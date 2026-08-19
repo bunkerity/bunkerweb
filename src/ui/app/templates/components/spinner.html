@@ -31,7 +31,7 @@
                 existing ".text-<variant>" rule. Default "primary".
      label      optional visible caption rendered beside the glyph (English
                 fallback). Omit for the bare-glyph shape.
-     label_i18n data-i18n key for label. Optional -- omit for the rare
+     label_i18n catalog key for label. Optional -- omit for the rare
                 untranslated case.
      id         optional id on the outer/root element.
      classes    extra utility classes on the outer/root element.
@@ -69,13 +69,13 @@
               role="status"
               aria-live="polite">
             <span class="spinner-border {{ size_cls }} text-{{ variant }}" aria-hidden="true"></span>
-            <span{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+            <span>{{ _(label_i18n) if label_i18n else label }}</span>
         </span>
     {%- else %}
         <span{% if id %} id="{{ id }}"{% endif %}
               class="spinner-border {{ size_cls }} text-{{ variant }}{% if classes %} {{ classes }}{% endif %}"
               role="status">
-            <span class="visually-hidden" data-i18n="status.loading">Loading...</span>
+            <span class="visually-hidden">{{ _("status.loading") }}</span>
         </span>
     {%- endif %}
 {%- endmacro %}

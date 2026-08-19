@@ -77,8 +77,7 @@
                     class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
                     data-bs-toggle="tooltip"
                     data-bs-placement="left"
-                    data-bs-original-title="{{ tooltip_fallback }}"
-                    data-i18n="{{ tooltip_key }}">
+                    data-bs-original-title="{{ _(tooltip_key) }}">
                 <i class="bx bx-sm bx-reset"></i>
             </button>
         {% endif %}
@@ -116,8 +115,7 @@
                     class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
                     data-bs-toggle="tooltip"
                     data-bs-placement="left"
-                    data-bs-original-title="{{ tooltip_fallback }}"
-                    data-i18n="{{ tooltip_key }}">
+                    data-bs-original-title="{{ _(tooltip_key) }}">
                 <i class="bx bx-sm bx-reset"></i>
             </button>
         {% endif %}

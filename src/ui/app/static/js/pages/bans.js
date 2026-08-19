@@ -1260,40 +1260,25 @@ $(document).ready(function () {
     }
   }, 5000); // 5 seconds fallback
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => {
-      const dt = initializeDataTable(bans_config);
-      dt.on("draw.dt", function () {
-        throttle(window.BWCountryFlag.updateTooltips, 200);
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
-        // Hide waiting message and show table
-        $("#bans-waiting").addClass("visually-hidden");
-        $("#bans").removeClass("d-none");
-      });
-      dt.on("column-visibility.dt", function (e, settings, column, state) {
-        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-        $(".tooltip").remove();
-      });
-      // Ensure tooltips are set after initialization
-      throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
-      // Hide waiting message and show table
-      $("#bans-waiting").addClass("visually-hidden");
-      $("#bans").removeClass("d-none");
-      return dt;
-    });
-  }
-
+  const dt = initializeDataTable(bans_config);
+  dt.on("draw.dt", function () {
+    throttle(window.BWCountryFlag.updateTooltips, 200);
+    throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+    $(".tooltip").remove();
+    // Hide waiting message and show table
+    $("#bans-waiting").addClass("visually-hidden");
+    $("#bans").removeClass("d-none");
+  });
+  dt.on("column-visibility.dt", function (e, settings, column, state) {
+    throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+    $(".tooltip").remove();
+  });
+  // Ensure tooltips are set after initialization
+  throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+  // Hide waiting message and show table
+  $("#bans-waiting").addClass("visually-hidden");
+  $("#bans").removeClass("d-none");
+  return dt;
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
     $(selector)

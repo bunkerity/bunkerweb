@@ -8,7 +8,7 @@
    Params:
      id           (required) unique id for the button-group root.
      presets      list of preset keys, default ["1h","24h","7d","30d"]. Each
-                  renders `data-i18n="range_picker.<preset>"` -- passing a
+                  renders the "range_picker.<preset>" key -- passing a
                   preset without a matching key in en.json (and the other
                   locales) is on the caller; nothing here enforces it.
      active       initially-active preset key.
@@ -16,21 +16,19 @@
                   input (flatpickr is already vendored, see bans.js/pro.js).
      classes      extra classes on the wrapper.
 
-   Note: the wrapper's aria-label uses `data-i18n="range_picker.aria_label"`;
-   i18n.js sets `aria-label` when the element already carries one (see
-   components/search.html for the same idiom). #}
+   Note: the wrapper's aria-label is translated server-side from
+   "range_picker.aria_label". #}
 {% macro range_picker(id, presets=["1h", "24h", "7d", "30d"], active="24h", with_custom=True, classes="") -%}
     <div class="range-picker btn-group{% if classes %} {{ classes }}{% endif %}"
          id="{{ id }}"
          role="group"
-         data-i18n="range_picker.aria_label"
-         aria-label="Time range">
+         aria-label="{{ _('range_picker.aria_label') }}">
         {% for preset in presets %}
             <button type="button"
                     class="btn btn-sm btn-outline-primary range-btn{% if preset == active %} active{% endif %}"
                     data-range="{{ preset }}"
                     aria-pressed="{{ 'true' if preset == active else 'false' }}"
-                    data-i18n="range_picker.{{ preset }}">{{ preset }}</button>
+                    >{{ _("range_picker." ~ preset) }}</button>
         {% endfor %}
         {% if with_custom %}
             <button type="button"
@@ -38,7 +36,7 @@
                     data-range="custom"
                     aria-pressed="{{ 'true' if active == 'custom' else 'false' }}">
                 <i class="bx bx-calendar" aria-hidden="true"></i>
-                <span data-i18n="range_picker.custom">Custom</span>
+                <span>{{ _("range_picker.custom") }}</span>
             </button>
             <input type="text" class="range-fp visually-hidden" id="{{ id }}-fp" />
         {% endif %}

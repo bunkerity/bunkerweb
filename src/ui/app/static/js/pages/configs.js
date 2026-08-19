@@ -28,7 +28,7 @@ $(document).ready(function () {
         "scope.global",
         "global",
       )}</span>`,
-      value: (rowData) => rowData[5].includes("scope.global"),
+      value: (rowData) => rowData[5].includes('data-value="global"'),
     },
   ];
   const templatesSearchPanesOptions = [
@@ -37,7 +37,7 @@ $(document).ready(function () {
         "template.none",
         "no template",
       )}</span>`,
-      value: (rowData) => rowData[7].includes("template.none"),
+      value: (rowData) => rowData[7].includes('data-value="none"'),
     },
   ];
 
@@ -752,35 +752,20 @@ $(document).ready(function () {
     }
   };
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => {
-      const dt = initializeDataTable(configs_config);
-      applyInitialFilters(dt);
-      // Show/hide filters based on initial selections
-      if (configTypeSelection || configServiceSelection) {
-        dt.searchPanes.container().show();
-        if (typeof dt.updateFilterToggleUI === "function") {
-          dt.updateFilterToggleUI(true);
-        } else if (dt.filterToggleSelectors) {
-          const selectors = dt.filterToggleSelectors;
-          if (selectors.show) $(selectors.show).addClass("d-none");
-          if (selectors.hide) $(selectors.hide).removeClass("d-none");
-        }
-      }
-      return dt;
-    });
+  const dt = initializeDataTable(configs_config);
+  applyInitialFilters(dt);
+  // Show/hide filters based on initial selections
+  if (configTypeSelection || configServiceSelection) {
+    dt.searchPanes.container().show();
+    if (typeof dt.updateFilterToggleUI === "function") {
+      dt.updateFilterToggleUI(true);
+    } else if (dt.filterToggleSelectors) {
+      const selectors = dt.filterToggleSelectors;
+      if (selectors.show) $(selectors.show).addClass("d-none");
+      if (selectors.hide) $(selectors.hide).removeClass("d-none");
+    }
   }
-
+  return dt;
   // Handle individual delete button click
   $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {

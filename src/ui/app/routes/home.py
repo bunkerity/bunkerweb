@@ -3,7 +3,7 @@ from re import match
 from operator import itemgetter
 from psutil import virtual_memory
 from flask import Blueprint, jsonify, render_template, request
-from flask_login import current_user, login_required
+from flask_login import login_required
 
 from app.dependencies import API_CLIENT, BW_INSTANCES_UTILS
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -92,8 +92,6 @@ def home_page():
     except (ApiClientError, ApiUnavailableError):
         metadata = {}
 
-    mfa_enabled = bool(getattr(current_user, "totp_secret", None))
-
     # Honest label: BunkerWeb has no live job-queue signal (no Celery queue depth exposed
     # to the UI), so this is a plain scheduled-jobs count, not "jobs queued".
     try:
@@ -136,7 +134,6 @@ def home_page():
         home_stats_days=home_stats_days,
         is_initialized=bool(metadata.get("is_initialized", False)),
         first_config_saved=bool(metadata.get("first_config_saved", False)),
-        mfa_enabled=mfa_enabled,
         jobs_count=len(jobs),
         bans_active=bans_active,
         certificates_total=certificates_total,

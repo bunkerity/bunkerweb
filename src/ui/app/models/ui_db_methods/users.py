@@ -6,7 +6,7 @@ from bcrypt import gensalt, hashpw
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import joinedload
 
-from model import Permissions, Roles, RolesPermissions, RolesUsers, UserColumnsPreferences, UserRecoveryCodes, UserSessions  # type: ignore
+from model import Permissions, Roles, RolesPermissions, RolesUsers, UserPreferences, UserRecoveryCodes, UserSessions  # type: ignore
 
 from db_methods.common import DatabaseMixinBase  # type: ignore
 
@@ -23,7 +23,7 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
             # Build query based on parameters
             stmt = select(UiUsers)
             stmt = stmt.filter_by(username=username) if username else stmt.filter_by(admin=True)
-            stmt = stmt.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.columns_preferences))
+            stmt = stmt.options(joinedload(UiUsers.roles), joinedload(UiUsers.recovery_codes), joinedload(UiUsers.preferences))
 
             ui_user = session.scalars(stmt.limit(1)).unique().first()
             if not ui_user:
@@ -51,12 +51,17 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
                     session.commit()
                     session.refresh(ui_user)
 
-            # Add default column preferences if missing
-            if not ui_user.columns_preferences and not self.readonly:
-                for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
-                    session.add(UserColumnsPreferences(user_name=ui_user.username, table_name=table_name, columns=columns))
-                session.commit()
-                session.refresh(ui_user)
+            # Seed the DataTables defaults that are missing. Keyed per table rather than on
+            # "the user has no preferences at all": the row set is now a shared namespace, so
+            # a feature key written first would otherwise suppress the seeding forever.
+            if not self.readonly:
+                stored = {preference.key for preference in ui_user.preferences}
+                missing = {key: value for key, value in COLUMNS_PREFERENCES_DEFAULTS.items() if key not in stored}
+                if missing:
+                    for key, value in missing.items():
+                        session.add(UserPreferences(user_name=ui_user.username, key=key, value=value))
+                    session.commit()
+                    session.refresh(ui_user)
 
             if not as_dict:
                 return ui_user
@@ -127,8 +132,8 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
             for code in totp_recovery_codes or []:
                 session.add(UserRecoveryCodes(user_name=username, code=hashpw(code.encode("utf-8"), gensalt(rounds=10)).decode("utf-8")))
 
-            for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
-                session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=columns))
+            for key, value in COLUMNS_PREFERENCES_DEFAULTS.items():
+                session.add(UserPreferences(user_name=username, key=key, value=value))
 
             try:
                 session.commit()
@@ -170,7 +175,7 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
                 session.execute(update(RolesUsers).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserRecoveryCodes).filter_by(user_name=old_username).values({"user_name": username}))
                 session.execute(update(UserSessions).filter_by(user_name=old_username).values({"user_name": username}))
-                session.execute(update(UserColumnsPreferences).filter_by(user_name=old_username).values({"user_name": username}))
+                session.execute(update(UserPreferences).filter_by(user_name=old_username).values({"user_name": username}))
 
             totp_changed = user.totp_secret != totp_secret
 
@@ -207,7 +212,7 @@ class UIUsersMethodsMixin(DatabaseMixinBase):
 
             session.execute(delete(RolesUsers).filter_by(user_name=username))
             session.execute(delete(UserRecoveryCodes).filter_by(user_name=username))
-            session.execute(delete(UserColumnsPreferences).filter_by(user_name=username))
+            session.execute(delete(UserPreferences).filter_by(user_name=username))
             session.delete(user)
 
             try:

@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "Wyczyść wyszukiwanie",
       "close": "Zamknij",
+      "collapse_multiline": "Zwiń wpisy wielowierszowe",
+      "configs_dropzone": "Wybierz plik eksportu konfiguracji niestandardowych albo upuść go tutaj",
       "copy": "Kopiuj logi",
       "download_log": "Pobierz ten plik logu",
       "follow": "Śledź",
       "hide_value": "Ukryj wartość",
-      "reveal_value": "Wyświetl wartość",
-      "select_file": "Wybierz plik",
-      "select_page": "Wybierz stronę",
       "issue_count": "Liczba błędów i ostrzeżeń",
       "level_filter": "Filtruj wiersze logu według poziomu",
       "local_time": "Pokaż znaczniki czasu w czasie lokalnym",
-      "collapse_multiline": "Zwiń wpisy wielowierszowe",
       "next_issue": "Następny błąd lub ostrzeżenie",
+      "passkey_name": "Nazwa klucza dostępu",
+      "plugins_dropzone": "Wybierz archiwa wtyczek albo upuść je tutaj",
       "prev_issue": "Poprzedni błąd lub ostrzeżenie",
-      "search_logs": "Szukaj w logach",
-      "toggle_wrap": "Przełącz zawijanie wierszy",
-      "configs_dropzone": "Wybierz plik eksportu konfiguracji niestandardowych albo upuść go tutaj",
       "raw_configuration": "Konfiguracja ręczna",
-      "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj",
-      "user_avatar": "Avatar użytkownika",
       "remove_value": "Usuń wartość",
-      "view_selected_items": "Wyświetl wybrane elementy",
-      "passkey_name": "Nazwa klucza dostępu"
+      "reveal_value": "Wyświetl wartość",
+      "search_logs": "Szukaj w logach",
+      "select_file": "Wybierz plik",
+      "select_page": "Wybierz stronę",
+      "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj",
+      "toggle_wrap": "Przełącz zawijanie wierszy",
+      "user_avatar": "Avatar użytkownika",
+      "view_selected_items": "Wyświetl wybrane elementy"
     }
   },
   "badge": {
@@ -92,12 +93,12 @@
     }
   },
   "breadcrumb": {
-    "about": "O Nas",
+    "about": "O nas",
     "bans": "Blokady",
     "cache": "Pamięć podręczna",
     "threatmap": "Mapa zagrożeń",
-    "web_cache": "Cache internetowy",
-    "timings": "Czasy",
+    "web_cache": "Pamięć podręczna WWW",
+    "timings": "Czasy wykonania",
     "configs": "Konfiguracje",
     "extra_pages": "Dodatkowe strony",
     "global_settings": "Ustawienia globalne",
@@ -111,14 +112,15 @@
     "more": "Więcej...",
     "new": "Nowe",
     "plugins": "Wtyczki",
-    "plugins_pages": "Wtyczki Strony",
+    "plugins_pages": "Strony wtyczek",
     "pro": "Pro",
     "profile": "Profil",
     "reports": "Raporty",
     "groups": "Grupy zasobów",
     "services": "Usługi",
     "support": "Wsparcie",
-    "templates": "Szablony"
+    "templates": "Szablony",
+    "whats_new": "Nowości"
   },
   "button": {
     "actions": "Działania",
@@ -128,7 +130,7 @@
     "add_plugin_plural": "Dodaj wtyczkę (wtyczki)",
     "add_plugins": "Dodaj wtyczki",
     "auto_refresh": "Automatyczne odświeżanie",
-    "ban": "Blokada",
+    "ban": "Zablokuj",
     "ban_selected": "Zablokuj wybrane",
     "cache": "Pamięć podręczna",
     "cancel": "Anuluj",
@@ -212,7 +214,7 @@
     "upload_photo": "Prześlij nowe zdjęcie",
     "view_details": "Zobacz szczegóły",
     "view_raw_data": "Wyświetl ręczne dane",
-    "wipe_other_sessions": "Wyczyść inne sesje",
+    "wipe_other_sessions": "Zakończ pozostałe sesje",
     "ban_all_filtered": "Zablokuj wszystkie pasujące raporty",
     "filtered_actions": "Filtrowane działania",
     "unban_all_filtered": "Cofnij wszystkie pasujące blokady",
@@ -224,7 +226,12 @@
     "rename": "Zmień nazwę",
     "add_passkey": "Dodaj klucz dostępu",
     "sign_in_with_passkey": "Zaloguj się kluczem dostępu",
-    "use_security_key": "Użyj klucza bezpieczeństwa"
+    "use_security_key": "Użyj klucza bezpieczeństwa",
+    "go": "Przejdź →",
+    "retry": "Ponów",
+    "got_it": "Rozumiem",
+    "show_me": "Pokaż",
+    "see_all_releases": "Zobacz wszystkie wydania"
   },
   "cache": {
     "kpi_files": "Pliki",
@@ -295,7 +302,7 @@
     "DE": "Niemcy",
     "DJ": "Dżibuti",
     "DK": "Dania",
-    "DM": "Dominica",
+    "DM": "Dominika",
     "DO": "Dominikana",
     "DZ": "Algieria",
     "EC": "Ekwador",
@@ -315,7 +322,7 @@
     "GA": "Gabon",
     "GB": "Wielka Brytania",
     "GD": "Grenada",
-    "GE": "Georgia",
+    "GE": "Gruzja",
     "GF": "Gujana Francuska",
     "GG": "Guernsey",
     "GH": "Ghana",
@@ -348,8 +355,8 @@
     "IS": "Islandia",
     "IT": "Włochy",
     "JE": "Jersey",
-    "JM": "Jamaica",
-    "JO": "Jordan",
+    "JM": "Jamajka",
+    "JO": "Jordania",
     "JP": "Japonia",
     "KE": "Kenia",
     "KG": "Kirgistan",
@@ -374,7 +381,7 @@
     "LV": "Łotwa",
     "LY": "Libia",
     "MA": "Maroko",
-    "MC": "Monaco",
+    "MC": "Monako",
     "MD": "Mołdawia",
     "ME": "Czarnogóra",
     "MF": "Saint Martin",
@@ -424,7 +431,7 @@
     "PW": "Palau",
     "PY": "Paragwaj",
     "QA": "Katar",
-    "RE": "Réunion",
+    "RE": "Reunion",
     "RO": "Rumunia",
     "RS": "Serbia",
     "RU": "Federacja Rosyjska",
@@ -451,7 +458,7 @@
     "SY": "Syria",
     "SZ": "Eswatini",
     "TC": "Wyspy Turks i Caicos",
-    "TD": "Chad",
+    "TD": "Czad",
     "TF": "Francuskie Terytoria Południowe",
     "TG": "Togo",
     "TH": "Tajlandia",
@@ -515,7 +522,7 @@
         "critical_high": "Krytyczne: Systemowi kończy się pamięć!",
         "good_high": "Doskonała pamięć dla środowisk produkcyjnych",
         "info_medium": "Rozważ aktualizację powyżej 16 GB do użytku produkcyjnego",
-        "title": "System RAM",
+        "title": "Pamięć RAM systemu",
         "usage": "{{percent}}% wykorzystane",
         "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
       },
@@ -531,7 +538,7 @@
       },
       "upstreams": {
         "planned": "Wkrótce",
-        "title": "Źródła"
+        "title": "Serwery upstream"
       },
       "top_reasons": {
         "title": "Najczęstsze przyczyny blokad"
@@ -581,16 +588,16 @@
       "greeting": "Witaj ponownie,"
     },
     "mini": {
-      "across_countries": "w krajach {{count}}",
+      "across_countries": "Liczba krajów: {{count}}",
       "enforced": "obecnie wdrożone",
       "pct_blocked": "{{percent}}% zablokowane",
       "scheduled": "Zaplanowane"
     },
     "status": {
-      "blocked_of_total": "zablokowane {{total}} całkowite",
+      "blocked_of_total": "· żądania łącznie: {{total}}",
       "free_plan": "Plan darmowy",
       "renews": "Rozszerza",
-      "services_licensed": "Usługi {{count}} licencjonowane",
+      "services_licensed": "Licencjonowane usługi: {{count}}",
       "trend_vs_prev": "w porównaniu z poprzednim",
       "vs_prev": "w porównaniu z poprzednim"
     },
@@ -636,7 +643,7 @@
     "info_jobs": "Wyświetlanie {{start}} do {{end}} z {{total}} Zadań",
     "info_plugins": "Wyświetlanie {{start}} do {{end}} z {{total}} Wtyczek",
     "info_reports": "Wyświetlanie {{start}} do {{end}} z {{total}} Raportów",
-    "info_services": "Wyswietlanie od {{start}} do {{end}} z {{total}} Usług",
+    "info_services": "Wyświetlane pozycje: {{start}}–{{end}} · usługi łącznie: {{total}}",
     "info_templates": "Wyświetlanie {{start}} do {{end}} z {{total}} Szablonów",
     "length_all": "Wszystkie",
     "length_menu_bans": "Wyświetl _MENU_ Blokady",
@@ -773,7 +780,7 @@
     "label": {
       "2fa_code": "Kod 2FA",
       "2fa_code_or_recovery": "Kod 2FA lub kod odzyskiwania",
-      "admin_email": "Admin Email",
+      "admin_email": "Adres e-mail administratora",
       "admin_password": "Hasło administratora",
       "admin_username": "Nazwa użytkownika administratora",
       "auto_lets_encrypt": "Auto Let's Encrypt",
@@ -864,7 +871,7 @@
     }
   },
   "input_list": {
-    "view_all_settings": "Wyświetl wszystkie {{count}} ustawień"
+    "view_all_settings": "Wyświetl wszystkie ustawienia ({{count}})"
   },
   "instance": {
     "type": {
@@ -883,6 +890,7 @@
   "interval": {
     "day": "Codziennie",
     "hour": "Co godzinę",
+    "minute": "Co minutę",
     "once": "Jednorazowo",
     "week": "Co tydzień"
   },
@@ -934,7 +942,7 @@
     "main_logs": "Główne logi",
     "new_lines_sr": "{{count}} nowych wierszy logu",
     "no_log_files": "Brak plików log do wyświetlenia, sprawdź dokumentację, aby uzyskać więcej informacji na temat włączania logowania",
-    "issue_summary": "{{errors}} błędów, {{warnings}} ostrzeżeń",
+    "issue_summary": "Błędy: {{errors}}, ostrzeżenia: {{warnings}}",
     "level_critical": "Krytyczny",
     "level_debug": "Debug",
     "level_error": "Błąd",
@@ -979,7 +987,7 @@
       "confirmation_instance_deletion": "Czy na pewno chcesz usunąć wybraną instancję?",
       "delete_confirmation_alert": "Czy na pewno chcesz usunąć wybraną instancję?",
       "delete_confirmation_alert_plural": "Czy na pewno chcesz usunąć wybrane instancje?",
-      "delete_confirmation_template_used": "Jeden lub więcej wybranych szablonów jest przypisanych do usług ({{services_count}} usług łącznie). Usunięcie ich spowoduje wyczyszczenie tych przypisów. Czy chcesz kontynuować?",
+      "delete_confirmation_template_used": "Co najmniej jeden wybrany szablon jest przypisany do usług (liczba usług: {{services_count}}). Usunięcie szablonów wyczyści te przypisania. Czy chcesz kontynuować?",
       "delete_step_confirmation": "Czy na pewno chcesz usunąć ten krok?",
       "delete_step_content_label": "Treść",
       "delete_step_name_label": "Krok",
@@ -1004,7 +1012,7 @@
       "unban_confirmation_alert": "Czy na pewno chcesz odblokować wybrany adres IP?",
       "unban_confirmation_alert_plural": "Czy na pewno chcesz odblokować wybrane adresy IP?",
       "update_duration_alert": "Wybierz nowy czas trwania dla wybranych blokad:",
-      "ban_filtered_confirmation": "Zablokować adresy IP ze wszystkich {{count}} pasujących raportów? Powtarzające się cele zostaną zastosowane raz.",
+      "ban_filtered_confirmation": "Zablokować adresy IP ze wszystkich pasujących raportów (liczba raportów: {{count}})? Powtarzające się adresy zostaną zablokowane tylko raz.",
       "unban_filtered_confirmation": "Czy na pewno cofnąć wszystkie {{count}} pasujące blokady?",
       "update_filtered_duration_alert": "Wybierz nowy czas trwania dla wszystkich {{count}} pasujących blokad:"
     },
@@ -1064,13 +1072,13 @@
     "version": "Wersja"
   },
   "navigation": {
-    "about": "O Nas",
+    "about": "O nas",
     "bans": "Blokady",
     "cache": "Pamięć podręczna",
     "certificates": "Certyfikaty",
     "threatmap": "Mapa zagrożeń",
-    "web_cache": "Cache internetowy",
-    "timings": "Czasy",
+    "web_cache": "Pamięć podręczna WWW",
+    "timings": "Czasy wykonania",
     "configs": "Konfiguracje",
     "extra_pages": "Dodatkowe strony",
     "global_settings": "Ustawienia globalne",
@@ -1087,19 +1095,19 @@
     "plugin_deactivated": "Wtyczka wyłączona",
     "plugin_deactivated_global": "Wtyczka wyłączona globalnie",
     "plugins": "Wtyczki",
-    "plugins_pages": "Wtyczki Strony",
+    "plugins_pages": "Strony wtyczek",
     "pro": "Pro",
     "reports": "Raporty",
     "services": "Usługi",
     "support": "Wsparcie",
     "templates": "Szablony",
     "overview": "Przegląd",
-    "configure": "Konfiguracja",
-    "operate": "Obsługa",
+    "configure": "Konfiguruj",
+    "operate": "Obsługuj",
     "system": "System",
     "edition_community": "Społeczność",
-    "redirects": "Przekierowuje",
-    "upstreams": "Źródła",
+    "redirects": "Przekierowania",
+    "upstreams": "Serwery upstream",
     "workflows": "Przepływy pracy",
     "edition_pro": "Pro"
   },
@@ -1162,7 +1170,7 @@
   "pro": {
     "alert": {
       "overlapped_1": "Masz więcej aktywnych usług niż pozwala na to Twoja licencja!",
-      "overlapped_2": "Usuń lub przekonwertuj niektóre usługi do trybu Szkicu, aby osiągnąć limit usług {{pro_services}}."
+      "overlapped_2": "Usuń część usług lub przełącz je w tryb wersji roboczej, aby ich liczba nie przekraczała {{pro_services}}."
     },
     "button": {
       "all_features_available": "Wszystkie dostępne funkcje",
@@ -1195,12 +1203,12 @@
       "upgrade_required": "Aby uzyskać dostęp do tej funkcji, należy wykupić wersję Pro."
     },
     "status": {
-      "draft_services_count": "{{draft_services}} Szkice usług",
+      "draft_services_count": "Usługi w wersji roboczej: {{draft_services}}",
       "expired": "WYGAŚNIĘTE",
       "free_version": "Wersja BEZPŁATNA",
       "overlapped": "NAKŁADAJĄCE SIĘ",
       "pro_version": "Wersja PRO",
-      "services_count": "Usługi online {{online_services}} /Usługi PRO {{pro_services}}",
+      "services_count": "Usługi online: {{online_services}} / usługi PRO: {{pro_services}}",
       "suspended": "ZAWIESZONE",
       "title": "Status"
     },
@@ -1298,7 +1306,7 @@
         "title": "Najważniejsze ASNs"
       },
       "top_offenders": {
-        "title": "Najbardziej niebezpieczne"
+        "title": "Najaktywniejsi atakujący"
       },
       "top_rules": {
         "title": "Najczęściej aktywowane reguły ModSecurity"
@@ -1315,7 +1323,7 @@
     "subtitle": "Raporty bezpieczeństwa generowane z zablokowanych żądań w Twoich instancjach BunkerWeb — wyszukuj, filtruj, eksportuj i blokuj nieprawidłowe adresy IP bezpośrednio z tabeli.",
     "tab": {
       "eventlog": "Log zdarzeń",
-      "offenders": "Najbardziej niebezpieczne",
+      "offenders": "Najaktywniejsi atakujący",
       "overview": "Przegląd",
       "patterns": "Schematy ataków"
     },
@@ -1337,9 +1345,9 @@
       "peak_hour": "Szczytowa godzina",
       "rce": "RCE / polecenie",
       "repeat_offenders": "Powtarzające się naruszenia (10 najczęstszych)",
-      "sqli": "SQL injection",
+      "sqli": "Wstrzykiwanie SQL",
       "unique_ips": "Topowe adresy IP atakujących",
-      "unique_offenders": "Najczęstsze naruszenia"
+      "unique_offenders": "Najaktywniejsi atakujący"
     }
   },
   "scope": {
@@ -1452,7 +1460,7 @@
         "lets_encrypt": "Let's Encrypt",
         "zerossl": "ZeroSSL",
         "real_ip": "Prawdziwy adres IP",
-        "reverse_proxy": "Reverse Proxy"
+        "reverse_proxy": "Odwrotny serwer proxy"
       },
       "subtitle": "Skonfiguruj ustawienia specyficzne dla interfejsu użytkownika aplikacji internetowej.",
       "title": "Ustawienia interfejsu użytkownika"
@@ -1545,7 +1553,8 @@
     "expired": "Ważny do",
     "expiring": "Wygasające",
     "no_settings": "Ta wtyczka nie ma ustawień dla tego zakresu.",
-    "yes": "Tak"
+    "yes": "Tak",
+    "optional": "Opcjonalne"
   },
   "step": {
     "next": "Dalej",
@@ -1671,7 +1680,7 @@
       "missing_configs_upload_failed": "Nie udało się przesłać plików konfiguracyjnych",
       "missing_configs_upload_label": "Prześlij brakujące konfiguracje (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "Przesłano {{uploaded}} z {{total}} konfiguracji. Nadal brakuje: {{missing}}",
-      "missing_configs_upload_success": "Pomyślnie przesłano {{count}} plik(ów) konfiguracyjny(ch)",
+      "missing_configs_upload_success": "Pomyślnie przesłane pliki konfiguracyjne: {{count}}",
       "multiselect_placeholder": "Wybierz opcje",
       "multiselect_summary": "Wybrano: {{count}}",
       "multivalue_add": "Dodaj wartość",
@@ -1694,7 +1703,7 @@
       "raw_configs_help": "Prześlij pliki konfiguracyjne (.conf, .cfg, .txt), aby dołączyć wpisy do <code>configs</code>. Typy domyślnie ustawione są na <code>server_http</code>; dostosuj w JSON, jeśli to konieczne.",
       "raw_configs_import_invalid": "Nie można zaimportować konfiguracji, ponieważ bieżący kod JSON jest nieprawidłowy.",
       "raw_configs_import_none": "Nie zaimportowano żadnych konfiguracji.",
-      "raw_configs_import_success": "Zaimportowano {{count}} plik(ów) konfiguracyjny(ch).",
+      "raw_configs_import_success": "Zaimportowane pliki konfiguracyjne: {{count}}.",
       "raw_configs_note": "Zaimportowane pliki są dodawane do edytora JSON. Przejrzyj i dostosuj przed zapisaniem.",
       "raw_configs_title": "Importy niestandardowej konfiguracji",
       "raw_configs_upload": "Prześlij pliki konfiguracyjne (.conf, .cfg, .txt)",
@@ -1744,7 +1753,7 @@
       "setting_selector_clear": "Wyczyść wyszukiwanie",
       "setting_selector_count_all_used": "Wszystkie pasujące ustawienia zostały już dodane.",
       "setting_selector_count_empty": "Brak ustawień do wyświetlenia.",
-      "setting_selector_count_only_available": "{{count, plural, one {Dostępne ustawienie: #} few {Dostępne ustawienia: #} many {Dostępnych ustawień: #} other {Dostępnych ustawień: #}}}",
+      "setting_selector_count_only_available": "Dostępne ustawienia: {{count}}",
       "setting_selector_count_with_used": "{{available}} dostępne, {{used}} już dodane",
       "setting_selector_default": "Domyślne",
       "setting_selector_docs": "Zobacz dokumentację",
@@ -2331,7 +2340,7 @@
     "purge_key_placeholder": "Aktywny PROXY_CACHE_KEY (opcjonalnie)",
     "purge_url": "Usuń URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
-    "reporting_instances": "Raportowanie instancji",
+    "reporting_instances": "Raportujące instancje",
     "service": "Usługa",
     "services": "Włączenie serwisu",
     "status": "Przechowywanie danych instancji",
@@ -2379,7 +2388,7 @@
     "delete_copy": "Czy chcesz usunąć przekierowanie {{name}}?",
     "delete_help": "Przekierowanie, które jest nadal dołączone do usługi, nie można usunąć. Najpierw je odłącz.",
     "edit": "Edytuj przekierowanie",
-    "edit_shared": "To przekierowanie jest dołączone do usługi(y) {{count}}: {{services}}. Zapisanie zmian dla wszystkich.",
+    "edit_shared": "To przekierowanie jest przypisane do usług (liczba: {{count}}): {{services}}. Zapisanie zmieni je wszystkie.",
     "empty_text": "Przekierowanie to nazwana reguła, którą dołączasz do jednej lub więcej usług. Ustawienia REDIRECT_* działają w trybie inline.",
     "empty_title": "Brak przekierowań",
     "from_path": "Przekieruj z",
@@ -2408,21 +2417,21 @@
     "create": "Utwórz upstream",
     "delete_confirm_title": "Czy chcesz usunąć ten upstream?",
     "delete_copy": "Czy chcesz usunąć upstream {{name}}?",
-    "delete_help": "Upstream, który jest nadal podłączony do usługi, nie można usunąć. Najpierw odłącz go.",
+    "delete_help": "Nie można usunąć upstreamu nadal przypisanego do usługi. Najpierw go odłącz.",
     "edit": "Edytuj upstream",
     "edit_shared": "Ten upstream jest podłączony do usług {{count}}: {{services}}. Zapisz zmiany dla wszystkich.",
-    "empty_text": "Upstream to nazwany zestaw backendów, które podłącza się do jednej lub więcej usług w punkcie pośrednika. Ustawienia REVERSE_PROXY_HOST działają w trybie inline.",
+    "empty_text": "Upstream to nazwana pula backendów, którą przypisuje się do jednej lub kilku usług na ścieżce odwrotnego proxy. Ustawienia REVERSE_PROXY_HOST w trybie inline nadal działają równolegle.",
     "empty_title": "Brak upstream",
     "keepalive": "Utrzymuj połączenie",
     "keepalive_help": "Liczba utrzymywanych połączeń na pracownika. Tylko HTTP i gRPC; pozostaw puste, aby wyłączyć.",
-    "match_path": "Punkt pośrednika",
+    "match_path": "Ścieżka odwrotnego proxy",
     "match_path_help": "Lokalizacja, do której usługi proxy są przekierowywane. Pomijane dla pul strumieniowego, która obejmuje całą usługę.",
     "method": "Rozkład obciążenia",
     "name_help": "Tylko litery, cyfry, myślniki i podkreślenia. Kropki są niedozwolone, więc nazwa puli nigdy nie może zasłonić rzeczywistego hosta.",
     "new": "Nowy upstream",
     "not_attached": "Nie podłączony",
     "protocol": "Protokół",
-    "protocol_help": "Pule HTTP i gRPC są podłączone do ścieżki; pula strumieni przeją cały serwis TCP/UDP.",
+    "protocol_help": "Pule HTTP i gRPC są przypisywane do ścieżki; pula strumieniowa przejmuje całą usługę TCP/UDP.",
     "protocols": {
       "grpc": "gRPC",
       "http": "HTTP",
@@ -2443,8 +2452,8 @@
     "server_weight": "Waga",
     "servers": "Serwery",
     "services_help": "Użyj Ctrl lub Command, aby wybrać wiele usług. Upstream można podłączyć później.",
-    "services_hidden": "Serwis {{count}}(y) ukryty: upstream {{protocol}} może być podłączony tylko do pasującego serwisu.",
-    "truncated": "Wyświetlane są tylko pierwsze 500 upstreamów. Wąź uprawny list za pomocą API, aby uzyskać pełny wynik."
+    "services_hidden": "Ukryte usługi: {{count}}. Upstream {{protocol}} może być przypisany tylko do usługi odpowiedniego typu.",
+    "truncated": "Wyświetlanych jest tylko pierwszych 500 upstreamów. Zawęź listę za pomocą API, aby uzyskać pełny wynik."
   },
   "workflows": {
     "act_block": "Zablokuj",
@@ -2482,7 +2491,7 @@
       "removeValue": "Usuń wartość",
       "requestCount": "Liczba żądań",
       "resourceGroup": "Grupa zasobów",
-      "ruleErrors": "Problemy z walidacją w regule {{count}}",
+      "ruleErrors": "Liczba problemów z walidacją w tej regule: {{count}}",
       "ruleName": "Nazwa reguły {{n}}",
       "terminalAction": "Akcja końcowa",
       "uriMatch": "Tryb dopasowania URI",
@@ -2496,7 +2505,7 @@
       "auxCanvas": "Od lewej do prawej. Pierwsza dopasowana reguła wygrywa.",
       "auxList": "Od góry do dołu. Pierwsza dopasowana reguła wygrywa.",
       "close": "Zamknij",
-      "drawerSub": "Działa na pozycji {{n}} w {{total}}",
+      "drawerSub": "Pozycja wykonania: {{n}} z {{total}}",
       "dropHint": "Wybierz priorytet — miejsce reguły w łańcuchu to jedyne, co może oznaczać",
       "emptyBody": "Przepływ pracy bez reguł nie zmienia nic — każde żądanie przechodzi bezpośrednio do następnego podłączonego przepływu pracy.",
       "emptyCta": "Dodaj pierwszą regułę",
@@ -2668,7 +2677,7 @@
     },
     "threshold": "Tylko powyżej progu",
     "threshold_count": "Żądania",
-    "threshold_window": "Na (sekundy)",
+    "threshold_window": "sekund",
     "tree": {
       "addCondition": "Warunek",
       "addGroup": "Grupa",
@@ -2735,7 +2744,7 @@
         "certificate": "Certyfikaty",
         "redirect": "Przekierowania",
         "template": "Szablon",
-        "upstream": "Źródła",
+        "upstream": "Serwery upstream",
         "workflow": "Przepływy pracy"
       },
       "match_path": "Ścieżka",
@@ -2746,20 +2755,40 @@
         "note": "Nie jest zasobem: szablon to ustawienie. Stosuje się go po zapisie, a zmiana go przenosi wiele ustawień naraz.",
         "pending": "Stosuje się po zapisie",
         "switching": "Zapis zmienia tę usługę z „{{from}}” na „{{to}}”. Wartości aktualnego szablonu są usuwane, a wartości „{{to}}” są stosowane — wiele ustawień jest zmieniane naraz.",
-        "unwired": "Ta strona nie publikuje „USE_TEMPLATE”, więc szablon nie można zmienić z niej."
+        "unwired": "Ta strona nie przesyła USE_TEMPLATE, więc nie można tutaj zmienić szablonu."
       },
       "title": "Przypisane zasoby",
       "unavailable": "Niedostępne"
     }
   },
   "onboarding": {
+    "dismiss": "Odrzuć",
+    "error": "Nie udało się wczytać przewodnika.",
+    "hint": {
+      "bans": "Bany to klienci, których BunkerWeb obecnie odrzuca. Każdy wiersz pokazuje powód i czas wygaśnięcia.",
+      "home": "Ten pulpit pokazuje bieżący stan: działające instancje, obsługiwane usługi i ruch przetworzony przez BunkerWeb.",
+      "logs": "Logi na żywo ze wszystkich instancji, z filtrowaniem po instancji i ważności.",
+      "reports": "Każde zablokowane żądanie trafia tutaj. Otwórz je, aby zobaczyć, która kontrola bezpieczeństwa je zatrzymała i dlaczego.",
+      "title": "Szybki przewodnik"
+    },
     "item": {
+      "first_block": "Zobaczyć, jak BunkerWeb coś blokuje",
+      "https": "Uruchomić HTTPS",
       "install": "Zainstaluj BunkerWeb na 1+ hoście",
       "mfa": "Włącz MFA",
       "pro": "Włącz BunkerWeb PRO",
-      "service": "Zarejestruj pierwszą usługę"
+      "read_bans": "Zobaczyć, kto jest zbanowany i do kiedy",
+      "read_home": "Przeczytać pulpit: co jest teraz sprawne",
+      "read_logs": "Śledzić logi na żywo ze wszystkich instancji",
+      "read_reports": "Dowiedzieć się, dlaczego żądanie zostało zablokowane",
+      "service": "Zarejestruj pierwszą usługę",
+      "workflow": "Podłączyć workflow bezpieczeństwa"
     },
+    "not_saved": "Nie udało się zapisać.",
     "pro_tips": "Wskazówki PRO",
+    "restart": "Uruchom przewodnik ponownie",
+    "restart_help": "Pokaż początkowe kroki ponownie na górnym pasku.",
+    "subtitle": "Kilka kroków, aby BunkerWeb chronił Twoje usługi.",
     "title": "Pierwsze kroki"
   },
   "timings": {
@@ -2783,5 +2812,15 @@
     "disabled_help": "Ustaw METRICS_COLLECT_TIMINGS na yes, aby mierzyć czas działania każdej wtyczki. Całkowity czas żądania jest zbierany niezależnie od tego.",
     "unreachable_title": "Żadna instancja nie zgłosiła czasów",
     "unreachable_help": "Czasy są odczytywane z samych instancji, więc żadna nie odpowiedziała — albo żadna nie obsłużyła jeszcze żądania."
+  },
+  "whatsnew": {
+    "missing_action": "Otwórz dziennik zmian na GitHubie",
+    "missing_message": "Plik CHANGELOG.md nie został dołączony do tej kompilacji. Informacje o wydaniach są dostępne na GitHubie.",
+    "missing_title": "Brak dziennika zmian w tej instalacji",
+    "modal": {
+      "intro": "Oto co zmieniło się od ostatnio używanej wersji.",
+      "title": "Nowości"
+    },
+    "subtitle": "Wszystkie wydania BunkerWeb, od najnowszego, prosto z dziennika zmian dołączonego do tej instalacji."
   }
 }

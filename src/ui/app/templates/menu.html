@@ -49,36 +49,35 @@
     <ul class="menu-inner py-1">
         {% for group in menu_groups %}
             <li class="menu-header small text-uppercase">
-                <span class="menu-header-text" data-i18n="navigation.{{ group.header }}">{{ group.header |title }}</span>
+                <span class="menu-header-text">{{ _("navigation." ~ group.header) }}</span>
             </li>
             {% for endpoint, item in group['items'].items() %}
                 {% set is_active = endpoint == current_endpoint or endpoint != 'plugins' and endpoint == request.path.split('/')[1] %}
                 <li class="menu-item{% if is_active %} active{% endif %}">
                     <a href="{{ item['url'] }}"
                        class="menu-link"
+                       data-tour="nav-{{ endpoint }}"
                        {% if is_active %}aria-current="page"{% endif %}>
                         <i class="menu-icon tf-icons bx {{ item['icon'] }}" aria-hidden="true"></i>
-                        <div class="text-truncate"
-                             data-i18n="navigation.{{ endpoint | replace('-', '_') }}">
-                            {{ endpoint | replace('-', ' ') |title }}
-                        </div>
+                        <div class="text-truncate">{{ _("navigation." ~ endpoint | replace('-', '_')) }}</div>
                     </a>
                 </li>
             {% endfor %}
         {% endfor %}
         <!-- System -->
         <li class="menu-header small text-uppercase">
-            <span class="menu-header-text" data-i18n="navigation.system">System</span>
+            <span class="menu-header-text">{{ _("navigation.system") }}</span>
         </li>
         <li class="menu-item{% if current_endpoint == 'pro' %} active{% endif %}">
             <a href="{{ url_for('pro') }}"
                class="menu-link"
+               data-tour="nav-pro"
                {% if current_endpoint == 'pro' %}aria-current="page"{% endif %}>
                 <img class="menu-icon tf-icons"
                      src="{{ pro_diamond_url }}"
                      alt=""
                      aria-hidden="true">
-                <div class="text-truncate" data-i18n="navigation.pro">Pro</div>
+                <div class="text-truncate">{{ _("navigation.pro") }}</div>
             </a>
         </li>
         <li class="menu-item{% if current_endpoint == 'support' %} active{% endif %}">
@@ -86,7 +85,7 @@
                class="menu-link"
                {% if current_endpoint == 'support' %}aria-current="page"{% endif %}>
                 <i class="menu-icon tf-icons bx bx-support" aria-hidden="true"></i>
-                <div class="text-truncate" data-i18n="navigation.support">Support</div>
+                <div class="text-truncate">{{ _("navigation.support") }}</div>
             </a>
         </li>
         <li class="menu-item{% if current_endpoint == 'about' %} active{% endif %}">
@@ -94,7 +93,7 @@
                class="menu-link"
                {% if current_endpoint == 'about' %}aria-current="page"{% endif %}>
                 <i class="menu-icon tf-icons bx bx-info-circle" aria-hidden="true"></i>
-                <div class="text-truncate" data-i18n="navigation.about">About</div>
+                <div class="text-truncate">{{ _("navigation.about") }}</div>
             </a>
         </li>
         {% set menu_plugin_types = {
@@ -123,7 +122,7 @@
         {% if visible_extra_pages %}
             <!-- Extra Pages -->
             <li class="menu-header text-uppercase align-items-center mb-0">
-                <span class="menu-header-text" data-i18n="navigation.extra_pages">Extra Pages</span>
+                <span class="menu-header-text">{{ _("navigation.extra_pages") }}</span>
                 <button class="btn btn-link menu-header-text p-0"
                         type="button"
                         data-bs-toggle="collapse"
@@ -137,7 +136,7 @@
                 <div class="menu-inner">
                     {% for page in visible_extra_pages %}
                         {% set extra_plugin_data = extra_plugin_lookup.get(page) or extra_plugin_lookup.get(page | lower) or extra_plugin_lookup.get(page | replace('-', '_') | lower) or extra_plugin_lookup.get(page | replace('_', '-') | lower) %}
-                        <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}"{% if extra_plugin_data and not is_pro_version and extra_plugin_data['type'] == "pro" %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"{% endif %}>
+                        <li class="menu-item{% if current_endpoint == page|lower %} active{% endif %}"{% if extra_plugin_data and not is_pro_version and extra_plugin_data['type'] == "pro" %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span>{{ _('pro.overlay.pro_feature') }}</span>"{% endif %}>
                             <a href="{{ url_for(page) }}"
                                class="menu-link"
                                {% if current_endpoint == page|lower %}aria-current="page"{% endif %}>
@@ -162,7 +161,7 @@
         {% endif %}
         <!-- Plugins Pages -->
         <li class="menu-header text-uppercase align-items-center mb-0">
-            <span class="menu-header-text" data-i18n="navigation.plugins_pages">Plugins Pages</span>
+            <span class="menu-header-text">{{ _("navigation.plugins_pages") }}</span>
             <button class="btn btn-link menu-header-text p-0"
                     type="button"
                     data-bs-toggle="collapse"
@@ -177,7 +176,7 @@
                 {% for plugin, plugin_data in plugins.items() %}
                     {% with not_pro_pro_plugin = not is_pro_version and plugin_data['type'] == "pro" %}
                         {% if (not_pro_pro_plugin or plugin_data['page']) and url_for(plugin) == "#" %}
-                            <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
+                            <li class="menu-item{% if current_endpoint == plugin|lower %} active{% endif %}"{% if not_pro_pro_plugin %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs' aria-hidden='true'></i><span>{{ _('pro.overlay.pro_feature') }}</span>"
                             {% endif %}
                             >
                             <a href="{% if not_pro_pro_plugin %}{{ url_for('pro') }}{% else %}{{ url_for("plugins") }}/{{ plugin }}{% endif %}"
@@ -203,7 +202,11 @@
     <!-- Sidebar footer: version + edition (kit .menu-footer, admin.css:99-104) -->
     <div class="menu-footer">
         <i class="bx bx-shield-quarter" aria-hidden="true"></i>
-        <span>v{{ bw_version }} · <span data-i18n="navigation.edition_{{ 'pro' if is_pro_version else 'community' }}">{{ 'Pro' if is_pro_version else 'Community' }}</span></span>
+        {# Clicking your own version is where an operator looks for what changed in it, so the
+           release notes hang off it rather than taking a line of their own in the nav. #}
+        <span><a href="{{ url_for('whats_new.whats_new_page') }}"
+   class="text-reset"
+   aria-label="{{ _('breadcrumb.whats_new') }}">v{{ bw_version }}</a> · <span>{{ _("navigation.edition_pro" if is_pro_version else "navigation.edition_community") }}</span></span>
     </div>
 </aside>
 <!-- / Menu -->

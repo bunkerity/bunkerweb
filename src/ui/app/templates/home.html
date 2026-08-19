@@ -5,7 +5,6 @@
 {% from "components/chart-donut.html" import chart_donut %}
 {% from "components/geo-map.html" import geo_map %}
 {% from "components/range-picker.html" import range_picker %}
-{% from "components/checklist.html" import checklist %}
 {% from "components/page-head.html" import page_head %}
 {# The page-head band now owns the title + head actions, so suppress the dashboard
    shell's legacy breadcrumb/mode row (kills the duplicated header). #}
@@ -44,18 +43,16 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
-    {# Page-head band: welcome title (name in the Don Jose accent span -- kept a sibling of
-       the data-i18n greeting span, since i18n.js applyTranslations() sets .text() and would
-       otherwise flatten the accent span away) + head actions (Reload / range-picker / Get
-       support). #}
-    {% set welcome_title %}<span data-i18n="dashboard.welcome.greeting">Welcome back,</span> <span class="don-jose">{{ current_user.get_id() }}</span>{% endset %}
+    {# Page-head band: welcome title (name in its own Don Jose accent span, a sibling of the
+       greeting) + head actions (Reload / range-picker / Get support). #}
+    {% set welcome_title %}<span>{{ _("dashboard.welcome.greeting") }}</span> <span class="don-jose">{{ current_user.get_id() }}</span>{% endset %}
     {% call page_head(title=welcome_title) %}
         <a href="{{ url_for('home') }}" class="btn btn-outline-secondary d-flex align-items-center">
-            <i class="bx bx-refresh" aria-hidden="true"></i>&nbsp;<span data-i18n="button.reload">Reload</span>
+            <i class="bx bx-refresh" aria-hidden="true"></i>&nbsp;<span>{{ _("button.reload") }}</span>
         </a>
         {{ range_picker(id="home-range", active="7d") }}
         <a href="{{ url_for('support') }}" class="btn btn-primary don-jose d-flex align-items-center">
-            <i class="bx bx-support" aria-hidden="true"></i>&nbsp;<span data-i18n="link.get_support">Get support</span>
+            <i class="bx bx-support" aria-hidden="true"></i>&nbsp;<span>{{ _("link.get_support") }}</span>
         </a>
     {% endcall %}
     {# Blocked-vs-total request aggregate over the fixed home_stats_days window -- the
@@ -74,28 +71,28 @@
        chip (#home-blocked-trend) is filled by home-dashboard.js from the range picker. #}
     <div class="status-band mb-4">
         <div class="sb-col sb-plan">
-            <span class="sb-eyebrow" data-i18n="dashboard.card.plan.title">Plan</span>
+            <span class="sb-eyebrow">{{ _("dashboard.card.plan.title") }}</span>
             <div class="sb-primary">
                 <span class="sb-plan-name don-jose">{{ "PRO" if is_pro_version else "FREE" }}</span>
                 {% if is_pro_version and pro_status == 'active' %}
-                    <span class="sb-chip sb-chip-green"><i class="bx bx-check" aria-hidden="true"></i> <span data-i18n="status.active">Active</span></span>
+                    <span class="sb-chip sb-chip-green"><i class="bx bx-check" aria-hidden="true"></i> <span>{{ _("status.active") }}</span></span>
                 {% elif is_pro_version %}
                     <span class="sb-chip sb-chip-danger"><i class="bx bx-error-circle" aria-hidden="true"></i> {{ pro_status | capitalize }}</span>
                 {% else %}
-                    <span class="sb-chip sb-chip-muted" data-i18n="dashboard.status.free_plan">Free plan</span>
+                    <span class="sb-chip sb-chip-muted">{{ _("dashboard.status.free_plan") }}</span>
                 {% endif %}
             </div>
             <div class="sb-meta">
                 {% if is_pro_version %}
-                    <span data-i18n="dashboard.status.renews">Renews</span> <strong>{{ pro_expire }}</strong>{% if pro_services %} · <span data-i18n="dashboard.status.services_licensed" data-i18n-options='{"count": {{ pro_services }}}'>{{ pro_services }} services licensed</span>{% endif %}
+                    <span>{{ _("dashboard.status.renews") }}</span> <strong>{{ pro_expire }}</strong>{% if pro_services %} · <span >{{ _("dashboard.status.services_licensed", count=pro_services) }}</span>{% endif %}
                 {% else %}
-                    <a class="link-underline-primary" href="{{ url_for('pro') }}" data-i18n="link.upgrade">Upgrade?</a>
+                    <a class="link-underline-primary" href="{{ url_for('pro') }}">{{ _("link.upgrade") }}</a>
                 {% endif %}
             </div>
         </div>
         <div class="sb-divider"></div>
         <div class="sb-col sb-ram">
-            <span class="sb-eyebrow" data-i18n="dashboard.card.ram.title">System RAM</span>
+            <span class="sb-eyebrow">{{ _("dashboard.card.ram.title") }}</span>
             <div class="sb-primary">
                 <span class="sb-ram-val don-jose">{{ memory_info.used_gb }}<span class="sb-ram-unit"> / {{ memory_info.total_gb }} GB</span></span>
                 <span class="sb-chip sb-chip-{{ 'danger' if memory_info.memory_state == 'danger' else 'warn' if memory_info.memory_state == 'low' else 'muted' if memory_info.memory_state == 'medium' else 'green' }}">{{ memory_info.used_percent | round(1) }}%</span>
@@ -104,13 +101,13 @@
         </div>
         <div class="sb-divider"></div>
         <div class="sb-col sb-blocked">
-            <span class="sb-eyebrow" data-i18n="dashboard.card.blocked_requests.title">Blocked Requests</span>
+            <span class="sb-eyebrow">{{ _("dashboard.card.blocked_requests.title") }}</span>
             <div class="sb-primary">
                 <span class="sb-uptime-val don-jose">{{ blocked_pct }}<span style="font-size: .55em; opacity: .55; margin-left: .12em">%</span></span>
-                <span class="sb-chip sb-chip-muted" id="home-blocked-trend" data-i18n="dashboard.status.trend_vs_prev">vs prev.</span>
+                <span class="sb-chip sb-chip-muted" id="home-blocked-trend">{{ _("dashboard.status.trend_vs_prev") }}</span>
             </div>
             <div class="sb-meta">
-                <strong>{{ human_readable_number(ns.blocked_requests) }}</strong> <span data-i18n="dashboard.status.blocked_of_total" data-i18n-options='{"total": "{{ human_readable_number(total_requests) }}"}'>blocked of {{ human_readable_number(total_requests) }} total</span>
+                <strong>{{ human_readable_number(ns.blocked_requests) }}</strong> <span >{{ _("dashboard.status.blocked_of_total", total=human_readable_number(total_requests)) }}</span>
             </div>
         </div>
     </div>
@@ -131,7 +128,7 @@
                     {% set ns.down_instances = ns.down_instances + 1 %}
                 {% endif %}
             {% endfor %}
-            {% set instances_caption %}<span class="hl-good">{{ ns.up_instances }} <span data-i18n="status.up">up</span></span> · <span class="{{ 'hl-bad' if ns.down_instances else '' }}">{{ ns.down_instances }} <span data-i18n="status.down">down</span></span>{% if ns.loading_instances %} · <span class="hl-info">{{ ns.loading_instances }} <span data-i18n="status.loading">loading</span></span>{% endif %}{% endset %}
+            {% set instances_caption %}<span class="hl-good">{{ ns.up_instances }} <span>{{ _("status.up") }}</span></span> · <span class="{{ 'hl-bad' if ns.down_instances else '' }}">{{ ns.down_instances }} <span>{{ _("status.down") }}</span></span>{% if ns.loading_instances %} · <span class="hl-info">{{ ns.loading_instances }} <span>{{ _("status.loading") }}</span></span>{% endif %}{% endset %}
             <a role="button" href="{{ url_for('instances') }}" class="home-nav-tile d-block h-100">
                 {{ tile(title="Instances", value=('0' if instances|length < 10 else '') ~ instances|length, title_i18n="dashboard.card.instances.title", color="blue", icon="bx-box", caption=instances_caption) }}
             </a>
@@ -145,7 +142,7 @@
                     {% set ns.online_services = ns.online_services + 1 %}
                 {% endif %}
             {% endfor %}
-            {% set services_caption %}<span class="hl-good">{{ ns.online_services }} <span data-i18n="status.online">online</span></span>{% if ns.draft_services %} · <span class="hl-warn">{{ ns.draft_services }} <span data-i18n="status.draft">draft</span></span>{% endif %}{% endset %}
+            {% set services_caption %}<span class="hl-good">{{ ns.online_services }} <span>{{ _("status.online") }}</span></span>{% if ns.draft_services %} · <span class="hl-warn">{{ ns.draft_services }} <span>{{ _("status.draft") }}</span></span>{% endif %}{% endset %}
             <a role="button" href="{{ url_for('services') }}" class="home-nav-tile d-block h-100">
                 {{ tile(title="Services", value=('0' if services|length < 10 else '') ~ services|length, title_i18n="dashboard.card.services.title", color="navy", icon="bx-grid-alt", caption=services_caption) }}
             </a>
@@ -156,7 +153,7 @@
             </a>
         </div>
         <div class="col-md-3">
-            {% set certs_caption %}{% if certs_expiring or certs_expired %}{% if certs_expiring %}<span class="hl-warn">{{ certs_expiring }} <span data-i18n="status.expiring">expiring</span></span>{% endif %}{% if certs_expiring and certs_expired %} · {% endif %}{% if certs_expired %}<span class="hl-bad">{{ certs_expired }} <span data-i18n="status.expired">expired</span></span>{% endif %}{% else %}<span class="hl-good" data-i18n="status.all_valid">All valid</span>{% endif %}{% endset %}
+            {% set certs_caption %}{% if certs_expiring or certs_expired %}{% if certs_expiring %}<span class="hl-warn">{{ certs_expiring }} <span>{{ _("status.expiring") }}</span></span>{% endif %}{% if certs_expiring and certs_expired %} · {% endif %}{% if certs_expired %}<span class="hl-bad">{{ certs_expired }} <span>{{ _("status.expired") }}</span></span>{% endif %}{% else %}<span class="hl-good">{{ _("status.all_valid") }}</span>{% endif %}{% endset %}
             <a role="button" href="{{ url_for('certificates') }}" class="home-nav-tile d-block h-100">
                 {{ tile(title="Certificates", value=certificates_total, title_i18n="dashboard.card.certificates.title", color="green", icon="bx-certification", caption=certs_caption) }}
             </a>
@@ -167,46 +164,45 @@
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="mini-tile bad">
-                <div class="lbl"><i class="bx bx-block" aria-hidden="true"></i> <span data-i18n="dashboard.tile.bans_active">Bans active</span></div>
+                <div class="lbl"><i class="bx bx-block" aria-hidden="true"></i> <span>{{ _("dashboard.tile.bans_active") }}</span></div>
                 <div class="val don-jose">{{ human_readable_number(bans_active) }}</div>
-                <div class="trend"><span data-i18n="dashboard.mini.enforced">currently enforced</span></div>
+                <div class="trend"><span>{{ _("dashboard.mini.enforced") }}</span></div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="mini-tile bad">
-                <div class="lbl"><i class="bx bx-globe" aria-hidden="true"></i> <span data-i18n="dashboard.card.blocked_unique_ips.title">Blocked Unique IPs</span></div>
+                <div class="lbl"><i class="bx bx-globe" aria-hidden="true"></i> <span>{{ _("dashboard.card.blocked_unique_ips.title") }}</span></div>
                 <div class="val don-jose" id="home-unique-ips">—</div>
-                <div class="trend"><span id="home-unique-ips-countries" data-i18n="dashboard.mini.across_countries" data-i18n-options='{"count": 0}'>across 0 countries</span></div>
+                <div class="trend"><span id="home-unique-ips-countries" >{{ _("dashboard.mini.across_countries", count=0) }}</span></div>
             </div>
         </div>
         <div class="col-md-3">
             <a role="button" href="{{ url_for('jobs') }}" class="home-nav-tile d-block h-100">
                 <div class="mini-tile info h-100">
-                    <div class="lbl"><i class="bx bx-task" aria-hidden="true"></i> <span data-i18n="dashboard.tile.jobs">Scheduled jobs</span></div>
+                    <div class="lbl"><i class="bx bx-task" aria-hidden="true"></i> <span>{{ _("dashboard.tile.jobs") }}</span></div>
                     <div class="val don-jose">{{ jobs_count }}</div>
-                    <div class="trend"><span data-i18n="dashboard.mini.scheduled">scheduled</span></div>
+                    <div class="trend"><span>{{ _("dashboard.mini.scheduled") }}</span></div>
                 </div>
             </a>
         </div>
         <div class="col-md-3">
             <div class="mini-tile info">
-                <div class="lbl"><i class="bx bx-broadcast" aria-hidden="true"></i> <span data-i18n="dashboard.card.total_requests.title">Total Requests</span></div>
+                <div class="lbl"><i class="bx bx-broadcast" aria-hidden="true"></i> <span>{{ _("dashboard.card.total_requests.title") }}</span></div>
                 <div class="val don-jose">{{ human_readable_number(total_requests) }}</div>
-                <div class="trend"><span data-i18n="dashboard.mini.pct_blocked" data-i18n-options='{"percent": {{ blocked_pct }}}'>{{ blocked_pct }}% blocked</span></div>
+                <div class="trend"><span >{{ _("dashboard.mini.pct_blocked", percent=blocked_pct) }}</span></div>
             </div>
         </div>
     </div>
     {# The legacy widgets below stay a fixed home_stats_days aggregate (only the hero trend
        tile + timeline chart above are picker-driven), so keep the honest window caption. #}
     <p class="text-muted small mb-3"
-       data-i18n="dashboard.window.last_days"
-       data-i18n-options='{"days": {{ home_stats_days }}}'>Last {{ home_stats_days }} days</p>
+       >{{ _("dashboard.window.last_days", days=home_stats_days) }}</p>
     {# Distribution + top IPs + top reasons. #}
     <div class="row g-4 mb-4">
         <div class="col-12 col-lg-4">
             <div class="home-async-chart h-100" id="requests-ips-async">
                 {{ chart_donut(id="requests-ips", title="Top 10 Blocked IPs", title_key="dashboard.chart.top_blocked_ips.title", subtitle="By request count", subtitle_key="dashboard.panel.top_ips_sub", uppercase=true, series=request_ips, card_classes="h-100") }}
-                <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden" data-i18n="status.loading">Loading...</span></div></div>
+                <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
             </div>
         </div>
         <div class="col-12 col-lg-4">
@@ -219,7 +215,7 @@
                         <tbody id="home-top-reasons-body"></tbody>
                     </table>
                 {% endcall %}
-                <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden" data-i18n="status.loading">Loading...</span></div></div>
+                <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
             </div>
         </div>
     </div>
@@ -230,40 +226,31 @@
         <a href="{{ url_for('threatmap') }}"
            role="button"
            class="btn btn-sm btn-outline-primary position-absolute top-0 end-0 m-3 z-1">
-            <i class="bx bx-map-alt me-1" aria-hidden="true"></i><span data-i18n="threatmap.open_live">Live view</span>
+            <i class="bx bx-map-alt me-1" aria-hidden="true"></i><span>{{ _("threatmap.open_live") }}</span>
         </a>
-        <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden" data-i18n="status.loading">Loading...</span></div></div>
+        <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
     </div>
     {# Blocking status over time (async -- data from /home/metrics). #}
     <div class="home-async-chart mb-4" id="requests-blocking-async">
         {{ chart_area(id="requests-blocking", title="Blocking Status Over Time", title_key="dashboard.chart.blocking_status.title", subtitle="Blocked vs allowed", subtitle_key="dashboard.panel.blocking_sub", uppercase=true, series=time_buckets, height=400, card_classes="") }}
-        <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden" data-i18n="status.loading">Loading...</span></div></div>
+        <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
     </div>
-    {# Onboarding checklist (hides once complete) + news. #}
-    {% set onboarding_done = is_initialized and first_config_saved and (services | length > 0) and mfa_enabled and is_pro_version %}
+    {# News. The "Getting started" card that used to share this row is gone: it was four
+       hardcoded entries with no persistence, no links, and the same list for every role --
+       it told a `reader` to activate PRO, which a reader cannot do. The walkthrough that
+       replaced it follows the user across pages instead of living on one page (drawer +
+       pill in the app chrome, models/onboarding_drawer.html). The freed half-row collapses
+       rather than being backfilled. #}
     <div class="row g-4">
-        {% if not onboarding_done %}
-            <div class="col-lg-6">
-                {% set gs_header_right %}<span class="tag-chip green"><i class="bx bx-crown" aria-hidden="true"></i> <span data-i18n="onboarding.pro_tips">PRO tips</span></span>{% endset %}
-                {% call card(classes="h-100", title="Getting started", title_key="onboarding.title", icon="bx-rocket", header_right=gs_header_right) %}
-                    {{ checklist(items=[
-                        {"text": "Install BunkerWeb on 1+ host", "i18n_key": "onboarding.item.install", "done": is_initialized and first_config_saved},
-                        {"text": "Register your first service", "i18n_key": "onboarding.item.service", "done": services | length > 0},
-                        {"text": "Activate MFA", "i18n_key": "onboarding.item.mfa", "done": mfa_enabled},
-                        {"text": "Activate BunkerWeb PRO", "i18n_key": "onboarding.item.pro", "done": is_pro_version},
-                    ]) }}
-                {% endcall %}
-            </div>
-        {% endif %}
-        <div class="col-lg-6">
+        <div class="col-12">
             {% set news_header_right %}<a class="news-see-more"
    href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
    target="_blank"
    rel="noopener"
-   data-i18n="link.see_more">See more</a>
+  >{{ _("link.see_more") }}</a>
                 <div class="news-nav">
-                    <button type="button" class="icon-btn" id="home-news-prev" aria-label="Previous" data-i18n="step.previous"><i class="bx bx-chevron-left" aria-hidden="true"></i></button>
-                    <button type="button" class="icon-btn" id="home-news-next" aria-label="Next" data-i18n="step.next"><i class="bx bx-chevron-right" aria-hidden="true"></i></button>
+                    <button type="button" class="icon-btn" id="home-news-prev" aria-label="{{ _("step.previous") }}"><i class="bx bx-chevron-left" aria-hidden="true"></i></button>
+                    <button type="button" class="icon-btn" id="home-news-next" aria-label="{{ _("step.next") }}"><i class="bx bx-chevron-right" aria-hidden="true"></i></button>
                 </div>{% endset %}
             {% call card(classes="h-100 news-carousel", title="News", title_key="dashboard.card.news.title", icon="bx-news", header_right=news_header_right) %}
                 <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
@@ -271,19 +258,18 @@
                         <div class="flex-grow-1 overflow-hidden me-2">
                             <div id="banner-container">
                                 <p id="banner-text" class="mb-0 slide-in">
-                                    <span data-i18n="banner.pro">Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial</span> <a class="light-href text-white-80"
+                                    <span>{{ _("banner.pro") }}</span> <a class="light-href text-white-80"
     target="_blank"
     rel="noopener"
     href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro"
-    data-i18n="banner.link.here">here</a>.
+   >{{ _("banner.link.here") }}</a>.
                                 </p>
                             </div>
                         </div>
                         <button id="next-news"
                                 type="button"
                                 class="btn btn-sm btn-icon border-0 bg-transparent p-0 text-white"
-                                aria-label="Next"
-                                data-i18n="step.next">
+                                aria-label="{{ _("step.next") }}">
                             <i class="bx bx-sm bx-chevron-right" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -291,7 +277,7 @@
                 <div class="news-viewport mt-3">
                     <div class="news-track" id="data-news-container-home">
                         <p class="news-empty"
-                           data-i18n="status.news_connection_error">Impossible to connect to blog news.</p>
+                          >{{ _("status.news_connection_error") }}</p>
                     </div>
                     <div class="news-dots" id="home-news-dots"></div>
                 </div>

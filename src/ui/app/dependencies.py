@@ -12,6 +12,7 @@ from traceback import format_exc
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall  # type: ignore
 
 from app.api_client import ApiClient
+from app.perf import record_api_call
 from app.models.config import Config
 from app.models.instance import InstancesUtils
 from app.models.ui_data import UIData
@@ -26,6 +27,10 @@ API_CLIENT = ApiClient(
     base_url=getenv("API_URL", "http://bw-api:5000"),
     api_token=getenv("API_TOKEN", ""),
 )
+
+# Every UI page is assembled from API calls, and what makes one slow is almost always their
+# number. Counting them costs an integer per call and is what `Server-Timing` reports.
+API_CLIENT.observer = record_api_call
 
 BW_CONFIG = Config(data=DATA, api_client=API_CLIENT)
 BW_INSTANCES_UTILS = InstancesUtils(api_client=API_CLIENT)

@@ -1,0 +1,35 @@
+{# usage: {% from "components/release-notes.html" import release_entries %}
+          {{ release_entries(release) }}
+
+   One release's changelog lines. Shared by the permanent /whats-new page and the post-upgrade
+   modal so the two can never describe the same release differently.
+
+   `entry.html` arrives as Markup from app/models/changelog.py, which escapes the raw text
+   before turning the three markups the changelog uses (`code`, **bold**, links) into tags --
+   so it is safe to render unescaped here and nowhere else does that conversion. #}
+
+{% set TAG_VARIANTS = {
+    "SECURITY": "danger",
+    "BUGFIX": "warning",
+    "FEATURE": "success",
+    "UI": "info",
+    "DEPS": "secondary",
+    "DOCS": "secondary",
+    "MISC": "secondary",
+    "LINUX": "secondary",
+    "AUTOCONF": "secondary",
+    "CONTRIBUTION": "secondary"
+} %}
+
+{% macro release_entries(release) %}
+    <ul class="list-unstyled mb-0 release-notes">
+        {% for entry in release.entries %}
+            <li class="d-flex gap-2 py-2 border-bottom border-light-subtle">
+                {% if entry.tag %}
+                    <span class="badge bg-label-{{ TAG_VARIANTS.get(entry.tag, 'secondary') }} flex-shrink-0 align-self-start">{{ entry.tag }}</span>
+                {% endif %}
+                <span class="small">{{ entry.html }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}

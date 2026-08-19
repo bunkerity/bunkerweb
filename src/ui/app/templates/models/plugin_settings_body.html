@@ -71,8 +71,7 @@
                         <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                               data-bs-toggle="tooltip"
                               data-bs-placement="top"
-                              data-bs-original-title="Managed via API"
-                              data-i18n="badge.managed_via_api">
+                              data-bs-original-title="{{ _("badge.managed_via_api") }}">
                             <span class="bx bx-code-curly bx-xs"></span>
                         </span>
                     {% endif %}
@@ -125,10 +124,10 @@
     {% set setting_id_prefix = "multiple-setting-" + plugin +"-" %}
     <div class="card-header pb-2 mt-6">
         <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}"
-            data-i18n="settings.multiple.title">Multiple settings</h5>
+           >{{ _("settings.multiple.title") }}</h5>
         <p class="card-subtitle text-muted mt-2"
-           data-i18n="settings.multiple.description">
-            This is where you can configure multiple settings for this plugin.
+          >
+            {{ _("settings.multiple.description") }}
         </p>
     </div>
     <div class="card-body row g-2 gx-6 pt-0">
@@ -146,7 +145,7 @@
                             <div class="d-flex align-items-center">
                                 {% if setting_suffix == "0" %}
                                     <div class="me-1"
-                                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                                          {% endif %}>
                                         {{ button(id="add-multiple-" + plugin + "-" + multiple, label="ADD", i18n_key="button.multiple_add", variant="text-bw-green", icon="bx-plus-circle bx-sm", disabled=is_readonly, classes="btn-xs rounded-pill add-multiple p-0 pe-2") }}
                                     </div>
@@ -160,7 +159,7 @@
                                         data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                         aria-expanded="true"
                                         aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
-                                    <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span data-i18n="button.multiple_hide">HIDE</span>
+                                    <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span>{{ _("button.multiple_hide") }}</span>
                                 </button>
                             </div>
                         </div>
@@ -221,8 +220,7 @@
                                                     <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                           data-bs-toggle="tooltip"
                                                           data-bs-placement="top"
-                                                          data-bs-original-title="Managed via API"
-                                                          data-i18n="badge.managed_via_api">
+                                                          data-bs-original-title="{{ _("badge.managed_via_api") }}">
                                                         <span class="bx bx-code-curly bx-xs"></span>
                                                     </span>
                                                 {% endif %}

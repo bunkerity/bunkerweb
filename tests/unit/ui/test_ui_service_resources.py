@@ -8,6 +8,7 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from jinja2 import Environment, FileSystemLoader
 
@@ -156,7 +157,7 @@ def test_band_renders_families_and_chip_for_attached_resource():
     # aria-hidden. No stale title/data-i18n-title pair left behind either.
     detach_button = re.search(r"<button[^>]*\bdetach-resource\b[^>]*>", html).group(0)
     assert 'aria-label="Detach"' in detach_button
-    assert 'data-i18n="service.resources.detach"' in detach_button
+    assert f'aria-label="{english("service.resources.detach")}"' in detach_button
     assert "title=" not in detach_button
     assert "data-i18n-title" not in detach_button
     assert '<span aria-hidden="true">&times;</span>' in html
@@ -176,13 +177,13 @@ def test_band_shows_unavailable_state_for_a_failed_family_not_the_empty_state():
     html = _render_band("app.example.com", attachments)
 
     redirect_block = _family_block(html, "redirect")
-    assert 'data-i18n="service.resources.unavailable"' in redirect_block
-    assert 'data-i18n="service.resources.none"' not in redirect_block
+    assert english("service.resources.unavailable") in redirect_block
+    assert english("service.resources.none") not in redirect_block
 
     # the other, unaffected families still show the plain empty state.
     for family in ("upstream", "certificate", "workflow"):
         block = _family_block(html, family)
-        assert 'data-i18n="service.resources.none"' in block
+        assert english("service.resources.none") in block
         assert 'data-i18n="service.resources.unavailable"' not in block
 
 
@@ -621,7 +622,7 @@ def test_a_service_with_no_template_row_still_gets_a_picker():
     )
 
     assert 'id="service-template-picker"' in html
-    assert re.search(r'<option value="" selected\s+data-i18n="service.resources.template.none"', html)
+    assert re.search(r'<option value="" selected\s*>' + re.escape(english("service.resources.template.none")), html)
 
 
 def test_the_band_hands_the_conflict_context_to_the_dialog():
@@ -664,10 +665,10 @@ def test_a_dead_resource_family_leaves_the_template_column_alone():
         config={"USE_TEMPLATE": {"value": "low", "method": "ui"}},
     )
 
-    assert 'data-i18n="service.resources.unavailable"' in _family_block(html, "workflow")
+    assert english("service.resources.unavailable") in _family_block(html, "workflow")
     assert 'id="service-template-picker"' in _family_block(html, "template")
     for family in ("upstream", "certificate", "redirect"):
-        assert 'data-i18n="service.resources.none"' in _family_block(html, family)
+        assert english("service.resources.none") in _family_block(html, family)
 
 
 # --------------------------------------------------------------------------------------

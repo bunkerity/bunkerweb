@@ -53,7 +53,7 @@
                     {% if mode == 'easy' %}aria-selected="true"{% endif %}>
                 <i class="bx bx-customize {{ pill_icon_size }}"></i>
                 &nbsp;
-                <span class="{{ pill_label_class }}" data-i18n="mode.easy">Easy</span>
+                <span class="{{ pill_label_class }}">{{ _("mode.easy") }}</span>
             </button>
         </li>
     {% else %}
@@ -63,7 +63,7 @@
                {% if not raw_active %}aria-current="page"{% endif %}>
                 <i class="bx bx-layer {{ pill_icon_size }}"></i>
                 &nbsp;
-                <span class="{{ pill_label_class }}" data-i18n="mode.compose">Compose</span>
+                <span class="{{ pill_label_class }}">{{ _("mode.compose") }}</span>
             </a>
         </li>
     {% endif %}
@@ -74,7 +74,7 @@
                {% if raw_active %}aria-current="page"{% endif %}>
                 <i class="bx bx-notepad {{ pill_icon_size }}"></i>
                 &nbsp;
-                <span class="{{ pill_label_class }}" data-i18n="mode.raw">Raw</span>
+                <span class="{{ pill_label_class }}">{{ _("mode.raw") }}</span>
             </a>
         {% else %}
             <button type="button"
@@ -86,7 +86,7 @@
                     {% if raw_active %}aria-selected="true"{% endif %}>
                 <i class="bx bx-notepad {{ pill_icon_size }}"></i>
                 &nbsp;
-                <span class="{{ pill_label_class }}" data-i18n="mode.raw">Raw</span>
+                <span class="{{ pill_label_class }}">{{ _("mode.raw") }}</span>
             </button>
         {% endif %}
     </li>

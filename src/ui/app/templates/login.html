@@ -7,47 +7,14 @@
 {% endblock %}
 {% block page %}
     <div class="setup-screen">
-        <!-- Decorations (shared design-system auth deco, purely decorative) -->
-        <svg class="sw-deco sw-hatch" viewBox="0 0 150 22" aria-hidden="true">
-            <line x1="0" y1="22" x2="14" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="14" y1="22" x2="28" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="28" y1="22" x2="42" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="42" y1="22" x2="56" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="56" y1="22" x2="70" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="70" y1="22" x2="84" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="84" y1="22" x2="98" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="98" y1="22" x2="112" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="112" y1="22" x2="126" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="126" y1="22" x2="140" y2="0" stroke="currentColor" stroke-width="2" />
-            <line x1="140" y1="22" x2="154" y2="0" stroke="currentColor" stroke-width="2" />
-        </svg>
-        <svg class="sw-deco sw-hatch-r" viewBox="0 0 22 150" aria-hidden="true">
-            <line x1="0" y1="14" x2="22" y2="0" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="28" x2="22" y2="14" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="42" x2="22" y2="28" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="56" x2="22" y2="42" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="70" x2="22" y2="56" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="84" x2="22" y2="70" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="98" x2="22" y2="84" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="112" x2="22" y2="98" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="126" x2="22" y2="112" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="140" x2="22" y2="126" stroke="currentColor" stroke-width="1.5" />
-            <line x1="0" y1="154" x2="22" y2="140" stroke="currentColor" stroke-width="1.5" />
-        </svg>
-        <div class="sw-deco sw-rule sw-rule-1"></div>
-        <div class="sw-deco sw-rule sw-rule-2"></div>
-        <div class="sw-deco sw-rule sw-rule-3"></div>
-        <div class="sw-deco sw-vertical-text" aria-hidden="true">Secure like a Bunker</div>
-        <svg class="sw-deco sw-poly" viewBox="0 0 580 105" fill="none" aria-hidden="true">
-            <path d="M1 1 H435 L580 104 H1 Z M1 88 H560" stroke="currentColor" stroke-width="1" />
-        </svg>
+        {% include "components/auth-deco.html" %}
         <!-- Topbar: language selector + theme toggle (markup/ids/wiring unchanged) -->
         <header class="sw-topbar">
             <div>{% include "language-selector.html" %}</div>
             <div class="toggle-container d-flex align-items-center theme-toggle-pill p-3 rounded-pill shadow-lg">
                 <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"
-                       data-i18n="theme.light">Light</label>
+                      >{{ _("theme.light") }}</label>
                 <div class="form-switch">
                     <input id="dark-mode-toggle"
                            name="dark-mode-toggle"
@@ -58,7 +25,7 @@
                 </div>
                 <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
                        for="dark-mode-toggle"
-                       data-i18n="theme.dark">Dark</label>
+                      >{{ _("theme.dark") }}</label>
             </div>
         </header>
         <!-- Login card -->
@@ -69,7 +36,7 @@
             </div>
             <div class="sw-card-head">
                 <div>
-                    <p class="sw-subtitle" data-i18n="login.subtitle">Sign in to your BunkerWeb account</p>
+                    <p class="sw-subtitle">{{ _("login.subtitle") }}</p>
                 </div>
             </div>
             {% if webauthn_enabled %}
@@ -79,11 +46,11 @@
                             type="button"
                             id="passkey-login">
                         <i class="bx bx-fingerprint" aria-hidden="true"></i>
-                        <span data-i18n="button.sign_in_with_passkey">Sign in with a passkey</span>
+                        <span>{{ _("button.sign_in_with_passkey") }}</span>
                     </button>
                     <p class="sw-key-status" id="passkey-status" role="status" aria-live="polite"></p>
                     <div class="passkey-separator">
-                        <span data-i18n="login.or_use_password">or use your password</span>
+                        <span>{{ _("login.or_use_password") }}</span>
                     </div>
                 </div>
             {% endif %}
@@ -95,21 +62,20 @@
                 <input type="hidden" name="language" value="en" />
                 <input type="hidden" name="theme" value="" />
                 <div class="sw-field">
-                    <label for="username" data-i18n="form.label.username">Username</label>
+                    <label for="username">{{ _("form.label.username") }}</label>
                     <div class="sw-input-wrap">
                         <input type="text"
                                class="sw-input"
                                id="username"
                                name="username"
-                               placeholder="Enter username"
-                               data-i18n="form.placeholder.enter_username"
+                               placeholder="{{ _('form.placeholder.enter_username') }}"
                                autocomplete="username"
                                autofocus
                                required />
                     </div>
                 </div>
                 <div class="sw-field form-password-toggle">
-                    <label for="password" data-i18n="form.label.password">Password</label>
+                    <label for="password">{{ _("form.label.password") }}</label>
                     <div class="sw-input-wrap">
                         <input type="password"
                                class="sw-input"
@@ -130,7 +96,7 @@
                                name="remember-me" />
                         <label class="form-check-label"
                                for="remember-me"
-                               data-i18n="form.checkbox.remember_me">Remember Me</label>
+                              >{{ _("form.checkbox.remember_me") }}</label>
                     </div>
                     <a href="{{ docs_url('/troubleshooting', '#__tabbed_6_2') }}"
                        target="_blank"
@@ -138,11 +104,11 @@
                        class="login-forgot docs-link"
                        data-endpoint="/troubleshooting"
                        data-fragment="#__tabbed_6_2">
-                        <span data-i18n="link.forgot_password">Forgot Password?</span>
+                        <span>{{ _("link.forgot_password") }}</span>
                     </a>
                 </div>
                 <button class="sw-btn sw-btn-next login-submit" type="submit">
-                    <span data-i18n="button.login">Login</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                    <span>{{ _("button.login") }}</span> <i class="bx bx-chevron-right" aria-hidden="true"></i>
                 </button>
             </form>
         </div>

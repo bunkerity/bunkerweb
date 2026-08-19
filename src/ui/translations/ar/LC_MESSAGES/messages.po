@@ -1,0 +1,7058 @@
+# Arabic translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ar\n"
+"Language-Team: ar <LL@li.org>\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=0 && n%100<=2 ? 4 : 5);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "تم البناء باستخدام"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero General Public License v3.0"
+
+msgid "about.license_title"
+msgstr "الترخيص"
+
+msgid "about.social.discord"
+msgstr "ديسكورد"
+
+msgid "about.social.instagram"
+msgstr "انستغرام"
+
+msgid "about.social.linkedin"
+msgstr "لينكد إن"
+
+msgid "about.social.reddit"
+msgstr "ريديت"
+
+msgid "about.socials"
+msgstr "وسائل التواصل الاجتماعي"
+
+msgid "about.tagline"
+msgstr "حماية قوية، مبسطة"
+
+msgid "about.title"
+msgstr "حول BunkerWeb"
+
+msgid "about.version"
+msgstr "الإصدار: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "إصدار وتجديد الشهادات تلقائيًا."
+
+msgid "accordion.title.tls"
+msgstr "TLS والشهادات"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "الرجاء تحميل ملف تصدير التكوينات المخصصة صالح (.json)."
+
+msgid "alert.custom_end_date_required"
+msgstr "يرجى تحديد تاريخ انتهاء مخصص."
+
+msgid "alert.important"
+msgstr "هام"
+
+msgid "alert.no_changes_detected"
+msgstr "لم يتم اكتشاف أي تغييرات."
+
+msgid "alert.notice"
+msgstr "تنويه"
+
+msgid "alert.ping_error"
+msgstr "حدث خطأ أثناء اختبار اتصال المثيلات."
+
+msgid "alert.readonly_mode"
+msgstr "هذا الإجراء معطل في وضع القراءة فقط."
+
+msgid "aria.label.clear_search"
+msgstr "مسح البحث"
+
+msgid "aria.label.close"
+msgstr "إغلاق"
+
+msgid "aria.label.collapse_multiline"
+msgstr "طي الإدخالات متعددة الأسطر"
+
+msgid "aria.label.configs_dropzone"
+msgstr "حدد ملف تصدير التكوينات المخصصة أو أفلت واحدًا هنا"
+
+msgid "aria.label.copy"
+msgstr "نسخ السجلات"
+
+msgid "aria.label.download_log"
+msgstr "تنزيل ملف السجل هذا"
+
+msgid "aria.label.follow"
+msgstr "متابعة"
+
+msgid "aria.label.hide_value"
+msgstr "إخفاء القيمة"
+
+msgid "aria.label.issue_count"
+msgstr "عدد الأخطاء والتحذيرات"
+
+msgid "aria.label.level_filter"
+msgstr "تصفية أسطر السجل حسب المستوى"
+
+msgid "aria.label.local_time"
+msgstr "عرض الطوابع الزمنية بالتوقيت المحلي"
+
+msgid "aria.label.next_issue"
+msgstr "الخطأ أو التحذير التالي"
+
+msgid "aria.label.passkey_name"
+msgstr "اسم مفتاح المرور"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "حدّد أرشيفات الإضافات أو أفلتها هنا"
+
+msgid "aria.label.prev_issue"
+msgstr "الخطأ أو التحذير السابق"
+
+msgid "aria.label.raw_configuration"
+msgstr "التكوين الخام"
+
+msgid "aria.label.remove_value"
+msgstr "حذف القيمة"
+
+msgid "aria.label.reveal_value"
+msgstr "إظهار القيمة"
+
+msgid "aria.label.search_logs"
+msgstr "البحث في السجلات"
+
+msgid "aria.label.select_file"
+msgstr "اختر ملفًا"
+
+msgid "aria.label.select_page"
+msgstr "اختر صفحة"
+
+msgid "aria.label.services_dropzone"
+msgstr "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا"
+
+msgid "aria.label.toggle_wrap"
+msgstr "تبديل التفاف الأسطر"
+
+msgid "aria.label.user_avatar"
+msgstr "صورة المستخدم"
+
+msgid "aria.label.view_selected_items"
+msgstr "عرض العناصر المحددة"
+
+msgid "badge.from_template"
+msgstr "من القالب"
+
+msgid "badge.managed_via_api"
+msgstr "مُدار عبر API"
+
+msgid "badge.new_version"
+msgstr "إصدار جديد"
+
+msgid "badge.no_template"
+msgstr "لا يوجد قالب"
+
+msgid "badge.unread_news"
+msgstr "أخبار غير مقروءة"
+
+msgid "badge.unread_notifications"
+msgstr "إشعارات غير مقروءة"
+
+msgid "banner.community"
+msgstr "كن جزءًا من مجتمع Bunker بالانضمام إلى <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">دردشة Discord</a> ومتابعتنا على <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>."
+
+msgid "banner.link.here"
+msgstr "هنا"
+
+msgid "banner.pro"
+msgstr "احصل على أقصى استفادة من BunkerWeb بالترقية إلى إصدار PRO. مزيد من المعلومات وتجربة مجانية <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">هنا</a>."
+
+msgid "banner.support"
+msgstr "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
+
+msgid "bans.stats.card.by_reason"
+msgstr "عمليات الحظر حسب السبب"
+
+msgid "bans.stats.tile.active"
+msgstr "عمليات الحظر النشطة"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "عناوين IP + نطاقات CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "البلدان"
+
+msgid "bans.stats.tile.expiring"
+msgstr "تنتهي خلال ≤ 1 ساعة"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "تدوير تلقائي"
+
+msgid "bans.stats.tile.permanent"
+msgstr "عمليات الحظر الدائمة"
+
+msgid "bans.subtitle"
+msgstr "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر."
+
+msgid "breadcrumb.about"
+msgstr "حول"
+
+msgid "breadcrumb.bans"
+msgstr "الحظر"
+
+msgid "breadcrumb.cache"
+msgstr "الذاكرة المؤقتة"
+
+msgid "breadcrumb.configs"
+msgstr "التكوينات"
+
+msgid "breadcrumb.extra_pages"
+msgstr "صفحات إضافية"
+
+msgid "breadcrumb.global_config"
+msgstr "التكوين العام"
+
+msgid "breadcrumb.global_settings"
+msgstr "الإعدادات العامة"
+
+msgid "breadcrumb.groups"
+msgstr "مجموعات الموارد"
+
+msgid "breadcrumb.home"
+msgstr "الرئيسية"
+
+msgid "breadcrumb.instances"
+msgstr "المثيلات"
+
+msgid "breadcrumb.jobs"
+msgstr "المهام"
+
+msgid "breadcrumb.logs"
+msgstr "السجلات"
+
+msgid "breadcrumb.misc"
+msgstr "متنوع"
+
+msgid "breadcrumb.mode_selection"
+msgstr "اختيار الوضع"
+
+msgid "breadcrumb.more"
+msgstr "المزيد..."
+
+msgid "breadcrumb.new"
+msgstr "جديد"
+
+msgid "breadcrumb.plugins"
+msgstr "الإضافات"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "صفحات الإضافات"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "الملف الشخصي"
+
+msgid "breadcrumb.reports"
+msgstr "التقارير"
+
+msgid "breadcrumb.services"
+msgstr "الخدمات"
+
+msgid "breadcrumb.support"
+msgstr "الدعم"
+
+msgid "breadcrumb.templates"
+msgstr "القوالب"
+
+msgid "breadcrumb.threatmap"
+msgstr "خريطة التهديدات"
+
+msgid "breadcrumb.timings"
+msgstr "التوقيتات"
+
+msgid "breadcrumb.web_cache"
+msgstr "ذاكرة التخزين المؤقت للموقع"
+
+msgid "breadcrumb.whats_new"
+msgstr "ما الجديد"
+
+msgid "button.actions"
+msgstr "الإجراءات"
+
+msgid "button.activate_key"
+msgstr "تفعيل المفتاح"
+
+msgid "button.add"
+msgstr "إدراج"
+
+msgid "button.add_ban_plural"
+msgstr "إضافة عمليات حظر"
+
+msgid "button.add_passkey"
+msgstr "إضافة مفتاح مرور"
+
+msgid "button.add_plugin_plural"
+msgstr "إضافة إضافات"
+
+msgid "button.add_plugins"
+msgstr "إضافة الإضافات"
+
+msgid "button.auto_refresh"
+msgstr "تحديث تلقائي"
+
+msgid "button.ban"
+msgstr "حظر"
+
+msgid "button.ban_all_filtered"
+msgstr "حظر كل التقارير المطابقة"
+
+msgid "button.ban_selected"
+msgstr "حظر المحدد"
+
+msgid "button.cache"
+msgstr "الذاكرة المؤقتة"
+
+msgid "button.cancel"
+msgstr "إلغاء"
+
+msgid "button.clear"
+msgstr "مسح"
+
+msgid "button.clone"
+msgstr "نسخ"
+
+msgid "button.close"
+msgstr "إغلاق"
+
+msgid "button.collapse_multiline"
+msgstr "طي"
+
+msgid "button.columns"
+msgstr "الأعمدة"
+
+msgid "button.convert_configs"
+msgstr "تحويل الإعدادات"
+
+msgid "button.convert_configs_to"
+msgstr "التحويل إلى %(state)s"
+
+msgid "button.convert_services"
+msgstr "تحويل الخدمات"
+
+msgid "button.copy"
+msgstr "نسخ"
+
+msgid "button.copy_codes"
+msgstr "نسخ الرموز"
+
+msgid "button.copy_raw"
+msgstr "نسخ البيانات الخام"
+
+msgid "button.copy_visible"
+msgstr "نسخ المرئي"
+
+msgid "button.create_config"
+msgstr "إنشاء تكوين مخصص"
+
+msgid "button.create_instance"
+msgstr "إنشاء مثيل"
+
+msgid "button.create_service"
+msgstr "إنشاء خدمة جديدة"
+
+msgid "button.create_template"
+msgstr "إنشاء قالب"
+
+msgid "button.delete"
+msgstr "حذف"
+
+msgid "button.delete_instance"
+msgstr "حذف المثيلات"
+
+msgid "button.disable_totp"
+msgstr "تعطيل TOTP"
+
+msgid "button.download"
+msgstr "تنزيل"
+
+msgid "button.edit"
+msgstr "تعديل"
+
+msgid "button.enable_totp"
+msgstr "تمكين TOTP"
+
+msgid "button.entire_config"
+msgstr "التكوين الكامل"
+
+msgid "button.export"
+msgstr "تصدير"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "جلب الإعدادات العامة"
+
+msgid "button.filtered_actions"
+msgstr "الإجراءات المصفاة"
+
+msgid "button.filters_suffix"
+msgstr " مرشحات"
+
+msgid "button.follow"
+msgstr "متابعة"
+
+msgid "button.force_check"
+msgstr "فرض الفحص"
+
+msgid "button.force_update"
+msgstr "فرض التحديث"
+
+msgid "button.github_stars"
+msgstr "نجوم"
+
+msgid "button.go"
+msgstr "انتقل ←"
+
+msgid "button.go_back"
+msgstr "الرجوع"
+
+msgid "button.got_it"
+msgstr "فهمت"
+
+msgid "button.hide"
+msgstr "إخفاء"
+
+msgid "button.history"
+msgstr "السجل"
+
+msgid "button.import_configs"
+msgstr "استيراد التكوينات المخصصة"
+
+msgid "button.import_services"
+msgstr "استيراد الخدمات"
+
+msgid "button.local_time"
+msgstr "التوقيت المحلي"
+
+msgid "button.login"
+msgstr "تسجيل الدخول"
+
+msgid "button.multiple_add"
+msgstr "إضافة"
+
+msgid "button.multiple_hide"
+msgstr "إخفاء"
+
+msgid "button.multiple_remove"
+msgstr "إزالة"
+
+msgid "button.multiple_show"
+msgstr "إظهار"
+
+msgid "button.need_help"
+msgstr "هل تحتاج إلى مساعدة؟"
+
+msgid "button.news"
+msgstr "الأخبار"
+
+msgid "button.notifications"
+msgstr "الإشعارات"
+
+msgid "button.open_support_ticket"
+msgstr "فتح تذكرة دعم"
+
+msgid "button.order_support"
+msgstr "طلب دعم"
+
+msgid "button.ping"
+msgstr "Ping"
+
+msgid "button.plugin_page"
+msgstr "صفحة الإضافة"
+
+msgid "button.proceed"
+msgstr "متابعة"
+
+msgid "button.refresh"
+msgstr "تحديث"
+
+msgid "button.refresh_recovery_codes"
+msgstr "تحديث رموز الاسترداد"
+
+msgid "button.reload"
+msgstr "إعادة تحميل"
+
+msgid "button.rename"
+msgstr "إعادة تسمية"
+
+msgid "button.reset"
+msgstr "إعادة تعيين"
+
+msgid "button.reset_columns"
+msgstr "إعادة تعيين الأعمدة"
+
+msgid "button.retry"
+msgstr "إعادة المحاولة"
+
+msgid "button.return_to_safety"
+msgstr "العودة إلى الأمان"
+
+msgid "button.run"
+msgstr "تشغيل"
+
+msgid "button.run_selected_jobs"
+msgstr "تشغيل المهام المحددة"
+
+msgid "button.save"
+msgstr "حفظ"
+
+msgid "button.save_changes"
+msgstr "حفظ التغييرات"
+
+msgid "button.search"
+msgstr "بحث"
+
+msgid "button.see_all_releases"
+msgstr "عرض كل الإصدارات"
+
+msgid "button.select_file"
+msgstr "اختيار ملف"
+
+msgid "button.select_page"
+msgstr "اختيار صفحة"
+
+msgid "button.service"
+msgstr "خدمة"
+
+msgid "button.set_1h"
+msgstr "تعيين ساعة واحدة"
+
+msgid "button.set_1w"
+msgstr "تعيين أسبوع واحد"
+
+msgid "button.set_24h"
+msgstr "تعيين 24 ساعة"
+
+msgid "button.set_permanent"
+msgstr "تعيين دائم"
+
+msgid "button.setup"
+msgstr "إعداد"
+
+msgid "button.show"
+msgstr "إظهار"
+
+msgid "button.show_me"
+msgstr "أرني"
+
+msgid "button.sign_in_with_passkey"
+msgstr "تسجيل الدخول بمفتاح مرور"
+
+msgid "button.stop"
+msgstr "إيقاف"
+
+msgid "button.submit"
+msgstr "إرسال"
+
+msgid "button.subscribe"
+msgstr "اشتراك"
+
+msgid "button.unban"
+msgstr "رفع الحظر"
+
+msgid "button.unban_all_filtered"
+msgstr "إلغاء كل عمليات الحظر المطابقة"
+
+msgid "button.update_duration"
+msgstr "تحديث مدة الحظر"
+
+msgid "button.update_duration_all_filtered"
+msgstr "تحديث مدة كل عمليات الحظر المطابقة"
+
+msgid "button.update_key"
+msgstr "تحديث المفتاح"
+
+msgid "button.upload_photo"
+msgstr "تحميل صورة جديدة"
+
+msgid "button.use_security_key"
+msgstr "استخدام مفتاح أمان"
+
+msgid "button.use_template"
+msgstr "استخدام قالب"
+
+msgid "button.verify"
+msgstr "التحقق"
+
+msgid "button.view"
+msgstr "عرض"
+
+msgid "button.view_details"
+msgstr "عرض التفاصيل"
+
+msgid "button.view_raw_data"
+msgstr "عرض البيانات الخام"
+
+msgid "button.wipe_other_sessions"
+msgstr "إنهاء الجلسات الأخرى"
+
+msgid "button.wrap"
+msgstr "التفاف"
+
+msgid "cache.kpi_files"
+msgstr "الملفات"
+
+msgid "cache.kpi_per_service"
+msgstr "لكل خدمة"
+
+msgid "cache.subtitle"
+msgstr "ملفات التخزين المؤقت التي تم إنشاؤها بواسطة المهام المجدولة (قوائم الحظر وقواعد GeoIP وما إلى ذلك) — تفحصها أو قم بتنزيلها أو حذفها لكل خدمة وإضافة."
+
+msgid "cache.title"
+msgstr "ملفات الذاكرة المؤقتة"
+
+msgid "certificates.acme_help"
+msgstr "حدد الخدمات التي تمكينها وإعدادها بالفعل Let's Encrypt. هذه العملية تقوم فقط بجدولة هذا التكوين؛ لا يتم إدخال تفاصيل الشهادة و بيانات التحدي هنا."
+
+msgid "certificates.active"
+msgstr "شهادات نشطة"
+
+msgid "certificates.algorithm"
+msgstr "الخوارزمية"
+
+msgid "certificates.all"
+msgstr "الكل"
+
+msgid "certificates.assignment_notice"
+msgstr "التخصيص ينظم المخزون المركزي؛ يظل نشر TLS تحت سيطرة إعدادات الشهادة لكل خدمة."
+
+msgid "certificates.assignments"
+msgstr "تخصيص المخزون"
+
+msgid "certificates.assignments_help"
+msgstr "هذه التخصيصات لا تغير إعدادات TLS الحية."
+
+msgid "certificates.attach"
+msgstr "خصص"
+
+msgid "certificates.attach_all"
+msgstr "هذه الشهادة مرتبطة بالفعل بكل خدمة متاحة."
+
+msgid "certificates.attach_copy"
+msgstr "خصص \"%(name)s\" لخدمة في المخزون المركزي."
+
+msgid "certificates.browse_certificate"
+msgstr "تصفح الشهادة"
+
+msgid "certificates.browse_key"
+msgstr "تصفح المفتاح الخاص"
+
+msgid "certificates.common_name"
+msgstr "اسم شائع"
+
+msgid "certificates.confirm"
+msgstr "تأكيد"
+
+msgid "certificates.confirm_action"
+msgstr "تأكيد إجراء الشهادة"
+
+msgid "certificates.confirm_delete"
+msgstr "حذف \"%(name)s\"؟ لا يمكن التراجع عن ذلك."
+
+msgid "certificates.confirm_generic"
+msgstr "تأكيد إجراء الشهادة؟"
+
+msgid "certificates.confirm_renew"
+msgstr "تجديد \"%(name)s\"؟"
+
+msgid "certificates.confirm_renew_due"
+msgstr "تحقق من كل شهادة وتجدد تلك التي تنتهي صلاحيتها؟"
+
+msgid "certificates.create"
+msgstr "إنشاء شهادة"
+
+msgid "certificates.download_chain"
+msgstr "تنزيل السلسلة"
+
+msgid "certificates.download_leaf"
+msgstr "تنزيل الورقة"
+
+msgid "certificates.edit_help"
+msgstr "هذا يغير بيانات تعريف المخزون فقط، وليس مواد الشهادة أو إعدادات TLS الحية."
+
+msgid "certificates.edit_metadata"
+msgstr "تحرير بيانات تعريف الشهادة"
+
+msgid "certificates.empty"
+msgstr "لا توجد شهادات"
+
+msgid "certificates.empty_help"
+msgstr "إنشاء شهادة موقعة ذاتيًا، وجدولة إصدار ACME، أو تحميل شهادة PEM و مفتاح موجودة."
+
+msgid "certificates.expired_help"
+msgstr "يحتاج إلى اهتمام"
+
+msgid "certificates.expires"
+msgstr "ينتهي الصلاحية"
+
+msgid "certificates.expiring_help"
+msgstr "أقل من 30 يومًا"
+
+msgid "certificates.file_extensions"
+msgstr "استخدم أحد هذه امتدادات الملف: %(extensions)s."
+
+msgid "certificates.file_select"
+msgstr "حدد ملف PEM."
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "يجب ألا يتجاوز الملف 1 ميجابايت."
+
+msgid "certificates.fingerprint"
+msgstr "بصمة SHA-256"
+
+msgid "certificates.issuer"
+msgstr "الجهة المصدرة"
+
+msgid "certificates.issuers"
+msgstr "الجهات المصدرة الرائدة"
+
+msgid "certificates.key_drop"
+msgstr "ضع المفتاح الخاص المطابق هنا"
+
+msgid "certificates.key_limit"
+msgstr "حد أقصى 1 ميجابايت؛ مشفر أثناء الراحة ولا يمكن تنزيله"
+
+msgid "certificates.last_error"
+msgstr "آخر خطأ"
+
+msgid "certificates.make_primary"
+msgstr "ضع علامة على هذا كتعيين المخزون الأساسي لهذا الخدمة"
+
+msgid "certificates.managed"
+msgstr "شهادات مُدارة"
+
+msgid "certificates.new_selfsigned"
+msgstr "شهادة موقعة ذاتيًا جديدة"
+
+msgid "certificates.no_issuers"
+msgstr "لا توجد بيانات جهة إصدار"
+
+msgid "certificates.none_due"
+msgstr "لا توجد شهادات قادمة"
+
+msgid "certificates.orphan_account"
+msgstr "حساب"
+
+msgid "certificates.orphan_badge"
+msgstr "حساب ACME مفقود"
+
+msgid "certificates.orphan_help"
+msgstr "يشير هذا السجل لإعادة التجديد إلى حساب ACME غير موجود حاليًا. تبقى عملية التجديد معلقة حتى يتم إصلاح حالة المزود."
+
+msgid "certificates.orphan_server"
+msgstr "خادم ACME"
+
+msgid "certificates.orphan_title"
+msgstr "حساب ACME مفقود"
+
+msgid "certificates.pem_certificate"
+msgstr "شهادة PEM أو سلسلة"
+
+msgid "certificates.pem_drop"
+msgstr "ضع شهادة PEM أو سلسلة عامة هنا"
+
+msgid "certificates.pem_limit"
+msgstr "حد أقصى 1 ميجابايت"
+
+msgid "certificates.pem_private_key"
+msgstr "مفتاح PEM الخاص"
+
+msgid "certificates.primary"
+msgstr "التعيين الأساسي"
+
+msgid "certificates.primary_help"
+msgstr "ضع علامة على الخدمات المحددة كتعيين المخزون الأساسي"
+
+msgid "certificates.readonly"
+msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص الشهادات وتنزيلها، ولكن لا يمكن تعديلها."
+
+msgid "certificates.renew_due"
+msgstr "تحقق/جدد"
+
+msgid "certificates.sans"
+msgstr "أسماء بديلة للموضوع"
+
+msgid "certificates.save_metadata"
+msgstr "حفظ البيانات الوصفية"
+
+msgid "certificates.schedule"
+msgstr "جدولة الإصدار"
+
+msgid "certificates.schedule_acme"
+msgstr "جدولة إصدار ACME"
+
+msgid "certificates.search"
+msgstr "ابحث عن الاسم، الاسم الشائع، SAN، جهة الإصدار، أو البصمة…"
+
+msgid "certificates.serial"
+msgstr "رقم التسلسل"
+
+msgid "certificates.services"
+msgstr "الخدمات"
+
+msgid "certificates.services_help"
+msgstr "استخدم Ctrl أو Command لتحديد الخدمات المتعددة."
+
+msgid "certificates.showing_count"
+msgstr "عرض %(visible)s من %(total)s شهادات"
+
+msgid "certificates.source.customcert"
+msgstr "مخصص"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "ذاتية التوقيع"
+
+msgid "certificates.source_label"
+msgstr "المصدر"
+
+msgid "certificates.status.expired"
+msgstr "منتهية الصلاحية"
+
+msgid "certificates.status.expiring_soon"
+msgstr "ستنتهي صلاحيتها قريبًا"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "لم تصبح صالحة بعد"
+
+msgid "certificates.status.revoked"
+msgstr "تم إلغاؤها"
+
+msgid "certificates.status.valid"
+msgstr "صالحة"
+
+msgid "certificates.subtitle"
+msgstr "إصدار، وتحميل، وتعيين، وتجديد، وفحص الشهادات في المخزون المركزي."
+
+msgid "certificates.total"
+msgstr "إجمالي"
+
+msgid "certificates.truncated"
+msgstr "يتم عرض أول 500 شهادة فقط. لتقليل المخزون، استخدم API للحصول على النتيجة الكاملة."
+
+msgid "certificates.unassigned"
+msgstr "غير مُعيّن"
+
+msgid "certificates.upcoming"
+msgstr "تجديدات قادمة"
+
+msgid "certificates.upcoming_help"
+msgstr "منتهية الصلاحية أو ضمن نافذة التجديد البالغة 30 يومًا"
+
+msgid "certificates.upload"
+msgstr "تحميل شهادة"
+
+msgid "certificates.upload_custom"
+msgstr "تحميل شهادة مخصصة"
+
+msgid "certificates.upload_invalid"
+msgstr "اختر شهادة عامة صالحة ومفتاحها الخاص المطابق."
+
+msgid "certificates.valid_days"
+msgstr "مدة الصلاحية (بالأيام)"
+
+msgid "certificates.valid_from"
+msgstr "تبدأ الصلاحية من"
+
+msgid "certificates.valid_to"
+msgstr "تنتهي الصلاحية في"
+
+msgid "compose.always_on"
+msgstr "دائمًا"
+
+msgid "compose.count"
+msgstr "%(on)s على · %(total)s متاح · %(locked)s مقفل"
+
+msgid "compose.entries"
+msgstr "%(count)s تم التكوين"
+
+msgid "compose.filter.all"
+msgstr "الكل"
+
+msgid "compose.filter.changed"
+msgstr "تم التغيير"
+
+msgid "compose.filter.on"
+msgstr "تشغيل"
+
+msgid "compose.locked"
+msgstr "لا يوجد تحكم هنا"
+
+msgid "compose.provenance.api"
+msgstr "مُدار عبر API"
+
+msgid "compose.provenance.attachment"
+msgstr "من المرفق"
+
+msgid "compose.provenance.clone"
+msgstr "نسخ"
+
+msgid "compose.provenance.default"
+msgstr "افتراضي"
+
+msgid "compose.provenance.edited"
+msgstr "تم التعديل هنا"
+
+msgid "compose.provenance.global"
+msgstr "من العالمي"
+
+msgid "compose.provenance.managed"
+msgstr "تم تعيينه بواسطة %(method)s"
+
+msgid "compose.provenance.template"
+msgstr "من القالب"
+
+msgid "compose.set_value"
+msgstr "عيّن قيمة…"
+
+msgid "compose.show_more"
+msgstr "عرض المزيد من %(count)s"
+
+msgid "compose.unavailable"
+msgstr "لا يمكن تحميل قائمة الإضافات، لذلك لا يمكن تحرير هذه الصفحة بأمان. أعد التحميل بعد تلقي رد من API."
+
+msgid "configs.subtitle"
+msgstr "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
+
+msgid "country.AD"
+msgstr "أندورا"
+
+msgid "country.AE"
+msgstr "الإمارات العربية المتحدة"
+
+msgid "country.AF"
+msgstr "أفغانستان"
+
+msgid "country.AG"
+msgstr "أنتيغوا وباربودا"
+
+msgid "country.AI"
+msgstr "أنغويلا"
+
+msgid "country.AL"
+msgstr "ألبانيا"
+
+msgid "country.AM"
+msgstr "أرمينيا"
+
+msgid "country.AO"
+msgstr "أنغولا"
+
+msgid "country.AQ"
+msgstr "القارة القطبية الجنوبية"
+
+msgid "country.AR"
+msgstr "الأرجنتين"
+
+msgid "country.AS"
+msgstr "ساموا الأمريكية"
+
+msgid "country.AT"
+msgstr "النمسا"
+
+msgid "country.AU"
+msgstr "أستراليا"
+
+msgid "country.AW"
+msgstr "أروبا"
+
+msgid "country.AX"
+msgstr "جزر آلاند"
+
+msgid "country.AZ"
+msgstr "أذربيجان"
+
+msgid "country.BA"
+msgstr "البوسنة والهرسك"
+
+msgid "country.BB"
+msgstr "بربادوس"
+
+msgid "country.BD"
+msgstr "بنغلاديش"
+
+msgid "country.BE"
+msgstr "بلجيكا"
+
+msgid "country.BF"
+msgstr "بوركينا فاسو"
+
+msgid "country.BG"
+msgstr "بلغاريا"
+
+msgid "country.BH"
+msgstr "البحرين"
+
+msgid "country.BI"
+msgstr "بوروندي"
+
+msgid "country.BJ"
+msgstr "بنين"
+
+msgid "country.BL"
+msgstr "سان بارتيلمي"
+
+msgid "country.BM"
+msgstr "برمودا"
+
+msgid "country.BN"
+msgstr "بروناي دار السلام"
+
+msgid "country.BO"
+msgstr "بوليفيا"
+
+msgid "country.BQ"
+msgstr "الجزر الكاريبية الهولندية"
+
+msgid "country.BR"
+msgstr "البرازيل"
+
+msgid "country.BS"
+msgstr "البهاما"
+
+msgid "country.BT"
+msgstr "بوتان"
+
+msgid "country.BV"
+msgstr "جزيرة بوفيت"
+
+msgid "country.BW"
+msgstr "بوتسوانا"
+
+msgid "country.BY"
+msgstr "بيلاروسيا"
+
+msgid "country.BZ"
+msgstr "بليز"
+
+msgid "country.CA"
+msgstr "كندا"
+
+msgid "country.CC"
+msgstr "جزر كوكوس (كيلينغ)"
+
+msgid "country.CD"
+msgstr "جمهورية الكونغو الديمقراطية"
+
+msgid "country.CF"
+msgstr "جمهورية أفريقيا الوسطى"
+
+msgid "country.CG"
+msgstr "جمهورية الكونغو"
+
+msgid "country.CH"
+msgstr "سويسرا"
+
+msgid "country.CI"
+msgstr "ساحل العاج"
+
+msgid "country.CK"
+msgstr "جزر كوك"
+
+msgid "country.CL"
+msgstr "تشيلي"
+
+msgid "country.CM"
+msgstr "الكاميرون"
+
+msgid "country.CN"
+msgstr "الصين"
+
+msgid "country.CO"
+msgstr "كولومبيا"
+
+msgid "country.CR"
+msgstr "كوستاريكا"
+
+msgid "country.CU"
+msgstr "كوبا"
+
+msgid "country.CV"
+msgstr "الرأس الأخضر"
+
+msgid "country.CW"
+msgstr "كوراساو"
+
+msgid "country.CX"
+msgstr "جزيرة عيد الميلاد"
+
+msgid "country.CY"
+msgstr "قبرص"
+
+msgid "country.CZ"
+msgstr "جمهورية التشيك"
+
+msgid "country.DE"
+msgstr "ألمانيا"
+
+msgid "country.DJ"
+msgstr "جيبوتي"
+
+msgid "country.DK"
+msgstr "الدنمارك"
+
+msgid "country.DM"
+msgstr "دومينيكا"
+
+msgid "country.DO"
+msgstr "جمهورية الدومينيكان"
+
+msgid "country.DZ"
+msgstr "الجزائر"
+
+msgid "country.EC"
+msgstr "الإكوادور"
+
+msgid "country.EE"
+msgstr "إستونيا"
+
+msgid "country.EG"
+msgstr "مصر"
+
+msgid "country.EH"
+msgstr "الصحراء الغربية"
+
+msgid "country.ER"
+msgstr "إريتريا"
+
+msgid "country.ES"
+msgstr "إسبانيا"
+
+msgid "country.ET"
+msgstr "إثيوبيا"
+
+msgid "country.EU"
+msgstr "أوروبا"
+
+msgid "country.FI"
+msgstr "فنلندا"
+
+msgid "country.FJ"
+msgstr "فيجي"
+
+msgid "country.FK"
+msgstr "جزر فوكلاند (مالفيناس)"
+
+msgid "country.FM"
+msgstr "ميكرونيزيا"
+
+msgid "country.FO"
+msgstr "جزر فارو"
+
+msgid "country.FR"
+msgstr "فرنسا"
+
+msgid "country.GA"
+msgstr "الغابون"
+
+msgid "country.GB"
+msgstr "المملكة المتحدة"
+
+msgid "country.GD"
+msgstr "غرينادا"
+
+msgid "country.GE"
+msgstr "جورجيا"
+
+msgid "country.GF"
+msgstr "غويانا الفرنسية"
+
+msgid "country.GG"
+msgstr "غيرنسي"
+
+msgid "country.GH"
+msgstr "غانا"
+
+msgid "country.GI"
+msgstr "جبل طارق"
+
+msgid "country.GL"
+msgstr "غرينلاند"
+
+msgid "country.GM"
+msgstr "غامبيا"
+
+msgid "country.GN"
+msgstr "غينيا"
+
+msgid "country.GP"
+msgstr "غوادلوب"
+
+msgid "country.GQ"
+msgstr "غينيا الاستوائية"
+
+msgid "country.GR"
+msgstr "اليونان"
+
+msgid "country.GS"
+msgstr "جورجيا الجنوبية وجزر ساندويتش الجنوبية"
+
+msgid "country.GT"
+msgstr "غواتيمالا"
+
+msgid "country.GU"
+msgstr "غوام"
+
+msgid "country.GW"
+msgstr "غينيا بيساو"
+
+msgid "country.GY"
+msgstr "غيانا"
+
+msgid "country.HK"
+msgstr "هونغ كونغ"
+
+msgid "country.HM"
+msgstr "جزيرة هيرد وجزر ماكدونالد"
+
+msgid "country.HN"
+msgstr "هندوراس"
+
+msgid "country.HR"
+msgstr "كرواتيا"
+
+msgid "country.HT"
+msgstr "هايتي"
+
+msgid "country.HU"
+msgstr "المجر"
+
+msgid "country.ID"
+msgstr "إندونيسيا"
+
+msgid "country.IE"
+msgstr "أيرلندا"
+
+msgid "country.IL"
+msgstr "إسرائيل"
+
+msgid "country.IM"
+msgstr "جزيرة مان"
+
+msgid "country.IN"
+msgstr "الهند"
+
+msgid "country.IO"
+msgstr "إقليم المحيط الهندي البريطاني"
+
+msgid "country.IQ"
+msgstr "العراق"
+
+msgid "country.IR"
+msgstr "إيران"
+
+msgid "country.IS"
+msgstr "آيسلندا"
+
+msgid "country.IT"
+msgstr "إيطاليا"
+
+msgid "country.JE"
+msgstr "جيرسي"
+
+msgid "country.JM"
+msgstr "جامايكا"
+
+msgid "country.JO"
+msgstr "الأردن"
+
+msgid "country.JP"
+msgstr "اليابان"
+
+msgid "country.KE"
+msgstr "كينيا"
+
+msgid "country.KG"
+msgstr "قيرغيزستان"
+
+msgid "country.KH"
+msgstr "كمبوديا"
+
+msgid "country.KI"
+msgstr "كيريباتي"
+
+msgid "country.KM"
+msgstr "جزر القمر"
+
+msgid "country.KN"
+msgstr "سانت كيتس ونيفيس"
+
+msgid "country.KP"
+msgstr "كوريا الشمالية"
+
+msgid "country.KR"
+msgstr "كوريا الجنوبية"
+
+msgid "country.KW"
+msgstr "الكويت"
+
+msgid "country.KY"
+msgstr "جزر كايمان"
+
+msgid "country.KZ"
+msgstr "كازاخستان"
+
+msgid "country.LA"
+msgstr "لاوس"
+
+msgid "country.LB"
+msgstr "لبنان"
+
+msgid "country.LC"
+msgstr "سانت لوسيا"
+
+msgid "country.LI"
+msgstr "ليختنشتاين"
+
+msgid "country.LK"
+msgstr "سريلانكا"
+
+msgid "country.LR"
+msgstr "ليبيريا"
+
+msgid "country.LS"
+msgstr "ليسوتو"
+
+msgid "country.LT"
+msgstr "ليتوانيا"
+
+msgid "country.LU"
+msgstr "لوكسمبورغ"
+
+msgid "country.LV"
+msgstr "لاتفيا"
+
+msgid "country.LY"
+msgstr "ليبيا"
+
+msgid "country.MA"
+msgstr "المغرب"
+
+msgid "country.MC"
+msgstr "موناكو"
+
+msgid "country.MD"
+msgstr "مولدوفا"
+
+msgid "country.ME"
+msgstr "الجبل الأسود"
+
+msgid "country.MF"
+msgstr "سانت مارتن"
+
+msgid "country.MG"
+msgstr "مدغشقر"
+
+msgid "country.MH"
+msgstr "جزر مارشال"
+
+msgid "country.MK"
+msgstr "مقدونيا الشمالية"
+
+msgid "country.ML"
+msgstr "مالي"
+
+msgid "country.MM"
+msgstr "ميانمار"
+
+msgid "country.MN"
+msgstr "منغوليا"
+
+msgid "country.MO"
+msgstr "ماكاو"
+
+msgid "country.MP"
+msgstr "جزر ماريانا الشمالية"
+
+msgid "country.MQ"
+msgstr "مارتينيك"
+
+msgid "country.MR"
+msgstr "موريتانيا"
+
+msgid "country.MS"
+msgstr "مونتسيرات"
+
+msgid "country.MT"
+msgstr "مالطا"
+
+msgid "country.MU"
+msgstr "موريشيوس"
+
+msgid "country.MV"
+msgstr "المالديف"
+
+msgid "country.MW"
+msgstr "مالاوي"
+
+msgid "country.MX"
+msgstr "المكسيك"
+
+msgid "country.MY"
+msgstr "ماليزيا"
+
+msgid "country.MZ"
+msgstr "موزمبيق"
+
+msgid "country.NA"
+msgstr "ناميبيا"
+
+msgid "country.NC"
+msgstr "كاليدونيا الجديدة"
+
+msgid "country.NE"
+msgstr "النيجر"
+
+msgid "country.NF"
+msgstr "جزيرة نورفولك"
+
+msgid "country.NG"
+msgstr "نيجيريا"
+
+msgid "country.NI"
+msgstr "نيكاراغوا"
+
+msgid "country.NL"
+msgstr "هولندا"
+
+msgid "country.NO"
+msgstr "النرويج"
+
+msgid "country.NP"
+msgstr "نيبال"
+
+msgid "country.NR"
+msgstr "ناورو"
+
+msgid "country.NU"
+msgstr "نييوي"
+
+msgid "country.NZ"
+msgstr "نيوزيلندا"
+
+msgid "country.OM"
+msgstr "عمان"
+
+msgid "country.PA"
+msgstr "بنما"
+
+msgid "country.PE"
+msgstr "بيرو"
+
+msgid "country.PF"
+msgstr "بولينيزيا الفرنسية"
+
+msgid "country.PG"
+msgstr "بابوا غينيا الجديدة"
+
+msgid "country.PH"
+msgstr "الفلبين"
+
+msgid "country.PK"
+msgstr "باكستان"
+
+msgid "country.PL"
+msgstr "بولندا"
+
+msgid "country.PM"
+msgstr "سان بيير وميكلون"
+
+msgid "country.PN"
+msgstr "بيتكيرن"
+
+msgid "country.PR"
+msgstr "بورتوريكو"
+
+msgid "country.PS"
+msgstr "فلسطين"
+
+msgid "country.PT"
+msgstr "البرتغال"
+
+msgid "country.PW"
+msgstr "بالاو"
+
+msgid "country.PY"
+msgstr "باراغواي"
+
+msgid "country.QA"
+msgstr "قطر"
+
+msgid "country.RE"
+msgstr "ريونيون"
+
+msgid "country.RO"
+msgstr "رومانيا"
+
+msgid "country.RS"
+msgstr "صربيا"
+
+msgid "country.RU"
+msgstr "الاتحاد الروسي"
+
+msgid "country.RW"
+msgstr "رواندا"
+
+msgid "country.SA"
+msgstr "المملكة العربية السعودية"
+
+msgid "country.SB"
+msgstr "جزر سليمان"
+
+msgid "country.SC"
+msgstr "سيشيل"
+
+msgid "country.SD"
+msgstr "السودان"
+
+msgid "country.SE"
+msgstr "السويد"
+
+msgid "country.SG"
+msgstr "سنغافورة"
+
+msgid "country.SH"
+msgstr "سانت هيلينا وأسينسيون وتريستان دا كونا"
+
+msgid "country.SI"
+msgstr "سلوفينيا"
+
+msgid "country.SJ"
+msgstr "سفالبارد ويان ماين"
+
+msgid "country.SK"
+msgstr "سلوفاكيا"
+
+msgid "country.SL"
+msgstr "سيراليون"
+
+msgid "country.SM"
+msgstr "سان مارينو"
+
+msgid "country.SN"
+msgstr "السنغال"
+
+msgid "country.SO"
+msgstr "الصومال"
+
+msgid "country.SR"
+msgstr "سورينام"
+
+msgid "country.SS"
+msgstr "جنوب السودان"
+
+msgid "country.ST"
+msgstr "ساو تومي وبرينسيب"
+
+msgid "country.SV"
+msgstr "السلفادور"
+
+msgid "country.SX"
+msgstr "سينت مارتن (الجزء الهولندي)"
+
+msgid "country.SY"
+msgstr "سوريا"
+
+msgid "country.SZ"
+msgstr "إسواتيني"
+
+msgid "country.TC"
+msgstr "جزر توركس وكايكوس"
+
+msgid "country.TD"
+msgstr "تشاد"
+
+msgid "country.TF"
+msgstr "الأراضي الجنوبية الفرنسية"
+
+msgid "country.TG"
+msgstr "توغو"
+
+msgid "country.TH"
+msgstr "تايلاند"
+
+msgid "country.TJ"
+msgstr "طاجيكستان"
+
+msgid "country.TK"
+msgstr "توكيلاو"
+
+msgid "country.TL"
+msgstr "تيمور الشرقية"
+
+msgid "country.TM"
+msgstr "تركمانستان"
+
+msgid "country.TN"
+msgstr "تونس"
+
+msgid "country.TO"
+msgstr "تونغا"
+
+msgid "country.TR"
+msgstr "تركيا"
+
+msgid "country.TT"
+msgstr "ترينيداد وتوباغو"
+
+msgid "country.TV"
+msgstr "توفالو"
+
+msgid "country.TW"
+msgstr "تايوان"
+
+msgid "country.TZ"
+msgstr "تنزانيا"
+
+msgid "country.UA"
+msgstr "أوكرانيا"
+
+msgid "country.UG"
+msgstr "أوغندا"
+
+msgid "country.UM"
+msgstr "جزر الولايات المتحدة الصغيرة النائية"
+
+msgid "country.US"
+msgstr "الولايات المتحدة"
+
+msgid "country.UY"
+msgstr "أوروغواي"
+
+msgid "country.UZ"
+msgstr "أوزبكستان"
+
+msgid "country.VA"
+msgstr "الكرسي الرسولي (دولة مدينة الفاتيكان)"
+
+msgid "country.VC"
+msgstr "سانت فنسنت وجزر غرينادين"
+
+msgid "country.VE"
+msgstr "فنزويلا"
+
+msgid "country.VG"
+msgstr "جزر العذراء البريطانية"
+
+msgid "country.VI"
+msgstr "جزر العذراء الأمريكية"
+
+msgid "country.VN"
+msgstr "فيتنام"
+
+msgid "country.VU"
+msgstr "فانواتو"
+
+msgid "country.WF"
+msgstr "واليس وفوتونا"
+
+msgid "country.WS"
+msgstr "ساموا"
+
+msgid "country.XK"
+msgstr "كوسوفو"
+
+msgid "country.YE"
+msgstr "اليمن"
+
+msgid "country.YT"
+msgstr "مايوت"
+
+msgid "country.ZA"
+msgstr "جنوب أفريقيا"
+
+msgid "country.ZM"
+msgstr "زامبيا"
+
+msgid "country.ZW"
+msgstr "زيمبابوي"
+
+msgid "country.not_applicable"
+msgstr "غير متاح"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "الطلبات المحظورة"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "IP فريدة محظورة"
+
+msgid "dashboard.card.certificates.title"
+msgstr "الشهادات"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s قيد التشغيل / %(down)s متوقف / %(loading)s قيد التحميل"
+
+msgid "dashboard.card.instances.title"
+msgstr "المثيلات"
+
+msgid "dashboard.card.news.title"
+msgstr "الأخبار"
+
+msgid "dashboard.card.plan.title"
+msgstr "الخطة"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s أساسي / %(pro)s PRO / %(external)s خارجي"
+
+msgid "dashboard.card.plugins.title"
+msgstr "الإضافات"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "حرج: النظام على وشك نفاد الذاكرة!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "ذاكرة ممتازة لبيئات الإنتاج"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "يفضل الترقية إلى 16 جيجابايت أو أكثر للاستخدام في الإنتاج"
+
+msgid "dashboard.card.ram.title"
+msgstr "ذاكرة النظام (RAM)"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s٪ مستخدمة"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "تحذير: انخفاض الذاكرة قد يؤثر على الأداء"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s متصل / %(draft)s مسودة"
+
+msgid "dashboard.card.services.title"
+msgstr "الخدمات"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "أهم أسباب الحظر"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "إجمالي الطلبات"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "قريبًا"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "الخوادم الخلفية"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "الطلبات المحظورة حسب البلد"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "الطلبات المحظورة"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "العدد"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "الطلبات المحظورة مع مرور الوقت"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "الوقت"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "حالة الحظر مع مرور الوقت"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "الطلبات المحظورة"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "توزيع حالة الطلبات"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "محظورة"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "الطلبات المحظورة بمرور الوقت (النطاق المحدد)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "IP الأكثر حظرًا"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "أعلى 10 IP محظورة"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "الطلبات المحظورة"
+
+msgid "dashboard.map.hover_info"
+msgstr "مرر الفأرة فوق بلد"
+
+msgid "dashboard.map.legend"
+msgstr "مفتاح الخريطة"
+
+msgid "dashboard.map.no_data"
+msgstr "لا توجد بيانات"
+
+msgid "dashboard.mini.across_countries"
+msgstr "في جميع أنحاء %(count)s"
+
+msgid "dashboard.mini.enforced"
+msgstr "مطبق حاليًا"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% محظور"
+
+msgid "dashboard.mini.scheduled"
+msgstr "مجدولة"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "المحظورة مقابل المسموح بها"
+
+msgid "dashboard.panel.map_sub"
+msgstr "مرر المؤشر لعرض التفاصيل"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "حسب القاعدة المشغلة"
+
+msgid "dashboard.panel.status_sub"
+msgstr "رموز استجابة HTTP"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "النطاق المحدد"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "حسب عدد الطلبات"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "محظورة من %(total)s إجمالاً"
+
+msgid "dashboard.status.free_plan"
+msgstr "خطة مجانية"
+
+msgid "dashboard.status.renews"
+msgstr "تجديد"
+
+msgid "dashboard.status.services_licensed"
+msgstr "خدمات %(count)s مرخصة"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "مقارنة مع السابقة"
+
+msgid "dashboard.status.vs_prev"
+msgstr "مقارنة مع السابقة"
+
+msgid "dashboard.tile.bans_active"
+msgstr "عمليات الحظر النشطة"
+
+msgid "dashboard.tile.jobs"
+msgstr "المهام المجدولة"
+
+msgid "dashboard.tile.trend"
+msgstr "اتجاه الطلبات المحظورة"
+
+msgid "dashboard.welcome.greeting"
+msgstr "مرحبًا بعودتك،"
+
+msgid "dashboard.welcome.title"
+msgstr "مرحبًا بعودتك، %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "آخر %(days)s يومًا"
+
+msgid "dashboard.window.title"
+msgstr "نطاق لوحة المعلومات"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "تم تحديد كل %(count)s %(entity)s المطابقة."
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "تحديد كل %(count)s %(entity)s المطابقة"
+
+msgid "datatable.bulk_select_clear"
+msgstr "مسح التحديد"
+
+msgid "datatable.bulk_select_page"
+msgstr "تم تحديد كل %(count)s %(entity)s في هذه الصفحة."
+
+msgid "datatable.info_bans"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s حظر"
+
+msgid "datatable.info_cache"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s ملفات ذاكرة مؤقتة"
+
+msgid "datatable.info_configs"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s تكوينات مخصصة"
+
+msgid "datatable.info_empty_bans"
+msgstr "لا يوجد حظر متاح"
+
+msgid "datatable.info_empty_cache"
+msgstr "لا يوجد ملفات ذاكرة مؤقتة متاحة"
+
+msgid "datatable.info_empty_configs"
+msgstr "لا يوجد تكوينات مخصصة متاحة"
+
+msgid "datatable.info_empty_instances"
+msgstr "لا يوجد مثيلات متاحة"
+
+msgid "datatable.info_empty_items"
+msgstr "لا يوجد عناصر متاحة"
+
+msgid "datatable.info_empty_jobs"
+msgstr "لا يوجد مهام متاحة"
+
+msgid "datatable.info_empty_plugins"
+msgstr "لا يوجد إضافات متاحة"
+
+msgid "datatable.info_empty_reports"
+msgstr "لا يوجد تقارير متاحة"
+
+msgid "datatable.info_empty_services"
+msgstr "لا يوجد خدمات متاحة"
+
+msgid "datatable.info_empty_templates"
+msgstr "لا توجد قوالب متاحة"
+
+msgid "datatable.info_filtered_bans"
+msgstr "(تمت التصفية من إجمالي _MAX_ حظر)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(تمت التصفية من إجمالي _MAX_ ملفات ذاكرة مؤقتة)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(تمت التصفية من إجمالي _MAX_ تكوينات مخصصة)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(تمت التصفية من إجمالي _MAX_ مثيلات)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(تمت التصفية من إجمالي _MAX_ عناصر)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(تمت التصفية من إجمالي _MAX_ مهام)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(تمت التصفية من إجمالي _MAX_ إضافات)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(تمت التصفية من إجمالي _MAX_ تقارير)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(تمت التصفية من إجمالي _MAX_ خدمات)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(تمت التصفية من إجمالي _MAX_ قالب)"
+
+msgid "datatable.info_instances"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s مثيلات"
+
+msgid "datatable.info_items"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s عناصر"
+
+msgid "datatable.info_jobs"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s مهام"
+
+msgid "datatable.info_plugins"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s إضافات"
+
+msgid "datatable.info_reports"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s تقارير"
+
+msgid "datatable.info_services"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s خدمات"
+
+msgid "datatable.info_templates"
+msgstr "عرض %(start)s إلى %(end)s من أصل %(total)s قوالب"
+
+msgid "datatable.length_all"
+msgstr "الكل"
+
+msgid "datatable.length_menu_bans"
+msgstr "عرض _MENU_ حظر"
+
+msgid "datatable.length_menu_cache"
+msgstr "عرض _MENU_ ملفات ذاكرة مؤقتة"
+
+msgid "datatable.length_menu_configs"
+msgstr "عرض _MENU_ تكوينات مخصصة"
+
+msgid "datatable.length_menu_instances"
+msgstr "عرض _MENU_ مثيلات"
+
+msgid "datatable.length_menu_items"
+msgstr "عرض _MENU_ عناصر"
+
+msgid "datatable.length_menu_jobs"
+msgstr "عرض _MENU_ مهام"
+
+msgid "datatable.length_menu_plugins"
+msgstr "عرض _MENU_ إضافات"
+
+msgid "datatable.length_menu_reports"
+msgstr "عرض _MENU_ تقارير"
+
+msgid "datatable.length_menu_services"
+msgstr "عرض _MENU_ خدمات"
+
+msgid "datatable.length_menu_templates"
+msgstr "عرض _MENU_ قوالب"
+
+msgid "datatable.paginate.first"
+msgstr "الأول"
+
+msgid "datatable.paginate.last"
+msgstr "الأخير"
+
+msgid "datatable.paginate.next"
+msgstr "التالي"
+
+msgid "datatable.paginate.previous"
+msgstr "السابق"
+
+msgid "datatable.processing"
+msgstr "جاري المعالجة..."
+
+msgid "datatable.search"
+msgstr "بحث:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "لم يتم تحديد أي حظر"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "تم تحديد 1 حظر"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "تم تحديد %d حظر"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "لم يتم تحديد أي ملفات ذاكرة مؤقتة"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "تم تحديد 1 ملف ذاكرة مؤقتة"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "تم تحديد %d ملفات ذاكرة مؤقتة"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "لم يتم تحديد أي تكوينات مخصصة"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "تم تحديد 1 تكوين مخصص"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "تم تحديد %d تكوينات مخصصة"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "لم يتم تحديد أي مثيلات"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "تم تحديد 1 مثيل"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "تم تحديد %d مثيلات"
+
+msgid "datatable.select_rows_items_0"
+msgstr "لم يتم تحديد أي عناصر"
+
+msgid "datatable.select_rows_items_1"
+msgstr "تم تحديد 1 عنصر"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "تم تحديد %d عناصر"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "لم يتم تحديد أي مهام"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "تم تحديد 1 مهمة"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "تم تحديد %d مهام"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "لم يتم تحديد أي إضافات"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "تم تحديد 1 إضافة"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "تم تحديد %d إضافات"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "لم يتم تحديد أي تقارير"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "تم تحديد 1 تقرير"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "تم تحديد %d تقارير"
+
+msgid "datatable.select_rows_services_0"
+msgstr "لم يتم تحديد أي خدمات"
+
+msgid "datatable.select_rows_services_1"
+msgstr "تم تحديد 1 خدمة"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "تم تحديد %d خدمات"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "لم يتم تحديد أي قوالب"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "تم تحديد 1 قالب"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "تم تحديد %d قوالب"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s محدد"
+
+msgid "datatable.selected_list_empty"
+msgstr "لا يوجد %(entity)s محدد."
+
+msgid "datatable.zero_records_bans"
+msgstr "لم يتم العثور على حظر مطابق"
+
+msgid "datatable.zero_records_cache"
+msgstr "لم يتم العثور على ملفات ذاكرة مؤقتة مطابقة"
+
+msgid "datatable.zero_records_configs"
+msgstr "لم يتم العثور على تكوينات مخصصة مطابقة"
+
+msgid "datatable.zero_records_instances"
+msgstr "لم يتم العثور على مثيلات مطابقة"
+
+msgid "datatable.zero_records_items"
+msgstr "لم يتم العثور على عناصر مطابقة"
+
+msgid "datatable.zero_records_jobs"
+msgstr "لم يتم العثور على مهام مطابقة"
+
+msgid "datatable.zero_records_plugins"
+msgstr "لم يتم العثور على إضافات مطابقة"
+
+msgid "datatable.zero_records_reports"
+msgstr "لم يتم العثور على تقارير مطابقة"
+
+msgid "datatable.zero_records_services"
+msgstr "لم يتم العثور على خدمات مطابقة"
+
+msgid "datatable.zero_records_templates"
+msgstr "لم يتم العثور على قوالب مطابقة"
+
+msgid "dev_log.copy_failed"
+msgstr "فشل نسخ النص:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "فشل جلب الأخبار:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "تجاهل السطر غير المنسق: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "ساعة واحدة"
+
+msgid "duration.1_week"
+msgstr "أسبوع واحد"
+
+msgid "duration.24_hours"
+msgstr "24 ساعة"
+
+msgid "duration.custom"
+msgstr "مخصص"
+
+msgid "duration.permanent"
+msgstr "دائم"
+
+msgid "error.401.help"
+msgstr "يجب عليك تسجيل الدخول للوصول إلى هذا المورد."
+
+msgid "error.401.message"
+msgstr "يرجى تسجيل الدخول للمتابعة."
+
+msgid "error.401.title"
+msgstr "المصادقة مطلوبة"
+
+msgid "error.403.help"
+msgstr "يرجى التحقق من بيانات الاعتماد الخاصة بك أو الاتصال بمسؤول إذا كنت تعتقد أن هذا خطأ."
+
+msgid "error.403.message"
+msgstr "ليس لديك الإذن للوصول إلى هذه الصفحة."
+
+msgid "error.403.title"
+msgstr "الوصول مرفوض"
+
+msgid "error.404.help"
+msgstr "يرجى التحقق من صحة عنوان URL أو الاتصال بمسؤول إذا كنت تعتقد أن هذا خطأ."
+
+msgid "error.404.message"
+msgstr "تعذر العثور على المورد المطلوب."
+
+msgid "error.404.title"
+msgstr "غير موجود"
+
+msgid "error.5xx.help"
+msgstr "يرجى المحاولة مرة أخرى لاحقًا أو الاتصال بمسؤول إذا استمرت المشكلة."
+
+msgid "error.5xx.message"
+msgstr "حدث خطأ غير متوقع في الخادم."
+
+msgid "error.5xx.title"
+msgstr "خطأ في الخادم"
+
+msgid "error.ban_update_failed"
+msgstr "فشل تحديث مدة الحظر. يرجى المحاولة مرة أخرى."
+
+msgid "error.reports_load_error"
+msgstr "حدث خطأ أثناء تحميل التقارير. يرجى محاولة تحديث الصفحة."
+
+msgid "error.unban_failed"
+msgstr "فشل رفع الحظر عن عنوان IP. يرجى المحاولة مرة أخرى."
+
+msgid "flash.easter_egg"
+msgstr "إذا قرأت هذا، فهذا يعني أنك فضولي"
+
+msgid "flash.error"
+msgstr "خطأ"
+
+msgid "flash.message"
+msgstr "معلومة"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "لديك خدمات أكثر مما يسمح به ترخيص PRO الخاص بك. قم بترقية ترخيصك أو حوّل بعض الخدمات إلى وضع المسودة لإلغاء قفل ترخيص PRO."
+
+msgid "flash.time.just_now"
+msgstr "الآن"
+
+msgid "flash.warning"
+msgstr "تحذير"
+
+msgid "footer.blog"
+msgstr "المدونة"
+
+msgid "footer.documentation"
+msgstr "التوثيق"
+
+msgid "footer.license"
+msgstr "الترخيص"
+
+msgid "footer.made_by"
+msgstr "تم إنشاؤه بواسطة"
+
+msgid "footer.privacy"
+msgstr "الخصوصية"
+
+msgid "footer.support"
+msgstr "الدعم"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "تضمين التكوينات المخصصة المرفقة"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "استبدال تكوينات UI/API المخصصة الحالية"
+
+msgid "form.checkbox.remember_me"
+msgstr "تذكرني"
+
+msgid "form.help.ban_specific_service"
+msgstr "سيطبق الحظر فقط على هذه الخدمة المحددة."
+
+msgid "form.help.hostname_length_limit"
+msgstr "اسم المضيف محدود بـ 256 حرفًا."
+
+msgid "form.help.hostname_special_chars"
+msgstr "يُسمح فقط بـ `/` و `:` لتحديد البروتوكول/المنفذ."
+
+msgid "form.help.multivalue_separator"
+msgstr "القيم مفصولة بـ:"
+
+msgid "form.help.permanent_ban"
+msgstr "إذا تم تحديده، لن تنتهي صلاحية الحظر أبدًا حتى تتم إزالته يدويًا."
+
+msgid "form.help.photo_extensions"
+msgstr "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
+
+msgid "form.label.2fa_code"
+msgstr "رمز 2FA"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "رمز 2FA أو رمز الاسترداد"
+
+msgid "form.label.admin_email"
+msgstr "البريد الإلكتروني للمسؤول"
+
+msgid "form.label.admin_password"
+msgstr "كلمة مرور المسؤول"
+
+msgid "form.label.admin_username"
+msgstr "اسم مستخدم المسؤول"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "Let's Encrypt تلقائي"
+
+msgid "form.label.ban_scope"
+msgstr "نطاق الحظر"
+
+msgid "form.label.certificate_authority"
+msgstr "الجهة المصدرة للشهادة"
+
+msgid "form.label.certificate_priority"
+msgstr "أولوية الشهادة"
+
+msgid "form.label.challenge_type"
+msgstr "نوع التحدي"
+
+msgid "form.label.config_type"
+msgstr "نوع التكوين"
+
+msgid "form.label.configuration_name"
+msgstr "اسم التكوين"
+
+msgid "form.label.confirm_password"
+msgstr "تأكيد كلمة المرور"
+
+msgid "form.label.current_password"
+msgstr "كلمة المرور الحالية"
+
+msgid "form.label.custom_config"
+msgstr "التكوين"
+
+msgid "form.label.custom_end_date"
+msgstr "تاريخ انتهاء مخصص"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "شهادة SSL مخصصة"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "بيانات شهادة SSL المخصصة (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "مفتاح SSL مخصص"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "بيانات مفتاح SSL المخصصة (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "عناصر بيانات اعتماد DNS لـ Let's Encrypt"
+
+msgid "form.label.dns_propagation"
+msgstr "تأخير انتشار DNS"
+
+msgid "form.label.dns_provider"
+msgstr "مزود DNS"
+
+msgid "form.label.email"
+msgstr "البريد الإلكتروني"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "البريد الإلكتروني لـ Let's Encrypt"
+
+msgid "form.label.end_date"
+msgstr "تاريخ الانتهاء"
+
+msgid "form.label.hostname"
+msgstr "اسم المضيف"
+
+msgid "form.label.instance_id"
+msgstr "معرف المثيل"
+
+msgid "form.label.ip_address"
+msgstr "عنوان IP"
+
+msgid "form.label.keywords"
+msgstr "الكلمات المفتاحية"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "ملف تعريف Let's Encrypt مخصص"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "تعطيل اللاحقات العامة (قائمة PSL السوداء)"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "عناصر بيانات اعتماد DNS لـ Let's Encrypt"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "ملف تعريف Let's Encrypt"
+
+msgid "form.label.license_key"
+msgstr "مفتاح الترخيص"
+
+msgid "form.label.make_permanent"
+msgstr "جعله دائمًا"
+
+msgid "form.label.name"
+msgstr "الاسم"
+
+msgid "form.label.new_duration"
+msgstr "مدة جديدة"
+
+msgid "form.label.new_password"
+msgstr "كلمة مرور جديدة"
+
+msgid "form.label.optional"
+msgstr "(اختياري)"
+
+msgid "form.label.passkey_name"
+msgstr "اسم مفتاح المرور"
+
+msgid "form.label.password"
+msgstr "كلمة المرور"
+
+msgid "form.label.permanent_ban"
+msgstr "حظر دائم"
+
+msgid "form.label.plugin_id"
+msgstr "معرف الإضافة"
+
+msgid "form.label.raw_configuration"
+msgstr "التكوين الخام"
+
+msgid "form.label.real_ip_from"
+msgstr "IP الحقيقي من"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "IP الحقيقي من (عناوين URL)"
+
+msgid "form.label.real_ip_header"
+msgstr "رأس IP الحقيقي"
+
+msgid "form.label.real_ip_recursive"
+msgstr "IP الحقيقي المتكرر"
+
+msgid "form.label.reason"
+msgstr "السبب"
+
+msgid "form.label.secret_token"
+msgstr "الرمز السري"
+
+msgid "form.label.server_name"
+msgstr "اسم الخادم"
+
+msgid "form.label.service_name"
+msgstr "اسم الخدمة"
+
+msgid "form.label.template_id"
+msgstr "معرف القالب"
+
+msgid "form.label.theme"
+msgstr "المظهر"
+
+msgid "form.label.type"
+msgstr "النوع"
+
+msgid "form.label.ui_host"
+msgstr "مضيف واجهة المستخدم"
+
+msgid "form.label.ui_url"
+msgstr "URL واجهة المستخدم"
+
+msgid "form.label.use_custom_ssl"
+msgstr "استخدام SSL مخصص"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "استخدام Let's Encrypt Staging"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "استخدام بروتوكول PROXY"
+
+msgid "form.label.use_real_ip"
+msgstr "استخدام IP الحقيقي"
+
+msgid "form.label.username"
+msgstr "اسم المستخدم"
+
+msgid "form.label.wildcard_certificates"
+msgstr "شهادات Wildcard"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL"
+
+msgid "form.label.zerossl_api_key"
+msgstr "مفتاح واجهة برمجة تطبيقات ZeroSSL"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "محاولات إعادة واجهة برمجة تطبيقات ZeroSSL"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL"
+
+msgid "form.placeholder.2fa_code"
+msgstr "أدخل الرمز"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "أدخل الرمز أو رمز الاسترداد"
+
+msgid "form.placeholder.config_name"
+msgstr "تكوين-مخصص-لي"
+
+msgid "form.placeholder.current_password"
+msgstr "كلمة المرور الحالية"
+
+msgid "form.placeholder.enter_username"
+msgstr "أدخل اسم المستخدم الخاص بك"
+
+msgid "form.placeholder.keywords"
+msgstr "الكلمات المفتاحية..."
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "أدخل قيمة..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "ابحث عن الإضافات..."
+
+msgid "form.placeholder.search"
+msgstr "بحث..."
+
+msgid "form.placeholder.secret_token"
+msgstr "الرمز السري"
+
+msgid "form.placeholder.select_service"
+msgstr "اختر خدمة"
+
+msgid "form.placeholder.username_example"
+msgstr "زيدعمر"
+
+msgid "form.validation.confirm_password_match"
+msgstr "كلمات المرور غير متطابقة."
+
+msgid "form.validation.password_length"
+msgstr "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل."
+
+msgid "form.validation.password_number"
+msgstr "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل."
+
+msgid "form.validation.password_special"
+msgstr "يجب أن تحتوي كلمة المرور على حرف خاص واحد على الأقل."
+
+msgid "form.validation.password_uppercase"
+msgstr "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل."
+
+msgid "input_list.view_all_settings"
+msgstr "عرض جميع %(count)s الإعدادات"
+
+msgid "instance.type.container"
+msgstr "حاوية"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "ثابت"
+
+msgid "instances.down"
+msgstr "متوقف"
+
+msgid "instances.loading"
+msgstr "جاري التحميل"
+
+msgid "instances.subtitle"
+msgstr "إدارة مثيلات BunkerWeb المتصلة بواجهة المستخدم هذه: أنشئ، وقم بالتحقق من الاتصال، وأعد التحميل، أو أوقفها أو احذفها."
+
+msgid "instances.total"
+msgstr "إجمالي المثيلات"
+
+msgid "instances.up"
+msgstr "قيد التشغيل"
+
+msgid "interval.day"
+msgstr "يوميًا"
+
+msgid "interval.hour"
+msgstr "كل ساعة"
+
+msgid "interval.minute"
+msgstr "كل دقيقة"
+
+msgid "interval.once"
+msgstr "مرة واحدة"
+
+msgid "interval.week"
+msgstr "أسبوعيًا"
+
+msgid "job.history.end_date"
+msgstr "تاريخ الانتهاء"
+
+msgid "job.history.start_date"
+msgstr "تاريخ البدء"
+
+msgid "job.history.success"
+msgstr "نجاح"
+
+msgid "jobs.subtitle"
+msgstr "المهام المجدولة والمهام لمرة واحدة التي يتم تشغيلها بواسطة جدولة BunkerWeb — تتبع حالتها وقم بتشغيلها عند الطلب."
+
+msgid "jobs.tile.async"
+msgstr "غير متزامن"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "فشل التشغيل الأخير"
+
+msgid "jobs.tile.reload_required"
+msgstr "إعادة التحميل مطلوبة"
+
+msgid "jobs.tile.total"
+msgstr "إجمالي المهام"
+
+msgid "legend.locked_settings_annotation"
+msgstr "مقفل (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "الإعدادات المقفلة مميزة"
+
+msgid "link.back_to_login"
+msgstr "العودة إلى تسجيل الدخول"
+
+msgid "link.forgot_password"
+msgstr "هل نسيت كلمة المرور؟"
+
+msgid "link.get_support"
+msgstr "الحصول على الدعم"
+
+msgid "link.here"
+msgstr "هنا"
+
+msgid "link.more_info"
+msgstr "مزيد من المعلومات"
+
+msgid "link.more_news"
+msgstr "المزيد من الأخبار"
+
+msgid "link.opens_new_tab"
+msgstr "(يفتح في علامة تبويب جديدة)"
+
+msgid "link.privacy_policy"
+msgstr "سياسة الخصوصية"
+
+msgid "link.read_more"
+msgstr "اقرأ المزيد"
+
+msgid "link.see_more"
+msgstr "شاهد المزيد"
+
+msgid "link.upgrade"
+msgstr "ترقية؟"
+
+msgid "link.use_authenticator_code"
+msgstr "استخدم رمز المصادقة"
+
+msgid "link.use_recovery_code"
+msgstr "استخدم رمز الاسترداد"
+
+msgid "login.or_use_password"
+msgstr "أو استخدم كلمة المرور"
+
+msgid "login.subtitle"
+msgstr "تسجيل الدخول إلى حساب BunkerWeb الخاص بك"
+
+msgid "login.title"
+msgstr "تسجيل الدخول"
+
+msgid "logs.all_sources"
+msgstr "كل المصادر (مباشر)"
+
+msgid "logs.annotation_error"
+msgstr "خطأ"
+
+msgid "logs.annotation_warning"
+msgstr "تحذير"
+
+msgid "logs.collapse"
+msgstr "طي"
+
+msgid "logs.expand"
+msgstr "توسيع"
+
+msgid "logs.filter_levels"
+msgstr "المستويات"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s خطأ، %(warnings)s تحذير"
+
+msgid "logs.letsencrypt_logs"
+msgstr "سجلات Let's Encrypt"
+
+msgid "logs.level_all"
+msgstr "كل السجلات"
+
+msgid "logs.level_critical"
+msgstr "حرج"
+
+msgid "logs.level_debug"
+msgstr "تصحيح"
+
+msgid "logs.level_error"
+msgstr "خطأ"
+
+msgid "logs.level_errors_only"
+msgstr "الأخطاء فقط"
+
+msgid "logs.level_info"
+msgstr "معلومات"
+
+msgid "logs.level_notice"
+msgstr "إشعار"
+
+msgid "logs.level_security_only"
+msgstr "الأمان فقط"
+
+msgid "logs.level_warning"
+msgstr "تحذير"
+
+msgid "logs.lines_all"
+msgstr "الكل"
+
+msgid "logs.lines_label"
+msgstr "الأسطر"
+
+msgid "logs.live_title"
+msgstr "السجلات المباشرة"
+
+msgid "logs.main_logs"
+msgstr "السجلات الرئيسية"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s أسطر · تم التعديل %(when)s"
+
+msgid "logs.new_lines"
+msgstr "أسطر جديدة"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s أسطر سجل جديدة"
+
+msgid "logs.no_log_files"
+msgstr "لا توجد ملفات سجل لعرضها، يرجى الرجوع إلى الوثائق للحصول على مزيد من المعلومات حول كيفية تمكين التسجيل"
+
+msgid "logs.pause"
+msgstr "إيقاف مؤقت"
+
+msgid "logs.resume"
+msgstr "استئناف"
+
+msgid "logs.select_file_prompt"
+msgstr "حدد ملف السجل لعرض محتواه"
+
+msgid "logs.showing_all"
+msgstr "%(total)s أسطر"
+
+msgid "logs.showing_some"
+msgstr "عرض %(shown)s من %(total)s"
+
+msgid "logs.tailing_sources"
+msgstr "متابعة · %(count)s مصادر"
+
+msgid "logs.taller"
+msgstr "أطول"
+
+msgid "logs.trimmed_notice"
+msgstr "--- تم إزالة %(count)s سطر من السجلات القديمة لتحسين الأداء ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات."
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "هل تريد حظر عناوين IP من كل التقارير المطابقة وعددها %(count)s؟ ستُطبق الأهداف المكررة مرة واحدة."
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟"
+msgstr[2] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "هل تريد بالتأكيد تحويل التكوينات المخصصة المحددة؟"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "هل أنت متأكد أنك تريد تحويل الإعدادات المخصصة المحددة إلى %(state)s؟"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد حذف التكوين المخصص المحدد؟"
+msgstr[2] "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟"
+
+msgid "modal.body.confirm_next_step"
+msgstr "هل أنت متأكد أنك تريد المتابعة إلى الخطوة التالية؟"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد حذف الإضافة المحددة؟"
+msgstr[2] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد حذف الإضافات المحددة؟"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "هل أنت متأكد أنك تريد حذف القالب %(name)s؟"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "هل أنت متأكد أنك تريد حذف المثيل المحدد؟"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد حذف المثيل المحدد؟"
+msgstr[2] "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "تم تعيين قالب واحد أو أكثر من القوالب المحددة إلى خدمات (%(services_count)s خدمة إجمالاً). سيؤدي حذفها إلى إلغاء تلك التعيينات. هل تريد المتابعة؟"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "هل أنت متأكد أنك تريد حذف هذه الخطوة؟"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "المحتوى"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "الخطوة"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "يُستخدم هذا القالب أيضًا كقالب عالمي. سيؤدي حذفه إلى إزالته من الاستخدام العالمي."
+
+msgid "modal.body.delete_template_services_list"
+msgstr "الخدمات التي تستخدم هذا القالب: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "سيتم تصدير الخدمات المحددة. فعّل الخيار أدناه لتضمين التكوينات المخصصة المرفقة بها في أرشيف .zip."
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "سيقوم ذلك بجلب الإعدادات العامة وتطبيقها على القالب الحالي."
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "يتم تحديث الإعدادات الموجودة في هذا القالب فقط."
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "يتم تجاهل القيم المطابقة للقيم الافتراضية."
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "لن يتم الكتابة فوق SERVER_NAME مطلقًا."
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "اسحب وأفلت ملف تصدير التكوينات المخصصة هنا أو انقر لتحديد ملف."
+
+msgid "modal.body.import_configs_warning"
+msgstr "يتم دائمًا الاحتفاظ بالتكوينات المخصصة التي أنشأها scheduler أو autoconf أو templates. يمكن فقط استبدال تكوينات UI/API."
+
+msgid "modal.body.import_services_dropzone"
+msgstr "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف."
+
+msgid "modal.body.import_services_warning"
+msgstr "سيؤدي استيراد الخدمات إلى إنشاء خدمات واجهة مستخدم جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة."
+
+msgid "modal.body.instance_creation_alert"
+msgstr "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل."
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "إذا واجهت مشاكل، يمكنك قبول الشهادة غير الآمنة يدويًا:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك."
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "يتم عرض رموز الاسترداد هذه مرة واحدة فقط. يرجى التأكد من حفظها بأمان."
+
+msgid "modal.body.reset_template_alert"
+msgstr "هل أنت متأكد أنك تريد إعادة تعيين إعدادات القالب الحالية والتكوينات المخصصة؟"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟"
+
+#. plural pair; 6 form(s) for ar, singular in slot 1
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+msgstr[1] "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟"
+msgstr[2] "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+msgstr[3] "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+msgstr[4] "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+msgstr[5] "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "هل تريد بالتأكيد إلغاء كل عمليات الحظر المطابقة وعددها %(count)s؟"
+
+msgid "modal.body.update_duration_alert"
+msgstr "حدد مدة جديدة للحظر (الحظر) المحدد:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها %(count)s:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "تطبيق الإعدادات العامة"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "إعادة تعيين تكوين القالب"
+
+msgid "modal.section.ban_details"
+msgstr "تفاصيل الحظر"
+
+msgid "modal.section.ban_scope"
+msgstr "نطاق الحظر"
+
+msgid "modal.section.delete"
+msgstr "حذف"
+
+msgid "modal.title.add_bans"
+msgstr "إضافة عمليات حظر"
+
+msgid "modal.title.add_plugins"
+msgstr "إضافة الإضافات"
+
+msgid "modal.title.confirm_conversion"
+msgstr "تأكيد التحويل"
+
+msgid "modal.title.confirm_deletion"
+msgstr "تأكيد الحذف"
+
+msgid "modal.title.confirm_unban"
+msgstr "تأكيد رفع الحظر"
+
+msgid "modal.title.create_new_instance"
+msgstr "إنشاء مثيل جديد"
+
+msgid "modal.title.create_template"
+msgstr "إنشاء قالب"
+
+msgid "modal.title.delete_instance"
+msgstr "حذف المثيلات"
+
+msgid "modal.title.delete_step"
+msgstr "حذف خطوة"
+
+msgid "modal.title.delete_template"
+msgstr "حذف القوالب"
+
+msgid "modal.title.edit_template"
+msgstr "تعديل القالب: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "تصدير الخدمات"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "تطبيق الإعدادات العامة؟"
+
+msgid "modal.title.from_plugin"
+msgstr "من الإضافة"
+
+msgid "modal.title.full_url"
+msgstr "URL كامل"
+
+msgid "modal.title.import_configs"
+msgstr "استيراد التكوينات المخصصة"
+
+msgid "modal.title.import_services"
+msgstr "استيراد الخدمات"
+
+msgid "modal.title.job_history"
+msgstr "آخر 10 عمليات تنفيذ للمهام"
+
+msgid "modal.title.job_history_count"
+msgstr "آخر %(count)s عمليات تنفيذ للمهمة"
+
+msgid "modal.title.multiselect_selected"
+msgstr "العناصر المحددة"
+
+msgid "modal.title.recovery_codes"
+msgstr "رموز الاسترداد"
+
+msgid "modal.title.reset_template_config"
+msgstr "إعادة تعيين تكوين القالب؟"
+
+msgid "modal.title.security_report_details"
+msgstr "تفاصيل تقرير الأمان"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "اسم الخادم ليس فريدًا"
+
+msgid "modal.title.update_duration"
+msgstr "تحديث مدة الحظر"
+
+msgid "mode.advanced"
+msgstr "متقدم"
+
+msgid "mode.compose"
+msgstr "اكتب"
+
+msgid "mode.easy"
+msgstr "سهل"
+
+msgid "mode.raw"
+msgstr "خام"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "الترقية إلى PRO"
+
+msgid "navbar.dropdown.logout"
+msgstr "تسجيل الخروج"
+
+msgid "navbar.link.documentation"
+msgstr "التوثيق"
+
+msgid "navbar.version"
+msgstr "الإصدار"
+
+msgid "navigation.about"
+msgstr "حول"
+
+msgid "navigation.bans"
+msgstr "الحظر"
+
+msgid "navigation.cache"
+msgstr "الذاكرة المؤقتة"
+
+msgid "navigation.certificates"
+msgstr "الشهادات"
+
+msgid "navigation.configs"
+msgstr "التكوينات"
+
+msgid "navigation.configure"
+msgstr "التكوين"
+
+msgid "navigation.edition_community"
+msgstr "المجتمع"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "صفحات إضافية"
+
+msgid "navigation.global_settings"
+msgstr "الإعدادات العامة"
+
+msgid "navigation.groups"
+msgstr "مجموعات الموارد"
+
+msgid "navigation.home"
+msgstr "الرئيسية"
+
+msgid "navigation.instances"
+msgstr "المثيلات"
+
+msgid "navigation.jobs"
+msgstr "المهام"
+
+msgid "navigation.logs"
+msgstr "السجلات"
+
+msgid "navigation.misc"
+msgstr "متنوع"
+
+msgid "navigation.mode_selection"
+msgstr "اختيار الوضع"
+
+msgid "navigation.more"
+msgstr "المزيد..."
+
+msgid "navigation.operate"
+msgstr "التشغيل"
+
+msgid "navigation.overview"
+msgstr "نظرة عامة"
+
+msgid "navigation.plugin_activated"
+msgstr "تم تفعيل الإضافة"
+
+msgid "navigation.plugin_activated_global"
+msgstr "تم تفعيل الإضافة عالميًا"
+
+msgid "navigation.plugin_deactivated"
+msgstr "تم تعطيل الإضافة"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "تم تعطيل الإضافة عالميًا"
+
+msgid "navigation.plugins"
+msgstr "الإضافات"
+
+msgid "navigation.plugins_pages"
+msgstr "صفحات الإضافات"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "إعادة التوجيه"
+
+msgid "navigation.reports"
+msgstr "التقارير"
+
+msgid "navigation.services"
+msgstr "الخدمات"
+
+msgid "navigation.support"
+msgstr "الدعم"
+
+msgid "navigation.system"
+msgstr "النظام"
+
+msgid "navigation.templates"
+msgstr "القوالب"
+
+msgid "navigation.threatmap"
+msgstr "خريطة التهديدات"
+
+msgid "navigation.timings"
+msgstr "التوقيتات"
+
+msgid "navigation.upstreams"
+msgstr "الخوادم الخلفية"
+
+msgid "navigation.web_cache"
+msgstr "ذاكرة التخزين المؤقت للموقع"
+
+msgid "navigation.workflows"
+msgstr "مسارات العمل"
+
+msgid "news.image_alt"
+msgstr "صورة الخبر"
+
+msgid "news.posted_on"
+msgstr "نُشر في"
+
+msgid "news.slide"
+msgstr "انزلق"
+
+msgid "newsletter.legal_agreement"
+msgstr "أرغب في الاشتراك في النشرة الإخبارية، وقد قرأت ووافقت على:"
+
+msgid "newsletter.title"
+msgstr "انضم إلى النشرة الإخبارية"
+
+msgid "onboarding.dismiss"
+msgstr "تجاهل"
+
+msgid "onboarding.error"
+msgstr "تعذّر تحميل الجولة التعريفية."
+
+msgid "onboarding.hint.bans"
+msgstr "الحظر يعرض العملاء الذين يرفضهم BunkerWeb حاليًا. يوضح كل صف السبب وموعد انتهاء الحظر."
+
+msgid "onboarding.hint.home"
+msgstr "تعرض لوحة المعلومات هذه الحالة الحالية: المثيلات العاملة، والخدمات المقدَّمة، وحركة المرور التي عالجها BunkerWeb."
+
+msgid "onboarding.hint.logs"
+msgstr "سجلات مباشرة من كل مثيل، يمكن تصفيتها حسب المثيل ومستوى الخطورة."
+
+msgid "onboarding.hint.reports"
+msgstr "كل طلب محظور يظهر هنا. افتح أحدها لمعرفة أي فحص أمني أوقفه ولماذا."
+
+msgid "onboarding.hint.title"
+msgstr "جولة سريعة"
+
+msgid "onboarding.item.first_block"
+msgstr "شاهد BunkerWeb يحظر طلبًا"
+
+msgid "onboarding.item.https"
+msgstr "تشغيل HTTPS"
+
+msgid "onboarding.item.install"
+msgstr "ثبّت BunkerWeb على 1+ مضيف"
+
+msgid "onboarding.item.mfa"
+msgstr "فعّل MFA"
+
+msgid "onboarding.item.pro"
+msgstr "فعّل BunkerWeb PRO"
+
+msgid "onboarding.item.read_bans"
+msgstr "اعرف من المحظور وإلى متى"
+
+msgid "onboarding.item.read_home"
+msgstr "اقرأ لوحة المعلومات: ما هو سليم الآن"
+
+msgid "onboarding.item.read_logs"
+msgstr "تابع السجلات المباشرة عبر جميع النسخ"
+
+msgid "onboarding.item.read_reports"
+msgstr "اكتشف سبب حظر أحد الطلبات"
+
+msgid "onboarding.item.service"
+msgstr "سجّل خدمتك الأولى"
+
+msgid "onboarding.item.workflow"
+msgstr "إرفاق سير عمل أمني"
+
+msgid "onboarding.not_saved"
+msgstr "تعذّر الحفظ."
+
+msgid "onboarding.pro_tips"
+msgstr "نصائح PRO"
+
+msgid "onboarding.restart"
+msgstr "إعادة تشغيل الجولة"
+
+msgid "onboarding.restart_help"
+msgstr "إظهار خطوات البداية مجددًا في الشريط العلوي."
+
+msgid "onboarding.subtitle"
+msgstr "خطوات قليلة كي يحمي BunkerWeb خدماتك."
+
+msgid "onboarding.title"
+msgstr "بدء الاستخدام"
+
+msgid "pagination.page"
+msgstr "صفحة"
+
+msgid "plan.free"
+msgstr "مجاني"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "الإضافة معطلة؛ لذلك، لا تتوفر معلومات."
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "تتم إدارة هذه الإضافة في صفحة مخصصة لم يتم تحميلها بعد. أعد تشغيل واجهة الويب للوصول إليها."
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "إضافة المقاييس غير مفعلة؛ لذلك، لا تتوفر معلومات."
+
+msgid "plugin.page.status.no_content"
+msgstr "لا توفر هذه الإضافة صفحة مضمّنة."
+
+msgid "plugin.page.status.not_available"
+msgstr "صفحة الإضافة غير متاحة بعد خلال مرحلة البيتا."
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "خطأ في العرض المسبق"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "هذه الإضافة تحتوي على صفحة خاصة بها، والتي تعمل تعليمات الإضافة. يمكن فقط للمسؤولين تحميلها."
+
+msgid "plugin.type.all"
+msgstr "الكل"
+
+msgid "plugin.type.core"
+msgstr "أساسي"
+
+msgid "plugin.type.external"
+msgstr "خارجي"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "واجهة المستخدم"
+
+msgid "plugins.marketplace.active"
+msgstr "نشط"
+
+msgid "plugins.marketplace.always_on"
+msgstr "أساسي / يعمل دائمًا"
+
+msgid "plugins.marketplace.disabled"
+msgstr "معطل"
+
+msgid "plugins.marketplace.enabled"
+msgstr "مُمكّن"
+
+msgid "plugins.marketplace.inactive"
+msgstr "غير نشط"
+
+msgid "plugins.marketplace.no_match"
+msgstr "لا توجد إضافات تطابق عوامل التصفية"
+
+msgid "plugins.marketplace.search"
+msgstr "البحث عن إضافات..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "الكل"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "المجتمع"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "معطل"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "مُمكّن"
+
+msgid "plugins.multivalue.more_value"
+msgstr "قيمة أخرى"
+
+msgid "plugins.multivalue.more_values"
+msgstr "قيم أخرى"
+
+msgid "plugins.multivalue.show_less"
+msgstr "إظهار أقل"
+
+msgid "pro.alert.overlapped_1"
+msgstr "لديك خدمات نشطة أكثر مما يسمح به ترخيصك!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "احذف بعض الخدمات أو حولها إلى وضع المسودة للوصول إلى حد %(pro_services)s خدمة."
+
+msgid "pro.button.all_features_available"
+msgstr "جميع الميزات متاحة"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "في انتظار الامتثال..."
+
+msgid "pro.button.renew_license"
+msgstr "تجديد الترخيص"
+
+msgid "pro.button.suspended_license"
+msgstr "الترخيص معلق"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "الترقية إلى PRO"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "ينتهي في"
+
+msgid "pro.expiration_date.title"
+msgstr "تاريخ انتهاء صلاحية Pro"
+
+msgid "pro.expiration_date.unknown"
+msgstr "تاريخ انتهاء صلاحية غير معروف"
+
+msgid "pro.force_check.description"
+msgstr "فرض فحص جديد لإضافات PRO. سيؤدي هذا إلى تنزيل جديد للإضافات إذا كانت هناك إصدارات جديدة متاحة."
+
+msgid "pro.force_check.title"
+msgstr "فرض الفحص"
+
+msgid "pro.force_update.description"
+msgstr "تجاوز عمليات التحقق وفرض تنزيل إضافات PRO. إذا لم يكن الفرض ممكنًا، يتم الاحتفاظ بالحالة الحالية."
+
+msgid "pro.force_update.title"
+msgstr "فرض التحديث"
+
+msgid "pro.key.title.activate"
+msgstr "تفعيل المفتاح"
+
+msgid "pro.key.title.update"
+msgstr "تحديث المفتاح"
+
+msgid "pro.overlay.pro_feature"
+msgstr "ميزة Pro"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "قم بالترقية إلى Pro للوصول إلى هذه الميزة"
+
+msgid "pro.status.draft_services_count"
+msgstr "%(draft_services)s خدمة (خدمات) مسودة"
+
+msgid "pro.status.expired"
+msgstr "منتهي الصلاحية"
+
+msgid "pro.status.free_version"
+msgstr "الإصدار المجاني"
+
+msgid "pro.status.overlapped"
+msgstr "متجاوز"
+
+msgid "pro.status.pro_version"
+msgstr "إصدار PRO"
+
+msgid "pro.status.services_count"
+msgstr "%(online_services)s خدمة (خدمات) متصلة / %(pro_services)s خدمة (خدمات) PRO"
+
+msgid "pro.status.suspended"
+msgstr "معلق"
+
+msgid "pro.status.title"
+msgstr "الحالة"
+
+msgid "pro.title"
+msgstr "ترخيص Pro"
+
+msgid "profile.2fa.disable_title"
+msgstr "تعطيل 2FA"
+
+msgid "profile.2fa.enable_title"
+msgstr "تمكين 2FA"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "تحديث رموز الاسترداد الخاصة بك سيؤدي إلى إبطال الرموز السابقة."
+
+msgid "profile.badge.2fa_disabled"
+msgstr "تم تعطيل المصادقة الثنائية (2FA)"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "تم تمكين المصادقة الثنائية"
+
+msgid "profile.card.coming_soon"
+msgstr "قريبا"
+
+msgid "profile.card.title.2fa"
+msgstr "المصادقة الثنائية (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "تغيير كلمة المرور"
+
+msgid "profile.card.title.change_theme"
+msgstr "تغيير المظهر"
+
+msgid "profile.card.title.coming_soon"
+msgstr "قريبا"
+
+msgid "profile.card.title.edit_profile"
+msgstr "تعديل الملف الشخصي"
+
+msgid "profile.card.title.passkeys"
+msgstr "مفاتيح المرور"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "تحديث رموز الاسترداد"
+
+msgid "profile.card.title.sessions"
+msgstr "الجلسات"
+
+msgid "profile.help.photo_extensions"
+msgstr "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "يقوم هذا بتسجيل الخروج الفوري لكل جلسة نشطة أخرى في حسابك. أدخل كلمة المرور للتحقق."
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "مسح الجلسات الأخرى؟"
+
+msgid "profile.passkey.added"
+msgstr "أُضيف"
+
+msgid "profile.passkey.empty"
+msgstr "لا يوجد مفتاح مرور مسجّل بعد."
+
+msgid "profile.passkey.help"
+msgstr "يتيح لك مفتاح المرور تسجيل الدخول دون كلمة مرور، باستخدام قفل شاشة جهازك أو مفتاح أمان."
+
+msgid "profile.passkey.last_used"
+msgstr "آخر استخدام"
+
+msgid "profile.passkey.never_used"
+msgstr "لم يُستخدم مطلقًا"
+
+msgid "profile.passkey.unsupported"
+msgstr "هذا المتصفح لا يدعم مفاتيح المرور."
+
+msgid "profile.session.browser"
+msgstr "المتصفح"
+
+msgid "profile.session.creation_date"
+msgstr "تاريخ الإنشاء"
+
+msgid "profile.session.current_session"
+msgstr "الجلسة الحالية"
+
+msgid "profile.session.device"
+msgstr "الجهاز"
+
+msgid "profile.session.ip_address"
+msgstr "عنوان IP"
+
+msgid "profile.session.last_activity"
+msgstr "آخر نشاط"
+
+msgid "profile.session.os"
+msgstr "نظام التشغيل"
+
+msgid "profile.session.title"
+msgstr "الجلسة"
+
+msgid "profile.session.wipe_help"
+msgstr "إنهاء كل جلسة نشطة أخرى في حسابك. ستبقى مسجلاً هنا."
+
+msgid "profile.subtitle"
+msgstr "إدارة حسابك، والأمان، والجلسات النشطة."
+
+msgid "profile.tab.profile"
+msgstr "الملف الشخصي"
+
+msgid "profile.tab.security"
+msgstr "الأمان"
+
+msgid "profile.tab.sessions"
+msgstr "الجلسات"
+
+msgid "range_picker.1h"
+msgstr "الساعة الماضية"
+
+msgid "range_picker.24h"
+msgstr "آخر 24 ساعة"
+
+msgid "range_picker.30d"
+msgstr "آخر 30 يومًا"
+
+msgid "range_picker.7d"
+msgstr "الأسبوع الماضي"
+
+msgid "range_picker.aria_label"
+msgstr "نطاق زمني"
+
+msgid "range_picker.custom"
+msgstr "مخصص"
+
+msgid "redirects.all"
+msgstr "الكل"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "إضافة URI المطلوب إلى الهدف"
+
+msgid "redirects.attach"
+msgstr "ربط"
+
+msgid "redirects.attach_copy"
+msgstr "إرفاق %(name)s (%(from)s → %(to)s) إلى خدمة واحدة أو أكثر."
+
+msgid "redirects.code.301"
+msgstr "301 — تم نقل بشكل دائم"
+
+msgid "redirects.code.302"
+msgstr "302 — تم العثور عليه"
+
+msgid "redirects.code.303"
+msgstr "303 — انظر آخر"
+
+msgid "redirects.code.307"
+msgstr "307 — إعادة توجيه مؤقتة"
+
+msgid "redirects.code.308"
+msgstr "308 — إعادة توجيه دائمة"
+
+msgid "redirects.create"
+msgstr "إنشاء إعادة توجيه"
+
+msgid "redirects.delete_confirm_title"
+msgstr "حذف إعادة التوجيه هذه؟"
+
+msgid "redirects.delete_copy"
+msgstr "حذف إعادة التوجيه %(name)s؟"
+
+msgid "redirects.delete_help"
+msgstr "لا يمكن حذف إعادة التوجيه المرتبطة بخدمة إذا كانت مرتبطة. قم بإزالتها أولاً."
+
+msgid "redirects.edit"
+msgstr "تحرير إعادة التوجيه"
+
+msgid "redirects.edit_shared"
+msgstr "إعادة التوجيه هذه مرتبطة بـ %(count)s من الخدمات: %(services)s. سيؤدي الحفظ إلى تغييرها جميعًا."
+
+msgid "redirects.empty_text"
+msgstr "إعادة التوجيه هي قاعدة مسماة تقوم بإرفاقها بخدمة واحدة أو أكثر. تظل إعدادات REDIRECT_* المضمنة قيد التشغيل جنبًا إلى جنب معها."
+
+msgid "redirects.empty_title"
+msgstr "لا توجد عمليات إعادة توجيه حتى الآن"
+
+msgid "redirects.from_path"
+msgstr "إعادة التوجيه من"
+
+msgid "redirects.from_path_help"
+msgstr "مسار المصدر في الخدمات المرتبطة، على سبيل المثال /old."
+
+msgid "redirects.new"
+msgstr "إعادة توجيه جديدة"
+
+msgid "redirects.not_attached"
+msgstr "غير مرتبطة"
+
+msgid "redirects.readonly"
+msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص عمليات إعادة التوجيه ولكن لا يمكن تغييرها."
+
+msgid "redirects.save"
+msgstr "حفظ إعادة التوجيه"
+
+msgid "redirects.search"
+msgstr "ابحث عن الاسم أو مسار المصدر أو الهدف..."
+
+msgid "redirects.services_help"
+msgstr "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن إضافة إعادة التوجيه لاحقًا."
+
+msgid "redirects.status_code"
+msgstr "رمز الحالة"
+
+msgid "redirects.to_url"
+msgstr "إعادة التوجيه إلى"
+
+msgid "redirects.truncated"
+msgstr "يتم عرض أول 500 إعادة توجيه فقط. ضيق القائمة باستخدام API للحصول على النتيجة الكاملة."
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "تم اكتشاف نشاط غير لائق"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "تم تجاوز هذه الطلبات الحد المسموح به من النشاط غير اللائق وتم تجميعها معًا."
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "تم التقاط في"
+
+msgid "reports.bad_behavior_ip"
+msgstr "عنوان IP"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "لم يتم التقاط أي تفاصيل حول النشاط غير اللائق لهذا التقرير."
+
+msgid "reports.bad_behavior_request_id"
+msgstr "معرف الطلب"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "طلب"
+
+msgid "reports.bad_behavior_server"
+msgstr "الخادم"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "طلبات مشبوهة"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "عائلات الهجوم"
+
+msgid "reports.card.recent.title"
+msgstr "أحدث الحوادث"
+
+msgid "reports.card.top_asn.title"
+msgstr "أرقام ASN الأعلى"
+
+msgid "reports.card.top_offenders.title"
+msgstr "أبرز المهاجمين"
+
+msgid "reports.card.top_rules.title"
+msgstr "قواعد ModSecurity الأكثر تفعيلًا"
+
+msgid "reports.chart.timeseries.series"
+msgstr "محظورة"
+
+msgid "reports.chart.timeseries.title"
+msgstr "الطلبات المحظورة مع مرور الوقت"
+
+msgid "reports.security_incident"
+msgstr "حادث أمني"
+
+msgid "reports.security_report_data"
+msgstr "بيانات تقرير الأمان"
+
+msgid "reports.subtitle"
+msgstr "تم إنشاء تقارير أمان بناءً على الطلبات المحظورة عبر مثيلات BunkerWeb الخاصة بك — ابحث، وقم بالتصفية، وقم بالتصدير، وحظر عناوين IP المخالفة مباشرة من الجدول."
+
+msgid "reports.tab.eventlog"
+msgstr "سجل الأحداث"
+
+msgid "reports.tab.offenders"
+msgstr "أبرز المهاجمين"
+
+msgid "reports.tab.overview"
+msgstr "نظرة عامة"
+
+msgid "reports.tab.patterns"
+msgstr "أنماط الهجوم"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "حظر"
+
+msgid "reports.table.country"
+msgstr "البلد"
+
+msgid "reports.table.fires"
+msgstr "تفعيل"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "قاعدة"
+
+msgid "reports.table.top_rule"
+msgstr "قاعدة الأعلى"
+
+msgid "reports.tile.asns"
+msgstr "أرقام ASN الأعلى"
+
+msgid "reports.tile.blocked"
+msgstr "طلبات محظورة"
+
+msgid "reports.tile.blocked_rate"
+msgstr "الاتجاه مقارنة بالفترة السابقة"
+
+msgid "reports.tile.bot"
+msgstr "روبوت / جامع بيانات"
+
+msgid "reports.tile.countries"
+msgstr "أكثر البلدان مصدرًا للهجمات"
+
+msgid "reports.tile.peak_hour"
+msgstr "الساعة الذروة"
+
+msgid "reports.tile.rce"
+msgstr "RCE / أمر"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "المخالفون المتكررون (أفضل 10)"
+
+msgid "reports.tile.sqli"
+msgstr "حقن SQL"
+
+msgid "reports.tile.unique_ips"
+msgstr "أعلى عناوين IP للمهاجمين"
+
+msgid "reports.tile.unique_offenders"
+msgstr "أبرز المهاجمين"
+
+msgid "request_path.client"
+msgstr "العميل"
+
+msgid "request_path.source"
+msgstr "ترتيب تنفيذ الإضافات في مرحلة %(phase)s، من %(setting)s - ترتيب عرض، وليس تتبع لكل طلب."
+
+msgid "request_path.terminal.inline"
+msgstr "الخادم"
+
+msgid "request_path.terminal.none"
+msgstr "لم يتم تقديم أي خدمة"
+
+msgid "request_path.terminal.pool"
+msgstr "مجموعة التدفق"
+
+msgid "request_path.terminal.root"
+msgstr "الملفات المحلية"
+
+msgid "request_path.title"
+msgstr "مسار الطلب"
+
+msgid "request_path.unordered"
+msgstr "لا يوجد موقع مُعلن في المرحلة %(phase)s؛ يتم تشغيله بعد الإضافات بترتيب أبجدي."
+
+msgid "resource_groups.add_entry"
+msgstr "إضافة إدخال"
+
+msgid "resource_groups.add_to_setting"
+msgstr "إضافة مجموعة موارد…"
+
+msgid "resource_groups.add_values"
+msgstr "إضافة قيم"
+
+msgid "resource_groups.alias"
+msgstr "اسم مستعار"
+
+msgid "resource_groups.alias_help"
+msgstr "الأحرف، والأرقام، وعلامات الشرطة السفلية، وعلامات الشرطة. لا يمكن إعادة تسمية الأسماء المستعارة الموجودة."
+
+msgid "resource_groups.bulk_import"
+msgstr "استيراد بالجملة"
+
+msgid "resource_groups.clone"
+msgstr "نسخ مجموعة موارد"
+
+msgid "resource_groups.clone_copy"
+msgstr "إنشاء نسخة قابلة للتحرير من @%(name)s."
+
+msgid "resource_groups.collapse_all"
+msgstr "طي الكل"
+
+msgid "resource_groups.comment"
+msgstr "تعليق"
+
+msgid "resource_groups.delete"
+msgstr "حذف مجموعة موارد"
+
+msgid "resource_groups.delete_confirm"
+msgstr "حذف @%(name)s؟ لا يمكن التراجع عن ذلك."
+
+msgid "resource_groups.delete_help"
+msgstr "تم حظر الحذف أثناء الإشارة إلى هذا الاسم المستعار."
+
+msgid "resource_groups.editor_edit"
+msgstr "تحرير @%(name)s"
+
+msgid "resource_groups.editor_new"
+msgstr "مجموعة موارد جديدة"
+
+msgid "resource_groups.editor_title"
+msgstr "مجموعة موارد"
+
+msgid "resource_groups.empty"
+msgstr "لا توجد مجموعات موارد"
+
+msgid "resource_groups.empty_help"
+msgstr "إنشاء اسم مستعار قابل لإعادة الاستخدام لمشاركة القيم المحددة عبر إعدادات متوافقة."
+
+msgid "resource_groups.entries"
+msgstr "إدخالات"
+
+msgid "resource_groups.expand_all"
+msgstr "توسيع الكل"
+
+msgid "resource_groups.global_configuration"
+msgstr "التكوين العالمي"
+
+msgid "resource_groups.import_extension"
+msgstr "اختر ملفًا بامتداد .txt أو .csv."
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "تقتصر عمليات استيراد TXT/CSV على 256 KiB."
+
+msgid "resource_groups.kind"
+msgstr "النوع"
+
+msgid "resource_groups.kinds"
+msgstr "أنواع"
+
+msgid "resource_groups.loading_references"
+msgstr "جاري التحميل..."
+
+msgid "resource_groups.max_entries"
+msgstr "لا يمكن لمجموعة الموارد أن تحتوي على أكثر من %(max)s إدخال."
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s أنواع · %(values)s قيم · %(usages)s استخدامات"
+
+msgid "resource_groups.new"
+msgstr "مجموعة جديدة"
+
+msgid "resource_groups.new_alias"
+msgstr "اسم مستعار جديد"
+
+msgid "resource_groups.no_entries"
+msgstr "لا توجد إدخالات"
+
+msgid "resource_groups.no_entries_help"
+msgstr "أضف الإدخالات بشكل فردي أو استخدم المستورد المجمع أدناه."
+
+msgid "resource_groups.no_references"
+msgstr "لا توجد مراجع"
+
+msgid "resource_groups.readonly"
+msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص ومصدر مجموعات الموارد، ولكن لا يمكن تعديلها."
+
+msgid "resource_groups.references_error"
+msgstr "تعذر تحميل المراجع"
+
+msgid "resource_groups.save"
+msgstr "حفظ المجموعة"
+
+msgid "resource_groups.search"
+msgstr "ابحث عن أسماء مستعارة أو أوصاف أو أنواع أو قيم..."
+
+msgid "resource_groups.showing_count"
+msgstr "تم عرض %(visible)s من %(total)s مجموعات"
+
+msgid "resource_groups.subtitle"
+msgstr "أسماء مستعارة منسقة قابلة لإعادة الاستخدام لـ عناوين IP، والبلدان، وأرقام AS، وأسماء DNS المعكوسة، وعناوين وكلاء المستخدم، وعناوين URL."
+
+msgid "resource_groups.template_configuration"
+msgstr "القالب %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "الاستخدام"
+
+msgid "resource_groups.value"
+msgstr "القيمة"
+
+msgid "resource_groups.values"
+msgstr "القيم"
+
+msgid "scope.all_services"
+msgstr "جميع الخدمات"
+
+msgid "scope.global"
+msgstr "عام"
+
+msgid "scope.global_all_services"
+msgstr "عام (جميع الخدمات)"
+
+msgid "scope.permanent"
+msgstr "دائم"
+
+msgid "scope.service_specific"
+msgstr "خاص بالخدمة"
+
+msgid "searchpane.active"
+msgstr "نشط"
+
+msgid "searchpane.async"
+msgstr "غير متزامن"
+
+msgid "searchpane.ban_scope"
+msgstr "نطاق الحظر"
+
+msgid "searchpane.clear"
+msgstr "مسح الكل"
+
+msgid "searchpane.collapse_0"
+msgstr "لوحات البحث"
+
+msgid "searchpane.collapse_message"
+msgstr "طي الكل"
+
+msgid "searchpane.collapse_plural"
+msgstr "لوحات البحث (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "البلد"
+
+msgid "searchpane.created"
+msgstr "تم الإنشاء"
+
+msgid "searchpane.data"
+msgstr "البيانات"
+
+msgid "searchpane.date"
+msgstr "التاريخ"
+
+msgid "searchpane.empty"
+msgstr "لا توجد لوحات بحث متاحة"
+
+msgid "searchpane.end_date"
+msgstr "تاريخ الانتهاء"
+
+msgid "searchpane.first_seen"
+msgstr "شوهد لأول مرة"
+
+msgid "searchpane.future_30d"
+msgstr "أكثر من 30 يومًا"
+
+msgid "searchpane.health"
+msgstr "الصحة"
+
+msgid "searchpane.interval"
+msgstr "الفاصل الزمني"
+
+msgid "searchpane.ip_address"
+msgstr "عنوان IP"
+
+msgid "searchpane.job_name"
+msgstr "اسم المهمة"
+
+msgid "searchpane.last_24h"
+msgstr "آخر 24 ساعة"
+
+msgid "searchpane.last_30d"
+msgstr "آخر 30 يومًا"
+
+msgid "searchpane.last_7d"
+msgstr "آخر 7 أيام"
+
+msgid "searchpane.last_run"
+msgstr "حالة التشغيل الأخير"
+
+msgid "searchpane.last_seen"
+msgstr "آخر مشاهدة"
+
+msgid "searchpane.last_update"
+msgstr "آخر تحديث"
+
+msgid "searchpane.loading"
+msgstr "جار التحميل..."
+
+msgid "searchpane.method"
+msgstr "الطريقة"
+
+msgid "searchpane.next_24h"
+msgstr "الـ 24 ساعة القادمة"
+
+msgid "searchpane.next_30d"
+msgstr "الـ 30 يومًا القادمة"
+
+msgid "searchpane.next_7d"
+msgstr "الـ 7 أيام القادمة"
+
+msgid "searchpane.older_30d"
+msgstr "أكثر من 30 يومًا"
+
+msgid "searchpane.one_or_more"
+msgstr "واحد أو أكثر"
+
+msgid "searchpane.permanent"
+msgstr "دائم"
+
+msgid "searchpane.plugin"
+msgstr "الإضافة"
+
+msgid "searchpane.protocol"
+msgstr "البروتوكول"
+
+msgid "searchpane.reason"
+msgstr "السبب"
+
+msgid "searchpane.reload"
+msgstr "إعادة التحميل مطلوبة"
+
+msgid "searchpane.scope"
+msgstr "النطاق"
+
+msgid "searchpane.security_mode"
+msgstr "وضع الأمان"
+
+msgid "searchpane.server_name"
+msgstr "اسم الخادم"
+
+msgid "searchpane.service"
+msgstr "الخدمة"
+
+msgid "searchpane.show_message"
+msgstr "إظهار الكل"
+
+msgid "searchpane.start_date"
+msgstr "تاريخ البدء"
+
+msgid "searchpane.status"
+msgstr "الحالة"
+
+msgid "searchpane.status_code"
+msgstr "رمز الحالة"
+
+msgid "searchpane.steps"
+msgstr "الخطوات"
+
+msgid "searchpane.stream"
+msgstr "دعم البث"
+
+msgid "searchpane.template"
+msgstr "القالب"
+
+msgid "searchpane.title_0"
+msgstr "لا توجد فلاتر نشطة"
+
+msgid "searchpane.title_1"
+msgstr "فلتر نشط - 1"
+
+msgid "searchpane.title_plural"
+msgstr "فلاتر نشطة - %d"
+
+msgid "searchpane.type"
+msgstr "النوع"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "الإصدار"
+
+msgid "searchpane.zero"
+msgstr "لا شيء"
+
+msgid "security_mode.block"
+msgstr "حظر"
+
+msgid "security_mode.detect"
+msgstr "اكتشاف"
+
+msgid "service.resources.attach"
+msgstr "ربط"
+
+msgid "service.resources.conflict.inline"
+msgstr "الـ %(service)s بالفعل يقدم الخدمة %(path)s من خلال إعداداته الخاصة %(family)s. قم بإلغاء هذه الإعدادات لـ %(path)s، أو استخدم مسارًا مختلفًا."
+
+msgid "service.resources.conflict.primary"
+msgstr "\"%(name)s\" هو الشهادة الرئيسية لهذه الخدمة وسوف يتم تخفيضها دون تحذير إضافي. الشهادة الرئيسية هي التي يتم نشرها بالفعل."
+
+msgid "service.resources.conflict.resource"
+msgstr "الـ %(service)s بالفعل يقدم الخدمة %(path)s من خلال \"%(kind)s\" %(name)s. قم بإلغاء \"%(name)s\"، أو أعطِ إحداهما مسارًا مختلفًا."
+
+msgid "service.resources.conflict.stream"
+msgstr "خدمة التدفق تقوم بتوجيه كل اتصال إلى خلفية واحدة، والـ %(service)s يستخدم بالفعل \"%(name)s\" الخلفية. قم بإلغاء ربطه أولاً."
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "الـ %(service)s لديه بالفعل خلفية في REVERSE_PROXY_HOST. قم بإلغاء هذه الإعدادات للسماح للخلفية بالسيطرة."
+
+msgid "service.resources.detach"
+msgstr "إلغاء الربط"
+
+msgid "service.resources.family.certificate"
+msgstr "الشهادات"
+
+msgid "service.resources.family.redirect"
+msgstr "إعادة التوجيه"
+
+msgid "service.resources.family.template"
+msgstr "القالب"
+
+msgid "service.resources.family.upstream"
+msgstr "الخوادم الخلفية"
+
+msgid "service.resources.family.workflow"
+msgstr "مسارات العمل"
+
+msgid "service.resources.match_path"
+msgstr "المسار"
+
+msgid "service.resources.none"
+msgstr "لا يوجد مرفق"
+
+msgid "service.resources.primary"
+msgstr "الشهادة الرئيسية"
+
+msgid "service.resources.template.none"
+msgstr "لا يوجد قالب"
+
+msgid "service.resources.template.note"
+msgstr "ليس موردًا: القالب هو إعداد. يتم تطبيقه عند الحفظ، وعند تغييره يتم نقل العديد من الإعدادات في وقت واحد."
+
+msgid "service.resources.template.pending"
+msgstr "يتم تطبيقه عند الحفظ"
+
+msgid "service.resources.template.switching"
+msgstr "عند الحفظ، يتم نقل هذه الخدمة من \"%(from)s\" إلى \"%(to)s\". يتم التخلص من القيم التي يوفرها القالب الحالي ويتم تطبيق قيم \"%(to)s\" - يتم نقل العديد من الإعدادات في وقت واحد."
+
+msgid "service.resources.template.unwired"
+msgstr "لا تقوم هذه الصفحة بنشر USE_TEMPLATE، لذلك لا يمكن تغيير القالب من هنا."
+
+msgid "service.resources.title"
+msgstr "الموارد المرفقة"
+
+msgid "service.resources.unavailable"
+msgstr "غير متوفر"
+
+msgid "services.draft"
+msgstr "خدمات مسودة"
+
+msgid "services.online"
+msgstr "متصل"
+
+msgid "services.subtitle"
+msgstr "إدارة الخدمات المتعددة المدعومة بـ BunkerWeb: إنشاء، تعديل، تحويل إلى مسودة، أو حذفها."
+
+msgid "services.total"
+msgstr "إجمالي الخدمات"
+
+msgid "services.with_configs"
+msgstr "مع تكوينات مخصصة"
+
+msgid "settings.custom_config.title"
+msgstr "تكوين مخصص"
+
+msgid "settings.multiple.description"
+msgstr "قم بتكوين مثيلات متعددة من الإعدادات لهذه الإضافة هنا."
+
+msgid "settings.multiple.title"
+msgstr "إعدادات متعددة"
+
+msgid "setup.status.admin_user_exists"
+msgstr "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية."
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "تم تكوين مفتاح ترخيص PRO بالفعل، يرجى المتابعة إلى الخطوة التالية."
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية."
+
+msgid "setup.status.secure_password"
+msgstr "كلمة مرور آمنة"
+
+msgid "setup.status.unique_server_name"
+msgstr "اسم خادم فريد"
+
+msgid "setup.step1.subtitle"
+msgstr "أنشئ حساب المسؤول الخاص بك."
+
+msgid "setup.step1.title"
+msgstr "مستخدم مسؤول"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "محدد الجهة المصدرة للشهادة"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "استخدم Let's Encrypt للإصدار القياسي عبر ACME. تتوفر بيئة Staging للاختبار والتحقق من التكامل."
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "إذا تُرك فارغًا، سيستخدم ZeroSSL البريد الإلكتروني المُعد لتسجيل الحساب."
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "استخدم ZeroSSL مع zerossl-bot. قدّم بريد الحساب الإلكتروني أو مفتاح API لإصدار الحساب وتتبع إعادة الإصدار المعتمدة على المفتاح."
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "شهادة مخصصة"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "IP الحقيقي"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "وكيل عكسي"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "قم بتكوين الإعدادات الخاصة بواجهة المستخدم على الويب."
+
+msgid "setup.step2.title"
+msgstr "إعدادات واجهة المستخدم"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "مزايا PRO"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "افتح جميع الميزات المتقدمة بما في ذلك الأمان والأداء وأدوات الإدارة المحسنة."
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "الوصول إلى جميع ميزات PRO"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "احصل على دعم ذي أولوية من فريق BunkerWeb لأي مشاكل أو أسئلة قد تكون لديك."
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "دعم فني من المشرفين"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "حلول مخصصة لتلبية احتياجاتك الخاصة."
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "تطوير مخصص"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "نصائح من الخبراء لتحسين إعداد BunkerWeb الخاص بك."
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "استشارات مخصصة"
+
+msgid "setup.step3.subtitle"
+msgstr "افتح الميزات المتقدمة واحصل على أقصى استفادة من BunkerWeb."
+
+msgid "setup.step3.title"
+msgstr "الترقية إلى PRO"
+
+msgid "setup.step4.label.final_url"
+msgstr "URL واجهة مستخدم BunkerWeb"
+
+msgid "setup.step4.subtitle"
+msgstr "راجع إعداداتك قبل إكمال الإعداد."
+
+msgid "setup.step4.title"
+msgstr "نظرة عامة"
+
+msgid "setup.subtitle"
+msgstr "اتبع الخطوات لإكمال معالج الإعداد."
+
+msgid "setup.title"
+msgstr "معالج الإعداد"
+
+msgid "status.active"
+msgstr "نشط"
+
+msgid "status.admin_user_exists"
+msgstr "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية."
+
+msgid "status.all_valid"
+msgstr "جميعها صالحة"
+
+msgid "status.blog_connection_fail"
+msgstr "تعذر الاتصال بالمدونة للحصول على تحديثات الأخبار."
+
+msgid "status.default_server"
+msgstr "الخادم الافتراضي"
+
+msgid "status.done"
+msgstr "مكتمل"
+
+msgid "status.down"
+msgstr "متوقف"
+
+msgid "status.draft"
+msgstr "مسودة"
+
+msgid "status.error_deleting_template"
+msgstr "حدث خطأ أثناء حذف القالب."
+
+msgid "status.error_loading_bans"
+msgstr "خطأ في تحميل الحظر. يرجى محاولة تحديث الصفحة."
+
+msgid "status.error_loading_data"
+msgstr "تعذر تحميل البيانات"
+
+msgid "status.error_loading_template"
+msgstr "حدث خطأ أثناء تحميل القالب."
+
+msgid "status.error_saving_template"
+msgstr "حدث خطأ أثناء حفظ القالب."
+
+msgid "status.expired"
+msgstr "منتهية الصلاحية"
+
+msgid "status.expiring"
+msgstr "منتهي الصلاحية"
+
+msgid "status.failed"
+msgstr "فشل"
+
+msgid "status.invalid_json_payload"
+msgstr "حمولة JSON غير صالحة."
+
+msgid "status.loading"
+msgstr "جار التحميل..."
+
+msgid "status.loading_bans"
+msgstr "جار تحميل الحظر..."
+
+msgid "status.loading_cache_file"
+msgstr "جار تحميل ملف الذاكرة المؤقتة..."
+
+msgid "status.loading_cache_files"
+msgstr "جار تحميل ملفات الذاكرة المؤقتة..."
+
+msgid "status.loading_custom_config"
+msgstr "جار تحميل التكوين المخصص..."
+
+msgid "status.loading_custom_configs"
+msgstr "جار تحميل التكوينات المخصصة..."
+
+msgid "status.loading_instances"
+msgstr "جار تحميل المثيلات..."
+
+msgid "status.loading_items"
+msgstr "جار تحميل العناصر..."
+
+msgid "status.loading_jobs"
+msgstr "جار تحميل المهام..."
+
+msgid "status.loading_logs"
+msgstr "جار تحميل السجلات..."
+
+msgid "status.loading_plugins"
+msgstr "جار تحميل الإضافات..."
+
+msgid "status.loading_reports"
+msgstr "جار تحميل التقارير..."
+
+msgid "status.loading_services"
+msgstr "جار تحميل الخدمات..."
+
+msgid "status.loading_templates"
+msgstr "جار تحميل القوالب..."
+
+msgid "status.missing_template_information"
+msgstr "معلومات القالب مفقودة."
+
+msgid "status.news_connection_error"
+msgstr "تعذر الاتصال بالمدونة للحصول على تحديثات الأخبار."
+
+msgid "status.no"
+msgstr "لا"
+
+msgid "status.no_data"
+msgstr "لا توجد بيانات"
+
+msgid "status.no_history"
+msgstr "لا يوجد سجل متاح."
+
+msgid "status.no_item"
+msgstr "لا يوجد عنصر"
+
+msgid "status.no_notifications"
+msgstr "لا توجد إشعارات لعرضها."
+
+msgid "status.no_search_results"
+msgstr "لم يتم العثور على عناصر."
+
+msgid "status.no_settings"
+msgstr "هذه الإضافة ليس لديها إعدادات لهذا النطاق."
+
+msgid "status.no_steps"
+msgstr "لا توجد خطوات متاحة"
+
+msgid "status.no_steps_description"
+msgstr "لا يحتوي هذا القالب على أي خطوات للتكوين."
+
+msgid "status.not_applicable"
+msgstr "غير متاح"
+
+msgid "status.online"
+msgstr "متصل"
+
+msgid "status.optional"
+msgstr "اختياري"
+
+msgid "status.partial"
+msgstr "جزئي"
+
+msgid "status.pending"
+msgstr "قيد الانتظار"
+
+msgid "status.pinging_instances"
+msgstr "جار اختبار اتصال المثيلات، يرجى الانتظار..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "الإضافة معطلة؛ لذلك، لا تتوفر معلومات."
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "إضافة المقاييس غير مفعلة؛ لذلك، لا تتوفر معلومات."
+
+msgid "status.plugin_page.status.not_available"
+msgstr "صفحة الإضافة غير متاحة بعد خلال مرحلة البيتا."
+
+msgid "status.reverse_proxy_configured"
+msgstr "تم تكوين وكيل عكسي بالفعل لواجهة الويب. يرجى المتابعة إلى الخطوة التالية."
+
+msgid "status.secure_password"
+msgstr "كلمة مرور آمنة"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "جار إعداد BunkerWeb الخاص بك، يرجى الانتظار..."
+
+msgid "status.success"
+msgstr "نجاح"
+
+msgid "status.template_in_use"
+msgstr "تستخدم هذه الخدمة حاليًا القالب \"%(template)s\" الذي تتم إدارته عبر الطريقة \"%(method)s\"."
+
+msgid "status.template_in_use_description"
+msgstr "لا يُسمح بإجراء تغييرات خارج القالب الحالي. يرجى إجراء التغييرات باستخدام القالب الحالي أو التبديل إلى الوضع المتقدم/الخام."
+
+msgid "status.unique_server_name"
+msgstr "اسم خادم فريد"
+
+msgid "status.up"
+msgstr "قيد التشغيل"
+
+msgid "status.yes"
+msgstr "نعم"
+
+msgid "step.next"
+msgstr "التالي"
+
+msgid "step.previous"
+msgstr "السابق"
+
+msgid "support.card.download_logs.help"
+msgstr "سيتم إخفاء هوية جميع البيانات الخاصة."
+
+msgid "support.card.download_logs.title"
+msgstr "تنزيل السجلات"
+
+msgid "support.card.extract_config.title"
+msgstr "استخراج التكوين"
+
+msgid "support.card.support_link.title"
+msgstr "رابط الدعم"
+
+msgid "support.subtitle"
+msgstr "تنزيل سجلات التصحيح، واستخراج تكوينك، والحصول على المساعدة من فريق BunkerWeb."
+
+msgid "support.title"
+msgstr "الدعم"
+
+msgid "tab.custom_certificate"
+msgstr "شهادة مخصصة"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "الإجراءات"
+
+msgid "table.header.active"
+msgstr "نشط"
+
+msgid "table.header.async"
+msgstr "غير متزامن"
+
+msgid "table.header.bytes_received"
+msgstr "البايتات المستلمة"
+
+msgid "table.header.bytes_sent"
+msgstr "البايتات المرسلة"
+
+msgid "table.header.checksum"
+msgstr "المجموع الاختباري"
+
+msgid "table.header.client_port"
+msgstr "منفذ العميل"
+
+msgid "table.header.configs"
+msgstr "التكوينات"
+
+msgid "table.header.country"
+msgstr "البلد"
+
+msgid "table.header.created"
+msgstr "تاريخ الإنشاء"
+
+msgid "table.header.current_time_left"
+msgstr "الوقت المتبقي الحالي"
+
+msgid "table.header.data"
+msgstr "البيانات"
+
+msgid "table.header.date"
+msgstr "التاريخ"
+
+msgid "table.header.description"
+msgstr "الوصف"
+
+msgid "table.header.end_date"
+msgstr "تاريخ الانتهاء"
+
+msgid "table.header.file_name"
+msgstr "اسم الملف"
+
+msgid "table.header.health"
+msgstr "الصحة"
+
+msgid "table.header.hostname"
+msgstr "اسم المضيف"
+
+msgid "table.header.id"
+msgstr "المعرف"
+
+msgid "table.header.interval"
+msgstr "الفاصل الزمني"
+
+msgid "table.header.ip_address"
+msgstr "عنوان IP"
+
+msgid "table.header.job_name"
+msgstr "اسم المهمة"
+
+msgid "table.header.last_run"
+msgstr "آخر تشغيل"
+
+msgid "table.header.last_seen"
+msgstr "آخر مشاهدة"
+
+msgid "table.header.last_update"
+msgstr "آخر تحديث"
+
+msgid "table.header.listen_port"
+msgstr "منفذ الاستماع"
+
+msgid "table.header.method"
+msgstr "الطريقة"
+
+msgid "table.header.name"
+msgstr "الاسم"
+
+msgid "table.header.plugin"
+msgstr "الإضافة"
+
+msgid "table.header.protocol"
+msgstr "البروتوكول"
+
+msgid "table.header.reason"
+msgstr "السبب"
+
+msgid "table.header.reload"
+msgstr "إعادة تحميل"
+
+msgid "table.header.request_id"
+msgstr "معرف الطلب"
+
+msgid "table.header.scope"
+msgstr "النطاق"
+
+msgid "table.header.security_mode"
+msgstr "وضع الأمان"
+
+msgid "table.header.server_name"
+msgstr "اسم الخادم"
+
+msgid "table.header.service"
+msgstr "الخدمة"
+
+msgid "table.header.service_name"
+msgstr "اسم الخدمة"
+
+msgid "table.header.session_time"
+msgstr "مدة الجلسة"
+
+msgid "table.header.settings"
+msgstr "الإعدادات"
+
+msgid "table.header.status"
+msgstr "الحالة"
+
+msgid "table.header.status_code"
+msgstr "رمز الحالة"
+
+msgid "table.header.steps"
+msgstr "الخطوات"
+
+msgid "table.header.stream"
+msgstr "البث"
+
+msgid "table.header.template"
+msgstr "القالب"
+
+msgid "table.header.templates"
+msgstr "القوالب"
+
+msgid "table.header.time_left"
+msgstr "الوقت المتبقي"
+
+msgid "table.header.type"
+msgstr "النوع"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "القيمة"
+
+msgid "table.header.version"
+msgstr "الإصدار"
+
+msgid "template.editor.button_add_config"
+msgstr "إضافة تكوين"
+
+msgid "template.editor.button_add_setting"
+msgstr "إضافة إعداد"
+
+msgid "template.editor.button_add_step"
+msgstr "إضافة خطوة"
+
+msgid "template.editor.button_move_down"
+msgstr "تحريك لأسفل"
+
+msgid "template.editor.button_move_up"
+msgstr "تحريك لأعلى"
+
+msgid "template.editor.button_remove"
+msgstr "إزالة"
+
+msgid "template.editor.clone_badge"
+msgstr "مستنسخ من %(template)s"
+
+msgid "template.editor.configs"
+msgstr "تكوينات مخصصة"
+
+msgid "template.editor.configs_help"
+msgstr "أرفق مقتطفات تكوين مخصصة اختيارية بهذا القالب."
+
+msgid "template.editor.delete_step_confirm"
+msgstr "هل أنت متأكد أنك تريد حذف هذه الخطوة؟"
+
+msgid "template.editor.details"
+msgstr "تفاصيل القالب"
+
+msgid "template.editor.details_help"
+msgstr "قم بتعيين المعلومات الأساسية لهذا القالب."
+
+msgid "template.editor.drag_handle"
+msgstr "اسحب لإعادة الترتيب"
+
+msgid "template.editor.empty_configs"
+msgstr "لا توجد تكوينات مخصصة حتى الآن."
+
+msgid "template.editor.empty_settings"
+msgstr "لا توجد إعدادات حتى الآن. أضف إعدادك الأول."
+
+msgid "template.editor.empty_steps"
+msgstr "لا توجد خطوات حتى الآن. أضف خطوتك الأولى."
+
+msgid "template.editor.error_generic"
+msgstr "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "تعذر تحديد نقطة نهاية الإرسال."
+
+msgid "template.editor.heading_create"
+msgstr "إنشاء قالب"
+
+msgid "template.editor.heading_edit"
+msgstr "تعديل القالب %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "البيانات"
+
+msgid "template.editor.label_config_name"
+msgstr "الاسم"
+
+msgid "template.editor.label_config_order"
+msgstr "الترتيب"
+
+msgid "template.editor.label_config_type"
+msgstr "النوع"
+
+msgid "template.editor.label_setting_key"
+msgstr "مفتاح الإعداد"
+
+msgid "template.editor.label_setting_value"
+msgstr "القيمة الافتراضية"
+
+msgid "template.editor.label_step_configs"
+msgstr "التكوينات في هذه الخطوة"
+
+msgid "template.editor.label_step_settings"
+msgstr "الإعدادات في هذه الخطوة"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "عنوان فرعي للخطوة"
+
+msgid "template.editor.label_step_title"
+msgstr "عنوان الخطوة"
+
+msgid "template.editor.missing_configs_body"
+msgstr "يشير القالب المستورد إلى تكوينات مخصصة لم يتم تحميلها بعد. يرجى استيراد هذه التكوينات لإكمال إعداد القالب:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "استعراض الملفات"
+
+msgid "template.editor.missing_configs_done"
+msgstr "تم"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "اسحب وأفلت ملفات التكوين هنا (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "أو"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "ستتم إضافة ملفات التحميل تلقائيًا إلى القالب الخاص بك. تأكد من أن أسماء الملفات تتطابق مع التكوينات المفقودة المدرجة أعلاه."
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "تلميح:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "تم تحميل جميع التكوينات المفقودة! تم استيراد القالب بنجاح."
+
+msgid "template.editor.missing_configs_title"
+msgstr "التكوينات المخصصة المفقودة"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "فشل تحميل ملفات التكوين"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "تحميل التكوينات المفقودة (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "تم تحميل %(uploaded)s من أصل %(total)s تكوينات. لا يزال مفقودًا: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "تم تحميل %(count)s ملف (ملفات) تكوين بنجاح"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "اختر الخيارات"
+
+msgid "template.editor.multiselect_summary"
+msgstr "تم اختيار %(count)s"
+
+msgid "template.editor.multivalue_add"
+msgstr "إضافة قيمة"
+
+msgid "template.editor.multivalue_helper"
+msgstr "قيمة واحدة لكل سطر.%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "نظرة عامة"
+
+msgid "template.editor.panel_overview_help"
+msgstr "تتبع المعلومات الرئيسية وانتقل بين الأقسام."
+
+msgid "template.editor.placeholder_config_data"
+msgstr "البيانات"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "الاسم"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "core"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "المفتاح"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "القيمة الافتراضية"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "عنوان فرعي للخطوة"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "عنوان الخطوة"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "معرف-القالب"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "قالبي"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "استعراض الملفات"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "اسحب وأفلت ملفات التكوين هنا أو انقر للاستعراض (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "التنسيقات المدعومة: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "لا توجد ملفات تكوين مستوردة بعد. ستظهر الملفات الجديدة أدناه."
+
+msgid "template.editor.raw_configs_help"
+msgstr "تحميل ملفات التكوين (.conf, .cfg, .txt) لإلحاق الإدخالات بـ <code>configs</code>. الأنواع الافتراضية هي <code>server_http</code>؛ اضبطها في JSON إذا لزم الأمر."
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "تعذر استيراد التكوينات لأن JSON الحالي غير صالح."
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "لم يتم استيراد أي تكوينات."
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "تم استيراد %(count)s ملف (ملفات) تكوين بنجاح."
+
+msgid "template.editor.raw_configs_note"
+msgstr "تتم إضافة الملفات المستوردة إلى محرر JSON. قم بمراجعتها وتعديلها قبل الحفظ."
+
+msgid "template.editor.raw_configs_title"
+msgstr "استيراد التكوينات المخصصة"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "تحميل ملفات التكوين (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "تعذر قراءة أحد الملفات المحددة."
+
+msgid "template.editor.raw_editor_aria"
+msgstr "محرر JSON للقالب الخام"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "أسقط ملف JSON قالب (.json فقط) لاستبدال المحتوى الحالي."
+
+msgid "template.editor.raw_editor_help"
+msgstr "تعديل تعريف القالب الكامل بصيغة JSON. يؤدي التبديل مرة أخرى إلى الوضع السهل إلى التحقق من الصحة وإعادة تحميل المحرر المرئي."
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "تم استيراد JSON القالب بنجاح."
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "سيؤدي استيراد هذا الملف إلى استبدال JSON القالب الحالي بالكامل. سيتم فقدان التغييرات التي تم إجراؤها في المحرر. هل تريد المتابعة؟"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "استبدال القالب"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "استبدال JSON القالب؟"
+
+msgid "template.editor.raw_editor_title"
+msgstr "JSON القالب الخام"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "الملف الذي تم تحميله فارغ."
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "تعذر قراءة الملف المحدد."
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "تحميل JSON القالب (.json فقط)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "تعريف تكوين غير صالح."
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "يجب أن تكون إدخالات التكوين كائنات (objects)."
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "التكوينات %(configs)s غير معينة لأي خطوة."
+
+msgid "template.editor.raw_validation_empty"
+msgstr "لا يمكن أن يكون JSON القالب فارغًا."
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "حمولة JSON غير صالحة: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "يجب أن تكون حمولة القالب كائن JSON (JSON object)."
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "يجب أن تكون مفاتيح الإعدادات سلاسل نصية غير فارغة."
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "يجب تقديم الإعدادات ككائن (object)."
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "الإعدادات %(settings)s غير معينة لأي خطوة."
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "التكوين %(config)s مُعيّن لخطوات متعددة."
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "الخطوة %(index)s تحتوي على مرجع تكوين غير صالح."
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "الخطوة %(index)s تشير إلى تكوين غير معروف %(config)s."
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "يجب أن تكون الخطوة %(index)s كائنًا (object)."
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "الإعداد %(setting)s مُعيّن لخطوات متعددة."
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "الخطوة %(index)s تحتوي على مرجع إعداد غير صالح."
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "الخطوة %(index)s تشير إلى إعداد غير معروف %(setting)s."
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "يجب أن تحتوي الخطوة %(index)s على عنوان."
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "يجب أن يحتوي القالب على خطوة واحدة على الأقل."
+
+msgid "template.editor.readonly_db"
+msgstr "قاعدة البيانات حاليًا للقراءة فقط. لا يمكن تغيير القوالب."
+
+msgid "template.editor.readonly_method"
+msgstr "تم إنشاء هذا القالب بواسطة عملية %(method)s ولا يمكن تعديله من واجهة المستخدم."
+
+msgid "template.editor.readonly_title"
+msgstr "للقراءة فقط"
+
+msgid "template.editor.readonly_user"
+msgstr "لديك أذونات للقراءة فقط. اتصل بالمسؤول لطلب صلاحية الكتابة."
+
+msgid "template.editor.select_config_placeholder"
+msgstr "اختر تكوينًا"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "اختر نوعًا"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "اختر إعدادًا"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "هل أنت متأكد أنك تريد إزالة هذا الإعداد من القالب؟"
+
+msgid "template.editor.setting_remove_key"
+msgstr "الإعداد"
+
+msgid "template.editor.setting_remove_title"
+msgstr "إزالة الإعداد"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "إضافة المحدد"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "متقدم"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "تمت إضافته بالفعل"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "مسح البحث"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "تمت إضافة جميع الإعدادات المطابقة بالفعل."
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "لا توجد إعدادات لعرضها."
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "الإعدادات المتاحة: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "متاح: %(available)s، تمت إضافته: %(used)s"
+
+msgid "template.editor.setting_selector_default"
+msgstr "افتراضي"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "عرض التوثيق"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "لا توجد إعدادات تطابق الفلاتر الحالية."
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "الإضافة"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "كل الإضافات"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "النوع"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "كل الأنواع"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "فقط إعدادات المواقع المتعددة متاحة. استخدم الفلاتر لتضييق القائمة."
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "متعدد"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "نمط"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "البحث عن إعداد للمواقع المتعددة"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "ابحث بالاسم، المفتاح، أو الإضافة"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "مُمكَّن"
+
+msgid "template.editor.settings"
+msgstr "الإعدادات"
+
+msgid "template.editor.settings_help"
+msgstr "حدد الإعدادات التي يعرضها هذا القالب وقيمها الافتراضية."
+
+msgid "template.editor.step_configs_empty"
+msgstr "لم تتم إضافة أي تكوينات إلى هذه الخطوة بعد."
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "اختر التكوينات الحالية"
+
+msgid "template.editor.step_default_title"
+msgstr "خطوة بدون عنوان"
+
+msgid "template.editor.step_prefix"
+msgstr "الخطوة"
+
+msgid "template.editor.step_settings_empty"
+msgstr "لم تتم إضافة أي إعدادات إلى هذه الخطوة بعد."
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "اختر الإعدادات الحالية"
+
+msgid "template.editor.steps"
+msgstr "الخطوات"
+
+msgid "template.editor.steps_help"
+msgstr "نظم الإعدادات في خطوات موجهة. حدد الإعدادات أو التكوينات التي تنتمي إلى كل خطوة."
+
+msgid "template.editor.summary_clone_info"
+msgstr "يتم الاستنساخ حاليًا من %(template)s."
+
+msgid "template.editor.summary_counts_configs"
+msgstr "التكوينات"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "الإعدادات"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "الخطوات"
+
+msgid "template.editor.summary_counts_title"
+msgstr "المحتوى"
+
+msgid "template.editor.summary_link_configs"
+msgstr "تكوينات مخصصة"
+
+msgid "template.editor.summary_link_details"
+msgstr "تفاصيل القالب"
+
+msgid "template.editor.summary_link_settings"
+msgstr "الإعدادات"
+
+msgid "template.editor.summary_link_steps"
+msgstr "الخطوات"
+
+msgid "template.editor.summary_links_title"
+msgstr "روابط سريعة"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "تم الإنشاء"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "الطريقة"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "البيانات الوصفية"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "غير متوفر"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "آخر تحديث"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "اسم التكوين مطلوب عند تحديد تكوين."
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "يجب أن يكون نوع التكوين أحد الأنواع المتوافقة مع المواقع المتعددة."
+
+msgid "template.editor.validation_config_type_required"
+msgstr "نوع التكوين مطلوب عند تحديد تكوين."
+
+msgid "template.editor.validation_configs_unique"
+msgstr "يجب أن يكون كل اسم تكوين فريدًا."
+
+msgid "template.editor.validation_id_required"
+msgstr "معرف القالب مطلوب."
+
+msgid "template.editor.validation_setting_key"
+msgstr "يجب أن يكون لكل إعداد مفتاح."
+
+msgid "template.editor.validation_settings_unique"
+msgstr "يجب أن يكون كل مفتاح إعداد فريدًا."
+
+msgid "template.none"
+msgstr "لا يوجد قالب"
+
+msgid "templates.gallery.delete_selected"
+msgstr "حذف المحدد"
+
+msgid "templates.gallery.empty_message"
+msgstr "أنشئ قالبك الأول لتجميع الإعدادات والخطوات والتكوينات المخصصة وإعادة استخدامها."
+
+msgid "templates.gallery.empty_title"
+msgstr "لا توجد قوالب بعد"
+
+msgid "templates.gallery.select"
+msgstr "تحديد"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "أمان مرتفع"
+
+msgid "templates.name.low"
+msgstr "أمان منخفض"
+
+msgid "templates.name.medium"
+msgstr "أمان متوسط"
+
+msgid "templates.name.ui"
+msgstr "واجهة الويب"
+
+msgid "templates.subtitle"
+msgstr "قوالب تكوين قابلة لإعادة الاستخدام لخدماتك — تجميع الإعدادات، والخطوات، والتكوينات المخصصة، ثم إنشاءها أو نسخها أو حذفها."
+
+msgid "templates.tag.config"
+msgstr "تكوين مخصص: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "ميزة مدمجة: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "الإضافة: %(name)s"
+
+msgid "templates.title"
+msgstr "قوالب الخدمات"
+
+msgid "theme.dark"
+msgstr "داكن"
+
+msgid "theme.light"
+msgstr "فاتح"
+
+msgid "threatmap.attacks_today"
+msgstr "هجمات اليوم"
+
+msgid "threatmap.countries"
+msgstr "بلدان المصدر"
+
+msgid "threatmap.disabled_help"
+msgstr "تقرأ خريطة التهديدات التقارير المخزَّنة نفسها التي تقرأها صفحة التقارير. اضبط METRICS_PERSIST_TO_DB على yes لبدء تسجيلها."
+
+msgid "threatmap.disabled_title"
+msgstr "حفظ التقارير معطَّل"
+
+msgid "threatmap.empty_help"
+msgstr "إمّا أنه لم يُحظر أي طلب خلال آخر 24 ساعة، أو أن التقارير لم تُجمع بعد."
+
+msgid "threatmap.empty_title"
+msgstr "لم يُحظر شيء في هذه المدة"
+
+msgid "threatmap.error_help"
+msgstr "تحتفظ الخريطة بآخر أرقام تمكّنت من تحميلها وستعيد المحاولة عند التحديث التالي."
+
+msgid "threatmap.error_title"
+msgstr "تعذَّر الوصول إلى خدمة المقاييس"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "إنهاء ملء الشاشة"
+
+msgid "threatmap.freshness"
+msgstr "تصل التقارير إلى قاعدة البيانات مرة كل دقيقة تقريبًا، لذا تتأخر الخريطة عن حركة المرور الفعلية بنحو دقيقة إلى دقيقتين."
+
+msgid "threatmap.fullscreen"
+msgstr "ملء الشاشة"
+
+msgid "threatmap.map_sub"
+msgstr "توضّح الأقواس بلد المصدر، لا موقعًا دقيقًا"
+
+msgid "threatmap.map_title"
+msgstr "مصدر حركة المرور المحظورة"
+
+msgid "threatmap.more_hidden"
+msgstr "أخرى غير معروضة"
+
+msgid "threatmap.not_localised"
+msgstr "غير محدَّد الموقع"
+
+msgid "threatmap.open_live"
+msgstr "عرض مباشر"
+
+msgid "threatmap.show_less"
+msgstr "عرض أفضل %(count)s فقط"
+
+msgid "threatmap.show_more"
+msgstr "عرض الكل (%(count)s)"
+
+msgid "threatmap.stale"
+msgstr "توقّفت هذه الأرقام عن التحديث. خدمة المقاييس لا تستجيب."
+
+msgid "threatmap.subtitle"
+msgstr "من أين جاءت حركة المرور التي حظرتها مثيلاتك خلال آخر 24 ساعة."
+
+msgid "threatmap.ticker_title"
+msgstr "أحداث مباشرة"
+
+msgid "threatmap.top_origins"
+msgstr "أبرز المصادر"
+
+msgid "threatmap.top_reason"
+msgstr "السبب الأبرز"
+
+msgid "threatmap.top_reasons"
+msgstr "أبرز الأسباب"
+
+msgid "threatmap.top_target"
+msgstr "الهدف الأبرز"
+
+msgid "threatmap.top_targets"
+msgstr "أبرز الأهداف"
+
+msgid "threatmap.updated"
+msgstr "آخر تحديث"
+
+msgid "timings.calls"
+msgstr "الاستدعاءات"
+
+msgid "timings.disabled_help"
+msgstr "اضبط METRICS_COLLECT_TIMINGS على yes لقياس مدة كل إضافة. تُجمع مدة الطلب كاملة في كل الأحوال."
+
+msgid "timings.disabled_title"
+msgstr "توقيتات الإضافات معطلة"
+
+msgid "timings.max"
+msgstr "الحد الأقصى"
+
+msgid "timings.max_request"
+msgstr "أبطأ طلب"
+
+msgid "timings.mean"
+msgstr "المتوسط"
+
+msgid "timings.mean_request"
+msgstr "متوسط الطلب"
+
+msgid "timings.partial"
+msgstr "لم تستجب بعض المثيلات. تشمل الأرقام أدناه المثيلات التي استجابت."
+
+msgid "timings.phase"
+msgstr "المرحلة"
+
+msgid "timings.phases"
+msgstr "مراحل الإضافات"
+
+msgid "timings.plugin"
+msgstr "الإضافة"
+
+msgid "timings.reporting_instances"
+msgstr "المثيلات التي ترسل التقارير"
+
+msgid "timings.requests_measured"
+msgstr "الطلبات المقيسة"
+
+msgid "timings.share"
+msgstr "الحصة"
+
+msgid "timings.share_help"
+msgstr "الحصة هي إجمالي وقت الإضافة من إجمالي وقت الطلب. المراحل التي لا تعمل مرة واحدة لكل طلب — بدء العامل والمؤقت في الخلفية وواجهة API الداخلية — لا حصة لها وتعرض شرطة."
+
+msgid "timings.subtitle"
+msgstr "المدة التي تستغرقها كل إضافة في كل مرحلة من الطلب، وتُقرأ مباشرة من كل مثيل ثم تُدمج."
+
+msgid "timings.total"
+msgstr "الإجمالي"
+
+msgid "timings.unreachable_help"
+msgstr "تُقرأ التوقيتات من المثيلات نفسها، لذلك لم يستجب أي منها — أو لم يعالج أي منها طلبًا بعد."
+
+msgid "timings.unreachable_title"
+msgstr "لم يبلغ أي مثيل عن توقيتات"
+
+msgid "timings.volatile"
+msgstr "توجد التوقيتات في الذاكرة المشتركة لكل مثيل وتُقرأ عند الطلب — ولا تُخزّن، وتُصفّر عند إعادة تشغيل المثيل."
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "إذا تم إزالة الخدمة أو إعادة تشغيلها، فسيتم فقد تكوين واجهة المستخدم الخاص بك."
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "هذا لأن طريقة الخدمة هي 'autoconf'، المصممة لمنع تعارضات التكوين."
+
+msgid "toast.ban_updated"
+msgstr "تم تحديث مدة الحظر بنجاح!"
+
+msgid "toast.body.ping_succeed"
+msgstr "المثيلات: %(instances)s"
+
+msgid "toast.copied"
+msgstr "تم النسخ!"
+
+msgid "toast.disclaimer_title"
+msgstr "إخلاء مسؤولية"
+
+msgid "toast.global_settings_applied_body"
+msgstr "تم جلب الإعدادات العامة وتطبيقها بنجاح على النموذج الحالي."
+
+msgid "toast.global_settings_applied_title"
+msgstr "تم تطبيق الإعدادات العامة"
+
+msgid "toast.global_settings_failed_body"
+msgstr "حدث خطأ أثناء جلب الإعدادات العامة."
+
+msgid "toast.global_settings_failed_title"
+msgstr "فشل جلب الإعدادات العامة"
+
+msgid "toast.header.ping_failed"
+msgstr "فشل اختبار الاتصال"
+
+msgid "toast.header.ping_succeed"
+msgstr "نجح اختبار الاتصال"
+
+msgid "toast.ip_unbanned"
+msgstr "تم رفع الحظر عن عنوان IP بنجاح!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "هل يجب طلب شهادة Let's Encrypt تلقائيًا."
+
+msgid "tooltip.button.ban_ip"
+msgstr "حظر عنوان الـIP هذا"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "تحويل التكوين %(name)s إلى مسودة"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "تحويل التكوين %(name)s إلى متصل"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "تحويل الخدمة %(name)s إلى مسودة"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "تحويل الخدمة %(name)s إلى متصل"
+
+msgid "tooltip.button.delete_config"
+msgstr "حذف التكوين المخصص %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "حذف ملف الذاكرة المؤقتة: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "حذف المثيل %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "حذف الإضافة %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "حذف الخدمة %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "حذف القالب %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "جدولة تحقق؛ يتم التنزيل فقط إذا كانت هناك تحديثات."
+
+msgid "tooltip.button.force_update"
+msgstr "يتجاوز عمليات التحقق ويفرض تنزيل إضافات PRO؛ يحافظ على الحالة الحالية عند الفشل."
+
+msgid "tooltip.button.ping_instance"
+msgstr "اختبار اتصال المثيل %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "إعادة تحميل المثيل %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "إعادة التعيين إلى القيمة الافتراضية"
+
+msgid "tooltip.button.reset_global"
+msgstr "إعادة التعيين إلى القيمة العامة"
+
+msgid "tooltip.button.run_job"
+msgstr "تشغيل المهمة %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "إظهار المحددة فقط"
+
+msgid "tooltip.button.stop_instance"
+msgstr "إيقاف المثيل %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "رفع الحظر عن %(ip)s"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "تحديث مدة الحظر"
+
+msgid "tooltip.button.value_from_global"
+msgstr "قيمة من الإعدادات العامة"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "لا يمكن حذف إدخال الحظر الأصلي."
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل."
+
+msgid "tooltip.certificate_priority"
+msgstr "اختر ما إذا كنت تريد إعطاء الأولوية للشهادة من مسار الملف أو من بيانات base64."
+
+msgid "tooltip.challenge_type"
+msgstr "نوع التحدي المطلوب استخدامه للتحقق من Let's Encrypt (http أو dns)."
+
+msgid "tooltip.collapse_multiline"
+msgstr "طي الإدخالات متعددة الأسطر (تتبعات الأخطاء، الحمولات)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "طي القيم متعددة الأسطر (الشهادات، المفاتيح)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "التكوينات المطبقة بعد تحميل إضافات OWASP Core Rule Set."
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "التكوينات المطبقة قبل تحميل إضافات OWASP Core Rule Set."
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "التكوينات على مستوى خادم Nginx، خصيصًا لكتلة 'الخادم الافتراضي'، المستخدمة عندما لا يتطابق طلب العميل مع أي اسم خادم مكون."
+
+msgid "tooltip.config_type.http"
+msgstr "التكوينات المطبقة عالميًا على مستوى HTTP في Nginx."
+
+msgid "tooltip.config_type.modsec"
+msgstr "تكوينات ModSecurity المطبقة بعد تحميل OWASP Core Rule Set، أو المستخدمة إذا لم يتم تحميل Core Rule Set."
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "تكوينات ModSecurity المطبقة قبل تحميل OWASP Core Rule Set."
+
+msgid "tooltip.config_type.server_http"
+msgstr "التكوينات المطبقة على مستوى خادم HTTP (المضيف الظاهري) في Nginx."
+
+msgid "tooltip.config_type.server_stream"
+msgstr "التكوينات المطبقة على مستوى خادم Stream في Nginx."
+
+msgid "tooltip.config_type.stream"
+msgstr "التكوينات المطبقة عالميًا على مستوى Stream في Nginx."
+
+msgid "tooltip.confirm_password_match"
+msgstr "يجب أن تتطابق كلمة مرور التأكيد مع كلمة المرور المدخلة أعلاه."
+
+msgid "tooltip.copied"
+msgstr "تم النسخ!"
+
+msgid "tooltip.copy_https_only"
+msgstr "ميزة النسخ متاحة فقط عبر HTTPS."
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "بيانات شهادة SSL المخصصة (تنسيق PEM أو Base64 المشفرة)."
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "المسار إلى ملف شهادة SSL المخصصة."
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "بيانات مفتاح SSL الخاص المخصص (تنسيق PEM أو Base64 المشفرة)."
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "المسار إلى ملف مفتاح SSL الخاص المخصص."
+
+msgid "tooltip.different_from_template"
+msgstr "القيمة تختلف عن القيمة الافتراضية للقالب"
+
+msgid "tooltip.disabled_by_method"
+msgstr "معطل: مُدار عبر الطريقة '%(method)s'."
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "معطل: قاعدة البيانات في وضع القراءة فقط."
+
+msgid "tooltip.disabled_draft"
+msgstr "معطل: الخدمة في وضع المسودة."
+
+msgid "tooltip.disabled_readonly"
+msgstr "معطل: وضع القراءة فقط نشط."
+
+msgid "tooltip.dns_check_url"
+msgstr "إذا أظهرت الصفحة 'ok'، فمن المحتمل أن يكون اسم الخادم متاحًا."
+
+msgid "tooltip.dns_credential_items"
+msgstr "بيانات اعتماد مزود DNS، المستخدمة لتحديات DNS (مثل 'cloudflare_api_token=123456'). يعتمد التنسيق المطلوب على المزود."
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "بيانات الاعتماد قابلة للتطبيق فقط لتحديات DNS."
+
+msgid "tooltip.dns_propagation"
+msgstr "الوقت (بالثواني) للانتظار حتى تنتشر تغييرات DNS أثناء تحديات DNS."
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "تأخير انتشار DNS قابل للتطبيق فقط لتحديات DNS."
+
+msgid "tooltip.dns_provider"
+msgstr "مزود DNS المطلوب استخدامه لتحديات DNS الخاصة بـ Let's Encrypt."
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "اختيار مزود DNS قابل للتطبيق فقط لتحديات DNS."
+
+msgid "tooltip.download_file"
+msgstr "تنزيل الملف"
+
+msgid "tooltip.download_log"
+msgstr "تنزيل ملف السجل هذا"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "يمكن تبديل وضع المسودة فقط للخدمات التي تم إنشاؤها عبر واجهة المستخدم."
+
+msgid "tooltip.email_length"
+msgstr "يجب أن يكون البريد الإلكتروني بين 1 و 256 حرفًا."
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "عنوان البريد الإلكتروني المطلوب تسجيله لدى Let's Encrypt لإدارة الشهادات والإشعارات."
+
+msgid "tooltip.fetch_global_settings"
+msgstr "جلب الإعدادات العامة وتطبيقها على القالب الحالي"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "وضع المتابعة متاح فقط في الصفحة الأحدث"
+
+msgid "tooltip.global_settings_source"
+msgstr "القيمة موروثة من الإعدادات العامة."
+
+msgid "tooltip.instance_not_up"
+msgstr "المثيل %(hostname)s لا يستجيب حاليًا ('up')."
+
+msgid "tooltip.issue_count"
+msgstr "الأخطاء والتحذيرات في هذا العرض"
+
+msgid "tooltip.latest_version_installed"
+msgstr "أنت تستخدم أحدث إصدار."
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile')."
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "تعطيل طلبات الشهادات للنطاقات التي تطابق قائمة Public Suffix List (موصى به)."
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "ملف التعريف الذي سيتم استخدامه لـ Let's Encrypt (classic، tlsserver، shortlived)."
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "اختر موفر الشهادات لعرض الإعدادات الخاصة بكل موفر."
+
+msgid "tooltip.license_key"
+msgstr "مفتاح ترخيص BunkerWeb PRO الخاص بك."
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "الوصول إلى صفحة %(name)s"
+
+msgid "tooltip.link.access_service"
+msgstr "الوصول إلى الخدمة %(name)s"
+
+msgid "tooltip.link.clone_config"
+msgstr "استنساخ التكوين المخصص %(name)s"
+
+msgid "tooltip.link.clone_service"
+msgstr "استنساخ الخدمة %(name)s"
+
+msgid "tooltip.link.clone_template"
+msgstr "استنساخ القالب %(template)s"
+
+msgid "tooltip.link.download_file"
+msgstr "تنزيل %(filename)s"
+
+msgid "tooltip.link.edit_config"
+msgstr "تحرير التكوين المخصص %(name)s"
+
+msgid "tooltip.link.edit_service"
+msgstr "تحرير الخدمة %(service)s"
+
+msgid "tooltip.link.edit_template"
+msgstr "تحرير القالب %(template)s"
+
+msgid "tooltip.link.export_config"
+msgstr "تصدير التكوين المخصص %(name)s"
+
+msgid "tooltip.link.export_service"
+msgstr "تصدير تكوين الخدمة %(service)s"
+
+msgid "tooltip.link.manage_activation"
+msgstr "إدارة تفعيل %(name)s في الإعدادات العامة"
+
+msgid "tooltip.link.view_config"
+msgstr "عرض التكوين المخصص %(name)s"
+
+msgid "tooltip.link.view_file"
+msgstr "عرض %(filename)s"
+
+msgid "tooltip.link.view_service"
+msgstr "عرض الخدمة %(service)s"
+
+msgid "tooltip.link.view_template"
+msgstr "عرض القالب %(template)s"
+
+msgid "tooltip.local_time"
+msgstr "عرض الطوابع الزمنية بتوقيتك المحلي"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "URL كامل"
+
+msgid "tooltip.multisite_setting"
+msgstr "هذا إعداد متعدد المواقع، يؤثر على خدمات متعددة إذا تم تعريفه عالميًا."
+
+msgid "tooltip.new_version_available"
+msgstr "يتوفر إصدار جديد!"
+
+msgid "tooltip.next_issue"
+msgstr "الانتقال إلى الخطأ أو التحذير التالي"
+
+msgid "tooltip.no_cache"
+msgstr "لم يتم العثور على ملفات ذاكرة مؤقتة لهذه المهمة."
+
+msgid "tooltip.no_history"
+msgstr "لم يتم العثور على سجل تنفيذ لهذه المهمة."
+
+msgid "tooltip.no_log_files"
+msgstr "لا توجد ملفات سجل متاحة."
+
+msgid "tooltip.no_page_available"
+msgstr "لا توجد صفحة مخصصة متاحة لهذه الإضافة."
+
+msgid "tooltip.password_requirements"
+msgstr "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل وأن تتضمن حرفًا كبيرًا واحدًا ورقمًا واحدًا وحرفًا خاصًا واحدًا."
+
+msgid "tooltip.prev_issue"
+msgstr "الانتقال إلى الخطأ أو التحذير السابق"
+
+msgid "tooltip.pro_feature"
+msgstr "هذه ميزة PRO."
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "معطل: قاعدة البيانات في وضع القراءة فقط."
+
+msgid "tooltip.readonly_mode"
+msgstr "هذه العملية غير مسموح بها في وضع القراءة فقط."
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "معطل: حسابك للقراءة فقط، الإجراء '%(action)s' معطل."
+
+msgid "tooltip.real_ip_from"
+msgstr "قائمة عناوين IP / الشبكات الموثوقة، مفصولة بمسافات، التي تأتي منها الطلبات الوكيلة."
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "قائمة عناوين URL التي تحتوي على عناوين IP / شبكات موثوقة، مفصولة بمسافات، التي تأتي منها الطلبات الوكيلة. تدعم أيضًا عناوين URL file:// والمصادقة الأساسية باستخدام مخطط http://user:pass@url."
+
+msgid "tooltip.real_ip_header"
+msgstr "رأس HTTP الذي يحتوي على IP الحقيقي أو القيمة الخاصة proxy_protocol لبروتوكول PROXY."
+
+msgid "tooltip.real_ip_recursive"
+msgstr "إجراء بحث متكرر في رأس حاوية عنوان IP."
+
+msgid "tooltip.remove_ban_entry"
+msgstr "إزالة إدخال الحظر هذا من القائمة."
+
+msgid "tooltip.reset_template_settings"
+msgstr "إعادة تعيين جميع الإعدادات في عرض القالب الحالي إلى قيمها الافتراضية."
+
+msgid "tooltip.search_logs"
+msgstr "البحث في السجلات (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "اختر ملفًا لتمكين وضع المتابعة"
+
+msgid "tooltip.server_name"
+msgstr "اسم النطاق الأساسي أو اسم الخادم لهذه الخدمة."
+
+msgid "tooltip.stream_support.no"
+msgstr "لا يدعم وضع STREAM."
+
+msgid "tooltip.stream_support.partial"
+msgstr "يدعم وضع STREAM جزئيًا."
+
+msgid "tooltip.stream_support.yes"
+msgstr "يدعم وضع STREAM."
+
+msgid "tooltip.table.bans.actions"
+msgstr "الإجراءات المتاحة لهذا الحظر"
+
+msgid "tooltip.table.bans.country"
+msgstr "بلد عنوان IP المحظور"
+
+msgid "tooltip.table.bans.date"
+msgstr "تاريخ ووقت إنشاء الحظر"
+
+msgid "tooltip.table.bans.details"
+msgstr "إظهار تفاصيل الحظر"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "تاريخ ووقت انتهاء الحظر"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "عنوان IP المحظور"
+
+msgid "tooltip.table.bans.reason"
+msgstr "سبب الحظر"
+
+msgid "tooltip.table.bans.scope"
+msgstr "نطاق الحظر (عام أو خاص بالخدمة)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "تحديد كل الحظر"
+
+msgid "tooltip.table.bans.service"
+msgstr "الخدمة التي نشأ منها الحظر (إذا كان النطاق خاصًا بالخدمة)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "الوقت المتبقي حتى انتهاء الحظر"
+
+msgid "tooltip.table.cache.actions"
+msgstr "الإجراءات المتاحة لملف الذاكرة المؤقتة هذا"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "Checksum لملف الذاكرة المؤقتة"
+
+msgid "tooltip.table.cache.details"
+msgstr "إظهار تفاصيل ملف الذاكرة المؤقتة"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "اسم ملف الذاكرة المؤقتة"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "المهمة التي أنشأت ملف الذاكرة المؤقتة هذا"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "تاريخ ووقت آخر تحديث لملف الذاكرة المؤقتة"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "الإضافة المرتبطة بالمهمة التي أنشأت ملف الذاكرة المؤقتة هذا"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "حدد جميع ملفات الذاكرة المؤقتة"
+
+msgid "tooltip.table.cache.service"
+msgstr "الخدمة المرتبطة بملف الذاكرة المؤقتة هذا (أو عام)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "الإجراءات المتاحة لهذا التكوين المخصص"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "Checksum لمحتوى التكوين المخصص"
+
+msgid "tooltip.table.configs.details"
+msgstr "إظهار تفاصيل التكوين المخصص"
+
+msgid "tooltip.table.configs.method"
+msgstr "طريقة إنشاء التكوين المخصص (مثل ui, file)"
+
+msgid "tooltip.table.configs.name"
+msgstr "اسم التكوين المخصص"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "تحديد كل التكوينات المخصصة"
+
+msgid "tooltip.table.configs.service"
+msgstr "الخدمة المرتبطة بالتكوين المخصص (أو عام)"
+
+msgid "tooltip.table.configs.status"
+msgstr "حالة مسودة التكوين المخصص"
+
+msgid "tooltip.table.configs.template"
+msgstr "يشير إلى ما إذا كان التكوين المخصص يأتي من قالب"
+
+msgid "tooltip.table.configs.type"
+msgstr "نوع أو سياق التكوين المخصص (مثل HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "الإجراءات المتاحة لهذا المثيل"
+
+msgid "tooltip.table.instances.created"
+msgstr "تاريخ ووقت تسجيل المثيل لأول مرة"
+
+msgid "tooltip.table.instances.details"
+msgstr "إظهار تفاصيل المثيل"
+
+msgid "tooltip.table.instances.health"
+msgstr "حالة صحة المثيل (قيد التشغيل، متوقف، قيد التحميل)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "اسم المضيف أو URL للمثيل"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "تاريخ ووقت آخر مشاهدة للمثيل"
+
+msgid "tooltip.table.instances.method"
+msgstr "طريقة إنشاء المثيل (مثل ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "اسم المثيل المعرف من قبل المستخدم أو الذي تم إنشاؤه تلقائيًا"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "تحديد كل المثيلات"
+
+msgid "tooltip.table.instances.type"
+msgstr "نوع المثيل (مثل حاوية، ثابت)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "الإجراءات المتاحة لهذه المهمة"
+
+msgid "tooltip.table.jobs.async"
+msgstr "يشير إلى ما إذا كانت المهمة تعمل بشكل غير متزامن"
+
+msgid "tooltip.table.jobs.details"
+msgstr "إظهار تفاصيل المهمة"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "تردد تنفيذ المهمة"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "حالة آخر تنفيذ للمهمة (نجاح/فشل)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "اسم المهمة"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "الإضافة المرتبطة بالمهمة"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "يشير إلى ما إذا كانت المهمة تؤدي إلى إعادة تحميل BunkerWeb"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "تحديد كل المهام"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "الإجراءات المتاحة لهذه الإضافة"
+
+msgid "tooltip.table.plugins.description"
+msgstr "وصف الإضافة"
+
+msgid "tooltip.table.plugins.details"
+msgstr "إظهار تفاصيل الإضافة"
+
+msgid "tooltip.table.plugins.id"
+msgstr "معرف فريد للإضافة"
+
+msgid "tooltip.table.plugins.method"
+msgstr "طريقة إنشاء الإضافة (مثل ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "اسم الإضافة"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "تحديد كل الإضافات"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "يشير إلى ما إذا كانت الإضافة تدعم وضع البث"
+
+msgid "tooltip.table.plugins.type"
+msgstr "نوع الإضافة (أساسي، خارجي، Pro، UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "إصدار الإضافة"
+
+msgid "tooltip.table.reports.actions"
+msgstr "الإجراءات المتاحة لهذا التقرير"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "البث فقط: البايتات المستلمة من العميل خلال الجلسة"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "البث فقط: البايتات المرسلة إلى العميل خلال الجلسة"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "البث فقط: منفذ المصدر للعميل"
+
+msgid "tooltip.table.reports.country"
+msgstr "البلد المرتبط بعنوان IP المبلغ عنه"
+
+msgid "tooltip.table.reports.data"
+msgstr "بيانات إضافية متعلقة بالتقرير"
+
+msgid "tooltip.table.reports.date"
+msgstr "تاريخ ووقت إنشاء التقرير"
+
+msgid "tooltip.table.reports.details"
+msgstr "إظهار تفاصيل التقرير"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "عنوان IP الذي أدى إلى التقرير"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "البث فقط: المنفذ الذي وصلت عليه الجلسة"
+
+msgid "tooltip.table.reports.method"
+msgstr "طريقة HTTP للطلب المبلغ عنه"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "طلب HTTP أو جلسة بث TCP/UDP"
+
+msgid "tooltip.table.reports.reason"
+msgstr "سبب إنشاء التقرير"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "المعرف الفريد للطلب"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "وضع الأمان النشط عند إنشاء التقرير"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "تحديد كل التقارير"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "اسم الخادم (vhost) الذي أنشأ التقرير"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "البث فقط: مدة الجلسة بالثواني"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "رمز حالة HTTP الذي تم إرجاعه للطلب المبلغ عنه"
+
+msgid "tooltip.table.reports.url"
+msgstr "URL المستهدف في الطلب المبلغ عنه"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "سلسلة User-Agent من الطلب المبلغ عنه"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "يرجى تحديد صف واحد أو أكثر لتنفيذ إجراء."
+
+msgid "tooltip.table.services.actions"
+msgstr "الإجراءات المتاحة لهذه الخدمة"
+
+msgid "tooltip.table.services.created"
+msgstr "تاريخ ووقت إنشاء الخدمة"
+
+msgid "tooltip.table.services.details"
+msgstr "إظهار تفاصيل الخدمة"
+
+msgid "tooltip.table.services.last_update"
+msgstr "تاريخ ووقت آخر تحديث للخدمة"
+
+msgid "tooltip.table.services.method"
+msgstr "طريقة إنشاء الخدمة (مثل ui, file)"
+
+msgid "tooltip.table.services.name"
+msgstr "اسم الخدمة"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "وضع الأمان للخدمة (حظر أو اكتشاف)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "تحديد كل الخدمات"
+
+msgid "tooltip.table.services.template"
+msgstr "القالب المستخدم بواسطة الخدمة"
+
+msgid "tooltip.table.services.type"
+msgstr "نوع الخدمة (متصل/مسودة)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "الإجراءات المتاحة لهذا القالب"
+
+msgid "tooltip.table.templates.configs"
+msgstr "عدد تكوينات القالب"
+
+msgid "tooltip.table.templates.created"
+msgstr "تاريخ إنشاء القالب"
+
+msgid "tooltip.table.templates.details"
+msgstr "عرض تفاصيل القالب"
+
+msgid "tooltip.table.templates.id"
+msgstr "معرّف القالب"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "تاريخ آخر تحديث للقالب"
+
+msgid "tooltip.table.templates.method"
+msgstr "طريقة إنشاء القالب"
+
+msgid "tooltip.table.templates.name"
+msgstr "اسم القالب المُعرّف من المستخدم أو المُنشأ تلقائيًا"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "الإضافة التي تحتوي على القالب"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "تحديد كل القوالب"
+
+msgid "tooltip.table.templates.settings"
+msgstr "عدد إعدادات القالب"
+
+msgid "tooltip.table.templates.steps"
+msgstr "عدد خطوات القالب"
+
+msgid "tooltip.toggle_level"
+msgstr "إظهار / إخفاء أسطر %(level)s"
+
+msgid "tooltip.toggle_wrap"
+msgstr "تبديل التفاف الأسطر"
+
+msgid "tooltip.ui_host"
+msgstr "اسم المضيف أو عنوان IP الذي سيخدم واجهة مستخدم BunkerWeb عبر الوكيل العكسي."
+
+msgid "tooltip.ui_url"
+msgstr "مسار URL المستخدم للوصول إلى واجهة مستخدم BunkerWeb عبر الوكيل العكسي."
+
+msgid "tooltip.ui_url_security"
+msgstr "استخدام مسار URL غير قياسي وصعب التخمين يعزز الأمان."
+
+msgid "tooltip.use_custom_ssl"
+msgstr "هل يجب استخدام شهادة SSL مخصصة بدلاً من Let's Encrypt."
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "هل يجب استخدام بيئة Let's Encrypt staging للاختبار (تنشئ شهادات غير موثوقة)."
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "بيئة Let's Encrypt Staging متاحة فقط عند استخدام خادم Let's Encrypt."
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "تمكين اتصال بروتوكول PROXY."
+
+msgid "tooltip.use_real_ip"
+msgstr "استخدام IP الحقيقي"
+
+msgid "tooltip.username_length"
+msgstr "يجب أن يتراوح طول اسم المستخدم بين 1 و 256 حرفًا."
+
+msgid "tooltip.value_from_global"
+msgstr "القيمة من الإعدادات العامة"
+
+msgid "tooltip.view_full_url"
+msgstr "انقر لعرض URL الكامل"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS."
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS."
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL."
+
+msgid "tooltip.zerossl_api_key"
+msgstr "مفتاح API اختياري لـ ZeroSSL يستخدمه zerossl-bot."
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة)."
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL."
+
+msgid "totp.cant_access"
+msgstr "هل لا يمكنك الوصول إلى رمز المصادقة الخاص بك؟"
+
+msgid "totp.or_use_security_key"
+msgstr "أو استخدم مفتاح الأمان"
+
+msgid "totp.prompt"
+msgstr "يرجى إدخال رمز TOTP الخاص بك."
+
+msgid "totp.signing_in"
+msgstr "تسجيل الدخول إلى BunkerWeb"
+
+msgid "totp.subtitle"
+msgstr "أدخل الرمز من تطبيق المصادقة الخاص بك."
+
+msgid "totp.subtitle_security_key"
+msgstr "أكّد هويتك باستخدام مفتاح الأمان."
+
+msgid "totp.title"
+msgstr "مفتاح ثنائي"
+
+msgid "upstreams.add_server"
+msgstr "أضف الخادم"
+
+msgid "upstreams.all"
+msgstr "الكل"
+
+msgid "upstreams.attach"
+msgstr "ربط"
+
+msgid "upstreams.attach_copy"
+msgstr "أضف %(name)s (%(servers)s) إلى خدمة واحدة أو أكثر."
+
+msgid "upstreams.backend_ssl"
+msgstr "تحدث TLS مع الخوادم (https:// / grpcs://)"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "تجزئة IP — نفس العميل، نفس الواجهة الخلفية"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "أقل عدد من الاتصالات"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "دورة (افتراضي)"
+
+msgid "upstreams.create"
+msgstr "إنشاء واجهة خلفية"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "حذف هذه الواجهة الخلفية؟"
+
+msgid "upstreams.delete_copy"
+msgstr "حذف الواجهة الخلفية %(name)s؟"
+
+msgid "upstreams.delete_help"
+msgstr "لا يمكن حذف الواجهة الخلفية المرتبطة بخدمة إذا كانت لا تزال مرتبطة. قم بفصلها أولاً."
+
+msgid "upstreams.edit"
+msgstr "تحرير الواجهة الخلفية"
+
+msgid "upstreams.edit_shared"
+msgstr "مجموعة الخوادم الخلفية هذه مرتبطة بـ %(count)s من الخدمات: %(services)s. سيؤدي الحفظ إلى تغييرها جميعًا."
+
+msgid "upstreams.empty_text"
+msgstr "الواجهة الخلفية هي مجموعة مُسمَّاة من الواجهات الخلفية التي تقوم بإرفاقها بخدمة واحدة أو أكثر على مسار الوكيل العكسي. تظل إعدادات REVERSE_PROXY_HOST قيد التشغيل جنبًا إلى جنب معها."
+
+msgid "upstreams.empty_title"
+msgstr "لا توجد واجهات خلفية بعد"
+
+msgid "upstreams.keepalive"
+msgstr "الحفاظ على الاتصال"
+
+msgid "upstreams.keepalive_help"
+msgstr "الاتصالات الخاملة لكل عامل. HTTP و gRPC فقط؛ اتركها فارغة لتعطيلها."
+
+msgid "upstreams.match_path"
+msgstr "مسار الوكيل العكسي"
+
+msgid "upstreams.match_path_help"
+msgstr "الموقع الذي تقوم به الخدمات المحددة بالوكيل إلى هذه المجموعة. يتم تجاهله لمجموعة التدفق، والتي تأخذ الخدمة بأكملها."
+
+msgid "upstreams.method"
+msgstr "توزيع التحميل"
+
+msgid "upstreams.name_help"
+msgstr "يسمح فقط بالأحرف، الأرقام، الشرطات، وعلامات الشرطة السفلية. لا يُسمح باستخدام النقاط، لذلك لا يمكن أن يطغى اسم المجموعة على المضيف الحقيقي."
+
+msgid "upstreams.new"
+msgstr "مجموعة جديدة"
+
+msgid "upstreams.not_attached"
+msgstr "غير متصل"
+
+msgid "upstreams.protocol"
+msgstr "البروتوكول"
+
+msgid "upstreams.protocol_help"
+msgstr "مجموعات HTTP و gRPC متصلة بمسار؛ تأخذ مجموعة التدفق السيطرة على خدمة TCP/UDP بأكملها."
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "تدفق (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص مجموعات الخوادم الخلفية، ولكن لا يمكن تغييرها."
+
+msgid "upstreams.role.backup"
+msgstr "نسخ احتياطي"
+
+msgid "upstreams.role.down"
+msgstr "متوقف"
+
+msgid "upstreams.role.primary"
+msgstr "رئيسي"
+
+msgid "upstreams.save"
+msgstr "حفظ مجموعة الخوادم الخلفية"
+
+msgid "upstreams.search"
+msgstr "ابحث عن الاسم، الوصف، أو الخادم..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "مهلة الفشل"
+
+msgid "upstreams.server_host"
+msgstr "الخادم"
+
+msgid "upstreams.server_max_fails"
+msgstr "أقصى عدد من الفشل"
+
+msgid "upstreams.server_role"
+msgstr "الدور"
+
+msgid "upstreams.server_weight"
+msgstr "الوزن"
+
+msgid "upstreams.servers"
+msgstr "الخوادم"
+
+msgid "upstreams.services_help"
+msgstr "استخدم Ctrl أو Command لتحديد خدمات متعددة. يمكن توصيل الموجه لاحقًا."
+
+msgid "upstreams.services_hidden"
+msgstr "%(count)s من الخدمات مخفية: لا يمكن ربط مجموعة %(protocol)s إلا بخدمة مطابقة."
+
+msgid "upstreams.truncated"
+msgstr "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة."
+
+msgid "validation.default_field_name"
+msgstr "هذا الحقل"
+
+msgid "validation.invalid_date"
+msgstr "تاريخ غير صالح"
+
+msgid "validation.ip_global_duplicate"
+msgstr "عنوان IP هذا محظور عالميًا بالفعل."
+
+msgid "validation.ip_invalid"
+msgstr "تنسيق عنوان IP غير صالح."
+
+msgid "validation.ip_required"
+msgstr "عنوان IP مطلوب."
+
+msgid "validation.ip_service_duplicate"
+msgstr "عنوان IP هذا محظور بالفعل للخدمة المحددة (%(service)s)."
+
+msgid "validation.pattern"
+msgstr "يرجى إدخال قيمة صالحة لـ %(field)s."
+
+msgid "validation.required"
+msgstr "%(field)s مطلوب."
+
+msgid "validation.service_required_for_ban"
+msgstr "يجب تحديد خدمة لحظر خاص بالخدمة."
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
+
+msgid "web_cache.available"
+msgstr "متاح"
+
+msgid "web_cache.cache_state"
+msgstr "الحالة"
+
+msgid "web_cache.cached_files"
+msgstr "ملفات مخزنة مؤقتًا"
+
+msgid "web_cache.deployment"
+msgstr "النشر"
+
+msgid "web_cache.disabled"
+msgstr "معطل"
+
+msgid "web_cache.disk_usage"
+msgstr "استخدام القرص"
+
+msgid "web_cache.empty"
+msgstr "فارغ"
+
+msgid "web_cache.enabled"
+msgstr "مُمكَّن"
+
+msgid "web_cache.enabled_instances"
+msgstr "تم تمكين التخزين المؤقت"
+
+msgid "web_cache.enabled_services"
+msgstr "الخدمات الممكنة"
+
+msgid "web_cache.error"
+msgstr "خطأ"
+
+msgid "web_cache.hit_rate"
+msgstr "معدل النجاح"
+
+msgid "web_cache.instance"
+msgstr "مثيل"
+
+msgid "web_cache.metrics"
+msgstr "توزيع التوزيع الصحيح / الخاطئ"
+
+msgid "web_cache.metrics_scope"
+msgstr "يتم تجميع العدادات لكل مثيل عبر جميع الخدمات التي تم تمكين التخزين المؤقت لها."
+
+msgid "web_cache.not_reporting"
+msgstr "غير مُبلغ"
+
+msgid "web_cache.path"
+msgstr "المسار"
+
+msgid "web_cache.purge"
+msgstr "مسح الاستجابات المخزنة مؤقتًا"
+
+msgid "web_cache.purge_all"
+msgstr "مسح الكل"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "هذا يحذف كل استجابة مخزنة لكل خدمة على كل مثيل يمكن الوصول إليه. لا يمكن التراجع عن ذلك."
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "مسح ذاكرة التخزين المؤقت بالكامل؟"
+
+msgid "web_cache.purge_help"
+msgstr "تنفيذ الإجراءات على الفور على المثيلات القابلة للوصول. يتم تخطي المثيلات غير القابلة للوصول ولا يتم جدولة أي إجراء."
+
+msgid "web_cache.purge_key"
+msgstr "مفتاح ذاكرة التخزين المؤقت الفعال"
+
+msgid "web_cache.purge_key_help"
+msgstr "اترك مفتاح ذاكرة التخزين المؤقت فارغًا فقط لـ $scheme$host$request_uri الافتراضي. إذا قامت الخدمة بتجاوز PROXY_CACHE_KEY، فانسخ قيمته الفعالة هنا؛ يتم رفض المتغيرات المحددة فقط غير المدعومة بدلاً من مسح إدخال مختلف."
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "PROXY_CACHE_KEY الفعال (اختياري)"
+
+msgid "web_cache.purge_url"
+msgstr "مسح عنوان URL"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "المثيلات التي ترسل التقارير"
+
+msgid "web_cache.service"
+msgstr "الخدمة"
+
+msgid "web_cache.services"
+msgstr "تمكين الخدمة"
+
+msgid "web_cache.status"
+msgstr "تخزين المثيل"
+
+msgid "web_cache.subtitle"
+msgstr "حالة ذاكرة التخزين المؤقت لـ Reverse-proxy، مقاييس معدل الضربة الإجمالية والتحكم في المسح الفوري."
+
+msgid "whatsnew.missing_action"
+msgstr "افتح سجل التغييرات على GitHub"
+
+msgid "whatsnew.missing_message"
+msgstr "لم يُضمَّن CHANGELOG.md في هذه النسخة. ملاحظات الإصدار متاحة على GitHub."
+
+msgid "whatsnew.missing_title"
+msgstr "لا يوجد سجل تغييرات في هذا التثبيت"
+
+msgid "whatsnew.modal.intro"
+msgstr "إليك ما تغيّر منذ الإصدار الذي كنت تستخدمه."
+
+msgid "whatsnew.modal.title"
+msgstr "ما الجديد"
+
+msgid "whatsnew.subtitle"
+msgstr "جميع إصدارات BunkerWeb، الأحدث أولاً، مأخوذة مباشرة من سجل التغييرات المرفق بهذا التثبيت."
+
+msgid "workflows.act_block"
+msgstr "حظر"
+
+msgid "workflows.act_challenge"
+msgstr "اختبار تحقق"
+
+msgid "workflows.act_code"
+msgstr "رمز الحالة"
+
+msgid "workflows.act_denyDefault"
+msgstr "حالة الرفض الخاصة بالمثيل"
+
+msgid "workflows.act_denyShort"
+msgstr "حالة الرفض"
+
+msgid "workflows.act_provider"
+msgstr "موفر مكافحة الروبوتات"
+
+msgid "workflows.act_redirect"
+msgstr "إعادة توجيه"
+
+msgid "workflows.act_status"
+msgstr "حالة الرفض"
+
+msgid "workflows.act_terminal"
+msgstr "إجراء واحد لكل قاعدة، وينهي التقييم؛ فلا يوجد مسار صواب أو خطأ يخرج من القاعدة."
+
+msgid "workflows.act_url"
+msgstr "عنوان URL للوجهة"
+
+msgid "workflows.action"
+msgstr "ثم"
+
+msgid "workflows.add_rule"
+msgstr "أضف قاعدة"
+
+msgid "workflows.all"
+msgstr "الكل"
+
+msgid "workflows.aria.collapse"
+msgstr "طي"
+
+msgid "workflows.aria.combinator"
+msgstr "تغيير عامل الربط، الحالي"
+
+msgid "workflows.aria.conditionType"
+msgstr "نوع الشرط"
+
+msgid "workflows.aria.denyStatus"
+msgstr "حالة الرفض"
+
+msgid "workflows.aria.drag"
+msgstr "اسحب لإعادة الترتيب"
+
+msgid "workflows.aria.expand"
+msgstr "توسيع"
+
+msgid "workflows.aria.groupKind"
+msgstr "نوع المجموعة"
+
+msgid "workflows.aria.insertAt"
+msgstr "أضف قاعدة في الموضع %(n)s"
+
+msgid "workflows.aria.more"
+msgstr "المزيد"
+
+msgid "workflows.aria.moveDown"
+msgstr "نقل لأسفل — يعمل لاحقًا"
+
+msgid "workflows.aria.moveRule"
+msgstr "نقل القاعدة"
+
+msgid "workflows.aria.moveUp"
+msgstr "نقل لأعلى — يعمل مبكرًا"
+
+msgid "workflows.aria.openRule"
+msgstr "افتح القاعدة %(n)s"
+
+msgid "workflows.aria.provider"
+msgstr "موفر مكافحة الروبوتات"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "حالة إعادة التوجيه"
+
+msgid "workflows.aria.removeCondition"
+msgstr "إزالة الشرط"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "إزالة الحد"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "إزالة حد المعدل"
+
+msgid "workflows.aria.removeValue"
+msgstr "إزالة القيمة"
+
+msgid "workflows.aria.requestCount"
+msgstr "عدد الطلبات"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "مجموعة الموارد"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "مشاكل التحقق من القاعدة %(count)s"
+
+msgid "workflows.aria.ruleName"
+msgstr "اسم القاعدة %(n)s"
+
+msgid "workflows.aria.terminalAction"
+msgstr "الإجراء النهائي"
+
+msgid "workflows.aria.uriMatch"
+msgstr "وضع مطابقة URI"
+
+msgid "workflows.aria.uriValue"
+msgstr "قيمة URI"
+
+msgid "workflows.aria.window"
+msgstr "النافذة بالثواني"
+
+msgid "workflows.attach"
+msgstr "إرفاق بالخدمات"
+
+msgid "workflows.attach_help"
+msgstr "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها."
+
+msgid "workflows.attached_notice"
+msgstr "سيؤدي الحفظ إلى تطبيق هذه القواعد على %(count)s من الخدمات المرفقة."
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "من اليسار إلى اليمين. القاعدة الأولى هي التي تفوز."
+
+msgid "workflows.canvas.auxList"
+msgstr "من الأعلى إلى الأسفل. القاعدة الأولى هي التي تفوز."
+
+msgid "workflows.canvas.close"
+msgstr "إغلاق"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "تنفذ في الموضع %(n)s من %(total)s"
+
+msgid "workflows.canvas.dropHint"
+msgstr "ضع لإعطاء الأولوية — مكان القاعدة في السلسلة هو الشيء الوحيد الذي يمكن أن يعني"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "مسار عمل بدون قواعد لا يغير شيئًا — يمر كل طلب مباشرة إلى المسار العمل التالي المرتبط."
+
+msgid "workflows.canvas.emptyCta"
+msgstr "أضف القاعدة الأولى"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "لا توجد قواعد حتى الآن"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "تُنفذ القواعد من اليسار إلى اليمين."
+
+msgid "workflows.canvas.entry_title"
+msgstr "كل طلب"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "يستمر في المسار التالي المرفق."
+
+msgid "workflows.canvas.exit_title"
+msgstr "لم تتطابق أي قاعدة"
+
+msgid "workflows.canvas.fit"
+msgstr "لتناسب العرض"
+
+msgid "workflows.canvas.gateTip"
+msgstr "بوابة مطابقة وليست إجراءً: إذا كانت القيمة دون الحد، فلن تتطابق القاعدة وستُقيّم القاعدة التالية."
+
+msgid "workflows.canvas.hint"
+msgstr "اسحب عقدة لإعادة الترتيب · اسحب اللوحة للتحريك · استخدم Alt + ← / → على العقدة المحددة"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "للقراءة فقط — حرّك العرض للتجوّل؛ لا يمكن تغيير الترتيب."
+
+msgid "workflows.canvas.insert"
+msgstr "أضف قاعدة هنا"
+
+msgid "workflows.canvas.open"
+msgstr "افتح القاعدة"
+
+msgid "workflows.canvas.skipped"
+msgstr "معطل — يتم تخطيه بالكامل، كما لو لم يكن في السلسلة."
+
+msgid "workflows.canvas.stopTail"
+msgstr "، يتوقف التقييم هنا — لا توجد قاعدة بعد ذلك."
+
+msgid "workflows.canvas.title"
+msgstr "ترتيب القواعد"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "تكبير"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "تصغير"
+
+msgid "workflows.capacity"
+msgstr "%(count)s من %(maxRules)s قاعدة · أكبر قاعدة تستخدم %(worst)s من %(maxPredicates)s شرطًا · %(regexes)s تعبيرًا نمطيًا في سير العمل هذا"
+
+msgid "workflows.clone"
+msgstr "نسخ سير العمل"
+
+msgid "workflows.clone_help"
+msgstr "يتم نسخ القواعد، ولكن ليس إرفاق الخدمات."
+
+msgid "workflows.clone_name"
+msgstr "اسم النسخة"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "هل تريد حذف هذه القاعدة؟ ستتحرك كل القواعد أسفلها موضعًا واحدًا إلى أعلى."
+
+msgid "workflows.copySuffix"
+msgstr " (نسخة)"
+
+msgid "workflows.delete"
+msgstr "حذف سير العمل"
+
+msgid "workflows.delete_confirm"
+msgstr "سيتم حذف هذا سير العمل وجميع قواعده بشكل دائم."
+
+msgid "workflows.empty_text"
+msgstr "سير العمل هو قائمة مرتبة من القواعد التي تقوم بإرفاقها بالخدمات: شجرة شروط، وقيمة عتبة اختيارية، وإجراء واحد - تحدي، حظر أو إعادة توجيه."
+
+msgid "workflows.empty_title"
+msgstr "لا توجد سير عمل حتى الآن"
+
+msgid "workflows.entry_sub"
+msgstr "تعمل مسارات العمل بترتيب الإرفاق، وتعمل القواعد داخل هذا المسار من أعلى إلى أسفل."
+
+msgid "workflows.entry_title"
+msgstr "كل طلب إلى خدمة مرفقة"
+
+msgid "workflows.err.save"
+msgstr "تعذر الحفظ"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "تعذر الوصول إلى نقطة نهاية الحفظ"
+
+msgid "workflows.err.validate"
+msgstr "تعذر التحقق"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "تعذر الوصول إلى نقطة نهاية التحقق"
+
+msgid "workflows.errors.body"
+msgstr "لم يُطبّق شيء؛ تظل السياسة الجارية دون تغيير."
+
+msgid "workflows.errors.count"
+msgstr "توجد %(count)s مشكلة تمنع الحفظ."
+
+msgid "workflows.errors.rule"
+msgstr "القاعدة %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "القاعدة %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "سير العمل هذا"
+
+msgid "workflows.exit_sub"
+msgstr "يتابع الطلب إلى سير العمل المرفق التالي، ثم إلى بقية حزمة الأمان."
+
+msgid "workflows.exit_title"
+msgstr "لم تتطابق أي قاعدة"
+
+msgid "workflows.gate.and"
+msgstr "وفقط بعد أن يرسل عنوان IP نفسه للعميل أكثر من"
+
+msgid "workflows.gate.chip"
+msgstr "بوابة المطابقة"
+
+msgid "workflows.gate.help"
+msgstr "يُحسب لكل عنوان IP عميل. تحت الحد لا تتطابق القاعدة إطلاقًا، ويستمر التقييم إلى القاعدة التالية؛ وهي لا تفرض حدًا للمعدل بمفردها."
+
+msgid "workflows.legend.fall"
+msgstr "عدم التطابق ينتقل إلى القاعدة التالية"
+
+msgid "workflows.legend.gate"
+msgstr "حد المعدل يضبط المطابقة وليس إجراءً"
+
+msgid "workflows.legend.move"
+msgstr "اسحب أو استخدم الأسهم أو اضغط Alt + ↑ / ↓ لإعادة الترتيب"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "اسحب، استخدم العلامة المرقمة، أو اضغط Alt + ← / → لإعادة الترتيب"
+
+msgid "workflows.legend.stop"
+msgstr "التطابق ينفذ إجراءً واحدًا ثم يتوقف"
+
+msgid "workflows.link.entry"
+msgstr "كل طلب"
+
+msgid "workflows.link.noMatch"
+msgstr "لا تطابق"
+
+msgid "workflows.menu.bottom"
+msgstr "تشغيل أخيرًا"
+
+msgid "workflows.menu.delete"
+msgstr "حذف القاعدة"
+
+msgid "workflows.menu.disable"
+msgstr "تعطيل القاعدة"
+
+msgid "workflows.menu.duplicate"
+msgstr "تكرار أسفلها"
+
+msgid "workflows.menu.enable"
+msgstr "تمكين القاعدة"
+
+msgid "workflows.menu.top"
+msgstr "تشغيل أولًا"
+
+msgid "workflows.move.first"
+msgstr "تشغيل أولًا"
+
+msgid "workflows.move.last"
+msgstr "تشغيل أخيرًا"
+
+msgid "workflows.new"
+msgstr "سير عمل جديد"
+
+msgid "workflows.no_rules"
+msgstr "لا توجد قاعدة حتى الآن. أضف واحدة لبدء بناء هذه السياسة."
+
+msgid "workflows.not_attached"
+msgstr "غير مرتبط"
+
+msgid "workflows.not_attached_notice"
+msgstr "سير العمل هذا غير مرفق بأي خدمة، لذلك لا تُفرض هذه القواعد في أي مكان بعد."
+
+msgid "workflows.not_validated"
+msgstr "لم يتم التحقق بعد"
+
+msgid "workflows.order_help"
+msgstr "يتم تقييم القواعد بالترتيب، والقاعدة الأولى التي تتطابق تفوز. القاعدة التي تحتوي على قيمة عتبة تطابق مرة واحدة فقط بعد تجاوز العتبة، لذا يمكن للقاعدة الأقل أن تلتقط حركة المرور تحتها."
+
+msgid "workflows.readonly"
+msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص سير العمل، ولكن لا يمكن تعديلها."
+
+msgid "workflows.rule.disabled"
+msgstr "معطلة"
+
+msgid "workflows.rule.if"
+msgstr "إذا"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "اسم القاعدة"
+
+msgid "workflows.rule.noun"
+msgstr "قاعدة"
+
+msgid "workflows.rule.onMatch"
+msgstr "إذا تطابقت"
+
+msgid "workflows.rule.skipped"
+msgstr "معطلة — يتم تجاوزها بالكامل كما لو لم تكن في القائمة."
+
+msgid "workflows.rule.stopTail"
+msgstr "، يتوقف التقييم هنا ولا يتم الوصول إلى أي قاعدة أسفلها."
+
+msgid "workflows.rules"
+msgstr "القواعد"
+
+msgid "workflows.say.actionChanged"
+msgstr "تغير الإجراء إلى %(type)s. وما زال الإجراء الوحيد وما زال ينهي التقييم."
+
+msgid "workflows.say.added"
+msgstr "أُضيفت القاعدة في الموضع %(n)s، وهو الأخير، لذلك تُفحص كل القواعد أعلاها أولًا."
+
+msgid "workflows.say.deleted"
+msgstr "حُذفت القاعدة. تبقت %(count)s قاعدة."
+
+msgid "workflows.say.duplicated"
+msgstr "أُدرجت النسخة في الموضع %(n)s. لا يمكن أن تتطابق ما دامت القاعدة الأصلية أعلاها مُمكّنة."
+
+msgid "workflows.say.gateAdded"
+msgstr "أُضيف حد معدل إلى المطابقة. تحته لا تتطابق القاعدة ويستمر التقييم."
+
+msgid "workflows.say.inserted"
+msgstr "تمت إضافة القاعدة في الموضع %(n)s من %(total)s. يتم التحقق من كل قاعدة قبلها أولاً."
+
+msgid "workflows.say.inspecting"
+msgstr "تعديل القاعدة %(n)s من %(total)s — %(name)s."
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "أُزيلت القيمة الأخيرة؛ لا يمكن حفظ هذا الشرط حتى يحتوي على قيمة."
+
+msgid "workflows.say.moved"
+msgstr "نُقلت %(name)s إلى الموضع %(to)s من %(total)s%(how)s. وهي تعمل الآن %(where)s."
+
+msgid "workflows.say.predicateCap"
+msgstr "تحتوي هذه القاعدة بالفعل على الحد الأقصى، وهو %(max)s شرطًا."
+
+msgid "workflows.say.ruleAbove"
+msgstr "القاعدة أعلاه"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "عُطّلت %(name)s؛ يتم تجاوزها بالكامل وترى القواعد أسفلها هذه الطلبات الآن."
+
+msgid "workflows.say.ruleEnabled"
+msgstr "مُكّنت %(name)s؛ يجري تقييمها مجددًا في الموضع %(n)s."
+
+msgid "workflows.say.runsAfter"
+msgstr "بعد %(name)s"
+
+msgid "workflows.say.runsFirst"
+msgstr "أولًا"
+
+msgid "workflows.say.runsLast"
+msgstr "أخيرًا"
+
+msgid "workflows.say.saved"
+msgstr "حُفظت القواعد ودُفعت إلى الخدمات المرفقة."
+
+msgid "workflows.say.theRule"
+msgstr "القاعدة"
+
+msgid "workflows.say.valuesDropped"
+msgstr "تغير الشرط إلى %(type)s؛ تعذر نقل القيم البالغ عددها %(count)s."
+
+msgid "workflows.say.via.drag"
+msgstr "بالسحب"
+
+msgid "workflows.say.via.keyboard"
+msgstr "بلوحة المفاتيح"
+
+msgid "workflows.say.viewCanvas"
+msgstr "عرض اللوحة. تعمل القواعد من اليسار إلى اليمين؛ والفائز الأول يفوز."
+
+msgid "workflows.say.viewList"
+msgstr "عرض القائمة. تعمل القواعد من الأعلى إلى الأسفل؛ والفائز الأول يفوز."
+
+msgid "workflows.search"
+msgstr "ابحث عن الاسم أو الوصف..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "اتركه فارغًا لمحاكاة فشل البحث عن ASN."
+
+msgid "workflows.test.asn_invalid"
+msgstr "يجب أن يكون ASN رقمًا"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "يفترض أن العميل ليس في القائمة البيضاء."
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "رقم الطلب %(request_number)s قيمة مُدخلة وليس قياسًا."
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "يفترض أن ميزانية التعابير النمطية للمثيل لم تنفد."
+
+msgid "workflows.test.assumptions"
+msgstr "الافتراضات"
+
+msgid "workflows.test.country"
+msgstr "البلد"
+
+msgid "workflows.test.detail_challenge"
+msgstr "يتولى اختبار التحقق المعالجة، وتستمر بقية حزمة الأمان في العمل."
+
+msgid "workflows.test.detail_detect"
+msgstr "هذه الخدمة في وضع الكشف، لذلك لا يُفرض شيء فعليًا."
+
+msgid "workflows.test.detail_status"
+msgstr "يرى العميل %(status)s."
+
+msgid "workflows.test.failed"
+msgstr "تعذر تشغيل الاختبار"
+
+msgid "workflows.test.geo"
+msgstr "بحث GeoIP"
+
+msgid "workflows.test.geo_help"
+msgstr "عند عدم توفره تصبح قواعد البلد وASN مجهولة، فلا يمكن أن تتطابق أبدًا."
+
+msgid "workflows.test.geo_local"
+msgstr "عنوان محلي / خاص"
+
+msgid "workflows.test.geo_resolved"
+msgstr "تم الحل"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "قاعدة البيانات غير متوفرة"
+
+msgid "workflows.test.intro"
+msgstr "يقيّم كل سير عمل مرفق بالخدمة بالترتيب، تمامًا كما يفعل المثيل."
+
+msgid "workflows.test.invalid"
+msgstr "أصلح المشكلات أعلاه قبل الاختبار."
+
+msgid "workflows.test.ip"
+msgstr "عنوان IP للعميل"
+
+msgid "workflows.test.method"
+msgstr "الطريقة"
+
+msgid "workflows.test.number"
+msgstr "رقم الطلب"
+
+msgid "workflows.test.number_help"
+msgstr "طلب هذا العميل رقم N في النافذة. افتراض تقدمه أنت وليس قياسًا."
+
+msgid "workflows.test.open"
+msgstr "اختبار طلب"
+
+msgid "workflows.test.other_matched"
+msgstr "تطابق هنا"
+
+msgid "workflows.test.other_no_match"
+msgstr "لم تتطابق أي قاعدة"
+
+msgid "workflows.test.other_unreached"
+msgstr "لم يتم الوصول إليه"
+
+msgid "workflows.test.other_workflows"
+msgstr "مسارات العمل الأخرى في هذه الخدمة"
+
+msgid "workflows.test.out_draft"
+msgstr "هذه الخدمة مسودة؛ لم يُجمّع لها سير عمل بعد."
+
+msgid "workflows.test.out_match"
+msgstr "تطابق %(workflow)s · %(rule)s ونفّذ %(action)s على الطلب."
+
+msgid "workflows.test.out_no_match"
+msgstr "لم تتطابق أي قاعدة. يتابع الطلب إلى بقية حزمة الأمان."
+
+msgid "workflows.test.out_not_attached"
+msgstr "سير العمل هذا غير مرفق بأي خدمة، لذلك لا توجد سلسلة قواعد لتقييمها."
+
+msgid "workflows.test.out_whitelisted"
+msgstr "في القائمة البيضاء؛ يتم تجاوز سير العمل كله ولا تُقيّم أي قاعدة."
+
+msgid "workflows.test.run"
+msgstr "تشغيل الاختبار"
+
+msgid "workflows.test.service"
+msgstr "الخدمة"
+
+msgid "workflows.test.title"
+msgstr "اختبار طلب"
+
+msgid "workflows.test.unreachable"
+msgstr "تعذر الوصول إلى نقطة نهاية الاختبار"
+
+msgid "workflows.test.uri"
+msgstr "مسار URI"
+
+msgid "workflows.test.uri_help"
+msgstr "المسار فقط؛ لا يحتوي $uri على سلسلة استعلام أبدًا."
+
+msgid "workflows.test.v_gate"
+msgstr "تطابقت الشروط · البوابة مغلقة عند %(n)s من %(count)s"
+
+msgid "workflows.test.v_match"
+msgstr "متطابق"
+
+msgid "workflows.test.v_unknown"
+msgstr "مجهول"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "تعذر تحديد معلومة تحتاجها هذه القاعدة، لذلك لا يمكن أن تتطابق أبدًا."
+
+msgid "workflows.test.whitelisted"
+msgstr "هذا العميل في القائمة البيضاء"
+
+msgid "workflows.threshold"
+msgstr "فقط فوق قيمة معينة"
+
+msgid "workflows.threshold_count"
+msgstr "طلبات"
+
+msgid "workflows.threshold_window"
+msgstr "لكل (ثانية)"
+
+msgid "workflows.tree.addCondition"
+msgstr "شرط"
+
+msgid "workflows.tree.addGroup"
+msgstr "مجموعة"
+
+msgid "workflows.tree.all"
+msgstr "جميع"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)s شرطًا — يجب أن تكون كلها صحيحة"
+
+msgid "workflows.tree.and"
+msgstr "و"
+
+msgid "workflows.tree.any"
+msgstr "أي من"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)s شرطًا — يجب أن يكون واحد منها على الأقل صحيحًا"
+
+msgid "workflows.tree.empty"
+msgstr "مجموعة فارغة؛ أضف شرطًا، فلا يمكن حفظها هكذا."
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "لا تحتوي أي مجموعة على إدخالات من نوع %(kind)s"
+
+msgid "workflows.tree.noneMeta"
+msgstr "يتطابق عندما لا يكون أي منها صحيحًا"
+
+msgid "workflows.tree.not"
+msgstr "لا شيء من"
+
+msgid "workflows.tree.or"
+msgstr "أو"
+
+msgid "workflows.tree.removeGroup"
+msgstr "إزالة المجموعة"
+
+msgid "workflows.truncated"
+msgstr "يتم عرض أول 500 سير عمل فقط. لتقليل القائمة، استخدم API للحصول على النتيجة الكاملة."
+
+msgid "workflows.untitled"
+msgstr "قاعدة بلا عنوان"
+
+msgid "workflows.value.add"
+msgstr "قيمة"
+
+msgid "workflows.values.fewer"
+msgstr "عرض أقل"
+
+msgid "workflows.values.more"
+msgstr "+%(n)s أخرى"
+
+msgid "workflows.verb.asn"
+msgstr "هو"
+
+msgid "workflows.verb.country"
+msgstr "هو"
+
+msgid "workflows.verb.group"
+msgstr "ضمن المجموعة"
+
+msgid "workflows.verb.ip"
+msgstr "ضمن"
+
+msgid "workflows.verb.isIn"
+msgstr "ضمن"
+
+msgid "workflows.verb.isOneOf"
+msgstr "واحد من"
+
+msgid "workflows.verb.method"
+msgstr "هي"
+
+msgid "workflows.verb.uri"
+msgstr "يطابق"
+
+msgid "workflows.view.canvas"
+msgstr "اللوحة"
+
+msgid "workflows.view.list"
+msgstr "القائمة"
+

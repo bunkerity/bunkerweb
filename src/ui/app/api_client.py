@@ -461,12 +461,14 @@ class ApiClient(BaseApiClient):
 
     # ── Plugins ─────────────────────────────────────────────────────────
 
-    def get_plugins(self, type="all", with_data=False, only_enabled=False):
+    def get_plugins(self, type="all", with_data=False, only_enabled=False, with_settings=True):
         params = {"type": type}
         if with_data:
             params["with_data"] = "true"
         if only_enabled:
             params["only_enabled"] = "true"
+        if not with_settings:
+            params["with_settings"] = "false"
         plugins = self._get("/plugins", params=params).get("plugins", [])
         if with_data:
             from base64 import b64decode
@@ -553,11 +555,11 @@ class ApiClient(BaseApiClient):
 
     # ── User Preferences ────────────────────────────────────────────────
 
-    def get_user_preferences(self, username, table_name):
-        return self._get(f"/users/{username}/preferences/{table_name}").get("preferences", {})
+    def get_user_preferences(self, username, key):
+        return self._get(f"/users/{username}/preferences/{key}").get("preferences", {})
 
-    def update_user_preferences(self, username, table_name, columns):
-        return self._patch(f"/users/{username}/preferences/{table_name}", json={"columns": columns})
+    def update_user_preferences(self, username, key, value):
+        return self._patch(f"/users/{username}/preferences/{key}", json={"value": value})
 
     def mark_user_access(self, username, session_id):
         return self._post(f"/users/{username}/access", json={"session_id": session_id})

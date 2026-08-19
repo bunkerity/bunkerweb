@@ -5,6 +5,7 @@ option. Render tests follow ``test_ui_components.py``'s standalone-Jinja-env pat
 
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import Environment, FileSystemLoader
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
@@ -28,7 +29,7 @@ def _render_page_head(body, call=False):
 def test_page_head_renders_bare_h1_without_icon_or_subtitle():
     html = _render_page_head('page_head(title="Service templates", title_i18n="templates.title")')
 
-    assert '<h1 class="bw-page-head-title mb-0" data-i18n="templates.title">Service templates</h1>' in html
+    assert f'<h1 class="bw-page-head-title mb-0">{english("templates.title")}</h1>' in html
     # Bare H1: no leading icon, no subtitle paragraph in the head band.
     assert "bx-" not in html.split("</h1>")[0]
     assert "page-head-subtitle" not in html
@@ -43,9 +44,9 @@ def test_page_head_breadcrumb_marks_last_crumb_current_and_links_earlier_ones():
     )
 
     # Plain text crumb (no url) -> span; url crumb -> link; last -> current, no link.
-    assert '<span data-i18n="navigation.configure">Configure</span>' in html
-    assert '<a href="/detail" data-i18n="d.key">Detail</a>' in html
-    assert '<span class="is-current" aria-current="page" data-i18n="navigation.templates">Templates</span>' in html
+    assert f'<span>{english("navigation.configure")}</span>' in html
+    assert '<a href="/detail">d.key</a>' in html  # no such key: gettext renders the id
+    assert f'<span class="is-current" aria-current="page">{english("navigation.templates")}</span>' in html
     # Two separators for three crumbs.
     assert html.count('<span class="sep" aria-hidden="true">/</span>') == 2
 
@@ -85,13 +86,12 @@ def test_tile_label_is_uppercase_hook_and_value_keeps_bw_kpi_value_class():
     assert "bw-kpi-tile::before" not in html
 
 
-def test_tile_i18n_sits_on_inner_span_so_inline_icon_survives_translation():
+def test_tile_label_keeps_its_inline_icon_beside_the_translated_text():
     html = _render_tile(title="Servers", value="3", title_i18n="tile.servers", icon="bx-server")
 
-    # Icon rendered inline before the label text, i18n on the span (not the <p>).
-    assert '<i class="bx bx-server" aria-hidden="true"></i>' in html
-    assert '<span data-i18n="tile.servers">Servers</span>' in html
-    assert 'data-i18n="tile.servers"><i' not in html
+    # Icon and label are siblings inside the <p>: the label span holds only the text, which is
+    # what let the icon survive back when a DOM pass rewrote that span's contents.
+    assert '<i class="bx bx-server" aria-hidden="true"></i><span>tile.servers</span>' in html
 
 
 def test_tile_caption_line_is_optional():
@@ -99,7 +99,7 @@ def test_tile_caption_line_is_optional():
     assert "bw-kpi-caption" not in without
 
     withcap = _render_tile(title="A", value="1", caption="IPs + CIDRs", caption_i18n="tile.cap")
-    assert '<small class="bw-kpi-caption d-block" data-i18n="tile.cap">IPs + CIDRs</small>' in withcap
+    assert '<small class="bw-kpi-caption d-block">tile.cap</small>' in withcap
 
 
 # --------------------------------------------------------------------------------------
@@ -122,4 +122,4 @@ def test_card_header_default_is_unchanged_without_uppercase():
 
     assert "bw-panel-title" not in html
     assert "bw-panel-sub" not in html
-    assert '<h5 class="card-title mb-0" data-i18n="home.requests">Requests</h5>' in html
+    assert f'<h5 class="card-title mb-0">{english("home.requests")}</h5>' in html

@@ -1,0 +1,7043 @@
+# Russian translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "Создано с помощью"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero General Public License v3.0"
+
+msgid "about.license_title"
+msgstr "Лицензия"
+
+msgid "about.social.discord"
+msgstr "Discord"
+
+msgid "about.social.instagram"
+msgstr "Instagram"
+
+msgid "about.social.linkedin"
+msgstr "LinkedIn"
+
+msgid "about.social.reddit"
+msgstr "Reddit"
+
+msgid "about.socials"
+msgstr "Социальные сети"
+
+msgid "about.tagline"
+msgstr "Мощная защита, упрощенная"
+
+msgid "about.title"
+msgstr "О BunkerWeb"
+
+msgid "about.version"
+msgstr "Версия: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "Автоматически выдавать и обновлять сертификаты."
+
+msgid "accordion.title.tls"
+msgstr "TLS & сертификаты"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "Пожалуйста, загрузите действительный файл экспорта пользовательских настроек (.json)."
+
+msgid "alert.custom_end_date_required"
+msgstr "Пожалуйста, выберите пользовательскую дату окончания."
+
+msgid "alert.important"
+msgstr "Важно"
+
+msgid "alert.no_changes_detected"
+msgstr "Изменения не обнаружены."
+
+msgid "alert.notice"
+msgstr "Уведомление"
+
+msgid "alert.ping_error"
+msgstr "Произошла ошибка при пинге экземпляров."
+
+msgid "alert.readonly_mode"
+msgstr "Это действие отключено в режиме только для чтения."
+
+msgid "aria.label.clear_search"
+msgstr "Очистить поиск"
+
+msgid "aria.label.close"
+msgstr "Закрыть"
+
+msgid "aria.label.collapse_multiline"
+msgstr "Свернуть многострочные записи"
+
+msgid "aria.label.configs_dropzone"
+msgstr "Выберите файл экспорта пользовательских конфигураций или перетащите его сюда"
+
+msgid "aria.label.copy"
+msgstr "Копировать журналы"
+
+msgid "aria.label.download_log"
+msgstr "Скачать этот файл журнала"
+
+msgid "aria.label.follow"
+msgstr "Следить"
+
+msgid "aria.label.hide_value"
+msgstr "Скрыть значение"
+
+msgid "aria.label.issue_count"
+msgstr "Количество ошибок и предупреждений"
+
+msgid "aria.label.level_filter"
+msgstr "Фильтровать строки журнала по уровню"
+
+msgid "aria.label.local_time"
+msgstr "Показывать временные метки в местном времени"
+
+msgid "aria.label.next_issue"
+msgstr "Следующая ошибка или предупреждение"
+
+msgid "aria.label.passkey_name"
+msgstr "Имя ключа доступа"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "Выберите архивы плагинов или перетащите их сюда"
+
+msgid "aria.label.prev_issue"
+msgstr "Предыдущая ошибка или предупреждение"
+
+msgid "aria.label.raw_configuration"
+msgstr "Необработанная конфигурация"
+
+msgid "aria.label.remove_value"
+msgstr "Удалить значение"
+
+msgid "aria.label.reveal_value"
+msgstr "Показать значение"
+
+msgid "aria.label.search_logs"
+msgstr "Поиск в журналах"
+
+msgid "aria.label.select_file"
+msgstr "Выбрать файл"
+
+msgid "aria.label.select_page"
+msgstr "Выбрать страницу"
+
+msgid "aria.label.services_dropzone"
+msgstr "Выберите файл экспорта служб или перетащите его сюда"
+
+msgid "aria.label.toggle_wrap"
+msgstr "Переключить перенос строк"
+
+msgid "aria.label.user_avatar"
+msgstr "Аватар пользователя"
+
+msgid "aria.label.view_selected_items"
+msgstr "Просмотреть выбранные элементы"
+
+msgid "badge.from_template"
+msgstr "Из шаблона"
+
+msgid "badge.managed_via_api"
+msgstr "Управляется через API"
+
+msgid "badge.new_version"
+msgstr "Новая версия"
+
+msgid "badge.no_template"
+msgstr "Нет шаблона"
+
+msgid "badge.unread_news"
+msgstr "Непрочитанные новости"
+
+msgid "badge.unread_notifications"
+msgstr "Непрочитанные уведомления"
+
+msgid "banner.community"
+msgstr "Станьте частью сообщества Bunker, присоединившись к <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">чату Discord</a> и подписавшись на нас в <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>."
+
+msgid "banner.link.here"
+msgstr "здесь"
+
+msgid "banner.pro"
+msgstr "Получите максимум от BunkerWeb, обновившись до версии PRO. Больше информации и бесплатная пробная версия <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">здесь</a>."
+
+msgid "banner.support"
+msgstr "Нужна премиум-поддержка или индивидуальная консультация по BunkerWeb? Ознакомьтесь с нашими <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">профессиональными услугами</a>."
+
+msgid "bans.stats.card.by_reason"
+msgstr "Блокировки по причине"
+
+msgid "bans.stats.tile.active"
+msgstr "Активные блокировки"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "Страны"
+
+msgid "bans.stats.tile.expiring"
+msgstr "Истекают через ≤ 1 ч"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "Автоматическая ротация"
+
+msgid "bans.stats.tile.permanent"
+msgstr "Постоянные блокировки"
+
+msgid "bans.subtitle"
+msgstr "Заблокированные IP-адреса для всех ваших экземпляров BunkerWeb — добавляйте, удаляйте или изменяйте длительность блокировки."
+
+msgid "breadcrumb.about"
+msgstr "О программе"
+
+msgid "breadcrumb.bans"
+msgstr "Баны"
+
+msgid "breadcrumb.cache"
+msgstr "Кэш"
+
+msgid "breadcrumb.configs"
+msgstr "Конфигурации"
+
+msgid "breadcrumb.extra_pages"
+msgstr "Дополнительные страницы"
+
+msgid "breadcrumb.global_config"
+msgstr "Глобальная конфигурация"
+
+msgid "breadcrumb.global_settings"
+msgstr "Глобальные настройки"
+
+msgid "breadcrumb.groups"
+msgstr "Группы ресурсов"
+
+msgid "breadcrumb.home"
+msgstr "Главная"
+
+msgid "breadcrumb.instances"
+msgstr "Экземпляры"
+
+msgid "breadcrumb.jobs"
+msgstr "Задачи"
+
+msgid "breadcrumb.logs"
+msgstr "Логи"
+
+msgid "breadcrumb.misc"
+msgstr "Разное"
+
+msgid "breadcrumb.mode_selection"
+msgstr "Выбор режима"
+
+msgid "breadcrumb.more"
+msgstr "Ещё..."
+
+msgid "breadcrumb.new"
+msgstr "Новый"
+
+msgid "breadcrumb.plugins"
+msgstr "Плагины"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "Страницы плагинов"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "Профиль"
+
+msgid "breadcrumb.reports"
+msgstr "Отчеты"
+
+msgid "breadcrumb.services"
+msgstr "Сервисы"
+
+msgid "breadcrumb.support"
+msgstr "Поддержка"
+
+msgid "breadcrumb.templates"
+msgstr "Шаблоны"
+
+msgid "breadcrumb.threatmap"
+msgstr "Карта угроз"
+
+msgid "breadcrumb.timings"
+msgstr "Время выполнения"
+
+msgid "breadcrumb.web_cache"
+msgstr "Веб-кэш"
+
+msgid "breadcrumb.whats_new"
+msgstr "Что нового"
+
+msgid "button.actions"
+msgstr "Действия"
+
+msgid "button.activate_key"
+msgstr "Активировать ключ"
+
+msgid "button.add"
+msgstr "ВСТАВИТЬ"
+
+msgid "button.add_ban_plural"
+msgstr "Добавить блокировку"
+
+msgid "button.add_passkey"
+msgstr "Добавить ключ доступа"
+
+msgid "button.add_plugin_plural"
+msgstr "Добавить плагины"
+
+msgid "button.add_plugins"
+msgstr "Добавить плагины"
+
+msgid "button.auto_refresh"
+msgstr "Автообновление"
+
+msgid "button.ban"
+msgstr "Забанить"
+
+msgid "button.ban_all_filtered"
+msgstr "Заблокировать все подходящие отчёты"
+
+msgid "button.ban_selected"
+msgstr "Забанить выбранные"
+
+msgid "button.cache"
+msgstr "Кэш"
+
+msgid "button.cancel"
+msgstr "Отмена"
+
+msgid "button.clear"
+msgstr "ОЧИСТИТЬ"
+
+msgid "button.clone"
+msgstr "Клонировать"
+
+msgid "button.close"
+msgstr "Закрыть"
+
+msgid "button.collapse_multiline"
+msgstr "Свернуть"
+
+msgid "button.columns"
+msgstr "Столбцы"
+
+msgid "button.convert_configs"
+msgstr "Преобразовать конфиги"
+
+msgid "button.convert_configs_to"
+msgstr "Преобразовать в %(state)s"
+
+msgid "button.convert_services"
+msgstr "Конвертировать сервисы"
+
+msgid "button.copy"
+msgstr "Копировать"
+
+msgid "button.copy_codes"
+msgstr "Копировать коды"
+
+msgid "button.copy_raw"
+msgstr "Копировать необработанные данные"
+
+msgid "button.copy_visible"
+msgstr "Копировать видимые"
+
+msgid "button.create_config"
+msgstr "Создать кастомную конфигурацию"
+
+msgid "button.create_instance"
+msgstr "Создать экземпляр"
+
+msgid "button.create_service"
+msgstr "Создать новый сервис"
+
+msgid "button.create_template"
+msgstr "Создать шаблон"
+
+msgid "button.delete"
+msgstr "Удалить"
+
+msgid "button.delete_instance"
+msgstr "Удалить экземпляры"
+
+msgid "button.disable_totp"
+msgstr "Отключить TOTP"
+
+msgid "button.download"
+msgstr "Скачать"
+
+msgid "button.edit"
+msgstr "Изменить"
+
+msgid "button.enable_totp"
+msgstr "Включить TOTP"
+
+msgid "button.entire_config"
+msgstr "Вся конфигурация"
+
+msgid "button.export"
+msgstr "Экспорт"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "Получить глобальные настройки"
+
+msgid "button.filtered_actions"
+msgstr "Отфильтрованные действия"
+
+msgid "button.filters_suffix"
+msgstr " Фильтры"
+
+msgid "button.follow"
+msgstr "Следить"
+
+msgid "button.force_check"
+msgstr "Принудительная проверка"
+
+msgid "button.force_update"
+msgstr "Принудительно обновить"
+
+msgid "button.github_stars"
+msgstr "Звезды"
+
+msgid "button.go"
+msgstr "Перейти →"
+
+msgid "button.go_back"
+msgstr "Вернуться"
+
+msgid "button.got_it"
+msgstr "Понятно"
+
+msgid "button.hide"
+msgstr "Скрыть"
+
+msgid "button.history"
+msgstr "История"
+
+msgid "button.import_configs"
+msgstr "Импорт пользовательских конфигураций"
+
+msgid "button.import_services"
+msgstr "Импорт служб"
+
+msgid "button.local_time"
+msgstr "Местное время"
+
+msgid "button.login"
+msgstr "Войти"
+
+msgid "button.multiple_add"
+msgstr "ДОБАВИТЬ"
+
+msgid "button.multiple_hide"
+msgstr "СКРЫТЬ"
+
+msgid "button.multiple_remove"
+msgstr "УДАЛИТЬ"
+
+msgid "button.multiple_show"
+msgstr "ПОКАЗАТЬ"
+
+msgid "button.need_help"
+msgstr "Нужна помощь?"
+
+msgid "button.news"
+msgstr "Новости"
+
+msgid "button.notifications"
+msgstr "Уведомления"
+
+msgid "button.open_support_ticket"
+msgstr "Открыть тикет поддержки"
+
+msgid "button.order_support"
+msgstr "Заказать поддержку"
+
+msgid "button.ping"
+msgstr "Пинг"
+
+msgid "button.plugin_page"
+msgstr "Страница плагина"
+
+msgid "button.proceed"
+msgstr "Продолжить"
+
+msgid "button.refresh"
+msgstr "Обновить"
+
+msgid "button.refresh_recovery_codes"
+msgstr "Обновить коды восстановления"
+
+msgid "button.reload"
+msgstr "Перезагрузить"
+
+msgid "button.rename"
+msgstr "Переименовать"
+
+msgid "button.reset"
+msgstr "Сбросить"
+
+msgid "button.reset_columns"
+msgstr "Сбросить столбцы"
+
+msgid "button.retry"
+msgstr "Повторить"
+
+msgid "button.return_to_safety"
+msgstr "Вернуться в безопасное место"
+
+msgid "button.run"
+msgstr "Запустить"
+
+msgid "button.run_selected_jobs"
+msgstr "Запустить выбранные задачи"
+
+msgid "button.save"
+msgstr "Сохранить"
+
+msgid "button.save_changes"
+msgstr "Сохранить изменения"
+
+msgid "button.search"
+msgstr "Поиск"
+
+msgid "button.see_all_releases"
+msgstr "Все выпуски"
+
+msgid "button.select_file"
+msgstr "Выбрать файл"
+
+msgid "button.select_page"
+msgstr "Выбрать страницу"
+
+msgid "button.service"
+msgstr "Сервис"
+
+msgid "button.set_1h"
+msgstr "Установить 1 час"
+
+msgid "button.set_1w"
+msgstr "Установить 1 неделю"
+
+msgid "button.set_24h"
+msgstr "Установить 24 часа"
+
+msgid "button.set_permanent"
+msgstr "Установить бессрочно"
+
+msgid "button.setup"
+msgstr "Настройка"
+
+msgid "button.show"
+msgstr "Показать"
+
+msgid "button.show_me"
+msgstr "Показать"
+
+msgid "button.sign_in_with_passkey"
+msgstr "Войти с ключом доступа"
+
+msgid "button.stop"
+msgstr "Остановить"
+
+msgid "button.submit"
+msgstr "Отправить"
+
+msgid "button.subscribe"
+msgstr "Подписаться"
+
+msgid "button.unban"
+msgstr "Разбанить"
+
+msgid "button.unban_all_filtered"
+msgstr "Снять все подходящие блокировки"
+
+msgid "button.update_duration"
+msgstr "Обновить срок бана"
+
+msgid "button.update_duration_all_filtered"
+msgstr "Изменить срок всех подходящих блокировок"
+
+msgid "button.update_key"
+msgstr "Обновить ключ"
+
+msgid "button.upload_photo"
+msgstr "Загрузить новое фото"
+
+msgid "button.use_security_key"
+msgstr "Использовать ключ безопасности"
+
+msgid "button.use_template"
+msgstr "Использовать шаблон"
+
+msgid "button.verify"
+msgstr "Проверить"
+
+msgid "button.view"
+msgstr "Просмотреть"
+
+msgid "button.view_details"
+msgstr "Просмотреть детали"
+
+msgid "button.view_raw_data"
+msgstr "Просмотреть необработанные данные"
+
+msgid "button.wipe_other_sessions"
+msgstr "Завершить другие сеансы"
+
+msgid "button.wrap"
+msgstr "Перенос"
+
+msgid "cache.kpi_files"
+msgstr "Файлы"
+
+msgid "cache.kpi_per_service"
+msgstr "По службам"
+
+msgid "cache.subtitle"
+msgstr "Кэшированные файлы, созданные запланированными задачами (блоки, базы данных GeoIP и т.д.) — просматривайте, скачивайте или удаляйте их для каждого сервиса и плагина."
+
+msgid "cache.title"
+msgstr "Файлы кэша"
+
+msgid "certificates.acme_help"
+msgstr "Выбрать сервисы, для которых существующие настройки уже позволяют и настраивают Let's Encrypt. Это действие только планирует эту конфигурацию; детали сертификата и учетные данные для проверки не вводятся здесь."
+
+msgid "certificates.active"
+msgstr "Активные сертификаты"
+
+msgid "certificates.algorithm"
+msgstr "Алгоритм"
+
+msgid "certificates.all"
+msgstr "Все"
+
+msgid "certificates.assignment_notice"
+msgstr "Назначения организуют центральный инвентарь; развертывание TLS остается под контролем настроек сертификата каждого сервиса."
+
+msgid "certificates.assignments"
+msgstr "Назначения инвентаря"
+
+msgid "certificates.assignments_help"
+msgstr "Эти назначения не изменяют текущие настройки TLS."
+
+msgid "certificates.attach"
+msgstr "Назначить"
+
+msgid "certificates.attach_all"
+msgstr "Этот сертификат уже привязан ко всем доступным сервисам."
+
+msgid "certificates.attach_copy"
+msgstr "Назначить \"%(name)s\" сервису в центральном инвентаре."
+
+msgid "certificates.browse_certificate"
+msgstr "Просмотреть сертификат"
+
+msgid "certificates.browse_key"
+msgstr "Просмотреть приватный ключ"
+
+msgid "certificates.common_name"
+msgstr "Общее имя"
+
+msgid "certificates.confirm"
+msgstr "Подтвердить"
+
+msgid "certificates.confirm_action"
+msgstr "Подтвердить действие с сертификатом"
+
+msgid "certificates.confirm_delete"
+msgstr "Удалить \"%(name)s\"? Это нельзя отменить."
+
+msgid "certificates.confirm_generic"
+msgstr "Подтвердить действие с сертификатом?"
+
+msgid "certificates.confirm_renew"
+msgstr "Обновить \"%(name)s\"?"
+
+msgid "certificates.confirm_renew_due"
+msgstr "Проверить все сертификаты и обновить те, которые истекают?"
+
+msgid "certificates.create"
+msgstr "Создать сертификат"
+
+msgid "certificates.download_chain"
+msgstr "Скачать цепочку"
+
+msgid "certificates.download_leaf"
+msgstr "Скачать лист"
+
+msgid "certificates.edit_help"
+msgstr "Это изменяет только метаданные инвентаря, а не сам сертификат или текущие настройки TLS."
+
+msgid "certificates.edit_metadata"
+msgstr "Редактировать метаданные сертификата"
+
+msgid "certificates.empty"
+msgstr "Нет сертификатов"
+
+msgid "certificates.empty_help"
+msgstr "Создать самоподписанный сертификат, запланировать выдачу ACME или загрузить существующий сертификат и ключ PEM."
+
+msgid "certificates.expired_help"
+msgstr "Требует внимания"
+
+msgid "certificates.expires"
+msgstr "Истекает"
+
+msgid "certificates.expiring_help"
+msgstr "30 дней или меньше"
+
+msgid "certificates.file_extensions"
+msgstr "Использовать один из следующих расширений файлов: %(extensions)s."
+
+msgid "certificates.file_select"
+msgstr "Выбрать файл PEM."
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "Файл не должен превышать 1 MiB."
+
+msgid "certificates.fingerprint"
+msgstr "Отпечаток SHA-256"
+
+msgid "certificates.issuer"
+msgstr "Эмитент"
+
+msgid "certificates.issuers"
+msgstr "Топ эмитент"
+
+msgid "certificates.key_drop"
+msgstr "Загрузите соответствующий приватный ключ здесь"
+
+msgid "certificates.key_limit"
+msgstr "Максимум 1 MiB; зашифровано в состоянии покоя и никогда не загружалось"
+
+msgid "certificates.last_error"
+msgstr "Последняя ошибка"
+
+msgid "certificates.make_primary"
+msgstr "Отметить как основной элемент управления для этого сервиса"
+
+msgid "certificates.managed"
+msgstr "Сертификаты, управляемые"
+
+msgid "certificates.new_selfsigned"
+msgstr "Новый самоподписанный сертификат"
+
+msgid "certificates.no_issuers"
+msgstr "Нет данных об эмитент"
+
+msgid "certificates.none_due"
+msgstr "Нет сертификатов в ожидании"
+
+msgid "certificates.orphan_account"
+msgstr "Аккаунт"
+
+msgid "certificates.orphan_badge"
+msgstr "Отсутствует аккаунт ACME"
+
+msgid "certificates.orphan_help"
+msgstr "Этот рекорд обновления ссылается на аккаунт ACME, который больше не существует. Обновление остается заблокированным до восстановления состояния провайдера."
+
+msgid "certificates.orphan_server"
+msgstr "Сервер ACME"
+
+msgid "certificates.orphan_title"
+msgstr "Отсутствует аккаунт ACME"
+
+msgid "certificates.pem_certificate"
+msgstr "Сертификат или цепочка PEM"
+
+msgid "certificates.pem_drop"
+msgstr "Загрузите публичный сертификат или цепочку PEM здесь"
+
+msgid "certificates.pem_limit"
+msgstr "Максимум 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "Приватный ключ PEM"
+
+msgid "certificates.primary"
+msgstr "Основное назначение"
+
+msgid "certificates.primary_help"
+msgstr "Отметить выбранные сервисы как основной элемент управления"
+
+msgid "certificates.readonly"
+msgstr "База данных только для чтения. Сертификаты можно просматривать и загружать, но не изменять."
+
+msgid "certificates.renew_due"
+msgstr "Проверить/обновить срок действия"
+
+msgid "certificates.sans"
+msgstr "Альтернативные имена субъекта"
+
+msgid "certificates.save_metadata"
+msgstr "Сохранить метаданные"
+
+msgid "certificates.schedule"
+msgstr "Запланировать выдачу"
+
+msgid "certificates.schedule_acme"
+msgstr "Запланировать выдачу ACME"
+
+msgid "certificates.search"
+msgstr "Поиск по имени, общему имени, SAN, эмитенту или отпечатку…"
+
+msgid "certificates.serial"
+msgstr "Серийный номер"
+
+msgid "certificates.services"
+msgstr "Сервисы"
+
+msgid "certificates.services_help"
+msgstr "Используйте Ctrl или Command для выбора нескольких сервисов."
+
+msgid "certificates.showing_count"
+msgstr "Отображено %(visible)s из %(total)s сертификатов"
+
+msgid "certificates.source.customcert"
+msgstr "Пользовательский"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "Самоподписанный"
+
+msgid "certificates.source_label"
+msgstr "Источник"
+
+msgid "certificates.status.expired"
+msgstr "Истекший срок действия"
+
+msgid "certificates.status.expiring_soon"
+msgstr "Скоро истекает"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "Недействительный"
+
+msgid "certificates.status.revoked"
+msgstr "Аннулирован"
+
+msgid "certificates.status.valid"
+msgstr "Действительный"
+
+msgid "certificates.subtitle"
+msgstr "Выдача, загрузка, назначение, продление и проверка сертификатов в центральном инвентаре."
+
+msgid "certificates.total"
+msgstr "Всего"
+
+msgid "certificates.truncated"
+msgstr "Отображаются только первые 500 сертификатов. Для получения полного результата используйте API."
+
+msgid "certificates.unassigned"
+msgstr "Не назначено"
+
+msgid "certificates.upcoming"
+msgstr "Предстоящие продления"
+
+msgid "certificates.upcoming_help"
+msgstr "Истекшие или находящиеся в 30-дневном периоде продления"
+
+msgid "certificates.upload"
+msgstr "Загрузить сертификат"
+
+msgid "certificates.upload_custom"
+msgstr "Загрузить пользовательский сертификат"
+
+msgid "certificates.upload_invalid"
+msgstr "Выберите действительный публичный сертификат и соответствующий приватный ключ."
+
+msgid "certificates.valid_days"
+msgstr "Срок действия (в днях)"
+
+msgid "certificates.valid_from"
+msgstr "Действителен с"
+
+msgid "certificates.valid_to"
+msgstr "Действителен до"
+
+msgid "compose.always_on"
+msgstr "Всегда включено"
+
+msgid "compose.count"
+msgstr "Активно: %(on)s · доступно: %(total)s · заблокировано: %(locked)s"
+
+msgid "compose.entries"
+msgstr "Настроено: %(count)s"
+
+msgid "compose.filter.all"
+msgstr "Все"
+
+msgid "compose.filter.changed"
+msgstr "Изменено"
+
+msgid "compose.filter.on"
+msgstr "Включено"
+
+msgid "compose.locked"
+msgstr "Нет контроля здесь"
+
+msgid "compose.provenance.api"
+msgstr "Управляется через API"
+
+msgid "compose.provenance.attachment"
+msgstr "Из вложения"
+
+msgid "compose.provenance.clone"
+msgstr "Клонировано"
+
+msgid "compose.provenance.default"
+msgstr "По умолчанию"
+
+msgid "compose.provenance.edited"
+msgstr "Изменено здесь"
+
+msgid "compose.provenance.global"
+msgstr "Глобально"
+
+msgid "compose.provenance.managed"
+msgstr "Установлено %(method)s"
+
+msgid "compose.provenance.template"
+msgstr "Из шаблона"
+
+msgid "compose.set_value"
+msgstr "Укажите значение…"
+
+msgid "compose.show_more"
+msgstr "Показать ещё (%(count)s)"
+
+msgid "compose.unavailable"
+msgstr "Список плагинов не удалось загрузить, поэтому эту страницу нельзя безопасно редактировать. Обновите после ответа API."
+
+msgid "configs.subtitle"
+msgstr "Пользовательские фрагменты конфигурации NGINX для ваших сервисов — создавайте, редактируйте и управляйте HTTP, ModSecurity и переопределениями на уровне потока."
+
+msgid "country.AD"
+msgstr "Андорра"
+
+msgid "country.AE"
+msgstr "Объединенные Арабские Эмираты"
+
+msgid "country.AF"
+msgstr "Афганистан"
+
+msgid "country.AG"
+msgstr "Антигуа и Барбуда"
+
+msgid "country.AI"
+msgstr "Ангилья"
+
+msgid "country.AL"
+msgstr "Албания"
+
+msgid "country.AM"
+msgstr "Армения"
+
+msgid "country.AO"
+msgstr "Ангола"
+
+msgid "country.AQ"
+msgstr "Антарктида"
+
+msgid "country.AR"
+msgstr "Аргентина"
+
+msgid "country.AS"
+msgstr "Американское Самоа"
+
+msgid "country.AT"
+msgstr "Австрия"
+
+msgid "country.AU"
+msgstr "Австралия"
+
+msgid "country.AW"
+msgstr "Аруба"
+
+msgid "country.AX"
+msgstr "Аландские острова"
+
+msgid "country.AZ"
+msgstr "Азербайджан"
+
+msgid "country.BA"
+msgstr "Босния и Герцеговина"
+
+msgid "country.BB"
+msgstr "Барбадос"
+
+msgid "country.BD"
+msgstr "Бангладеш"
+
+msgid "country.BE"
+msgstr "Бельгия"
+
+msgid "country.BF"
+msgstr "Буркина-Фасо"
+
+msgid "country.BG"
+msgstr "Болгария"
+
+msgid "country.BH"
+msgstr "Бахрейн"
+
+msgid "country.BI"
+msgstr "Бурунди"
+
+msgid "country.BJ"
+msgstr "Бенин"
+
+msgid "country.BL"
+msgstr "Сен-Бартелеми"
+
+msgid "country.BM"
+msgstr "Бермуды"
+
+msgid "country.BN"
+msgstr "Бруней-Даруссалам"
+
+msgid "country.BO"
+msgstr "Боливия"
+
+msgid "country.BQ"
+msgstr "Карибские Нидерланды"
+
+msgid "country.BR"
+msgstr "Бразилия"
+
+msgid "country.BS"
+msgstr "Багамы"
+
+msgid "country.BT"
+msgstr "Бутан"
+
+msgid "country.BV"
+msgstr "Остров Буве"
+
+msgid "country.BW"
+msgstr "Ботсвана"
+
+msgid "country.BY"
+msgstr "Беларусь"
+
+msgid "country.BZ"
+msgstr "Белиз"
+
+msgid "country.CA"
+msgstr "Канада"
+
+msgid "country.CC"
+msgstr "Кокосовые (Килинг) острова"
+
+msgid "country.CD"
+msgstr "Демократическая Республика Конго"
+
+msgid "country.CF"
+msgstr "Центральноафриканская Республика"
+
+msgid "country.CG"
+msgstr "Республика Конго"
+
+msgid "country.CH"
+msgstr "Швейцария"
+
+msgid "country.CI"
+msgstr "Кот-д'Ивуар"
+
+msgid "country.CK"
+msgstr "Острова Кука"
+
+msgid "country.CL"
+msgstr "Чили"
+
+msgid "country.CM"
+msgstr "Камерун"
+
+msgid "country.CN"
+msgstr "Китай"
+
+msgid "country.CO"
+msgstr "Колумбия"
+
+msgid "country.CR"
+msgstr "Коста-Рика"
+
+msgid "country.CU"
+msgstr "Куба"
+
+msgid "country.CV"
+msgstr "Кабо-Верде"
+
+msgid "country.CW"
+msgstr "Кюрасао"
+
+msgid "country.CX"
+msgstr "Остров Рождества"
+
+msgid "country.CY"
+msgstr "Кипр"
+
+msgid "country.CZ"
+msgstr "Чешская Республика"
+
+msgid "country.DE"
+msgstr "Германия"
+
+msgid "country.DJ"
+msgstr "Джибути"
+
+msgid "country.DK"
+msgstr "Дания"
+
+msgid "country.DM"
+msgstr "Доминика"
+
+msgid "country.DO"
+msgstr "Доминиканская Республика"
+
+msgid "country.DZ"
+msgstr "Алжир"
+
+msgid "country.EC"
+msgstr "Эквадор"
+
+msgid "country.EE"
+msgstr "Эстония"
+
+msgid "country.EG"
+msgstr "Египет"
+
+msgid "country.EH"
+msgstr "Западная Сахара"
+
+msgid "country.ER"
+msgstr "Эритрея"
+
+msgid "country.ES"
+msgstr "Испания"
+
+msgid "country.ET"
+msgstr "Эфиопия"
+
+msgid "country.EU"
+msgstr "Европа"
+
+msgid "country.FI"
+msgstr "Финляндия"
+
+msgid "country.FJ"
+msgstr "Фиджи"
+
+msgid "country.FK"
+msgstr "Фолклендские (Мальвинские) острова"
+
+msgid "country.FM"
+msgstr "Микронезия"
+
+msgid "country.FO"
+msgstr "Фарерские острова"
+
+msgid "country.FR"
+msgstr "Франция"
+
+msgid "country.GA"
+msgstr "Габон"
+
+msgid "country.GB"
+msgstr "Великобритания"
+
+msgid "country.GD"
+msgstr "Гренада"
+
+msgid "country.GE"
+msgstr "Грузия"
+
+msgid "country.GF"
+msgstr "Французская Гвиана"
+
+msgid "country.GG"
+msgstr "Гернси"
+
+msgid "country.GH"
+msgstr "Гана"
+
+msgid "country.GI"
+msgstr "Гибралтар"
+
+msgid "country.GL"
+msgstr "Гренландия"
+
+msgid "country.GM"
+msgstr "Гамбия"
+
+msgid "country.GN"
+msgstr "Гвинея"
+
+msgid "country.GP"
+msgstr "Гваделупа"
+
+msgid "country.GQ"
+msgstr "Экваториальная Гвинея"
+
+msgid "country.GR"
+msgstr "Греция"
+
+msgid "country.GS"
+msgstr "Южная Георгия и Южные Сандвичевы острова"
+
+msgid "country.GT"
+msgstr "Гватемала"
+
+msgid "country.GU"
+msgstr "Гуам"
+
+msgid "country.GW"
+msgstr "Гвинея-Бисау"
+
+msgid "country.GY"
+msgstr "Гайана"
+
+msgid "country.HK"
+msgstr "Гонконг"
+
+msgid "country.HM"
+msgstr "Остров Херд и острова Макдональд"
+
+msgid "country.HN"
+msgstr "Гондурас"
+
+msgid "country.HR"
+msgstr "Хорватия"
+
+msgid "country.HT"
+msgstr "Гаити"
+
+msgid "country.HU"
+msgstr "Венгрия"
+
+msgid "country.ID"
+msgstr "Индонезия"
+
+msgid "country.IE"
+msgstr "Ирландия"
+
+msgid "country.IL"
+msgstr "Израиль"
+
+msgid "country.IM"
+msgstr "Остров Мэн"
+
+msgid "country.IN"
+msgstr "Индия"
+
+msgid "country.IO"
+msgstr "Британская территория в Индийском океане"
+
+msgid "country.IQ"
+msgstr "Ирак"
+
+msgid "country.IR"
+msgstr "Иран"
+
+msgid "country.IS"
+msgstr "Исландия"
+
+msgid "country.IT"
+msgstr "Италия"
+
+msgid "country.JE"
+msgstr "Джерси"
+
+msgid "country.JM"
+msgstr "Ямайка"
+
+msgid "country.JO"
+msgstr "Иордания"
+
+msgid "country.JP"
+msgstr "Япония"
+
+msgid "country.KE"
+msgstr "Кения"
+
+msgid "country.KG"
+msgstr "Киргизия"
+
+msgid "country.KH"
+msgstr "Камбоджа"
+
+msgid "country.KI"
+msgstr "Кирибати"
+
+msgid "country.KM"
+msgstr "Коморы"
+
+msgid "country.KN"
+msgstr "Сент-Китс и Невис"
+
+msgid "country.KP"
+msgstr "Северная Корея"
+
+msgid "country.KR"
+msgstr "Южная Корея"
+
+msgid "country.KW"
+msgstr "Кувейт"
+
+msgid "country.KY"
+msgstr "Каймановы острова"
+
+msgid "country.KZ"
+msgstr "Казахстан"
+
+msgid "country.LA"
+msgstr "Лаос"
+
+msgid "country.LB"
+msgstr "Ливан"
+
+msgid "country.LC"
+msgstr "Сент-Люсия"
+
+msgid "country.LI"
+msgstr "Лихтенштейн"
+
+msgid "country.LK"
+msgstr "Шри-Ланка"
+
+msgid "country.LR"
+msgstr "Либерия"
+
+msgid "country.LS"
+msgstr "Лесото"
+
+msgid "country.LT"
+msgstr "Литва"
+
+msgid "country.LU"
+msgstr "Люксембург"
+
+msgid "country.LV"
+msgstr "Латвия"
+
+msgid "country.LY"
+msgstr "Ливия"
+
+msgid "country.MA"
+msgstr "Марокко"
+
+msgid "country.MC"
+msgstr "Монако"
+
+msgid "country.MD"
+msgstr "Молдова"
+
+msgid "country.ME"
+msgstr "Черногория"
+
+msgid "country.MF"
+msgstr "Сен-Мартен"
+
+msgid "country.MG"
+msgstr "Мадагаскар"
+
+msgid "country.MH"
+msgstr "Маршалловы Острова"
+
+msgid "country.MK"
+msgstr "Северная Македония"
+
+msgid "country.ML"
+msgstr "Мали"
+
+msgid "country.MM"
+msgstr "Мьянма"
+
+msgid "country.MN"
+msgstr "Монголия"
+
+msgid "country.MO"
+msgstr "Макао"
+
+msgid "country.MP"
+msgstr "Северные Марианские острова"
+
+msgid "country.MQ"
+msgstr "Мартиника"
+
+msgid "country.MR"
+msgstr "Мавритания"
+
+msgid "country.MS"
+msgstr "Монтсеррат"
+
+msgid "country.MT"
+msgstr "Мальта"
+
+msgid "country.MU"
+msgstr "Маврикий"
+
+msgid "country.MV"
+msgstr "Мальдивы"
+
+msgid "country.MW"
+msgstr "Малави"
+
+msgid "country.MX"
+msgstr "Мексика"
+
+msgid "country.MY"
+msgstr "Малайзия"
+
+msgid "country.MZ"
+msgstr "Мозамбик"
+
+msgid "country.NA"
+msgstr "Намибия"
+
+msgid "country.NC"
+msgstr "Новая Каледония"
+
+msgid "country.NE"
+msgstr "Нигер"
+
+msgid "country.NF"
+msgstr "Остров Норфолк"
+
+msgid "country.NG"
+msgstr "Нигерия"
+
+msgid "country.NI"
+msgstr "Никарагуа"
+
+msgid "country.NL"
+msgstr "Нидерланды"
+
+msgid "country.NO"
+msgstr "Норвегия"
+
+msgid "country.NP"
+msgstr "Непал"
+
+msgid "country.NR"
+msgstr "Науру"
+
+msgid "country.NU"
+msgstr "Ниуэ"
+
+msgid "country.NZ"
+msgstr "Новая Зеландия"
+
+msgid "country.OM"
+msgstr "Оман"
+
+msgid "country.PA"
+msgstr "Панама"
+
+msgid "country.PE"
+msgstr "Перу"
+
+msgid "country.PF"
+msgstr "Французская Полинезия"
+
+msgid "country.PG"
+msgstr "Папуа - Новая Гвинея"
+
+msgid "country.PH"
+msgstr "Филиппины"
+
+msgid "country.PK"
+msgstr "Пакистан"
+
+msgid "country.PL"
+msgstr "Польша"
+
+msgid "country.PM"
+msgstr "Сен-Пьер и Микелон"
+
+msgid "country.PN"
+msgstr "Питкэрн"
+
+msgid "country.PR"
+msgstr "Пуэрто-Рико"
+
+msgid "country.PS"
+msgstr "Палестина"
+
+msgid "country.PT"
+msgstr "Португалия"
+
+msgid "country.PW"
+msgstr "Палау"
+
+msgid "country.PY"
+msgstr "Парагвай"
+
+msgid "country.QA"
+msgstr "Катар"
+
+msgid "country.RE"
+msgstr "Реюньон"
+
+msgid "country.RO"
+msgstr "Румыния"
+
+msgid "country.RS"
+msgstr "Сербия"
+
+msgid "country.RU"
+msgstr "Российская Федерация"
+
+msgid "country.RW"
+msgstr "Руанда"
+
+msgid "country.SA"
+msgstr "Саудовская Аравия"
+
+msgid "country.SB"
+msgstr "Соломоновы Острова"
+
+msgid "country.SC"
+msgstr "Сейшелы"
+
+msgid "country.SD"
+msgstr "Судан"
+
+msgid "country.SE"
+msgstr "Швеция"
+
+msgid "country.SG"
+msgstr "Сингапур"
+
+msgid "country.SH"
+msgstr "Остров Святой Елены, Вознесения и Тристан-да-Кунья"
+
+msgid "country.SI"
+msgstr "Словения"
+
+msgid "country.SJ"
+msgstr "Шпицберген и Ян-Майен"
+
+msgid "country.SK"
+msgstr "Словакия"
+
+msgid "country.SL"
+msgstr "Сьерра-Леоне"
+
+msgid "country.SM"
+msgstr "Сан-Марино"
+
+msgid "country.SN"
+msgstr "Сенегал"
+
+msgid "country.SO"
+msgstr "Сомали"
+
+msgid "country.SR"
+msgstr "Суринам"
+
+msgid "country.SS"
+msgstr "Южный Судан"
+
+msgid "country.ST"
+msgstr "Сан-Томе и Принсипи"
+
+msgid "country.SV"
+msgstr "Сальвадор"
+
+msgid "country.SX"
+msgstr "Синт-Мартен (голландская часть)"
+
+msgid "country.SY"
+msgstr "Сирия"
+
+msgid "country.SZ"
+msgstr "Эсватини"
+
+msgid "country.TC"
+msgstr "Острова Теркс и Кайкос"
+
+msgid "country.TD"
+msgstr "Чад"
+
+msgid "country.TF"
+msgstr "Французские Южные и Антарктические Территории"
+
+msgid "country.TG"
+msgstr "Того"
+
+msgid "country.TH"
+msgstr "Таиланд"
+
+msgid "country.TJ"
+msgstr "Таджикистан"
+
+msgid "country.TK"
+msgstr "Токелау"
+
+msgid "country.TL"
+msgstr "Восточный Тимор"
+
+msgid "country.TM"
+msgstr "Туркменистан"
+
+msgid "country.TN"
+msgstr "Тунис"
+
+msgid "country.TO"
+msgstr "Тонга"
+
+msgid "country.TR"
+msgstr "Турция"
+
+msgid "country.TT"
+msgstr "Тринидад и Тобаго"
+
+msgid "country.TV"
+msgstr "Тувалу"
+
+msgid "country.TW"
+msgstr "Тайвань"
+
+msgid "country.TZ"
+msgstr "Танзания"
+
+msgid "country.UA"
+msgstr "Украина"
+
+msgid "country.UG"
+msgstr "Уганда"
+
+msgid "country.UM"
+msgstr "Малые отдалённые острова США"
+
+msgid "country.US"
+msgstr "Соединенные Штаты"
+
+msgid "country.UY"
+msgstr "Уругвай"
+
+msgid "country.UZ"
+msgstr "Узбекистан"
+
+msgid "country.VA"
+msgstr "Святой Престол (Государство-город Ватикан)"
+
+msgid "country.VC"
+msgstr "Сент-Винсент и Гренадины"
+
+msgid "country.VE"
+msgstr "Венесуэла"
+
+msgid "country.VG"
+msgstr "Британские Виргинские острова"
+
+msgid "country.VI"
+msgstr "Американские Виргинские острова"
+
+msgid "country.VN"
+msgstr "Вьетнам"
+
+msgid "country.VU"
+msgstr "Вануату"
+
+msgid "country.WF"
+msgstr "Уоллис и Футуна"
+
+msgid "country.WS"
+msgstr "Самоа"
+
+msgid "country.XK"
+msgstr "Косово"
+
+msgid "country.YE"
+msgstr "Йемен"
+
+msgid "country.YT"
+msgstr "Майотта"
+
+msgid "country.ZA"
+msgstr "Южная Африка"
+
+msgid "country.ZM"
+msgstr "Замбия"
+
+msgid "country.ZW"
+msgstr "Зимбабве"
+
+msgid "country.not_applicable"
+msgstr "Н/Д"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "Заблокированные запросы"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "Заблокированные уникальные IP"
+
+msgid "dashboard.card.certificates.title"
+msgstr "Сертификаты"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s в сети / %(down)s не в сети / %(loading)s загрузка"
+
+msgid "dashboard.card.instances.title"
+msgstr "Экземпляры"
+
+msgid "dashboard.card.news.title"
+msgstr "Новости"
+
+msgid "dashboard.card.plan.title"
+msgstr "План"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s базовых / %(pro)s PRO / %(external)s внешних"
+
+msgid "dashboard.card.plugins.title"
+msgstr "Плагины"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "Критический уровень: системе не хватает памяти!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "Отличный объём памяти для продуктивной среды"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "Рекомендуется обновить до 16 ГБ и более для использования в продуктивной среде"
+
+msgid "dashboard.card.ram.title"
+msgstr "Системная память (RAM)"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% использовано"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "Предупреждение: недостаток памяти может повлиять на производительность"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s в сети / %(draft)s черновик"
+
+msgid "dashboard.card.services.title"
+msgstr "Сервисы"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "Основные причины блокировки"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "Всего запросов"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "Скоро"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "Апстримы"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "Заблокированные запросы по странам"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "Заблокированные запросы"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "Количество"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "Заблокированные запросы с течением времени"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "Время"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "Статус блокировки по времени"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "Заблокированные запросы"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "Распределение статусов запросов"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "Заблокировано"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "Заблокированные запросы во времени (выбранный диапазон)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "Самый блокируемый IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "Топ 10 заблокированных IP"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "Заблокированные запросы"
+
+msgid "dashboard.map.hover_info"
+msgstr "Наведите курсор на страну"
+
+msgid "dashboard.map.legend"
+msgstr "Легенда"
+
+msgid "dashboard.map.no_data"
+msgstr "Нет данных"
+
+msgid "dashboard.mini.across_countries"
+msgstr "Количество стран: %(count)s"
+
+msgid "dashboard.mini.enforced"
+msgstr "в настоящее время применяется"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% заблокировано"
+
+msgid "dashboard.mini.scheduled"
+msgstr "планируемый"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "Заблокированные и разрешённые"
+
+msgid "dashboard.panel.map_sub"
+msgstr "Наведите указатель для подробностей"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "По сработавшему правилу"
+
+msgid "dashboard.panel.status_sub"
+msgstr "Коды ответов HTTP"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "Выбранный диапазон"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "По числу запросов"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "· всего запросов: %(total)s"
+
+msgid "dashboard.status.free_plan"
+msgstr "Бесплатный план"
+
+msgid "dashboard.status.renews"
+msgstr "Автоматическое продление"
+
+msgid "dashboard.status.services_licensed"
+msgstr "Лицензировано сервисов: %(count)s"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "по сравнению с предыдущим"
+
+msgid "dashboard.status.vs_prev"
+msgstr "по сравнению с предыдущим"
+
+msgid "dashboard.tile.bans_active"
+msgstr "Активные блокировки"
+
+msgid "dashboard.tile.jobs"
+msgstr "Запланированные задания"
+
+msgid "dashboard.tile.trend"
+msgstr "Динамика заблокированных запросов"
+
+msgid "dashboard.welcome.greeting"
+msgstr "С возвращением,"
+
+msgid "dashboard.welcome.title"
+msgstr "С возвращением, %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "Последние %(days)s дней"
+
+msgid "dashboard.window.title"
+msgstr "Окно дашборда"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "Все %(count)s совпадающих %(entity)s выбраны."
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "Выбрать все %(count)s совпадающих %(entity)s"
+
+msgid "datatable.bulk_select_clear"
+msgstr "Очистить выбор"
+
+msgid "datatable.bulk_select_page"
+msgstr "Все %(count)s %(entity)s на этой странице выбраны."
+
+msgid "datatable.info_bans"
+msgstr "Показано с %(start)s по %(end)s из %(total)s банов"
+
+msgid "datatable.info_cache"
+msgstr "Показано с %(start)s по %(end)s из %(total)s файлов кэша"
+
+msgid "datatable.info_configs"
+msgstr "Показано с %(start)s по %(end)s из %(total)s кастомных конфигураций"
+
+msgid "datatable.info_empty_bans"
+msgstr "Баны отсутствуют"
+
+msgid "datatable.info_empty_cache"
+msgstr "Файлы кэша отсутствуют"
+
+msgid "datatable.info_empty_configs"
+msgstr "Кастомные конфигурации отсутствуют"
+
+msgid "datatable.info_empty_instances"
+msgstr "Экземпляры отсутствуют"
+
+msgid "datatable.info_empty_items"
+msgstr "Элементы отсутствуют"
+
+msgid "datatable.info_empty_jobs"
+msgstr "Задачи отсутствуют"
+
+msgid "datatable.info_empty_plugins"
+msgstr "Плагины отсутствуют"
+
+msgid "datatable.info_empty_reports"
+msgstr "Отчеты отсутствуют"
+
+msgid "datatable.info_empty_services"
+msgstr "Сервисы отсутствуют"
+
+msgid "datatable.info_empty_templates"
+msgstr "Нет доступных шаблонов"
+
+msgid "datatable.info_filtered_bans"
+msgstr "(отфильтровано из _MAX_ всего банов)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(отфильтровано из _MAX_ всего файлов кэша)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(отфильтровано из _MAX_ всего кастомных конфигураций)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(отфильтровано из _MAX_ всего экземпляров)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(отфильтровано из _MAX_ всего элементов)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(отфильтровано из _MAX_ всего задач)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(отфильтровано из _MAX_ всего плагинов)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(отфильтровано из _MAX_ всего отчетов)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(отфильтровано из _MAX_ всего сервисов)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(отфильтровано из _MAX_ шаблонов)"
+
+msgid "datatable.info_instances"
+msgstr "Показано с %(start)s по %(end)s из %(total)s экземпляров"
+
+msgid "datatable.info_items"
+msgstr "Показано с %(start)s по %(end)s из %(total)s элементов"
+
+msgid "datatable.info_jobs"
+msgstr "Показано с %(start)s по %(end)s из %(total)s задач"
+
+msgid "datatable.info_plugins"
+msgstr "Показано с %(start)s по %(end)s из %(total)s плагинов"
+
+msgid "datatable.info_reports"
+msgstr "Показано с %(start)s по %(end)s из %(total)s отчетов"
+
+msgid "datatable.info_services"
+msgstr "Показано с %(start)s по %(end)s из %(total)s сервисов"
+
+msgid "datatable.info_templates"
+msgstr "Показано от %(start)s до %(end)s из %(total)s шаблонов"
+
+msgid "datatable.length_all"
+msgstr "Все"
+
+msgid "datatable.length_menu_bans"
+msgstr "Показывать _MENU_ банов"
+
+msgid "datatable.length_menu_cache"
+msgstr "Показывать _MENU_ файлов кэша"
+
+msgid "datatable.length_menu_configs"
+msgstr "Показывать _MENU_ кастомных конфигураций"
+
+msgid "datatable.length_menu_instances"
+msgstr "Показывать _MENU_ экземпляров"
+
+msgid "datatable.length_menu_items"
+msgstr "Показывать _MENU_ элементов"
+
+msgid "datatable.length_menu_jobs"
+msgstr "Показывать _MENU_ задач"
+
+msgid "datatable.length_menu_plugins"
+msgstr "Показывать _MENU_ плагинов"
+
+msgid "datatable.length_menu_reports"
+msgstr "Показывать _MENU_ отчетов"
+
+msgid "datatable.length_menu_services"
+msgstr "Показывать _MENU_ сервисов"
+
+msgid "datatable.length_menu_templates"
+msgstr "Показать _MENU_ шаблонов"
+
+msgid "datatable.paginate.first"
+msgstr "Первая"
+
+msgid "datatable.paginate.last"
+msgstr "Последняя"
+
+msgid "datatable.paginate.next"
+msgstr "Следующая"
+
+msgid "datatable.paginate.previous"
+msgstr "Предыдущая"
+
+msgid "datatable.processing"
+msgstr "Обработка..."
+
+msgid "datatable.search"
+msgstr "Поиск:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "Баны не выбраны"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "Выбран 1 бан"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "Выбрано %d банов"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "Файлы кэша не выбраны"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "Выбран 1 файл кэша"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "Выбрано %d файлов кэша"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "Кастомные конфигурации не выбраны"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "Выбрана 1 кастомная конфигурация"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "Выбрано %d кастомных конфигураций"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "Экземпляры не выбраны"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "Выбран 1 экземпляр"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "Выбрано %d экземпляров"
+
+msgid "datatable.select_rows_items_0"
+msgstr "Элементы не выбраны"
+
+msgid "datatable.select_rows_items_1"
+msgstr "Выбран 1 элемент"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "Выбрано %d элементов"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "Задачи не выбраны"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "Выбрана 1 задача"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "Выбрано %d задач"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "Плагины не выбраны"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "Выбран 1 плагин"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "Выбрано %d плагинов"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "Отчеты не выбраны"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "Выбран 1 отчет"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "Выбрано %d отчетов"
+
+msgid "datatable.select_rows_services_0"
+msgstr "Сервисы не выбраны"
+
+msgid "datatable.select_rows_services_1"
+msgstr "Выбран 1 сервис"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "Выбрано %d сервисов"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "Шаблоны не выбраны"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "Выбран 1 шаблон"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "Выбрано %d шаблонов"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s выбрано"
+
+msgid "datatable.selected_list_empty"
+msgstr "%(entity)s не выбрано."
+
+msgid "datatable.zero_records_bans"
+msgstr "Совпадающих банов не найдено"
+
+msgid "datatable.zero_records_cache"
+msgstr "Совпадающих файлов кэша не найдено"
+
+msgid "datatable.zero_records_configs"
+msgstr "Совпадающих кастомных конфигураций не найдено"
+
+msgid "datatable.zero_records_instances"
+msgstr "Совпадающих экземпляров не найдено"
+
+msgid "datatable.zero_records_items"
+msgstr "Совпадающих элементов не найдено"
+
+msgid "datatable.zero_records_jobs"
+msgstr "Совпадающих задач не найдено"
+
+msgid "datatable.zero_records_plugins"
+msgstr "Совпадающих плагинов не найдено"
+
+msgid "datatable.zero_records_reports"
+msgstr "Совпадающих отчетов не найдено"
+
+msgid "datatable.zero_records_services"
+msgstr "Совпадающих сервисов не найдено"
+
+msgid "datatable.zero_records_templates"
+msgstr "Совпадающих шаблонов не найдено"
+
+msgid "dev_log.copy_failed"
+msgstr "Не удалось скопировать текст:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "Не удалось получить новости:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "Пропуск некорректной строки: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "1 час"
+
+msgid "duration.1_week"
+msgstr "1 неделя"
+
+msgid "duration.24_hours"
+msgstr "24 часа"
+
+msgid "duration.custom"
+msgstr "Пользовательский"
+
+msgid "duration.permanent"
+msgstr "Бессрочно"
+
+msgid "error.401.help"
+msgstr "Для доступа к этому ресурсу необходимо войти в систему."
+
+msgid "error.401.message"
+msgstr "Пожалуйста, войдите, чтобы продолжить."
+
+msgid "error.401.title"
+msgstr "Требуется аутентификация"
+
+msgid "error.403.help"
+msgstr "Пожалуйста, проверьте свои учетные данные или свяжитесь с администратором, если считаете, что это ошибка."
+
+msgid "error.403.message"
+msgstr "У вас нет разрешения на доступ к этой странице."
+
+msgid "error.403.title"
+msgstr "Доступ запрещен"
+
+msgid "error.404.help"
+msgstr "Пожалуйста, проверьте правильность URL-адреса или свяжитесь с администратором, если считаете, что это ошибка."
+
+msgid "error.404.message"
+msgstr "Запрошенный ресурс не найден."
+
+msgid "error.404.title"
+msgstr "Не найдено"
+
+msgid "error.5xx.help"
+msgstr "Пожалуйста, повторите попытку позже или свяжитесь с администратором, если проблема не устранена."
+
+msgid "error.5xx.message"
+msgstr "Произошла непредвиденная ошибка сервера."
+
+msgid "error.5xx.title"
+msgstr "Ошибка сервера"
+
+msgid "error.ban_update_failed"
+msgstr "Не удалось обновить срок бана. Пожалуйста, попробуйте еще раз."
+
+msgid "error.reports_load_error"
+msgstr "Ошибка при загрузке отчетов. Пожалуйста, попробуйте обновить страницу."
+
+msgid "error.unban_failed"
+msgstr "Не удалось разбанить IP-адрес. Пожалуйста, попробуйте еще раз."
+
+msgid "flash.easter_egg"
+msgstr "Если вы это читаете, значит, вы любопытны"
+
+msgid "flash.error"
+msgstr "Ошибка"
+
+msgid "flash.message"
+msgstr "Информация"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "У вас больше сервисов, чем позволяет ваша лицензия PRO. Обновите лицензию или переведите некоторые сервисы в режим Черновика, чтобы разблокировать лицензию PRO."
+
+msgid "flash.time.just_now"
+msgstr "только что"
+
+msgid "flash.warning"
+msgstr "Предупреждение"
+
+msgid "footer.blog"
+msgstr "Блог"
+
+msgid "footer.documentation"
+msgstr "Документация"
+
+msgid "footer.license"
+msgstr "Лицензия"
+
+msgid "footer.made_by"
+msgstr "создано"
+
+msgid "footer.privacy"
+msgstr "Конфиденциальность"
+
+msgid "footer.support"
+msgstr "Поддержка"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "Включить прикрепленные пользовательские конфигурации"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "Перезаписать существующие пользовательские конфигурации UI/API"
+
+msgid "form.checkbox.remember_me"
+msgstr "Запомнить меня"
+
+msgid "form.help.ban_specific_service"
+msgstr "Бан будет применяться только к этому конкретному сервису."
+
+msgid "form.help.hostname_length_limit"
+msgstr "Имя хоста ограничено 256 символами."
+
+msgid "form.help.hostname_special_chars"
+msgstr "Для указания протокола/порта допускаются только `/` и `:`."
+
+msgid "form.help.multivalue_separator"
+msgstr "Значения разделяются:"
+
+msgid "form.help.permanent_ban"
+msgstr "Если отмечено, бан будет действовать бессрочно, пока не будет удалён вручную"
+
+msgid "form.help.photo_extensions"
+msgstr "Разрешены JPG, GIF или PNG. Максимальный размер: 800КБ."
+
+msgid "form.label.2fa_code"
+msgstr "Код 2FA"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "Код 2FA или код восстановления"
+
+msgid "form.label.admin_email"
+msgstr "Email администратора"
+
+msgid "form.label.admin_password"
+msgstr "Пароль администратора"
+
+msgid "form.label.admin_username"
+msgstr "Имя пользователя администратора"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "Авто Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "Область бана"
+
+msgid "form.label.certificate_authority"
+msgstr "Центр сертификации"
+
+msgid "form.label.certificate_priority"
+msgstr "Приоритет сертификата"
+
+msgid "form.label.challenge_type"
+msgstr "Тип вызова"
+
+msgid "form.label.config_type"
+msgstr "Тип конфигурации"
+
+msgid "form.label.configuration_name"
+msgstr "Имя конфигурации"
+
+msgid "form.label.confirm_password"
+msgstr "Подтвердите пароль"
+
+msgid "form.label.current_password"
+msgstr "Текущий пароль"
+
+msgid "form.label.custom_config"
+msgstr "Конфигурация"
+
+msgid "form.label.custom_end_date"
+msgstr "Пользовательская дата окончания"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "Пользовательский SSL-сертификат"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "Данные пользовательского SSL-сертификата (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "Пользовательский SSL-ключ"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "Данные пользовательского SSL-ключа (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Элементы учетных данных DNS Let's Encrypt"
+
+msgid "form.label.dns_propagation"
+msgstr "Задержка распространения DNS"
+
+msgid "form.label.dns_provider"
+msgstr "DNS-провайдер"
+
+msgid "form.label.email"
+msgstr "Email"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "Email для Let's Encrypt"
+
+msgid "form.label.end_date"
+msgstr "Дата окончания"
+
+msgid "form.label.hostname"
+msgstr "Имя хоста"
+
+msgid "form.label.instance_id"
+msgstr "ID экземпляра"
+
+msgid "form.label.ip_address"
+msgstr "IP-адрес"
+
+msgid "form.label.keywords"
+msgstr "Ключевые слова"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Пользовательский профиль Let's Encrypt"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "Отключить публичные суффиксы (черный список PSL)"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Элементы учетных данных DNS Let's Encrypt"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Профиль Let's Encrypt"
+
+msgid "form.label.license_key"
+msgstr "Лицензионный ключ"
+
+msgid "form.label.make_permanent"
+msgstr "Сделать бессрочным"
+
+msgid "form.label.name"
+msgstr "Имя"
+
+msgid "form.label.new_duration"
+msgstr "Новая продолжительность"
+
+msgid "form.label.new_password"
+msgstr "Новый пароль"
+
+msgid "form.label.optional"
+msgstr "(Необязательно)"
+
+msgid "form.label.passkey_name"
+msgstr "Имя ключа доступа"
+
+msgid "form.label.password"
+msgstr "Пароль"
+
+msgid "form.label.permanent_ban"
+msgstr "Постоянный бан"
+
+msgid "form.label.plugin_id"
+msgstr "Плагин"
+
+msgid "form.label.raw_configuration"
+msgstr "Необработанная конфигурация"
+
+msgid "form.label.real_ip_from"
+msgstr "Реальный IP из"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "Реальный IP из (URL-адреса)"
+
+msgid "form.label.real_ip_header"
+msgstr "Заголовок реального IP"
+
+msgid "form.label.real_ip_recursive"
+msgstr "Рекурсивный реальный IP"
+
+msgid "form.label.reason"
+msgstr "Причина"
+
+msgid "form.label.secret_token"
+msgstr "Секретный токен"
+
+msgid "form.label.server_name"
+msgstr "Имя сервера"
+
+msgid "form.label.service_name"
+msgstr "Имя сервиса"
+
+msgid "form.label.template_id"
+msgstr "ID Шаблона"
+
+msgid "form.label.theme"
+msgstr "Тема"
+
+msgid "form.label.type"
+msgstr "Тип"
+
+msgid "form.label.ui_host"
+msgstr "Хост UI"
+
+msgid "form.label.ui_url"
+msgstr "URL UI"
+
+msgid "form.label.use_custom_ssl"
+msgstr "Использовать пользовательский SSL"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "Использовать Let's Encrypt Staging"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "Использовать протокол PROXY"
+
+msgid "form.label.use_real_ip"
+msgstr "Использовать реальный IP"
+
+msgid "form.label.username"
+msgstr "Имя пользователя"
+
+msgid "form.label.wildcard_certificates"
+msgstr "Wildcard-сертификаты"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "Таймаут подключения API ZeroSSL"
+
+msgid "form.label.zerossl_api_key"
+msgstr "API-ключ ZeroSSL"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "Максимальное время API ZeroSSL"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "Повторы API ZeroSSL"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "Задержка повтора API ZeroSSL"
+
+msgid "form.placeholder.2fa_code"
+msgstr "Введите код"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "Введите код или код восстановления"
+
+msgid "form.placeholder.config_name"
+msgstr "моя-кастомная-конфигурация"
+
+msgid "form.placeholder.current_password"
+msgstr "Текущий пароль"
+
+msgid "form.placeholder.enter_username"
+msgstr "Введите ваше имя пользователя"
+
+msgid "form.placeholder.keywords"
+msgstr "Ключевые слова"
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "Введите значение..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "Поиск плагинов..."
+
+msgid "form.placeholder.search"
+msgstr "Поиск..."
+
+msgid "form.placeholder.secret_token"
+msgstr "Секретный токен"
+
+msgid "form.placeholder.select_service"
+msgstr "Выберите сервис"
+
+msgid "form.placeholder.username_example"
+msgstr "иванпетров"
+
+msgid "form.validation.confirm_password_match"
+msgstr "Пароли не совпадают."
+
+msgid "form.validation.password_length"
+msgstr "Пароль должен содержать не менее 8 символов."
+
+msgid "form.validation.password_number"
+msgstr "Пароль должен содержать не менее 1 цифры."
+
+msgid "form.validation.password_special"
+msgstr "Пароль должен содержать не менее 1 специального символа."
+
+msgid "form.validation.password_uppercase"
+msgstr "Пароль должен содержать не менее 1 заглавной буквы."
+
+msgid "input_list.view_all_settings"
+msgstr "Просмотреть все %(count)s настроек"
+
+msgid "instance.type.container"
+msgstr "Контейнер"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "Статический"
+
+msgid "instances.down"
+msgstr "Не в сети"
+
+msgid "instances.loading"
+msgstr "Загрузка"
+
+msgid "instances.subtitle"
+msgstr "Управлять экземплярами BunkerWeb, подключенными к этому интерфейсу: создавайте, пингуйте, перезагружайте, останавливайте или удаляйте их."
+
+msgid "instances.total"
+msgstr "Общее количество экземпляров"
+
+msgid "instances.up"
+msgstr "В сети"
+
+msgid "interval.day"
+msgstr "Ежедневно"
+
+msgid "interval.hour"
+msgstr "Ежечасно"
+
+msgid "interval.minute"
+msgstr "Каждую минуту"
+
+msgid "interval.once"
+msgstr "Один раз"
+
+msgid "interval.week"
+msgstr "Еженедельно"
+
+msgid "job.history.end_date"
+msgstr "Дата окончания"
+
+msgid "job.history.start_date"
+msgstr "Дата начала"
+
+msgid "job.history.success"
+msgstr "Успех"
+
+msgid "jobs.subtitle"
+msgstr "Запланированные и разовые задачи, выполняемые планировщиком BunkerWeb — отслеживайте их статус и запускайте по требованию."
+
+msgid "jobs.tile.async"
+msgstr "Асинхронные"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "Последний запуск завершился неудачно"
+
+msgid "jobs.tile.reload_required"
+msgstr "Требуется перезагрузка"
+
+msgid "jobs.tile.total"
+msgstr "Общее количество задач"
+
+msgid "legend.locked_settings_annotation"
+msgstr "Заблокировано (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "Заблокированные параметры выделены"
+
+msgid "link.back_to_login"
+msgstr "Назад ко входу"
+
+msgid "link.forgot_password"
+msgstr "Забыли пароль?"
+
+msgid "link.get_support"
+msgstr "Получить поддержку"
+
+msgid "link.here"
+msgstr "здесь"
+
+msgid "link.more_info"
+msgstr "Подробнее"
+
+msgid "link.more_news"
+msgstr "Больше новостей"
+
+msgid "link.opens_new_tab"
+msgstr "(открывается в новой вкладке)"
+
+msgid "link.privacy_policy"
+msgstr "Политика конфиденциальности"
+
+msgid "link.read_more"
+msgstr "Читать дальше"
+
+msgid "link.see_more"
+msgstr "Смотреть больше"
+
+msgid "link.upgrade"
+msgstr "Обновить?"
+
+msgid "link.use_authenticator_code"
+msgstr "Используйте код аутентификатора"
+
+msgid "link.use_recovery_code"
+msgstr "Используйте код восстановления"
+
+msgid "login.or_use_password"
+msgstr "или используйте пароль"
+
+msgid "login.subtitle"
+msgstr "Войти в свой аккаунт BunkerWeb"
+
+msgid "login.title"
+msgstr "Войти"
+
+msgid "logs.all_sources"
+msgstr "Все источники (в реальном времени)"
+
+msgid "logs.annotation_error"
+msgstr "Ошибка"
+
+msgid "logs.annotation_warning"
+msgstr "Предупреждение"
+
+msgid "logs.collapse"
+msgstr "Свернуть"
+
+msgid "logs.expand"
+msgstr "Развернуть"
+
+msgid "logs.filter_levels"
+msgstr "Уровни"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "Ошибки: %(errors)s, предупреждения: %(warnings)s"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Журналы Let's Encrypt"
+
+msgid "logs.level_all"
+msgstr "Все журналы"
+
+msgid "logs.level_critical"
+msgstr "Критический"
+
+msgid "logs.level_debug"
+msgstr "Отладка"
+
+msgid "logs.level_error"
+msgstr "Ошибка"
+
+msgid "logs.level_errors_only"
+msgstr "Только ошибки"
+
+msgid "logs.level_info"
+msgstr "Инфо"
+
+msgid "logs.level_notice"
+msgstr "Уведомление"
+
+msgid "logs.level_security_only"
+msgstr "Только безопасность"
+
+msgid "logs.level_warning"
+msgstr "Предупреждение"
+
+msgid "logs.lines_all"
+msgstr "Все"
+
+msgid "logs.lines_label"
+msgstr "Строки"
+
+msgid "logs.live_title"
+msgstr "Журналы в реальном времени"
+
+msgid "logs.main_logs"
+msgstr "Основные журналы"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s строк · изменено %(when)s"
+
+msgid "logs.new_lines"
+msgstr "новые строки"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s новых строк журнала"
+
+msgid "logs.no_log_files"
+msgstr "Нет файлов журналов для отображения, обратитесь к документации для получения дополнительной информации о том, как включить ведение журналов."
+
+msgid "logs.pause"
+msgstr "Приостановить"
+
+msgid "logs.resume"
+msgstr "Продолжить"
+
+msgid "logs.select_file_prompt"
+msgstr "Выберите файл журнала для просмотра его содержимого"
+
+msgid "logs.showing_all"
+msgstr "%(total)s строк"
+
+msgid "logs.showing_some"
+msgstr "показано %(shown)s из %(total)s"
+
+msgid "logs.tailing_sources"
+msgstr "Отслеживание · %(count)s источников"
+
+msgid "logs.taller"
+msgstr "Выше"
+
+msgid "logs.trimmed_notice"
+msgstr "--- %(count)s старых строк лога были удалены для повышения производительности ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы."
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "Заблокировать IP из всех %(count)s подходящих отчётов? Повторяющиеся цели будут применены один раз."
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "Вы уверены, что хотите удалить выбранный файл кэша?"
+msgstr[1] "Вы уверены, что хотите удалить выбранные файлы кэша?"
+msgstr[2] "Вы уверены, что хотите удалить выбранные файлы кэша?"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "Преобразовать выбранные пользовательские конфигурации?"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "Вы уверены, что хотите преобразовать выбранные пользовательские конфигурации в %(state)s?"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?"
+msgstr[1] "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?"
+msgstr[2] "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "Вы уверены, что хотите конвертировать выбранные сервисы?"
+
+msgid "modal.body.confirm_next_step"
+msgstr "Вы уверены, что хотите перейти к следующему шагу?"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "Вы уверены, что хотите удалить выбранный плагин?"
+msgstr[1] "Вы уверены, что хотите удалить выбранные плагины?"
+msgstr[2] "Вы уверены, что хотите удалить выбранные плагины?"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "Вы уверены, что хотите удалить шаблон %(name)s?"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "Вы уверены, что хотите удалить выбранный экземпляр?"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "Вы уверены, что хотите удалить выбранный экземпляр?"
+msgstr[1] "Вы уверены, что хотите удалить выбранные экземпляры?"
+msgstr[2] "Вы уверены, что хотите удалить выбранные экземпляры?"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "Один или несколько выбранных шаблонов назначены сервисам (всего %(services_count)s сервисов). Их удаление приведет к очистке этих назначений. Вы хотите продолжить?"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "Вы уверены, что хотите удалить этот шаг?"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "Содержимое"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "Шаг"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "Используется глобальными настройками"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "Используется сервисами: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "Выбранные службы будут экспортированы. Включите параметр ниже, чтобы добавить их прикрепленные пользовательские конфигурации в архив .zip."
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "Это загрузит глобальные настройки и применит их к текущему шаблону."
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "Обновляются только параметры, присутствующие в этом шаблоне."
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "Значения, совпадающие со значениями по умолчанию, игнорируются."
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME никогда не перезаписывается."
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "Перетащите сюда файл экспорта пользовательских конфигураций или нажмите, чтобы выбрать файл."
+
+msgid "modal.body.import_configs_warning"
+msgstr "Пользовательские конфигурации, созданные scheduler, autoconf или templates, всегда сохраняются. Перезаписать можно только конфигурации UI/API."
+
+msgid "modal.body.import_services_dropzone"
+msgstr "Перетащите файл экспорта служб сюда или нажмите, чтобы выбрать файл."
+
+msgid "modal.body.import_services_warning"
+msgstr "Импорт служб создаст новые службы пользовательского интерфейса из файла экспорта. Существующие службы пропускаются."
+
+msgid "modal.body.instance_creation_alert"
+msgstr "Вам не нужно указывать порт или имя сервера; для конфигурации экземпляра будут использованы значения `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` и `API_SERVER_NAME`."
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "Если возникнут проблемы, вы можете вручную принять небезопасный сертификат:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "Пожалуйста, сохраните эти коды восстановления в безопасном месте (например, в менеджере паролей или сейфе). Вы можете использовать их для доступа к своей учетной записи, если потеряете устройство аутентификации."
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "Эти коды восстановления показываются только один раз. Пожалуйста, убедитесь, что вы сохранили их в безопасном месте."
+
+msgid "modal.body.reset_template_alert"
+msgstr "Вы уверены, что хотите сбросить текущие настройки шаблона и пользовательские конфигурации?"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "Вы уверены, что хотите конвертировать выбранные сервисы?"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "Вы уверены, что хотите удалить выбранные сервисы?"
+
+#. plural pair; 3 form(s) for ru, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "Вы уверены, что хотите разбанить выбранный IP-адрес?"
+msgstr[1] "Вы уверены, что хотите разбанить выбранные IP-адреса?"
+msgstr[2] "Вы уверены, что хотите разбанить выбранные IP-адреса?"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "Снять все %(count)s подходящих блокировок?"
+
+msgid "modal.body.update_duration_alert"
+msgstr "Выберите новую продолжительность для выбранных банов:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "Выберите новый срок для всех %(count)s подходящих блокировок:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "Применить глобальные настройки"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "Сбросить конфигурацию шаблона"
+
+msgid "modal.section.ban_details"
+msgstr "Детали бана"
+
+msgid "modal.section.ban_scope"
+msgstr "Область бана"
+
+msgid "modal.section.delete"
+msgstr "Удалить"
+
+msgid "modal.title.add_bans"
+msgstr "Добавить блокировку"
+
+msgid "modal.title.add_plugins"
+msgstr "Добавить плагины"
+
+msgid "modal.title.confirm_conversion"
+msgstr "Подтвердить конвертацию"
+
+msgid "modal.title.confirm_deletion"
+msgstr "Подтвердить удаление"
+
+msgid "modal.title.confirm_unban"
+msgstr "Подтвердить разбан"
+
+msgid "modal.title.create_new_instance"
+msgstr "Создать новый экземпляр"
+
+msgid "modal.title.create_template"
+msgstr "Создать шаблон"
+
+msgid "modal.title.delete_instance"
+msgstr "Удалить экземпляры"
+
+msgid "modal.title.delete_step"
+msgstr "Удалить шаг"
+
+msgid "modal.title.delete_template"
+msgstr "Удалить шаблоны"
+
+msgid "modal.title.edit_template"
+msgstr "Редактировать шаблон: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "Экспорт служб"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "Применить глобальные настройки?"
+
+msgid "modal.title.from_plugin"
+msgstr "из плагина"
+
+msgid "modal.title.full_url"
+msgstr "Полный URL"
+
+msgid "modal.title.import_configs"
+msgstr "Импорт пользовательских конфигураций"
+
+msgid "modal.title.import_services"
+msgstr "Импорт служб"
+
+msgid "modal.title.job_history"
+msgstr "Последние 10 выполнений задачи"
+
+msgid "modal.title.job_history_count"
+msgstr "Последние %(count)s выполнений задачи"
+
+msgid "modal.title.multiselect_selected"
+msgstr "Выбранные элементы"
+
+msgid "modal.title.recovery_codes"
+msgstr "Коды восстановления"
+
+msgid "modal.title.reset_template_config"
+msgstr "Сбросить конфигурацию шаблона?"
+
+msgid "modal.title.security_report_details"
+msgstr "Детали отчета о безопасности"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "Имя сервера не уникально"
+
+msgid "modal.title.update_duration"
+msgstr "Обновить срок бана"
+
+msgid "mode.advanced"
+msgstr "Продвинутый"
+
+msgid "mode.compose"
+msgstr "Создать"
+
+msgid "mode.easy"
+msgstr "Простой"
+
+msgid "mode.raw"
+msgstr "Исходный"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "Обновить до PRO"
+
+msgid "navbar.dropdown.logout"
+msgstr "Выйти"
+
+msgid "navbar.link.documentation"
+msgstr "Документация"
+
+msgid "navbar.version"
+msgstr "Версия"
+
+msgid "navigation.about"
+msgstr "О программе"
+
+msgid "navigation.bans"
+msgstr "Баны"
+
+msgid "navigation.cache"
+msgstr "Кэш"
+
+msgid "navigation.certificates"
+msgstr "Сертификаты"
+
+msgid "navigation.configs"
+msgstr "Конфигурации"
+
+msgid "navigation.configure"
+msgstr "Настройка"
+
+msgid "navigation.edition_community"
+msgstr "Сообщество"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "Дополнительные страницы"
+
+msgid "navigation.global_settings"
+msgstr "Глобальные настройки"
+
+msgid "navigation.groups"
+msgstr "Группы ресурсов"
+
+msgid "navigation.home"
+msgstr "Главная"
+
+msgid "navigation.instances"
+msgstr "Экземпляры"
+
+msgid "navigation.jobs"
+msgstr "Задачи"
+
+msgid "navigation.logs"
+msgstr "Логи"
+
+msgid "navigation.misc"
+msgstr "Разное"
+
+msgid "navigation.mode_selection"
+msgstr "Выбор режима"
+
+msgid "navigation.more"
+msgstr "Ещё..."
+
+msgid "navigation.operate"
+msgstr "Управление"
+
+msgid "navigation.overview"
+msgstr "Обзор"
+
+msgid "navigation.plugin_activated"
+msgstr "Плагин активирован"
+
+msgid "navigation.plugin_activated_global"
+msgstr "Плагин активирован глобально"
+
+msgid "navigation.plugin_deactivated"
+msgstr "Плагин деактивирован"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "Плагин деактивирован глобально"
+
+msgid "navigation.plugins"
+msgstr "Плагины"
+
+msgid "navigation.plugins_pages"
+msgstr "Страницы плагинов"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "Перенаправления"
+
+msgid "navigation.reports"
+msgstr "Отчеты"
+
+msgid "navigation.services"
+msgstr "Сервисы"
+
+msgid "navigation.support"
+msgstr "Поддержка"
+
+msgid "navigation.system"
+msgstr "Система"
+
+msgid "navigation.templates"
+msgstr "Шаблоны"
+
+msgid "navigation.threatmap"
+msgstr "Карта угроз"
+
+msgid "navigation.timings"
+msgstr "Время выполнения"
+
+msgid "navigation.upstreams"
+msgstr "Апстримы"
+
+msgid "navigation.web_cache"
+msgstr "Веб-кэш"
+
+msgid "navigation.workflows"
+msgstr "Рабочие процессы"
+
+msgid "news.image_alt"
+msgstr "Изображение новости"
+
+msgid "news.posted_on"
+msgstr "Опубликовано"
+
+msgid "news.slide"
+msgstr "Слайд"
+
+msgid "newsletter.legal_agreement"
+msgstr "Я подписываюсь на рассылку и соглашаюсь с:"
+
+msgid "newsletter.title"
+msgstr "Подписаться на рассылку"
+
+msgid "onboarding.dismiss"
+msgstr "Скрыть"
+
+msgid "onboarding.error"
+msgstr "Не удалось загрузить руководство."
+
+msgid "onboarding.hint.bans"
+msgstr "Баны — это клиенты, которым BunkerWeb сейчас отказывает. В каждой строке указаны причина и срок окончания."
+
+msgid "onboarding.hint.home"
+msgstr "Эта панель показывает текущее состояние: работающие экземпляры, обслуживаемые сервисы и трафик, обработанный BunkerWeb."
+
+msgid "onboarding.hint.logs"
+msgstr "Живые логи со всех экземпляров, с фильтрами по экземпляру и уровню важности."
+
+msgid "onboarding.hint.reports"
+msgstr "Каждый заблокированный запрос попадает сюда. Откройте его, чтобы увидеть, какая проверка безопасности его остановила и почему."
+
+msgid "onboarding.hint.title"
+msgstr "Краткий обзор"
+
+msgid "onboarding.item.first_block"
+msgstr "Увидеть, как BunkerWeb что-то блокирует"
+
+msgid "onboarding.item.https"
+msgstr "Настроить HTTPS"
+
+msgid "onboarding.item.install"
+msgstr "Установите BunkerWeb на 1+ узле"
+
+msgid "onboarding.item.mfa"
+msgstr "Включите MFA"
+
+msgid "onboarding.item.pro"
+msgstr "Активируйте BunkerWeb PRO"
+
+msgid "onboarding.item.read_bans"
+msgstr "Посмотреть, кто забанен и до какого времени"
+
+msgid "onboarding.item.read_home"
+msgstr "Прочитать панель: что сейчас в порядке"
+
+msgid "onboarding.item.read_logs"
+msgstr "Следить за логами в реальном времени по всем экземплярам"
+
+msgid "onboarding.item.read_reports"
+msgstr "Выяснить, почему запрос был заблокирован"
+
+msgid "onboarding.item.service"
+msgstr "Зарегистрируйте первую службу"
+
+msgid "onboarding.item.workflow"
+msgstr "Привязать workflow безопасности"
+
+msgid "onboarding.not_saved"
+msgstr "Не удалось сохранить."
+
+msgid "onboarding.pro_tips"
+msgstr "Советы PRO"
+
+msgid "onboarding.restart"
+msgstr "Запустить руководство заново"
+
+msgid "onboarding.restart_help"
+msgstr "Снова показать начальные шаги в верхней панели."
+
+msgid "onboarding.subtitle"
+msgstr "Несколько шагов, чтобы BunkerWeb защищал ваши сервисы."
+
+msgid "onboarding.title"
+msgstr "Начало работы"
+
+msgid "pagination.page"
+msgstr "Страница"
+
+msgid "plan.free"
+msgstr "БЕСПЛАТНО"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "Плагин деактивирован; следовательно, информация недоступна."
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "Этот плагин управляется на отдельной странице, которая ещё не загружена. Перезапустите веб-интерфейс, чтобы получить к ней доступ."
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "Плагин метрик не активирован; следовательно, информация недоступна."
+
+msgid "plugin.page.status.no_content"
+msgstr "Этот плагин не предоставляет встроенную страницу."
+
+msgid "plugin.page.status.not_available"
+msgstr "Страница плагина пока недоступна на этапе бета-тестирования."
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "Ошибка предварительного рендеринга"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "Этот плагин имеет свою собственную страницу, которая выполняет код плагина. Только администраторы могут загрузить его."
+
+msgid "plugin.type.all"
+msgstr "Все"
+
+msgid "plugin.type.core"
+msgstr "Базовый"
+
+msgid "plugin.type.external"
+msgstr "Внешний"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "Активно"
+
+msgid "plugins.marketplace.always_on"
+msgstr "Ядро / всегда включено"
+
+msgid "plugins.marketplace.disabled"
+msgstr "Отключено"
+
+msgid "plugins.marketplace.enabled"
+msgstr "Включено"
+
+msgid "plugins.marketplace.inactive"
+msgstr "Неактивно"
+
+msgid "plugins.marketplace.no_match"
+msgstr "Нет плагинов, соответствующих фильтрам"
+
+msgid "plugins.marketplace.search"
+msgstr "Поиск плагинов..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "Все"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "Сообщество"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "Отключено"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "Включено"
+
+msgid "plugins.multivalue.more_value"
+msgstr "еще значение"
+
+msgid "plugins.multivalue.more_values"
+msgstr "еще значения"
+
+msgid "plugins.multivalue.show_less"
+msgstr "Показать меньше"
+
+msgid "pro.alert.overlapped_1"
+msgstr "У вас больше активных сервисов, чем позволяет ваша лицензия!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "Удалите часть сервисов или переведите их в режим черновика, чтобы число сервисов не превышало %(pro_services)s."
+
+msgid "pro.button.all_features_available"
+msgstr "Все функции доступны"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "Ожидание соответствия..."
+
+msgid "pro.button.renew_license"
+msgstr "Продлить лицензию"
+
+msgid "pro.button.suspended_license"
+msgstr "Лицензия приостановлена"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "Обновить до PRO"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "Истекает через"
+
+msgid "pro.expiration_date.title"
+msgstr "Дата истечения Pro"
+
+msgid "pro.expiration_date.unknown"
+msgstr "Неизвестная дата истечения"
+
+msgid "pro.force_check.description"
+msgstr "Принудительно проверить плагины PRO. При наличии новых версий плагины будут загружены заново."
+
+msgid "pro.force_check.title"
+msgstr "Принудительно проверить"
+
+msgid "pro.force_update.description"
+msgstr "Пропустить проверки и принудительно загрузить плагины PRO. Если это невозможно, текущее состояние будет сохранено."
+
+msgid "pro.force_update.title"
+msgstr "Принудительно обновить"
+
+msgid "pro.key.title.activate"
+msgstr "Активировать ключ"
+
+msgid "pro.key.title.update"
+msgstr "Обновить ключ"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Функция Pro"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "Обновите до Pro, чтобы получить доступ к этой функции"
+
+msgid "pro.status.draft_services_count"
+msgstr "Сервисов в черновике: %(draft_services)s"
+
+msgid "pro.status.expired"
+msgstr "ИСТЕК"
+
+msgid "pro.status.free_version"
+msgstr "БЕСПЛАТНАЯ версия"
+
+msgid "pro.status.overlapped"
+msgstr "ПРЕВЫШЕНО"
+
+msgid "pro.status.pro_version"
+msgstr "PRO версия"
+
+msgid "pro.status.services_count"
+msgstr "Сервисы онлайн: %(online_services)s / сервисы PRO: %(pro_services)s"
+
+msgid "pro.status.suspended"
+msgstr "ПРИОСТАНОВЛЕНО"
+
+msgid "pro.status.title"
+msgstr "Статус"
+
+msgid "pro.title"
+msgstr "Лицензия Pro"
+
+msgid "profile.2fa.disable_title"
+msgstr "Отключить 2FA"
+
+msgid "profile.2fa.enable_title"
+msgstr "Включить 2FA"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "Обновление кодов восстановления сделает предыдущие недействительными."
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA отключено"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "Включена двухфакторная аутентификация"
+
+msgid "profile.card.coming_soon"
+msgstr "Скоро"
+
+msgid "profile.card.title.2fa"
+msgstr "Двухфакторная аутентификация (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "Изменить пароль"
+
+msgid "profile.card.title.change_theme"
+msgstr "Изменить тему"
+
+msgid "profile.card.title.coming_soon"
+msgstr "Скоро"
+
+msgid "profile.card.title.edit_profile"
+msgstr "Редактировать профиль"
+
+msgid "profile.card.title.passkeys"
+msgstr "Ключи доступа"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "Обновить коды восстановления"
+
+msgid "profile.card.title.sessions"
+msgstr "Сессии"
+
+msgid "profile.help.photo_extensions"
+msgstr "Разрешены JPG, GIF или PNG. Максимальный размер: 800КБ."
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "Это немедленно завершит работу всех остальных активных сессий в вашей учетной записи. Введите свой пароль для подтверждения."
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "Завершить остальные активные сессии?"
+
+msgid "profile.passkey.added"
+msgstr "Добавлен"
+
+msgid "profile.passkey.empty"
+msgstr "Ключи доступа пока не зарегистрированы."
+
+msgid "profile.passkey.help"
+msgstr "Ключ доступа позволяет входить без пароля — с помощью блокировки экрана вашего устройства или ключа безопасности."
+
+msgid "profile.passkey.last_used"
+msgstr "последнее использование"
+
+msgid "profile.passkey.never_used"
+msgstr "не использовался"
+
+msgid "profile.passkey.unsupported"
+msgstr "Этот браузер не поддерживает ключи доступа."
+
+msgid "profile.session.browser"
+msgstr "Браузер"
+
+msgid "profile.session.creation_date"
+msgstr "Дата создания"
+
+msgid "profile.session.current_session"
+msgstr "Текущая сессия"
+
+msgid "profile.session.device"
+msgstr "Устройство"
+
+msgid "profile.session.ip_address"
+msgstr "IP-адрес"
+
+msgid "profile.session.last_activity"
+msgstr "Последняя активность"
+
+msgid "profile.session.os"
+msgstr "Операционная система"
+
+msgid "profile.session.title"
+msgstr "Сессия"
+
+msgid "profile.session.wipe_help"
+msgstr "Завершить все остальные активные сессии в вашей учетной записи. Вы останетесь вошли."
+
+msgid "profile.subtitle"
+msgstr "Управление вашей учетной записью, безопасностью и активными сессиями."
+
+msgid "profile.tab.profile"
+msgstr "Профиль"
+
+msgid "profile.tab.security"
+msgstr "Безопасность"
+
+msgid "profile.tab.sessions"
+msgstr "Сессии"
+
+msgid "range_picker.1h"
+msgstr "Последняя час"
+
+msgid "range_picker.24h"
+msgstr "Последние 24 часа"
+
+msgid "range_picker.30d"
+msgstr "Последние 30 дней"
+
+msgid "range_picker.7d"
+msgstr "Последняя неделя"
+
+msgid "range_picker.aria_label"
+msgstr "Диапазон времени"
+
+msgid "range_picker.custom"
+msgstr "Пользовательский"
+
+msgid "redirects.all"
+msgstr "Все"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "Добавить запрошенный URI в целевое"
+
+msgid "redirects.attach"
+msgstr "Прикрепить"
+
+msgid "redirects.attach_copy"
+msgstr "Прикрепить %(name)s (%(from)s → %(to)s) к одному или нескольким сервисам."
+
+msgid "redirects.code.301"
+msgstr "301 — Перенаправление навсегда"
+
+msgid "redirects.code.302"
+msgstr "302 — Найдено"
+
+msgid "redirects.code.303"
+msgstr "303 — Посмотреть другие"
+
+msgid "redirects.code.307"
+msgstr "307 — Временное перенаправление"
+
+msgid "redirects.code.308"
+msgstr "308 — Постоянное перенаправление"
+
+msgid "redirects.create"
+msgstr "Создать перенаправление"
+
+msgid "redirects.delete_confirm_title"
+msgstr "Удалить это перенаправление?"
+
+msgid "redirects.delete_copy"
+msgstr "Удалить перенаправление %(name)s?"
+
+msgid "redirects.delete_help"
+msgstr "Перенаправление, прикрепленное к сервису, нельзя удалить. Сначала открепите его."
+
+msgid "redirects.edit"
+msgstr "Редактировать перенаправление"
+
+msgid "redirects.edit_shared"
+msgstr "Это перенаправление прикреплено к сервисам (количество: %(count)s): %(services)s. Сохранение изменит их все."
+
+msgid "redirects.empty_text"
+msgstr "Перенаправление — это имя правила, которое вы прикрепляете к одному или нескольким сервисам. Встроенные настройки REDIRECT_* продолжают работать вместе с ним."
+
+msgid "redirects.empty_title"
+msgstr "Перенаправлений пока нет"
+
+msgid "redirects.from_path"
+msgstr "Перенаправить от"
+
+msgid "redirects.from_path_help"
+msgstr "Исходный путь на прикрепленных сервисах, например /old."
+
+msgid "redirects.new"
+msgstr "Новое перенаправление"
+
+msgid "redirects.not_attached"
+msgstr "Не прикреплено"
+
+msgid "redirects.readonly"
+msgstr "База данных только для чтения. Перенаправления можно просматривать, но не изменять."
+
+msgid "redirects.save"
+msgstr "Сохранить перенаправление"
+
+msgid "redirects.search"
+msgstr "Поиск по имени, пути источника или целевому адресу..."
+
+msgid "redirects.services_help"
+msgstr "Используйте Ctrl или Command для выбора нескольких сервисов. Перенаправление можно добавить позже."
+
+msgid "redirects.status_code"
+msgstr "Код статуса"
+
+msgid "redirects.to_url"
+msgstr "Перенаправить на"
+
+msgid "redirects.truncated"
+msgstr "Отображаются только первые 500 перенаправлений. Уточните список с помощью API для получения полного результата."
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "Обнаружена подозрительная активность"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "Эти запросы превысили порог подозрительной активности и были объединены."
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "Зафиксировано в"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP-адрес"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "Для этого отчета не было зафиксировано никакой подозрительной активности."
+
+msgid "reports.bad_behavior_request_id"
+msgstr "Идентификатор запроса"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "Запрос"
+
+msgid "reports.bad_behavior_server"
+msgstr "Сервер"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "Подозрительные запросы"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "Семейства атак"
+
+msgid "reports.card.recent.title"
+msgstr "Последние инциденты"
+
+msgid "reports.card.top_asn.title"
+msgstr "Топ ASNs"
+
+msgid "reports.card.top_offenders.title"
+msgstr "Топ злоумышленников"
+
+msgid "reports.card.top_rules.title"
+msgstr "Топ срабатывающих правил ModSecurity"
+
+msgid "reports.chart.timeseries.series"
+msgstr "Заблокировано"
+
+msgid "reports.chart.timeseries.title"
+msgstr "Заблокированные запросы с течением времени"
+
+msgid "reports.security_incident"
+msgstr "Инцидент безопасности"
+
+msgid "reports.security_report_data"
+msgstr "Данные отчета о безопасности"
+
+msgid "reports.subtitle"
+msgstr "Отчеты о безопасности, сгенерированные на основе заблокированных запросов в ваших экземплярах BunkerWeb — поиск, фильтрация, экспорт и блокировка IP-адресов непосредственно из таблицы."
+
+msgid "reports.tab.eventlog"
+msgstr "Журнал событий"
+
+msgid "reports.tab.offenders"
+msgstr "Топ злоумышленников"
+
+msgid "reports.tab.overview"
+msgstr "Обзор"
+
+msgid "reports.tab.patterns"
+msgstr "Шаблоны атак"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "Блоки"
+
+msgid "reports.table.country"
+msgstr "Страна"
+
+msgid "reports.table.fires"
+msgstr "Срабатывания"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "Правило"
+
+msgid "reports.table.top_rule"
+msgstr "Топ правила"
+
+msgid "reports.tile.asns"
+msgstr "Топ ASNs"
+
+msgid "reports.tile.blocked"
+msgstr "Заблокированные запросы"
+
+msgid "reports.tile.blocked_rate"
+msgstr "Сравнение с предыдущим периодом"
+
+msgid "reports.tile.bot"
+msgstr "Бот / сканер"
+
+msgid "reports.tile.countries"
+msgstr "Топ стран"
+
+msgid "reports.tile.peak_hour"
+msgstr "Пик часа"
+
+msgid "reports.tile.rce"
+msgstr "RCE / команда"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "Повторяющиеся нарушения (10 наиболее частых)"
+
+msgid "reports.tile.sqli"
+msgstr "SQL-инъекция"
+
+msgid "reports.tile.unique_ips"
+msgstr "Топ-IP-адреса атакующих"
+
+msgid "reports.tile.unique_offenders"
+msgstr "Топ злоумышленников"
+
+msgid "request_path.client"
+msgstr "Клиент"
+
+msgid "request_path.source"
+msgstr "Порядок выполнения плагинов для фазы %(phase)s, от %(setting)s — порядок отображения, а не отслеживание по каждому запросу."
+
+msgid "request_path.terminal.inline"
+msgstr "Сервер"
+
+msgid "request_path.terminal.none"
+msgstr "Сервис не работает"
+
+msgid "request_path.terminal.pool"
+msgstr "Внешний пул"
+
+msgid "request_path.terminal.root"
+msgstr "Локальные файлы"
+
+msgid "request_path.title"
+msgstr "Путь запроса"
+
+msgid "request_path.unordered"
+msgstr "Не указана позиция в фазе %(phase)s; он выполняется после упорядоченных плагинов, в алфавитном порядке."
+
+msgid "resource_groups.add_entry"
+msgstr "Добавить запись"
+
+msgid "resource_groups.add_to_setting"
+msgstr "Добавить группу ресурсов…"
+
+msgid "resource_groups.add_values"
+msgstr "Добавить значения"
+
+msgid "resource_groups.alias"
+msgstr "Псевдоним"
+
+msgid "resource_groups.alias_help"
+msgstr "Буквы, цифры, подчеркивания и дефисы. Существующие псевдонимы нельзя переименовать."
+
+msgid "resource_groups.bulk_import"
+msgstr "Массовая загрузка"
+
+msgid "resource_groups.clone"
+msgstr "Клонировать группу ресурсов"
+
+msgid "resource_groups.clone_copy"
+msgstr "Создать редактируемую копию @%(name)s."
+
+msgid "resource_groups.collapse_all"
+msgstr "Свернуть все"
+
+msgid "resource_groups.comment"
+msgstr "Комментарий"
+
+msgid "resource_groups.delete"
+msgstr "Удалить группу ресурсов"
+
+msgid "resource_groups.delete_confirm"
+msgstr "Удалить @%(name)s? Это действие нельзя отменить."
+
+msgid "resource_groups.delete_help"
+msgstr "Удаление заблокировано, пока это значение используется в настройке."
+
+msgid "resource_groups.editor_edit"
+msgstr "Редактировать @%(name)s"
+
+msgid "resource_groups.editor_new"
+msgstr "Новая группа ресурсов"
+
+msgid "resource_groups.editor_title"
+msgstr "Группа ресурсов"
+
+msgid "resource_groups.empty"
+msgstr "Нет групп ресурсов"
+
+msgid "resource_groups.empty_help"
+msgstr "Создайте переиспользуемый псевдоним для обмена типом значений в совместимых настройках."
+
+msgid "resource_groups.entries"
+msgstr "Записи"
+
+msgid "resource_groups.expand_all"
+msgstr "Развернуть все"
+
+msgid "resource_groups.global_configuration"
+msgstr "Глобальная конфигурация"
+
+msgid "resource_groups.import_extension"
+msgstr "Выберите файл .txt или .csv."
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "Импорт TXT/CSV ограничен 256 KiB."
+
+msgid "resource_groups.kind"
+msgstr "Тип"
+
+msgid "resource_groups.kinds"
+msgstr "Типы"
+
+msgid "resource_groups.loading_references"
+msgstr "Загрузка ссылок..."
+
+msgid "resource_groups.max_entries"
+msgstr "Группа ресурсов не может содержать более %(max)s записей."
+
+msgid "resource_groups.meta_line"
+msgstr "Типы: %(kinds)s · значения: %(values)s · использования: %(usages)s"
+
+msgid "resource_groups.new"
+msgstr "Новая группа"
+
+msgid "resource_groups.new_alias"
+msgstr "Новое алиас"
+
+msgid "resource_groups.no_entries"
+msgstr "Нет записей"
+
+msgid "resource_groups.no_entries_help"
+msgstr "Добавьте записи по отдельности или используйте массовый импортер ниже."
+
+msgid "resource_groups.no_references"
+msgstr "Нет ссылок"
+
+msgid "resource_groups.readonly"
+msgstr "База данных только для чтения. Группы ресурсов можно просматривать и экспортировать, но не изменять."
+
+msgid "resource_groups.references_error"
+msgstr "Не удалось загрузить ссылки"
+
+msgid "resource_groups.save"
+msgstr "Сохранить группу"
+
+msgid "resource_groups.search"
+msgstr "Поиск алиасов, описаний, типов или значений…"
+
+msgid "resource_groups.showing_count"
+msgstr "Отображено %(visible)s из %(total)s групп"
+
+msgid "resource_groups.subtitle"
+msgstr "Переиспользуемые типы алиасов для IP-адресов, стран, ASN, обратных DNS-имен, пользовательских агентов и URL-адресов."
+
+msgid "resource_groups.template_configuration"
+msgstr "Шаблон %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "Использование"
+
+msgid "resource_groups.value"
+msgstr "Значение"
+
+msgid "resource_groups.values"
+msgstr "Значения"
+
+msgid "scope.all_services"
+msgstr "Все сервисы"
+
+msgid "scope.global"
+msgstr "Глобальный"
+
+msgid "scope.global_all_services"
+msgstr "Глобальный (все сервисы)"
+
+msgid "scope.permanent"
+msgstr "Постоянный"
+
+msgid "scope.service_specific"
+msgstr "Специфичный для сервиса"
+
+msgid "searchpane.active"
+msgstr "Активный"
+
+msgid "searchpane.async"
+msgstr "Асинхронный"
+
+msgid "searchpane.ban_scope"
+msgstr "Область бана"
+
+msgid "searchpane.clear"
+msgstr "Очистить все"
+
+msgid "searchpane.collapse_0"
+msgstr "Панели поиска"
+
+msgid "searchpane.collapse_message"
+msgstr "Свернуть все"
+
+msgid "searchpane.collapse_plural"
+msgstr "Панели поиска (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "Страна"
+
+msgid "searchpane.created"
+msgstr "Создано"
+
+msgid "searchpane.data"
+msgstr "Данные"
+
+msgid "searchpane.date"
+msgstr "Дата"
+
+msgid "searchpane.empty"
+msgstr "Нет доступных панелей поиска"
+
+msgid "searchpane.end_date"
+msgstr "Дата окончания"
+
+msgid "searchpane.first_seen"
+msgstr "Впервые замечен"
+
+msgid "searchpane.future_30d"
+msgstr "Более чем через 30 дней"
+
+msgid "searchpane.health"
+msgstr "Состояние"
+
+msgid "searchpane.interval"
+msgstr "Интервал"
+
+msgid "searchpane.ip_address"
+msgstr "IP-адрес"
+
+msgid "searchpane.job_name"
+msgstr "Имя задачи"
+
+msgid "searchpane.last_24h"
+msgstr "Последние 24 часа"
+
+msgid "searchpane.last_30d"
+msgstr "Последние 30 дней"
+
+msgid "searchpane.last_7d"
+msgstr "Последние 7 дней"
+
+msgid "searchpane.last_run"
+msgstr "Состояние последнего запуска"
+
+msgid "searchpane.last_seen"
+msgstr "Последний раз замечен"
+
+msgid "searchpane.last_update"
+msgstr "Последнее обновление"
+
+msgid "searchpane.loading"
+msgstr "Загрузка панелей поиска..."
+
+msgid "searchpane.method"
+msgstr "Метод"
+
+msgid "searchpane.next_24h"
+msgstr "Следующие 24 часа"
+
+msgid "searchpane.next_30d"
+msgstr "Следующие 30 дней"
+
+msgid "searchpane.next_7d"
+msgstr "Следующие 7 дней"
+
+msgid "searchpane.older_30d"
+msgstr "Более 30 дней назад"
+
+msgid "searchpane.one_or_more"
+msgstr "Один или несколько"
+
+msgid "searchpane.permanent"
+msgstr "Постоянный"
+
+msgid "searchpane.plugin"
+msgstr "Плагин"
+
+msgid "searchpane.protocol"
+msgstr "Протокол"
+
+msgid "searchpane.reason"
+msgstr "Причина"
+
+msgid "searchpane.reload"
+msgstr "Требуется перезагрузка"
+
+msgid "searchpane.scope"
+msgstr "Область"
+
+msgid "searchpane.security_mode"
+msgstr "Режим безопасности"
+
+msgid "searchpane.server_name"
+msgstr "Имя сервера"
+
+msgid "searchpane.service"
+msgstr "Сервис"
+
+msgid "searchpane.show_message"
+msgstr "Показать все"
+
+msgid "searchpane.start_date"
+msgstr "Дата начала"
+
+msgid "searchpane.status"
+msgstr "Статус"
+
+msgid "searchpane.status_code"
+msgstr "Код состояния"
+
+msgid "searchpane.steps"
+msgstr "Шаги"
+
+msgid "searchpane.stream"
+msgstr "Поддержка Stream"
+
+msgid "searchpane.template"
+msgstr "Шаблон"
+
+msgid "searchpane.title_0"
+msgstr "Нет активных фильтров"
+
+msgid "searchpane.title_1"
+msgstr "Активный фильтр - 1"
+
+msgid "searchpane.title_plural"
+msgstr "Активные фильтры - %d"
+
+msgid "searchpane.type"
+msgstr "Тип"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "Версия"
+
+msgid "searchpane.zero"
+msgstr "Нет"
+
+msgid "security_mode.block"
+msgstr "Блокировка"
+
+msgid "security_mode.detect"
+msgstr "Обнаружение"
+
+msgid "service.resources.attach"
+msgstr "Прикрепить"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s уже обслуживает %(path)s через свои собственные настройки %(family)s. Очистите эти настройки для %(path)s или используйте другой путь."
+
+msgid "service.resources.conflict.primary"
+msgstr "«%(name)s» в настоящее время является основным сертификатом для этого сервиса и будет понижен без дальнейших предупреждений. Основной — это тот, который фактически развернут."
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s уже обслуживает %(path)s через ресурс %(kind)s «%(name)s». Открепите «%(name)s» или назначьте одному из ресурсов другой путь."
+
+msgid "service.resources.conflict.stream"
+msgstr "Потоковый сервис проксирует каждое соединение на один бэкенд, а %(service)s уже использует апстрим «%(name)s». Сначала открепите его."
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "У %(service)s уже есть собственный бэкенд в REVERSE_PROXY_HOST. Очистите эту настройку, чтобы управление перешло к апстриму."
+
+msgid "service.resources.detach"
+msgstr "Отключить"
+
+msgid "service.resources.family.certificate"
+msgstr "Сертификаты"
+
+msgid "service.resources.family.redirect"
+msgstr "Перенаправления"
+
+msgid "service.resources.family.template"
+msgstr "Шаблон"
+
+msgid "service.resources.family.upstream"
+msgstr "Апстримы"
+
+msgid "service.resources.family.workflow"
+msgstr "Рабочие процессы"
+
+msgid "service.resources.match_path"
+msgstr "Путь"
+
+msgid "service.resources.none"
+msgstr "Ничего не прикреплено"
+
+msgid "service.resources.primary"
+msgstr "Основной сертификат"
+
+msgid "service.resources.template.none"
+msgstr "Нет шаблона"
+
+msgid "service.resources.template.note"
+msgstr "Не ресурс: шаблон — это настройка. Он применяется при сохранении, и его изменение перемещает множество настроек одновременно."
+
+msgid "service.resources.template.pending"
+msgstr "Применяется при сохранении"
+
+msgid "service.resources.template.switching"
+msgstr "Сохранение переключает этот сервис с «%(from)s» на «%(to)s». Значения, предоставленные текущим шаблоном, удаляются, и применяются значения «%(to)s» — при этом перемещается множество настроек одновременно."
+
+msgid "service.resources.template.unwired"
+msgstr "Эта страница не публикует USE_TEMPLATE, поэтому шаблон нельзя изменить здесь."
+
+msgid "service.resources.title"
+msgstr "Прикрепленные ресурсы"
+
+msgid "service.resources.unavailable"
+msgstr "Недоступно"
+
+msgid "services.draft"
+msgstr "Черновики сервисов"
+
+msgid "services.online"
+msgstr "В сети"
+
+msgid "services.subtitle"
+msgstr "Управление многосайтовыми сервисами, защищенными BunkerWeb: создавать, редактировать, переводить в черновик или удалять их."
+
+msgid "services.total"
+msgstr "Все сервисы"
+
+msgid "services.with_configs"
+msgstr "С пользовательскими настройками"
+
+msgid "settings.custom_config.title"
+msgstr "Пользовательская конфигурация"
+
+msgid "settings.multiple.description"
+msgstr "Настройте здесь несколько экземпляров настроек для этого плагина."
+
+msgid "settings.multiple.title"
+msgstr "Множественные настройки"
+
+msgid "setup.status.admin_user_exists"
+msgstr "Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу."
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "Лицензионный ключ PRO уже настроен, пожалуйста, перейдите к следующему шагу."
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "Обратный прокси уже настроен для веб-интерфейса. Пожалуйста, перейдите к следующему шагу."
+
+msgid "setup.status.secure_password"
+msgstr "Надежный пароль"
+
+msgid "setup.status.unique_server_name"
+msgstr "Уникальное имя сервера"
+
+msgid "setup.step1.subtitle"
+msgstr "Создайте свою учетную запись администратора."
+
+msgid "setup.step1.title"
+msgstr "Пользователь администратора"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "Выбор центра сертификации"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "Используйте Let's Encrypt для стандартной выдачи ACME. Режим staging доступен для тестирования и проверок интеграции."
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "Если поле пустое, ZeroSSL будет использовать настроенный email для регистрации аккаунта."
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "Используйте ZeroSSL с zerossl-bot. Укажите email аккаунта или API-ключ для выпуска аккаунта и отслеживания перевыпуска по ключу."
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "Пользовательский сертификат"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "Реальный IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "Обратный прокси"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "Настройте специфические параметры веб-интерфейса."
+
+msgid "setup.step2.title"
+msgstr "Настройки UI"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "Преимущества PRO"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "Разблокируйте все расширенные функции, включая улучшенную безопасность, производительность и инструменты управления."
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "Доступ ко всем функциям PRO"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "Получите приоритетную поддержку от команды BunkerWeb по любым вопросам или проблемам."
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "Техническая поддержка от разработчиков"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "Индивидуальные решения для удовлетворения ваших конкретных потребностей."
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "Индивидуальная разработка"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "Экспертные советы для оптимизации вашей установки BunkerWeb."
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "Индивидуальная консультация"
+
+msgid "setup.step3.subtitle"
+msgstr "Разблокируйте расширенные функции и получите максимум от BunkerWeb."
+
+msgid "setup.step3.title"
+msgstr "Обновить до PRO"
+
+msgid "setup.step4.label.final_url"
+msgstr "URL UI BunkerWeb"
+
+msgid "setup.step4.subtitle"
+msgstr "Проверьте свои настройки перед завершением установки."
+
+msgid "setup.step4.title"
+msgstr "Обзор"
+
+msgid "setup.subtitle"
+msgstr "Следуйте шагам для завершения мастера установки."
+
+msgid "setup.title"
+msgstr "Мастер установки"
+
+msgid "status.active"
+msgstr "Активный"
+
+msgid "status.admin_user_exists"
+msgstr "Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу."
+
+msgid "status.all_valid"
+msgstr "Все действительные"
+
+msgid "status.blog_connection_fail"
+msgstr "Не удалось подключиться к блогу для получения новостей."
+
+msgid "status.default_server"
+msgstr "сервер по умолчанию"
+
+msgid "status.done"
+msgstr "Завершенные"
+
+msgid "status.down"
+msgstr "Не в сети"
+
+msgid "status.draft"
+msgstr "Черновик"
+
+msgid "status.error_deleting_template"
+msgstr "Произошла ошибка при удалении шаблона."
+
+msgid "status.error_loading_bans"
+msgstr "Ошибка загрузки банов. Пожалуйста, попробуйте обновить страницу."
+
+msgid "status.error_loading_data"
+msgstr "Не удалось загрузить данные"
+
+msgid "status.error_loading_template"
+msgstr "Не удалось загрузить данные шаблона."
+
+msgid "status.error_saving_template"
+msgstr "Произошла ошибка при сохранении шаблона."
+
+msgid "status.expired"
+msgstr "Истекший срок действия"
+
+msgid "status.expiring"
+msgstr "Истекает"
+
+msgid "status.failed"
+msgstr "Неудачно"
+
+msgid "status.invalid_json_payload"
+msgstr "Неверный формат JSON."
+
+msgid "status.loading"
+msgstr "Загрузка..."
+
+msgid "status.loading_bans"
+msgstr "Загрузка банов..."
+
+msgid "status.loading_cache_file"
+msgstr "Загрузка файла кэша..."
+
+msgid "status.loading_cache_files"
+msgstr "Загрузка файлов кэша..."
+
+msgid "status.loading_custom_config"
+msgstr "Загрузка пользовательской конфигурации..."
+
+msgid "status.loading_custom_configs"
+msgstr "Загрузка пользовательских конфигураций..."
+
+msgid "status.loading_instances"
+msgstr "Загрузка экземпляров..."
+
+msgid "status.loading_items"
+msgstr "Загрузка элементов..."
+
+msgid "status.loading_jobs"
+msgstr "Загрузка задач..."
+
+msgid "status.loading_logs"
+msgstr "Загрузка логов..."
+
+msgid "status.loading_plugins"
+msgstr "Загрузка плагинов..."
+
+msgid "status.loading_reports"
+msgstr "Загрузка отчетов..."
+
+msgid "status.loading_services"
+msgstr "Загрузка сервисов..."
+
+msgid "status.loading_templates"
+msgstr "Загрузка шаблонов..."
+
+msgid "status.missing_template_information"
+msgstr "Отсутствует информация о шаблоне."
+
+msgid "status.news_connection_error"
+msgstr "Не удалось подключиться к блогу для получения новостей."
+
+msgid "status.no"
+msgstr "Нет"
+
+msgid "status.no_data"
+msgstr "Нет данных"
+
+msgid "status.no_history"
+msgstr "История недоступна."
+
+msgid "status.no_item"
+msgstr "Нет элементов"
+
+msgid "status.no_notifications"
+msgstr "Нет уведомлений для отображения."
+
+msgid "status.no_search_results"
+msgstr "Элементы не найдены."
+
+msgid "status.no_settings"
+msgstr "Этот плагин не имеет настроек для этой области."
+
+msgid "status.no_steps"
+msgstr "Нет доступных шагов"
+
+msgid "status.no_steps_description"
+msgstr "Этот шаблон не имеет шагов для настройки."
+
+msgid "status.not_applicable"
+msgstr "Н/Д"
+
+msgid "status.online"
+msgstr "В сети"
+
+msgid "status.optional"
+msgstr "Необязательно"
+
+msgid "status.partial"
+msgstr "Частично"
+
+msgid "status.pending"
+msgstr "Ожидающие"
+
+msgid "status.pinging_instances"
+msgstr "Пингуем экземпляры, пожалуйста, подождите..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "Плагин деактивирован; следовательно, информация недоступна."
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "Плагин метрик не активирован; следовательно, информация недоступна."
+
+msgid "status.plugin_page.status.not_available"
+msgstr "Страница плагина пока недоступна на этапе бета-тестирования."
+
+msgid "status.reverse_proxy_configured"
+msgstr "Обратный прокси уже настроен для веб-интерфейса. Пожалуйста, перейдите к следующему шагу."
+
+msgid "status.secure_password"
+msgstr "Надежный пароль"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "Настройка вашего BunkerWeb, пожалуйста, подождите..."
+
+msgid "status.success"
+msgstr "Успешно"
+
+msgid "status.template_in_use"
+msgstr "Этот сервис в настоящее время использует шаблон \"%(template)s\", который управляется методом \"%(method)s\"."
+
+msgid "status.template_in_use_description"
+msgstr "Изменения вне текущего шаблона не допускаются. Пожалуйста, вносите изменения с использованием текущего шаблона или переключитесь в режим Продвинутый/Исходный."
+
+msgid "status.unique_server_name"
+msgstr "Уникальное имя сервера"
+
+msgid "status.up"
+msgstr "В сети"
+
+msgid "status.yes"
+msgstr "Да"
+
+msgid "step.next"
+msgstr "Далее"
+
+msgid "step.previous"
+msgstr "Назад"
+
+msgid "support.card.download_logs.help"
+msgstr "Все личные данные будут анонимизированы."
+
+msgid "support.card.download_logs.title"
+msgstr "Скачать логи"
+
+msgid "support.card.extract_config.title"
+msgstr "Извлечь конфигурацию"
+
+msgid "support.card.support_link.title"
+msgstr "Ссылка на поддержку"
+
+msgid "support.subtitle"
+msgstr "Скачать логи отладки, извлечь конфигурацию и получить помощь от команды BunkerWeb."
+
+msgid "support.title"
+msgstr "Поддержка"
+
+msgid "tab.custom_certificate"
+msgstr "Пользовательский сертификат"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "Действия"
+
+msgid "table.header.active"
+msgstr "Активный"
+
+msgid "table.header.async"
+msgstr "Асинхронный"
+
+msgid "table.header.bytes_received"
+msgstr "Получено байт"
+
+msgid "table.header.bytes_sent"
+msgstr "Отправлено байт"
+
+msgid "table.header.checksum"
+msgstr "Контрольная сумма"
+
+msgid "table.header.client_port"
+msgstr "Порт клиента"
+
+msgid "table.header.configs"
+msgstr "Конфиги"
+
+msgid "table.header.country"
+msgstr "Страна"
+
+msgid "table.header.created"
+msgstr "Создано"
+
+msgid "table.header.current_time_left"
+msgstr "Текущее оставшееся время"
+
+msgid "table.header.data"
+msgstr "Данные"
+
+msgid "table.header.date"
+msgstr "Дата"
+
+msgid "table.header.description"
+msgstr "Описание"
+
+msgid "table.header.end_date"
+msgstr "Дата окончания"
+
+msgid "table.header.file_name"
+msgstr "Имя файла"
+
+msgid "table.header.health"
+msgstr "Состояние"
+
+msgid "table.header.hostname"
+msgstr "Имя хоста"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "Интервал"
+
+msgid "table.header.ip_address"
+msgstr "IP-адрес"
+
+msgid "table.header.job_name"
+msgstr "Имя задачи"
+
+msgid "table.header.last_run"
+msgstr "Последний запуск"
+
+msgid "table.header.last_seen"
+msgstr "Последний раз замечен"
+
+msgid "table.header.last_update"
+msgstr "Последнее обновление"
+
+msgid "table.header.listen_port"
+msgstr "Порт прослушивания"
+
+msgid "table.header.method"
+msgstr "Метод"
+
+msgid "table.header.name"
+msgstr "Имя"
+
+msgid "table.header.plugin"
+msgstr "Плагин"
+
+msgid "table.header.protocol"
+msgstr "Протокол"
+
+msgid "table.header.reason"
+msgstr "Причина"
+
+msgid "table.header.reload"
+msgstr "Перезагрузка"
+
+msgid "table.header.request_id"
+msgstr "Идентификатор запроса"
+
+msgid "table.header.scope"
+msgstr "Область"
+
+msgid "table.header.security_mode"
+msgstr "Режим безопасности"
+
+msgid "table.header.server_name"
+msgstr "Имя сервера"
+
+msgid "table.header.service"
+msgstr "Сервис"
+
+msgid "table.header.service_name"
+msgstr "Имя сервиса"
+
+msgid "table.header.session_time"
+msgstr "Длительность сессии"
+
+msgid "table.header.settings"
+msgstr "Настройки"
+
+msgid "table.header.status"
+msgstr "Статус"
+
+msgid "table.header.status_code"
+msgstr "Код состояния"
+
+msgid "table.header.steps"
+msgstr "Шаги"
+
+msgid "table.header.stream"
+msgstr "Поток"
+
+msgid "table.header.template"
+msgstr "Шаблон"
+
+msgid "table.header.templates"
+msgstr "Шаблоны"
+
+msgid "table.header.time_left"
+msgstr "Оставшееся время"
+
+msgid "table.header.type"
+msgstr "Тип"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "Значение"
+
+msgid "table.header.version"
+msgstr "Версия"
+
+msgid "template.editor.button_add_config"
+msgstr "Добавить конфигурацию"
+
+msgid "template.editor.button_add_setting"
+msgstr "Добавить настройку"
+
+msgid "template.editor.button_add_step"
+msgstr "Добавить шаг"
+
+msgid "template.editor.button_move_down"
+msgstr "Переместить вниз"
+
+msgid "template.editor.button_move_up"
+msgstr "Переместить вверх"
+
+msgid "template.editor.button_remove"
+msgstr "Удалить"
+
+msgid "template.editor.clone_badge"
+msgstr "Клонировано из %(template)s"
+
+msgid "template.editor.configs"
+msgstr "Пользовательские конфигурации"
+
+msgid "template.editor.configs_help"
+msgstr "Прикрепите к этому шаблону необязательные фрагменты пользовательской конфигурации."
+
+msgid "template.editor.delete_step_confirm"
+msgstr "Вы уверены, что хотите удалить этот шаг?"
+
+msgid "template.editor.details"
+msgstr "Детали шаблона"
+
+msgid "template.editor.details_help"
+msgstr "Укажите основную информацию для этого шаблона."
+
+msgid "template.editor.drag_handle"
+msgstr "Перетащите для изменения порядка"
+
+msgid "template.editor.empty_configs"
+msgstr "Пользовательских конфигураций пока нет."
+
+msgid "template.editor.empty_settings"
+msgstr "Настроек пока нет. Добавьте свою первую настройку."
+
+msgid "template.editor.empty_steps"
+msgstr "Шагов пока нет. Добавьте свой первый шаг."
+
+msgid "template.editor.error_generic"
+msgstr "Что-то пошло не так. Пожалуйста, попробуйте еще раз."
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "Не удалось определить конечную точку для отправки."
+
+msgid "template.editor.heading_create"
+msgstr "Создать шаблон"
+
+msgid "template.editor.heading_edit"
+msgstr "Редактировать шаблон %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "Данные"
+
+msgid "template.editor.label_config_name"
+msgstr "Имя"
+
+msgid "template.editor.label_config_order"
+msgstr "Порядок"
+
+msgid "template.editor.label_config_type"
+msgstr "Тип"
+
+msgid "template.editor.label_setting_key"
+msgstr "Ключ настройки"
+
+msgid "template.editor.label_setting_value"
+msgstr "Значение по умолчанию"
+
+msgid "template.editor.label_step_configs"
+msgstr "Конфигурации на этом шаге"
+
+msgid "template.editor.label_step_settings"
+msgstr "Настройки на этом шаге"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "Подзаголовок шага"
+
+msgid "template.editor.label_step_title"
+msgstr "Заголовок шага"
+
+msgid "template.editor.missing_configs_body"
+msgstr "Импортированный шаблон ссылается на пользовательские конфигурации, которые еще не были загружены. Пожалуйста, импортируйте эти конфигурации для завершения настройки шаблона:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "Обзор файлов"
+
+msgid "template.editor.missing_configs_done"
+msgstr "Готово"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "Перетащите файлы конфигурации сюда (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "или"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "Загруженные файлы будут автоматически добавлены в ваш шаблон. Убедитесь, что имена файлов совпадают с отсутствующими конфигурациями, перечисленными выше."
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "Подсказка:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "Все отсутствующие конфигурации загружены! Шаблон успешно импортирован."
+
+msgid "template.editor.missing_configs_title"
+msgstr "Отсутствующие пользовательские конфигурации"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "Не удалось загрузить файлы конфигурации"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "Загрузить отсутствующие конфигурации (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "Загружено %(uploaded)s из %(total)s конфигураций. Все еще отсутствуют: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "Файлов конфигурации успешно загружено: %(count)s"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "Выберите опции"
+
+msgid "template.editor.multiselect_summary"
+msgstr "Выбрано: %(count)s"
+
+msgid "template.editor.multivalue_add"
+msgstr "Добавить значение"
+
+msgid "template.editor.multivalue_helper"
+msgstr "Одно значение в строке.%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "Обзор"
+
+msgid "template.editor.panel_overview_help"
+msgstr "Отслеживайте ключевую информацию и перемещайтесь по разделам."
+
+msgid "template.editor.placeholder_config_data"
+msgstr "Данные"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "Имя"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "core"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "Ключ"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "Значение по умолчанию"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "Подзаголовок шага"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "Заголовок шага"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "id-шаблона"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "Мой шаблон"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "Обзор файлов"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "Перетащите файлы конфигурации сюда или нажмите для обзора (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "Поддерживаемые форматы: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "Пока нет импортированных файлов конфигурации. Новые файлы появятся ниже."
+
+msgid "template.editor.raw_configs_help"
+msgstr "Загрузите файлы конфигурации (.conf, .cfg, .txt), чтобы добавить записи в <code>configs</code>. Типы по умолчанию — <code>server_http</code>; при необходимости скорректируйте в JSON."
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "Невозможно импортировать конфигурации, поскольку текущий JSON недействителен."
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "Конфигурации не были импортированы."
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "Импортировано файлов конфигурации: %(count)s."
+
+msgid "template.editor.raw_configs_note"
+msgstr "Импортированные файлы добавляются в редактор JSON. Просмотрите и скорректируйте перед сохранением."
+
+msgid "template.editor.raw_configs_title"
+msgstr "Импорт пользовательских конфигураций"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "Загрузить файлы конфигурации (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "Не удалось прочитать один из выбранных файлов."
+
+msgid "template.editor.raw_editor_aria"
+msgstr "Редактор необработанного JSON шаблона"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "Перетащите файл JSON шаблона (только .json), чтобы заменить текущее содержимое."
+
+msgid "template.editor.raw_editor_help"
+msgstr "Редактировать полное определение шаблона как JSON. Переключение обратно в простой режим проверяет и перезагружает визуальный редактор."
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "Шаблон JSON успешно импортирован."
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "Импорт этого файла полностью заменит текущий JSON шаблона. Изменения, внесенные в редактор, будут потеряны. Вы хотите продолжить?"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "Заменить шаблон"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "Заменить JSON шаблона?"
+
+msgid "template.editor.raw_editor_title"
+msgstr "Необработанный JSON шаблона"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "Загруженный файл пуст."
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "Не удалось прочитать выбранный файл."
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "Загрузить шаблон JSON (только .json)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "Недействительное определение конфигурации."
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "Записи конфигурации должны быть объектами."
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "Конфигурации %(configs)s не назначены ни одному шагу."
+
+msgid "template.editor.raw_validation_empty"
+msgstr "JSON шаблона не может быть пустым."
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "Недействительный JSON-пакет: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "Пакет шаблона должен быть объектом JSON."
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "Ключи настроек должны быть непустыми строками."
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "Настройки должны быть предоставлены как объект."
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "Настройки %(settings)s не назначены ни одному шагу."
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "Конфигурация %(config)s назначена нескольким шагам."
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "Шаг %(index)s содержит недействительную ссылку на конфигурацию."
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "Шаг %(index)s ссылается на неизвестную конфигурацию %(config)s."
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "Шаг %(index)s должен быть объектом."
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "Настройка %(setting)s назначена нескольким шагам."
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "Шаг %(index)s содержит недействительную ссылку на настройку."
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "Шаг %(index)s ссылается на неизвестную настройку %(setting)s."
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "Шаг %(index)s должен иметь заголовок."
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "Шаблон должен содержать хотя бы один шаг."
+
+msgid "template.editor.readonly_db"
+msgstr "База данных в настоящее время находится в режиме только для чтения. Шаблоны не могут быть изменены."
+
+msgid "template.editor.readonly_method"
+msgstr "Этот шаблон был создан процессом %(method)s и не может быть отредактирован через пользовательский интерфейс."
+
+msgid "template.editor.readonly_title"
+msgstr "Только для чтения"
+
+msgid "template.editor.readonly_user"
+msgstr "У вас есть права только для чтения. Свяжитесь с администратором, чтобы запросить права на запись."
+
+msgid "template.editor.select_config_placeholder"
+msgstr "Выберите конфигурацию"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "Выберите тип"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "Выберите настройку"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "Вы уверены, что хотите удалить эту настройку из шаблона?"
+
+msgid "template.editor.setting_remove_key"
+msgstr "Настройка"
+
+msgid "template.editor.setting_remove_title"
+msgstr "Удалить настройку"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "Добавить выбранное"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "Расширенный"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "Уже добавлено"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "Очистить поиск"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "Все подходящие настройки уже добавлены."
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "Нет настроек для отображения."
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "Доступные настройки: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s доступно, %(used)s уже добавлено"
+
+msgid "template.editor.setting_selector_default"
+msgstr "По умолчанию"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "Посмотреть документацию"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "Настройки, соответствующие текущим фильтрам, не найдены."
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "Плагин"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "Все плагины"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "Тип"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "Все типы"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "Доступны только мультисайтовые настройки. Используйте фильтры, чтобы сузить список."
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "Множественный"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "Шаблон"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "Найти мультисайтовую настройку"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "Искать по метке, ключу или плагину"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "Включено"
+
+msgid "template.editor.settings"
+msgstr "Настройки"
+
+msgid "template.editor.settings_help"
+msgstr "Определите настройки, предоставляемые этим шаблоном, и их значения по умолчанию."
+
+msgid "template.editor.step_configs_empty"
+msgstr "К этому шагу еще не добавлено ни одной конфигурации."
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "Выберите существующие конфигурации"
+
+msgid "template.editor.step_default_title"
+msgstr "Шаг без названия"
+
+msgid "template.editor.step_prefix"
+msgstr "Шаг"
+
+msgid "template.editor.step_settings_empty"
+msgstr "К этому шагу еще не добавлено ни одной настройки."
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "Выберите существующие настройки"
+
+msgid "template.editor.steps"
+msgstr "Шаги"
+
+msgid "template.editor.steps_help"
+msgstr "Организуйте настройки в виде пошаговых инструкций. Выберите, какие настройки или конфигурации относятся к каждому шагу."
+
+msgid "template.editor.summary_clone_info"
+msgstr "В настоящее время клонируется из %(template)s."
+
+msgid "template.editor.summary_counts_configs"
+msgstr "Конфигурации"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "Настройки"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "Шаги"
+
+msgid "template.editor.summary_counts_title"
+msgstr "Содержимое"
+
+msgid "template.editor.summary_link_configs"
+msgstr "Пользовательские конфигурации"
+
+msgid "template.editor.summary_link_details"
+msgstr "Детали шаблона"
+
+msgid "template.editor.summary_link_settings"
+msgstr "Настройки"
+
+msgid "template.editor.summary_link_steps"
+msgstr "Шаги"
+
+msgid "template.editor.summary_links_title"
+msgstr "Быстрые ссылки"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "Создано"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "Метод"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "Метаданные"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "Недоступно"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "Последнее обновление"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "Имя конфигурации обязательно, если определена конфигурация."
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "Тип конфигурации должен быть одним из типов, совместимых с мультисайтом."
+
+msgid "template.editor.validation_config_type_required"
+msgstr "Тип конфигурации обязателен, если определена конфигурация."
+
+msgid "template.editor.validation_configs_unique"
+msgstr "Каждое имя конфигурации должно быть уникальным."
+
+msgid "template.editor.validation_id_required"
+msgstr "Требуется ID шаблона."
+
+msgid "template.editor.validation_setting_key"
+msgstr "Каждая настройка должна иметь ключ."
+
+msgid "template.editor.validation_settings_unique"
+msgstr "Каждый ключ настройки должен быть уникальным."
+
+msgid "template.none"
+msgstr "Нет шаблона"
+
+msgid "templates.gallery.delete_selected"
+msgstr "Удалить выбранное"
+
+msgid "templates.gallery.empty_message"
+msgstr "Создайте первый шаблон, чтобы объединить настройки, шаги и пользовательские конфигурации для повторного использования."
+
+msgid "templates.gallery.empty_title"
+msgstr "Шаблонов пока нет"
+
+msgid "templates.gallery.select"
+msgstr "Выбрать"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "Высокая безопасность"
+
+msgid "templates.name.low"
+msgstr "Низкая безопасность"
+
+msgid "templates.name.medium"
+msgstr "Средняя безопасность"
+
+msgid "templates.name.ui"
+msgstr "Веб-интерфейс"
+
+msgid "templates.subtitle"
+msgstr "Переиспользуемые шаблоны конфигурации для ваших сервисов — объедините настройки, шаги и пользовательские конфигурации, затем создайте, клонируйте или удалите их."
+
+msgid "templates.tag.config"
+msgstr "Пользовательская конфигурация: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "Встроенная функция: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "Плагин: %(name)s"
+
+msgid "templates.title"
+msgstr "Шаблоны служб"
+
+msgid "theme.dark"
+msgstr "Темная"
+
+msgid "theme.light"
+msgstr "Светлая"
+
+msgid "threatmap.attacks_today"
+msgstr "Атак сегодня"
+
+msgid "threatmap.countries"
+msgstr "Страны происхождения"
+
+msgid "threatmap.disabled_help"
+msgstr "Карта угроз читает те же сохранённые отчёты, что и страница «Отчёты». Установите METRICS_PERSIST_TO_DB в yes, чтобы начать их записывать."
+
+msgid "threatmap.disabled_title"
+msgstr "Сохранение отчётов отключено"
+
+msgid "threatmap.empty_help"
+msgstr "Либо за последние 24 часа не было заблокировано ни одного запроса, либо отчёты ещё не собраны."
+
+msgid "threatmap.empty_title"
+msgstr "За этот период ничего не заблокировано"
+
+msgid "threatmap.error_help"
+msgstr "Карта сохраняет последние загруженные значения и повторит попытку при следующем обновлении."
+
+msgid "threatmap.error_title"
+msgstr "Служба метрик недоступна"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "Выйти из полноэкранного режима"
+
+msgid "threatmap.freshness"
+msgstr "Отчёты попадают в базу примерно раз в минуту, поэтому карта отстаёт от реального трафика на одну-две минуты."
+
+msgid "threatmap.fullscreen"
+msgstr "Полный экран"
+
+msgid "threatmap.map_sub"
+msgstr "Дуги показывают страну происхождения, а не точное местоположение"
+
+msgid "threatmap.map_title"
+msgstr "Источник заблокированного трафика"
+
+msgid "threatmap.more_hidden"
+msgstr "ещё не показано"
+
+msgid "threatmap.not_localised"
+msgstr "не определено"
+
+msgid "threatmap.open_live"
+msgstr "Прямой эфир"
+
+msgid "threatmap.show_less"
+msgstr "Показать только %(count)s"
+
+msgid "threatmap.show_more"
+msgstr "Показать все (%(count)s)"
+
+msgid "threatmap.stale"
+msgstr "Эти данные перестали обновляться. Служба метрик не отвечает."
+
+msgid "threatmap.subtitle"
+msgstr "Откуда пришёл трафик, заблокированный вашими экземплярами за последние 24 часа."
+
+msgid "threatmap.ticker_title"
+msgstr "События в реальном времени"
+
+msgid "threatmap.top_origins"
+msgstr "Основные источники"
+
+msgid "threatmap.top_reason"
+msgstr "Главная причина"
+
+msgid "threatmap.top_reasons"
+msgstr "Основные причины"
+
+msgid "threatmap.top_target"
+msgstr "Главная цель"
+
+msgid "threatmap.top_targets"
+msgstr "Основные цели"
+
+msgid "threatmap.updated"
+msgstr "Обновлено"
+
+msgid "timings.calls"
+msgstr "Вызовы"
+
+msgid "timings.disabled_help"
+msgstr "Установите METRICS_COLLECT_TIMINGS в yes, чтобы измерять время каждого плагина. Полная длительность запроса собирается в любом случае."
+
+msgid "timings.disabled_title"
+msgstr "Измерение времени плагинов отключено"
+
+msgid "timings.max"
+msgstr "Максимум"
+
+msgid "timings.max_request"
+msgstr "Самый медленный запрос"
+
+msgid "timings.mean"
+msgstr "Среднее"
+
+msgid "timings.mean_request"
+msgstr "Средний запрос"
+
+msgid "timings.partial"
+msgstr "Некоторые экземпляры не ответили. Ниже учтены только ответившие."
+
+msgid "timings.phase"
+msgstr "Фаза"
+
+msgid "timings.phases"
+msgstr "Фазы плагинов"
+
+msgid "timings.plugin"
+msgstr "Плагин"
+
+msgid "timings.reporting_instances"
+msgstr "Отчитавшиеся экземпляры"
+
+msgid "timings.requests_measured"
+msgstr "Измеренные запросы"
+
+msgid "timings.share"
+msgstr "Доля"
+
+msgid "timings.share_help"
+msgstr "Доля — это общее время плагина относительно общего времени запроса. Фазы, которые выполняются не один раз на запрос — запуск worker, фоновый таймер и внутренний API — не имеют доли и показывают тире."
+
+msgid "timings.subtitle"
+msgstr "Время работы каждого плагина на каждой фазе запроса, полученное в реальном времени со всех экземпляров и объединённое."
+
+msgid "timings.total"
+msgstr "Всего"
+
+msgid "timings.unreachable_help"
+msgstr "Значения считываются с самих экземпляров, поэтому ни один не ответил — либо ещё ни один не обработал запрос."
+
+msgid "timings.unreachable_title"
+msgstr "Ни один экземпляр не сообщил время"
+
+msgid "timings.volatile"
+msgstr "Значения находятся в общей памяти каждого экземпляра и считываются по запросу — они не сохраняются и сбрасываются при перезапуске экземпляра."
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "Если сервис будет удален или перезапущен, ваша конфигурация UI будет потеряна."
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "Это связано с тем, что метод сервиса - 'autoconf', предназначенный для предотвращения конфликтов конфигурации."
+
+msgid "toast.ban_updated"
+msgstr "Срок бана успешно обновлен!"
+
+msgid "toast.body.ping_succeed"
+msgstr "Экземпляры: %(instances)s"
+
+msgid "toast.copied"
+msgstr "Скопировано!"
+
+msgid "toast.disclaimer_title"
+msgstr "Отказ от ответственности"
+
+msgid "toast.global_settings_applied_body"
+msgstr "Глобальные параметры были успешно получены и применены к форме."
+
+msgid "toast.global_settings_applied_title"
+msgstr "Применены глобальные настройки"
+
+msgid "toast.global_settings_failed_body"
+msgstr "Произошла ошибка при получении глобальных настроек."
+
+msgid "toast.global_settings_failed_title"
+msgstr "Не удалось получить глобальные настройки"
+
+msgid "toast.header.ping_failed"
+msgstr "Пинг не удался"
+
+msgid "toast.header.ping_succeed"
+msgstr "Пинг успешен"
+
+msgid "toast.ip_unbanned"
+msgstr "IP-адрес успешно разбанен!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "Автоматически запрашивать сертификат Let's Encrypt."
+
+msgid "tooltip.button.ban_ip"
+msgstr "Забанить этот IP-адрес"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "Преобразовать конфигурацию %(name)s в черновик"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "Перевести конфигурацию %(name)s в рабочий режим"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "Конвертировать сервис %(name)s в черновик"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "Конвертировать сервис %(name)s в онлайн"
+
+msgid "tooltip.button.delete_config"
+msgstr "Удалить кастомную конфигурацию %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "Удалить файл кэша: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "Удалить экземпляр %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "Удалить плагин %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "Удалить сервис %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "Удалить Шаблон %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "Запланировать проверку; загрузка только при наличии обновлений."
+
+msgid "tooltip.button.force_update"
+msgstr "Пропускает проверки и принудительно скачивает PRO-плагины; сохраняет текущее состояние при сбое."
+
+msgid "tooltip.button.ping_instance"
+msgstr "Пинговать экземпляр %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "Перезагрузить экземпляр %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "Сбросить на значение по умолчанию"
+
+msgid "tooltip.button.reset_global"
+msgstr "Сбросить до глобального значения"
+
+msgid "tooltip.button.run_job"
+msgstr "Запустить задачу %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "Показывать только выбранные"
+
+msgid "tooltip.button.stop_instance"
+msgstr "Остановить экземпляр %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "Разбанить %(ip)s"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "Обновить продолжительность блокировки"
+
+msgid "tooltip.button.value_from_global"
+msgstr "Значение из глобальных настроек"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "Невозможно удалить исходную запись бана."
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "Невозможно удалить, так как одна или несколько настроек отключены."
+
+msgid "tooltip.certificate_priority"
+msgstr "Выберите, следует ли отдавать приоритет сертификату из пути файла или из данных base64."
+
+msgid "tooltip.challenge_type"
+msgstr "Тип вызова для использования при проверке Let's Encrypt (http или dns)."
+
+msgid "tooltip.collapse_multiline"
+msgstr "Свернуть многострочные записи (трассировки, полезные нагрузки)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "Свернуть многострочные значения (сертификаты, ключи)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "Конфигурации, применяемые после загрузки плагинов OWASP Core Rule Set."
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "Конфигурации, применяемые перед загрузкой плагинов OWASP Core Rule Set."
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Конфигурации на уровне сервера Nginx, специально для блока 'default server', используемые, когда запрос клиента не соответствует ни одному настроенному имени сервера."
+
+msgid "tooltip.config_type.http"
+msgstr "Конфигурации, применяемые глобально на уровне HTTP Nginx."
+
+msgid "tooltip.config_type.modsec"
+msgstr "Конфигурации ModSecurity, применяемые после загрузки OWASP Core Rule Set, или используемые, если Core Rule Set не загружен."
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "Конфигурации ModSecurity, применяемые перед загрузкой OWASP Core Rule Set."
+
+msgid "tooltip.config_type.server_http"
+msgstr "Конфигурации, применяемые на уровне HTTP-сервера (виртуального хоста) Nginx."
+
+msgid "tooltip.config_type.server_stream"
+msgstr "Конфигурации, применяемые на уровне Stream-сервера Nginx."
+
+msgid "tooltip.config_type.stream"
+msgstr "Конфигурации, применяемые глобально на уровне Stream Nginx."
+
+msgid "tooltip.confirm_password_match"
+msgstr "Пароль подтверждения должен совпадать с паролем, введенным выше."
+
+msgid "tooltip.copied"
+msgstr "Скопировано!"
+
+msgid "tooltip.copy_https_only"
+msgstr "Функция копирования доступна только через HTTPS."
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "Данные пользовательского SSL-сертификата (формат PEM или кодировка Base64)."
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "Путь к файлу пользовательского SSL-сертификата."
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "Данные пользовательского закрытого SSL-ключа (формат PEM или кодировка Base64)."
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "Путь к файлу пользовательского закрытого SSL-ключа."
+
+msgid "tooltip.different_from_template"
+msgstr "Значение отличается от значения по умолчанию в шаблоне"
+
+msgid "tooltip.disabled_by_method"
+msgstr "Отключено: Управляется методом '%(method)s'."
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "Отключено: База данных находится в режиме только для чтения."
+
+msgid "tooltip.disabled_draft"
+msgstr "Отключено: Сервис находится в режиме черновика."
+
+msgid "tooltip.disabled_readonly"
+msgstr "Отключено: Режим только для чтения активен."
+
+msgid "tooltip.dns_check_url"
+msgstr "Если страница показывает 'ok', имя сервера, скорее всего, доступно."
+
+msgid "tooltip.dns_credential_items"
+msgstr "Учетные данные для DNS-провайдера, используемые для DNS-вызовов (например, 'cloudflare_api_token=123456'). Требуемый формат зависит от провайдера."
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "Учетные данные применимы только для DNS-вызовов."
+
+msgid "tooltip.dns_propagation"
+msgstr "Время (в секундах) ожидания распространения изменений DNS во время DNS-вызовов."
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "Задержка распространения DNS применима только для DNS-вызовов."
+
+msgid "tooltip.dns_provider"
+msgstr "DNS-провайдер для использования при DNS-вызовах Let's Encrypt."
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "Выбор DNS-провайдера применим только для DNS-вызовов."
+
+msgid "tooltip.download_file"
+msgstr "Скачать файл"
+
+msgid "tooltip.download_log"
+msgstr "Скачать этот файл журнала"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "Режим черновика можно переключить только для сервисов, созданных через UI."
+
+msgid "tooltip.email_length"
+msgstr "Email должен содержать от 1 до 256 символов."
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "Адрес электронной почты для регистрации в Let's Encrypt для управления сертификатами и уведомлениями."
+
+msgid "tooltip.fetch_global_settings"
+msgstr "Получить глобальные настройки и применить их к текущему шаблону"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "Режим слежения доступен только на последней странице"
+
+msgid "tooltip.global_settings_source"
+msgstr "Значение унаследовано от глобальных настроек."
+
+msgid "tooltip.instance_not_up"
+msgstr "Экземпляр %(hostname)s в настоящее время не отвечает ('up')."
+
+msgid "tooltip.issue_count"
+msgstr "Ошибки и предупреждения в этом представлении"
+
+msgid "tooltip.latest_version_installed"
+msgstr "Вы используете последнюю версию."
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "Пользовательский профиль, который будет использоваться для Let's Encrypt (например, 'my_custom_profile')."
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "Отключить запросы сертификатов для доменов, соответствующих Public Suffix List (рекомендуется)."
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "Профиль, который будет использоваться для Let's Encrypt (classic, tlsserver, shortlived)."
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "Выберите поставщика сертификатов, чтобы показать настройки для выбранного поставщика."
+
+msgid "tooltip.license_key"
+msgstr "Ваш лицензионный ключ BunkerWeb PRO."
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "Перейти на страницу %(name)s"
+
+msgid "tooltip.link.access_service"
+msgstr "Перейти к сервису %(name)s"
+
+msgid "tooltip.link.clone_config"
+msgstr "Клонировать кастомную конфигурацию %(name)s"
+
+msgid "tooltip.link.clone_service"
+msgstr "Клонировать сервис %(name)s"
+
+msgid "tooltip.link.clone_template"
+msgstr "Клонировать Шаблон %(template)s"
+
+msgid "tooltip.link.download_file"
+msgstr "Скачать %(filename)s"
+
+msgid "tooltip.link.edit_config"
+msgstr "Редактировать кастомную конфигурацию %(name)s"
+
+msgid "tooltip.link.edit_service"
+msgstr "Редактировать сервис %(service)s"
+
+msgid "tooltip.link.edit_template"
+msgstr "Редактировать Шаблон %(template)s"
+
+msgid "tooltip.link.export_config"
+msgstr "Экспортировать пользовательскую конфигурацию %(name)s"
+
+msgid "tooltip.link.export_service"
+msgstr "Экспортировать конфигурацию сервиса %(service)s"
+
+msgid "tooltip.link.manage_activation"
+msgstr "Управление активацией %(name)s в глобальных настройках"
+
+msgid "tooltip.link.view_config"
+msgstr "Просмотреть кастомную конфигурацию %(name)s"
+
+msgid "tooltip.link.view_file"
+msgstr "Просмотреть %(filename)s"
+
+msgid "tooltip.link.view_service"
+msgstr "Просмотреть сервис %(service)s"
+
+msgid "tooltip.link.view_template"
+msgstr "Просмотреть Шаблон %(template)s"
+
+msgid "tooltip.local_time"
+msgstr "Показывать временные метки в вашем местном времени"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "Полный URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "Это настройка для нескольких сайтов, влияющая на несколько сервисов, если определена глобально."
+
+msgid "tooltip.new_version_available"
+msgstr "Доступна новая версия!"
+
+msgid "tooltip.next_issue"
+msgstr "Перейти к следующей ошибке или предупреждению"
+
+msgid "tooltip.no_cache"
+msgstr "Для этой задачи не найдено файлов кэша."
+
+msgid "tooltip.no_history"
+msgstr "Для этой задачи не найдено истории выполнения."
+
+msgid "tooltip.no_log_files"
+msgstr "Нет доступных лог-файлов."
+
+msgid "tooltip.no_page_available"
+msgstr "Для этого плагина нет выделенной страницы."
+
+msgid "tooltip.password_requirements"
+msgstr "Пароль должен содержать не менее 8 символов и включать 1 заглавную букву, 1 цифру и 1 специальный символ."
+
+msgid "tooltip.prev_issue"
+msgstr "Перейти к предыдущей ошибке или предупреждению"
+
+msgid "tooltip.pro_feature"
+msgstr "Это функция PRO."
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "Отключено: База данных находится в режиме только для чтения."
+
+msgid "tooltip.readonly_mode"
+msgstr "Это действие запрещено в режиме только для чтения."
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "Отключено: Ваша учетная запись доступна только для чтения, действие '%(action)s' отключено."
+
+msgid "tooltip.real_ip_from"
+msgstr "Список доверенных IP-адресов/сетей, разделенных пробелами, откуда поступают проксированные запросы."
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "Список URL-адресов, содержащих доверенные IP-адреса/сети, разделенные пробелами, откуда поступают проксированные запросы. Также поддерживает URL-адреса file:// и базовую аутентификацию по схеме http://user:pass@url."
+
+msgid "tooltip.real_ip_header"
+msgstr "HTTP-заголовок, содержащий реальный IP-адрес или специальное значение proxy_protocol для протокола PROXY."
+
+msgid "tooltip.real_ip_recursive"
+msgstr "Выполнить рекурсивный поиск в контейнере заголовка IP-адреса."
+
+msgid "tooltip.remove_ban_entry"
+msgstr "Удалить эту запись бана из списка."
+
+msgid "tooltip.reset_template_settings"
+msgstr "Сбросить все настройки в текущем представлении шаблона до значений по умолчанию."
+
+msgid "tooltip.search_logs"
+msgstr "Поиск в журналах (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "Выберите файл, чтобы включить режим слежения"
+
+msgid "tooltip.server_name"
+msgstr "Основное доменное имя или имя сервера для этого сервиса."
+
+msgid "tooltip.stream_support.no"
+msgstr "Не поддерживает режим STREAM."
+
+msgid "tooltip.stream_support.partial"
+msgstr "Частично поддерживает режим STREAM."
+
+msgid "tooltip.stream_support.yes"
+msgstr "Поддерживает режим STREAM."
+
+msgid "tooltip.table.bans.actions"
+msgstr "Действия, доступные для этого бана"
+
+msgid "tooltip.table.bans.country"
+msgstr "Страна забаненного IP-адреса"
+
+msgid "tooltip.table.bans.date"
+msgstr "Дата и время создания бана"
+
+msgid "tooltip.table.bans.details"
+msgstr "Показать детали бана"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "Дата и время истечения бана"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "Забаненный IP-адрес"
+
+msgid "tooltip.table.bans.reason"
+msgstr "Причина бана"
+
+msgid "tooltip.table.bans.scope"
+msgstr "Область бана (Глобальный или Специфичный для сервиса)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "Выбрать все баны"
+
+msgid "tooltip.table.bans.service"
+msgstr "Сервис, где возник бан (если область Специфичная)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "Оставшееся время до истечения бана"
+
+msgid "tooltip.table.cache.actions"
+msgstr "Действия, доступные для этого файла кэша"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "Контрольная сумма файла кэша"
+
+msgid "tooltip.table.cache.details"
+msgstr "Показать детали файла кэша"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "Имя файла кэша"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "Задача, сгенерировавшая этот файл кэша"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "Дата и время последнего обновления файла кэша"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "Плагин, связанный с задачей, сгенерировавшей этот файл кэша"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "Выбрать все файлы кэша"
+
+msgid "tooltip.table.cache.service"
+msgstr "Сервис, связанный с этим файлом кэша (или Глобальный)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "Действия, доступные для этой кастомной конфигурации"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "Контрольная сумма содержимого кастомной конфигурации"
+
+msgid "tooltip.table.configs.details"
+msgstr "Показать детали кастомной конфигурации"
+
+msgid "tooltip.table.configs.method"
+msgstr "Метод создания кастомной конфигурации (например, ui, file)"
+
+msgid "tooltip.table.configs.name"
+msgstr "Имя кастомной конфигурации"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "Выбрать все кастомные конфигурации"
+
+msgid "tooltip.table.configs.service"
+msgstr "Сервис, связанный с кастомной конфигурацией (или Глобальный)"
+
+msgid "tooltip.table.configs.status"
+msgstr "Статус черновика пользовательской конфигурации"
+
+msgid "tooltip.table.configs.template"
+msgstr "Указывает, происходит ли кастомная конфигурация из шаблона"
+
+msgid "tooltip.table.configs.type"
+msgstr "Тип или контекст кастомной конфигурации (например, HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "Действия, доступные для этого экземпляра"
+
+msgid "tooltip.table.instances.created"
+msgstr "Дата и время первой регистрации экземпляра"
+
+msgid "tooltip.table.instances.details"
+msgstr "Показать детали экземпляра"
+
+msgid "tooltip.table.instances.health"
+msgstr "Состояние здоровья экземпляра (Работает, Остановлен, Загрузка)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "Имя хоста или URL экземпляра"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "Дата и время последнего обнаружения экземпляра"
+
+msgid "tooltip.table.instances.method"
+msgstr "Метод создания экземпляра (например, ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "Определенное пользователем или автоматически сгенерированное имя экземпляра"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "Выбрать все экземпляры"
+
+msgid "tooltip.table.instances.type"
+msgstr "Тип экземпляра (например, Контейнер, Статический)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "Действия, доступные для этой задачи"
+
+msgid "tooltip.table.jobs.async"
+msgstr "Указывает, выполняется ли задача асинхронно"
+
+msgid "tooltip.table.jobs.details"
+msgstr "Показать детали задачи"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "Частота выполнения задачи"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "Статус последнего выполнения задачи (Успех/Неудача)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "Имя задачи"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "Плагин, связанный с задачей"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "Указывает, вызывает ли задача перезагрузку BunkerWeb"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "Выбрать все задачи"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "Действия, доступные для этого плагина"
+
+msgid "tooltip.table.plugins.description"
+msgstr "Описание плагина"
+
+msgid "tooltip.table.plugins.details"
+msgstr "Показать детали плагина"
+
+msgid "tooltip.table.plugins.id"
+msgstr "Уникальный идентификатор плагина"
+
+msgid "tooltip.table.plugins.method"
+msgstr "Метод создания плагина (например, ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "Имя плагина"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "Выбрать все плагины"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "Указывает, поддерживает ли плагин режим stream"
+
+msgid "tooltip.table.plugins.type"
+msgstr "Тип плагина (Базовый, Внешний, Pro, UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "Версия плагина"
+
+msgid "tooltip.table.reports.actions"
+msgstr "Действия, доступные для этого отчета"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "Только Stream: байты, полученные от клиента за сессию"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "Только Stream: байты, отправленные клиенту за сессию"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "Только Stream: исходный порт клиента"
+
+msgid "tooltip.table.reports.country"
+msgstr "Страна, связанная с сообщенным IP-адресом"
+
+msgid "tooltip.table.reports.data"
+msgstr "Дополнительные данные, связанные с отчетом"
+
+msgid "tooltip.table.reports.date"
+msgstr "Дата и время создания отчета"
+
+msgid "tooltip.table.reports.details"
+msgstr "Показать детали отчета"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "IP-адрес, вызвавший отчет"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "Только Stream: порт, на который пришла сессия"
+
+msgid "tooltip.table.reports.method"
+msgstr "HTTP-метод сообщенного запроса"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP-запрос или сессия Stream TCP/UDP"
+
+msgid "tooltip.table.reports.reason"
+msgstr "Причина создания отчета"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "Уникальный идентификатор запроса"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "Режим безопасности, активный при создании отчета"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "Выбрать все отчеты"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "Имя сервера (vhost), создавшего отчет"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "Только Stream: длительность сессии в секундах"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "Код состояния HTTP, возвращенный для сообщенного запроса"
+
+msgid "tooltip.table.reports.url"
+msgstr "Целевой URL в сообщенном запросе"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "Строка User-Agent из сообщенного запроса"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "Пожалуйста, выберите одну или несколько строк для выполнения действия."
+
+msgid "tooltip.table.services.actions"
+msgstr "Действия, доступные для этого сервиса"
+
+msgid "tooltip.table.services.created"
+msgstr "Дата и время создания сервиса"
+
+msgid "tooltip.table.services.details"
+msgstr "Показать детали сервиса"
+
+msgid "tooltip.table.services.last_update"
+msgstr "Дата и время последнего обновления сервиса"
+
+msgid "tooltip.table.services.method"
+msgstr "Метод создания сервиса (например, ui, file)"
+
+msgid "tooltip.table.services.name"
+msgstr "Имя сервиса"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "Режим безопасности сервиса (Блокировка или Обнаружение)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "Выбрать все Сервисы"
+
+msgid "tooltip.table.services.template"
+msgstr "Шаблон, используемый Сервисом"
+
+msgid "tooltip.table.services.type"
+msgstr "Тип Сервиса (Онлайн/Черновик)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "Доступные действия для этого Шаблона"
+
+msgid "tooltip.table.templates.configs"
+msgstr "Количество пользовательских конфигураций Шаблона"
+
+msgid "tooltip.table.templates.created"
+msgstr "Дата создания Шаблона"
+
+msgid "tooltip.table.templates.details"
+msgstr "Показать детали Шаблона"
+
+msgid "tooltip.table.templates.id"
+msgstr "ID Шаблона"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "Дата последнего обновления Шаблона"
+
+msgid "tooltip.table.templates.method"
+msgstr "Метод создания Шаблона"
+
+msgid "tooltip.table.templates.name"
+msgstr "Имя Шаблона, заданное пользователем или сгенерированное автоматически"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "Плагин, содержащий Шаблон"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "Выбрать все Шаблоны"
+
+msgid "tooltip.table.templates.settings"
+msgstr "Количество настроек Шаблона"
+
+msgid "tooltip.table.templates.steps"
+msgstr "Количество шагов Шаблона"
+
+msgid "tooltip.toggle_level"
+msgstr "Показать / скрыть строки %(level)s"
+
+msgid "tooltip.toggle_wrap"
+msgstr "Переключить перенос строк"
+
+msgid "tooltip.ui_host"
+msgstr "Имя хоста или IP-адрес, который будет обслуживать UI BunkerWeb через обратный прокси."
+
+msgid "tooltip.ui_url"
+msgstr "Путь URL, используемый для доступа к UI BunkerWeb через обратный прокси."
+
+msgid "tooltip.ui_url_security"
+msgstr "Использование нестандартного, трудно угадываемого пути URL повышает безопасность."
+
+msgid "tooltip.use_custom_ssl"
+msgstr "Использовать ли пользовательский SSL-сертификат вместо Let's Encrypt."
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "Использовать ли среду staging Let's Encrypt для тестирования (генерирует недоверенные сертификаты)."
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "Staging Let's Encrypt доступен только при использовании сервера Let's Encrypt."
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "Включить связь по протоколу PROXY."
+
+msgid "tooltip.use_real_ip"
+msgstr "Использовать реальный IP"
+
+msgid "tooltip.username_length"
+msgstr "Имя пользователя должно содержать от 1 до 256 символов."
+
+msgid "tooltip.value_from_global"
+msgstr "Значение из глобальных настроек"
+
+msgid "tooltip.view_full_url"
+msgstr "Нажмите, чтобы просмотреть полный URL"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "Генерировать wildcard-сертификаты (*.domain.com). Требуется DNS-вызов."
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "Wildcard-сертификаты поддерживаются только с типом вызова DNS."
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "Таймаут подключения в секундах для вызовов API ZeroSSL."
+
+msgid "tooltip.zerossl_api_key"
+msgstr "Необязательный API-ключ ZeroSSL, используемый zerossl-bot."
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "Максимальное общее время в секундах для каждого запроса API ZeroSSL."
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "Количество повторов для запросов API ZeroSSL (0 отключает повторы)."
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "Задержка в секундах между повторами API ZeroSSL."
+
+msgid "totp.cant_access"
+msgstr "Не можете получить доступ к своему аутентификатору?"
+
+msgid "totp.or_use_security_key"
+msgstr "или используйте ключ безопасности"
+
+msgid "totp.prompt"
+msgstr "Пожалуйста, введите ваш TOTP-код."
+
+msgid "totp.signing_in"
+msgstr "Вход в BunkerWeb"
+
+msgid "totp.subtitle"
+msgstr "Введите код из вашего приложения для аутентификации."
+
+msgid "totp.subtitle_security_key"
+msgstr "Подтвердите свою личность ключом безопасности."
+
+msgid "totp.title"
+msgstr "Двухфакторная"
+
+msgid "upstreams.add_server"
+msgstr "Добавить сервер"
+
+msgid "upstreams.all"
+msgstr "Все"
+
+msgid "upstreams.attach"
+msgstr "Прикрепить"
+
+msgid "upstreams.attach_copy"
+msgstr "Прикрепите %(name)s (%(servers)s) к одному или нескольким сервисам."
+
+msgid "upstreams.backend_ssl"
+msgstr "Общаться с серверами (https:// / grpcs://) с помощью TLS"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "Хэш IP — один и тот же клиент, один и тот же бэкенд"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "Наименьшее количество соединений"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "Круговое распределение (по умолчанию)"
+
+msgid "upstreams.create"
+msgstr "Создать upstream"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "Удалить этот upstream?"
+
+msgid "upstreams.delete_copy"
+msgstr "Удалить upstream %(name)s?"
+
+msgid "upstreams.delete_help"
+msgstr "Upstream, прикрепленный к сервису, нельзя удалить. Сначала отсоедините его."
+
+msgid "upstreams.edit"
+msgstr "Редактировать upstream"
+
+msgid "upstreams.edit_shared"
+msgstr "Этот апстрим прикреплён к сервисам (количество: %(count)s): %(services)s. Сохранение изменит их все."
+
+msgid "upstreams.empty_text"
+msgstr "Upstream — это именованный пул бэкендов, к которым вы прикрепляете один или несколько сервисов в пути обратного прокси. Встроенные настройки REVERSE_PROXY_HOST продолжают работать вместе с ним."
+
+msgid "upstreams.empty_title"
+msgstr "Апстримов пока нет"
+
+msgid "upstreams.keepalive"
+msgstr "Поддержание соединения"
+
+msgid "upstreams.keepalive_help"
+msgstr "Число бездействующих соединений, сохраняемых каждым рабочим процессом. Только для HTTP и gRPC; оставьте поле пустым, чтобы отключить."
+
+msgid "upstreams.match_path"
+msgstr "Путь обратного прокси"
+
+msgid "upstreams.match_path_help"
+msgstr "Место, куда обращаются выбранные сервисы для доступа к этому пулу. Игнорируется для пула потоков, который использует весь сервис."
+
+msgid "upstreams.method"
+msgstr "Балансировка нагрузки"
+
+msgid "upstreams.name_help"
+msgstr "Только буквы, цифры, дефисы и подчеркивания. Точки не допускаются, чтобы имя пула не совпадало с реальным хостом."
+
+msgid "upstreams.new"
+msgstr "Новый upstream"
+
+msgid "upstreams.not_attached"
+msgstr "Не привязан"
+
+msgid "upstreams.protocol"
+msgstr "Протокол"
+
+msgid "upstreams.protocol_help"
+msgstr "Пулы HTTP и gRPC привязаны к пути; пул потока берет на себя весь сервис TCP/UDP."
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "Поток (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "База данных только для чтения. Upstreams можно просматривать, но не изменять."
+
+msgid "upstreams.role.backup"
+msgstr "Резервный"
+
+msgid "upstreams.role.down"
+msgstr "Не в сети"
+
+msgid "upstreams.role.primary"
+msgstr "Основной"
+
+msgid "upstreams.save"
+msgstr "Сохранить upstream"
+
+msgid "upstreams.search"
+msgstr "Поиск имени, описания или сервера..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "Время ожидания отказа"
+
+msgid "upstreams.server_host"
+msgstr "Сервер"
+
+msgid "upstreams.server_max_fails"
+msgstr "Максимальное количество отказов"
+
+msgid "upstreams.server_role"
+msgstr "Роль"
+
+msgid "upstreams.server_weight"
+msgstr "Вес"
+
+msgid "upstreams.servers"
+msgstr "Серверы"
+
+msgid "upstreams.services_help"
+msgstr "Используйте Ctrl или Command для выбора нескольких сервисов. Upstream можно привязать позже."
+
+msgid "upstreams.services_hidden"
+msgstr "Скрыто сервисов: %(count)s. Апстрим %(protocol)s можно привязать только к сервису соответствующего типа."
+
+msgid "upstreams.truncated"
+msgstr "Отображаются только первые 500 апстримов. Чтобы получить полный результат, сузьте список через API."
+
+msgid "validation.default_field_name"
+msgstr "Это поле"
+
+msgid "validation.invalid_date"
+msgstr "Неверная дата"
+
+msgid "validation.ip_global_duplicate"
+msgstr "Этот IP-адрес уже забанен глобально."
+
+msgid "validation.ip_invalid"
+msgstr "Неверный формат IP-адреса."
+
+msgid "validation.ip_required"
+msgstr "Требуется IP-адрес."
+
+msgid "validation.ip_service_duplicate"
+msgstr "Этот IP-адрес уже забанен для выбранного сервиса (%(service)s)."
+
+msgid "validation.pattern"
+msgstr "Пожалуйста, введите допустимое значение для %(field)s."
+
+msgid "validation.required"
+msgstr "%(field)s обязательно для заполнения."
+
+msgid "validation.service_required_for_ban"
+msgstr "Для бана, специфичного для сервиса, необходимо выбрать сервис."
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL требует либо email, либо API-ключ ZeroSSL."
+
+msgid "web_cache.available"
+msgstr "Доступно"
+
+msgid "web_cache.cache_state"
+msgstr "Состояние"
+
+msgid "web_cache.cached_files"
+msgstr "Кэшированные файлы"
+
+msgid "web_cache.deployment"
+msgstr "Развертывание"
+
+msgid "web_cache.disabled"
+msgstr "Отключено"
+
+msgid "web_cache.disk_usage"
+msgstr "Использование диска"
+
+msgid "web_cache.empty"
+msgstr "Пусто"
+
+msgid "web_cache.enabled"
+msgstr "Включено"
+
+msgid "web_cache.enabled_instances"
+msgstr "Кэш включен"
+
+msgid "web_cache.enabled_services"
+msgstr "Включенные службы"
+
+msgid "web_cache.error"
+msgstr "Ошибка"
+
+msgid "web_cache.hit_rate"
+msgstr "Процент попадания"
+
+msgid "web_cache.instance"
+msgstr "Инстанс"
+
+msgid "web_cache.metrics"
+msgstr "Агрегированное распределение попаданий/промахов"
+
+msgid "web_cache.metrics_scope"
+msgstr "Счетчики агрегируются по инстансу для всех служб с включенным кэшированием."
+
+msgid "web_cache.not_reporting"
+msgstr "Не отображается"
+
+msgid "web_cache.path"
+msgstr "Путь"
+
+msgid "web_cache.purge"
+msgstr "Очистить кэшированные ответы"
+
+msgid "web_cache.purge_all"
+msgstr "Очистить все"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "Это удаляет все кэшированные ответы для всех сервисов на всех доступных экземплярах. Это действие необратимо."
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "Очистить весь кэш?"
+
+msgid "web_cache.purge_help"
+msgstr "Действия очистки выполняются немедленно на доступных экземплярах. Недоступные экземпляры пропускаются, и никаких действий не планируется."
+
+msgid "web_cache.purge_key"
+msgstr "Эффективный ключ кэша"
+
+msgid "web_cache.purge_key_help"
+msgstr "Оставьте ключ кэша пустым только для значения по умолчанию $scheme$host$request_uri. Если сервис переопределяет PROXY_CACHE_KEY, вставьте его эффективное значение здесь; недопустимые переменные только для запроса отклоняются вместо очистки другой записи."
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "Эффективный PROXY_CACHE_KEY (необязательно)"
+
+msgid "web_cache.purge_url"
+msgstr "Очистить URL"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "Отчитавшиеся экземпляры"
+
+msgid "web_cache.service"
+msgstr "Сервис"
+
+msgid "web_cache.services"
+msgstr "Включение сервиса"
+
+msgid "web_cache.status"
+msgstr "Хранилище экземпляра"
+
+msgid "web_cache.subtitle"
+msgstr "Статус кэша обратного прокси, агрегированные метрики частоты попадания и немедленные средства очистки."
+
+msgid "whatsnew.missing_action"
+msgstr "Открыть журнал изменений на GitHub"
+
+msgid "whatsnew.missing_message"
+msgstr "CHANGELOG.md не входит в эту сборку. Заметки о выпусках доступны на GitHub."
+
+msgid "whatsnew.missing_title"
+msgstr "В этой установке нет журнала изменений"
+
+msgid "whatsnew.modal.intro"
+msgstr "Вот что изменилось с версии, которой вы пользовались."
+
+msgid "whatsnew.modal.title"
+msgstr "Что нового"
+
+msgid "whatsnew.subtitle"
+msgstr "Все выпуски BunkerWeb, начиная с самого нового, прямо из журнала изменений, поставляемого с этой установкой."
+
+msgid "workflows.act_block"
+msgstr "Заблокировать"
+
+msgid "workflows.act_challenge"
+msgstr "Проверка"
+
+msgid "workflows.act_code"
+msgstr "Код состояния"
+
+msgid "workflows.act_denyDefault"
+msgstr "Код отказа экземпляра"
+
+msgid "workflows.act_denyShort"
+msgstr "код отказа"
+
+msgid "workflows.act_provider"
+msgstr "Поставщик антибот-проверки"
+
+msgid "workflows.act_redirect"
+msgstr "Перенаправить"
+
+msgid "workflows.act_status"
+msgstr "Код отказа"
+
+msgid "workflows.act_terminal"
+msgstr "Одно действие на правило, после которого проверка завершается — у правила нет ветвей «истина» и «ложь»."
+
+msgid "workflows.act_url"
+msgstr "URL назначения"
+
+msgid "workflows.action"
+msgstr "Затем"
+
+msgid "workflows.add_rule"
+msgstr "Добавить правило"
+
+msgid "workflows.all"
+msgstr "Все"
+
+msgid "workflows.aria.collapse"
+msgstr "Свернуть"
+
+msgid "workflows.aria.combinator"
+msgstr "Изменить логическую связку, сейчас"
+
+msgid "workflows.aria.conditionType"
+msgstr "Тип условия"
+
+msgid "workflows.aria.denyStatus"
+msgstr "Код отказа"
+
+msgid "workflows.aria.drag"
+msgstr "Перетащите для изменения порядка"
+
+msgid "workflows.aria.expand"
+msgstr "Развернуть"
+
+msgid "workflows.aria.groupKind"
+msgstr "Тип группы"
+
+msgid "workflows.aria.insertAt"
+msgstr "Добавить правило в позицию %(n)s"
+
+msgid "workflows.aria.more"
+msgstr "Ещё"
+
+msgid "workflows.aria.moveDown"
+msgstr "Переместить вниз — выполняется позже"
+
+msgid "workflows.aria.moveRule"
+msgstr "Переместить правило"
+
+msgid "workflows.aria.moveUp"
+msgstr "Переместить вверх — выполняется раньше"
+
+msgid "workflows.aria.openRule"
+msgstr "Открыть правило %(n)s"
+
+msgid "workflows.aria.provider"
+msgstr "Поставщик антибот-проверки"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "Код перенаправления"
+
+msgid "workflows.aria.removeCondition"
+msgstr "Удалить условие"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "Удалить порог"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "Удалить порог частоты"
+
+msgid "workflows.aria.removeValue"
+msgstr "Удалить значение"
+
+msgid "workflows.aria.requestCount"
+msgstr "Количество запросов"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "Группа ресурсов"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "Проблем валидации в этом правиле: %(count)s"
+
+msgid "workflows.aria.ruleName"
+msgstr "Название правила %(n)s"
+
+msgid "workflows.aria.terminalAction"
+msgstr "Завершающее действие"
+
+msgid "workflows.aria.uriMatch"
+msgstr "Режим сопоставления URI"
+
+msgid "workflows.aria.uriValue"
+msgstr "Значение URI"
+
+msgid "workflows.aria.window"
+msgstr "Окно в секундах"
+
+msgid "workflows.attach"
+msgstr "Прикрепить к сервисам"
+
+msgid "workflows.attach_help"
+msgstr "Правила применяются только к тем сервисам, к которым прикреплен рабочий процесс."
+
+msgid "workflows.attached_notice"
+msgstr "После сохранения правила будут применены ко всем привязанным сервисам. Количество сервисов: %(count)s."
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "Слева направо. Первое совпадение побеждает."
+
+msgid "workflows.canvas.auxList"
+msgstr "Сверху вниз. Первое совпадение побеждает."
+
+msgid "workflows.canvas.close"
+msgstr "Закрыть"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "Позиция выполнения: %(n)s из %(total)s"
+
+msgid "workflows.canvas.dropHint"
+msgstr "Перетащите для установки приоритета — место правила в цепочке — это единственное, что оно означает"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "Рабочий процесс без правил ничего не меняет — каждый запрос просто проходит к следующему прикрепленному рабочему процессу."
+
+msgid "workflows.canvas.emptyCta"
+msgstr "Добавить первое правило"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "Правил еще нет"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "Правила выполняются слева направо."
+
+msgid "workflows.canvas.entry_title"
+msgstr "Каждый запрос"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "Переходит к следующему прикрепленному рабочему процессу."
+
+msgid "workflows.canvas.exit_title"
+msgstr "Ни одно правило не совпало"
+
+msgid "workflows.canvas.fit"
+msgstr "Подстроить под вид"
+
+msgid "workflows.canvas.gateTip"
+msgstr "Ворота совпадения, а не действие: если значение ниже порога, правило не совпадает, и следующее правило оценивается."
+
+msgid "workflows.canvas.hint"
+msgstr "Перетащите узел для перестановки · перетащите доску для обзора · Alt + ← / → на выделенном узле"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "Только для чтения — обведите, чтобы осмотреться, порядок не может быть изменен"
+
+msgid "workflows.canvas.insert"
+msgstr "Добавить правило здесь"
+
+msgid "workflows.canvas.open"
+msgstr "Открыть правило"
+
+msgid "workflows.canvas.skipped"
+msgstr "Отключено — полностью пропускается, как будто оно не входит в цепочку."
+
+msgid "workflows.canvas.stopTail"
+msgstr ", оценка останавливается здесь — после него нет других правил"
+
+msgid "workflows.canvas.title"
+msgstr "Порядок правил"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "Увеличить масштаб"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "Уменьшить масштаб"
+
+msgid "workflows.capacity"
+msgstr "Правил: %(count)s из %(maxRules)s · крупнейшее правило использует %(worst)s из %(maxPredicates)s условий · регулярных выражений в процессе: %(regexes)s"
+
+msgid "workflows.clone"
+msgstr "Клонировать рабочий процесс"
+
+msgid "workflows.clone_help"
+msgstr "Правила копируются, а прикрепления к сервисам — нет."
+
+msgid "workflows.clone_name"
+msgstr "Название копии"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "Удалить это правило? Все правила ниже поднимутся на одну позицию."
+
+msgid "workflows.copySuffix"
+msgstr " (копия)"
+
+msgid "workflows.delete"
+msgstr "Удалить рабочий процесс"
+
+msgid "workflows.delete_confirm"
+msgstr "Этот рабочий процесс и все его правила будут навсегда удалены."
+
+msgid "workflows.empty_text"
+msgstr "Рабочий процесс — это упорядоченный список правил, которые вы прикрепляете к сервисам: дерево условий, необязательный порог скорости и одно действие — запрос, блокировка или перенаправление."
+
+msgid "workflows.empty_title"
+msgstr "Рабочих процессов пока нет"
+
+msgid "workflows.entry_sub"
+msgstr "Процессы выполняются в порядке привязки, а правила внутри этого процесса — сверху вниз."
+
+msgid "workflows.entry_title"
+msgstr "Каждый запрос к привязанной службе"
+
+msgid "workflows.err.save"
+msgstr "Не удалось сохранить"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "Не удалось связаться с конечной точкой сохранения"
+
+msgid "workflows.err.validate"
+msgstr "Не удалось проверить"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "Не удалось связаться с конечной точкой проверки"
+
+msgid "workflows.errors.body"
+msgstr "Ничего не применено — действующая политика не изменилась."
+
+msgid "workflows.errors.count"
+msgstr "Сохранению мешают проблемы: %(count)s."
+
+msgid "workflows.errors.rule"
+msgstr "Правило %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "Правило %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "Этот процесс"
+
+msgid "workflows.exit_sub"
+msgstr "Запрос перейдёт к следующему привязанному процессу, а затем к остальной части стека безопасности."
+
+msgid "workflows.exit_title"
+msgstr "Ни одно правило не совпало"
+
+msgid "workflows.gate.and"
+msgstr "и только после того, как один и тот же IP клиента отправит больше"
+
+msgid "workflows.gate.chip"
+msgstr "порог совпадения"
+
+msgid "workflows.gate.help"
+msgstr "Счёт ведётся отдельно для каждого IP клиента. Ниже порога правило вообще не срабатывает, и проверка переходит к следующему правилу; само по себе оно не ограничивает частоту."
+
+msgid "workflows.legend.fall"
+msgstr "При несовпадении переход к следующему правилу"
+
+msgid "workflows.legend.gate"
+msgstr "Порог частоты разрешает совпадение, но не является действием"
+
+msgid "workflows.legend.move"
+msgstr "Чтобы изменить порядок, перетащите, используйте стрелки или нажмите Alt + ↑ / ↓"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "Перетащите, используйте номерную метку или нажмите Alt + ← / → для перестановки"
+
+msgid "workflows.legend.stop"
+msgstr "Совпадение выполняет одно действие и останавливает проверку"
+
+msgid "workflows.link.entry"
+msgstr "каждый запрос"
+
+msgid "workflows.link.noMatch"
+msgstr "нет совпадения"
+
+msgid "workflows.menu.bottom"
+msgstr "Выполнять последним"
+
+msgid "workflows.menu.delete"
+msgstr "Удалить правило"
+
+msgid "workflows.menu.disable"
+msgstr "Отключить правило"
+
+msgid "workflows.menu.duplicate"
+msgstr "Создать копию ниже"
+
+msgid "workflows.menu.enable"
+msgstr "Включить правило"
+
+msgid "workflows.menu.top"
+msgstr "Выполнять первым"
+
+msgid "workflows.move.first"
+msgstr "Выполнять первым"
+
+msgid "workflows.move.last"
+msgstr "Выполнять последним"
+
+msgid "workflows.new"
+msgstr "Новый рабочий процесс"
+
+msgid "workflows.no_rules"
+msgstr "Правила пока нет. Добавьте одно, чтобы начать создавать эту политику."
+
+msgid "workflows.not_attached"
+msgstr "Не прикреплено"
+
+msgid "workflows.not_attached_notice"
+msgstr "Этот процесс не привязан ни к одной службе, поэтому его правила пока нигде не применяются."
+
+msgid "workflows.not_validated"
+msgstr "Ещё не проверено"
+
+msgid "workflows.order_help"
+msgstr "Правила оцениваются в порядке, и первое, которое совпадает, выигрывает. Правило с порогом скорости срабатывает только после превышения порога, поэтому более низкое правило может перехватывать трафик ниже него."
+
+msgid "workflows.readonly"
+msgstr "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять."
+
+msgid "workflows.rule.disabled"
+msgstr "Отключено"
+
+msgid "workflows.rule.if"
+msgstr "Если"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "Название правила"
+
+msgid "workflows.rule.noun"
+msgstr "Правило"
+
+msgid "workflows.rule.onMatch"
+msgstr "Если сработало"
+
+msgid "workflows.rule.skipped"
+msgstr "Отключено — полностью пропускается, как будто правила нет в списке."
+
+msgid "workflows.rule.stopTail"
+msgstr ", проверка завершается здесь — правила ниже не будут достигнуты."
+
+msgid "workflows.rules"
+msgstr "Правила"
+
+msgid "workflows.say.actionChanged"
+msgstr "Действие изменено на %(type)s. Оно по-прежнему единственное и завершает проверку."
+
+msgid "workflows.say.added"
+msgstr "Правило добавлено на позицию %(n)s — последнюю, поэтому сначала проверяются все правила выше."
+
+msgid "workflows.say.deleted"
+msgstr "Правило удалено. Осталось правил: %(count)s."
+
+msgid "workflows.say.duplicated"
+msgstr "Копия вставлена на позицию %(n)s. Она не сможет сработать, пока исходное правило выше включено."
+
+msgid "workflows.say.gateAdded"
+msgstr "К совпадению добавлен порог частоты. Ниже него правило не срабатывает, и проверка продолжается."
+
+msgid "workflows.say.inserted"
+msgstr "Правило добавлено в позицию %(n)s правила %(total)s. Все правила перед ним проверяются в первую очередь."
+
+msgid "workflows.say.inspecting"
+msgstr "Редактирование правила %(n)s из %(total)s — %(name)s."
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "Последнее значение удалено — это условие нельзя сохранить, пока не будет добавлено значение."
+
+msgid "workflows.say.moved"
+msgstr "%(name)s перемещено на позицию %(to)s из %(total)s%(how)s. Теперь оно выполняется %(where)s."
+
+msgid "workflows.say.predicateCap"
+msgstr "Это правило уже содержит максимально допустимые %(max)s условий."
+
+msgid "workflows.say.ruleAbove"
+msgstr "правило выше"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s отключено — оно полностью пропускается, и запросы теперь видят правила ниже."
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s включено — оно снова проверяется на позиции %(n)s."
+
+msgid "workflows.say.runsAfter"
+msgstr "после %(name)s"
+
+msgid "workflows.say.runsFirst"
+msgstr "первым"
+
+msgid "workflows.say.runsLast"
+msgstr "последним"
+
+msgid "workflows.say.saved"
+msgstr "Правила сохранены и отправлены привязанным службам."
+
+msgid "workflows.say.theRule"
+msgstr "Правило"
+
+msgid "workflows.say.valuesDropped"
+msgstr "Условие изменено на %(type)s — его прежние значения (%(count)s) нельзя перенести."
+
+msgid "workflows.say.via.drag"
+msgstr "перетаскиванием"
+
+msgid "workflows.say.via.keyboard"
+msgstr "с клавиатуры"
+
+msgid "workflows.say.viewCanvas"
+msgstr "Вид канвы. Правила выполняются слева направо; первое совпадение побеждает."
+
+msgid "workflows.say.viewList"
+msgstr "Вид списка. Правила выполняются сверху вниз; первое совпадение побеждает."
+
+msgid "workflows.search"
+msgstr "Поиск по имени или описанию..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "Оставьте пустым, чтобы имитировать неудачный поиск ASN."
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN должен быть числом"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "Предполагается, что клиент не находится в белом списке."
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "Номер запроса %(request_number)s — введённое значение, а не результат измерения."
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "Предполагается, что лимит регулярных выражений экземпляра не исчерпан."
+
+msgid "workflows.test.assumptions"
+msgstr "Допущения"
+
+msgid "workflows.test.country"
+msgstr "Страна"
+
+msgid "workflows.test.detail_challenge"
+msgstr "Проверка перехватывает управление; остальная часть стека безопасности продолжает работу."
+
+msgid "workflows.test.detail_detect"
+msgstr "Служба работает в режиме обнаружения, поэтому фактически ничего не применяется."
+
+msgid "workflows.test.detail_status"
+msgstr "Клиент увидит %(status)s."
+
+msgid "workflows.test.failed"
+msgstr "Не удалось запустить тест"
+
+msgid "workflows.test.geo"
+msgstr "Поиск GeoIP"
+
+msgid "workflows.test.geo_help"
+msgstr "При недоступности правила страны и ASN получают состояние «НЕИЗВЕСТНО» и никогда не срабатывают."
+
+msgid "workflows.test.geo_local"
+msgstr "Локальный/частный адрес"
+
+msgid "workflows.test.geo_resolved"
+msgstr "Определено"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "База данных недоступна"
+
+msgid "workflows.test.intro"
+msgstr "Последовательно проверяет все процессы, привязанные к службе, точно так же, как это сделал бы экземпляр."
+
+msgid "workflows.test.invalid"
+msgstr "Исправьте указанные выше проблемы перед тестированием."
+
+msgid "workflows.test.ip"
+msgstr "IP клиента"
+
+msgid "workflows.test.method"
+msgstr "Метод"
+
+msgid "workflows.test.number"
+msgstr "Номер запроса"
+
+msgid "workflows.test.number_help"
+msgstr "N-й запрос этого клиента в окне. Это заданное вами допущение, а не результат измерения."
+
+msgid "workflows.test.open"
+msgstr "Проверить запрос"
+
+msgid "workflows.test.other_matched"
+msgstr "сработало здесь"
+
+msgid "workflows.test.other_no_match"
+msgstr "ни одно правило не сработало"
+
+msgid "workflows.test.other_unreached"
+msgstr "не достигнуто"
+
+msgid "workflows.test.other_workflows"
+msgstr "Другие процессы этой службы"
+
+msgid "workflows.test.out_draft"
+msgstr "Эта служба является черновиком — процесс для неё ещё не скомпилирован."
+
+msgid "workflows.test.out_match"
+msgstr "Сработали %(workflow)s · %(rule)s, действие над запросом: %(action)s."
+
+msgid "workflows.test.out_no_match"
+msgstr "Ни одно правило не сработало. Запрос переходит к остальной части стека безопасности."
+
+msgid "workflows.test.out_not_attached"
+msgstr "Этот процесс не привязан ни к одной службе, поэтому проверять нечего."
+
+msgid "workflows.test.out_whitelisted"
+msgstr "Клиент в белом списке — весь процесс пропущен, ни одно правило не проверяется."
+
+msgid "workflows.test.run"
+msgstr "Запустить тест"
+
+msgid "workflows.test.service"
+msgstr "Служба"
+
+msgid "workflows.test.title"
+msgstr "Проверка запроса"
+
+msgid "workflows.test.unreachable"
+msgstr "Не удалось связаться с конечной точкой тестирования"
+
+msgid "workflows.test.uri"
+msgstr "Путь URI"
+
+msgid "workflows.test.uri_help"
+msgstr "Только путь — $uri никогда не содержит строку запроса."
+
+msgid "workflows.test.v_gate"
+msgstr "условия совпали · порог закрыт на %(n)s из %(count)s"
+
+msgid "workflows.test.v_match"
+msgstr "СОВПАДЕНИЕ"
+
+msgid "workflows.test.v_unknown"
+msgstr "НЕИЗВЕСТНО"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "Не удалось определить необходимый правилу факт, поэтому оно никогда не сработает."
+
+msgid "workflows.test.whitelisted"
+msgstr "Этот клиент находится в белом списке"
+
+msgid "workflows.threshold"
+msgstr "Только при превышении скорости"
+
+msgid "workflows.threshold_count"
+msgstr "Запросы"
+
+msgid "workflows.threshold_window"
+msgstr "секунд"
+
+msgid "workflows.tree.addCondition"
+msgstr "Условие"
+
+msgid "workflows.tree.addGroup"
+msgstr "Группа"
+
+msgid "workflows.tree.all"
+msgstr "Все из"
+
+msgid "workflows.tree.allMeta"
+msgstr "Условия: %(count)s — все должны быть истинными"
+
+msgid "workflows.tree.and"
+msgstr "и"
+
+msgid "workflows.tree.any"
+msgstr "Любое из"
+
+msgid "workflows.tree.anyMeta"
+msgstr "Условия: %(count)s — хотя бы одно должно быть истинным"
+
+msgid "workflows.tree.empty"
+msgstr "Пустая группа — добавьте условие, иначе её нельзя сохранить."
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "ни одна группа не содержит записи типа %(kind)s"
+
+msgid "workflows.tree.noneMeta"
+msgstr "срабатывает, когда ни одно из условий не истинно"
+
+msgid "workflows.tree.not"
+msgstr "Ни одно из"
+
+msgid "workflows.tree.or"
+msgstr "или"
+
+msgid "workflows.tree.removeGroup"
+msgstr "Удалить группу"
+
+msgid "workflows.truncated"
+msgstr "Отображаются только первые 500 рабочих процессов. Чтобы получить полный результат, используйте API."
+
+msgid "workflows.untitled"
+msgstr "Правило без названия"
+
+msgid "workflows.value.add"
+msgstr "Значение"
+
+msgid "workflows.values.fewer"
+msgstr "Показать меньше"
+
+msgid "workflows.values.more"
+msgstr "Ещё %(n)s"
+
+msgid "workflows.verb.asn"
+msgstr "равен"
+
+msgid "workflows.verb.country"
+msgstr "равна"
+
+msgid "workflows.verb.group"
+msgstr "входит в группу"
+
+msgid "workflows.verb.ip"
+msgstr "находится в"
+
+msgid "workflows.verb.isIn"
+msgstr "находится в"
+
+msgid "workflows.verb.isOneOf"
+msgstr "является одним из"
+
+msgid "workflows.verb.method"
+msgstr "равен"
+
+msgid "workflows.verb.uri"
+msgstr "совпадает с"
+
+msgid "workflows.view.canvas"
+msgstr "Канва"
+
+msgid "workflows.view.list"
+msgstr "Список"
+

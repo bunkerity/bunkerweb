@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "清除搜索",
       "close": "关闭",
+      "collapse_multiline": "折叠多行条目",
+      "configs_dropzone": "选择自定义配置导出文件或将其拖放到此处",
       "copy": "复制日志",
       "download_log": "下载此日志文件",
       "follow": "跟随",
       "hide_value": "隐藏值",
-      "reveal_value": "显示值",
-      "select_file": "选择文件",
-      "select_page": "选择页面",
       "issue_count": "错误和警告计数",
       "level_filter": "按级别筛选日志行",
       "local_time": "以本地时间显示时间戳",
-      "collapse_multiline": "折叠多行条目",
       "next_issue": "下一个错误或警告",
+      "passkey_name": "通行密钥名称",
+      "plugins_dropzone": "选择插件压缩包或将其拖放到此处",
       "prev_issue": "上一个错误或警告",
-      "search_logs": "搜索日志",
-      "toggle_wrap": "切换自动换行",
-      "configs_dropzone": "选择自定义配置导出文件或将其拖放到此处",
       "raw_configuration": "原始配置",
-      "services_dropzone": "选择服务导出文件或将其拖放到此处",
-      "user_avatar": "用户头像",
       "remove_value": "删除值",
-      "view_selected_items": "查看选定的项目",
-      "passkey_name": "通行密钥名称"
+      "reveal_value": "显示值",
+      "search_logs": "搜索日志",
+      "select_file": "选择文件",
+      "select_page": "选择页面",
+      "services_dropzone": "选择服务导出文件或将其拖放到此处",
+      "toggle_wrap": "切换自动换行",
+      "user_avatar": "用户头像",
+      "view_selected_items": "查看选定的项目"
     }
   },
   "badge": {
@@ -118,7 +119,8 @@
     "groups": "资源组",
     "services": "服务",
     "support": "支持",
-    "templates": "模板"
+    "templates": "模板",
+    "whats_new": "新增内容"
   },
   "button": {
     "actions": "操作",
@@ -212,7 +214,7 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话",
+    "wipe_other_sessions": "注销其他会话",
     "ban_all_filtered": "封禁所有匹配报告",
     "filtered_actions": "筛选后的操作",
     "unban_all_filtered": "解除所有匹配的封禁",
@@ -224,7 +226,12 @@
     "rename": "重命名",
     "add_passkey": "添加通行密钥",
     "sign_in_with_passkey": "使用通行密钥登录",
-    "use_security_key": "使用安全密钥"
+    "use_security_key": "使用安全密钥",
+    "go": "前往 →",
+    "retry": "重试",
+    "got_it": "知道了",
+    "show_me": "带我看看",
+    "see_all_releases": "查看所有版本"
   },
   "cache": {
     "kpi_files": "文件",
@@ -233,7 +240,7 @@
     "title": "缓存文件"
   },
   "configs": {
-    "subtitle": "针对您服务的自定义 NGINX 配置片段 — 创建、编辑和管理 HTTP、ModSecurity 和流级别覆盖。"
+    "subtitle": "面向您服务的自定义 NGINX 配置片段——创建、编辑并管理 HTTP、ModSecurity 和 stream 层级的覆盖配置。"
   },
   "country": {
     "AD": "安道尔",
@@ -883,6 +890,7 @@
   "interval": {
     "day": "每天",
     "hour": "每小时",
+    "minute": "每分钟",
     "once": "一次",
     "week": "每周"
   },
@@ -1146,7 +1154,7 @@
       "show_less": "显示较少"
     },
     "marketplace": {
-      "active": "有效",
+    "active": "已启用",
       "always_on": "核心/始终启用",
       "disabled": "已禁用",
       "enabled": "已启用",
@@ -1277,11 +1285,11 @@
     "custom": "自定义"
   },
   "reports": {
-    "bad_behavior_activity_detected": "检测到不良行为活动",
-    "bad_behavior_activity_explanation": "这些请求超过了不良行为阈值，并被组合在一起。",
+    "bad_behavior_activity_detected": "检测到异常行为",
+    "bad_behavior_activity_explanation": "这些请求超过了异常行为阈值，并被组合在一起。",
     "bad_behavior_captured_at": "捕获时间",
     "bad_behavior_ip": "IP地址",
-    "bad_behavior_no_details": "此报告未捕获任何不良行为详情。",
+    "bad_behavior_no_details": "此报告未捕获任何异常行为详情。",
     "bad_behavior_request_id": "请求 ID",
     "bad_behavior_request_label": "请求",
     "bad_behavior_server": "服务器",
@@ -1289,16 +1297,16 @@
     "bad_behavior_url": "URL",
     "card": {
       "attack_families": {
-        "title": "攻击家族"
+        "title": "攻击类型"
       },
       "recent": {
         "title": "最近事件"
       },
       "top_asn": {
-        "title": "顶级ASN"
+        "title": "主要攻击来源 ASN"
       },
       "top_offenders": {
-        "title": "顶级攻击者"
+        "title": "主要攻击者"
       },
       "top_rules": {
         "title": "触发最多的ModSecurity规则"
@@ -1307,7 +1315,7 @@
     "chart": {
       "timeseries": {
         "series": "已阻止",
-        "title": "随时间变化的被阻止请求"
+        "title": "拦截请求趋势"
       }
     },
     "security_incident": "安全事件",
@@ -1315,7 +1323,7 @@
     "subtitle": "从您的所有BunkerWeb实例中生成的安全报告——搜索、过滤、导出，并直接从表中阻止可疑IP地址。",
     "tab": {
       "eventlog": "事件日志",
-      "offenders": "顶级攻击者",
+      "offenders": "主要攻击者",
       "overview": "概览",
       "patterns": "攻击模式"
     },
@@ -1326,20 +1334,20 @@
       "fires": "触发",
       "ip": "IP",
       "rule": "规则",
-      "top_rule": "最常用的规则"
+      "top_rule": "最常触发的规则"
     },
     "tile": {
-      "asns": "顶级ASN",
+      "asns": "主要攻击来源 ASN",
       "blocked": "已阻止的请求",
       "blocked_rate": "与前一期间的趋势比较",
       "bot": "机器人/爬虫",
-      "countries": "顶级攻击国家",
+      "countries": "主要攻击来源国家/地区",
       "peak_hour": "高峰时段",
       "rce": "RCE / 命令",
-      "repeat_offenders": "重犯者（前10名）",
+      "repeat_offenders": "重复攻击来源（前 10）",
       "sqli": "SQL注入",
       "unique_ips": "顶级攻击者IP",
-      "unique_offenders": "顶级违规者"
+      "unique_offenders": "主要攻击者"
     }
   },
   "scope": {
@@ -1350,7 +1358,7 @@
     "service_specific": "特定服务"
   },
   "searchpane": {
-    "active": "活动",
+    "active": "启用",
     "async": "异步",
     "ban_scope": "封禁范围",
     "clear": "清除全部",
@@ -1540,12 +1548,13 @@
     "template_in_use_description": "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。",
     "unique_server_name": "唯一服务器名称",
     "up": "运行中",
-    "active": "活动",
+    "active": "有效",
     "all_valid": "全部有效",
     "expired": "已过期",
     "expiring": "即将到期",
     "no_settings": "此插件在该范围内没有设置。",
-    "yes": "是"
+    "yes": "是",
+    "optional": "可选"
   },
   "step": {
     "next": "下一步",
@@ -1574,7 +1583,7 @@
   "table": {
     "header": {
       "actions": "操作",
-      "active": "活动",
+      "active": "启用",
       "async": "异步",
       "bytes_received": "接收字节数",
       "bytes_sent": "发送字节数",
@@ -1744,7 +1753,7 @@
       "setting_selector_clear": "清除搜索",
       "setting_selector_count_all_used": "所有匹配的设置都已添加。",
       "setting_selector_count_empty": "没有可显示的设置。",
-      "setting_selector_count_only_available": "有 {{count}} 个设置可用",
+      "setting_selector_count_only_available": "可用设置：{{count}}",
       "setting_selector_count_with_used": "{{available}} 个可用，{{used}} 个已添加",
       "setting_selector_default": "默认",
       "setting_selector_docs": "查看文档",
@@ -2218,7 +2227,7 @@
     "serial": "序列号",
     "services": "服务",
     "services_help": "使用 Ctrl 或 Command 选择多个服务。",
-    "showing_count": "显示 {{visible}} 个中的 {{total}} 个证书",
+    "showing_count": "显示 {{visible}} / {{total}} 个证书",
     "source": {
       "customcert": "自定义",
       "letsencrypt": "Let's Encrypt",
@@ -2254,8 +2263,8 @@
     "bulk_import": "批量导入",
     "clone": "克隆资源组",
     "clone_copy": "创建可编辑的 @{{name}} 的副本。",
-    "comment": "评论",
-    "collapse_all": "展开所有",
+    "comment": "注释",
+    "collapse_all": "折叠所有",
     "delete": "删除资源组",
     "delete_confirm": "删除 @{{name}}？ 无法撤销。",
     "delete_help": "在设置引用此别名时，删除将被阻止。",
@@ -2284,10 +2293,10 @@
     "references_error": "无法加载引用",
     "save": "保存组",
     "search": "搜索别名、描述、类型或值...",
-    "showing_count": "显示 {{visible}} 个中的 {{total}} 个组",
+    "showing_count": "显示 {{visible}} / {{total}} 个组",
     "subtitle": "可重用的数据类型别名，用于 IP、国家、ASN、反向 DNS 名称、用户代理和 URL。",
     "template_configuration": "模板 {{template}}",
-    "usage": "使用",
+    "usage": "使用情况",
     "value": "值",
     "values": "值"
   },
@@ -2326,15 +2335,15 @@
     "purge_all_confirm_body": "这将删除所有服务的所有可访问实例上的所有缓存响应。 无法撤销。",
     "purge_all_confirm_title": "清除整个缓存？",
     "purge_help": "立即在可访问的实例上执行清除操作。 不可访问的实例将被跳过，并且不会有任何操作排队。",
-    "purge_key": "有效的缓存键",
-    "purge_key_help": "仅将缓存键留空用于默认的 $scheme$host$request_uri。 如果服务覆盖 PROXY_CACHE_KEY，请在此处粘贴其有效值；不支持的仅请求变量将被拒绝，而不是清除不同的条目。",
-    "purge_key_placeholder": "有效的 PROXY_CACHE_KEY (可选)",
+    "purge_key": "实际生效的缓存键",
+    "purge_key_help": "仅在使用默认 $scheme$host$request_uri 时将缓存键留空。如果服务覆盖了 PROXY_CACHE_KEY，请在此粘贴实际生效的值；不支持的仅在请求处理期间可用的变量会被拒绝，以免清除其他缓存条目。",
+    "purge_key_placeholder": "实际生效的 PROXY_CACHE_KEY（可选）",
     "purge_url": "清除 URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
-    "reporting_instances": "报告实例",
+    "reporting_instances": "正在上报的实例",
     "service": "服务",
-    "services": "服务启用",
-    "status": "实例存储",
+    "services": "服务启用情况",
+    "status": "实例存储空间",
     "subtitle": "反向代理缓存状态，汇总命中率指标和立即清除控制。"
   },
   "compose": {
@@ -2379,7 +2388,7 @@
     "delete_copy": "删除 {{name}} 重定向？",
     "delete_help": "附加到服务的重定向无法删除。 先将其分离。",
     "edit": "编辑重定向",
-    "edit_shared": "此重定向附加到 {{count}} 服务(s)：{{services}}。 保存所有更改。",
+    "edit_shared": "此重定向已关联 {{count}} 个服务：{{services}}。保存后，变更会应用到所有这些服务。",
     "empty_text": "重定向是一种名称规则，您将其附加到一个或多个服务。 嵌入式 REDIRECT_* 设置将继续与其一起工作。",
     "empty_title": "还没有重定向",
     "from_path": "从",
@@ -2410,7 +2419,7 @@
     "delete_copy": "删除上游 {{name}}？",
     "delete_help": "与服务关联的上游无法删除。首先将其断开连接。",
     "edit": "编辑上游",
-    "edit_shared": "此上游与 {{count}} 服务(们)关联：{{services}}。保存所有更改。",
+    "edit_shared": "此上游已关联 {{count}} 个服务：{{services}}。保存后，变更会应用到所有这些服务。",
     "empty_text": "上游是一个名称的后端池，您将其连接到一个或多个服务，位于反向代理路径上。 REVERSE_PROXY_HOST 设置与此一起保持工作。",
     "empty_title": "尚无上游",
     "keepalive": "保持连接",
@@ -2443,7 +2452,7 @@
     "server_weight": "权重",
     "servers": "服务器",
     "services_help": "使用 Ctrl 或 Command 选择多个服务。上游可以稍后连接。",
-    "services_hidden": "{{count}} 服务(们) 已隐藏：{{protocol}} 上游只能连接到匹配的服务。",
+    "services_hidden": "已隐藏 {{count}} 个服务：{{protocol}} 上游只能关联协议匹配的服务。",
     "truncated": "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
   },
   "workflows": {
@@ -2493,8 +2502,8 @@
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
     "attached_notice": "保存后会将这些规则应用到 {{count}} 个已关联服务。",
     "canvas": {
-      "auxCanvas": "从左到右。第一个匹配项获胜。",
-      "auxList": "从上到下。第一个匹配项获胜。",
+      "auxCanvas": "从左到右。第一个匹配的规则生效。",
+      "auxList": "从上到下。第一个匹配的规则生效。",
       "close": "关闭",
       "drawerSub": "在 {{total}} 的 {{n}} 位置运行",
       "dropHint": "通过拖动来设置优先级 — 规则在链中的位置是它唯一可以表示的内容",
@@ -2579,7 +2588,7 @@
     "not_attached": "未附加",
     "not_attached_notice": "此工作流未关联到任何服务，因此这些规则尚未在任何位置生效。",
     "not_validated": "尚未验证",
-    "order_help": "规则按顺序评估，第一个匹配的规则获胜。具有速率阈值的规则只有在阈值超过时才会匹配，因此较低的规则可以捕获低于它的流量。",
+    "order_help": "规则按顺序评估，首个匹配的规则生效。带请求率阈值的规则仅在超过阈值后匹配，因此下方规则仍可处理未达到该阈值的流量。",
     "readonly": "数据库是只读的。可以查看工作流程，但不能修改。",
     "rule": {
       "disabled": "已禁用",
@@ -2603,7 +2612,7 @@
       "lastValueRemoved": "最后一个值已删除；此条件必须包含一个值才能保存。",
       "moved": "{{name}} 已移至第 {{to}} 位，共 {{total}} 位{{how}}。现在它在{{where}}运行。",
       "predicateCap": "此规则已有 {{max}} 个条件，已达到上限。",
-      "ruleAbove": "上方规则之后",
+      "ruleAbove": "上方规则",
       "ruleDisabled": "{{name}} 已禁用，将被完全跳过，下方规则现在会处理这些请求。",
       "ruleEnabled": "{{name}} 已启用，将再次在第 {{n}} 位接受评估。",
       "runsAfter": "{{name}} 之后",
@@ -2616,8 +2625,8 @@
         "drag": "通过拖动",
         "keyboard": "通过键盘"
       },
-      "viewCanvas": "画布视图。 规则从左到右运行；第一个匹配项获胜。",
-      "viewList": "列表视图。 规则从上到下运行；第一个匹配项获胜。"
+      "viewCanvas": "画布视图。规则从左到右运行；第一个匹配的规则生效。",
+      "viewList": "列表视图。规则从上到下运行；第一个匹配的规则生效。"
     },
     "search": "搜索名称或描述...",
     "test": {
@@ -2718,7 +2727,7 @@
       "root": "本地文件"
     },
     "title": "请求路径",
-    "unordered": "未在 {{phase}} 阶段声明位置；它在按字母顺序排列的插件之后运行。"
+    "unordered": "未在 {{phase}} 阶段声明位置；它会在已排序的插件之后按字母顺序运行。"
   },
   "service": {
     "resources": {
@@ -2753,20 +2762,40 @@
     }
   },
   "onboarding": {
+    "dismiss": "忽略",
+    "error": "无法加载引导。",
+    "hint": {
+      "bans": "封禁列表显示 BunkerWeb 当前拒绝的客户端；每一行都会列出原因和到期时间。",
+      "home": "此仪表板显示当前运行状况：运行中的实例、正在提供服务的服务，以及 BunkerWeb 已处理的流量。",
+      "logs": "来自所有实例的实时日志，可按实例和严重级别筛选。",
+      "reports": "每个被拦截的请求都会出现在这里。打开其中一条即可查看是哪项安全检查拦截了它以及原因。",
+      "title": "快速导览"
+    },
     "item": {
-      "install": "在 1+ 台主机上安装 BunkerWeb",
+      "first_block": "看到 BunkerWeb 拦截请求",
+      "https": "让 HTTPS 正常工作",
+      "install": "在一台或多台主机上安装 BunkerWeb",
       "mfa": "启用 MFA",
       "pro": "启用 BunkerWeb PRO",
-      "service": "注册首个服务"
+      "read_bans": "查看谁被封禁，以及封禁到何时",
+      "read_home": "在仪表盘中查看当前运行状况",
+      "read_logs": "跨实例查看实时日志",
+      "read_reports": "了解请求被拦截的原因",
+      "service": "注册首个服务",
+      "workflow": "附加一个安全工作流"
     },
+    "not_saved": "无法保存。",
     "pro_tips": "PRO 提示",
+    "restart": "重新开始引导",
+    "restart_help": "在顶部栏重新显示入门步骤。",
+    "subtitle": "只需几步，即可让 BunkerWeb 开始保护您的服务。",
     "title": "开始使用"
   },
   "timings": {
     "subtitle": "每个插件在各请求阶段所需的时间，从所有实例实时读取并合并。",
     "volatile": "执行时间保存在各实例的共享内存中并按需读取；不会持久存储，实例重启时会重置。",
     "partial": "部分实例没有响应。以下数据仅涵盖已响应的实例。",
-    "reporting_instances": "报告实例",
+    "reporting_instances": "正在上报的实例",
     "requests_measured": "已测量请求",
     "mean_request": "平均请求时间",
     "max_request": "最慢请求",
@@ -2783,5 +2812,15 @@
     "disabled_help": "将 METRICS_COLLECT_TIMINGS 设为 yes 以测量每个插件所需的时间。无论如何都会收集完整请求时长。",
     "unreachable_title": "没有实例报告执行时间",
     "unreachable_help": "执行时间从实例本身读取，因此没有实例响应，或尚未有实例处理请求。"
+  },
+  "whatsnew": {
+    "missing_action": "在 GitHub 上打开变更日志",
+    "missing_message": "此构建未包含 CHANGELOG.md。版本说明可在 GitHub 上查看。",
+    "missing_title": "此安装中没有变更日志",
+    "modal": {
+      "intro": "以下是自您上次使用的版本以来的变化。",
+      "title": "新增内容"
+    },
+    "subtitle": "BunkerWeb 的所有版本，最新在前，直接来自本安装附带的变更日志。"
   }
 }

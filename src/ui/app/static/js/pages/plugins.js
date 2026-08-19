@@ -442,7 +442,7 @@ $(document).ready(function () {
                   "PRO",
                 )}</span>`,
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("plugin.type.pro");
+                  return rowData[7].includes('data-value="pro"');
                 },
               },
               {
@@ -451,7 +451,7 @@ $(document).ready(function () {
                   t("plugin.type.external", "EXTERNAL") +
                   "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("plugin.type.external");
+                  return rowData[7].includes('data-value="external"');
                 },
               },
               {
@@ -460,7 +460,7 @@ $(document).ready(function () {
                   t("plugin.type.ui", "UI") +
                   "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("plugin.type.ui");
+                  return rowData[7].includes('data-value="ui"');
                 },
               },
               {
@@ -469,7 +469,7 @@ $(document).ready(function () {
                   t("plugin.type.core", "CORE") +
                   "</span>",
                 value: function (rowData, rowIdx) {
-                  return rowData[7].includes("plugin.type.core");
+                  return rowData[7].includes('data-value="core"');
                 },
               },
             ],
@@ -521,20 +521,7 @@ $(document).ready(function () {
     },
   };
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => initializeDataTable(plugins_config));
-  }
-
+  initializeDataTable(plugins_config);
   $(document).on("click", ".delete-plugin", function () {
     if (isReadOnly) {
       alert(

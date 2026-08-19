@@ -513,6 +513,15 @@ def on_starting(server):
             LOGGER.debug(f"Couldn't get the admin user: {e}")
             sleep(1)
 
+    # The API answers in JSON, so the stored hash arrives as a str while bcrypt only speaks
+    # bytes. Normalising here rather than at each use: `check_password` below raised
+    # `TypeError: argument 'hashed_password': 'str' object cannot be converted to 'PyBytes'`
+    # and killed the boot — on every restart of a UI that has both an admin user and
+    # ADMIN_PASSWORD set, i.e. the documented setup. The comparison two lines further down
+    # was quietly wrong for the same reason: bytes != str is always true.
+    if ADMIN_USER and isinstance(ADMIN_USER.get("password"), str):
+        ADMIN_USER["password"] = ADMIN_USER["password"].encode("utf-8")
+
     env_admin_username = getenv("ADMIN_USERNAME", "").strip()
     env_admin_password = getenv("ADMIN_PASSWORD", "").strip()
 
@@ -570,7 +579,7 @@ def on_starting(server):
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
                         )
                     else:
-                        ADMIN_USER["password"] = gen_password_hash(env_admin_password).decode("utf-8")
+                        ADMIN_USER["password"] = gen_password_hash(env_admin_password)
                         updated = True
 
                 if updated:

@@ -229,3 +229,104 @@ def test_partial_purge_flashes_preserved_and_skipped_counts(route_app, monkeypat
         "Web cache purged on 2 instance(s); 1 failed and 1 unreachable instance(s) were skipped (nothing was queued).",
         "warning",
     )
+
+
+# --------------------------------------------------------------------------------------
+# Render tests — the aggregate distribution widget
+#
+# The route tests above mock ``render_template``, so nothing here was covered by them.
+# These follow ``test_bans_stats.py``'s standalone-Jinja-env pattern.
+# --------------------------------------------------------------------------------------
+
+TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
+
+
+def _render_web_cache(status_totals, **overrides):
+    from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
+
+    env = Environment(
+        loader=ChoiceLoader(
+            [
+                DictLoader({"dashboard.html": "{% block head %}{% endblock %}{% block content %}{% endblock %}"}),
+                FileSystemLoader(TEMPLATES),
+            ]
+        ),
+        autoescape=True,
+    )
+    env.globals.update(csrf_token=lambda: "test-token", url_for=lambda endpoint, **kwargs: "/" + "/".join([endpoint, *kwargs.values()]))
+    total = sum(status_totals.values())
+    context = {
+        "cache_statuses": ["HIT", "MISS", "BYPASS", "EXPIRED", "STALE", "UPDATING", "REVALIDATED"],
+        "status_totals": {status: 0 for status in ("HIT", "MISS", "BYPASS", "EXPIRED", "STALE", "UPDATING", "REVALIDATED")} | status_totals,
+        "summary": {
+            "total_requests": total,
+            "hit_rate": round(status_totals.get("HIT", 0) / total * 100, 1) if total else None,
+            "enabled_services": 1,
+            "active_services": 1,
+            "reporting_count": 1,
+            "total_instances": 1,
+            "total_files": 0,
+            "total_size_bytes": 0,
+        },
+        "services_data": [],
+        "instances_data": [],
+        "is_readonly": False,
+        "style_nonce": "nonce",
+    }
+    context.update(overrides)
+    return env.get_template("web_cache.html").render(**context)
+
+
+def test_metrics_widget_links_its_stylesheet():
+    """The CSS is a separate file; a page that forgets the link renders an unstyled bar."""
+    html = _render_web_cache({"HIT": 3, "MISS": 1})
+
+    assert "css/pages/web-cache.css" in html
+
+
+def test_metrics_widget_renders_one_segment_per_non_zero_status():
+    html = _render_web_cache({"HIT": 750, "MISS": 250})
+
+    assert '<div class="wc-stack"' in html
+    assert 'style="width: 75.00%"' in html
+    assert 'style="width: 25.00%"' in html
+    # Zero-count statuses contribute no segment at all.
+    assert html.count('<i class="bg-') == 2
+    # The stacked Bootstrap progress bar it replaces is gone.
+    assert "progress-bar" not in html
+
+
+def test_metrics_widget_is_one_image_not_seven_progressbars():
+    """A stacked share bar is a single figure; each slice is not its own 0-100 gauge."""
+    html = _render_web_cache({"HIT": 750, "MISS": 250})
+
+    assert '<div class="wc-stack" role="img" aria-label="Cache status distribution: HIT 75.0%, MISS 25.0%"' in html
+    assert 'role="progressbar"' not in html
+    assert "aria-valuenow" not in html
+
+
+def test_metrics_legend_carries_count_and_share_for_each_status():
+    html = _render_web_cache({"HIT": 12345, "MISS": 55})
+
+    assert '<span class="wc-leg-val">12,345</span>' in html
+    assert '<span class="wc-leg-val">55</span>' in html
+    assert "99.6%" in html
+    assert "0.4%" in html
+
+
+def test_metrics_widget_marks_a_sub_tenth_share_rather_than_rounding_it_to_zero():
+    """A single request in a million is not 0.0% — the old round(1) said it was."""
+    html = _render_web_cache({"HIT": 999_999, "STALE": 1})
+
+    assert "&lt;0.1%" in html
+    # Not "0.0%" — which is what round(1) produced and what this replaces.
+    assert '<span class="wc-leg-pct font-monospace">0.0%</span>' not in html
+    # The slice still exists in the bar even though it is invisible at this width.
+    assert 'style="width: 0.00%"' in html
+
+
+def test_metrics_widget_falls_back_to_the_empty_state_with_no_traffic():
+    html = _render_web_cache({})
+
+    assert "wc-stack" not in html
+    assert 'id="web-cache-metrics-empty"' in html

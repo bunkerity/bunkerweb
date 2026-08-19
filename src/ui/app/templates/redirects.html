@@ -7,6 +7,7 @@
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/service-options.html" import service_options with context %}
 {# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row (same treatment as the certificates page). #}
 {% block page_head %}{% endblock %}
@@ -17,34 +18,34 @@
     {% macro rule_fields(prefix, rule) -%}
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="{{ prefix }}-name" data-i18n="table.header.name">Name</label>
+                <label class="form-label" for="{{ prefix }}-name">{{ _("table.header.name") }}</label>
                 <input class="form-control" id="{{ prefix }}-name" name="name" maxlength="256" value="{{ rule.name if rule else '' }}" required />
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="{{ prefix }}-status-code" data-i18n="redirects.status_code">Status code</label>
+                <label class="form-label" for="{{ prefix }}-status-code">{{ _("redirects.status_code") }}</label>
                 <select class="form-select" id="{{ prefix }}-status-code" name="status_code">
                     {% for code in status_codes %}
-                        <option value="{{ code }}" data-i18n="redirects.code.{{ code }}">{{ code }}</option>
+                        <option value="{{ code }}" >{{ _("redirects.code." ~ code) }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="{{ prefix }}-from-path" data-i18n="redirects.from_path">Redirect from</label>
+                <label class="form-label" for="{{ prefix }}-from-path">{{ _("redirects.from_path") }}</label>
                 <input class="form-control" id="{{ prefix }}-from-path" name="from_path" maxlength="256" value="/" required />
-                <div class="form-text" data-i18n="redirects.from_path_help">Source path on the attached services, for example /old.</div>
+                <div class="form-text">{{ _("redirects.from_path_help") }}</div>
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="{{ prefix }}-to-url" data-i18n="redirects.to_url">Redirect to</label>
+                <label class="form-label" for="{{ prefix }}-to-url">{{ _("redirects.to_url") }}</label>
                 <input class="form-control" id="{{ prefix }}-to-url" name="to_url" maxlength="512" placeholder="https://example.com" required />
             </div>
             <div class="col-12">
-                <label class="form-label" for="{{ prefix }}-description" data-i18n="table.header.description">Description</label>
+                <label class="form-label" for="{{ prefix }}-description">{{ _("table.header.description") }}</label>
                 <textarea class="form-control" id="{{ prefix }}-description" name="description" maxlength="4000" rows="2"></textarea>
             </div>
             <div class="col-12">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="{{ prefix }}-append-uri" name="append_request_uri" value="yes" />
-                    <label class="form-check-label" for="{{ prefix }}-append-uri" data-i18n="redirects.append_request_uri">Append the requested URI to the target</label>
+                    <label class="form-check-label" for="{{ prefix }}-append-uri">{{ _("redirects.append_request_uri") }}</label>
                 </div>
             </div>
         </div>
@@ -69,10 +70,9 @@
                 {{ search(id="redirects-search", placeholder="Search name, source path, or target...", i18n_key="redirects.search", size="sm", clearable=true, clear_id="redirects-search-clear") }}
             </div>
             <div>
-                <label class="form-label small" for="redirects-service-filter" data-i18n="table.header.service">Service</label>
-                <select class="form-select form-select-sm" id="redirects-service-filter">
-                    <option value="" data-i18n="redirects.all">All</option>
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label small" for="redirects-service-filter">{{ _("table.header.service") }}</label>
+                <select class="form-select form-select-sm" id="redirects-service-filter" data-bw-service-options>
+                    <option value="">{{ _("redirects.all") }}</option>
                 </select>
             </div>
         </div>
@@ -82,12 +82,12 @@
                 <table class="table align-middle redirects-table">
                     <thead>
                         <tr>
-                            <th data-i18n="table.header.name">Name</th>
-                            <th data-i18n="redirects.from_path">From</th>
-                            <th data-i18n="redirects.to_url">To</th>
-                            <th data-i18n="redirects.status_code">Code</th>
-                            <th data-i18n="table.header.service">Services</th>
-                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                            <th>{{ _("table.header.name") }}</th>
+                            <th>{{ _("redirects.from_path") }}</th>
+                            <th>{{ _("redirects.to_url") }}</th>
+                            <th>{{ _("redirects.status_code") }}</th>
+                            <th>{{ _("table.header.service") }}</th>
+                            <th class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,11 +158,10 @@
             <div class="modal-body">
                 {{ rule_fields("redirect-create", none) }}
                 <div class="mt-3">
-                    <label class="form-label" for="redirect-create-services" data-i18n="table.header.service">Services</label>
-                    <select class="form-select" id="redirect-create-services" name="service_ids" multiple size="4">
-                        {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                    <label class="form-label" for="redirect-create-services">{{ _("table.header.service") }}</label>
+                    <select class="form-select" id="redirect-create-services" name="service_ids" multiple size="4" data-bw-service-options>
                     </select>
-                    <div class="form-text" data-i18n="redirects.services_help">Use Ctrl or Command to select multiple services. A redirect can be attached later.</div>
+                    <div class="form-text">{{ _("redirects.services_help") }}</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -193,11 +192,10 @@
             <input type="hidden" name="redirect_id" id="redirect-attach-id" />
             <div class="modal-body">
                 <p id="redirect-attach-copy" class="text-muted"></p>
-                <label class="form-label" for="redirect-attach-services" data-i18n="table.header.service">Services</label>
-                <select class="form-select" id="redirect-attach-services" name="service_ids" multiple size="6" required>
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label" for="redirect-attach-services">{{ _("table.header.service") }}</label>
+                <select class="form-select" id="redirect-attach-services" name="service_ids" multiple size="6" required data-bw-service-options>
                 </select>
-                <div class="form-text" data-i18n="redirects.services_help">Use Ctrl or Command to select multiple services. A redirect can be attached later.</div>
+                <div class="form-text">{{ _("redirects.services_help") }}</div>
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
@@ -212,7 +210,7 @@
             <input type="hidden" name="redirect_id" id="redirect-delete-id" />
             <div class="modal-body">
                 <p id="redirect-delete-copy"></p>
-                <p class="text-muted small mb-0" data-i18n="redirects.delete_help">A redirect still attached to a service cannot be deleted. Detach it first.</p>
+                <p class="text-muted small mb-0">{{ _("redirects.delete_help") }}</p>
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
@@ -220,6 +218,8 @@
             </div>
         </form>
     {% endcall %}
+    {# Every service picker on this page is filled from here (components/service-options.html). #}
+    {{ service_options(services) }}
 {% endblock %}
 
 {% block scripts %}

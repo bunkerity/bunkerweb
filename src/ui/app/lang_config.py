@@ -18,3 +18,34 @@ SUPPORTED_LANGUAGES = [
     {"code": "pl", "name": "Polski", "flag": "pl.svg", "english_name": "Polish"},
     {"code": "tl", "name": "Filipino", "flag": "ph.svg", "english_name": "Filipino"},
 ]
+
+# The UI's language codes are not all valid locale identifiers, and two of them name a different
+# language than the one they are used for:
+#
+#   `br` is this UI's Brazilian Portuguese, but `br` is **Breton** in CLDR/ISO-639
+#   `tw` is this UI's Traditional Chinese, but `tw` is **Twi**
+#
+# That is harmless while translation is a JSON lookup keyed by the code, and stops being harmless
+# the moment a real i18n library reads them: Babel would give Brazilian users Breton's four plural
+# forms and Taiwanese users Twi's two. The UI codes stay as they are — they are persisted on user
+# records, drive the flag lookup, and are what `/set_language` accepts — and this maps them to the
+# locale each one actually means.
+BABEL_LOCALES = {"br": "pt_BR", "tw": "zh_Hant"}
+
+DEFAULT_LANGUAGE = "en"
+
+
+def babel_locale(code: str) -> str:
+    """The CLDR locale identifier for a UI language code."""
+    return BABEL_LOCALES.get(code, code)
+
+
+def ui_language(locale_id: str) -> str:
+    """The UI language code for a CLDR locale identifier — the inverse of `babel_locale`."""
+    for code, mapped in BABEL_LOCALES.items():
+        if mapped == locale_id:
+            return code
+    return locale_id
+
+
+SUPPORTED_LANGUAGE_CODES = frozenset(entry["code"] for entry in SUPPORTED_LANGUAGES)

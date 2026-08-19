@@ -10,6 +10,12 @@
 {# The page-head band owns the breadcrumb + title, so drop the dashboard shell's
    legacy breadcrumb row for this page. #}
 {% block page_head %}{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/web-cache.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     {% set web_cache_url = url_for("web_cache") %}
     {% set status_colors = {"HIT": "success", "MISS": "secondary", "BYPASS": "secondary", "EXPIRED": "warning", "STALE": "danger", "UPDATING": "info", "REVALIDATED": "primary"} %}
@@ -17,7 +23,7 @@
     {{ page_head(title="Web cache", title_i18n="breadcrumb.web_cache",
                  breadcrumb=[("Operate", "navigation.operate", none),
                              ("Web cache", "breadcrumb.web_cache", none)]) }}
-    <p class="text-muted mb-4" data-i18n="web_cache.subtitle">Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls.</p>
+    <p class="text-muted mb-4">{{ _("web_cache.subtitle") }}</p>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-4">
         <div class="col">
@@ -38,48 +44,46 @@
     </div>
 
     {% call card(classes="p-4 mb-4", title="Purge cached responses", title_key="web_cache.purge", icon="bx-eraser") %}
-        <p class="text-muted" data-i18n="web_cache.purge_help">Purge actions run immediately on reachable instances. Unreachable instances are skipped and no action is queued.</p>
+        <p class="text-muted">{{ _("web_cache.purge_help") }}</p>
         <form method="POST"
               action="{{ web_cache_url }}/purge"
               class="row g-2 align-items-start">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="scope" value="url" />
             <div class="col-12 col-md">
-                <label for="web-cache-purge-url" class="visually-hidden" data-i18n="web_cache.purge_url">Purge URL</label>
+                <label for="web-cache-purge-url" class="visually-hidden">{{ _("web_cache.purge_url") }}</label>
                 <input id="web-cache-purge-url"
                        type="url"
                        name="url"
                        class="form-control"
                        maxlength="8192"
-                       data-i18n="web_cache.purge_url_placeholder"
-                       placeholder="https://www.example.com/asset.js"
+                       placeholder="{{ _("web_cache.purge_url_placeholder") }}"
                        {% if is_readonly %}disabled{% endif %}
                        required />
             </div>
             <div class="col-12 col-md">
-                <label for="web-cache-purge-key" class="visually-hidden" data-i18n="web_cache.purge_key">Effective cache key</label>
+                <label for="web-cache-purge-key" class="visually-hidden">{{ _("web_cache.purge_key") }}</label>
                 <input id="web-cache-purge-key"
                        type="text"
                        name="key"
                        class="form-control font-monospace"
                        maxlength="4096"
-                       data-i18n="web_cache.purge_key_placeholder"
-                       placeholder="Effective PROXY_CACHE_KEY (optional)"
+                       placeholder="{{ _("web_cache.purge_key_placeholder") }}"
                        {% if is_readonly %}disabled{% endif %} />
             </div>
             <div class="col-12 col-md-auto">
                 {{ button(label="Purge URL", i18n_key="web_cache.purge_url", variant="primary", icon="bx-eraser", type="submit", disabled=is_readonly, classes="w-100") }}
             </div>
         </form>
-        <p class="text-muted small mt-3 mb-0" data-i18n="web_cache.purge_key_help">Leave the cache key empty only for the default <code>$scheme$host$request_uri</code>. If the service overrides PROXY_CACHE_KEY, paste its effective value here; unsupported request-only variables are rejected instead of purging a different entry.</p>
+        <p class="text-muted small mt-3 mb-0">{{ _("web_cache.purge_key_help") }}<code>$scheme$host$request_uri</code>. If the service overrides PROXY_CACHE_KEY, paste its effective value here; unsupported request-only variables are rejected instead of purging a different entry.</p>
         <!-- Isolated danger zone: bulk purge is destructive and irreversible, so it
              lives apart from the routine single-URL purge above. -->
         <div class="web-cache-danger mt-4 pt-3 border-top d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
             <div>
                 <h6 class="mb-1 text-danger d-flex align-items-center gap-1">
-                    <i class="bx bx-error-circle" aria-hidden="true"></i><span data-i18n="web_cache.purge_all">Purge all</span>
+                    <i class="bx bx-error-circle" aria-hidden="true"></i><span>{{ _("web_cache.purge_all") }}</span>
                 </h6>
-                <p class="text-muted small mb-0" data-i18n="web_cache.purge_all_confirm_body">This deletes every cached response for every service on every reachable instance. This cannot be undone.</p>
+                <p class="text-muted small mb-0">{{ _("web_cache.purge_all_confirm_body") }}</p>
             </div>
             {{ button(label="Purge all", i18n_key="web_cache.purge_all", variant="danger", icon="bx-trash", modal_target="purge-all", disabled=is_readonly, classes="flex-shrink-0") }}
         </div>
@@ -87,7 +91,7 @@
 
     {% call modal(id="purge-all", title_key="web_cache.purge_all_confirm_title", title="Purge entire cache?") %}
         <div class="modal-body">
-            <p class="mb-0" data-i18n="web_cache.purge_all_confirm_body">This deletes every cached response for every service on every reachable instance. This cannot be undone.</p>
+            <p class="mb-0">{{ _("web_cache.purge_all_confirm_body") }}</p>
         </div>
         <div class="modal-footer">
             {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
@@ -101,29 +105,47 @@
 
     {% call card(classes="p-4 mb-4", title="Aggregate hit / miss distribution", title_key="web_cache.metrics", icon="bx-line-chart") %}
         {% if summary.total_requests %}
-            <div class="progress mb-3" style="height: 1.5rem" aria-label="Cache response distribution">
+            {# Segmented distribution bar + legend grid (kit .wc-stack). The whole
+               bar is ONE role="img": a stacked share bar is not seven independent
+               progressbars, and the old per-segment aria-valuenow announced each
+               share as if it were its own 0-100 gauge. Status names are the literal
+               $upstream_cache_status values, so they stay uppercase and monospaced. #}
+            {% set ns = namespace(aria=[]) %}
+            {% for status in cache_statuses %}
+                {% set count = status_totals[status] %}
+                {% if count %}
+                    {% set share = count / summary.total_requests * 100 %}
+                    {% set ns.aria = ns.aria + [status ~ " " ~ ("%.1f" | format(share) if share >= 0.1 else "under 0.1") ~ "%"] %}
+                {% endif %}
+            {% endfor %}
+            <div class="wc-stack" role="img" aria-label="Cache status distribution: {{ ns.aria | join(', ') }}">
                 {% for status in cache_statuses %}
                     {% set count = status_totals[status] %}
                     {% if count %}
-                        {% set percentage = (count / summary.total_requests * 100) | round(1) %}
-                        <div class="progress-bar bg-{{ status_colors[status] }}"
-                             role="progressbar"
-                             style="width: {{ percentage }}%"
-                             aria-label="{{ status | title }}"
-                             aria-valuenow="{{ percentage }}"
-                             aria-valuemin="0"
-                             aria-valuemax="100"></div>
+                        {% set share = count / summary.total_requests * 100 %}
+                        <i class="bg-{{ status_colors[status] }}"
+                           style="width: {{ '%.2f' | format(share) }}%"
+                           title="{{ status }} &middot; {{ '%.1f' | format(share) if share >= 0.1 else '<0.1' }}%"></i>
                     {% endif %}
                 {% endfor %}
             </div>
-            <div class="d-flex flex-wrap gap-3">
+            <div class="wc-eff-legend">
                 {% for status in cache_statuses %}
-                    {% if status_totals[status] %}
-                        {{ badge(text=(status | title) ~ " (" ~ status_totals[status] ~ ")", variant=status_colors[status]) }}
+                    {% set count = status_totals[status] %}
+                    {% if count %}
+                        {% set share = count / summary.total_requests * 100 %}
+                        <div class="wc-leg-cell">
+                            <span class="wc-leg-name">
+                                <i class="wc-leg-dot bg-{{ status_colors[status] }}" aria-hidden="true"></i>
+                                <span class="font-monospace">{{ status }}</span>
+                            </span>
+                            <span class="wc-leg-val">{{ "{:,}".format(count) }}</span>
+                            <span class="wc-leg-pct font-monospace">{{ "%.1f" | format(share) if share >= 0.1 else "<0.1" }}%</span>
+                        </div>
                     {% endif %}
                 {% endfor %}
             </div>
-            <p class="text-muted small mt-3 mb-0" data-i18n="web_cache.metrics_scope">Counters are aggregated per instance across all cache-enabled services.</p>
+            <p class="wc-eff-foot">{{ _("web_cache.metrics_scope") }}</p>
         {% else %}
             {{ empty_state(id="web-cache-metrics-empty", title_key="status.no_data") }}
         {% endif %}
@@ -136,9 +158,9 @@
                     <table class="table align-middle mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" data-i18n="web_cache.service">Service</th>
-                                <th scope="col" data-i18n="web_cache.deployment">Deployment</th>
-                                <th scope="col" data-i18n="web_cache.cache_state">State</th>
+                                <th scope="col">{{ _("web_cache.service") }}</th>
+                                <th scope="col">{{ _("web_cache.deployment") }}</th>
+                                <th scope="col">{{ _("web_cache.cache_state") }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -174,11 +196,11 @@
                     <table class="table align-middle mb-0">
                         <thead>
                             <tr>
-                                <th scope="col" data-i18n="web_cache.instance">Instance</th>
-                                <th scope="col" data-i18n="web_cache.cache_state">State</th>
-                                <th scope="col" data-i18n="web_cache.cached_files">Cached files</th>
-                                <th scope="col" data-i18n="web_cache.disk_usage">Disk usage</th>
-                                <th scope="col" data-i18n="web_cache.path">Path</th>
+                                <th scope="col">{{ _("web_cache.instance") }}</th>
+                                <th scope="col">{{ _("web_cache.cache_state") }}</th>
+                                <th scope="col">{{ _("web_cache.cached_files") }}</th>
+                                <th scope="col">{{ _("web_cache.disk_usage") }}</th>
+                                <th scope="col">{{ _("web_cache.path") }}</th>
                             </tr>
                         </thead>
                         <tbody>

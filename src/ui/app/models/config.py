@@ -84,13 +84,16 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
-        db_plugins = self.__api_client.get_plugins(type=_type, with_data=with_data)
+    def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False, with_settings: bool = True) -> dict:
+        db_plugins = self.__api_client.get_plugins(type=_type, with_data=with_data, with_settings=with_settings)
 
         plugins = {"general": {}}
 
-        for plugin in db_plugins.copy():
-            plugins[plugin.pop("id")] = plugin
+        # Keyed by id, and the id stays *in* each record: `.pop()` here edited the API client's
+        # own response in place, so a second call inside one request (a plugin page resolving
+        # its plugin after the shared context already listed them) got records with no id at all.
+        for plugin in db_plugins:
+            plugins[plugin["id"]] = {key: value for key, value in plugin.items() if key != "id"}
 
         return plugins
 

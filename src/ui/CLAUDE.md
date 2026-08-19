@@ -116,9 +116,37 @@ Plugins can extend the UI by providing `ui/hooks.py` and `ui/blueprints/`. Hook 
 
 - **JS**: Vanilla JavaScript + jQuery. Page-specific scripts in `app/static/js/pages/`. No modules or bundling.
 - **CSS**: Bootstrap 5.3.3 + custom CSS variables in `overrides.css`. Dark mode via `data-bs-theme` attribute.
-- **i18n**: i18next with 17 language JSON files in `app/static/locales/`. Elements use `data-i18n` attributes.
+- **i18n**: server-rendered, with a small browser helper. No client library.
+  - **Server-side (Flask-Babel)** — `app/i18n.py` resolves the locale (session → user preference → `Accept-Language` → `en`) and `src/ui/translations/<locale>/LC_MESSAGES/` holds the compiled catalogs. **Every** template uses `_('some.key')` and arrives already translated; `tests/unit/ui/test_i18n_migration.py` fails on any `data-i18n*` in a template.
+  - **Browser** — `/locales/<lang>.js` serves the locale's JSON as `window.BW_I18N` from a plain `<script>` ahead of every page script, and `t()` in `js/i18n.js` reads it synchronously. Use it for strings JavaScript builds. `window.i18next` is a shim over the same `t()` for plugin front-ends. `applyTranslations(root)` still exists but only for markup a script just built from a string — never on load.
+  - **When JS reads a key out of rendered markup, it breaks.** DataTables SearchPane filters did; they match `data-value` now and `tests/unit/ui/test_searchpane_filters.py` bans the old form.
+  - The 18 JSON files in `app/static/locales/` are the source of truth for both halves: `misc/dev/i18n/json_to_po.py` generates the gettext catalogs from them, and a unit test fails if they drift. Message ids are the dotted keys, not English text. See `misc/dev/i18n/README.md` — in particular why `br`/`tw` are remapped to `pt_BR`/`zh_Hant` and when a literal `%` must be doubled.
 - **Libs**: Vendored in `app/static/libs/` (DataTables, Ace editor, ApexCharts, Leaflet, Flatpickr, etc.)
 - **Minification**: Only during Docker build (UglifyJS for JS, cssnano for CSS). Skip with `SKIP_MINIFY=yes` build arg.
+
+### Jinja macros: `{% from ... %}` does not pass context
+
+`{% from "components/x.html" import macro %}` imports **without** context. Jinja globals (`_`,
+`url_for`, `csrf_token`) still resolve, but anything a **context processor** supplies does not —
+and `script_nonce` is one of those.
+
+A macro that emits an inline `<script nonce="{{ script_nonce }}">` therefore renders `nonce=""`,
+the page's CSP blocks the script, and whatever it was going to do never happens. **No error, no
+500, one console line — and `curl` shows a perfectly good page.** A failure that is invisible from
+the server side is the kind that ships. `components/service-options.html` hit exactly this: every
+service picker on `/certificates`, `/upstreams` and `/redirects` rendered empty.
+
+Import such a macro `with context`, and pin it in a test — `tests/unit/ui/test_service_options.py`
+asserts both the rendered nonce and the import line on each page that uses one.
+
+Two neighbours of the same trap:
+
+- **Jinja comments do not nest.** A `{# ... #}` inside a macro's doc comment closes it early and
+  turns the rest of the file into live template code. Loud, at least: `UndefinedError` on render.
+- **Page scripts are `defer`red, so they run _before_ `DOMContentLoaded`** — as do jQuery's
+  `$(document).ready` callbacks. A macro that populates DOM for page code to read must run at parse
+  time (an IIFE) and be called _after_ the elements it fills, not from a `DOMContentLoaded`
+  listener, which would fire too late.
 
 ### Gunicorn: `utils/gunicorn.conf.py`
 

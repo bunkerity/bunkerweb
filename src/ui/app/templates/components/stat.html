@@ -21,7 +21,7 @@
      percent      (required) number 0-100 driving the bar width and the "{{ percent }}%"
                   text. Caller pre-rounds it -- same convention as components/tile.html's
                   `value`, this macro never touches formatting.
-     label_i18n   data-i18n key for label.
+     label_i18n   catalog key for label.
      color        Bootstrap bg-<color> tinting the bar fill: "primary" (default),
                   "secondary", "success", "warning", "danger".
      pct_color    Bootstrap text-<color> tinting the percent figure, e.g. "danger" to
@@ -71,12 +71,12 @@
     {%- endset %}
     <div{% if id %} id="{{ id }}"{% endif %} class="{{ outer_classes }}{% if variant == 'aligned' %} d-flex align-items-center gap-2{% endif %}">
         {%- if variant == 'aligned' %}
-            <span class="bw-stat-label text-truncate"{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+            <span class="bw-stat-label text-truncate">{{ _(label_i18n) if label_i18n else label }}</span>
             {{ bar }}
             <span class="{{ pct_classes }}">{{ percent }}%</span>
         {%- else %}
             <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
-                <span class="bw-stat-label text-truncate"{% if label_i18n %} data-i18n="{{ label_i18n }}"{% endif %}>{{ label }}</span>
+                <span class="bw-stat-label text-truncate">{{ _(label_i18n) if label_i18n else label }}</span>
                 <span class="{{ pct_classes }}">{{ percent }}%</span>
             </div>
             {{ bar }}

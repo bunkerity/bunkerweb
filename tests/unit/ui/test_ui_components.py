@@ -3,6 +3,7 @@ import re
 from html.parser import HTMLParser
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 TEMPLATES = Path(__file__).parents[3] / "src" / "ui" / "app" / "templates"
@@ -151,7 +152,7 @@ def test_range_picker_data_i18n_keys_resolve_in_en_json():
     # every data-i18n attribute the macro actually renders for this call
     emitted = [f"range_picker.{preset}" for preset in presets] + ["range_picker.custom", "range_picker.aria_label"]
     for key in emitted:
-        assert f'data-i18n="{key}"' in html
+        assert english(key) in html
         assert _resolves_in_locale(locale, key), key
 
 
@@ -312,7 +313,7 @@ def test_reports_page_renders_four_tabs_with_event_log_table_intact():
     locale = json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8"))
     for tab_key in ("overview", "patterns", "offenders", "eventlog"):
         i18n_key = f"reports.tab.{tab_key}"
-        assert f'data-i18n="{i18n_key}"' in html
+        assert english(i18n_key) in html
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # Event log pane still carries the pre-existing table/toolbar/modals unchanged.
@@ -378,7 +379,7 @@ def test_reports_overview_tab_renders_kpi_chart_and_incident_mount_points():
         "reports.card.recent.title",
         "reports.card.top_asn.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in overview_pane, i18n_key
+        assert english(i18n_key) in overview_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # The range picker (Task 7) is rendered into the content block.
@@ -533,7 +534,7 @@ def test_reports_patterns_tab_renders_kpi_and_card_mount_points():
         "reports.card.top_rules.title",
         "reports.card.attack_families.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in patterns_pane, i18n_key
+        assert english(i18n_key) in patterns_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # reports-patterns.js must load after reports-overview.js (it consumes the shared
@@ -617,7 +618,7 @@ def test_reports_offenders_tab_renders_kpi_and_table_mount_points():
         "reports.tile.asns",
         "reports.card.top_offenders.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in offenders_pane, i18n_key
+        assert english(i18n_key) in offenders_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # reports-offenders.js must load after reports-patterns.js (it consumes the same
@@ -798,7 +799,9 @@ def test_plugin_dropzone_is_keyboard_operable():
     dropzone = template.split('id="drag-area"', 1)[1].split(">", 1)[0]
     assert 'tabindex="0"' in dropzone
     assert 'aria-controls="file-input"' in dropzone
-    assert 'aria-label="Select plugin archives or drop them here"' in dropzone
+    # source, not rendered output: the accessible name is translated server-side, and it names
+    # this dropzone rather than borrowing the generic "Select File" label
+    assert 'aria-label="{{ _("aria.label.plugins_dropzone") }}"' in dropzone
     assert 'dragArea.on("keydown"' in script
 
 
@@ -920,27 +923,35 @@ def test_every_locale_keeps_the_interpolation_variables_en_json_declares():
 
 
 def test_every_data_i18n_key_resolves_in_en_json():
-    """Every literal data-i18n="<key>" found in templates/JS must exist in en.json.
+    """Every literal key found in templates/JS must exist in en.json -- whether it is named by
+    a data-i18n="<key>" attribute (client-side) or by a `_("<key>")` call (server-side).
 
-    Dynamic keys built from Jinja/JS expressions (containing "{") are skipped --
-    they can't be resolved statically. Occurrences inside {# ... #} Jinja
-    comments (macro docs that show data-i18n usage as an example) are stripped
-    before scanning so documentation doesn't get flagged as a real usage.
+    The server-side half matters more than the client one: gettext answers a missing key with
+    the key itself, so a typo renders `button.svae` in the page rather than failing anywhere.
+
+    Dynamic keys built from Jinja/JS expressions (containing "{") are skipped -- they can't be
+    resolved statically. Occurrences inside {# ... #} Jinja comments (macro docs that show
+    usage as an example) are stripped before scanning so documentation isn't flagged.
     """
     locale = json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8"))
 
     jinja_comment_re = re.compile(r"\{#.*?#\}", re.DOTALL)
     html_attr_re = re.compile(r'data-i18n="([^"]*)"')
     js_attr_re = re.compile(r'data-i18n[=,]\s*["\']([^"\']*)["\']')
+    # `_("navigation." ~ endpoint)` captures only the literal prefix, and a prefix is not a key.
+    # Those are checked separately, in test_a_composed_key_prefix_still_names_something_real:
+    # what the loop can actually build is enumerated by the per-catalog tests.
+    gettext_re = re.compile(r'\b_\(\s*["\']([^"\']*)["\']')
 
     occurrences = []  # (relative_path, key)
 
     for path in sorted(TEMPLATES.rglob("*.html")):
         text = jinja_comment_re.sub("", path.read_text(encoding="utf-8"))
-        for match in html_attr_re.finditer(text):
-            key = match.group(1)
-            if key and "{" not in key and "}" not in key:
-                occurrences.append((str(path.relative_to(TEMPLATES.parents[1])), key))
+        for pattern in (html_attr_re, gettext_re):
+            for match in pattern.finditer(text):
+                key = match.group(1)
+                if key and "{" not in key and "}" not in key and not key.endswith((".", "_")):
+                    occurrences.append((str(path.relative_to(TEMPLATES.parents[1])), key))
 
     for path in sorted((STATIC / "js").rglob("*.js")):
         text = path.read_text(encoding="utf-8")
@@ -1094,3 +1105,81 @@ def test_the_workflow_editor_dynamic_i18n_keys_resolve():
     # Terminals pass their key in as a parameter.
     for key in ("workflows.entry_title", "workflows.entry_sub", "workflows.exit_title", "workflows.exit_sub"):
         assert _resolves_in_locale(locale, key), key
+
+
+def test_a_composed_key_prefix_still_names_something_real():
+    """`_("tooltip.button.convert_config_to_" ~ state)` builds its key at render time, so the
+    scan above only sees the prefix and skips it. A typo in that prefix would then reach the page
+    as a raw key with nothing failing -- assert instead that each prefix has descendants."""
+    locale = json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8"))
+
+    def flatten(node, prefix=""):
+        for key, value in node.items():
+            if isinstance(value, dict):
+                yield from flatten(value, f"{prefix}{key}.")
+            else:
+                yield f"{prefix}{key}"
+
+    keys = set(flatten(locale))
+    jinja_comment_re = re.compile(r"\{#.*?#\}", re.DOTALL)
+    prefix_re = re.compile(r'\b_\(\s*["\']([^"\']*[._])["\']')
+
+    orphans = []
+    for path in sorted(TEMPLATES.rglob("*.html")):
+        text = jinja_comment_re.sub("", path.read_text(encoding="utf-8"))
+        for prefix in {match.group(1) for match in prefix_re.finditer(text)}:
+            if not any(key.startswith(prefix) for key in keys):
+                orphans.append(f"{path.name}: {prefix}*")
+
+    assert not orphans, "composed key prefixes that match nothing in en.json:\n  " + "\n  ".join(orphans)
+
+
+def test_a_component_that_emits_a_nonced_script_is_imported_with_context():
+    """`{% from ... import ... %}` imports **without** context, and `script_nonce` comes from a
+    context processor rather than from Jinja's globals.
+
+    So a component that emits `<script nonce="{{ script_nonce }}">` renders `nonce=""` unless the
+    importing page says `with context` — the page's CSP then blocks the script and whatever it was
+    going to do never happens. There is no error, no 500, and `curl` returns a page that looks
+    perfect; only a browser console shows anything. `components/service-options.html` shipped that
+    way for one round: every service picker on three pages rendered empty.
+
+    Checked over all components rather than the one that hit it, because the next such macro will
+    be written by someone who has never seen this failure.
+    """
+    emitters = sorted(path.name for path in (TEMPLATES / "components").rglob("*.html") if "script_nonce" in path.read_text(encoding="utf-8"))
+
+    assert emitters, "no component emits a nonced script any more; drop this test with the last one"
+
+    offenders = []
+    for name in emitters:
+        for page in sorted(TEMPLATES.rglob("*.html")):
+            for line in page.read_text(encoding="utf-8").splitlines():
+                if f'"components/{name}"' in line and line.lstrip().startswith("{% from") and "with context" not in line:
+                    offenders.append(f"{page.relative_to(TEMPLATES)} imports {name} without context")
+
+    assert not offenders, "these imports render an empty nonce, and CSP silently drops the script:\n  " + "\n  ".join(offenders)
+
+
+def test_no_template_inlines_a_large_asset_as_a_data_uri():
+    """An inlined asset is paid for on every request, by every page, forever.
+
+    `base.html` carried the 38 KB favicon as a base64 data URI: 50,797 bytes in **every** HTML
+    response the UI produced — 34% of `/cache`, 33% of `/configs` — and a data URI is part of the
+    document, so there is nothing separate for a browser to cache and it arrives again on the next
+    page. Linked from `static/`, it is fetched once and then served from cache with no request at
+    all.
+
+    The threshold is generous on purpose: a tiny inline SVG in a style attribute is fine and saves
+    a round trip. What this catches is an *asset* — an icon, a logo, a font — pasted into markup,
+    where the cost is invisible in review because the diff is one unreadable line.
+    """
+    limit = 4096
+    offenders = []
+
+    for path in sorted(TEMPLATES.rglob("*.html")):
+        for match in re.finditer(r"data:[a-z/+.-]+;base64,[A-Za-z0-9+/=]+", path.read_text(encoding="utf-8")):
+            if len(match.group(0)) > limit:
+                offenders.append(f"{path.relative_to(TEMPLATES)}: {len(match.group(0))} bytes inlined")
+
+    assert not offenders, "link these from static/ instead — each is shipped with every page that renders it:\n  " + "\n  ".join(offenders)

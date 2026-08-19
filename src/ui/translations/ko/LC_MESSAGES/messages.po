@@ -1,0 +1,7033 @@
+# Korean translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ko\n"
+"Language-Team: ko <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "제작 도구"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero General Public License v3.0"
+
+msgid "about.license_title"
+msgstr "라이선스"
+
+msgid "about.social.discord"
+msgstr "디스코드"
+
+msgid "about.social.instagram"
+msgstr "인스타그램"
+
+msgid "about.social.linkedin"
+msgstr "링크드인"
+
+msgid "about.social.reddit"
+msgstr "레딧"
+
+msgid "about.socials"
+msgstr "소셜 미디어"
+
+msgid "about.tagline"
+msgstr "단순함 속에 담긴 강력한 보안"
+
+msgid "about.title"
+msgstr "BunkerWeb 정보"
+
+msgid "about.version"
+msgstr "버전: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "자동으로 인증서 발급 및 갱신"
+
+msgid "accordion.title.tls"
+msgstr "TLS & 인증서"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오."
+
+msgid "alert.custom_end_date_required"
+msgstr "사용자 지정 종료 날짜를 선택해 주세요."
+
+msgid "alert.important"
+msgstr "중요"
+
+msgid "alert.no_changes_detected"
+msgstr "감지된 변경 사항이 없습니다."
+
+msgid "alert.notice"
+msgstr "알림"
+
+msgid "alert.ping_error"
+msgstr "인스턴스 핑(Ping) 전송 중 오류가 발생했습니다."
+
+msgid "alert.readonly_mode"
+msgstr "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
+
+msgid "aria.label.clear_search"
+msgstr "검색 지우기"
+
+msgid "aria.label.close"
+msgstr "닫기"
+
+msgid "aria.label.collapse_multiline"
+msgstr "여러 줄 항목 접기"
+
+msgid "aria.label.configs_dropzone"
+msgstr "사용자 지정 설정 내보내기 파일을 선택하거나 여기에 놓으세요"
+
+msgid "aria.label.copy"
+msgstr "로그 복사"
+
+msgid "aria.label.download_log"
+msgstr "이 로그 파일 다운로드"
+
+msgid "aria.label.follow"
+msgstr "따라가기"
+
+msgid "aria.label.hide_value"
+msgstr "값 숨기기"
+
+msgid "aria.label.issue_count"
+msgstr "오류 및 경고 수"
+
+msgid "aria.label.level_filter"
+msgstr "수준별 로그 줄 필터링"
+
+msgid "aria.label.local_time"
+msgstr "타임스탬프를 현지 시간으로 표시"
+
+msgid "aria.label.next_issue"
+msgstr "다음 오류 또는 경고"
+
+msgid "aria.label.passkey_name"
+msgstr "패스키 이름"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "플러그인 압축 파일을 선택하거나 여기에 놓으세요"
+
+msgid "aria.label.prev_issue"
+msgstr "이전 오류 또는 경고"
+
+msgid "aria.label.raw_configuration"
+msgstr "원시 설정"
+
+msgid "aria.label.remove_value"
+msgstr "값 제거"
+
+msgid "aria.label.reveal_value"
+msgstr "값 표시"
+
+msgid "aria.label.search_logs"
+msgstr "로그 검색"
+
+msgid "aria.label.select_file"
+msgstr "파일 선택"
+
+msgid "aria.label.select_page"
+msgstr "페이지 선택"
+
+msgid "aria.label.services_dropzone"
+msgstr "서비스 내보내기 파일을 선택하거나 여기에 놓으세요"
+
+msgid "aria.label.toggle_wrap"
+msgstr "줄 바꿈 전환"
+
+msgid "aria.label.user_avatar"
+msgstr "사용자 아바타"
+
+msgid "aria.label.view_selected_items"
+msgstr "선택된 항목 보기"
+
+msgid "badge.from_template"
+msgstr "템플릿에서 생성됨"
+
+msgid "badge.managed_via_api"
+msgstr "API를 통해 관리됨"
+
+msgid "badge.new_version"
+msgstr "새 버전"
+
+msgid "badge.no_template"
+msgstr "템플릿 없음"
+
+msgid "badge.unread_news"
+msgstr "읽지 않은 소식"
+
+msgid "badge.unread_notifications"
+msgstr "읽지 않은 알림"
+
+msgid "banner.community"
+msgstr "Bunker 커뮤니티의 일원이 되어보세요. <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 채팅</a>에 참여하거나 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>을 팔로우하세요."
+
+msgid "banner.link.here"
+msgstr "여기"
+
+msgid "banner.pro"
+msgstr "PRO 버전으로 업그레이드하여 BunkerWeb의 모든 기능을 활용해 보세요. 자세한 정보와 무료 체험은 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">여기</a>를 클릭하세요."
+
+msgid "banner.support"
+msgstr "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
+
+msgid "bans.stats.card.by_reason"
+msgstr "사유별 차단"
+
+msgid "bans.stats.tile.active"
+msgstr "활성 차단"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "국가"
+
+msgid "bans.stats.tile.expiring"
+msgstr "≤ 1시간 후 만료"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "자동 순환"
+
+msgid "bans.stats.tile.permanent"
+msgstr "영구 차단"
+
+msgid "bans.subtitle"
+msgstr "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다."
+
+msgid "breadcrumb.about"
+msgstr "정보"
+
+msgid "breadcrumb.bans"
+msgstr "차단 목록"
+
+msgid "breadcrumb.cache"
+msgstr "캐시"
+
+msgid "breadcrumb.configs"
+msgstr "설정"
+
+msgid "breadcrumb.extra_pages"
+msgstr "추가 페이지"
+
+msgid "breadcrumb.global_config"
+msgstr "전역 구성"
+
+msgid "breadcrumb.global_settings"
+msgstr "전역 설정"
+
+msgid "breadcrumb.groups"
+msgstr "리소스 그룹"
+
+msgid "breadcrumb.home"
+msgstr "홈"
+
+msgid "breadcrumb.instances"
+msgstr "인스턴스"
+
+msgid "breadcrumb.jobs"
+msgstr "작업"
+
+msgid "breadcrumb.logs"
+msgstr "로그"
+
+msgid "breadcrumb.misc"
+msgstr "기타"
+
+msgid "breadcrumb.mode_selection"
+msgstr "모드 선택"
+
+msgid "breadcrumb.more"
+msgstr "더 보기..."
+
+msgid "breadcrumb.new"
+msgstr "신규"
+
+msgid "breadcrumb.plugins"
+msgstr "플러그인"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "플러그인 페이지"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "프로필"
+
+msgid "breadcrumb.reports"
+msgstr "보고서"
+
+msgid "breadcrumb.services"
+msgstr "서비스"
+
+msgid "breadcrumb.support"
+msgstr "지원"
+
+msgid "breadcrumb.templates"
+msgstr "템플릿"
+
+msgid "breadcrumb.threatmap"
+msgstr "위협 지도"
+
+msgid "breadcrumb.timings"
+msgstr "처리 시간"
+
+msgid "breadcrumb.web_cache"
+msgstr "웹 캐시"
+
+msgid "breadcrumb.whats_new"
+msgstr "새로운 기능"
+
+msgid "button.actions"
+msgstr "작업"
+
+msgid "button.activate_key"
+msgstr "키 활성화"
+
+msgid "button.add"
+msgstr "삽입"
+
+msgid "button.add_ban_plural"
+msgstr "차단 추가"
+
+msgid "button.add_passkey"
+msgstr "패스키 추가"
+
+msgid "button.add_plugin_plural"
+msgstr "플러그인 추가"
+
+msgid "button.add_plugins"
+msgstr "플러그인 추가"
+
+msgid "button.auto_refresh"
+msgstr "자동 새로고침"
+
+msgid "button.ban"
+msgstr "차단"
+
+msgid "button.ban_all_filtered"
+msgstr "일치하는 모든 보고서 차단"
+
+msgid "button.ban_selected"
+msgstr "선택 항목 차단"
+
+msgid "button.cache"
+msgstr "캐시"
+
+msgid "button.cancel"
+msgstr "취소"
+
+msgid "button.clear"
+msgstr "삭제"
+
+msgid "button.clone"
+msgstr "복제"
+
+msgid "button.close"
+msgstr "닫기"
+
+msgid "button.collapse_multiline"
+msgstr "접기"
+
+msgid "button.columns"
+msgstr "열"
+
+msgid "button.convert_configs"
+msgstr "설정 전환"
+
+msgid "button.convert_configs_to"
+msgstr "%(state)s(으)로 전환"
+
+msgid "button.convert_services"
+msgstr "서비스 전환"
+
+msgid "button.copy"
+msgstr "복사"
+
+msgid "button.copy_codes"
+msgstr "코드 복사"
+
+msgid "button.copy_raw"
+msgstr "원본 데이터 복사"
+
+msgid "button.copy_visible"
+msgstr "보이는 데이터 복사"
+
+msgid "button.create_config"
+msgstr "사용자 정의 설정 생성"
+
+msgid "button.create_instance"
+msgstr "인스턴스 생성"
+
+msgid "button.create_service"
+msgstr "새 서비스 생성"
+
+msgid "button.create_template"
+msgstr "템플릿 생성"
+
+msgid "button.delete"
+msgstr "삭제"
+
+msgid "button.delete_instance"
+msgstr "인스턴스 삭제"
+
+msgid "button.disable_totp"
+msgstr "TOTP 비활성화"
+
+msgid "button.download"
+msgstr "다운로드"
+
+msgid "button.edit"
+msgstr "편집"
+
+msgid "button.enable_totp"
+msgstr "TOTP 활성화"
+
+msgid "button.entire_config"
+msgstr "전체 설정"
+
+msgid "button.export"
+msgstr "내보내기"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "전역 설정 가져오기"
+
+msgid "button.filtered_actions"
+msgstr "필터링된 작업"
+
+msgid "button.filters_suffix"
+msgstr " 필터"
+
+msgid "button.follow"
+msgstr "추적"
+
+msgid "button.force_check"
+msgstr "강제 확인"
+
+msgid "button.force_update"
+msgstr "강제 업데이트"
+
+msgid "button.github_stars"
+msgstr "스타"
+
+msgid "button.go"
+msgstr "이동 →"
+
+msgid "button.go_back"
+msgstr "뒤로 가기"
+
+msgid "button.got_it"
+msgstr "알겠습니다"
+
+msgid "button.hide"
+msgstr "숨기기"
+
+msgid "button.history"
+msgstr "기록"
+
+msgid "button.import_configs"
+msgstr "사용자 지정 설정 가져오기"
+
+msgid "button.import_services"
+msgstr "서비스 가져오기"
+
+msgid "button.local_time"
+msgstr "현지 시간"
+
+msgid "button.login"
+msgstr "로그인"
+
+msgid "button.multiple_add"
+msgstr "추가"
+
+msgid "button.multiple_hide"
+msgstr "숨기기"
+
+msgid "button.multiple_remove"
+msgstr "제거"
+
+msgid "button.multiple_show"
+msgstr "표시"
+
+msgid "button.need_help"
+msgstr "도움이 필요하신가요?"
+
+msgid "button.news"
+msgstr "소식"
+
+msgid "button.notifications"
+msgstr "알림"
+
+msgid "button.open_support_ticket"
+msgstr "기술 지원 티켓 생성"
+
+msgid "button.order_support"
+msgstr "기술 지원 요청"
+
+msgid "button.ping"
+msgstr "핑(Ping)"
+
+msgid "button.plugin_page"
+msgstr "플러그인 페이지"
+
+msgid "button.proceed"
+msgstr "계속"
+
+msgid "button.refresh"
+msgstr "새로 고침"
+
+msgid "button.refresh_recovery_codes"
+msgstr "복구 코드 갱신"
+
+msgid "button.reload"
+msgstr "새로고침"
+
+msgid "button.rename"
+msgstr "이름 변경"
+
+msgid "button.reset"
+msgstr "초기화"
+
+msgid "button.reset_columns"
+msgstr "열 초기화"
+
+msgid "button.retry"
+msgstr "다시 시도"
+
+msgid "button.return_to_safety"
+msgstr "안전한 곳으로 돌아가기"
+
+msgid "button.run"
+msgstr "실행"
+
+msgid "button.run_selected_jobs"
+msgstr "선택한 작업 실행"
+
+msgid "button.save"
+msgstr "저장"
+
+msgid "button.save_changes"
+msgstr "변경 사항 저장"
+
+msgid "button.search"
+msgstr "검색"
+
+msgid "button.see_all_releases"
+msgstr "모든 릴리스 보기"
+
+msgid "button.select_file"
+msgstr "파일 선택"
+
+msgid "button.select_page"
+msgstr "페이지 선택"
+
+msgid "button.service"
+msgstr "서비스"
+
+msgid "button.set_1h"
+msgstr "1시간 설정"
+
+msgid "button.set_1w"
+msgstr "1주일 설정"
+
+msgid "button.set_24h"
+msgstr "24시간 설정"
+
+msgid "button.set_permanent"
+msgstr "영구 설정"
+
+msgid "button.setup"
+msgstr "설정"
+
+msgid "button.show"
+msgstr "표시"
+
+msgid "button.show_me"
+msgstr "보여 주세요"
+
+msgid "button.sign_in_with_passkey"
+msgstr "패스키로 로그인"
+
+msgid "button.stop"
+msgstr "중지"
+
+msgid "button.submit"
+msgstr "제출"
+
+msgid "button.subscribe"
+msgstr "구독"
+
+msgid "button.unban"
+msgstr "차단 해제"
+
+msgid "button.unban_all_filtered"
+msgstr "일치하는 모든 차단 해제"
+
+msgid "button.update_duration"
+msgstr "차단 기간 업데이트"
+
+msgid "button.update_duration_all_filtered"
+msgstr "일치하는 모든 차단 기간 변경"
+
+msgid "button.update_key"
+msgstr "키 업데이트"
+
+msgid "button.upload_photo"
+msgstr "새 사진 업로드"
+
+msgid "button.use_security_key"
+msgstr "보안 키 사용"
+
+msgid "button.use_template"
+msgstr "템플릿 사용"
+
+msgid "button.verify"
+msgstr "확인"
+
+msgid "button.view"
+msgstr "보기"
+
+msgid "button.view_details"
+msgstr "상세 보기"
+
+msgid "button.view_raw_data"
+msgstr "원본 데이터 보기"
+
+msgid "button.wipe_other_sessions"
+msgstr "다른 세션 로그아웃"
+
+msgid "button.wrap"
+msgstr "줄 바꿈"
+
+msgid "cache.kpi_files"
+msgstr "파일"
+
+msgid "cache.kpi_per_service"
+msgstr "서비스별"
+
+msgid "cache.subtitle"
+msgstr "스케줄된 작업에 의해 생성된 캐시 파일(블랙리스트, GeoIP 데이터베이스 등) — 서비스 및 플러그인별로 검사, 다운로드 또는 삭제합니다."
+
+msgid "cache.title"
+msgstr "캐시 파일"
+
+msgid "certificates.acme_help"
+msgstr "기존 설정이 Let's Encrypt를 활성화하고 구성하는 서비스 중에서 선택합니다. 이 작업은 해당 설정을 예약하는 것만입니다. 인증서 세부 정보 및 도전 인증 자격 증명은 여기에 입력되지 않습니다."
+
+msgid "certificates.active"
+msgstr "활성 인증서"
+
+msgid "certificates.algorithm"
+msgstr "알고리즘"
+
+msgid "certificates.all"
+msgstr "전체"
+
+msgid "certificates.assignment_notice"
+msgstr "할당은 중앙 재고를 구성합니다. TLS 배포는 각 서비스의 인증서 설정에 의해 제어됩니다."
+
+msgid "certificates.assignments"
+msgstr "재고 할당"
+
+msgid "certificates.assignments_help"
+msgstr "이 할당은 실시간 TLS 설정을 변경하지 않습니다."
+
+msgid "certificates.attach"
+msgstr "할당"
+
+msgid "certificates.attach_all"
+msgstr "이 인증서는 모든 사용 가능한 서비스에 이미 연결되어 있습니다."
+
+msgid "certificates.attach_copy"
+msgstr "중앙 재고의 서비스에 \"%(name)s\"을 할당합니다."
+
+msgid "certificates.browse_certificate"
+msgstr "인증서 보기"
+
+msgid "certificates.browse_key"
+msgstr "개인 키 보기"
+
+msgid "certificates.common_name"
+msgstr "공통 이름"
+
+msgid "certificates.confirm"
+msgstr "확인"
+
+msgid "certificates.confirm_action"
+msgstr "인증서 작업 확인"
+
+msgid "certificates.confirm_delete"
+msgstr "\"%(name)s\" 삭제? 이 작업을 취소할 수 없습니다."
+
+msgid "certificates.confirm_generic"
+msgstr "이 인증서 작업 확인?"
+
+msgid "certificates.confirm_renew"
+msgstr "\"%(name)s\" 갱신?"
+
+msgid "certificates.confirm_renew_due"
+msgstr "모든 인증서를 확인하고 현재 만료된 인증서를 갱신?"
+
+msgid "certificates.create"
+msgstr "인증서 생성"
+
+msgid "certificates.download_chain"
+msgstr "체인 다운로드"
+
+msgid "certificates.download_leaf"
+msgstr "리프 다운로드"
+
+msgid "certificates.edit_help"
+msgstr "이것은 인증서 또는 실시간 TLS 설정이 아닌 재고 메타데이터만 변경합니다."
+
+msgid "certificates.edit_metadata"
+msgstr "인증서 메타데이터 편집"
+
+msgid "certificates.empty"
+msgstr "인증서 없음"
+
+msgid "certificates.empty_help"
+msgstr "자체 서명 인증서를 생성하고, ACME 발급 일정을 예약하거나, 기존 PEM 인증서와 키를 업로드합니다."
+
+msgid "certificates.expired_help"
+msgstr "주의가 필요"
+
+msgid "certificates.expires"
+msgstr "만료됨"
+
+msgid "certificates.expiring_help"
+msgstr "30일 이내"
+
+msgid "certificates.file_extensions"
+msgstr "다음 파일 확장자를 사용하세요: %(extensions)s."
+
+msgid "certificates.file_select"
+msgstr "PEM 파일을 선택합니다."
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "파일 크기는 1 MiB를 초과할 수 없습니다."
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 지문"
+
+msgid "certificates.issuer"
+msgstr "발급 기관"
+
+msgid "certificates.issuers"
+msgstr "주요 발급 기관"
+
+msgid "certificates.key_drop"
+msgstr "해당하는 개인 키를 여기에 드롭합니다"
+
+msgid "certificates.key_limit"
+msgstr "최대 1 MiB; 휴식 시 암호화되며 다운로드할 수 없습니다"
+
+msgid "certificates.last_error"
+msgstr "마지막 오류"
+
+msgid "certificates.make_primary"
+msgstr "이 서비스에 대한 주요 재고 할당으로 표시"
+
+msgid "certificates.managed"
+msgstr "관리되는 인증서"
+
+msgid "certificates.new_selfsigned"
+msgstr "새 자체 서명 인증서"
+
+msgid "certificates.no_issuers"
+msgstr "발급 기관 정보 없음"
+
+msgid "certificates.none_due"
+msgstr "인증서 없음"
+
+msgid "certificates.orphan_account"
+msgstr "계정"
+
+msgid "certificates.orphan_badge"
+msgstr "ACME 계정 누락"
+
+msgid "certificates.orphan_help"
+msgstr "이 갱신 기록은 더 이상 존재하지 않는 ACME 계정을 참조합니다. 제공업체 상태가 복구될 때까지 갱신은 차단됩니다."
+
+msgid "certificates.orphan_server"
+msgstr "ACME 서버"
+
+msgid "certificates.orphan_title"
+msgstr "ACME 계정 누락"
+
+msgid "certificates.pem_certificate"
+msgstr "PEM 인증서 또는 체인"
+
+msgid "certificates.pem_drop"
+msgstr "해당하는 공개 PEM 인증서 또는 체인을 여기에 드롭합니다"
+
+msgid "certificates.pem_limit"
+msgstr "최대 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "PEM 개인 키"
+
+msgid "certificates.primary"
+msgstr "주요 할당"
+
+msgid "certificates.primary_help"
+msgstr "선택된 서비스에 대한 주요 재고 할당으로 표시"
+
+msgid "certificates.readonly"
+msgstr "데이터베이스는 읽기 전용입니다. 인증서를 검사하고 다운로드할 수 있지만 변경할 수 없습니다."
+
+msgid "certificates.renew_due"
+msgstr "검토/갱신 예정"
+
+msgid "certificates.sans"
+msgstr "주체 대체 이름"
+
+msgid "certificates.save_metadata"
+msgstr "메타데이터 저장"
+
+msgid "certificates.schedule"
+msgstr "발급 예약"
+
+msgid "certificates.schedule_acme"
+msgstr "ACME 발급 예약"
+
+msgid "certificates.search"
+msgstr "이름, 일반 이름, SAN, 발급 기관 또는 지문을 검색하세요…"
+
+msgid "certificates.serial"
+msgstr "시리얼 번호"
+
+msgid "certificates.services"
+msgstr "서비스"
+
+msgid "certificates.services_help"
+msgstr "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다."
+
+msgid "certificates.showing_count"
+msgstr "인증서 %(visible)s개 / %(total)s개 표시"
+
+msgid "certificates.source.customcert"
+msgstr "사용자 정의"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "자체 서명"
+
+msgid "certificates.source_label"
+msgstr "출처"
+
+msgid "certificates.status.expired"
+msgstr "만료"
+
+msgid "certificates.status.expiring_soon"
+msgstr "곧 만료"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "아직 유효하지 않음"
+
+msgid "certificates.status.revoked"
+msgstr "취소"
+
+msgid "certificates.status.valid"
+msgstr "유효"
+
+msgid "certificates.subtitle"
+msgstr "중앙 재고에서 인증서 발급, 업로드, 할당, 갱신, 검사"
+
+msgid "certificates.total"
+msgstr "전체"
+
+msgid "certificates.truncated"
+msgstr "첫 500개의 인증서만 표시됩니다. 완전한 결과를 위해 API를 통해 재고를 좁힙니다."
+
+msgid "certificates.unassigned"
+msgstr "할당되지 않음"
+
+msgid "certificates.upcoming"
+msgstr "예정된 갱신"
+
+msgid "certificates.upcoming_help"
+msgstr "만료 또는 30일 갱신 기간 내"
+
+msgid "certificates.upload"
+msgstr "인증서 업로드"
+
+msgid "certificates.upload_custom"
+msgstr "사용자 지정 인증서 업로드"
+
+msgid "certificates.upload_invalid"
+msgstr "유효한 공개 인증서와 해당되는 개인 키를 선택합니다."
+
+msgid "certificates.valid_days"
+msgstr "일 수"
+
+msgid "certificates.valid_from"
+msgstr "유효 시작일"
+
+msgid "certificates.valid_to"
+msgstr "유효 종료일"
+
+msgid "compose.always_on"
+msgstr "항상 켜짐"
+
+msgid "compose.count"
+msgstr "%(on)s 활성화됨 · %(total)s 사용 가능 · %(locked)s 잠김"
+
+msgid "compose.entries"
+msgstr "%(count)s 설정됨"
+
+msgid "compose.filter.all"
+msgstr "전체"
+
+msgid "compose.filter.changed"
+msgstr "변경됨"
+
+msgid "compose.filter.on"
+msgstr "켜짐"
+
+msgid "compose.locked"
+msgstr "여기에서는 제어 불가"
+
+msgid "compose.provenance.api"
+msgstr "API를 통해 관리됨"
+
+msgid "compose.provenance.attachment"
+msgstr "첨부 파일"
+
+msgid "compose.provenance.clone"
+msgstr "복제"
+
+msgid "compose.provenance.default"
+msgstr "기본"
+
+msgid "compose.provenance.edited"
+msgstr "여기 수정"
+
+msgid "compose.provenance.global"
+msgstr "전역에서"
+
+msgid "compose.provenance.managed"
+msgstr "%(method)s에 의해 설정"
+
+msgid "compose.provenance.template"
+msgstr "템플릿에서 생성됨"
+
+msgid "compose.set_value"
+msgstr "값을 설정하세요…"
+
+msgid "compose.show_more"
+msgstr "%(count)s 더 보기"
+
+msgid "compose.unavailable"
+msgstr "플러그인 목록을 로드할 수 없으므로 이 페이지를 안전하게 수정할 수 없습니다. API에 답변하면 다시 로드하세요."
+
+msgid "configs.subtitle"
+msgstr "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
+
+msgid "country.AD"
+msgstr "안도라"
+
+msgid "country.AE"
+msgstr "아랍에미리트"
+
+msgid "country.AF"
+msgstr "아프가니스탄"
+
+msgid "country.AG"
+msgstr "안티가 바부다"
+
+msgid "country.AI"
+msgstr "앵귈라"
+
+msgid "country.AL"
+msgstr "알바니아"
+
+msgid "country.AM"
+msgstr "아르메니아"
+
+msgid "country.AO"
+msgstr "앙골라"
+
+msgid "country.AQ"
+msgstr "남극"
+
+msgid "country.AR"
+msgstr "아르헨티나"
+
+msgid "country.AS"
+msgstr "아메리칸 사모아"
+
+msgid "country.AT"
+msgstr "오스트리아"
+
+msgid "country.AU"
+msgstr "호주"
+
+msgid "country.AW"
+msgstr "아루바"
+
+msgid "country.AX"
+msgstr "올란드 제도"
+
+msgid "country.AZ"
+msgstr "아제르바이잔"
+
+msgid "country.BA"
+msgstr "보스니아 헤르체고비나"
+
+msgid "country.BB"
+msgstr "바베이도스"
+
+msgid "country.BD"
+msgstr "방글라데시"
+
+msgid "country.BE"
+msgstr "벨기에"
+
+msgid "country.BF"
+msgstr "부르키나파소"
+
+msgid "country.BG"
+msgstr "불가리아"
+
+msgid "country.BH"
+msgstr "바레인"
+
+msgid "country.BI"
+msgstr "부룬디"
+
+msgid "country.BJ"
+msgstr "베냉"
+
+msgid "country.BL"
+msgstr "생바르텔레미"
+
+msgid "country.BM"
+msgstr "버뮤다"
+
+msgid "country.BN"
+msgstr "브루나이 다루살람"
+
+msgid "country.BO"
+msgstr "볼리비아"
+
+msgid "country.BQ"
+msgstr "네덜란드령 카리브"
+
+msgid "country.BR"
+msgstr "브라질"
+
+msgid "country.BS"
+msgstr "바하마"
+
+msgid "country.BT"
+msgstr "부탄"
+
+msgid "country.BV"
+msgstr "부베섬"
+
+msgid "country.BW"
+msgstr "보츠와나"
+
+msgid "country.BY"
+msgstr "벨라루스"
+
+msgid "country.BZ"
+msgstr "벨리즈"
+
+msgid "country.CA"
+msgstr "캐나다"
+
+msgid "country.CC"
+msgstr "코코스 제도"
+
+msgid "country.CD"
+msgstr "콩고 민주 공화국"
+
+msgid "country.CF"
+msgstr "중앙아프리카 공화국"
+
+msgid "country.CG"
+msgstr "콩고 공화국"
+
+msgid "country.CH"
+msgstr "스위스"
+
+msgid "country.CI"
+msgstr "코트디부아르"
+
+msgid "country.CK"
+msgstr "쿡 제도"
+
+msgid "country.CL"
+msgstr "칠레"
+
+msgid "country.CM"
+msgstr "카메룬"
+
+msgid "country.CN"
+msgstr "중국"
+
+msgid "country.CO"
+msgstr "콜롬비아"
+
+msgid "country.CR"
+msgstr "코스타리카"
+
+msgid "country.CU"
+msgstr "쿠바"
+
+msgid "country.CV"
+msgstr "카보베르데"
+
+msgid "country.CW"
+msgstr "퀴라소"
+
+msgid "country.CX"
+msgstr "크리스마스섬"
+
+msgid "country.CY"
+msgstr "사이프러스"
+
+msgid "country.CZ"
+msgstr "체코"
+
+msgid "country.DE"
+msgstr "독일"
+
+msgid "country.DJ"
+msgstr "지부티"
+
+msgid "country.DK"
+msgstr "덴마크"
+
+msgid "country.DM"
+msgstr "도미니카"
+
+msgid "country.DO"
+msgstr "도미니카 공화국"
+
+msgid "country.DZ"
+msgstr "알제리"
+
+msgid "country.EC"
+msgstr "에콰도르"
+
+msgid "country.EE"
+msgstr "에스토니아"
+
+msgid "country.EG"
+msgstr "이집트"
+
+msgid "country.EH"
+msgstr "서사하라"
+
+msgid "country.ER"
+msgstr "에리트레아"
+
+msgid "country.ES"
+msgstr "스페인"
+
+msgid "country.ET"
+msgstr "에티오피아"
+
+msgid "country.EU"
+msgstr "유럽"
+
+msgid "country.FI"
+msgstr "핀란드"
+
+msgid "country.FJ"
+msgstr "피지"
+
+msgid "country.FK"
+msgstr "포클랜드 제도"
+
+msgid "country.FM"
+msgstr "미크로네시아"
+
+msgid "country.FO"
+msgstr "페로 제도"
+
+msgid "country.FR"
+msgstr "프랑스"
+
+msgid "country.GA"
+msgstr "가봉"
+
+msgid "country.GB"
+msgstr "영국"
+
+msgid "country.GD"
+msgstr "그레나다"
+
+msgid "country.GE"
+msgstr "조지아"
+
+msgid "country.GF"
+msgstr "프랑스령 기아나"
+
+msgid "country.GG"
+msgstr "건지"
+
+msgid "country.GH"
+msgstr "가나"
+
+msgid "country.GI"
+msgstr "지브롤터"
+
+msgid "country.GL"
+msgstr "그린란드"
+
+msgid "country.GM"
+msgstr "감비아"
+
+msgid "country.GN"
+msgstr "기니"
+
+msgid "country.GP"
+msgstr "과들루프"
+
+msgid "country.GQ"
+msgstr "적도 기니"
+
+msgid "country.GR"
+msgstr "그리스"
+
+msgid "country.GS"
+msgstr "사우스 조지아 사우스 샌드위치 제도"
+
+msgid "country.GT"
+msgstr "과테말라"
+
+msgid "country.GU"
+msgstr "괌"
+
+msgid "country.GW"
+msgstr "기니비사우"
+
+msgid "country.GY"
+msgstr "가이아나"
+
+msgid "country.HK"
+msgstr "홍콩"
+
+msgid "country.HM"
+msgstr "허드 맥도널드 제도"
+
+msgid "country.HN"
+msgstr "온두라스"
+
+msgid "country.HR"
+msgstr "크로아티아"
+
+msgid "country.HT"
+msgstr "아이티"
+
+msgid "country.HU"
+msgstr "헝가리"
+
+msgid "country.ID"
+msgstr "인도네시아"
+
+msgid "country.IE"
+msgstr "아일랜드"
+
+msgid "country.IL"
+msgstr "이스라엘"
+
+msgid "country.IM"
+msgstr "맨섬"
+
+msgid "country.IN"
+msgstr "인도"
+
+msgid "country.IO"
+msgstr "영국령 인도양 지역"
+
+msgid "country.IQ"
+msgstr "이라크"
+
+msgid "country.IR"
+msgstr "이란"
+
+msgid "country.IS"
+msgstr "아이슬란드"
+
+msgid "country.IT"
+msgstr "이탈리아"
+
+msgid "country.JE"
+msgstr "저지"
+
+msgid "country.JM"
+msgstr "자메이카"
+
+msgid "country.JO"
+msgstr "요르단"
+
+msgid "country.JP"
+msgstr "일본"
+
+msgid "country.KE"
+msgstr "케냐"
+
+msgid "country.KG"
+msgstr "키르기스스탄"
+
+msgid "country.KH"
+msgstr "캄보디아"
+
+msgid "country.KI"
+msgstr "키리바시"
+
+msgid "country.KM"
+msgstr "코모로"
+
+msgid "country.KN"
+msgstr "세인트키츠 네비스"
+
+msgid "country.KP"
+msgstr "북한"
+
+msgid "country.KR"
+msgstr "대한민국"
+
+msgid "country.KW"
+msgstr "쿠웨이트"
+
+msgid "country.KY"
+msgstr "케이맨 제도"
+
+msgid "country.KZ"
+msgstr "카자흐스탄"
+
+msgid "country.LA"
+msgstr "라오스"
+
+msgid "country.LB"
+msgstr "레바논"
+
+msgid "country.LC"
+msgstr "세인트루시아"
+
+msgid "country.LI"
+msgstr "리히텐슈타인"
+
+msgid "country.LK"
+msgstr "스리랑카"
+
+msgid "country.LR"
+msgstr "라이베리아"
+
+msgid "country.LS"
+msgstr "레소토"
+
+msgid "country.LT"
+msgstr "리투아니아"
+
+msgid "country.LU"
+msgstr "룩셈부르크"
+
+msgid "country.LV"
+msgstr "라트비아"
+
+msgid "country.LY"
+msgstr "리비아"
+
+msgid "country.MA"
+msgstr "모로코"
+
+msgid "country.MC"
+msgstr "모나코"
+
+msgid "country.MD"
+msgstr "몰도바"
+
+msgid "country.ME"
+msgstr "몬테네그로"
+
+msgid "country.MF"
+msgstr "세인트마틴"
+
+msgid "country.MG"
+msgstr "마다가스카르"
+
+msgid "country.MH"
+msgstr "마셜 제도"
+
+msgid "country.MK"
+msgstr "북마케도니아"
+
+msgid "country.ML"
+msgstr "말리"
+
+msgid "country.MM"
+msgstr "미얀마"
+
+msgid "country.MN"
+msgstr "몽골"
+
+msgid "country.MO"
+msgstr "마카오"
+
+msgid "country.MP"
+msgstr "북마리아나 제도"
+
+msgid "country.MQ"
+msgstr "마르티니크"
+
+msgid "country.MR"
+msgstr "모리타니"
+
+msgid "country.MS"
+msgstr "몬세라트"
+
+msgid "country.MT"
+msgstr "몰타"
+
+msgid "country.MU"
+msgstr "모리셔스"
+
+msgid "country.MV"
+msgstr "몰디브"
+
+msgid "country.MW"
+msgstr "말라위"
+
+msgid "country.MX"
+msgstr "멕시코"
+
+msgid "country.MY"
+msgstr "말레이시아"
+
+msgid "country.MZ"
+msgstr "모잠비크"
+
+msgid "country.NA"
+msgstr "나미비아"
+
+msgid "country.NC"
+msgstr "뉴칼레도니아"
+
+msgid "country.NE"
+msgstr "니제르"
+
+msgid "country.NF"
+msgstr "노퍽섬"
+
+msgid "country.NG"
+msgstr "나이지리아"
+
+msgid "country.NI"
+msgstr "니카라과"
+
+msgid "country.NL"
+msgstr "네덜란드"
+
+msgid "country.NO"
+msgstr "노르웨이"
+
+msgid "country.NP"
+msgstr "네팔"
+
+msgid "country.NR"
+msgstr "나우루"
+
+msgid "country.NU"
+msgstr "니우에"
+
+msgid "country.NZ"
+msgstr "뉴질랜드"
+
+msgid "country.OM"
+msgstr "오만"
+
+msgid "country.PA"
+msgstr "파나마"
+
+msgid "country.PE"
+msgstr "페루"
+
+msgid "country.PF"
+msgstr "프랑스령 폴리네시아"
+
+msgid "country.PG"
+msgstr "파푸아뉴기니"
+
+msgid "country.PH"
+msgstr "필리핀"
+
+msgid "country.PK"
+msgstr "파키스탄"
+
+msgid "country.PL"
+msgstr "폴란드"
+
+msgid "country.PM"
+msgstr "생피에르 미클롱"
+
+msgid "country.PN"
+msgstr "핏케언 제도"
+
+msgid "country.PR"
+msgstr "푸에르토리코"
+
+msgid "country.PS"
+msgstr "팔레스타인"
+
+msgid "country.PT"
+msgstr "포르투갈"
+
+msgid "country.PW"
+msgstr "팔라우"
+
+msgid "country.PY"
+msgstr "파라과이"
+
+msgid "country.QA"
+msgstr "카타르"
+
+msgid "country.RE"
+msgstr "레위니옹"
+
+msgid "country.RO"
+msgstr "루마니아"
+
+msgid "country.RS"
+msgstr "세르비아"
+
+msgid "country.RU"
+msgstr "러시아"
+
+msgid "country.RW"
+msgstr "르완다"
+
+msgid "country.SA"
+msgstr "사우디아라비아"
+
+msgid "country.SB"
+msgstr "솔로몬 제도"
+
+msgid "country.SC"
+msgstr "세이셸"
+
+msgid "country.SD"
+msgstr "수단"
+
+msgid "country.SE"
+msgstr "스웨덴"
+
+msgid "country.SG"
+msgstr "싱가포르"
+
+msgid "country.SH"
+msgstr "세인트헬레나 어센션 트리스탄다쿠냐"
+
+msgid "country.SI"
+msgstr "슬로베니아"
+
+msgid "country.SJ"
+msgstr "스발바르 얀마옌 제도"
+
+msgid "country.SK"
+msgstr "슬로바키아"
+
+msgid "country.SL"
+msgstr "시에라리온"
+
+msgid "country.SM"
+msgstr "산마리노"
+
+msgid "country.SN"
+msgstr "세네갈"
+
+msgid "country.SO"
+msgstr "소말리아"
+
+msgid "country.SR"
+msgstr "수리남"
+
+msgid "country.SS"
+msgstr "남수단"
+
+msgid "country.ST"
+msgstr "상투메 프린시페"
+
+msgid "country.SV"
+msgstr "엘살바도르"
+
+msgid "country.SX"
+msgstr "신트마르턴"
+
+msgid "country.SY"
+msgstr "시리아"
+
+msgid "country.SZ"
+msgstr "에스와티니"
+
+msgid "country.TC"
+msgstr "터크스 케이커스 제도"
+
+msgid "country.TD"
+msgstr "차드"
+
+msgid "country.TF"
+msgstr "프랑스령 남부와 남극 지역"
+
+msgid "country.TG"
+msgstr "토고"
+
+msgid "country.TH"
+msgstr "태국"
+
+msgid "country.TJ"
+msgstr "타지키스탄"
+
+msgid "country.TK"
+msgstr "토켈라우"
+
+msgid "country.TL"
+msgstr "동티모르"
+
+msgid "country.TM"
+msgstr "투르크메니스탄"
+
+msgid "country.TN"
+msgstr "튀니지"
+
+msgid "country.TO"
+msgstr "통가"
+
+msgid "country.TR"
+msgstr "튀르키예"
+
+msgid "country.TT"
+msgstr "트리니다드 토바고"
+
+msgid "country.TV"
+msgstr "투발루"
+
+msgid "country.TW"
+msgstr "대만"
+
+msgid "country.TZ"
+msgstr "탄자니아"
+
+msgid "country.UA"
+msgstr "우크라이나"
+
+msgid "country.UG"
+msgstr "우간다"
+
+msgid "country.UM"
+msgstr "미국령 군소 제도"
+
+msgid "country.US"
+msgstr "미국"
+
+msgid "country.UY"
+msgstr "우루과이"
+
+msgid "country.UZ"
+msgstr "우즈베키스탄"
+
+msgid "country.VA"
+msgstr "바티칸 시국"
+
+msgid "country.VC"
+msgstr "세인트빈센트 그레나딘"
+
+msgid "country.VE"
+msgstr "베네수엘라"
+
+msgid "country.VG"
+msgstr "영국령 버진아일랜드"
+
+msgid "country.VI"
+msgstr "미국령 버진아일랜드"
+
+msgid "country.VN"
+msgstr "베트남"
+
+msgid "country.VU"
+msgstr "바누아투"
+
+msgid "country.WF"
+msgstr "왈리스 푸투나 제도"
+
+msgid "country.WS"
+msgstr "사모아"
+
+msgid "country.XK"
+msgstr "코소보"
+
+msgid "country.YE"
+msgstr "예멘"
+
+msgid "country.YT"
+msgstr "마요트"
+
+msgid "country.ZA"
+msgstr "남아프리카 공화국"
+
+msgid "country.ZM"
+msgstr "잠비아"
+
+msgid "country.ZW"
+msgstr "짐바브웨"
+
+msgid "country.not_applicable"
+msgstr "해당 없음"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "차단된 요청"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "차단된 순방문 IP"
+
+msgid "dashboard.card.certificates.title"
+msgstr "인증서"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s 활성 / %(down)s 비활성 / %(loading)s 로딩 중"
+
+msgid "dashboard.card.instances.title"
+msgstr "인스턴스"
+
+msgid "dashboard.card.news.title"
+msgstr "소식"
+
+msgid "dashboard.card.plan.title"
+msgstr "요금제"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s 코어 / %(pro)s PRO / %(external)s 외부"
+
+msgid "dashboard.card.plugins.title"
+msgstr "플러그인"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "위험: 시스템 메모리가 부족합니다!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "운영 환경에 적합한 우수한 메모리 상태입니다."
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "운영 용도로는 16GB 이상으로 업그레이드하는 것을 권장합니다."
+
+msgid "dashboard.card.ram.title"
+msgstr "시스템 RAM"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% 사용 중"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "주의: 메모리 부족으로 성능이 저하될 수 있습니다."
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s 온라인 / %(draft)s 초안"
+
+msgid "dashboard.card.services.title"
+msgstr "서비스"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "주요 차단 사유"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "전체 요청"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "곧 출시 예정"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "업스트림"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "국가별 차단 요청"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "차단된 요청"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "수치"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "시간에 따른 차단 요청 수"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "시간"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "시간별 차단 현황"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "차단된 요청"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "요청 상태 분포"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "차단됨"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "시간별 차단 요청(선택 범위)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "최다 차단 IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "최다 차단 IP Top 10"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "차단된 요청"
+
+msgid "dashboard.map.hover_info"
+msgstr "국가 위에 마우스를 올리세요"
+
+msgid "dashboard.map.legend"
+msgstr "범례"
+
+msgid "dashboard.map.no_data"
+msgstr "데이터 없음"
+
+msgid "dashboard.mini.across_countries"
+msgstr "%(count)s 국가를 통해"
+
+msgid "dashboard.mini.enforced"
+msgstr "현재 적용 중"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s 차단"
+
+msgid "dashboard.mini.scheduled"
+msgstr "예정됨"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "차단됨과 허용됨"
+
+msgid "dashboard.panel.map_sub"
+msgstr "자세한 내용을 보려면 마우스를 올리세요"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "트리거 규칙 기준"
+
+msgid "dashboard.panel.status_sub"
+msgstr "HTTP 응답 코드"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "선택 범위"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "요청 수 기준"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "%(total)s 전체 사용"
+
+msgid "dashboard.status.free_plan"
+msgstr "무료 플랜"
+
+msgid "dashboard.status.renews"
+msgstr "갱신"
+
+msgid "dashboard.status.services_licensed"
+msgstr "%(count)s 서비스 라이선스"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "이전과 비교"
+
+msgid "dashboard.status.vs_prev"
+msgstr "이전과 비교"
+
+msgid "dashboard.tile.bans_active"
+msgstr "활성 차단"
+
+msgid "dashboard.tile.jobs"
+msgstr "예약 작업"
+
+msgid "dashboard.tile.trend"
+msgstr "차단 요청 추세"
+
+msgid "dashboard.welcome.greeting"
+msgstr "다시 오신 것을 환영합니다,"
+
+msgid "dashboard.welcome.title"
+msgstr "다시 오신 것을 환영합니다, %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "지난 %(days)s일"
+
+msgid "dashboard.window.title"
+msgstr "대시보드 창"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "일치하는 %(entity)s %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "일치하는 %(entity)s %(count)s개 모두 선택"
+
+msgid "datatable.bulk_select_clear"
+msgstr "선택 지우기"
+
+msgid "datatable.bulk_select_page"
+msgstr "이 페이지의 %(entity)s %(count)s개가 모두 선택되었습니다."
+
+msgid "datatable.info_bans"
+msgstr "%(total)s개의 차단 항목 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_cache"
+msgstr "%(total)s개의 캐시 파일 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_configs"
+msgstr "%(total)s개의 사용자 정의 설정 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_empty_bans"
+msgstr "차단된 항목이 없습니다."
+
+msgid "datatable.info_empty_cache"
+msgstr "캐시 파일이 없습니다."
+
+msgid "datatable.info_empty_configs"
+msgstr "사용자 정의 설정이 없습니다."
+
+msgid "datatable.info_empty_instances"
+msgstr "인스턴스가 없습니다."
+
+msgid "datatable.info_empty_items"
+msgstr "항목이 없습니다."
+
+msgid "datatable.info_empty_jobs"
+msgstr "작업이 없습니다."
+
+msgid "datatable.info_empty_plugins"
+msgstr "플러그인이 없습니다."
+
+msgid "datatable.info_empty_reports"
+msgstr "보고서가 없습니다."
+
+msgid "datatable.info_empty_services"
+msgstr "서비스가 없습니다."
+
+msgid "datatable.info_empty_templates"
+msgstr "템플릿이 없습니다."
+
+msgid "datatable.info_filtered_bans"
+msgstr "(전체 _MAX_개의 차단 항목에서 필터링됨)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(전체 _MAX_개의 캐시 파일에서 필터링됨)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(전체 _MAX_개의 사용자 정의 설정에서 필터링됨)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(전체 _MAX_개의 인스턴스에서 필터링됨)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(전체 _MAX_개의 항목에서 필터링됨)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(전체 _MAX_개의 작업에서 필터링됨)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(전체 _MAX_개의 플러그인에서 필터링됨)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(전체 _MAX_개의 보고서에서 필터링됨)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(전체 _MAX_개의 서비스에서 필터링됨)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(전체 _MAX_개의 템플릿에서 필터링됨)"
+
+msgid "datatable.info_instances"
+msgstr "%(total)s개의 인스턴스 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_items"
+msgstr "%(total)s개의 항목 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_jobs"
+msgstr "%(total)s개의 작업 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_plugins"
+msgstr "%(total)s개의 플러그인 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_reports"
+msgstr "%(total)s개의 보고서 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_services"
+msgstr "%(total)s개의 서비스 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.info_templates"
+msgstr "%(total)s개의 템플릿 중 %(start)s~%(end)s 표시 중"
+
+msgid "datatable.length_all"
+msgstr "전체"
+
+msgid "datatable.length_menu_bans"
+msgstr "_MENU_개씩 보기 (차단)"
+
+msgid "datatable.length_menu_cache"
+msgstr "_MENU_개씩 보기 (캐시)"
+
+msgid "datatable.length_menu_configs"
+msgstr "_MENU_개씩 보기 (설정)"
+
+msgid "datatable.length_menu_instances"
+msgstr "_MENU_개씩 보기 (인스턴스)"
+
+msgid "datatable.length_menu_items"
+msgstr "_MENU_개씩 보기 (항목)"
+
+msgid "datatable.length_menu_jobs"
+msgstr "_MENU_개씩 보기 (작업)"
+
+msgid "datatable.length_menu_plugins"
+msgstr "_MENU_개씩 보기 (플러그인)"
+
+msgid "datatable.length_menu_reports"
+msgstr "_MENU_개씩 보기 (보고서)"
+
+msgid "datatable.length_menu_services"
+msgstr "_MENU_개씩 보기 (서비스)"
+
+msgid "datatable.length_menu_templates"
+msgstr "_MENU_개씩 보기 (템플릿)"
+
+msgid "datatable.paginate.first"
+msgstr "처음"
+
+msgid "datatable.paginate.last"
+msgstr "마지막"
+
+msgid "datatable.paginate.next"
+msgstr "다음"
+
+msgid "datatable.paginate.previous"
+msgstr "이전"
+
+msgid "datatable.processing"
+msgstr "처리 중..."
+
+msgid "datatable.search"
+msgstr "검색:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "선택된 차단 항목 없음"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "1개의 차단 항목 선택됨"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "%d개의 차단 항목 선택됨"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "선택된 캐시 파일 없음"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "1개의 캐시 파일 선택됨"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "%d개의 캐시 파일 선택됨"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "선택된 설정 없음"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "1개의 설정 선택됨"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "%d개의 설정 선택됨"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "선택된 인스턴스 없음"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "1개의 인스턴스 선택됨"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "%d개의 인스턴스 선택됨"
+
+msgid "datatable.select_rows_items_0"
+msgstr "선택된 항목 없음"
+
+msgid "datatable.select_rows_items_1"
+msgstr "1개의 항목 선택됨"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "%d개의 항목 선택됨"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "선택된 작업 없음"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "1개의 작업 선택됨"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "%d개의 작업 선택됨"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "선택된 플러그인 없음"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "1개의 플러그인 선택됨"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "%d개의 플러그인 선택됨"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "선택된 보고서 없음"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "1개의 보고서 선택됨"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "%d개의 보고서 선택됨"
+
+msgid "datatable.select_rows_services_0"
+msgstr "선택된 서비스 없음"
+
+msgid "datatable.select_rows_services_1"
+msgstr "1개의 서비스 선택됨"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "%d개의 서비스 선택됨"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "선택된 템플릿 없음"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "1개의 템플릿 선택됨"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "%d개의 템플릿 선택됨"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s 선택됨"
+
+msgid "datatable.selected_list_empty"
+msgstr "%(entity)s 선택되지 않음."
+
+msgid "datatable.zero_records_bans"
+msgstr "일치하는 차단 항목이 없습니다."
+
+msgid "datatable.zero_records_cache"
+msgstr "일치하는 캐시 파일이 없습니다."
+
+msgid "datatable.zero_records_configs"
+msgstr "일치하는 설정이 없습니다."
+
+msgid "datatable.zero_records_instances"
+msgstr "일치하는 인스턴스가 없습니다."
+
+msgid "datatable.zero_records_items"
+msgstr "일치하는 항목이 없습니다."
+
+msgid "datatable.zero_records_jobs"
+msgstr "일치하는 작업이 없습니다."
+
+msgid "datatable.zero_records_plugins"
+msgstr "일치하는 플러그인이 없습니다."
+
+msgid "datatable.zero_records_reports"
+msgstr "일치하는 보고서가 없습니다."
+
+msgid "datatable.zero_records_services"
+msgstr "일치하는 서비스가 없습니다."
+
+msgid "datatable.zero_records_templates"
+msgstr "일치하는 템플릿이 없습니다."
+
+msgid "dev_log.copy_failed"
+msgstr "텍스트 복사 실패:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "소식 가져오기 실패:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "잘못된 형식의 라인 건너뜀: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "1시간"
+
+msgid "duration.1_week"
+msgstr "1주일"
+
+msgid "duration.24_hours"
+msgstr "24시간"
+
+msgid "duration.custom"
+msgstr "사용자 정의"
+
+msgid "duration.permanent"
+msgstr "영구"
+
+msgid "error.401.help"
+msgstr "이 리소스에 접근하려면 로그인해야 합니다."
+
+msgid "error.401.message"
+msgstr "계속하려면 로그인하세요."
+
+msgid "error.401.title"
+msgstr "인증 필요"
+
+msgid "error.403.help"
+msgstr "자격 증명을 확인하거나, 오류라고 생각되면 관리자에게 문의하세요."
+
+msgid "error.403.message"
+msgstr "이 페이지에 접근할 권한이 없습니다."
+
+msgid "error.403.title"
+msgstr "접근 거부됨"
+
+msgid "error.404.help"
+msgstr "URL이 올바른지 확인하거나, 오류라고 생각되면 관리자에게 문의하세요."
+
+msgid "error.404.message"
+msgstr "요청한 리소스를 찾을 수 없습니다."
+
+msgid "error.404.title"
+msgstr "찾을 수 없음"
+
+msgid "error.5xx.help"
+msgstr "잠시 후 다시 시도하거나, 문제가 지속되면 관리자에게 문의하세요."
+
+msgid "error.5xx.message"
+msgstr "예기치 않은 서버 오류가 발생했습니다."
+
+msgid "error.5xx.title"
+msgstr "서버 오류"
+
+msgid "error.ban_update_failed"
+msgstr "차단 기간 업데이트 실패. 다시 시도해 주세요."
+
+msgid "error.reports_load_error"
+msgstr "보고서 로드 중 오류 발생. 페이지를 새로고침해 주세요."
+
+msgid "error.unban_failed"
+msgstr "IP 주소 차단 해제 실패. 다시 시도해 주세요."
+
+msgid "flash.easter_egg"
+msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
+
+msgid "flash.error"
+msgstr "오류"
+
+msgid "flash.message"
+msgstr "정보"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "PRO 라이선스에서 허용하는 것보다 많은 서비스가 있습니다. 라이선스를 업그레이드하거나 일부 서비스를 초안(Draft) 모드로 전환하여 PRO 라이선스를 활성화하세요."
+
+msgid "flash.time.just_now"
+msgstr "방금 전"
+
+msgid "flash.warning"
+msgstr "경고"
+
+msgid "footer.blog"
+msgstr "블로그"
+
+msgid "footer.documentation"
+msgstr "문서"
+
+msgid "footer.license"
+msgstr "라이선스"
+
+msgid "footer.made_by"
+msgstr "제작:"
+
+msgid "footer.privacy"
+msgstr "개인정보 보호"
+
+msgid "footer.support"
+msgstr "기술 지원"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "첨부된 사용자 지정 설정 포함"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "기존 UI/API 사용자 지정 설정 덮어쓰기"
+
+msgid "form.checkbox.remember_me"
+msgstr "로그인 상태 유지"
+
+msgid "form.help.ban_specific_service"
+msgstr "차단은 이 특정 서비스에만 적용됩니다."
+
+msgid "form.help.hostname_length_limit"
+msgstr "호스트 이름은 256자로 제한됩니다."
+
+msgid "form.help.hostname_special_chars"
+msgstr "프로토콜/포트 지정에는 '/'와 ':'만 허용됩니다."
+
+msgid "form.help.multivalue_separator"
+msgstr "값은 다음으로 구분됩니다:"
+
+msgid "form.help.permanent_ban"
+msgstr "체크하면 수동으로 제거하기 전까지 차단이 만료되지 않습니다."
+
+msgid "form.help.photo_extensions"
+msgstr "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
+
+msgid "form.label.2fa_code"
+msgstr "2단계 인증 코드"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "2단계 인증 또는 복구 코드"
+
+msgid "form.label.admin_email"
+msgstr "관리자 이메일"
+
+msgid "form.label.admin_password"
+msgstr "관리자 비밀번호"
+
+msgid "form.label.admin_username"
+msgstr "관리자 이름"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "자동 Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "차단 범위"
+
+msgid "form.label.certificate_authority"
+msgstr "인증 기관"
+
+msgid "form.label.certificate_priority"
+msgstr "인증서 우선순위"
+
+msgid "form.label.challenge_type"
+msgstr "챌린지 유형"
+
+msgid "form.label.config_type"
+msgstr "설정 유형"
+
+msgid "form.label.configuration_name"
+msgstr "설정 이름"
+
+msgid "form.label.confirm_password"
+msgstr "비밀번호 확인"
+
+msgid "form.label.current_password"
+msgstr "현재 비밀번호"
+
+msgid "form.label.custom_config"
+msgstr "구성"
+
+msgid "form.label.custom_end_date"
+msgstr "사용자 정의 종료일"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "사용자 정의 SSL 인증서"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "인증서 데이터 (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "사용자 정의 SSL 키"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "인증서 키 데이터 (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Let's Encrypt DNS 인증 정보"
+
+msgid "form.label.dns_propagation"
+msgstr "DNS 전파 지연 시간"
+
+msgid "form.label.dns_provider"
+msgstr "DNS 제공업체"
+
+msgid "form.label.email"
+msgstr "이메일"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "Let's Encrypt용 이메일"
+
+msgid "form.label.end_date"
+msgstr "종료 날짜"
+
+msgid "form.label.hostname"
+msgstr "호스트 이름"
+
+msgid "form.label.instance_id"
+msgstr "인스턴스 ID"
+
+msgid "form.label.ip_address"
+msgstr "IP 주소"
+
+msgid "form.label.keywords"
+msgstr "키워드"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt 사용자 정의 프로필"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "공용 접미사(PSL) 비활성화"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Let's Encrypt DNS 인증 정보"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Let's Encrypt 프로필"
+
+msgid "form.label.license_key"
+msgstr "라이선스 키"
+
+msgid "form.label.make_permanent"
+msgstr "영구 적용"
+
+msgid "form.label.name"
+msgstr "이름"
+
+msgid "form.label.new_duration"
+msgstr "새 기간"
+
+msgid "form.label.new_password"
+msgstr "새 비밀번호"
+
+msgid "form.label.optional"
+msgstr "(선택 사항)"
+
+msgid "form.label.passkey_name"
+msgstr "패스키 이름"
+
+msgid "form.label.password"
+msgstr "비밀번호"
+
+msgid "form.label.permanent_ban"
+msgstr "영구 차단"
+
+msgid "form.label.plugin_id"
+msgstr "플러그인"
+
+msgid "form.label.raw_configuration"
+msgstr "원시 설정"
+
+msgid "form.label.real_ip_from"
+msgstr "실제 IP 원본(Real IP from)"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "실제 IP 원본(URLs)"
+
+msgid "form.label.real_ip_header"
+msgstr "실제 IP 헤더"
+
+msgid "form.label.real_ip_recursive"
+msgstr "실제 IP 재귀 검색"
+
+msgid "form.label.reason"
+msgstr "사유"
+
+msgid "form.label.secret_token"
+msgstr "비밀 토큰"
+
+msgid "form.label.server_name"
+msgstr "서버 이름"
+
+msgid "form.label.service_name"
+msgstr "서비스 이름"
+
+msgid "form.label.template_id"
+msgstr "템플릿 ID"
+
+msgid "form.label.theme"
+msgstr "테마"
+
+msgid "form.label.type"
+msgstr "유형"
+
+msgid "form.label.ui_host"
+msgstr "UI 호스트"
+
+msgid "form.label.ui_url"
+msgstr "UI URL"
+
+msgid "form.label.use_custom_ssl"
+msgstr "사용자 정의 SSL 사용"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "Let's Encrypt 스테이징 사용"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "PROXY 프로토콜 사용"
+
+msgid "form.label.use_real_ip"
+msgstr "실제 IP 사용"
+
+msgid "form.label.username"
+msgstr "사용자 이름"
+
+msgid "form.label.wildcard_certificates"
+msgstr "와일드카드 인증서"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 연결 시간 초과"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API 키"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "ZeroSSL API 최대 시간"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "ZeroSSL API 재시도 횟수"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 재시도 지연"
+
+msgid "form.placeholder.2fa_code"
+msgstr "코드 입력"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "코드 또는 복구 코드 입력"
+
+msgid "form.placeholder.config_name"
+msgstr "my-custom-config"
+
+msgid "form.placeholder.current_password"
+msgstr "현재 비밀번호"
+
+msgid "form.placeholder.enter_username"
+msgstr "사용자 이름 입력"
+
+msgid "form.placeholder.keywords"
+msgstr "키워드"
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "값 입력..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "플러그인 검색..."
+
+msgid "form.placeholder.search"
+msgstr "검색..."
+
+msgid "form.placeholder.secret_token"
+msgstr "비밀 토큰"
+
+msgid "form.placeholder.select_service"
+msgstr "서비스 선택"
+
+msgid "form.placeholder.username_example"
+msgstr "홍길동"
+
+msgid "form.validation.confirm_password_match"
+msgstr "비밀번호가 일치하지 않습니다."
+
+msgid "form.validation.password_length"
+msgstr "비밀번호는 최소 8자 이상이어야 합니다."
+
+msgid "form.validation.password_number"
+msgstr "비밀번호에 숫자가 최소 1개 포함되어야 합니다."
+
+msgid "form.validation.password_special"
+msgstr "비밀번호에 특수 문자가 최소 1개 포함되어야 합니다."
+
+msgid "form.validation.password_uppercase"
+msgstr "비밀번호에 대문자가 최소 1개 포함되어야 합니다."
+
+msgid "input_list.view_all_settings"
+msgstr "모든 %(count)s 설정 보기"
+
+msgid "instance.type.container"
+msgstr "컨테이너"
+
+msgid "instance.type.pod"
+msgstr "포드(Pod)"
+
+msgid "instance.type.static"
+msgstr "정적"
+
+msgid "instances.down"
+msgstr "중지됨"
+
+msgid "instances.loading"
+msgstr "로딩 중"
+
+msgid "instances.subtitle"
+msgstr "이 UI에 연결된 BunkerWeb 인스턴스를 관리합니다: 생성, 핑, 다시 로드, 중지 또는 제거합니다."
+
+msgid "instances.total"
+msgstr "총 인스턴스 수"
+
+msgid "instances.up"
+msgstr "실행 중"
+
+msgid "interval.day"
+msgstr "매일"
+
+msgid "interval.hour"
+msgstr "매시간"
+
+msgid "interval.minute"
+msgstr "매분"
+
+msgid "interval.once"
+msgstr "한 번"
+
+msgid "interval.week"
+msgstr "매주"
+
+msgid "job.history.end_date"
+msgstr "종료일"
+
+msgid "job.history.start_date"
+msgstr "시작일"
+
+msgid "job.history.success"
+msgstr "성공"
+
+msgid "jobs.subtitle"
+msgstr "BunkerWeb 스케줄러가 실행하는 예약 작업 및 일회성 작업 — 상태를 추적하고 필요할 때 실행합니다."
+
+msgid "jobs.tile.async"
+msgstr "비동기"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "마지막 실행 실패"
+
+msgid "jobs.tile.reload_required"
+msgstr "다시 로드 필요"
+
+msgid "jobs.tile.total"
+msgstr "총 작업 수"
+
+msgid "legend.locked_settings_annotation"
+msgstr "잠금됨 (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "잠금된 설정은 강조 표시됩니다"
+
+msgid "link.back_to_login"
+msgstr "로그인으로 돌아가기"
+
+msgid "link.forgot_password"
+msgstr "비밀번호를 잊으셨나요?"
+
+msgid "link.get_support"
+msgstr "지원 받기"
+
+msgid "link.here"
+msgstr "여기"
+
+msgid "link.more_info"
+msgstr "자세한 정보"
+
+msgid "link.more_news"
+msgstr "더 많은 소식"
+
+msgid "link.opens_new_tab"
+msgstr "(새 탭에서 열기)"
+
+msgid "link.privacy_policy"
+msgstr "개인정보 처리방침"
+
+msgid "link.read_more"
+msgstr "더 읽어보기"
+
+msgid "link.see_more"
+msgstr "더 보기"
+
+msgid "link.upgrade"
+msgstr "업그레이드하시겠습니까?"
+
+msgid "link.use_authenticator_code"
+msgstr "인증 코드 사용"
+
+msgid "link.use_recovery_code"
+msgstr "복구 코드 사용"
+
+msgid "login.or_use_password"
+msgstr "또는 비밀번호 사용"
+
+msgid "login.subtitle"
+msgstr "BunkerWeb 계정에 로그인"
+
+msgid "login.title"
+msgstr "로그인"
+
+msgid "logs.all_sources"
+msgstr "모든 소스(실시간)"
+
+msgid "logs.annotation_error"
+msgstr "오류"
+
+msgid "logs.annotation_warning"
+msgstr "경고"
+
+msgid "logs.collapse"
+msgstr "접기"
+
+msgid "logs.expand"
+msgstr "펼치기"
+
+msgid "logs.filter_levels"
+msgstr "수준"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "오류 %(errors)s개, 경고 %(warnings)s개"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Let's Encrypt 로그"
+
+msgid "logs.level_all"
+msgstr "모든 로그"
+
+msgid "logs.level_critical"
+msgstr "치명적"
+
+msgid "logs.level_debug"
+msgstr "디버그"
+
+msgid "logs.level_error"
+msgstr "오류"
+
+msgid "logs.level_errors_only"
+msgstr "오류만"
+
+msgid "logs.level_info"
+msgstr "정보"
+
+msgid "logs.level_notice"
+msgstr "알림"
+
+msgid "logs.level_security_only"
+msgstr "보안만"
+
+msgid "logs.level_warning"
+msgstr "경고"
+
+msgid "logs.lines_all"
+msgstr "전체"
+
+msgid "logs.lines_label"
+msgstr "줄"
+
+msgid "logs.live_title"
+msgstr "실시간 로그"
+
+msgid "logs.main_logs"
+msgstr "기본 로그"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s줄 · 수정됨 %(when)s"
+
+msgid "logs.new_lines"
+msgstr "새 줄"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s개의 새 로그 줄"
+
+msgid "logs.no_log_files"
+msgstr "표시할 로그 파일이 없습니다. 자세한 내용은 로그 활성화 방법에 대한 문서를 참조하십시오."
+
+msgid "logs.pause"
+msgstr "일시 정지"
+
+msgid "logs.resume"
+msgstr "재개"
+
+msgid "logs.select_file_prompt"
+msgstr "로그 파일 선택하여 내용을 보기"
+
+msgid "logs.showing_all"
+msgstr "%(total)s줄"
+
+msgid "logs.showing_some"
+msgstr "%(total)s개 중 %(shown)s개 표시"
+
+msgid "logs.tailing_sources"
+msgstr "추적 중 · 소스 %(count)s개"
+
+msgid "logs.taller"
+msgstr "더 높게"
+
+msgid "logs.trimmed_notice"
+msgstr "--- 성능을 위해 %(count)s개의 오래된 로그 라인을 제거했습니다 ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "플러그인 압축 파일을 여기에 드래그하거나 클릭하여 파일을 선택하세요."
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "일치하는 보고서 %(count)s개의 IP를 모두 차단하시겠습니까? 중복 대상은 한 번만 적용됩니다."
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "선택한 캐시 파일을 삭제하시겠습니까?"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "선택한 사용자 정의 설정을 전환하시겠습니까?"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "선택한 사용자 정의 설정을 %(state)s(으)로 전환하시겠습니까?"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "선택한 사용자 정의 설정을 삭제하시겠습니까?"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "선택한 서비스를 전환하시겠습니까?"
+
+msgid "modal.body.confirm_next_step"
+msgstr "다음 단계로 진행하시겠습니까?"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "선택한 플러그인을 삭제하시겠습니까?"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "템플릿 %(name)s을(를) 삭제하시겠습니까?"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "선택한 인스턴스를 삭제하시겠습니까?"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "선택한 인스턴스를 삭제하시겠습니까?"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "선택한 템플릿 중 하나 이상이 서비스(총 %(services_count)s개)에 할당되어 있습니다. 템플릿을 삭제하면 할당이 취소됩니다. 계속하시겠습니까?"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "이 단계를 삭제하시겠습니까?"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "내용"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "단계"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "전역 설정에서 사용 중"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "사용 중인 서비스: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "선택한 서비스가 내보내집니다. 아래 옵션을 활성화하면 첨부된 사용자 지정 설정을 .zip 아카이브에 함께 묶습니다."
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "전역 설정을 가져와 현재 템플릿에 적용합니다."
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "이 템플릿에 존재하는 설정만 업데이트됩니다."
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "기본값과 동일한 값은 무시됩니다."
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME은 재정의되지 않습니다."
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "사용자 지정 설정 내보내기 파일을 여기로 끌어다 놓거나 클릭하여 파일을 선택하세요."
+
+msgid "modal.body.import_configs_warning"
+msgstr "scheduler, autoconf 또는 templates에서 만든 사용자 지정 설정은 항상 보존됩니다. UI/API 설정만 덮어쓸 수 있습니다."
+
+msgid "modal.body.import_services_dropzone"
+msgstr "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요."
+
+msgid "modal.body.import_services_warning"
+msgstr "서비스를 가져오면 내보내기 파일로부터 새로운 UI 서비스가 생성됩니다. 이미 존재하는 서비스는 건너뜁니다."
+
+msgid "modal.body.instance_creation_alert"
+msgstr "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다."
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "문제가 발생할 경우, 수동으로 안전하지 않은 인증서를 수락할 수 있습니다:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다."
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "이 복구 코드는 한 번만 표시됩니다. 반드시 안전하게 저장해 주세요."
+
+msgid "modal.body.reset_template_alert"
+msgstr "현재 템플릿 설정과 사용자 정의 설정을 초기화하시겠습니까?"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "선택한 서비스를 전환하시겠습니까?"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "선택한 서비스를 삭제하시겠습니까?"
+
+#. plural pair; 1 form(s) for ko, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "선택한 IP 주소의 차단을 해제하시겠습니까?"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "일치하는 차단 %(count)s개를 모두 해제하시겠습니까?"
+
+msgid "modal.body.update_duration_alert"
+msgstr "선택한 차단 항목에 대해 새로운 기간을 선택하세요:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "일치하는 차단 %(count)s개의 새 기간을 선택하세요:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "전역 설정 적용"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "템플릿 설정 초기화"
+
+msgid "modal.section.ban_details"
+msgstr "차단 상세 정보"
+
+msgid "modal.section.ban_scope"
+msgstr "차단 범위"
+
+msgid "modal.section.delete"
+msgstr "삭제"
+
+msgid "modal.title.add_bans"
+msgstr "차단 추가"
+
+msgid "modal.title.add_plugins"
+msgstr "플러그인 추가"
+
+msgid "modal.title.confirm_conversion"
+msgstr "전환 확인"
+
+msgid "modal.title.confirm_deletion"
+msgstr "삭제 확인"
+
+msgid "modal.title.confirm_unban"
+msgstr "차단 해제 확인"
+
+msgid "modal.title.create_new_instance"
+msgstr "새 인스턴스 생성"
+
+msgid "modal.title.create_template"
+msgstr "템플릿 생성"
+
+msgid "modal.title.delete_instance"
+msgstr "인스턴스 삭제"
+
+msgid "modal.title.delete_step"
+msgstr "단계 삭제"
+
+msgid "modal.title.delete_template"
+msgstr "템플릿 삭제"
+
+msgid "modal.title.edit_template"
+msgstr "템플릿 수정: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "서비스 내보내기"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "전역 설정을 적용하시겠습니까?"
+
+msgid "modal.title.from_plugin"
+msgstr "플러그인 원본:"
+
+msgid "modal.title.full_url"
+msgstr "전체 URL"
+
+msgid "modal.title.import_configs"
+msgstr "사용자 지정 설정 가져오기"
+
+msgid "modal.title.import_services"
+msgstr "서비스 가져오기"
+
+msgid "modal.title.job_history"
+msgstr "최근 10회 작업 실행 기록"
+
+msgid "modal.title.job_history_count"
+msgstr "최근 %(count)s회 작업 실행 기록"
+
+msgid "modal.title.multiselect_selected"
+msgstr "선택된 항목"
+
+msgid "modal.title.recovery_codes"
+msgstr "복구 코드"
+
+msgid "modal.title.reset_template_config"
+msgstr "템플릿 설정을 초기화하시겠습니까?"
+
+msgid "modal.title.security_report_details"
+msgstr "보안 보고서 세부 정보"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "서버 이름이 중복됩니다"
+
+msgid "modal.title.update_duration"
+msgstr "차단 기간 업데이트"
+
+msgid "mode.advanced"
+msgstr "고급"
+
+msgid "mode.compose"
+msgstr "작성"
+
+msgid "mode.easy"
+msgstr "간편"
+
+msgid "mode.raw"
+msgstr "원본(Raw)"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "PRO로 업그레이드"
+
+msgid "navbar.dropdown.logout"
+msgstr "로그아웃"
+
+msgid "navbar.link.documentation"
+msgstr "문서"
+
+msgid "navbar.version"
+msgstr "버전"
+
+msgid "navigation.about"
+msgstr "정보"
+
+msgid "navigation.bans"
+msgstr "차단 목록"
+
+msgid "navigation.cache"
+msgstr "캐시"
+
+msgid "navigation.certificates"
+msgstr "인증서"
+
+msgid "navigation.configs"
+msgstr "설정"
+
+msgid "navigation.configure"
+msgstr "구성"
+
+msgid "navigation.edition_community"
+msgstr "커뮤니티"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "추가 페이지"
+
+msgid "navigation.global_settings"
+msgstr "전역 설정"
+
+msgid "navigation.groups"
+msgstr "리소스 그룹"
+
+msgid "navigation.home"
+msgstr "홈"
+
+msgid "navigation.instances"
+msgstr "인스턴스"
+
+msgid "navigation.jobs"
+msgstr "작업"
+
+msgid "navigation.logs"
+msgstr "로그"
+
+msgid "navigation.misc"
+msgstr "기타"
+
+msgid "navigation.mode_selection"
+msgstr "모드 선택"
+
+msgid "navigation.more"
+msgstr "더 보기..."
+
+msgid "navigation.operate"
+msgstr "운영"
+
+msgid "navigation.overview"
+msgstr "개요"
+
+msgid "navigation.plugin_activated"
+msgstr "플러그인 활성화됨"
+
+msgid "navigation.plugin_activated_global"
+msgstr "플러그인 전역 활성화됨"
+
+msgid "navigation.plugin_deactivated"
+msgstr "플러그인 비활성화됨"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "플러그인 전역 비활성화됨"
+
+msgid "navigation.plugins"
+msgstr "플러그인"
+
+msgid "navigation.plugins_pages"
+msgstr "플러그인 페이지"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "리디렉션"
+
+msgid "navigation.reports"
+msgstr "보고서"
+
+msgid "navigation.services"
+msgstr "서비스"
+
+msgid "navigation.support"
+msgstr "지원"
+
+msgid "navigation.system"
+msgstr "시스템"
+
+msgid "navigation.templates"
+msgstr "템플릿"
+
+msgid "navigation.threatmap"
+msgstr "위협 지도"
+
+msgid "navigation.timings"
+msgstr "처리 시간"
+
+msgid "navigation.upstreams"
+msgstr "업스트림"
+
+msgid "navigation.web_cache"
+msgstr "웹 캐시"
+
+msgid "navigation.workflows"
+msgstr "워크플로우"
+
+msgid "news.image_alt"
+msgstr "소식 이미지"
+
+msgid "news.posted_on"
+msgstr "게시일:"
+
+msgid "news.slide"
+msgstr "슬라이드"
+
+msgid "newsletter.legal_agreement"
+msgstr "뉴스레터 구독을 원하며, 다음 사항을 읽고 동의합니다:"
+
+msgid "newsletter.title"
+msgstr "뉴스레터 가입"
+
+msgid "onboarding.dismiss"
+msgstr "닫기"
+
+msgid "onboarding.error"
+msgstr "안내를 불러오지 못했습니다."
+
+msgid "onboarding.hint.bans"
+msgstr "차단 목록은 BunkerWeb이 현재 거부 중인 클라이언트입니다. 각 행에 사유와 만료 시점이 표시됩니다."
+
+msgid "onboarding.hint.home"
+msgstr "이 대시보드에서 현재 정상 상태인 인스턴스, 제공 중인 서비스, BunkerWeb이 처리한 트래픽을 확인할 수 있습니다."
+
+msgid "onboarding.hint.logs"
+msgstr "모든 인스턴스의 실시간 로그이며 인스턴스와 심각도로 필터링할 수 있습니다."
+
+msgid "onboarding.hint.reports"
+msgstr "차단된 모든 요청이 여기에 기록됩니다. 항목을 열면 어떤 보안 검사가 왜 차단했는지 확인할 수 있습니다."
+
+msgid "onboarding.hint.title"
+msgstr "빠른 둘러보기"
+
+msgid "onboarding.item.first_block"
+msgstr "BunkerWeb의 요청 차단 동작 확인하기"
+
+msgid "onboarding.item.https"
+msgstr "HTTPS 설정하기"
+
+msgid "onboarding.item.install"
+msgstr "한 대 이상의 호스트에 BunkerWeb 설치"
+
+msgid "onboarding.item.mfa"
+msgstr "MFA 활성화"
+
+msgid "onboarding.item.pro"
+msgstr "BunkerWeb PRO 활성화"
+
+msgid "onboarding.item.read_bans"
+msgstr "차단된 대상과 해제 시점 확인하기"
+
+msgid "onboarding.item.read_home"
+msgstr "대시보드에서 현재 상태 확인하기"
+
+msgid "onboarding.item.read_logs"
+msgstr "모든 인스턴스의 실시간 로그 보기"
+
+msgid "onboarding.item.read_reports"
+msgstr "요청이 차단된 이유 확인하기"
+
+msgid "onboarding.item.service"
+msgstr "첫 서비스 등록"
+
+msgid "onboarding.item.workflow"
+msgstr "보안 워크플로 연결하기"
+
+msgid "onboarding.not_saved"
+msgstr "저장하지 못했습니다."
+
+msgid "onboarding.pro_tips"
+msgstr "PRO 팁"
+
+msgid "onboarding.restart"
+msgstr "안내 다시 시작"
+
+msgid "onboarding.restart_help"
+msgstr "시작 단계를 상단 바에 다시 표시합니다."
+
+msgid "onboarding.subtitle"
+msgstr "몇 단계만 거치면 BunkerWeb이 서비스를 보호하기 시작합니다."
+
+msgid "onboarding.title"
+msgstr "시작하기"
+
+msgid "pagination.page"
+msgstr "페이지"
+
+msgid "plan.free"
+msgstr "무료"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "플러그인이 비활성화되어 정보를 표시할 수 없습니다."
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "이 플러그인은 아직 로드되지 않은 전용 페이지에서 관리됩니다. 접근하려면 웹 UI를 다시 시작하세요."
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "메트릭 플러그인이 활성화되지 않아 정보를 표시할 수 없습니다."
+
+msgid "plugin.page.status.no_content"
+msgstr "이 플러그인은 내장 페이지를 제공하지 않습니다."
+
+msgid "plugin.page.status.not_available"
+msgstr "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다."
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "사전 렌더링 오류"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "이 플러그인은 자체 페이지를 제공하며, 플러그인 코드를 실행합니다. 관리자만 로드할 수 있습니다."
+
+msgid "plugin.type.all"
+msgstr "전체"
+
+msgid "plugin.type.core"
+msgstr "코어"
+
+msgid "plugin.type.external"
+msgstr "외부"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "활성"
+
+msgid "plugins.marketplace.always_on"
+msgstr "핵심 / 항상 켜짐"
+
+msgid "plugins.marketplace.disabled"
+msgstr "비활성화됨"
+
+msgid "plugins.marketplace.enabled"
+msgstr "활성화됨"
+
+msgid "plugins.marketplace.inactive"
+msgstr "비활성"
+
+msgid "plugins.marketplace.no_match"
+msgstr "필터와 일치하는 플러그인이 없음"
+
+msgid "plugins.marketplace.search"
+msgstr "플러그인 검색..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "전체"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "커뮤니티"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "비활성화됨"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "활성화됨"
+
+msgid "plugins.multivalue.more_value"
+msgstr "더 보기"
+
+msgid "plugins.multivalue.more_values"
+msgstr "더 많은 값"
+
+msgid "plugins.multivalue.show_less"
+msgstr "덜 표시"
+
+msgid "pro.alert.overlapped_1"
+msgstr "라이선스에서 허용하는 것보다 많은 서비스가 활성화되어 있습니다!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "서비스 한도인 %(pro_services)s개를 맞추기 위해 일부 서비스를 삭제하거나 초안(Draft) 모드로 전환하세요."
+
+msgid "pro.button.all_features_available"
+msgstr "모든 기능 사용 가능"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "규정 준수 대기 중..."
+
+msgid "pro.button.renew_license"
+msgstr "라이선스 갱신"
+
+msgid "pro.button.suspended_license"
+msgstr "정지된 라이선스"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "PRO로 업그레이드"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "만료 기간:"
+
+msgid "pro.expiration_date.title"
+msgstr "Pro 만료일"
+
+msgid "pro.expiration_date.unknown"
+msgstr "만료일 알 수 없음"
+
+msgid "pro.force_check.description"
+msgstr "PRO 플러그인의 새 확인을 강제합니다. 새 버전이 있으면 플러그인을 다시 다운로드합니다."
+
+msgid "pro.force_check.title"
+msgstr "강제 확인"
+
+msgid "pro.force_update.description"
+msgstr "확인 단계를 건너뛰고 PRO 플러그인을 강제로 다운로드합니다. 강제 업데이트가 불가능하면 현재 상태가 유지됩니다."
+
+msgid "pro.force_update.title"
+msgstr "강제 업데이트"
+
+msgid "pro.key.title.activate"
+msgstr "키 활성화"
+
+msgid "pro.key.title.update"
+msgstr "키 업데이트"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Pro 전용 기능"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "이 기능을 사용하려면 Pro로 업그레이드하세요"
+
+msgid "pro.status.draft_services_count"
+msgstr "%(draft_services)s개의 초안 서비스"
+
+msgid "pro.status.expired"
+msgstr "만료됨"
+
+msgid "pro.status.free_version"
+msgstr "무료 버전"
+
+msgid "pro.status.overlapped"
+msgstr "한도 초과"
+
+msgid "pro.status.pro_version"
+msgstr "PRO 버전"
+
+msgid "pro.status.services_count"
+msgstr "%(online_services)s개 온라인 서비스 / %(pro_services)s개 PRO 서비스"
+
+msgid "pro.status.suspended"
+msgstr "일시 정지됨"
+
+msgid "pro.status.title"
+msgstr "상태"
+
+msgid "pro.title"
+msgstr "Pro 라이선스"
+
+msgid "profile.2fa.disable_title"
+msgstr "2단계 인증 비활성화"
+
+msgid "profile.2fa.enable_title"
+msgstr "2단계 인증 활성화"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "복구 코드를 새로 고치면 이전 코드는 사용할 수 없게 됩니다."
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA 비활성화"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "2FA 활성화"
+
+msgid "profile.card.coming_soon"
+msgstr "준비 중"
+
+msgid "profile.card.title.2fa"
+msgstr "2단계 인증 (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "비밀번호 변경"
+
+msgid "profile.card.title.change_theme"
+msgstr "테마 변경"
+
+msgid "profile.card.title.coming_soon"
+msgstr "준비 중"
+
+msgid "profile.card.title.edit_profile"
+msgstr "프로필 수정"
+
+msgid "profile.card.title.passkeys"
+msgstr "패스키"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "복구 코드 갱신"
+
+msgid "profile.card.title.sessions"
+msgstr "세션"
+
+msgid "profile.help.photo_extensions"
+msgstr "JPG, GIF, PNG 파일만 허용됩니다. 최대 크기: 800KB."
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "이것은 계정의 모든 활성 세션을 즉시 로그아웃합니다. 확인을 위해 비밀번호를 입력하세요."
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "다른 세션 삭제?"
+
+msgid "profile.passkey.added"
+msgstr "추가일"
+
+msgid "profile.passkey.empty"
+msgstr "등록된 패스키가 없습니다."
+
+msgid "profile.passkey.help"
+msgstr "패스키를 사용하면 기기의 화면 잠금이나 보안 키로 비밀번호 없이 로그인할 수 있습니다."
+
+msgid "profile.passkey.last_used"
+msgstr "마지막 사용"
+
+msgid "profile.passkey.never_used"
+msgstr "사용한 적 없음"
+
+msgid "profile.passkey.unsupported"
+msgstr "이 브라우저는 패스키를 지원하지 않습니다."
+
+msgid "profile.session.browser"
+msgstr "브라우저"
+
+msgid "profile.session.creation_date"
+msgstr "생성일"
+
+msgid "profile.session.current_session"
+msgstr "현재 세션"
+
+msgid "profile.session.device"
+msgstr "기기"
+
+msgid "profile.session.ip_address"
+msgstr "IP 주소"
+
+msgid "profile.session.last_activity"
+msgstr "마지막 활동"
+
+msgid "profile.session.os"
+msgstr "운영 체제"
+
+msgid "profile.session.title"
+msgstr "세션"
+
+msgid "profile.session.wipe_help"
+msgstr "계정의 모든 활성 세션을 종료합니다. 여기에서 계속 로그인됩니다."
+
+msgid "profile.subtitle"
+msgstr "계정, 보안 및 활성 세션을 관리합니다."
+
+msgid "profile.tab.profile"
+msgstr "프로필"
+
+msgid "profile.tab.security"
+msgstr "보안"
+
+msgid "profile.tab.sessions"
+msgstr "세션"
+
+msgid "range_picker.1h"
+msgstr "지난 1시간"
+
+msgid "range_picker.24h"
+msgstr "지난 24시간"
+
+msgid "range_picker.30d"
+msgstr "최근 30일"
+
+msgid "range_picker.7d"
+msgstr "지난 1주일"
+
+msgid "range_picker.aria_label"
+msgstr "시간 범위"
+
+msgid "range_picker.custom"
+msgstr "사용자 정의"
+
+msgid "redirects.all"
+msgstr "전체"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "요청된 URI을 대상에 추가"
+
+msgid "redirects.attach"
+msgstr "연결"
+
+msgid "redirects.attach_copy"
+msgstr "%(name)s (%(from)s → %(to)s)을 하나 이상의 서비스에 첨부"
+
+msgid "redirects.code.301"
+msgstr "301 — 영구 리디렉션"
+
+msgid "redirects.code.302"
+msgstr "302 — 임시 리디렉션"
+
+msgid "redirects.code.303"
+msgstr "303 — 다른 위치 보기"
+
+msgid "redirects.code.307"
+msgstr "307 — 일시적인 리디렉션"
+
+msgid "redirects.code.308"
+msgstr "308 — 영구적인 리디렉션"
+
+msgid "redirects.create"
+msgstr "리디렉션 생성"
+
+msgid "redirects.delete_confirm_title"
+msgstr "이 리디렉션을 삭제하시겠습니까?"
+
+msgid "redirects.delete_copy"
+msgstr "%(name)s 리디렉션을 삭제하시겠습니까?"
+
+msgid "redirects.delete_help"
+msgstr "서비스에 첨부된 리디렉션은 삭제할 수 없습니다. 먼저 분리하십시오."
+
+msgid "redirects.edit"
+msgstr "리디렉션 편집"
+
+msgid "redirects.edit_shared"
+msgstr "이 리디렉션은 %(count)s개 서비스에 연결되어 있습니다: %(services)s. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다."
+
+msgid "redirects.empty_text"
+msgstr "리디렉션은 하나 이상의 서비스에 첨부하는 이름이 지정된 규칙입니다. REDIRECT_* 설정은 함께 작동합니다."
+
+msgid "redirects.empty_title"
+msgstr "리디렉션 없음"
+
+msgid "redirects.from_path"
+msgstr "~에서 리디렉션"
+
+msgid "redirects.from_path_help"
+msgstr "첨부된 서비스의 소스 경로, 예: /old."
+
+msgid "redirects.new"
+msgstr "새 리디렉션"
+
+msgid "redirects.not_attached"
+msgstr "첨부되지 않음"
+
+msgid "redirects.readonly"
+msgstr "데이터베이스는 읽기 전용입니다. 리디렉션은 검사할 수 있지만 변경할 수 없습니다."
+
+msgid "redirects.save"
+msgstr "리디렉션 저장"
+
+msgid "redirects.search"
+msgstr "이름, 소스 경로 또는 대상 검색..."
+
+msgid "redirects.services_help"
+msgstr "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 나중에 리디렉션을 추가할 수 있습니다."
+
+msgid "redirects.status_code"
+msgstr "상태 코드"
+
+msgid "redirects.to_url"
+msgstr "리디렉션 대상"
+
+msgid "redirects.truncated"
+msgstr "첫 500개의 리디렉션만 표시됩니다. 전체 결과를 위해 API를 사용하여 목록을 좁힙니다."
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "비정상 활동 감지"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "이 요청은 비정상 활동 임계값을 초과하여 그룹화되었습니다."
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "캡처됨"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP 주소"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "이 보고서에 대한 비정상 활동 세부 정보는 캡처되지 않았습니다."
+
+msgid "reports.bad_behavior_request_id"
+msgstr "요청 ID"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "요청"
+
+msgid "reports.bad_behavior_server"
+msgstr "서버"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "의심스러운 요청"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "공격 유형"
+
+msgid "reports.card.recent.title"
+msgstr "최근 발생"
+
+msgid "reports.card.top_asn.title"
+msgstr "주요 공격자 ASN"
+
+msgid "reports.card.top_offenders.title"
+msgstr "상위 공격자"
+
+msgid "reports.card.top_rules.title"
+msgstr "가장 많이 발생한 ModSecurity 규칙"
+
+msgid "reports.chart.timeseries.series"
+msgstr "차단됨"
+
+msgid "reports.chart.timeseries.title"
+msgstr "시간에 따른 차단 요청 수"
+
+msgid "reports.security_incident"
+msgstr "보안 사고"
+
+msgid "reports.security_report_data"
+msgstr "보안 보고서 데이터"
+
+msgid "reports.subtitle"
+msgstr "BunkerWeb 인스턴스에서 차단된 요청에서 생성된 보안 보고서 — 테이블에서 직접 검색, 필터링, 내보내기 및 공격 IP 주소를 차단합니다."
+
+msgid "reports.tab.eventlog"
+msgstr "이벤트 로그"
+
+msgid "reports.tab.offenders"
+msgstr "상위 공격자"
+
+msgid "reports.tab.overview"
+msgstr "개요"
+
+msgid "reports.tab.patterns"
+msgstr "공격 패턴"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "차단"
+
+msgid "reports.table.country"
+msgstr "국가"
+
+msgid "reports.table.fires"
+msgstr "발동"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "규칙"
+
+msgid "reports.table.top_rule"
+msgstr "가장 많이 탐지된 규칙"
+
+msgid "reports.tile.asns"
+msgstr "주요 공격자 ASN"
+
+msgid "reports.tile.blocked"
+msgstr "차단된 요청"
+
+msgid "reports.tile.blocked_rate"
+msgstr "이전 기간과의 비교"
+
+msgid "reports.tile.bot"
+msgstr "봇 / 스크래퍼"
+
+msgid "reports.tile.countries"
+msgstr "최상위 공격자 국가"
+
+msgid "reports.tile.peak_hour"
+msgstr "최다 발생 시간대"
+
+msgid "reports.tile.rce"
+msgstr "RCE / 명령"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "반복 공격자(상위 10개)"
+
+msgid "reports.tile.sqli"
+msgstr "SQL 삽입"
+
+msgid "reports.tile.unique_ips"
+msgstr "상위 공격 IP 주소"
+
+msgid "reports.tile.unique_offenders"
+msgstr "상위 공격자"
+
+msgid "request_path.client"
+msgstr "클라이언트"
+
+msgid "request_path.source"
+msgstr "%(phase)s 단계의 플러그인 실행 순서, %(setting)s에서 — 표시 순서, 요청별 추적은 아닙니다."
+
+msgid "request_path.terminal.inline"
+msgstr "백엔드"
+
+msgid "request_path.terminal.none"
+msgstr "제공되는 항목 없음"
+
+msgid "request_path.terminal.pool"
+msgstr "업스트림 풀"
+
+msgid "request_path.terminal.root"
+msgstr "로컬 파일"
+
+msgid "request_path.title"
+msgstr "요청 경로"
+
+msgid "request_path.unordered"
+msgstr "%(phase)s 단계에서 위치가 지정되지 않았습니다. 정렬된 플러그인 다음에 알파벳순으로 실행됩니다."
+
+msgid "resource_groups.add_entry"
+msgstr "항목 추가"
+
+msgid "resource_groups.add_to_setting"
+msgstr "리소스 그룹 추가…"
+
+msgid "resource_groups.add_values"
+msgstr "값 추가"
+
+msgid "resource_groups.alias"
+msgstr "별칭"
+
+msgid "resource_groups.alias_help"
+msgstr "문자, 숫자, 밑줄, 하이픈. 기존 별칭은 이름을 변경할 수 없습니다."
+
+msgid "resource_groups.bulk_import"
+msgstr "대량 가져오기"
+
+msgid "resource_groups.clone"
+msgstr "리소스 그룹 복제"
+
+msgid "resource_groups.clone_copy"
+msgstr "@%(name)s의 편집 가능한 복사본을 만듭니다."
+
+msgid "resource_groups.collapse_all"
+msgstr "모두 접기"
+
+msgid "resource_groups.comment"
+msgstr "주석"
+
+msgid "resource_groups.delete"
+msgstr "리소스 그룹 삭제"
+
+msgid "resource_groups.delete_confirm"
+msgstr "@%(name)s 삭제? 이 작업을 취소할 수 없습니다."
+
+msgid "resource_groups.delete_help"
+msgstr "설정이 이 별칭을 참조하는 동안 삭제는 차단됩니다."
+
+msgid "resource_groups.editor_edit"
+msgstr "@%(name)s 편집"
+
+msgid "resource_groups.editor_new"
+msgstr "새 리소스 그룹"
+
+msgid "resource_groups.editor_title"
+msgstr "리소스 그룹"
+
+msgid "resource_groups.empty"
+msgstr "리소스 그룹 없음"
+
+msgid "resource_groups.empty_help"
+msgstr "유효한 설정 간에 입력된 값을 공유하기 위한 재사용 가능한 별칭을 만듭니다."
+
+msgid "resource_groups.entries"
+msgstr "항목"
+
+msgid "resource_groups.expand_all"
+msgstr "모두 펼치기"
+
+msgid "resource_groups.global_configuration"
+msgstr "전역 설정"
+
+msgid "resource_groups.import_extension"
+msgstr ".txt 또는 .csv 파일을 선택하십시오."
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "TXT/CSV 가져오기는 256 KiB로 제한됩니다."
+
+msgid "resource_groups.kind"
+msgstr "종류"
+
+msgid "resource_groups.kinds"
+msgstr "종류"
+
+msgid "resource_groups.loading_references"
+msgstr "참조 로딩 중..."
+
+msgid "resource_groups.max_entries"
+msgstr "리소스 그룹에는 %(max)s개를 초과하는 항목을 포함할 수 없습니다."
+
+msgid "resource_groups.meta_line"
+msgstr "유형 %(kinds)s개 · 값 %(values)s개 · 사용 %(usages)s회"
+
+msgid "resource_groups.new"
+msgstr "새 그룹"
+
+msgid "resource_groups.new_alias"
+msgstr "새 별칭"
+
+msgid "resource_groups.no_entries"
+msgstr "항목 없음"
+
+msgid "resource_groups.no_entries_help"
+msgstr "개별적으로 항목을 추가하거나 아래 대량 가져오기 기능을 사용하십시오."
+
+msgid "resource_groups.no_references"
+msgstr "참조 없음"
+
+msgid "resource_groups.readonly"
+msgstr "데이터베이스는 읽기 전용입니다. 리소스 그룹은 검사하고 내보낼 수 있지만 변경할 수 없습니다."
+
+msgid "resource_groups.references_error"
+msgstr "참조 로드 실패"
+
+msgid "resource_groups.save"
+msgstr "그룹 저장"
+
+msgid "resource_groups.search"
+msgstr "별칭, 설명, 종류 또는 값을 검색하십시오..."
+
+msgid "resource_groups.showing_count"
+msgstr "그룹 %(visible)s개 / %(total)s개 표시"
+
+msgid "resource_groups.subtitle"
+msgstr "IP, 국가, ASNs, 역 DNS 이름, 사용자 에이전트 및 URI에 대한 재사용 가능한 유형별 별칭."
+
+msgid "resource_groups.template_configuration"
+msgstr "템플릿 %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "사용 현황"
+
+msgid "resource_groups.value"
+msgstr "값"
+
+msgid "resource_groups.values"
+msgstr "값"
+
+msgid "scope.all_services"
+msgstr "모든 서비스"
+
+msgid "scope.global"
+msgstr "전역"
+
+msgid "scope.global_all_services"
+msgstr "전역 (모든 서비스)"
+
+msgid "scope.permanent"
+msgstr "영구"
+
+msgid "scope.service_specific"
+msgstr "특정 서비스"
+
+msgid "searchpane.active"
+msgstr "활성"
+
+msgid "searchpane.async"
+msgstr "비동기"
+
+msgid "searchpane.ban_scope"
+msgstr "차단 범위"
+
+msgid "searchpane.clear"
+msgstr "모두 지우기"
+
+msgid "searchpane.collapse_0"
+msgstr "검색창"
+
+msgid "searchpane.collapse_message"
+msgstr "모두 접기"
+
+msgid "searchpane.collapse_plural"
+msgstr "검색창 (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} (전체 {total})"
+
+msgid "searchpane.country"
+msgstr "국가"
+
+msgid "searchpane.created"
+msgstr "생성됨"
+
+msgid "searchpane.data"
+msgstr "데이터"
+
+msgid "searchpane.date"
+msgstr "날짜"
+
+msgid "searchpane.empty"
+msgstr "사용 가능한 검색창이 없습니다."
+
+msgid "searchpane.end_date"
+msgstr "종료 날짜"
+
+msgid "searchpane.first_seen"
+msgstr "최초 감지"
+
+msgid "searchpane.future_30d"
+msgstr "30일 이후"
+
+msgid "searchpane.health"
+msgstr "상태"
+
+msgid "searchpane.interval"
+msgstr "간격"
+
+msgid "searchpane.ip_address"
+msgstr "IP 주소"
+
+msgid "searchpane.job_name"
+msgstr "작업 이름"
+
+msgid "searchpane.last_24h"
+msgstr "최근 24시간"
+
+msgid "searchpane.last_30d"
+msgstr "최근 30일"
+
+msgid "searchpane.last_7d"
+msgstr "최근 7일"
+
+msgid "searchpane.last_run"
+msgstr "마지막 실행 상태"
+
+msgid "searchpane.last_seen"
+msgstr "마지막 감지"
+
+msgid "searchpane.last_update"
+msgstr "마지막 업데이트"
+
+msgid "searchpane.loading"
+msgstr "검색 창을 로드하는 중..."
+
+msgid "searchpane.method"
+msgstr "방식"
+
+msgid "searchpane.next_24h"
+msgstr "향후 24시간"
+
+msgid "searchpane.next_30d"
+msgstr "향후 30일"
+
+msgid "searchpane.next_7d"
+msgstr "향후 7일"
+
+msgid "searchpane.older_30d"
+msgstr "30일 이상 경과"
+
+msgid "searchpane.one_or_more"
+msgstr "하나 이상"
+
+msgid "searchpane.permanent"
+msgstr "영구"
+
+msgid "searchpane.plugin"
+msgstr "플러그인"
+
+msgid "searchpane.protocol"
+msgstr "프로토콜"
+
+msgid "searchpane.reason"
+msgstr "사유"
+
+msgid "searchpane.reload"
+msgstr "재로드 필요"
+
+msgid "searchpane.scope"
+msgstr "범위"
+
+msgid "searchpane.security_mode"
+msgstr "보안 모드"
+
+msgid "searchpane.server_name"
+msgstr "서버 이름"
+
+msgid "searchpane.service"
+msgstr "서비스"
+
+msgid "searchpane.show_message"
+msgstr "모두 표시"
+
+msgid "searchpane.start_date"
+msgstr "시작 날짜"
+
+msgid "searchpane.status"
+msgstr "상태"
+
+msgid "searchpane.status_code"
+msgstr "상태 코드"
+
+msgid "searchpane.steps"
+msgstr "단계"
+
+msgid "searchpane.stream"
+msgstr "스트림 지원"
+
+msgid "searchpane.template"
+msgstr "템플릿"
+
+msgid "searchpane.title_0"
+msgstr "활성 필터 없음"
+
+msgid "searchpane.title_1"
+msgstr "활성 필터 - 1"
+
+msgid "searchpane.title_plural"
+msgstr "활성 필터 - %d"
+
+msgid "searchpane.type"
+msgstr "유형"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "버전"
+
+msgid "searchpane.zero"
+msgstr "없음"
+
+msgid "security_mode.block"
+msgstr "차단"
+
+msgid "security_mode.detect"
+msgstr "탐지"
+
+msgid "service.resources.attach"
+msgstr "연결"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s은 자체 %(family)s 설정으로 %(path)s을 제공합니다. %(path)s에 대한 설정을 지우거나 다른 경로를 사용하십시오."
+
+msgid "service.resources.conflict.primary"
+msgstr "“%(name)s”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다."
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s은 %(kind)s의 “%(name)s”를 통해 %(path)s을 제공합니다. “%(name)s”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오."
+
+msgid "service.resources.conflict.stream"
+msgstr "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, %(service)s은 이미 상류 “%(name)s”를 사용합니다. 먼저 분리하십시오."
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "%(service)s은 REVERSE_PROXY_HOST에 자체 백엔드를 가지고 있습니다. 상류가 제어하도록 설정 설정을 지우십시오."
+
+msgid "service.resources.detach"
+msgstr "분리"
+
+msgid "service.resources.family.certificate"
+msgstr "인증서"
+
+msgid "service.resources.family.redirect"
+msgstr "리디렉션"
+
+msgid "service.resources.family.template"
+msgstr "템플릿"
+
+msgid "service.resources.family.upstream"
+msgstr "업스트림"
+
+msgid "service.resources.family.workflow"
+msgstr "워크플로우"
+
+msgid "service.resources.match_path"
+msgstr "경로"
+
+msgid "service.resources.none"
+msgstr "연결 없음"
+
+msgid "service.resources.primary"
+msgstr "주요 인증서"
+
+msgid "service.resources.template.none"
+msgstr "템플릿 없음"
+
+msgid "service.resources.template.note"
+msgstr "자원이 아님: 템플릿은 설정입니다. 저장 시 적용되며, 전환하면 여러 설정을 한 번에 변경할 수 있습니다."
+
+msgid "service.resources.template.pending"
+msgstr "저장 시 적용"
+
+msgid "service.resources.template.switching"
+msgstr "저장하면 이 서비스가 “%(from)s”에서 “%(to)s”로 전환됩니다. 현재 템플릿에서 제공된 값은 삭제되고, %(to)s의 값이 적용됩니다. 여러 설정이 한 번에 변경됩니다."
+
+msgid "service.resources.template.unwired"
+msgstr "이 페이지는 USE_TEMPLATE을 게시하지 않으므로, 여기서 템플릿을 변경할 수 없습니다."
+
+msgid "service.resources.title"
+msgstr "연결된 자원"
+
+msgid "service.resources.unavailable"
+msgstr "사용 불가능"
+
+msgid "services.draft"
+msgstr "초안 서비스"
+
+msgid "services.online"
+msgstr "온라인"
+
+msgid "services.subtitle"
+msgstr "BunkerWeb로 보호된 멀티 사이트 서비스를 관리합니다: 생성, 편집, 초안으로 변환 또는 삭제합니다."
+
+msgid "services.total"
+msgstr "전체 서비스"
+
+msgid "services.with_configs"
+msgstr "사용자 정의 설정과 함께"
+
+msgid "settings.custom_config.title"
+msgstr "사용자 정의 설정"
+
+msgid "settings.multiple.description"
+msgstr "이 플러그인에 대한 여러 설정 인스턴스를 여기에서 구성합니다."
+
+msgid "settings.multiple.title"
+msgstr "다중 설정"
+
+msgid "setup.status.admin_user_exists"
+msgstr "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요."
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "PRO 라이선스 키가 이미 설정되어 있습니다. 다음 단계로 진행하세요."
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요."
+
+msgid "setup.status.secure_password"
+msgstr "안전한 비밀번호"
+
+msgid "setup.status.unique_server_name"
+msgstr "고유한 서버 이름"
+
+msgid "setup.step1.subtitle"
+msgstr "관리자 계정을 생성합니다."
+
+msgid "setup.step1.title"
+msgstr "관리자 사용자"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "인증 기관 선택기"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "표준 ACME 발급에는 Let's Encrypt를 사용하세요. 테스트 및 통합 점검을 위해 스테이징을 사용할 수 있습니다."
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "비워 두면 ZeroSSL은 계정 등록에 구성된 이메일을 사용합니다."
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "zerossl-bot과 함께 ZeroSSL을 사용하세요. 계정 발급 및 키 기반 재발급 추적을 위해 계정 이메일 또는 API 키를 제공하세요."
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "사용자 정의 인증서"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "실제 IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "리버스 프록시"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "Web UI 전용 설정을 구성합니다."
+
+msgid "setup.step2.title"
+msgstr "UI 설정"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "PRO 혜택"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "강화된 보안, 성능 및 관리 도구를 포함한 모든 고급 기능이 제공됩니다."
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "모든 PRO 기능에 접근"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "문제나 문의 사항에 대해 BunkerWeb 팀으로부터 우선 지원을 받으세요."
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "관리자의 기술 지원"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "특수한 요구 사항을 충족하는 맞춤형 솔루션을 제공합니다."
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "맞춤형 개발"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "BunkerWeb 설정을 최적화하기 위한 전문가의 조언을 받으세요."
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "맞춤형 컨설팅"
+
+msgid "setup.step3.subtitle"
+msgstr "고급 기능을 잠금 해제하고 BunkerWeb을 최대한 활용해 보세요."
+
+msgid "setup.step3.title"
+msgstr "PRO로 업그레이드"
+
+msgid "setup.step4.label.final_url"
+msgstr "BunkerWeb UI URL"
+
+msgid "setup.step4.subtitle"
+msgstr "설정을 완료하기 전에 검토해 주세요."
+
+msgid "setup.step4.title"
+msgstr "개요"
+
+msgid "setup.subtitle"
+msgstr "설정 마법사의 단계에 따라 설정을 완료하세요."
+
+msgid "setup.title"
+msgstr "설정 마법사"
+
+msgid "status.active"
+msgstr "활성"
+
+msgid "status.admin_user_exists"
+msgstr "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요."
+
+msgid "status.all_valid"
+msgstr "모두 유효"
+
+msgid "status.blog_connection_fail"
+msgstr "소식 업데이트를 위해 블로그에 연결할 수 없습니다."
+
+msgid "status.default_server"
+msgstr "기본 서버"
+
+msgid "status.done"
+msgstr "완료됨"
+
+msgid "status.down"
+msgstr "비활성"
+
+msgid "status.draft"
+msgstr "초안"
+
+msgid "status.error_deleting_template"
+msgstr "템플릿 삭제 중 오류가 발생했습니다."
+
+msgid "status.error_loading_bans"
+msgstr "차단 목록 로드 중 오류 발생. 페이지를 새로고침해 주세요."
+
+msgid "status.error_loading_data"
+msgstr "데이터 로드 실패"
+
+msgid "status.error_loading_template"
+msgstr "템플릿 데이터를 로드할 수 없습니다."
+
+msgid "status.error_saving_template"
+msgstr "템플릿 저장 중 오류가 발생했습니다."
+
+msgid "status.expired"
+msgstr "만료"
+
+msgid "status.expiring"
+msgstr "만료 예정"
+
+msgid "status.failed"
+msgstr "실패"
+
+msgid "status.invalid_json_payload"
+msgstr "잘못된 JSON 페이로드입니다."
+
+msgid "status.loading"
+msgstr "로딩 중..."
+
+msgid "status.loading_bans"
+msgstr "차단 목록 로딩 중..."
+
+msgid "status.loading_cache_file"
+msgstr "캐시 파일 로딩 중..."
+
+msgid "status.loading_cache_files"
+msgstr "캐시 파일 목록 로딩 중..."
+
+msgid "status.loading_custom_config"
+msgstr "사용자 정의 설정 로딩 중..."
+
+msgid "status.loading_custom_configs"
+msgstr "사용자 정의 설정 목록 로딩 중..."
+
+msgid "status.loading_instances"
+msgstr "인스턴스 로딩 중..."
+
+msgid "status.loading_items"
+msgstr "항목 로딩 중..."
+
+msgid "status.loading_jobs"
+msgstr "작업 로딩 중..."
+
+msgid "status.loading_logs"
+msgstr "로그 로딩 중..."
+
+msgid "status.loading_plugins"
+msgstr "플러그인 로딩 중..."
+
+msgid "status.loading_reports"
+msgstr "보고서 로딩 중..."
+
+msgid "status.loading_services"
+msgstr "서비스 로딩 중..."
+
+msgid "status.loading_templates"
+msgstr "템플릿 로딩 중..."
+
+msgid "status.missing_template_information"
+msgstr "템플릿 정보가 누락되었습니다."
+
+msgid "status.news_connection_error"
+msgstr "소식 업데이트를 위해 블로그에 연결할 수 없습니다."
+
+msgid "status.no"
+msgstr "아니요"
+
+msgid "status.no_data"
+msgstr "데이터 없음"
+
+msgid "status.no_history"
+msgstr "사용 가능한 기록이 없습니다."
+
+msgid "status.no_item"
+msgstr "항목 없음"
+
+msgid "status.no_notifications"
+msgstr "표시할 알림이 없습니다."
+
+msgid "status.no_search_results"
+msgstr "항목을 찾을 수 없습니다."
+
+msgid "status.no_settings"
+msgstr "이 플러그인은 이 범위에 대한 설정이 없습니다."
+
+msgid "status.no_steps"
+msgstr "사용 가능한 단계 없음"
+
+msgid "status.no_steps_description"
+msgstr "이 템플릿에는 구성할 수 있는 단계가 없습니다."
+
+msgid "status.not_applicable"
+msgstr "해당 없음"
+
+msgid "status.online"
+msgstr "온라인"
+
+msgid "status.optional"
+msgstr "선택 사항"
+
+msgid "status.partial"
+msgstr "일부 적용"
+
+msgid "status.pending"
+msgstr "대기 중"
+
+msgid "status.pinging_instances"
+msgstr "인스턴스에 핑을 보내는 중입니다. 잠시만 기다려 주세요..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "플러그인이 비활성화되어 정보를 표시할 수 없습니다."
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "메트릭 플러그인이 활성화되지 않아 정보를 표시할 수 없습니다."
+
+msgid "status.plugin_page.status.not_available"
+msgstr "베타 단계에서는 플러그인 페이지를 사용할 수 없습니다."
+
+msgid "status.reverse_proxy_configured"
+msgstr "웹 인터페이스용 리버스 프록시가 이미 설정되어 있습니다. 다음 단계로 진행하세요."
+
+msgid "status.secure_password"
+msgstr "안전한 비밀번호"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "BunkerWeb을 설정 중입니다. 잠시만 기다려 주세요..."
+
+msgid "status.success"
+msgstr "성공"
+
+msgid "status.template_in_use"
+msgstr "이 서비스는 현재 \"%(method)s\"을(를) 통해 관리되는 \"%(template)s\" 템플릿을 사용 중입니다."
+
+msgid "status.template_in_use_description"
+msgstr "현재 템플릿 외부에서의 변경은 허용되지 않습니다. 현재 템플릿을 사용하여 수정하거나 고급/원본 모드로 전환하세요."
+
+msgid "status.unique_server_name"
+msgstr "고유한 서버 이름"
+
+msgid "status.up"
+msgstr "활성"
+
+msgid "status.yes"
+msgstr "예"
+
+msgid "step.next"
+msgstr "다음"
+
+msgid "step.previous"
+msgstr "이전"
+
+msgid "support.card.download_logs.help"
+msgstr "모든 개인 데이터는 익명화 처리됩니다."
+
+msgid "support.card.download_logs.title"
+msgstr "로그 다운로드"
+
+msgid "support.card.extract_config.title"
+msgstr "설정 추출"
+
+msgid "support.card.support_link.title"
+msgstr "기술 지원 링크"
+
+msgid "support.subtitle"
+msgstr "디버그 로그 다운로드, 설정 추출, BunkerWeb 팀의 도움을 받으세요."
+
+msgid "support.title"
+msgstr "지원"
+
+msgid "tab.custom_certificate"
+msgstr "사용자 정의 인증서"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "작업"
+
+msgid "table.header.active"
+msgstr "활성"
+
+msgid "table.header.async"
+msgstr "비동기"
+
+msgid "table.header.bytes_received"
+msgstr "받은 바이트"
+
+msgid "table.header.bytes_sent"
+msgstr "보낸 바이트"
+
+msgid "table.header.checksum"
+msgstr "체크섬"
+
+msgid "table.header.client_port"
+msgstr "클라이언트 포트"
+
+msgid "table.header.configs"
+msgstr "설정"
+
+msgid "table.header.country"
+msgstr "국가"
+
+msgid "table.header.created"
+msgstr "생성일"
+
+msgid "table.header.current_time_left"
+msgstr "남은 시간"
+
+msgid "table.header.data"
+msgstr "데이터"
+
+msgid "table.header.date"
+msgstr "날짜"
+
+msgid "table.header.description"
+msgstr "설명"
+
+msgid "table.header.end_date"
+msgstr "종료일"
+
+msgid "table.header.file_name"
+msgstr "파일명"
+
+msgid "table.header.health"
+msgstr "상태"
+
+msgid "table.header.hostname"
+msgstr "호스트 이름"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "간격"
+
+msgid "table.header.ip_address"
+msgstr "IP 주소"
+
+msgid "table.header.job_name"
+msgstr "작업 이름"
+
+msgid "table.header.last_run"
+msgstr "마지막 실행"
+
+msgid "table.header.last_seen"
+msgstr "마지막 감지"
+
+msgid "table.header.last_update"
+msgstr "마지막 업데이트"
+
+msgid "table.header.listen_port"
+msgstr "수신 포트"
+
+msgid "table.header.method"
+msgstr "방식"
+
+msgid "table.header.name"
+msgstr "이름"
+
+msgid "table.header.plugin"
+msgstr "플러그인"
+
+msgid "table.header.protocol"
+msgstr "프로토콜"
+
+msgid "table.header.reason"
+msgstr "사유"
+
+msgid "table.header.reload"
+msgstr "재로드"
+
+msgid "table.header.request_id"
+msgstr "요청 ID"
+
+msgid "table.header.scope"
+msgstr "범위"
+
+msgid "table.header.security_mode"
+msgstr "보안 모드"
+
+msgid "table.header.server_name"
+msgstr "서버 이름"
+
+msgid "table.header.service"
+msgstr "서비스"
+
+msgid "table.header.service_name"
+msgstr "서비스 이름"
+
+msgid "table.header.session_time"
+msgstr "세션 시간"
+
+msgid "table.header.settings"
+msgstr "세팅"
+
+msgid "table.header.status"
+msgstr "상태"
+
+msgid "table.header.status_code"
+msgstr "상태 코드"
+
+msgid "table.header.steps"
+msgstr "단계"
+
+msgid "table.header.stream"
+msgstr "스트림"
+
+msgid "table.header.template"
+msgstr "템플릿"
+
+msgid "table.header.templates"
+msgstr "템플릿"
+
+msgid "table.header.time_left"
+msgstr "남은 시간"
+
+msgid "table.header.type"
+msgstr "유형"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "값"
+
+msgid "table.header.version"
+msgstr "버전"
+
+msgid "template.editor.button_add_config"
+msgstr "설정 추가"
+
+msgid "template.editor.button_add_setting"
+msgstr "세팅 추가"
+
+msgid "template.editor.button_add_step"
+msgstr "단계 추가"
+
+msgid "template.editor.button_move_down"
+msgstr "아래로 이동"
+
+msgid "template.editor.button_move_up"
+msgstr "위로 이동"
+
+msgid "template.editor.button_remove"
+msgstr "제거"
+
+msgid "template.editor.clone_badge"
+msgstr "%(template)s에서 복제됨"
+
+msgid "template.editor.configs"
+msgstr "사용자 정의 설정"
+
+msgid "template.editor.configs_help"
+msgstr "이 템플릿에 선택적 사용자 정의 설정 코드 조각을 첨부합니다."
+
+msgid "template.editor.delete_step_confirm"
+msgstr "이 단계를 삭제하시겠습니까?"
+
+msgid "template.editor.details"
+msgstr "템플릿 상세 정보"
+
+msgid "template.editor.details_help"
+msgstr "이 템플릿의 기본 정보를 설정합니다."
+
+msgid "template.editor.drag_handle"
+msgstr "드래그하여 순서 변경"
+
+msgid "template.editor.empty_configs"
+msgstr "추가된 사용자 정의 설정이 없습니다."
+
+msgid "template.editor.empty_settings"
+msgstr "추가된 세팅이 없습니다. 첫 번째 세팅을 추가해 보세요."
+
+msgid "template.editor.empty_steps"
+msgstr "추가된 단계가 없습니다. 첫 번째 단계를 추가해 보세요."
+
+msgid "template.editor.error_generic"
+msgstr "문제가 발생했습니다. 다시 시도해 주세요."
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "제출 엔드포인트를 확인할 수 없습니다."
+
+msgid "template.editor.heading_create"
+msgstr "템플릿 생성"
+
+msgid "template.editor.heading_edit"
+msgstr "템플릿 %(id)s 수정"
+
+msgid "template.editor.label_config_data"
+msgstr "데이터"
+
+msgid "template.editor.label_config_name"
+msgstr "이름"
+
+msgid "template.editor.label_config_order"
+msgstr "순서"
+
+msgid "template.editor.label_config_type"
+msgstr "유형"
+
+msgid "template.editor.label_setting_key"
+msgstr "설정 키"
+
+msgid "template.editor.label_setting_value"
+msgstr "기본값"
+
+msgid "template.editor.label_step_configs"
+msgstr "이 단계의 설정"
+
+msgid "template.editor.label_step_settings"
+msgstr "이 단계의 세팅"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "단계 소제목"
+
+msgid "template.editor.label_step_title"
+msgstr "단계 제목"
+
+msgid "template.editor.missing_configs_body"
+msgstr "가져온 템플릿이 아직 업로드되지 않은 사용자 정의 설정을 참조하고 있습니다. 템플릿 설정을 완료하려면 다음 설정들을 가져오세요:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "파일 찾아보기"
+
+msgid "template.editor.missing_configs_done"
+msgstr "완료"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "설정 파일을 이곳에 드래그 앤 드롭하세요 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "또는"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "업로드된 파일은 템플릿에 자동으로 추가됩니다. 파일명이 위에 나열된 누락된 설정과 일치하는지 확인하세요."
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "팁:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "모든 누락된 설정이 업로드되었습니다! 템플릿을 성공적으로 가져왔습니다."
+
+msgid "template.editor.missing_configs_title"
+msgstr "누락된 사용자 정의 설정"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "설정 파일 업로드 실패"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "누락된 설정 업로드 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "%(total)s개 중 %(uploaded)s개 업로드됨. 남은 항목: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "%(count)s개의 설정 파일이 성공적으로 업로드되었습니다"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "옵션 선택"
+
+msgid "template.editor.multiselect_summary"
+msgstr "%(count)s개 선택됨"
+
+msgid "template.editor.multivalue_add"
+msgstr "값 추가"
+
+msgid "template.editor.multivalue_helper"
+msgstr "한 줄에 하나의 값.%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "개요"
+
+msgid "template.editor.panel_overview_help"
+msgstr "주요 정보를 확인하고 각 섹션으로 이동합니다."
+
+msgid "template.editor.placeholder_config_data"
+msgstr "데이터"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "이름"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "core"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "키"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "기본값"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "단계 소제목"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "단계 제목"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "template-id"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "나의 템플릿"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "파일 찾기"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "설정 파일을 여기에 드래그하거나 클릭하여 탐색하세요 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "지원 형식: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "가져온 설정 파일이 없습니다. 새 파일이 아래에 표시됩니다."
+
+msgid "template.editor.raw_configs_help"
+msgstr "설정 파일(.conf, .cfg, .txt)을 업로드하여 <code>configs</code>에 항목을 추가합니다. 유형은 기본적으로 <code>server_http</code>로 설정되며, 필요한 경우 JSON에서 조정하세요."
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "현재 JSON이 유효하지 않아 설정을 가져올 수 없습니다."
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "가져온 설정이 없습니다."
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "%(count)s개의 설정 파일을 가져왔습니다."
+
+msgid "template.editor.raw_configs_note"
+msgstr "가져온 파일은 JSON 에디터에 추가됩니다. 저장하기 전에 검토하고 조정하세요."
+
+msgid "template.editor.raw_configs_title"
+msgstr "사용자 정의 설정 가져오기"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "설정 파일 업로드 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "선택한 파일 중 하나를 읽을 수 없습니다."
+
+msgid "template.editor.raw_editor_aria"
+msgstr "원시 템플릿 JSON 편집기"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "현재 내용을 교체하려면 템플릿 JSON 파일(.json 전용)을 여기에 끌어다 놓으세요."
+
+msgid "template.editor.raw_editor_help"
+msgstr "전체 템플릿 정의를 JSON으로 편집합니다. 간편 모드로 돌아가면 시각적 에디터가 유효성 검사 후 다시 로드됩니다."
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "템플릿 JSON을 성공적으로 가져왔습니다."
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "이 파일을 가져오면 현재 템플릿 JSON이 완전히 교체됩니다. 에디터에서 수정한 내용은 손실됩니다. 계속하시겠습니까?"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "템플릿 교체"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "템플릿 JSON을 교체하시겠습니까?"
+
+msgid "template.editor.raw_editor_title"
+msgstr "템플릿 원본 JSON"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "업로드된 파일이 비어 있습니다."
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "선택한 파일을 읽을 수 없습니다."
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "템플릿 JSON 업로드 (.json 전용)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "잘못된 설정 정의입니다."
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "설정 항목은 객체여야 합니다."
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "설정 %(configs)s 가 어느 단계에도 할당되지 않았습니다."
+
+msgid "template.editor.raw_validation_empty"
+msgstr "템플릿 JSON은 비어 있을 수 없습니다."
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "유효하지 않은 JSON 페이로드: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "템플릿 페이로드는 JSON 객체여야 합니다."
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "세팅 키는 비어 있지 않은 문자열이어야 합니다."
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "세팅은 객체 형태로 제공되어야 합니다."
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "세팅 %(settings)s 이(가) 어느 단계에도 할당되지 않았습니다."
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "설정 %(config)s 가 여러 단계에 할당되었습니다."
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "%(index)s 단계에 잘못된 설정 참조가 포함되어 있습니다."
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "%(index)s 단계가 알 수 없는 설정 %(config)s 을(를) 참조하고 있습니다."
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "%(index)s 단계는 객체여야 합니다."
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "세팅 %(setting)s 이(가) 여러 단계에 할당되었습니다."
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "%(index)s 단계에 잘못된 세팅 참조가 포함되어 있습니다."
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "%(index)s 단계가 알 수 없는 세팅 %(setting)s 을(를) 참조하고 있습니다."
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "%(index)s 단계에는 제목이 있어야 합니다."
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "템플릿에는 최소 하나 이상의 단계가 포함되어야 합니다."
+
+msgid "template.editor.readonly_db"
+msgstr "현재 데이터베이스가 읽기 전용 상태입니다. 템플릿을 수정할 수 없습니다."
+
+msgid "template.editor.readonly_method"
+msgstr "이 템플릿은 %(method)s 프로세스를 통해 생성되었으며 UI에서 편집할 수 없습니다."
+
+msgid "template.editor.readonly_title"
+msgstr "읽기 전용"
+
+msgid "template.editor.readonly_user"
+msgstr "읽기 전용 권한을 가지고 있습니다. 쓰기 권한은 관리자에게 문의하세요."
+
+msgid "template.editor.select_config_placeholder"
+msgstr "설정 선택"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "유형 선택"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "세팅 선택"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "이 세팅을 템플릿에서 제거하시겠습니까?"
+
+msgid "template.editor.setting_remove_key"
+msgstr "세팅"
+
+msgid "template.editor.setting_remove_title"
+msgstr "세팅 제거"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "선택한 항목 추가"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "고급"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "이미 추가됨"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "검색 지우기"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "일치하는 모든 세팅이 이미 추가되었습니다."
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "표시할 세팅이 없습니다."
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "사용 가능한 설정: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s개 사용 가능, %(used)s개 이미 추가됨"
+
+msgid "template.editor.setting_selector_default"
+msgstr "기본"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "문서 보기"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "현재 필터와 일치하는 세팅이 없습니다."
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "플러그인"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "모든 플러그인"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "유형"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "모든 유형"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "멀티사이트 세팅만 사용 가능합니다. 필터를 사용하여 목록을 좁히세요."
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "다중"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "패턴"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "멀티사이트 세팅 찾기"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "레이블, 키 또는 플러그인으로 검색"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "활성화됨"
+
+msgid "template.editor.settings"
+msgstr "세팅"
+
+msgid "template.editor.settings_help"
+msgstr "이 템플릿에 노출될 세팅과 기본값을 정의합니다."
+
+msgid "template.editor.step_configs_empty"
+msgstr "이 단계에 추가된 설정이 없습니다."
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "기존 설정 선택"
+
+msgid "template.editor.step_default_title"
+msgstr "제목 없는 단계"
+
+msgid "template.editor.step_prefix"
+msgstr "단계"
+
+msgid "template.editor.step_settings_empty"
+msgstr "이 단계에 추가된 세팅이 없습니다."
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "기존 세팅 선택"
+
+msgid "template.editor.steps"
+msgstr "단계"
+
+msgid "template.editor.steps_help"
+msgstr "세팅을 안내 단계별로 구성합니다. 각 단계에 포함될 세팅이나 설정을 선택하세요."
+
+msgid "template.editor.summary_clone_info"
+msgstr "현재 %(template)s에서 복제 중입니다."
+
+msgid "template.editor.summary_counts_configs"
+msgstr "설정"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "세팅"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "단계"
+
+msgid "template.editor.summary_counts_title"
+msgstr "콘텐츠"
+
+msgid "template.editor.summary_link_configs"
+msgstr "사용자 정의 설정"
+
+msgid "template.editor.summary_link_details"
+msgstr "템플릿 상세 정보"
+
+msgid "template.editor.summary_link_settings"
+msgstr "세팅"
+
+msgid "template.editor.summary_link_steps"
+msgstr "단계"
+
+msgid "template.editor.summary_links_title"
+msgstr "빠른 링크"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "생성일"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "방식"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "메타데이터"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "제공되지 않음"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "마지막 업데이트"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "설정이 정의된 경우 설정 이름은 필수입니다."
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "설정 유형은 멀티사이트 호환 유형 중 하나여야 합니다."
+
+msgid "template.editor.validation_config_type_required"
+msgstr "설정이 정의된 경우 설정 유형은 필수입니다."
+
+msgid "template.editor.validation_configs_unique"
+msgstr "각 설정 이름은 고유해야 합니다."
+
+msgid "template.editor.validation_id_required"
+msgstr "템플릿 ID는 필수입니다."
+
+msgid "template.editor.validation_setting_key"
+msgstr "각 세팅에는 키가 있어야 합니다."
+
+msgid "template.editor.validation_settings_unique"
+msgstr "각 세팅 키는 고유해야 합니다."
+
+msgid "template.none"
+msgstr "템플릿 없음"
+
+msgid "templates.gallery.delete_selected"
+msgstr "선택 항목 삭제"
+
+msgid "templates.gallery.empty_message"
+msgstr "설정, 단계, 사용자 지정 구성을 묶어 재사용할 첫 템플릿을 만드세요."
+
+msgid "templates.gallery.empty_title"
+msgstr "아직 템플릿 없음"
+
+msgid "templates.gallery.select"
+msgstr "선택"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "높은 보안"
+
+msgid "templates.name.low"
+msgstr "낮은 보안"
+
+msgid "templates.name.medium"
+msgstr "중간 보안"
+
+msgid "templates.name.ui"
+msgstr "웹 UI"
+
+msgid "templates.subtitle"
+msgstr "서비스용 재사용 가능한 설정 템플릿 — 설정, 단계 및 사용자 정의 설정을 묶어 생성, 복제 또는 삭제합니다."
+
+msgid "templates.tag.config"
+msgstr "사용자 지정 구성: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "기본 제공 기능: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "플러그인: %(name)s"
+
+msgid "templates.title"
+msgstr "서비스 템플릿"
+
+msgid "theme.dark"
+msgstr "어둡게"
+
+msgid "theme.light"
+msgstr "밝게"
+
+msgid "threatmap.attacks_today"
+msgstr "오늘의 공격"
+
+msgid "threatmap.countries"
+msgstr "출발 국가"
+
+msgid "threatmap.disabled_help"
+msgstr "위협 지도는 보고서 페이지와 동일한 저장된 보고서를 읽습니다. 기록을 시작하려면 METRICS_PERSIST_TO_DB를 yes로 설정하세요."
+
+msgid "threatmap.disabled_title"
+msgstr "보고서 저장이 꺼져 있습니다"
+
+msgid "threatmap.empty_help"
+msgstr "지난 24시간 동안 차단된 요청이 없거나, 보고서가 아직 수집되지 않았습니다."
+
+msgid "threatmap.empty_title"
+msgstr "이 기간에 차단된 것이 없습니다"
+
+msgid "threatmap.error_help"
+msgstr "지도는 마지막으로 불러온 수치를 유지하며 다음 새로 고침에 다시 시도합니다."
+
+msgid "threatmap.error_title"
+msgstr "메트릭 서비스에 연결할 수 없습니다"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "전체 화면 종료"
+
+msgid "threatmap.freshness"
+msgstr "보고서는 약 1분에 한 번 데이터베이스에 도달하므로 지도는 실제 트래픽보다 1~2분 정도 늦습니다."
+
+msgid "threatmap.fullscreen"
+msgstr "전체 화면"
+
+msgid "threatmap.map_sub"
+msgstr "호는 정확한 위치가 아니라 출발 국가를 나타냅니다"
+
+msgid "threatmap.map_title"
+msgstr "차단된 트래픽의 출처"
+
+msgid "threatmap.more_hidden"
+msgstr "개 더 표시되지 않음"
+
+msgid "threatmap.not_localised"
+msgstr "위치 불명"
+
+msgid "threatmap.open_live"
+msgstr "실시간 보기"
+
+msgid "threatmap.show_less"
+msgstr "상위 %(count)s개만 보기"
+
+msgid "threatmap.show_more"
+msgstr "전체 %(count)s개 보기"
+
+msgid "threatmap.stale"
+msgstr "이 수치는 더 이상 갱신되지 않습니다. 메트릭 서비스가 응답하지 않습니다."
+
+msgid "threatmap.subtitle"
+msgstr "지난 24시간 동안 인스턴스가 차단한 트래픽의 출처입니다."
+
+msgid "threatmap.ticker_title"
+msgstr "실시간 이벤트"
+
+msgid "threatmap.top_origins"
+msgstr "주요 출처"
+
+msgid "threatmap.top_reason"
+msgstr "주요 사유"
+
+msgid "threatmap.top_reasons"
+msgstr "주요 사유"
+
+msgid "threatmap.top_target"
+msgstr "주요 대상"
+
+msgid "threatmap.top_targets"
+msgstr "주요 대상"
+
+msgid "threatmap.updated"
+msgstr "업데이트됨"
+
+msgid "timings.calls"
+msgstr "호출 수"
+
+msgid "timings.disabled_help"
+msgstr "각 플러그인의 시간을 측정하려면 METRICS_COLLECT_TIMINGS를 yes로 설정하세요. 전체 요청 시간은 어느 경우든 수집됩니다."
+
+msgid "timings.disabled_title"
+msgstr "플러그인 시간 측정이 꺼져 있음"
+
+msgid "timings.max"
+msgstr "최대"
+
+msgid "timings.max_request"
+msgstr "가장 느린 요청"
+
+msgid "timings.mean"
+msgstr "평균"
+
+msgid "timings.mean_request"
+msgstr "평균 요청 시간"
+
+msgid "timings.partial"
+msgstr "일부 인스턴스가 응답하지 않았습니다. 아래 수치는 응답한 인스턴스만 포함합니다."
+
+msgid "timings.phase"
+msgstr "단계"
+
+msgid "timings.phases"
+msgstr "플러그인 단계"
+
+msgid "timings.plugin"
+msgstr "플러그인"
+
+msgid "timings.reporting_instances"
+msgstr "보고 중인 인스턴스"
+
+msgid "timings.requests_measured"
+msgstr "측정된 요청 수"
+
+msgid "timings.share"
+msgstr "비율"
+
+msgid "timings.share_help"
+msgstr "비율은 전체 요청 시간에서 플러그인의 총 시간이 차지하는 비중입니다. 요청마다 한 번 실행되지 않는 단계인 워커 시작, 백그라운드 타이머, 내부 API에는 비율이 없으며 대시가 표시됩니다."
+
+msgid "timings.subtitle"
+msgstr "각 요청 단계에서 플러그인별 소요 시간을 모든 인스턴스에서 실시간으로 읽어 통합합니다."
+
+msgid "timings.total"
+msgstr "합계"
+
+msgid "timings.unreachable_help"
+msgstr "처리 시간은 인스턴스 자체에서 읽으므로 응답한 인스턴스가 없거나 아직 요청을 처리한 인스턴스가 없습니다."
+
+msgid "timings.unreachable_title"
+msgstr "처리 시간을 보고한 인스턴스가 없음"
+
+msgid "timings.volatile"
+msgstr "처리 시간은 각 인스턴스의 공유 메모리에 있으며 필요할 때 읽습니다. 저장되지 않고 인스턴스를 다시 시작하면 초기화됩니다."
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "서비스가 제거되거나 재시작되면 UI 구성 내용이 손실됩니다."
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "이는 서비스 방식이 설정 충돌을 방지하도록 설계된 'autoconf'이기 때문입니다."
+
+msgid "toast.ban_updated"
+msgstr "차단 기간이 성공적으로 업데이트되었습니다!"
+
+msgid "toast.body.ping_succeed"
+msgstr "인스턴스: %(instances)s"
+
+msgid "toast.copied"
+msgstr "복사되었습니다!"
+
+msgid "toast.disclaimer_title"
+msgstr "면책 조항"
+
+msgid "toast.global_settings_applied_body"
+msgstr "전역 설정을 성공적으로 가져와 현재 양식에 적용했습니다."
+
+msgid "toast.global_settings_applied_title"
+msgstr "전역 설정 적용됨"
+
+msgid "toast.global_settings_failed_body"
+msgstr "전역 설정을 가져오는 중 오류가 발생했습니다."
+
+msgid "toast.global_settings_failed_title"
+msgstr "전역 설정 가져오기 실패"
+
+msgid "toast.header.ping_failed"
+msgstr "핑(Ping) 실패"
+
+msgid "toast.header.ping_succeed"
+msgstr "핑(Ping) 성공"
+
+msgid "toast.ip_unbanned"
+msgstr "IP 주소 차단이 성공적으로 해제되었습니다!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다."
+
+msgid "tooltip.button.ban_ip"
+msgstr "이 IP 주소 차단"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "설정 %(name)s을(를) 초안으로 전환"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "설정 %(name)s을(를) 온라인으로 전환"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "서비스 %(name)s을(를) 초안으로 전환"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "서비스 %(name)s을(를) 온라인으로 전환"
+
+msgid "tooltip.button.delete_config"
+msgstr "사용자 정의 설정 %(name)s 삭제"
+
+msgid "tooltip.button.delete_file"
+msgstr "캐시 파일 삭제: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "인스턴스 %(hostname)s 삭제"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "플러그인 %(name)s 삭제"
+
+msgid "tooltip.button.delete_service"
+msgstr "서비스 %(name)s 삭제"
+
+msgid "tooltip.button.delete_template"
+msgstr "템플릿 %(name)s 삭제"
+
+msgid "tooltip.button.force_check"
+msgstr "확인 일정을 예약합니다. 업데이트가 있을 때만 다운로드합니다."
+
+msgid "tooltip.button.force_update"
+msgstr "확인을 건너뛰고 PRO 플러그인을 강제로 다운로드합니다. 실패 시 현재 상태를 유지합니다."
+
+msgid "tooltip.button.ping_instance"
+msgstr "인스턴스 %(hostname)s에 핑 보내기"
+
+msgid "tooltip.button.reload_instance"
+msgstr "인스턴스 %(hostname)s 새로고침"
+
+msgid "tooltip.button.reset_default"
+msgstr "기본값으로 초기화"
+
+msgid "tooltip.button.reset_global"
+msgstr "전역 설정값으로 초기화"
+
+msgid "tooltip.button.run_job"
+msgstr "작업 %(job)s 실행"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "선택한 항목만 표시"
+
+msgid "tooltip.button.stop_instance"
+msgstr "인스턴스 %(hostname)s 중지"
+
+msgid "tooltip.button.unban_ip"
+msgstr "%(ip)s 차단 해제"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "금지 기간 업데이트"
+
+msgid "tooltip.button.value_from_global"
+msgstr "전역 설정에서 가져온 값"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "원본 차단 항목은 삭제할 수 없습니다."
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다."
+
+msgid "tooltip.certificate_priority"
+msgstr "파일 경로의 인증서와 Base64 데이터 중 어느 것을 우선할지 선택합니다."
+
+msgid "tooltip.challenge_type"
+msgstr "Let's Encrypt 검증에 사용할 챌린지 유형 (http 또는 dns)입니다."
+
+msgid "tooltip.collapse_multiline"
+msgstr "여러 줄 항목 접기(트레이스백, 페이로드)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "여러 줄 값 접기(인증서, 키)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "OWASP 코어 규칙 세트(CRS) 플러그인이 로드된 후 적용되는 설정입니다."
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "OWASP 코어 규칙 세트(CRS) 플러그인이 로드되기 전 적용되는 설정입니다."
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Nginx의 서버 레벨 설정입니다. 요청이 구성된 서버 이름과 일치하지 않을 때 사용되는 '기본 서버' 블록 전용입니다."
+
+msgid "tooltip.config_type.http"
+msgstr "Nginx의 HTTP 레벨에서 전역으로 적용되는 설정입니다."
+
+msgid "tooltip.config_type.modsec"
+msgstr "OWASP CRS가 로드된 후 적용되거나, CRS가 로드되지 않은 경우 사용되는 ModSecurity 설정입니다."
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "OWASP CRS가 로드되기 전 적용되는 ModSecurity 설정입니다."
+
+msgid "tooltip.config_type.server_http"
+msgstr "Nginx의 HTTP 서버(가상 호스트) 레벨에서 적용되는 설정입니다."
+
+msgid "tooltip.config_type.server_stream"
+msgstr "Nginx의 스트림 서버 레벨에서 적용되는 설정입니다."
+
+msgid "tooltip.config_type.stream"
+msgstr "Nginx의 스트림 레벨에서 전역으로 적용되는 설정입니다."
+
+msgid "tooltip.confirm_password_match"
+msgstr "확인용 비밀번호는 위에서 입력한 비밀번호와 일치해야 합니다."
+
+msgid "tooltip.copied"
+msgstr "복사됨!"
+
+msgid "tooltip.copy_https_only"
+msgstr "복사 기능은 HTTPS를 통해서만 사용 가능합니다."
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "사용자 정의 SSL 인증서 데이터 (PEM 형식 또는 Base64 인코딩)입니다."
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "사용자 정의 SSL 인증서 파일 경로입니다."
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "사용자 정의 SSL 비밀 키 데이터 (PEM 형식 또는 Base64 인코딩)입니다."
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "사용자 정의 SSL 비밀 키 파일 경로입니다."
+
+msgid "tooltip.different_from_template"
+msgstr "값이 템플릿 기본값과 다릅니다"
+
+msgid "tooltip.disabled_by_method"
+msgstr "비활성화됨: '%(method)s' 방식으로 관리되고 있습니다."
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "비활성화됨: 데이터베이스가 읽기 전용 모드입니다."
+
+msgid "tooltip.disabled_draft"
+msgstr "비활성화됨: 서비스가 초안 모드입니다."
+
+msgid "tooltip.disabled_readonly"
+msgstr "비활성화됨: 읽기 전용 모드가 활성화되어 있습니다."
+
+msgid "tooltip.dns_check_url"
+msgstr "페이지에 'ok'가 표시되면 서버 이름을 사용할 수 있을 가능성이 높습니다."
+
+msgid "tooltip.dns_credential_items"
+msgstr "DNS 챌린지에 사용되는 DNS 제공업체의 인증 정보입니다(예: 'cloudflare_api_token=123456'). 형식은 업체에 따라 다릅니다."
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "인증 정보는 DNS 챌린지 유형에서만 적용됩니다."
+
+msgid "tooltip.dns_propagation"
+msgstr "DNS 챌린지 중 DNS 변경 사항이 전파되기를 기다리는 시간(초)입니다."
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "DNS 전파 지연 시간은 DNS 챌린지 유형에서만 적용됩니다."
+
+msgid "tooltip.dns_provider"
+msgstr "Let's Encrypt DNS 챌린지에 사용할 DNS 제공업체입니다."
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "DNS 제공업체 선택은 DNS 챌린지 유형에서만 적용됩니다."
+
+msgid "tooltip.download_file"
+msgstr "파일 다운로드"
+
+msgid "tooltip.download_log"
+msgstr "이 로그 파일 다운로드"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "초안 모드는 UI를 통해 생성된 서비스에 대해서만 전환할 수 있습니다."
+
+msgid "tooltip.email_length"
+msgstr "이메일은 1자에서 256자 사이여야 합니다."
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "인증서 관리 및 알림을 위해 Let's Encrypt에 등록할 이메일 주소입니다."
+
+msgid "tooltip.fetch_global_settings"
+msgstr "전역 설정을 가져와 현재 템플릿에 적용합니다."
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "추적 모드는 마지막 페이지에서만 사용 가능합니다."
+
+msgid "tooltip.global_settings_source"
+msgstr "전역 설정에서 상속된 값입니다."
+
+msgid "tooltip.instance_not_up"
+msgstr "인스턴스 %(hostname)s 가 현재 응답하지 않습니다 ('up' 상태 아님)."
+
+msgid "tooltip.issue_count"
+msgstr "이 보기의 오류와 경고"
+
+msgid "tooltip.latest_version_installed"
+msgstr "최신 버전을 사용 중입니다."
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt에 사용할 사용자 정의 프로필입니다 (예: 'my_custom_profile')."
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "공용 접미사 목록(PSL)과 일치하는 도메인에 대한 인증서 요청을 비활성화합니다(권장)."
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "Let's Encrypt에 사용할 프로필 (classic, tlsserver, shortlived)입니다."
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "공급자별 설정을 표시하려면 인증서 공급자를 선택하세요."
+
+msgid "tooltip.license_key"
+msgstr "BunkerWeb PRO 라이선스 키입니다."
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "%(name)s 페이지 접근"
+
+msgid "tooltip.link.access_service"
+msgstr "서비스 %(name)s 접근"
+
+msgid "tooltip.link.clone_config"
+msgstr "사용자 정의 설정 %(name)s 복제"
+
+msgid "tooltip.link.clone_service"
+msgstr "서비스 %(name)s 복제"
+
+msgid "tooltip.link.clone_template"
+msgstr "템플릿 %(template)s 복제"
+
+msgid "tooltip.link.download_file"
+msgstr "%(filename)s 다운로드"
+
+msgid "tooltip.link.edit_config"
+msgstr "사용자 정의 설정 %(name)s 수정"
+
+msgid "tooltip.link.edit_service"
+msgstr "서비스 %(service)s 수정"
+
+msgid "tooltip.link.edit_template"
+msgstr "템플릿 %(template)s 수정"
+
+msgid "tooltip.link.export_config"
+msgstr "사용자 지정 설정 %(name)s 내보내기"
+
+msgid "tooltip.link.export_service"
+msgstr "서비스 %(service)s 설정 내보내기"
+
+msgid "tooltip.link.manage_activation"
+msgstr "전역 설정에서 %(name)s 활성화 관리"
+
+msgid "tooltip.link.view_config"
+msgstr "사용자 정의 설정 %(name)s 보기"
+
+msgid "tooltip.link.view_file"
+msgstr "%(filename)s 보기"
+
+msgid "tooltip.link.view_service"
+msgstr "서비스 %(service)s 보기"
+
+msgid "tooltip.link.view_template"
+msgstr "템플릿 %(template)s 보기"
+
+msgid "tooltip.local_time"
+msgstr "타임스탬프를 사용자 현지 시간으로 표시"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "전체 URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "이것은 멀티사이트 설정으로, 전역으로 정의할 경우 여러 서비스에 영향을 미칩니다."
+
+msgid "tooltip.new_version_available"
+msgstr "새 버전을 사용할 수 있습니다!"
+
+msgid "tooltip.next_issue"
+msgstr "다음 오류 또는 경고로 이동"
+
+msgid "tooltip.no_cache"
+msgstr "이 작업에 대한 캐시 파일을 찾을 수 없습니다."
+
+msgid "tooltip.no_history"
+msgstr "이 작업에 대한 실행 기록을 찾을 수 없습니다."
+
+msgid "tooltip.no_log_files"
+msgstr "사용 가능한 로그 파일이 없습니다."
+
+msgid "tooltip.no_page_available"
+msgstr "이 플러그인 전용 페이지가 없습니다."
+
+msgid "tooltip.password_requirements"
+msgstr "비밀번호는 최소 8자 이상이어야 하며 대문자, 숫자, 특수 문자를 각각 하나 이상 포함해야 합니다."
+
+msgid "tooltip.prev_issue"
+msgstr "이전 오류 또는 경고로 이동"
+
+msgid "tooltip.pro_feature"
+msgstr "이 기능은 PRO 전용 기능입니다."
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "비활성화됨: 데이터베이스가 읽기 전용 모드입니다."
+
+msgid "tooltip.readonly_mode"
+msgstr "이 작업은 읽기 전용 모드에서는 허용되지 않습니다."
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "비활성화됨: 계정이 읽기 전용입니다. '%(action)s' 작업을 수행할 수 없습니다."
+
+msgid "tooltip.real_ip_from"
+msgstr "프록시 요청이 들어오는 신뢰할 수 있는 IP/네트워크 목록입니다 (공백으로 구분)."
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "프록시 요청이 들어오는 신뢰할 수 있는 IP/네트워크 목록이 포함된 URL들입니다 (공백으로 구분). file:// URL 및 http://user:pass@url 형식의 기본 인증도 지원합니다."
+
+msgid "tooltip.real_ip_header"
+msgstr "실제 IP가 포함된 HTTP 헤더 또는 PROXY 프로토콜을 위한 특수 값(proxy_protocol)입니다."
+
+msgid "tooltip.real_ip_recursive"
+msgstr "헤더에 포함된 IP 주소에 대해 재귀 검색을 수행합니다."
+
+msgid "tooltip.remove_ban_entry"
+msgstr "목록에서 이 차단 항목을 제거합니다."
+
+msgid "tooltip.reset_template_settings"
+msgstr "현재 템플릿 뷰의 모든 세팅을 기본값으로 초기화합니다."
+
+msgid "tooltip.search_logs"
+msgstr "로그 검색(Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "추적 모드를 활성화할 파일을 선택하세요."
+
+msgid "tooltip.server_name"
+msgstr "이 서비스의 주 도메인 이름 또는 서버 이름입니다."
+
+msgid "tooltip.stream_support.no"
+msgstr "STREAM 모드를 지원하지 않습니다."
+
+msgid "tooltip.stream_support.partial"
+msgstr "STREAM 모드를 부분적으로 지원합니다."
+
+msgid "tooltip.stream_support.yes"
+msgstr "STREAM 모드를 지원합니다."
+
+msgid "tooltip.table.bans.actions"
+msgstr "이 차단 항목에 사용 가능한 작업"
+
+msgid "tooltip.table.bans.country"
+msgstr "차단된 IP 주소의 국가"
+
+msgid "tooltip.table.bans.date"
+msgstr "차단 생성 날짜 및 시간"
+
+msgid "tooltip.table.bans.details"
+msgstr "차단 상세 정보 표시"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "차단 만료 날짜 및 시간"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "차단된 IP 주소"
+
+msgid "tooltip.table.bans.reason"
+msgstr "차단 사유"
+
+msgid "tooltip.table.bans.scope"
+msgstr "차단 범위 (전역 또는 특정 서비스)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "모든 차단 항목 선택"
+
+msgid "tooltip.table.bans.service"
+msgstr "차단이 발생한 서비스 (범위가 특정 서비스인 경우)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "차단 만료까지 남은 시간"
+
+msgid "tooltip.table.cache.actions"
+msgstr "이 캐시 파일에 사용 가능한 작업"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "캐시 파일 체크섬"
+
+msgid "tooltip.table.cache.details"
+msgstr "캐시 파일 상세 정보 표시"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "캐시 파일 이름"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "이 파일을 생성한 작업"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "캐시 파일 마지막 업데이트 날짜 및 시간"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "이 파일을 생성한 작업 관련 플러그인"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "모든 캐시 파일 선택"
+
+msgid "tooltip.table.cache.service"
+msgstr "이 파일과 관련된 서비스 (또는 전역)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "이 사용자 정의 설정에 사용 가능한 작업"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "설정 내용의 체크섬"
+
+msgid "tooltip.table.configs.details"
+msgstr "설정 상세 정보 표시"
+
+msgid "tooltip.table.configs.method"
+msgstr "설정 생성 방식 (예: ui, file)"
+
+msgid "tooltip.table.configs.name"
+msgstr "설정 이름"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "모든 설정 선택"
+
+msgid "tooltip.table.configs.service"
+msgstr "설정과 관련된 서비스 (또는 전역)"
+
+msgid "tooltip.table.configs.status"
+msgstr "설정의 초안(Draft) 상태"
+
+msgid "tooltip.table.configs.template"
+msgstr "설정이 템플릿에서 생성되었는지 여부"
+
+msgid "tooltip.table.configs.type"
+msgstr "설정의 유형 또는 컨텍스트 (예: HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "이 인스턴스에 사용 가능한 작업"
+
+msgid "tooltip.table.instances.created"
+msgstr "인스턴스가 처음 등록된 날짜 및 시간"
+
+msgid "tooltip.table.instances.details"
+msgstr "인스턴스 상세 정보 표시"
+
+msgid "tooltip.table.instances.health"
+msgstr "인스턴스 상태 (활성, 비활성, 로딩 중)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "인스턴스 호스트 이름 또는 URL"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "인스턴스가 마지막으로 감지된 날짜 및 시간"
+
+msgid "tooltip.table.instances.method"
+msgstr "인스턴스 생성 방식 (예: ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "사용자 정의 또는 자동 생성된 인스턴스 이름"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "모든 인스턴스 선택"
+
+msgid "tooltip.table.instances.type"
+msgstr "인스턴스 유형 (예: 컨테이너, 정적)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "이 작업에 사용 가능한 작업"
+
+msgid "tooltip.table.jobs.async"
+msgstr "작업의 비동기 실행 여부"
+
+msgid "tooltip.table.jobs.details"
+msgstr "작업 상세 정보 표시"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "작업 실행 주기"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "마지막 실행 상태 (성공/실패)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "작업 이름"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "작업 관련 플러그인"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "작업이 BunkerWeb 재로드를 트리거하는지 여부"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "모든 작업 선택"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "이 플러그인에 사용 가능한 작업"
+
+msgid "tooltip.table.plugins.description"
+msgstr "플러그인 설명"
+
+msgid "tooltip.table.plugins.details"
+msgstr "플러그인 상세 정보 표시"
+
+msgid "tooltip.table.plugins.id"
+msgstr "플러그인 고유 식별자"
+
+msgid "tooltip.table.plugins.method"
+msgstr "플러그인 생성 방식 (예: ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "플러그인 이름"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "모든 플러그인 선택"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "플러그인의 스트림 모드 지원 여부"
+
+msgid "tooltip.table.plugins.type"
+msgstr "플러그인 유형 (Core, External, Pro, UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "플러그인 버전"
+
+msgid "tooltip.table.reports.actions"
+msgstr "이 보고서에 사용 가능한 작업"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "스트림 전용: 세션 동안 클라이언트에서 받은 바이트"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "스트림 전용: 세션 동안 클라이언트로 보낸 바이트"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "스트림 전용: 클라이언트의 출발지 포트"
+
+msgid "tooltip.table.reports.country"
+msgstr "보고된 IP 주소 관련 국가"
+
+msgid "tooltip.table.reports.data"
+msgstr "보고서 관련 추가 데이터"
+
+msgid "tooltip.table.reports.date"
+msgstr "보고서 생성 날짜 및 시간"
+
+msgid "tooltip.table.reports.details"
+msgstr "보고서 상세 정보 표시"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "보고서를 트리거한 IP 주소"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "스트림 전용: 세션이 들어온 포트"
+
+msgid "tooltip.table.reports.method"
+msgstr "보고된 요청의 HTTP 방식"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP 요청 또는 TCP/UDP 스트림 세션"
+
+msgid "tooltip.table.reports.reason"
+msgstr "보고서 생성 사유"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "요청의 고유 식별자"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "보고서 생성 시 활성화된 보안 모드"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "모든 보고서 선택"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "보고서를 생성한 서버 이름 (vhost)"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "스트림 전용: 세션 지속 시간(초)"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "보고된 요청에 대해 반환된 HTTP 상태 코드"
+
+msgid "tooltip.table.reports.url"
+msgstr "보고된 요청의 대상 URL"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "보고된 요청의 User-Agent 문자열"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "작업을 수행할 행을 하나 이상 선택하세요."
+
+msgid "tooltip.table.services.actions"
+msgstr "이 서비스에 사용 가능한 작업"
+
+msgid "tooltip.table.services.created"
+msgstr "서비스 생성 날짜 및 시간"
+
+msgid "tooltip.table.services.details"
+msgstr "서비스 상세 정보 표시"
+
+msgid "tooltip.table.services.last_update"
+msgstr "서비스 마지막 업데이트 날짜 및 시간"
+
+msgid "tooltip.table.services.method"
+msgstr "서비스 생성 방식 (예: ui, file)"
+
+msgid "tooltip.table.services.name"
+msgstr "서비스 이름"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "서비스의 보안 모드(차단 또는 탐지)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "모든 서비스 선택"
+
+msgid "tooltip.table.services.template"
+msgstr "서비스에서 사용하는 템플릿"
+
+msgid "tooltip.table.services.type"
+msgstr "서비스 유형 (온라인/초안)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "이 템플릿에 사용 가능한 작업"
+
+msgid "tooltip.table.templates.configs"
+msgstr "템플릿 설정 수"
+
+msgid "tooltip.table.templates.created"
+msgstr "템플릿 생성일"
+
+msgid "tooltip.table.templates.details"
+msgstr "템플릿 상세 정보 표시"
+
+msgid "tooltip.table.templates.id"
+msgstr "템플릿 ID"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "템플릿 마지막 업데이트일"
+
+msgid "tooltip.table.templates.method"
+msgstr "템플릿 생성 방식"
+
+msgid "tooltip.table.templates.name"
+msgstr "사용자 정의 또는 자동 생성된 템플릿 이름"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "템플릿이 포함된 플러그인"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "모든 템플릿 선택"
+
+msgid "tooltip.table.templates.settings"
+msgstr "템플릿 세팅 수"
+
+msgid "tooltip.table.templates.steps"
+msgstr "템플릿 단계 수"
+
+msgid "tooltip.toggle_level"
+msgstr "%(level)s 줄 표시 / 숨기기"
+
+msgid "tooltip.toggle_wrap"
+msgstr "줄 바꿈 전환"
+
+msgid "tooltip.ui_host"
+msgstr "리버스 프록시를 통해 BunkerWeb UI를 서비스할 호스트 이름 또는 IP 주소입니다."
+
+msgid "tooltip.ui_url"
+msgstr "리버스 프록시를 통해 BunkerWeb UI에 접근하는 데 사용되는 URL 경로입니다."
+
+msgid "tooltip.ui_url_security"
+msgstr "표준적이지 않고 추측하기 어려운 URL 경로를 사용하면 보안이 강화됩니다."
+
+msgid "tooltip.use_custom_ssl"
+msgstr "Let's Encrypt 대신 사용자 정의 SSL 인증서를 사용할지 여부입니다."
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "테스트를 위해 Let's Encrypt 스테이징 환경을 사용할지 여부입니다 (신뢰되지 않는 인증서 생성)."
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "Let's Encrypt 스테이징은 Let's Encrypt 서버를 사용할 때만 사용할 수 있습니다."
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "PROXY 프로토콜 통신을 활성화합니다."
+
+msgid "tooltip.use_real_ip"
+msgstr "실제 IP 사용"
+
+msgid "tooltip.username_length"
+msgstr "사용자 이름은 1자에서 256자 사이여야 합니다."
+
+msgid "tooltip.value_from_global"
+msgstr "전역 설정에서 가져온 값"
+
+msgid "tooltip.view_full_url"
+msgstr "클릭하여 전체 URL 보기"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "와일드카드 인증서(*.domain.com)를 생성합니다. DNS 챌린지가 필요합니다."
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "와일드카드 인증서는 DNS 챌린지 유형에서만 지원됩니다."
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 호출의 연결 시간 초과(초)입니다."
+
+msgid "tooltip.zerossl_api_key"
+msgstr "zerossl-bot에서 사용하는 선택적 ZeroSSL API 키입니다."
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화)."
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 재시도 간 지연 시간(초)입니다."
+
+msgid "totp.cant_access"
+msgstr "인증 코드를 사용할 수 없으신가요?"
+
+msgid "totp.or_use_security_key"
+msgstr "또는 보안 키 사용"
+
+msgid "totp.prompt"
+msgstr "TOTP 코드를 입력해 주세요."
+
+msgid "totp.signing_in"
+msgstr "BunkerWeb에 로그인"
+
+msgid "totp.subtitle"
+msgstr "인증 앱에서 코드를 입력하세요."
+
+msgid "totp.subtitle_security_key"
+msgstr "보안 키로 본인임을 확인하세요."
+
+msgid "totp.title"
+msgstr "이중 인증"
+
+msgid "upstreams.add_server"
+msgstr "서버 추가"
+
+msgid "upstreams.all"
+msgstr "전체"
+
+msgid "upstreams.attach"
+msgstr "연결"
+
+msgid "upstreams.attach_copy"
+msgstr "%(name)s (%(servers)s)를 하나 이상의 서비스에 추가합니다."
+
+msgid "upstreams.backend_ssl"
+msgstr "서버와 TLS로 통신합니다(https:// / grpcs://)."
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "IP 해시 — 동일한 클라이언트, 동일한 백엔드"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "최소 연결"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "순환 (기본값)"
+
+msgid "upstreams.create"
+msgstr "업스트림 생성"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "이 업스트림 삭제?"
+
+msgid "upstreams.delete_copy"
+msgstr "%(name)s 업스트림 삭제?"
+
+msgid "upstreams.delete_help"
+msgstr "서비스에 연결된 업스트림은 삭제할 수 없습니다. 먼저 분리하십시오."
+
+msgid "upstreams.edit"
+msgstr "업스트림 편집"
+
+msgid "upstreams.edit_shared"
+msgstr "이 업스트림은 %(count)s개 서비스에 연결되어 있습니다: %(services)s. 저장하면 연결된 모든 서비스에 변경 사항이 적용됩니다."
+
+msgid "upstreams.empty_text"
+msgstr "업스트림은 역방향 프록시 경로에서 하나 이상의 서비스에 연결되는 백엔드의 이름이 지정된 풀입니다. REVERSE_PROXY_HOST 설정은 함께 작동합니다."
+
+msgid "upstreams.empty_title"
+msgstr "업스트림이 아직 없음"
+
+msgid "upstreams.keepalive"
+msgstr "지속 연결"
+
+msgid "upstreams.keepalive_help"
+msgstr "각 워커당 유지되는 유휴 연결 수. HTTP 및 gRPC만 적용 가능; 비활성화하려면 비워둡니다."
+
+msgid "upstreams.match_path"
+msgstr "역방향 프록시 경로"
+
+msgid "upstreams.match_path_help"
+msgstr "선택된 서비스가 이 풀로 프록시하는 위치. 스트림 풀의 경우 전체 서비스를 사용합니다."
+
+msgid "upstreams.method"
+msgstr "로드 밸런싱"
+
+msgid "upstreams.name_help"
+msgstr "알파벳, 숫자, 하이픈, 밑줄만 사용 가능. 점은 사용 불가하며, 풀 이름이 실제 호스트를 가리지 못합니다."
+
+msgid "upstreams.new"
+msgstr "새로운 업스트림"
+
+msgid "upstreams.not_attached"
+msgstr "연결되지 않음"
+
+msgid "upstreams.protocol"
+msgstr "프로토콜"
+
+msgid "upstreams.protocol_help"
+msgstr "HTTP 및 gRPC 풀은 경로에 연결되어 있습니다. 스트림 풀은 전체 TCP/UDP 서비스를 사용합니다."
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "스트림 (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "데이터베이스는 읽기 전용입니다. 업스트림은 확인할 수 있지만 변경할 수 없습니다."
+
+msgid "upstreams.role.backup"
+msgstr "백업"
+
+msgid "upstreams.role.down"
+msgstr "비활성"
+
+msgid "upstreams.role.primary"
+msgstr "주"
+
+msgid "upstreams.save"
+msgstr "업스트림 저장"
+
+msgid "upstreams.search"
+msgstr "이름, 설명 또는 서버 검색..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "실패 시간 초과"
+
+msgid "upstreams.server_host"
+msgstr "서버"
+
+msgid "upstreams.server_max_fails"
+msgstr "최대 실패 횟수"
+
+msgid "upstreams.server_role"
+msgstr "역할"
+
+msgid "upstreams.server_weight"
+msgstr "가중치"
+
+msgid "upstreams.servers"
+msgstr "서버"
+
+msgid "upstreams.services_help"
+msgstr "Ctrl 또는 Command를 사용하여 여러 서비스를 선택합니다. 업스트림은 나중에 연결할 수 있습니다."
+
+msgid "upstreams.services_hidden"
+msgstr "%(count)s개 서비스 숨김: %(protocol)s 업스트림은 프로토콜이 일치하는 서비스에만 연결할 수 있습니다."
+
+msgid "upstreams.truncated"
+msgstr "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
+
+msgid "validation.default_field_name"
+msgstr "이 필드"
+
+msgid "validation.invalid_date"
+msgstr "유효하지 않은 날짜입니다."
+
+msgid "validation.ip_global_duplicate"
+msgstr "이 IP 주소는 이미 전역 차단 목록에 있습니다."
+
+msgid "validation.ip_invalid"
+msgstr "IP 주소 형식이 올바르지 않습니다."
+
+msgid "validation.ip_required"
+msgstr "IP 주소는 필수입니다."
+
+msgid "validation.ip_service_duplicate"
+msgstr "이 IP 주소는 선택한 서비스(%(service)s)에 이미 차단되어 있습니다."
+
+msgid "validation.pattern"
+msgstr "%(field)s에 유효한 값을 입력해 주세요."
+
+msgid "validation.required"
+msgstr "%(field)s 필드는 필수입니다."
+
+msgid "validation.service_required_for_ban"
+msgstr "서비스별 차단을 위해서는 서비스를 선택해야 합니다."
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
+
+msgid "web_cache.available"
+msgstr "사용 가능"
+
+msgid "web_cache.cache_state"
+msgstr "상태"
+
+msgid "web_cache.cached_files"
+msgstr "캐시된 파일"
+
+msgid "web_cache.deployment"
+msgstr "배포"
+
+msgid "web_cache.disabled"
+msgstr "비활성화"
+
+msgid "web_cache.disk_usage"
+msgstr "디스크 사용량"
+
+msgid "web_cache.empty"
+msgstr "비어 있음"
+
+msgid "web_cache.enabled"
+msgstr "활성화됨"
+
+msgid "web_cache.enabled_instances"
+msgstr "캐시 활성화"
+
+msgid "web_cache.enabled_services"
+msgstr "활성화된 서비스"
+
+msgid "web_cache.error"
+msgstr "오류"
+
+msgid "web_cache.hit_rate"
+msgstr "적중률"
+
+msgid "web_cache.instance"
+msgstr "인스턴스"
+
+msgid "web_cache.metrics"
+msgstr "전체 적중/미적중 분포"
+
+msgid "web_cache.metrics_scope"
+msgstr "모든 캐시 활성화된 서비스에 걸쳐 인스턴스별로 카운터가 집계됩니다."
+
+msgid "web_cache.not_reporting"
+msgstr "보고되지 않음"
+
+msgid "web_cache.path"
+msgstr "경로"
+
+msgid "web_cache.purge"
+msgstr "캐시된 응답 지우기"
+
+msgid "web_cache.purge_all"
+msgstr "모두 지우기"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "이 기능은 모든 서비스의 모든 연결 가능한 인스턴스에 대한 캐시된 응답을 삭제합니다. 이 작업을 취소할 수 없습니다."
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "전체 캐시 삭제?"
+
+msgid "web_cache.purge_help"
+msgstr "연결 가능한 인스턴스의 캐시를 즉시 삭제합니다. 연결할 수 없는 인스턴스는 건너뛰며 삭제 작업을 큐에 넣지 않습니다."
+
+msgid "web_cache.purge_key"
+msgstr "유효한 캐시 키"
+
+msgid "web_cache.purge_key_help"
+msgstr "기본 $scheme$host$request_uri에 대해서만 캐시 키를 비워두십시오. 서비스가 PROXY_CACHE_KEY를 덮어쓰는 경우, 여기에 유효한 값을 붙여넣으십시오. 지원되지 않는 request-only 변수는 다른 항목을 삭제하는 대신 거부됩니다."
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "유효한 PROXY_CACHE_KEY (선택 사항)"
+
+msgid "web_cache.purge_url"
+msgstr "URL 캐시 삭제"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "보고 중인 인스턴스"
+
+msgid "web_cache.service"
+msgstr "서비스"
+
+msgid "web_cache.services"
+msgstr "서비스 활성화 현황"
+
+msgid "web_cache.status"
+msgstr "인스턴스별 저장 공간"
+
+msgid "web_cache.subtitle"
+msgstr "역방향 프록시 캐시 상태, 집계된 히트율 메트릭 및 즉시 삭제 제어."
+
+msgid "whatsnew.missing_action"
+msgstr "GitHub에서 변경 로그 열기"
+
+msgid "whatsnew.missing_message"
+msgstr "이 빌드에는 CHANGELOG.md가 포함되어 있지 않습니다. 릴리스 노트는 GitHub에서 확인할 수 있습니다."
+
+msgid "whatsnew.missing_title"
+msgstr "이 설치본에는 변경 로그가 없습니다"
+
+msgid "whatsnew.modal.intro"
+msgstr "마지막으로 사용한 버전 이후 변경된 내용입니다."
+
+msgid "whatsnew.modal.title"
+msgstr "새로운 기능"
+
+msgid "whatsnew.subtitle"
+msgstr "이 설치본에 포함된 변경 로그에서 가져온 모든 BunkerWeb 릴리스입니다. 최신 순으로 표시됩니다."
+
+msgid "workflows.act_block"
+msgstr "차단"
+
+msgid "workflows.act_challenge"
+msgstr "챌린지"
+
+msgid "workflows.act_code"
+msgstr "상태 코드"
+
+msgid "workflows.act_denyDefault"
+msgstr "인스턴스의 거부 상태 코드"
+
+msgid "workflows.act_denyShort"
+msgstr "거부 상태 코드"
+
+msgid "workflows.act_provider"
+msgstr "안티봇 제공자"
+
+msgid "workflows.act_redirect"
+msgstr "리디렉션"
+
+msgid "workflows.act_status"
+msgstr "거부 상태 코드"
+
+msgid "workflows.act_terminal"
+msgstr "규칙마다 하나의 작업만 실행하며 평가가 종료됩니다. 규칙에서 참/거짓 경로로 분기하지 않습니다."
+
+msgid "workflows.act_url"
+msgstr "대상 URL"
+
+msgid "workflows.action"
+msgstr "그 후"
+
+msgid "workflows.add_rule"
+msgstr "규칙 추가"
+
+msgid "workflows.all"
+msgstr "전체"
+
+msgid "workflows.aria.collapse"
+msgstr "접기"
+
+msgid "workflows.aria.combinator"
+msgstr "조합 연산자 변경, 현재"
+
+msgid "workflows.aria.conditionType"
+msgstr "조건 유형"
+
+msgid "workflows.aria.denyStatus"
+msgstr "거부 상태 코드"
+
+msgid "workflows.aria.drag"
+msgstr "드래그하여 순서 변경"
+
+msgid "workflows.aria.expand"
+msgstr "펼치기"
+
+msgid "workflows.aria.groupKind"
+msgstr "그룹 유형"
+
+msgid "workflows.aria.insertAt"
+msgstr "%(n)s 위치에 규칙 추가"
+
+msgid "workflows.aria.more"
+msgstr "더 보기"
+
+msgid "workflows.aria.moveDown"
+msgstr "아래로 이동 — 나중에 실행"
+
+msgid "workflows.aria.moveRule"
+msgstr "규칙 이동"
+
+msgid "workflows.aria.moveUp"
+msgstr "위로 이동 — 먼저 실행"
+
+msgid "workflows.aria.openRule"
+msgstr "%(n)s 규칙 열기"
+
+msgid "workflows.aria.provider"
+msgstr "안티봇 제공자"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "리디렉션 상태 코드"
+
+msgid "workflows.aria.removeCondition"
+msgstr "조건 제거"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "임계값 제거"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "요청률 임계값 제거"
+
+msgid "workflows.aria.removeValue"
+msgstr "값 제거"
+
+msgid "workflows.aria.requestCount"
+msgstr "요청 수"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "리소스 그룹"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "이 규칙에 유효성 검사 문제 %(count)s개"
+
+msgid "workflows.aria.ruleName"
+msgstr "규칙 %(n)s 이름"
+
+msgid "workflows.aria.terminalAction"
+msgstr "종료 작업"
+
+msgid "workflows.aria.uriMatch"
+msgstr "URI 일치 모드"
+
+msgid "workflows.aria.uriValue"
+msgstr "URI 값"
+
+msgid "workflows.aria.window"
+msgstr "시간 범위(초)"
+
+msgid "workflows.attach"
+msgstr "서비스에 연결"
+
+msgid "workflows.attach_help"
+msgstr "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다."
+
+msgid "workflows.attached_notice"
+msgstr "저장하면 이 규칙이 연결된 서비스 %(count)s개에 적용됩니다."
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "왼쪽에서 오른쪽으로. 첫 번째로 일치하는 규칙이 적용됩니다."
+
+msgid "workflows.canvas.auxList"
+msgstr "상단에서 하단으로. 첫 번째로 일치하는 규칙이 적용됩니다."
+
+msgid "workflows.canvas.close"
+msgstr "닫기"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "%(total)s의 %(n)s 위치에서 실행"
+
+msgid "workflows.canvas.dropHint"
+msgstr "우선순위 설정하려면 드롭 — 규칙의 체인에서의 위치만이 의미를 가집니다"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "규칙이 없는 워크플로우는 아무런 변화를 주지 않습니다 — 모든 요청이 바로 다음 연결된 워크플로우로 진행됩니다."
+
+msgid "workflows.canvas.emptyCta"
+msgstr "첫 번째 규칙 추가"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "규칙이 아직 없습니다"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "규칙은 왼쪽에서 오른쪽으로 실행됩니다."
+
+msgid "workflows.canvas.entry_title"
+msgstr "모든 요청"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "다음 연결된 워크플로우로 진행합니다."
+
+msgid "workflows.canvas.exit_title"
+msgstr "일치하는 규칙 없음"
+
+msgid "workflows.canvas.fit"
+msgstr "보기 맞춤"
+
+msgid "workflows.canvas.gateTip"
+msgstr "일치 게이트, 동작이 아닌: 임계값 아래에서는 규칙이 일치하지 않고 다음 규칙이 평가됩니다."
+
+msgid "workflows.canvas.hint"
+msgstr "순서를 재정렬하려면 노드를 드래그 · 보드를 드래그하여 이동 · 포커스된 노드에서 Alt + ← / → 사용"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "읽기 전용 — 확대/축소하여 둘러보며, 순서는 변경할 수 없습니다"
+
+msgid "workflows.canvas.insert"
+msgstr "여기 규칙 추가"
+
+msgid "workflows.canvas.open"
+msgstr "규칙 열기"
+
+msgid "workflows.canvas.skipped"
+msgstr "비활성화됨 — 완전히 건너뛰어, 마치 체인에 없는 것처럼 동작합니다."
+
+msgid "workflows.canvas.stopTail"
+msgstr ", 평가가 여기서 중단됨 — 이후 규칙이 도달하지 않습니다."
+
+msgid "workflows.canvas.title"
+msgstr "규칙 순서"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "확대"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "축소"
+
+msgid "workflows.capacity"
+msgstr "규칙 %(count)s/%(maxRules)s개 · 가장 큰 규칙은 조건식 %(worst)s/%(maxPredicates)s개 사용 · 이 워크플로의 정규식 %(regexes)s개"
+
+msgid "workflows.clone"
+msgstr "워크플로우 복제"
+
+msgid "workflows.clone_help"
+msgstr "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다."
+
+msgid "workflows.clone_name"
+msgstr "복제 이름"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
+
+msgid "workflows.copySuffix"
+msgstr " (사본)"
+
+msgid "workflows.delete"
+msgstr "워크플로우 삭제"
+
+msgid "workflows.delete_confirm"
+msgstr "이 워크플로우와 모든 규칙이 영구적으로 삭제됩니다."
+
+msgid "workflows.empty_text"
+msgstr "워크플로우는 서비스에 연결한 규칙의 순서대로 정렬된 목록입니다: 조건 트리, 선택적 속도 임계값, 그리고 하나의 동작 — 도전, 차단 또는 리디렉션."
+
+msgid "workflows.empty_title"
+msgstr "워크플로우는 아직 없습니다"
+
+msgid "workflows.entry_sub"
+msgstr "워크플로는 연결 순서대로 실행되고, 이 워크플로의 규칙은 위에서 아래로 실행됩니다."
+
+msgid "workflows.entry_title"
+msgstr "연결된 서비스로 보내는 모든 요청"
+
+msgid "workflows.err.save"
+msgstr "저장할 수 없음"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "저장 엔드포인트에 연결할 수 없음"
+
+msgid "workflows.err.validate"
+msgstr "검증할 수 없음"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "검증 엔드포인트에 연결할 수 없음"
+
+msgid "workflows.errors.body"
+msgstr "아무것도 적용되지 않았습니다. 실행 중인 정책은 변경되지 않았습니다."
+
+msgid "workflows.errors.count"
+msgstr "문제 %(count)s개로 인해 저장할 수 없습니다."
+
+msgid "workflows.errors.rule"
+msgstr "규칙 %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "규칙 %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "이 워크플로"
+
+msgid "workflows.exit_sub"
+msgstr "요청은 다음 연결된 워크플로로 이동한 뒤 나머지 보안 스택으로 계속 진행됩니다."
+
+msgid "workflows.exit_title"
+msgstr "일치하는 규칙 없음"
+
+msgid "workflows.gate.and"
+msgstr "또한 동일한 클라이언트 IP의 요청 수가 다음보다 많을 때만"
+
+msgid "workflows.gate.chip"
+msgstr "일치 게이트"
+
+msgid "workflows.gate.help"
+msgstr "클라이언트 IP별로 계산합니다. 임계값 미만에서는 이 규칙이 전혀 일치하지 않고 평가가 다음 규칙으로 이어집니다. 이 규칙 자체는 요청률을 제한하지 않습니다."
+
+msgid "workflows.legend.fall"
+msgstr "일치하지 않으면 다음 규칙으로 이동"
+
+msgid "workflows.legend.gate"
+msgstr "요청률 임계값은 일치를 제어하며 작업이 아님"
+
+msgid "workflows.legend.move"
+msgstr "드래그하거나 화살표를 사용하거나 Alt + ↑ / ↓를 눌러 순서 변경"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "드래그하거나, 번호 표시를 사용하거나, Alt + ← / →를 눌러 순서를 재정렬"
+
+msgid "workflows.legend.stop"
+msgstr "일치하면 하나의 작업을 실행하고 중지"
+
+msgid "workflows.link.entry"
+msgstr "모든 요청"
+
+msgid "workflows.link.noMatch"
+msgstr "일치하지 않음"
+
+msgid "workflows.menu.bottom"
+msgstr "마지막에 실행"
+
+msgid "workflows.menu.delete"
+msgstr "규칙 삭제"
+
+msgid "workflows.menu.disable"
+msgstr "규칙 비활성화"
+
+msgid "workflows.menu.duplicate"
+msgstr "아래에 복제"
+
+msgid "workflows.menu.enable"
+msgstr "규칙 활성화"
+
+msgid "workflows.menu.top"
+msgstr "첫 번째로 실행"
+
+msgid "workflows.move.first"
+msgstr "첫 번째로 실행"
+
+msgid "workflows.move.last"
+msgstr "마지막에 실행"
+
+msgid "workflows.new"
+msgstr "새 워크플로우"
+
+msgid "workflows.no_rules"
+msgstr "규칙은 아직 없습니다. 이 정책을 만들기 시작하려면 하나를 추가하세요."
+
+msgid "workflows.not_attached"
+msgstr "연결되지 않음"
+
+msgid "workflows.not_attached_notice"
+msgstr "이 워크플로는 어떤 서비스에도 연결되지 않아 아직 어디에서도 규칙이 적용되지 않습니다."
+
+msgid "workflows.not_validated"
+msgstr "아직 검증되지 않음"
+
+msgid "workflows.order_help"
+msgstr "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩니다. 요청률 임계값이 있는 규칙은 임계값을 초과한 뒤에만 일치하므로, 아래쪽 규칙이 임계값 미만의 트래픽을 처리할 수 있습니다."
+
+msgid "workflows.readonly"
+msgstr "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다."
+
+msgid "workflows.rule.disabled"
+msgstr "비활성화됨"
+
+msgid "workflows.rule.if"
+msgstr "조건"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "규칙 이름"
+
+msgid "workflows.rule.noun"
+msgstr "규칙"
+
+msgid "workflows.rule.onMatch"
+msgstr "일치하는 경우"
+
+msgid "workflows.rule.skipped"
+msgstr "비활성화됨 — 목록에 없는 것처럼 완전히 건너뜁니다."
+
+msgid "workflows.rule.stopTail"
+msgstr ", 여기서 평가가 중지되어 아래 규칙에는 도달하지 않습니다."
+
+msgid "workflows.rules"
+msgstr "규칙"
+
+msgid "workflows.say.actionChanged"
+msgstr "작업이 %(type)s(으)로 변경되었습니다. 여전히 유일한 작업이며 평가를 중지합니다."
+
+msgid "workflows.say.added"
+msgstr "규칙이 마지막인 %(n)s번 위치에 추가되었습니다. 따라서 위의 모든 규칙을 먼저 확인합니다."
+
+msgid "workflows.say.deleted"
+msgstr "규칙이 삭제되었습니다. 규칙 %(count)s개가 남았습니다."
+
+msgid "workflows.say.duplicated"
+msgstr "사본이 %(n)s번 위치에 삽입되었습니다. 위의 원본이 활성화된 동안에는 절대 일치할 수 없습니다."
+
+msgid "workflows.say.gateAdded"
+msgstr "일치 조건에 요청률 임계값이 추가되었습니다. 임계값 미만에서는 규칙이 일치하지 않고 평가가 계속됩니다."
+
+msgid "workflows.say.inserted"
+msgstr "%(total)s의 %(n)s 위치에 규칙 추가됨. 이전에 있는 모든 규칙을 먼저 확인합니다."
+
+msgid "workflows.say.inspecting"
+msgstr "%(total)s의 %(n)s 규칙 편집 — %(name)s."
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "마지막 값이 제거되었습니다. 값을 하나 추가하기 전에는 이 조건을 저장할 수 없습니다."
+
+msgid "workflows.say.moved"
+msgstr "%(name)s이(가) %(total)s개 중 %(to)s번 위치로 이동했습니다%(how)s. 이제 %(where)s 실행됩니다."
+
+msgid "workflows.say.predicateCap"
+msgstr "이 규칙에는 이미 최대 개수인 %(max)s개의 조건이 있습니다."
+
+msgid "workflows.say.ruleAbove"
+msgstr "위 규칙"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s이(가) 비활성화되어 완전히 건너뛰며, 이제 아래 규칙이 해당 요청을 처리합니다."
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s이(가) 활성화되어 %(n)s번 위치에서 다시 평가됩니다."
+
+msgid "workflows.say.runsAfter"
+msgstr "%(name)s 다음"
+
+msgid "workflows.say.runsFirst"
+msgstr "첫 번째"
+
+msgid "workflows.say.runsLast"
+msgstr "마지막"
+
+msgid "workflows.say.saved"
+msgstr "규칙을 저장하고 연결된 서비스에 배포했습니다."
+
+msgid "workflows.say.theRule"
+msgstr "해당 규칙"
+
+msgid "workflows.say.valuesDropped"
+msgstr "조건이 %(type)s(으)로 변경되었습니다. 기존 값 %(count)s개는 이전할 수 없습니다."
+
+msgid "workflows.say.via.drag"
+msgstr "드래그로"
+
+msgid "workflows.say.via.keyboard"
+msgstr "키보드로"
+
+msgid "workflows.say.viewCanvas"
+msgstr "캔버스 뷰. 규칙은 왼쪽에서 오른쪽으로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다."
+
+msgid "workflows.say.viewList"
+msgstr "목록 뷰. 규칙은 위에서 아래로 실행되며, 첫 번째로 일치하는 규칙이 적용됩니다."
+
+msgid "workflows.search"
+msgstr "이름 또는 설명을 검색하세요..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "ASN 조회 실패를 시뮬레이션하려면 비워 두세요."
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN은 숫자여야 합니다"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "클라이언트가 허용 목록에 없다고 가정합니다."
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "요청 번호 %(request_number)s은(는) 측정값이 아니라 입력값입니다."
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "인스턴스의 정규식 예산이 소진되지 않았다고 가정합니다."
+
+msgid "workflows.test.assumptions"
+msgstr "가정"
+
+msgid "workflows.test.country"
+msgstr "국가"
+
+msgid "workflows.test.detail_challenge"
+msgstr "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다."
+
+msgid "workflows.test.detail_detect"
+msgstr "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다."
+
+msgid "workflows.test.detail_status"
+msgstr "클라이언트에 %(status)s이(가) 표시됩니다."
+
+msgid "workflows.test.failed"
+msgstr "테스트를 실행할 수 없음"
+
+msgid "workflows.test.geo"
+msgstr "GeoIP 조회"
+
+msgid "workflows.test.geo_help"
+msgstr "사용할 수 없으면 국가 및 ASN 규칙이 '알 수 없음'이 되어 절대 일치할 수 없습니다."
+
+msgid "workflows.test.geo_local"
+msgstr "로컬/사설 주소"
+
+msgid "workflows.test.geo_resolved"
+msgstr "확인됨"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "데이터베이스를 사용할 수 없음"
+
+msgid "workflows.test.intro"
+msgstr "인스턴스와 동일한 방식으로 서비스에 연결된 모든 워크플로를 순서대로 평가합니다."
+
+msgid "workflows.test.invalid"
+msgstr "테스트하기 전에 위 문제를 해결하세요."
+
+msgid "workflows.test.ip"
+msgstr "클라이언트 IP"
+
+msgid "workflows.test.method"
+msgstr "메서드"
+
+msgid "workflows.test.number"
+msgstr "요청 번호"
+
+msgid "workflows.test.number_help"
+msgstr "시간 범위 내 이 클라이언트의 N번째 요청입니다. 측정값이 아니라 사용자가 제공하는 가정입니다."
+
+msgid "workflows.test.open"
+msgstr "요청 테스트"
+
+msgid "workflows.test.other_matched"
+msgstr "여기서 일치"
+
+msgid "workflows.test.other_no_match"
+msgstr "일치하는 규칙 없음"
+
+msgid "workflows.test.other_unreached"
+msgstr "도달하지 않음"
+
+msgid "workflows.test.other_workflows"
+msgstr "이 서비스의 다른 워크플로"
+
+msgid "workflows.test.out_draft"
+msgstr "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다."
+
+msgid "workflows.test.out_match"
+msgstr "%(workflow)s · %(rule)s이(가) 일치하여 요청에 %(action)s 작업을 수행했습니다."
+
+msgid "workflows.test.out_no_match"
+msgstr "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다."
+
+msgid "workflows.test.out_not_attached"
+msgstr "이 워크플로는 어떤 서비스에도 연결되지 않아 평가할 규칙 체인이 없습니다."
+
+msgid "workflows.test.out_whitelisted"
+msgstr "허용 목록에 있음 — 전체 워크플로를 건너뛰고 어떤 규칙도 평가하지 않습니다."
+
+msgid "workflows.test.run"
+msgstr "테스트 실행"
+
+msgid "workflows.test.service"
+msgstr "서비스"
+
+msgid "workflows.test.title"
+msgstr "요청 테스트"
+
+msgid "workflows.test.unreachable"
+msgstr "테스트 엔드포인트에 연결할 수 없음"
+
+msgid "workflows.test.uri"
+msgstr "URI 경로"
+
+msgid "workflows.test.uri_help"
+msgstr "경로만 입력합니다. $uri에는 쿼리 문자열이 포함되지 않습니다."
+
+msgid "workflows.test.v_gate"
+msgstr "조건 일치 · %(count)s개 중 %(n)s에서 게이트 닫힘"
+
+msgid "workflows.test.v_match"
+msgstr "일치"
+
+msgid "workflows.test.v_unknown"
+msgstr "알 수 없음"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "이 규칙에 필요한 정보를 확인할 수 없어 절대 일치할 수 없습니다."
+
+msgid "workflows.test.whitelisted"
+msgstr "이 클라이언트는 허용 목록에 있음"
+
+msgid "workflows.threshold"
+msgstr "속도 기준 이상"
+
+msgid "workflows.threshold_count"
+msgstr "요청"
+
+msgid "workflows.threshold_window"
+msgstr "(초)"
+
+msgid "workflows.tree.addCondition"
+msgstr "조건"
+
+msgid "workflows.tree.addGroup"
+msgstr "그룹"
+
+msgid "workflows.tree.all"
+msgstr "모두"
+
+msgid "workflows.tree.allMeta"
+msgstr "조건 %(count)s개 — 모두 참이어야 함"
+
+msgid "workflows.tree.and"
+msgstr "그리고"
+
+msgid "workflows.tree.any"
+msgstr "하나 이상"
+
+msgid "workflows.tree.anyMeta"
+msgstr "조건 %(count)s개 — 하나 이상 참이어야 함"
+
+msgid "workflows.tree.empty"
+msgstr "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다."
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "어떤 그룹에도 %(kind)s 항목이 없음"
+
+msgid "workflows.tree.noneMeta"
+msgstr "어느 조건도 참이 아닐 때 일치"
+
+msgid "workflows.tree.not"
+msgstr "모두 아님"
+
+msgid "workflows.tree.or"
+msgstr "또는"
+
+msgid "workflows.tree.removeGroup"
+msgstr "그룹 제거"
+
+msgid "workflows.truncated"
+msgstr "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 위해 API를 사용하여 목록을 좁히세요."
+
+msgid "workflows.untitled"
+msgstr "이름 없는 규칙"
+
+msgid "workflows.value.add"
+msgstr "값"
+
+msgid "workflows.values.fewer"
+msgstr "간단히 표시"
+
+msgid "workflows.values.more"
+msgstr "+%(n)s개 더 보기"
+
+msgid "workflows.verb.asn"
+msgstr "다음과 같음"
+
+msgid "workflows.verb.country"
+msgstr "다음과 같음"
+
+msgid "workflows.verb.group"
+msgstr "그룹에 속함"
+
+msgid "workflows.verb.ip"
+msgstr "다음에 포함됨"
+
+msgid "workflows.verb.isIn"
+msgstr "다음에 포함됨"
+
+msgid "workflows.verb.isOneOf"
+msgstr "다음 중 하나임"
+
+msgid "workflows.verb.method"
+msgstr "다음과 같음"
+
+msgid "workflows.verb.uri"
+msgstr "다음과 일치"
+
+msgid "workflows.view.canvas"
+msgstr "캔버스"
+
+msgid "workflows.view.list"
+msgstr "목록"
+

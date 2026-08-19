@@ -7,6 +7,7 @@
 {% from "components/modal.html" import modal %}
 {% from "components/search.html" import search %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/service-options.html" import service_options with context %}
 {# The page-head band owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row (same treatment as the redirects page). #}
 {% block page_head %}{% endblock %}
@@ -33,10 +34,9 @@
                 {{ search(id="workflows-search", placeholder="Search name or description...", i18n_key="workflows.search", size="sm", clearable=true, clear_id="workflows-search-clear") }}
             </div>
             <div>
-                <label class="form-label small" for="workflows-service-filter" data-i18n="table.header.service">Service</label>
-                <select class="form-select form-select-sm" id="workflows-service-filter">
-                    <option value="" data-i18n="workflows.all">All</option>
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label small" for="workflows-service-filter">{{ _("table.header.service") }}</label>
+                <select class="form-select form-select-sm" id="workflows-service-filter" data-bw-service-options>
+                    <option value="">{{ _("workflows.all") }}</option>
                 </select>
             </div>
         </div>
@@ -46,10 +46,10 @@
                 <table class="table align-middle workflows-table">
                     <thead>
                         <tr>
-                            <th data-i18n="table.header.name">Name</th>
-                            <th data-i18n="workflows.rules">Rules</th>
-                            <th data-i18n="table.header.service">Services</th>
-                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                            <th>{{ _("table.header.name") }}</th>
+                            <th>{{ _("workflows.rules") }}</th>
+                            <th>{{ _("table.header.service") }}</th>
+                            <th class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,19 +119,18 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="workflow-create-name" data-i18n="table.header.name">Name</label>
+                    <label class="form-label" for="workflow-create-name">{{ _("table.header.name") }}</label>
                     <input class="form-control" id="workflow-create-name" name="name" maxlength="256" required />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="workflow-create-description" data-i18n="table.header.description">Description</label>
+                    <label class="form-label" for="workflow-create-description">{{ _("table.header.description") }}</label>
                     <textarea class="form-control" id="workflow-create-description" name="description" maxlength="4000" rows="2"></textarea>
                 </div>
                 <div>
-                    <label class="form-label" for="workflow-create-services" data-i18n="table.header.service">Services</label>
-                    <select class="form-select" id="workflow-create-services" name="service_ids" multiple size="5">
-                        {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                    <label class="form-label" for="workflow-create-services">{{ _("table.header.service") }}</label>
+                    <select class="form-select" id="workflow-create-services" name="service_ids" multiple size="5" data-bw-service-options>
                     </select>
-                    <div class="form-text" data-i18n="workflows.attach_help">Rules are only enforced on the services a workflow is attached to.</div>
+                    <div class="form-text">{{ _("workflows.attach_help") }}</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -147,11 +146,11 @@
             <input type="hidden" name="workflow_id" id="workflow-edit-id" />
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="workflow-edit-name" data-i18n="table.header.name">Name</label>
+                    <label class="form-label" for="workflow-edit-name">{{ _("table.header.name") }}</label>
                     <input class="form-control" id="workflow-edit-name" name="name" maxlength="256" required />
                 </div>
                 <div>
-                    <label class="form-label" for="workflow-edit-description" data-i18n="table.header.description">Description</label>
+                    <label class="form-label" for="workflow-edit-description">{{ _("table.header.description") }}</label>
                     <textarea class="form-control" id="workflow-edit-description" name="description" maxlength="4000" rows="2"></textarea>
                 </div>
             </div>
@@ -170,9 +169,8 @@
                failed service fetch renders an empty picker instead of reading as "deselect all". #}
             <input type="hidden" name="offered_service_ids" value="{{ services | map(attribute='id') | join(' ') }}" />
             <div class="modal-body">
-                <label class="form-label" for="workflow-attach-services" data-i18n="table.header.service">Services</label>
-                <select class="form-select" id="workflow-attach-services" name="service_ids" multiple size="8">
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label" for="workflow-attach-services">{{ _("table.header.service") }}</label>
+                <select class="form-select" id="workflow-attach-services" name="service_ids" multiple size="8" data-bw-service-options>
                 </select>
             </div>
             <div class="modal-footer">
@@ -187,9 +185,9 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="workflow_id" id="workflow-clone-id" />
             <div class="modal-body">
-                <label class="form-label" for="workflow-clone-name" data-i18n="workflows.clone_name">Name of the copy</label>
+                <label class="form-label" for="workflow-clone-name">{{ _("workflows.clone_name") }}</label>
                 <input class="form-control" id="workflow-clone-name" name="name" maxlength="256" required />
-                <div class="form-text" data-i18n="workflows.clone_help">The rules are copied; the service attachments are not.</div>
+                <div class="form-text">{{ _("workflows.clone_help") }}</div>
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
@@ -203,7 +201,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="workflow_id" id="workflow-delete-id" />
             <div class="modal-body">
-                <p data-i18n="workflows.delete_confirm">This workflow and all of its rules will be permanently deleted.</p>
+                <p>{{ _("workflows.delete_confirm") }}</p>
                 <p class="fw-semibold" id="workflow-delete-name"></p>
             </div>
             <div class="modal-footer">
@@ -212,6 +210,8 @@
             </div>
         </form>
     {% endcall %}
+    {# Every service picker on this page is filled from here (components/service-options.html). #}
+    {{ service_options(services) }}
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/workflows.js') }}" nonce="{{ script_nonce }}" defer></script>

@@ -27,11 +27,11 @@
                wall display shows the board and nothing else. Hidden by threatmap.js when the
                browser has no Fullscreen API. #}
             <button type="button" id="threatmap-fullscreen" class="btn btn-sm btn-outline-primary">
-                <i class="bx bx-fullscreen me-1" aria-hidden="true"></i><span data-i18n="threatmap.fullscreen">Fullscreen</span>
+                <i class="bx bx-fullscreen me-1" aria-hidden="true"></i><span>{{ _("threatmap.fullscreen") }}</span>
             </button>
         {% endif %}
     {% endcall %}
-    <p class="text-muted mb-4" data-i18n="threatmap.subtitle">Where the traffic your instances blocked in the last 24 hours came from.</p>
+    <p class="text-muted mb-4">{{ _("threatmap.subtitle") }}</p>
 
     {% if not enabled %}
         {# Not "nothing happened yet" but "nothing is being stored" — an operator should be told
@@ -125,7 +125,7 @@
         {# The heartbeat. On a screen nobody is actively watching, this is what separates
            "nothing is happening" from "nothing is arriving". #}
         <p id="threatmap-updated" class="threatmap-updated text-muted small mb-0">
-            <i class="bx bx-refresh me-1" aria-hidden="true"></i><span data-i18n="threatmap.updated">Updated</span>
+            <i class="bx bx-refresh me-1" aria-hidden="true"></i><span>{{ _("threatmap.updated") }}</span>
             <span id="threatmap-updated-time">—</span>
         </p>
 

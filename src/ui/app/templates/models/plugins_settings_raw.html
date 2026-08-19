@@ -90,10 +90,10 @@
     <div class="card-header raw-config-toolbar d-flex flex-wrap justify-content-between align-items-start gap-3 border-0">
         <div class="raw-config-toolbar__title">
             <h5 class="mb-0 fw-semibold text-white"
-                data-i18n="form.label.raw_configuration">Raw configuration</h5>
+               >{{ _("form.label.raw_configuration") }}</h5>
             <div class="raw-config-toolbar__legend text-white-50 small d-flex align-items-center gap-2 mt-2">
                 <span class="raw-config-legend-chip"></span>
-                <span data-i18n="legend.locked_settings_hint">Locked settings are highlighted</span>
+                <span>{{ _("legend.locked_settings_hint") }}</span>
             </div>
         </div>
         <div class="raw-config-toolbar__actions d-flex flex-wrap align-items-center gap-2">
@@ -103,27 +103,26 @@
                         aria-pressed="false"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-i18n-title="tooltip.collapse_raw_values"
-                        title="Collapse multi-line values (certificates, keys)">
+                        title="{{ _("tooltip.collapse_raw_values") }}">
                     <i class="bx bx-collapse-vertical bx-xs" aria-hidden="true"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.collapse_multiline">Collapse</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.collapse_multiline") }}</span></span>
                 </button>
             </div>
             <div class="raw-config-toolbar__action"
-                 {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
+                 {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.copy_https_only") }}"{% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-outline-light raw-config-action-btn copy-settings{% if not request.is_secure %} disabled{% endif %}">
                     <i class="bx bx-copy-alt bx-xs"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.copy") }}</span></span>
                 </button>
             </div>
             <div class="raw-config-toolbar__action"
-                 {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                 {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                  {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green raw-config-save-btn save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-xs"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
                 </button>
             </div>
         </div>
@@ -135,8 +134,7 @@
              data-readonly="{{ 'true' if is_readonly else 'false' }}"
              data-source="#raw-config"
              role="textbox"
-             aria-label="Raw configuration"
-             data-i18n-aria-label="aria.label.raw_configuration"></div>
+             aria-label="{{ _("aria.label.raw_configuration") }}"></div>
         <textarea id="raw-config" class="d-none">{{- raw_config|safe -}}</textarea>
     </div>
 </div>

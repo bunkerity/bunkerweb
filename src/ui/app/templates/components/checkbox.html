@@ -18,9 +18,9 @@
                     literal -- always pass the real per-instance id (e.g.
                     "permanentBan-" ~ ban.id).
      label          (required unless you truly render no visible label -- see
-                    below) English fallback text shown before i18next rewrites
+                    below) literal text, used when the key is not given
                     it, wired to the input via <label for="id">.
-     i18n_key       data-i18n key for the label, e.g. "form.label.permanent_ban".
+     i18n_key       catalog key for the label, e.g. "form.label.permanent_ban".
                     Must exist in static/locales/en.json. Omit only for the
                     rare untranslated case.
      name           form field name. Defaults to id.
@@ -37,7 +37,7 @@
      help           optional helper text rendered below as "form-text
                     text-muted" (see bans.html's permanent-ban help line),
                     linked via aria-describedby.
-     help_i18n_key  data-i18n key for the help text.
+     help_i18n_key  catalog key for the help text.
      label_class    classes on the <label>. Default "form-check-label" (the
                     Bootstrap standard used almost everywhere). Pass
                     "setting-checkbox-label ..." to reproduce the compact
@@ -87,10 +87,10 @@
                {% if required %}required aria-required="true"{% endif %}
                {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
         {% if label %}
-            <label class="{{ label_class }}" for="{{ id }}"{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</label>
+            <label class="{{ label_class }}" for="{{ id }}">{{ _(i18n_key) if i18n_key else label }}</label>
         {% endif %}
         {% if help %}
-            <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n_key %} data-i18n="{{ help_i18n_key }}"{% endif %}>{{ help }}</div>
+            <div class="form-text text-muted" id="{{ help_id }}">{{ _(help_i18n_key) if help_i18n_key else help }}</div>
         {% endif %}
     </div>
 {%- endmacro %}

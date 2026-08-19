@@ -48,7 +48,7 @@
                    template text, not user input.
      label         toggle button text (English fallback). Omit for an
                    icon-only toggle (pass icon + aria_label instead).
-     i18n_key      data-i18n key for label, e.g. "button.select_file".
+     i18n_key      catalog key for label, e.g. "button.select_file".
      label_classes extra classes on the label <span>, e.g. "d-none d-md-inline"
                    to collapse the text to an icon-only toggle below a
                    breakpoint (matches jobs.html's Cache toggle, which hid
@@ -70,14 +70,9 @@
      aria_label    accessible name override for the toggle. Required (with
                    aria_i18n_key) when label is omitted -- an icon-only
                    toggle with no aria_label is a real accessibility bug.
-     aria_i18n_key data-i18n key for aria_label. i18n.js (see
-                   static/js/i18n.js) translates whichever attribute is
-                   present on the element in this order: placeholder >
-                   title > data-bs-original-title > aria-label -- since the
-                   toggle has none of the first three, a plain data-i18n here
-                   correctly retranslates aria-label. Explicit
-                   data-i18n-aria-label is also supported when one element
-                   needs a different key for its accessible name.
+     aria_i18n_key catalog key for aria_label. Translated into the
+                   attribute at render time, so it needs no arbitration
+                   against the toggle's other attributes.
      menu_classes  extra classes on the <ul>, e.g. "nav-pills max-vh-60
                    overflow-auto pt-0" for the long scrollable lists used in
                    config_edit.html/logs.html/support.html/language-selector.html.
@@ -117,9 +112,9 @@
             aria-haspopup="true"
             aria-expanded="false"
             {%- if disabled %} disabled{% endif %}
-            {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_i18n_key %} data-i18n="{{ aria_i18n_key }}"{% endif %}{% endif %}>
+            {%- if aria_label %} aria-label="{{ _(aria_i18n_key) if aria_i18n_key else aria_label }}"{% endif %}>
         {%- if icon %}<i class="bx {{ icon }}{% if label %} me-1{% endif %}" aria-hidden="true"></i>{% endif -%}
-        {%- if label %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% endif -%}
+        {%- if label %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}>{{ _(i18n_key) if i18n_key else label }}</span>{% endif -%}
     </button>
     <ul id="{{ id }}"
         class="dropdown-menu{% if align == 'end' %} dropdown-menu-end{% endif %}{% if menu_classes %} {{ menu_classes }}{% endif %}"
@@ -130,7 +125,7 @@
         {%- if it.divider %}
         <li role="presentation"><hr class="dropdown-divider"></li>
         {%- elif it.header is defined %}
-        <li role="presentation"><h6 class="dropdown-header"{% if it.header_i18n_key %} data-i18n="{{ it.header_i18n_key }}"{% endif %}>{{ it.header }}</h6></li>
+        <li role="presentation"><h6 class="dropdown-header">{{ _(it.header_i18n_key) if it.header_i18n_key else it.header }}</h6></li>
         {%- else %}
         {%- set tag = "button" if it.tag == "button" else "a" %}
         <li role="presentation">
@@ -142,7 +137,7 @@
                    {% if tag == "button" %} disabled{% else %} aria-disabled="true" tabindex="-1"{% endif %}
                {%- endif %}
                {%- if it.attrs %} {{ it.attrs | safe }}{% endif %}>
-                {%- if it.icon %}<i class="bx {{ it.icon }} me-2" aria-hidden="true"></i>{% endif %}<span{% if it.i18n_key %} data-i18n="{{ it.i18n_key }}"{% endif %}>{{ it.label }}</span>
+                {%- if it.icon %}<i class="bx {{ it.icon }} me-2" aria-hidden="true"></i>{% endif %}<span>{{ _(it.i18n_key) if it.i18n_key else it.label }}</span>
             </{{ tag }}>
         </li>
         {%- endif %}

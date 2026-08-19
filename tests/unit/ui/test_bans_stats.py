@@ -17,6 +17,7 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -220,7 +221,7 @@ def test_bans_page_renders_reason_breakdown_card_mount():
     html = _render_bans()
 
     assert 'id="bans-reason-breakdown"' in html
-    assert 'data-i18n="bans.stats.card.by_reason"' in html
+    assert english("bans.stats.card.by_reason") in html
 
 
 def test_bans_page_never_warns_about_non_persisted_bans():
@@ -246,5 +247,5 @@ def test_bans_stats_i18n_keys_resolve_in_en_json():
         "bans.stats.card.by_reason",
     ]
     for key in expected_keys:
-        assert f'data-i18n="{key}"' in html, key
+        assert english(key) in html, key
         assert _resolves_in_locale(locale, key), key

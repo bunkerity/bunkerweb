@@ -24,7 +24,7 @@
                                   ("Resource groups", "navigation.groups", none)]) %}
         {{ button(id="resource-group-new", label="Add group", i18n_key="resource_groups.new", size="sm", icon="bx-plus", disabled=readonly) }}
     {% endcall %}
-    <p class="text-muted mb-4" data-i18n="resource_groups.subtitle">Reusable typed aliases for IPs, countries, ASNs, reverse DNS names, user agents, and URIs.</p>
+    <p class="text-muted mb-4">{{ _("resource_groups.subtitle") }}</p>
     {% if readonly %}
         {{ alert(message="The database is read-only. Resource groups can be inspected and exported, but not changed.", message_key="resource_groups.readonly", variant="warning", icon="bx-lock-alt", classes="mb-4") }}
     {% endif %}
@@ -45,13 +45,13 @@
                     <thead>
                         <tr>
                             <th class="resource-group-expand-column"><span class="visually-hidden">Details</span></th>
-                            <th data-i18n="table.header.name">Name</th>
-                            <th data-i18n="table.header.description">Description</th>
-                            <th data-i18n="resource_groups.kinds">Kinds</th>
-                            <th data-i18n="resource_groups.entries">Entries</th>
-                            <th data-i18n="resource_groups.usage">Usage</th>
-                            <th data-i18n="table.header.method">Method</th>
-                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                            <th>{{ _("table.header.name") }}</th>
+                            <th>{{ _("table.header.description") }}</th>
+                            <th>{{ _("resource_groups.kinds") }}</th>
+                            <th>{{ _("resource_groups.entries") }}</th>
+                            <th>{{ _("resource_groups.usage") }}</th>
+                            <th>{{ _("table.header.method") }}</th>
+                            <th class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,8 +69,7 @@
                                     {% set values_n = group.entries | length %}
                                     {% set usages_n = group.usage_count or 0 %}
                                     <small class="d-block text-muted resource-group-meta"
-                                           data-i18n="resource_groups.meta_line"
-                                           data-i18n-options='{{ {"kinds": kinds_n, "values": values_n, "usages": usages_n} | tojson }}'>{{ kinds_n }} kinds · {{ values_n }} values · {{ usages_n }} usages</small>
+                                           >{{ _("resource_groups.meta_line", kinds=kinds_n, values=values_n, usages=usages_n) }}</small>
                                 </td>
                                 <td class="resource-group-description text-wrap">{{ group.description or "—" }}</td>
                                 <td>
@@ -145,8 +144,7 @@
                 </table>
             </div>
             <p id="resource-groups-count" class="text-muted small mb-0 mt-3" aria-live="polite">
-                <span data-i18n="resource_groups.showing_count"
-                      data-i18n-options='{{ {"visible": resource_groups | length, "total": resource_groups | length} | tojson }}'>Showing {{ resource_groups | length }} of {{ resource_groups | length }} groups</span>
+                <span >{{ _("resource_groups.showing_count", visible=resource_groups | length, total=resource_groups | length) }}</span>
             </p>
         {% else %}
             {{ empty_state(title="No resource groups", title_key="resource_groups.empty", message="Create a reusable alias to share typed values across compatible settings.", message_key="resource_groups.empty_help", icon="bx-collection", bordered=true, action_label=none if readonly else "Add group", action_key="resource_groups.new", action_icon="bx-plus", action_id="resource-group-empty-new") }}
@@ -161,7 +159,7 @@
             <div class="modal-body">
                 <div class="row g-3 mb-4">
                     <div class="col-md-5">
-                        <label class="form-label" for="resource-group-alias" data-i18n="resource_groups.alias">Alias</label>
+                        <label class="form-label" for="resource-group-alias">{{ _("resource_groups.alias") }}</label>
                         <div class="input-group">
                             <span class="input-group-text">@</span>
                             <input type="text"
@@ -172,10 +170,10 @@
                                    pattern="[A-Za-z0-9_-]+"
                                    required />
                         </div>
-                        <div class="form-text" data-i18n="resource_groups.alias_help">Letters, digits, underscores, and dashes. Existing aliases cannot be renamed.</div>
+                        <div class="form-text">{{ _("resource_groups.alias_help") }}</div>
                     </div>
                     <div class="col-md-7">
-                        <label class="form-label" for="resource-group-description" data-i18n="table.header.description">Description</label>
+                        <label class="form-label" for="resource-group-description">{{ _("table.header.description") }}</label>
                         <textarea class="form-control"
                                   id="resource-group-description"
                                   name="description"
@@ -184,17 +182,17 @@
                     </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                    <h6 class="mb-0" data-i18n="resource_groups.entries">Entries</h6>
+                    <h6 class="mb-0">{{ _("resource_groups.entries") }}</h6>
                     {{ button(id="resource-group-add-entry", label="Add entry", i18n_key="resource_groups.add_entry", variant="outline-primary", size="sm", icon="bx-plus") }}
                 </div>
                 <div class="table-responsive border rounded-3">
                     <table class="table table-sm align-middle mb-0 resource-entry-editor">
                         <thead>
                             <tr>
-                                <th data-i18n="resource_groups.kind">Kind</th>
-                                <th data-i18n="resource_groups.value">Value</th>
-                                <th data-i18n="resource_groups.comment">Comment</th>
-                                <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                                <th>{{ _("resource_groups.kind") }}</th>
+                                <th>{{ _("resource_groups.value") }}</th>
+                                <th>{{ _("resource_groups.comment") }}</th>
+                                <th class="text-end">{{ _("table.header.actions") }}</th>
                             </tr>
                         </thead>
                         <tbody id="resource-group-entry-rows"></tbody>
@@ -204,16 +202,16 @@
                     </div>
                 </div>
                 <section class="border rounded-3 p-3 mt-3" aria-labelledby="resource-group-bulk-title">
-                    <h6 id="resource-group-bulk-title" class="mb-3" data-i18n="resource_groups.bulk_import">Bulk import</h6>
+                    <h6 id="resource-group-bulk-title" class="mb-3">{{ _("resource_groups.bulk_import") }}</h6>
                     <div class="row g-2 align-items-end">
                         <div class="col-md-3">
-                            <label class="form-label" for="resource-group-bulk-kind" data-i18n="resource_groups.kind">Kind</label>
+                            <label class="form-label" for="resource-group-bulk-kind">{{ _("resource_groups.kind") }}</label>
                             <select class="form-select" id="resource-group-bulk-kind">
                                 {% for kind in resource_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="resource-group-bulk-values" data-i18n="resource_groups.values">Values</label>
+                            <label class="form-label" for="resource-group-bulk-values">{{ _("resource_groups.values") }}</label>
                             <textarea class="form-control"
                                       id="resource-group-bulk-values"
                                       rows="2"
@@ -244,7 +242,7 @@
             <input type="hidden" name="source_id" id="resource-group-clone-source" />
             <div class="modal-body">
                 <p class="text-muted" id="resource-group-clone-copy"></p>
-                <label class="form-label" for="resource-group-clone-alias" data-i18n="resource_groups.new_alias">New alias</label>
+                <label class="form-label" for="resource-group-clone-alias">{{ _("resource_groups.new_alias") }}</label>
                 <div class="input-group">
                     <span class="input-group-text">@</span>
                     <input type="text"
@@ -269,7 +267,7 @@
             <input type="hidden" name="group_id" id="resource-group-delete-id" />
             <div class="modal-body">
                 <p id="resource-group-delete-copy"></p>
-                <p class="text-muted small mb-0" data-i18n="resource_groups.delete_help">Deletion is blocked while a setting references this alias.</p>
+                <p class="text-muted small mb-0">{{ _("resource_groups.delete_help") }}</p>
             </div>
             <div class="modal-footer">
                 {{ button(label="Cancel", i18n_key="button.cancel", variant="outline-secondary", dismiss="modal") }}
@@ -283,7 +281,7 @@
             <p id="resource-group-usage-loading"
                class="text-muted mb-0"
                role="status"
-               data-i18n="resource_groups.loading_references">Loading references...</p>
+              >{{ _("resource_groups.loading_references") }}</p>
             <div id="resource-group-usage-error" class="alert alert-danger mb-0" role="alert" hidden></div>
             <div id="resource-group-usage-empty" hidden>
                 {{ empty_state(title="No references", title_key="resource_groups.no_references", icon="bx-unlink", size="sm") }}

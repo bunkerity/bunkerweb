@@ -35,6 +35,7 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/common/helpers helpers
 COPY src/VERSION VERSION
+COPY CHANGELOG.md CHANGELOG.md
 COPY src/ui ui
 
 WORKDIR /tmp

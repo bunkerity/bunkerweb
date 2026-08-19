@@ -4,7 +4,7 @@
         <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
             <div class="text-body">
                 ©
-                <script nonce="{{ script_nonce }}">document.write(new Date().getFullYear());</script>, <span data-i18n="footer.made_by">made by</span>
+                <script nonce="{{ script_nonce }}">document.write(new Date().getFullYear());</script>, <span>{{ _("footer.made_by") }}</span>
                 <a href="https://www.bunkerity.com/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
@@ -17,28 +17,23 @@
                    rel="noopener"
                    class="footer-link me-4 docs-link"
                    data-endpoint=""
-                   data-fragment=""
-                   data-i18n="footer.documentation">Documentation</a>
+                   data-fragment="">{{ _("footer.documentation") }}</a>
                 <a href="https://www.bunkerweb.io/privacy-policy?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4"
-                   data-i18n="footer.privacy">Privacy</a>
+                   class="footer-link me-4">{{ _("footer.privacy") }}</a>
                 <a href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4"
-                   data-i18n="footer.blog">Blog</a>
+                   class="footer-link me-4">{{ _("footer.blog") }}</a>
                 <a href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4"
-                   data-i18n="footer.support">Support</a>
+                   class="footer-link me-4">{{ _("footer.support") }}</a>
                 <a href="https://github.com/bunkerity/bunkerweb/blob/{% if bw_version != 'dev' and bw_version != 'testing' %}v{% endif %}{{ bw_version | replace('~', '-') }}/LICENSE.md"
                    class="footer-link"
                    target="_blank"
-                   rel="noreferrer"
-                   data-i18n="footer.license">License</a>
+                   rel="noreferrer">{{ _("footer.license") }}</a>
             </div>
         </div>
     </div>

@@ -4,7 +4,7 @@
 {# Contextual feedback banner -- superset of the ad-hoc "alert alert-<variant>" <div role="alert">
    blocks duplicated across setup.html, bans.html, cache.html, configs.html, instances.html,
    plugins.html, profile.html, services.html, template_edit.html, templates.html and
-   unauthorized.html. Covers both the simple one-liner form (plain data-i18n text, e.g.
+   unauthorized.html. Covers both the simple one-liner form (plain translated text, e.g.
    setup.html's "admin user already exists" notices) and the richer form (icon + title +
    list/links body, e.g. template_edit.html's read-only banner and the fetch-global-settings
    modal body) via the {% call %} block.
@@ -13,18 +13,14 @@
      message      English fallback body text, used when the macro is called WITHOUT a
                    {% call %}...{% endcall %} block (the setup.html-style one-liner case).
                    Ignored (not rendered) when a call block is supplied.
-     message_key  data-i18n key for message, e.g. "setup.status.admin_user_exists". Only
-                   applied in the no-call-block form, on a <span> wrapping just the message --
-                   never on a shared div, because src/ui/app/static/js/i18n.js applies
-                   translations via jQuery .text(), which clobbers ALL children of the element
-                   it's set on (would wipe out a sibling icon/title/dismiss button otherwise).
-                   With a call block the caller owns its own inner data-i18n attributes (see
-                   template_edit.html's readonly banner).
+     message_key  catalog key for message, e.g. "setup.status.admin_user_exists". Only
+                   applied in the no-call-block form; with a call block the caller owns its own
+                   translation (see template_edit.html's readonly banner).
      title        optional bold lead-in line, rendered as <h6 class="alert-heading">. For a
                    custom heading level/branded header (e.g. setup.html's PRO trial banner with
                    a logo image), skip this param and build the header inside a call block
                    instead -- title is only the plain-text shorthand.
-     title_key    data-i18n key for title.
+     title_key    catalog key for title.
      variant      color suffix appended to "alert-", e.g. "primary", "danger", "warning",
                    "info", "light" -- any variant with an existing .alert-<variant> rule in
                    core.css. Pass none/"" to omit the color class entirely (bare ".alert", the
@@ -51,15 +47,14 @@
          {%- if attrs %} {{ attrs }}{% endif %}>
         {%- if icon %}<i class="bx {{ icon }} flex-shrink-0" aria-hidden="true"></i>{% endif %}
         <div{% if icon or dismissible %} class="flex-grow-1"{% endif %}>
-            {%- if title %}<h6 class="alert-heading"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h6>{% endif %}
-            {%- if caller %}{{ caller() }}{% else %}<span{% if message_key %} data-i18n="{{ message_key }}"{% endif %}>{{ message }}</span>{% endif -%}
+            {%- if title %}<h6 class="alert-heading">{{ _(title_key) if title_key else title }}</h6>{% endif %}
+            {%- if caller %}{{ caller() }}{% else %}<span>{{ _(message_key) if message_key else message }}</span>{% endif -%}
         </div>
         {%- if dismissible %}
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
-                    aria-label="Close"
-                    data-i18n="aria.label.close"></button>
+                    aria-label="{{ _('aria.label.close') }}"></button>
         {%- endif %}
     </div>
 {%- endmacro %}

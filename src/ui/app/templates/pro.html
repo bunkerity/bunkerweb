@@ -44,7 +44,7 @@
                 <div class="card-header p-2">
                     <div class="card-title">
                         <h5 class="me-2 text-primary shine don-jose mb-0"
-                            data-i18n="pro.status.title">Status</h5>
+                           >{{ _("pro.status.title") }}</h5>
                     </div>
                 </div>
                 <div class="card-body position-relative">
@@ -52,30 +52,28 @@
                         <div class="text-center text-primary">
                             <h4 class="mt-0 mb-2 fw-semibold{% if is_pro_version %} text-primary shine courier-prime{% endif %}">
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.status.pro_version">PRO version</span>
+                                    <span>{{ _("pro.status.pro_version") }}</span>
                                 {% else %}
                                     {% if is_overlapped %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / {{ badge(text="OVERLAPPED", i18n_key="pro.status.overlapped", variant="danger") }}
+                                        <span>{{ _("pro.status.pro_version") }}</span> / {{ badge(text="OVERLAPPED", i18n_key="pro.status.overlapped", variant="danger") }}
                                     {% elif pro_status == "expired" %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / {{ badge(text="EXPIRED", i18n_key="pro.status.expired", variant="warning") }}
+                                        <span>{{ _("pro.status.pro_version") }}</span> / {{ badge(text="EXPIRED", i18n_key="pro.status.expired", variant="warning") }}
                                     {% elif pro_status == "suspended" %}
-                                        <span data-i18n="pro.status.pro_version">PRO version</span> / {{ badge(text="SUSPENDED", i18n_key="pro.status.suspended", variant="danger") }}
+                                        <span>{{ _("pro.status.pro_version") }}</span> / {{ badge(text="SUSPENDED", i18n_key="pro.status.suspended", variant="danger") }}
                                     {% else %}
-                                        <span data-i18n="pro.status.free_version">FREE version</span>
+                                        <span>{{ _("pro.status.free_version") }}</span>
                                     {% endif %}
                                 {% endif %}
                             </h4>
                             <h5 class="mt-2 mb-2 courier-prime fw-medium{% if is_overlapped %} text-decoration-line-through{% endif %}"
-                                data-i18n="pro.status.services_count"
-                                data-i18n-options='{"online_services": {{ online_services }}, "pro_services": {{ pro_services }}}'>
-                                {{ online_services }} Online service{{ 's' if online_services > 1 else '' }} / {{ pro_services }} PRO service{{ 's' if pro_services > 1 else '' }}
+                                >
+                                {{ _("pro.status.services_count", online_services=online_services, pro_services=pro_services) }}
                             </h5>
                             {% if is_overlapped %}
                                 {% call alert(variant="danger", classes="mt-2 mb-2 text-center") %}
-                                    <span data-i18n="pro.alert.overlapped_1">You have more services than your license allows !</span>
+                                    <span>{{ _("pro.alert.overlapped_1") }}</span>
                                     <br />
-                                    <span data-i18n="pro.alert.overlapped_2"
-                                          data-i18n-options="{'pro_services': {{ pro_services }}}">Delete or draft some services to reach the number of {{ pro_services }} services.</span>
+                                    <span >{{ _("pro.alert.overlapped_2", pro_services=pro_services) }}</span>
                                 {% endcall %}
                             {% endif %}
                             <a href="{% if is_pro_version %}https://panel.bunkerweb.io/clientarea.php?action=services&utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui{% endif %}"
@@ -91,25 +89,24 @@
                                          height="15.5px">
                                 </span>
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.button.all_features_available">All features available</span>
+                                    <span>{{ _("pro.button.all_features_available") }}</span>
                                 {% else %}
                                     {% if is_overlapped %}
-                                        <span data-i18n="pro.button.awaiting_compliance">Awaiting compliance...</span>
+                                        <span>{{ _("pro.button.awaiting_compliance") }}</span>
                                     {% elif pro_status == "expired" %}
-                                        <span data-i18n="pro.button.renew_license">Renew license</span>
+                                        <span>{{ _("pro.button.renew_license") }}</span>
                                     {% elif pro_status == "suspended" %}
-                                        <span data-i18n="pro.button.suspended_license">Suspended license</span>
+                                        <span>{{ _("pro.button.suspended_license") }}</span>
                                     {% else %}
-                                        <span data-i18n="pro.button.upgrade_to_pro">Upgrade to PRO</span>
+                                        <span>{{ _("pro.button.upgrade_to_pro") }}</span>
                                     {% endif %}
                                 {% endif %}
                             </a>
                         </div>
                     </div>
                     <small class="position-absolute bottom-0 end-0 text-muted"
-                           data-i18n="pro.status.draft_services_count"
-                           data-i18n-options='{"draft_services": {{ draft_services }}}'>
-                        {{ draft_services }} Draft service{{ 's' if draft_services > 1 else '' }}
+                           >
+                        {{ _("pro.status.draft_services_count", draft_services=draft_services) }}
                     </small>
                 </div>
             {% endcall %}
@@ -148,7 +145,7 @@
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0"
-                                data-i18n="pro.expiration_date.title">Pro expiration date</h5>
+                               >{{ _("pro.expiration_date.title") }}</h5>
                         </div>
                     </div>
                 {% endif %}
@@ -164,9 +161,9 @@
                     {% if is_pro_version %}
                         <small class="position-absolute bottom-0 end-0 text-primary">
                             {% if pro_expires_in != "Unknown" %}
-                                <span data-i18n="pro.expiration_date.expires_in">Expires in</span>: {{ pro_expires_in }}
+                                <span>{{ _("pro.expiration_date.expires_in") }}</span>: {{ pro_expires_in }}
                             {% else %}
-                                <span data-i18n="pro.expiration_date.unknown">Unknown expiration date</span>
+                                <span>{{ _("pro.expiration_date.unknown") }}</span>
                             {% endif %}
                         </small>
                     {% endif %}
@@ -181,9 +178,9 @@
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0">
                                 {% if is_pro_version %}
-                                    <span data-i18n="pro.key.title.update">Update key</span>
+                                    <span>{{ _("pro.key.title.update") }}</span>
                                 {% else %}
-                                    <span data-i18n="pro.key.title.activate">Activate key</span>
+                                    <span>{{ _("pro.key.title.activate") }}</span>
                                 {% endif %}
                             </h5>
                         </div>
@@ -217,14 +214,14 @@
                     <div class="card-header p-2">
                         <div class="card-title">
                             <h5 class="me-2 text-primary shine don-jose mb-0">
-                                <span data-i18n="pro.force_check.title">Force check</span>
+                                <span>{{ _("pro.force_check.title") }}</span>
                             </h5>
                         </div>
                     </div>
                     <div class="card-body position-relative">
                         <div class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
-                            <p data-i18n="pro.force_check.description">
-                                Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.
+                            <p>
+                                {{ _("pro.force_check.description") }}
                             </p>
                             <div class="d-flex gap-2 flex-wrap justify-content-center">
                                 <form method="POST" action="{{ url_for("pro") }}/force-check">

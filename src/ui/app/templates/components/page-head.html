@@ -12,8 +12,8 @@
    H1 -- no leading icon, no subtitle paragraph -- per the kit.
 
    Params:
-     title        (required) English fallback for the H1 shown before i18next rewrites it.
-     title_i18n   data-i18n key for the H1, e.g. "templates.title". Omit for untranslated
+     title        (required) literal H1 copy, used when `i18n_key` is not given.
+     title_i18n   catalog key for the H1, e.g. "templates.title". Omit for untranslated
                   text (rare).
      breadcrumb   list of (label, i18n_key, url) tuples, root -> current. i18n_key may be
                   none (untranslated crumb); url may be none (plain text crumb -- the last
@@ -31,19 +31,19 @@
                 <nav class="bw-page-head-crumbs d-flex gap-1" aria-label="Breadcrumb">
                     {%- for label, crumb_i18n, url in breadcrumb %}
                         {%- if loop.last %}
-                            <span class="is-current" aria-current="page"{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</span>
+                            <span class="is-current" aria-current="page">{{ _(crumb_i18n) if crumb_i18n else label }}</span>
                         {%- else %}
                             {%- if url %}
-                                <a href="{{ url }}"{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</a>
+                                <a href="{{ url }}">{{ _(crumb_i18n) if crumb_i18n else label }}</a>
                             {%- else %}
-                                <span{% if crumb_i18n %} data-i18n="{{ crumb_i18n }}"{% endif %}>{{ label }}</span>
+                                <span>{{ _(crumb_i18n) if crumb_i18n else label }}</span>
                             {%- endif %}
                             <span class="sep" aria-hidden="true">/</span>
                         {%- endif %}
                     {%- endfor %}
                 </nav>
             {%- endif %}
-            <h1 class="bw-page-head-title mb-0"{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</h1>
+            <h1 class="bw-page-head-title mb-0">{{ _(title_i18n) if title_i18n else title }}</h1>
         </div>
         {%- if caller %}
             <div class="bw-page-head-actions d-flex align-items-center gap-2 flex-wrap">{{ caller() }}</div>

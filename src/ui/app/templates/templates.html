@@ -17,18 +17,18 @@
                                   ("Templates", "navigation.templates", none)]) %}
         {% if not is_readonly and templates %}
             <button type="button" id="templates-select-toggle" class="btn btn-outline-secondary btn-sm">
-                <i class="bx bx-list-check bx-xs me-1"></i><span data-i18n="templates.gallery.select">Select</span>
+                <i class="bx bx-list-check bx-xs me-1"></i><span>{{ _("templates.gallery.select") }}</span>
             </button>
             <button type="button" id="templates-delete-selected" class="btn btn-outline-danger btn-sm d-none" disabled>
-                <i class="bx bx-trash bx-xs me-1"></i><span data-i18n="templates.gallery.delete_selected">Delete selected</span>
+                <i class="bx bx-trash bx-xs me-1"></i><span>{{ _("templates.gallery.delete_selected") }}</span>
                 <span id="templates-selected-count" class="badge rounded-pill bg-label-danger ms-1 d-none">0</span>
             </button>
         {% endif %}
-        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') }}"{% endif %}>
             <a role="button"
                class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}"
                href="{{ url_for('templates.template_create_page') }}">
-                <i class="bx bx-plus bx-xs me-1"></i><span data-i18n="button.create_template">Create template</span>
+                <i class="bx bx-plus bx-xs me-1"></i><span>{{ _("button.create_template") }}</span>
             </a>
         </div>
     {% endcall %}
@@ -56,7 +56,7 @@
                 {# Card title is the SHORT humanized id (kit tplCard anatomy); the long
                    template_data.name sentence becomes the muted description below. Core
                    ids carry an i18n key; custom ids fall back to the capitalized id with
-                   no data-i18n (i18next echoes missing keys, so we never attach one). #}
+                   no translation (gettext echoes missing keys, so we never look one up). #}
                 {% set core_names = {"low": "Low security", "medium": "Medium security", "high": "High security", "api": "API", "ui": "Web UI"} %}
                 {% set is_core_name = template in core_names %}
                 {# Keyword-map template id/name to a boxicon (presentation only, kit tplCard). #}
@@ -80,8 +80,8 @@
                                        aria-label="Select template {{ template }}" />
                             </div>
                             <i class="bx {{ tpl_icon }} bw-tpl-icon flex-shrink-0" aria-hidden="true"></i>
-                            <h6 class="bw-tpl-title mb-0 flex-grow-1"{% if is_core_name %} data-i18n="templates.name.{{ template }}"{% endif %}>{{ core_names[template] if is_core_name else template|capitalize }}</h6>
-                            <span class="tag-chip flex-shrink-0">{{ usage_count }}&nbsp;<span data-i18n="templates.gallery.svc_suffix">svc</span></span>
+                            <h6 class="bw-tpl-title mb-0 flex-grow-1">{{ _("templates.name." ~ template) if is_core_name else template|capitalize }}</h6>
+                            <span class="tag-chip flex-shrink-0">{{ usage_count }}&nbsp;<span>{{ _("templates.gallery.svc_suffix") }}</span></span>
                         </div>
                         <div class="bw-tpl-body">
                             <p class="bw-tpl-desc mb-3" title="{{ template_data.name }}">{{ template_data.name }}</p>
@@ -90,9 +90,7 @@
                                     {% for tag in visible_badges %}
                                         <span data-bs-toggle="tooltip"
                                               data-bs-placement="top"
-                                              data-bs-original-title="..."
-                                              data-i18n="templates.tag.{{ tag.type }}"
-                                              data-i18n-options='{{ {"name": tag.text} | tojson }}'>
+                                              data-bs-original-title="{{ _("templates.tag." ~ tag.type, name=tag.text) }}">
                                             {{ tpl_badge(text=tag.text, type=tag.type, icon=tag.icon) }}
                                         </span>
                                     {% endfor %}
@@ -107,38 +105,31 @@
                                 <a role="button"
                                    class="btn btn-primary btn-sm don-jose"
                                    href="{{ url_for('services.services_service_page', service='new', template=template) }}">
-                                    <i class="bx bx-rocket bx-xs" aria-hidden="true"></i><span data-i18n="button.use_template">Use template</span>
+                                    <i class="bx bx-rocket bx-xs" aria-hidden="true"></i><span>{{ _("button.use_template") }}</span>
                                 </a>
                                 <a role="button"
                                    class="btn btn-light btn-sm"
                                    href="{{ url_for('templates.template_edit_page', template_id=template) }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="..."
-                                   data-i18n="{% if is_view %}tooltip.link.view_template{% else %}tooltip.link.edit_template{% endif %}"
-                                   data-i18n-options='{"template": "{{ template }}"}'>
-                                    <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs" aria-hidden="true"></i><span data-i18n="button.{% if is_view %}view{% else %}edit{% endif %}">{% if is_view %}View{% else %}Edit{% endif %}</span>
+                                   data-bs-original-title="{{ _("tooltip.link.view_template" if is_view else "tooltip.link.edit_template", template=template) }}">
+                                    <i class="bx bx-{% if is_view %}show{% else %}edit{% endif %} bx-xs" aria-hidden="true"></i><span>{{ _("button.view" if is_view else "button.edit") }}</span>
                                 </a>
                                 <div class="row-actions d-flex gap-1 ms-auto">
-                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="tooltip.disabled_readonly"{% endif %}>
+                                    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly') }}"{% endif %}>
                                         <a role="button"
                                            class="btn btn-sm bw-icon-btn{% if is_readonly %} disabled{% endif %}"
                                            href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
                                            data-bs-toggle="tooltip"
                                            data-bs-placement="bottom"
-                                           data-bs-original-title="..."
-                                           data-i18n="tooltip.link.clone_template"
-                                           data-i18n-options='{"template": "{{ template }}"}'>
+                                           data-bs-original-title="{{ _("tooltip.link.clone_template", template=template) }}">
                                             <i class="bx bx-copy-alt bx-xs"></i>
                                         </a>
                                     </div>
                                     {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
-                                    {% set delete_tooltip_options = '{"method": "' ~ template_data['method'] ~ '"}' if template_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ template_data['id'] ~ '"}' %}
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="bottom"
-                                         data-bs-original-title="..."
-                                         data-i18n="{{ delete_tooltip_key }}"
-                                         data-i18n-options='{{ delete_tooltip_options }}'>
+                                         data-bs-original-title="{{ _(delete_tooltip_key, name=template_data['id'], method=template_data['method']) }}">
                                         <button type="button"
                                                 data-template-id="{{ template }}"
                                                 class="btn btn-sm bw-icon-btn bw-icon-btn-danger delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
@@ -162,14 +153,13 @@
         <div class="toast-header d-flex align-items-center">
             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+            <small class="text-body-secondary">{{ _("flash.time.just_now") }}</small>
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="toast"
-                    aria-label="Close"
-                    data-i18n="aria.label.close"></button>
+                    aria-label="{{ _("aria.label.close") }}"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
+        <div class="toast-body">{{ _("flash.easter_egg") }}</div>
     </div>
     {% if not is_readonly %}
         {% call modal(id="modal-delete-templates", title_key="modal.title.delete_template", title="Delete templates") %}

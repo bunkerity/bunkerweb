@@ -19,7 +19,7 @@
 
    Params:
      label           (required) accessible name / English fallback, e.g. "Admin User".
-     label_i18n_key  data-i18n key for label, e.g. "aria.label.user_avatar". Omit for names that
+     label_i18n_key  catalog key for label, e.g. "aria.label.user_avatar". Omit for names that
                      have no translation (e.g. a real person's display name).
      src             image URL. Takes precedence over initials when both are given.
      initials        1-2 letters shown when no src (CSS uppercases them automatically).
@@ -43,8 +43,7 @@
     <div{% if id %} id="{{ id }}"{% endif %}
          class="{{ outer_classes }}"
          role="img"
-         aria-label="{{ label }}"
-         {%- if label_i18n_key %} data-i18n="{{ label_i18n_key }}"{% endif %}>
+         aria-label="{{ _(label_i18n_key) if label_i18n_key else label }}">
         {%- if src %}
         <img src="{{ src }}"
              alt=""

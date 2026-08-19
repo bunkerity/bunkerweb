@@ -12,7 +12,7 @@
     {{ page_head(title="Timings", title_i18n="breadcrumb.timings",
                  breadcrumb=[("Operate", "navigation.operate", none),
                              ("Timings", "breadcrumb.timings", none)]) }}
-    <p class="text-muted mb-4" data-i18n="timings.subtitle">How long each plugin takes in each request phase, read live from every instance and merged.</p>
+    <p class="text-muted mb-4">{{ _("timings.subtitle") }}</p>
 
     {# Not persisted: what is on screen is what the instances hold right now, and it resets
        with them. Saying so up front stops the page being read as a history. #}
@@ -39,17 +39,17 @@
 
     {% call card(classes="table-responsive p-4", title="Plugin phases", title_key="timings.phases", icon="bx-stopwatch") %}
         {% if rows %}
-            <p class="text-muted small" data-i18n="timings.share_help">Share is the plugin's total time against total request time. Phases that do not run once per request — worker startup, the background timer and the internal API — have no share and show a dash.</p>
+            <p class="text-muted small">{{ _("timings.share_help") }}</p>
             <table class="table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th scope="col" data-i18n="timings.plugin">Plugin</th>
-                        <th scope="col" data-i18n="timings.phase">Phase</th>
-                        <th scope="col" class="text-end" data-i18n="timings.calls">Calls</th>
-                        <th scope="col" class="text-end" data-i18n="timings.mean">Mean</th>
-                        <th scope="col" class="text-end" data-i18n="timings.max">Max</th>
-                        <th scope="col" class="text-end" data-i18n="timings.total">Total</th>
-                        <th scope="col" class="text-end" data-i18n="timings.share">Share</th>
+                        <th scope="col">{{ _("timings.plugin") }}</th>
+                        <th scope="col">{{ _("timings.phase") }}</th>
+                        <th scope="col" class="text-end">{{ _("timings.calls") }}</th>
+                        <th scope="col" class="text-end">{{ _("timings.mean") }}</th>
+                        <th scope="col" class="text-end">{{ _("timings.max") }}</th>
+                        <th scope="col" class="text-end">{{ _("timings.total") }}</th>
+                        <th scope="col" class="text-end">{{ _("timings.share") }}</th>
                     </tr>
                 </thead>
                 <tbody>

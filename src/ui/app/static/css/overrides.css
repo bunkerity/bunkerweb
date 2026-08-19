@@ -4731,3 +4731,56 @@ code.bad-behavior-event__value {
   color: #ff8a8a;
   border-color: rgba(255, 99, 99, 0.4);
 }
+/* Guided walkthrough: the element a "Show me" is pointing at.
+   Outline rather than border so the chrome does not shift while it pulses. */
+.bw-tour-target {
+  outline: 3px solid var(--bs-primary);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+  animation: bw-tour-pulse 1.4s ease-in-out 3;
+}
+[data-bs-theme="dark"] .bw-tour-target {
+  outline-color: var(--bs-bw-green);
+}
+@keyframes bw-tour-pulse {
+  0%,
+  100% {
+    outline-offset: 2px;
+  }
+  50% {
+    outline-offset: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-tour-target {
+    animation: none;
+  }
+}
+/* The walkthrough's two floating surfaces. Sneat's core.css pins `--bs-popover-bg` and the
+   toast background to white in both themes while the text colour follows the theme, so in
+   dark mode both render white-on-white. Bound to the body tokens instead, which flip with
+   `data-bs-theme` on their own — no second rule, no JS reading the current theme. */
+#onboarding-hint .toast {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  /* In dark mode the body token is the page background too, so without these the card has no
+     edge and reads as text floating over the content. */
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.25);
+}
+.bw-tour-popover {
+  --bs-popover-bg: var(--bs-body-bg);
+  --bs-popover-body-color: var(--bs-body-color);
+  --bs-popover-header-bg: var(--bs-body-bg);
+  --bs-popover-header-color: var(--bs-body-color);
+  --bs-popover-border-color: var(--bs-border-color);
+}
+/* Release notes: a changelog line carries setting names like
+   METRICS_BASELINE_RETENTION_MAX_ROWS, and an unbreakable token that long makes the whole
+   dialog scroll sideways rather than wrapping. */
+.release-notes {
+  overflow-wrap: break-word;
+}
+.release-notes code {
+  overflow-wrap: anywhere;
+}

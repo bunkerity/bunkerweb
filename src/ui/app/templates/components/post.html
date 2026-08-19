@@ -37,28 +37,28 @@
      title           (required) English fallback title text, rendered as the card's link.
      excerpt         (required) English fallback excerpt/body text.
      href            link target for the title (and the image, if any). Default "#".
-     title_i18n      data-i18n key for title.
-     excerpt_i18n    data-i18n key for excerpt.
+     title_i18n      catalog key for title.
+     excerpt_i18n    catalog key for excerpt.
      external        add target="_blank" rel="noopener" to the title/image links (outbound blog
                       posts). Default false.
      image           optional lead image URL. Omit to render a text-only card.
      image_alt       English fallback alt text for the image. Default "".
-     image_alt_i18n  data-i18n key for image_alt.
+     image_alt_i18n  catalog key for image_alt.
      orientation      'vertical' (default -- image on top, `data-news-row` styling, matches the
                       sidebar-news.html card) | 'horizontal' (image on the left in a `row g-0`,
                       `data-news-row-home` styling, matches the dashboard.html wide card).
      avatar_label    optional author name -- when set, renders an xs components/avatar.html
                       next to `meta` (the "image/avatar" alternative to a lead `image`; the two
                       are independent, a card can have a lead image AND an author avatar).
-     avatar_i18n     data-i18n key for avatar_label.
+     avatar_i18n     catalog key for avatar_label.
      avatar_src      avatar image URL, passed straight to components/avatar.html.
      avatar_initials avatar initials fallback, passed straight to components/avatar.html.
      meta            optional English fallback meta text (date, "by <author>", read time...).
                       Rendered pre-formatted, same as the design kit's own `date` prop -- this
                       macro does not localize a "Posted on:" prefix for you.
-     meta_i18n       data-i18n key for meta.
+     meta_i18n       catalog key for meta.
      tag             optional English fallback text for the footer tag pill.
-     tag_i18n        data-i18n key for tag.
+     tag_i18n        catalog key for tag.
      tag_variant     bg-label-<variant> color passed to components/badge.html. Default
                       'secondary'.
      clamp           number of lines to clamp the excerpt to via core.css's `.line-clamp-<n>`
@@ -114,8 +114,7 @@
                 <a class="w-100" href="{{ href }}"{{ link_attrs | safe }}>
                     <img class="card-img card-img-left"
                          src="{{ image }}"
-                         alt="{{ image_alt or '' }}"
-                         {%- if image_alt_i18n %} data-i18n="{{ image_alt_i18n }}"{% endif %}
+                         alt="{{ _(image_alt_i18n) if image_alt_i18n else (image_alt or '') }}"
                          loading="lazy" />
                 </a>
             </div>
@@ -123,17 +122,17 @@
             <div class="{{ 'col-md-7' if image else 'col-12' }}">
                 <div class="card-body p-3">
                     <h6 class="card-title lh-sm mb-2">
-                        <a href="{{ href }}"{{ link_attrs | safe }}{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</a>
+                        <a href="{{ href }}"{{ link_attrs | safe }}>{{ _(title_i18n) if title_i18n else title }}</a>
                     </h6>
                     <p class="card-text lh-1 courier-prime mb-0">
-                        <small{% if clamp %} class="line-clamp-{{ clamp }}"{% endif %}{% if excerpt_i18n %} data-i18n="{{ excerpt_i18n }}"{% endif %}>{{ excerpt }}</small>
+                        <small{% if clamp %} class="line-clamp-{{ clamp }}"{% endif %}>{{ _(excerpt_i18n) if excerpt_i18n else excerpt }}</small>
                     </p>
                     {%- if has_footer %}
                     <div class="{{ footer_classes }}">
                         {%- if meta or avatar_label %}
                         <div class="d-flex align-items-center gap-2">
                             {%- if avatar_label %}{{ avatar(label=avatar_label, label_i18n_key=avatar_i18n, src=avatar_src, initials=avatar_initials, size='xs') }}{% endif %}
-                            {%- if meta %}<small class="text-muted courier-prime"{% if meta_i18n %} data-i18n="{{ meta_i18n }}"{% endif %}>{{ meta }}</small>{% endif %}
+                            {%- if meta %}<small class="text-muted courier-prime">{{ _(meta_i18n) if meta_i18n else meta }}</small>{% endif %}
                         </div>
                         {%- endif %}
                         {%- if tag %}{{ badge(text=tag, i18n_key=tag_i18n, variant=tag_variant, icon='bx-purchase-tag') }}{% endif %}
@@ -147,22 +146,21 @@
         <a href="{{ href }}"{{ link_attrs | safe }}>
             <img class="card-img-top"
                  src="{{ image }}"
-                 alt="{{ image_alt or '' }}"
-                 {%- if image_alt_i18n %} data-i18n="{{ image_alt_i18n }}"{% endif %}
+                 alt="{{ _(image_alt_i18n) if image_alt_i18n else (image_alt or '') }}"
                  loading="lazy" />
         </a>
         {%- endif %}
         <div class="card-body">
             <h5 class="card-title">
-                <a href="{{ href }}"{{ link_attrs | safe }}{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</a>
+                <a href="{{ href }}"{{ link_attrs | safe }}>{{ _(title_i18n) if title_i18n else title }}</a>
             </h5>
-            <p class="{{ excerpt_classes }}"{% if excerpt_i18n %} data-i18n="{{ excerpt_i18n }}"{% endif %}>{{ excerpt }}</p>
+            <p class="{{ excerpt_classes }}">{{ _(excerpt_i18n) if excerpt_i18n else excerpt }}</p>
             {%- if has_footer %}
             <div class="{{ footer_classes }}">
                 {%- if meta or avatar_label %}
                 <div class="d-flex align-items-center gap-2">
                     {%- if avatar_label %}{{ avatar(label=avatar_label, label_i18n_key=avatar_i18n, src=avatar_src, initials=avatar_initials, size='xs') }}{% endif %}
-                    {%- if meta %}<small class="text-muted courier-prime"{% if meta_i18n %} data-i18n="{{ meta_i18n }}"{% endif %}>{{ meta }}</small>{% endif %}
+                    {%- if meta %}<small class="text-muted courier-prime">{{ _(meta_i18n) if meta_i18n else meta }}</small>{% endif %}
                 </div>
                 {%- endif %}
                 {%- if tag %}{{ badge(text=tag, i18n_key=tag_i18n, variant=tag_variant, icon='bx-purchase-tag') }}{% endif %}

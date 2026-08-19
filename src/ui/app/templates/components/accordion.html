@@ -1,7 +1,7 @@
 {# usage: {% from "components/accordion.html" import accordion, accordion_item %}
           {% call accordion(id="waf-help") %}
             {% call accordion_item(id="waf-help-tls", parent_id="waf-help", title="TLS & certificates", title_i18n="accordion.title.tls", icon="bx-lock-alt", subtitle="AUTO_LETS_ENCRYPT", open=true) %}
-              <p data-i18n="accordion.body.tls">Issue and renew certificates automatically.</p>
+              <p>{{ _("accordion.body.tls") }}</p>
             {% endcall %}
           {% endcall %} #}
 
@@ -43,7 +43,7 @@
                  the heading/aria-labelledby link and is the data-bs-target the button
                  points at.
      title       required -- English fallback header text (the always-visible trigger copy).
-     title_i18n  data-i18n key for title.
+     title_i18n  catalog key for title.
      parent_id   accordion() id to close sibling sections on open (data-bs-parent). Omit
                  for a section that toggles independently of the rest of the group.
      open        start expanded. Default false.
@@ -51,7 +51,7 @@
      subtitle    optional trailing caption before the chevron -- e.g. a SETTING name,
                  rendered in the app's existing courier-prime monospace face (see
                  components/secret-field.html) since that's what it's for here too.
-     subtitle_i18n  data-i18n key for subtitle.
+     subtitle_i18n  catalog key for subtitle.
      disabled    render the trigger inert (disabled button, can't be toggled). Default false.
      heading     heading tag wrapping the button, for correct document outline in whatever
                  context the accordion is embedded ("h2" | "h3" | "h4" ...). Default "h2",
@@ -95,8 +95,8 @@
                     aria-controls="{{ id }}"
                     {% if disabled %}disabled{% endif %}>
                 {%- if icon %}<i class="bx {{ icon }} me-2" aria-hidden="true"></i>{% endif %}
-                <span class="flex-grow-1 text-truncate"{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</span>
-                {%- if subtitle %}<span class="courier-prime text-muted small me-2"{% if subtitle_i18n %} data-i18n="{{ subtitle_i18n }}"{% endif %}>{{ subtitle }}</span>{% endif %}
+                <span class="flex-grow-1 text-truncate">{{ _(title_i18n) if title_i18n else title }}</span>
+                {%- if subtitle %}<span class="courier-prime text-muted small me-2">{{ _(subtitle_i18n) if subtitle_i18n else subtitle }}</span>{% endif %}
             </button>
         </{{ heading }}>
         <div id="{{ id }}"

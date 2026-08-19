@@ -195,6 +195,11 @@ class BiscuitMiddleware:
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
+                # A reader has no `write` permission but owns its onboarding state. The route
+                # stamps `current_user` and never reads a username from the body, so this
+                # grants each account exactly its own blob and nothing else.
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/onboarding/state"'))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/whats-new/state"'))
                 authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
                 authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
 

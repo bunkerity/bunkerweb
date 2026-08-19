@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "Linisin ang paghahanap",
       "close": "Isara",
+      "collapse_multiline": "I-collapse ang mga multi-line na entry",
+      "configs_dropzone": "Pumili ng custom na file ng export ng mga configuration o i-drop dito",
       "copy": "Kopyahin ang mga log",
       "download_log": "I-download ang log file na ito",
       "follow": "Subaybayan",
       "hide_value": "Itago ang halaga",
-      "reveal_value": "Ipakita ang halaga",
-      "select_file": "Pumili ng File",
-      "select_page": "Pumili ng Pahina",
       "issue_count": "Bilang ng error at babala",
       "level_filter": "Salain ang mga linya ng log ayon sa antas",
       "local_time": "Ipakita ang mga timestamp sa lokal na oras",
-      "collapse_multiline": "I-collapse ang mga multi-line na entry",
       "next_issue": "Susunod na error o babala",
+      "passkey_name": "Pangalan ng passkey",
+      "plugins_dropzone": "Pumili ng mga archive ng plugin o i-drop ang mga ito dito",
       "prev_issue": "Nakaraang error o babala",
-      "search_logs": "Maghanap sa mga log",
-      "toggle_wrap": "I-toggle ang pag-wrap ng linya",
-      "configs_dropzone": "Pumili ng custom na file ng export ng mga configuration o i-drop dito",
       "raw_configuration": "Raw na configuration",
-      "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
-      "user_avatar": "Avatar ng gumagamit",
       "remove_value": "Alisin ang halaga",
-      "view_selected_items": "Tingnan ang napiling mga item",
-      "passkey_name": "Pangalan ng passkey"
+      "reveal_value": "Ipakita ang halaga",
+      "search_logs": "Maghanap sa mga log",
+      "select_file": "Pumili ng File",
+      "select_page": "Pumili ng Pahina",
+      "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
+      "toggle_wrap": "I-toggle ang pag-wrap ng linya",
+      "user_avatar": "Avatar ng gumagamit",
+      "view_selected_items": "Tingnan ang napiling mga item"
     }
   },
   "badge": {
@@ -92,23 +93,23 @@
     }
   },
   "breadcrumb": {
-    "about": "Tungkol Sa",
+    "about": "Tungkol sa",
     "bans": "Mga Ban",
     "cache": "Cache",
-    "threatmap": "Threatmap",
-    "web_cache": "Web Cache",
-    "timings": "Mga oras",
+    "threatmap": "Mapa ng mga banta",
+    "web_cache": "Cache ng web",
+    "timings": "Mga timing",
     "configs": "Mga Config",
-    "extra_pages": "Karagdagang Mga Pahina",
-    "global_settings": "Mga Pandaigdigang Setting",
+    "extra_pages": "Mga karagdagang pahina",
+    "global_settings": "Mga pangkalahatang setting",
     "global_config": "Pangkalahatang configuration",
-    "home": "Tahanan",
+    "home": "Pangunahing pahina",
     "instances": "Mga Instance",
-    "jobs": "Mga Trabaho",
+    "jobs": "Mga gawain",
     "logs": "Mga Log",
-    "misc": "Iba Pa",
+    "misc": "Iba pa",
     "mode_selection": "Pagpili ng Mode",
-    "more": "Higit Pa...",
+    "more": "Higit pa...",
     "new": "Bago",
     "plugins": "Mga Plugin",
     "plugins_pages": "Mga Pahina ng Plugin",
@@ -118,14 +119,15 @@
     "groups": "Mga grupo ng mapagkukunan",
     "services": "Mga Serbisyo",
     "support": "Suporta",
-    "templates": "Mga Template"
+    "templates": "Mga Template",
+    "whats_new": "Ano ang bago"
   },
   "button": {
     "actions": "Mga Aksyon",
     "activate_key": "I-activate ang Key",
     "add": "IDAGDAG",
-    "add_ban_plural": "Magdagdag ng Ban(s)",
-    "add_plugin_plural": "Magdagdag ng Plugin(s)",
+    "add_ban_plural": "Magdagdag ng ban",
+    "add_plugin_plural": "Magdagdag ng plugin",
     "add_plugins": "Magdagdag ng Mga Plugin",
     "auto_refresh": "Awtomatikong I-refresh",
     "ban": "I-ban",
@@ -147,7 +149,7 @@
     "create_instance": "Lumikha ng Instance",
     "create_service": "Lumikha ng bagong serbisyo",
     "create_template": "Lumikha ng template",
-    "delete": "Burahin",
+    "delete": "Tanggalin",
     "delete_instance": "Burahin ang Mga Instance",
     "disable_totp": "I-disable ang TOTP",
     "download": "I-download",
@@ -212,7 +214,7 @@
     "upload_photo": "Mag-upload ng Bagong Larawan",
     "view_details": "Tingnan ang Mga Detalye",
     "view_raw_data": "Tingnan ang Raw Data",
-    "wipe_other_sessions": "Burahin ang Ibang Mga Session",
+    "wipe_other_sessions": "I-log out ang iba pang session",
     "ban_all_filtered": "I-ban ang lahat ng tumutugmang report",
     "filtered_actions": "Mga na-filter na aksyon",
     "unban_all_filtered": "Alisin ang lahat ng tumutugmang ban",
@@ -224,7 +226,12 @@
     "rename": "Palitan ang pangalan",
     "add_passkey": "Magdagdag ng passkey",
     "sign_in_with_passkey": "Mag-sign in gamit ang passkey",
-    "use_security_key": "Gumamit ng security key"
+    "use_security_key": "Gumamit ng security key",
+    "go": "Pumunta →",
+    "retry": "Subukang muli",
+    "got_it": "Naiintindihan ko",
+    "show_me": "Ipakita sa akin",
+    "see_all_releases": "Tingnan ang lahat ng release"
   },
   "cache": {
     "kpi_files": "Mga file",
@@ -531,7 +538,7 @@
       },
       "upstreams": {
         "planned": "Sa darating na panahon",
-        "title": "Mga pinagmulan"
+        "title": "Mga upstream"
       },
       "top_reasons": {
         "title": "Pangunahing dahilan ng pag-block"
@@ -883,6 +890,7 @@
   "interval": {
     "day": "Araw-araw",
     "hour": "Bawat oras",
+    "minute": "Bawat minuto",
     "once": "Isang beses",
     "week": "Lingguhang"
   },
@@ -979,7 +987,7 @@
       "confirmation_instance_deletion": "Sigurado ka bang gusto mong burahin ang napiling instance?",
       "delete_confirmation_alert": "Sigurado ka bang gusto mong burahin ang napiling instance?",
       "delete_confirmation_alert_plural": "Sigurado ka bang gusto mong burahin ang mga napiling instance?",
-      "delete_confirmation_template_used": "Isa o higit pang napiling template ay nakatakda sa mga serbisyo ({{services_count}} serbisyo(s) kabuuan). Ang pag-alis sa kanila ay magtatanggal ng mga takdang ito. Gusto mo bang magpatuloy?",
+      "delete_confirmation_template_used": "Isa o higit pang napiling template ay nakatakda sa mga serbisyo (kabuuang serbisyo: {{services_count}}). Ang pag-alis sa mga ito ay magtatanggal ng mga takdang ito. Gusto mo bang magpatuloy?",
       "delete_step_confirmation": "Sigurado ka bang gusto mong burahin ang hakbang na ito?",
       "delete_step_content_label": "Nilalaman",
       "delete_step_name_label": "Hakbang",
@@ -1018,7 +1026,7 @@
       "delete": "Burahin"
     },
     "title": {
-      "add_bans": "Magdagdag ng Ban(s)",
+      "add_bans": "Magdagdag ng ban",
       "add_plugins": "Magdagdag ng Mga Plugin",
       "confirm_conversion": "Kumpirmahin ang Conversion",
       "confirm_deletion": "Kumpirmahin ang Pagbubura",
@@ -1064,28 +1072,28 @@
     "version": "Bersyon"
   },
   "navigation": {
-    "about": "Tungkol Sa",
+    "about": "Tungkol sa",
     "bans": "Mga Ban",
     "cache": "Cache",
     "certificates": "Mga Sertipiko",
-    "threatmap": "Threatmap",
-    "web_cache": "Web Cache",
-    "timings": "Mga oras",
+    "threatmap": "Mapa ng mga banta",
+    "web_cache": "Cache ng web",
+    "timings": "Mga timing",
     "configs": "Mga Config",
-    "extra_pages": "Karagdagang Mga Pahina",
-    "global_settings": "Mga Pandaigdigang Setting",
+    "extra_pages": "Mga karagdagang pahina",
+    "global_settings": "Mga pangkalahatang setting",
     "groups": "Mga grupo ng mapagkukunan",
-    "home": "Tahanan",
+    "home": "Pangunahing pahina",
     "instances": "Mga Instance",
-    "jobs": "Mga Trabaho",
+    "jobs": "Mga gawain",
     "logs": "Mga Log",
-    "misc": "Iba Pa",
+    "misc": "Iba pa",
     "mode_selection": "Pagpili ng Mode",
-    "more": "Higit Pa...",
+    "more": "Higit pa...",
     "plugin_activated": "Na-activate ang Plugin",
-    "plugin_activated_global": "Na-activate ang Plugin nang Pandaigdigang",
+    "plugin_activated_global": "Na-activate ang plugin sa buong system",
     "plugin_deactivated": "Na-deactivate ang Plugin",
-    "plugin_deactivated_global": "Na-deactivate ang Plugin nang Pandaigdigang",
+    "plugin_deactivated_global": "Na-deactivate ang plugin sa buong system",
     "plugins": "Mga Plugin",
     "plugins_pages": "Mga Pahina ng Plugin",
     "pro": "Pro",
@@ -1096,9 +1104,9 @@
     "overview": "Pangkalahatang-ideya",
     "configure": "I-configure",
     "operate": "Pamahalaan",
-    "system": "System",
+    "system": "Sistema",
     "edition_community": "Komunidad",
-    "redirects": "Nagrerefer",
+    "redirects": "Mga pag-redirect",
     "upstreams": "Mga upstream",
     "workflows": "Mga daloy ng trabaho",
     "edition_pro": "Pro"
@@ -1195,12 +1203,12 @@
       "upgrade_required": "Mag-upgrade sa Pro upang ma-access ang feature na ito"
     },
     "status": {
-      "draft_services_count": "{{draft_services}} Draft na serbisyo(s)",
+      "draft_services_count": "Mga draft na serbisyo: {{draft_services}}",
       "expired": "NAG-EXPIRE",
       "free_version": "Libreng Bersyon",
       "overlapped": "NAOBERLAPAN",
       "pro_version": "PRO na Bersyon",
-      "services_count": "{{online_services}} Online na Serbisyo(s) / {{pro_services}} PRO na Serbisyo(s)",
+      "services_count": "Mga online na serbisyo: {{online_services}} / Mga PRO na serbisyo: {{pro_services}}",
       "suspended": "NASUSPENDE",
       "title": "Katayuan"
     },
@@ -1298,7 +1306,7 @@
         "title": "Mga nangungunang ASNs"
       },
       "top_offenders": {
-        "title": "Mga nangungunang gumagamit"
+        "title": "Mga nangungunang umaatake"
       },
       "top_rules": {
         "title": "Mga nangungunang patakaran ng ModSecurity na na-trigger"
@@ -1315,7 +1323,7 @@
     "subtitle": "Mga ulat ng seguridad na nabuo mula sa mga na-block na kahilingan sa iyong mga instance ng BunkerWeb — maghanap, mag-filter, mag-export, at i-ban ang mga IP na nagdulot ng problema nang direkta mula sa talahanayan.",
     "tab": {
       "eventlog": "Log ng pangyayari",
-      "offenders": "Mga nangungunang gumagamit",
+      "offenders": "Mga nangungunang umaatake",
       "overview": "Pangkalahatang-tanaw",
       "patterns": "Mga pattern ng pag-atake"
     },
@@ -1333,13 +1341,13 @@
       "blocked": "Mga na-block na kahilingan",
       "blocked_rate": "Trend kumpara sa nakaraang panahon",
       "bot": "Bot / scraper",
-      "countries": "Mga nangungunang bansa",
+      "countries": "Mga bansang pinagmumulan ng pinakamaraming pag-atake",
       "peak_hour": "Oras ng peak",
       "rce": "RCE / command",
-      "repeat_offenders": "Mga madalas na gumagamit (top 10)",
+      "repeat_offenders": "Mga umuulit na umaatake (nangungunang 10)",
       "sqli": "SQL injection",
       "unique_ips": "Top na IP address ng mga umaatake",
-      "unique_offenders": "Mga madalas na gumagamit"
+      "unique_offenders": "Mga nangungunang umaatake"
     }
   },
   "scope": {
@@ -1542,10 +1550,11 @@
     "up": "Aktibo",
     "active": "Aktibo",
     "all_valid": "Lahat ay wasto",
-    "expired": "Nawawala na",
+    "expired": "Nag-expire na",
     "expiring": "Malapit nang mag-expire",
     "no_settings": "Ang plugin na ito ay walang setting para sa saklaw na ito.",
-    "yes": "Oo"
+    "yes": "Oo",
+    "optional": "Opsyonal"
   },
   "step": {
     "next": "Susunod",
@@ -1671,7 +1680,7 @@
       "missing_configs_upload_failed": "Nabigo ang pag-upload ng mga config file",
       "missing_configs_upload_label": "Mag-upload ng mga nawawalang config (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} ng {{total}} na config ang na-upload. Nawawala pa rin: {{missing}}",
-      "missing_configs_upload_success": "{{count}} na config file(s) ang matagumpay na na-upload",
+      "missing_configs_upload_success": "Mga config file na matagumpay na na-upload: {{count}}",
       "multiselect_placeholder": "Pumili ng mga opsyon",
       "multiselect_summary": "{{count}} napili",
       "multivalue_add": "Magdagdag ng value",
@@ -1694,7 +1703,7 @@
       "raw_configs_help": "Mag-upload ng mga config file (.conf, .cfg, .txt) upang magdagdag ng mga entry sa <code>configs</code>. Ang mga uri ay default sa <code>server_http</code>; ayusin sa JSON kung kinakailangan.",
       "raw_configs_import_invalid": "Hindi ma-import ang mga config dahil ang kasalukuyang JSON ay hindi valid.",
       "raw_configs_import_none": "Walang na-import na config.",
-      "raw_configs_import_success": "{{count}} na config file(s) ang na-import.",
+      "raw_configs_import_success": "Mga config file na na-import: {{count}}.",
       "raw_configs_note": "Ang mga na-import na file ay idadagdag sa JSON editor. Suriin at ayusin bago i-save.",
       "raw_configs_title": "Mga import ng custom config",
       "raw_configs_upload": "Mag-upload ng mga config file (.conf, .cfg, .txt)",
@@ -1744,7 +1753,7 @@
       "setting_selector_clear": "Linisin ang paghahanap",
       "setting_selector_count_all_used": "Lahat ng katugmang setting ay naidagdag na.",
       "setting_selector_count_empty": "Walang setting na ipapakita.",
-      "setting_selector_count_only_available": "{{count, plural, one {# setting na available} other {# na setting na available}}}",
+      "setting_selector_count_only_available": "Mga available na setting: {{count}}",
       "setting_selector_count_with_used": "{{available}} na available, {{used}} na naidagdag",
       "setting_selector_default": "Default",
       "setting_selector_docs": "Tingnan ang dokumentasyon",
@@ -2168,7 +2177,7 @@
     "common_name": "Common name",
     "confirm": "Kumpirmahin",
     "confirm_action": "Kumpirmahin ang aksyon sa sertipiko",
-    "confirm_delete": "Tanggalin ang \"{{name}}\"? Hindi ito maaaring baguhin.",
+    "confirm_delete": "Tanggalin ang “{{name}}”? Hindi na ito maibabalik.",
     "confirm_generic": "Kumpirmahin ang aksyon sa sertipiko?",
     "confirm_renew": "I-renew ang \"{{name}}\"?",
     "confirm_renew_due": "Suriin ang bawat sertipiko at i-renew ang mga ito na may takdang panahon?",
@@ -2180,7 +2189,7 @@
     "empty": "Walang sertipiko",
     "empty_help": "Gumawa ng sertipiko na may sariling sertipikasyon, mag-iskedyul ng ACME issuance, o i-upload ang umiiral na sertipiko at susi na nasa format na PEM.",
     "expired_help": "Kailangan ng atensyon",
-    "expires": "Nag-expire na",
+    "expires": "Petsa ng pag-expire",
     "expiring_help": "30 araw o mas maikli",
     "file_extensions": "Gumamit ng isa sa mga sumusunod na extension: {{extensions}}.",
     "file_select": "Piliin ang isang file na nasa format na PEM.",
@@ -2190,7 +2199,7 @@
     "issuer": "Tagapaglabas",
     "issuers": "Mga nangungunang tagapaglabas",
     "key_drop": "Ilagay dito ang katugmang pribadong susi",
-    "key_limit": "Maximum 1 MiB; naka-encrypt sa pahinga at hindi maaaring i-download",
+    "key_limit": "Maximum 1 MiB; naka-encrypt habang nakaimbak at hindi kailanman mada-download",
     "last_error": "Huling error",
     "make_primary": "Markahan bilang pangunahing pagtatalaga para sa serbisyong ito",
     "managed": "Mga sertipikong pinamamahalaan",
@@ -2209,7 +2218,7 @@
     "primary": "Pangunahing pagtatalaga",
     "primary_help": "Markahan bilang pangunahing pagtatalaga para sa napiling mga serbisyo",
     "readonly": "Ang database ay read-only. Maaaring suriin at i-download ang mga sertipiko, ngunit hindi maaaring baguhin.",
-    "renew_due": "Suriin/i-renew ang due date",
+    "renew_due": "Suriin at i-renew ang mga dapat nang i-renew",
     "sans": "Mga pangalan ng alternatibong paksa",
     "save_metadata": "I-save ang metadata",
     "schedule": "Mag-iskedyul ng issuance",
@@ -2226,7 +2235,7 @@
     },
     "source_label": "Pinagmulan",
     "status": {
-      "expired": "Nawawala na",
+      "expired": "Nag-expire na",
       "expiring_soon": "Malapit nang mag-expire",
       "not_yet_valid": "Hindi pa wasto",
       "revoked": "Na-revoke",
@@ -2237,7 +2246,7 @@
     "truncated": "Ang unang 500 sertipiko lamang ang ipinapakita. Limitahan ang imbentaryo gamit ang API para sa kumpletong resulta.",
     "unassigned": "Hindi naka-assign",
     "upcoming": "Mga paparating na renewal",
-    "upcoming_help": "Nawawala na o nasa loob ng 30-araw na panahon ng renewal",
+    "upcoming_help": "Nag-expire na o nasa loob ng 30-araw na renewal window",
     "upload": "Mag-upload ng sertipiko",
     "upload_custom": "Mag-upload ng custom na sertipiko",
     "upload_invalid": "Pumili ng wasto na publikong sertipiko at ang katugmang pribadong key.",
@@ -2257,7 +2266,7 @@
     "comment": "Komento",
     "collapse_all": "I-collapse lahat",
     "delete": "Tanggalin ang resource group",
-    "delete_confirm": "Tanggalin ang @{{name}}? Hindi ito maaaring baguhin.",
+    "delete_confirm": "Tanggalin ang @{{name}}? Hindi na ito maibabalik.",
     "delete_help": "Ang pagtanggal ay hindi pinapayagan habang may setting na tumutukoy sa alias na ito.",
     "editor_edit": "I-edit ang @{{name}}",
     "editor_new": "Bagong resource group",
@@ -2331,7 +2340,7 @@
     "purge_key_placeholder": "Epektibong PROXY_CACHE_KEY (opsyonal)",
     "purge_url": "Tanggalin ang URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
-    "reporting_instances": "Pag-uulat ng mga instance",
+    "reporting_instances": "Mga instance na nag-uulat",
     "service": "Serbisyo",
     "services": "Pag-enable ng serbisyo",
     "status": "Imbakan ng instance",
@@ -2365,8 +2374,8 @@
     "all": "Lahat",
     "append_badge": "+ URI",
     "append_request_uri": "Idagdag ang hinihinging URI sa target",
-    "attach": "Idikit",
-    "attach_copy": "Idikit ang {{name}} ({{from}} → {{to}}) sa isa o higit pang serbisyo.",
+    "attach": "Ikabit",
+    "attach_copy": "Ikabit ang {{name}} ({{from}} → {{to}}) sa isa o higit pang serbisyo.",
     "code": {
       "301": "301 — Permanently Moved",
       "302": "302 — Natagpuan",
@@ -2379,7 +2388,7 @@
     "delete_copy": "Burahin ang redirect {{name}}?",
     "delete_help": "Hindi maaaring burahin ang redirect na nakakabit sa isang serbisyo. Tanggalin muna ito.",
     "edit": "I-edit ang redirect",
-    "edit_shared": "Ang redirect na ito ay nakakabit sa serbisyo(y) {{count}}: {{services}}. I-save ang mga pagbabago sa lahat.",
+    "edit_shared": "Nakakabit ang redirect na ito sa {{count}} serbisyo: {{services}}. Kapag na-save, mababago ang lahat ng ito.",
     "empty_text": "Ang redirect ay isang pangalan na patakaran na ikinakabit sa isa o higit pang serbisyo. Ang mga setting ng REDIRECT_* ay patuloy na gumagana kasama nito.",
     "empty_title": "Walang redirect pa",
     "from_path": "Redirect mula sa",
@@ -2397,8 +2406,8 @@
   "upstreams": {
     "add_server": "Magdagdag ng server",
     "all": "Lahat",
-    "attach": "Idikit",
-    "attach_copy": "Idikit {{name}} ({{servers}}) sa isa o higit pang serbisyo.",
+    "attach": "Ikabit",
+    "attach_copy": "Ikabit ang {{name}} ({{servers}}) sa isa o higit pang serbisyo.",
     "backend_ssl": "Makipag-usap TLS sa mga server (https:// / grpcs://)",
     "balancing": {
       "ip_hash": "IP hash — parehong kliyente, parehong backend",
@@ -2410,7 +2419,7 @@
     "delete_copy": "Burahin ang upstream na {{name}}?",
     "delete_help": "Hindi maaaring burahin ang upstream na nakakabit sa isang serbisyo. Kailangan munang tanggalin ito.",
     "edit": "I-edit ang upstream",
-    "edit_shared": "Ang upstream na ito ay nakakabit sa serbisyo(y) na {{count}}: {{services}}. I-save ang mga pagbabago para sa lahat.",
+    "edit_shared": "Nakakabit ang upstream na ito sa {{count}} serbisyo: {{services}}. Kapag na-save, mababago ang lahat ng ito.",
     "empty_text": "Ang upstream ay isang pangalan na pool ng mga backends na ikinakabit sa isa o higit pang serbisyo sa isang reverse proxy path. Ang mga setting na REVERSE_PROXY_HOST ay patuloy na gumagana kasama nito.",
     "empty_title": "Walang upstream pa",
     "keepalive": "Panatilihin ang koneksyon",
@@ -2489,7 +2498,7 @@
       "uriValue": "Value ng URI",
       "window": "Window sa segundo"
     },
-    "attach": "Idikit sa mga serbisyo",
+    "attach": "Ikabit sa mga serbisyo",
     "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
     "attached_notice": "Sa pag-save, ilalapat ang mga patakarang ito sa {{count}} nakalakip na serbisyo.",
     "canvas": {
@@ -2504,7 +2513,7 @@
       "entry_sub": "Ang mga patakaran ay tumatakbo mula kaliwa pakanan.",
       "entry_title": "Bawat kahilingan",
       "exit_sub": "Patuloy sa susunod na nakakabit na daloy ng trabaho.",
-      "exit_title": "Walang patakaran ang tumugma",
+      "exit_title": "Walang tumugmang patakaran",
       "fit": "Fit to view",
       "gateTip": "Isang gate ng pagtutugma, hindi isang aksyon: kapag mas mababa sa threshold, hindi tumutugma ang patakaran at sinusuri ang susunod na patakaran.",
       "hint": "I-drag ang isang node upang ayusin · i-drag ang board upang mag-pan · Alt + ← / → sa isang naka-focus na node",
@@ -2603,7 +2612,7 @@
       "lastValueRemoved": "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value.",
       "moved": "Inilipat ang {{name}} sa puwestong {{to}} sa {{total}}{{how}}. Tumatakbo na ito {{where}}.",
       "predicateCap": "Mayroon nang {{max}} kondisyon ang patakarang ito, ang maximum.",
-      "ruleAbove": "pagkatapos ng patakaran sa itaas",
+      "ruleAbove": "patakaran sa itaas",
       "ruleDisabled": "Naka-disable ang {{name}} — lubos itong nilalaktawan at nakikita na ng mga patakaran sa ibaba ang mga request na iyon.",
       "ruleEnabled": "Naka-enable ang {{name}} — sinusuri ulit ito sa puwestong {{n}}.",
       "runsAfter": "pagkatapos ng {{name}}",
@@ -2713,27 +2722,27 @@
     "source": "Pagkasunod-sunod ng pagpapatupad ng plugin para sa phase na {{phase}}, mula sa {{setting}} — isang pagkakasunod-sunod ng pagpapakita, hindi isang pagsubaybay bawat kahilingan.",
     "terminal": {
       "inline": "Backend",
-      "none": "Walang natanggap",
+      "none": "Walang inihain",
       "pool": "Pool ng upstream",
       "root": "Mga lokal na file"
     },
     "title": "Landas ng kahilingan",
-    "unordered": "Walang ipinahayag na posisyon sa phase na {{phase}}; tumatak ito pagkatapos ng mga nakaayos na plugin, sa alpabetikong pagkakasunod."
+    "unordered": "Walang nakatalagang posisyon sa phase na {{phase}}; tumatakbo ito pagkatapos ng mga nakaayos na plugin, ayon sa alpabeto."
   },
   "service": {
     "resources": {
-      "attach": "Idikit",
+      "attach": "Ikabit",
       "conflict": {
         "inline": "Ang {{service}} ay nagsisilbi sa {{path}} sa pamamagitan ng sarili nitong mga setting na {{family}}. Linisin ang mga setting na ito para sa {{path}}, o gumamit ng ibang landas.",
-        "primary": "Ang “{{name}}” ay kasalukuyang ang pangunahing sertipiko para sa serbisyong ito at aalisin nang walang karagdagang babala. Ang pangunahing sertipiko ay ang aktwal na ginagamit.",
+        "primary": "Ang “{{name}}” ang kasalukuyang primary certificate ng serbisyong ito at hindi na ito magiging primary nang walang karagdagang babala. Ang primary ang aktwal na naka-deploy.",
         "resource": "Ang {{service}} ay nagsisilbi sa {{path}} sa pamamagitan ng “{{kind}}” na {{name}}. Tanggalin ang “{{name}}”, o bigyan ang isa sa kanila ng ibang landas.",
-        "stream": "Ang isang serbisyo ng stream ay nagpapalitan ng koneksyon sa isang solong backend, at ang {{service}} ay kasalukuyang gumagamit ng upstream na “{{name}}”. Tanggalin muna ito.",
+        "stream": "Ipinapasa ng stream service ang bawat koneksyon sa iisang backend, at ginagamit na ng {{service}} ang upstream na “{{name}}”. Ihiwalay muna ito.",
         "stream_inline": "Ang {{service}} ay may sariling backend sa REVERSE_PROXY_HOST. Linisin ang setting na ito upang hayaan ang upstream na kontrolin."
       },
       "detach": "Tanggalin",
       "family": {
         "certificate": "Mga Sertipiko",
-        "redirect": "Nagrerebisa",
+        "redirect": "Mga pag-redirect",
         "template": "Template",
         "upstream": "Mga upstream",
         "workflow": "Mga daloy ng trabaho"
@@ -2753,13 +2762,33 @@
     }
   },
   "onboarding": {
+    "dismiss": "Huwag nang ipakita",
+    "error": "Hindi ma-load ang gabay.",
+    "hint": {
+      "bans": "Ang mga ban ay ang mga client na kasalukuyang tinatanggihan ng BunkerWeb. Ipinapakita ng bawat hilera ang dahilan at kung kailan ito mag-e-expire.",
+      "home": "Ipinapakita ng dashboard na ito ang kasalukuyang kalagayan: mga tumatakbong instance, mga serbisyong inihahain at ang trapikong hinawakan ng BunkerWeb.",
+      "logs": "Live na log mula sa bawat instance, mafi-filter ayon sa instance at severity.",
+      "reports": "Dito napupunta ang bawat na-block na kahilingan. Buksan ang isa para makita kung aling pagsusuri sa seguridad ang humarang dito, at bakit.",
+      "title": "Mabilisang paglilibot"
+    },
     "item": {
+      "first_block": "Makita ang BunkerWeb na humarang ng request",
+      "https": "Paganahin ang HTTPS",
       "install": "I-install ang BunkerWeb sa 1+ host",
       "mfa": "I-activate ang MFA",
       "pro": "I-activate ang BunkerWeb PRO",
-      "service": "Irehistro ang unang serbisyo"
+      "read_bans": "Tingnan kung sino ang naka-ban, at hanggang kailan",
+      "read_home": "Basahin ang dashboard: kung ano ang maayos ngayon",
+      "read_logs": "Subaybayan ang live logs sa lahat ng instance",
+      "read_reports": "Alamin kung bakit hinarang ang isang request",
+      "service": "Irehistro ang unang serbisyo",
+      "workflow": "Maglakip ng security workflow"
     },
+    "not_saved": "Hindi ito na-save.",
     "pro_tips": "Mga tip para sa PRO",
+    "restart": "Simulan muli ang gabay",
+    "restart_help": "Ipakita muli ang mga panimulang hakbang sa itaas na bar.",
+    "subtitle": "Ilang hakbang lang para maprotektahan ng BunkerWeb ang iyong mga serbisyo.",
     "title": "Pagsisimula"
   },
   "timings": {
@@ -2783,5 +2812,15 @@
     "disabled_help": "Itakda ang METRICS_COLLECT_TIMINGS sa yes para sukatin ang tagal ng bawat plugin. Kinokolekta pa rin ang buong tagal ng request.",
     "unreachable_title": "Walang instance na nag-ulat ng oras",
     "unreachable_help": "Binabasa ang mga oras mula sa mga instance mismo, kaya walang sumagot — o wala pang nagserbisyo ng request."
+  },
+  "whatsnew": {
+    "missing_action": "Buksan ang changelog sa GitHub",
+    "missing_message": "Hindi kasama ang CHANGELOG.md sa build na ito. Available sa GitHub ang mga release note.",
+    "missing_title": "Walang changelog sa installation na ito",
+    "modal": {
+      "intro": "Narito ang mga nagbago mula sa bersyong huli mong ginamit.",
+      "title": "Ano ang bago"
+    },
+    "subtitle": "Lahat ng release ng BunkerWeb, pinakabago muna, mula mismo sa changelog na kasama ng installation na ito."
   }
 }

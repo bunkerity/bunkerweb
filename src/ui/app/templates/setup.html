@@ -10,13 +10,17 @@
 {% from "components/button.html" import button %}
 {% block head %}
     <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
           href="{{ url_for('static', filename='css/pages/auth-legacy.css') }}"
           nonce="{{ style_nonce }}" />
 {% endblock %}
 {% block page %}
     <!-- Content -->
-    <div class="theme-bg-surface">
-        <div class="login-background">
+    <div class="setup-screen">
+        {% include "components/auth-deco.html" %}
+        <div>
             <input type="hidden" id="ui_user" value="{{ 'yes' if ui_user else 'no' }}" />
             <input type="hidden"
                    id="ui_reverse_proxy"
@@ -36,7 +40,7 @@
                         <div class="toggle-container d-flex align-items-center theme-toggle-pill p-2 rounded-pill shadow-lg me-3">
                             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
                                    for="dark-mode-toggle"
-                                   data-i18n="theme.light">Light</label>
+                                  >{{ _("theme.light") }}</label>
                             <div class="form-switch">
                                 <input id="dark-mode-toggle"
                                        name="dark-mode-toggle"
@@ -47,17 +51,16 @@
                             </div>
                             <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
                                    for="dark-mode-toggle"
-                                   data-i18n="theme.dark">Dark</label>
+                                  >{{ _("theme.dark") }}</label>
                         </div>
                         <ul class="d-flex mb-0 list-unstyled">
                             {% if current_user.is_authenticated %}
                                 <li class="me-3">
                                     <a class="btn btn-sm btn-outline-danger fw-bold text-uppercase d-flex align-items-center h-100"
                                        href="{{ url_for('logout') }}"
-                                       aria-label="Log Out"
-                                       data-i18n-aria-label="navbar.dropdown.logout">
+                                       aria-label="{{ _("navbar.dropdown.logout") }}">
                                         <i class="bx bx-power-off me-0 me-md-2" aria-hidden="true"></i>
-                                        <span class="d-none d-md-inline" data-i18n="navbar.dropdown.logout">Log Out</span>
+                                        <span class="d-none d-md-inline">{{ _("navbar.dropdown.logout") }}</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -69,7 +72,7 @@
                                    target="_blank"
                                    rel="noopener">
                                     <span class="bx bx-help-circle me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.need_help">Need help?</span>
+                                    <span class="d-none d-md-inline">{{ _("button.need_help") }}</span>
                                 </a>
                             </li>
                             <li class="position-relative">
@@ -81,7 +84,7 @@
                                         data-bs-target="#side-offcanvas-news"
                                         aria-controls="side-offcanvas-news">
                                     <span class="bx bx-news me-0 me-md-2"></span>
-                                    <span class="d-none d-md-inline" data-i18n="button.news">News</span>
+                                    <span class="d-none d-md-inline">{{ _("button.news") }}</span>
                                 </button>
                             </li>
                         </ul>
@@ -90,18 +93,15 @@
                 <div class="authentication-wrapper authentication-basic container-p-y">
                     <div class="authentication-inner w-100">
                         <!-- Setup -->
-                        <div class="card px-sm-6 px-0">
+                        <div class="card sw-card px-sm-6 px-0">
                             <div class="card-header d-flex justify-content-between align-items-center mw-100">
                                 <div class="pt-1">
-                                    <h4 class="card-title d-inline border fw-bold p-2 don-jose"
-                                        data-i18n="setup.title">Setup Wizard</h4>
-                                    <p class="card-subtitle text-muted text-truncate mt-3"
-                                       data-i18n="setup.subtitle">Follow the steps to complete the setup wizard</p>
+                                    <h4 class="sw-title">{{ _("setup.title") }}</h4>
+                                    <p class="sw-subtitle text-truncate"
+                                      >{{ _("setup.subtitle") }}</p>
                                 </div>
-                                <div class="app-brand justify-content-center">
-                                    <span class="app-brand-logo login">
-                                        <i class="bx bx-lg bxs-magic-wand bx-tada"></i>
-                                    </span>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="bx bxs-magic-wand bx-tada sw-wand" aria-hidden="true"></i>
                                 </div>
                             </div>
                             <div class="card-body p-2 pb-8">
@@ -119,8 +119,8 @@
                                                         aria-controls="navs-steps-1"
                                                         aria-selected="true">1</button>
                                                 <div class="text-nowrap">
-                                                    <div class="fw-bold text-primary" data-i18n="setup.step1.title">Admin User</div>
-                                                    <small class="text-muted" data-i18n="setup.step1.subtitle">Create Admin User</small>
+                                                    <div class="fw-bold text-primary">{{ _("setup.step1.title") }}</div>
+                                                    <small class="text-muted">{{ _("setup.step1.subtitle") }}</small>
                                                 </div>
                                             </li>
                                             <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
@@ -131,8 +131,8 @@
                                                         data-bs-target="#navs-steps-2"
                                                         aria-controls="navs-steps-2">2</button>
                                                 <div class="text-nowrap">
-                                                    <div class="fw-bold text-muted" data-i18n="setup.step2.title">UI specific Settings</div>
-                                                    <small class="text-muted" data-i18n="setup.step2.subtitle">Configure web UI specific settings</small>
+                                                    <div class="fw-bold text-muted">{{ _("setup.step2.title") }}</div>
+                                                    <small class="text-muted">{{ _("setup.step2.subtitle") }}</small>
                                                 </div>
                                             </li>
                                             <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
@@ -143,8 +143,8 @@
                                                         data-bs-target="#navs-steps-3"
                                                         aria-controls="navs-steps-3">3</button>
                                                 <div class="text-nowrap">
-                                                    <div class="fw-bold text-muted" data-i18n="setup.step3.title">PRO Features</div>
-                                                    <small class="text-muted" data-i18n="setup.step3.subtitle">Activate PRO features</small>
+                                                    <div class="fw-bold text-muted">{{ _("setup.step3.title") }}</div>
+                                                    <small class="text-muted">{{ _("setup.step3.subtitle") }}</small>
                                                 </div>
                                             </li>
                                             <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
@@ -155,8 +155,8 @@
                                                         data-bs-target="#navs-steps-4"
                                                         aria-controls="navs-steps-4">4</button>
                                                 <div class="text-nowrap">
-                                                    <div class="fw-bold text-muted" data-i18n="setup.step4.title">Overview</div>
-                                                    <small class="text-muted" data-i18n="setup.step4.subtitle">Review your settings</small>
+                                                    <div class="fw-bold text-muted">{{ _("setup.step4.title") }}</div>
+                                                    <small class="text-muted">{{ _("setup.step4.subtitle") }}</small>
                                                 </div>
                                             </li>
                                         </ol>
@@ -169,8 +169,8 @@
                                          data-step="1"
                                          aria-labelledby="navs-steps-1-tab">
                                         <div class="pt-1 pb-4">
-                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step1.title">Admin User</h5>
-                                            <p class="card-subtitle text-muted" data-i18n="setup.step1.subtitle">Create Admin User</p>
+                                            <h5 class="mb-1 fw-bold">{{ _("setup.step1.title") }}</h5>
+                                            <p class="card-subtitle text-muted">{{ _("setup.step1.subtitle") }}</p>
                                         </div>
                                         {% if not ui_user %}
                                             <div class="row pb-0">
@@ -183,14 +183,13 @@
                                                         <label id="label-email"
                                                                for="email"
                                                                class="form-label fw-semibold text-truncate">
-                                                            <span data-i18n="form.label.admin_email">Admin Email</span><span id="email-optional"> <i><span data-i18n="form.label.optional">(optional)</span></i></span>
+                                                            <span>{{ _("form.label.admin_email") }}</span><span id="email-optional"> <i><span>{{ _("form.label.optional") }}</span></i></span>
                                                         </label>
                                                         <div class="d-flex align-items-center">
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Email must be between 1 and 256 characters long"
-                                                                  data-i18n="tooltip.email_length">
+                                                                  data-bs-original-title="{{ _("tooltip.email_length") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -222,20 +221,16 @@
                                                     <div class="mt-3">
                                                         <ul class="list-unstyled" id="password-requirements">
                                                             <li id="length-check">
-                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Your password must
-                                                                have at least 8 characters.</span>
+                                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_length") }}</span>
                                                             </li>
                                                             <li id="uppercase-check">
-                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Your password must
-                                                                have at least 1 uppercase letter.</span>
+                                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_uppercase") }}</span>
                                                             </li>
                                                             <li id="number-check">
-                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Your password must
-                                                                have at least 1 number.</span>
+                                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_number") }}</span>
                                                             </li>
                                                             <li id="special-check">
-                                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Your password must
-                                                                have at least 1 special character.</span>
+                                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_special") }}</span>
                                                             </li>
                                                         </ul>
                                                     </div>
@@ -261,7 +256,7 @@
                                             </div>
                                         {% else %}
                                             <div class="alert alert-primary text-center fw-bold" role="alert">
-                                                <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span data-i18n="setup.status.admin_user_exists">An admin user already exists, please proceed to the next step</span>
+                                                <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span>{{ _("setup.status.admin_user_exists") }}</span>
                                             </div>
                                         {% endif %}
                                     </div>
@@ -271,8 +266,8 @@
                                          data-step="2"
                                          aria-labelledby="navs-steps-2-tab">
                                         <div class="pt-1 pb-4">
-                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step2.title">UI specific Settings</h5>
-                                            <p class="card-subtitle text-muted" data-i18n="setup.step2.subtitle">Configure web UI specific settings</p>
+                                            <h5 class="mb-1 fw-bold">{{ _("setup.step2.title") }}</h5>
+                                            <p class="card-subtitle text-muted">{{ _("setup.step2.subtitle") }}</p>
                                         </div>
                                         {% if not ui_reverse_proxy %}
                                             <div class="pb-6">
@@ -281,7 +276,7 @@
                                                 {{ text(id="SERVER_NAME", label=none, value=server_name, placeholder=server_name_setting['default'], pattern=server_name_setting['regex'], required=true, input_class="plugin-setting mt-1") }}
                                             </div>
                                             <h6 class="mt-2 mb-2 fw-bold"
-                                                data-i18n="setup.step2.section.lets_encrypt">Let's Encrypt</h6>
+                                               >{{ _("setup.step2.section.lets_encrypt") }}</h6>
                                             <div class="row pb-0">
                                                 <div class="col-12 col-md-4 pb-3">
                                                     <div class="d-flex justify-content-between align-items-center">
@@ -298,8 +293,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Whether to automatically request a Let's Encrypt certificate"
-                                                                  data-i18n="tooltip.auto_lets_encrypt">
+                                                                  data-bs-original-title="{{ _("tooltip.auto_lets_encrypt") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -308,7 +302,7 @@
                                                 </div>
                                                 <div class="col-12 col-md-4 pb-3"
                                                      data-le-field="wildcard"
-                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Wildcard certificates are only supported with DNS challenges." data-i18n="tooltip.wildcard_dns_only"{% endif %}>
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.wildcard_dns_only") }}"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         {{ ui_label(for_id="USE_LETS_ENCRYPT_WILDCARD", text="Wildcard Certificates", id="label-USE_LETS_ENCRYPT_WILDCARD", text_i18n="form.label.wildcard_certificates", emphasized=true) }}
                                                         <div class="d-flex align-items-center">
@@ -323,8 +317,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Create wildcard certificates for all domains. This allows a single certificate to secure multiple subdomains."
-                                                                  data-i18n="tooltip.wildcard_certificates">
+                                                                  data-bs-original-title="{{ _("tooltip.wildcard_certificates") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -346,8 +339,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Disable certificate requests for domains matching the Public Suffix List (recommended)."
-                                                                  data-i18n="tooltip.lets_encrypt_disable_public_suffixes">
+                                                                  data-bs-original-title="{{ _("tooltip.lets_encrypt_disable_public_suffixes") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -369,8 +361,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The email address that will be used for Let's Encrypt"
-                                                                  data-i18n="tooltip.email_lets_encrypt">
+                                                                  data-bs-original-title="{{ _("tooltip.email_lets_encrypt") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -392,8 +383,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="Choose your certificate provider to show provider-specific settings."
-                                                                  data-i18n="tooltip.lets_encrypt_server">
+                                                                  data-bs-original-title="{{ _("tooltip.lets_encrypt_server") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -406,17 +396,15 @@
                                                     <ul class="nav nav-pills nav-fill mt-1"
                                                         id="acme-server-tabs"
                                                         role="tablist"
-                                                        data-i18n="setup.step2.lets_encrypt.certificate_authority_selector"
-                                                        aria-label="Certificate Authority Selector">
+                                                        aria-label="{{ _("setup.step2.lets_encrypt.certificate_authority_selector") }}">
                                                         <li class="nav-item" role="presentation">
                                                             <button class="nav-link {% if lets_encrypt_server == 'letsencrypt' %}active{% endif %}"
                                                                     id="acme-tab-letsencrypt"
                                                                     type="button"
                                                                     role="tab"
                                                                     data-acme-server="letsencrypt"
-                                                                    data-i18n="setup.step2.section.lets_encrypt"
                                                                     aria-selected="{% if lets_encrypt_server == 'letsencrypt' %}true{% else %}false{% endif %}">
-                                                                Let's Encrypt
+                                                                {{ _("setup.step2.section.lets_encrypt") }}
                                                             </button>
                                                         </li>
                                                         <li class="nav-item" role="presentation">
@@ -425,9 +413,8 @@
                                                                     type="button"
                                                                     role="tab"
                                                                     data-acme-server="zerossl"
-                                                                    data-i18n="setup.step2.section.zerossl"
                                                                     aria-selected="{% if lets_encrypt_server == 'zerossl' %}true{% else %}false{% endif %}">
-                                                                ZeroSSL
+                                                                {{ _("setup.step2.section.zerossl") }}
                                                             </button>
                                                         </li>
                                                     </ul>
@@ -436,8 +423,8 @@
                                                              id="acme-pane-letsencrypt"
                                                              role="tabpanel">
                                                             <p class="text-muted mb-3 small"
-                                                               data-i18n="setup.step2.lets_encrypt.letsencrypt_description">
-                                                                Use Let's Encrypt for standard ACME issuance. Staging is available for testing and integration checks.
+                                                              >
+                                                                {{ _("setup.step2.lets_encrypt.letsencrypt_description") }}
                                                             </p>
                                                             <div class="row">
                                                                 <div class="col-12 col-md-6 pb-3" data-le-field="staging">
@@ -455,8 +442,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Whether to use the Let's Encrypt staging environment"
-                                                                                  data-i18n="tooltip.use_lets_encrypt_staging">
+                                                                                  data-bs-original-title="{{ _("tooltip.use_lets_encrypt_staging") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -469,8 +455,8 @@
                                                              id="acme-pane-zerossl"
                                                              role="tabpanel">
                                                             <p class="text-muted mb-3 small"
-                                                               data-i18n="setup.step2.lets_encrypt.zerossl_description">
-                                                                Use ZeroSSL with zerossl-bot. Provide an account email or API key for account issuance and key-based reissue tracking.
+                                                              >
+                                                                {{ _("setup.step2.lets_encrypt.zerossl_description") }}
                                                             </p>
                                                             <div class="row">
                                                                 <div class="col-12 pb-3">
@@ -488,8 +474,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Optional ZeroSSL API key used by zerossl-bot."
-                                                                                  data-i18n="tooltip.zerossl_api_key">
+                                                                                  data-bs-original-title="{{ _("tooltip.zerossl_api_key") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -503,7 +488,7 @@
                                                                            aria-labelledby="label-LETS_ENCRYPT_ZEROSSL_API_KEY"
                                                                            pattern="{{ plugins_settings.get('LETS_ENCRYPT_ZEROSSL_API_KEY', {'regex': '^.*$'})['regex'] }}" />
                                                                     <small class="text-muted d-block mt-1"
-                                                                           data-i18n="setup.step2.lets_encrypt.zerossl_api_key_hint">If empty, ZeroSSL will use the configured email for account registration.</small>
+                                                                          >{{ _("setup.step2.lets_encrypt.zerossl_api_key_hint") }}</small>
                                                                 </div>
                                                                 <div class="col-sm-6 col-md-3 pb-3">
                                                                     <div class="d-flex justify-content-between align-items-center">
@@ -520,8 +505,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Number of retries for ZeroSSL API requests (0 disables retries)."
-                                                                                  data-i18n="tooltip.zerossl_api_retry">
+                                                                                  data-bs-original-title="{{ _("tooltip.zerossl_api_retry") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -549,8 +533,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Delay in seconds between ZeroSSL API retries."
-                                                                                  data-i18n="tooltip.zerossl_api_retry_delay">
+                                                                                  data-bs-original-title="{{ _("tooltip.zerossl_api_retry_delay") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -578,8 +561,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Connection timeout in seconds for ZeroSSL API calls."
-                                                                                  data-i18n="tooltip.zerossl_api_connect_timeout">
+                                                                                  data-bs-original-title="{{ _("tooltip.zerossl_api_connect_timeout") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -607,8 +589,7 @@
                                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                                   data-bs-toggle="tooltip"
                                                                                   data-bs-placement="top"
-                                                                                  data-bs-original-title="Maximum total time in seconds for each ZeroSSL API request."
-                                                                                  data-i18n="tooltip.zerossl_api_max_time">
+                                                                                  data-bs-original-title="{{ _("tooltip.zerossl_api_max_time") }}">
                                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                                             </span>
                                                                         </div>
@@ -640,8 +621,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The challenge type to use for Let's Encrypt (http or dns)."
-                                                                  data-i18n="tooltip.challenge_type">
+                                                                  data-bs-original-title="{{ _("tooltip.challenge_type") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -654,7 +634,7 @@
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
                                                      data-le-field="dns-provider"
-                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS provider is only supported with DNS challenges." data-i18n="tooltip.dns_provider_dns_only"{% endif %}>
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.dns_provider_dns_only") }}"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         {{ ui_label(for_id="LETS_ENCRYPT_DNS_PROVIDER", text="DNS Provider", id="label-LETS_ENCRYPT_DNS_PROVIDER", text_i18n="form.label.dns_provider", emphasized=true) }}
                                                         <div class="d-flex align-items-center">
@@ -669,8 +649,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The DNS provider to use for DNS challenges."
-                                                                  data-i18n="tooltip.dns_provider">
+                                                                  data-bs-original-title="{{ _("tooltip.dns_provider") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -728,8 +707,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The profile to use for Let's Encrypt (classic, tlsserver, shortlived)."
-                                                                  data-i18n="tooltip.lets_encrypt_profile">
+                                                                  data-bs-original-title="{{ _("tooltip.lets_encrypt_profile") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -755,8 +733,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile')."
-                                                                  data-i18n="tooltip.lets_encrypt_custom_profile">
+                                                                  data-bs-original-title="{{ _("tooltip.lets_encrypt_custom_profile") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -765,7 +742,7 @@
                                                 </div>
                                                 <div class="col-sm-6 col-md-4 pb-3"
                                                      data-le-field="dns-propagation"
-                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="DNS propagation is only supported with DNS challenges." data-i18n="tooltip.dns_propagation_dns_only"{% endif %}>
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.dns_propagation_dns_only") }}"{% endif %}>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         {{ ui_label(for_id="LETS_ENCRYPT_DNS_PROPAGATION", text="DNS Propagation", id="label-LETS_ENCRYPT_DNS_PROPAGATION", text_i18n="form.label.dns_propagation", emphasized=true) }}
                                                         <div class="d-flex align-items-center">
@@ -780,8 +757,7 @@
                                                             <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                   data-bs-toggle="tooltip"
                                                                   data-bs-placement="top"
-                                                                  data-bs-original-title="The time to wait for DNS propagation in seconds for DNS challenges."
-                                                                  data-i18n="tooltip.dns_propagation">
+                                                                  data-bs-original-title="{{ _("tooltip.dns_propagation") }}">
                                                                 <span class="bx bx-question-mark bx-xs"></span>
                                                             </span>
                                                         </div>
@@ -790,7 +766,7 @@
                                                 </div>
                                                 <div class="col-12 pb-3"
                                                      data-le-field="dns-credentials"
-                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Credentials are only supported with DNS challenges." data-i18n="tooltip.dns_credentials_dns_only"{% endif %}>
+                                                     {% if lets_encrypt_challenge == 'http' %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.dns_credentials_dns_only") }}"{% endif %}>
                                                     {{ ui_label(for_id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS", text="Lets encrypt dns credential items", id="label-LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS", text_i18n="form.label.lets_encrypt_dns_credential_items", emphasized=true, help="Configuration item that will be added to the credentials.ini file for the DNS provider (e.g. 'cloudflare_api_token 123456') for DNS challenges.", help_i18n="tooltip.dns_credential_items", help_as_tooltip=true) }}
                                                     {{ text_area(id="LETS_ENCRYPT_DNS_CREDENTIAL_ITEMS", label=none, value=(lets_encrypt_dns_credential_items | join("\n")), disabled=(lets_encrypt_challenge == 'http'), textarea_class="plugin-setting mt-1") }}
                                                 </div>
@@ -810,8 +786,8 @@
                                                 <div class="container">
                                                     <div class="row pb-0">
                                                         <h6 class="mt-2 mb-2 fw-bold"
-                                                            data-i18n="setup.step2.section.reverse_proxy">
-                                                            Reverse Proxy
+                                                           >
+                                                            {{ _("setup.step2.section.reverse_proxy") }}
                                                         </h6>
                                                         <div class="col-12 col-md-6 pb-6">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -828,8 +804,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The host that will be used for the reverse proxy"
-                                                                          data-i18n="tooltip.ui_host">
+                                                                          data-bs-original-title="{{ _("tooltip.ui_host") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -843,15 +818,13 @@
                                                                     <span class="badge badge-center rounded-pill bg-warning text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="We recommend using a random URL"
-                                                                          data-i18n="tooltip.ui_url_security">
+                                                                          data-bs-original-title="{{ _("tooltip.ui_url_security") }}">
                                                                         <span class="bx bx-shield bx-xs"></span>
                                                                     </span>
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The URL that will be used for the reverse proxy"
-                                                                          data-i18n="tooltip.ui_url">
+                                                                          data-bs-original-title="{{ _("tooltip.ui_url") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -859,7 +832,7 @@
                                                             {% set reverse_proxy_url_setting = plugins_settings.get('REVERSE_PROXY_URL', {'default': '/', 'regex': '^.+$'}) %}
                                                             {{ text(id="REVERSE_PROXY_URL", label=none, value=reverse_proxy_url_setting['default'], pattern=reverse_proxy_url_setting['regex'], required=true, input_class="plugin-setting mt-1") }}
                                                         </div>
-                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step2.section.real_ip">Real IP</h6>
+                                                        <h6 class="mt-2 mb-2 fw-bold">{{ _("setup.step2.section.real_ip") }}</h6>
                                                         <div class="col-4 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
                                                                 {{ ui_label(for_id="USE_REAL_IP", text="Use Real IP", id="label-USE_REAL_IP", text_i18n="form.label.use_real_ip", emphasized=true) }}
@@ -875,8 +848,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Use Real IP"
-                                                                          data-i18n="tooltip.use_real_ip">
+                                                                          data-bs-original-title="{{ _("tooltip.use_real_ip") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -898,8 +870,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Enable PROXY protocol communication."
-                                                                          data-i18n="tooltip.use_proxy_protocol">
+                                                                          data-bs-original-title="{{ _("tooltip.use_proxy_protocol") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -921,8 +892,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Perform a recursive search in the header container IP address."
-                                                                          data-i18n="tooltip.real_ip_recursive">
+                                                                          data-bs-original-title="{{ _("tooltip.real_ip_recursive") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -944,8 +914,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="HTTP header containing the real IP or special value proxy_protocol for PROXY protocol."
-                                                                          data-i18n="tooltip.real_ip_header">
+                                                                          data-bs-original-title="{{ _("tooltip.real_ip_header") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -967,8 +936,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="List of trusted IPs / networks, separated with spaces, where proxied requests come from."
-                                                                          data-i18n="tooltip.real_ip_from">
+                                                                          data-bs-original-title="{{ _("tooltip.real_ip_from") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -990,8 +958,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme."
-                                                                          data-i18n="tooltip.real_ip_from_urls">
+                                                                          data-bs-original-title="{{ _("tooltip.real_ip_from_urls") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -999,8 +966,8 @@
                                                             {{ text(id="REAL_IP_FROM_URLS", label=none, value=real_ip_from_urls, pattern=plugins_settings.get('REAL_IP_FROM_URLS', {'regex': '^.+$'})['regex'], input_class="plugin-setting mt-1") }}
                                                         </div>
                                                         <h6 class="mt-2 mb-2 fw-bold"
-                                                            data-i18n="setup.step2.section.custom_certificate">
-                                                            Custom certificate
+                                                           >
+                                                            {{ _("setup.step2.section.custom_certificate") }}
                                                         </h6>
                                                         <div class="col-12 col-md-6 pb-3">
                                                             <div class="d-flex justify-content-between align-items-center">
@@ -1017,8 +984,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Whether to use a custom SSL certificate"
-                                                                          data-i18n="tooltip.use_custom_ssl">
+                                                                          data-bs-original-title="{{ _("tooltip.use_custom_ssl") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1040,8 +1006,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="Choose whether to prioritize the certificate from file path or from base64 data."
-                                                                          data-i18n="tooltip.certificate_priority">
+                                                                          data-bs-original-title="{{ _("tooltip.certificate_priority") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1067,8 +1032,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The custom SSL certificate path"
-                                                                          data-i18n="tooltip.custom_ssl_cert_path">
+                                                                          data-bs-original-title="{{ _("tooltip.custom_ssl_cert_path") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1090,8 +1054,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The custom SSL key path"
-                                                                          data-i18n="tooltip.custom_ssl_key_path">
+                                                                          data-bs-original-title="{{ _("tooltip.custom_ssl_key_path") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1113,8 +1076,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The custom SSL certificate data (base64/pem)"
-                                                                          data-i18n="tooltip.custom_ssl_cert_data">
+                                                                          data-bs-original-title="{{ _("tooltip.custom_ssl_cert_data") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1147,8 +1109,7 @@
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"
-                                                                          data-bs-original-title="The custom SSL key data (base64/pem)"
-                                                                          data-i18n="tooltip.custom_ssl_key_data">
+                                                                          data-bs-original-title="{{ _("tooltip.custom_ssl_key_data") }}">
                                                                         <span class="bx bx-question-mark bx-xs"></span>
                                                                     </span>
                                                                 </div>
@@ -1179,7 +1140,7 @@
                                                    type="hidden"
                                                    value="{{ ui_reverse_proxy_url }}" />
                                             <div class="alert alert-primary text-center fw-bold" role="alert">
-                                                <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span data-i18n="setup.status.reverse_proxy_configured">A reverse proxy is already configured for the web interface, please proceed to the next step</span>
+                                                <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span>{{ _("setup.status.reverse_proxy_configured") }}</span>
                                             </div>
                                         {% endif %}
                                     </div>
@@ -1207,16 +1168,16 @@
                                             </p>
                                         </div>
                                         <div class="pt-1 pb-4">
-                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step3.title">Upgrade to PRO</h5>
-                                            <p class="card-subtitle text-muted" data-i18n="setup.step3.subtitle">
-                                                Unlock advanced features and get the most out of BunkerWeb.
+                                            <h5 class="mb-1 fw-bold">{{ _("setup.step3.title") }}</h5>
+                                            <p class="card-subtitle text-muted">
+                                                {{ _("setup.step3.subtitle") }}
                                             </p>
                                         </div>
                                         <div class="row justify-content-center">
                                             <div class="col-12 col-md-10 col-lg-8">
                                                 {% if pro_license_key %}
                                                     <div class="alert alert-primary text-center fw-bold" role="alert">
-                                                        <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span data-i18n="setup.status.pro_license_key_exists">A PRO license key is already configured, please proceed to the next step.</span>
+                                                        <i class="bx bx-check-circle me-1" aria-hidden="true"></i><span>{{ _("setup.status.pro_license_key_exists") }}</span>
                                                     </div>
                                                 {% else %}
                                                     <div class="mb-4">
@@ -1231,19 +1192,19 @@
                                                     </div>
                                                     <div class="pro-card card mb-4 p-0">
                                                         <div class="card-body">
-                                                            <h6 class="mb-3 fw-bold" data-i18n="setup.step3.label.pro_benefits">PRO Benefits</h6>
+                                                            <h6 class="mb-3 fw-bold">{{ _("setup.step3.label.pro_benefits") }}</h6>
                                                             <ul class="list-group list-group-flush">
                                                                 <li class="list-group-item">
-                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_1_title">Access to all PRO features</strong>: <span data-i18n="setup.step3.pro_benefit_1_description">Unlock all advanced features including enhanced security, performance, and management tools.</span>
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime">{{ _("setup.step3.pro_benefit_1_title") }}</strong>: <span>{{ _("setup.step3.pro_benefit_1_description") }}</span>
                                                                 </li>
                                                                 <li class="list-group-item">
-                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_2_title">Technical support from maintainers</strong>: <span data-i18n="setup.step3.pro_benefit_2_description">Get priority support from the BunkerWeb team for any issues or questions you may have.</span>
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime">{{ _("setup.step3.pro_benefit_2_title") }}</strong>: <span>{{ _("setup.step3.pro_benefit_2_description") }}</span>
                                                                 </li>
                                                                 <li class="list-group-item">
-                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_3_title">Custom development</strong>: <span data-i18n="setup.step3.pro_benefit_3_description">Tailored solutions to meet your specific needs.</span>
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime">{{ _("setup.step3.pro_benefit_3_title") }}</strong>: <span>{{ _("setup.step3.pro_benefit_3_description") }}</span>
                                                                 </li>
                                                                 <li class="list-group-item">
-                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_4_title">Custom consulting</strong>: <span data-i18n="setup.step3.pro_benefit_4_description">Expert advice to optimize your BunkerWeb setup.</span>
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime">{{ _("setup.step3.pro_benefit_4_title") }}</strong>: <span>{{ _("setup.step3.pro_benefit_4_description") }}</span>
                                                                 </li>
                                                             </ul>
                                                             <div class="text-center mt-3">
@@ -1252,7 +1213,7 @@
                                                                    target="_blank"
                                                                    rel="noopener"
                                                                    class="btn btn-bw-green"
-                                                                   data-i18n="link.more_info">More info</a>
+                                                                  >{{ _("link.more_info") }}</a>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1266,8 +1227,8 @@
                                          data-step="4"
                                          aria-labelledby="navs-steps-4-tab">
                                         <div class="pt-1 pb-4">
-                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step4.title">Overview</h5>
-                                            <p class="card-subtitle text-muted" data-i18n="setup.step4.subtitle">Review your settings</p>
+                                            <h5 class="mb-1 fw-bold">{{ _("setup.step4.title") }}</h5>
+                                            <p class="card-subtitle text-muted">{{ _("setup.step4.subtitle") }}</p>
                                         </div>
                                         <div class="d-flex justify-content-center pb-0 mb-4">
                                             <div class="col-12 col-md-8">
@@ -1301,7 +1262,7 @@
                                                 {% endif %}
                                                 {% if not ui_reverse_proxy %}
                                                     <div class="pb-3">
-                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step4.label.final_url">BunkerWeb UI final URL</h6>
+                                                        <h6 class="mt-2 mb-2 fw-bold">{{ _("setup.step4.label.final_url") }}</h6>
                                                         {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
                                                         {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
                                                         {% include "models/input_setting.html" %}
@@ -1312,12 +1273,12 @@
                                         <div class="d-flex justify-content-center text-center mt-4">
                                             {% if not ui_user %}
                                                 <div>
-                                                    <i class="bx bx-check text-success"></i> <span data-i18n="setup.status.secure_password">Secure password</span>
+                                                    <i class="bx bx-check text-success"></i> <span>{{ _("setup.status.secure_password") }}</span>
                                                 </div>
                                             {% endif %}
                                             {% if not ui_reverse_proxy %}
                                                 <div id="overview-unique-server-name" class="ms-4">
-                                                    <i class="bx bx-question-mark text-warning"></i> <span data-i18n="setup.status.unique_server_name">Unique Server Name</span>
+                                                    <i class="bx bx-question-mark text-warning"></i> <span>{{ _("setup.status.unique_server_name") }}</span>
                                                 </div>
                                             {% endif %}
                                         </div>
@@ -1329,10 +1290,10 @@
                                         class="btn btn-primary btn-prev previous-step disabled">
                                     <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
                                     <span class="align-middle d-sm-inline-block d-none"
-                                          data-i18n="step.previous">Previous</span>
+                                         >{{ _("step.previous") }}</span>
                                 </button>
                                 <div class="join-newsletter position-absolute bottom-0 start-50 translate-middle-x">
-                                    <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
+                                    <h5 class="mb-3 text-primary">{{ _("newsletter.title") }}</h5>
                                     <form id="setup-newsletter-form"
                                           action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
                                           target="_blank"
@@ -1350,12 +1311,12 @@
                                                    name="OPT_IN"
                                                    required />
                                             <label class="form-check-label" for="setup-subscribe-newsletter">
-                                                <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
+                                                <span>{{ _("newsletter.legal_agreement") }}</span>
                                                 <a class="fst-italic"
                                                    href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
                                                    target="_blank"
                                                    rel="noopener"
-                                                   data-i18n="link.privacy_policy">privacy policy</a>
+                                                  >{{ _("link.privacy_policy") }}</a>
                                             </label>
                                         </div>
                                     </form>
@@ -1363,11 +1324,11 @@
                                 <button type="button" class="btn btn-outline-bw-green save-settings d-none">
                                     <i class="bx bx-save bx-sm ms-sm-n2"></i>
                                     <span class="align-middle d-sm-inline-block d-none ms-sm-1"
-                                          data-i18n="button.setup">Setup</span>
+                                         >{{ _("button.setup") }}</span>
                                 </button>
                                 <button id="next-step" class="btn btn-primary btn-next next-step">
                                     <span class="align-middle d-sm-inline-block d-none me-sm-1"
-                                          data-i18n="step.next">Next</span>
+                                         >{{ _("step.next") }}</span>
                                     <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
                                 </button>
                             </div>
@@ -1389,14 +1350,13 @@
             <div class="toast-header d-flex align-items-center">
                 <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
                 <span class="fw-medium me-auto">BunkerWeb Forever</span>
-                <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+                <small class="text-body-secondary">{{ _("flash.time.just_now") }}</small>
                 <button type="button"
                         class="btn-close"
                         data-bs-dismiss="toast"
-                        aria-label="Close"
-                        data-i18n="aria.label.close"></button>
+                        aria-label="{{ _("aria.label.close") }}"></button>
             </div>
-            <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
+            <div class="toast-body">{{ _("flash.easter_egg") }}</div>
         </div>
         {% if not ui_reverse_proxy %}
             {% call modal(id="modal-confirm-dns", title_key="modal.title.server_name_not_unique", title="Server name is not unique") %}
@@ -1404,11 +1364,11 @@
                     <div id="dns-check-result"
                          class="alert alert-danger text-center"
                          role="alert"
-                         data-i18n="modal.body.confirm_next_step">
-                        Are you sure you want to proceed to the next step?
+                        >
+                        {{ _("modal.body.confirm_next_step") }}
                     </div>
                     <p class="mt-1 mb-0 text-center">
-                        <span data-i18n="modal.body.next_step_in_case_of_issue">In case of issues, you can manually accept the unsafe cert:</span> <a id="check-url"
+                        <span>{{ _("modal.body.next_step_in_case_of_issue") }}</span> <a id="check-url"
     class="fw-semibold"
     href="https://www.example.com/setup/check"
     target="_blank"
@@ -1416,7 +1376,7 @@
     data-bs-toggle="tooltip"
     data-bs-placement="top"
     data-bs-original-title='If the shown text is "ok", that means that the server name is available'
-    data-i18n="tooltip.dns_check_url"><span data-i18n="link.here">here</span></a>.
+   >{{ _("tooltip.dns_check_url") }}<span>{{ _("link.here") }}</span></a>.
                     </p>
                 </div>
                 <div class="modal-footer justify-content-center">
@@ -1436,7 +1396,7 @@
                         <div class="d-flex justify-content-center align-items-center w-100">
                             {{ lottie(src=url_for('static', filename='json/periscop.min.json')) }}
                         </div>
-                        <p class="mt-3 text-white" data-i18n="status.setting_up_bunkerweb">Setting up your BunkerWeb, please wait...</p>
+                        <p class="mt-3 text-white">{{ _("status.setting_up_bunkerweb") }}</p>
                     </div>
                 </div>
             </div>

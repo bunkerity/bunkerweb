@@ -25,10 +25,8 @@
                 class="btn btn-sm btn-link {% if disabled %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
                 data-bs-toggle="tooltip"
                 data-bs-placement="left"
-                data-bs-original-title="{{ tooltip_fallback }}"
-                data-i18n="{{ tooltip_key }}"
-                aria-label="{{ tooltip_fallback }}"
-                data-i18n-aria-label="{{ tooltip_key }}">
+                data-bs-original-title="{{ _(tooltip_key) }}"
+                aria-label="{{ _(tooltip_key) }}">
             <i class="bx bx-sm bx-reset" aria-hidden="true"></i>
         </button>
     {% endif %}

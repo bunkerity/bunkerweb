@@ -15,7 +15,7 @@
                     components/label.html and the aria-describedby target for help_text.
      label          optional visible caption above the field (English fallback), rendered
                     via components/label.html (variant="default").
-     label_i18n     data-i18n key for label.
+     label_i18n     catalog key for label.
      name           form field name. Defaults to id.
      value          initial content, rendered between the open/close tags (never a `value`
                     attribute -- textareas don't have one). Default "" (empty).
@@ -31,7 +31,7 @@
      help_text      optional helper text rendered below as "form-text text-muted" (same
                     markup components/label.html and components/number.html use for their
                     own help param), linked via aria-describedby.
-     help_i18n      data-i18n key for help_text.
+     help_i18n      catalog key for help_text.
      textarea_class extra classes appended to the <textarea>, e.g. a page-specific JS hook
                     class.
      classes        extra utility classes on the outer wrapper.
@@ -76,7 +76,7 @@
                   {% if readonly %}readonly{% endif %}
                   {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>{{ value }}</textarea>
         {%- if help_text %}
-        <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+        <div class="form-text text-muted" id="{{ help_id }}">{{ _(help_i18n) if help_i18n else help_text }}</div>
         {%- endif %}
     </div>
 {%- endmacro %}

@@ -1,0 +1,7033 @@
+# Chinese (Traditional) translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_Hant\n"
+"Language-Team: zh_Hant <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "建置工具"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero 通用公眾授權條款 v3.0"
+
+msgid "about.license_title"
+msgstr "授權"
+
+msgid "about.social.discord"
+msgstr "Discord"
+
+msgid "about.social.instagram"
+msgstr "Instagram"
+
+msgid "about.social.linkedin"
+msgstr "LinkedIn"
+
+msgid "about.social.reddit"
+msgstr "Reddit"
+
+msgid "about.socials"
+msgstr "社群媒體"
+
+msgid "about.tagline"
+msgstr "強大保護，化繁為簡"
+
+msgid "about.title"
+msgstr "關於 BunkerWeb"
+
+msgid "about.version"
+msgstr "版本：%(version)s"
+
+msgid "accordion.body.tls"
+msgstr "自動發行和更新憑證。"
+
+msgid "accordion.title.tls"
+msgstr "TLS & 憑證"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "請上傳有效的自訂設定匯出檔案（.json）。"
+
+msgid "alert.custom_end_date_required"
+msgstr "請選擇一個自訂結束日期。"
+
+msgid "alert.important"
+msgstr "重要"
+
+msgid "alert.no_changes_detected"
+msgstr "未偵測到任何變更。"
+
+msgid "alert.notice"
+msgstr "注意"
+
+msgid "alert.ping_error"
+msgstr "Ping 執行個體時發生錯誤。"
+
+msgid "alert.readonly_mode"
+msgstr "此操作在唯讀模式下被禁用。"
+
+msgid "aria.label.clear_search"
+msgstr "清除搜尋"
+
+msgid "aria.label.close"
+msgstr "關閉"
+
+msgid "aria.label.collapse_multiline"
+msgstr "收合多行項目"
+
+msgid "aria.label.configs_dropzone"
+msgstr "選取自訂設定匯出檔，或將檔案拖放到這裡"
+
+msgid "aria.label.copy"
+msgstr "複製日誌"
+
+msgid "aria.label.download_log"
+msgstr "下載此日誌檔案"
+
+msgid "aria.label.follow"
+msgstr "跟隨"
+
+msgid "aria.label.hide_value"
+msgstr "隱藏值"
+
+msgid "aria.label.issue_count"
+msgstr "錯誤與警告數量"
+
+msgid "aria.label.level_filter"
+msgstr "依等級篩選日誌行"
+
+msgid "aria.label.local_time"
+msgstr "以本地時間顯示時間戳記"
+
+msgid "aria.label.next_issue"
+msgstr "下一個錯誤或警告"
+
+msgid "aria.label.passkey_name"
+msgstr "密碼金鑰名稱"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "選取外掛程式封存檔，或將檔案拖放到這裡"
+
+msgid "aria.label.prev_issue"
+msgstr "上一個錯誤或警告"
+
+msgid "aria.label.raw_configuration"
+msgstr "原始設定"
+
+msgid "aria.label.remove_value"
+msgstr "移除值"
+
+msgid "aria.label.reveal_value"
+msgstr "顯示值"
+
+msgid "aria.label.search_logs"
+msgstr "搜尋日誌"
+
+msgid "aria.label.select_file"
+msgstr "選擇檔案"
+
+msgid "aria.label.select_page"
+msgstr "選擇頁面"
+
+msgid "aria.label.services_dropzone"
+msgstr "選取服務匯出檔，或將檔案拖放到這裡"
+
+msgid "aria.label.toggle_wrap"
+msgstr "切換自動換行"
+
+msgid "aria.label.user_avatar"
+msgstr "使用者頭像"
+
+msgid "aria.label.view_selected_items"
+msgstr "檢視已選取項目"
+
+msgid "badge.from_template"
+msgstr "來自範本"
+
+msgid "badge.managed_via_api"
+msgstr "透過 API 管理"
+
+msgid "badge.new_version"
+msgstr "新版本"
+
+msgid "badge.no_template"
+msgstr "無範本"
+
+msgid "badge.unread_news"
+msgstr "未讀新聞"
+
+msgid "badge.unread_notifications"
+msgstr "未讀通知"
+
+msgid "banner.community"
+msgstr "加入 Bunker 社群，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>並在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上關注我們。"
+
+msgid "banner.link.here"
+msgstr "這裡"
+
+msgid "banner.pro"
+msgstr "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試用請點擊<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">這裡</a>。"
+
+msgid "banner.support"
+msgstr "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
+
+msgid "bans.stats.card.by_reason"
+msgstr "依原因統計封鎖"
+
+msgid "bans.stats.tile.active"
+msgstr "有效封鎖"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "國家/地區"
+
+msgid "bans.stats.tile.expiring"
+msgstr "≤ 1 小時後到期"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "自動輪替"
+
+msgid "bans.stats.tile.permanent"
+msgstr "永久封鎖"
+
+msgid "bans.subtitle"
+msgstr "跨您所有 BunkerWeb 執行個體的封鎖 IP 位址 — 建立、移除或調整封鎖期限。"
+
+msgid "breadcrumb.about"
+msgstr "關於"
+
+msgid "breadcrumb.bans"
+msgstr "封鎖"
+
+msgid "breadcrumb.cache"
+msgstr "快取"
+
+msgid "breadcrumb.configs"
+msgstr "設定"
+
+msgid "breadcrumb.extra_pages"
+msgstr "附加頁面"
+
+msgid "breadcrumb.global_config"
+msgstr "全域設定"
+
+msgid "breadcrumb.global_settings"
+msgstr "全域設定"
+
+msgid "breadcrumb.groups"
+msgstr "資源群組"
+
+msgid "breadcrumb.home"
+msgstr "首頁"
+
+msgid "breadcrumb.instances"
+msgstr "執行個體"
+
+msgid "breadcrumb.jobs"
+msgstr "任務"
+
+msgid "breadcrumb.logs"
+msgstr "日誌"
+
+msgid "breadcrumb.misc"
+msgstr "雜項"
+
+msgid "breadcrumb.mode_selection"
+msgstr "模式選擇"
+
+msgid "breadcrumb.more"
+msgstr "更多..."
+
+msgid "breadcrumb.new"
+msgstr "新增"
+
+msgid "breadcrumb.plugins"
+msgstr "外掛程式"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "外掛程式頁面"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "個人資料"
+
+msgid "breadcrumb.reports"
+msgstr "報告"
+
+msgid "breadcrumb.services"
+msgstr "服務"
+
+msgid "breadcrumb.support"
+msgstr "支援"
+
+msgid "breadcrumb.templates"
+msgstr "範本"
+
+msgid "breadcrumb.threatmap"
+msgstr "威脅地圖"
+
+msgid "breadcrumb.timings"
+msgstr "執行時間"
+
+msgid "breadcrumb.web_cache"
+msgstr "Web 快取"
+
+msgid "breadcrumb.whats_new"
+msgstr "新增內容"
+
+msgid "button.actions"
+msgstr "操作"
+
+msgid "button.activate_key"
+msgstr "啟用金鑰"
+
+msgid "button.add"
+msgstr "新增"
+
+msgid "button.add_ban_plural"
+msgstr "新增封鎖"
+
+msgid "button.add_passkey"
+msgstr "新增密碼金鑰"
+
+msgid "button.add_plugin_plural"
+msgstr "新增外掛程式"
+
+msgid "button.add_plugins"
+msgstr "新增外掛程式"
+
+msgid "button.auto_refresh"
+msgstr "自動重新整理"
+
+msgid "button.ban"
+msgstr "封鎖"
+
+msgid "button.ban_all_filtered"
+msgstr "封鎖所有相符報告"
+
+msgid "button.ban_selected"
+msgstr "封鎖所選"
+
+msgid "button.cache"
+msgstr "快取"
+
+msgid "button.cancel"
+msgstr "取消"
+
+msgid "button.clear"
+msgstr "清除"
+
+msgid "button.clone"
+msgstr "複製"
+
+msgid "button.close"
+msgstr "關閉"
+
+msgid "button.collapse_multiline"
+msgstr "收合"
+
+msgid "button.columns"
+msgstr "欄"
+
+msgid "button.convert_configs"
+msgstr "轉換設定"
+
+msgid "button.convert_configs_to"
+msgstr "轉換為 %(state)s"
+
+msgid "button.convert_services"
+msgstr "轉換服務"
+
+msgid "button.copy"
+msgstr "複製"
+
+msgid "button.copy_codes"
+msgstr "複製代碼"
+
+msgid "button.copy_raw"
+msgstr "複製原始資料"
+
+msgid "button.copy_visible"
+msgstr "複製可見部分"
+
+msgid "button.create_config"
+msgstr "建立自訂設定"
+
+msgid "button.create_instance"
+msgstr "建立執行個體"
+
+msgid "button.create_service"
+msgstr "建立新服務"
+
+msgid "button.create_template"
+msgstr "建立範本"
+
+msgid "button.delete"
+msgstr "刪除"
+
+msgid "button.delete_instance"
+msgstr "刪除執行個體"
+
+msgid "button.disable_totp"
+msgstr "停用 TOTP"
+
+msgid "button.download"
+msgstr "下載"
+
+msgid "button.edit"
+msgstr "編輯"
+
+msgid "button.enable_totp"
+msgstr "啟用 TOTP"
+
+msgid "button.entire_config"
+msgstr "完整設定"
+
+msgid "button.export"
+msgstr "匯出"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "取得全域設定"
+
+msgid "button.filtered_actions"
+msgstr "篩選後的動作"
+
+msgid "button.filters_suffix"
+msgstr " 過濾器"
+
+msgid "button.follow"
+msgstr "追蹤"
+
+msgid "button.force_check"
+msgstr "強制檢查"
+
+msgid "button.force_update"
+msgstr "強制更新"
+
+msgid "button.github_stars"
+msgstr "星號"
+
+msgid "button.go"
+msgstr "前往 →"
+
+msgid "button.go_back"
+msgstr "返回"
+
+msgid "button.got_it"
+msgstr "知道了"
+
+msgid "button.hide"
+msgstr "隱藏"
+
+msgid "button.history"
+msgstr "歷史記錄"
+
+msgid "button.import_configs"
+msgstr "匯入自訂設定"
+
+msgid "button.import_services"
+msgstr "匯入服務"
+
+msgid "button.local_time"
+msgstr "本地時間"
+
+msgid "button.login"
+msgstr "登入"
+
+msgid "button.multiple_add"
+msgstr "新增"
+
+msgid "button.multiple_hide"
+msgstr "隱藏"
+
+msgid "button.multiple_remove"
+msgstr "移除"
+
+msgid "button.multiple_show"
+msgstr "顯示"
+
+msgid "button.need_help"
+msgstr "需要協助？"
+
+msgid "button.news"
+msgstr "新聞"
+
+msgid "button.notifications"
+msgstr "通知"
+
+msgid "button.open_support_ticket"
+msgstr "提交支援工單"
+
+msgid "button.order_support"
+msgstr "訂購支援"
+
+msgid "button.ping"
+msgstr "Ping"
+
+msgid "button.plugin_page"
+msgstr "外掛程式頁面"
+
+msgid "button.proceed"
+msgstr "繼續"
+
+msgid "button.refresh"
+msgstr "重新整理"
+
+msgid "button.refresh_recovery_codes"
+msgstr "重新整理復原碼"
+
+msgid "button.reload"
+msgstr "重新載入"
+
+msgid "button.rename"
+msgstr "重新命名"
+
+msgid "button.reset"
+msgstr "重設"
+
+msgid "button.reset_columns"
+msgstr "重設欄位"
+
+msgid "button.retry"
+msgstr "重試"
+
+msgid "button.return_to_safety"
+msgstr "返回安全區域"
+
+msgid "button.run"
+msgstr "執行"
+
+msgid "button.run_selected_jobs"
+msgstr "執行選定的任務"
+
+msgid "button.save"
+msgstr "儲存"
+
+msgid "button.save_changes"
+msgstr "儲存變更"
+
+msgid "button.search"
+msgstr "搜尋"
+
+msgid "button.see_all_releases"
+msgstr "查看所有版本"
+
+msgid "button.select_file"
+msgstr "選取檔案"
+
+msgid "button.select_page"
+msgstr "選取頁面"
+
+msgid "button.service"
+msgstr "服務"
+
+msgid "button.set_1h"
+msgstr "設定 1 小時"
+
+msgid "button.set_1w"
+msgstr "設定 1 週"
+
+msgid "button.set_24h"
+msgstr "設定 24 小時"
+
+msgid "button.set_permanent"
+msgstr "設定永久"
+
+msgid "button.setup"
+msgstr "設定"
+
+msgid "button.show"
+msgstr "顯示"
+
+msgid "button.show_me"
+msgstr "帶我看看"
+
+msgid "button.sign_in_with_passkey"
+msgstr "使用密碼金鑰登入"
+
+msgid "button.stop"
+msgstr "停止"
+
+msgid "button.submit"
+msgstr "提交"
+
+msgid "button.subscribe"
+msgstr "訂閱"
+
+msgid "button.unban"
+msgstr "解除封鎖"
+
+msgid "button.unban_all_filtered"
+msgstr "解除所有相符的封鎖"
+
+msgid "button.update_duration"
+msgstr "更新封鎖期限"
+
+msgid "button.update_duration_all_filtered"
+msgstr "更新所有相符封鎖的時間"
+
+msgid "button.update_key"
+msgstr "更新金鑰"
+
+msgid "button.upload_photo"
+msgstr "上傳新相片"
+
+msgid "button.use_security_key"
+msgstr "使用安全金鑰"
+
+msgid "button.use_template"
+msgstr "使用範本"
+
+msgid "button.verify"
+msgstr "驗證"
+
+msgid "button.view"
+msgstr "檢視"
+
+msgid "button.view_details"
+msgstr "檢視詳情"
+
+msgid "button.view_raw_data"
+msgstr "檢視原始資料"
+
+msgid "button.wipe_other_sessions"
+msgstr "登出其他工作階段"
+
+msgid "button.wrap"
+msgstr "換行"
+
+msgid "cache.kpi_files"
+msgstr "檔案"
+
+msgid "cache.kpi_per_service"
+msgstr "依服務"
+
+msgid "cache.subtitle"
+msgstr "由排程工作產生的快取檔案（封鎖清單、GeoIP 資料庫等）— 可依服務與外掛程式檢視、下載或刪除。"
+
+msgid "cache.title"
+msgstr "快取檔案"
+
+msgid "certificates.acme_help"
+msgstr "選擇已啟用且設定 Let's Encrypt 的現有設定的服務。此操作僅排程設定；憑證細節和挑戰憑證在此處不會輸入。"
+
+msgid "certificates.active"
+msgstr "活躍憑證"
+
+msgid "certificates.algorithm"
+msgstr "演算法"
+
+msgid "certificates.all"
+msgstr "全部"
+
+msgid "certificates.assignment_notice"
+msgstr "指派用於整理中央憑證清單；TLS 部署仍由各服務的憑證設定控制。"
+
+msgid "certificates.assignments"
+msgstr "任務組織"
+
+msgid "certificates.assignments_help"
+msgstr "這些任務不會更改現行的 TLS 設定。"
+
+msgid "certificates.attach"
+msgstr "指定"
+
+msgid "certificates.attach_all"
+msgstr "此憑證已連接到所有可用的服務。"
+
+msgid "certificates.attach_copy"
+msgstr "將「%(name)s」指定給中央庫中的服務。"
+
+msgid "certificates.browse_certificate"
+msgstr "瀏覽憑證"
+
+msgid "certificates.browse_key"
+msgstr "瀏覽私密金鑰"
+
+msgid "certificates.common_name"
+msgstr "通用名稱"
+
+msgid "certificates.confirm"
+msgstr "確認"
+
+msgid "certificates.confirm_action"
+msgstr "確認憑證操作"
+
+msgid "certificates.confirm_delete"
+msgstr "刪除「%(name)s」？此操作無法撤銷。"
+
+msgid "certificates.confirm_generic"
+msgstr "確認此憑證操作？"
+
+msgid "certificates.confirm_renew"
+msgstr "更新「%(name)s」？"
+
+msgid "certificates.confirm_renew_due"
+msgstr "檢查所有憑證並更新目前到期者？"
+
+msgid "certificates.create"
+msgstr "建立憑證"
+
+msgid "certificates.download_chain"
+msgstr "下載鏈"
+
+msgid "certificates.download_leaf"
+msgstr "下載葉"
+
+msgid "certificates.edit_help"
+msgstr "此操作僅更改庫元資料，不影響憑證材料或現行的 TLS 設定。"
+
+msgid "certificates.edit_metadata"
+msgstr "編輯憑證元資料"
+
+msgid "certificates.empty"
+msgstr "沒有憑證"
+
+msgid "certificates.empty_help"
+msgstr "建立自簽憑證、安排 ACME 發行，或上傳現有 PEM 憑證和金鑰。"
+
+msgid "certificates.expired_help"
+msgstr "需要注意"
+
+msgid "certificates.expires"
+msgstr "到期"
+
+msgid "certificates.expiring_help"
+msgstr "30 天或更短"
+
+msgid "certificates.file_extensions"
+msgstr "請使用以下檔案擴展名：%(extensions)s。"
+
+msgid "certificates.file_select"
+msgstr "選擇一個 PEM 檔案。"
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "檔案不得超過 1 MiB。"
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 指紋"
+
+msgid "certificates.issuer"
+msgstr "發行者"
+
+msgid "certificates.issuers"
+msgstr "主要發行者"
+
+msgid "certificates.key_drop"
+msgstr "在此處上傳相符的私密金鑰"
+
+msgid "certificates.key_limit"
+msgstr "最多 1 MiB；靜態加密且無法下載"
+
+msgid "certificates.last_error"
+msgstr "上次錯誤"
+
+msgid "certificates.make_primary"
+msgstr "將其標示為此服務的主要庫存分配"
+
+msgid "certificates.managed"
+msgstr "管理憑證"
+
+msgid "certificates.new_selfsigned"
+msgstr "新的自簽憑證"
+
+msgid "certificates.no_issuers"
+msgstr "沒有發行者資料"
+
+msgid "certificates.none_due"
+msgstr "憑證即將到期"
+
+msgid "certificates.orphan_account"
+msgstr "帳戶"
+
+msgid "certificates.orphan_badge"
+msgstr "缺少 ACME 帳戶"
+
+msgid "certificates.orphan_help"
+msgstr "此續訂記錄參考一個已不存在的 ACME 帳戶。續訂將保持停用，直到供應商狀態修復。"
+
+msgid "certificates.orphan_server"
+msgstr "ACME 伺服器"
+
+msgid "certificates.orphan_title"
+msgstr "缺少 ACME 帳戶"
+
+msgid "certificates.pem_certificate"
+msgstr "PEM 憑證或鏈"
+
+msgid "certificates.pem_drop"
+msgstr "在此處上傳公用 PEM 憑證或鏈"
+
+msgid "certificates.pem_limit"
+msgstr "最多 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "PEM 私密金鑰"
+
+msgid "certificates.primary"
+msgstr "主要分配"
+
+msgid "certificates.primary_help"
+msgstr "將其標示為所選服務的主要庫存分配"
+
+msgid "certificates.readonly"
+msgstr "資料庫僅供讀取。可以檢視和下載憑證，但無法修改。"
+
+msgid "certificates.renew_due"
+msgstr "檢查/續訂即將到期"
+
+msgid "certificates.sans"
+msgstr "主題替代名稱"
+
+msgid "certificates.save_metadata"
+msgstr "儲存元資料"
+
+msgid "certificates.schedule"
+msgstr "安排發行"
+
+msgid "certificates.schedule_acme"
+msgstr "安排 ACME 發行"
+
+msgid "certificates.search"
+msgstr "搜尋名稱、通用名稱、SAN、發行者或指紋…"
+
+msgid "certificates.serial"
+msgstr "序列號"
+
+msgid "certificates.services"
+msgstr "服務"
+
+msgid "certificates.services_help"
+msgstr "使用 Ctrl 或 Command 選擇多個服務。"
+
+msgid "certificates.showing_count"
+msgstr "顯示 %(visible)s／%(total)s 張憑證"
+
+msgid "certificates.source.customcert"
+msgstr "自訂"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "自簽憑證"
+
+msgid "certificates.source_label"
+msgstr "來源"
+
+msgid "certificates.status.expired"
+msgstr "已過期"
+
+msgid "certificates.status.expiring_soon"
+msgstr "即將到期"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "尚未有效"
+
+msgid "certificates.status.revoked"
+msgstr "已撤銷"
+
+msgid "certificates.status.valid"
+msgstr "有效"
+
+msgid "certificates.subtitle"
+msgstr "在中央清單中發行、上傳、指定、更新和檢查憑證。"
+
+msgid "certificates.total"
+msgstr "總數"
+
+msgid "certificates.truncated"
+msgstr "僅顯示前 500 個憑證。透過 API 獲取完整結果。"
+
+msgid "certificates.unassigned"
+msgstr "未指定"
+
+msgid "certificates.upcoming"
+msgstr "即將到期的憑證"
+
+msgid "certificates.upcoming_help"
+msgstr "已過期或在 30 天的更新期限內"
+
+msgid "certificates.upload"
+msgstr "上傳憑證"
+
+msgid "certificates.upload_custom"
+msgstr "上傳自訂憑證"
+
+msgid "certificates.upload_invalid"
+msgstr "選擇有效的公鑰和對應的私鑰。"
+
+msgid "certificates.valid_days"
+msgstr "有效期限（天）"
+
+msgid "certificates.valid_from"
+msgstr "從...開始有效"
+
+msgid "certificates.valid_to"
+msgstr "到...結束有效"
+
+msgid "compose.always_on"
+msgstr "永遠開啟"
+
+msgid "compose.count"
+msgstr "%(on)s 已啟用 · %(total)s 停用 · %(locked)s 鎖定"
+
+msgid "compose.entries"
+msgstr "%(count)s 已設定"
+
+msgid "compose.filter.all"
+msgstr "全部"
+
+msgid "compose.filter.changed"
+msgstr "已變更"
+
+msgid "compose.filter.on"
+msgstr "開啟"
+
+msgid "compose.locked"
+msgstr "這裡沒有控制"
+
+msgid "compose.provenance.api"
+msgstr "透過 API 管理"
+
+msgid "compose.provenance.attachment"
+msgstr "從附件"
+
+msgid "compose.provenance.clone"
+msgstr "複製"
+
+msgid "compose.provenance.default"
+msgstr "預設"
+
+msgid "compose.provenance.edited"
+msgstr "在此編輯"
+
+msgid "compose.provenance.global"
+msgstr "來自全球"
+
+msgid "compose.provenance.managed"
+msgstr "由 %(method)s 設定"
+
+msgid "compose.provenance.template"
+msgstr "來自範本"
+
+msgid "compose.set_value"
+msgstr "設定一個值…"
+
+msgid "compose.show_more"
+msgstr "顯示更多 %(count)s"
+
+msgid "compose.unavailable"
+msgstr "外掛程式列表無法載入，因此此頁面無法安全編輯。 重新載入後 API 回覆。"
+
+msgid "configs.subtitle"
+msgstr "針對您服務的自訂 NGINX 設定片段 — 建立、編輯並管理 HTTP、ModSecurity 與 stream 層級的覆寫設定。"
+
+msgid "country.AD"
+msgstr "安道爾"
+
+msgid "country.AE"
+msgstr "阿拉伯聯合大公國"
+
+msgid "country.AF"
+msgstr "阿富汗"
+
+msgid "country.AG"
+msgstr "安地卡及巴布達"
+
+msgid "country.AI"
+msgstr "安圭拉"
+
+msgid "country.AL"
+msgstr "阿爾巴尼亞"
+
+msgid "country.AM"
+msgstr "亞美尼亞"
+
+msgid "country.AO"
+msgstr "安哥拉"
+
+msgid "country.AQ"
+msgstr "南極洲"
+
+msgid "country.AR"
+msgstr "阿根廷"
+
+msgid "country.AS"
+msgstr "美屬薩摩亞"
+
+msgid "country.AT"
+msgstr "奧地利"
+
+msgid "country.AU"
+msgstr "澳洲"
+
+msgid "country.AW"
+msgstr "阿魯巴"
+
+msgid "country.AX"
+msgstr "奧蘭群島"
+
+msgid "country.AZ"
+msgstr "亞塞拜然"
+
+msgid "country.BA"
+msgstr "波士尼亞與赫塞哥維納"
+
+msgid "country.BB"
+msgstr "巴貝多"
+
+msgid "country.BD"
+msgstr "孟加拉"
+
+msgid "country.BE"
+msgstr "比利時"
+
+msgid "country.BF"
+msgstr "布吉納法索"
+
+msgid "country.BG"
+msgstr "保加利亞"
+
+msgid "country.BH"
+msgstr "巴林"
+
+msgid "country.BI"
+msgstr "蒲隆地"
+
+msgid "country.BJ"
+msgstr "貝南"
+
+msgid "country.BL"
+msgstr "聖巴瑟米"
+
+msgid "country.BM"
+msgstr "百慕達"
+
+msgid "country.BN"
+msgstr "汶萊"
+
+msgid "country.BO"
+msgstr "玻利維亞"
+
+msgid "country.BQ"
+msgstr "荷蘭加勒比區"
+
+msgid "country.BR"
+msgstr "巴西"
+
+msgid "country.BS"
+msgstr "巴哈馬"
+
+msgid "country.BT"
+msgstr "不丹"
+
+msgid "country.BV"
+msgstr "布韋島"
+
+msgid "country.BW"
+msgstr "波札那"
+
+msgid "country.BY"
+msgstr "白俄羅斯"
+
+msgid "country.BZ"
+msgstr "貝里斯"
+
+msgid "country.CA"
+msgstr "加拿大"
+
+msgid "country.CC"
+msgstr "科科斯（基林）群島"
+
+msgid "country.CD"
+msgstr "剛果民主共和國"
+
+msgid "country.CF"
+msgstr "中非共和國"
+
+msgid "country.CG"
+msgstr "剛果共和國"
+
+msgid "country.CH"
+msgstr "瑞士"
+
+msgid "country.CI"
+msgstr "象牙海岸"
+
+msgid "country.CK"
+msgstr "庫克群島"
+
+msgid "country.CL"
+msgstr "智利"
+
+msgid "country.CM"
+msgstr "喀麥隆"
+
+msgid "country.CN"
+msgstr "中國"
+
+msgid "country.CO"
+msgstr "哥倫比亞"
+
+msgid "country.CR"
+msgstr "哥斯大黎加"
+
+msgid "country.CU"
+msgstr "古巴"
+
+msgid "country.CV"
+msgstr "維德角"
+
+msgid "country.CW"
+msgstr "古拉索"
+
+msgid "country.CX"
+msgstr "聖誕島"
+
+msgid "country.CY"
+msgstr "賽普勒斯"
+
+msgid "country.CZ"
+msgstr "捷克共和國"
+
+msgid "country.DE"
+msgstr "德國"
+
+msgid "country.DJ"
+msgstr "吉布提"
+
+msgid "country.DK"
+msgstr "丹麥"
+
+msgid "country.DM"
+msgstr "多米尼克"
+
+msgid "country.DO"
+msgstr "多明尼加共和國"
+
+msgid "country.DZ"
+msgstr "阿爾及利亞"
+
+msgid "country.EC"
+msgstr "厄瓜多"
+
+msgid "country.EE"
+msgstr "愛沙尼亞"
+
+msgid "country.EG"
+msgstr "埃及"
+
+msgid "country.EH"
+msgstr "西撒哈拉"
+
+msgid "country.ER"
+msgstr "厄利垂亞"
+
+msgid "country.ES"
+msgstr "西班牙"
+
+msgid "country.ET"
+msgstr "衣索比亞"
+
+msgid "country.EU"
+msgstr "歐洲"
+
+msgid "country.FI"
+msgstr "芬蘭"
+
+msgid "country.FJ"
+msgstr "斐濟"
+
+msgid "country.FK"
+msgstr "福克蘭群島（馬爾維納斯）"
+
+msgid "country.FM"
+msgstr "密克羅尼西亞"
+
+msgid "country.FO"
+msgstr "法羅群島"
+
+msgid "country.FR"
+msgstr "法國"
+
+msgid "country.GA"
+msgstr "加彭"
+
+msgid "country.GB"
+msgstr "英國"
+
+msgid "country.GD"
+msgstr "格瑞那達"
+
+msgid "country.GE"
+msgstr "喬治亞"
+
+msgid "country.GF"
+msgstr "法屬圭亞那"
+
+msgid "country.GG"
+msgstr "根西"
+
+msgid "country.GH"
+msgstr "迦納"
+
+msgid "country.GI"
+msgstr "直布羅陀"
+
+msgid "country.GL"
+msgstr "格陵蘭"
+
+msgid "country.GM"
+msgstr "甘比亞"
+
+msgid "country.GN"
+msgstr "幾內亞"
+
+msgid "country.GP"
+msgstr "瓜地洛普"
+
+msgid "country.GQ"
+msgstr "赤道幾內亞"
+
+msgid "country.GR"
+msgstr "希臘"
+
+msgid "country.GS"
+msgstr "南喬治亞與南桑威奇群島"
+
+msgid "country.GT"
+msgstr "瓜地馬拉"
+
+msgid "country.GU"
+msgstr "關島"
+
+msgid "country.GW"
+msgstr "幾內亞比索"
+
+msgid "country.GY"
+msgstr "蓋亞那"
+
+msgid "country.HK"
+msgstr "香港"
+
+msgid "country.HM"
+msgstr "赫德島和麥克唐納群島"
+
+msgid "country.HN"
+msgstr "宏都拉斯"
+
+msgid "country.HR"
+msgstr "克羅埃西亞"
+
+msgid "country.HT"
+msgstr "海地"
+
+msgid "country.HU"
+msgstr "匈牙利"
+
+msgid "country.ID"
+msgstr "印尼"
+
+msgid "country.IE"
+msgstr "愛爾蘭"
+
+msgid "country.IL"
+msgstr "以色列"
+
+msgid "country.IM"
+msgstr "曼島"
+
+msgid "country.IN"
+msgstr "印度"
+
+msgid "country.IO"
+msgstr "英屬印度洋領地"
+
+msgid "country.IQ"
+msgstr "伊拉克"
+
+msgid "country.IR"
+msgstr "伊朗"
+
+msgid "country.IS"
+msgstr "冰島"
+
+msgid "country.IT"
+msgstr "義大利"
+
+msgid "country.JE"
+msgstr "澤西"
+
+msgid "country.JM"
+msgstr "牙買加"
+
+msgid "country.JO"
+msgstr "約旦"
+
+msgid "country.JP"
+msgstr "日本"
+
+msgid "country.KE"
+msgstr "肯亞"
+
+msgid "country.KG"
+msgstr "吉爾吉斯"
+
+msgid "country.KH"
+msgstr "柬埔寨"
+
+msgid "country.KI"
+msgstr "吉里巴斯"
+
+msgid "country.KM"
+msgstr "葛摩"
+
+msgid "country.KN"
+msgstr "聖克里斯多福及尼維斯"
+
+msgid "country.KP"
+msgstr "北韓"
+
+msgid "country.KR"
+msgstr "南韓"
+
+msgid "country.KW"
+msgstr "科威特"
+
+msgid "country.KY"
+msgstr "開曼群島"
+
+msgid "country.KZ"
+msgstr "哈薩克"
+
+msgid "country.LA"
+msgstr "寮國"
+
+msgid "country.LB"
+msgstr "黎巴嫩"
+
+msgid "country.LC"
+msgstr "聖露西亞"
+
+msgid "country.LI"
+msgstr "列支敦斯登"
+
+msgid "country.LK"
+msgstr "斯里蘭卡"
+
+msgid "country.LR"
+msgstr "賴比瑞亞"
+
+msgid "country.LS"
+msgstr "賴索托"
+
+msgid "country.LT"
+msgstr "立陶宛"
+
+msgid "country.LU"
+msgstr "盧森堡"
+
+msgid "country.LV"
+msgstr "拉脫維亞"
+
+msgid "country.LY"
+msgstr "利比亞"
+
+msgid "country.MA"
+msgstr "摩洛哥"
+
+msgid "country.MC"
+msgstr "摩納哥"
+
+msgid "country.MD"
+msgstr "摩爾多瓦"
+
+msgid "country.ME"
+msgstr "蒙特內哥羅"
+
+msgid "country.MF"
+msgstr "聖馬丁"
+
+msgid "country.MG"
+msgstr "馬達加斯加"
+
+msgid "country.MH"
+msgstr "馬紹爾群島"
+
+msgid "country.MK"
+msgstr "北馬其頓"
+
+msgid "country.ML"
+msgstr "馬利"
+
+msgid "country.MM"
+msgstr "緬甸"
+
+msgid "country.MN"
+msgstr "蒙古"
+
+msgid "country.MO"
+msgstr "澳門"
+
+msgid "country.MP"
+msgstr "北馬利安納群島"
+
+msgid "country.MQ"
+msgstr "馬丁尼克"
+
+msgid "country.MR"
+msgstr "茅利塔尼亞"
+
+msgid "country.MS"
+msgstr "蒙哲臘"
+
+msgid "country.MT"
+msgstr "馬爾他"
+
+msgid "country.MU"
+msgstr "模里西斯"
+
+msgid "country.MV"
+msgstr "馬爾地夫"
+
+msgid "country.MW"
+msgstr "馬拉威"
+
+msgid "country.MX"
+msgstr "墨西哥"
+
+msgid "country.MY"
+msgstr "馬來西亞"
+
+msgid "country.MZ"
+msgstr "莫三比克"
+
+msgid "country.NA"
+msgstr "納米比亞"
+
+msgid "country.NC"
+msgstr "新喀里多尼亞"
+
+msgid "country.NE"
+msgstr "尼日"
+
+msgid "country.NF"
+msgstr "諾福克島"
+
+msgid "country.NG"
+msgstr "奈及利亞"
+
+msgid "country.NI"
+msgstr "尼加拉瓜"
+
+msgid "country.NL"
+msgstr "荷蘭"
+
+msgid "country.NO"
+msgstr "挪威"
+
+msgid "country.NP"
+msgstr "尼泊爾"
+
+msgid "country.NR"
+msgstr "諾魯"
+
+msgid "country.NU"
+msgstr "紐埃"
+
+msgid "country.NZ"
+msgstr "紐西蘭"
+
+msgid "country.OM"
+msgstr "阿曼"
+
+msgid "country.PA"
+msgstr "巴拿馬"
+
+msgid "country.PE"
+msgstr "秘魯"
+
+msgid "country.PF"
+msgstr "法屬玻里尼西亞"
+
+msgid "country.PG"
+msgstr "巴布亞紐幾內亞"
+
+msgid "country.PH"
+msgstr "菲律賓"
+
+msgid "country.PK"
+msgstr "巴基斯坦"
+
+msgid "country.PL"
+msgstr "波蘭"
+
+msgid "country.PM"
+msgstr "聖皮埃與密克隆群島"
+
+msgid "country.PN"
+msgstr "皮特肯群島"
+
+msgid "country.PR"
+msgstr "波多黎各"
+
+msgid "country.PS"
+msgstr "巴勒斯坦"
+
+msgid "country.PT"
+msgstr "葡萄牙"
+
+msgid "country.PW"
+msgstr "帛琉"
+
+msgid "country.PY"
+msgstr "巴拉圭"
+
+msgid "country.QA"
+msgstr "卡達"
+
+msgid "country.RE"
+msgstr "留尼旺"
+
+msgid "country.RO"
+msgstr "羅馬尼亞"
+
+msgid "country.RS"
+msgstr "塞爾維亞"
+
+msgid "country.RU"
+msgstr "俄羅斯聯邦"
+
+msgid "country.RW"
+msgstr "盧安達"
+
+msgid "country.SA"
+msgstr "沙烏地阿拉伯"
+
+msgid "country.SB"
+msgstr "索羅門群島"
+
+msgid "country.SC"
+msgstr "塞席爾"
+
+msgid "country.SD"
+msgstr "蘇丹"
+
+msgid "country.SE"
+msgstr "瑞典"
+
+msgid "country.SG"
+msgstr "新加坡"
+
+msgid "country.SH"
+msgstr "聖赫勒拿、亞森欣和崔斯坦達庫尼亞"
+
+msgid "country.SI"
+msgstr "斯洛維尼亞"
+
+msgid "country.SJ"
+msgstr "斯瓦巴和揚馬延"
+
+msgid "country.SK"
+msgstr "斯洛伐克"
+
+msgid "country.SL"
+msgstr "獅子山"
+
+msgid "country.SM"
+msgstr "聖馬利諾"
+
+msgid "country.SN"
+msgstr "塞內加爾"
+
+msgid "country.SO"
+msgstr "索馬利亞"
+
+msgid "country.SR"
+msgstr "蘇利南"
+
+msgid "country.SS"
+msgstr "南蘇丹"
+
+msgid "country.ST"
+msgstr "聖多美普林西比"
+
+msgid "country.SV"
+msgstr "薩爾瓦多"
+
+msgid "country.SX"
+msgstr "聖馬丁（荷蘭部分）"
+
+msgid "country.SY"
+msgstr "敘利亞"
+
+msgid "country.SZ"
+msgstr "史瓦帝尼"
+
+msgid "country.TC"
+msgstr "特克斯與凱科斯群島"
+
+msgid "country.TD"
+msgstr "查德"
+
+msgid "country.TF"
+msgstr "法屬南部領地"
+
+msgid "country.TG"
+msgstr "多哥"
+
+msgid "country.TH"
+msgstr "泰國"
+
+msgid "country.TJ"
+msgstr "塔吉克"
+
+msgid "country.TK"
+msgstr "托克勞"
+
+msgid "country.TL"
+msgstr "東帝汶"
+
+msgid "country.TM"
+msgstr "土庫曼"
+
+msgid "country.TN"
+msgstr "突尼西亞"
+
+msgid "country.TO"
+msgstr "東加"
+
+msgid "country.TR"
+msgstr "土耳其"
+
+msgid "country.TT"
+msgstr "千里達及托巴哥"
+
+msgid "country.TV"
+msgstr "吐瓦魯"
+
+msgid "country.TW"
+msgstr "台灣"
+
+msgid "country.TZ"
+msgstr "坦尚尼亞"
+
+msgid "country.UA"
+msgstr "烏克蘭"
+
+msgid "country.UG"
+msgstr "烏干達"
+
+msgid "country.UM"
+msgstr "美國本土外小島嶼"
+
+msgid "country.US"
+msgstr "美國"
+
+msgid "country.UY"
+msgstr "烏拉圭"
+
+msgid "country.UZ"
+msgstr "烏茲別克"
+
+msgid "country.VA"
+msgstr "梵蒂岡"
+
+msgid "country.VC"
+msgstr "聖文森及格瑞那丁"
+
+msgid "country.VE"
+msgstr "委內瑞拉"
+
+msgid "country.VG"
+msgstr "英屬維京群島"
+
+msgid "country.VI"
+msgstr "美屬維京群島"
+
+msgid "country.VN"
+msgstr "越南"
+
+msgid "country.VU"
+msgstr "萬那杜"
+
+msgid "country.WF"
+msgstr "瓦利斯和富圖那"
+
+msgid "country.WS"
+msgstr "薩摩亞"
+
+msgid "country.XK"
+msgstr "科索沃"
+
+msgid "country.YE"
+msgstr "葉門"
+
+msgid "country.YT"
+msgstr "馬約特"
+
+msgid "country.ZA"
+msgstr "南非"
+
+msgid "country.ZM"
+msgstr "尚比亞"
+
+msgid "country.ZW"
+msgstr "辛巴威"
+
+msgid "country.not_applicable"
+msgstr "不適用"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "已封鎖的請求"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "已封鎖的唯一 IP"
+
+msgid "dashboard.card.certificates.title"
+msgstr "憑證"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s 執行中 / %(down)s 已停止 / %(loading)s 載入中"
+
+msgid "dashboard.card.instances.title"
+msgstr "執行個體"
+
+msgid "dashboard.card.news.title"
+msgstr "新聞"
+
+msgid "dashboard.card.plan.title"
+msgstr "方案"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s 核心 / %(pro)s PRO / %(external)s 外部"
+
+msgid "dashboard.card.plugins.title"
+msgstr "外掛程式"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "危急：系統記憶體即將耗盡！"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "適合生產環境的優質記憶體"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "建議升級至 16GB 以上以用於生產環境"
+
+msgid "dashboard.card.ram.title"
+msgstr "系統 RAM"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% 已使用"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "警告：記憶體不足可能影響效能"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s 線上 / %(draft)s 草稿"
+
+msgid "dashboard.card.services.title"
+msgstr "服務"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "主要封鎖原因"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "總請求數"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "即將推出"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "上游"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "按國家/地區封鎖的請求"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "已封鎖的請求"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "數量"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "隨時間變化的已封鎖請求"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "時間"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "封鎖狀態隨時間變化"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "已封鎖的請求"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "請求狀態分佈"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "已封鎖"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "一段時間內的已封鎖請求（所選範圍）"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "被封鎖最多的 IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "前 10 名被封鎖的 IP"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "已封鎖的請求"
+
+msgid "dashboard.map.hover_info"
+msgstr "將滑鼠懸停在國家/地區上"
+
+msgid "dashboard.map.legend"
+msgstr "圖例"
+
+msgid "dashboard.map.no_data"
+msgstr "無資料"
+
+msgid "dashboard.mini.across_countries"
+msgstr "在 %(count)s 國家/地區"
+
+msgid "dashboard.mini.enforced"
+msgstr "目前強制執行"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% 封鎖"
+
+msgid "dashboard.mini.scheduled"
+msgstr "預約"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "已封鎖與已允許"
+
+msgid "dashboard.panel.map_sub"
+msgstr "將游標移至上方以查看詳細資料"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "依觸發規則"
+
+msgid "dashboard.panel.status_sub"
+msgstr "HTTP 回應碼"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "所選範圍"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "依請求數"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "已封鎖 %(total)s 總計"
+
+msgid "dashboard.status.free_plan"
+msgstr "免費方案"
+
+msgid "dashboard.status.renews"
+msgstr "續訂"
+
+msgid "dashboard.status.services_licensed"
+msgstr "%(count)s 服務已授權"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "與前次比較"
+
+msgid "dashboard.status.vs_prev"
+msgstr "與前次比較"
+
+msgid "dashboard.tile.bans_active"
+msgstr "有效封鎖"
+
+msgid "dashboard.tile.jobs"
+msgstr "排程工作"
+
+msgid "dashboard.tile.trend"
+msgstr "已封鎖請求趨勢"
+
+msgid "dashboard.welcome.greeting"
+msgstr "歡迎回來，"
+
+msgid "dashboard.welcome.title"
+msgstr "歡迎回來，%(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "最近 %(days)s 天"
+
+msgid "dashboard.window.title"
+msgstr "儀表板視窗"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "所有 %(count)s 個符合條件的 %(entity)s 均已選取。"
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "選取所有 %(count)s 個符合條件的 %(entity)s"
+
+msgid "datatable.bulk_select_clear"
+msgstr "清除選取"
+
+msgid "datatable.bulk_select_page"
+msgstr "此頁面上的所有 %(count)s 個 %(entity)s 均已選取。"
+
+msgid "datatable.info_bans"
+msgstr "顯示 %(start)s 到 %(end)s 個封鎖，共 %(total)s 個"
+
+msgid "datatable.info_cache"
+msgstr "顯示 %(start)s 到 %(end)s 個快取檔案，共 %(total)s 個"
+
+msgid "datatable.info_configs"
+msgstr "顯示 %(start)s 到 %(end)s 個自訂設定，共 %(total)s 個"
+
+msgid "datatable.info_empty_bans"
+msgstr "無可用封鎖"
+
+msgid "datatable.info_empty_cache"
+msgstr "無可用快取檔案"
+
+msgid "datatable.info_empty_configs"
+msgstr "無可用自訂設定"
+
+msgid "datatable.info_empty_instances"
+msgstr "無可用執行個體"
+
+msgid "datatable.info_empty_items"
+msgstr "無可用項目"
+
+msgid "datatable.info_empty_jobs"
+msgstr "無可用任務"
+
+msgid "datatable.info_empty_plugins"
+msgstr "無可用外掛程式"
+
+msgid "datatable.info_empty_reports"
+msgstr "無可用報告"
+
+msgid "datatable.info_empty_services"
+msgstr "無可用服務"
+
+msgid "datatable.info_empty_templates"
+msgstr "沒有可用的範本"
+
+msgid "datatable.info_filtered_bans"
+msgstr "（從 _MAX_ 個總封鎖中篩選）"
+
+msgid "datatable.info_filtered_cache"
+msgstr "（從 _MAX_ 個總快取檔案中篩選）"
+
+msgid "datatable.info_filtered_configs"
+msgstr "（從 _MAX_ 個總自訂設定中篩選）"
+
+msgid "datatable.info_filtered_instances"
+msgstr "（從 _MAX_ 個總執行個體中篩選）"
+
+msgid "datatable.info_filtered_items"
+msgstr "（從 _MAX_ 個總項目中篩選）"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "（從 _MAX_ 個總任務中篩選）"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "（從 _MAX_ 個總外掛程式中篩選）"
+
+msgid "datatable.info_filtered_reports"
+msgstr "（從 _MAX_ 個總報告中篩選）"
+
+msgid "datatable.info_filtered_services"
+msgstr "（從 _MAX_ 個總服務中篩選）"
+
+msgid "datatable.info_filtered_templates"
+msgstr "（從 _MAX_ 個總範本中篩選）"
+
+msgid "datatable.info_instances"
+msgstr "顯示 %(start)s 到 %(end)s 個執行個體，共 %(total)s 個"
+
+msgid "datatable.info_items"
+msgstr "顯示 %(start)s 到 %(end)s 個項目，共 %(total)s 個"
+
+msgid "datatable.info_jobs"
+msgstr "顯示 %(start)s 到 %(end)s 個任務，共 %(total)s 個"
+
+msgid "datatable.info_plugins"
+msgstr "顯示 %(start)s 到 %(end)s 個外掛程式，共 %(total)s 個"
+
+msgid "datatable.info_reports"
+msgstr "顯示 %(start)s 到 %(end)s 個報告，共 %(total)s 個"
+
+msgid "datatable.info_services"
+msgstr "顯示 %(start)s 到 %(end)s 個服務，共 %(total)s 個"
+
+msgid "datatable.info_templates"
+msgstr "顯示 %(start)s 到 %(end)s 個範本，共 %(total)s 個"
+
+msgid "datatable.length_all"
+msgstr "全部"
+
+msgid "datatable.length_menu_bans"
+msgstr "顯示 _MENU_ 個封鎖"
+
+msgid "datatable.length_menu_cache"
+msgstr "顯示 _MENU_ 個快取檔案"
+
+msgid "datatable.length_menu_configs"
+msgstr "顯示 _MENU_ 個自訂設定"
+
+msgid "datatable.length_menu_instances"
+msgstr "顯示 _MENU_ 個執行個體"
+
+msgid "datatable.length_menu_items"
+msgstr "顯示 _MENU_ 個項目"
+
+msgid "datatable.length_menu_jobs"
+msgstr "顯示 _MENU_ 個任務"
+
+msgid "datatable.length_menu_plugins"
+msgstr "顯示 _MENU_ 個外掛程式"
+
+msgid "datatable.length_menu_reports"
+msgstr "顯示 _MENU_ 個報告"
+
+msgid "datatable.length_menu_services"
+msgstr "顯示 _MENU_ 個服務"
+
+msgid "datatable.length_menu_templates"
+msgstr "顯示 _MENU_ 個範本"
+
+msgid "datatable.paginate.first"
+msgstr "第一頁"
+
+msgid "datatable.paginate.last"
+msgstr "最後一頁"
+
+msgid "datatable.paginate.next"
+msgstr "下一頁"
+
+msgid "datatable.paginate.previous"
+msgstr "上一頁"
+
+msgid "datatable.processing"
+msgstr "處理中..."
+
+msgid "datatable.search"
+msgstr "搜尋："
+
+msgid "datatable.select_rows_bans_0"
+msgstr "未選取封鎖"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "已選取 1 個封鎖"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "已選取 %d 個封鎖"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "未選取快取檔案"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "已選取 1 個快取檔案"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "已選取 %d 個快取檔案"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "未選取自訂設定"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "已選取 1 個自訂設定"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "已選取 %d 個自訂設定"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "未選取執行個體"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "已選取 1 個執行個體"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "已選取 %d 個執行個體"
+
+msgid "datatable.select_rows_items_0"
+msgstr "未選取項目"
+
+msgid "datatable.select_rows_items_1"
+msgstr "已選取 1 個項目"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "已選取 %d 個項目"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "未選取任務"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "已選取 1 個任務"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "已選取 %d 個任務"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "未選取外掛程式"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "已選取 1 個外掛程式"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "已選取 %d 個外掛程式"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "未選取報告"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "已選取 1 個報告"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "已選取 %d 個報告"
+
+msgid "datatable.select_rows_services_0"
+msgstr "未選取服務"
+
+msgid "datatable.select_rows_services_1"
+msgstr "已選取 1 個服務"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "已選取 %d 個服務"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "未選擇範本"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "選擇了 1 個範本"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "選擇了 %d 個範本"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s 已選取"
+
+msgid "datatable.selected_list_empty"
+msgstr "未選取 %(entity)s。"
+
+msgid "datatable.zero_records_bans"
+msgstr "找不到相符的封鎖"
+
+msgid "datatable.zero_records_cache"
+msgstr "找不到相符的快取檔案"
+
+msgid "datatable.zero_records_configs"
+msgstr "找不到相符的自訂設定"
+
+msgid "datatable.zero_records_instances"
+msgstr "找不到相符的執行個體"
+
+msgid "datatable.zero_records_items"
+msgstr "找不到相符的項目"
+
+msgid "datatable.zero_records_jobs"
+msgstr "找不到相符的任務"
+
+msgid "datatable.zero_records_plugins"
+msgstr "找不到相符的外掛程式"
+
+msgid "datatable.zero_records_reports"
+msgstr "找不到相符的報告"
+
+msgid "datatable.zero_records_services"
+msgstr "找不到相符的服務"
+
+msgid "datatable.zero_records_templates"
+msgstr "未找到匹配的範本"
+
+msgid "dev_log.copy_failed"
+msgstr "複製文字失敗："
+
+msgid "dev_log.news_fetch_fail"
+msgstr "取得新聞失敗："
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "跳過格式錯誤的行：%(line)s"
+
+msgid "duration.1_hour"
+msgstr "1 小時"
+
+msgid "duration.1_week"
+msgstr "1 週"
+
+msgid "duration.24_hours"
+msgstr "24 小時"
+
+msgid "duration.custom"
+msgstr "自訂"
+
+msgid "duration.permanent"
+msgstr "永久"
+
+msgid "error.401.help"
+msgstr "您必須登入才能存取此資源。"
+
+msgid "error.401.message"
+msgstr "請登入後繼續。"
+
+msgid "error.401.title"
+msgstr "需要驗證"
+
+msgid "error.403.help"
+msgstr "請驗證您的憑證，如果您認為這是錯誤，請聯絡管理員。"
+
+msgid "error.403.message"
+msgstr "您無權存取此頁面。"
+
+msgid "error.403.title"
+msgstr "存取遭拒"
+
+msgid "error.404.help"
+msgstr "請檢查 URL 是否正確，如果您認為這是錯誤，請聯絡管理員。"
+
+msgid "error.404.message"
+msgstr "找不到請求的資源。"
+
+msgid "error.404.title"
+msgstr "未找到"
+
+msgid "error.5xx.help"
+msgstr "請稍後再試，如果問題仍然存在，請聯絡管理員。"
+
+msgid "error.5xx.message"
+msgstr "發生未預期的伺服器錯誤。"
+
+msgid "error.5xx.title"
+msgstr "伺服器錯誤"
+
+msgid "error.ban_update_failed"
+msgstr "更新封鎖期限失敗。請再試一次。"
+
+msgid "error.reports_load_error"
+msgstr "載入報告時發生錯誤。請嘗試重新整理頁面。"
+
+msgid "error.unban_failed"
+msgstr "解除封鎖 IP 位址失敗。請再試一次。"
+
+msgid "flash.easter_egg"
+msgstr "如果你讀到這條訊息，表示你很好奇"
+
+msgid "flash.error"
+msgstr "錯誤"
+
+msgid "flash.message"
+msgstr "訊息"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "您的服務數量超出了 PRO 授權允許的範圍。請升級授權，或將部分服務轉換為草稿模式以解鎖您的 PRO 授權。"
+
+msgid "flash.time.just_now"
+msgstr "剛才"
+
+msgid "flash.warning"
+msgstr "警告"
+
+msgid "footer.blog"
+msgstr "部落格"
+
+msgid "footer.documentation"
+msgstr "說明文件"
+
+msgid "footer.license"
+msgstr "授權"
+
+msgid "footer.made_by"
+msgstr "由"
+
+msgid "footer.privacy"
+msgstr "隱私權"
+
+msgid "footer.support"
+msgstr "支援"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "包含附加的自訂設定"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "覆寫現有 UI/API 自訂設定"
+
+msgid "form.checkbox.remember_me"
+msgstr "記住我"
+
+msgid "form.help.ban_specific_service"
+msgstr "封鎖將僅適用於此特定服務。"
+
+msgid "form.help.hostname_length_limit"
+msgstr "主機名稱限制為 256 個字元。"
+
+msgid "form.help.hostname_special_chars"
+msgstr "協定/連接埠規範中只允許使用 `/` 和 `:`。"
+
+msgid "form.help.multivalue_separator"
+msgstr "值以以下字元分隔："
+
+msgid "form.help.permanent_ban"
+msgstr "如果勾選，封鎖將永久有效，直到手動移除為止。"
+
+msgid "form.help.photo_extensions"
+msgstr "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+
+msgid "form.label.2fa_code"
+msgstr "兩步驟驗證碼"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "兩步驟驗證碼或恢復碼"
+
+msgid "form.label.admin_email"
+msgstr "管理員電子郵件"
+
+msgid "form.label.admin_password"
+msgstr "管理員密碼"
+
+msgid "form.label.admin_username"
+msgstr "管理員使用者名稱"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "自動 Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "封鎖範圍"
+
+msgid "form.label.certificate_authority"
+msgstr "憑證授權單位"
+
+msgid "form.label.certificate_priority"
+msgstr "憑證優先順序"
+
+msgid "form.label.challenge_type"
+msgstr "挑戰類型"
+
+msgid "form.label.config_type"
+msgstr "設定類型"
+
+msgid "form.label.configuration_name"
+msgstr "設定名稱"
+
+msgid "form.label.confirm_password"
+msgstr "確認密碼"
+
+msgid "form.label.current_password"
+msgstr "目前密碼"
+
+msgid "form.label.custom_config"
+msgstr "設定"
+
+msgid "form.label.custom_end_date"
+msgstr "自訂結束日期"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "自訂 SSL 憑證"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "自訂 SSL 憑證資料 (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "自訂 SSL 金鑰"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "自訂 SSL 金鑰資料 (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Let's Encrypt DNS 憑證項目"
+
+msgid "form.label.dns_propagation"
+msgstr "DNS 傳播延遲"
+
+msgid "form.label.dns_provider"
+msgstr "DNS 提供者"
+
+msgid "form.label.email"
+msgstr "電子郵件"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "用於 Let's Encrypt 的電子郵件"
+
+msgid "form.label.end_date"
+msgstr "結束日期"
+
+msgid "form.label.hostname"
+msgstr "主機名稱"
+
+msgid "form.label.instance_id"
+msgstr "執行個體 ID"
+
+msgid "form.label.ip_address"
+msgstr "IP 位址"
+
+msgid "form.label.keywords"
+msgstr "關鍵字"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt 自訂設定檔"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "停用公共字尾（PSL 黑名單）"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Let's Encrypt DNS 憑證項目"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Let's Encrypt 設定檔"
+
+msgid "form.label.license_key"
+msgstr "授權金鑰"
+
+msgid "form.label.make_permanent"
+msgstr "設為永久"
+
+msgid "form.label.name"
+msgstr "名稱"
+
+msgid "form.label.new_duration"
+msgstr "新期限"
+
+msgid "form.label.new_password"
+msgstr "新密碼"
+
+msgid "form.label.optional"
+msgstr "（選填）"
+
+msgid "form.label.passkey_name"
+msgstr "密碼金鑰名稱"
+
+msgid "form.label.password"
+msgstr "密碼"
+
+msgid "form.label.permanent_ban"
+msgstr "永久封鎖"
+
+msgid "form.label.plugin_id"
+msgstr "外掛程式"
+
+msgid "form.label.raw_configuration"
+msgstr "原始設定"
+
+msgid "form.label.real_ip_from"
+msgstr "真實 IP 來源"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "真實 IP 來源（URLs）"
+
+msgid "form.label.real_ip_header"
+msgstr "真實 IP 標頭"
+
+msgid "form.label.real_ip_recursive"
+msgstr "遞迴搜尋真實 IP"
+
+msgid "form.label.reason"
+msgstr "原因"
+
+msgid "form.label.secret_token"
+msgstr "密鑰"
+
+msgid "form.label.server_name"
+msgstr "伺服器名稱"
+
+msgid "form.label.service_name"
+msgstr "服務名稱"
+
+msgid "form.label.template_id"
+msgstr "範本 ID"
+
+msgid "form.label.theme"
+msgstr "主題"
+
+msgid "form.label.type"
+msgstr "類型"
+
+msgid "form.label.ui_host"
+msgstr "UI 主機"
+
+msgid "form.label.ui_url"
+msgstr "UI URL"
+
+msgid "form.label.use_custom_ssl"
+msgstr "使用自訂 SSL"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "使用 Let's Encrypt Staging"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "使用 PROXY 協定"
+
+msgid "form.label.use_real_ip"
+msgstr "使用真實 IP"
+
+msgid "form.label.username"
+msgstr "使用者名稱"
+
+msgid "form.label.wildcard_certificates"
+msgstr "萬用字元憑證"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 連線逾時"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API 金鑰"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "ZeroSSL API 最長時間"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "ZeroSSL API 重試次數"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 重試延遲"
+
+msgid "form.placeholder.2fa_code"
+msgstr "輸入代碼"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "輸入代碼或恢復碼"
+
+msgid "form.placeholder.config_name"
+msgstr "我的自訂設定"
+
+msgid "form.placeholder.current_password"
+msgstr "目前密碼"
+
+msgid "form.placeholder.enter_username"
+msgstr "輸入您的使用者名稱"
+
+msgid "form.placeholder.keywords"
+msgstr "關鍵字..."
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "輸入值..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "搜尋外掛程式..."
+
+msgid "form.placeholder.search"
+msgstr "搜尋..."
+
+msgid "form.placeholder.secret_token"
+msgstr "密鑰"
+
+msgid "form.placeholder.select_service"
+msgstr "選擇服務"
+
+msgid "form.placeholder.username_example"
+msgstr "王小明"
+
+msgid "form.validation.confirm_password_match"
+msgstr "密碼不符。"
+
+msgid "form.validation.password_length"
+msgstr "密碼必須至少包含 8 個字元。"
+
+msgid "form.validation.password_number"
+msgstr "密碼必須至少包含 1 個數字。"
+
+msgid "form.validation.password_special"
+msgstr "密碼必須至少包含 1 個特殊字元。"
+
+msgid "form.validation.password_uppercase"
+msgstr "密碼必須至少包含 1 個大寫字母。"
+
+msgid "input_list.view_all_settings"
+msgstr "檢視所有 %(count)s 設定"
+
+msgid "instance.type.container"
+msgstr "容器"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "靜態"
+
+msgid "instances.down"
+msgstr "已停止"
+
+msgid "instances.loading"
+msgstr "正在載入"
+
+msgid "instances.subtitle"
+msgstr "管理與此 UI 連結的 BunkerWeb 執行個體：建立、ping、重新載入、停止或移除它們。"
+
+msgid "instances.total"
+msgstr "總執行個體數"
+
+msgid "instances.up"
+msgstr "執行中"
+
+msgid "interval.day"
+msgstr "每天"
+
+msgid "interval.hour"
+msgstr "每小時"
+
+msgid "interval.minute"
+msgstr "每分鐘"
+
+msgid "interval.once"
+msgstr "一次"
+
+msgid "interval.week"
+msgstr "每週"
+
+msgid "job.history.end_date"
+msgstr "結束日期"
+
+msgid "job.history.start_date"
+msgstr "開始日期"
+
+msgid "job.history.success"
+msgstr "成功"
+
+msgid "jobs.subtitle"
+msgstr "由 BunkerWeb 計劃器執行，包括排程和一次性任務 — 追蹤其狀態並按需執行。"
+
+msgid "jobs.tile.async"
+msgstr "非同步"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "上次執行失敗"
+
+msgid "jobs.tile.reload_required"
+msgstr "需要重新載入"
+
+msgid "jobs.tile.total"
+msgstr "總任務數"
+
+msgid "legend.locked_settings_annotation"
+msgstr "已鎖定 (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "鎖定的設定會反白顯示"
+
+msgid "link.back_to_login"
+msgstr "返回登入"
+
+msgid "link.forgot_password"
+msgstr "忘記密碼？"
+
+msgid "link.get_support"
+msgstr "取得支援"
+
+msgid "link.here"
+msgstr "這裡"
+
+msgid "link.more_info"
+msgstr "更多資訊"
+
+msgid "link.more_news"
+msgstr "更多新聞"
+
+msgid "link.opens_new_tab"
+msgstr "（在新視窗中開啟）"
+
+msgid "link.privacy_policy"
+msgstr "隱私權政策"
+
+msgid "link.read_more"
+msgstr "閱讀更多"
+
+msgid "link.see_more"
+msgstr "查看更多"
+
+msgid "link.upgrade"
+msgstr "升級？"
+
+msgid "link.use_authenticator_code"
+msgstr "使用驗證碼"
+
+msgid "link.use_recovery_code"
+msgstr "使用恢復碼"
+
+msgid "login.or_use_password"
+msgstr "或使用您的密碼"
+
+msgid "login.subtitle"
+msgstr "登入您的 BunkerWeb 帳戶"
+
+msgid "login.title"
+msgstr "登入"
+
+msgid "logs.all_sources"
+msgstr "所有來源（即時）"
+
+msgid "logs.annotation_error"
+msgstr "錯誤"
+
+msgid "logs.annotation_warning"
+msgstr "警告"
+
+msgid "logs.collapse"
+msgstr "收合"
+
+msgid "logs.expand"
+msgstr "展開"
+
+msgid "logs.filter_levels"
+msgstr "等級"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s 個錯誤，%(warnings)s 個警告"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Let's Encrypt 日誌"
+
+msgid "logs.level_all"
+msgstr "所有記錄"
+
+msgid "logs.level_critical"
+msgstr "嚴重"
+
+msgid "logs.level_debug"
+msgstr "除錯"
+
+msgid "logs.level_error"
+msgstr "錯誤"
+
+msgid "logs.level_errors_only"
+msgstr "僅錯誤"
+
+msgid "logs.level_info"
+msgstr "資訊"
+
+msgid "logs.level_notice"
+msgstr "通知"
+
+msgid "logs.level_security_only"
+msgstr "僅安全性記錄"
+
+msgid "logs.level_warning"
+msgstr "警告"
+
+msgid "logs.lines_all"
+msgstr "全部"
+
+msgid "logs.lines_label"
+msgstr "行"
+
+msgid "logs.live_title"
+msgstr "即時記錄"
+
+msgid "logs.main_logs"
+msgstr "主要日誌"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s 行 · 修改於 %(when)s"
+
+msgid "logs.new_lines"
+msgstr "新行"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s 行新日誌"
+
+msgid "logs.no_log_files"
+msgstr "沒有任何記錄檔案可顯示，請參閱文件以獲取更多關於如何啟用記錄的資訊。"
+
+msgid "logs.pause"
+msgstr "暫停"
+
+msgid "logs.resume"
+msgstr "繼續"
+
+msgid "logs.select_file_prompt"
+msgstr "選擇一個記錄檔案以檢視其內容"
+
+msgid "logs.showing_all"
+msgstr "%(total)s 行"
+
+msgid "logs.showing_some"
+msgstr "顯示 %(shown)s / %(total)s"
+
+msgid "logs.tailing_sources"
+msgstr "正在追蹤 · %(count)s 個來源"
+
+msgid "logs.taller"
+msgstr "加高"
+
+msgid "logs.trimmed_notice"
+msgstr "--- 為了效能，已移除 %(count)s 筆較舊的日誌行 ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "將您的外掛程式封存拖放到此處或點擊以選取檔案。"
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "要封鎖所有 %(count)s 份相符報告中的 IP 嗎？重複的目標只會套用一次。"
+
+#. plural pair; 1 form(s) for zh_Hant, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "您確定要刪除選定的快取檔案嗎？"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "確定要轉換所選的自訂組態嗎？"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "確定將所選自訂設定轉換為 %(state)s 嗎？"
+
+#. plural pair; 1 form(s) for zh_Hant, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "您確定要刪除選定的自訂設定嗎？"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "您確定要轉換選定的服務嗎？"
+
+msgid "modal.body.confirm_next_step"
+msgstr "您確定要繼續下一步嗎？"
+
+#. plural pair; 1 form(s) for zh_Hant, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "您確定要刪除選定的外掛程式嗎？"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "您確定要刪除範本 %(name)s 嗎？"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "您確定要刪除選定的執行個體嗎？"
+
+#. plural pair; 1 form(s) for zh_Hant, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "您確定要刪除選定的執行個體嗎？"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "一個或多個選定的範本已分配給服務（總共 %(services_count)s 個服務）。刪除它們將清除這些分配。您想繼續嗎？"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "您確定要刪除此步驟嗎？"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "內容"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "步驟"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "由全域設定使用"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "由服務使用：%(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "將匯出所選服務。啟用下方選項，可將其附加的自訂設定打包到 .zip 封存檔中。"
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "這將取得全域設定並套用到目前的樣板。"
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "只會更新此樣板中存在的設定。"
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "與預設值相同的數值會被忽略。"
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME 永不會被覆寫。"
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "將您的自訂設定匯出檔拖放到這裡，或按一下以選取檔案。"
+
+msgid "modal.body.import_configs_warning"
+msgstr "由 scheduler、autoconf 或 templates 建立的自訂設定一律會保留。只有 UI/API 設定可以被覆寫。"
+
+msgid "modal.body.import_services_dropzone"
+msgstr "將您的服務匯出檔案拖放到此處，或按一下以選取檔案。"
+
+msgid "modal.body.import_services_warning"
+msgstr "匯入服務將從匯出檔案建立新的 UI 服務。現有服務將被略過。"
+
+msgid "modal.body.instance_creation_alert"
+msgstr "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。"
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "如果遇到問題，您可以手動接受不安全的憑證："
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。"
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "這些恢復碼僅顯示一次。請確保將其安全儲存。"
+
+msgid "modal.body.reset_template_alert"
+msgstr "您確定要重設目前的範本設定和自訂設定嗎？"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "您確定要轉換選定的服務嗎？"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "您確定要刪除選定的服務嗎？"
+
+#. plural pair; 1 form(s) for zh_Hant, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "您確定要解除封鎖選定的 IP 位址嗎？"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "確定要解除所有 %(count)s 個相符的封鎖嗎？"
+
+msgid "modal.body.update_duration_alert"
+msgstr "請為選定的封鎖選擇新的期限："
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "為所有 %(count)s 個相符的封鎖選擇新時間："
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "套用全域設定"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "重設範本設定"
+
+msgid "modal.section.ban_details"
+msgstr "封鎖詳情"
+
+msgid "modal.section.ban_scope"
+msgstr "封鎖範圍"
+
+msgid "modal.section.delete"
+msgstr "刪除"
+
+msgid "modal.title.add_bans"
+msgstr "新增封鎖"
+
+msgid "modal.title.add_plugins"
+msgstr "新增外掛程式"
+
+msgid "modal.title.confirm_conversion"
+msgstr "確認轉換"
+
+msgid "modal.title.confirm_deletion"
+msgstr "確認刪除"
+
+msgid "modal.title.confirm_unban"
+msgstr "確認解除封鎖"
+
+msgid "modal.title.create_new_instance"
+msgstr "建立新執行個體"
+
+msgid "modal.title.create_template"
+msgstr "建立範本"
+
+msgid "modal.title.delete_instance"
+msgstr "刪除執行個體"
+
+msgid "modal.title.delete_step"
+msgstr "刪除步驟"
+
+msgid "modal.title.delete_template"
+msgstr "刪除範本"
+
+msgid "modal.title.edit_template"
+msgstr "編輯範本：%(name)s"
+
+msgid "modal.title.export_services"
+msgstr "匯出服務"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "要套用全域設定嗎？"
+
+msgid "modal.title.from_plugin"
+msgstr "來自外掛程式"
+
+msgid "modal.title.full_url"
+msgstr "完整 URL"
+
+msgid "modal.title.import_configs"
+msgstr "匯入自訂設定"
+
+msgid "modal.title.import_services"
+msgstr "匯入服務"
+
+msgid "modal.title.job_history"
+msgstr "最近 10 次任務執行"
+
+msgid "modal.title.job_history_count"
+msgstr "任務 %(count)s 次執行"
+
+msgid "modal.title.multiselect_selected"
+msgstr "已選取項目"
+
+msgid "modal.title.recovery_codes"
+msgstr "恢復碼"
+
+msgid "modal.title.reset_template_config"
+msgstr "重設範本設定？"
+
+msgid "modal.title.security_report_details"
+msgstr "安全報告詳細資訊"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "伺服器名稱不是唯一的"
+
+msgid "modal.title.update_duration"
+msgstr "更新封鎖期限"
+
+msgid "mode.advanced"
+msgstr "進階"
+
+msgid "mode.compose"
+msgstr "撰寫"
+
+msgid "mode.easy"
+msgstr "簡易"
+
+msgid "mode.raw"
+msgstr "原始"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "升級至 PRO"
+
+msgid "navbar.dropdown.logout"
+msgstr "登出"
+
+msgid "navbar.link.documentation"
+msgstr "說明文件"
+
+msgid "navbar.version"
+msgstr "版本"
+
+msgid "navigation.about"
+msgstr "關於"
+
+msgid "navigation.bans"
+msgstr "封鎖"
+
+msgid "navigation.cache"
+msgstr "快取"
+
+msgid "navigation.certificates"
+msgstr "憑證"
+
+msgid "navigation.configs"
+msgstr "設定"
+
+msgid "navigation.configure"
+msgstr "設定"
+
+msgid "navigation.edition_community"
+msgstr "社群版"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "附加頁面"
+
+msgid "navigation.global_settings"
+msgstr "全域設定"
+
+msgid "navigation.groups"
+msgstr "資源群組"
+
+msgid "navigation.home"
+msgstr "首頁"
+
+msgid "navigation.instances"
+msgstr "執行個體"
+
+msgid "navigation.jobs"
+msgstr "任務"
+
+msgid "navigation.logs"
+msgstr "日誌"
+
+msgid "navigation.misc"
+msgstr "雜項"
+
+msgid "navigation.mode_selection"
+msgstr "模式選擇"
+
+msgid "navigation.more"
+msgstr "更多..."
+
+msgid "navigation.operate"
+msgstr "操作"
+
+msgid "navigation.overview"
+msgstr "總覽"
+
+msgid "navigation.plugin_activated"
+msgstr "外掛程式已啟用"
+
+msgid "navigation.plugin_activated_global"
+msgstr "外掛程式已全域啟用"
+
+msgid "navigation.plugin_deactivated"
+msgstr "外掛程式已停用"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "外掛程式已全域停用"
+
+msgid "navigation.plugins"
+msgstr "外掛程式"
+
+msgid "navigation.plugins_pages"
+msgstr "外掛程式頁面"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "重導向"
+
+msgid "navigation.reports"
+msgstr "報告"
+
+msgid "navigation.services"
+msgstr "服務"
+
+msgid "navigation.support"
+msgstr "支援"
+
+msgid "navigation.system"
+msgstr "系統"
+
+msgid "navigation.templates"
+msgstr "範本"
+
+msgid "navigation.threatmap"
+msgstr "威脅地圖"
+
+msgid "navigation.timings"
+msgstr "執行時間"
+
+msgid "navigation.upstreams"
+msgstr "上游"
+
+msgid "navigation.web_cache"
+msgstr "Web 快取"
+
+msgid "navigation.workflows"
+msgstr "工作流程"
+
+msgid "news.image_alt"
+msgstr "新聞圖片"
+
+msgid "news.posted_on"
+msgstr "發布於"
+
+msgid "news.slide"
+msgstr "滑動"
+
+msgid "newsletter.legal_agreement"
+msgstr "我想要訂閱新聞通訊，並且我已經閱讀並同意："
+
+msgid "newsletter.title"
+msgstr "加入新聞通訊"
+
+msgid "onboarding.dismiss"
+msgstr "略過"
+
+msgid "onboarding.error"
+msgstr "無法載入導覽。"
+
+msgid "onboarding.hint.bans"
+msgstr "封鎖清單顯示 BunkerWeb 目前拒絕的用戶端。每一列都會列出原因與到期時間。"
+
+msgid "onboarding.hint.home"
+msgstr "此儀表板顯示目前運行狀況：正在執行的執行個體、提供服務中的服務，以及 BunkerWeb 已處理的流量。"
+
+msgid "onboarding.hint.logs"
+msgstr "來自所有執行個體的即時日誌，可依執行個體與嚴重層級篩選。"
+
+msgid "onboarding.hint.reports"
+msgstr "每個被攔截的請求都會出現在這裡。開啟其中一筆即可查看是哪項安全檢查攔截了它以及原因。"
+
+msgid "onboarding.hint.title"
+msgstr "快速導覽"
+
+msgid "onboarding.item.first_block"
+msgstr "看到 BunkerWeb 攔截請求"
+
+msgid "onboarding.item.https"
+msgstr "讓 HTTPS 正常運作"
+
+msgid "onboarding.item.install"
+msgstr "在一台以上的主機上安裝 BunkerWeb"
+
+msgid "onboarding.item.mfa"
+msgstr "啟用 MFA"
+
+msgid "onboarding.item.pro"
+msgstr "啟用 BunkerWeb PRO"
+
+msgid "onboarding.item.read_bans"
+msgstr "查看誰被封鎖，以及封鎖到何時"
+
+msgid "onboarding.item.read_home"
+msgstr "在儀表板中查看目前運行狀況"
+
+msgid "onboarding.item.read_logs"
+msgstr "跨執行個體查看即時日誌"
+
+msgid "onboarding.item.read_reports"
+msgstr "了解請求被攔截的原因"
+
+msgid "onboarding.item.service"
+msgstr "註冊第一個服務"
+
+msgid "onboarding.item.workflow"
+msgstr "連結安全工作流程"
+
+msgid "onboarding.not_saved"
+msgstr "無法儲存。"
+
+msgid "onboarding.pro_tips"
+msgstr "PRO 提示"
+
+msgid "onboarding.restart"
+msgstr "重新開始導覽"
+
+msgid "onboarding.restart_help"
+msgstr "在頂端列重新顯示入門步驟。"
+
+msgid "onboarding.subtitle"
+msgstr "只要幾個步驟，即可讓 BunkerWeb 開始保護您的服務。"
+
+msgid "onboarding.title"
+msgstr "開始使用"
+
+msgid "pagination.page"
+msgstr "頁"
+
+msgid "plan.free"
+msgstr "免費"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "外掛程式已停用；因此，沒有可用資訊。"
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "此外掛在專屬頁面中管理，該頁面尚未載入。請重新啟動 Web UI 以存取。"
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "指標外掛程式未啟用；因此，沒有可用資訊。"
+
+msgid "plugin.page.status.no_content"
+msgstr "此外掛不提供內嵌頁面。"
+
+msgid "plugin.page.status.not_available"
+msgstr "外掛程式頁面在 Beta 階段尚不可用。"
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "預先渲染錯誤"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "此外掛程式會載入自己的頁面，並執行外掛程式程式碼。只有管理員才能載入。"
+
+msgid "plugin.type.all"
+msgstr "全部"
+
+msgid "plugin.type.core"
+msgstr "核心"
+
+msgid "plugin.type.external"
+msgstr "外部"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "啟用中"
+
+msgid "plugins.marketplace.always_on"
+msgstr "核心/永遠啟用"
+
+msgid "plugins.marketplace.disabled"
+msgstr "已停用"
+
+msgid "plugins.marketplace.enabled"
+msgstr "已啟用"
+
+msgid "plugins.marketplace.inactive"
+msgstr "未啟用"
+
+msgid "plugins.marketplace.no_match"
+msgstr "沒有外掛程式符合篩選條件"
+
+msgid "plugins.marketplace.search"
+msgstr "搜尋外掛程式..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "全部"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "社群版"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "已停用"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "已啟用"
+
+msgid "plugins.multivalue.more_value"
+msgstr "更多值"
+
+msgid "plugins.multivalue.more_values"
+msgstr "更多值"
+
+msgid "plugins.multivalue.show_less"
+msgstr "顯示較少"
+
+msgid "pro.alert.overlapped_1"
+msgstr "您的啟用服務數量超出授權允許的範圍！"
+
+msgid "pro.alert.overlapped_2"
+msgstr "刪除或將某些服務轉換為草稿模式，以達到 %(pro_services)s 個服務的限制。"
+
+msgid "pro.button.all_features_available"
+msgstr "所有功能可用"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "等待合規..."
+
+msgid "pro.button.renew_license"
+msgstr "續訂授權"
+
+msgid "pro.button.suspended_license"
+msgstr "授權已暫停"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "升級至 PRO"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "有效期至"
+
+msgid "pro.expiration_date.title"
+msgstr "Pro 到期日期"
+
+msgid "pro.expiration_date.unknown"
+msgstr "未知的到期日期"
+
+msgid "pro.force_check.description"
+msgstr "強制重新檢查 PRO 外掛程式。如有新版本，將重新下載外掛程式。"
+
+msgid "pro.force_check.title"
+msgstr "強制檢查"
+
+msgid "pro.force_update.description"
+msgstr "略過檢查並強制下載 PRO 外掛程式。若無法強制執行，會保留目前狀態。"
+
+msgid "pro.force_update.title"
+msgstr "強制更新"
+
+msgid "pro.key.title.activate"
+msgstr "啟用金鑰"
+
+msgid "pro.key.title.update"
+msgstr "更新金鑰"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Pro 功能"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "升級至 Pro 以存取此功能"
+
+msgid "pro.status.draft_services_count"
+msgstr "%(draft_services)s 個草稿服務"
+
+msgid "pro.status.expired"
+msgstr "已過期"
+
+msgid "pro.status.free_version"
+msgstr "免費版本"
+
+msgid "pro.status.overlapped"
+msgstr "已超額"
+
+msgid "pro.status.pro_version"
+msgstr "PRO 版本"
+
+msgid "pro.status.services_count"
+msgstr "%(online_services)s 個線上服務 / %(pro_services)s 個 PRO 服務"
+
+msgid "pro.status.suspended"
+msgstr "已暫停"
+
+msgid "pro.status.title"
+msgstr "狀態"
+
+msgid "pro.title"
+msgstr "Pro 授權"
+
+msgid "profile.2fa.disable_title"
+msgstr "停用兩步驟驗證"
+
+msgid "profile.2fa.enable_title"
+msgstr "啟用兩步驟驗證"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "重新整理恢復碼將使先前的代碼失效。"
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA 已停用"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "啟用雙重驗證"
+
+msgid "profile.card.coming_soon"
+msgstr "即將推出"
+
+msgid "profile.card.title.2fa"
+msgstr "兩步驟驗證 (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "變更密碼"
+
+msgid "profile.card.title.change_theme"
+msgstr "變更主題"
+
+msgid "profile.card.title.coming_soon"
+msgstr "即將推出"
+
+msgid "profile.card.title.edit_profile"
+msgstr "編輯個人資料"
+
+msgid "profile.card.title.passkeys"
+msgstr "密碼金鑰"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "重新整理恢復碼"
+
+msgid "profile.card.title.sessions"
+msgstr "工作階段"
+
+msgid "profile.help.photo_extensions"
+msgstr "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "這會立即登出您帳戶上所有其他目前使用中的工作階段。請輸入您的密碼以確認。"
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "清除其他會話？"
+
+msgid "profile.passkey.added"
+msgstr "新增於"
+
+msgid "profile.passkey.empty"
+msgstr "尚未註冊任何密碼金鑰。"
+
+msgid "profile.passkey.help"
+msgstr "密碼金鑰可讓您免密碼登入，只需使用裝置的螢幕鎖定或安全金鑰。"
+
+msgid "profile.passkey.last_used"
+msgstr "上次使用"
+
+msgid "profile.passkey.never_used"
+msgstr "從未使用"
+
+msgid "profile.passkey.unsupported"
+msgstr "此瀏覽器不支援密碼金鑰。"
+
+msgid "profile.session.browser"
+msgstr "瀏覽器"
+
+msgid "profile.session.creation_date"
+msgstr "建立日期"
+
+msgid "profile.session.current_session"
+msgstr "目前工作階段"
+
+msgid "profile.session.device"
+msgstr "裝置"
+
+msgid "profile.session.ip_address"
+msgstr "IP 位址"
+
+msgid "profile.session.last_activity"
+msgstr "上次活動"
+
+msgid "profile.session.os"
+msgstr "作業系統"
+
+msgid "profile.session.title"
+msgstr "工作階段"
+
+msgid "profile.session.wipe_help"
+msgstr "結束您帳戶上所有其他目前使用中的工作階段。您將在此處保持登入狀態。"
+
+msgid "profile.subtitle"
+msgstr "管理您的帳戶、安全性和目前使用中的工作階段。"
+
+msgid "profile.tab.profile"
+msgstr "個人資料"
+
+msgid "profile.tab.security"
+msgstr "安全性"
+
+msgid "profile.tab.sessions"
+msgstr "工作階段"
+
+msgid "range_picker.1h"
+msgstr "過去一小時"
+
+msgid "range_picker.24h"
+msgstr "過去 24 小時"
+
+msgid "range_picker.30d"
+msgstr "過去 30 天"
+
+msgid "range_picker.7d"
+msgstr "過去一週"
+
+msgid "range_picker.aria_label"
+msgstr "時間範圍"
+
+msgid "range_picker.custom"
+msgstr "自訂"
+
+msgid "redirects.all"
+msgstr "全部"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "將要求的 URI 附加到目標"
+
+msgid "redirects.attach"
+msgstr "連結"
+
+msgid "redirects.attach_copy"
+msgstr "將 %(name)s (%(from)s → %(to)s) 連結至一個或多個服務。"
+
+msgid "redirects.code.301"
+msgstr "301 — 永久移動"
+
+msgid "redirects.code.302"
+msgstr "302 — 已找到"
+
+msgid "redirects.code.303"
+msgstr "303 — 查看其他位置"
+
+msgid "redirects.code.307"
+msgstr "307 — 暫時重導向"
+
+msgid "redirects.code.308"
+msgstr "308 — 永久重導向"
+
+msgid "redirects.create"
+msgstr "建立重導向"
+
+msgid "redirects.delete_confirm_title"
+msgstr "刪除此重導向？"
+
+msgid "redirects.delete_copy"
+msgstr "刪除 %(name)s 的重導向？"
+
+msgid "redirects.delete_help"
+msgstr "仍連結至服務的重導向無法刪除。請先解除連結。"
+
+msgid "redirects.edit"
+msgstr "編輯重導向"
+
+msgid "redirects.edit_shared"
+msgstr "此重導向已連結至 %(count)s 個服務：%(services)s。儲存後，變更會套用到所有這些服務。"
+
+msgid "redirects.empty_text"
+msgstr "重導向是一種名稱規則，您將附加到一個或多個服務。 內聯 REDIRECT_* 設定將與其一起運作。"
+
+msgid "redirects.empty_title"
+msgstr "目前沒有重導向"
+
+msgid "redirects.from_path"
+msgstr "從"
+
+msgid "redirects.from_path_help"
+msgstr "附加到服務的路徑，例如 /old."
+
+msgid "redirects.new"
+msgstr "建立新的重導向"
+
+msgid "redirects.not_attached"
+msgstr "未連結"
+
+msgid "redirects.readonly"
+msgstr "資料庫為唯讀模式。可以檢視重導向，但無法修改。"
+
+msgid "redirects.save"
+msgstr "儲存重導向"
+
+msgid "redirects.search"
+msgstr "搜尋名稱、來源路徑或目標..."
+
+msgid "redirects.services_help"
+msgstr "使用 Ctrl 或 Command 選擇多個服務。重導向可稍後連結。"
+
+msgid "redirects.status_code"
+msgstr "狀態碼"
+
+msgid "redirects.to_url"
+msgstr "重導向至"
+
+msgid "redirects.truncated"
+msgstr "僅顯示前 500 個重導向。 使用 API 縮小清單以顯示完整結果。"
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "偵測到異常行為"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "這些請求超過異常行為門檻，並已合併。"
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "擷取於"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP 位址"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "此報告中沒有擷取任何異常行為細節。"
+
+msgid "reports.bad_behavior_request_id"
+msgstr "請求識別碼"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "請求"
+
+msgid "reports.bad_behavior_server"
+msgstr "伺服器"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "可疑請求"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "攻擊類型"
+
+msgid "reports.card.recent.title"
+msgstr "最近事件"
+
+msgid "reports.card.top_asn.title"
+msgstr "主要攻擊來源 ASN"
+
+msgid "reports.card.top_offenders.title"
+msgstr "主要攻擊者"
+
+msgid "reports.card.top_rules.title"
+msgstr "觸發次數最多的 ModSecurity 規則"
+
+msgid "reports.chart.timeseries.series"
+msgstr "已封鎖"
+
+msgid "reports.chart.timeseries.title"
+msgstr "封鎖請求趨勢"
+
+msgid "reports.security_incident"
+msgstr "安全事件"
+
+msgid "reports.security_report_data"
+msgstr "安全報告資料"
+
+msgid "reports.subtitle"
+msgstr "從您的 BunkerWeb 執行個體中產生，針對已封鎖的請求的安全報告 — 搜尋、過濾、匯出，並直接從表格中封鎖可疑 IP 位址。"
+
+msgid "reports.tab.eventlog"
+msgstr "事件記錄"
+
+msgid "reports.tab.offenders"
+msgstr "主要攻擊者"
+
+msgid "reports.tab.overview"
+msgstr "概觀"
+
+msgid "reports.tab.patterns"
+msgstr "攻擊模式"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "封鎖次數"
+
+msgid "reports.table.country"
+msgstr "國家/地區"
+
+msgid "reports.table.fires"
+msgstr "觸發次數"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "規則"
+
+msgid "reports.table.top_rule"
+msgstr "最常觸發的規則"
+
+msgid "reports.tile.asns"
+msgstr "主要攻擊來源 ASN"
+
+msgid "reports.tile.blocked"
+msgstr "已封鎖的請求"
+
+msgid "reports.tile.blocked_rate"
+msgstr "與前一期間的比較"
+
+msgid "reports.tile.bot"
+msgstr "Bot / 爬蟲"
+
+msgid "reports.tile.countries"
+msgstr "主要攻擊來源國家/地區"
+
+msgid "reports.tile.peak_hour"
+msgstr "高峰時段"
+
+msgid "reports.tile.rce"
+msgstr "RCE / 命令"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "重複攻擊來源（前 10）"
+
+msgid "reports.tile.sqli"
+msgstr "SQL 注入"
+
+msgid "reports.tile.unique_ips"
+msgstr "主要攻擊 IP 位址"
+
+msgid "reports.tile.unique_offenders"
+msgstr "主要攻擊者"
+
+msgid "request_path.client"
+msgstr "用戶端"
+
+msgid "request_path.source"
+msgstr "%(phase)s 階段的外掛程式執行順序，從 %(setting)s 開始 — 顯示順序，而不是按請求追蹤。"
+
+msgid "request_path.terminal.inline"
+msgstr "後端"
+
+msgid "request_path.terminal.none"
+msgstr "沒有服務"
+
+msgid "request_path.terminal.pool"
+msgstr "上游池"
+
+msgid "request_path.terminal.root"
+msgstr "本地檔案"
+
+msgid "request_path.title"
+msgstr "請求路徑"
+
+msgid "request_path.unordered"
+msgstr "未在 %(phase)s 階段指定位置；它會在已排序的外掛程式之後依字母順序執行。"
+
+msgid "resource_groups.add_entry"
+msgstr "新增"
+
+msgid "resource_groups.add_to_setting"
+msgstr "新增資源群組…"
+
+msgid "resource_groups.add_values"
+msgstr "新增值"
+
+msgid "resource_groups.alias"
+msgstr "別名"
+
+msgid "resource_groups.alias_help"
+msgstr "只能使用字母、數字、底線與連字號。既有別名無法重新命名。"
+
+msgid "resource_groups.bulk_import"
+msgstr "批次匯入"
+
+msgid "resource_groups.clone"
+msgstr "複製資源群組"
+
+msgid "resource_groups.clone_copy"
+msgstr "建立一個可編輯的 @%(name)s 的副本。"
+
+msgid "resource_groups.collapse_all"
+msgstr "全部收合"
+
+msgid "resource_groups.comment"
+msgstr "註解"
+
+msgid "resource_groups.delete"
+msgstr "刪除資源群組"
+
+msgid "resource_groups.delete_confirm"
+msgstr "刪除 @%(name)s？ 這是不可撤銷的。"
+
+msgid "resource_groups.delete_help"
+msgstr "在設定引用此別名時，刪除將被阻止。"
+
+msgid "resource_groups.editor_edit"
+msgstr "編輯 @%(name)s"
+
+msgid "resource_groups.editor_new"
+msgstr "新增資源群組"
+
+msgid "resource_groups.editor_title"
+msgstr "資源群組"
+
+msgid "resource_groups.empty"
+msgstr "沒有資源群組"
+
+msgid "resource_groups.empty_help"
+msgstr "建立一個可重複使用的別名，以在相容的設定之間共享輸入值。"
+
+msgid "resource_groups.entries"
+msgstr "項目"
+
+msgid "resource_groups.expand_all"
+msgstr "展開所有"
+
+msgid "resource_groups.global_configuration"
+msgstr "全域設定"
+
+msgid "resource_groups.import_extension"
+msgstr "選擇一個 .txt 或 .csv 檔案。"
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "TXT/CSV 匯入限制為 256 KiB。"
+
+msgid "resource_groups.kind"
+msgstr "種類"
+
+msgid "resource_groups.kinds"
+msgstr "種類"
+
+msgid "resource_groups.loading_references"
+msgstr "正在載入參考資料..."
+
+msgid "resource_groups.max_entries"
+msgstr "一個資源群組不能包含超過 %(max)s 個項目。"
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s 種類型 · %(values)s 個值 · %(usages)s 次使用"
+
+msgid "resource_groups.new"
+msgstr "建立新群組"
+
+msgid "resource_groups.new_alias"
+msgstr "建立新別名"
+
+msgid "resource_groups.no_entries"
+msgstr "沒有項目"
+
+msgid "resource_groups.no_entries_help"
+msgstr "個別新增項目或使用下方批次匯入功能。"
+
+msgid "resource_groups.no_references"
+msgstr "沒有參考資料"
+
+msgid "resource_groups.readonly"
+msgstr "資料庫僅供讀取。 資源群組可以檢視和匯出，但不能修改。"
+
+msgid "resource_groups.references_error"
+msgstr "無法載入參考資料"
+
+msgid "resource_groups.save"
+msgstr "儲存群組"
+
+msgid "resource_groups.search"
+msgstr "搜尋別名、描述、種類或值..."
+
+msgid "resource_groups.showing_count"
+msgstr "顯示 %(visible)s／%(total)s 個群組"
+
+msgid "resource_groups.subtitle"
+msgstr "可重複使用的類型別名，適用於 IP 位址、國家、ASN、反向 DNS 名稱、使用者代理程式和 URL。"
+
+msgid "resource_groups.template_configuration"
+msgstr "範本 %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "使用情況"
+
+msgid "resource_groups.value"
+msgstr "值"
+
+msgid "resource_groups.values"
+msgstr "值"
+
+msgid "scope.all_services"
+msgstr "所有服務"
+
+msgid "scope.global"
+msgstr "全域"
+
+msgid "scope.global_all_services"
+msgstr "全域（所有服務）"
+
+msgid "scope.permanent"
+msgstr "永久"
+
+msgid "scope.service_specific"
+msgstr "特定服務"
+
+msgid "searchpane.active"
+msgstr "啟用中"
+
+msgid "searchpane.async"
+msgstr "非同步"
+
+msgid "searchpane.ban_scope"
+msgstr "封鎖範圍"
+
+msgid "searchpane.clear"
+msgstr "全部清除"
+
+msgid "searchpane.collapse_0"
+msgstr "搜尋窗格"
+
+msgid "searchpane.collapse_message"
+msgstr "全部摺疊"
+
+msgid "searchpane.collapse_plural"
+msgstr "搜尋窗格 (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "國家/地區"
+
+msgid "searchpane.created"
+msgstr "建立時間"
+
+msgid "searchpane.data"
+msgstr "資料"
+
+msgid "searchpane.date"
+msgstr "日期"
+
+msgid "searchpane.empty"
+msgstr "無可用搜尋窗格"
+
+msgid "searchpane.end_date"
+msgstr "結束日期"
+
+msgid "searchpane.first_seen"
+msgstr "首次出現"
+
+msgid "searchpane.future_30d"
+msgstr "超過 30 天後"
+
+msgid "searchpane.health"
+msgstr "健康狀況"
+
+msgid "searchpane.interval"
+msgstr "間隔"
+
+msgid "searchpane.ip_address"
+msgstr "IP 位址"
+
+msgid "searchpane.job_name"
+msgstr "任務名稱"
+
+msgid "searchpane.last_24h"
+msgstr "過去 24 小時"
+
+msgid "searchpane.last_30d"
+msgstr "過去 30 天"
+
+msgid "searchpane.last_7d"
+msgstr "過去 7 天"
+
+msgid "searchpane.last_run"
+msgstr "上次執行狀態"
+
+msgid "searchpane.last_seen"
+msgstr "最後出現"
+
+msgid "searchpane.last_update"
+msgstr "最後更新"
+
+msgid "searchpane.loading"
+msgstr "正在載入搜尋窗格..."
+
+msgid "searchpane.method"
+msgstr "方法"
+
+msgid "searchpane.next_24h"
+msgstr "未來 24 小時"
+
+msgid "searchpane.next_30d"
+msgstr "未來 30 天"
+
+msgid "searchpane.next_7d"
+msgstr "未來 7 天"
+
+msgid "searchpane.older_30d"
+msgstr "超過 30 天前"
+
+msgid "searchpane.one_or_more"
+msgstr "一個或多個"
+
+msgid "searchpane.permanent"
+msgstr "永久"
+
+msgid "searchpane.plugin"
+msgstr "外掛程式"
+
+msgid "searchpane.protocol"
+msgstr "協定"
+
+msgid "searchpane.reason"
+msgstr "原因"
+
+msgid "searchpane.reload"
+msgstr "需要重新載入"
+
+msgid "searchpane.scope"
+msgstr "範圍"
+
+msgid "searchpane.security_mode"
+msgstr "安全模式"
+
+msgid "searchpane.server_name"
+msgstr "伺服器名稱"
+
+msgid "searchpane.service"
+msgstr "服務"
+
+msgid "searchpane.show_message"
+msgstr "全部顯示"
+
+msgid "searchpane.start_date"
+msgstr "開始日期"
+
+msgid "searchpane.status"
+msgstr "狀態"
+
+msgid "searchpane.status_code"
+msgstr "狀態碼"
+
+msgid "searchpane.steps"
+msgstr "步驟"
+
+msgid "searchpane.stream"
+msgstr "串流支援"
+
+msgid "searchpane.template"
+msgstr "範本"
+
+msgid "searchpane.title_0"
+msgstr "無啟用中篩選器"
+
+msgid "searchpane.title_1"
+msgstr "啟用中篩選器 - 1"
+
+msgid "searchpane.title_plural"
+msgstr "啟用中篩選器 - %d"
+
+msgid "searchpane.type"
+msgstr "類型"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "版本"
+
+msgid "searchpane.zero"
+msgstr "無"
+
+msgid "security_mode.block"
+msgstr "封鎖"
+
+msgid "security_mode.detect"
+msgstr "偵測"
+
+msgid "service.resources.attach"
+msgstr "連結"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s 已經透過自己的 %(family)s 設定，服務 %(path)s。請清除 %(path)s 的設定，或使用不同的路徑。"
+
+msgid "service.resources.conflict.primary"
+msgstr "「%(name)s」目前是此服務的主要憑證，且將在沒有警告的情況下被降級。主要的憑證是指實際部署的憑證。"
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s 已經透過 %(kind)s 的「%(name)s」服務 %(path)s。請解除「%(name)s」，或為其中一個指定不同的路徑。"
+
+msgid "service.resources.conflict.stream"
+msgstr "一個流式服務會將所有連接代理到單一後端，而 %(service)s 已經使用上游「%(name)s」。請先解除它。"
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "%(service)s 在 REVERSE_PROXY_HOST 中已經有自己的後端。清除此設定，讓上游接管。"
+
+msgid "service.resources.detach"
+msgstr "解除"
+
+msgid "service.resources.family.certificate"
+msgstr "憑證"
+
+msgid "service.resources.family.redirect"
+msgstr "重導向"
+
+msgid "service.resources.family.template"
+msgstr "範本"
+
+msgid "service.resources.family.upstream"
+msgstr "上游"
+
+msgid "service.resources.family.workflow"
+msgstr "工作流程"
+
+msgid "service.resources.match_path"
+msgstr "路徑"
+
+msgid "service.resources.none"
+msgstr "未連結"
+
+msgid "service.resources.primary"
+msgstr "主要憑證"
+
+msgid "service.resources.template.none"
+msgstr "沒有範本"
+
+msgid "service.resources.template.note"
+msgstr "不是資源：範本是設定。它適用於儲存時，並且切換它會一次性更改許多設定。"
+
+msgid "service.resources.template.pending"
+msgstr "適用於儲存"
+
+msgid "service.resources.template.switching"
+msgstr "儲存時，此服務從「%(from)s」變為「%(to)s」。目前範本提供的值會被移除，並應用「%(to)s」的設定 — 許多設定會一次性更改。"
+
+msgid "service.resources.template.unwired"
+msgstr "此頁面不會發佈「USE_TEMPLATE」，因此無法在此處更改範本。"
+
+msgid "service.resources.title"
+msgstr "已連結資源"
+
+msgid "service.resources.unavailable"
+msgstr "不可用"
+
+msgid "services.draft"
+msgstr "草稿服務"
+
+msgid "services.online"
+msgstr "線上"
+
+msgid "services.subtitle"
+msgstr "管理使用 BunkerWeb 提供的多網站服務：建立、編輯、轉換為草稿或刪除。"
+
+msgid "services.total"
+msgstr "總服務"
+
+msgid "services.with_configs"
+msgstr "使用自訂設定"
+
+msgid "settings.custom_config.title"
+msgstr "自訂設定"
+
+msgid "settings.multiple.description"
+msgstr "在此設定此外掛程式的多個設定執行個體。"
+
+msgid "settings.multiple.title"
+msgstr "多個設定"
+
+msgid "setup.status.admin_user_exists"
+msgstr "管理員使用者已存在。請繼續下一步。"
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "PRO 授權金鑰已設定，請繼續下一步。"
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "Web 介面已設定反向代理。請繼續下一步。"
+
+msgid "setup.status.secure_password"
+msgstr "安全密碼"
+
+msgid "setup.status.unique_server_name"
+msgstr "唯一伺服器名稱"
+
+msgid "setup.step1.subtitle"
+msgstr "建立您的管理員帳戶。"
+
+msgid "setup.step1.title"
+msgstr "管理員使用者"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "憑證授權單位選擇器"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "使用 Let's Encrypt 進行標準 ACME 簽發。可使用 staging 環境進行測試與整合檢查。"
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "若留空，ZeroSSL 會使用已設定的電子郵件進行帳戶註冊。"
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "搭配 zerossl-bot 使用 ZeroSSL。請提供帳戶電子郵件或 API 金鑰，以進行帳戶簽發與基於金鑰的重新簽發追蹤。"
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "自訂憑證"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "真實 IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "反向代理"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "設定 Web UI 特定設定。"
+
+msgid "setup.step2.title"
+msgstr "UI 設定"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "PRO 方案優勢"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "解鎖所有進階功能，包括強化的安全性、效能和管理工具。"
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "存取所有 PRO 功能"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "對於您可能遇到的任何問題或疑問，從 BunkerWeb 團隊獲得優先支援。"
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "由維護人員提供技術支援"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "量身打造的解決方案，以滿足您的特定需求。"
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "客製化開發"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "優化您的 BunkerWeb 設定的專家建議。"
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "客製化諮詢"
+
+msgid "setup.step3.subtitle"
+msgstr "解鎖進階功能，充分利用 BunkerWeb。"
+
+msgid "setup.step3.title"
+msgstr "升級至 PRO"
+
+msgid "setup.step4.label.final_url"
+msgstr "BunkerWeb UI URL"
+
+msgid "setup.step4.subtitle"
+msgstr "在完成設定前檢查您的設定。"
+
+msgid "setup.step4.title"
+msgstr "概觀"
+
+msgid "setup.subtitle"
+msgstr "按照步驟完成設定精靈。"
+
+msgid "setup.title"
+msgstr "設定精靈"
+
+msgid "status.active"
+msgstr "啟用中"
+
+msgid "status.admin_user_exists"
+msgstr "管理員使用者已存在。請繼續下一步。"
+
+msgid "status.all_valid"
+msgstr "全部有效"
+
+msgid "status.blog_connection_fail"
+msgstr "無法連線至部落格以取得新聞更新。"
+
+msgid "status.default_server"
+msgstr "預設伺服器"
+
+msgid "status.done"
+msgstr "已完成"
+
+msgid "status.down"
+msgstr "已停止"
+
+msgid "status.draft"
+msgstr "草稿"
+
+msgid "status.error_deleting_template"
+msgstr "刪除範本時發生錯誤。"
+
+msgid "status.error_loading_bans"
+msgstr "載入封鎖時發生錯誤。請嘗試重新整理頁面。"
+
+msgid "status.error_loading_data"
+msgstr "無法載入資料"
+
+msgid "status.error_loading_template"
+msgstr "無法載入範本資料。"
+
+msgid "status.error_saving_template"
+msgstr "儲存範本時發生錯誤。"
+
+msgid "status.expired"
+msgstr "已過期"
+
+msgid "status.expiring"
+msgstr "即將到期"
+
+msgid "status.failed"
+msgstr "失敗"
+
+msgid "status.invalid_json_payload"
+msgstr "無效的 JSON 負載。"
+
+msgid "status.loading"
+msgstr "載入中..."
+
+msgid "status.loading_bans"
+msgstr "正在載入封鎖..."
+
+msgid "status.loading_cache_file"
+msgstr "正在載入快取檔案..."
+
+msgid "status.loading_cache_files"
+msgstr "正在載入快取檔案..."
+
+msgid "status.loading_custom_config"
+msgstr "正在載入自訂設定..."
+
+msgid "status.loading_custom_configs"
+msgstr "正在載入自訂設定..."
+
+msgid "status.loading_instances"
+msgstr "正在載入執行個體..."
+
+msgid "status.loading_items"
+msgstr "正在載入項目..."
+
+msgid "status.loading_jobs"
+msgstr "正在載入任務..."
+
+msgid "status.loading_logs"
+msgstr "正在載入日誌..."
+
+msgid "status.loading_plugins"
+msgstr "正在載入外掛程式..."
+
+msgid "status.loading_reports"
+msgstr "正在載入報告..."
+
+msgid "status.loading_services"
+msgstr "正在載入服務..."
+
+msgid "status.loading_templates"
+msgstr "正在載入範本..."
+
+msgid "status.missing_template_information"
+msgstr "缺少範本資訊。"
+
+msgid "status.news_connection_error"
+msgstr "無法連線至部落格以取得新聞更新。"
+
+msgid "status.no"
+msgstr "否"
+
+msgid "status.no_data"
+msgstr "無資料"
+
+msgid "status.no_history"
+msgstr "無可用歷史記錄。"
+
+msgid "status.no_item"
+msgstr "無項目"
+
+msgid "status.no_notifications"
+msgstr "無通知可顯示。"
+
+msgid "status.no_search_results"
+msgstr "找不到項目。"
+
+msgid "status.no_settings"
+msgstr "此外掛程式在此範圍內沒有設定。"
+
+msgid "status.no_steps"
+msgstr "無可用步驟"
+
+msgid "status.no_steps_description"
+msgstr "此範本沒有任何可設定的步驟。"
+
+msgid "status.not_applicable"
+msgstr "不適用"
+
+msgid "status.online"
+msgstr "線上"
+
+msgid "status.optional"
+msgstr "選用"
+
+msgid "status.partial"
+msgstr "部分"
+
+msgid "status.pending"
+msgstr "待辦"
+
+msgid "status.pinging_instances"
+msgstr "正在 Ping 執行個體，請稍候..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "外掛程式已停用；因此，沒有可用資訊。"
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "指標外掛程式未啟用；因此，沒有可用資訊。"
+
+msgid "status.plugin_page.status.not_available"
+msgstr "外掛程式頁面在 Beta 階段尚不可用。"
+
+msgid "status.reverse_proxy_configured"
+msgstr "Web 介面已設定反向代理。請繼續下一步。"
+
+msgid "status.secure_password"
+msgstr "安全密碼"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "正在設定您的 BunkerWeb，請稍候..."
+
+msgid "status.success"
+msgstr "成功"
+
+msgid "status.template_in_use"
+msgstr "此服務目前使用透過「%(method)s」管理的範本「%(template)s」。"
+
+msgid "status.template_in_use_description"
+msgstr "不允許在目前範本之外進行變更。請使用目前範本進行變更或切換到進階/原始模式。"
+
+msgid "status.unique_server_name"
+msgstr "唯一伺服器名稱"
+
+msgid "status.up"
+msgstr "執行中"
+
+msgid "status.yes"
+msgstr "是"
+
+msgid "step.next"
+msgstr "下一步"
+
+msgid "step.previous"
+msgstr "上一步"
+
+msgid "support.card.download_logs.help"
+msgstr "所有私人資料將被匿名化。"
+
+msgid "support.card.download_logs.title"
+msgstr "下載日誌"
+
+msgid "support.card.extract_config.title"
+msgstr "擷取設定"
+
+msgid "support.card.support_link.title"
+msgstr "支援連結"
+
+msgid "support.subtitle"
+msgstr "下載偵錯記錄、提取您的設定，並向 BunkerWeb 團隊尋求協助。"
+
+msgid "support.title"
+msgstr "支援"
+
+msgid "tab.custom_certificate"
+msgstr "自訂憑證"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "操作"
+
+msgid "table.header.active"
+msgstr "啟用中"
+
+msgid "table.header.async"
+msgstr "非同步"
+
+msgid "table.header.bytes_received"
+msgstr "接收位元組"
+
+msgid "table.header.bytes_sent"
+msgstr "傳送位元組"
+
+msgid "table.header.checksum"
+msgstr "校驗和"
+
+msgid "table.header.client_port"
+msgstr "用戶端連接埠"
+
+msgid "table.header.configs"
+msgstr "設定檔"
+
+msgid "table.header.country"
+msgstr "國家/地區"
+
+msgid "table.header.created"
+msgstr "建立時間"
+
+msgid "table.header.current_time_left"
+msgstr "目前剩餘時間"
+
+msgid "table.header.data"
+msgstr "資料"
+
+msgid "table.header.date"
+msgstr "日期"
+
+msgid "table.header.description"
+msgstr "描述"
+
+msgid "table.header.end_date"
+msgstr "結束日期"
+
+msgid "table.header.file_name"
+msgstr "檔案名稱"
+
+msgid "table.header.health"
+msgstr "健康狀況"
+
+msgid "table.header.hostname"
+msgstr "主機名稱"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "間隔"
+
+msgid "table.header.ip_address"
+msgstr "IP 位址"
+
+msgid "table.header.job_name"
+msgstr "任務名稱"
+
+msgid "table.header.last_run"
+msgstr "上次執行"
+
+msgid "table.header.last_seen"
+msgstr "最後出現"
+
+msgid "table.header.last_update"
+msgstr "最後更新"
+
+msgid "table.header.listen_port"
+msgstr "監聽連接埠"
+
+msgid "table.header.method"
+msgstr "方法"
+
+msgid "table.header.name"
+msgstr "名稱"
+
+msgid "table.header.plugin"
+msgstr "外掛程式"
+
+msgid "table.header.protocol"
+msgstr "協定"
+
+msgid "table.header.reason"
+msgstr "原因"
+
+msgid "table.header.reload"
+msgstr "重新載入"
+
+msgid "table.header.request_id"
+msgstr "請求識別碼"
+
+msgid "table.header.scope"
+msgstr "範圍"
+
+msgid "table.header.security_mode"
+msgstr "安全模式"
+
+msgid "table.header.server_name"
+msgstr "伺服器名稱"
+
+msgid "table.header.service"
+msgstr "服務"
+
+msgid "table.header.service_name"
+msgstr "服務名稱"
+
+msgid "table.header.session_time"
+msgstr "工作階段時間"
+
+msgid "table.header.settings"
+msgstr "設定"
+
+msgid "table.header.status"
+msgstr "狀態"
+
+msgid "table.header.status_code"
+msgstr "狀態碼"
+
+msgid "table.header.steps"
+msgstr "步驟"
+
+msgid "table.header.stream"
+msgstr "串流"
+
+msgid "table.header.template"
+msgstr "範本"
+
+msgid "table.header.templates"
+msgstr "範本"
+
+msgid "table.header.time_left"
+msgstr "剩餘時間"
+
+msgid "table.header.type"
+msgstr "類型"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "值"
+
+msgid "table.header.version"
+msgstr "版本"
+
+msgid "template.editor.button_add_config"
+msgstr "新增設定檔"
+
+msgid "template.editor.button_add_setting"
+msgstr "新增設定"
+
+msgid "template.editor.button_add_step"
+msgstr "新增步驟"
+
+msgid "template.editor.button_move_down"
+msgstr "下移"
+
+msgid "template.editor.button_move_up"
+msgstr "上移"
+
+msgid "template.editor.button_remove"
+msgstr "移除"
+
+msgid "template.editor.clone_badge"
+msgstr "從 %(template)s 複製"
+
+msgid "template.editor.configs"
+msgstr "自訂設定"
+
+msgid "template.editor.configs_help"
+msgstr "為此範本附加選用的自訂設定片段。"
+
+msgid "template.editor.delete_step_confirm"
+msgstr "您確定要刪除此步驟嗎？"
+
+msgid "template.editor.details"
+msgstr "範本詳細資訊"
+
+msgid "template.editor.details_help"
+msgstr "設定此範本的基本資訊。"
+
+msgid "template.editor.drag_handle"
+msgstr "拖曳以重新排序"
+
+msgid "template.editor.empty_configs"
+msgstr "尚無自訂設定。"
+
+msgid "template.editor.empty_settings"
+msgstr "尚無設定。新增第一個設定。"
+
+msgid "template.editor.empty_steps"
+msgstr "尚無步驟。新增第一個步驟。"
+
+msgid "template.editor.error_generic"
+msgstr "發生錯誤，請再試一次。"
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "無法判斷提交端點。"
+
+msgid "template.editor.heading_create"
+msgstr "建立範本"
+
+msgid "template.editor.heading_edit"
+msgstr "編輯範本 %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "資料"
+
+msgid "template.editor.label_config_name"
+msgstr "名稱"
+
+msgid "template.editor.label_config_order"
+msgstr "順序"
+
+msgid "template.editor.label_config_type"
+msgstr "類型"
+
+msgid "template.editor.label_setting_key"
+msgstr "設定鍵"
+
+msgid "template.editor.label_setting_value"
+msgstr "預設值"
+
+msgid "template.editor.label_step_configs"
+msgstr "此步驟中的設定檔"
+
+msgid "template.editor.label_step_settings"
+msgstr "此步驟中的設定"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "步驟副標題"
+
+msgid "template.editor.label_step_title"
+msgstr "步驟標題"
+
+msgid "template.editor.missing_configs_body"
+msgstr "匯入的範本參考了尚未上傳的自訂設定檔。請匯入這些設定檔以完成範本設定："
+
+msgid "template.editor.missing_configs_browse"
+msgstr "瀏覽檔案"
+
+msgid "template.editor.missing_configs_done"
+msgstr "完成"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "將設定檔拖曳至此處 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "或"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "上傳的檔案將自動新增到您的範本中。請確保檔案名稱與上面列出的缺少設定檔相符。"
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "提示:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "所有缺少的設定檔都已上傳！範本成功匯入。"
+
+msgid "template.editor.missing_configs_title"
+msgstr "缺少自訂設定檔"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "上傳設定檔失敗"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "上傳缺少的設定檔 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "已上傳 %(total)s 個設定檔中的 %(uploaded)s 個。仍缺少: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "成功上傳 %(count)s 個設定檔"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "選擇選項"
+
+msgid "template.editor.multiselect_summary"
+msgstr "已選擇 %(count)s 項"
+
+msgid "template.editor.multivalue_add"
+msgstr "新增值"
+
+msgid "template.editor.multivalue_helper"
+msgstr "每行一個值。%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "總覽"
+
+msgid "template.editor.panel_overview_help"
+msgstr "追蹤關鍵資訊並在各區塊間導覽。"
+
+msgid "template.editor.placeholder_config_data"
+msgstr "資料"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "名稱"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "核心"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "鍵"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "預設值"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "步驟副標題"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "步驟標題"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "範本ID"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "我的範本"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "瀏覽檔案"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "將設定檔拖曳至此處或點擊以瀏覽 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "支援的格式: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "尚無匯入的設定檔。新檔案將顯示在下方。"
+
+msgid "template.editor.raw_configs_help"
+msgstr "上傳設定檔 (.conf, .cfg, .txt) 以將項目附加到 <code>configs</code>。類型預設為 <code>server_http</code>；如果需要，請在 JSON 中進行調整。"
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "由於目前的 JSON 無效，無法匯入設定檔。"
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "未匯入任何設定檔。"
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "已匯入 %(count)s 個設定檔。"
+
+msgid "template.editor.raw_configs_note"
+msgstr "匯入的檔案會新增到 JSON 編輯器。儲存前請檢視和調整。"
+
+msgid "template.editor.raw_configs_title"
+msgstr "自訂設定檔匯入"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "上傳設定檔 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "無法讀取其中一個選定的檔案。"
+
+msgid "template.editor.raw_editor_aria"
+msgstr "原始範本 JSON 編輯器"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "拖曳範本 JSON 檔案 (僅 .json) 以取代目前的內容。"
+
+msgid "template.editor.raw_editor_help"
+msgstr "將完整的範本定義編輯為 JSON。切換回簡易模式會驗證並重新載入視覺化編輯器。"
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "範本 JSON 成功匯入。"
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "匯入此檔案將完全取代目前的範本 JSON。在編輯器中所做的變更將會遺失。您要繼續嗎？"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "取代範本"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "取代範本 JSON 嗎？"
+
+msgid "template.editor.raw_editor_title"
+msgstr "原始範本 JSON"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "上傳的檔案是空的。"
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "無法讀取選定的檔案。"
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "上傳範本 JSON (僅 .json)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "無效的設定檔定義。"
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "設定檔項目必須是物件。"
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "設定檔 %(configs)s 未分配給任何步驟。"
+
+msgid "template.editor.raw_validation_empty"
+msgstr "範本 JSON 不能為空。"
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "無效的 JSON 酬載: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "範本酬載必須是 JSON 物件。"
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "設定鍵必須是非空字串。"
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "設定必須以物件形式提供。"
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "設定 %(settings)s 未分配給任何步驟。"
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "設定檔 %(config)s 已分配給多個步驟。"
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "步驟 %(index)s 包含無效的設定檔參考。"
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "步驟 %(index)s 參考了未知設定檔 %(config)s。"
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "步驟 %(index)s 必須是一個物件。"
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "設定 %(setting)s 已分配給多個步驟。"
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "步驟 %(index)s 包含無效的設定參考。"
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "步驟 %(index)s 參考了未知設定 %(setting)s。"
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "步驟 %(index)s 必須有一個標題。"
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "範本必須至少包含一個步驟。"
+
+msgid "template.editor.readonly_db"
+msgstr "資料庫目前為唯讀。無法變更範本。"
+
+msgid "template.editor.readonly_method"
+msgstr "此範本由 %(method)s 流程建立，無法從 UI 編輯。"
+
+msgid "template.editor.readonly_title"
+msgstr "唯讀"
+
+msgid "template.editor.readonly_user"
+msgstr "您具有唯讀權限。請聯絡管理員以申請寫入權限。"
+
+msgid "template.editor.select_config_placeholder"
+msgstr "選擇一個設定檔"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "選擇類型"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "選擇一個設定"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "您確定要從範本中移除此設定嗎？"
+
+msgid "template.editor.setting_remove_key"
+msgstr "設定"
+
+msgid "template.editor.setting_remove_title"
+msgstr "移除設定"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "新增所選"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "進階"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "已新增"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "清除搜尋"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "所有相符的設定都已新增。"
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "無可顯示的設定。"
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "可用設定：%(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s 個可用，%(used)s 個已新增"
+
+msgid "template.editor.setting_selector_default"
+msgstr "預設"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "檢視說明文件"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "沒有符合目前篩選條件的設定。"
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "外掛程式"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "所有外掛程式"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "類型"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "所有類型"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "僅提供多站台設定。使用篩選器縮小清單範圍。"
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "多個"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "模式"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "尋找多站台設定"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "依標籤、鍵或外掛程式搜尋"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "已啟用"
+
+msgid "template.editor.settings"
+msgstr "設定"
+
+msgid "template.editor.settings_help"
+msgstr "定義此範本公開的設定與其預設值。"
+
+msgid "template.editor.step_configs_empty"
+msgstr "此步驟尚未新增任何設定檔。"
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "選擇現有設定檔"
+
+msgid "template.editor.step_default_title"
+msgstr "未命名步驟"
+
+msgid "template.editor.step_prefix"
+msgstr "步驟"
+
+msgid "template.editor.step_settings_empty"
+msgstr "此步驟尚未新增任何設定。"
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "選擇現有設定"
+
+msgid "template.editor.steps"
+msgstr "步驟"
+
+msgid "template.editor.steps_help"
+msgstr "將設定組織成引導式步驟。選擇每個步驟包含哪些設定或設定檔。"
+
+msgid "template.editor.summary_clone_info"
+msgstr "目前從 %(template)s 複製。"
+
+msgid "template.editor.summary_counts_configs"
+msgstr "設定檔"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "設定"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "步驟"
+
+msgid "template.editor.summary_counts_title"
+msgstr "內容"
+
+msgid "template.editor.summary_link_configs"
+msgstr "自訂設定"
+
+msgid "template.editor.summary_link_details"
+msgstr "範本詳細資訊"
+
+msgid "template.editor.summary_link_settings"
+msgstr "設定"
+
+msgid "template.editor.summary_link_steps"
+msgstr "步驟"
+
+msgid "template.editor.summary_links_title"
+msgstr "快速連結"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "建立時間"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "方式"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "中繼資料"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "無法取得"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "最後更新"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "定義設定檔時必須指定名稱。"
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "設定檔類型必須為多站台相容的類型之一。"
+
+msgid "template.editor.validation_config_type_required"
+msgstr "定義設定檔時必須指定類型。"
+
+msgid "template.editor.validation_configs_unique"
+msgstr "每個設定檔名稱必須唯一。"
+
+msgid "template.editor.validation_id_required"
+msgstr "範本 ID 為必填。"
+
+msgid "template.editor.validation_setting_key"
+msgstr "每個設定必須有鍵。"
+
+msgid "template.editor.validation_settings_unique"
+msgstr "每個設定鍵必須唯一。"
+
+msgid "template.none"
+msgstr "無範本"
+
+msgid "templates.gallery.delete_selected"
+msgstr "刪除所選項目"
+
+msgid "templates.gallery.empty_message"
+msgstr "建立第一個範本，將設定、步驟和自訂組態整合起來以便重複使用。"
+
+msgid "templates.gallery.empty_title"
+msgstr "目前沒有範本"
+
+msgid "templates.gallery.select"
+msgstr "選取"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "高安全性"
+
+msgid "templates.name.low"
+msgstr "低安全性"
+
+msgid "templates.name.medium"
+msgstr "中等安全性"
+
+msgid "templates.name.ui"
+msgstr "Web 介面"
+
+msgid "templates.subtitle"
+msgstr "可重複使用的服務設定範本 — 包含設定、步驟和自訂設定，然後建立、複製或刪除。"
+
+msgid "templates.tag.config"
+msgstr "自訂組態：%(name)s"
+
+msgid "templates.tag.feature"
+msgstr "內建功能：%(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "外掛程式：%(name)s"
+
+msgid "templates.title"
+msgstr "服務範本"
+
+msgid "theme.dark"
+msgstr "深色"
+
+msgid "theme.light"
+msgstr "淺色"
+
+msgid "threatmap.attacks_today"
+msgstr "今日攻擊"
+
+msgid "threatmap.countries"
+msgstr "來源國家/地區"
+
+msgid "threatmap.disabled_help"
+msgstr "威脅地圖讀取與「報告」頁面相同的已儲存報告。將 METRICS_PERSIST_TO_DB 設為 yes 即可開始記錄。"
+
+msgid "threatmap.disabled_title"
+msgstr "報告持久化已關閉"
+
+msgid "threatmap.empty_help"
+msgstr "可能是過去 24 小時內沒有請求被封鎖，也可能是報告尚未收集。"
+
+msgid "threatmap.empty_title"
+msgstr "此時間範圍內沒有封鎖紀錄"
+
+msgid "threatmap.error_help"
+msgstr "地圖會保留最後一次成功載入的資料，並於下次重新整理時重試。"
+
+msgid "threatmap.error_title"
+msgstr "無法連線至指標服務"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "退出全螢幕"
+
+msgid "threatmap.freshness"
+msgstr "報告大約每分鐘寫入資料庫一次，因此地圖比真實流量落後約一到兩分鐘。"
+
+msgid "threatmap.fullscreen"
+msgstr "全螢幕"
+
+msgid "threatmap.map_sub"
+msgstr "弧線表示來源國家/地區，而非精確位置"
+
+msgid "threatmap.map_title"
+msgstr "遭封鎖流量的來源"
+
+msgid "threatmap.more_hidden"
+msgstr "項未顯示"
+
+msgid "threatmap.not_localised"
+msgstr "未定位"
+
+msgid "threatmap.open_live"
+msgstr "即時檢視"
+
+msgid "threatmap.show_less"
+msgstr "僅顯示前 %(count)s 項"
+
+msgid "threatmap.show_more"
+msgstr "顯示全部 %(count)s 項"
+
+msgid "threatmap.stale"
+msgstr "這些資料已停止更新。指標服務沒有回應。"
+
+msgid "threatmap.subtitle"
+msgstr "過去 24 小時內您的執行個體所封鎖流量的來源。"
+
+msgid "threatmap.ticker_title"
+msgstr "即時事件"
+
+msgid "threatmap.top_origins"
+msgstr "主要來源"
+
+msgid "threatmap.top_reason"
+msgstr "主要原因"
+
+msgid "threatmap.top_reasons"
+msgstr "主要原因"
+
+msgid "threatmap.top_target"
+msgstr "主要目標"
+
+msgid "threatmap.top_targets"
+msgstr "主要目標"
+
+msgid "threatmap.updated"
+msgstr "更新於"
+
+msgid "timings.calls"
+msgstr "呼叫次數"
+
+msgid "timings.disabled_help"
+msgstr "將 METRICS_COLLECT_TIMINGS 設為 yes 以量測每個外掛程式所需的時間。無論如何都會收集完整請求時間。"
+
+msgid "timings.disabled_title"
+msgstr "外掛程式執行時間已關閉"
+
+msgid "timings.max"
+msgstr "最大"
+
+msgid "timings.max_request"
+msgstr "最慢的請求"
+
+msgid "timings.mean"
+msgstr "平均"
+
+msgid "timings.mean_request"
+msgstr "平均請求時間"
+
+msgid "timings.partial"
+msgstr "部分執行個體沒有回應。以下資料僅涵蓋有回應的執行個體。"
+
+msgid "timings.phase"
+msgstr "階段"
+
+msgid "timings.phases"
+msgstr "外掛程式階段"
+
+msgid "timings.plugin"
+msgstr "外掛程式"
+
+msgid "timings.reporting_instances"
+msgstr "正在回報的執行個體"
+
+msgid "timings.requests_measured"
+msgstr "已量測的請求"
+
+msgid "timings.share"
+msgstr "占比"
+
+msgid "timings.share_help"
+msgstr "占比是外掛程式總時間相對於請求總時間的比例。不是每個請求執行一次的階段（worker 啟動、背景計時器和內部 API）沒有占比，並顯示破折號。"
+
+msgid "timings.subtitle"
+msgstr "每個外掛程式在各個請求階段所需的時間，從所有執行個體即時讀取並合併。"
+
+msgid "timings.total"
+msgstr "總計"
+
+msgid "timings.unreachable_help"
+msgstr "執行時間是從執行個體本身讀取，因此沒有執行個體回應，或尚未有執行個體處理請求。"
+
+msgid "timings.unreachable_title"
+msgstr "沒有執行個體回報時間"
+
+msgid "timings.volatile"
+msgstr "執行時間位於各執行個體的共用記憶體中，並視需要讀取；不會儲存，且執行個體重新啟動時會重設。"
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "如果服務被移除或重新啟動，您的 UI 設定將會遺失。"
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "這是因為服務的建立方法是 'autoconf'，旨在防止設定衝突。"
+
+msgid "toast.ban_updated"
+msgstr "封鎖期限已成功更新！"
+
+msgid "toast.body.ping_succeed"
+msgstr "執行個體：%(instances)s"
+
+msgid "toast.copied"
+msgstr "已複製！"
+
+msgid "toast.disclaimer_title"
+msgstr "免責聲明"
+
+msgid "toast.global_settings_applied_body"
+msgstr "已成功取得全域設定並套用到目前的表單。"
+
+msgid "toast.global_settings_applied_title"
+msgstr "全域設定已套用"
+
+msgid "toast.global_settings_failed_body"
+msgstr "取得全域設定時發生錯誤。"
+
+msgid "toast.global_settings_failed_title"
+msgstr "取得全域設定失敗"
+
+msgid "toast.header.ping_failed"
+msgstr "Ping 失敗"
+
+msgid "toast.header.ping_succeed"
+msgstr "Ping 成功"
+
+msgid "toast.ip_unbanned"
+msgstr "IP 位址已成功解除封鎖！"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "是否自動請求 Let's Encrypt 憑證。"
+
+msgid "tooltip.button.ban_ip"
+msgstr "封鎖此 IP 位址"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "將組態 %(name)s 轉為草稿"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "將組態 %(name)s 轉為上線"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "將服務 %(name)s 轉換為草稿"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "將服務 %(name)s 轉換為線上"
+
+msgid "tooltip.button.delete_config"
+msgstr "刪除自訂設定 %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "刪除快取檔案：%(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "刪除執行個體 %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "刪除外掛程式 %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "刪除服務 %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "刪除範本 %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "排程檢查；僅在有更新時下載。"
+
+msgid "tooltip.button.force_update"
+msgstr "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
+
+msgid "tooltip.button.ping_instance"
+msgstr "Ping 執行個體 %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "重新載入執行個體 %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "重設為預設值"
+
+msgid "tooltip.button.reset_global"
+msgstr "重設為全域值"
+
+msgid "tooltip.button.run_job"
+msgstr "執行任務 %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "僅顯示所選項目"
+
+msgid "tooltip.button.stop_instance"
+msgstr "停止執行個體 %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "解除封鎖 %(ip)s"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "更新封鎖期限"
+
+msgid "tooltip.button.value_from_global"
+msgstr "來自全域設定的值"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "無法刪除原始封鎖項目。"
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "無法移除，因為一或多個設定已停用。"
+
+msgid "tooltip.certificate_priority"
+msgstr "選擇是優先使用檔案路徑中的憑證還是 base64 資料中的憑證。"
+
+msgid "tooltip.challenge_type"
+msgstr "用於 Let's Encrypt 驗證的挑戰類型（http 或 dns）。"
+
+msgid "tooltip.collapse_multiline"
+msgstr "收合多行項目（traceback、payload）"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "收合多行值（憑證、金鑰）"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "在載入 OWASP 核心規則集外掛程式後套用的設定。"
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "在載入 OWASP 核心規則集外掛程式前套用的設定。"
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Nginx 伺服器層級的設定，特別用於「預設伺服器」區塊，當用戶端請求與任何設定的伺服器名稱不符時使用。"
+
+msgid "tooltip.config_type.http"
+msgstr "全域套用於 Nginx HTTP 層級的設定。"
+
+msgid "tooltip.config_type.modsec"
+msgstr "在載入 OWASP 核心規則集後套用的 ModSecurity 設定，或者在未載入核心規則集時使用。"
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "在載入 OWASP 核心規則集前套用的 ModSecurity 設定。"
+
+msgid "tooltip.config_type.server_http"
+msgstr "套用於 Nginx HTTP 伺服器（虛擬主機）層級的設定。"
+
+msgid "tooltip.config_type.server_stream"
+msgstr "套用於 Nginx 串流伺服器層級的設定。"
+
+msgid "tooltip.config_type.stream"
+msgstr "全域套用於 Nginx 串流層級的設定。"
+
+msgid "tooltip.confirm_password_match"
+msgstr "確認密碼必須與上面輸入的密碼相符。"
+
+msgid "tooltip.copied"
+msgstr "已複製！"
+
+msgid "tooltip.copy_https_only"
+msgstr "複製功能僅在 HTTPS 下可用。"
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "自訂 SSL 憑證資料（PEM 格式或 Base64 編碼）。"
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "自訂 SSL 憑證檔案的路徑。"
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "自訂 SSL 私密金鑰資料（PEM 格式或 Base64 編碼）。"
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "自訂 SSL 私密金鑰檔案的路徑。"
+
+msgid "tooltip.different_from_template"
+msgstr "值與範本預設值不同"
+
+msgid "tooltip.disabled_by_method"
+msgstr "已停用：透過方法 '%(method)s' 管理。"
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "已停用：資料庫處於唯讀模式。"
+
+msgid "tooltip.disabled_draft"
+msgstr "已停用：服務處於草稿模式。"
+
+msgid "tooltip.disabled_readonly"
+msgstr "已停用：唯讀模式已啟用。"
+
+msgid "tooltip.dns_check_url"
+msgstr "如果頁面顯示 'ok'，則伺服器名稱很可能可用。"
+
+msgid "tooltip.dns_credential_items"
+msgstr "DNS 提供者的憑證，用於 DNS 挑戰（例如 'cloudflare_api_token=123456'）。所需格式取決於提供者。"
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "憑證僅適用於 DNS 挑戰。"
+
+msgid "tooltip.dns_propagation"
+msgstr "在 DNS 挑戰期間等待 DNS 變更傳播的時間（秒）。"
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "DNS 傳播延遲僅適用於 DNS 挑戰。"
+
+msgid "tooltip.dns_provider"
+msgstr "用於 Let's Encrypt DNS 挑戰的 DNS 提供者。"
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "DNS 提供者選擇僅適用於 DNS 挑戰。"
+
+msgid "tooltip.download_file"
+msgstr "下載檔案"
+
+msgid "tooltip.download_log"
+msgstr "下載此日誌檔案"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "草稿模式只能在透過 UI 建立的服務上切換。"
+
+msgid "tooltip.email_length"
+msgstr "電子郵件必須在 1 到 256 個字元之間。"
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。"
+
+msgid "tooltip.fetch_global_settings"
+msgstr "取得全域設定並應用於當前範本"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "追蹤模式僅在最新頁面可用"
+
+msgid "tooltip.global_settings_source"
+msgstr "值繼承自全域設定。"
+
+msgid "tooltip.instance_not_up"
+msgstr "執行個體 %(hostname)s 目前未回應 ('up')。"
+
+msgid "tooltip.issue_count"
+msgstr "此檢視中的錯誤與警告"
+
+msgid "tooltip.latest_version_installed"
+msgstr "您正在執行最新版本。"
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。"
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "停用符合公共字尾清單（PSL）的網域的憑證請求（建議啟用）。"
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。"
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "選擇您的憑證供應商以顯示供應商專屬設定。"
+
+msgid "tooltip.license_key"
+msgstr "您的 BunkerWeb PRO 授權金鑰。"
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "存取 %(name)s 頁面"
+
+msgid "tooltip.link.access_service"
+msgstr "存取服務 %(name)s"
+
+msgid "tooltip.link.clone_config"
+msgstr "複製自訂設定 %(name)s"
+
+msgid "tooltip.link.clone_service"
+msgstr "複製服務 %(name)s"
+
+msgid "tooltip.link.clone_template"
+msgstr "複製範本 %(template)s"
+
+msgid "tooltip.link.download_file"
+msgstr "下載 %(filename)s"
+
+msgid "tooltip.link.edit_config"
+msgstr "編輯自訂設定 %(name)s"
+
+msgid "tooltip.link.edit_service"
+msgstr "編輯服務 %(service)s"
+
+msgid "tooltip.link.edit_template"
+msgstr "編輯範本 %(template)s"
+
+msgid "tooltip.link.export_config"
+msgstr "匯出自訂設定 %(name)s"
+
+msgid "tooltip.link.export_service"
+msgstr "匯出服務 %(service)s 設定"
+
+msgid "tooltip.link.manage_activation"
+msgstr "在全局設定中管理 %(name)s 的啟用"
+
+msgid "tooltip.link.view_config"
+msgstr "檢視自訂設定 %(name)s"
+
+msgid "tooltip.link.view_file"
+msgstr "檢視 %(filename)s"
+
+msgid "tooltip.link.view_service"
+msgstr "檢視服務 %(service)s"
+
+msgid "tooltip.link.view_template"
+msgstr "檢視範本 %(template)s"
+
+msgid "tooltip.local_time"
+msgstr "以您的本地時間顯示時間戳記"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "完整 URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "這是一個多站點設定，如果全域定義，將影響多個服務。"
+
+msgid "tooltip.new_version_available"
+msgstr "有新版本可用！"
+
+msgid "tooltip.next_issue"
+msgstr "跳至下一個錯誤或警告"
+
+msgid "tooltip.no_cache"
+msgstr "找不到此任務的快取檔案。"
+
+msgid "tooltip.no_history"
+msgstr "找不到此任務的執行歷史記錄。"
+
+msgid "tooltip.no_log_files"
+msgstr "無可用日誌檔案。"
+
+msgid "tooltip.no_page_available"
+msgstr "此外掛程式無專用頁面。"
+
+msgid "tooltip.password_requirements"
+msgstr "密碼必須至少包含 8 個字元，並包括 1 個大寫字母、1 個數字和 1 個特殊字元。"
+
+msgid "tooltip.prev_issue"
+msgstr "跳至上一個錯誤或警告"
+
+msgid "tooltip.pro_feature"
+msgstr "這是一個 PRO 功能。"
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "已停用：資料庫處於唯讀模式。"
+
+msgid "tooltip.readonly_mode"
+msgstr "此操作在唯讀模式下無法執行。"
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "已停用：您的帳戶是唯讀的，操作 '%(action)s' 已停用。"
+
+msgid "tooltip.real_ip_from"
+msgstr "受信任的 IP / 網路清單（以空格分隔），代理請求的來源。"
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "包含受信任的 IP / 網路的 URL 清單（以空格分隔），代理請求的來源。也支援 file:// URL 和使用 http://user:pass@url 格式的基本驗證。"
+
+msgid "tooltip.real_ip_header"
+msgstr "包含真實 IP 或 PROXY 協定的特殊值 proxy_protocol 的 HTTP 標頭。"
+
+msgid "tooltip.real_ip_recursive"
+msgstr "在包含 IP 位址的標頭中執行遞迴搜尋。"
+
+msgid "tooltip.remove_ban_entry"
+msgstr "從清單中移除此封鎖項目。"
+
+msgid "tooltip.reset_template_settings"
+msgstr "將目前範本檢視中的所有設定重設為其預設值。"
+
+msgid "tooltip.search_logs"
+msgstr "搜尋日誌 (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "選取檔案以啟用追蹤模式"
+
+msgid "tooltip.server_name"
+msgstr "此服務的主要網域名稱或伺服器名稱。"
+
+msgid "tooltip.stream_support.no"
+msgstr "不支援 STREAM 模式。"
+
+msgid "tooltip.stream_support.partial"
+msgstr "部分支援 STREAM 模式。"
+
+msgid "tooltip.stream_support.yes"
+msgstr "支援 STREAM 模式。"
+
+msgid "tooltip.table.bans.actions"
+msgstr "此封鎖可用的操作"
+
+msgid "tooltip.table.bans.country"
+msgstr "被封鎖 IP 位址的國家/地區"
+
+msgid "tooltip.table.bans.date"
+msgstr "封鎖建立的日期和時間"
+
+msgid "tooltip.table.bans.details"
+msgstr "顯示封鎖詳情"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "封鎖到期的日期和時間"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "被封鎖的 IP 位址"
+
+msgid "tooltip.table.bans.reason"
+msgstr "封鎖的原因"
+
+msgid "tooltip.table.bans.scope"
+msgstr "封鎖的範圍（全域或特定服務）"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "選取所有封鎖"
+
+msgid "tooltip.table.bans.service"
+msgstr "封鎖來源的服務（如果範圍是特定服務）"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "封鎖到期前的剩餘時間"
+
+msgid "tooltip.table.cache.actions"
+msgstr "此快取檔案可用的操作"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "快取檔案的校驗和"
+
+msgid "tooltip.table.cache.details"
+msgstr "顯示快取檔案詳情"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "快取檔案的名稱"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "產生此快取檔案的任務"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "快取檔案最後更新的日期和時間"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "與產生此快取檔案的任務關聯的外掛程式"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "選擇所有快取檔案"
+
+msgid "tooltip.table.cache.service"
+msgstr "與此快取檔案關聯的服務（或全域）"
+
+msgid "tooltip.table.configs.actions"
+msgstr "此自訂設定可用的操作"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "自訂設定內容的校驗和"
+
+msgid "tooltip.table.configs.details"
+msgstr "顯示自訂設定詳情"
+
+msgid "tooltip.table.configs.method"
+msgstr "自訂設定的建立方法（例如，ui, file）"
+
+msgid "tooltip.table.configs.name"
+msgstr "自訂設定的名稱"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "選取所有自訂設定"
+
+msgid "tooltip.table.configs.service"
+msgstr "與自訂設定關聯的服務（或全域）"
+
+msgid "tooltip.table.configs.status"
+msgstr "自訂設定的草稿狀態"
+
+msgid "tooltip.table.configs.template"
+msgstr "指示自訂設定是否源自範本"
+
+msgid "tooltip.table.configs.type"
+msgstr "自訂設定的類型或上下文（例如，HTTP, MODSEC）"
+
+msgid "tooltip.table.instances.actions"
+msgstr "此執行個體可用的操作"
+
+msgid "tooltip.table.instances.created"
+msgstr "執行個體首次註冊的日期和時間"
+
+msgid "tooltip.table.instances.details"
+msgstr "顯示執行個體詳情"
+
+msgid "tooltip.table.instances.health"
+msgstr "執行個體的健康狀況（執行中、已停止、載入中）"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "執行個體的主機名稱或 URL"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "執行個體最後出現的日期和時間"
+
+msgid "tooltip.table.instances.method"
+msgstr "執行個體的建立方法（例如，ui, autoconf）"
+
+msgid "tooltip.table.instances.name"
+msgstr "使用者定義或自動產生的執行個體名稱"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "選取所有執行個體"
+
+msgid "tooltip.table.instances.type"
+msgstr "執行個體的類型（例如，容器、靜態）"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "此任務可用的操作"
+
+msgid "tooltip.table.jobs.async"
+msgstr "指示任務是否非同步執行"
+
+msgid "tooltip.table.jobs.details"
+msgstr "顯示任務詳情"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "任務的執行頻率"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "上次任務執行的狀態（成功/失敗）"
+
+msgid "tooltip.table.jobs.name"
+msgstr "任務的名稱"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "與任務關聯的外掛程式"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "指示任務是否觸發 BunkerWeb 重新載入"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "選取所有任務"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "此外掛程式可用的操作"
+
+msgid "tooltip.table.plugins.description"
+msgstr "外掛程式的描述"
+
+msgid "tooltip.table.plugins.details"
+msgstr "顯示外掛程式詳情"
+
+msgid "tooltip.table.plugins.id"
+msgstr "外掛程式的唯一識別碼"
+
+msgid "tooltip.table.plugins.method"
+msgstr "外掛程式的建立方法（例如，ui, core）"
+
+msgid "tooltip.table.plugins.name"
+msgstr "外掛程式的名稱"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "選取所有外掛程式"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "指示外掛程式是否支援串流模式"
+
+msgid "tooltip.table.plugins.type"
+msgstr "外掛程式的類型（核心、外部、Pro、UI）"
+
+msgid "tooltip.table.plugins.version"
+msgstr "外掛程式的版本"
+
+msgid "tooltip.table.reports.actions"
+msgstr "此報告可用的操作"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "僅限串流：工作階段期間從用戶端接收的位元組"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "僅限串流：工作階段期間傳送給用戶端的位元組"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "僅限串流：用戶端的來源連接埠"
+
+msgid "tooltip.table.reports.country"
+msgstr "與報告的 IP 位址關聯的國家/地區"
+
+msgid "tooltip.table.reports.data"
+msgstr "與報告相關的附加資料"
+
+msgid "tooltip.table.reports.date"
+msgstr "報告產生的日期和時間"
+
+msgid "tooltip.table.reports.details"
+msgstr "顯示報告詳情"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "觸發報告的 IP 位址"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "僅限串流：工作階段進入的連接埠"
+
+msgid "tooltip.table.reports.method"
+msgstr "報告的請求的 HTTP 方法"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP 請求，或 TCP/UDP 串流工作階段"
+
+msgid "tooltip.table.reports.reason"
+msgstr "產生報告的原因"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "請求的唯一識別碼"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "產生報告時啟用的安全模式"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "選取所有報告"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "產生報告的伺服器名稱 (vhost)"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "僅限串流：工作階段持續時間（秒）"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "為報告的請求傳回的 HTTP 狀態碼"
+
+msgid "tooltip.table.reports.url"
+msgstr "報告的請求中針對的 URL"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "報告的請求中的 User-Agent 字串"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "請選取一或多列以執行操作。"
+
+msgid "tooltip.table.services.actions"
+msgstr "此服務可用的操作"
+
+msgid "tooltip.table.services.created"
+msgstr "服務建立的日期和時間"
+
+msgid "tooltip.table.services.details"
+msgstr "顯示服務詳情"
+
+msgid "tooltip.table.services.last_update"
+msgstr "服務最後更新的日期和時間"
+
+msgid "tooltip.table.services.method"
+msgstr "服務的建立方法（例如，ui, file）"
+
+msgid "tooltip.table.services.name"
+msgstr "服務的名稱"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "服務的安全模式（封鎖或偵測）"
+
+msgid "tooltip.table.services.select_all"
+msgstr "選擇所有服務"
+
+msgid "tooltip.table.services.template"
+msgstr "服務使用的範本"
+
+msgid "tooltip.table.services.type"
+msgstr "服務類型 (線上/草稿)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "此範本可用的操作"
+
+msgid "tooltip.table.templates.configs"
+msgstr "範本的設定檔數量"
+
+msgid "tooltip.table.templates.created"
+msgstr "範本的建立日期"
+
+msgid "tooltip.table.templates.details"
+msgstr "顯示範本詳情"
+
+msgid "tooltip.table.templates.id"
+msgstr "範本 ID"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "範本的最後更新日期"
+
+msgid "tooltip.table.templates.method"
+msgstr "範本的建立方式"
+
+msgid "tooltip.table.templates.name"
+msgstr "使用者定義或自動產生的範本名稱"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "包含此範本的外掛"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "選取所有範本"
+
+msgid "tooltip.table.templates.settings"
+msgstr "範本的設定數量"
+
+msgid "tooltip.table.templates.steps"
+msgstr "範本的步驟數"
+
+msgid "tooltip.toggle_level"
+msgstr "顯示 / 隱藏 %(level)s 行"
+
+msgid "tooltip.toggle_wrap"
+msgstr "切換自動換行"
+
+msgid "tooltip.ui_host"
+msgstr "將透過反向代理提供 BunkerWeb UI 的主機名稱或 IP 位址。"
+
+msgid "tooltip.ui_url"
+msgstr "透過反向代理存取 BunkerWeb UI 的 URL 路徑。"
+
+msgid "tooltip.ui_url_security"
+msgstr "使用非標準、難以猜測的 URL 路徑可增強安全性。"
+
+msgid "tooltip.use_custom_ssl"
+msgstr "是否使用自訂 SSL 憑證而不是 Let's Encrypt。"
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "是否使用 Let's Encrypt 的 staging 環境進行測試（產生不受信任的憑證）。"
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "只有在使用 Let's Encrypt 伺服器時，才可使用 Let's Encrypt staging。"
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "啟用 PROXY 協定通訊。"
+
+msgid "tooltip.use_real_ip"
+msgstr "使用真實 IP"
+
+msgid "tooltip.username_length"
+msgstr "使用者名稱必須在 1 到 256 個字元之間。"
+
+msgid "tooltip.value_from_global"
+msgstr "來自全域設定的值"
+
+msgid "tooltip.view_full_url"
+msgstr "點擊檢視完整 URL"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。"
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "萬用字元憑證僅支援 DNS 挑戰類型。"
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 呼叫的連線逾時秒數。"
+
+msgid "tooltip.zerossl_api_key"
+msgstr "由 zerossl-bot 使用的可選 ZeroSSL API 金鑰。"
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "每個 ZeroSSL API 請求的最大總秒數。"
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "ZeroSSL API 請求的重試次數（0 代表停用重試）。"
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 重試之間的延遲秒數。"
+
+msgid "totp.cant_access"
+msgstr "無法存取您的驗證碼？"
+
+msgid "totp.or_use_security_key"
+msgstr "或使用您的安全金鑰"
+
+msgid "totp.prompt"
+msgstr "請輸入您的 TOTP 代碼。"
+
+msgid "totp.signing_in"
+msgstr "登入 BunkerWeb"
+
+msgid "totp.subtitle"
+msgstr "請輸入您驗證碼應用程式中的碼。"
+
+msgid "totp.subtitle_security_key"
+msgstr "請使用安全金鑰確認您的身分。"
+
+msgid "totp.title"
+msgstr "雙重驗證"
+
+msgid "upstreams.add_server"
+msgstr "新增伺服器"
+
+msgid "upstreams.all"
+msgstr "全部"
+
+msgid "upstreams.attach"
+msgstr "連結"
+
+msgid "upstreams.attach_copy"
+msgstr "將 %(name)s (%(servers)s) 連結至一個或多個服務。"
+
+msgid "upstreams.backend_ssl"
+msgstr "與伺服器進行 TLS 訊息交換 (https:// / grpcs://)"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "IP 雜項 — 同一客戶端、同一後端"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "最少連線"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "輪流 (預設)"
+
+msgid "upstreams.create"
+msgstr "建立 upstream"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "刪除這個 upstream？"
+
+msgid "upstreams.delete_copy"
+msgstr "刪除 upstream %(name)s？"
+
+msgid "upstreams.delete_help"
+msgstr "與服務相關聯的 upstream 無法刪除。 請先解除連結。"
+
+msgid "upstreams.edit"
+msgstr "編輯 upstream"
+
+msgid "upstreams.edit_shared"
+msgstr "這個 upstream 已連結至 %(count)s 個服務：%(services)s。儲存後，變更會套用到所有這些服務。"
+
+msgid "upstreams.empty_text"
+msgstr "upstream 是一個名稱的後端池，您將其連接到一個或多個服務，位於反向代理路徑上。 Inline REVERSE_PROXY_HOST 設定將繼續與其一起運作。"
+
+msgid "upstreams.empty_title"
+msgstr "目前沒有 upstream"
+
+msgid "upstreams.keepalive"
+msgstr "保持連線"
+
+msgid "upstreams.keepalive_help"
+msgstr "每位工作者保持的閒置連線。 僅適用於 HTTP 和 gRPC； 留空以停用。"
+
+msgid "upstreams.match_path"
+msgstr "反向代理路徑"
+
+msgid "upstreams.match_path_help"
+msgstr "選擇的服務將其代理到此池的位置。 對於流池，則取整個服務。"
+
+msgid "upstreams.method"
+msgstr "負載平衡"
+
+msgid "upstreams.name_help"
+msgstr "只能輸入字母、數字、連字符和底線。 點號不允許，因此池名稱永遠不會與實際主機衝突。"
+
+msgid "upstreams.new"
+msgstr "新的上游"
+
+msgid "upstreams.not_attached"
+msgstr "未連接"
+
+msgid "upstreams.protocol"
+msgstr "協定"
+
+msgid "upstreams.protocol_help"
+msgstr "HTTP 和 gRPC 均連接到一個路徑；一個流池會接管整個 TCP/UDP 服務。"
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "流 (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "資料庫為唯讀。 可以檢視上游，但不能修改。"
+
+msgid "upstreams.role.backup"
+msgstr "備份"
+
+msgid "upstreams.role.down"
+msgstr "已停止"
+
+msgid "upstreams.role.primary"
+msgstr "主要"
+
+msgid "upstreams.save"
+msgstr "儲存上游"
+
+msgid "upstreams.search"
+msgstr "搜尋名稱、描述或伺服器..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "失敗逾時"
+
+msgid "upstreams.server_host"
+msgstr "伺服器"
+
+msgid "upstreams.server_max_fails"
+msgstr "最大失敗次數"
+
+msgid "upstreams.server_role"
+msgstr "角色"
+
+msgid "upstreams.server_weight"
+msgstr "權重"
+
+msgid "upstreams.servers"
+msgstr "伺服器"
+
+msgid "upstreams.services_help"
+msgstr "使用 Ctrl 或 Command 選擇多個服務。 上游可以稍後連接。"
+
+msgid "upstreams.services_hidden"
+msgstr "已隱藏 %(count)s 個服務：%(protocol)s 上游只能連結至協定相符的服務。"
+
+msgid "upstreams.truncated"
+msgstr "僅顯示前 500 個上游。 使用 API 縮小列表以獲得完整結果。"
+
+msgid "validation.default_field_name"
+msgstr "此欄位"
+
+msgid "validation.invalid_date"
+msgstr "無效日期"
+
+msgid "validation.ip_global_duplicate"
+msgstr "此 IP 位址已被全域封鎖。"
+
+msgid "validation.ip_invalid"
+msgstr "IP 位址格式無效。"
+
+msgid "validation.ip_required"
+msgstr "需要 IP 位址。"
+
+msgid "validation.ip_service_duplicate"
+msgstr "此 IP 位址已針對所選服務 (%(service)s) 被封鎖。"
+
+msgid "validation.pattern"
+msgstr "請輸入有效的 %(field)s 值。"
+
+msgid "validation.required"
+msgstr "%(field)s 是必填項。"
+
+msgid "validation.service_required_for_ban"
+msgstr "對於特定於服務的封鎖，必須選取一個服務。"
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
+
+msgid "web_cache.available"
+msgstr "可用"
+
+msgid "web_cache.cache_state"
+msgstr "狀態"
+
+msgid "web_cache.cached_files"
+msgstr "快取檔案"
+
+msgid "web_cache.deployment"
+msgstr "部署"
+
+msgid "web_cache.disabled"
+msgstr "停用"
+
+msgid "web_cache.disk_usage"
+msgstr "磁碟使用量"
+
+msgid "web_cache.empty"
+msgstr "空"
+
+msgid "web_cache.enabled"
+msgstr "已啟用"
+
+msgid "web_cache.enabled_instances"
+msgstr "快取已啟用"
+
+msgid "web_cache.enabled_services"
+msgstr "已啟用服務"
+
+msgid "web_cache.error"
+msgstr "錯誤"
+
+msgid "web_cache.hit_rate"
+msgstr "命中率"
+
+msgid "web_cache.instance"
+msgstr "執行個體"
+
+msgid "web_cache.metrics"
+msgstr "彙總命中／未命中分布"
+
+msgid "web_cache.metrics_scope"
+msgstr "計數器按執行個體彙總，適用於所有已啟用快取的服務。"
+
+msgid "web_cache.not_reporting"
+msgstr "未回報"
+
+msgid "web_cache.path"
+msgstr "路徑"
+
+msgid "web_cache.purge"
+msgstr "清除快取回應"
+
+msgid "web_cache.purge_all"
+msgstr "清除全部"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "這會刪除所有可連線執行個體上每個服務的所有快取回應。此操作無法復原。"
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "清除整個快取？"
+
+msgid "web_cache.purge_help"
+msgstr "立即在可達執行個體上執行清除操作。 無法達到的執行個體會被跳過，且不會產生任何佇列。"
+
+msgid "web_cache.purge_key"
+msgstr "實際生效的快取鍵"
+
+msgid "web_cache.purge_key_help"
+msgstr "僅在使用預設 $scheme$host$request_uri 時將快取鍵留空。如果服務覆寫了 PROXY_CACHE_KEY，請在此貼上實際生效的值；不支援的、僅在請求處理期間可用的變數會被拒絕，以免清除其他快取項目。"
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "實際生效的 PROXY_CACHE_KEY（選填）"
+
+msgid "web_cache.purge_url"
+msgstr "清除 URL"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "正在回報的執行個體"
+
+msgid "web_cache.service"
+msgstr "服務"
+
+msgid "web_cache.services"
+msgstr "服務啟用情況"
+
+msgid "web_cache.status"
+msgstr "執行個體儲存空間"
+
+msgid "web_cache.subtitle"
+msgstr "反向代理快取狀態，匯總命中率指標和即時清除控制。"
+
+msgid "whatsnew.missing_action"
+msgstr "在 GitHub 上開啟變更日誌"
+
+msgid "whatsnew.missing_message"
+msgstr "此組建未包含 CHANGELOG.md。版本說明可在 GitHub 上查看。"
+
+msgid "whatsnew.missing_title"
+msgstr "此安裝中沒有變更日誌"
+
+msgid "whatsnew.modal.intro"
+msgstr "以下是自您上次使用的版本以來的變更。"
+
+msgid "whatsnew.modal.title"
+msgstr "新增內容"
+
+msgid "whatsnew.subtitle"
+msgstr "BunkerWeb 的所有版本，最新在前，直接來自本安裝隨附的變更日誌。"
+
+msgid "workflows.act_block"
+msgstr "封鎖"
+
+msgid "workflows.act_challenge"
+msgstr "驗證挑戰"
+
+msgid "workflows.act_code"
+msgstr "狀態碼"
+
+msgid "workflows.act_denyDefault"
+msgstr "執行個體的拒絕狀態碼"
+
+msgid "workflows.act_denyShort"
+msgstr "拒絕狀態碼"
+
+msgid "workflows.act_provider"
+msgstr "反機器人驗證供應商"
+
+msgid "workflows.act_redirect"
+msgstr "重新導向"
+
+msgid "workflows.act_status"
+msgstr "拒絕狀態碼"
+
+msgid "workflows.act_terminal"
+msgstr "每條規則只能執行一個動作，且會結束評估；規則不會產生真/假分支。"
+
+msgid "workflows.act_url"
+msgstr "目的地 URL"
+
+msgid "workflows.action"
+msgstr "然後"
+
+msgid "workflows.add_rule"
+msgstr "新增規則"
+
+msgid "workflows.all"
+msgstr "全部"
+
+msgid "workflows.aria.collapse"
+msgstr "收合"
+
+msgid "workflows.aria.combinator"
+msgstr "變更組合方式，目前為"
+
+msgid "workflows.aria.conditionType"
+msgstr "條件類型"
+
+msgid "workflows.aria.denyStatus"
+msgstr "拒絕狀態碼"
+
+msgid "workflows.aria.drag"
+msgstr "拖曳以重新排序"
+
+msgid "workflows.aria.expand"
+msgstr "展開"
+
+msgid "workflows.aria.groupKind"
+msgstr "群組類型"
+
+msgid "workflows.aria.insertAt"
+msgstr "在此位置新增規則 %(n)s"
+
+msgid "workflows.aria.more"
+msgstr "更多"
+
+msgid "workflows.aria.moveDown"
+msgstr "下移，稍後執行"
+
+msgid "workflows.aria.moveRule"
+msgstr "移動規則"
+
+msgid "workflows.aria.moveUp"
+msgstr "上移，提早執行"
+
+msgid "workflows.aria.openRule"
+msgstr "開啟規則 %(n)s"
+
+msgid "workflows.aria.provider"
+msgstr "反機器人驗證供應商"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "重新導向狀態碼"
+
+msgid "workflows.aria.removeCondition"
+msgstr "移除條件"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "移除門檻"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "移除速率門檻"
+
+msgid "workflows.aria.removeValue"
+msgstr "移除值"
+
+msgid "workflows.aria.requestCount"
+msgstr "請求數"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "資源群組"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "%(count)s 規則中存在驗證問題"
+
+msgid "workflows.aria.ruleName"
+msgstr "規則 %(n)s 的名稱"
+
+msgid "workflows.aria.terminalAction"
+msgstr "終止動作"
+
+msgid "workflows.aria.uriMatch"
+msgstr "URI 比對模式"
+
+msgid "workflows.aria.uriValue"
+msgstr "URI 值"
+
+msgid "workflows.aria.window"
+msgstr "時間範圍（秒）"
+
+msgid "workflows.attach"
+msgstr "連接到服務"
+
+msgid "workflows.attach_help"
+msgstr "規則僅在工作流程連接到的服務上執行。"
+
+msgid "workflows.attached_notice"
+msgstr "儲存後會將這些規則套用至 %(count)s 個已連結的服務。"
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "從左到右。第一個相符的規則生效。"
+
+msgid "workflows.canvas.auxList"
+msgstr "從上到下。第一個相符的規則生效。"
+
+msgid "workflows.canvas.close"
+msgstr "關閉"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "在 %(total)s 的 %(n)s 位置執行"
+
+msgid "workflows.canvas.dropHint"
+msgstr "設定優先順序 — 規則的位置是它所代表的唯一意義"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "沒有規則的工作流程不會改變任何東西 — 每個請求都會直接傳送到下一個連接的工作流程。"
+
+msgid "workflows.canvas.emptyCta"
+msgstr "新增第一個規則"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "還沒有規則"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "規則從左到右執行。"
+
+msgid "workflows.canvas.entry_title"
+msgstr "每個請求"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "繼續到下一個連接的工作流程。"
+
+msgid "workflows.canvas.exit_title"
+msgstr "沒有規則相符"
+
+msgid "workflows.canvas.fit"
+msgstr "調整視窗"
+
+msgid "workflows.canvas.gateTip"
+msgstr "一個匹配閘，不是一個動作：如果條件不滿足，則規則不匹配，並評估下一個規則。"
+
+msgid "workflows.canvas.hint"
+msgstr "拖曳節點重新排序 · 拖曳畫布以平移 · 在選取的節點上使用 Alt + ← / →"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "唯讀 — 瀏覽，無法更改順序"
+
+msgid "workflows.canvas.insert"
+msgstr "在此新增規則"
+
+msgid "workflows.canvas.open"
+msgstr "開啟規則"
+
+msgid "workflows.canvas.skipped"
+msgstr "已停用 — 完全跳過，就像不在鏈上一樣。"
+
+msgid "workflows.canvas.stopTail"
+msgstr "，評估在此停止 — 沒有規則到達"
+
+msgid "workflows.canvas.title"
+msgstr "規則順序"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "放大"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "縮小"
+
+msgid "workflows.capacity"
+msgstr "共 %(maxRules)s 條規則，已使用 %(count)s 條；最大規則使用 %(maxPredicates)s 個述詞中的 %(worst)s 個；此工作流程包含 %(regexes)s 個規則運算式"
+
+msgid "workflows.clone"
+msgstr "複製工作流程"
+
+msgid "workflows.clone_help"
+msgstr "規則會被複製，但服務連接不會。"
+
+msgid "workflows.clone_name"
+msgstr "複製名稱"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "要刪除此規則嗎？其下方的所有規則都會上移一個位置。"
+
+msgid "workflows.copySuffix"
+msgstr "（副本）"
+
+msgid "workflows.delete"
+msgstr "刪除工作流程"
+
+msgid "workflows.delete_confirm"
+msgstr "此工作流程及其所有規則將永久刪除。"
+
+msgid "workflows.empty_text"
+msgstr "工作流程是一個規則的有序列表，您將其連接到服務：一個條件樹、一個可選的速率閾值，以及一個動作 — 挑戰、阻止或重導向。"
+
+msgid "workflows.empty_title"
+msgstr "目前沒有工作流程"
+
+msgid "workflows.entry_sub"
+msgstr "工作流程依連結順序執行；其中的規則由上而下執行。"
+
+msgid "workflows.entry_title"
+msgstr "送往已連結服務的每個請求"
+
+msgid "workflows.err.save"
+msgstr "無法儲存"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "無法連線至儲存端點"
+
+msgid "workflows.err.validate"
+msgstr "無法驗證"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "無法連線至驗證端點"
+
+msgid "workflows.errors.body"
+msgstr "未套用任何變更，執行中的原則維持不變。"
+
+msgid "workflows.errors.count"
+msgstr "有 %(count)s 個問題阻止儲存。"
+
+msgid "workflows.errors.rule"
+msgstr "規則 %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "規則 %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "此工作流程"
+
+msgid "workflows.exit_sub"
+msgstr "請求會繼續進入下一個已連結的工作流程，接著進入安全堆疊的其餘部分。"
+
+msgid "workflows.exit_title"
+msgstr "沒有規則相符"
+
+msgid "workflows.gate.and"
+msgstr "且僅在同一用戶端 IP 的請求數超過"
+
+msgid "workflows.gate.chip"
+msgstr "比對閘門"
+
+msgid "workflows.gate.help"
+msgstr "依用戶端 IP 計數。低於門檻時，此規則完全不相符，評估會繼續至下一條規則；它本身不會進行速率限制。"
+
+msgid "workflows.legend.fall"
+msgstr "不相符時前往下一條規則"
+
+msgid "workflows.legend.gate"
+msgstr "速率門檻控制是否相符，它不是動作"
+
+msgid "workflows.legend.move"
+msgstr "拖曳、使用方向鍵，或按 Alt + ↑ / ↓ 重新排序"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "拖曳、使用編號標籤，或按下 Alt + ← / → 重新排序"
+
+msgid "workflows.legend.stop"
+msgstr "相符時執行一個動作並停止"
+
+msgid "workflows.link.entry"
+msgstr "每個請求"
+
+msgid "workflows.link.noMatch"
+msgstr "不相符"
+
+msgid "workflows.menu.bottom"
+msgstr "最後執行"
+
+msgid "workflows.menu.delete"
+msgstr "刪除規則"
+
+msgid "workflows.menu.disable"
+msgstr "停用規則"
+
+msgid "workflows.menu.duplicate"
+msgstr "在下方複製"
+
+msgid "workflows.menu.enable"
+msgstr "啟用規則"
+
+msgid "workflows.menu.top"
+msgstr "最先執行"
+
+msgid "workflows.move.first"
+msgstr "最先執行"
+
+msgid "workflows.move.last"
+msgstr "最後執行"
+
+msgid "workflows.new"
+msgstr "建立新工作流程"
+
+msgid "workflows.no_rules"
+msgstr "目前沒有規則。新增一項規則即可開始建立此原則。"
+
+msgid "workflows.not_attached"
+msgstr "未連接"
+
+msgid "workflows.not_attached_notice"
+msgstr "此工作流程未連結至任何服務，因此這些規則目前不會在任何位置生效。"
+
+msgid "workflows.not_validated"
+msgstr "尚未驗證"
+
+msgid "workflows.order_help"
+msgstr "規則會按順序評估，且第一個匹配的規則會生效。具有速率閾值的規則只有在閾值超過時才會匹配，因此較低的規則可以捕獲閾值以下的流量。"
+
+msgid "workflows.readonly"
+msgstr "資料庫僅供讀取。可以檢視工作流程，但無法修改。"
+
+msgid "workflows.rule.disabled"
+msgstr "已停用"
+
+msgid "workflows.rule.if"
+msgstr "如果"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "規則名稱"
+
+msgid "workflows.rule.noun"
+msgstr "規則"
+
+msgid "workflows.rule.onMatch"
+msgstr "若相符"
+
+msgid "workflows.rule.skipped"
+msgstr "已停用，會完全略過，就像它不在清單中一樣。"
+
+msgid "workflows.rule.stopTail"
+msgstr "，評估會在此停止，不會到達下方的規則。"
+
+msgid "workflows.rules"
+msgstr "規則"
+
+msgid "workflows.say.actionChanged"
+msgstr "動作已變更為 %(type)s。它仍是唯一動作，且仍會停止評估。"
+
+msgid "workflows.say.added"
+msgstr "規則已新增至第 %(n)s 個位置，也就是最後一位，因此會先檢查其上方的所有規則。"
+
+msgid "workflows.say.deleted"
+msgstr "規則已刪除。還剩 %(count)s 條規則。"
+
+msgid "workflows.say.duplicated"
+msgstr "副本已插入第 %(n)s 個位置。只要上方的原始規則保持啟用，它就永遠不會相符。"
+
+msgid "workflows.say.gateAdded"
+msgstr "已為比對加入速率門檻。低於門檻時規則不相符，評估會繼續。"
+
+msgid "workflows.say.inserted"
+msgstr "在 %(total)s 的 %(n)s 位置新增規則。 檢查所有先前規則。"
+
+msgid "workflows.say.inspecting"
+msgstr "編輯 %(total)s 的 %(n)s 規則 — %(name)s。"
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s：%(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "最後一個值已移除；此條件必須包含一個值才能儲存。"
+
+msgid "workflows.say.moved"
+msgstr "%(name)s 已移至第 %(to)s 個位置，共 %(total)s 個%(how)s。現在它會在%(where)s執行。"
+
+msgid "workflows.say.predicateCap"
+msgstr "此規則已有 %(max)s 個條件，已達上限。"
+
+msgid "workflows.say.ruleAbove"
+msgstr "上方規則"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s 已停用，會被完全略過，下方規則現在會收到這些請求。"
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s 已啟用，會再次於第 %(n)s 個位置接受評估。"
+
+msgid "workflows.say.runsAfter"
+msgstr "%(name)s 之後"
+
+msgid "workflows.say.runsFirst"
+msgstr "最先"
+
+msgid "workflows.say.runsLast"
+msgstr "最後"
+
+msgid "workflows.say.saved"
+msgstr "規則已儲存並推送至已連結的服務。"
+
+msgid "workflows.say.theRule"
+msgstr "該規則"
+
+msgid "workflows.say.valuesDropped"
+msgstr "條件已變更為 %(type)s；原本的 %(count)s 個值無法保留。"
+
+msgid "workflows.say.via.drag"
+msgstr "透過拖曳"
+
+msgid "workflows.say.via.keyboard"
+msgstr "透過鍵盤"
+
+msgid "workflows.say.viewCanvas"
+msgstr "畫布視圖。規則從左到右執行；第一個相符的規則生效。"
+
+msgid "workflows.say.viewList"
+msgstr "列表視圖。規則從上到下執行；第一個相符的規則生效。"
+
+msgid "workflows.search"
+msgstr "搜尋名稱或描述..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "留空以模擬 ASN 查詢失敗。"
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN 必須是數字"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "假設用戶端不在允許清單中。"
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "請求編號 %(request_number)s 是輸入值，不是量測結果。"
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "假設執行個體的規則運算式額度尚未用盡。"
+
+msgid "workflows.test.assumptions"
+msgstr "假設條件"
+
+msgid "workflows.test.country"
+msgstr "國家/地區"
+
+msgid "workflows.test.detail_challenge"
+msgstr "驗證挑戰會接管處理；安全堆疊的其餘部分仍會執行。"
+
+msgid "workflows.test.detail_detect"
+msgstr "此服務處於偵測模式，因此不會實際強制執行任何動作。"
+
+msgid "workflows.test.detail_status"
+msgstr "用戶端會看到 %(status)s。"
+
+msgid "workflows.test.failed"
+msgstr "無法執行測試"
+
+msgid "workflows.test.geo"
+msgstr "GeoIP 查詢"
+
+msgid "workflows.test.geo_help"
+msgstr "無法使用時，國家/地區與 ASN 規則會變為「未知」，因此永遠不會相符。"
+
+msgid "workflows.test.geo_local"
+msgstr "本機/私人位址"
+
+msgid "workflows.test.geo_resolved"
+msgstr "已解析"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "資料庫無法使用"
+
+msgid "workflows.test.intro"
+msgstr "完全依照執行個體的處理方式，依序評估連結至此服務的每個工作流程。"
+
+msgid "workflows.test.invalid"
+msgstr "請先修正上方的問題再進行測試。"
+
+msgid "workflows.test.ip"
+msgstr "用戶端 IP"
+
+msgid "workflows.test.method"
+msgstr "方法"
+
+msgid "workflows.test.number"
+msgstr "請求編號"
+
+msgid "workflows.test.number_help"
+msgstr "此用戶端在時間範圍內的第 N 個請求。這是您提供的假設值，不是量測結果。"
+
+msgid "workflows.test.open"
+msgstr "測試請求"
+
+msgid "workflows.test.other_matched"
+msgstr "在此相符"
+
+msgid "workflows.test.other_no_match"
+msgstr "沒有規則相符"
+
+msgid "workflows.test.other_unreached"
+msgstr "未到達"
+
+msgid "workflows.test.other_workflows"
+msgstr "此服務上的其他工作流程"
+
+msgid "workflows.test.out_draft"
+msgstr "此服務是草稿，尚未為其編譯工作流程。"
+
+msgid "workflows.test.out_match"
+msgstr "%(workflow)s · %(rule)s 相符，並對請求執行了%(action)s。"
+
+msgid "workflows.test.out_no_match"
+msgstr "沒有規則相符。請求會繼續進入安全堆疊的其餘部分。"
+
+msgid "workflows.test.out_not_attached"
+msgstr "此工作流程未連結至任何服務，因此沒有可評估的規則階梯。"
+
+msgid "workflows.test.out_whitelisted"
+msgstr "已列入允許清單；會略過整個工作流程，且不評估任何規則。"
+
+msgid "workflows.test.run"
+msgstr "執行測試"
+
+msgid "workflows.test.service"
+msgstr "服務"
+
+msgid "workflows.test.title"
+msgstr "測試請求"
+
+msgid "workflows.test.unreachable"
+msgstr "無法連線至測試端點"
+
+msgid "workflows.test.uri"
+msgstr "URI 路徑"
+
+msgid "workflows.test.uri_help"
+msgstr "僅限路徑；$uri 絕不包含查詢字串。"
+
+msgid "workflows.test.v_gate"
+msgstr "條件相符；閘門在 %(n)s/%(count)s 時關閉"
+
+msgid "workflows.test.v_match"
+msgstr "相符"
+
+msgid "workflows.test.v_unknown"
+msgstr "未知"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "無法判定此規則需要的資訊，因此它永遠不會相符。"
+
+msgid "workflows.test.whitelisted"
+msgstr "此用戶端位於允許清單中"
+
+msgid "workflows.threshold"
+msgstr "僅限於特定速率"
+
+msgid "workflows.threshold_count"
+msgstr "請求"
+
+msgid "workflows.threshold_window"
+msgstr "每 (秒)"
+
+msgid "workflows.tree.addCondition"
+msgstr "條件"
+
+msgid "workflows.tree.addGroup"
+msgstr "群組"
+
+msgid "workflows.tree.all"
+msgstr "全部符合"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)s 個條件，必須全部為真"
+
+msgid "workflows.tree.and"
+msgstr "且"
+
+msgid "workflows.tree.any"
+msgstr "任一符合"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)s 個條件，至少一個必須為真"
+
+msgid "workflows.tree.empty"
+msgstr "空群組；請新增條件，目前狀態無法儲存。"
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "沒有群組包含 %(kind)s 個項目"
+
+msgid "workflows.tree.noneMeta"
+msgstr "這些條件全都不為真時相符"
+
+msgid "workflows.tree.not"
+msgstr "全部不符合"
+
+msgid "workflows.tree.or"
+msgstr "或"
+
+msgid "workflows.tree.removeGroup"
+msgstr "移除群組"
+
+msgid "workflows.truncated"
+msgstr "僅顯示前 500 個工作流程。通過 API 獲取完整結果以縮小列表。"
+
+msgid "workflows.untitled"
+msgstr "未命名規則"
+
+msgid "workflows.value.add"
+msgstr "值"
+
+msgid "workflows.values.fewer"
+msgstr "顯示較少"
+
+msgid "workflows.values.more"
+msgstr "另有 %(n)s 個"
+
+msgid "workflows.verb.asn"
+msgstr "是"
+
+msgid "workflows.verb.country"
+msgstr "是"
+
+msgid "workflows.verb.group"
+msgstr "位於群組中"
+
+msgid "workflows.verb.ip"
+msgstr "位於"
+
+msgid "workflows.verb.isIn"
+msgstr "位於"
+
+msgid "workflows.verb.isOneOf"
+msgstr "是下列其中之一"
+
+msgid "workflows.verb.method"
+msgstr "是"
+
+msgid "workflows.verb.uri"
+msgstr "符合"
+
+msgid "workflows.view.canvas"
+msgstr "畫布"
+
+msgid "workflows.view.list"
+msgstr "列表"
+

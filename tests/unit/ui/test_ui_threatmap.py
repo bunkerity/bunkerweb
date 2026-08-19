@@ -16,6 +16,7 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -273,7 +274,7 @@ class TestPage:
     def test_it_says_the_map_is_delayed_rather_than_live(self, page):
         """Freshness is bounded by the once-a-minute scrape job. Calling it live is a claim an
         operator could act on during an incident."""
-        assert "threatmap.freshness" in _render(page)
+        assert english("threatmap.freshness") in _render(page)
 
 
 def test_the_client_calls_the_single_round_trip_endpoint():

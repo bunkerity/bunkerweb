@@ -31,19 +31,15 @@
                                          generated .tooltip popup itself (which is appended
                                          next to <body>, not nested under the trigger, so a
                                          class on the trigger would never reach it).
-     data-i18n="{i18n_key}"           -- ONLY when html=false: i18n.js's applyTranslations()
-                                         special-cases `[data-bs-original-title]` elements and
-                                         rewrites that attribute directly on locale change
-                                         (see navbar.html's "Version" link, or the
-                                         reset-setting button in models/input_setting.html).
-                                         When html=true the translatable text is markup the
-                                         caller controls (see menu.html's "Pro feature"
-                                         tooltip) -- embed your own <span data-i18n="...">
-                                         inside `text` yourself in that case.
+     data-bs-original-title           -- holds `text`, already translated from i18n_key when
+                                         one is given and html=false. With html=true the copy
+                                         is markup the caller controls (see menu.html's "Pro
+                                         feature" tooltip), so it is passed through untouched
+                                         and the caller translates it itself.
 
    Params:
      text        (required) English fallback tooltip copy (or trusted HTML when html=true).
-     i18n_key    data-i18n key applied to the trigger, e.g. "tooltip.restart_scheduler".
+     i18n_key    catalog key for the tooltip copy, e.g. "tooltip.restart_scheduler".
                  Ignored when html=true -- see contract above.
      placement   "top" | "right" | "bottom" | "left". Default "top".
      trigger     space-separated Bootstrap trigger events. Default "hover focus" -- keep
@@ -65,10 +61,10 @@
           class="{{ outer_classes }}"
           {%- if disabled %} tabindex="0"{% endif %}
           data-bs-toggle="tooltip"
-          data-bs-original-title="{{ text }}"
+          data-bs-original-title="{{ _(i18n_key) if i18n_key and not html else text }}"
           data-bs-placement="{{ placement }}"
           {%- if trigger and trigger != 'hover focus' %} data-bs-trigger="{{ trigger }}"{% endif %}
-          {%- if html %} data-bs-html="true"{% elif i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}
+          {%- if html %} data-bs-html="true"{% endif %}
           {%- if delay is not none %} data-bs-delay="{{ delay }}"{% endif %}
           {%- if variant == 'warning' %} data-bs-custom-class="warning-tooltip"{% endif %}>{{ caller() }}</{{ tag }}>
 {%- endmacro %}
@@ -80,19 +76,17 @@
 
    Params: text/i18n_key/placement/delay/variant same as tooltip(), plus:
      glyph   Boxicons class, e.g. "bx-info-circle" (default), "bx-help-circle".
-     label   accessible name (aria-label). Falls back to `text`. Only emitted when
-             i18n_key is unset: when i18n_key is set, data-i18n targets
-             data-bs-original-title (see contract above) and a static aria-label would go
-             stale on locale change -- the same trade-off the existing reset-setting
-             button already makes (it has no aria-label either). #}
+     label   accessible name (aria-label). Falls back to the translated `text`, so it
+             stays in the rendered language instead of going stale like the old
+             client-side pass left it. #}
 {% macro tooltip_icon(text, i18n_key=none, glyph='bx-info-circle', placement='top', label=none, delay=none, variant=none, id=none, classes='') -%}
 <button type="button"
         {%- if id %} id="{{ id }}"{% endif %}
         class="btn btn-link p-0 border-0{% if classes %} {{ classes }}{% endif %}"
         data-bs-toggle="tooltip"
-        data-bs-original-title="{{ text }}"
+        data-bs-original-title="{{ _(i18n_key) if i18n_key else text }}"
         data-bs-placement="{{ placement }}"
-        {%- if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %} aria-label="{{ label or text }}"
+        aria-label="{{ label or (_(i18n_key) if i18n_key else text) }}"
         {%- if delay is not none %} data-bs-delay="{{ delay }}"{% endif %}
         {%- if variant == 'warning' %} data-bs-custom-class="warning-tooltip"{% endif %}>
   <i class="bx {{ glyph }}" aria-hidden="true"></i>

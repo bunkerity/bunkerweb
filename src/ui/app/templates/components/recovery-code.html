@@ -28,10 +28,10 @@
                     (2, 3, 4, 6 or 12). Default 2, matching profile.html today.
      copyable       show the "Copy Codes" button below the codes. Default true.
      aria_label     English fallback for the codes list's aria-label.
-     aria_i18n_key  data-i18n key for aria_label. Defaults to the existing
+     aria_i18n_key  catalog key for aria_label. Defaults to the existing
                     "modal.title.recovery_codes" key.
      copy_label     English fallback for the copy button's text.
-     copy_i18n_key  data-i18n key for copy_label. Defaults to the existing
+     copy_i18n_key  catalog key for copy_label. Defaults to the existing
                     "button.copy_codes" key.
      classes        extra utility classes appended to the wrapper. #}
 {% macro recovery_code(
@@ -52,8 +52,7 @@
     <div id="{{ wrapper_id }}"
          data-recovery-codes
          role="list"
-         aria-label="{{ aria_label }}"
-         data-i18n="{{ aria_i18n_key }}"
+         aria-label="{{ _(aria_i18n_key) if aria_i18n_key else aria_label }}"
          {%- if classes %} class="{{ classes }}"{% endif %}>
         {% if variant == "inline" %}
             <div class="d-flex flex-wrap gap-2">
@@ -81,7 +80,7 @@
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     data-bs-original-title=""
-                    data-i18n="{{ copy_i18n_key }}">{{ copy_label }}</button>
+                    >{{ _(copy_i18n_key) if copy_i18n_key else copy_label }}</button>
         </div>
     {% endif %}
 {%- endmacro %}

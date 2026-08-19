@@ -23,7 +23,7 @@
     }
   },
   "alert": {
-    "configs_import_invalid_file": "請上傳有效的自定義配置匯出檔案（.json）。",
+    "configs_import_invalid_file": "請上傳有效的自訂設定匯出檔案（.json）。",
     "custom_end_date_required": "請選擇一個自訂結束日期。",
     "important": "重要",
     "no_changes_detected": "未偵測到任何變更。",
@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "清除搜尋",
       "close": "關閉",
+      "collapse_multiline": "收合多行項目",
+      "configs_dropzone": "選取自訂設定匯出檔，或將檔案拖放到這裡",
       "copy": "複製日誌",
       "download_log": "下載此日誌檔案",
       "follow": "跟隨",
       "hide_value": "隱藏值",
-      "reveal_value": "顯示值",
-      "select_file": "選擇檔案",
-      "select_page": "選擇頁面",
       "issue_count": "錯誤與警告數量",
       "level_filter": "依等級篩選日誌行",
       "local_time": "以本地時間顯示時間戳記",
-      "collapse_multiline": "收合多行項目",
       "next_issue": "下一個錯誤或警告",
+      "passkey_name": "密碼金鑰名稱",
+      "plugins_dropzone": "選取外掛程式封存檔，或將檔案拖放到這裡",
       "prev_issue": "上一個錯誤或警告",
-      "search_logs": "搜尋日誌",
-      "toggle_wrap": "切換自動換行",
-      "configs_dropzone": "選取自訂設定匯出檔，或將檔案拖放到這裡",
       "raw_configuration": "原始設定",
-      "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
-      "user_avatar": "使用者頭像",
       "remove_value": "移除值",
-      "view_selected_items": "檢視已選取項目",
-      "passkey_name": "密碼金鑰名稱"
+      "reveal_value": "顯示值",
+      "search_logs": "搜尋日誌",
+      "select_file": "選擇檔案",
+      "select_page": "選擇頁面",
+      "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
+      "toggle_wrap": "切換自動換行",
+      "user_avatar": "使用者頭像",
+      "view_selected_items": "檢視已選取項目"
     }
   },
   "badge": {
@@ -76,7 +77,7 @@
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
   "bans": {
-    "subtitle": "跨您所有 BunkerWeb 實例的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
+    "subtitle": "跨您所有 BunkerWeb 執行個體的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
     "stats": {
       "card": {
         "by_reason": "依原因統計封鎖"
@@ -96,7 +97,7 @@
     "bans": "封鎖",
     "cache": "快取",
     "threatmap": "威脅地圖",
-    "web_cache": "Web 緩存",
+    "web_cache": "Web 快取",
     "timings": "執行時間",
     "configs": "設定",
     "extra_pages": "附加頁面",
@@ -118,7 +119,8 @@
     "groups": "資源群組",
     "services": "服務",
     "support": "支援",
-    "templates": "範本"
+    "templates": "範本",
+    "whats_new": "新增內容"
   },
   "button": {
     "actions": "操作",
@@ -212,7 +214,7 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段",
+    "wipe_other_sessions": "登出其他工作階段",
     "ban_all_filtered": "封鎖所有相符報告",
     "filtered_actions": "篩選後的動作",
     "unban_all_filtered": "解除所有相符的封鎖",
@@ -224,16 +226,21 @@
     "rename": "重新命名",
     "add_passkey": "新增密碼金鑰",
     "sign_in_with_passkey": "使用密碼金鑰登入",
-    "use_security_key": "使用安全金鑰"
+    "use_security_key": "使用安全金鑰",
+    "go": "前往 →",
+    "retry": "重試",
+    "got_it": "知道了",
+    "show_me": "帶我看看",
+    "see_all_releases": "查看所有版本"
   },
   "cache": {
     "kpi_files": "檔案",
     "kpi_per_service": "依服務",
-    "subtitle": "複製由排程工作產生的緩存檔案（封鎖清單、GeoIP 資料庫等） — 依照服務和插件進行檢視、下載或刪除。",
+    "subtitle": "由排程工作產生的快取檔案（封鎖清單、GeoIP 資料庫等）— 可依服務與外掛程式檢視、下載或刪除。",
     "title": "快取檔案"
   },
   "configs": {
-    "subtitle": "針對您服務的自定義 NGINX 配置片段 — 建立、編輯和管理 HTTP、ModSecurity 和流層過濾。"
+    "subtitle": "針對您服務的自訂 NGINX 設定片段 — 建立、編輯並管理 HTTP、ModSecurity 與 stream 層級的覆寫設定。"
   },
   "country": {
     "AD": "安道爾",
@@ -620,7 +627,7 @@
     "info_empty_plugins": "無可用外掛程式",
     "info_empty_reports": "無可用報告",
     "info_empty_services": "無可用服務",
-    "info_empty_templates": "沒有可用的模板",
+    "info_empty_templates": "沒有可用的範本",
     "info_filtered_bans": "（從 _MAX_ 個總封鎖中篩選）",
     "info_filtered_cache": "（從 _MAX_ 個總快取檔案中篩選）",
     "info_filtered_configs": "（從 _MAX_ 個總自訂設定中篩選）",
@@ -630,14 +637,14 @@
     "info_filtered_plugins": "（從 _MAX_ 個總外掛程式中篩選）",
     "info_filtered_reports": "（從 _MAX_ 個總報告中篩選）",
     "info_filtered_services": "（從 _MAX_ 個總服務中篩選）",
-    "info_filtered_templates": "（從 _MAX_ 個總模板中篩選）",
+    "info_filtered_templates": "（從 _MAX_ 個總範本中篩選）",
     "info_instances": "顯示 {{start}} 到 {{end}} 個執行個體，共 {{total}} 個",
     "info_items": "顯示 {{start}} 到 {{end}} 個項目，共 {{total}} 個",
     "info_jobs": "顯示 {{start}} 到 {{end}} 個任務，共 {{total}} 個",
     "info_plugins": "顯示 {{start}} 到 {{end}} 個外掛程式，共 {{total}} 個",
     "info_reports": "顯示 {{start}} 到 {{end}} 個報告，共 {{total}} 個",
     "info_services": "顯示 {{start}} 到 {{end}} 個服務，共 {{total}} 個",
-    "info_templates": "顯示 {{start}} 到 {{end}} 個模板，共 {{total}} 個",
+    "info_templates": "顯示 {{start}} 到 {{end}} 個範本，共 {{total}} 個",
     "length_all": "全部",
     "length_menu_bans": "顯示 _MENU_ 個封鎖",
     "length_menu_cache": "顯示 _MENU_ 個快取檔案",
@@ -648,7 +655,7 @@
     "length_menu_plugins": "顯示 _MENU_ 個外掛程式",
     "length_menu_reports": "顯示 _MENU_ 個報告",
     "length_menu_services": "顯示 _MENU_ 個服務",
-    "length_menu_templates": "顯示 _MENU_ 個模板",
+    "length_menu_templates": "顯示 _MENU_ 個範本",
     "paginate": {
       "first": "第一頁",
       "last": "最後一頁",
@@ -684,9 +691,9 @@
     "select_rows_services_0": "未選取服務",
     "select_rows_services_1": "已選取 1 個服務",
     "select_rows_services_plural": "已選取 %d 個服務",
-    "select_rows_templates_0": "未選擇模板",
-    "select_rows_templates_1": "選擇了 1 個模板",
-    "select_rows_templates_plural": "選擇了 %d 個模板",
+    "select_rows_templates_0": "未選擇範本",
+    "select_rows_templates_1": "選擇了 1 個範本",
+    "select_rows_templates_plural": "選擇了 %d 個範本",
     "selected_list_count": "{{count}} {{entity}} 已選取",
     "selected_list_empty": "未選取 {{entity}}。",
     "zero_records_bans": "找不到相符的封鎖",
@@ -698,7 +705,7 @@
     "zero_records_plugins": "找不到相符的外掛程式",
     "zero_records_reports": "找不到相符的報告",
     "zero_records_services": "找不到相符的服務",
-    "zero_records_templates": "未找到匹配的模板"
+    "zero_records_templates": "未找到匹配的範本"
   },
   "dev_log": {
     "copy_failed": "複製文字失敗：",
@@ -750,7 +757,7 @@
   },
   "footer": {
     "blog": "部落格",
-    "documentation": "文件",
+    "documentation": "說明文件",
     "license": "授權",
     "made_by": "由",
     "privacy": "隱私權",
@@ -785,7 +792,7 @@
       "configuration_name": "設定名稱",
       "confirm_password": "確認密碼",
       "current_password": "目前密碼",
-      "custom_config": "配置",
+      "custom_config": "設定",
       "custom_end_date": "自訂結束日期",
       "custom_ssl_certificate": "自訂 SSL 憑證",
       "custom_ssl_certificate_data": "自訂 SSL 憑證資料 (Base64/PEM)",
@@ -798,7 +805,7 @@
       "email_for_lets_encrypt": "用於 Let's Encrypt 的電子郵件",
       "end_date": "結束日期",
       "hostname": "主機名稱",
-      "instance_id": "實例 ID",
+      "instance_id": "執行個體 ID",
       "ip_address": "IP 位址",
       "keywords": "關鍵字",
       "lets_encrypt_custom_profile": "Let's Encrypt 自訂設定檔",
@@ -876,13 +883,14 @@
   "instances": {
     "down": "已停止",
     "loading": "正在載入",
-    "subtitle": "管理與此 UI 連結的 BunkerWeb 實例：建立、ping、重新載入、停止或移除它們。",
-    "total": "總實例數",
+    "subtitle": "管理與此 UI 連結的 BunkerWeb 執行個體：建立、ping、重新載入、停止或移除它們。",
+    "total": "總執行個體數",
     "up": "執行中"
   },
   "interval": {
     "day": "每天",
     "hour": "每小時",
+    "minute": "每分鐘",
     "once": "一次",
     "week": "每週"
   },
@@ -979,7 +987,7 @@
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert_plural": "您確定要刪除選定的執行個體嗎？",
-      "delete_confirmation_template_used": "一個或多個選定的模板已分配給服務（總共 {{services_count}} 個服務）。刪除它們將清除這些分配。您想繼續嗎？",
+      "delete_confirmation_template_used": "一個或多個選定的範本已分配給服務（總共 {{services_count}} 個服務）。刪除它們將清除這些分配。您想繼續嗎？",
       "delete_step_confirmation": "您確定要刪除此步驟嗎？",
       "delete_step_content_label": "內容",
       "delete_step_name_label": "步驟",
@@ -1028,7 +1036,7 @@
       "delete_instance": "刪除執行個體",
       "delete_step": "刪除步驟",
       "delete_template": "刪除範本",
-      "edit_template": "編輯模板：{{name}}",
+      "edit_template": "編輯範本：{{name}}",
       "fetch_global_settings": "要套用全域設定嗎？",
       "export_services": "匯出服務",
       "from_plugin": "來自外掛程式",
@@ -1059,7 +1067,7 @@
       "logout": "登出"
     },
     "link": {
-      "documentation": "文件"
+      "documentation": "說明文件"
     },
     "version": "版本"
   },
@@ -1069,7 +1077,7 @@
     "cache": "快取",
     "certificates": "憑證",
     "threatmap": "威脅地圖",
-    "web_cache": "Web 緩存",
+    "web_cache": "Web 快取",
     "timings": "執行時間",
     "configs": "設定",
     "extra_pages": "附加頁面",
@@ -1146,7 +1154,7 @@
       "show_less": "顯示較少"
     },
     "marketplace": {
-      "active": "有效",
+    "active": "啟用中",
       "always_on": "核心/永遠啟用",
       "disabled": "已停用",
       "enabled": "已啟用",
@@ -1236,7 +1244,7 @@
     },
     "modal": {
       "body": {
-        "wipe_sessions_confirm": "這會立即登出您帳戶上的所有其他正在運行的會話。請輸入您的密碼以確認。"
+        "wipe_sessions_confirm": "這會立即登出您帳戶上所有其他目前使用中的工作階段。請輸入您的密碼以確認。"
       },
       "title": {
         "wipe_sessions": "清除其他會話？"
@@ -1259,9 +1267,9 @@
       "last_activity": "上次活動",
       "os": "作業系統",
       "title": "工作階段",
-      "wipe_help": "結束您帳戶上的所有其他正在運行的會話。您將在此處保持登入狀態。"
+      "wipe_help": "結束您帳戶上所有其他目前使用中的工作階段。您將在此處保持登入狀態。"
     },
-    "subtitle": "管理您的帳戶、安全性和正在運行的會話。",
+    "subtitle": "管理您的帳戶、安全性和目前使用中的工作階段。",
     "tab": {
       "profile": "個人資料",
       "security": "安全性",
@@ -1277,11 +1285,11 @@
     "custom": "自訂"
   },
   "reports": {
-    "bad_behavior_activity_detected": "偵測到不良行為活動",
-    "bad_behavior_activity_explanation": "這些請求超過不良行為閾值，並已合併。",
+    "bad_behavior_activity_detected": "偵測到異常行為",
+    "bad_behavior_activity_explanation": "這些請求超過異常行為門檻，並已合併。",
     "bad_behavior_captured_at": "擷取於",
     "bad_behavior_ip": "IP 位址",
-    "bad_behavior_no_details": "此報告中沒有擷取任何不良行為細節。",
+    "bad_behavior_no_details": "此報告中沒有擷取任何異常行為細節。",
     "bad_behavior_request_id": "請求識別碼",
     "bad_behavior_request_label": "請求",
     "bad_behavior_server": "伺服器",
@@ -1295,51 +1303,51 @@
         "title": "最近事件"
       },
       "top_asn": {
-        "title": "頂級 ASN"
+        "title": "主要攻擊來源 ASN"
       },
       "top_offenders": {
-        "title": "頂級惡意行為者"
+        "title": "主要攻擊者"
       },
       "top_rules": {
-        "title": "觸發頂級 ModSecurity 規則"
+        "title": "觸發次數最多的 ModSecurity 規則"
       }
     },
     "chart": {
       "timeseries": {
         "series": "已封鎖",
-        "title": "隨時間變化的已封鎖請求"
+        "title": "封鎖請求趨勢"
       }
     },
     "security_incident": "安全事件",
     "security_report_data": "安全報告資料",
-    "subtitle": "從您的 BunkerWeb 實例中產生，針對已封鎖的請求的安全報告 — 搜尋、過濾、匯出，並直接從表格中封鎖可疑 IP 位址。",
+    "subtitle": "從您的 BunkerWeb 執行個體中產生，針對已封鎖的請求的安全報告 — 搜尋、過濾、匯出，並直接從表格中封鎖可疑 IP 位址。",
     "tab": {
       "eventlog": "事件記錄",
-      "offenders": "頂級惡意行為者",
+      "offenders": "主要攻擊者",
       "overview": "概觀",
       "patterns": "攻擊模式"
     },
     "table": {
       "asn": "ASN",
-      "blocks": "封鎖",
+      "blocks": "封鎖次數",
       "country": "國家/地區",
-      "fires": "觸發",
+      "fires": "觸發次數",
       "ip": "IP",
       "rule": "規則",
-      "top_rule": "頂級規則"
+      "top_rule": "最常觸發的規則"
     },
     "tile": {
-      "asns": "頂級 ASN",
+      "asns": "主要攻擊來源 ASN",
       "blocked": "已封鎖的請求",
       "blocked_rate": "與前一期間的比較",
       "bot": "Bot / 爬蟲",
-      "countries": "頂級國家",
+      "countries": "主要攻擊來源國家/地區",
       "peak_hour": "高峰時段",
       "rce": "RCE / 命令",
-      "repeat_offenders": "重複違規者（前10名）",
+      "repeat_offenders": "重複攻擊來源（前 10）",
       "sqli": "SQL 注入",
       "unique_ips": "主要攻擊 IP 位址",
-      "unique_offenders": "主要違規者"
+      "unique_offenders": "主要攻擊者"
     }
   },
   "scope": {
@@ -1489,11 +1497,11 @@
     "done": "已完成",
     "down": "已停止",
     "draft": "草稿",
-    "error_deleting_template": "刪除模板時發生錯誤。",
+    "error_deleting_template": "刪除範本時發生錯誤。",
     "error_loading_bans": "載入封鎖時發生錯誤。請嘗試重新整理頁面。",
     "error_loading_data": "無法載入資料",
-    "error_loading_template": "無法載入模板資料。",
-    "error_saving_template": "儲存模板時發生錯誤。",
+    "error_loading_template": "無法載入範本資料。",
+    "error_saving_template": "儲存範本時發生錯誤。",
     "failed": "失敗",
     "invalid_json_payload": "無效的 JSON 負載。",
     "loading": "載入中...",
@@ -1510,7 +1518,7 @@
     "loading_reports": "正在載入報告...",
     "loading_services": "正在載入服務...",
     "loading_templates": "正在載入範本...",
-    "missing_template_information": "缺少模板資訊。",
+    "missing_template_information": "缺少範本資訊。",
     "news_connection_error": "無法連線至部落格以取得新聞更新。",
     "no": "否",
     "no_data": "無資料",
@@ -1545,7 +1553,8 @@
     "expired": "已過期",
     "expiring": "即將到期",
     "no_settings": "此外掛程式在此範圍內沒有設定。",
-    "yes": "是"
+    "yes": "是",
+    "optional": "選用"
   },
   "step": {
     "next": "下一步",
@@ -1618,7 +1627,7 @@
       "steps": "步驟",
       "stream": "串流",
       "template": "範本",
-      "templates": "模板",
+      "templates": "範本",
       "time_left": "剩餘時間",
       "type": "類型",
       "url": "URL",
@@ -1700,7 +1709,7 @@
       "raw_configs_upload": "上傳設定檔 (.conf, .cfg, .txt)",
       "raw_configs_upload_failed": "無法讀取其中一個選定的檔案。",
       "raw_editor_drop_hint": "拖曳範本 JSON 檔案 (僅 .json) 以取代目前的內容。",
-      "raw_editor_aria": "原始模板 JSON 編輯器",
+      "raw_editor_aria": "原始範本 JSON 編輯器",
       "raw_editor_help": "將完整的範本定義編輯為 JSON。切換回簡易模式會驗證並重新載入視覺化編輯器。",
       "raw_editor_import_success": "範本 JSON 成功匯入。",
       "raw_editor_override_body": "匯入此檔案將完全取代目前的範本 JSON。在編輯器中所做的變更將會遺失。您要繼續嗎？",
@@ -1744,10 +1753,10 @@
       "setting_selector_clear": "清除搜尋",
       "setting_selector_count_all_used": "所有相符的設定都已新增。",
       "setting_selector_count_empty": "無可顯示的設定。",
-      "setting_selector_count_only_available": "有 {{count}} 個設定可用",
+      "setting_selector_count_only_available": "可用設定：{{count}}",
       "setting_selector_count_with_used": "{{available}} 個可用，{{used}} 個已新增",
       "setting_selector_default": "預設",
-      "setting_selector_docs": "檢視文件",
+      "setting_selector_docs": "檢視說明文件",
       "setting_selector_empty": "沒有符合目前篩選條件的設定。",
       "setting_selector_filter_plugin": "外掛程式",
       "setting_selector_filter_plugin_all": "所有外掛程式",
@@ -1827,7 +1836,7 @@
     "more_hidden": "項未顯示",
     "show_less": "僅顯示前 {{count}} 項",
     "show_more": "顯示全部 {{count}} 項",
-    "stale": "這些數據已停止更新。指標服務沒有回應。",
+    "stale": "這些資料已停止更新。指標服務沒有回應。",
     "subtitle": "過去 24 小時內您的執行個體所封鎖流量的來源。",
     "freshness": "報告大約每分鐘寫入資料庫一次，因此地圖比真實流量落後約一到兩分鐘。",
     "disabled_title": "報告持久化已關閉",
@@ -1846,7 +1855,7 @@
     "empty_title": "此時間範圍內沒有封鎖紀錄",
     "empty_help": "可能是過去 24 小時內沒有請求被封鎖，也可能是報告尚未收集。",
     "error_title": "無法連線至指標服務",
-    "error_help": "地圖會保留最後一次成功載入的數據，並於下次重新整理時重試。",
+    "error_help": "地圖會保留最後一次成功載入的資料，並於下次重新整理時重試。",
     "open_live": "即時檢視",
     "updated": "更新於"
   },
@@ -2218,7 +2227,7 @@
     "serial": "序列號",
     "services": "服務",
     "services_help": "使用 Ctrl 或 Command 選擇多個服務。",
-    "showing_count": "顯示 {{visible}} 個中的 {{total}} 憑證",
+    "showing_count": "顯示 {{visible}}／{{total}} 張憑證",
     "source": {
       "customcert": "自訂",
       "letsencrypt": "Let's Encrypt",
@@ -2239,7 +2248,7 @@
     "upcoming": "即將到期的憑證",
     "upcoming_help": "已過期或在 30 天的更新期限內",
     "upload": "上傳憑證",
-    "upload_custom": "上傳自定義憑證",
+    "upload_custom": "上傳自訂憑證",
     "upload_invalid": "選擇有效的公鑰和對應的私鑰。",
     "valid_days": "有效期限（天）",
     "valid_from": "從...開始有效",
@@ -2250,12 +2259,12 @@
     "add_to_setting": "新增資源群組…",
     "add_values": "新增值",
     "alias": "別名",
-    "alias_help": "字母、數字、下劃線和連字符。 既存的別名無法更名。",
-    "bulk_import": "批量匯入",
+    "alias_help": "只能使用字母、數字、底線與連字號。既有別名無法重新命名。",
+    "bulk_import": "批次匯入",
     "clone": "複製資源群組",
     "clone_copy": "建立一個可編輯的 @{{name}} 的副本。",
     "comment": "註解",
-    "collapse_all": "展開所有",
+    "collapse_all": "全部收合",
     "delete": "刪除資源群組",
     "delete_confirm": "刪除 @{{name}}？ 這是不可撤銷的。",
     "delete_help": "在設定引用此別名時，刪除將被阻止。",
@@ -2264,9 +2273,9 @@
     "editor_title": "資源群組",
     "empty": "沒有資源群組",
     "empty_help": "建立一個可重複使用的別名，以在相容的設定之間共享輸入值。",
-    "entries": "記錄",
+    "entries": "項目",
     "expand_all": "展開所有",
-    "global_configuration": "全球設定",
+    "global_configuration": "全域設定",
     "import_extension": "選擇一個 .txt 或 .csv 檔案。",
     "import_file": "TXT/CSV",
     "import_size": "TXT/CSV 匯入限制為 256 KiB。",
@@ -2278,16 +2287,16 @@
     "new": "建立新群組",
     "new_alias": "建立新別名",
     "no_entries": "沒有項目",
-    "no_entries_help": "個別新增項目或使用下方批量匯入功能。",
+    "no_entries_help": "個別新增項目或使用下方批次匯入功能。",
     "no_references": "沒有參考資料",
     "readonly": "資料庫僅供讀取。 資源群組可以檢視和匯出，但不能修改。",
     "references_error": "無法載入參考資料",
     "save": "儲存群組",
     "search": "搜尋別名、描述、種類或值...",
-    "showing_count": "顯示 {{visible}} 個中的 {{total}} 個群組",
+    "showing_count": "顯示 {{visible}}／{{total}} 個群組",
     "subtitle": "可重複使用的類型別名，適用於 IP 位址、國家、ASN、反向 DNS 名稱、使用者代理程式和 URL。",
     "template_configuration": "範本 {{template}}",
-    "usage": "使用方式",
+    "usage": "使用情況",
     "value": "值",
     "values": "值"
   },
@@ -2316,26 +2325,26 @@
     "enabled_instances": "快取已啟用",
     "enabled_services": "已啟用服務",
     "hit_rate": "命中率",
-    "instance": "實例",
-    "metrics": "匯總命中/失誤分配",
-    "metrics_scope": "計數器按實例彙總，適用於所有已啟用快取的服務。",
-    "not_reporting": "未報告",
+    "instance": "執行個體",
+    "metrics": "彙總命中／未命中分布",
+    "metrics_scope": "計數器按執行個體彙總，適用於所有已啟用快取的服務。",
+    "not_reporting": "未回報",
     "path": "路徑",
     "purge": "清除快取回應",
     "purge_all": "清除全部",
     "purge_all_confirm_body": "這會刪除所有可連線執行個體上每個服務的所有快取回應。此操作無法復原。",
-    "purge_all_confirm_title": "清除整個緩存？",
-    "purge_help": "立即在可達實例上執行清除操作。 無法達到的實例會被跳過，且不會產生任何佇列。",
-    "purge_key": "有效的緩存鍵",
-    "purge_key_help": "僅在預設的 $scheme$host$request_uri 上將緩存鍵留空。 如果服務覆蓋 PROXY_CACHE_KEY，請在此處輸入其有效的值；未支援的僅限請求變數將被拒絕，而不是清除不同的記錄。",
-    "purge_key_placeholder": "有效的 PROXY_CACHE_KEY (可選)",
+    "purge_all_confirm_title": "清除整個快取？",
+    "purge_help": "立即在可達執行個體上執行清除操作。 無法達到的執行個體會被跳過，且不會產生任何佇列。",
+    "purge_key": "實際生效的快取鍵",
+    "purge_key_help": "僅在使用預設 $scheme$host$request_uri 時將快取鍵留空。如果服務覆寫了 PROXY_CACHE_KEY，請在此貼上實際生效的值；不支援的、僅在請求處理期間可用的變數會被拒絕，以免清除其他快取項目。",
+    "purge_key_placeholder": "實際生效的 PROXY_CACHE_KEY（選填）",
     "purge_url": "清除 URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
-    "reporting_instances": "報告實例",
+    "reporting_instances": "正在回報的執行個體",
     "service": "服務",
-    "services": "服務啟用",
-    "status": "實例儲存",
-    "subtitle": "反向代理緩存狀態，匯總命中率指標和即時清除控制。"
+    "services": "服務啟用情況",
+    "status": "執行個體儲存空間",
+    "subtitle": "反向代理快取狀態，匯總命中率指標和即時清除控制。"
   },
   "compose": {
     "always_on": "永遠開啟",
@@ -2359,37 +2368,37 @@
     },
     "set_value": "設定一個值…",
     "show_more": "顯示更多 {{count}}",
-    "unavailable": "插件列表無法載入，因此此頁面無法安全編輯。 重新載入後 API 回覆。"
+    "unavailable": "外掛程式列表無法載入，因此此頁面無法安全編輯。 重新載入後 API 回覆。"
   },
   "redirects": {
     "all": "全部",
     "append_badge": "+ URI",
     "append_request_uri": "將要求的 URI 附加到目標",
-    "attach": "附加",
-    "attach_copy": "將 {{name}} ({{from}} → {{to}}) 附加到一個或多個服務。",
+    "attach": "連結",
+    "attach_copy": "將 {{name}} ({{from}} → {{to}}) 連結至一個或多個服務。",
     "code": {
       "301": "301 — 永久移動",
       "302": "302 — 已找到",
-      "303": "303 — 請參閱其他",
-      "307": "307 — 暫時重定向",
-      "308": "308 — 永久重定向"
+      "303": "303 — 查看其他位置",
+      "307": "307 — 暫時重導向",
+      "308": "308 — 永久重導向"
     },
-    "create": "建立重定向",
-    "delete_confirm_title": "刪除此重定向？",
-    "delete_copy": "刪除 {{name}} 的重定向？",
-    "delete_help": "附加到服務的重定向無法刪除。 請先解除附加。",
-    "edit": "編輯重定向",
-    "edit_shared": "此重定向附加到 {{count}} 服務：{{services}}。 儲存所有變更。",
-    "empty_text": "重定向是一種名稱規則，您將附加到一個或多個服務。 內聯 REDIRECT_* 設定將與其一起運作。",
-    "empty_title": "目前沒有重定向",
+    "create": "建立重導向",
+    "delete_confirm_title": "刪除此重導向？",
+    "delete_copy": "刪除 {{name}} 的重導向？",
+    "delete_help": "仍連結至服務的重導向無法刪除。請先解除連結。",
+    "edit": "編輯重導向",
+    "edit_shared": "此重導向已連結至 {{count}} 個服務：{{services}}。儲存後，變更會套用到所有這些服務。",
+    "empty_text": "重導向是一種名稱規則，您將附加到一個或多個服務。 內聯 REDIRECT_* 設定將與其一起運作。",
+    "empty_title": "目前沒有重導向",
     "from_path": "從",
     "from_path_help": "附加到服務的路徑，例如 /old.",
-    "new": "建立新的重定向",
-    "not_attached": "未附加",
-    "readonly": "資料庫僅供閱讀。 可以檢視重定向，但無法修改。",
-    "save": "儲存重定向",
+    "new": "建立新的重導向",
+    "not_attached": "未連結",
+    "readonly": "資料庫為唯讀模式。可以檢視重導向，但無法修改。",
+    "save": "儲存重導向",
     "search": "搜尋名稱、來源路徑或目標...",
-    "services_help": "使用 Ctrl 或 Command 選擇多個服務。 之後可以附加重導向。",
+    "services_help": "使用 Ctrl 或 Command 選擇多個服務。重導向可稍後連結。",
     "status_code": "狀態碼",
     "to_url": "重導向至",
     "truncated": "僅顯示前 500 個重導向。 使用 API 縮小清單以顯示完整結果。"
@@ -2397,8 +2406,8 @@
   "upstreams": {
     "add_server": "新增伺服器",
     "all": "全部",
-    "attach": "附加",
-    "attach_copy": "將 {{name}} ({{servers}}) 附加到一個或多個服務。",
+    "attach": "連結",
+    "attach_copy": "將 {{name}} ({{servers}}) 連結至一個或多個服務。",
     "backend_ssl": "與伺服器進行 TLS 訊息交換 (https:// / grpcs://)",
     "balancing": {
       "ip_hash": "IP 雜項 — 同一客戶端、同一後端",
@@ -2410,7 +2419,7 @@
     "delete_copy": "刪除 upstream {{name}}？",
     "delete_help": "與服務相關聯的 upstream 無法刪除。 請先解除連結。",
     "edit": "編輯 upstream",
-    "edit_shared": "這個 upstream 與服務 {{count}} 相關聯：{{services}}。 儲存所有變更。",
+    "edit_shared": "這個 upstream 已連結至 {{count}} 個服務：{{services}}。儲存後，變更會套用到所有這些服務。",
     "empty_text": "upstream 是一個名稱的後端池，您將其連接到一個或多個服務，位於反向代理路徑上。 Inline REVERSE_PROXY_HOST 設定將繼續與其一起運作。",
     "empty_title": "目前沒有 upstream",
     "keepalive": "保持連線",
@@ -2421,7 +2430,7 @@
     "name_help": "只能輸入字母、數字、連字符和底線。 點號不允許，因此池名稱永遠不會與實際主機衝突。",
     "new": "新的上游",
     "not_attached": "未連接",
-    "protocol": "協議",
+    "protocol": "協定",
     "protocol_help": "HTTP 和 gRPC 均連接到一個路徑；一個流池會接管整個 TCP/UDP 服務。",
     "protocols": {
       "grpc": "gRPC",
@@ -2443,7 +2452,7 @@
     "server_weight": "權重",
     "servers": "伺服器",
     "services_help": "使用 Ctrl 或 Command 選擇多個服務。 上游可以稍後連接。",
-    "services_hidden": "{{count}} 服務(們) 已隱藏：一個 {{protocol}} 上游只能連接到相符的服務。",
+    "services_hidden": "已隱藏 {{count}} 個服務：{{protocol}} 上游只能連結至協定相符的服務。",
     "truncated": "僅顯示前 500 個上游。 使用 API 縮小列表以獲得完整結果。"
   },
   "workflows": {
@@ -2493,8 +2502,8 @@
     "attach_help": "規則僅在工作流程連接到的服務上執行。",
     "attached_notice": "儲存後會將這些規則套用至 {{count}} 個已連結的服務。",
     "canvas": {
-      "auxCanvas": "從左到右。第一個匹配獲勝。",
-      "auxList": "從上到下。第一個匹配獲勝。",
+      "auxCanvas": "從左到右。第一個相符的規則生效。",
+      "auxList": "從上到下。第一個相符的規則生效。",
       "close": "關閉",
       "drawerSub": "在 {{total}} 的 {{n}} 位置執行",
       "dropHint": "設定優先順序 — 規則的位置是它所代表的唯一意義",
@@ -2504,10 +2513,10 @@
       "entry_sub": "規則從左到右執行。",
       "entry_title": "每個請求",
       "exit_sub": "繼續到下一個連接的工作流程。",
-      "exit_title": "沒有規則匹配",
+      "exit_title": "沒有規則相符",
       "fit": "調整視窗",
       "gateTip": "一個匹配閘，不是一個動作：如果條件不滿足，則規則不匹配，並評估下一個規則。",
-      "hint": "拖曳節點重新排序 · 拖曳板進行瀏覽 · 在選取的節點上，Alt + ← / →",
+      "hint": "拖曳節點重新排序 · 拖曳畫布以平移 · 在選取的節點上使用 Alt + ← / →",
       "hintReadonly": "唯讀 — 瀏覽，無法更改順序",
       "insert": "在此新增規則",
       "open": "開啟規則",
@@ -2527,7 +2536,7 @@
     "copySuffix": "（副本）",
     "delete": "刪除工作流程",
     "delete_confirm": "此工作流程及其所有規則將永久刪除。",
-    "empty_text": "工作流程是一個規則的有序列表，您將其連接到服務：一個條件樹、一個可選的速率閾值，以及一個動作 — 挑戰、阻止或重定向。",
+    "empty_text": "工作流程是一個規則的有序列表，您將其連接到服務：一個條件樹、一個可選的速率閾值，以及一個動作 — 挑戰、阻止或重導向。",
     "empty_title": "目前沒有工作流程",
     "entry_sub": "工作流程依連結順序執行；其中的規則由上而下執行。",
     "entry_title": "送往已連結服務的每個請求",
@@ -2575,7 +2584,7 @@
       "last": "最後執行"
     },
     "new": "建立新工作流程",
-    "no_rules": "目前沒有規則。添加一個以開始建立此策略。",
+    "no_rules": "目前沒有規則。新增一項規則即可開始建立此原則。",
     "not_attached": "未連接",
     "not_attached_notice": "此工作流程未連結至任何服務，因此這些規則目前不會在任何位置生效。",
     "not_validated": "尚未驗證",
@@ -2603,7 +2612,7 @@
       "lastValueRemoved": "最後一個值已移除；此條件必須包含一個值才能儲存。",
       "moved": "{{name}} 已移至第 {{to}} 個位置，共 {{total}} 個{{how}}。現在它會在{{where}}執行。",
       "predicateCap": "此規則已有 {{max}} 個條件，已達上限。",
-      "ruleAbove": "上方規則之後",
+      "ruleAbove": "上方規則",
       "ruleDisabled": "{{name}} 已停用，會被完全略過，下方規則現在會收到這些請求。",
       "ruleEnabled": "{{name}} 已啟用，會再次於第 {{n}} 個位置接受評估。",
       "runsAfter": "{{name}} 之後",
@@ -2616,8 +2625,8 @@
         "drag": "透過拖曳",
         "keyboard": "透過鍵盤"
       },
-      "viewCanvas": "畫布視圖。 規則從左到右執行；第一個匹配獲勝。",
-      "viewList": "列表視圖。 規則從上到下執行；第一個匹配獲勝。"
+      "viewCanvas": "畫布視圖。規則從左到右執行；第一個相符的規則生效。",
+      "viewList": "列表視圖。規則從上到下執行；第一個相符的規則生效。"
     },
     "search": "搜尋名稱或描述...",
     "test": {
@@ -2709,8 +2718,8 @@
     }
   },
   "request_path": {
-    "client": "客戶端",
-    "source": "{{phase}} 階段的插件執行順序，從 {{setting}} 開始 — 顯示順序，而不是按請求追蹤。",
+    "client": "用戶端",
+    "source": "{{phase}} 階段的外掛程式執行順序，從 {{setting}} 開始 — 顯示順序，而不是按請求追蹤。",
     "terminal": {
       "inline": "後端",
       "none": "沒有服務",
@@ -2718,11 +2727,11 @@
       "root": "本地檔案"
     },
     "title": "請求路徑",
-    "unordered": "未在 {{phase}} 階段明確指定位置；它會在已排序的外掛程式之後執行。"
+    "unordered": "未在 {{phase}} 階段指定位置；它會在已排序的外掛程式之後依字母順序執行。"
   },
   "service": {
     "resources": {
-      "attach": "附加",
+      "attach": "連結",
       "conflict": {
         "inline": "{{service}} 已經透過自己的 {{family}} 設定，服務 {{path}}。請清除 {{path}} 的設定，或使用不同的路徑。",
         "primary": "「{{name}}」目前是此服務的主要憑證，且將在沒有警告的情況下被降級。主要的憑證是指實際部署的憑證。",
@@ -2733,13 +2742,13 @@
       "detach": "解除",
       "family": {
         "certificate": "憑證",
-        "redirect": "重定向",
+        "redirect": "重導向",
         "template": "範本",
         "upstream": "上游",
         "workflow": "工作流程"
       },
       "match_path": "路徑",
-      "none": "未附加",
+      "none": "未連結",
       "primary": "主要憑證",
       "template": {
         "none": "沒有範本",
@@ -2748,25 +2757,45 @@
         "switching": "儲存時，此服務從「{{from}}」變為「{{to}}」。目前範本提供的值會被移除，並應用「{{to}}」的設定 — 許多設定會一次性更改。",
         "unwired": "此頁面不會發佈「USE_TEMPLATE」，因此無法在此處更改範本。"
       },
-      "title": "附加資源",
+      "title": "已連結資源",
       "unavailable": "不可用"
     }
   },
   "onboarding": {
+    "dismiss": "略過",
+    "error": "無法載入導覽。",
+    "hint": {
+      "bans": "封鎖清單顯示 BunkerWeb 目前拒絕的用戶端。每一列都會列出原因與到期時間。",
+      "home": "此儀表板顯示目前運行狀況：正在執行的執行個體、提供服務中的服務，以及 BunkerWeb 已處理的流量。",
+      "logs": "來自所有執行個體的即時日誌，可依執行個體與嚴重層級篩選。",
+      "reports": "每個被攔截的請求都會出現在這裡。開啟其中一筆即可查看是哪項安全檢查攔截了它以及原因。",
+      "title": "快速導覽"
+    },
     "item": {
-      "install": "在 1+ 台主機上安裝 BunkerWeb",
+      "first_block": "看到 BunkerWeb 攔截請求",
+      "https": "讓 HTTPS 正常運作",
+      "install": "在一台以上的主機上安裝 BunkerWeb",
       "mfa": "啟用 MFA",
       "pro": "啟用 BunkerWeb PRO",
-      "service": "註冊第一個服務"
+      "read_bans": "查看誰被封鎖，以及封鎖到何時",
+      "read_home": "在儀表板中查看目前運行狀況",
+      "read_logs": "跨執行個體查看即時日誌",
+      "read_reports": "了解請求被攔截的原因",
+      "service": "註冊第一個服務",
+      "workflow": "連結安全工作流程"
     },
+    "not_saved": "無法儲存。",
     "pro_tips": "PRO 提示",
+    "restart": "重新開始導覽",
+    "restart_help": "在頂端列重新顯示入門步驟。",
+    "subtitle": "只要幾個步驟，即可讓 BunkerWeb 開始保護您的服務。",
     "title": "開始使用"
   },
   "timings": {
     "subtitle": "每個外掛程式在各個請求階段所需的時間，從所有執行個體即時讀取並合併。",
     "volatile": "執行時間位於各執行個體的共用記憶體中，並視需要讀取；不會儲存，且執行個體重新啟動時會重設。",
-    "partial": "部分執行個體沒有回應。以下數據僅涵蓋有回應的執行個體。",
-    "reporting_instances": "回報的執行個體",
+    "partial": "部分執行個體沒有回應。以下資料僅涵蓋有回應的執行個體。",
+    "reporting_instances": "正在回報的執行個體",
     "requests_measured": "已量測的請求",
     "mean_request": "平均請求時間",
     "max_request": "最慢的請求",
@@ -2783,5 +2812,15 @@
     "disabled_help": "將 METRICS_COLLECT_TIMINGS 設為 yes 以量測每個外掛程式所需的時間。無論如何都會收集完整請求時間。",
     "unreachable_title": "沒有執行個體回報時間",
     "unreachable_help": "執行時間是從執行個體本身讀取，因此沒有執行個體回應，或尚未有執行個體處理請求。"
+  },
+  "whatsnew": {
+    "missing_action": "在 GitHub 上開啟變更日誌",
+    "missing_message": "此組建未包含 CHANGELOG.md。版本說明可在 GitHub 上查看。",
+    "missing_title": "此安裝中沒有變更日誌",
+    "modal": {
+      "intro": "以下是自您上次使用的版本以來的變更。",
+      "title": "新增內容"
+    },
+    "subtitle": "BunkerWeb 的所有版本，最新在前，直接來自本安裝隨附的變更日誌。"
   }
 }

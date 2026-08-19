@@ -43,7 +43,7 @@
                     <ol class="breadcrumb mb-1">
                         {% if service_id %}
                             <li class="breadcrumb-item">
-                                <a href="{{ url_for('services.services_page') }}" data-i18n="navigation.services">Services</a>
+                                <a href="{{ url_for('services.services_page') }}">{{ _("navigation.services") }}</a>
                             </li>
                             <li class="breadcrumb-item">
                                 <a href="{{ url_for('services.services_service_page', service=service_id) }}">{{ service_id }}</a>
@@ -51,7 +51,7 @@
                         {% else %}
                             <li class="breadcrumb-item">
                                 <a href="{{ url_for('global_settings.global_settings_page') }}"
-                                   data-i18n="navigation.global_settings">Global settings</a>
+                                  >{{ _("navigation.global_settings") }}</a>
                             </li>
                         {% endif %}
                         <li class="breadcrumb-item active" aria-current="page">{{ plugin_data["name"] }}</li>
@@ -60,13 +60,13 @@
                 <h5 class="mb-0 don-jose">{{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}</h5>
                 <p class="text-muted mb-0 courier-prime">{{ plugin_data["description"] }}</p>
             </div>
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                  {% endif %}>
                 <button type="submit"
                         class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
                         {% if is_readonly %}disabled{% endif %}>
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
                 </button>
             </div>
         </div>
@@ -74,8 +74,8 @@
             {% if filtered_settings %}
                 {% include "models/plugin_settings_body.html" %}
             {% else %}
-                <div class="card-body text-center text-muted" data-i18n="status.no_settings">
-                    This plugin has no settings for this scope.
+                <div class="card-body text-center text-muted">
+                    {{ _("status.no_settings") }}
                 </div>
             {% endif %}
         </div>

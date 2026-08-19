@@ -11,6 +11,7 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -158,7 +159,7 @@ def test_the_populated_page_shows_the_numbers_and_the_dash(timings_route, page):
     html = _render(page, module, rows=rows, request_total=request_total)
 
     assert "5.0%" in html and "600 µs" in html and "12.00 ms" in html
-    assert 'data-i18n="timings.share_help"' in html
+    assert english("timings.share_help") in html
     # The lifecycle row is present but carries no percentage.
     assert "<code>jobs</code>" in html
 
@@ -189,7 +190,7 @@ def test_a_partial_fan_out_is_announced(timings_route, page):
 
     html = _render(page, module, rows=rows, request_total=request_total, partial=True)
 
-    assert 'data-i18n="timings.partial"' in html
+    assert english("timings.partial") in html
 
 
 def test_the_page_asks_whether_collection_is_on_only_when_there_is_nothing_to_show(route):

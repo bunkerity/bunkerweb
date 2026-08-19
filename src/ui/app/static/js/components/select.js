@@ -18,10 +18,6 @@
   if (window.__bwSelectInit) return;
   window.__bwSelectInit = true;
 
-  function t(key, fallback) {
-    return typeof i18next !== "undefined" ? i18next.t(key, fallback) : fallback;
-  }
-
   function visibleOptions(wrapper) {
     return wrapper.querySelectorAll(
       ".bw-select-list li:not(.d-none) > [data-select-option]",
@@ -54,15 +50,11 @@
 
     const labelEl = trigger.querySelector("[data-select-trigger-label]");
     if (labelEl) {
-      const optLabelEl = opt.querySelector(".select-option-label");
-      const key = optLabelEl ? optLabelEl.getAttribute("data-i18n") : null;
-      if (key) {
-        labelEl.setAttribute("data-i18n", key);
-        labelEl.textContent = t(key, label);
-      } else {
-        labelEl.removeAttribute("data-i18n");
-        labelEl.textContent = label;
-      }
+      // `data-label` is the option's label already translated by the server, so the trigger has
+      // nothing left to resolve. It used to copy the option's `data-i18n` key across and call
+      // t() on it -- with the macro translated server-side that key is gone, and the fallback
+      // silently showed the English text in every language.
+      labelEl.textContent = label;
     }
 
     const iconEl = trigger.querySelector("[data-select-trigger-icon]");

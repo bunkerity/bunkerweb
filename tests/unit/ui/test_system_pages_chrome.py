@@ -9,6 +9,7 @@ Render harness mirrors ``test_templates_gallery.py``'s standalone-Jinja-env patt
 
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
@@ -52,15 +53,15 @@ def _pro_context(**overrides):
 def test_pro_page_head_band_has_system_breadcrumb_and_keeps_green_upsell_cta():
     html = _render_dashboard_page("pro.html", **_pro_context())
 
-    assert '<h1 class="bw-page-head-title mb-0" data-i18n="pro.title">Pro license</h1>' in html
-    assert '<span data-i18n="navigation.system">System</span>' in html
-    assert '<span class="is-current" aria-current="page" data-i18n="navigation.pro">Pro</span>' in html
+    assert f'<h1 class="bw-page-head-title mb-0">{english("pro.title")}</h1>' in html
+    assert f'<span>{english("navigation.system")}</span>' in html
+    assert f'<span class="is-current" aria-current="page">{english("navigation.pro")}</span>' in html
     # No page-head actions slot -- the license CTA stays inline in its card (tightly coupled
     # to the status/overlap conditional logic), untouched.
     assert "bw-page-head-actions" not in html
     # Explicit PRO-upsell CTA keeps its sanctioned green accent (brand rule exception).
     assert "btn-pro-now" in html
-    assert 'data-i18n="pro.button.upgrade_to_pro"' in html
+    assert english("pro.button.upgrade_to_pro") in html
 
 
 def test_support_page_head_moves_cta_to_navy_primary_and_drops_link_card():
@@ -71,17 +72,17 @@ def test_support_page_head_moves_cta_to_navy_primary_and_drops_link_card():
         pro_status="inactive",
     )
 
-    assert '<h1 class="bw-page-head-title mb-0" data-i18n="support.title">Support</h1>' in html
-    assert '<span class="is-current" aria-current="page" data-i18n="navigation.support">Support</span>' in html
+    assert f'<h1 class="bw-page-head-title mb-0">{english("support.title")}</h1>' in html
+    assert f'<span class="is-current" aria-current="page">{english("navigation.support")}</span>' in html
     assert "bw-page-head-actions" in html
     # CTA fully swapped to navy -- this is not the "Upgrade to PRO" upsell CTA.
     assert "btn-pro-now" not in html
     assert "btn-primary btn-sm don-jose" in html
-    assert 'data-i18n="button.open_support_ticket">Open a Support Ticket' in html
+    assert english("button.open_support_ticket") in html
     # PRO badge preserved as a decoration next to the CTA, not on the CTA itself.
-    assert 'data-i18n="plan.pro"' in html
+    assert english("plan.pro") in html
     # The now-empty "Support Link" card is gone; its column neighbours reclaim the row.
-    assert "support.card.support_link.title" not in html
+    assert english("support.card.support_link.title") not in html
     assert "col-xl-3" not in html and "col-xl-5" not in html
     assert "col-6 col-xl-4" in html and "col-6 col-xl-8" in html
     # Orientation subtitle paragraph dropped -- the kit's bare-H1 head has no subtitle slot.
@@ -91,6 +92,6 @@ def test_support_page_head_moves_cta_to_navy_primary_and_drops_link_card():
 def test_about_page_head_band_has_bare_title_and_no_actions_slot():
     html = _render_dashboard_page("about.html", bw_version="1.7.0")
 
-    assert '<h1 class="bw-page-head-title mb-0" data-i18n="about.title">About BunkerWeb</h1>' in html
-    assert '<span class="is-current" aria-current="page" data-i18n="navigation.about">About</span>' in html
+    assert f'<h1 class="bw-page-head-title mb-0">{english("about.title")}</h1>' in html
+    assert f'<span class="is-current" aria-current="page">{english("navigation.about")}</span>' in html
     assert "bw-page-head-actions" not in html

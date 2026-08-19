@@ -15,7 +15,7 @@
                     components/label.html and the aria-describedby target for help_text.
      label          optional visible caption above the field (English fallback), rendered
                     via components/label.html (variant="default").
-     label_i18n     data-i18n key for label.
+     label_i18n     catalog key for label.
      name           form field name. Defaults to id.
      value          initial value. Default "" (empty -- an empty number input is valid HTML,
                     unlike e.g. omitting `value` on a controlled JS widget).
@@ -29,7 +29,7 @@
      help_text      optional helper text rendered below as "form-text text-muted" (same
                     markup components/label.html and components/checkbox.html use for their
                     own help param), linked via aria-describedby.
-     help_i18n      data-i18n key for help_text.
+     help_i18n      catalog key for help_text.
      input_class    extra classes appended to the <input>, e.g. a page-specific JS hook class.
      classes        extra utility classes on the outer wrapper.
 
@@ -78,7 +78,7 @@
                {% if readonly %}readonly{% endif %}
                {% if help_id %}aria-describedby="{{ help_id }}"{% endif %}>
         {%- if help_text %}
-        <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+        <div class="form-text text-muted" id="{{ help_id }}">{{ _(help_i18n) if help_i18n else help_text }}</div>
         {%- endif %}
     </div>
 {%- endmacro %}

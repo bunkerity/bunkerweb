@@ -102,15 +102,13 @@
                        class="form-control form-control-sm multivalue-input"
                        value="{{ value }}"
                        id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
-                       placeholder="Enter value..."
-                       data-i18n="form.placeholder.multivalue_enter_value"
+                       placeholder="{{ _("form.placeholder.multivalue_enter_value") }}"
                        aria-labelledby="label-{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}"
                        {% if disabled %}disabled{% endif %}>
                 {% if not disabled %}
                     <button type="button"
                             class="multivalue-chip-remove remove-multivalue-item"
-                            aria-label="Remove value"
-                            data-i18n="aria.label.remove_value">
+                            aria-label="{{ _("aria.label.remove_value") }}">
                         <i class="bx bx-x" aria-hidden="true"></i>
                     </button>
                 {% endif %}
@@ -121,7 +119,7 @@
         <div class="mt-2">
             <small class="text-muted">
                 <i class="bx bx-info-circle me-1" aria-hidden="true"></i>
-                <span data-i18n="form.help.multivalue_separator">Values are separated by:</span>
+                <span>{{ _("form.help.multivalue_separator") }}</span>
                 <code>
                     {% if setting_separator == " " %}
                         [space]

@@ -5,7 +5,7 @@
    markup duplicated across (non-exhaustive) web_cache.html, services.html, instances.html,
    configs.html, template_edit.html, config_edit.html, plugins.html and profile.html:
      - plain text button:      <button class="btn btn-outline-primary">...
-     - icon + label button:    <i class="bx bx-eraser me-1" aria-hidden="true"></i><span data-i18n="...">...
+     - icon + label button:    <i class="bx bx-eraser me-1" aria-hidden="true"></i><span>...
      - link styled as button:  <a class="btn btn-primary" href="...">...
      - icon-only button:       aria-label required, no visible label (plugin_page.html's
                                 secret-toggle, modal.html's close button)
@@ -22,10 +22,9 @@
 
    Params:
      label            visible text. Empty for icon-only buttons.
-     i18n_key         data-i18n key for label, e.g. "web_cache.purge_url", "button.save".
-                      Applied to the inner <span> that wraps label, never to the outer
-                      element -- so it never clobbers a sibling icon like a bare
-                      data-i18n on the <button> would.
+     i18n_key         catalog key for label, e.g. "web_cache.purge_url", "button.save".
+                      Translated server-side into the inner <span> that wraps label; when
+                      omitted, `label` is rendered as given.
      variant          color suffix appended to "btn-", e.g. "primary", "outline-primary",
                       "outline-secondary", "secondary", "danger", "outline-danger",
                       "bw-green", "outline-bw-green", "text-bw-green", "link". Must have an
@@ -66,14 +65,12 @@
                       button should keep its normal color, just with a spinner in place
                       of its icon, not look greyed out.
      loading_label    label shown while loading. Defaults to `label`.
-     loading_i18n_key data-i18n key for the loading label. Defaults to `i18n_key`.
+     loading_i18n_key catalog key for the loading label. Defaults to `i18n_key`.
      aria_label       English fallback for the accessible name. Required for icon_only.
-     aria_i18n_key    data-i18n key for aria_label. Ignored when tooltip_i18n_key is also
-                      set -- only one data-i18n attribute can live on the element, and
-                      i18n.js resolves data-bs-original-title before aria-label, so the
-                      tooltip key would win anyway; pass only the one you need translated.
+     aria_i18n_key    catalog key for aria_label. Requires aria_label to be set too; it is
+                      what decides whether the attribute is emitted at all.
      tooltip_text     optional Bootstrap tooltip text (data-bs-toggle="tooltip").
-     tooltip_i18n_key data-i18n key for tooltip_text.
+     tooltip_i18n_key catalog key for tooltip_text.
      tooltip_placement Bootstrap tooltip placement. Default "top".
      modal_target     id (without "#") of a components/modal.html instance to open --
                       renders data-bs-toggle="modal" data-bs-target="#<id>".
@@ -114,8 +111,7 @@
                 {%- if id %} id="{{ id }}"{% endif %}
                 class="btn-close{% if classes %} {{ classes }}{% endif %}"
                 {%- if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}
-                aria-label="{{ aria_label or 'Close' }}"
-                data-i18n="{{ aria_i18n_key or 'aria.label.close' }}"></button>
+                aria-label="{{ _(aria_i18n_key or 'aria.label.close') }}"></button>
     {%- else -%}
         {%- set force_disabled = disabled or loading -%}
         {%- set outer_classes = 'btn btn-' ~ variant ~ (' btn-' ~ size if size else '') ~ (' btn-icon' if icon_only else '') ~ (' don-jose' if variant == 'primary' and not icon_only and 'don-jose' not in classes.split() else '') ~ (' disabled' if disabled else '') ~ (' ' ~ classes if classes else '') -%}
@@ -133,8 +129,8 @@
                 {%- if loading %} aria-busy="true"{% endif %}
                 {%- if modal_target %} data-bs-toggle="modal" data-bs-target="#{{ modal_target }}"{% endif %}
                 {%- if dismiss %} data-bs-dismiss="{{ dismiss }}"{% endif %}
-                {%- if tooltip_text %} data-bs-toggle="tooltip" data-bs-placement="{{ tooltip_placement }}" data-bs-original-title="{{ tooltip_text }}"{% if tooltip_i18n_key %} data-i18n="{{ tooltip_i18n_key }}"{% endif %}{% endif %}
-                {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_i18n_key and not tooltip_i18n_key %} data-i18n="{{ aria_i18n_key }}"{% endif %}{% endif %}
-                >{% if loading %}<span class="spinner-border spinner-border-sm{% if label or loading_label %} me-1{% endif %}" role="status" aria-hidden="true"></span>{% if not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if loading_i18n_key or i18n_key %} data-i18n="{{ loading_i18n_key or i18n_key }}"{% endif %}>{{ loading_label or label }}</span>{% endif %}{% else %}{% if icon %}<i class="bx {{ icon }}{% if label and not icon_only %} me-1{% endif %}" aria-hidden="true"></i>{% endif %}{% if label and not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% endif %}{% if icon_end %}<i class="bx {{ icon_end }}{% if label and not icon_only %} ms-1{% endif %}" aria-hidden="true"></i>{% endif %}{% endif %}</{{ 'a' if tag == 'a' else 'button' }}>
+                {%- if tooltip_text %} data-bs-toggle="tooltip" data-bs-placement="{{ tooltip_placement }}" data-bs-original-title="{{ _(tooltip_i18n_key) if tooltip_i18n_key else tooltip_text }}"{% endif %}
+                {%- if aria_label %} aria-label="{{ _(aria_i18n_key) if aria_i18n_key else aria_label }}"{% endif %}
+                >{% if loading %}<span class="spinner-border spinner-border-sm{% if label or loading_label %} me-1{% endif %}" role="status" aria-hidden="true"></span>{% if not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}>{% if loading_i18n_key or i18n_key %}{{ _(loading_i18n_key or i18n_key) }}{% else %}{{ loading_label or label }}{% endif %}</span>{% endif %}{% else %}{% if icon %}<i class="bx {{ icon }}{% if label and not icon_only %} me-1{% endif %}" aria-hidden="true"></i>{% endif %}{% if label and not icon_only %}<span{% if label_classes %} class="{{ label_classes }}"{% endif %}>{{ _(i18n_key) if i18n_key else label }}</span>{% endif %}{% if icon_end %}<i class="bx {{ icon_end }}{% if label and not icon_only %} ms-1{% endif %}" aria-hidden="true"></i>{% endif %}{% endif %}</{{ 'a' if tag == 'a' else 'button' }}>
     {%- endif -%}
 {%- endmacro %}

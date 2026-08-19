@@ -21,11 +21,11 @@
     {% call page_head(title="Instances", title_i18n="navigation.instances",
                       breadcrumb=[("Overview", "navigation.overview", none),
                                   ("Instances", "navigation.instances", none)]) %}
-        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="..." data-i18n="{{ 'tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly' }}"{% endif %}>
+        <div{% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _('tooltip.disabled_readonly' if user_readonly else 'tooltip.disabled_db_readonly') }}"{% endif %}>
             <button type="button"
                     id="instances-create-btn"
                     class="btn btn-primary btn-sm don-jose{% if is_readonly %} disabled{% endif %}">
-                <i class="bx bx-plus bx-xs me-1" aria-hidden="true"></i><span data-i18n="button.create_instance">Create instance</span>
+                <i class="bx bx-plus bx-xs me-1" aria-hidden="true"></i><span>{{ _("button.create_instance") }}</span>
             </button>
         </div>
     {% endcall %}
@@ -67,7 +67,7 @@
                         <lottie-player src="{{ url_for('static', filename='json/periscop.min.json') }}" background="transparent"  speed="1" style="width: 300px; height: 300px;" class="img-fluid" loop autoplay></lottie-player>
                     </div>
                     <p class="mt-3 text-white text-center"
-                       data-i18n="status.pinging_instances">Pinging instances, please wait...</p>
+                      >{{ _("status.pinging_instances") }}</p>
                 </div>
             </div>
         </div>
@@ -78,60 +78,50 @@
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the instances' details"
-                        data-i18n="tooltip.table.instances.details"></th>
+                        data-bs-original-title="{{ _("tooltip.table.instances.details") }}"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all instances"
-                        data-i18n="tooltip.table.instances.select_all"></th>
+                        data-bs-original-title="{{ _("tooltip.table.instances.select_all") }}"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The hostname of the Instance"
-                        data-i18n="tooltip.table.instances.hostname">
-                        <span data-i18n="table.header.hostname">Hostname</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.hostname") }}">
+                        <span>{{ _("table.header.hostname") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The user defined or auto-generated Instance's name"
-                        data-i18n="tooltip.table.instances.name">
-                        <span data-i18n="table.header.name">Name</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.name") }}">
+                        <span>{{ _("table.header.name") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The creation method of the Instance"
-                        data-i18n="tooltip.table.instances.method">
-                        <span data-i18n="table.header.method">Method</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.method") }}">
+                        <span>{{ _("table.header.method") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Instance's health status"
-                        data-i18n="tooltip.table.instances.health">
-                        <span data-i18n="table.header.health">Health</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.health") }}">
+                        <span>{{ _("table.header.health") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Instance's type"
-                        data-i18n="tooltip.table.instances.type">
-                        <span data-i18n="table.header.type">Type</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.type") }}">
+                        <span>{{ _("table.header.type") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Instance was created"
-                        data-i18n="tooltip.table.instances.created">
-                        <span data-i18n="table.header.created">Created</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.created") }}">
+                        <span>{{ _("table.header.created") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Instance was last seen"
-                        data-i18n="tooltip.table.instances.last_seen">
-                        <span data-i18n="table.header.last_seen">Last Seen</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.last_seen") }}">
+                        <span>{{ _("table.header.last_seen") }}</span>
                     </th>
                     <th class="actions-col"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Instance"
-                        data-i18n="tooltip.table.instances.actions">
-                        <span data-i18n="table.header.actions">Actions</span>
+                        data-bs-original-title="{{ _("tooltip.table.instances.actions") }}">
+                        <span>{{ _("table.header.actions") }}</span>
                     </th>
                 </tr>
             </thead>
@@ -155,11 +145,11 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 {% if instance.type == "container" %}
-                                    <i class="bx bxl-docker"></i>&nbsp;<span data-i18n="instance.type.container">Container</span>
+                                    <i class="bx bxl-docker"></i>&nbsp;<span data-value="container">{{ _("instance.type.container") }}</span>
                                 {% elif instance.type == "pod" %}
-                                    <i class="bx bxl-kubernetes"></i>&nbsp;<span data-i18n="instance.type.pod">Pod</span>
+                                    <i class="bx bxl-kubernetes"></i>&nbsp;<span data-value="pod">{{ _("instance.type.pod") }}</span>
                                 {% else %}
-                                    <i class="bx bx-microchip"></i>&nbsp;<span data-i18n="instance.type.static">Static</span>
+                                    <i class="bx bx-microchip"></i>&nbsp;<span data-value="static">{{ _("instance.type.static") }}</span>
                                 {% endif %}
                             </div>
                         </td>
@@ -171,53 +161,40 @@
                                 <button type="button"
                                         class="icon-btn ping-instance"
                                         data-instance="{{ instance['hostname'] }}"
-                                        aria-label="Ping instance {{ instance['hostname'] }}"
-                                        data-i18n-aria-label="tooltip.button.ping_instance"
+                                        aria-label="{{ _("tooltip.button.ping_instance", hostname=instance['hostname']) }}"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="bottom"
-                                        data-bs-original-title="Ping instance {{ instance['hostname'] }}"
-                                        data-i18n="tooltip.button.ping_instance"
-                                        data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
+                                        data-bs-original-title="{{ _("tooltip.button.ping_instance", hostname=instance['hostname']) }}">
                                     <i class="bx bx-bell" aria-hidden="true"></i>
                                 </button>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{% if instance.status != 'up' %}tooltip.instance_not_up{% else %}tooltip.button.reload_instance{% endif %}"
-                                     data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
+                                     data-bs-original-title="{{ _("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.reload_instance", hostname=instance['hostname']) }}">
                                     <button type="button"
                                             class="icon-btn reload-instance{% if instance.status != 'up' %} disabled{% endif %}"
-                                            aria-label="Reload instance {{ instance['hostname'] }}"
-                                            data-i18n-aria-label="tooltip.button.reload_instance"
+                                            aria-label="{{ _("tooltip.button.reload_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
                                         <i class="bx bx-refresh" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{% if instance.status != 'up' %}tooltip.instance_not_up{% else %}tooltip.button.stop_instance{% endif %}"
-                                     data-i18n-options='{"hostname": "{{ instance['hostname'] }}"}'>
+                                     data-bs-original-title="{{ _("tooltip.instance_not_up" if instance.status != 'up' else "tooltip.button.stop_instance", hostname=instance['hostname']) }}">
                                     <button type="button"
                                             class="icon-btn stop-instance{% if instance.status != 'up' %} disabled{% endif %}"
-                                            aria-label="Stop instance {{ instance['hostname'] }}"
-                                            data-i18n-aria-label="tooltip.button.stop_instance"
+                                            aria-label="{{ _("tooltip.button.stop_instance", hostname=instance['hostname']) }}"
                                             data-instance="{{ instance['hostname'] }}">
                                         <i class="bx bx-stop" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete_instance else 'tooltip.button.delete_instance')) %}
-                                {% set delete_tooltip_options = '{"method": "' ~ instance['method'] ~ '"}' if not can_delete_instance and not is_readonly else '{"hostname": "' ~ instance['hostname'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{{ delete_tooltip_key }}"
-                                     data-i18n-options='{{ delete_tooltip_options }}'>
+                                     data-bs-original-title="{{ _(delete_tooltip_key, hostname=instance['hostname'], method=instance['method']) }}">
                                     <button type="button"
                                             data-instance="{{ instance['hostname'] }}"
                                             class="icon-btn danger delete-instance{% if not can_delete_instance or is_readonly %} disabled{% endif %}"
-                                            aria-label="Delete instance {{ instance['hostname'] }}"
-                                            data-i18n-aria-label="tooltip.button.delete_instance">
+                                            aria-label="{{ _("tooltip.button.delete_instance", hostname=instance['hostname']) }}">
                                         <i class="bx bx-trash" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -240,14 +217,13 @@
         <div class="toast-header d-flex align-items-center">
             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+            <small class="text-body-secondary">{{ _("flash.time.just_now") }}</small>
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="toast"
-                    aria-label="Close"
-                    data-i18n="aria.label.close"></button>
+                    aria-label="{{ _("aria.label.close") }}"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
+        <div class="toast-body">{{ _("flash.easter_egg") }}</div>
     </div>
     {% if not is_readonly %}
         <div class="modal fade"
@@ -260,12 +236,11 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modal-create-instance-title" data-i18n="modal.title.create_new_instance">Create new instance</h5>
+                        <h5 class="modal-title" id="modal-create-instance-title">{{ _("modal.title.create_new_instance") }}</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+                                aria-label="{{ _("aria.label.close") }}"></button>
                     </div>
                     <form action="{{ url_for("instances") }}/new" method="POST">
                         <div class="modal-body">
@@ -273,7 +248,7 @@
                             <div class="mb-3">
                                 <label for="hostname"
                                        class="form-label fw-medium"
-                                       data-i18n="form.label.hostname">Hostname</label>
+                                      >{{ _("form.label.hostname") }}</label>
                                 <input type="text"
                                        class="form-control form-control-lg mb-3"
                                        id="hostname"
@@ -285,17 +260,17 @@
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            <span data-i18n="form.help.hostname_length_limit">The hostname is limited to 256 characters long.</span>
+                                            <span>{{ _("form.help.hostname_length_limit") }}</span>
                                         </li>
                                         <li class="list-group-item bg-transparent border-0 d-flex align-items-center">
                                             <i class="bx bx-info-circle me-2"></i>
-                                            <span data-i18n="form.help.hostname_special_chars">Only <code class="d-inline ms-1 me-1">/</code> and <code class="d-inline ms-1 me-1">:</code> are allowed in protocol/port.</span>
+                                            <span>{{ _("form.help.hostname_special_chars") }}<code class="d-inline ms-1 me-1">/</code> and <code class="d-inline ms-1 me-1">:</code> are allowed in protocol/port.</span>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="name" class="form-label" data-i18n="form.label.name">Name</label>
+                                <label for="name" class="form-label">{{ _("form.label.name") }}</label>
                                 <input type="text"
                                        class="form-control"
                                        id="name"
@@ -306,18 +281,18 @@
                             </div>
                             <div class="alert alert-primary text-center"
                                  role="alert"
-                                 data-i18n="modal.body.instance_creation_alert">
-                                You don't need to provide the port or the server_name. The values of <code>API_HTTP_PORT</code>, <code>API_LISTEN_HTTPS</code>, <code>API_HTTPS_PORT</code>, and <code>API_SERVER_NAME</code> will be used for the instance configuration.
+                                 >
+                                {{ _("modal.body.instance_creation_alert") }}
                             </div>
                         </div>
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-primary don-jose me-2"
-                                    data-i18n="button.create_instance">Create instance</button>
+                                   >{{ _("button.create_instance") }}</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
-                                    data-i18n="button.close">Close</button>
+                                   >{{ _("button.close") }}</button>
                         </div>
                     </form>
                 </div>
@@ -333,12 +308,11 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modal-delete-instances-title" data-i18n="modal.title.delete_instance">Delete instances</h5>
+                        <h5 class="modal-title" id="modal-delete-instances-title">{{ _("modal.title.delete_instance") }}</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"
-                                data-i18n="aria.label.close"></button>
+                                aria-label="{{ _("aria.label.close") }}"></button>
                     </div>
                     <form action="{{ url_for("instances") }}/delete" method="POST">
                         <div class="modal-body">
@@ -346,19 +320,19 @@
                             <input type="hidden" id="selected-instances-input" name="instances" value="" />
                             <div class="alert alert-danger text-center"
                                  role="alert"
-                                 data-i18n="modal.body.delete_confirmation_alert">
-                                Are you sure you want to delete the selected instances?
+                                >
+                                {{ _("modal.body.delete_confirmation_alert") }}
                             </div>
                             <div id="selected-instances" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete_instance">Delete instances</button>
+                                   >{{ _("button.delete_instance") }}</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"
-                                    data-i18n="button.close">Close</button>
+                                   >{{ _("button.close") }}</button>
                         </div>
                     </form>
                 </div>

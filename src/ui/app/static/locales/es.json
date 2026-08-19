@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "Limpiar búsqueda",
       "close": "Cerrar",
+      "collapse_multiline": "Contraer entradas de varias líneas",
+      "configs_dropzone": "Selecciona un archivo de exportación de configuraciones personalizadas o suéltalo aquí",
       "copy": "Copiar registros",
       "download_log": "Descargar este archivo de registro",
       "follow": "Seguir",
       "hide_value": "Ocultar valor",
-      "reveal_value": "Mostrar valor",
-      "select_file": "Seleccionar archivo",
-      "select_page": "Seleccionar página",
       "issue_count": "Recuento de errores y advertencias",
       "level_filter": "Filtrar líneas de registro por nivel",
       "local_time": "Mostrar marcas de tiempo en hora local",
-      "collapse_multiline": "Contraer entradas de varias líneas",
       "next_issue": "Siguiente error o advertencia",
+      "passkey_name": "Nombre de la clave de acceso",
+      "plugins_dropzone": "Selecciona archivos de plugins o suéltalos aquí",
       "prev_issue": "Error o advertencia anterior",
-      "search_logs": "Buscar registros",
-      "toggle_wrap": "Alternar ajuste de línea",
-      "configs_dropzone": "Selecciona un archivo de exportación de configuraciones personalizadas o suéltalo aquí",
       "raw_configuration": "Configuración sin procesar",
-      "services_dropzone": "Selecciona un archivo de exportación de servicios o suéltalo aquí",
-      "user_avatar": "Avatar de usuario",
       "remove_value": "Eliminar valor",
-      "view_selected_items": "Ver elementos seleccionados",
-      "passkey_name": "Nombre de la clave de acceso"
+      "reveal_value": "Mostrar valor",
+      "search_logs": "Buscar registros",
+      "select_file": "Seleccionar archivo",
+      "select_page": "Seleccionar página",
+      "services_dropzone": "Selecciona un archivo de exportación de servicios o suéltalo aquí",
+      "toggle_wrap": "Alternar ajuste de línea",
+      "user_avatar": "Avatar de usuario",
+      "view_selected_items": "Ver elementos seleccionados"
     }
   },
   "badge": {
@@ -96,10 +97,10 @@
     "bans": "Bloqueos",
     "cache": "Caché",
     "threatmap": "Mapa de amenazas",
-    "web_cache": "Almacenamiento web",
-    "timings": "Tiempos",
+    "web_cache": "Caché web",
+    "timings": "Tiempos de ejecución",
     "configs": "Configuraciones",
-    "extra_pages": "Páginas Adicionales",
+    "extra_pages": "Páginas adicionales",
     "global_settings": "Ajustes globales",
     "global_config": "Configuración global",
     "home": "Inicio",
@@ -107,25 +108,26 @@
     "jobs": "Tareas",
     "logs": "Registros",
     "misc": "Varios",
-    "mode_selection": "Selección de Modo",
+    "mode_selection": "Selección de modo",
     "more": "Más...",
     "new": "Nuevo",
     "plugins": "Plugins",
-    "plugins_pages": "Páginas de Plugins",
+    "plugins_pages": "Páginas de plugins",
     "pro": "Pro",
     "profile": "Perfil",
     "reports": "Informes",
     "groups": "Grupos de recursos",
     "services": "Servicios",
     "support": "Soporte",
-    "templates": "Plantillas"
+    "templates": "Plantillas",
+    "whats_new": "Novedades"
   },
   "button": {
     "actions": "Acciones",
     "activate_key": "Activar Clave",
     "add": "INSERTAR",
-    "add_ban_plural": "Añadir Bloqueo(s)",
-    "add_plugin_plural": "Añadir Plugin(s)",
+    "add_ban_plural": "Añadir bloqueos",
+    "add_plugin_plural": "Añadir plugins",
     "add_plugins": "Añadir Plugins",
     "auto_refresh": "Actualización Automática",
     "ban": "Bloquear",
@@ -143,9 +145,9 @@
     "copy_codes": "Copiar Códigos",
     "copy_raw": "Copiar Datos sin Procesar",
     "copy_visible": "Copiar Visibles",
-    "create_config": "Crear Configuración Personalizada",
-    "create_instance": "Crear Instancia",
-    "create_service": "Crear nuevo Servicio",
+    "create_config": "Crear configuración personalizada",
+    "create_instance": "Crear instancia",
+    "create_service": "Crear nuevo servicio",
     "create_template": "Crear plantilla",
     "delete": "Eliminar",
     "delete_instance": "Eliminar Instancias",
@@ -209,10 +211,10 @@
     "unban": "Desbloquear",
     "update_duration": "Actualizar Duración del Bloqueo",
     "update_key": "Actualizar Clave",
-    "upload_photo": "Subir Nueva Foto",
+    "upload_photo": "Subir nueva foto",
     "view_details": "Ver Detalles",
     "view_raw_data": "Ver Datos sin Procesar",
-    "wipe_other_sessions": "Limpiar Otras Sesiones",
+    "wipe_other_sessions": "Cerrar las demás sesiones",
     "ban_all_filtered": "Bloquear todos los informes coincidentes",
     "filtered_actions": "Acciones filtradas",
     "unban_all_filtered": "Desbloquear todos los bloqueos coincidentes",
@@ -224,7 +226,12 @@
     "rename": "Renombrar",
     "add_passkey": "Añadir una clave de acceso",
     "sign_in_with_passkey": "Iniciar sesión con una clave de acceso",
-    "use_security_key": "Usar una llave de seguridad"
+    "use_security_key": "Usar una llave de seguridad",
+    "go": "Ir →",
+    "retry": "Reintentar",
+    "got_it": "Entendido",
+    "show_me": "Muéstrame",
+    "see_all_releases": "Ver todas las versiones"
   },
   "cache": {
     "kpi_files": "Archivos",
@@ -254,7 +261,7 @@
     "AZ": "Azerbaiyán",
     "BA": "Bosnia y Herzegovina",
     "BB": "Barbados",
-    "BD": "Bangladesh",
+    "BD": "Bangladés",
     "BE": "Bélgica",
     "BF": "Burkina Faso",
     "BG": "Bulgaria",
@@ -317,7 +324,7 @@
     "GD": "Granada",
     "GE": "Georgia",
     "GF": "Guayana Francesa",
-    "GG": "Guernsey",
+    "GG": "Guernesey",
     "GH": "Ghana",
     "GI": "Gibraltar",
     "GL": "Groenlandia",
@@ -417,7 +424,7 @@
     "PK": "Pakistán",
     "PL": "Polonia",
     "PM": "San Pedro y Miquelón",
-    "PN": "Pitcairn",
+    "PN": "Islas Pitcairn",
     "PR": "Puerto Rico",
     "PS": "Palestina",
     "PT": "Portugal",
@@ -531,7 +538,7 @@
       },
       "upstreams": {
         "planned": "Próximamente",
-        "title": "Fuentes"
+        "title": "Servidores de origen"
       },
       "top_reasons": {
         "title": "Principales motivos de bloqueo"
@@ -876,13 +883,14 @@
   "instances": {
     "down": "Inactivo",
     "loading": "Cargando",
-    "subtitle": "Administre las instancias de BunkerWeb conectadas a esta interfaz: cree, pinge, recargue, detenga o elimínelas.",
+    "subtitle": "Administre las instancias de BunkerWeb conectadas a esta interfaz: créelas, compruebe su conectividad, recárguelas, deténgalas o elimínelas.",
     "total": "Número total de instancias",
     "up": "Activo"
   },
   "interval": {
     "day": "Diario",
     "hour": "Cada hora",
+    "minute": "Cada minuto",
     "once": "Una vez",
     "week": "Semanal"
   },
@@ -934,7 +942,7 @@
     "main_logs": "Registros principales",
     "new_lines_sr": "{{count}} nuevas líneas de registro",
     "no_log_files": "No hay archivos de registro para mostrar, consulte la documentación para obtener más información sobre cómo habilitar el registro.",
-    "issue_summary": "{{errors}} error(es), {{warnings}} advertencia(s)",
+    "issue_summary": "Errores: {{errors}} · advertencias: {{warnings}}",
     "level_critical": "Crítico",
     "level_debug": "Depuración",
     "level_error": "Error",
@@ -979,7 +987,7 @@
       "confirmation_instance_deletion": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",
       "delete_confirmation_alert": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",
       "delete_confirmation_alert_plural": "¿Estás seguro de que quieres eliminar las instancias seleccionadas?",
-      "delete_confirmation_template_used": "Una o más plantillas seleccionadas están asignadas a servicios ({{services_count}} servicio(s) en total). Eliminarlas borrará esas asignaciones. ¿Desea continuar?",
+      "delete_confirmation_template_used": "Una o más plantillas seleccionadas están asignadas a servicios (total de servicios: {{services_count}}). Al eliminarlas se borrarán esas asignaciones. ¿Desea continuar?",
       "delete_step_confirmation": "¿Estás seguro de que quieres eliminar este paso?",
       "delete_step_content_label": "Contenido",
       "delete_step_name_label": "Paso",
@@ -993,7 +1001,7 @@
       "import_configs_dropzone": "Arrastra y suelta aquí tu archivo de exportación de configuraciones personalizadas o haz clic para seleccionar un archivo.",
       "import_configs_warning": "Las configuraciones personalizadas creadas por scheduler, autoconf o templates se conservan siempre. Solo se pueden sobrescribir las configuraciones UI/API.",
       "import_services_dropzone": "Arrastra y suelta tu archivo de exportación de servicios aquí o haz clic para seleccionar un archivo.",
-      "import_services_warning": "La importación de servicios creará nuevos servicios de UI a partir del archivo de exportación. Se omiten los servicios existentes.",
+      "import_services_warning": "La importación creará nuevos servicios de la interfaz web a partir del archivo exportado. Los servicios existentes se omitirán. También se acepta un archivo .zip exportado con configuraciones personalizadas.",
       "instance_creation_alert": "No necesitas proporcionar el puerto o el nombre del servidor; los valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` y `API_SERVER_NAME` se usarán para la configuración de la instancia.",
       "next_step_in_case_of_issue": "Si encuentras problemas, puedes aceptar manualmente el certificado no seguro:",
       "recovery_codes_save_alert": "Guarda estos códigos de recuperación en un lugar seguro (como un gestor de contraseñas o una caja fuerte). Puedes usarlos para acceder a tu cuenta si pierdes tu dispositivo de autenticación.",
@@ -1018,7 +1026,7 @@
       "delete": "Eliminar"
     },
     "title": {
-      "add_bans": "Añadir Bloqueo(s)",
+      "add_bans": "Añadir bloqueos",
       "add_plugins": "Añadir Plugins",
       "confirm_conversion": "Confirmar Conversión",
       "confirm_deletion": "Confirmar Eliminación",
@@ -1069,10 +1077,10 @@
     "cache": "Caché",
     "certificates": "Certificados",
     "threatmap": "Mapa de amenazas",
-    "web_cache": "Almacenamiento web",
-    "timings": "Tiempos",
+    "web_cache": "Caché web",
+    "timings": "Tiempos de ejecución",
     "configs": "Configuraciones",
-    "extra_pages": "Páginas Adicionales",
+    "extra_pages": "Páginas adicionales",
     "global_settings": "Ajustes globales",
     "groups": "Grupos de recursos",
     "home": "Inicio",
@@ -1080,14 +1088,14 @@
     "jobs": "Tareas",
     "logs": "Registros",
     "misc": "Varios",
-    "mode_selection": "Selección de Modo",
+    "mode_selection": "Selección de modo",
     "more": "Más...",
-    "plugin_activated": "Plugin Activado",
-    "plugin_activated_global": "Plugin Activado Globalmente",
-    "plugin_deactivated": "Plugin Desactivado",
-    "plugin_deactivated_global": "Plugin Desactivado Globalmente",
+    "plugin_activated": "Plugin activado",
+    "plugin_activated_global": "Plugin activado globalmente",
+    "plugin_deactivated": "Plugin desactivado",
+    "plugin_deactivated_global": "Plugin desactivado globalmente",
     "plugins": "Plugins",
-    "plugins_pages": "Páginas de Plugins",
+    "plugins_pages": "Páginas de plugins",
     "pro": "Pro",
     "reports": "Informes",
     "services": "Servicios",
@@ -1098,8 +1106,8 @@
     "operate": "Operar",
     "system": "Sistema",
     "edition_community": "Comunidad",
-    "redirects": "Redirige",
-    "upstreams": "Entradas",
+    "redirects": "Redirecciones",
+    "upstreams": "Servidores de origen",
     "workflows": "Flujos de trabajo",
     "edition_pro": "Pro"
   },
@@ -1195,12 +1203,12 @@
       "upgrade_required": "Actualiza a Pro para acceder a esta función"
     },
     "status": {
-      "draft_services_count": "{{draft_services}} Servicio(s) en Borrador",
+      "draft_services_count": "Servicios en borrador: {{draft_services}}",
       "expired": "EXPIRADO",
       "free_version": "Versión GRATUITA",
-      "overlapped": "SOBREPASADO",
+      "overlapped": "SOLAPADO",
       "pro_version": "Versión PRO",
-      "services_count": "{{online_services}} Servicio(s) en Línea / {{pro_services}} Servicio(s) PRO",
+      "services_count": "Servicios en línea: {{online_services}} / servicios PRO: {{pro_services}}",
       "suspended": "SUSPENDIDO",
       "title": "Estado"
     },
@@ -1312,7 +1320,7 @@
     },
     "security_incident": "Incidente de Seguridad",
     "security_report_data": "Datos del Informe de Seguridad",
-    "subtitle": "Informes de seguridad generados a partir de solicitudes bloqueadas en sus instancias de BunkerWeb — busque, filtre, exporte e impida directamente las direcciones IP infractoras de la tabla.",
+    "subtitle": "Informes de seguridad generados a partir de solicitudes bloqueadas en sus instancias de BunkerWeb: busque, filtre, exporte y bloquee directamente desde la tabla las direcciones IP infractoras.",
     "tab": {
       "eventlog": "Registro de eventos",
       "offenders": "Principales atacantes",
@@ -1336,10 +1344,10 @@
       "countries": "Países de los principales atacantes",
       "peak_hour": "Hora pico",
       "rce": "RCE / comando",
-      "repeat_offenders": "Usuarios con más incidencias (los 10 principales)",
+      "repeat_offenders": "Atacantes recurrentes (10 principales)",
       "sqli": "Inyección SQL",
       "unique_ips": "Direcciones IP de los atacantes principales",
-      "unique_offenders": "Usuarios con más incidencias"
+      "unique_offenders": "Principales atacantes"
     }
   },
   "scope": {
@@ -1396,7 +1404,7 @@
     "show_message": "Mostrar Todo",
     "start_date": "Fecha de Inicio",
     "status": "Estado",
-    "status_code": "Código de Estado",
+    "status_code": "Código de estado",
     "steps": "Pasos",
     "stream": "Soporte Stream",
     "template": "Plantilla",
@@ -1545,7 +1553,8 @@
     "expired": "Vencido",
     "expiring": "A punto de caducar",
     "no_settings": "Este plugin no tiene configuraciones para este ámbito.",
-    "yes": "Sí"
+    "yes": "Sí",
+    "optional": "Opcional"
   },
   "step": {
     "next": "Siguiente",
@@ -1614,9 +1623,9 @@
       "session_time": "Duración Sesión",
       "settings": "Ajustes",
       "status": "Estado",
-      "status_code": "Código Estado",
+      "status_code": "Código de estado",
       "steps": "Pasos",
-      "stream": "Flujo",
+      "stream": "Stream",
       "template": "Plantilla",
       "templates": "Plantillas",
       "time_left": "Tiempo Restante",
@@ -1671,9 +1680,9 @@
       "missing_configs_upload_failed": "Error al subir archivos de configuración",
       "missing_configs_upload_label": "Subir configuraciones faltantes (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} de {{total}} configuraciones subidas. Aún faltan: {{missing}}",
-      "missing_configs_upload_success": "{{count}} archivo(s) de configuración subido(s) correctamente",
+      "missing_configs_upload_success": "Carga de archivos de configuración completada: {{count}}",
       "multiselect_placeholder": "Seleccionar opciones",
-      "multiselect_summary": "{{count}} seleccionado(s)",
+      "multiselect_summary": "Elementos seleccionados: {{count}}",
       "multivalue_add": "Añadir valor",
       "multivalue_helper": "Un valor por línea.{{separatorNote}}",
       "panel_overview": "Resumen",
@@ -1694,7 +1703,7 @@
       "raw_configs_help": "Sube archivos de configuración (.conf, .cfg, .txt) para adjuntar entradas a <code>configs</code>. Los tipos por defecto son <code>server_http</code>; ajústalos en el JSON si es necesario.",
       "raw_configs_import_invalid": "No se pueden importar las configuraciones porque el JSON actual no es válido.",
       "raw_configs_import_none": "No se importaron configuraciones.",
-      "raw_configs_import_success": "{{count}} archivo(s) de configuración importado(s).",
+      "raw_configs_import_success": "Archivos de configuración importados: {{count}}.",
       "raw_configs_note": "Los archivos importados se añaden al editor JSON. Revísalos y ajústalos antes de guardar.",
       "raw_configs_title": "Importaciones de configuración personalizada",
       "raw_configs_upload": "Subir archivos de configuración (.conf, .cfg, .txt)",
@@ -1744,7 +1753,7 @@
       "setting_selector_clear": "Limpiar búsqueda",
       "setting_selector_count_all_used": "Todos los ajustes coincidentes ya han sido añadidos.",
       "setting_selector_count_empty": "No hay ajustes para mostrar.",
-      "setting_selector_count_only_available": "{{count, plural, one {# ajuste disponible} other {# ajustes disponibles}}}",
+      "setting_selector_count_only_available": "Ajustes disponibles: {{count}}",
       "setting_selector_count_with_used": "{{available}} disponibles, {{used}} ya añadidos",
       "setting_selector_default": "Predeterminado",
       "setting_selector_docs": "Ver documentación",
@@ -2331,7 +2340,7 @@
     "purge_key_placeholder": "PROXY_CACHE_KEY efectivo (opcional)",
     "purge_url": "Eliminar URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
-    "reporting_instances": "Informar instancias",
+    "reporting_instances": "Instancias informantes",
     "service": "Servicio",
     "services": "Habilitar servicio",
     "status": "Almacenamiento de instancia",
@@ -2368,9 +2377,9 @@
     "attach": "Adjuntar",
     "attach_copy": "Adjuntar {{name}} ({{from}} → {{to}}) a uno o más servicios.",
     "code": {
-      "301": "301 — Movió permanentemente",
+      "301": "301 — Movido permanentemente",
       "302": "302 — Encontrado",
-      "303": "303 — Ver otros",
+      "303": "303 — Ver otro",
       "307": "307 — Redirección temporal",
       "308": "308 — Redirección permanente"
     },
@@ -2379,8 +2388,8 @@
     "delete_copy": "¿Eliminar la redirección {{name}}?",
     "delete_help": "Una redirección aún adjunta a un servicio no se puede eliminar. Desconéctala primero.",
     "edit": "Editar redirección",
-    "edit_shared": "Esta redirección está adjunta al servicio(s) {{count}}: {{services}}. Guardar los cambios en todos.",
-    "empty_text": "Una redirección es una regla nombrada que adjunta a uno o más servicios. Las configuraciones REDIRECT_* en línea siguen funcionando junto con ella.",
+    "edit_shared": "Esta redirección está asociada a los servicios siguientes ({{count}}): {{services}}. Al guardarla se modificarán todos.",
+    "empty_text": "Una redirección es una regla con nombre que se asocia a uno o más servicios. Las configuraciones REDIRECT_* definidas en línea siguen funcionando junto con ella.",
     "empty_title": "No hay redirecciones aún",
     "from_path": "Redirigir desde",
     "from_path_help": "Ruta de origen en los servicios adjuntos, por ejemplo /old.",
@@ -2399,7 +2408,7 @@
     "all": "Todos",
     "attach": "Adjuntar",
     "attach_copy": "Adjuntar {{name}} ({{servers}}) a uno o más servicios.",
-    "backend_ssl": "Hablar con TLS a los servidores (https:// / grpcs://)",
+    "backend_ssl": "Conectarse a los servidores mediante TLS (https:// / grpcs://)",
     "balancing": {
       "ip_hash": "IP hash — mismo cliente, mismo backend",
       "least_conn": "Menos conexiones",
@@ -2410,8 +2419,8 @@
     "delete_copy": "¿Eliminar el upstream {{name}}?",
     "delete_help": "Un upstream aún adjunto a un servicio no se puede eliminar. Desconéctalo primero.",
     "edit": "Editar upstream",
-    "edit_shared": "Este upstream está adjunto al servicio(s) {{count}}: {{services}}. Guardar los cambios para todos.",
-    "empty_text": "Un upstream es una piscina de backends nombrada a la que se adjunta a uno o más servicios en una ruta de proxy inverso. Las configuraciones REVERSE_PROXY_HOST funcionan junto con él.",
+    "edit_shared": "Este upstream está asociado a los servicios siguientes ({{count}}): {{services}}. Al guardarlo se modificarán todos.",
+    "empty_text": "Un upstream es un pool de backends con nombre que se asocia a uno o más servicios en una ruta de proxy inverso. Las configuraciones REVERSE_PROXY_HOST definidas en línea siguen funcionando junto con él.",
     "empty_title": "Todavía no hay upstreams",
     "keepalive": "Mantener conexión",
     "keepalive_help": "Conexiones inactivas mantenidas por trabajador. HTTP y gRPC solo; dejar en blanco para desactivar.",
@@ -2426,7 +2435,7 @@
     "protocols": {
       "grpc": "gRPC",
       "http": "HTTP",
-      "stream": "Flujo (TCP/UDP)"
+      "stream": "Stream (TCP/UDP)"
     },
     "readonly": "La base de datos es de solo lectura. Los upstream pueden ser inspeccionados pero no modificados.",
     "role": {
@@ -2443,7 +2452,7 @@
     "server_weight": "Peso",
     "servers": "Servidores",
     "services_help": "Utilice Ctrl o Command para seleccionar múltiples servicios. Un upstream puede ser conectado posteriormente.",
-    "services_hidden": "El servicio {{count}}(s) oculto(s): un upstream {{protocol}} solo puede conectarse a un servicio correspondiente.",
+    "services_hidden": "Servicios ocultos: {{count}}. Un upstream {{protocol}} solo puede asociarse a un servicio compatible.",
     "truncated": "Solo se muestran los primeros 500 upstream. Reduce la lista a través de API para obtener el resultado completo."
   },
   "workflows": {
@@ -2491,22 +2500,22 @@
     },
     "attach": "Adjuntar a los servicios",
     "attach_help": "Las reglas solo se aplican a los servicios a los que está adjunto el flujo de trabajo.",
-    "attached_notice": "Al guardar se aplican estas reglas a {{count}} servicio(s) vinculado(s).",
+    "attached_notice": "Al guardar se aplican estas reglas a los servicios asociados ({{count}}).",
     "canvas": {
       "auxCanvas": "De izquierda a derecha. La primera coincidencia gana.",
       "auxList": "De arriba a abajo. La primera coincidencia gana.",
       "close": "Cerrar",
       "drawerSub": "Se ejecuta en la posición {{n}} de {{total}}",
-      "dropHint": "Soltar para establecer la prioridad — la posición de una regla en la cadena es lo único que puede significar",
+      "dropHint": "Suelte para establecer la prioridad: la posición de la regla en la cadena determina su prioridad",
       "emptyBody": "Un flujo de trabajo sin reglas no cambia nada — cada solicitud pasa directamente al siguiente flujo de trabajo conectado.",
       "emptyCta": "Añadir la primera regla",
       "emptyTitle": "Aún no hay reglas",
       "entry_sub": "Las reglas se ejecutan de izquierda a derecha.",
       "entry_title": "Cada solicitud",
       "exit_sub": "Continúa al siguiente flujo de trabajo adjunto.",
-      "exit_title": "No se encontró ninguna regla",
+      "exit_title": "Ninguna regla coincidió",
       "fit": "Ajustar a la vista",
-      "gateTip": "Una puerta de coincidencia, no una acción: por debajo del umbral, la regla no coincide y se evalúa la siguiente regla.",
+      "gateTip": "Un criterio de coincidencia, no una acción: por debajo del umbral, la regla no coincide y se evalúa la siguiente.",
       "hint": "Arrastrar un nodo para reordenar · arrastrar el tablero para navegar · Alt + ← / → en un nodo seleccionado",
       "hintReadonly": "Solo lectura — navegar para ver, el orden no se puede cambiar",
       "insert": "Insertar una regla aquí",
@@ -2517,7 +2526,7 @@
       "zoomIn": "Acercar",
       "zoomOut": "Alejar"
     },
-    "capacity": "{{count}} de {{maxRules}} reglas · la regla mayor usa {{worst}} de {{maxPredicates}} predicados · {{regexes}} expresión(es) regular(es) en este flujo de trabajo",
+    "capacity": "Reglas: {{count}}/{{maxRules}} · máximo de predicados por regla: {{worst}}/{{maxPredicates}} · expresiones regulares: {{regexes}}",
     "clone": "Clonar flujo de trabajo",
     "clone_help": "Las reglas se copian; los adjuntos de servicio no.",
     "clone_name": "Nombre de la copia",
@@ -2539,7 +2548,7 @@
     },
     "errors": {
       "body": "No se aplica nada; la política en ejecución no cambia.",
-      "count": "{{count}} problema(s) impiden guardar.",
+      "count": "Problemas que impiden guardar: {{count}}.",
       "rule": "Regla {{n}}",
       "ruleNamed": "Regla {{n}}: {{name}}",
       "whole": "Este flujo de trabajo"
@@ -2594,7 +2603,7 @@
     "say": {
       "actionChanged": "La acción cambió a {{type}}. Sigue siendo la única acción y sigue deteniendo la evaluación.",
       "added": "Regla añadida en la posición {{n}}, la última; todas las reglas superiores se comprueban antes.",
-      "deleted": "Regla eliminada. Quedan {{count}} regla(s).",
+      "deleted": "Regla eliminada. Reglas restantes: {{count}}.",
       "duplicated": "Copia insertada en la posición {{n}}. Nunca puede coincidir mientras el original superior esté activado.",
       "gateAdded": "Se añadió un umbral de frecuencia a la coincidencia. Por debajo de él, la regla no coincide y la evaluación continúa.",
       "inserted": "Regla añadida en la posición {{n}} de {{total}}. Todas las reglas anteriores se comprueban primero.",
@@ -2611,7 +2620,7 @@
       "runsLast": "al final",
       "saved": "Reglas guardadas y enviadas a los servicios vinculados.",
       "theRule": "La regla",
-      "valuesDropped": "La condición cambió a {{type}}; no se pudieron conservar sus {{count}} valor(es).",
+      "valuesDropped": "La condición cambió a {{type}}. Valores que no se pudieron conservar: {{count}}.",
       "via": {
         "drag": "arrastrando",
         "keyboard": "con el teclado"
@@ -2673,10 +2682,10 @@
       "addCondition": "Condición",
       "addGroup": "Grupo",
       "all": "Todas",
-      "allMeta": "{{count}} condición(es): todas deben ser verdaderas",
+      "allMeta": "Condiciones: {{count}}; todas deben ser verdaderas",
       "and": "y",
       "any": "Cualquiera",
-      "anyMeta": "{{count}} condición(es): al menos una debe ser verdadera",
+      "anyMeta": "Condiciones: {{count}}; al menos una debe ser verdadera",
       "empty": "Grupo vacío: añade una condición; no puede guardarse así.",
       "noGroupHolds": "ningún grupo contiene entradas {{kind}}",
       "noneMeta": "coincide cuando ninguna de estas es verdadera",
@@ -2684,7 +2693,7 @@
       "or": "o",
       "removeGroup": "Eliminar grupo"
     },
-    "truncated": "Solo se muestran las primeras 500 solicitudes. Para obtener el resultado completo, utilice API.",
+    "truncated": "Solo se muestran los primeros 500 flujos de trabajo. Refine la lista mediante la API para obtener el resultado completo.",
     "untitled": "Regla sin título",
     "value": {
       "add": "Valor"
@@ -2714,7 +2723,7 @@
     "terminal": {
       "inline": "Servidor de origen",
       "none": "Ningún servicio activo",
-      "pool": "Piscina upstream",
+      "pool": "Pool de upstream",
       "root": "Archivos locales"
     },
     "title": "Ruta de la solicitud",
@@ -2733,7 +2742,7 @@
       "detach": "Desconectar",
       "family": {
         "certificate": "Certificados",
-        "redirect": "Redirecciona",
+        "redirect": "Redirecciones",
         "template": "Plantilla",
         "upstream": "Servidores de origen",
         "workflow": "Flujos de trabajo"
@@ -2753,13 +2762,33 @@
     }
   },
   "onboarding": {
+    "dismiss": "Descartar",
+    "error": "No se pudo cargar la guía.",
+    "hint": {
+      "bans": "Los bloqueos corresponden a los clientes que BunkerWeb rechaza en este momento. Cada fila muestra el motivo y cuándo expira.",
+      "home": "Este panel muestra el estado actual: instancias activas, servicios atendidos y tráfico gestionado por BunkerWeb.",
+      "logs": "Registros en vivo de cada instancia, filtrables por instancia y gravedad.",
+      "reports": "Cada solicitud bloqueada llega aquí. Abre una para ver qué comprobación de seguridad la detuvo y por qué.",
+      "title": "Recorrido rápido"
+    },
     "item": {
+      "first_block": "Ver a BunkerWeb bloquear algo",
+      "https": "Poner HTTPS en marcha",
       "install": "Instalar BunkerWeb en 1+ host",
       "mfa": "Activar MFA",
       "pro": "Activar BunkerWeb PRO",
-      "service": "Registrar tu primer servicio"
+      "read_bans": "Ver qué clientes están bloqueados y hasta cuándo",
+      "read_home": "Consultar en el panel qué funciona correctamente",
+      "read_logs": "Seguir los registros en vivo de todas las instancias",
+      "read_reports": "Averiguar por qué se bloqueó una petición",
+      "service": "Registrar tu primer servicio",
+      "workflow": "Adjuntar un flujo de seguridad"
     },
+    "not_saved": "No se pudo guardar.",
     "pro_tips": "Consejos de PRO",
+    "restart": "Reiniciar la guía",
+    "restart_help": "Volver a mostrar los pasos iniciales en la barra superior.",
+    "subtitle": "Unos pasos para que BunkerWeb proteja tus servicios.",
     "title": "Primeros pasos"
   },
   "timings": {
@@ -2772,7 +2801,7 @@
     "max_request": "Solicitud más lenta",
     "phases": "Fases de los complementos",
     "share_help": "La proporción es el tiempo total del complemento respecto al tiempo total de la solicitud. Las fases que no se ejecutan una vez por solicitud — inicio del worker, temporizador en segundo plano y API interna — no tienen proporción y muestran un guion.",
-    "plugin": "Complemento",
+    "plugin": "Plugin",
     "phase": "Fase",
     "calls": "Llamadas",
     "mean": "Media",
@@ -2783,5 +2812,15 @@
     "disabled_help": "Establece METRICS_COLLECT_TIMINGS en yes para medir cuánto tarda cada complemento. La duración total de la solicitud se recopila de todos modos.",
     "unreachable_title": "Ninguna instancia informó de tiempos",
     "unreachable_help": "Los tiempos se leen de las propias instancias, por lo que ninguna respondió — o ninguna ha servido aún una solicitud."
+  },
+  "whatsnew": {
+    "missing_action": "Abrir el changelog en GitHub",
+    "missing_message": "CHANGELOG.md no se incluyó en esta compilación. Las notas de versión están disponibles en GitHub.",
+    "missing_title": "No hay changelog en esta instalación",
+    "modal": {
+      "intro": "Esto es lo que ha cambiado desde la versión que usabas.",
+      "title": "Novedades"
+    },
+    "subtitle": "Todas las versiones de BunkerWeb, la más reciente primero, directamente del changelog incluido en esta instalación."
   }
 }

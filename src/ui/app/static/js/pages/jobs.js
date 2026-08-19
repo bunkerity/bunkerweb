@@ -273,28 +273,35 @@ $(document).ready(function () {
                   "interval.day",
                   "Every day",
                 )}</span>`,
-                value: (rowData) => rowData[4].includes("interval.day"),
+                value: (rowData) => rowData[4].includes('data-value="day"'),
               },
               {
                 label: `<span data-i18n="interval.hour">${t(
                   "interval.hour",
                   "Every hour",
                 )}</span>`,
-                value: (rowData) => rowData[4].includes("interval.hour"),
+                value: (rowData) => rowData[4].includes('data-value="hour"'),
               },
               {
                 label: `<span data-i18n="interval.week">${t(
                   "interval.week",
                   "Every week",
                 )}</span>`,
-                value: (rowData) => rowData[4].includes("interval.week"),
+                value: (rowData) => rowData[4].includes('data-value="week"'),
+              },
+              {
+                label: `<span data-i18n="interval.minute">${t(
+                  "interval.minute",
+                  "Every minute",
+                )}</span>`,
+                value: (rowData) => rowData[4].includes('data-value="minute"'),
               },
               {
                 label: `<span data-i18n="interval.once">${t(
                   "interval.once",
                   "Once",
                 )}</span>`,
-                value: (rowData) => rowData[4].includes("interval.once"),
+                value: (rowData) => rowData[4].includes('data-value="once"'),
               },
             ],
             combiner: "or",
@@ -393,20 +400,7 @@ $(document).ready(function () {
     },
   };
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => initializeDataTable(jobs_config));
-  }
-
+  initializeDataTable(jobs_config);
   $(document).on("click", ".show-history", function () {
     const historyModal = $("#modal-job-history");
     const job = $(this).data("job");

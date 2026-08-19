@@ -35,28 +35,29 @@
     "label": {
       "clear_search": "Clear search",
       "close": "Close",
+      "collapse_multiline": "Collapse multi-line entries",
+      "configs_dropzone": "Select a custom configurations export file or drop one here",
       "copy": "Copy logs",
       "download_log": "Download this log file",
       "follow": "Follow",
       "hide_value": "Hide value",
-      "reveal_value": "Reveal value",
-      "select_file": "Select File",
-      "select_page": "Select Page",
       "issue_count": "Error and warning count",
       "level_filter": "Filter log lines by level",
       "local_time": "Show timestamps in local time",
-      "collapse_multiline": "Collapse multi-line entries",
       "next_issue": "Next error or warning",
+      "passkey_name": "Passkey name",
+      "plugins_dropzone": "Select plugin archives or drop them here",
       "prev_issue": "Previous error or warning",
-      "search_logs": "Search logs",
-      "toggle_wrap": "Toggle line wrapping",
-      "configs_dropzone": "Select a custom configurations export file or drop one here",
       "raw_configuration": "Raw configuration",
-      "services_dropzone": "Select a services export file or drop one here",
-      "user_avatar": "User avatar",
       "remove_value": "Remove value",
-      "view_selected_items": "View selected items",
-      "passkey_name": "Passkey name"
+      "reveal_value": "Reveal value",
+      "search_logs": "Search logs",
+      "select_file": "Select File",
+      "select_page": "Select Page",
+      "services_dropzone": "Select a services export file or drop one here",
+      "toggle_wrap": "Toggle line wrapping",
+      "user_avatar": "User avatar",
+      "view_selected_items": "View selected items"
     }
   },
   "badge": {
@@ -118,14 +119,15 @@
     "groups": "Resource groups",
     "services": "Services",
     "support": "Support",
-    "templates": "Templates"
+    "templates": "Templates",
+    "whats_new": "What's new"
   },
   "button": {
     "actions": "Actions",
     "activate_key": "Activate Key",
     "add": "INSERT",
-    "add_ban_plural": "Add Ban(s)",
-    "add_plugin_plural": "Add plugin(s)",
+    "add_ban_plural": "Add bans",
+    "add_plugin_plural": "Add plugins",
     "add_plugins": "Add Plugins",
     "auto_refresh": "Auto Refresh",
     "ban": "Ban",
@@ -224,7 +226,12 @@
     "rename": "Rename",
     "add_passkey": "Add a passkey",
     "sign_in_with_passkey": "Sign in with a passkey",
-    "use_security_key": "Use a security key"
+    "use_security_key": "Use a security key",
+    "go": "Go →",
+    "retry": "Retry",
+    "got_it": "Got it",
+    "show_me": "Show me",
+    "see_all_releases": "See all releases"
   },
   "cache": {
     "kpi_files": "Files",
@@ -907,6 +914,7 @@
   "interval": {
     "day": "Daily",
     "hour": "Hourly",
+    "minute": "Every minute",
     "once": "Once",
     "week": "Weekly"
   },
@@ -970,7 +978,7 @@
     "main_logs": "Main Logs",
     "new_lines_sr": "{{count}} new log lines",
     "no_log_files": "There are no log files to display, check the documentation for more information on how to enable logging",
-    "issue_summary": "{{errors}} error(s), {{warnings}} warning(s)",
+    "issue_summary": "Errors: {{errors}} · warnings: {{warnings}}",
     "level_critical": "Critical",
     "level_debug": "Debug",
     "level_error": "Error",
@@ -1003,7 +1011,7 @@
       "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert_plural": "Are you sure you want to delete the selected instances?",
-      "delete_confirmation_template_used": "One or more selected templates are assigned to services ({{services_count}} service(s) total). Removing them will clear those assignments. Do you want to continue?",
+      "delete_confirmation_template_used": "One or more selected templates are assigned to services (total services: {{services_count}}). Removing them will clear those assignments. Do you want to continue?",
       "delete_step_confirmation": "Are you sure you want to delete this step?",
       "delete_step_content_label": "Content",
       "delete_step_name_label": "Step",
@@ -1042,7 +1050,7 @@
       "delete": "Delete"
     },
     "title": {
-      "add_bans": "Add Ban(s)",
+      "add_bans": "Add bans",
       "add_plugins": "Add Plugins",
       "confirm_conversion": "Confirm Conversion",
       "confirm_deletion": "Confirm Deletion",
@@ -1137,13 +1145,33 @@
     "title": "Join the Newsletter"
   },
   "onboarding": {
+    "dismiss": "Dismiss",
+    "error": "The walkthrough could not be loaded.",
+    "hint": {
+      "bans": "Bans are the clients BunkerWeb is currently refusing. Each row shows the reason and when it expires.",
+      "home": "This dashboard shows what is healthy right now: instances up, services served and the traffic BunkerWeb handled.",
+      "logs": "Live logs from every instance, filterable by instance and severity.",
+      "reports": "Every blocked request lands here. Open one to see which security check stopped it, and why.",
+      "title": "Quick tour"
+    },
     "item": {
+      "first_block": "See BunkerWeb block something",
+      "https": "Get HTTPS working",
       "install": "Install BunkerWeb on 1+ host",
       "mfa": "Activate MFA",
       "pro": "Activate BunkerWeb PRO",
-      "service": "Register your first service"
+      "read_bans": "See who is banned, and until when",
+      "read_home": "Read the dashboard: what is healthy right now",
+      "read_logs": "Tail live logs across instances",
+      "read_reports": "Find out why a request was blocked",
+      "service": "Register your first service",
+      "workflow": "Attach a security workflow"
     },
+    "not_saved": "This could not be saved.",
     "pro_tips": "PRO tips",
+    "restart": "Restart walkthrough",
+    "restart_help": "Show the getting-started steps again in the top bar.",
+    "subtitle": "A few steps to get BunkerWeb protecting your services.",
     "title": "Getting started"
   },
   "pagination": {
@@ -1229,12 +1257,12 @@
       "upgrade_required": "Upgrade to Pro to access this feature"
     },
     "status": {
-      "draft_services_count": "{{draft_services}} Draft service(s)",
+      "draft_services_count": "Draft services: {{draft_services}}",
       "expired": "EXPIRED",
       "free_version": "FREE Version",
       "overlapped": "OVERLAPPED",
       "pro_version": "PRO Version",
-      "services_count": "{{online_services}} Online Service(s) / {{pro_services}} PRO Service(s)",
+      "services_count": "Online services: {{online_services}} / PRO services: {{pro_services}}",
       "suspended": "SUSPENDED",
       "title": "Status"
     },
@@ -1561,6 +1589,7 @@
     "no_steps_description": "This template does not have any steps to configure.",
     "not_applicable": "N/A",
     "online": "Online",
+    "optional": "Optional",
     "partial": "Partial",
     "pending": "Pending",
     "pinging_instances": "Pinging instances, please wait...",
@@ -1705,7 +1734,7 @@
       "missing_configs_upload_failed": "Failed to upload config files",
       "missing_configs_upload_label": "Upload missing configs (.conf, .cfg, .txt)",
       "missing_configs_upload_partial": "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
-      "missing_configs_upload_success": "{{count}} config file(s) uploaded successfully",
+      "missing_configs_upload_success": "Config files uploaded successfully: {{count}}",
       "multiselect_placeholder": "Select options",
       "multiselect_summary": "{{count}} selected",
       "multivalue_add": "Add value",
@@ -1728,7 +1757,7 @@
       "raw_configs_help": "Upload config files (.conf, .cfg, .txt) to append entries to <code>configs</code>. Types default to <code>server_http</code>; adjust in the JSON if needed.",
       "raw_configs_import_invalid": "Unable to import configs because the current JSON is invalid.",
       "raw_configs_import_none": "No configs were imported.",
-      "raw_configs_import_success": "{{count}} config file(s) imported.",
+      "raw_configs_import_success": "Config files imported: {{count}}.",
       "raw_configs_note": "Imported files are added to the JSON editor. Review and adjust before saving.",
       "raw_configs_title": "Custom config imports",
       "raw_configs_upload": "Upload config files (.conf, .cfg, .txt)",
@@ -1778,7 +1807,7 @@
       "setting_selector_clear": "Clear search",
       "setting_selector_count_all_used": "All matching settings have already been added.",
       "setting_selector_count_empty": "No settings to display.",
-      "setting_selector_count_only_available": "{{count, plural, one {# setting available} other {# settings available}}}",
+      "setting_selector_count_only_available": "Available settings: {{count}}",
       "setting_selector_count_with_used": "{{available}} available, {{used}} already added",
       "setting_selector_default": "Default",
       "setting_selector_docs": "View documentation",
@@ -2297,7 +2326,7 @@
     "delete_copy": "Delete the redirect {{name}}?",
     "delete_help": "A redirect still attached to a service cannot be deleted. Detach it first.",
     "edit": "Edit redirect",
-    "edit_shared": "This redirect is attached to {{count}} service(s): {{services}}. Saving changes all of them.",
+    "edit_shared": "This redirect is attached to these services ({{count}}): {{services}}. Saving changes all of them.",
     "empty_text": "A redirect is a named rule you attach to one or more services. Inline REDIRECT_* settings keep working alongside it.",
     "empty_title": "No redirects yet",
     "from_path": "Redirect from",
@@ -2328,7 +2357,7 @@
     "delete_copy": "Delete the upstream {{name}}?",
     "delete_help": "An upstream still attached to a service cannot be deleted. Detach it first.",
     "edit": "Edit upstream",
-    "edit_shared": "This upstream is attached to {{count}} service(s): {{services}}. Saving changes all of them.",
+    "edit_shared": "This upstream is attached to these services ({{count}}): {{services}}. Saving changes all of them.",
     "empty_text": "An upstream is a named pool of backends you attach to one or more services at a reverse proxy path. Inline REVERSE_PROXY_HOST settings keep working alongside it.",
     "empty_title": "No upstreams yet",
     "keepalive": "Keepalive",
@@ -2361,7 +2390,7 @@
     "server_weight": "Weight",
     "servers": "Servers",
     "services_help": "Use Ctrl or Command to select multiple services. An upstream can be attached later.",
-    "services_hidden": "{{count}} service(s) hidden: a {{protocol}} upstream can only be attached to a matching service.",
+    "services_hidden": "Hidden services: {{count}}. A {{protocol}} upstream can only be attached to a matching service.",
     "truncated": "Only the first 500 upstreams are displayed. Narrow the list through the API for the complete result."
   },
   "workflows": {
@@ -2409,7 +2438,7 @@
     },
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
-    "attached_notice": "Saving applies these rules to {{count}} attached service(s).",
+    "attached_notice": "Saving applies these rules to the attached services ({{count}}).",
     "canvas": {
       "title": "Rule order",
       "auxList": "Top to bottom. First match wins.",
@@ -2435,7 +2464,7 @@
       "zoomOut": "Zoom out",
       "fit": "Fit to view"
     },
-    "capacity": "{{count}} of {{maxRules}} rules · largest rule uses {{worst}} of {{maxPredicates}} predicates · {{regexes}} regex(es) in this workflow",
+    "capacity": "Rules: {{count}}/{{maxRules}} · maximum predicates per rule: {{worst}}/{{maxPredicates}} · regular expressions: {{regexes}}",
     "clone": "Clone workflow",
     "clone_help": "The rules are copied; the service attachments are not.",
     "clone_name": "Name of the copy",
@@ -2457,7 +2486,7 @@
     },
     "errors": {
       "body": "Nothing is applied — the running policy is unchanged.",
-      "count": "{{count}} problem(s) block the save.",
+      "count": "Problems blocking the save: {{count}}.",
       "rule": "Rule {{n}}",
       "ruleNamed": "Rule {{n}} — {{name}}",
       "whole": "This workflow"
@@ -2512,7 +2541,7 @@
     "say": {
       "actionChanged": "Action changed to {{type}}. It is still the only action, and it still stops evaluation.",
       "added": "Rule added at position {{n}} — last, so every rule above it is checked first.",
-      "deleted": "Rule deleted. {{count}} rules remain.",
+      "deleted": "Rule deleted. Remaining rules: {{count}}.",
       "duplicated": "Copy inserted at position {{n}}. It can never match while the original above it is enabled.",
       "gateAdded": "Rate threshold added to the match. Below it the rule does not match and evaluation continues.",
       "jumped": "{{where}}: {{message}}",
@@ -2527,7 +2556,7 @@
       "runsLast": "last",
       "saved": "Rules saved and pushed to the attached services.",
       "theRule": "The rule",
-      "valuesDropped": "Condition changed to {{type}} — the {{count}} value(s) it held could not carry over.",
+      "valuesDropped": "Condition changed to {{type}}. Values that could not carry over: {{count}}.",
       "via": {
         "drag": "drag",
         "keyboard": "keyboard"
@@ -2591,10 +2620,10 @@
       "addCondition": "Condition",
       "addGroup": "Group",
       "all": "All of",
-      "allMeta": "{{count}} condition(s) — all must be true",
+      "allMeta": "Conditions: {{count}} — all must be true",
       "and": "and",
       "any": "Any of",
-      "anyMeta": "{{count}} condition(s) — at least one must be true",
+      "anyMeta": "Conditions: {{count}} — at least one must be true",
       "empty": "Empty group — add a condition, it cannot be saved like this.",
       "noGroupHolds": "no group holds {{kind}} entries",
       "noneMeta": "matches when none of these are true",
@@ -2783,5 +2812,15 @@
     "disabled_help": "Set METRICS_COLLECT_TIMINGS to yes to measure how long each plugin takes. Whole-request duration is collected either way.",
     "unreachable_title": "No instance reported timings",
     "unreachable_help": "Timings are read from the instances themselves, so none of them answered — or none has served a request yet."
+  },
+  "whatsnew": {
+    "missing_action": "Open the changelog on GitHub",
+    "missing_message": "CHANGELOG.md was not bundled with this build. Release notes are available on GitHub.",
+    "missing_title": "No changelog in this installation",
+    "modal": {
+      "intro": "Here is what changed since the version you last used.",
+      "title": "What's new"
+    },
+    "subtitle": "Every release of BunkerWeb, newest first, straight from the changelog shipped with this installation."
   }
 }

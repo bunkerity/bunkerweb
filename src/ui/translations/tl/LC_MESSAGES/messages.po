@@ -1,0 +1,7038 @@
+# Filipino (Philippines) translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: tl\n"
+"Language-Team: tl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "Ginawa Gamit ang"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero General Public License v3.0"
+
+msgid "about.license_title"
+msgstr "Lisensya"
+
+msgid "about.social.discord"
+msgstr "Discord"
+
+msgid "about.social.instagram"
+msgstr "Instagram"
+
+msgid "about.social.linkedin"
+msgstr "LinkedIn"
+
+msgid "about.social.reddit"
+msgstr "Reddit"
+
+msgid "about.socials"
+msgstr "Mga Social Media"
+
+msgid "about.tagline"
+msgstr "Malakas na Proteksyon, Simpleng Gamitin"
+
+msgid "about.title"
+msgstr "Tungkol sa BunkerWeb"
+
+msgid "about.version"
+msgstr "Bersyon: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "Mag-isyu at mag-renew ng mga sertipiko nang awtomatiko."
+
+msgid "accordion.title.tls"
+msgstr "TLS & sertipiko"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "Mangyaring i-upload ang isang valid na file ng custom na configuration (.json)."
+
+msgid "alert.custom_end_date_required"
+msgstr "Mangyaring pumili ng pasadyang petsa ng pagtatapos."
+
+msgid "alert.important"
+msgstr "Mahalaga"
+
+msgid "alert.no_changes_detected"
+msgstr "Walang nakitang pagbabago."
+
+msgid "alert.notice"
+msgstr "Paunawa"
+
+msgid "alert.ping_error"
+msgstr "May naganap na error habang pina-ping ang mga instance."
+
+msgid "alert.readonly_mode"
+msgstr "Ang aksyong ito ay hindi pinagana sa read-only na mode."
+
+msgid "aria.label.clear_search"
+msgstr "Linisin ang paghahanap"
+
+msgid "aria.label.close"
+msgstr "Isara"
+
+msgid "aria.label.collapse_multiline"
+msgstr "I-collapse ang mga multi-line na entry"
+
+msgid "aria.label.configs_dropzone"
+msgstr "Pumili ng custom na file ng export ng mga configuration o i-drop dito"
+
+msgid "aria.label.copy"
+msgstr "Kopyahin ang mga log"
+
+msgid "aria.label.download_log"
+msgstr "I-download ang log file na ito"
+
+msgid "aria.label.follow"
+msgstr "Subaybayan"
+
+msgid "aria.label.hide_value"
+msgstr "Itago ang halaga"
+
+msgid "aria.label.issue_count"
+msgstr "Bilang ng error at babala"
+
+msgid "aria.label.level_filter"
+msgstr "Salain ang mga linya ng log ayon sa antas"
+
+msgid "aria.label.local_time"
+msgstr "Ipakita ang mga timestamp sa lokal na oras"
+
+msgid "aria.label.next_issue"
+msgstr "Susunod na error o babala"
+
+msgid "aria.label.passkey_name"
+msgstr "Pangalan ng passkey"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "Pumili ng mga archive ng plugin o i-drop ang mga ito dito"
+
+msgid "aria.label.prev_issue"
+msgstr "Nakaraang error o babala"
+
+msgid "aria.label.raw_configuration"
+msgstr "Raw na configuration"
+
+msgid "aria.label.remove_value"
+msgstr "Alisin ang halaga"
+
+msgid "aria.label.reveal_value"
+msgstr "Ipakita ang halaga"
+
+msgid "aria.label.search_logs"
+msgstr "Maghanap sa mga log"
+
+msgid "aria.label.select_file"
+msgstr "Pumili ng File"
+
+msgid "aria.label.select_page"
+msgstr "Pumili ng Pahina"
+
+msgid "aria.label.services_dropzone"
+msgstr "Pumili ng file ng export ng mga serbisyo o i-drop dito"
+
+msgid "aria.label.toggle_wrap"
+msgstr "I-toggle ang pag-wrap ng linya"
+
+msgid "aria.label.user_avatar"
+msgstr "Avatar ng gumagamit"
+
+msgid "aria.label.view_selected_items"
+msgstr "Tingnan ang napiling mga item"
+
+msgid "badge.from_template"
+msgstr "Mula sa template"
+
+msgid "badge.managed_via_api"
+msgstr "Pinamamahalaan sa pamamagitan ng API"
+
+msgid "badge.new_version"
+msgstr "Bagong bersyon"
+
+msgid "badge.no_template"
+msgstr "Walang Template"
+
+msgid "badge.unread_news"
+msgstr "Hindi pa nababasang balita"
+
+msgid "badge.unread_notifications"
+msgstr "Hindi pa nababasang mga abiso"
+
+msgid "banner.community"
+msgstr "Maging bahagi ng Bunker community sa pamamagitan ng pagsali sa <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord chat</a> at pagsunod sa amin sa <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>."
+
+msgid "banner.link.here"
+msgstr "dito"
+
+msgid "banner.pro"
+msgstr "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. Karagdagang impormasyon at libreng pagsubok <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">dito</a>."
+
+msgid "banner.support"
+msgstr "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
+
+msgid "bans.stats.card.by_reason"
+msgstr "Mga ban ayon sa dahilan"
+
+msgid "bans.stats.tile.active"
+msgstr "Mga aktibong ban"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "Mga IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "Mga bansa"
+
+msgid "bans.stats.tile.expiring"
+msgstr "Mag-e-expire sa ≤ 1 oras"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "Awtomatikong nagpapalit"
+
+msgid "bans.stats.tile.permanent"
+msgstr "Mga permanenteng ban"
+
+msgid "bans.subtitle"
+msgstr "Mga IP address na binuwag sa iyong mga instance ng BunkerWeb — idagdag, alisin, o ayusin ang tagal ng pagbabawal."
+
+msgid "breadcrumb.about"
+msgstr "Tungkol sa"
+
+msgid "breadcrumb.bans"
+msgstr "Mga Ban"
+
+msgid "breadcrumb.cache"
+msgstr "Cache"
+
+msgid "breadcrumb.configs"
+msgstr "Mga Config"
+
+msgid "breadcrumb.extra_pages"
+msgstr "Mga karagdagang pahina"
+
+msgid "breadcrumb.global_config"
+msgstr "Pangkalahatang configuration"
+
+msgid "breadcrumb.global_settings"
+msgstr "Mga pangkalahatang setting"
+
+msgid "breadcrumb.groups"
+msgstr "Mga grupo ng mapagkukunan"
+
+msgid "breadcrumb.home"
+msgstr "Pangunahing pahina"
+
+msgid "breadcrumb.instances"
+msgstr "Mga Instance"
+
+msgid "breadcrumb.jobs"
+msgstr "Mga gawain"
+
+msgid "breadcrumb.logs"
+msgstr "Mga Log"
+
+msgid "breadcrumb.misc"
+msgstr "Iba pa"
+
+msgid "breadcrumb.mode_selection"
+msgstr "Pagpili ng Mode"
+
+msgid "breadcrumb.more"
+msgstr "Higit pa..."
+
+msgid "breadcrumb.new"
+msgstr "Bago"
+
+msgid "breadcrumb.plugins"
+msgstr "Mga Plugin"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "Mga Pahina ng Plugin"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "Profile"
+
+msgid "breadcrumb.reports"
+msgstr "Mga Ulat"
+
+msgid "breadcrumb.services"
+msgstr "Mga Serbisyo"
+
+msgid "breadcrumb.support"
+msgstr "Suporta"
+
+msgid "breadcrumb.templates"
+msgstr "Mga Template"
+
+msgid "breadcrumb.threatmap"
+msgstr "Mapa ng mga banta"
+
+msgid "breadcrumb.timings"
+msgstr "Mga timing"
+
+msgid "breadcrumb.web_cache"
+msgstr "Cache ng web"
+
+msgid "breadcrumb.whats_new"
+msgstr "Ano ang bago"
+
+msgid "button.actions"
+msgstr "Mga Aksyon"
+
+msgid "button.activate_key"
+msgstr "I-activate ang Key"
+
+msgid "button.add"
+msgstr "IDAGDAG"
+
+msgid "button.add_ban_plural"
+msgstr "Magdagdag ng ban"
+
+msgid "button.add_passkey"
+msgstr "Magdagdag ng passkey"
+
+msgid "button.add_plugin_plural"
+msgstr "Magdagdag ng plugin"
+
+msgid "button.add_plugins"
+msgstr "Magdagdag ng Mga Plugin"
+
+msgid "button.auto_refresh"
+msgstr "Awtomatikong I-refresh"
+
+msgid "button.ban"
+msgstr "I-ban"
+
+msgid "button.ban_all_filtered"
+msgstr "I-ban ang lahat ng tumutugmang report"
+
+msgid "button.ban_selected"
+msgstr "I-ban ang mga napili"
+
+msgid "button.cache"
+msgstr "Cache"
+
+msgid "button.cancel"
+msgstr "Kanselahin"
+
+msgid "button.clear"
+msgstr "LINISIN"
+
+msgid "button.clone"
+msgstr "Kopyahin"
+
+msgid "button.close"
+msgstr "Isara"
+
+msgid "button.collapse_multiline"
+msgstr "I-collapse"
+
+msgid "button.columns"
+msgstr "Mga Hanay"
+
+msgid "button.convert_configs"
+msgstr "I-convert ang Mga Config"
+
+msgid "button.convert_configs_to"
+msgstr "I-convert sa %(state)s"
+
+msgid "button.convert_services"
+msgstr "I-convert ang Mga Serbisyo"
+
+msgid "button.copy"
+msgstr "Kopyahin"
+
+msgid "button.copy_codes"
+msgstr "Kopyahin ang Mga Code"
+
+msgid "button.copy_raw"
+msgstr "Kopyahin ang Raw Data"
+
+msgid "button.copy_visible"
+msgstr "Kopyahin ang Nakikita"
+
+msgid "button.create_config"
+msgstr "Lumikha ng Custom Config"
+
+msgid "button.create_instance"
+msgstr "Lumikha ng Instance"
+
+msgid "button.create_service"
+msgstr "Lumikha ng bagong serbisyo"
+
+msgid "button.create_template"
+msgstr "Lumikha ng template"
+
+msgid "button.delete"
+msgstr "Tanggalin"
+
+msgid "button.delete_instance"
+msgstr "Burahin ang Mga Instance"
+
+msgid "button.disable_totp"
+msgstr "I-disable ang TOTP"
+
+msgid "button.download"
+msgstr "I-download"
+
+msgid "button.edit"
+msgstr "I-edit"
+
+msgid "button.enable_totp"
+msgstr "I-enable ang TOTP"
+
+msgid "button.entire_config"
+msgstr "Buong Config"
+
+msgid "button.export"
+msgstr "I-export"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "Kunin ang Mga Pandaigdigang Setting"
+
+msgid "button.filtered_actions"
+msgstr "Mga na-filter na aksyon"
+
+msgid "button.filters_suffix"
+msgstr " Mga Filter"
+
+msgid "button.follow"
+msgstr "Sundan"
+
+msgid "button.force_check"
+msgstr "Pilitin ang pagsusuri"
+
+msgid "button.force_update"
+msgstr "Pilitin ang pag-update"
+
+msgid "button.github_stars"
+msgstr "Mga Bituin"
+
+msgid "button.go"
+msgstr "Pumunta →"
+
+msgid "button.go_back"
+msgstr "Bumalik"
+
+msgid "button.got_it"
+msgstr "Naiintindihan ko"
+
+msgid "button.hide"
+msgstr "Itago"
+
+msgid "button.history"
+msgstr "Kasaysayan"
+
+msgid "button.import_configs"
+msgstr "Mag-import ng mga custom na configuration"
+
+msgid "button.import_services"
+msgstr "Mag-import ng mga serbisyo"
+
+msgid "button.local_time"
+msgstr "Lokal na oras"
+
+msgid "button.login"
+msgstr "Mag-login"
+
+msgid "button.multiple_add"
+msgstr "IDAGDAG"
+
+msgid "button.multiple_hide"
+msgstr "ITAGO"
+
+msgid "button.multiple_remove"
+msgstr "ALISIN"
+
+msgid "button.multiple_show"
+msgstr "IPAKITA"
+
+msgid "button.need_help"
+msgstr "Kailangan ng Tulong?"
+
+msgid "button.news"
+msgstr "Balita"
+
+msgid "button.notifications"
+msgstr "Mga Abiso"
+
+msgid "button.open_support_ticket"
+msgstr "Magbukas ng Support Ticket"
+
+msgid "button.order_support"
+msgstr "Umorder ng Suporta"
+
+msgid "button.ping"
+msgstr "Ping"
+
+msgid "button.plugin_page"
+msgstr "Pahina ng Plugin"
+
+msgid "button.proceed"
+msgstr "Magpatuloy"
+
+msgid "button.refresh"
+msgstr "I-refresh"
+
+msgid "button.refresh_recovery_codes"
+msgstr "I-refresh ang Mga Recovery Code"
+
+msgid "button.reload"
+msgstr "I-reload"
+
+msgid "button.rename"
+msgstr "Palitan ang pangalan"
+
+msgid "button.reset"
+msgstr "I-reset"
+
+msgid "button.reset_columns"
+msgstr "I-reset ang Mga Hanay"
+
+msgid "button.retry"
+msgstr "Subukang muli"
+
+msgid "button.return_to_safety"
+msgstr "Bumalik sa Kaligtasan"
+
+msgid "button.run"
+msgstr "Patakbuhin"
+
+msgid "button.run_selected_jobs"
+msgstr "Patakbuhin ang Mga Napiling Trabaho"
+
+msgid "button.save"
+msgstr "I-save"
+
+msgid "button.save_changes"
+msgstr "I-save ang Mga Pagbabago"
+
+msgid "button.search"
+msgstr "Maghanap"
+
+msgid "button.see_all_releases"
+msgstr "Tingnan ang lahat ng release"
+
+msgid "button.select_file"
+msgstr "Pumili ng File"
+
+msgid "button.select_page"
+msgstr "Pumili ng Pahina"
+
+msgid "button.service"
+msgstr "Serbisyo"
+
+msgid "button.set_1h"
+msgstr "Itakda ng 1 Oras"
+
+msgid "button.set_1w"
+msgstr "Itakda ng 1 Linggo"
+
+msgid "button.set_24h"
+msgstr "Itakda ng 24 Oras"
+
+msgid "button.set_permanent"
+msgstr "Itakda bilang Permanente"
+
+msgid "button.setup"
+msgstr "Pag-setup"
+
+msgid "button.show"
+msgstr "Ipakita"
+
+msgid "button.show_me"
+msgstr "Ipakita sa akin"
+
+msgid "button.sign_in_with_passkey"
+msgstr "Mag-sign in gamit ang passkey"
+
+msgid "button.stop"
+msgstr "Itigil"
+
+msgid "button.submit"
+msgstr "Isumite"
+
+msgid "button.subscribe"
+msgstr "Mag-subscribe"
+
+msgid "button.unban"
+msgstr "Alisin ang Ban"
+
+msgid "button.unban_all_filtered"
+msgstr "Alisin ang lahat ng tumutugmang ban"
+
+msgid "button.update_duration"
+msgstr "I-update ang Tagal ng Ban"
+
+msgid "button.update_duration_all_filtered"
+msgstr "Baguhin ang tagal ng lahat ng tumutugmang ban"
+
+msgid "button.update_key"
+msgstr "I-update ang Key"
+
+msgid "button.upload_photo"
+msgstr "Mag-upload ng Bagong Larawan"
+
+msgid "button.use_security_key"
+msgstr "Gumamit ng security key"
+
+msgid "button.use_template"
+msgstr "Gamitin ang template"
+
+msgid "button.verify"
+msgstr "I-verify"
+
+msgid "button.view"
+msgstr "Tingnan"
+
+msgid "button.view_details"
+msgstr "Tingnan ang Mga Detalye"
+
+msgid "button.view_raw_data"
+msgstr "Tingnan ang Raw Data"
+
+msgid "button.wipe_other_sessions"
+msgstr "I-log out ang iba pang session"
+
+msgid "button.wrap"
+msgstr "I-wrap"
+
+msgid "cache.kpi_files"
+msgstr "Mga file"
+
+msgid "cache.kpi_per_service"
+msgstr "Bawat serbisyo"
+
+msgid "cache.subtitle"
+msgstr "Mga file ng cache na nabuo ng mga naka-iskedyul na gawain (blocklists, GeoIP databases, at iba pa) — suriin, i-download, o burahin ang mga ito bawat serbisyo at plugin."
+
+msgid "cache.title"
+msgstr "Mga cache file"
+
+msgid "certificates.acme_help"
+msgstr "Piliin ang mga serbisyo kung saan ang mga kasalukuyang setting ay nagpapagana at nagko-configure ng Let's Encrypt. Ang aksyong ito ay nagpaplano lamang ng configuration; ang mga detalye ng sertipiko at mga kredensyal ng hamon ay hindi ipinasok dito."
+
+msgid "certificates.active"
+msgstr "Mga aktibong sertipiko"
+
+msgid "certificates.algorithm"
+msgstr "Algorithm"
+
+msgid "certificates.all"
+msgstr "Lahat"
+
+msgid "certificates.assignment_notice"
+msgstr "Ang mga assignment ay organisado ang sentral na imbentaryo; ang deployment ng TLS ay nananatiling kontrolado ng mga setting ng sertipiko ng bawat serbisyo."
+
+msgid "certificates.assignments"
+msgstr "Assignment ng imbentaryo"
+
+msgid "certificates.assignments_help"
+msgstr "Ang mga assignment na ito ay hindi nagbabago sa mga live na setting ng TLS."
+
+msgid "certificates.attach"
+msgstr "Mag-assign"
+
+msgid "certificates.attach_all"
+msgstr "Ang sertipikong ito ay naka-attach na sa lahat ng available na serbisyo."
+
+msgid "certificates.attach_copy"
+msgstr "Mag-assign ng \"%(name)s\" sa isang serbisyo sa sentral na imbentaryo."
+
+msgid "certificates.browse_certificate"
+msgstr "I-browse ang sertipiko"
+
+msgid "certificates.browse_key"
+msgstr "I-browse ang pribadong key"
+
+msgid "certificates.common_name"
+msgstr "Common name"
+
+msgid "certificates.confirm"
+msgstr "Kumpirmahin"
+
+msgid "certificates.confirm_action"
+msgstr "Kumpirmahin ang aksyon sa sertipiko"
+
+msgid "certificates.confirm_delete"
+msgstr "Tanggalin ang “%(name)s”? Hindi na ito maibabalik."
+
+msgid "certificates.confirm_generic"
+msgstr "Kumpirmahin ang aksyon sa sertipiko?"
+
+msgid "certificates.confirm_renew"
+msgstr "I-renew ang \"%(name)s\"?"
+
+msgid "certificates.confirm_renew_due"
+msgstr "Suriin ang bawat sertipiko at i-renew ang mga ito na may takdang panahon?"
+
+msgid "certificates.create"
+msgstr "Lumikha ng sertipiko"
+
+msgid "certificates.download_chain"
+msgstr "I-download ang chain"
+
+msgid "certificates.download_leaf"
+msgstr "I-download ang leaf"
+
+msgid "certificates.edit_help"
+msgstr "Binabago lamang nito ang metadata ng imbentaryo, hindi ang materyal ng sertipiko o ang mga live na setting ng TLS."
+
+msgid "certificates.edit_metadata"
+msgstr "I-edit ang metadata ng sertipiko"
+
+msgid "certificates.empty"
+msgstr "Walang sertipiko"
+
+msgid "certificates.empty_help"
+msgstr "Gumawa ng sertipiko na may sariling sertipikasyon, mag-iskedyul ng ACME issuance, o i-upload ang umiiral na sertipiko at susi na nasa format na PEM."
+
+msgid "certificates.expired_help"
+msgstr "Kailangan ng atensyon"
+
+msgid "certificates.expires"
+msgstr "Petsa ng pag-expire"
+
+msgid "certificates.expiring_help"
+msgstr "30 araw o mas maikli"
+
+msgid "certificates.file_extensions"
+msgstr "Gumamit ng isa sa mga sumusunod na extension: %(extensions)s."
+
+msgid "certificates.file_select"
+msgstr "Piliin ang isang file na nasa format na PEM."
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "Ang file ay hindi dapat lumampas sa 1 MiB."
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 fingerprint"
+
+msgid "certificates.issuer"
+msgstr "Tagapaglabas"
+
+msgid "certificates.issuers"
+msgstr "Mga nangungunang tagapaglabas"
+
+msgid "certificates.key_drop"
+msgstr "Ilagay dito ang katugmang pribadong susi"
+
+msgid "certificates.key_limit"
+msgstr "Maximum 1 MiB; naka-encrypt habang nakaimbak at hindi kailanman mada-download"
+
+msgid "certificates.last_error"
+msgstr "Huling error"
+
+msgid "certificates.make_primary"
+msgstr "Markahan bilang pangunahing pagtatalaga para sa serbisyong ito"
+
+msgid "certificates.managed"
+msgstr "Mga sertipikong pinamamahalaan"
+
+msgid "certificates.new_selfsigned"
+msgstr "Bagong sertipiko na may sariling sertipikasyon"
+
+msgid "certificates.no_issuers"
+msgstr "Walang impormasyon ng tagapaglabas"
+
+msgid "certificates.none_due"
+msgstr "Walang sertipiko na naghihintay"
+
+msgid "certificates.orphan_account"
+msgstr "Account"
+
+msgid "certificates.orphan_badge"
+msgstr "Walang account na ACME"
+
+msgid "certificates.orphan_help"
+msgstr "Ang record na ito ng pag-renew ay tumutukoy sa isang account na ACME na wala na. Ang pag-renew ay nananatiling naka-block hanggang maayos ang estado ng provider."
+
+msgid "certificates.orphan_server"
+msgstr "Server ng ACME"
+
+msgid "certificates.orphan_title"
+msgstr "Walang account na ACME"
+
+msgid "certificates.pem_certificate"
+msgstr "Sertipiko o chain na nasa format na PEM"
+
+msgid "certificates.pem_drop"
+msgstr "Ilagay dito ang pampublikong sertipiko o chain na nasa format na PEM"
+
+msgid "certificates.pem_limit"
+msgstr "Hanggang 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "Pribadong susi na nasa format na PEM"
+
+msgid "certificates.primary"
+msgstr "Pangunahing pagtatalaga"
+
+msgid "certificates.primary_help"
+msgstr "Markahan bilang pangunahing pagtatalaga para sa napiling mga serbisyo"
+
+msgid "certificates.readonly"
+msgstr "Ang database ay read-only. Maaaring suriin at i-download ang mga sertipiko, ngunit hindi maaaring baguhin."
+
+msgid "certificates.renew_due"
+msgstr "Suriin at i-renew ang mga dapat nang i-renew"
+
+msgid "certificates.sans"
+msgstr "Mga pangalan ng alternatibong paksa"
+
+msgid "certificates.save_metadata"
+msgstr "I-save ang metadata"
+
+msgid "certificates.schedule"
+msgstr "Mag-iskedyul ng issuance"
+
+msgid "certificates.schedule_acme"
+msgstr "Mag-iskedyul ng ACME issuance"
+
+msgid "certificates.search"
+msgstr "Maghanap sa pamamagitan ng pangalan, common name, SAN, issuer, o fingerprint…"
+
+msgid "certificates.serial"
+msgstr "Numero ng serye"
+
+msgid "certificates.services"
+msgstr "Mga Serbisyo"
+
+msgid "certificates.services_help"
+msgstr "Gumamit ng Ctrl o Command upang piliin ang maraming serbisyo."
+
+msgid "certificates.showing_count"
+msgstr "Ipinapakita ang %(visible)s sa %(total)s na sertipiko"
+
+msgid "certificates.source.customcert"
+msgstr "Pasadya"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "Self-signed"
+
+msgid "certificates.source_label"
+msgstr "Pinagmulan"
+
+msgid "certificates.status.expired"
+msgstr "Nag-expire na"
+
+msgid "certificates.status.expiring_soon"
+msgstr "Malapit nang mag-expire"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "Hindi pa wasto"
+
+msgid "certificates.status.revoked"
+msgstr "Na-revoke"
+
+msgid "certificates.status.valid"
+msgstr "Wasto"
+
+msgid "certificates.subtitle"
+msgstr "Mag-issue, mag-upload, mag-assign, mag-renew, at suriin ang mga sertipiko sa sentral na imbentaryo."
+
+msgid "certificates.total"
+msgstr "Kabuuang"
+
+msgid "certificates.truncated"
+msgstr "Ang unang 500 sertipiko lamang ang ipinapakita. Limitahan ang imbentaryo gamit ang API para sa kumpletong resulta."
+
+msgid "certificates.unassigned"
+msgstr "Hindi naka-assign"
+
+msgid "certificates.upcoming"
+msgstr "Mga paparating na renewal"
+
+msgid "certificates.upcoming_help"
+msgstr "Nag-expire na o nasa loob ng 30-araw na renewal window"
+
+msgid "certificates.upload"
+msgstr "Mag-upload ng sertipiko"
+
+msgid "certificates.upload_custom"
+msgstr "Mag-upload ng custom na sertipiko"
+
+msgid "certificates.upload_invalid"
+msgstr "Pumili ng wasto na publikong sertipiko at ang katugmang pribadong key."
+
+msgid "certificates.valid_days"
+msgstr "Valididad sa araw"
+
+msgid "certificates.valid_from"
+msgstr "Nagsimula sa"
+
+msgid "certificates.valid_to"
+msgstr "Wasto hanggang"
+
+msgid "compose.always_on"
+msgstr "Laging naka-on"
+
+msgid "compose.count"
+msgstr "%(on)s naka-on · %(total)s available · %(locked)s naka-lock"
+
+msgid "compose.entries"
+msgstr "%(count)s na-configure"
+
+msgid "compose.filter.all"
+msgstr "Lahat"
+
+msgid "compose.filter.changed"
+msgstr "Binago"
+
+msgid "compose.filter.on"
+msgstr "Naka-on"
+
+msgid "compose.locked"
+msgstr "Walang kontrol dito"
+
+msgid "compose.provenance.api"
+msgstr "Pinamamahalaan sa pamamagitan ng API"
+
+msgid "compose.provenance.attachment"
+msgstr "Mula sa attachment"
+
+msgid "compose.provenance.clone"
+msgstr "Kinopya"
+
+msgid "compose.provenance.default"
+msgstr "Default"
+
+msgid "compose.provenance.edited"
+msgstr "Binago dito"
+
+msgid "compose.provenance.global"
+msgstr "Mula sa global"
+
+msgid "compose.provenance.managed"
+msgstr "Itinakda ng %(method)s"
+
+msgid "compose.provenance.template"
+msgstr "Mula sa template"
+
+msgid "compose.set_value"
+msgstr "Itakda ang halaga…"
+
+msgid "compose.show_more"
+msgstr "Ipakita ang higit pang %(count)s"
+
+msgid "compose.unavailable"
+msgstr "Hindi ma-load ang listahan ng plugin, kaya hindi ligtas na mabago ang pahinang ito. I-reload kapag sumagot ang API."
+
+msgid "configs.subtitle"
+msgstr "Mga snippet ng custom na configuration ng NGINX para sa iyong mga serbisyo — lumikha, i-edit, at pamahalaan ang HTTP, ModSecurity, at mga override sa antas ng stream."
+
+msgid "country.AD"
+msgstr "Andora"
+
+msgid "country.AE"
+msgstr "Nagkakaisang Emiratong Arabo"
+
+msgid "country.AF"
+msgstr "Apganistan"
+
+msgid "country.AG"
+msgstr "Antigua at Barbuda"
+
+msgid "country.AI"
+msgstr "Anguilla"
+
+msgid "country.AL"
+msgstr "Albaniya"
+
+msgid "country.AM"
+msgstr "Armenya"
+
+msgid "country.AO"
+msgstr "Angola"
+
+msgid "country.AQ"
+msgstr "Antartika"
+
+msgid "country.AR"
+msgstr "Arghentina"
+
+msgid "country.AS"
+msgstr "Amerikanong Samoa"
+
+msgid "country.AT"
+msgstr "Austrya"
+
+msgid "country.AU"
+msgstr "Australya"
+
+msgid "country.AW"
+msgstr "Aruba"
+
+msgid "country.AX"
+msgstr "Mga Isla ng Åland"
+
+msgid "country.AZ"
+msgstr "Aserbayjan"
+
+msgid "country.BA"
+msgstr "Bosnia at Herzegovina"
+
+msgid "country.BB"
+msgstr "Barbados"
+
+msgid "country.BD"
+msgstr "Bangladesh"
+
+msgid "country.BE"
+msgstr "Belghika"
+
+msgid "country.BF"
+msgstr "Burkina Faso"
+
+msgid "country.BG"
+msgstr "Bulgarya"
+
+msgid "country.BH"
+msgstr "Bahrain"
+
+msgid "country.BI"
+msgstr "Burundi"
+
+msgid "country.BJ"
+msgstr "Benin"
+
+msgid "country.BL"
+msgstr "Saint Barthélemy"
+
+msgid "country.BM"
+msgstr "Bermuda"
+
+msgid "country.BN"
+msgstr "Brunei Darussalam"
+
+msgid "country.BO"
+msgstr "Bolivya"
+
+msgid "country.BQ"
+msgstr "Netherlands ng Caribbean"
+
+msgid "country.BR"
+msgstr "Brasil"
+
+msgid "country.BS"
+msgstr "Bahamas"
+
+msgid "country.BT"
+msgstr "Bhutan"
+
+msgid "country.BV"
+msgstr "Pulo ng Bouvet"
+
+msgid "country.BW"
+msgstr "Botswana"
+
+msgid "country.BY"
+msgstr "Belarus"
+
+msgid "country.BZ"
+msgstr "Belize"
+
+msgid "country.CA"
+msgstr "Kanada"
+
+msgid "country.CC"
+msgstr "Mga Isla ng Cocos (Keeling)"
+
+msgid "country.CD"
+msgstr "Demokratikong Republika ng Congo"
+
+msgid "country.CF"
+msgstr "Republikang Gitnang Aprika"
+
+msgid "country.CG"
+msgstr "Republika ng Congo"
+
+msgid "country.CH"
+msgstr "Swiserlano"
+
+msgid "country.CI"
+msgstr "Baybayin ng Garing"
+
+msgid "country.CK"
+msgstr "Mga Isla ng Cook"
+
+msgid "country.CL"
+msgstr "Chile"
+
+msgid "country.CM"
+msgstr "Cameroon"
+
+msgid "country.CN"
+msgstr "Tsina"
+
+msgid "country.CO"
+msgstr "Kolombia"
+
+msgid "country.CR"
+msgstr "Costa Rica"
+
+msgid "country.CU"
+msgstr "Kuba"
+
+msgid "country.CV"
+msgstr "Cape Verde"
+
+msgid "country.CW"
+msgstr "Curaçao"
+
+msgid "country.CX"
+msgstr "Christmas Island"
+
+msgid "country.CY"
+msgstr "Siprus"
+
+msgid "country.CZ"
+msgstr "Republika ng Czech"
+
+msgid "country.DE"
+msgstr "Alemanya"
+
+msgid "country.DJ"
+msgstr "Djibouti"
+
+msgid "country.DK"
+msgstr "Dinamarka"
+
+msgid "country.DM"
+msgstr "Dominica"
+
+msgid "country.DO"
+msgstr "Republika ng Dominikano"
+
+msgid "country.DZ"
+msgstr "Alherya"
+
+msgid "country.EC"
+msgstr "Ecuador"
+
+msgid "country.EE"
+msgstr "Estonia"
+
+msgid "country.EG"
+msgstr "Ehipto"
+
+msgid "country.EH"
+msgstr "Kanlurang Sahara"
+
+msgid "country.ER"
+msgstr "Eritrea"
+
+msgid "country.ES"
+msgstr "Espanya"
+
+msgid "country.ET"
+msgstr "Etiopya"
+
+msgid "country.EU"
+msgstr "Europa"
+
+msgid "country.FI"
+msgstr "Pinlandya"
+
+msgid "country.FJ"
+msgstr "Fiji"
+
+msgid "country.FK"
+msgstr "Mga Isla ng Falkland (Malvinas)"
+
+msgid "country.FM"
+msgstr "Micronesia"
+
+msgid "country.FO"
+msgstr "Mga Isla ng Faroe"
+
+msgid "country.FR"
+msgstr "Pransya"
+
+msgid "country.GA"
+msgstr "Gabon"
+
+msgid "country.GB"
+msgstr "Nagkakaisang Kaharian"
+
+msgid "country.GD"
+msgstr "Grenada"
+
+msgid "country.GE"
+msgstr "Georgia"
+
+msgid "country.GF"
+msgstr "Pranses na Guiana"
+
+msgid "country.GG"
+msgstr "Guernsey"
+
+msgid "country.GH"
+msgstr "Ghana"
+
+msgid "country.GI"
+msgstr "Gibraltar"
+
+msgid "country.GL"
+msgstr "Greenland"
+
+msgid "country.GM"
+msgstr "Gambia"
+
+msgid "country.GN"
+msgstr "Guinea"
+
+msgid "country.GP"
+msgstr "Guadeloupe"
+
+msgid "country.GQ"
+msgstr "Ekwatoryal na Guinea"
+
+msgid "country.GR"
+msgstr "Gresya"
+
+msgid "country.GS"
+msgstr "Timog Georgia at Timog Sandwich Islands"
+
+msgid "country.GT"
+msgstr "Guatemala"
+
+msgid "country.GU"
+msgstr "Guam"
+
+msgid "country.GW"
+msgstr "Guinea-Bissau"
+
+msgid "country.GY"
+msgstr "Guyana"
+
+msgid "country.HK"
+msgstr "Hong Kong"
+
+msgid "country.HM"
+msgstr "Pulo ng Heard at mga Isla ng McDonald"
+
+msgid "country.HN"
+msgstr "Honduras"
+
+msgid "country.HR"
+msgstr "Kroasya"
+
+msgid "country.HT"
+msgstr "Haiti"
+
+msgid "country.HU"
+msgstr "Hungarya"
+
+msgid "country.ID"
+msgstr "Indonesha"
+
+msgid "country.IE"
+msgstr "Irlandya"
+
+msgid "country.IL"
+msgstr "Israel"
+
+msgid "country.IM"
+msgstr "Pulo ng Man"
+
+msgid "country.IN"
+msgstr "Indya"
+
+msgid "country.IO"
+msgstr "Teritoryo ng Britanya sa Karagatang Indiyano"
+
+msgid "country.IQ"
+msgstr "Irak"
+
+msgid "country.IR"
+msgstr "Iran"
+
+msgid "country.IS"
+msgstr "Iceland"
+
+msgid "country.IT"
+msgstr "Italya"
+
+msgid "country.JE"
+msgstr "Jersey"
+
+msgid "country.JM"
+msgstr "Jamaica"
+
+msgid "country.JO"
+msgstr "Jordanya"
+
+msgid "country.JP"
+msgstr "Hapon"
+
+msgid "country.KE"
+msgstr "Kenya"
+
+msgid "country.KG"
+msgstr "Kyrgyzstan"
+
+msgid "country.KH"
+msgstr "Kambodya"
+
+msgid "country.KI"
+msgstr "Kiribati"
+
+msgid "country.KM"
+msgstr "Comoros"
+
+msgid "country.KN"
+msgstr "Saint Kitts at Nevis"
+
+msgid "country.KP"
+msgstr "Hilagang Korea"
+
+msgid "country.KR"
+msgstr "Timog Korea"
+
+msgid "country.KW"
+msgstr "Kuwait"
+
+msgid "country.KY"
+msgstr "Mga Isla ng Cayman"
+
+msgid "country.KZ"
+msgstr "Kazakhstan"
+
+msgid "country.LA"
+msgstr "Laos"
+
+msgid "country.LB"
+msgstr "Libanon"
+
+msgid "country.LC"
+msgstr "Santa Lucia"
+
+msgid "country.LI"
+msgstr "Liechtenstein"
+
+msgid "country.LK"
+msgstr "Sri Lanka"
+
+msgid "country.LR"
+msgstr "Liberia"
+
+msgid "country.LS"
+msgstr "Lesotho"
+
+msgid "country.LT"
+msgstr "Litwanya"
+
+msgid "country.LU"
+msgstr "Luxembourg"
+
+msgid "country.LV"
+msgstr "Latbya"
+
+msgid "country.LY"
+msgstr "Libya"
+
+msgid "country.MA"
+msgstr "Maroke"
+
+msgid "country.MC"
+msgstr "Monaco"
+
+msgid "country.MD"
+msgstr "Moldova"
+
+msgid "country.ME"
+msgstr "Montenegro"
+
+msgid "country.MF"
+msgstr "San Martin"
+
+msgid "country.MG"
+msgstr "Madagascar"
+
+msgid "country.MH"
+msgstr "Mga Isla ng Marshall"
+
+msgid "country.MK"
+msgstr "Hilagang Macedonia"
+
+msgid "country.ML"
+msgstr "Mali"
+
+msgid "country.MM"
+msgstr "Myanmar"
+
+msgid "country.MN"
+msgstr "Mongolia"
+
+msgid "country.MO"
+msgstr "Macao"
+
+msgid "country.MP"
+msgstr "Hilagang Kapuluang Mariana"
+
+msgid "country.MQ"
+msgstr "Martinique"
+
+msgid "country.MR"
+msgstr "Mauritania"
+
+msgid "country.MS"
+msgstr "Montserrat"
+
+msgid "country.MT"
+msgstr "Malta"
+
+msgid "country.MU"
+msgstr "Mauritius"
+
+msgid "country.MV"
+msgstr "Maldives"
+
+msgid "country.MW"
+msgstr "Malawi"
+
+msgid "country.MX"
+msgstr "Mehiko"
+
+msgid "country.MY"
+msgstr "Malasya"
+
+msgid "country.MZ"
+msgstr "Mozambique"
+
+msgid "country.NA"
+msgstr "Namibia"
+
+msgid "country.NC"
+msgstr "Bagong Caledonia"
+
+msgid "country.NE"
+msgstr "Niger"
+
+msgid "country.NF"
+msgstr "Pulo ng Norfolk"
+
+msgid "country.NG"
+msgstr "Niherya"
+
+msgid "country.NI"
+msgstr "Nicaragua"
+
+msgid "country.NL"
+msgstr "Netherlands"
+
+msgid "country.NO"
+msgstr "Norweha"
+
+msgid "country.NP"
+msgstr "Nepal"
+
+msgid "country.NR"
+msgstr "Nauru"
+
+msgid "country.NU"
+msgstr "Niue"
+
+msgid "country.NZ"
+msgstr "Bagong Selanda"
+
+msgid "country.OM"
+msgstr "Oman"
+
+msgid "country.PA"
+msgstr "Panama"
+
+msgid "country.PE"
+msgstr "Peru"
+
+msgid "country.PF"
+msgstr "Pranses na Polynesia"
+
+msgid "country.PG"
+msgstr "Papua Bagong Guinea"
+
+msgid "country.PH"
+msgstr "Pilipinas"
+
+msgid "country.PK"
+msgstr "Pakistan"
+
+msgid "country.PL"
+msgstr "Polonya"
+
+msgid "country.PM"
+msgstr "Saint Pierre at Miquelon"
+
+msgid "country.PN"
+msgstr "Pitcairn"
+
+msgid "country.PR"
+msgstr "Puerto Rico"
+
+msgid "country.PS"
+msgstr "Palestina"
+
+msgid "country.PT"
+msgstr "Portugal"
+
+msgid "country.PW"
+msgstr "Palau"
+
+msgid "country.PY"
+msgstr "Paraguay"
+
+msgid "country.QA"
+msgstr "Qatar"
+
+msgid "country.RE"
+msgstr "Réunion"
+
+msgid "country.RO"
+msgstr "Rumaniya"
+
+msgid "country.RS"
+msgstr "Serbia"
+
+msgid "country.RU"
+msgstr "Rusya"
+
+msgid "country.RW"
+msgstr "Rwanda"
+
+msgid "country.SA"
+msgstr "Arabya Saudita"
+
+msgid "country.SB"
+msgstr "Mga Isla ng Solomon"
+
+msgid "country.SC"
+msgstr "Seychelles"
+
+msgid "country.SD"
+msgstr "Sudan"
+
+msgid "country.SE"
+msgstr "Suedya"
+
+msgid "country.SG"
+msgstr "Singapur"
+
+msgid "country.SH"
+msgstr "Saint Helena, Ascension at Tristan da Cunha"
+
+msgid "country.SI"
+msgstr "Slovenia"
+
+msgid "country.SJ"
+msgstr "Svalbard at Jan Mayen"
+
+msgid "country.SK"
+msgstr "Slovakia"
+
+msgid "country.SL"
+msgstr "Sierra Leone"
+
+msgid "country.SM"
+msgstr "San Marino"
+
+msgid "country.SN"
+msgstr "Senegal"
+
+msgid "country.SO"
+msgstr "Somalya"
+
+msgid "country.SR"
+msgstr "Suriname"
+
+msgid "country.SS"
+msgstr "Timog Sudan"
+
+msgid "country.ST"
+msgstr "Sao Tome at Principe"
+
+msgid "country.SV"
+msgstr "El Salvador"
+
+msgid "country.SX"
+msgstr "Sint Maarten (bahaging Olandes)"
+
+msgid "country.SY"
+msgstr "Sirya"
+
+msgid "country.SZ"
+msgstr "Eswatini"
+
+msgid "country.TC"
+msgstr "Mga Isla ng Turks at Caicos"
+
+msgid "country.TD"
+msgstr "Chad"
+
+msgid "country.TF"
+msgstr "Pranses na Katimugang Teritoryo"
+
+msgid "country.TG"
+msgstr "Togo"
+
+msgid "country.TH"
+msgstr "Tailandya"
+
+msgid "country.TJ"
+msgstr "Tajikistan"
+
+msgid "country.TK"
+msgstr "Tokelau"
+
+msgid "country.TL"
+msgstr "Timor-Leste"
+
+msgid "country.TM"
+msgstr "Turkmenistan"
+
+msgid "country.TN"
+msgstr "Tunisya"
+
+msgid "country.TO"
+msgstr "Tonga"
+
+msgid "country.TR"
+msgstr "Türkiye"
+
+msgid "country.TT"
+msgstr "Trinidad at Tobago"
+
+msgid "country.TV"
+msgstr "Tuvalu"
+
+msgid "country.TW"
+msgstr "Taiwan"
+
+msgid "country.TZ"
+msgstr "Tanzania"
+
+msgid "country.UA"
+msgstr "Ukraniya"
+
+msgid "country.UG"
+msgstr "Uganda"
+
+msgid "country.UM"
+msgstr "Maliit na Malayong Isla ng U.S."
+
+msgid "country.US"
+msgstr "Estados Unidos"
+
+msgid "country.UY"
+msgstr "Uruguay"
+
+msgid "country.UZ"
+msgstr "Uzbekistan"
+
+msgid "country.VA"
+msgstr "Banal na Luklukan (Lungsod ng Vatican)"
+
+msgid "country.VC"
+msgstr "Saint Vincent at Grenadines"
+
+msgid "country.VE"
+msgstr "Venezuela"
+
+msgid "country.VG"
+msgstr "Mga Isla ng Birhen ng Britanya"
+
+msgid "country.VI"
+msgstr "Mga Isla ng Birhen ng U.S."
+
+msgid "country.VN"
+msgstr "Vietnam"
+
+msgid "country.VU"
+msgstr "Vanuatu"
+
+msgid "country.WF"
+msgstr "Mga Isla ng Wallis at Futuna"
+
+msgid "country.WS"
+msgstr "Samoa"
+
+msgid "country.XK"
+msgstr "Kosovo"
+
+msgid "country.YE"
+msgstr "Yemen"
+
+msgid "country.YT"
+msgstr "Mayotte"
+
+msgid "country.ZA"
+msgstr "Timog Aprika"
+
+msgid "country.ZM"
+msgstr "Zambia"
+
+msgid "country.ZW"
+msgstr "Zimbabwe"
+
+msgid "country.not_applicable"
+msgstr "Hindi Naaangkop"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "Mga Na-block na Kahilingan"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "Mga Na-block na Natatanging IP"
+
+msgid "dashboard.card.certificates.title"
+msgstr "Mga Sertipiko"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s aktibo / %(down)s hindi aktibo / %(loading)s naglo-load"
+
+msgid "dashboard.card.instances.title"
+msgstr "Mga Instance"
+
+msgid "dashboard.card.news.title"
+msgstr "Balita"
+
+msgid "dashboard.card.plan.title"
+msgstr "Plano"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s core / %(pro)s PRO / %(external)s panlabas"
+
+msgid "dashboard.card.plugins.title"
+msgstr "Mga Plugin"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "Kritikal: Malapit nang maubusan ng memorya ang sistema!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "Mahusay na memorya para sa mga production environment"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "Isaalang-alang ang pag-upgrade sa 16GB+ para sa production"
+
+msgid "dashboard.card.ram.title"
+msgstr "System RAM"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% nagagamit"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "Babala: Ang mababang memorya ay maaaring makaapekto sa pagganap"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s online / %(draft)s draft"
+
+msgid "dashboard.card.services.title"
+msgstr "Mga Serbisyo"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "Pangunahing dahilan ng pag-block"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "Kabuuang Mga Kahilingan"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "Sa darating na panahon"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "Mga upstream"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "Mga Na-block na Kahilingan ayon sa Bansa"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "Mga Na-block na Kahilingan"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "Bilang"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "Mga na-block na kahilingan sa paglipas ng panahon"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "Oras"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "Katayuan ng Pag-block sa Paglipas ng Panahon"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "Mga Na-block na Kahilingan"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "Distribusyon ng Katayuan ng Kahilingan"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "Na-block"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "Mga na-block na request sa paglipas ng panahon (piniling saklaw)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "Pinaka-block na IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "Nangungunang 10 Na-block na IP"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "Mga Na-block na Kahilingan"
+
+msgid "dashboard.map.hover_info"
+msgstr "Mag-hover sa isang bansa"
+
+msgid "dashboard.map.legend"
+msgstr "Alamat"
+
+msgid "dashboard.map.no_data"
+msgstr "Walang data"
+
+msgid "dashboard.mini.across_countries"
+msgstr "sa mga bansa ng %(count)s"
+
+msgid "dashboard.mini.enforced"
+msgstr "kasalukuyang ipinapatupad"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% na bloke"
+
+msgid "dashboard.mini.scheduled"
+msgstr "Nagschedule"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "Na-block at pinayagan"
+
+msgid "dashboard.panel.map_sub"
+msgstr "Itapat ang pointer para sa detalye"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "Ayon sa nag-trigger na patakaran"
+
+msgid "dashboard.panel.status_sub"
+msgstr "Mga HTTP response code"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "Piniling saklaw"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "Ayon sa bilang ng request"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "Na-block ng %(total)s"
+
+msgid "dashboard.status.free_plan"
+msgstr "Libreng plano"
+
+msgid "dashboard.status.renews"
+msgstr "Nag-renew"
+
+msgid "dashboard.status.services_licensed"
+msgstr "Mga serbisyo ng %(count)s na may lisensya"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "kumpara sa nakaraang"
+
+msgid "dashboard.status.vs_prev"
+msgstr "kumpara sa nakaraang"
+
+msgid "dashboard.tile.bans_active"
+msgstr "Mga aktibong ban"
+
+msgid "dashboard.tile.jobs"
+msgstr "Mga nakaiskedyul na gawain"
+
+msgid "dashboard.tile.trend"
+msgstr "Takbo ng mga na-block na request"
+
+msgid "dashboard.welcome.greeting"
+msgstr "Maligayang pagbabalik,"
+
+msgid "dashboard.welcome.title"
+msgstr "Maligayang pagbabalik, %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "Nakaraang %(days)s araw"
+
+msgid "dashboard.window.title"
+msgstr "Window ng Dashboard"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "Lahat ng %(count)s na katugmang %(entity)s ay napili na."
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "Piliin ang lahat ng %(count)s na katugmang %(entity)s"
+
+msgid "datatable.bulk_select_clear"
+msgstr "Alisin ang pagpili"
+
+msgid "datatable.bulk_select_page"
+msgstr "Lahat ng %(count)s %(entity)s sa pahinang ito ay napili na."
+
+msgid "datatable.info_bans"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Ban"
+
+msgid "datatable.info_cache"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Cache File"
+
+msgid "datatable.info_configs"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Custom Config"
+
+msgid "datatable.info_empty_bans"
+msgstr "Walang available na Mga Ban"
+
+msgid "datatable.info_empty_cache"
+msgstr "Walang available na Mga Cache File"
+
+msgid "datatable.info_empty_configs"
+msgstr "Walang available na Mga Custom Config"
+
+msgid "datatable.info_empty_instances"
+msgstr "Walang available na Mga Instance"
+
+msgid "datatable.info_empty_items"
+msgstr "Walang available na Mga Item"
+
+msgid "datatable.info_empty_jobs"
+msgstr "Walang available na Mga Trabaho"
+
+msgid "datatable.info_empty_plugins"
+msgstr "Walang available na Mga Plugin"
+
+msgid "datatable.info_empty_reports"
+msgstr "Walang available na Mga Ulat"
+
+msgid "datatable.info_empty_services"
+msgstr "Walang available na Mga Serbisyo"
+
+msgid "datatable.info_empty_templates"
+msgstr "Walang available na Mga Template"
+
+msgid "datatable.info_filtered_bans"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Ban)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Cache File)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Custom Config)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Instance)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Item)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Trabaho)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Plugin)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Ulat)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Serbisyo)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(na-filter mula sa _MAX_ na kabuuang Mga Template)"
+
+msgid "datatable.info_instances"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Instance"
+
+msgid "datatable.info_items"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Item"
+
+msgid "datatable.info_jobs"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Trabaho"
+
+msgid "datatable.info_plugins"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Plugin"
+
+msgid "datatable.info_reports"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Ulat"
+
+msgid "datatable.info_services"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Serbisyo"
+
+msgid "datatable.info_templates"
+msgstr "Ipinapakita ang %(start)s hanggang %(end)s ng %(total)s na Mga Template"
+
+msgid "datatable.length_all"
+msgstr "Lahat"
+
+msgid "datatable.length_menu_bans"
+msgstr "Ipakita ang _MENU_ na Mga Ban"
+
+msgid "datatable.length_menu_cache"
+msgstr "Ipakita ang _MENU_ na Mga Cache File"
+
+msgid "datatable.length_menu_configs"
+msgstr "Ipakita ang _MENU_ na Mga Custom Config"
+
+msgid "datatable.length_menu_instances"
+msgstr "Ipakita ang _MENU_ na Mga Instance"
+
+msgid "datatable.length_menu_items"
+msgstr "Ipakita ang _MENU_ na Mga Item"
+
+msgid "datatable.length_menu_jobs"
+msgstr "Ipakita ang _MENU_ na Mga Trabaho"
+
+msgid "datatable.length_menu_plugins"
+msgstr "Ipakita ang _MENU_ na Mga Plugin"
+
+msgid "datatable.length_menu_reports"
+msgstr "Ipakita ang _MENU_ na Mga Ulat"
+
+msgid "datatable.length_menu_services"
+msgstr "Ipakita ang _MENU_ na Mga Serbisyo"
+
+msgid "datatable.length_menu_templates"
+msgstr "Ipakita ang _MENU_ na Mga Template"
+
+msgid "datatable.paginate.first"
+msgstr "Una"
+
+msgid "datatable.paginate.last"
+msgstr "Huli"
+
+msgid "datatable.paginate.next"
+msgstr "Susunod"
+
+msgid "datatable.paginate.previous"
+msgstr "Nakaraan"
+
+msgid "datatable.processing"
+msgstr "Pinoproseso..."
+
+msgid "datatable.search"
+msgstr "Maghanap:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "Walang napiling Mga Ban"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "Napili ang 1 Ban"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "Napili ang %d na Mga Ban"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "Walang napiling Mga Cache File"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "Napili ang 1 Cache File"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "Napili ang %d na Mga Cache File"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "Walang napiling Mga Custom Config"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "Napili ang 1 Custom Config"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "Napili ang %d na Mga Custom Config"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "Walang napiling Mga Instance"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "Napili ang 1 Instance"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "Napili ang %d na Mga Instance"
+
+msgid "datatable.select_rows_items_0"
+msgstr "Walang napiling Mga Item"
+
+msgid "datatable.select_rows_items_1"
+msgstr "Napili ang 1 Item"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "Napili ang %d na Mga Item"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "Walang napiling Mga Trabaho"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "Napili ang 1 Trabaho"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "Napili ang %d na Mga Trabaho"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "Walang napiling Mga Plugin"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "Napili ang 1 Plugin"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "Napili ang %d na Mga Plugin"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "Walang napiling Mga Ulat"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "Napili ang 1 Ulat"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "Napili ang %d na Mga Ulat"
+
+msgid "datatable.select_rows_services_0"
+msgstr "Walang napiling Mga Serbisyo"
+
+msgid "datatable.select_rows_services_1"
+msgstr "Napili ang 1 Serbisyo"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "Napili ang %d na Mga Serbisyo"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "Walang napiling Mga Template"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "Napili ang 1 Template"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "Napili ang %d na Mga Template"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s napili"
+
+msgid "datatable.selected_list_empty"
+msgstr "Walang %(entity)s napili."
+
+msgid "datatable.zero_records_bans"
+msgstr "Walang nahanap na katugmang Mga Ban"
+
+msgid "datatable.zero_records_cache"
+msgstr "Walang nahanap na katugmang Mga Cache File"
+
+msgid "datatable.zero_records_configs"
+msgstr "Walang nahanap na katugmang Mga Custom Config"
+
+msgid "datatable.zero_records_instances"
+msgstr "Walang nahanap na katugmang Mga Instance"
+
+msgid "datatable.zero_records_items"
+msgstr "Walang nahanap na katugmang Mga Item"
+
+msgid "datatable.zero_records_jobs"
+msgstr "Walang nahanap na katugmang Mga Trabaho"
+
+msgid "datatable.zero_records_plugins"
+msgstr "Walang nahanap na katugmang Mga Plugin"
+
+msgid "datatable.zero_records_reports"
+msgstr "Walang nahanap na katugmang Mga Ulat"
+
+msgid "datatable.zero_records_services"
+msgstr "Walang nahanap na katugmang Mga Serbisyo"
+
+msgid "datatable.zero_records_templates"
+msgstr "Walang nahanap na katugmang Mga Template"
+
+msgid "dev_log.copy_failed"
+msgstr "Nabigo ang pagkopya ng teksto:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "Nabigo ang pagkuha ng balita:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "Nilalaktawan ang maling linya: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "1 Oras"
+
+msgid "duration.1_week"
+msgstr "1 Linggo"
+
+msgid "duration.24_hours"
+msgstr "24 Oras"
+
+msgid "duration.custom"
+msgstr "Pasadya"
+
+msgid "duration.permanent"
+msgstr "Permanente"
+
+msgid "error.401.help"
+msgstr "Kailangan mong mag-login upang ma-access ang resource na ito."
+
+msgid "error.401.message"
+msgstr "Mangyaring mag-login upang magpatuloy."
+
+msgid "error.401.title"
+msgstr "Kailangan ng Pagpapatunay"
+
+msgid "error.403.help"
+msgstr "Mangyaring suriin ang iyong mga kredensyal o makipag-ugnayan sa isang administrator kung naniniwala kang may error ito."
+
+msgid "error.403.message"
+msgstr "Wala kang pahintulot na ma-access ang pahinang ito."
+
+msgid "error.403.title"
+msgstr "Hindi Pinahintulutan"
+
+msgid "error.404.help"
+msgstr "Mangyaring suriin kung tama ang URL o makipag-ugnayan sa isang administrator kung naniniwala kang may error ito."
+
+msgid "error.404.message"
+msgstr "Hindi mahanap ang hiniling na resource."
+
+msgid "error.404.title"
+msgstr "Hindi Nahanap"
+
+msgid "error.5xx.help"
+msgstr "Mangyaring subukan muli mamaya o makipag-ugnayan sa isang administrator kung nagpapatuloy ang problema."
+
+msgid "error.5xx.message"
+msgstr "Naganap ang isang hindi inaasahang error sa server."
+
+msgid "error.5xx.title"
+msgstr "Error sa Server"
+
+msgid "error.ban_update_failed"
+msgstr "Nabigo ang pag-update ng tagal ng ban. Mangyaring subukan muli."
+
+msgid "error.reports_load_error"
+msgstr "Error sa pag-load ng mga ulat. Mangyaring i-refresh ang pahina."
+
+msgid "error.unban_failed"
+msgstr "Nabigo ang pag-unban ng IP address. Mangyaring subukan muli."
+
+msgid "flash.easter_egg"
+msgstr "Kung nabasa mo ito, ibig sabihin ay mausisa ka"
+
+msgid "flash.error"
+msgstr "Error"
+
+msgid "flash.message"
+msgstr "Impormasyon"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "Mayroon kang higit pang serbisyo kaysa sa pinapayagan ng iyong PRO license. I-upgrade ang iyong license o ilipat ang ilang serbisyo sa Draft mode upang i-unlock ang iyong PRO license."
+
+msgid "flash.time.just_now"
+msgstr "ngayon lang"
+
+msgid "flash.warning"
+msgstr "Babala"
+
+msgid "footer.blog"
+msgstr "Blog"
+
+msgid "footer.documentation"
+msgstr "Dokumentasyon"
+
+msgid "footer.license"
+msgstr "Lisensya"
+
+msgid "footer.made_by"
+msgstr "ginawa ng"
+
+msgid "footer.privacy"
+msgstr "Privacy"
+
+msgid "footer.support"
+msgstr "Suporta"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "Isama ang mga naka-attach na custom na configuration"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "I-overwrite ang mga umiiral na UI/API custom na configuration"
+
+msgid "form.checkbox.remember_me"
+msgstr "Alalahanin Ako"
+
+msgid "form.help.ban_specific_service"
+msgstr "Ang ban ay ilalapat lamang sa partikular na serbisyong ito."
+
+msgid "form.help.hostname_length_limit"
+msgstr "Ang hostname ay limitado sa 256 na character."
+
+msgid "form.help.hostname_special_chars"
+msgstr "Ang `/` at `:` lamang ang pinapayagan para sa pagtukoy ng protocol/port."
+
+msgid "form.help.multivalue_separator"
+msgstr "Ang mga value ay pinaghihiwalay ng:"
+
+msgid "form.help.permanent_ban"
+msgstr "Kung naka-check, ang ban ay hindi kailanman mag-e-expire hanggang sa mano-manong alisin"
+
+msgid "form.help.photo_extensions"
+msgstr "Pinapayagan ang JPG, GIF, o PNG. Max na laki: 800KB."
+
+msgid "form.label.2fa_code"
+msgstr "2FA Code"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "2FA Code o Recovery Code"
+
+msgid "form.label.admin_email"
+msgstr "Email ng Admin"
+
+msgid "form.label.admin_password"
+msgstr "Password ng Admin"
+
+msgid "form.label.admin_username"
+msgstr "Username ng Admin"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "Awtomatikong Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "Saklaw ng Ban"
+
+msgid "form.label.certificate_authority"
+msgstr "Awtoridad ng sertipiko"
+
+msgid "form.label.certificate_priority"
+msgstr "Priyoridad ng Certificate"
+
+msgid "form.label.challenge_type"
+msgstr "Uri ng Challenge"
+
+msgid "form.label.config_type"
+msgstr "Uri ng Config"
+
+msgid "form.label.configuration_name"
+msgstr "Pangalan ng Configuration"
+
+msgid "form.label.confirm_password"
+msgstr "Kumpirmahin ang Password"
+
+msgid "form.label.current_password"
+msgstr "Kasalukuyang Password"
+
+msgid "form.label.custom_config"
+msgstr "Configuration"
+
+msgid "form.label.custom_end_date"
+msgstr "Pasadyang Petsa ng Pagtatapos"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "Custom na SSL certificate"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "Data ng Custom SSL Certificate (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "Custom na SSL key"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "Data ng Custom SSL Key (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Mga Kredensyal ng Let's Encrypt DNS"
+
+msgid "form.label.dns_propagation"
+msgstr "Pagkaantala ng DNS Propagation"
+
+msgid "form.label.dns_provider"
+msgstr "Tagapagbigay ng DNS"
+
+msgid "form.label.email"
+msgstr "Email"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "Email para sa Let's Encrypt"
+
+msgid "form.label.end_date"
+msgstr "Petsa ng Pagtatapos"
+
+msgid "form.label.hostname"
+msgstr "Hostname"
+
+msgid "form.label.instance_id"
+msgstr "ID ng Instance"
+
+msgid "form.label.ip_address"
+msgstr "IP address"
+
+msgid "form.label.keywords"
+msgstr "Mga Keyword"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Custom Profile ng Let's Encrypt"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "I-disable ang Mga Public Suffix (PSL Blacklist)"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Mga Kredensyal ng Let's Encrypt DNS"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Profile ng Let's Encrypt"
+
+msgid "form.label.license_key"
+msgstr "License key"
+
+msgid "form.label.make_permanent"
+msgstr "Gawing Permanente"
+
+msgid "form.label.name"
+msgstr "Pangalan"
+
+msgid "form.label.new_duration"
+msgstr "Bagong Tagal"
+
+msgid "form.label.new_password"
+msgstr "Bagong Password"
+
+msgid "form.label.optional"
+msgstr "(Opsyonal)"
+
+msgid "form.label.passkey_name"
+msgstr "Pangalan ng passkey"
+
+msgid "form.label.password"
+msgstr "Password"
+
+msgid "form.label.permanent_ban"
+msgstr "Permanenteng Ban"
+
+msgid "form.label.plugin_id"
+msgstr "Plugin"
+
+msgid "form.label.raw_configuration"
+msgstr "Raw na Configuration"
+
+msgid "form.label.real_ip_from"
+msgstr "Tunay na IP mula sa"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "Tunay na IP mula sa (mga URL)"
+
+msgid "form.label.real_ip_header"
+msgstr "Header ng tunay na IP"
+
+msgid "form.label.real_ip_recursive"
+msgstr "Recursive na tunay na IP"
+
+msgid "form.label.reason"
+msgstr "Dahilan"
+
+msgid "form.label.secret_token"
+msgstr "Lihim na token"
+
+msgid "form.label.server_name"
+msgstr "Pangalan ng Server"
+
+msgid "form.label.service_name"
+msgstr "Pangalan ng Serbisyo"
+
+msgid "form.label.template_id"
+msgstr "ID ng Template"
+
+msgid "form.label.theme"
+msgstr "Tema"
+
+msgid "form.label.type"
+msgstr "Uri"
+
+msgid "form.label.ui_host"
+msgstr "UI Host"
+
+msgid "form.label.ui_url"
+msgstr "UI URL"
+
+msgid "form.label.use_custom_ssl"
+msgstr "Gumamit ng Custom SSL"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "Gumamit ng Let's Encrypt Staging"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "Gumamit ng PROXY protocol"
+
+msgid "form.label.use_real_ip"
+msgstr "Gumamit ng Tunay na IP"
+
+msgid "form.label.username"
+msgstr "Username"
+
+msgid "form.label.wildcard_certificates"
+msgstr "Mga Wildcard Certificate"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "Connect Timeout ng ZeroSSL API"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API Key"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "Max na Oras ng ZeroSSL API"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "Mga Ulit ng ZeroSSL API"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "Pagkaantala ng Ulit ng ZeroSSL API"
+
+msgid "form.placeholder.2fa_code"
+msgstr "Ipasok ang code"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "Ipasok ang code o recovery code"
+
+msgid "form.placeholder.config_name"
+msgstr "aking-custom-config"
+
+msgid "form.placeholder.current_password"
+msgstr "Kasalukuyang Password"
+
+msgid "form.placeholder.enter_username"
+msgstr "Ipasok ang username"
+
+msgid "form.placeholder.keywords"
+msgstr "Mga Keyword"
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "Ipasok ang value..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "Maghanap ng mga plugin..."
+
+msgid "form.placeholder.search"
+msgstr "Maghanap..."
+
+msgid "form.placeholder.secret_token"
+msgstr "Lihim na token"
+
+msgid "form.placeholder.select_service"
+msgstr "Pumili ng Serbisyo"
+
+msgid "form.placeholder.username_example"
+msgstr "juandelacruz"
+
+msgid "form.validation.confirm_password_match"
+msgstr "Hindi magkatugma ang mga password."
+
+msgid "form.validation.password_length"
+msgstr "Ang password ay dapat may hindi bababa sa 8 na character."
+
+msgid "form.validation.password_number"
+msgstr "Ang password ay dapat may hindi bababa sa 1 numero."
+
+msgid "form.validation.password_special"
+msgstr "Ang password ay dapat may hindi bababa sa 1 espesyal na character."
+
+msgid "form.validation.password_uppercase"
+msgstr "Ang password ay dapat may hindi bababa sa 1 malaking titik."
+
+msgid "input_list.view_all_settings"
+msgstr "Tingnan ang lahat ng %(count)s setting"
+
+msgid "instance.type.container"
+msgstr "Container"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "Static"
+
+msgid "instances.down"
+msgstr "Hindi Aktibo"
+
+msgid "instances.loading"
+msgstr "Naglo-load"
+
+msgid "instances.subtitle"
+msgstr "Pamahalaan ang mga instance ng BunkerWeb na konektado sa UI na ito: lumikha, i-ping, i-reload, itigil, o alisin ang mga ito."
+
+msgid "instances.total"
+msgstr "Kabuuang bilang ng mga instance"
+
+msgid "instances.up"
+msgstr "Aktibo"
+
+msgid "interval.day"
+msgstr "Araw-araw"
+
+msgid "interval.hour"
+msgstr "Bawat oras"
+
+msgid "interval.minute"
+msgstr "Bawat minuto"
+
+msgid "interval.once"
+msgstr "Isang beses"
+
+msgid "interval.week"
+msgstr "Lingguhang"
+
+msgid "job.history.end_date"
+msgstr "Petsa ng Pagtatapos"
+
+msgid "job.history.start_date"
+msgstr "Petsa ng Simula"
+
+msgid "job.history.success"
+msgstr "Matagumpay"
+
+msgid "jobs.subtitle"
+msgstr "Mga naka-iskedyul at one-off na gawain na pinapatakbo ng scheduler ng BunkerWeb — subaybayan ang kanilang katayuan at patakbuhin ang mga ito sa pangangailangan."
+
+msgid "jobs.tile.async"
+msgstr "Asynchronous"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "Nabigo ang huling pagtakbo"
+
+msgid "jobs.tile.reload_required"
+msgstr "Kailangan i-reload"
+
+msgid "jobs.tile.total"
+msgstr "Kabuuang bilang ng mga gawain"
+
+msgid "legend.locked_settings_annotation"
+msgstr "Naka-lock (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "Ang mga naka-lock na setting ay naka-highlight"
+
+msgid "link.back_to_login"
+msgstr "Bumalik sa Login"
+
+msgid "link.forgot_password"
+msgstr "Nakalimutan ang Password?"
+
+msgid "link.get_support"
+msgstr "Humingi ng suporta"
+
+msgid "link.here"
+msgstr "dito"
+
+msgid "link.more_info"
+msgstr "Karagdagang Impormasyon"
+
+msgid "link.more_news"
+msgstr "Higit pang Balita"
+
+msgid "link.opens_new_tab"
+msgstr "(bubukas sa bagong tab)"
+
+msgid "link.privacy_policy"
+msgstr "Patakaran sa Privacy"
+
+msgid "link.read_more"
+msgstr "Magbasa ng Higit Pa"
+
+msgid "link.see_more"
+msgstr "Tingnan ang Higit Pa"
+
+msgid "link.upgrade"
+msgstr "Mag-upgrade?"
+
+msgid "link.use_authenticator_code"
+msgstr "Gumamit ng code ng pag-authenticate"
+
+msgid "link.use_recovery_code"
+msgstr "Gumamit ng code ng pagbawi"
+
+msgid "login.or_use_password"
+msgstr "o gamitin ang iyong password"
+
+msgid "login.subtitle"
+msgstr "Mag-log in sa iyong account ng BunkerWeb"
+
+msgid "login.title"
+msgstr "Mag-login"
+
+msgid "logs.all_sources"
+msgstr "Lahat ng source (live)"
+
+msgid "logs.annotation_error"
+msgstr "Error"
+
+msgid "logs.annotation_warning"
+msgstr "Babala"
+
+msgid "logs.collapse"
+msgstr "I-collapse"
+
+msgid "logs.expand"
+msgstr "I-expand"
+
+msgid "logs.filter_levels"
+msgstr "Mga antas"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s error, %(warnings)s babala"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Mga Log ng Let's Encrypt"
+
+msgid "logs.level_all"
+msgstr "Lahat ng log"
+
+msgid "logs.level_critical"
+msgstr "Kritikal"
+
+msgid "logs.level_debug"
+msgstr "Debug"
+
+msgid "logs.level_error"
+msgstr "Error"
+
+msgid "logs.level_errors_only"
+msgstr "Mga error lang"
+
+msgid "logs.level_info"
+msgstr "Info"
+
+msgid "logs.level_notice"
+msgstr "Paunawa"
+
+msgid "logs.level_security_only"
+msgstr "Seguridad lang"
+
+msgid "logs.level_warning"
+msgstr "Babala"
+
+msgid "logs.lines_all"
+msgstr "Lahat"
+
+msgid "logs.lines_label"
+msgstr "Mga linya"
+
+msgid "logs.live_title"
+msgstr "Mga live log"
+
+msgid "logs.main_logs"
+msgstr "Pangunahing mga Log"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s linya · binago %(when)s"
+
+msgid "logs.new_lines"
+msgstr "bagong mga linya"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s bagong linya ng log"
+
+msgid "logs.no_log_files"
+msgstr "Walang mga file ng log na ipapakita, tingnan ang dokumentasyon para sa karagdagang impormasyon kung paano paganahin ang pag-log"
+
+msgid "logs.pause"
+msgstr "I-pause"
+
+msgid "logs.resume"
+msgstr "Ipagpatuloy"
+
+msgid "logs.select_file_prompt"
+msgstr "Piliin ang isang file ng log upang tingnan ang nilalaman nito"
+
+msgid "logs.showing_all"
+msgstr "%(total)s linya"
+
+msgid "logs.showing_some"
+msgstr "ipinapakita ang %(shown)s sa %(total)s"
+
+msgid "logs.tailing_sources"
+msgstr "Sinusubaybayan · %(count)s source"
+
+msgid "logs.taller"
+msgstr "Mas mataas"
+
+msgid "logs.trimmed_notice"
+msgstr "--- Inalis ang %(count)s na mas lumang linya ng log para sa pagganap ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "I-drag at i-drop ang iyong plugin archive dito o mag-click upang pumili ng mga file."
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "I-ban ang mga IP mula sa lahat ng %(count)s tumutugmang report? Isang beses lang ilalapat ang mga dobleng target."
+
+#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling cache file?"
+msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling cache file?"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration?"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling custom na configuration sa %(state)s?"
+
+#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling custom na configuration?"
+msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling custom na configuration?"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo?"
+
+msgid "modal.body.confirm_next_step"
+msgstr "Sigurado ka bang gusto mong magpatuloy sa susunod na hakbang?"
+
+#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling plugin?"
+msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling plugin?"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "Sigurado ka bang gusto mong burahin ang template na %(name)s?"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "Sigurado ka bang gusto mong burahin ang napiling instance?"
+
+#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "Sigurado ka bang gusto mong burahin ang napiling instance?"
+msgstr[1] "Sigurado ka bang gusto mong burahin ang mga napiling instance?"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "Isa o higit pang napiling template ay nakatakda sa mga serbisyo (kabuuang serbisyo: %(services_count)s). Ang pag-alis sa mga ito ay magtatanggal ng mga takdang ito. Gusto mo bang magpatuloy?"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "Sigurado ka bang gusto mong burahin ang hakbang na ito?"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "Nilalaman"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "Hakbang"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "Ginagamit ng mga pandaigdigang setting"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "Ginagamit ng mga serbisyo: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "Iae-export ang mga napiling serbisyo. I-enable ang opsyon sa ibaba upang isama ang kanilang mga naka-attach na custom na configuration sa isang .zip archive."
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "Kukunin nito ang mga pandaigdigang setting at ilalapat ang mga ito sa kasalukuyang template."
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "Ang mga setting lamang na naroroon sa template na ito ang ia-update."
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "Ang mga value na kapareho ng mga default ay hindi papansinin."
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "Ang SERVER_NAME ay hindi kailanman ino-override."
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "I-drag at i-drop ang iyong custom na configuration export file dito o mag-click upang pumili ng file."
+
+msgid "modal.body.import_configs_warning"
+msgstr "Ang mga custom na configuration na ginawa ng scheduler, autoconf, o mga template ay palaging pinapanatili. Ang mga UI/API configuration lamang ang maaaring ma-overwrite."
+
+msgid "modal.body.import_services_dropzone"
+msgstr "I-drag at i-drop ang iyong services export file dito o mag-click upang pumili ng file."
+
+msgid "modal.body.import_services_warning"
+msgstr "Ang pag-import ng mga serbisyo ay lilikha ng mga bagong UI service mula sa export file. Ang mga umiiral na serbisyo ay nilalaktawan. Ang isang .zip archive na na-export kasama ang mga custom na configuration ay tinatanggap din."
+
+msgid "modal.body.instance_creation_alert"
+msgstr "Hindi mo kailangang ibigay ang port o pangalan ng server; ang mga value ng `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, at `API_SERVER_NAME` ang gagamitin para sa configuration ng instance."
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "Kung makakatagpo ka ng mga isyu, maaari mong mano-manong tanggapin ang hindi ligtas na certificate:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "Mangyaring i-save ang mga recovery code na ito sa isang ligtas na lugar (tulad ng password manager o bunker). Maaari mo itong gamitin upang ma-access ang iyong account kung mawawala ang iyong authentication device."
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "Ang mga recovery code na ito ay ipinakita nang isang beses lamang. Mangyaring tiyakin na nai-save mo ang mga ito nang ligtas."
+
+msgid "modal.body.reset_template_alert"
+msgstr "Sigurado ka bang gusto mong i-reset ang kasalukuyang mga setting ng template at custom na mga configuration?"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "Sigurado ka bang gusto mong i-convert ang mga napiling serbisyo?"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "Sigurado ka bang gusto mong burahin ang mga napiling serbisyo?"
+
+#. plural pair; 2 form(s) for tl, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "Sigurado ka bang gusto mong i-unban ang napiling IP address?"
+msgstr[1] "Sigurado ka bang gusto mong i-unban ang mga napiling IP address?"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "Sigurado ka bang aalisin ang lahat ng %(count)s tumutugmang ban?"
+
+msgid "modal.body.update_duration_alert"
+msgstr "Pumili ng bagong tagal para sa mga napiling ban:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "Pumili ng bagong tagal para sa lahat ng %(count)s tumutugmang ban:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "Ilapat ang mga pandaigdigang setting"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "I-reset ang Configuration ng Template"
+
+msgid "modal.section.ban_details"
+msgstr "Mga Detalye ng Ban"
+
+msgid "modal.section.ban_scope"
+msgstr "Saklaw ng Ban"
+
+msgid "modal.section.delete"
+msgstr "Burahin"
+
+msgid "modal.title.add_bans"
+msgstr "Magdagdag ng ban"
+
+msgid "modal.title.add_plugins"
+msgstr "Magdagdag ng Mga Plugin"
+
+msgid "modal.title.confirm_conversion"
+msgstr "Kumpirmahin ang Conversion"
+
+msgid "modal.title.confirm_deletion"
+msgstr "Kumpirmahin ang Pagbubura"
+
+msgid "modal.title.confirm_unban"
+msgstr "Kumpirmahin ang Pag-unban"
+
+msgid "modal.title.create_new_instance"
+msgstr "Lumikha ng Bagong Instance"
+
+msgid "modal.title.create_template"
+msgstr "Lumikha ng template"
+
+msgid "modal.title.delete_instance"
+msgstr "Burahin ang Mga Instance"
+
+msgid "modal.title.delete_step"
+msgstr "Burahin ang hakbang"
+
+msgid "modal.title.delete_template"
+msgstr "Burahin ang template"
+
+msgid "modal.title.edit_template"
+msgstr "I-edit ang template: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "I-export ang mga serbisyo"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "Ilapat ang Mga Pandaigdigang Setting?"
+
+msgid "modal.title.from_plugin"
+msgstr "mula sa plugin"
+
+msgid "modal.title.full_url"
+msgstr "Buong URL"
+
+msgid "modal.title.import_configs"
+msgstr "Mag-import ng mga custom na configuration"
+
+msgid "modal.title.import_services"
+msgstr "Mag-import ng mga serbisyo"
+
+msgid "modal.title.job_history"
+msgstr "Huling 10 Pagpapatupad ng Trabaho"
+
+msgid "modal.title.job_history_count"
+msgstr "Huling %(count)s pagpapatupad ng Trabaho"
+
+msgid "modal.title.multiselect_selected"
+msgstr "Napiling mga item"
+
+msgid "modal.title.recovery_codes"
+msgstr "Mga Recovery Code"
+
+msgid "modal.title.reset_template_config"
+msgstr "I-reset ang Configuration ng Template?"
+
+msgid "modal.title.security_report_details"
+msgstr "Detalye ng Security Report"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "Ang Pangalan ng Server ay Hindi Natatangi"
+
+msgid "modal.title.update_duration"
+msgstr "I-update ang Tagal ng Ban"
+
+msgid "mode.advanced"
+msgstr "Advanced"
+
+msgid "mode.compose"
+msgstr "Gumawa"
+
+msgid "mode.easy"
+msgstr "Madali"
+
+msgid "mode.raw"
+msgstr "Raw"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "Mag-upgrade sa PRO"
+
+msgid "navbar.dropdown.logout"
+msgstr "Mag-logout"
+
+msgid "navbar.link.documentation"
+msgstr "Dokumentasyon"
+
+msgid "navbar.version"
+msgstr "Bersyon"
+
+msgid "navigation.about"
+msgstr "Tungkol sa"
+
+msgid "navigation.bans"
+msgstr "Mga Ban"
+
+msgid "navigation.cache"
+msgstr "Cache"
+
+msgid "navigation.certificates"
+msgstr "Mga Sertipiko"
+
+msgid "navigation.configs"
+msgstr "Mga Config"
+
+msgid "navigation.configure"
+msgstr "I-configure"
+
+msgid "navigation.edition_community"
+msgstr "Komunidad"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "Mga karagdagang pahina"
+
+msgid "navigation.global_settings"
+msgstr "Mga pangkalahatang setting"
+
+msgid "navigation.groups"
+msgstr "Mga grupo ng mapagkukunan"
+
+msgid "navigation.home"
+msgstr "Pangunahing pahina"
+
+msgid "navigation.instances"
+msgstr "Mga Instance"
+
+msgid "navigation.jobs"
+msgstr "Mga gawain"
+
+msgid "navigation.logs"
+msgstr "Mga Log"
+
+msgid "navigation.misc"
+msgstr "Iba pa"
+
+msgid "navigation.mode_selection"
+msgstr "Pagpili ng Mode"
+
+msgid "navigation.more"
+msgstr "Higit pa..."
+
+msgid "navigation.operate"
+msgstr "Pamahalaan"
+
+msgid "navigation.overview"
+msgstr "Pangkalahatang-ideya"
+
+msgid "navigation.plugin_activated"
+msgstr "Na-activate ang Plugin"
+
+msgid "navigation.plugin_activated_global"
+msgstr "Na-activate ang plugin sa buong system"
+
+msgid "navigation.plugin_deactivated"
+msgstr "Na-deactivate ang Plugin"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "Na-deactivate ang plugin sa buong system"
+
+msgid "navigation.plugins"
+msgstr "Mga Plugin"
+
+msgid "navigation.plugins_pages"
+msgstr "Mga Pahina ng Plugin"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "Mga pag-redirect"
+
+msgid "navigation.reports"
+msgstr "Mga Ulat"
+
+msgid "navigation.services"
+msgstr "Mga Serbisyo"
+
+msgid "navigation.support"
+msgstr "Suporta"
+
+msgid "navigation.system"
+msgstr "Sistema"
+
+msgid "navigation.templates"
+msgstr "Mga Template"
+
+msgid "navigation.threatmap"
+msgstr "Mapa ng mga banta"
+
+msgid "navigation.timings"
+msgstr "Mga timing"
+
+msgid "navigation.upstreams"
+msgstr "Mga upstream"
+
+msgid "navigation.web_cache"
+msgstr "Cache ng web"
+
+msgid "navigation.workflows"
+msgstr "Mga daloy ng trabaho"
+
+msgid "news.image_alt"
+msgstr "Larawan ng balita"
+
+msgid "news.posted_on"
+msgstr "Nai-post noong"
+
+msgid "news.slide"
+msgstr "Slide"
+
+msgid "newsletter.legal_agreement"
+msgstr "Gusto kong mag-subscribe sa newsletter, at nabasa at sinangayunan ko ang:"
+
+msgid "newsletter.title"
+msgstr "Sumali sa Newsletter"
+
+msgid "onboarding.dismiss"
+msgstr "Huwag nang ipakita"
+
+msgid "onboarding.error"
+msgstr "Hindi ma-load ang gabay."
+
+msgid "onboarding.hint.bans"
+msgstr "Ang mga ban ay ang mga client na kasalukuyang tinatanggihan ng BunkerWeb. Ipinapakita ng bawat hilera ang dahilan at kung kailan ito mag-e-expire."
+
+msgid "onboarding.hint.home"
+msgstr "Ipinapakita ng dashboard na ito ang kasalukuyang kalagayan: mga tumatakbong instance, mga serbisyong inihahain at ang trapikong hinawakan ng BunkerWeb."
+
+msgid "onboarding.hint.logs"
+msgstr "Live na log mula sa bawat instance, mafi-filter ayon sa instance at severity."
+
+msgid "onboarding.hint.reports"
+msgstr "Dito napupunta ang bawat na-block na kahilingan. Buksan ang isa para makita kung aling pagsusuri sa seguridad ang humarang dito, at bakit."
+
+msgid "onboarding.hint.title"
+msgstr "Mabilisang paglilibot"
+
+msgid "onboarding.item.first_block"
+msgstr "Makita ang BunkerWeb na humarang ng request"
+
+msgid "onboarding.item.https"
+msgstr "Paganahin ang HTTPS"
+
+msgid "onboarding.item.install"
+msgstr "I-install ang BunkerWeb sa 1+ host"
+
+msgid "onboarding.item.mfa"
+msgstr "I-activate ang MFA"
+
+msgid "onboarding.item.pro"
+msgstr "I-activate ang BunkerWeb PRO"
+
+msgid "onboarding.item.read_bans"
+msgstr "Tingnan kung sino ang naka-ban, at hanggang kailan"
+
+msgid "onboarding.item.read_home"
+msgstr "Basahin ang dashboard: kung ano ang maayos ngayon"
+
+msgid "onboarding.item.read_logs"
+msgstr "Subaybayan ang live logs sa lahat ng instance"
+
+msgid "onboarding.item.read_reports"
+msgstr "Alamin kung bakit hinarang ang isang request"
+
+msgid "onboarding.item.service"
+msgstr "Irehistro ang unang serbisyo"
+
+msgid "onboarding.item.workflow"
+msgstr "Maglakip ng security workflow"
+
+msgid "onboarding.not_saved"
+msgstr "Hindi ito na-save."
+
+msgid "onboarding.pro_tips"
+msgstr "Mga tip para sa PRO"
+
+msgid "onboarding.restart"
+msgstr "Simulan muli ang gabay"
+
+msgid "onboarding.restart_help"
+msgstr "Ipakita muli ang mga panimulang hakbang sa itaas na bar."
+
+msgid "onboarding.subtitle"
+msgstr "Ilang hakbang lang para maprotektahan ng BunkerWeb ang iyong mga serbisyo."
+
+msgid "onboarding.title"
+msgstr "Pagsisimula"
+
+msgid "pagination.page"
+msgstr "Pahina"
+
+msgid "plan.free"
+msgstr "LIBRE"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "Ang plugin ay hindi aktibo; kaya naman, walang available na impormasyon."
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "Ang plugin na ito ay pinamamahalaan sa isang dedicated na pahina na hindi pa naka-load. I-restart ang web UI upang ma-access ito."
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "Ang Metrics plugin ay hindi aktibo; kaya naman, walang available na impormasyon."
+
+msgid "plugin.page.status.no_content"
+msgstr "Ang plugin na ito ay hindi nagbibigay ng naka-embed na pahina."
+
+msgid "plugin.page.status.not_available"
+msgstr "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase."
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "Error sa pre-rendering"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "Ang plugin na ito ay may sariling pahina, na tumatakbo ang code ng plugin. Maaaring i-load lamang ito ng mga administrator."
+
+msgid "plugin.type.all"
+msgstr "Lahat"
+
+msgid "plugin.type.core"
+msgstr "Core"
+
+msgid "plugin.type.external"
+msgstr "Panlabas"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "Aktibo"
+
+msgid "plugins.marketplace.always_on"
+msgstr "Core / laging naka-on"
+
+msgid "plugins.marketplace.disabled"
+msgstr "Naka-disable"
+
+msgid "plugins.marketplace.enabled"
+msgstr "Naka-enable"
+
+msgid "plugins.marketplace.inactive"
+msgstr "Hindi aktibo"
+
+msgid "plugins.marketplace.no_match"
+msgstr "Walang plugin na tumutugma sa mga filter"
+
+msgid "plugins.marketplace.search"
+msgstr "Maghanap ng plugin..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "Lahat"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "Komunidad"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "Naka-disable"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "Naka-enable"
+
+msgid "plugins.multivalue.more_value"
+msgstr "mas maraming halaga"
+
+msgid "plugins.multivalue.more_values"
+msgstr "mas maraming halaga"
+
+msgid "plugins.multivalue.show_less"
+msgstr "Ipakita ang mas kaunti"
+
+msgid "pro.alert.overlapped_1"
+msgstr "Mayroon kang higit pang aktibong serbisyo kaysa sa pinapayagan ng iyong lisensya!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "Burahin o i-convert ang ilang serbisyo sa Draft mode upang maabot ang limitasyong %(pro_services)s serbisyo."
+
+msgid "pro.button.all_features_available"
+msgstr "Lahat ng Feature ay Available"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "Naghihintay ng Pagsunod..."
+
+msgid "pro.button.renew_license"
+msgstr "Mag-renew ng Lisensya"
+
+msgid "pro.button.suspended_license"
+msgstr "Nasuspende ang Lisensya"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "Mag-upgrade sa PRO"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "Mag-e-expire sa loob ng"
+
+msgid "pro.expiration_date.title"
+msgstr "Petsa ng Pag-expire ng Pro"
+
+msgid "pro.expiration_date.unknown"
+msgstr "Hindi kilalang petsa ng pag-expire"
+
+msgid "pro.force_check.description"
+msgstr "Pilitin ang bagong pagsusuri para sa mga PRO plugin. Magti-trigger ito ng bagong pag-download ng mga plugin kung may mga bagong bersyon na available."
+
+msgid "pro.force_check.title"
+msgstr "Pilitin ang pagsusuri"
+
+msgid "pro.force_update.description"
+msgstr "Laktawan ang mga pagsusuri at pilitin ang pag-download ng mga PRO plugin. Kung hindi posible ang pagpilit, ang kasalukuyang estado ay pananatilihin."
+
+msgid "pro.force_update.title"
+msgstr "Pilitin ang pag-update"
+
+msgid "pro.key.title.activate"
+msgstr "I-activate ang Key"
+
+msgid "pro.key.title.update"
+msgstr "I-update ang Key"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Feature ng Pro"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "Mag-upgrade sa Pro upang ma-access ang feature na ito"
+
+msgid "pro.status.draft_services_count"
+msgstr "Mga draft na serbisyo: %(draft_services)s"
+
+msgid "pro.status.expired"
+msgstr "NAG-EXPIRE"
+
+msgid "pro.status.free_version"
+msgstr "Libreng Bersyon"
+
+msgid "pro.status.overlapped"
+msgstr "NAOBERLAPAN"
+
+msgid "pro.status.pro_version"
+msgstr "PRO na Bersyon"
+
+msgid "pro.status.services_count"
+msgstr "Mga online na serbisyo: %(online_services)s / Mga PRO na serbisyo: %(pro_services)s"
+
+msgid "pro.status.suspended"
+msgstr "NASUSPENDE"
+
+msgid "pro.status.title"
+msgstr "Katayuan"
+
+msgid "pro.title"
+msgstr "Lisensyang Pro"
+
+msgid "profile.2fa.disable_title"
+msgstr "I-disable ang 2FA"
+
+msgid "profile.2fa.enable_title"
+msgstr "I-enable ang 2FA"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "Ang pag-refresh ng iyong mga recovery code ay magpapawalang-bisa sa mga nakaraang code."
+
+msgid "profile.badge.2fa_disabled"
+msgstr "Naka-disable ang 2FA"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "Naka-enable ang 2FA"
+
+msgid "profile.card.coming_soon"
+msgstr "Malapit na"
+
+msgid "profile.card.title.2fa"
+msgstr "Dalawang-salik na pagpapatunay (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "Palitan ang Password"
+
+msgid "profile.card.title.change_theme"
+msgstr "Palitan ang Tema"
+
+msgid "profile.card.title.coming_soon"
+msgstr "Malapit na"
+
+msgid "profile.card.title.edit_profile"
+msgstr "I-edit ang Profile"
+
+msgid "profile.card.title.passkeys"
+msgstr "Mga passkey"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "I-refresh ang Mga Recovery Code"
+
+msgid "profile.card.title.sessions"
+msgstr "Mga Session"
+
+msgid "profile.help.photo_extensions"
+msgstr "Pinapayagan ang JPG, GIF, o PNG. Max na laki: 800KB."
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "Agad na nagtatapos ang lahat ng aktibong sesyon sa iyong account. Ipasok ang iyong password upang kumpirmahin."
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "Tanggalin ang ibang sesyon?"
+
+msgid "profile.passkey.added"
+msgstr "Naidagdag"
+
+msgid "profile.passkey.empty"
+msgstr "Wala pang nakarehistrong passkey."
+
+msgid "profile.passkey.help"
+msgstr "Ang passkey ay nagpapa-sign in sa iyo nang walang password, gamit ang screen lock ng iyong device o isang security key."
+
+msgid "profile.passkey.last_used"
+msgstr "huling ginamit"
+
+msgid "profile.passkey.never_used"
+msgstr "hindi pa nagagamit"
+
+msgid "profile.passkey.unsupported"
+msgstr "Hindi sinusuportahan ng browser na ito ang mga passkey."
+
+msgid "profile.session.browser"
+msgstr "Browser"
+
+msgid "profile.session.creation_date"
+msgstr "Petsa ng Paglikha"
+
+msgid "profile.session.current_session"
+msgstr "Kasalukuyang Session"
+
+msgid "profile.session.device"
+msgstr "Device"
+
+msgid "profile.session.ip_address"
+msgstr "IP address"
+
+msgid "profile.session.last_activity"
+msgstr "Huling Aktibidad"
+
+msgid "profile.session.os"
+msgstr "Operating system"
+
+msgid "profile.session.title"
+msgstr "Session"
+
+msgid "profile.session.wipe_help"
+msgstr "Tapusin ang lahat ng aktibong sesyon sa iyong account. Mananatili kang naka-log in dito."
+
+msgid "profile.subtitle"
+msgstr "Pamahalaan ang iyong account, seguridad, at aktibong sesyon."
+
+msgid "profile.tab.profile"
+msgstr "Profile"
+
+msgid "profile.tab.security"
+msgstr "Seguridad"
+
+msgid "profile.tab.sessions"
+msgstr "Mga Session"
+
+msgid "range_picker.1h"
+msgstr "Huling oras"
+
+msgid "range_picker.24h"
+msgstr "Huling 24 na oras"
+
+msgid "range_picker.30d"
+msgstr "Nakaraang 30 araw"
+
+msgid "range_picker.7d"
+msgstr "Huling linggo"
+
+msgid "range_picker.aria_label"
+msgstr "Saklaw ng oras"
+
+msgid "range_picker.custom"
+msgstr "Pasadya"
+
+msgid "redirects.all"
+msgstr "Lahat"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "Idagdag ang hinihinging URI sa target"
+
+msgid "redirects.attach"
+msgstr "Ikabit"
+
+msgid "redirects.attach_copy"
+msgstr "Ikabit ang %(name)s (%(from)s → %(to)s) sa isa o higit pang serbisyo."
+
+msgid "redirects.code.301"
+msgstr "301 — Permanently Moved"
+
+msgid "redirects.code.302"
+msgstr "302 — Natagpuan"
+
+msgid "redirects.code.303"
+msgstr "303 — Tingnan ang iba"
+
+msgid "redirects.code.307"
+msgstr "307 — Temporary Redirect"
+
+msgid "redirects.code.308"
+msgstr "308 — Permanent Redirect"
+
+msgid "redirects.create"
+msgstr "Gumawa ng redirect"
+
+msgid "redirects.delete_confirm_title"
+msgstr "Burahin ang redirect na ito?"
+
+msgid "redirects.delete_copy"
+msgstr "Burahin ang redirect %(name)s?"
+
+msgid "redirects.delete_help"
+msgstr "Hindi maaaring burahin ang redirect na nakakabit sa isang serbisyo. Tanggalin muna ito."
+
+msgid "redirects.edit"
+msgstr "I-edit ang redirect"
+
+msgid "redirects.edit_shared"
+msgstr "Nakakabit ang redirect na ito sa %(count)s serbisyo: %(services)s. Kapag na-save, mababago ang lahat ng ito."
+
+msgid "redirects.empty_text"
+msgstr "Ang redirect ay isang pangalan na patakaran na ikinakabit sa isa o higit pang serbisyo. Ang mga setting ng REDIRECT_* ay patuloy na gumagana kasama nito."
+
+msgid "redirects.empty_title"
+msgstr "Walang redirect pa"
+
+msgid "redirects.from_path"
+msgstr "Redirect mula sa"
+
+msgid "redirects.from_path_help"
+msgstr "Landas ng pinagmulan sa mga nakakabit na serbisyo, halimbawa /old."
+
+msgid "redirects.new"
+msgstr "Bagong redirect"
+
+msgid "redirects.not_attached"
+msgstr "Hindi nakakabit"
+
+msgid "redirects.readonly"
+msgstr "Ang database ay read-only. Maaaring suriin ang mga redirect ngunit hindi mababago."
+
+msgid "redirects.save"
+msgstr "I-save ang redirect"
+
+msgid "redirects.search"
+msgstr "Maghanap ng pangalan, landas ng pinagmulan, o target..."
+
+msgid "redirects.services_help"
+msgstr "Gamitin ang Ctrl o Command upang piliin ang maraming serbisyo. Maaaring idikit ang isang redirect sa ibang pagkakataon."
+
+msgid "redirects.status_code"
+msgstr "Kode ng estado"
+
+msgid "redirects.to_url"
+msgstr "I-redirect sa"
+
+msgid "redirects.truncated"
+msgstr "Ang unang 500 redirects lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "Natukoy ang hindi kanais-nais na aktibidad"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "Ang mga kahilingang ito ay lumampas sa limitasyon ng hindi kanais-nais na aktibidad at pinagsama-sama."
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "Nakuha sa"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP address"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "Walang detalye ng hindi kanais-nais na aktibidad na nakuhang para sa ulat na ito."
+
+msgid "reports.bad_behavior_request_id"
+msgstr "ID ng Kahilingan"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "Kahilingan"
+
+msgid "reports.bad_behavior_server"
+msgstr "Server"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "Mga kahilingang kahina-hinala"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "Mga pamilya ng pag-atake"
+
+msgid "reports.card.recent.title"
+msgstr "Mga kamakailang insidente"
+
+msgid "reports.card.top_asn.title"
+msgstr "Mga nangungunang ASNs"
+
+msgid "reports.card.top_offenders.title"
+msgstr "Mga nangungunang umaatake"
+
+msgid "reports.card.top_rules.title"
+msgstr "Mga nangungunang patakaran ng ModSecurity na na-trigger"
+
+msgid "reports.chart.timeseries.series"
+msgstr "Na-block"
+
+msgid "reports.chart.timeseries.title"
+msgstr "Mga na-block na kahilingan sa paglipas ng panahon"
+
+msgid "reports.security_incident"
+msgstr "Insidente ng Seguridad"
+
+msgid "reports.security_report_data"
+msgstr "Data ng Ulat ng Seguridad"
+
+msgid "reports.subtitle"
+msgstr "Mga ulat ng seguridad na nabuo mula sa mga na-block na kahilingan sa iyong mga instance ng BunkerWeb — maghanap, mag-filter, mag-export, at i-ban ang mga IP na nagdulot ng problema nang direkta mula sa talahanayan."
+
+msgid "reports.tab.eventlog"
+msgstr "Log ng pangyayari"
+
+msgid "reports.tab.offenders"
+msgstr "Mga nangungunang umaatake"
+
+msgid "reports.tab.overview"
+msgstr "Pangkalahatang-tanaw"
+
+msgid "reports.tab.patterns"
+msgstr "Mga pattern ng pag-atake"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "Mga pagbabawal"
+
+msgid "reports.table.country"
+msgstr "Bansa"
+
+msgid "reports.table.fires"
+msgstr "Mga trigger"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "Patakaran"
+
+msgid "reports.table.top_rule"
+msgstr "Nangungunang patakaran"
+
+msgid "reports.tile.asns"
+msgstr "Mga nangungunang ASNs"
+
+msgid "reports.tile.blocked"
+msgstr "Mga na-block na kahilingan"
+
+msgid "reports.tile.blocked_rate"
+msgstr "Trend kumpara sa nakaraang panahon"
+
+msgid "reports.tile.bot"
+msgstr "Bot / scraper"
+
+msgid "reports.tile.countries"
+msgstr "Mga bansang pinagmumulan ng pinakamaraming pag-atake"
+
+msgid "reports.tile.peak_hour"
+msgstr "Oras ng peak"
+
+msgid "reports.tile.rce"
+msgstr "RCE / command"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "Mga umuulit na umaatake (nangungunang 10)"
+
+msgid "reports.tile.sqli"
+msgstr "SQL injection"
+
+msgid "reports.tile.unique_ips"
+msgstr "Top na IP address ng mga umaatake"
+
+msgid "reports.tile.unique_offenders"
+msgstr "Mga nangungunang umaatake"
+
+msgid "request_path.client"
+msgstr "Kliente"
+
+msgid "request_path.source"
+msgstr "Pagkasunod-sunod ng pagpapatupad ng plugin para sa phase na %(phase)s, mula sa %(setting)s — isang pagkakasunod-sunod ng pagpapakita, hindi isang pagsubaybay bawat kahilingan."
+
+msgid "request_path.terminal.inline"
+msgstr "Backend"
+
+msgid "request_path.terminal.none"
+msgstr "Walang inihain"
+
+msgid "request_path.terminal.pool"
+msgstr "Pool ng upstream"
+
+msgid "request_path.terminal.root"
+msgstr "Mga lokal na file"
+
+msgid "request_path.title"
+msgstr "Landas ng kahilingan"
+
+msgid "request_path.unordered"
+msgstr "Walang nakatalagang posisyon sa phase na %(phase)s; tumatakbo ito pagkatapos ng mga nakaayos na plugin, ayon sa alpabeto."
+
+msgid "resource_groups.add_entry"
+msgstr "Magdagdag ng entry"
+
+msgid "resource_groups.add_to_setting"
+msgstr "Magdagdag ng resource group…"
+
+msgid "resource_groups.add_values"
+msgstr "Magdagdag ng mga halaga"
+
+msgid "resource_groups.alias"
+msgstr "Alias"
+
+msgid "resource_groups.alias_help"
+msgstr "Mga letra, numero, underscore, at dash. Hindi maaaring palitan ang mga umiiral na alias."
+
+msgid "resource_groups.bulk_import"
+msgstr "Maramihang import"
+
+msgid "resource_groups.clone"
+msgstr "Kopyahin ang resource group"
+
+msgid "resource_groups.clone_copy"
+msgstr "Lumikha ng isang editable na kopya ng @%(name)s."
+
+msgid "resource_groups.collapse_all"
+msgstr "I-collapse lahat"
+
+msgid "resource_groups.comment"
+msgstr "Komento"
+
+msgid "resource_groups.delete"
+msgstr "Tanggalin ang resource group"
+
+msgid "resource_groups.delete_confirm"
+msgstr "Tanggalin ang @%(name)s? Hindi na ito maibabalik."
+
+msgid "resource_groups.delete_help"
+msgstr "Ang pagtanggal ay hindi pinapayagan habang may setting na tumutukoy sa alias na ito."
+
+msgid "resource_groups.editor_edit"
+msgstr "I-edit ang @%(name)s"
+
+msgid "resource_groups.editor_new"
+msgstr "Bagong resource group"
+
+msgid "resource_groups.editor_title"
+msgstr "Grupo ng resource"
+
+msgid "resource_groups.empty"
+msgstr "Walang resource groups"
+
+msgid "resource_groups.empty_help"
+msgstr "Lumikha ng isang reusable alias upang ibahagi ang mga halagang na-type sa iba't ibang compatible na setting."
+
+msgid "resource_groups.entries"
+msgstr "Mga entry"
+
+msgid "resource_groups.expand_all"
+msgstr "I-expand lahat"
+
+msgid "resource_groups.global_configuration"
+msgstr "Pangkalahatang konfigurasyon"
+
+msgid "resource_groups.import_extension"
+msgstr "Piliin ang isang .txt o .csv file."
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "Ang pag-import ng TXT/CSV ay limitado sa 256 KiB."
+
+msgid "resource_groups.kind"
+msgstr "Uri"
+
+msgid "resource_groups.kinds"
+msgstr "Mga uri"
+
+msgid "resource_groups.loading_references"
+msgstr "Naglo-load ng mga sanggunian..."
+
+msgid "resource_groups.max_entries"
+msgstr "Hindi maaaring maglaman ang isang grupo ng mga mapagkukunan ng higit sa %(max)s na entry."
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s uri · %(values)s value · %(usages)s paggamit"
+
+msgid "resource_groups.new"
+msgstr "Bagong grupo"
+
+msgid "resource_groups.new_alias"
+msgstr "Bagong alias"
+
+msgid "resource_groups.no_entries"
+msgstr "Walang entry"
+
+msgid "resource_groups.no_entries_help"
+msgstr "Magdagdag ng mga entry nang isa-isa o gumamit ng bulk importer sa ibaba."
+
+msgid "resource_groups.no_references"
+msgstr "Walang sanggunian"
+
+msgid "resource_groups.readonly"
+msgstr "Ang database ay read-only. Maaaring suriin at i-export ang mga grupo ng mapagkukunan, ngunit hindi mababago."
+
+msgid "resource_groups.references_error"
+msgstr "Hindi ma-load ang mga sanggunian"
+
+msgid "resource_groups.save"
+msgstr "I-save ang grupo"
+
+msgid "resource_groups.search"
+msgstr "Maghanap ng mga alias, paglalarawan, uri, o halaga..."
+
+msgid "resource_groups.showing_count"
+msgstr "Ipinapakita ang %(visible)s sa %(total)s na grupo"
+
+msgid "resource_groups.subtitle"
+msgstr "Mga reusable na alias na may uri para sa IP, bansa, ASNs, reverse DNS names, user agents, at URIs."
+
+msgid "resource_groups.template_configuration"
+msgstr "Template %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "Paggamit"
+
+msgid "resource_groups.value"
+msgstr "Halaga"
+
+msgid "resource_groups.values"
+msgstr "Mga halaga"
+
+msgid "scope.all_services"
+msgstr "Lahat ng Serbisyo"
+
+msgid "scope.global"
+msgstr "Pandaigdigang"
+
+msgid "scope.global_all_services"
+msgstr "Pandaigdigang (lahat ng serbisyo)"
+
+msgid "scope.permanent"
+msgstr "Permanente"
+
+msgid "scope.service_specific"
+msgstr "Tukoy sa serbisyo"
+
+msgid "searchpane.active"
+msgstr "Aktibo"
+
+msgid "searchpane.async"
+msgstr "Async"
+
+msgid "searchpane.ban_scope"
+msgstr "Saklaw ng Ban"
+
+msgid "searchpane.clear"
+msgstr "Linisin ang Lahat"
+
+msgid "searchpane.collapse_0"
+msgstr "Mga Search Pane"
+
+msgid "searchpane.collapse_message"
+msgstr "I-collapse ang Lahat"
+
+msgid "searchpane.collapse_plural"
+msgstr "Mga Search Pane (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "Bansa"
+
+msgid "searchpane.created"
+msgstr "Nilikha"
+
+msgid "searchpane.data"
+msgstr "Data"
+
+msgid "searchpane.date"
+msgstr "Petsa"
+
+msgid "searchpane.empty"
+msgstr "Walang available na search pane"
+
+msgid "searchpane.end_date"
+msgstr "Petsa ng Pagtatapos"
+
+msgid "searchpane.first_seen"
+msgstr "Unang Nakita"
+
+msgid "searchpane.future_30d"
+msgstr "Higit sa 30 araw pa"
+
+msgid "searchpane.health"
+msgstr "Kalusugan"
+
+msgid "searchpane.interval"
+msgstr "Agwat"
+
+msgid "searchpane.ip_address"
+msgstr "IP address"
+
+msgid "searchpane.job_name"
+msgstr "Pangalan ng Trabaho"
+
+msgid "searchpane.last_24h"
+msgstr "Nakaraang 24 na oras"
+
+msgid "searchpane.last_30d"
+msgstr "Nakaraang 30 araw"
+
+msgid "searchpane.last_7d"
+msgstr "Nakaraang 7 araw"
+
+msgid "searchpane.last_run"
+msgstr "Katayuan ng Huling Pagpapatakbo"
+
+msgid "searchpane.last_seen"
+msgstr "Huling Nakita"
+
+msgid "searchpane.last_update"
+msgstr "Huling Update"
+
+msgid "searchpane.loading"
+msgstr "Naglo-load ng mga search pane..."
+
+msgid "searchpane.method"
+msgstr "Paraan"
+
+msgid "searchpane.next_24h"
+msgstr "Susunod na 24 na oras"
+
+msgid "searchpane.next_30d"
+msgstr "Susunod na 30 araw"
+
+msgid "searchpane.next_7d"
+msgstr "Susunod na 7 araw"
+
+msgid "searchpane.older_30d"
+msgstr "Higit sa 30 araw na ang nakalipas"
+
+msgid "searchpane.one_or_more"
+msgstr "Isa o higit pa"
+
+msgid "searchpane.permanent"
+msgstr "Permanente"
+
+msgid "searchpane.plugin"
+msgstr "Plugin"
+
+msgid "searchpane.protocol"
+msgstr "Protocol"
+
+msgid "searchpane.reason"
+msgstr "Dahilan"
+
+msgid "searchpane.reload"
+msgstr "Kailangan ng Reload"
+
+msgid "searchpane.scope"
+msgstr "Saklaw"
+
+msgid "searchpane.security_mode"
+msgstr "Mode ng Seguridad"
+
+msgid "searchpane.server_name"
+msgstr "Pangalan ng Server"
+
+msgid "searchpane.service"
+msgstr "Serbisyo"
+
+msgid "searchpane.show_message"
+msgstr "Ipakita ang Lahat"
+
+msgid "searchpane.start_date"
+msgstr "Petsa ng Simula"
+
+msgid "searchpane.status"
+msgstr "Katayuan"
+
+msgid "searchpane.status_code"
+msgstr "Status code"
+
+msgid "searchpane.steps"
+msgstr "Mga Hakbang"
+
+msgid "searchpane.stream"
+msgstr "Suporta sa Stream"
+
+msgid "searchpane.template"
+msgstr "Template"
+
+msgid "searchpane.title_0"
+msgstr "Walang Aktibong Filter"
+
+msgid "searchpane.title_1"
+msgstr "Aktibong Filter - 1"
+
+msgid "searchpane.title_plural"
+msgstr "Mga Aktibong Filter - %d"
+
+msgid "searchpane.type"
+msgstr "Uri"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "Bersyon"
+
+msgid "searchpane.zero"
+msgstr "Wala"
+
+msgid "security_mode.block"
+msgstr "I-block"
+
+msgid "security_mode.detect"
+msgstr "Tuklasin"
+
+msgid "service.resources.attach"
+msgstr "Ikabit"
+
+msgid "service.resources.conflict.inline"
+msgstr "Ang %(service)s ay nagsisilbi sa %(path)s sa pamamagitan ng sarili nitong mga setting na %(family)s. Linisin ang mga setting na ito para sa %(path)s, o gumamit ng ibang landas."
+
+msgid "service.resources.conflict.primary"
+msgstr "Ang “%(name)s” ang kasalukuyang primary certificate ng serbisyong ito at hindi na ito magiging primary nang walang karagdagang babala. Ang primary ang aktwal na naka-deploy."
+
+msgid "service.resources.conflict.resource"
+msgstr "Ang %(service)s ay nagsisilbi sa %(path)s sa pamamagitan ng “%(kind)s” na %(name)s. Tanggalin ang “%(name)s”, o bigyan ang isa sa kanila ng ibang landas."
+
+msgid "service.resources.conflict.stream"
+msgstr "Ipinapasa ng stream service ang bawat koneksyon sa iisang backend, at ginagamit na ng %(service)s ang upstream na “%(name)s”. Ihiwalay muna ito."
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "Ang %(service)s ay may sariling backend sa REVERSE_PROXY_HOST. Linisin ang setting na ito upang hayaan ang upstream na kontrolin."
+
+msgid "service.resources.detach"
+msgstr "Tanggalin"
+
+msgid "service.resources.family.certificate"
+msgstr "Mga Sertipiko"
+
+msgid "service.resources.family.redirect"
+msgstr "Mga pag-redirect"
+
+msgid "service.resources.family.template"
+msgstr "Template"
+
+msgid "service.resources.family.upstream"
+msgstr "Mga upstream"
+
+msgid "service.resources.family.workflow"
+msgstr "Mga daloy ng trabaho"
+
+msgid "service.resources.match_path"
+msgstr "Path"
+
+msgid "service.resources.none"
+msgstr "Walang nakakabit"
+
+msgid "service.resources.primary"
+msgstr "Pangunahing sertipiko"
+
+msgid "service.resources.template.none"
+msgstr "Walang template"
+
+msgid "service.resources.template.note"
+msgstr "Hindi ito isang mapagkukunan: ang template ay isang setting. Ito ay ina-apply sa pag-save, at ang pagbabago nito ay nagpapalit ng maraming setting nang sabay."
+
+msgid "service.resources.template.pending"
+msgstr "Ina-apply sa pag-save"
+
+msgid "service.resources.template.switching"
+msgstr "Ang pag-save ay nagpapalit sa serbisyong ito mula sa “%(from)s” patungo sa “%(to)s”. Ang mga halaga na ibinibigay ng kasalukuyang template ay tinatanggal at ang mga halaga ng “%(to)s” ay inilalapat — maraming setting ang nagbabago nang sabay."
+
+msgid "service.resources.template.unwired"
+msgstr "Ang pahinang ito ay hindi nagpo-post ng USE_TEMPLATE, kaya hindi maaaring baguhin ang template mula dito."
+
+msgid "service.resources.title"
+msgstr "Mga nakakabit na mapagkukunan"
+
+msgid "service.resources.unavailable"
+msgstr "Hindi magagamit"
+
+msgid "services.draft"
+msgstr "Mga serbisyo sa draft"
+
+msgid "services.online"
+msgstr "Online"
+
+msgid "services.subtitle"
+msgstr "Pamahalaan ang mga serbisyo na protektado ng BunkerWeb: lumikha, i-edit, i-convert sa draft, o tanggalin ang mga ito."
+
+msgid "services.total"
+msgstr "Kabuuang bilang ng mga serbisyo"
+
+msgid "services.with_configs"
+msgstr "Na may custom na configuration"
+
+msgid "settings.custom_config.title"
+msgstr "Custom na Configuration"
+
+msgid "settings.multiple.description"
+msgstr "I-configure ang maraming instance ng mga setting para sa plugin na ito dito."
+
+msgid "settings.multiple.title"
+msgstr "Maramihang Mga Setting"
+
+msgid "setup.status.admin_user_exists"
+msgstr "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang."
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "Naka-configure na ang isang PRO license key, mangyaring magpatuloy sa susunod na hakbang."
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang."
+
+msgid "setup.status.secure_password"
+msgstr "Ligtas na Password"
+
+msgid "setup.status.unique_server_name"
+msgstr "Natatanging Pangalan ng Server"
+
+msgid "setup.step1.subtitle"
+msgstr "Lumikha ng iyong administrator account."
+
+msgid "setup.step1.title"
+msgstr "Admin user"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "Pagpili ng Certificate Authority"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "Gumamit ng Let's Encrypt para sa karaniwang pag-isyu ng ACME. Available ang Staging para sa pagsubok at pagsusuri ng integrasyon."
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "Kung walang laman, gagamitin ng ZeroSSL ang naka-configure na email para sa pagpaparehistro ng account."
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "Gumamit ng ZeroSSL na may zerossl-bot. Magbigay ng email ng account o API key para sa pag-isyu ng account at pagsubaybay ng muling pag-isyu batay sa key."
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "Custom na Certificate"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "Tunay na IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "Reverse Proxy"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "I-configure ang mga setting na tukoy sa Web UI."
+
+msgid "setup.step2.title"
+msgstr "Mga Setting ng UI"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "Mga Benepisyo ng PRO"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "I-unlock ang lahat ng advanced na feature kabilang ang pinahusay na seguridad, pagganap, at mga tool sa pamamahala."
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "Access sa lahat ng PRO feature"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "Makakuha ng priority support mula sa BunkerWeb team para sa anumang isyu o tanong na mayroon ka."
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "Teknikal na suporta mula sa mga maintainer"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "Mga pasadyang solusyon upang matugunan ang iyong mga partikular na pangangailangan."
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "Pasadyang development"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "Ekspertong payo upang ma-optimize ang iyong BunkerWeb setup."
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "Pasadyang konsultasyon"
+
+msgid "setup.step3.subtitle"
+msgstr "I-unlock ang mga advanced na feature at masulit ang BunkerWeb."
+
+msgid "setup.step3.title"
+msgstr "Mag-upgrade sa PRO"
+
+msgid "setup.step4.label.final_url"
+msgstr "URL ng BunkerWeb UI"
+
+msgid "setup.step4.subtitle"
+msgstr "Suriin ang iyong mga setting bago kumpletuhin ang setup."
+
+msgid "setup.step4.title"
+msgstr "Pangkalahatang-tanaw"
+
+msgid "setup.subtitle"
+msgstr "Sundin ang mga hakbang upang makumpleto ang setup wizard."
+
+msgid "setup.title"
+msgstr "Setup wizard"
+
+msgid "status.active"
+msgstr "Aktibo"
+
+msgid "status.admin_user_exists"
+msgstr "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang."
+
+msgid "status.all_valid"
+msgstr "Lahat ay wasto"
+
+msgid "status.blog_connection_fail"
+msgstr "Hindi makakonekta sa blog para sa mga update sa balita."
+
+msgid "status.default_server"
+msgstr "Default na Server"
+
+msgid "status.done"
+msgstr "Tapos na"
+
+msgid "status.down"
+msgstr "Hindi Aktibo"
+
+msgid "status.draft"
+msgstr "Draft"
+
+msgid "status.error_deleting_template"
+msgstr "Naganap ang isang error habang binubura ang template."
+
+msgid "status.error_loading_bans"
+msgstr "Error sa pag-load ng mga ban. Mangyaring i-refresh ang pahina."
+
+msgid "status.error_loading_data"
+msgstr "Hindi ma-load ang data"
+
+msgid "status.error_loading_template"
+msgstr "Hindi ma-load ang data ng template."
+
+msgid "status.error_saving_template"
+msgstr "Naganap ang isang error habang sine-save ang template."
+
+msgid "status.expired"
+msgstr "Nag-expire na"
+
+msgid "status.expiring"
+msgstr "Malapit nang mag-expire"
+
+msgid "status.failed"
+msgstr "Nabigo"
+
+msgid "status.invalid_json_payload"
+msgstr "Hindi valid na JSON payload."
+
+msgid "status.loading"
+msgstr "Naglo-load..."
+
+msgid "status.loading_bans"
+msgstr "Naglo-load ng mga ban..."
+
+msgid "status.loading_cache_file"
+msgstr "Naglo-load ng cache file..."
+
+msgid "status.loading_cache_files"
+msgstr "Naglo-load ng mga cache file..."
+
+msgid "status.loading_custom_config"
+msgstr "Naglo-load ng custom na configuration..."
+
+msgid "status.loading_custom_configs"
+msgstr "Naglo-load ng mga custom na configuration..."
+
+msgid "status.loading_instances"
+msgstr "Naglo-load ng mga instance..."
+
+msgid "status.loading_items"
+msgstr "Naglo-load ng mga item..."
+
+msgid "status.loading_jobs"
+msgstr "Naglo-load ng mga trabaho..."
+
+msgid "status.loading_logs"
+msgstr "Naglo-load ng mga log..."
+
+msgid "status.loading_plugins"
+msgstr "Naglo-load ng mga plugin..."
+
+msgid "status.loading_reports"
+msgstr "Naglo-load ng mga ulat..."
+
+msgid "status.loading_services"
+msgstr "Naglo-load ng mga serbisyo..."
+
+msgid "status.loading_templates"
+msgstr "Naglo-load ng mga template..."
+
+msgid "status.missing_template_information"
+msgstr "Nawawalang impormasyon ng template."
+
+msgid "status.news_connection_error"
+msgstr "Hindi makakonekta sa blog para sa mga update sa balita."
+
+msgid "status.no"
+msgstr "Hindi"
+
+msgid "status.no_data"
+msgstr "Walang data"
+
+msgid "status.no_history"
+msgstr "Walang available na kasaysayan."
+
+msgid "status.no_item"
+msgstr "Walang Item"
+
+msgid "status.no_notifications"
+msgstr "Walang abiso na ipapakita."
+
+msgid "status.no_search_results"
+msgstr "Walang nahanap na item."
+
+msgid "status.no_settings"
+msgstr "Ang plugin na ito ay walang setting para sa saklaw na ito."
+
+msgid "status.no_steps"
+msgstr "Walang Available na Mga Hakbang"
+
+msgid "status.no_steps_description"
+msgstr "Ang template na ito ay walang mga hakbang na iko-configure."
+
+msgid "status.not_applicable"
+msgstr "Hindi Naaangkop"
+
+msgid "status.online"
+msgstr "Online"
+
+msgid "status.optional"
+msgstr "Opsyonal"
+
+msgid "status.partial"
+msgstr "Bahagyan"
+
+msgid "status.pending"
+msgstr "Naka-antay"
+
+msgid "status.pinging_instances"
+msgstr "Pina-ping ang mga instance, mangyaring maghintay..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "Ang plugin ay hindi aktibo; kaya naman, walang available na impormasyon."
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "Ang Metrics plugin ay hindi aktibo; kaya naman, walang available na impormasyon."
+
+msgid "status.plugin_page.status.not_available"
+msgstr "Ang pahina ng plugin ay hindi pa available sa panahon ng beta phase."
+
+msgid "status.reverse_proxy_configured"
+msgstr "Naka-configure na ang isang reverse proxy para sa web interface. Mangyaring magpatuloy sa susunod na hakbang."
+
+msgid "status.secure_password"
+msgstr "Ligtas na Password"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "Kino-configure ang iyong BunkerWeb, mangyaring maghintay..."
+
+msgid "status.success"
+msgstr "Matagumpay"
+
+msgid "status.template_in_use"
+msgstr "Kasalukuyang gumagamit ang serbisyong ito ng template na \"%(template)s\" na pinamamahalaan sa pamamagitan ng \"%(method)s\"."
+
+msgid "status.template_in_use_description"
+msgstr "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan. Mangyaring gumawa ng mga pagbabago gamit ang kasalukuyang template o lumipat sa Advanced/Raw mode."
+
+msgid "status.unique_server_name"
+msgstr "Natatanging Pangalan ng Server"
+
+msgid "status.up"
+msgstr "Aktibo"
+
+msgid "status.yes"
+msgstr "Oo"
+
+msgid "step.next"
+msgstr "Susunod"
+
+msgid "step.previous"
+msgstr "Nakaraan"
+
+msgid "support.card.download_logs.help"
+msgstr "Lahat ng pribadong data ay iano-anonymize."
+
+msgid "support.card.download_logs.title"
+msgstr "I-download ang Mga Log"
+
+msgid "support.card.extract_config.title"
+msgstr "Kunin ang Configuration"
+
+msgid "support.card.support_link.title"
+msgstr "Link ng Suporta"
+
+msgid "support.subtitle"
+msgstr "I-download ang mga log ng debug, i-extract ang iyong configuration, at humingi ng tulong sa team ng BunkerWeb."
+
+msgid "support.title"
+msgstr "Suporta"
+
+msgid "tab.custom_certificate"
+msgstr "Custom na Certificate"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "Mga Aksyon"
+
+msgid "table.header.active"
+msgstr "Aktibo"
+
+msgid "table.header.async"
+msgstr "Async"
+
+msgid "table.header.bytes_received"
+msgstr "Bytes na natanggap"
+
+msgid "table.header.bytes_sent"
+msgstr "Bytes na ipinadala"
+
+msgid "table.header.checksum"
+msgstr "Checksum"
+
+msgid "table.header.client_port"
+msgstr "Client port"
+
+msgid "table.header.configs"
+msgstr "Mga Config"
+
+msgid "table.header.country"
+msgstr "Bansa"
+
+msgid "table.header.created"
+msgstr "Nilikha"
+
+msgid "table.header.current_time_left"
+msgstr "Kasalukuyang Natitirang Oras"
+
+msgid "table.header.data"
+msgstr "Data"
+
+msgid "table.header.date"
+msgstr "Petsa"
+
+msgid "table.header.description"
+msgstr "Paglalarawan"
+
+msgid "table.header.end_date"
+msgstr "Petsa ng Pagtatapos"
+
+msgid "table.header.file_name"
+msgstr "Pangalan ng File"
+
+msgid "table.header.health"
+msgstr "Kalusugan"
+
+msgid "table.header.hostname"
+msgstr "Hostname"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "Agwat"
+
+msgid "table.header.ip_address"
+msgstr "IP address"
+
+msgid "table.header.job_name"
+msgstr "Pangalan ng Trabaho"
+
+msgid "table.header.last_run"
+msgstr "Huling Pagpapatakbo"
+
+msgid "table.header.last_seen"
+msgstr "Huling Nakita"
+
+msgid "table.header.last_update"
+msgstr "Huling Update"
+
+msgid "table.header.listen_port"
+msgstr "Listen port"
+
+msgid "table.header.method"
+msgstr "Paraan"
+
+msgid "table.header.name"
+msgstr "Pangalan"
+
+msgid "table.header.plugin"
+msgstr "Plugin"
+
+msgid "table.header.protocol"
+msgstr "Protocol"
+
+msgid "table.header.reason"
+msgstr "Dahilan"
+
+msgid "table.header.reload"
+msgstr "I-reload"
+
+msgid "table.header.request_id"
+msgstr "ID ng Kahilingan"
+
+msgid "table.header.scope"
+msgstr "Saklaw"
+
+msgid "table.header.security_mode"
+msgstr "Mode ng Seguridad"
+
+msgid "table.header.server_name"
+msgstr "Pangalan ng Server"
+
+msgid "table.header.service"
+msgstr "Serbisyo"
+
+msgid "table.header.service_name"
+msgstr "Pangalan ng Serbisyo"
+
+msgid "table.header.session_time"
+msgstr "Tagal ng session"
+
+msgid "table.header.settings"
+msgstr "Mga Setting"
+
+msgid "table.header.status"
+msgstr "Katayuan"
+
+msgid "table.header.status_code"
+msgstr "Status code"
+
+msgid "table.header.steps"
+msgstr "Mga Hakbang"
+
+msgid "table.header.stream"
+msgstr "Stream"
+
+msgid "table.header.template"
+msgstr "Template"
+
+msgid "table.header.templates"
+msgstr "Mga Template"
+
+msgid "table.header.time_left"
+msgstr "Natitirang Oras"
+
+msgid "table.header.type"
+msgstr "Uri"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "Halaga"
+
+msgid "table.header.version"
+msgstr "Bersyon"
+
+msgid "template.editor.button_add_config"
+msgstr "Magdagdag ng config"
+
+msgid "template.editor.button_add_setting"
+msgstr "Magdagdag ng setting"
+
+msgid "template.editor.button_add_step"
+msgstr "Magdagdag ng hakbang"
+
+msgid "template.editor.button_move_down"
+msgstr "Ilipat pababa"
+
+msgid "template.editor.button_move_up"
+msgstr "Ilipat pataas"
+
+msgid "template.editor.button_remove"
+msgstr "Alisin"
+
+msgid "template.editor.clone_badge"
+msgstr "Na-clone mula sa %(template)s"
+
+msgid "template.editor.configs"
+msgstr "Mga custom config"
+
+msgid "template.editor.configs_help"
+msgstr "Mag-attach ng mga opsyonal na custom na configuration snippet sa template na ito."
+
+msgid "template.editor.delete_step_confirm"
+msgstr "Sigurado ka bang gusto mong burahin ang hakbang na ito?"
+
+msgid "template.editor.details"
+msgstr "Mga detalye ng template"
+
+msgid "template.editor.details_help"
+msgstr "Itakda ang pangunahing impormasyon para sa template na ito."
+
+msgid "template.editor.drag_handle"
+msgstr "I-drag upang muling ayusin"
+
+msgid "template.editor.empty_configs"
+msgstr "Wala pang mga custom config."
+
+msgid "template.editor.empty_settings"
+msgstr "Wala pang mga setting. Magdagdag ng iyong unang setting."
+
+msgid "template.editor.empty_steps"
+msgstr "Wala pang mga hakbang. Magdagdag ng iyong unang hakbang."
+
+msgid "template.editor.error_generic"
+msgstr "May nangyaring mali. Mangyaring subukan muli."
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "Hindi matukoy ang submission endpoint."
+
+msgid "template.editor.heading_create"
+msgstr "Lumikha ng template"
+
+msgid "template.editor.heading_edit"
+msgstr "I-edit ang template %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "Data"
+
+msgid "template.editor.label_config_name"
+msgstr "Pangalan"
+
+msgid "template.editor.label_config_order"
+msgstr "Ayos"
+
+msgid "template.editor.label_config_type"
+msgstr "Uri"
+
+msgid "template.editor.label_setting_key"
+msgstr "Key ng setting"
+
+msgid "template.editor.label_setting_value"
+msgstr "Default na value"
+
+msgid "template.editor.label_step_configs"
+msgstr "Mga config sa hakbang na ito"
+
+msgid "template.editor.label_step_settings"
+msgstr "Mga setting sa hakbang na ito"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "Subtitle ng hakbang"
+
+msgid "template.editor.label_step_title"
+msgstr "Pamagat ng hakbang"
+
+msgid "template.editor.missing_configs_body"
+msgstr "Ang na-import na template ay may mga reference sa custom config na hindi pa na-upload. Mangyaring i-import ang mga config na ito upang makumpleto ang setup ng template:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "Mag-browse ng Mga File"
+
+msgid "template.editor.missing_configs_done"
+msgstr "Tapos na"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "I-drag at i-drop ang mga config file dito (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "o"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "Ang mga na-upload na file ay awtomatikong idadagdag sa iyong template. Tiyakin na ang mga pangalan ng file ay tugma sa mga nawawalang config na nakalista sa itaas."
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "Payo:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "Lahat ng nawawalang config ay na-upload na! Matagumpay na na-import ang template."
+
+msgid "template.editor.missing_configs_title"
+msgstr "Mga Nawawalang Custom Config"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "Nabigo ang pag-upload ng mga config file"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "Mag-upload ng mga nawawalang config (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "%(uploaded)s ng %(total)s na config ang na-upload. Nawawala pa rin: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "Mga config file na matagumpay na na-upload: %(count)s"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "Pumili ng mga opsyon"
+
+msgid "template.editor.multiselect_summary"
+msgstr "%(count)s napili"
+
+msgid "template.editor.multivalue_add"
+msgstr "Magdagdag ng value"
+
+msgid "template.editor.multivalue_helper"
+msgstr "Isang value bawat linya.%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "Pangkalahatang-tanaw"
+
+msgid "template.editor.panel_overview_help"
+msgstr "Subaybayan ang pangunahing impormasyon at mag-navigate sa pagitan ng mga seksyon."
+
+msgid "template.editor.placeholder_config_data"
+msgstr "Data"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "Pangalan"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "core"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "Key"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "Default na value"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "Subtitle ng hakbang"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "Pamagat ng hakbang"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "template-id"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "Aking template"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "Mag-browse ng mga file"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "I-drag at i-drop ang mga config file dito o mag-click upang mag-browse (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "Mga sinusuportahang format: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "Wala pang mga na-import na config file. Ang mga bagong file ay lalabas sa ibaba."
+
+msgid "template.editor.raw_configs_help"
+msgstr "Mag-upload ng mga config file (.conf, .cfg, .txt) upang magdagdag ng mga entry sa <code>configs</code>. Ang mga uri ay default sa <code>server_http</code>; ayusin sa JSON kung kinakailangan."
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "Hindi ma-import ang mga config dahil ang kasalukuyang JSON ay hindi valid."
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "Walang na-import na config."
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "Mga config file na na-import: %(count)s."
+
+msgid "template.editor.raw_configs_note"
+msgstr "Ang mga na-import na file ay idadagdag sa JSON editor. Suriin at ayusin bago i-save."
+
+msgid "template.editor.raw_configs_title"
+msgstr "Mga import ng custom config"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "Mag-upload ng mga config file (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "Hindi mabasa ang isa sa mga napiling file."
+
+msgid "template.editor.raw_editor_aria"
+msgstr "Raw JSON editor ng template"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "Mag-drop ng template JSON file (.json lamang) upang palitan ang kasalukuyang nilalaman."
+
+msgid "template.editor.raw_editor_help"
+msgstr "I-edit ang kumpletong kahulugan ng template bilang JSON. Ang pagbabalik sa Easy mode ay nagva-validate at nagre-reload ng visual editor."
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "Matagumpay na na-import ang template JSON."
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "Ang pag-import ng file na ito ay ganap na papalitan ang kasalukuyang template JSON. Ang mga pagbabagong ginawa sa editor ay mawawala. Gusto mo bang magpatuloy?"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "Palitan ang template"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "Palitan ang template JSON?"
+
+msgid "template.editor.raw_editor_title"
+msgstr "Raw JSON ng template"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "Ang na-upload na file ay walang laman."
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "Hindi mabasa ang napiling file."
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "Mag-upload ng template JSON (.json lamang)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "Hindi valid na kahulugan ng config."
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "Ang mga config entry ay dapat na mga object."
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "Ang mga config na %(configs)s ay hindi nakatakda sa anumang hakbang."
+
+msgid "template.editor.raw_validation_empty"
+msgstr "Ang template JSON ay hindi maaaring walang laman."
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "Hindi valid na JSON payload: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "Ang template payload ay dapat na isang JSON object."
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "Ang mga key ng setting ay dapat na mga hindi walang laman na string."
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "Ang mga setting ay dapat ibigay bilang isang object."
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "Ang mga setting na %(settings)s ay hindi nakatakda sa anumang hakbang."
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "Ang config na %(config)s ay nakatakda sa maraming hakbang."
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "Ang hakbang %(index)s ay naglalaman ng hindi valid na reference ng config."
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "Ang hakbang %(index)s ay may reference sa hindi kilalang config na %(config)s."
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "Ang hakbang %(index)s ay dapat na isang object."
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "Ang setting na %(setting)s ay nakatakda sa maraming hakbang."
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "Ang hakbang %(index)s ay naglalaman ng hindi valid na reference ng setting."
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "Ang hakbang %(index)s ay may reference sa hindi kilalang setting na %(setting)s."
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "Ang hakbang %(index)s ay dapat may pamagat."
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "Ang isang template ay dapat naglalaman ng hindi bababa sa isang hakbang."
+
+msgid "template.editor.readonly_db"
+msgstr "Kasalukuyang read-only ang database. Hindi maaaring baguhin ang mga template."
+
+msgid "template.editor.readonly_method"
+msgstr "Ang template na ito ay nilikha ng proseso ng %(method)s at hindi maaaring i-edit mula sa UI."
+
+msgid "template.editor.readonly_title"
+msgstr "Basahin lamang"
+
+msgid "template.editor.readonly_user"
+msgstr "Mayroon kang read-only na mga pahintulot. Makipag-ugnayan sa isang administrator upang humiling ng write access."
+
+msgid "template.editor.select_config_placeholder"
+msgstr "Pumili ng config"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "Pumili ng uri"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "Pumili ng setting"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "Sigurado ka bang gusto mong alisin ang setting na ito mula sa template?"
+
+msgid "template.editor.setting_remove_key"
+msgstr "Setting"
+
+msgid "template.editor.setting_remove_title"
+msgstr "Alisin ang setting"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "Idagdag ang napili"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "Advanced"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "Naidagdag na"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "Linisin ang paghahanap"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "Lahat ng katugmang setting ay naidagdag na."
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "Walang setting na ipapakita."
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "Mga available na setting: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s na available, %(used)s na naidagdag"
+
+msgid "template.editor.setting_selector_default"
+msgstr "Default"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "Tingnan ang dokumentasyon"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "Walang setting na tumutugma sa kasalukuyang mga filter."
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "Plugin"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "Lahat ng plugin"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "Uri"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "Lahat ng uri"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "Ang mga multisite setting lamang ang available. Gumamit ng mga filter upang mapaliit ang listahan."
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "Marami"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "Pattern"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "Maghanap ng multisite setting"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "Maghanap ayon sa label, key, o plugin"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "Pinagana"
+
+msgid "template.editor.settings"
+msgstr "Mga Setting"
+
+msgid "template.editor.settings_help"
+msgstr "Tukuyin ang mga setting na inilalantad ng template na ito at ang kanilang mga default na value."
+
+msgid "template.editor.step_configs_empty"
+msgstr "Wala pang config na naidagdag sa hakbang na ito."
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "Pumili ng mga umiiral na config"
+
+msgid "template.editor.step_default_title"
+msgstr "Walang pamagat na hakbang"
+
+msgid "template.editor.step_prefix"
+msgstr "Hakbang"
+
+msgid "template.editor.step_settings_empty"
+msgstr "Wala pang setting na naidagdag sa hakbang na ito."
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "Pumili ng mga umiiral na setting"
+
+msgid "template.editor.steps"
+msgstr "Mga Hakbang"
+
+msgid "template.editor.steps_help"
+msgstr "Ayusin ang mga setting sa mga gabay na hakbang. Pumili kung aling mga setting o config ang nabibilang sa bawat hakbang."
+
+msgid "template.editor.summary_clone_info"
+msgstr "Kasalukuyang nagko-clone mula sa %(template)s."
+
+msgid "template.editor.summary_counts_configs"
+msgstr "Mga Config"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "Mga Setting"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "Mga Hakbang"
+
+msgid "template.editor.summary_counts_title"
+msgstr "Nilalaman"
+
+msgid "template.editor.summary_link_configs"
+msgstr "Mga custom config"
+
+msgid "template.editor.summary_link_details"
+msgstr "Mga detalye ng template"
+
+msgid "template.editor.summary_link_settings"
+msgstr "Mga Setting"
+
+msgid "template.editor.summary_link_steps"
+msgstr "Mga Hakbang"
+
+msgid "template.editor.summary_links_title"
+msgstr "Mga mabilis na link"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "Nilikha"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "Paraan"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "Metadata"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "Hindi available"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "Huling update"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "Kailangan ng pangalan ng config kapag may tinukoy na config."
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "Ang uri ng config ay dapat isa sa mga uri na compatible sa multisite."
+
+msgid "template.editor.validation_config_type_required"
+msgstr "Kailangan ng uri ng config kapag may tinukoy na config."
+
+msgid "template.editor.validation_configs_unique"
+msgstr "Ang bawat pangalan ng config ay dapat natatangi."
+
+msgid "template.editor.validation_id_required"
+msgstr "Kailangan ng ID ng template."
+
+msgid "template.editor.validation_setting_key"
+msgstr "Ang bawat setting ay dapat may key."
+
+msgid "template.editor.validation_settings_unique"
+msgstr "Ang bawat key ng setting ay dapat natatangi."
+
+msgid "template.none"
+msgstr "Walang Template"
+
+msgid "templates.gallery.delete_selected"
+msgstr "Burahin ang napili"
+
+msgid "templates.gallery.empty_message"
+msgstr "Gawin ang unang template para pagsama-samahin at muling gamitin ang mga setting, hakbang at custom config."
+
+msgid "templates.gallery.empty_title"
+msgstr "Wala pang template"
+
+msgid "templates.gallery.select"
+msgstr "Piliin"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "Mataas na seguridad"
+
+msgid "templates.name.low"
+msgstr "Mababang seguridad"
+
+msgid "templates.name.medium"
+msgstr "Katamtamang seguridad"
+
+msgid "templates.name.ui"
+msgstr "Web UI"
+
+msgid "templates.subtitle"
+msgstr "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
+
+msgid "templates.tag.config"
+msgstr "Custom config: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "Built-in na feature: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "Plugin: %(name)s"
+
+msgid "templates.title"
+msgstr "Mga template ng serbisyo"
+
+msgid "theme.dark"
+msgstr "Madilim"
+
+msgid "theme.light"
+msgstr "Maliwanag"
+
+msgid "threatmap.attacks_today"
+msgstr "Mga pag-atake ngayong araw"
+
+msgid "threatmap.countries"
+msgstr "Mga bansang pinagmulan"
+
+msgid "threatmap.disabled_help"
+msgstr "Binabasa ng threatmap ang parehong nakaimbak na ulat na ginagamit ng pahinang Reports. Itakda ang METRICS_PERSIST_TO_DB sa yes upang simulan itong itala."
+
+msgid "threatmap.disabled_title"
+msgstr "Naka-off ang pag-iimbak ng mga ulat"
+
+msgid "threatmap.empty_help"
+msgstr "Maaaring walang request na hinarang sa nakaraang 24 na oras, o hindi pa nakukuha ang mga ulat."
+
+msgid "threatmap.empty_title"
+msgstr "Walang hinarang sa panahong ito"
+
+msgid "threatmap.error_help"
+msgstr "Pinapanatili ng mapa ang huling datos na nakarga at susubok muli sa susunod na pag-refresh."
+
+msgid "threatmap.error_title"
+msgstr "Hindi maabot ang metrics service"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "Lumabas sa buong screen"
+
+msgid "threatmap.freshness"
+msgstr "Umaabot ang mga ulat sa database mga isang beses kada minuto, kaya nahuhuli ang mapa sa totoong trapiko nang mga isa hanggang dalawang minuto."
+
+msgid "threatmap.fullscreen"
+msgstr "Buong screen"
+
+msgid "threatmap.map_sub"
+msgstr "Ipinapakita ng mga arko ang bansang pinagmulan, hindi ang eksaktong lokasyon"
+
+msgid "threatmap.map_title"
+msgstr "Pinagmulan ng hinarang na trapiko"
+
+msgid "threatmap.more_hidden"
+msgstr "pa ang hindi ipinapakita"
+
+msgid "threatmap.not_localised"
+msgstr "walang lokasyon"
+
+msgid "threatmap.open_live"
+msgstr "Live na view"
+
+msgid "threatmap.show_less"
+msgstr "Ipakita ang nangungunang %(count)s"
+
+msgid "threatmap.show_more"
+msgstr "Ipakita lahat (%(count)s)"
+
+msgid "threatmap.stale"
+msgstr "Tumigil na sa pag-update ang mga bilang na ito. Hindi tumutugon ang metrics service."
+
+msgid "threatmap.subtitle"
+msgstr "Kung saan nanggaling ang trapikong hinarang ng iyong mga instance sa nakaraang 24 na oras."
+
+msgid "threatmap.ticker_title"
+msgstr "Mga live na kaganapan"
+
+msgid "threatmap.top_origins"
+msgstr "Pangunahing pinagmulan"
+
+msgid "threatmap.top_reason"
+msgstr "Pangunahing dahilan"
+
+msgid "threatmap.top_reasons"
+msgstr "Pangunahing dahilan"
+
+msgid "threatmap.top_target"
+msgstr "Pangunahing target"
+
+msgid "threatmap.top_targets"
+msgstr "Pangunahing target"
+
+msgid "threatmap.updated"
+msgstr "Na-update"
+
+msgid "timings.calls"
+msgstr "Mga tawag"
+
+msgid "timings.disabled_help"
+msgstr "Itakda ang METRICS_COLLECT_TIMINGS sa yes para sukatin ang tagal ng bawat plugin. Kinokolekta pa rin ang buong tagal ng request."
+
+msgid "timings.disabled_title"
+msgstr "Naka-off ang pagsukat ng oras ng plugin"
+
+msgid "timings.max"
+msgstr "Pinakamataas"
+
+msgid "timings.max_request"
+msgstr "Pinakamabagal na request"
+
+msgid "timings.mean"
+msgstr "Karaniwan"
+
+msgid "timings.mean_request"
+msgstr "Karaniwang request"
+
+msgid "timings.partial"
+msgstr "Hindi sumagot ang ilang instance. Ang mga bilang sa ibaba ay para sa mga sumagot."
+
+msgid "timings.phase"
+msgstr "Yugto"
+
+msgid "timings.phases"
+msgstr "Mga yugto ng plugin"
+
+msgid "timings.plugin"
+msgstr "Plugin"
+
+msgid "timings.reporting_instances"
+msgstr "Mga instance na nag-uulat"
+
+msgid "timings.requests_measured"
+msgstr "Mga request na sinukat"
+
+msgid "timings.share"
+msgstr "Bahagi"
+
+msgid "timings.share_help"
+msgstr "Ang bahagi ay kabuuang oras ng plugin kumpara sa kabuuang oras ng request. Ang mga yugtong hindi tumatakbo nang isang beses bawat request — pagsisimula ng worker, background timer at internal API — ay walang bahagi at nagpapakita ng gitling."
+
+msgid "timings.subtitle"
+msgstr "Tagal ng bawat plugin sa bawat yugto ng request, binabasa nang live mula sa lahat ng instance at pinagsasama."
+
+msgid "timings.total"
+msgstr "Kabuuan"
+
+msgid "timings.unreachable_help"
+msgstr "Binabasa ang mga oras mula sa mga instance mismo, kaya walang sumagot — o wala pang nagserbisyo ng request."
+
+msgid "timings.unreachable_title"
+msgstr "Walang instance na nag-ulat ng oras"
+
+msgid "timings.volatile"
+msgstr "Nasa shared memory ng bawat instance ang mga oras at binabasa kapag kailangan — hindi iniimbak at nare-reset kapag nag-restart ang instance."
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "Kung aalisin o ire-restart ang serbisyo, mawawala ang iyong UI configuration."
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "Ito ay dahil ang paraan ng serbisyo ay 'autoconf', na idinisenyo upang maiwasan ang mga salungatan sa configuration."
+
+msgid "toast.ban_updated"
+msgstr "Matagumpay na na-update ang tagal ng ban!"
+
+msgid "toast.body.ping_succeed"
+msgstr "Mga Instance: %(instances)s"
+
+msgid "toast.copied"
+msgstr "Nakopya!"
+
+msgid "toast.disclaimer_title"
+msgstr "Paunawa"
+
+msgid "toast.global_settings_applied_body"
+msgstr "Matagumpay na nakuha at nailapat ang mga pandaigdigang setting sa kasalukuyang form."
+
+msgid "toast.global_settings_applied_title"
+msgstr "Nailapat ang mga pandaigdigang setting"
+
+msgid "toast.global_settings_failed_body"
+msgstr "Naganap ang isang error habang kinukuha ang mga pandaigdigang setting."
+
+msgid "toast.global_settings_failed_title"
+msgstr "Nabigo ang pagkuha ng mga pandaigdigang setting"
+
+msgid "toast.header.ping_failed"
+msgstr "Nabigo ang ping"
+
+msgid "toast.header.ping_succeed"
+msgstr "Matagumpay ang ping"
+
+msgid "toast.ip_unbanned"
+msgstr "Matagumpay na na-unban ang IP address!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate."
+
+msgid "tooltip.button.ban_ip"
+msgstr "I-ban ang IP address na ito"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "I-convert ang Config na %(name)s sa Draft"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "I-convert ang Config na %(name)s sa Online"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "I-convert ang Serbisyo na %(name)s sa Draft"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "I-convert ang Serbisyo na %(name)s sa Online"
+
+msgid "tooltip.button.delete_config"
+msgstr "Burahin ang Custom Config na %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "Burahin ang Cache File: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "Burahin ang Instance na %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "Burahin ang Plugin na %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "Burahin ang Serbisyo na %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "Burahin ang Template na %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "Nag-iiskedyul ng pagsusuri; nagda-download lamang kung may mga update."
+
+msgid "tooltip.button.force_update"
+msgstr "Nilalaktawan ang mga pagsusuri at pinipilit ang pag-download ng PRO plugin; pinapanatili ang kasalukuyang estado sa pagkabigo."
+
+msgid "tooltip.button.ping_instance"
+msgstr "I-ping ang Instance na %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "I-reload ang Instance na %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "I-reset sa default na value"
+
+msgid "tooltip.button.reset_global"
+msgstr "I-reset sa global na value"
+
+msgid "tooltip.button.run_job"
+msgstr "Patakbuhin ang Trabaho na %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "Ipakita ang mga napili lamang"
+
+msgid "tooltip.button.stop_instance"
+msgstr "Itigil ang Instance na %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "I-unban ang %(ip)s"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "Baguhin ang tagal ng pagbabawal"
+
+msgid "tooltip.button.value_from_global"
+msgstr "Value mula sa mga pandaigdigang setting"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "Hindi mabura ang orihinal na entry ng Ban."
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "Hindi maaaring alisin dahil ang isa o higit pang setting ay hindi pinagana."
+
+msgid "tooltip.certificate_priority"
+msgstr "Pumili kung uunahin ang certificate mula sa file path o mula sa base64 data."
+
+msgid "tooltip.challenge_type"
+msgstr "Ang uri ng challenge na gagamitin para sa Let's Encrypt verification (http o dns)."
+
+msgid "tooltip.collapse_multiline"
+msgstr "I-collapse ang mga multi-line na entry (tracebacks, payloads)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "I-collapse ang mga multi-line na value (mga certificate, key)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "Mga configuration na inilalapat pagkatapos ma-load ang mga OWASP Core Rule Set plugin."
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "Mga configuration na inilalapat bago ma-load ang mga OWASP Core Rule Set plugin."
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Mga configuration sa antas ng Server ng Nginx, partikular para sa 'default server' block, na ginagamit kapag ang kahilingan ng kliyente ay hindi tumutugma sa anumang naka-configure na pangalan ng server."
+
+msgid "tooltip.config_type.http"
+msgstr "Mga configuration na inilalapat nang pandaigdigang sa antas ng HTTP ng Nginx."
+
+msgid "tooltip.config_type.modsec"
+msgstr "Mga configuration ng ModSecurity na inilalapat pagkatapos ma-load ang OWASP Core Rule Set, o ginagamit kung hindi na-load ang Core Rule Set."
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "Mga configuration ng ModSecurity na inilalapat bago ma-load ang OWASP Core Rule Set."
+
+msgid "tooltip.config_type.server_http"
+msgstr "Mga configuration na inilalapat sa antas ng HTTP Server (virtual host) ng Nginx."
+
+msgid "tooltip.config_type.server_stream"
+msgstr "Mga configuration na inilalapat sa antas ng Stream Server ng Nginx."
+
+msgid "tooltip.config_type.stream"
+msgstr "Mga configuration na inilalapat nang pandaigdigang sa antas ng Stream ng Nginx."
+
+msgid "tooltip.confirm_password_match"
+msgstr "Ang kumpirmasyon ng password ay dapat tumugma sa password na ipinasok sa itaas."
+
+msgid "tooltip.copied"
+msgstr "Nakopya!"
+
+msgid "tooltip.copy_https_only"
+msgstr "Ang feature ng pagkopya ay available lamang sa HTTPS."
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "Ang custom na data ng SSL certificate (format na PEM o Base64 encoded)."
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "Path sa custom na SSL certificate file."
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "Ang custom na data ng SSL private key (format na PEM o Base64 encoded)."
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "Path sa custom na SSL private key file."
+
+msgid "tooltip.different_from_template"
+msgstr "Ang value ay naiiba sa default ng template"
+
+msgid "tooltip.disabled_by_method"
+msgstr "Hindi pinagana: Pinamamahalaan sa pamamagitan ng paraan na '%(method)s'."
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "Hindi pinagana: Ang database ay nasa read-only na mode."
+
+msgid "tooltip.disabled_draft"
+msgstr "Hindi pinagana: Ang serbisyo ay nasa Draft mode."
+
+msgid "tooltip.disabled_readonly"
+msgstr "Hindi pinagana: Ang read-only na mode ay aktibo."
+
+msgid "tooltip.dns_check_url"
+msgstr "Kung ipinapakita ng pahina ang 'ok', ang pangalan ng server ay malamang na available."
+
+msgid "tooltip.dns_credential_items"
+msgstr "Mga kredensyal para sa DNS provider, ginagamit para sa mga DNS challenge (hal., 'cloudflare_api_token=123456'). Ang kinakailangang format ay depende sa provider."
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "Ang mga kredensyal ay naaangkop lamang para sa mga DNS challenge."
+
+msgid "tooltip.dns_propagation"
+msgstr "Oras (sa segundo) na hihintayin para sa mga pagbabago ng DNS na maipalaganap sa panahon ng mga DNS challenge."
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "Ang pagkaantala ng DNS propagation ay naaangkop lamang para sa mga DNS challenge."
+
+msgid "tooltip.dns_provider"
+msgstr "Ang DNS provider na gagamitin para sa mga Let's Encrypt DNS challenge."
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "Ang pagpili ng DNS provider ay naaangkop lamang para sa mga DNS challenge."
+
+msgid "tooltip.download_file"
+msgstr "I-download ang file"
+
+msgid "tooltip.download_log"
+msgstr "I-download ang log file na ito"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "Ang Draft mode ay maaari lamang i-toggle para sa mga serbisyong nilikha sa pamamagitan ng UI."
+
+msgid "tooltip.email_length"
+msgstr "Ang email ay dapat na may 1 hanggang 256 na character."
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "Ang email address na irerehistro sa Let's Encrypt para sa pamamahala ng certificate at mga abiso."
+
+msgid "tooltip.fetch_global_settings"
+msgstr "Kunin ang mga pandaigdigang setting at ilapat ang mga ito sa kasalukuyang template"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "Ang follow mode ay available lamang sa pinakabagong pahina"
+
+msgid "tooltip.global_settings_source"
+msgstr "Value na minana mula sa mga pandaigdigang setting."
+
+msgid "tooltip.instance_not_up"
+msgstr "Ang Instance na %(hostname)s ay kasalukuyang hindi tumutugon ('up')."
+
+msgid "tooltip.issue_count"
+msgstr "Mga error at babala sa view na ito"
+
+msgid "tooltip.latest_version_installed"
+msgstr "Nagpapatakbo ka ng pinakabagong bersyon."
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "Ang custom na profile na gagamitin para sa Let's Encrypt (hal. 'aking_custom_profile')."
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "I-disable ang mga kahilingan ng certificate para sa mga domain na tumutugma sa Public Suffix List (inirerekomenda)."
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "Ang profile na gagamitin para sa Let's Encrypt (classic, tlsserver, shortlived)."
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "Pumili ng iyong certificate provider upang ipakita ang mga setting na tukoy sa provider."
+
+msgid "tooltip.license_key"
+msgstr "Ang iyong BunkerWeb PRO license key."
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "I-access ang Pahina ng %(name)s"
+
+msgid "tooltip.link.access_service"
+msgstr "I-access ang Serbisyo na %(name)s"
+
+msgid "tooltip.link.clone_config"
+msgstr "I-clone ang Custom Config na %(name)s"
+
+msgid "tooltip.link.clone_service"
+msgstr "I-clone ang Serbisyo na %(name)s"
+
+msgid "tooltip.link.clone_template"
+msgstr "I-clone ang Template na %(template)s"
+
+msgid "tooltip.link.download_file"
+msgstr "I-download ang %(filename)s"
+
+msgid "tooltip.link.edit_config"
+msgstr "I-edit ang Custom Config na %(name)s"
+
+msgid "tooltip.link.edit_service"
+msgstr "I-edit ang Serbisyo na %(service)s"
+
+msgid "tooltip.link.edit_template"
+msgstr "I-edit ang Template na %(template)s"
+
+msgid "tooltip.link.export_config"
+msgstr "I-export ang Custom Config na %(name)s"
+
+msgid "tooltip.link.export_service"
+msgstr "I-export ang Configuration ng Serbisyo na %(service)s"
+
+msgid "tooltip.link.manage_activation"
+msgstr "Pamahalaan ang pag-activate ng %(name)s sa mga pangkalahatang setting"
+
+msgid "tooltip.link.view_config"
+msgstr "Tingnan ang Custom Config na %(name)s"
+
+msgid "tooltip.link.view_file"
+msgstr "Tingnan ang %(filename)s"
+
+msgid "tooltip.link.view_service"
+msgstr "Tingnan ang Serbisyo na %(service)s"
+
+msgid "tooltip.link.view_template"
+msgstr "Tingnan ang Template na %(template)s"
+
+msgid "tooltip.local_time"
+msgstr "Ipakita ang mga timestamp sa iyong lokal na oras"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "Buong URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "Ito ay isang multisite setting, nakakaapekto sa maraming serbisyo kung tinukoy nang pandaigdigang."
+
+msgid "tooltip.new_version_available"
+msgstr "Mayroon nang bagong bersyon!"
+
+msgid "tooltip.next_issue"
+msgstr "Tumalon sa susunod na error o babala"
+
+msgid "tooltip.no_cache"
+msgstr "Walang nahanap na cache file para sa trabahong ito."
+
+msgid "tooltip.no_history"
+msgstr "Walang nahanap na kasaysayan ng pagpapatupad para sa trabahong ito."
+
+msgid "tooltip.no_log_files"
+msgstr "Walang available na mga log file."
+
+msgid "tooltip.no_page_available"
+msgstr "Walang dedicated na pahina para sa plugin na ito."
+
+msgid "tooltip.password_requirements"
+msgstr "Ang password ay dapat hindi bababa sa 8 na character at may kasamang 1 malaking titik, 1 numero, at 1 espesyal na character."
+
+msgid "tooltip.prev_issue"
+msgstr "Tumalon sa nakaraang error o babala"
+
+msgid "tooltip.pro_feature"
+msgstr "Ito ay isang PRO feature."
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "Hindi pinagana: Ang database ay nasa read-only na mode."
+
+msgid "tooltip.readonly_mode"
+msgstr "Hindi pinapayagan ang aksyong ito sa mode na \"read-only\"."
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "Hindi pinagana: Ang iyong account ay read-only, aksyon na '%(action)s' ay hindi pinagana."
+
+msgid "tooltip.real_ip_from"
+msgstr "Listahan ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan."
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at auth basic gamit ang http://user:pass@url scheme."
+
+msgid "tooltip.real_ip_header"
+msgstr "HTTP header na naglalaman ng tunay na IP o espesyal na value na proxy_protocol para sa PROXY protocol."
+
+msgid "tooltip.real_ip_recursive"
+msgstr "Magsagawa ng recursive na paghahanap sa header container IP address."
+
+msgid "tooltip.remove_ban_entry"
+msgstr "Alisin ang entry ng ban na ito mula sa listahan."
+
+msgid "tooltip.reset_template_settings"
+msgstr "I-reset ang lahat ng setting sa kasalukuyang view ng template sa kanilang mga default."
+
+msgid "tooltip.search_logs"
+msgstr "Maghanap sa mga log (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "Pumili ng file upang paganahin ang follow mode"
+
+msgid "tooltip.server_name"
+msgstr "Ang pangunahing domain name o pangalan ng server para sa serbisyong ito."
+
+msgid "tooltip.stream_support.no"
+msgstr "Hindi sinusuportahan ang STREAM mode."
+
+msgid "tooltip.stream_support.partial"
+msgstr "Bahagyang sinusuportahan ang STREAM mode."
+
+msgid "tooltip.stream_support.yes"
+msgstr "Sinusuportahan ang STREAM mode."
+
+msgid "tooltip.table.bans.actions"
+msgstr "Mga aksyon na available para sa Ban na ito"
+
+msgid "tooltip.table.bans.country"
+msgstr "Bansa ng na-ban na IP address"
+
+msgid "tooltip.table.bans.date"
+msgstr "Petsa at oras kung kailan nilikha ang Ban"
+
+msgid "tooltip.table.bans.details"
+msgstr "Ipakita ang mga detalye ng Ban"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "Petsa at oras kung kailan mag-e-expire ang Ban"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "Na-ban na IP address"
+
+msgid "tooltip.table.bans.reason"
+msgstr "Dahilan ng ban"
+
+msgid "tooltip.table.bans.scope"
+msgstr "Saklaw ng ban (Pandaigdigang o Tukoy sa serbisyo)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "Piliin ang lahat ng Ban"
+
+msgid "tooltip.table.bans.service"
+msgstr "Serbisyo kung saan nagmula ang ban (kung ang saklaw ay Tukoy sa serbisyo)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "Natitirang oras bago mag-expire ang Ban"
+
+msgid "tooltip.table.cache.actions"
+msgstr "Mga aksyon na available para sa cache file na ito"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "Checksum ng cache file"
+
+msgid "tooltip.table.cache.details"
+msgstr "Ipakita ang mga detalye ng cache file"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "Pangalan ng cache file"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "Trabaho na lumikha ng cache file na ito"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "Petsa at oras kung kailan huling na-update ang cache file"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "Plugin na nauugnay sa trabaho na lumikha ng cache file na ito"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "Piliin ang lahat ng file ng Cache"
+
+msgid "tooltip.table.cache.service"
+msgstr "Serbisyo na nauugnay sa cache file na ito (o Pandaigdigang)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "Mga aksyon na available para sa Custom Config na ito"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "Checksum ng nilalaman ng Custom Config"
+
+msgid "tooltip.table.configs.details"
+msgstr "Ipakita ang mga detalye ng Custom Config"
+
+msgid "tooltip.table.configs.method"
+msgstr "Paraan ng paglikha ng Custom Config (hal., ui, file)"
+
+msgid "tooltip.table.configs.name"
+msgstr "Pangalan ng Custom Config"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "Piliin ang lahat ng Custom Config"
+
+msgid "tooltip.table.configs.service"
+msgstr "Serbisyo na nauugnay sa Custom Config (o Pandaigdigang)"
+
+msgid "tooltip.table.configs.status"
+msgstr "Draft na katayuan ng Custom na configuration"
+
+msgid "tooltip.table.configs.template"
+msgstr "Nagpapahiwatig kung ang Custom Config ay nagmula sa isang template"
+
+msgid "tooltip.table.configs.type"
+msgstr "Uri o konteksto ng Custom Config (hal., HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "Mga aksyon na available para sa Instance na ito"
+
+msgid "tooltip.table.instances.created"
+msgstr "Petsa at oras kung kailan unang narehistro ang Instance"
+
+msgid "tooltip.table.instances.details"
+msgstr "Ipakita ang mga detalye ng Instance"
+
+msgid "tooltip.table.instances.health"
+msgstr "Katayuan ng kalusugan ng Instance (Aktibo, Hindi Aktibo, Naglo-load)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "Hostname o URL ng Instance"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "Petsa at oras kung kailan huling nakita ang Instance"
+
+msgid "tooltip.table.instances.method"
+msgstr "Paraan ng paglikha ng Instance (hal., ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "Tinukoy ng user o auto-generated na pangalan ng Instance"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "Piliin ang lahat ng Instance"
+
+msgid "tooltip.table.instances.type"
+msgstr "Uri ng Instance (hal., Container, Static)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "Mga aksyon na available para sa Trabaho na ito"
+
+msgid "tooltip.table.jobs.async"
+msgstr "Nagpapahiwatig kung ang Trabaho ay tumatakbo nang asynchronously"
+
+msgid "tooltip.table.jobs.details"
+msgstr "Ipakita ang mga detalye ng Trabaho"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "Dalas ng pagpapatupad ng Trabaho"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "Katayuan ng huling pagpapatupad ng Trabaho (Matagumpay/Nabigo)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "Pangalan ng Trabaho"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "Plugin na nauugnay sa Trabaho"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "Nagpapahiwatig kung ang Trabaho ay nagti-trigger ng reload ng BunkerWeb"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "Piliin ang lahat ng Trabaho"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "Mga aksyon na available para sa Plugin na ito"
+
+msgid "tooltip.table.plugins.description"
+msgstr "Paglalarawan ng Plugin"
+
+msgid "tooltip.table.plugins.details"
+msgstr "Ipakita ang mga detalye ng Plugin"
+
+msgid "tooltip.table.plugins.id"
+msgstr "Natatanging identifier ng Plugin"
+
+msgid "tooltip.table.plugins.method"
+msgstr "Paraan ng paglikha ng Plugin (hal., ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "Pangalan ng Plugin"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "Piliin ang lahat ng Plugin"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "Nagpapahiwatig kung sinusuportahan ng plugin ang stream mode"
+
+msgid "tooltip.table.plugins.type"
+msgstr "Uri ng Plugin (Core, External, Pro, UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "Bersyon ng Plugin"
+
+msgid "tooltip.table.reports.actions"
+msgstr "Mga aksyon na available para sa Ulat na ito"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "Stream lang: bytes na natanggap mula sa client sa loob ng session"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "Stream lang: bytes na ipinadala sa client sa loob ng session"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "Stream lang: ang source port ng client"
+
+msgid "tooltip.table.reports.country"
+msgstr "Bansa na nauugnay sa iniulat na IP address"
+
+msgid "tooltip.table.reports.data"
+msgstr "Karagdagang data na nauugnay sa ulat"
+
+msgid "tooltip.table.reports.date"
+msgstr "Petsa at oras kung kailan nabuo ang ulat"
+
+msgid "tooltip.table.reports.details"
+msgstr "Ipakita ang mga detalye ng Ulat"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "IP address na nag-trigger ng ulat"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "Stream lang: ang port kung saan pumasok ang session"
+
+msgid "tooltip.table.reports.method"
+msgstr "HTTP method ng iniulat na kahilingan"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP request, o TCP/UDP Stream session"
+
+msgid "tooltip.table.reports.reason"
+msgstr "Dahilan kung bakit nabuo ang ulat"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "Ang natatanging identifier para sa kahilingan"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "Mode ng seguridad na aktibo nang nabuo ang ulat"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "Piliin ang lahat ng Ulat"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "Pangalan ng server (vhost) na lumikha ng ulat"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "Stream lang: gaano katagal ang session, sa segundo"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "HTTP status code na ibinalik para sa iniulat na kahilingan"
+
+msgid "tooltip.table.reports.url"
+msgstr "URL na tinargeto sa iniulat na kahilingan"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "User-Agent string mula sa iniulat na kahilingan"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "Mangyaring pumili ng isa o higit pang row upang magsagawa ng aksyon."
+
+msgid "tooltip.table.services.actions"
+msgstr "Mga aksyon na available para sa Serbisyo na ito"
+
+msgid "tooltip.table.services.created"
+msgstr "Petsa at oras kung kailan nilikha ang Serbisyo"
+
+msgid "tooltip.table.services.details"
+msgstr "Ipakita ang mga detalye ng Serbisyo"
+
+msgid "tooltip.table.services.last_update"
+msgstr "Petsa at oras kung kailan huling na-update ang Serbisyo"
+
+msgid "tooltip.table.services.method"
+msgstr "Paraan ng paglikha ng Serbisyo (hal., ui, file)"
+
+msgid "tooltip.table.services.name"
+msgstr "Pangalan ng Serbisyo"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "Mode ng seguridad ng Serbisyo (I-block o Tuklasin)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "Piliin ang lahat ng Serbisyo"
+
+msgid "tooltip.table.services.template"
+msgstr "Ang template na ginagamit ng Serbisyo"
+
+msgid "tooltip.table.services.type"
+msgstr "Uri ng serbisyo (Online/Draft)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "Mga aksyon na available para sa Template na ito"
+
+msgid "tooltip.table.templates.configs"
+msgstr "Bilang ng mga config ng Template"
+
+msgid "tooltip.table.templates.created"
+msgstr "Petsa ng paglikha ng Template"
+
+msgid "tooltip.table.templates.details"
+msgstr "Ipakita ang mga detalye ng Template"
+
+msgid "tooltip.table.templates.id"
+msgstr "Ang ID ng Template"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "Petsa ng huling update ng Template"
+
+msgid "tooltip.table.templates.method"
+msgstr "Paraan ng paglikha ng Template"
+
+msgid "tooltip.table.templates.name"
+msgstr "Ang tinukoy ng user o auto-generated na pangalan ng Template"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "Ang Plugin na naglalaman ng Template"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "Piliin ang lahat ng Template"
+
+msgid "tooltip.table.templates.settings"
+msgstr "Bilang ng mga setting ng Template"
+
+msgid "tooltip.table.templates.steps"
+msgstr "Bilang ng mga hakbang ng Template"
+
+msgid "tooltip.toggle_level"
+msgstr "Ipakita / itago ang mga linyang %(level)s"
+
+msgid "tooltip.toggle_wrap"
+msgstr "I-toggle ang pag-wrap ng linya"
+
+msgid "tooltip.ui_host"
+msgstr "Ang hostname o IP address na magse-serve ng BunkerWeb UI sa pamamagitan ng reverse proxy."
+
+msgid "tooltip.ui_url"
+msgstr "Ang URL path na ginagamit upang ma-access ang BunkerWeb UI sa pamamagitan ng reverse proxy."
+
+msgid "tooltip.ui_url_security"
+msgstr "Ang paggamit ng hindi karaniwang, mahirap hulaan na URL path ay nagpapahusay ng seguridad."
+
+msgid "tooltip.use_custom_ssl"
+msgstr "Kung gagamit ng custom na SSL certificate sa halip na Let's Encrypt."
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "Kung gagamit ng Let's Encrypt staging environment para sa pagsubok (gumagawa ng mga hindi pinagkakatiwalaang certificate)."
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "Ang Let's Encrypt staging ay available lamang kapag gumagamit ng Let's Encrypt server."
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "Paganahin ang PROXY protocol na komunikasyon."
+
+msgid "tooltip.use_real_ip"
+msgstr "Gumamit ng Tunay na IP"
+
+msgid "tooltip.username_length"
+msgstr "Ang username ay dapat na may 1 hanggang 256 na character."
+
+msgid "tooltip.value_from_global"
+msgstr "Value mula sa mga pandaigdigang setting"
+
+msgid "tooltip.view_full_url"
+msgstr "Mag-click upang tingnan ang buong URL"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "Gumawa ng mga wildcard certificate (*.domain.com). Nangangailangan ng DNS challenge."
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "Ang mga wildcard certificate ay sinusuportahan lamang sa uri ng DNS challenge."
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "Connection timeout sa segundo para sa mga tawag ng ZeroSSL API."
+
+msgid "tooltip.zerossl_api_key"
+msgstr "Opsyonal na ZeroSSL API key na ginagamit ng zerossl-bot."
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API."
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "Bilang ng mga ulit para sa mga kahilingan ng ZeroSSL API (0 ang nagdi-disable ng mga ulit)."
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "Pagkaantala sa segundo sa pagitan ng mga ulit ng ZeroSSL API."
+
+msgid "totp.cant_access"
+msgstr "Hindi makakuha ng access sa iyong authenticator?"
+
+msgid "totp.or_use_security_key"
+msgstr "o gamitin ang iyong security key"
+
+msgid "totp.prompt"
+msgstr "Mangyaring ipasok ang iyong TOTP code."
+
+msgid "totp.signing_in"
+msgstr "Pag-login sa BunkerWeb"
+
+msgid "totp.subtitle"
+msgstr "Ilagay ang code mula sa iyong app ng authenticator."
+
+msgid "totp.subtitle_security_key"
+msgstr "Kumpirmahin na ikaw nga gamit ang iyong security key."
+
+msgid "totp.title"
+msgstr "Dalawang-Hakbang"
+
+msgid "upstreams.add_server"
+msgstr "Magdagdag ng server"
+
+msgid "upstreams.all"
+msgstr "Lahat"
+
+msgid "upstreams.attach"
+msgstr "Ikabit"
+
+msgid "upstreams.attach_copy"
+msgstr "Ikabit ang %(name)s (%(servers)s) sa isa o higit pang serbisyo."
+
+msgid "upstreams.backend_ssl"
+msgstr "Makipag-usap TLS sa mga server (https:// / grpcs://)"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "IP hash — parehong kliyente, parehong backend"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "Pinakamababang koneksyon"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "Round robin (default)"
+
+msgid "upstreams.create"
+msgstr "Lumikha ng upstream"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "Burahin ba ang upstream na ito?"
+
+msgid "upstreams.delete_copy"
+msgstr "Burahin ang upstream na %(name)s?"
+
+msgid "upstreams.delete_help"
+msgstr "Hindi maaaring burahin ang upstream na nakakabit sa isang serbisyo. Kailangan munang tanggalin ito."
+
+msgid "upstreams.edit"
+msgstr "I-edit ang upstream"
+
+msgid "upstreams.edit_shared"
+msgstr "Nakakabit ang upstream na ito sa %(count)s serbisyo: %(services)s. Kapag na-save, mababago ang lahat ng ito."
+
+msgid "upstreams.empty_text"
+msgstr "Ang upstream ay isang pangalan na pool ng mga backends na ikinakabit sa isa o higit pang serbisyo sa isang reverse proxy path. Ang mga setting na REVERSE_PROXY_HOST ay patuloy na gumagana kasama nito."
+
+msgid "upstreams.empty_title"
+msgstr "Walang upstream pa"
+
+msgid "upstreams.keepalive"
+msgstr "Panatilihin ang koneksyon"
+
+msgid "upstreams.keepalive_help"
+msgstr "Bilang ng mga koneksyon na pinapanatili ng bawat worker. Tanging HTTP at gRPC; iwanan itong walang laman upang hindi paganahin."
+
+msgid "upstreams.match_path"
+msgstr "Path ng reverse proxy"
+
+msgid "upstreams.match_path_help"
+msgstr "Ang lokasyon kung saan ipinapasa ng mga napiling serbisyo ang trapiko sa pool na ito. Hindi ginagamit para sa isang stream pool, na kumukuha ng buong serbisyo."
+
+msgid "upstreams.method"
+msgstr "Pagbalanse ng trapiko"
+
+msgid "upstreams.name_help"
+msgstr "Mga letra, numero, hyphen at underscore lamang. Hindi pinapayagan ang mga tuldok kaya hindi maaaring maging pareho ang pangalan ng pool at isang tunay na host."
+
+msgid "upstreams.new"
+msgstr "Bagong upstream"
+
+msgid "upstreams.not_attached"
+msgstr "Hindi nakakabit"
+
+msgid "upstreams.protocol"
+msgstr "Protocol"
+
+msgid "upstreams.protocol_help"
+msgstr "Ang HTTP at gRPC ay nakakabit sa isang path; ang isang pool ng stream ay kumokontrol sa buong serbisyo na TCP/UDP."
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "Stream (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "Ang database ay read-only. Maaaring suriin ang mga upstream ngunit hindi mababago."
+
+msgid "upstreams.role.backup"
+msgstr "Backup"
+
+msgid "upstreams.role.down"
+msgstr "Hindi Aktibo"
+
+msgid "upstreams.role.primary"
+msgstr "Pangunahin"
+
+msgid "upstreams.save"
+msgstr "I-save ang upstream"
+
+msgid "upstreams.search"
+msgstr "Maghanap ng pangalan, paglalarawan, o server..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "Oras ng pagkabigo"
+
+msgid "upstreams.server_host"
+msgstr "Server"
+
+msgid "upstreams.server_max_fails"
+msgstr "Pinakamaraming pagkabigo"
+
+msgid "upstreams.server_role"
+msgstr "Papel"
+
+msgid "upstreams.server_weight"
+msgstr "Bigat"
+
+msgid "upstreams.servers"
+msgstr "Mga Server"
+
+msgid "upstreams.services_help"
+msgstr "Gumamit ng Ctrl o Command upang piliin ang maraming serbisyo. Maaaring ikabit ang isang upstream sa ibang pagkakataon."
+
+msgid "upstreams.services_hidden"
+msgstr "Ang serbisyo na %(count)s ay nakatago: ang isang upstream na %(protocol)s ay maaari lamang ikabit sa isang tugmang serbisyo."
+
+msgid "upstreams.truncated"
+msgstr "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+
+msgid "validation.default_field_name"
+msgstr "Ang field na ito"
+
+msgid "validation.invalid_date"
+msgstr "Hindi valid na petsa"
+
+msgid "validation.ip_global_duplicate"
+msgstr "Ang IP address na ito ay pandaigdigang na-ban na."
+
+msgid "validation.ip_invalid"
+msgstr "Hindi valid na format ng IP address."
+
+msgid "validation.ip_required"
+msgstr "Kailangan ng IP address."
+
+msgid "validation.ip_service_duplicate"
+msgstr "Ang IP address na ito ay na-ban na para sa napiling serbisyo (%(service)s)."
+
+msgid "validation.pattern"
+msgstr "Mangyaring magpasok ng valid na value para sa %(field)s."
+
+msgid "validation.required"
+msgstr "Kailangan ang %(field)s."
+
+msgid "validation.service_required_for_ban"
+msgstr "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo."
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
+
+msgid "web_cache.available"
+msgstr "Available"
+
+msgid "web_cache.cache_state"
+msgstr "Estado"
+
+msgid "web_cache.cached_files"
+msgstr "Mga naka-cache na file"
+
+msgid "web_cache.deployment"
+msgstr "Pag-deploy"
+
+msgid "web_cache.disabled"
+msgstr "Hindi naka-enable"
+
+msgid "web_cache.disk_usage"
+msgstr "Paglalaan ng disk"
+
+msgid "web_cache.empty"
+msgstr "Walang laman"
+
+msgid "web_cache.enabled"
+msgstr "Pinagana"
+
+msgid "web_cache.enabled_instances"
+msgstr "Naka-enable ang cache"
+
+msgid "web_cache.enabled_services"
+msgstr "Mga naka-enable na serbisyo"
+
+msgid "web_cache.error"
+msgstr "Error"
+
+msgid "web_cache.hit_rate"
+msgstr "Rate ng pag-hit"
+
+msgid "web_cache.instance"
+msgstr "Instance"
+
+msgid "web_cache.metrics"
+msgstr "Pinagsamang distribusyon ng hit / miss"
+
+msgid "web_cache.metrics_scope"
+msgstr "Ang mga counter ay pinagsama-sama sa bawat instance sa lahat ng mga serbisyo na may naka-enable na cache."
+
+msgid "web_cache.not_reporting"
+msgstr "Hindi nag-uulat"
+
+msgid "web_cache.path"
+msgstr "Path"
+
+msgid "web_cache.purge"
+msgstr "Tanggalin ang mga naka-cache na tugon"
+
+msgid "web_cache.purge_all"
+msgstr "Tanggalin ang lahat"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "Ito ay nagtatanggal ng lahat ng naka-cache na tugon para sa bawat serbisyo sa bawat naa-access na instance. Hindi ito maaaring i-undo."
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "Tanggalin ang buong cache?"
+
+msgid "web_cache.purge_help"
+msgstr "Tanggalin ang mga aksyon na tumatakbo kaagad sa mga naa-access na instance. Ang mga hindi naa-access na instance ay hindi isinasagawa at walang aksyon na ina-queue."
+
+msgid "web_cache.purge_key"
+msgstr "Epektibong susi ng cache"
+
+msgid "web_cache.purge_key_help"
+msgstr "Iwanan ang susi ng cache na walang laman lamang para sa default na $scheme$host$request_uri. Kung ang serbisyo ay nag-o-override ng PROXY_CACHE_KEY, ilagay dito ang epektibong halaga; ang mga variable na may kaugnayan lamang sa kahilingan na hindi sinusuportahan ay tinatanggihan sa halip na tanggalin ang ibang entry."
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "Epektibong PROXY_CACHE_KEY (opsyonal)"
+
+msgid "web_cache.purge_url"
+msgstr "Tanggalin ang URL"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "Mga instance na nag-uulat"
+
+msgid "web_cache.service"
+msgstr "Serbisyo"
+
+msgid "web_cache.services"
+msgstr "Pag-enable ng serbisyo"
+
+msgid "web_cache.status"
+msgstr "Imbakan ng instance"
+
+msgid "web_cache.subtitle"
+msgstr "Status ng cache ng reverse-proxy, aggregate na mga sukatan ng hit-rate at agarang kontrol sa pagtanggal."
+
+msgid "whatsnew.missing_action"
+msgstr "Buksan ang changelog sa GitHub"
+
+msgid "whatsnew.missing_message"
+msgstr "Hindi kasama ang CHANGELOG.md sa build na ito. Available sa GitHub ang mga release note."
+
+msgid "whatsnew.missing_title"
+msgstr "Walang changelog sa installation na ito"
+
+msgid "whatsnew.modal.intro"
+msgstr "Narito ang mga nagbago mula sa bersyong huli mong ginamit."
+
+msgid "whatsnew.modal.title"
+msgstr "Ano ang bago"
+
+msgid "whatsnew.subtitle"
+msgstr "Lahat ng release ng BunkerWeb, pinakabago muna, mula mismo sa changelog na kasama ng installation na ito."
+
+msgid "workflows.act_block"
+msgstr "I-block"
+
+msgid "workflows.act_challenge"
+msgstr "Hamunin"
+
+msgid "workflows.act_code"
+msgstr "Status code"
+
+msgid "workflows.act_denyDefault"
+msgstr "Deny status ng instance"
+
+msgid "workflows.act_denyShort"
+msgstr "katayuan ng pagtanggi"
+
+msgid "workflows.act_provider"
+msgstr "Tagapagbigay ng antibot"
+
+msgid "workflows.act_redirect"
+msgstr "I-redirect"
+
+msgid "workflows.act_status"
+msgstr "Katayuan ng pagtanggi"
+
+msgid "workflows.act_terminal"
+msgstr "Isang aksyon lang sa bawat patakaran at tinatapos nito ang pagsusuri — walang true / false na landas palabas ng patakaran."
+
+msgid "workflows.act_url"
+msgstr "Patutunguhang URL"
+
+msgid "workflows.action"
+msgstr "Pagkatapos"
+
+msgid "workflows.add_rule"
+msgstr "Magdagdag ng panuntunan"
+
+msgid "workflows.all"
+msgstr "Lahat"
+
+msgid "workflows.aria.collapse"
+msgstr "I-collapse"
+
+msgid "workflows.aria.combinator"
+msgstr "Baguhin ang combinator, kasalukuyang"
+
+msgid "workflows.aria.conditionType"
+msgstr "Uri ng kondisyon"
+
+msgid "workflows.aria.denyStatus"
+msgstr "Katayuan ng pagtanggi"
+
+msgid "workflows.aria.drag"
+msgstr "I-drag para baguhin ang ayos"
+
+msgid "workflows.aria.expand"
+msgstr "I-expand"
+
+msgid "workflows.aria.groupKind"
+msgstr "Uri ng grupo"
+
+msgid "workflows.aria.insertAt"
+msgstr "Magdagdag ng patakaran sa posisyon %(n)s"
+
+msgid "workflows.aria.more"
+msgstr "Higit pa"
+
+msgid "workflows.aria.moveDown"
+msgstr "Ilipat pababa — mas huling tatakbo"
+
+msgid "workflows.aria.moveRule"
+msgstr "Ilipat ang patakaran"
+
+msgid "workflows.aria.moveUp"
+msgstr "Ilipat pataas — mas maagang tatakbo"
+
+msgid "workflows.aria.openRule"
+msgstr "Buksan ang patakaran %(n)s"
+
+msgid "workflows.aria.provider"
+msgstr "Tagapagbigay ng antibot"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "Katayuan ng pag-redirect"
+
+msgid "workflows.aria.removeCondition"
+msgstr "Alisin ang kondisyon"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "Alisin ang threshold"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "Alisin ang rate threshold"
+
+msgid "workflows.aria.removeValue"
+msgstr "Alisin ang value"
+
+msgid "workflows.aria.requestCount"
+msgstr "Bilang ng mga request"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "Grupo ng resource"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "Mga problema sa pagpapatunay ng %(count)s sa patakarang ito"
+
+msgid "workflows.aria.ruleName"
+msgstr "Pangalan ng patakaran %(n)s"
+
+msgid "workflows.aria.terminalAction"
+msgstr "Pangwakas na aksyon"
+
+msgid "workflows.aria.uriMatch"
+msgstr "Mode ng pagtutugma ng URI"
+
+msgid "workflows.aria.uriValue"
+msgstr "Value ng URI"
+
+msgid "workflows.aria.window"
+msgstr "Window sa segundo"
+
+msgid "workflows.attach"
+msgstr "Ikabit sa mga serbisyo"
+
+msgid "workflows.attach_help"
+msgstr "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho."
+
+msgid "workflows.attached_notice"
+msgstr "Sa pag-save, ilalapat ang mga patakarang ito sa %(count)s nakalakip na serbisyo."
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "Mula kaliwa pakanan. Ang unang pagtutugma ang panalo."
+
+msgid "workflows.canvas.auxList"
+msgstr "Mula itaas pababa. Ang unang pagtutugma ang panalo."
+
+msgid "workflows.canvas.close"
+msgstr "Isara"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "Tumatakbo sa posisyon %(n)s ng %(total)s"
+
+msgid "workflows.canvas.dropHint"
+msgstr "I-drop upang itakda ang prayoridad — ang posisyon ng patakaran sa chain lamang ang maaaring mangahulugan"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "Ang isang daloy ng trabaho na walang patakaran ay walang pagbabago — ang bawat kahilingan ay dumadaan diretso sa susunod na nakakabit na daloy ng trabaho."
+
+msgid "workflows.canvas.emptyCta"
+msgstr "Magdagdag ng unang patakaran"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "Walang patakaran pa"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "Ang mga patakaran ay tumatakbo mula kaliwa pakanan."
+
+msgid "workflows.canvas.entry_title"
+msgstr "Bawat kahilingan"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "Patuloy sa susunod na nakakabit na daloy ng trabaho."
+
+msgid "workflows.canvas.exit_title"
+msgstr "Walang tumugmang patakaran"
+
+msgid "workflows.canvas.fit"
+msgstr "Fit to view"
+
+msgid "workflows.canvas.gateTip"
+msgstr "Isang gate ng pagtutugma, hindi isang aksyon: kapag mas mababa sa threshold, hindi tumutugma ang patakaran at sinusuri ang susunod na patakaran."
+
+msgid "workflows.canvas.hint"
+msgstr "I-drag ang isang node upang ayusin · i-drag ang board upang mag-pan · Alt + ← / → sa isang naka-focus na node"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "Read-only — i-pan upang tingnan, hindi maaaring baguhin ang pagkakasunod-sunod"
+
+msgid "workflows.canvas.insert"
+msgstr "Magdagdag ng patakaran dito"
+
+msgid "workflows.canvas.open"
+msgstr "Buksan ang patakaran"
+
+msgid "workflows.canvas.skipped"
+msgstr "Naka-disable — hindi ginagamit, parang wala sa chain."
+
+msgid "workflows.canvas.stopTail"
+msgstr ", humihinto ang pagtatasa dito — walang patakaran pagkatapos nito ang naabot."
+
+msgid "workflows.canvas.title"
+msgstr "Pagkasunod-sunod ng patakaran"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "Zoom in"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "Zoom out"
+
+msgid "workflows.capacity"
+msgstr "%(count)s sa %(maxRules)s patakaran · gumagamit ang pinakamalaking patakaran ng %(worst)s sa %(maxPredicates)s predicate · %(regexes)s regex sa workflow na ito"
+
+msgid "workflows.clone"
+msgstr "Kopyahin ang daloy ng trabaho"
+
+msgid "workflows.clone_help"
+msgstr "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi."
+
+msgid "workflows.clone_name"
+msgstr "Pangalan ng kopya"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "Burahin ang patakarang ito? Aakyat nang isang puwesto ang lahat ng nasa ibaba nito."
+
+msgid "workflows.copySuffix"
+msgstr " (kopya)"
+
+msgid "workflows.delete"
+msgstr "Burahin ang daloy ng trabaho"
+
+msgid "workflows.delete_confirm"
+msgstr "Ang daloy ng trabaho at lahat ng mga panuntunan nito ay permanenteng tatanggalin."
+
+msgid "workflows.empty_text"
+msgstr "Ang isang daloy ng trabaho ay isang nakaayos na listahan ng mga panuntunan na ikinakabit sa mga serbisyo: isang puno ng kondisyon, isang opsyon na threshold ng rate, at isang aksyon — hamunin, harangan o i-redirect."
+
+msgid "workflows.empty_title"
+msgstr "Walang daloy ng trabaho pa"
+
+msgid "workflows.entry_sub"
+msgstr "Tumatakbo ang mga workflow ayon sa pagkakalakip; ang mga patakaran dito ay tumatakbo mula itaas pababa."
+
+msgid "workflows.entry_title"
+msgstr "Bawat request sa nakalakip na serbisyo"
+
+msgid "workflows.err.save"
+msgstr "Hindi ma-save"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "Hindi maabot ang endpoint ng pag-save"
+
+msgid "workflows.err.validate"
+msgstr "Hindi ma-validate"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "Hindi maabot ang endpoint ng validation"
+
+msgid "workflows.errors.body"
+msgstr "Walang inilapat — hindi nagbago ang kasalukuyang policy."
+
+msgid "workflows.errors.count"
+msgstr "May %(count)s problemang pumipigil sa pag-save."
+
+msgid "workflows.errors.rule"
+msgstr "Patakaran %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "Patakaran %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "Ang workflow na ito"
+
+msgid "workflows.exit_sub"
+msgstr "Magpapatuloy ang request sa susunod na nakalakip na workflow, at saka sa natitirang bahagi ng security stack."
+
+msgid "workflows.exit_title"
+msgstr "Walang tumugmang patakaran"
+
+msgid "workflows.gate.and"
+msgstr "at kapag nakagawa na ang parehong client IP ng higit sa"
+
+msgid "workflows.gate.chip"
+msgstr "tarangkahan ng pagtugma"
+
+msgid "workflows.gate.help"
+msgstr "Binibilang sa bawat client IP. Sa ibaba ng threshold, hindi talaga tutugma ang patakaran at magpapatuloy ang pagsusuri sa susunod — hindi ito naglilimita ng rate nang mag-isa."
+
+msgid "workflows.legend.fall"
+msgstr "Kapag walang tugma, pumunta sa susunod na patakaran"
+
+msgid "workflows.legend.gate"
+msgstr "Kinokontrol ng rate threshold ang tugma; hindi ito aksyon"
+
+msgid "workflows.legend.move"
+msgstr "I-drag, gamitin ang mga arrow, o pindutin ang Alt + ↑ / ↓ para baguhin ang ayos"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "I-drag, gamitin ang naka-number na badge, o pindutin ang Alt + ← / → upang ayusin"
+
+msgid "workflows.legend.stop"
+msgstr "Kapag may tugma, tatakbo ang isang aksyon at titigil"
+
+msgid "workflows.link.entry"
+msgstr "bawat kahilingan"
+
+msgid "workflows.link.noMatch"
+msgstr "walang tugma"
+
+msgid "workflows.menu.bottom"
+msgstr "Patakbuhin sa huli"
+
+msgid "workflows.menu.delete"
+msgstr "Burahin ang patakaran"
+
+msgid "workflows.menu.disable"
+msgstr "I-disable ang patakaran"
+
+msgid "workflows.menu.duplicate"
+msgstr "Kopyahin sa ibaba"
+
+msgid "workflows.menu.enable"
+msgstr "I-enable ang patakaran"
+
+msgid "workflows.menu.top"
+msgstr "Patakbuhin muna"
+
+msgid "workflows.move.first"
+msgstr "Patakbuhin muna"
+
+msgid "workflows.move.last"
+msgstr "Patakbuhin sa huli"
+
+msgid "workflows.new"
+msgstr "Bagong daloy ng trabaho"
+
+msgid "workflows.no_rules"
+msgstr "Walang panuntunan pa. Magdagdag ng isa upang simulan ang pagbuo ng patakarang ito."
+
+msgid "workflows.not_attached"
+msgstr "Hindi nakakabit"
+
+msgid "workflows.not_attached_notice"
+msgstr "Hindi nakalakip ang workflow na ito sa anumang serbisyo, kaya hindi pa ipinapatupad ang mga patakarang ito kahit saan."
+
+msgid "workflows.not_validated"
+msgstr "Hindi pa na-validate"
+
+msgid "workflows.order_help"
+msgstr "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tumugma ay mananalo. Ang isang panuntunan na may threshold ng rate ay tumutugma lamang kapag ang threshold ay lumampas, kaya ang isang mas mababang panuntunan ay maaaring mahuli ang trapiko sa ibaba nito."
+
+msgid "workflows.readonly"
+msgstr "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago."
+
+msgid "workflows.rule.disabled"
+msgstr "Naka-disable"
+
+msgid "workflows.rule.if"
+msgstr "Kung"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "Pangalan ng patakaran"
+
+msgid "workflows.rule.noun"
+msgstr "Patakaran"
+
+msgid "workflows.rule.onMatch"
+msgstr "Kung tumugma"
+
+msgid "workflows.rule.skipped"
+msgstr "Naka-disable — lubos na nilalaktawan, na parang wala sa listahan."
+
+msgid "workflows.rule.stopTail"
+msgstr ", dito titigil ang pagsusuri — hindi na maaabot ang patakaran sa ibaba."
+
+msgid "workflows.rules"
+msgstr "Mga panuntunan"
+
+msgid "workflows.say.actionChanged"
+msgstr "Binago ang aksyon sa %(type)s. Ito pa rin ang nag-iisang aksyon at itinitigil pa rin nito ang pagsusuri."
+
+msgid "workflows.say.added"
+msgstr "Idinagdag ang patakaran sa puwestong %(n)s — huli, kaya susuriin muna ang lahat ng patakaran sa itaas."
+
+msgid "workflows.say.deleted"
+msgstr "Binura ang patakaran. %(count)s patakaran ang natitira."
+
+msgid "workflows.say.duplicated"
+msgstr "Ipinasok ang kopya sa puwestong %(n)s. Hindi ito tutugma habang naka-enable ang orihinal sa itaas."
+
+msgid "workflows.say.gateAdded"
+msgstr "Nagdagdag ng rate threshold sa tugma. Sa ibaba nito, hindi tutugma ang patakaran at magpapatuloy ang pagsusuri."
+
+msgid "workflows.say.inserted"
+msgstr "Idinagdag ang patakaran sa posisyon %(n)s ng %(total)s. Ang bawat patakaran bago ito ay sinusuri muna."
+
+msgid "workflows.say.inspecting"
+msgstr "I-edit ang patakaran %(n)s ng %(total)s — %(name)s."
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "Inalis ang huling value — hindi mase-save ang kondisyong ito hangga't wala itong value."
+
+msgid "workflows.say.moved"
+msgstr "Inilipat ang %(name)s sa puwestong %(to)s sa %(total)s%(how)s. Tumatakbo na ito %(where)s."
+
+msgid "workflows.say.predicateCap"
+msgstr "Mayroon nang %(max)s kondisyon ang patakarang ito, ang maximum."
+
+msgid "workflows.say.ruleAbove"
+msgstr "patakaran sa itaas"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "Naka-disable ang %(name)s — lubos itong nilalaktawan at nakikita na ng mga patakaran sa ibaba ang mga request na iyon."
+
+msgid "workflows.say.ruleEnabled"
+msgstr "Naka-enable ang %(name)s — sinusuri ulit ito sa puwestong %(n)s."
+
+msgid "workflows.say.runsAfter"
+msgstr "pagkatapos ng %(name)s"
+
+msgid "workflows.say.runsFirst"
+msgstr "una"
+
+msgid "workflows.say.runsLast"
+msgstr "huli"
+
+msgid "workflows.say.saved"
+msgstr "Na-save ang mga patakaran at ipinadala sa mga nakalakip na serbisyo."
+
+msgid "workflows.say.theRule"
+msgstr "Ang patakaran"
+
+msgid "workflows.say.valuesDropped"
+msgstr "Binago ang kondisyon sa %(type)s — hindi mailipat ang %(count)s value na laman nito."
+
+msgid "workflows.say.via.drag"
+msgstr "sa pag-drag"
+
+msgid "workflows.say.via.keyboard"
+msgstr "gamit ang keyboard"
+
+msgid "workflows.say.viewCanvas"
+msgstr "Tingnan ang canvas. Ang mga patakaran ay tumatakbo mula kaliwa pakanan; ang unang pagtutugma ang panalo."
+
+msgid "workflows.say.viewList"
+msgstr "Listahan. Ang mga patakaran ay tumatakbo mula itaas pababa; ang unang pagtutugma ang panalo."
+
+msgid "workflows.search"
+msgstr "Maghanap ng pangalan o paglalarawan..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "Iwang blangko para gayahin ang nabigong ASN lookup."
+
+msgid "workflows.test.asn_invalid"
+msgstr "Dapat numero ang ASN"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "Ipinapalagay na wala sa whitelist ang client."
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "Input mo ang request number %(request_number)s, hindi ito sukat."
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "Ipinapalagay na hindi pa ubos ang regex budget ng instance."
+
+msgid "workflows.test.assumptions"
+msgstr "Mga palagay"
+
+msgid "workflows.test.country"
+msgstr "Bansa"
+
+msgid "workflows.test.detail_challenge"
+msgstr "Kukunin ng challenge ang kontrol; tatakbo pa rin ang natitirang security stack."
+
+msgid "workflows.test.detail_detect"
+msgstr "Nasa detect mode ang serbisyong ito, kaya walang aktuwal na ipinapatupad."
+
+msgid "workflows.test.detail_status"
+msgstr "Makikita ng client ang %(status)s."
+
+msgid "workflows.test.failed"
+msgstr "Hindi mapatakbo ang test"
+
+msgid "workflows.test.geo"
+msgstr "Paghahanap ng GeoIP"
+
+msgid "workflows.test.geo_help"
+msgstr "Kapag unavailable, magiging UNKNOWN ang mga patakaran ng bansa at ASN kaya hindi kailanman tutugma."
+
+msgid "workflows.test.geo_local"
+msgstr "Lokal / pribadong address"
+
+msgid "workflows.test.geo_resolved"
+msgstr "Naresolba"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "Hindi available ang database"
+
+msgid "workflows.test.intro"
+msgstr "Sinusuri nang sunod-sunod ang bawat workflow na nakalakip sa serbisyo, gaya mismo ng gagawin ng instance."
+
+msgid "workflows.test.invalid"
+msgstr "Ayusin muna ang mga problema sa itaas bago mag-test."
+
+msgid "workflows.test.ip"
+msgstr "IP ng client"
+
+msgid "workflows.test.method"
+msgstr "Paraan"
+
+msgid "workflows.test.number"
+msgstr "Bilang ng request"
+
+msgid "workflows.test.number_help"
+msgstr "Ika-N request ng client na ito sa window. Palagay na ibinibigay mo, hindi sukat."
+
+msgid "workflows.test.open"
+msgstr "Subukan ang request"
+
+msgid "workflows.test.other_matched"
+msgstr "tumugma rito"
+
+msgid "workflows.test.other_no_match"
+msgstr "walang tumugmang patakaran"
+
+msgid "workflows.test.other_unreached"
+msgstr "hindi naabot"
+
+msgid "workflows.test.other_workflows"
+msgstr "Ibang workflow sa serbisyong ito"
+
+msgid "workflows.test.out_draft"
+msgstr "Draft ang serbisyong ito — wala pang workflow na na-compile para rito."
+
+msgid "workflows.test.out_match"
+msgstr "Tumugma ang %(workflow)s · %(rule)s at %(action)s ang request."
+
+msgid "workflows.test.out_no_match"
+msgstr "Walang tumugmang patakaran. Magpapatuloy ang request sa natitirang security stack."
+
+msgid "workflows.test.out_not_attached"
+msgstr "Hindi nakalakip ang workflow na ito sa anumang serbisyo, kaya walang hanay na susuriin."
+
+msgid "workflows.test.out_whitelisted"
+msgstr "Nasa whitelist — nilalaktawan ang buong workflow at walang patakarang sinusuri."
+
+msgid "workflows.test.run"
+msgstr "Patakbuhin ang test"
+
+msgid "workflows.test.service"
+msgstr "Serbisyo"
+
+msgid "workflows.test.title"
+msgstr "Subukan ang request"
+
+msgid "workflows.test.unreachable"
+msgstr "Hindi maabot ang test endpoint"
+
+msgid "workflows.test.uri"
+msgstr "Path ng URI"
+
+msgid "workflows.test.uri_help"
+msgstr "Path lang — hindi kailanman kasama sa $uri ang query string."
+
+msgid "workflows.test.v_gate"
+msgstr "tugma ang mga kondisyon · sarado ang gate sa %(n)s sa %(count)s"
+
+msgid "workflows.test.v_match"
+msgstr "TUMUGMA"
+
+msgid "workflows.test.v_unknown"
+msgstr "HINDI ALAM"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "Hindi matukoy ang fact na kailangan ng patakarang ito, kaya hindi ito kailanman tutugma."
+
+msgid "workflows.test.whitelisted"
+msgstr "Nasa whitelist ang client na ito"
+
+msgid "workflows.threshold"
+msgstr "Lamang sa itaas ng rate"
+
+msgid "workflows.threshold_count"
+msgstr "Mga kahilingan"
+
+msgid "workflows.threshold_window"
+msgstr "Sa (segundo)"
+
+msgid "workflows.tree.addCondition"
+msgstr "Kondisyon"
+
+msgid "workflows.tree.addGroup"
+msgstr "Grupo"
+
+msgid "workflows.tree.all"
+msgstr "Lahat ng"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)s kondisyon — dapat true ang lahat"
+
+msgid "workflows.tree.and"
+msgstr "at"
+
+msgid "workflows.tree.any"
+msgstr "Alinman sa"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)s kondisyon — dapat true ang kahit isa"
+
+msgid "workflows.tree.empty"
+msgstr "Walang laman ang grupo — magdagdag ng kondisyon; hindi ito mase-save nang ganito."
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "walang grupong naglalaman ng %(kind)s entry"
+
+msgid "workflows.tree.noneMeta"
+msgstr "tutugma kapag walang true sa mga ito"
+
+msgid "workflows.tree.not"
+msgstr "Wala sa"
+
+msgid "workflows.tree.or"
+msgstr "o"
+
+msgid "workflows.tree.removeGroup"
+msgstr "Alisin ang grupo"
+
+msgid "workflows.truncated"
+msgstr "Ang unang 500 daloy ng trabaho lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
+
+msgid "workflows.untitled"
+msgstr "Patakarang walang pamagat"
+
+msgid "workflows.value.add"
+msgstr "Halaga"
+
+msgid "workflows.values.fewer"
+msgstr "Magpakita ng mas kaunti"
+
+msgid "workflows.values.more"
+msgstr "+%(n)s pa"
+
+msgid "workflows.verb.asn"
+msgstr "ay"
+
+msgid "workflows.verb.country"
+msgstr "ay"
+
+msgid "workflows.verb.group"
+msgstr "ay nasa grupo"
+
+msgid "workflows.verb.ip"
+msgstr "ay nasa"
+
+msgid "workflows.verb.isIn"
+msgstr "ay nasa"
+
+msgid "workflows.verb.isOneOf"
+msgstr "ay isa sa"
+
+msgid "workflows.verb.method"
+msgstr "ay"
+
+msgid "workflows.verb.uri"
+msgstr "tumutugma sa"
+
+msgid "workflows.view.canvas"
+msgstr "Canvas"
+
+msgid "workflows.view.list"
+msgstr "List"
+

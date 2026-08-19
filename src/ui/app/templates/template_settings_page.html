@@ -71,7 +71,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-1">
                         <li class="breadcrumb-item">
-                            <a href="{{ url_for('services.services_page') }}" data-i18n="navigation.services">Services</a>
+                            <a href="{{ url_for('services.services_page') }}">{{ _("navigation.services") }}</a>
                         </li>
                         <li class="breadcrumb-item">
                             <a href="{{ url_for('services.services_service_page', service=service_id) }}">{{ service_id }}</a>
@@ -89,28 +89,26 @@
                         class="btn btn-sm btn-outline-danger"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-bs-original-title="Reset the current template settings"
-                        data-i18n="tooltip.reset_template_settings">
+                        data-bs-original-title="{{ _("tooltip.reset_template_settings") }}">
                     <i class="bx bx-sm bx-reset"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.reset">Reset</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.reset") }}</span></span>
                 </button>
                 <button id="fetch-global-config"
                         type="button"
                         class="btn btn-sm btn-outline-info"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-bs-original-title="Fetch global settings and apply them to the current template"
-                        data-i18n="tooltip.fetch_global_settings">
+                        data-bs-original-title="{{ _("tooltip.fetch_global_settings") }}">
                     <i class="bx bx-sm bx-download"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.fetch_global") }}</span></span>
                 </button>
-                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                      {% endif %}>
                     <button type="submit"
                             class="btn btn-sm btn-primary don-jose save-settings{% if is_readonly %} disabled{% endif %}"
                             {% if is_readonly %}disabled{% endif %}>
                         <i class="bx bx-save bx-sm"></i>
-                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                        <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
                     </button>
                 </div>
             </div>
@@ -150,18 +148,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="modal.title.reset_template_config">Reset template configuration?</h5>
+                    <h5 class="modal-title">{{ _("modal.title.reset_template_config") }}</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
-                            aria-label="Close"
-                            data-i18n="aria.label.close"></button>
+                            aria-label="{{ _("aria.label.close") }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger text-center"
                          role="alert"
-                         data-i18n="modal.body.reset_template_alert">
-                        Are you sure you want to reset the current template settings and custom configurations?
+                        >
+                        {{ _("modal.body.reset_template_alert") }}
                     </div>
                 </div>
                 <div class="modal-footer justify-content-center">
@@ -169,7 +166,7 @@
                             type="button"
                             class="btn btn-outline-danger me-2"
                             data-bs-dismiss="modal"
-                            data-i18n="modal.button.reset_template_confirm">Reset template configuration</button>
+                           >{{ _("modal.button.reset_template_confirm") }}</button>
                 </div>
             </div>
         </div>
@@ -183,22 +180,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="modal.title.fetch_global_settings">Apply global settings?</h5>
+                    <h5 class="modal-title">{{ _("modal.title.fetch_global_settings") }}</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
-                            aria-label="Close"
-                            data-i18n="aria.label.close"></button>
+                            aria-label="{{ _("aria.label.close") }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info" role="alert">
-                        <div class="fw-bold" data-i18n="modal.body.fetch_global_settings_bold">
-                            This will fetch the global settings and apply them to the current template.
+                        <div class="fw-bold">
+                            {{ _("modal.body.fetch_global_settings_bold") }}
                         </div>
                         <ul class="mt-2 mb-0 ps-3">
-                            <li data-i18n="modal.body.fetch_global_settings_point_1">Only settings present in this template are updated.</li>
-                            <li data-i18n="modal.body.fetch_global_settings_point_2">Values identical to defaults are ignored.</li>
-                            <li data-i18n="modal.body.fetch_global_settings_point_3">SERVER_NAME is never overridden.</li>
+                            <li>{{ _("modal.body.fetch_global_settings_point_1") }}</li>
+                            <li>{{ _("modal.body.fetch_global_settings_point_2") }}</li>
+                            <li>{{ _("modal.body.fetch_global_settings_point_3") }}</li>
                         </ul>
                     </div>
                 </div>
@@ -207,7 +203,7 @@
                             type="button"
                             class="btn btn-outline-info"
                             data-bs-dismiss="modal"
-                            data-i18n="modal.button.fetch_global_settings_confirm">Apply global settings</button>
+                           >{{ _("modal.button.fetch_global_settings_confirm") }}</button>
                 </div>
             </div>
         </div>
@@ -224,14 +220,13 @@
         <div class="toast-header d-flex align-items-center text-warning">
             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+            <small class="text-body-secondary">{{ _("flash.time.just_now") }}</small>
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="toast"
-                    aria-label="Close"
-                    data-i18n="aria.label.close"></button>
+                    aria-label="{{ _("aria.label.close") }}"></button>
         </div>
-        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious</div>
+        <div class="toast-body">{{ _("flash.easter_egg") }}</div>
     </div>
 {% endblock %}
 {% block scripts %}

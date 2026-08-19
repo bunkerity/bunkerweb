@@ -30,7 +30,7 @@
      options          (required) list of dicts: {value, text, i18n_key=none,
                       disabled=false, selected=false}. `value`/`text` are
                       required per option; `text` is the English fallback
-                      shown before i18next rewrites it via `i18n_key` (same
+                      used when `i18n_key` is not given (same
                       contract as every other macro in this directory).
                       `selected` force-selects an option regardless of
                       `value` below (rarely needed -- prefer `value`).
@@ -42,12 +42,12 @@
      label            optional visible caption above the field (English
                       fallback). Rendered via components/label.html
                       (variant="default").
-     label_i18n       data-i18n key for label.
+     label_i18n       catalog key for label.
      placeholder      optional English fallback text for a disabled,
                       not-directly-selectable leading option (the
                       bans.html "Select a service" prompt pattern) --
                       rendered selected only when `value` is none.
-     placeholder_i18n data-i18n key for placeholder.
+     placeholder_i18n catalog key for placeholder.
      size             'sm' | 'md' | 'lg'. Adds form-select-sm/form-select-lg
                       to the <select> and is forwarded as-is to
                       components/label.html's own `size` param so the
@@ -66,7 +66,7 @@
                       text-muted", same markup components/label.html /
                       components/checkbox.html already use for their own
                       help param).
-     help_i18n        data-i18n key for help_text.
+     help_i18n        catalog key for help_text.
      select_classes   extra classes appended to the <select> itself, e.g. a
                       page-specific JS hook class.
      classes          extra utility classes on the root wrapper.
@@ -110,17 +110,17 @@
         <option value=""
                 disabled
                 {% if value is none %}selected{% endif %}
-                {% if placeholder_i18n %}data-i18n="{{ placeholder_i18n }}"{% endif %}>{{ placeholder }}</option>
+                >{{ _(placeholder_i18n) if placeholder_i18n else placeholder }}</option>
         {%- endif %}
         {%- for option in options %}
         <option value="{{ option.value }}"
                 {% if option.disabled %}disabled{% endif %}
                 {% if option.selected or (value is not none and option.value == value) %}selected{% endif %}
-                {% if option.i18n_key %}data-i18n="{{ option.i18n_key }}"{% endif %}>{{ option.text }}</option>
+                >{{ _(option.i18n_key) if option.i18n_key else option.text }}</option>
         {%- endfor %}
     </select>
     {%- if help_text %}
-    <div class="form-text text-muted" id="{{ help_id }}"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+    <div class="form-text text-muted" id="{{ help_id }}">{{ _(help_i18n) if help_i18n else help_text }}</div>
     {%- endif %}
 </div>
 {%- endmacro %}

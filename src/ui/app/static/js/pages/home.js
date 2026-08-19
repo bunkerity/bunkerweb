@@ -1414,23 +1414,6 @@ $(async function () {
     }
   }
 
-  // Setup language change listener immediately if i18next is ready
   setupLanguageChangeListener();
-
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => {
-      setupLanguageChangeListener();
-      debouncedUpdateCharts();
-    });
-  }
+  debouncedUpdateCharts();
 });

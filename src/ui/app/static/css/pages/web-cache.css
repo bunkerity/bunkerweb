@@ -1,0 +1,92 @@
+/* Web cache — segmented status distribution.
+   Replaces the stacked Bootstrap `.progress`: one bar carrying every
+   $upstream_cache_status share, plus a legend grid that gives each status its
+   absolute count and its percentage. The kit calls this pattern `.wc-stack`.
+   Segment colours come from the page's existing `status_colors` map, so they
+   stay Bootstrap variants and follow the light/dark theme for free. */
+
+.wc-stack {
+  display: flex;
+  width: 100%;
+  height: 1.25rem;
+  overflow: hidden;
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bw-bg-subtle, var(--bs-secondary-bg));
+}
+
+.wc-stack > i {
+  display: block;
+  /* A sub-percent slice must still be visible, and the inset rule keeps two
+     adjacent segments that share a variant (MISS/BYPASS) readable as two. */
+  min-width: 2px;
+  box-shadow: inset -1px 0 0 var(--bs-body-bg);
+}
+
+.wc-stack > i:last-child {
+  box-shadow: none;
+}
+
+/* One grid for the whole legend, not one per row: `display: contents` promotes
+   every cell's three spans into the shared grid so counts and percentages line
+   up in a column you can read down. A per-cell grid leaves each row to size
+   itself and the numbers drift out of alignment. */
+.wc-eff-legend {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  margin-top: 1rem;
+}
+
+.wc-leg-cell {
+  display: contents;
+}
+
+.wc-eff-legend > .wc-leg-cell > * {
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid var(--bw-border, var(--bs-border-color));
+}
+
+.wc-eff-legend > .wc-leg-cell > *:first-child {
+  padding-left: 0;
+}
+
+.wc-eff-legend > .wc-leg-cell > *:last-child {
+  padding-right: 0;
+}
+
+.wc-leg-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bw-fg-2, var(--bs-body-color));
+}
+
+.wc-leg-dot {
+  flex: 0 0 auto;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  /* The palette is semantic and fixed (see test_template_uses_semantic_cache_status_palette),
+     and REVALIDATED's `primary` is a dark navy that vanishes on the dark card. The ring keeps
+     every dot legible without touching the status -> variant map. */
+  box-shadow: 0 0 0 1px var(--bw-border, var(--bs-border-color));
+}
+
+.wc-leg-val {
+  font-variant-numeric: tabular-nums;
+  color: var(--bw-fg-1, var(--bs-emphasis-color));
+}
+
+.wc-leg-pct {
+  min-width: 3.75rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}
+
+.wc-eff-foot {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+  color: var(--bw-fg-3, var(--bs-secondary-color));
+}

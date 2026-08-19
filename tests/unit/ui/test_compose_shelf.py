@@ -14,6 +14,7 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from jinja2 import Environment, FileSystemLoader
 
@@ -146,6 +147,13 @@ class _ShelfParser(HTMLParser):
                 row["posts"].append(attributes["name"])
         if tag not in VOID_TAGS:
             self._depth += 1
+
+    def handle_data(self, data):
+        # Converted templates carry their copy as text, not as a `data-i18n` attribute, so a row's
+        # reason is only visible if the parser collects what is between the tags.
+        text = data.strip()
+        if text and self._plugin is not None:
+            self.rows[self._plugin].setdefault("text", []).append(text)
 
     def handle_endtag(self, tag):
         self.flat.append(("/" + tag, {}))
@@ -542,11 +550,11 @@ def test_stream_locked_rows_say_why(render_shelf):
     for plugin_id in ("brotli", "errors", "headers"):
         row = parser.rows[plugin_id]
         assert row["attrs"]["data-shelf-kind"] == "locked", f"{plugin_id} is stream: no"
-        assert any(attrs.get("data-i18n") == "tooltip.stream_support.no" for _, attrs in row["tags"]), f"{plugin_id} gives no reason"
+        assert english("tooltip.stream_support.no") in row.get("text", []), f"{plugin_id} gives no reason"
     # An http service keeps them all, and `partial` is never excluded on either.
     http = parse_shelf(render_shelf())
     assert http.rows["headers"]["attrs"]["data-shelf-kind"] == "always"
-    assert not any(attrs.get("data-i18n") == "tooltip.stream_support.no" for _, attrs in http.rows["brotli"]["tags"])
+    assert english("tooltip.stream_support.no") not in http.rows["brotli"].get("text", [])
 
 
 def test_a_non_ui_editable_method_leaves_the_row_unpostable(render_shelf):
@@ -858,8 +866,8 @@ def test_a_row_the_scope_refused_says_who_set_it(render_shelf):
         assert parser.rows["brotli"]["attrs"]["data-shelf-kind"] == "locked"
         assert parser.rows["brotli"]["posts"] == []
         # The method itself is named, not just "somebody else".
-        label = next(attrs for _, attrs in parser.rows["brotli"]["tags"] if attrs.get("data-i18n") == "compose.provenance.managed")
-        assert json.loads(label["data-i18n-options"]) == {"method": method}
+        # the chip names the method inside its own translated text now, not in a data-i18n-options
+        assert english("compose.provenance.managed", method=method) in parser.rows["brotli"].get("text", []), method
 
 
 def test_no_rendered_row_is_ever_left_bare(render_shelf):

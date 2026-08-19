@@ -1,0 +1,7033 @@
+# Turkish translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: tr\n"
+"Language-Team: tr <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "Şununla Geliştirildi"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero Genel Kamu Lisansı v3.0"
+
+msgid "about.license_title"
+msgstr "Lisans"
+
+msgid "about.social.discord"
+msgstr "Discord"
+
+msgid "about.social.instagram"
+msgstr "Instagram"
+
+msgid "about.social.linkedin"
+msgstr "LinkedIn"
+
+msgid "about.social.reddit"
+msgstr "Reddit"
+
+msgid "about.socials"
+msgstr "Sosyal Medya"
+
+msgid "about.tagline"
+msgstr "Güçlü Koruma, Basitlik"
+
+msgid "about.title"
+msgstr "BunkerWeb hakkında"
+
+msgid "about.version"
+msgstr "Versiyon: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "Sertifikaları otomatik olarak oluştur ve yenileyin."
+
+msgid "accordion.title.tls"
+msgstr "TLS & sertifikalar"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "Lütfen geçerli özel yapılandırma dışı dosyasını (.json) yükleyin."
+
+msgid "alert.custom_end_date_required"
+msgstr "Lütfen özel bir bitiş tarihi seçin."
+
+msgid "alert.important"
+msgstr "Önemli"
+
+msgid "alert.no_changes_detected"
+msgstr "Değişiklik tespit edilmedi."
+
+msgid "alert.notice"
+msgstr "Bildirim"
+
+msgid "alert.ping_error"
+msgstr "Instances pinglenirken bir hata oluştu."
+
+msgid "alert.readonly_mode"
+msgstr "Bu işlem salt okunur modda devre dışı."
+
+msgid "aria.label.clear_search"
+msgstr "Aramayı temizle"
+
+msgid "aria.label.close"
+msgstr "Kapat"
+
+msgid "aria.label.collapse_multiline"
+msgstr "Çok satırlı girdileri daralt"
+
+msgid "aria.label.configs_dropzone"
+msgstr "Özel yapılandırma dışa aktarma dosyası seçin veya buraya bırakın"
+
+msgid "aria.label.copy"
+msgstr "Günlükleri kopyala"
+
+msgid "aria.label.download_log"
+msgstr "Bu günlük dosyasını indir"
+
+msgid "aria.label.follow"
+msgstr "Takip et"
+
+msgid "aria.label.hide_value"
+msgstr "Değeri gizle"
+
+msgid "aria.label.issue_count"
+msgstr "Hata ve uyarı sayısı"
+
+msgid "aria.label.level_filter"
+msgstr "Günlük satırlarını seviyeye göre filtrele"
+
+msgid "aria.label.local_time"
+msgstr "Zaman damgalarını yerel saatte göster"
+
+msgid "aria.label.next_issue"
+msgstr "Sonraki hata veya uyarı"
+
+msgid "aria.label.passkey_name"
+msgstr "Parola anahtarı adı"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "Eklenti arşivlerini seçin veya buraya bırakın"
+
+msgid "aria.label.prev_issue"
+msgstr "Önceki hata veya uyarı"
+
+msgid "aria.label.raw_configuration"
+msgstr "Ham yapılandırma"
+
+msgid "aria.label.remove_value"
+msgstr "Değeri kaldır"
+
+msgid "aria.label.reveal_value"
+msgstr "Değeri göster"
+
+msgid "aria.label.search_logs"
+msgstr "Günlüklerde ara"
+
+msgid "aria.label.select_file"
+msgstr "Dosya seç"
+
+msgid "aria.label.select_page"
+msgstr "Sayfa seç"
+
+msgid "aria.label.services_dropzone"
+msgstr "Hizmet dışa aktarma dosyası seçin veya buraya bırakın"
+
+msgid "aria.label.toggle_wrap"
+msgstr "Satır kaydırmayı değiştir"
+
+msgid "aria.label.user_avatar"
+msgstr "Kullanıcı avatarı"
+
+msgid "aria.label.view_selected_items"
+msgstr "Seçilen öğeleri görüntüle"
+
+msgid "badge.from_template"
+msgstr "Şablondan"
+
+msgid "badge.managed_via_api"
+msgstr "API aracılığıyla yönetilir"
+
+msgid "badge.new_version"
+msgstr "Yeni sürüm"
+
+msgid "badge.no_template"
+msgstr "Şablon Yok"
+
+msgid "badge.unread_news"
+msgstr "Okunmamış haberler"
+
+msgid "badge.unread_notifications"
+msgstr "Okunmamış bildirimler"
+
+msgid "banner.community"
+msgstr "<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord sohbetine</a> katılarak ve <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>'de bizi takip ederek Bunker topluluğunun bir parçası olun."
+
+msgid "banner.link.here"
+msgstr "burada"
+
+msgid "banner.pro"
+msgstr "BunkerWeb'den en iyi şekilde yararlanmak için PRO sürümüne yükseltin. Daha fazla bilgi ve ücretsiz deneme <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">burada</a>."
+
+msgid "banner.support"
+msgstr "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
+
+msgid "bans.stats.card.by_reason"
+msgstr "Nedene göre yasaklar"
+
+msgid "bans.stats.tile.active"
+msgstr "Etkin yasaklar"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP'ler + CIDR'ler"
+
+msgid "bans.stats.tile.countries"
+msgstr "Ülkeler"
+
+msgid "bans.stats.tile.expiring"
+msgstr "≤ 1 saatte sona eren"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "Otomatik dönüşümlü"
+
+msgid "bans.stats.tile.permanent"
+msgstr "Kalıcı yasaklar"
+
+msgid "bans.subtitle"
+msgstr "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın."
+
+msgid "breadcrumb.about"
+msgstr "Hakkında"
+
+msgid "breadcrumb.bans"
+msgstr "Yasaklamalar"
+
+msgid "breadcrumb.cache"
+msgstr "Önbellek"
+
+msgid "breadcrumb.configs"
+msgstr "Yapılandırmalar"
+
+msgid "breadcrumb.extra_pages"
+msgstr "Ek sayfalar"
+
+msgid "breadcrumb.global_config"
+msgstr "Genel yapılandırma"
+
+msgid "breadcrumb.global_settings"
+msgstr "Genel ayarlar"
+
+msgid "breadcrumb.groups"
+msgstr "Kaynak grupları"
+
+msgid "breadcrumb.home"
+msgstr "Ana sayfa"
+
+msgid "breadcrumb.instances"
+msgstr "Örnekler"
+
+msgid "breadcrumb.jobs"
+msgstr "İşler"
+
+msgid "breadcrumb.logs"
+msgstr "Kayıtlar"
+
+msgid "breadcrumb.misc"
+msgstr "Çeşitli"
+
+msgid "breadcrumb.mode_selection"
+msgstr "Mod seçimi"
+
+msgid "breadcrumb.more"
+msgstr "Daha fazla..."
+
+msgid "breadcrumb.new"
+msgstr "Yeni"
+
+msgid "breadcrumb.plugins"
+msgstr "Eklentiler"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "Eklenti sayfaları"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "Profil"
+
+msgid "breadcrumb.reports"
+msgstr "Raporlar"
+
+msgid "breadcrumb.services"
+msgstr "Servisler"
+
+msgid "breadcrumb.support"
+msgstr "Destek"
+
+msgid "breadcrumb.templates"
+msgstr "Şablonlar"
+
+msgid "breadcrumb.threatmap"
+msgstr "Tehdit haritası"
+
+msgid "breadcrumb.timings"
+msgstr "Süreler"
+
+msgid "breadcrumb.web_cache"
+msgstr "Web önbelleği"
+
+msgid "breadcrumb.whats_new"
+msgstr "Yenilikler"
+
+msgid "button.actions"
+msgstr "Aksiyonlar"
+
+msgid "button.activate_key"
+msgstr "Anahtarı Etkinleştir"
+
+msgid "button.add"
+msgstr "EKLE"
+
+msgid "button.add_ban_plural"
+msgstr "Yasaklama ekle"
+
+msgid "button.add_passkey"
+msgstr "Parola anahtarı ekle"
+
+msgid "button.add_plugin_plural"
+msgstr "Eklenti ekle"
+
+msgid "button.add_plugins"
+msgstr "Eklenti Ekle"
+
+msgid "button.auto_refresh"
+msgstr "Otomatik Yenile"
+
+msgid "button.ban"
+msgstr "Yasakla"
+
+msgid "button.ban_all_filtered"
+msgstr "Eşleşen tüm raporları yasakla"
+
+msgid "button.ban_selected"
+msgstr "Seçilenleri yasakla"
+
+msgid "button.cache"
+msgstr "Önbellek"
+
+msgid "button.cancel"
+msgstr "İptal"
+
+msgid "button.clear"
+msgstr "TEMİZLE"
+
+msgid "button.clone"
+msgstr "Kopyala"
+
+msgid "button.close"
+msgstr "Kapat"
+
+msgid "button.collapse_multiline"
+msgstr "Daralt"
+
+msgid "button.columns"
+msgstr "Sütunlar"
+
+msgid "button.convert_configs"
+msgstr "Yapılandırmaları dönüştür"
+
+msgid "button.convert_configs_to"
+msgstr "%(state)s durumuna dönüştür"
+
+msgid "button.convert_services"
+msgstr "Servisleri Dönüştür"
+
+msgid "button.copy"
+msgstr "Kopyala"
+
+msgid "button.copy_codes"
+msgstr "Kodları Kopyala"
+
+msgid "button.copy_raw"
+msgstr "Ham Veriyi Kopyala"
+
+msgid "button.copy_visible"
+msgstr "Görüneni Kopyala"
+
+msgid "button.create_config"
+msgstr "Özel Yapılandırma Oluştur"
+
+msgid "button.create_instance"
+msgstr "Instance Oluştur"
+
+msgid "button.create_service"
+msgstr "Yeni Servis Oluştur"
+
+msgid "button.create_template"
+msgstr "Şablon oluştur"
+
+msgid "button.delete"
+msgstr "Sil"
+
+msgid "button.delete_instance"
+msgstr "Örnekleri Sil"
+
+msgid "button.disable_totp"
+msgstr "TOTP'yi Devre Dışı Bırak"
+
+msgid "button.download"
+msgstr "İndir"
+
+msgid "button.edit"
+msgstr "Düzenle"
+
+msgid "button.enable_totp"
+msgstr "TOTP'yi Etkinleştir"
+
+msgid "button.entire_config"
+msgstr "Tüm Yapılandırma"
+
+msgid "button.export"
+msgstr "Dışa Aktar"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "Genel ayarları getir"
+
+msgid "button.filtered_actions"
+msgstr "Filtrelenmiş eylemler"
+
+msgid "button.filters_suffix"
+msgstr " Filtreler"
+
+msgid "button.follow"
+msgstr "Takip Et"
+
+msgid "button.force_check"
+msgstr "Zorla kontrol et"
+
+msgid "button.force_update"
+msgstr "Güncellemeyi zorla"
+
+msgid "button.github_stars"
+msgstr "Yıldızlar"
+
+msgid "button.go"
+msgstr "Git →"
+
+msgid "button.go_back"
+msgstr "Geri Dön"
+
+msgid "button.got_it"
+msgstr "Anladım"
+
+msgid "button.hide"
+msgstr "Gizle"
+
+msgid "button.history"
+msgstr "Geçmiş"
+
+msgid "button.import_configs"
+msgstr "Özel yapılandırmaları içe aktar"
+
+msgid "button.import_services"
+msgstr "Hizmetleri içe aktar"
+
+msgid "button.local_time"
+msgstr "Yerel saat"
+
+msgid "button.login"
+msgstr "Giriş Yap"
+
+msgid "button.multiple_add"
+msgstr "EKLE"
+
+msgid "button.multiple_hide"
+msgstr "GİZLE"
+
+msgid "button.multiple_remove"
+msgstr "KALDIR"
+
+msgid "button.multiple_show"
+msgstr "GÖSTER"
+
+msgid "button.need_help"
+msgstr "Yardıma mı ihtiyacınız var?"
+
+msgid "button.news"
+msgstr "Haberler"
+
+msgid "button.notifications"
+msgstr "Bildirimler"
+
+msgid "button.open_support_ticket"
+msgstr "Destek Talebi Oluştur"
+
+msgid "button.order_support"
+msgstr "Destek Siparişi Ver"
+
+msgid "button.ping"
+msgstr "Ping"
+
+msgid "button.plugin_page"
+msgstr "Eklenti Sayfası"
+
+msgid "button.proceed"
+msgstr "Devam Et"
+
+msgid "button.refresh"
+msgstr "Yenile"
+
+msgid "button.refresh_recovery_codes"
+msgstr "Kurtarma Kodlarını Yenile"
+
+msgid "button.reload"
+msgstr "Yeniden Yükle"
+
+msgid "button.rename"
+msgstr "Yeniden adlandır"
+
+msgid "button.reset"
+msgstr "Sıfırla"
+
+msgid "button.reset_columns"
+msgstr "Sütunları Sıfırla"
+
+msgid "button.retry"
+msgstr "Yeniden dene"
+
+msgid "button.return_to_safety"
+msgstr "Güvenliğe Dön"
+
+msgid "button.run"
+msgstr "Çalıştır"
+
+msgid "button.run_selected_jobs"
+msgstr "Seçili İşleri Çalıştır"
+
+msgid "button.save"
+msgstr "Kaydet"
+
+msgid "button.save_changes"
+msgstr "Değişiklikleri Kaydet"
+
+msgid "button.search"
+msgstr "Ara"
+
+msgid "button.see_all_releases"
+msgstr "Tüm sürümleri gör"
+
+msgid "button.select_file"
+msgstr "Dosya Seç"
+
+msgid "button.select_page"
+msgstr "Sayfa Seç"
+
+msgid "button.service"
+msgstr "Servis"
+
+msgid "button.set_1h"
+msgstr "1 Saat Ayarla"
+
+msgid "button.set_1w"
+msgstr "1 Hafta Ayarla"
+
+msgid "button.set_24h"
+msgstr "24 Saat Ayarla"
+
+msgid "button.set_permanent"
+msgstr "Kalıcı Ayarla"
+
+msgid "button.setup"
+msgstr "Kurulum"
+
+msgid "button.show"
+msgstr "Göster"
+
+msgid "button.show_me"
+msgstr "Göster"
+
+msgid "button.sign_in_with_passkey"
+msgstr "Parola anahtarıyla giriş yap"
+
+msgid "button.stop"
+msgstr "Durdur"
+
+msgid "button.submit"
+msgstr "Gönder"
+
+msgid "button.subscribe"
+msgstr "Abone Ol"
+
+msgid "button.unban"
+msgstr "Yasağı Kaldır"
+
+msgid "button.unban_all_filtered"
+msgstr "Eşleşen tüm yasakları kaldır"
+
+msgid "button.update_duration"
+msgstr "Yasaklama Süresini Güncelle"
+
+msgid "button.update_duration_all_filtered"
+msgstr "Eşleşen tüm yasakların süresini güncelle"
+
+msgid "button.update_key"
+msgstr "Anahtarı Güncelle"
+
+msgid "button.upload_photo"
+msgstr "Yeni Fotoğraf Yükle"
+
+msgid "button.use_security_key"
+msgstr "Güvenlik anahtarı kullan"
+
+msgid "button.use_template"
+msgstr "Şablon kullan"
+
+msgid "button.verify"
+msgstr "Doğrula"
+
+msgid "button.view"
+msgstr "Görüntüle"
+
+msgid "button.view_details"
+msgstr "Detayları Görüntüle"
+
+msgid "button.view_raw_data"
+msgstr "Ham Veriyi Görüntüle"
+
+msgid "button.wipe_other_sessions"
+msgstr "Diğer Oturumları Sonlandır"
+
+msgid "button.wrap"
+msgstr "Kaydır"
+
+msgid "cache.kpi_files"
+msgstr "Dosyalar"
+
+msgid "cache.kpi_per_service"
+msgstr "Hizmet başına"
+
+msgid "cache.subtitle"
+msgstr "Planlı işler tarafından oluşturulan önbellek dosyaları (blok listeleri, GeoIP veritabanları ve daha fazlası) — hizmet ve eklenti başına inceleyin, indirin veya silin."
+
+msgid "cache.title"
+msgstr "Önbellek dosyaları"
+
+msgid "certificates.acme_help"
+msgstr "Mevcut ayarlarınız zaten Let's Encrypt'i etkinleştiriyor ve yapılandırıyor olan hizmetleri seçin. Bu işlem yalnızca bu yapılandırmayı planlar; sertifika ayrıntıları ve meydan okuma kimlik bilgileri burada girilmez."
+
+msgid "certificates.active"
+msgstr "Aktif sertifikalar"
+
+msgid "certificates.algorithm"
+msgstr "Algoritma"
+
+msgid "certificates.all"
+msgstr "Tümü"
+
+msgid "certificates.assignment_notice"
+msgstr "Atamalar, merkezi envanteri düzenler; TLS dağıtımı, her hizmetin sertifika ayarları tarafından kontrol edilir."
+
+msgid "certificates.assignments"
+msgstr "Envanter atamaları"
+
+msgid "certificates.assignments_help"
+msgstr "Bu atamalar, canlı TLS ayarlarını değiştirmez."
+
+msgid "certificates.attach"
+msgstr "Atayın"
+
+msgid "certificates.attach_all"
+msgstr "Bu sertifika, mevcut tüm hizmetlere zaten bağlıdır."
+
+msgid "certificates.attach_copy"
+msgstr "Merkezi envanterdeki bir hizmete \"%(name)s\" atayın."
+
+msgid "certificates.browse_certificate"
+msgstr "Sertifikayı görüntüle"
+
+msgid "certificates.browse_key"
+msgstr "Gizli anahtıyı görüntüle"
+
+msgid "certificates.common_name"
+msgstr "Ortak ad"
+
+msgid "certificates.confirm"
+msgstr "Onayla"
+
+msgid "certificates.confirm_action"
+msgstr "Sertifika eylemini onayla"
+
+msgid "certificates.confirm_delete"
+msgstr "\"%(name)s\"i sil? Bu geri alınamaz."
+
+msgid "certificates.confirm_generic"
+msgstr "Bu sertifika eylemini onaylamak?"
+
+msgid "certificates.confirm_renew"
+msgstr "\"%(name)s\"i yenile?"
+
+msgid "certificates.confirm_renew_due"
+msgstr "Her sertifikayı ve şu anda vadesi dolmuş olanları kontrol et?"
+
+msgid "certificates.create"
+msgstr "Sertifika oluştur"
+
+msgid "certificates.download_chain"
+msgstr "Zinciri indirin"
+
+msgid "certificates.download_leaf"
+msgstr "Yaprağı indirin"
+
+msgid "certificates.edit_help"
+msgstr "Bu, yalnızca envanter meta verilerini değiştirir, sertifika malzemesini veya canlı TLS ayarlarını değiştirmez."
+
+msgid "certificates.edit_metadata"
+msgstr "Sertifika meta verilerini düzenle"
+
+msgid "certificates.empty"
+msgstr "Sertifikalar yok"
+
+msgid "certificates.empty_help"
+msgstr "Kend imzalanmış bir sertifika oluşturun, ACME yayınını planlayın veya mevcut bir PEM sertifikası ve ana bilgisini yükleyin."
+
+msgid "certificates.expired_help"
+msgstr "Dikkat gerektirir"
+
+msgid "certificates.expires"
+msgstr "Son kullanma tarihi"
+
+msgid "certificates.expiring_help"
+msgstr "30 gün veya daha az"
+
+msgid "certificates.file_extensions"
+msgstr "Aşağıdaki dosya uzantılarından birini kullanın: %(extensions)s."
+
+msgid "certificates.file_select"
+msgstr "Bir PEM dosyasını seçin."
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "Dosya 1 MiB'ı geçmemelidir."
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 parmak izi"
+
+msgid "certificates.issuer"
+msgstr "İşveren"
+
+msgid "certificates.issuers"
+msgstr "En çok kullanılan işverenler"
+
+msgid "certificates.key_drop"
+msgstr "İlgili özel anahtarı buraya bırakın"
+
+msgid "certificates.key_limit"
+msgstr "Maksimum 1 MiB; dinlenme halindeyken şifrelenmiş ve indirilemez"
+
+msgid "certificates.last_error"
+msgstr "Son hata"
+
+msgid "certificates.make_primary"
+msgstr "Bu hizmet için ana envanter atamasını işaretleyin"
+
+msgid "certificates.managed"
+msgstr "Yönetilen sertifikalar"
+
+msgid "certificates.new_selfsigned"
+msgstr "Yeni kend imzalanmış sertifika"
+
+msgid "certificates.no_issuers"
+msgstr "İşveren verisi yok"
+
+msgid "certificates.none_due"
+msgstr "Sertifikalar yok"
+
+msgid "certificates.orphan_account"
+msgstr "Hesap"
+
+msgid "certificates.orphan_badge"
+msgstr "ACME hesabı eksik"
+
+msgid "certificates.orphan_help"
+msgstr "Bu yenileme kaydı, artık mevcut olmayan bir ACME hesabını işaret etmektedir. Yenileme, sağlayıcının durumu onarılana kadar bloke kalır."
+
+msgid "certificates.orphan_server"
+msgstr "ACME sunucusu"
+
+msgid "certificates.orphan_title"
+msgstr "ACME hesabı eksik"
+
+msgid "certificates.pem_certificate"
+msgstr "PEM sertifikası veya zincir"
+
+msgid "certificates.pem_drop"
+msgstr "Buraya halk PEM sertifikasını veya zinciri bırakın"
+
+msgid "certificates.pem_limit"
+msgstr "Maksimum 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "PEM özel anahtar"
+
+msgid "certificates.primary"
+msgstr "Ana atama"
+
+msgid "certificates.primary_help"
+msgstr "Seçilen hizmetler için ana envanter atamasını işaretleyin"
+
+msgid "certificates.readonly"
+msgstr "Veritabanı salt okunurdur. Sertifikalar incelenebilir ve indirilebilir, ancak değiştirilemez."
+
+msgid "certificates.renew_due"
+msgstr "Kontrol/yenileyin"
+
+msgid "certificates.sans"
+msgstr "Konu alternatif adları"
+
+msgid "certificates.save_metadata"
+msgstr "Meta verileri kaydedin"
+
+msgid "certificates.schedule"
+msgstr "Yayınlamayı planlayın"
+
+msgid "certificates.schedule_acme"
+msgstr "ACME yayınlamayı planlayın"
+
+msgid "certificates.search"
+msgstr "Ad, ortak ad, SAN, işveren veya parmak izi ile arayın…"
+
+msgid "certificates.serial"
+msgstr "Seri numarası"
+
+msgid "certificates.services"
+msgstr "Servisler"
+
+msgid "certificates.services_help"
+msgstr "Ctrl veya Command kullanarak birden fazla hizmeti seçin."
+
+msgid "certificates.showing_count"
+msgstr "%(visible)s tanesi görüntüleniyor, toplamda %(total)s tane"
+
+msgid "certificates.source.customcert"
+msgstr "Özel"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "Kendiliğinden imzalanmış"
+
+msgid "certificates.source_label"
+msgstr "Kaynak"
+
+msgid "certificates.status.expired"
+msgstr "Geçerlilik süresi dolmuş"
+
+msgid "certificates.status.expiring_soon"
+msgstr "Yakında geçerlilik süresi dolacak"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "Henüz geçerli değil"
+
+msgid "certificates.status.revoked"
+msgstr "İptal edilmiş"
+
+msgid "certificates.status.valid"
+msgstr "Geçerli"
+
+msgid "certificates.subtitle"
+msgstr "Merkezi envanterde sertifikaları oluştur, yükle, atayın, yenileyin ve inceleyin."
+
+msgid "certificates.total"
+msgstr "Toplam"
+
+msgid "certificates.truncated"
+msgstr "Sadece ilk 500 sertifika görüntüleniyor. Tam sonucu almak için API üzerinden envanteri daraltın."
+
+msgid "certificates.unassigned"
+msgstr "Atanmamış"
+
+msgid "certificates.upcoming"
+msgstr "Yaklaşan yenilemeler"
+
+msgid "certificates.upcoming_help"
+msgstr "Geçerlilik süresi dolmuş veya 30 günlük yenileme penceresi içinde"
+
+msgid "certificates.upload"
+msgstr "Sertifikayı yükle"
+
+msgid "certificates.upload_custom"
+msgstr "Özel sertifikayı yükle"
+
+msgid "certificates.upload_invalid"
+msgstr "Geçerli bir kamu sertifikası ve eşleşen özel anahtar seçin."
+
+msgid "certificates.valid_days"
+msgstr "Gün cinsinden geçerlilik süresi"
+
+msgid "certificates.valid_from"
+msgstr "Geçerli olan"
+
+msgid "certificates.valid_to"
+msgstr "Geçerlilik süresi sona erecek"
+
+msgid "compose.always_on"
+msgstr "Her zaman açık"
+
+msgid "compose.count"
+msgstr "%(on)s etkin · %(total)s kullanılabilir · %(locked)s kilitli"
+
+msgid "compose.entries"
+msgstr "%(count)s yapılandırılmış"
+
+msgid "compose.filter.all"
+msgstr "Tümü"
+
+msgid "compose.filter.changed"
+msgstr "Değişti"
+
+msgid "compose.filter.on"
+msgstr "Evet"
+
+msgid "compose.locked"
+msgstr "Burada kontrol yok"
+
+msgid "compose.provenance.api"
+msgstr "API aracılığıyla yönetilir"
+
+msgid "compose.provenance.attachment"
+msgstr "Ekli dosyadan"
+
+msgid "compose.provenance.clone"
+msgstr "Kopyalandı"
+
+msgid "compose.provenance.default"
+msgstr "Varsayılan"
+
+msgid "compose.provenance.edited"
+msgstr "İşte düzenlendi"
+
+msgid "compose.provenance.global"
+msgstr "Küresel"
+
+msgid "compose.provenance.managed"
+msgstr "%(method)s tarafından ayarlandı"
+
+msgid "compose.provenance.template"
+msgstr "Şablondan"
+
+msgid "compose.set_value"
+msgstr "Bir değer belirle…"
+
+msgid "compose.show_more"
+msgstr "%(count)s tane daha göster"
+
+msgid "compose.unavailable"
+msgstr "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde düzenlenemez. API yanıtını bekleyin."
+
+msgid "configs.subtitle"
+msgstr "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
+
+msgid "country.AD"
+msgstr "Andorra"
+
+msgid "country.AE"
+msgstr "Birleşik Arap Emirlikleri"
+
+msgid "country.AF"
+msgstr "Afganistan"
+
+msgid "country.AG"
+msgstr "Antigua ve Barbuda"
+
+msgid "country.AI"
+msgstr "Anguilla"
+
+msgid "country.AL"
+msgstr "Arnavutluk"
+
+msgid "country.AM"
+msgstr "Ermenistan"
+
+msgid "country.AO"
+msgstr "Angola"
+
+msgid "country.AQ"
+msgstr "Antarktika"
+
+msgid "country.AR"
+msgstr "Arjantin"
+
+msgid "country.AS"
+msgstr "Amerikan Samoası"
+
+msgid "country.AT"
+msgstr "Avusturya"
+
+msgid "country.AU"
+msgstr "Avustralya"
+
+msgid "country.AW"
+msgstr "Aruba"
+
+msgid "country.AX"
+msgstr "Aland Adaları"
+
+msgid "country.AZ"
+msgstr "Azerbaycan"
+
+msgid "country.BA"
+msgstr "Bosna-Hersek"
+
+msgid "country.BB"
+msgstr "Barbados"
+
+msgid "country.BD"
+msgstr "Bangladeş"
+
+msgid "country.BE"
+msgstr "Belçika"
+
+msgid "country.BF"
+msgstr "Burkina Faso"
+
+msgid "country.BG"
+msgstr "Bulgaristan"
+
+msgid "country.BH"
+msgstr "Bahreyn"
+
+msgid "country.BI"
+msgstr "Burundi"
+
+msgid "country.BJ"
+msgstr "Benin"
+
+msgid "country.BL"
+msgstr "Saint Barthélemy"
+
+msgid "country.BM"
+msgstr "Bermuda"
+
+msgid "country.BN"
+msgstr "Brunei Darussalam"
+
+msgid "country.BO"
+msgstr "Bolivya"
+
+msgid "country.BQ"
+msgstr "Karayip Hollandası"
+
+msgid "country.BR"
+msgstr "Brezilya"
+
+msgid "country.BS"
+msgstr "Bahamalar"
+
+msgid "country.BT"
+msgstr "Butan"
+
+msgid "country.BV"
+msgstr "Bouvet Adası"
+
+msgid "country.BW"
+msgstr "Botsvana"
+
+msgid "country.BY"
+msgstr "Belarus"
+
+msgid "country.BZ"
+msgstr "Belize"
+
+msgid "country.CA"
+msgstr "Kanada"
+
+msgid "country.CC"
+msgstr "Cocos (Keeling) Adaları"
+
+msgid "country.CD"
+msgstr "Demokratik Kongo"
+
+msgid "country.CF"
+msgstr "Orta Afrika Cumhuriyeti"
+
+msgid "country.CG"
+msgstr "Kongo Cumhuriyeti"
+
+msgid "country.CH"
+msgstr "İsviçre"
+
+msgid "country.CI"
+msgstr "Côte d'Ivoire"
+
+msgid "country.CK"
+msgstr "Cook Adaları"
+
+msgid "country.CL"
+msgstr "Şili"
+
+msgid "country.CM"
+msgstr "Kamerun"
+
+msgid "country.CN"
+msgstr "Çin"
+
+msgid "country.CO"
+msgstr "Kolombiya"
+
+msgid "country.CR"
+msgstr "Kosta Rika"
+
+msgid "country.CU"
+msgstr "Küba"
+
+msgid "country.CV"
+msgstr "Cabo Verde"
+
+msgid "country.CW"
+msgstr "Curaçao"
+
+msgid "country.CX"
+msgstr "Christmas Adası"
+
+msgid "country.CY"
+msgstr "Kıbrıs"
+
+msgid "country.CZ"
+msgstr "Çek Cumhuriyeti"
+
+msgid "country.DE"
+msgstr "Almanya"
+
+msgid "country.DJ"
+msgstr "Cibuti"
+
+msgid "country.DK"
+msgstr "Danimarka"
+
+msgid "country.DM"
+msgstr "Dominika"
+
+msgid "country.DO"
+msgstr "Dominik Cumhuriyeti"
+
+msgid "country.DZ"
+msgstr "Cezayir"
+
+msgid "country.EC"
+msgstr "Ekvador"
+
+msgid "country.EE"
+msgstr "Estonya"
+
+msgid "country.EG"
+msgstr "Mısır"
+
+msgid "country.EH"
+msgstr "Batı Sahra"
+
+msgid "country.ER"
+msgstr "Eritre"
+
+msgid "country.ES"
+msgstr "İspanya"
+
+msgid "country.ET"
+msgstr "Etiyopya"
+
+msgid "country.EU"
+msgstr "Avrupa"
+
+msgid "country.FI"
+msgstr "Finlandiya"
+
+msgid "country.FJ"
+msgstr "Fiji"
+
+msgid "country.FK"
+msgstr "Falkland Adaları (Malvinas)"
+
+msgid "country.FM"
+msgstr "Mikronezya"
+
+msgid "country.FO"
+msgstr "Faroe Adaları"
+
+msgid "country.FR"
+msgstr "Fransa"
+
+msgid "country.GA"
+msgstr "Gabon"
+
+msgid "country.GB"
+msgstr "Birleşik Krallık"
+
+msgid "country.GD"
+msgstr "Grenada"
+
+msgid "country.GE"
+msgstr "Gürcistan"
+
+msgid "country.GF"
+msgstr "Fransız Guyanası"
+
+msgid "country.GG"
+msgstr "Guernsey"
+
+msgid "country.GH"
+msgstr "Gana"
+
+msgid "country.GI"
+msgstr "Cebelitarık"
+
+msgid "country.GL"
+msgstr "Grönland"
+
+msgid "country.GM"
+msgstr "Gambiya"
+
+msgid "country.GN"
+msgstr "Gine"
+
+msgid "country.GP"
+msgstr "Guadeloupe"
+
+msgid "country.GQ"
+msgstr "Ekvator Ginesi"
+
+msgid "country.GR"
+msgstr "Yunanistan"
+
+msgid "country.GS"
+msgstr "Güney Georgia ve Güney Sandwich Adaları"
+
+msgid "country.GT"
+msgstr "Guatemala"
+
+msgid "country.GU"
+msgstr "Guam"
+
+msgid "country.GW"
+msgstr "Gine-Bissau"
+
+msgid "country.GY"
+msgstr "Guyana"
+
+msgid "country.HK"
+msgstr "Hong Kong"
+
+msgid "country.HM"
+msgstr "Heard Adası ve McDonald Adaları"
+
+msgid "country.HN"
+msgstr "Honduras"
+
+msgid "country.HR"
+msgstr "Hırvatistan"
+
+msgid "country.HT"
+msgstr "Haiti"
+
+msgid "country.HU"
+msgstr "Macaristan"
+
+msgid "country.ID"
+msgstr "Endonezya"
+
+msgid "country.IE"
+msgstr "İrlanda"
+
+msgid "country.IL"
+msgstr "İsrail"
+
+msgid "country.IM"
+msgstr "Man Adası"
+
+msgid "country.IN"
+msgstr "Hindistan"
+
+msgid "country.IO"
+msgstr "Britanya Hint Okyanusu Toprakları"
+
+msgid "country.IQ"
+msgstr "Irak"
+
+msgid "country.IR"
+msgstr "İran"
+
+msgid "country.IS"
+msgstr "İzlanda"
+
+msgid "country.IT"
+msgstr "İtalya"
+
+msgid "country.JE"
+msgstr "Jersey"
+
+msgid "country.JM"
+msgstr "Jamaika"
+
+msgid "country.JO"
+msgstr "Ürdün"
+
+msgid "country.JP"
+msgstr "Japonya"
+
+msgid "country.KE"
+msgstr "Kenya"
+
+msgid "country.KG"
+msgstr "Kırgızistan"
+
+msgid "country.KH"
+msgstr "Kamboçya"
+
+msgid "country.KI"
+msgstr "Kiribati"
+
+msgid "country.KM"
+msgstr "Komorlar"
+
+msgid "country.KN"
+msgstr "Saint Kitts ve Nevis"
+
+msgid "country.KP"
+msgstr "Kuzey Kore"
+
+msgid "country.KR"
+msgstr "Güney Kore"
+
+msgid "country.KW"
+msgstr "Kuveyt"
+
+msgid "country.KY"
+msgstr "Cayman Adaları"
+
+msgid "country.KZ"
+msgstr "Kazakistan"
+
+msgid "country.LA"
+msgstr "Laos"
+
+msgid "country.LB"
+msgstr "Lübnan"
+
+msgid "country.LC"
+msgstr "Saint Lucia"
+
+msgid "country.LI"
+msgstr "Lihtenştayn"
+
+msgid "country.LK"
+msgstr "Sri Lanka"
+
+msgid "country.LR"
+msgstr "Liberya"
+
+msgid "country.LS"
+msgstr "Lesotho"
+
+msgid "country.LT"
+msgstr "Litvanya"
+
+msgid "country.LU"
+msgstr "Lüksemburg"
+
+msgid "country.LV"
+msgstr "Letonya"
+
+msgid "country.LY"
+msgstr "Libya"
+
+msgid "country.MA"
+msgstr "Fas"
+
+msgid "country.MC"
+msgstr "Monako"
+
+msgid "country.MD"
+msgstr "Moldova"
+
+msgid "country.ME"
+msgstr "Karadağ"
+
+msgid "country.MF"
+msgstr "Saint Martin"
+
+msgid "country.MG"
+msgstr "Madagaskar"
+
+msgid "country.MH"
+msgstr "Marshall Adaları"
+
+msgid "country.MK"
+msgstr "Kuzey Makedonya"
+
+msgid "country.ML"
+msgstr "Mali"
+
+msgid "country.MM"
+msgstr "Myanmar"
+
+msgid "country.MN"
+msgstr "Moğolistan"
+
+msgid "country.MO"
+msgstr "Macao"
+
+msgid "country.MP"
+msgstr "Kuzey Mariana Adaları"
+
+msgid "country.MQ"
+msgstr "Martinik"
+
+msgid "country.MR"
+msgstr "Moritanya"
+
+msgid "country.MS"
+msgstr "Montserrat"
+
+msgid "country.MT"
+msgstr "Malta"
+
+msgid "country.MU"
+msgstr "Mauritius"
+
+msgid "country.MV"
+msgstr "Maldivler"
+
+msgid "country.MW"
+msgstr "Malavi"
+
+msgid "country.MX"
+msgstr "Meksika"
+
+msgid "country.MY"
+msgstr "Malezya"
+
+msgid "country.MZ"
+msgstr "Mozambik"
+
+msgid "country.NA"
+msgstr "Namibya"
+
+msgid "country.NC"
+msgstr "Yeni Kaledonya"
+
+msgid "country.NE"
+msgstr "Nijer"
+
+msgid "country.NF"
+msgstr "Norfolk Adası"
+
+msgid "country.NG"
+msgstr "Nijerya"
+
+msgid "country.NI"
+msgstr "Nikaragua"
+
+msgid "country.NL"
+msgstr "Hollanda"
+
+msgid "country.NO"
+msgstr "Norveç"
+
+msgid "country.NP"
+msgstr "Nepal"
+
+msgid "country.NR"
+msgstr "Nauru"
+
+msgid "country.NU"
+msgstr "Niue"
+
+msgid "country.NZ"
+msgstr "Yeni Zelanda"
+
+msgid "country.OM"
+msgstr "Umman"
+
+msgid "country.PA"
+msgstr "Panama"
+
+msgid "country.PE"
+msgstr "Peru"
+
+msgid "country.PF"
+msgstr "Fransız Polinezyası"
+
+msgid "country.PG"
+msgstr "Papua Yeni Gine"
+
+msgid "country.PH"
+msgstr "Filipinler"
+
+msgid "country.PK"
+msgstr "Pakistan"
+
+msgid "country.PL"
+msgstr "Polonya"
+
+msgid "country.PM"
+msgstr "Saint Pierre ve Miquelon"
+
+msgid "country.PN"
+msgstr "Pitcairn Adaları"
+
+msgid "country.PR"
+msgstr "Porto Riko"
+
+msgid "country.PS"
+msgstr "Filistin"
+
+msgid "country.PT"
+msgstr "Portekiz"
+
+msgid "country.PW"
+msgstr "Palau"
+
+msgid "country.PY"
+msgstr "Paraguay"
+
+msgid "country.QA"
+msgstr "Katar"
+
+msgid "country.RE"
+msgstr "Réunion"
+
+msgid "country.RO"
+msgstr "Romanya"
+
+msgid "country.RS"
+msgstr "Sırbistan"
+
+msgid "country.RU"
+msgstr "Rusya Federasyonu"
+
+msgid "country.RW"
+msgstr "Ruanda"
+
+msgid "country.SA"
+msgstr "Suudi Arabistan"
+
+msgid "country.SB"
+msgstr "Solomon Adaları"
+
+msgid "country.SC"
+msgstr "Seyşeller"
+
+msgid "country.SD"
+msgstr "Sudan"
+
+msgid "country.SE"
+msgstr "İsveç"
+
+msgid "country.SG"
+msgstr "Singapur"
+
+msgid "country.SH"
+msgstr "Saint Helena, Ascension ve Tristan da Cunha"
+
+msgid "country.SI"
+msgstr "Slovenya"
+
+msgid "country.SJ"
+msgstr "Svalbard ve Jan Mayen Adaları"
+
+msgid "country.SK"
+msgstr "Slovakya"
+
+msgid "country.SL"
+msgstr "Sierra Leone"
+
+msgid "country.SM"
+msgstr "San Marino"
+
+msgid "country.SN"
+msgstr "Senegal"
+
+msgid "country.SO"
+msgstr "Somali"
+
+msgid "country.SR"
+msgstr "Surinam"
+
+msgid "country.SS"
+msgstr "Güney Sudan"
+
+msgid "country.ST"
+msgstr "Sao Tome ve Principe"
+
+msgid "country.SV"
+msgstr "El Salvador"
+
+msgid "country.SX"
+msgstr "Sint Maarten (Hollanda kısmı)"
+
+msgid "country.SY"
+msgstr "Suriye"
+
+msgid "country.SZ"
+msgstr "Esvatini"
+
+msgid "country.TC"
+msgstr "Turks ve Caicos Adaları"
+
+msgid "country.TD"
+msgstr "Çad"
+
+msgid "country.TF"
+msgstr "Fransız Güney Toprakları"
+
+msgid "country.TG"
+msgstr "Togo"
+
+msgid "country.TH"
+msgstr "Tayland"
+
+msgid "country.TJ"
+msgstr "Tacikistan"
+
+msgid "country.TK"
+msgstr "Tokelau"
+
+msgid "country.TL"
+msgstr "Timor-Leste"
+
+msgid "country.TM"
+msgstr "Türkmenistan"
+
+msgid "country.TN"
+msgstr "Tunus"
+
+msgid "country.TO"
+msgstr "Tonga"
+
+msgid "country.TR"
+msgstr "Türkiye"
+
+msgid "country.TT"
+msgstr "Trinidad ve Tobago"
+
+msgid "country.TV"
+msgstr "Tuvalu"
+
+msgid "country.TW"
+msgstr "Tayvan"
+
+msgid "country.TZ"
+msgstr "Tanzanya"
+
+msgid "country.UA"
+msgstr "Ukrayna"
+
+msgid "country.UG"
+msgstr "Uganda"
+
+msgid "country.UM"
+msgstr "ABD'nin Küçük Dış Adaları"
+
+msgid "country.US"
+msgstr "Amerika Birleşmiş Devletleri"
+
+msgid "country.UY"
+msgstr "Uruguay"
+
+msgid "country.UZ"
+msgstr "Özbekistan"
+
+msgid "country.VA"
+msgstr "Vatikan (Kutsal Makam)"
+
+msgid "country.VC"
+msgstr "Saint Vincent ve Grenadinler"
+
+msgid "country.VE"
+msgstr "Venezuela"
+
+msgid "country.VG"
+msgstr "Britanya Virjin Adaları"
+
+msgid "country.VI"
+msgstr "ABD Virjin Adaları"
+
+msgid "country.VN"
+msgstr "Vietnam"
+
+msgid "country.VU"
+msgstr "Vanuatu"
+
+msgid "country.WF"
+msgstr "Wallis ve Futuna Adaları"
+
+msgid "country.WS"
+msgstr "Samoa"
+
+msgid "country.XK"
+msgstr "Kosova"
+
+msgid "country.YE"
+msgstr "Yemen"
+
+msgid "country.YT"
+msgstr "Mayotte"
+
+msgid "country.ZA"
+msgstr "Güney Afrika"
+
+msgid "country.ZM"
+msgstr "Zambiya"
+
+msgid "country.ZW"
+msgstr "Zimbabve"
+
+msgid "country.not_applicable"
+msgstr "N/A"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "Engellenen İstekler"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "Engellenen Benzersiz IP'ler"
+
+msgid "dashboard.card.certificates.title"
+msgstr "Sertifikalar"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s aktif / %(down)s deaktif / %(loading)s yükleniyor"
+
+msgid "dashboard.card.instances.title"
+msgstr "Örnekler"
+
+msgid "dashboard.card.news.title"
+msgstr "Haberler"
+
+msgid "dashboard.card.plan.title"
+msgstr "Plan"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s çekirdek / %(pro)s PRO / %(external)s harici"
+
+msgid "dashboard.card.plugins.title"
+msgstr "Eklentiler"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "Kritik: Sistem belleği tükenmek üzere!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "Üretim ortamları için mükemmel bellek"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "Üretim ortamlarında kullanım için 16 GB veya daha fazlasına yükseltmeyi düşünün"
+
+msgid "dashboard.card.ram.title"
+msgstr "Sistem RAM'i"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% kullanıldı"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "Uyarı: Düşük bellek performansı etkileyebilir"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s çevrimiçi / %(draft)s taslak"
+
+msgid "dashboard.card.services.title"
+msgstr "Servisler"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "En sık engelleme nedenleri"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "Toplam İstekler"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "Yakında"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "Upstream sunucuları"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "Ülkeye Göre Engellenen İstekler"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "Engellenen İstekler"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "Adet"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "Zaman içinde engellenen istekler"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "Zaman"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "Zaman İçinde Engelleme Durumu"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "Engellenen İstekler"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "İstek Durumu Dağılımı"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "Engellendi"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "Zaman içinde engellenen istekler (seçili aralık)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "En Çok Engellenen IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "En Çok Engellenen 10 IP"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "Engellenen İstekler"
+
+msgid "dashboard.map.hover_info"
+msgstr "Bir ülkenin üzerine gelin"
+
+msgid "dashboard.map.legend"
+msgstr "Açıklama"
+
+msgid "dashboard.map.no_data"
+msgstr "Veri yok"
+
+msgid "dashboard.mini.across_countries"
+msgstr "%(count)s ülkede"
+
+msgid "dashboard.mini.enforced"
+msgstr "Şu anda uygulanıyor"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% engellendi"
+
+msgid "dashboard.mini.scheduled"
+msgstr "Planlanmış"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "Engellenen ve izin verilen"
+
+msgid "dashboard.panel.map_sub"
+msgstr "Ayrıntılar için üzerine gelin"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "Tetikleyen kurala göre"
+
+msgid "dashboard.panel.status_sub"
+msgstr "HTTP yanıt kodları"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "Seçili aralık"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "İstek sayısına göre"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "· toplam istek: %(total)s"
+
+msgid "dashboard.status.free_plan"
+msgstr "Ücretsiz plan"
+
+msgid "dashboard.status.renews"
+msgstr "Yenile"
+
+msgid "dashboard.status.services_licensed"
+msgstr "Lisanslı servis: %(count)s"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "önceki ile karşılaştır"
+
+msgid "dashboard.status.vs_prev"
+msgstr "önceki ile karşılaştır"
+
+msgid "dashboard.tile.bans_active"
+msgstr "Etkin yasaklar"
+
+msgid "dashboard.tile.jobs"
+msgstr "Zamanlanmış işler"
+
+msgid "dashboard.tile.trend"
+msgstr "Engellenen istek eğilimi"
+
+msgid "dashboard.welcome.greeting"
+msgstr "Tekrar hoş geldiniz,"
+
+msgid "dashboard.welcome.title"
+msgstr "Tekrar hoş geldiniz, %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "Son %(days)s gün"
+
+msgid "dashboard.window.title"
+msgstr "Panel penceresi"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "Eşleşen %(count)s %(entity)s öğesinin tümü seçildi."
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "Eşleşen %(count)s %(entity)s öğesinin tümünü seç"
+
+msgid "datatable.bulk_select_clear"
+msgstr "Seçimi temizle"
+
+msgid "datatable.bulk_select_page"
+msgstr "Bu sayfadaki %(count)s %(entity)s öğesinin tümü seçildi."
+
+msgid "datatable.info_bans"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Yasaklama"
+
+msgid "datatable.info_cache"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Önbellek Dosyası"
+
+msgid "datatable.info_configs"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Özel Yapılandırma"
+
+msgid "datatable.info_empty_bans"
+msgstr "Hiç Yasaklama yok"
+
+msgid "datatable.info_empty_cache"
+msgstr "Hiç Önbellek Dosyası yok"
+
+msgid "datatable.info_empty_configs"
+msgstr "Hiç Özel Yapılandırma yok"
+
+msgid "datatable.info_empty_instances"
+msgstr "Hiç Örnek yok"
+
+msgid "datatable.info_empty_items"
+msgstr "Hiç öğe yok"
+
+msgid "datatable.info_empty_jobs"
+msgstr "Hiç İş yok"
+
+msgid "datatable.info_empty_plugins"
+msgstr "Hiç Eklenti yok"
+
+msgid "datatable.info_empty_reports"
+msgstr "Hiç Rapor yok"
+
+msgid "datatable.info_empty_services"
+msgstr "Hiç Servis yok"
+
+msgid "datatable.info_empty_templates"
+msgstr "Kullanılabilir şablon yok"
+
+msgid "datatable.info_filtered_bans"
+msgstr "(_MAX_ toplam Yasaklama içinden filtrelendi)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(_MAX_ toplam Önbellek Dosyası içinden filtrelendi)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(_MAX_ toplam Özel Yapılandırma içinden filtrelendi)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(_MAX_ toplam Örnek içinden filtrelendi)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(_MAX_ toplam öğe içinden filtrelendi)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(_MAX_ toplam İş içinden filtrelendi)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(_MAX_ toplam Eklenti içinden filtrelendi)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(_MAX_ toplam Rapor içinden filtrelendi)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(_MAX_ toplam Servis içinden filtrelendi)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(_MAX_ toplam şablondan filtrelendi)"
+
+msgid "datatable.info_instances"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Örnek"
+
+msgid "datatable.info_items"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s öğe"
+
+msgid "datatable.info_jobs"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s İş"
+
+msgid "datatable.info_plugins"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Eklenti"
+
+msgid "datatable.info_reports"
+msgstr "%(start)s ile %(end)s arası gösteriliyor, toplam %(total)s Rapor"
+
+msgid "datatable.info_services"
+msgstr "%(start)s–%(end)s arası gösteriliyor · toplam servis: %(total)s"
+
+msgid "datatable.info_templates"
+msgstr "%(total)s şablonun %(start)s ile %(end)s arası gösteriliyor"
+
+msgid "datatable.length_all"
+msgstr "Tümü"
+
+msgid "datatable.length_menu_bans"
+msgstr "_MENU_ Yasaklama Göster"
+
+msgid "datatable.length_menu_cache"
+msgstr "_MENU_ Önbellek Dosyası Göster"
+
+msgid "datatable.length_menu_configs"
+msgstr "_MENU_ Özel Yapılandırma Göster"
+
+msgid "datatable.length_menu_instances"
+msgstr "_MENU_ Örnek Göster"
+
+msgid "datatable.length_menu_items"
+msgstr "_MENU_ Öğeleri Göster"
+
+msgid "datatable.length_menu_jobs"
+msgstr "_MENU_ İş Göster"
+
+msgid "datatable.length_menu_plugins"
+msgstr "_MENU_ Eklenti Göster"
+
+msgid "datatable.length_menu_reports"
+msgstr "_MENU_ Rapor Göster"
+
+msgid "datatable.length_menu_services"
+msgstr "_MENU_ Servis Göster"
+
+msgid "datatable.length_menu_templates"
+msgstr "_MENU_ şablon göster"
+
+msgid "datatable.paginate.first"
+msgstr "İlk"
+
+msgid "datatable.paginate.last"
+msgstr "Son"
+
+msgid "datatable.paginate.next"
+msgstr "Sonraki"
+
+msgid "datatable.paginate.previous"
+msgstr "Önceki"
+
+msgid "datatable.processing"
+msgstr "İşleniyor..."
+
+msgid "datatable.search"
+msgstr "Ara:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "Hiç Yasaklama seçilmedi"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "1 Yasaklama seçildi"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "%d Yasaklama seçildi"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "Hiç Önbellek Dosyası seçilmedi"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "1 Önbellek Dosyası seçildi"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "%d Önbellek Dosyası seçildi"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "Hiç Özel Yapılandırma seçilmedi"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "1 Özel Yapılandırma seçildi"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "%d Özel Yapılandırma seçildi"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "Hiç Örnek seçilmedi"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "1 Örnek seçildi"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "%d Örnek seçildi"
+
+msgid "datatable.select_rows_items_0"
+msgstr "Hiç öğe seçilmedi"
+
+msgid "datatable.select_rows_items_1"
+msgstr "1 öğe seçildi"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "%d öğe seçildi"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "Hiç İş seçilmedi"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "1 İş seçildi"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "%d İş seçildi"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "Hiç Eklenti seçilmedi"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "1 Eklenti seçildi"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "%d Eklenti seçildi"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "Hiç Rapor seçilmedi"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "1 Rapor seçildi"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "%d Rapor seçildi"
+
+msgid "datatable.select_rows_services_0"
+msgstr "Hiç Servis seçilmedi"
+
+msgid "datatable.select_rows_services_1"
+msgstr "1 Servis seçildi"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "%d Servis seçildi"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "Şablon seçilmedi"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "1 şablon seçildi"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "%d şablon seçildi"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s seçildi"
+
+msgid "datatable.selected_list_empty"
+msgstr "Seçilen %(entity)s yok."
+
+msgid "datatable.zero_records_bans"
+msgstr "Eşleşen Yasaklama bulunamadı"
+
+msgid "datatable.zero_records_cache"
+msgstr "Eşleşen Önbellek Dosyası bulunamadı"
+
+msgid "datatable.zero_records_configs"
+msgstr "Eşleşen Özel Yapılandırma bulunamadı"
+
+msgid "datatable.zero_records_instances"
+msgstr "Eşleşen Örnek bulunamadı"
+
+msgid "datatable.zero_records_items"
+msgstr "Eşleşen öğe bulunamadı"
+
+msgid "datatable.zero_records_jobs"
+msgstr "Eşleşen İş bulunamadı"
+
+msgid "datatable.zero_records_plugins"
+msgstr "Eşleşen Eklenti bulunamadı"
+
+msgid "datatable.zero_records_reports"
+msgstr "Eşleşen Rapor bulunamadı"
+
+msgid "datatable.zero_records_services"
+msgstr "Eşleşen Servis bulunamadı"
+
+msgid "datatable.zero_records_templates"
+msgstr "Eşleşen şablon bulunamadı"
+
+msgid "dev_log.copy_failed"
+msgstr "Metin kopyalanamadı:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "Haberler alınamadı:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "Bozuk satır atlanıyor: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "1 Saat"
+
+msgid "duration.1_week"
+msgstr "1 Hafta"
+
+msgid "duration.24_hours"
+msgstr "24 Saat"
+
+msgid "duration.custom"
+msgstr "Özel"
+
+msgid "duration.permanent"
+msgstr "Kalıcı"
+
+msgid "error.401.help"
+msgstr "Bu kaynağa erişmek için giriş yapmalısınız."
+
+msgid "error.401.message"
+msgstr "Devam etmek için lütfen giriş yapın."
+
+msgid "error.401.title"
+msgstr "Kimlik Doğrulama Gerekli"
+
+msgid "error.403.help"
+msgstr "Lütfen kimlik bilgilerinizi doğrulayın veya bunun bir hata olduğunu düşünüyorsanız bir yöneticiyle iletişime geçin."
+
+msgid "error.403.message"
+msgstr "Bu sayfaya erişim izniniz yok."
+
+msgid "error.403.title"
+msgstr "Erişim Reddedildi"
+
+msgid "error.404.help"
+msgstr "Lütfen URL'nin doğru olduğundan emin olun veya bunun bir hata olduğunu düşünüyorsanız bir yöneticiyle iletişime geçin."
+
+msgid "error.404.message"
+msgstr "İstenen kaynak bulunamadı."
+
+msgid "error.404.title"
+msgstr "Bulunamadı"
+
+msgid "error.5xx.help"
+msgstr "Lütfen daha sonra tekrar deneyin veya sorun devam ederse bir yöneticiyle iletişime geçin."
+
+msgid "error.5xx.message"
+msgstr "Beklenmeyen bir sunucu hatası oluştu."
+
+msgid "error.5xx.title"
+msgstr "Sunucu Hatası"
+
+msgid "error.ban_update_failed"
+msgstr "Yasaklama süresi güncellenemedi. Lütfen tekrar deneyin."
+
+msgid "error.reports_load_error"
+msgstr "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
+
+msgid "error.unban_failed"
+msgstr "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin."
+
+msgid "flash.easter_egg"
+msgstr "Bunu okuyorsan meraklısın demektir"
+
+msgid "flash.error"
+msgstr "Hata"
+
+msgid "flash.message"
+msgstr "Bilgi"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "PRO lisansınızın izin verdiğinden daha fazla servise sahipsiniz. Lisansınızı yükseltin veya PRO lisansınızı açmak için bazı servisleri Taslak moduna dönüştürün."
+
+msgid "flash.time.just_now"
+msgstr "az önce"
+
+msgid "flash.warning"
+msgstr "Uyarı"
+
+msgid "footer.blog"
+msgstr "Blog"
+
+msgid "footer.documentation"
+msgstr "Dokümantasyon"
+
+msgid "footer.license"
+msgstr "Lisans"
+
+msgid "footer.made_by"
+msgstr "tarafından yapıldı"
+
+msgid "footer.privacy"
+msgstr "Gizlilik"
+
+msgid "footer.support"
+msgstr "Destek"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "Ekli özel yapılandırmaları dahil et"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "Mevcut UI/API özel yapılandırmalarının üzerine yaz"
+
+msgid "form.checkbox.remember_me"
+msgstr "Beni Hatırla"
+
+msgid "form.help.ban_specific_service"
+msgstr "Yasaklama yalnızca bu servise uygulanacaktır."
+
+msgid "form.help.hostname_length_limit"
+msgstr "Ana bilgisayar adı 256 karakter ile sınırlıdır."
+
+msgid "form.help.hostname_special_chars"
+msgstr "Protokol/port belirtimi için yalnızca `/` ve `:` kullanılabilir."
+
+msgid "form.help.multivalue_separator"
+msgstr "Değerler şunlarla ayrılır:"
+
+msgid "form.help.permanent_ban"
+msgstr "Seçiliyse, yasaklama manuel olarak kaldırılana kadar asla sona ermeyecek"
+
+msgid "form.help.photo_extensions"
+msgstr "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+
+msgid "form.label.2fa_code"
+msgstr "2FA Kodu"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "2FA Kodu veya Kurtarma Kodu"
+
+msgid "form.label.admin_email"
+msgstr "Yönetici E-postası"
+
+msgid "form.label.admin_password"
+msgstr "Yönetici Şifresi"
+
+msgid "form.label.admin_username"
+msgstr "Yönetici Kullanıcı Adı"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "Otomatik Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "Yasaklama Kapsamı"
+
+msgid "form.label.certificate_authority"
+msgstr "Sertifika Yetkilisi"
+
+msgid "form.label.certificate_priority"
+msgstr "Sertifika Önceliği"
+
+msgid "form.label.challenge_type"
+msgstr "Doğrulama Türü"
+
+msgid "form.label.config_type"
+msgstr "Yapılandırma Türü"
+
+msgid "form.label.configuration_name"
+msgstr "Yapılandırma Adı"
+
+msgid "form.label.confirm_password"
+msgstr "Şifreyi Onayla"
+
+msgid "form.label.current_password"
+msgstr "Mevcut Şifre"
+
+msgid "form.label.custom_config"
+msgstr "Yapılandırma"
+
+msgid "form.label.custom_end_date"
+msgstr "Özel Bitiş Tarihi"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "Özel SSL Sertifikası"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "Özel SSL Sertifikası Verisi (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "Özel SSL Anahtarı"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "Özel SSL Anahtar Verisi (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Let's Encrypt DNS Kimlik Bilgileri"
+
+msgid "form.label.dns_propagation"
+msgstr "DNS Yayılma Gecikmesi"
+
+msgid "form.label.dns_provider"
+msgstr "DNS Sağlayıcı"
+
+msgid "form.label.email"
+msgstr "E-posta"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "Let's Encrypt için E-posta"
+
+msgid "form.label.end_date"
+msgstr "Bitiş Tarihi"
+
+msgid "form.label.hostname"
+msgstr "Ana bilgisayar adı"
+
+msgid "form.label.instance_id"
+msgstr "Örnek kimliği"
+
+msgid "form.label.ip_address"
+msgstr "IP Adresi"
+
+msgid "form.label.keywords"
+msgstr "Anahtar Kelimeler"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt Özel Profil"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "Genel Sonekleri Devre Dışı Bırak (PSL Kara Listesi)"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Let's Encrypt DNS Kimlik Bilgileri"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Let's Encrypt Profili"
+
+msgid "form.label.license_key"
+msgstr "Lisans Anahtarı"
+
+msgid "form.label.make_permanent"
+msgstr "Kalıcı Yap"
+
+msgid "form.label.name"
+msgstr "Ad"
+
+msgid "form.label.new_duration"
+msgstr "Yeni Süre"
+
+msgid "form.label.new_password"
+msgstr "Yeni Şifre"
+
+msgid "form.label.optional"
+msgstr "(İsteğe bağlı)"
+
+msgid "form.label.passkey_name"
+msgstr "Parola anahtarı adı"
+
+msgid "form.label.password"
+msgstr "Şifre"
+
+msgid "form.label.permanent_ban"
+msgstr "Kalıcı Yasaklama"
+
+msgid "form.label.plugin_id"
+msgstr "Eklenti"
+
+msgid "form.label.raw_configuration"
+msgstr "Ham Yapılandırma"
+
+msgid "form.label.real_ip_from"
+msgstr "Gerçek IP'den"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "Gerçek IP'den (URL'ler)"
+
+msgid "form.label.real_ip_header"
+msgstr "Gerçek IP başlığı"
+
+msgid "form.label.real_ip_recursive"
+msgstr "Gerçek IP yinelemeli"
+
+msgid "form.label.reason"
+msgstr "Sebep"
+
+msgid "form.label.secret_token"
+msgstr "Gizli Belirteç"
+
+msgid "form.label.server_name"
+msgstr "Sunucu Adı"
+
+msgid "form.label.service_name"
+msgstr "Servis Adı"
+
+msgid "form.label.template_id"
+msgstr "Şablon Kimliği"
+
+msgid "form.label.theme"
+msgstr "Tema"
+
+msgid "form.label.type"
+msgstr "Tür"
+
+msgid "form.label.ui_host"
+msgstr "UI Ana Bilgisayarı"
+
+msgid "form.label.ui_url"
+msgstr "UI URL'si"
+
+msgid "form.label.use_custom_ssl"
+msgstr "Özel SSL Kullan"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "Let's Encrypt Staging Kullan"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "PROXY protokolünü kullan"
+
+msgid "form.label.use_real_ip"
+msgstr "Gerçek IP Kullan"
+
+msgid "form.label.username"
+msgstr "Kullanıcı Adı"
+
+msgid "form.label.wildcard_certificates"
+msgstr "Wildcard Sertifikalar"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API Bağlantı Zaman Aşımı"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API Anahtarı"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "ZeroSSL API Azami Süre"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "ZeroSSL API Yeniden Deneme Sayısı"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "ZeroSSL API Yeniden Deneme Gecikmesi"
+
+msgid "form.placeholder.2fa_code"
+msgstr "Kod girin"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "Kod veya kurtarma kodu girin"
+
+msgid "form.placeholder.config_name"
+msgstr "ozel-konfig-adim"
+
+msgid "form.placeholder.current_password"
+msgstr "Mevcut Şifre"
+
+msgid "form.placeholder.enter_username"
+msgstr "Kullanıcı adı girin"
+
+msgid "form.placeholder.keywords"
+msgstr "Anahtar Kelimeler"
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "Değer girin..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "Eklenti ara..."
+
+msgid "form.placeholder.search"
+msgstr "Ara..."
+
+msgid "form.placeholder.secret_token"
+msgstr "Gizli Belirteç"
+
+msgid "form.placeholder.select_service"
+msgstr "Servis Seç"
+
+msgid "form.placeholder.username_example"
+msgstr "mehmetyilmaz"
+
+msgid "form.validation.confirm_password_match"
+msgstr "Şifreler eşleşmiyor."
+
+msgid "form.validation.password_length"
+msgstr "Şifre en az 8 karakter olmalıdır."
+
+msgid "form.validation.password_number"
+msgstr "Şifre en az 1 rakam içermelidir."
+
+msgid "form.validation.password_special"
+msgstr "Şifre en az 1 özel karakter içermelidir."
+
+msgid "form.validation.password_uppercase"
+msgstr "Şifre en az 1 büyük harf içermelidir."
+
+msgid "input_list.view_all_settings"
+msgstr "Tüm %(count)s ayarları görüntüle"
+
+msgid "instance.type.container"
+msgstr "Konteyner"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "Statik"
+
+msgid "instances.down"
+msgstr "Kapalı"
+
+msgid "instances.loading"
+msgstr "Yükleniyor"
+
+msgid "instances.subtitle"
+msgstr "Bu arayüzle bağlantılı BunkerWeb örneklerini yönetin: oluşturun, ping, yeniden yükleyin, durdurun veya kaldırın."
+
+msgid "instances.total"
+msgstr "Toplam örnekler"
+
+msgid "instances.up"
+msgstr "Açık"
+
+msgid "interval.day"
+msgstr "Günlük"
+
+msgid "interval.hour"
+msgstr "Saatlik"
+
+msgid "interval.minute"
+msgstr "Her dakika"
+
+msgid "interval.once"
+msgstr "Bir Kez"
+
+msgid "interval.week"
+msgstr "Haftalık"
+
+msgid "job.history.end_date"
+msgstr "Bitiş Tarihi"
+
+msgid "job.history.start_date"
+msgstr "Başlangıç Tarihi"
+
+msgid "job.history.success"
+msgstr "Başarılı"
+
+msgid "jobs.subtitle"
+msgstr "BunkerWeb zamanlayıcısı tarafından çalıştırılan planlı ve tek seferlik görevler — durumlarını izleyin ve gerektiğinde çalıştırın."
+
+msgid "jobs.tile.async"
+msgstr "Asenkron"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "Son çalıştırma başarısız"
+
+msgid "jobs.tile.reload_required"
+msgstr "Yeniden yükleme gerekiyor"
+
+msgid "jobs.tile.total"
+msgstr "Toplam işler"
+
+msgid "legend.locked_settings_annotation"
+msgstr "Kilitli (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "Kilitli ayarlar vurgulanıyor"
+
+msgid "link.back_to_login"
+msgstr "Girişe Dön"
+
+msgid "link.forgot_password"
+msgstr "Şifremi Unuttum?"
+
+msgid "link.get_support"
+msgstr "Destek alın"
+
+msgid "link.here"
+msgstr "burada"
+
+msgid "link.more_info"
+msgstr "Daha Fazla Bilgi"
+
+msgid "link.more_news"
+msgstr "Daha Fazla Haber"
+
+msgid "link.opens_new_tab"
+msgstr "(Yeni bir sekmede açılır)"
+
+msgid "link.privacy_policy"
+msgstr "Gizlilik Politikası"
+
+msgid "link.read_more"
+msgstr "Devamını Oku"
+
+msgid "link.see_more"
+msgstr "Daha Fazlası"
+
+msgid "link.upgrade"
+msgstr "Yükselt?"
+
+msgid "link.use_authenticator_code"
+msgstr "Bir kimlik doğrulama kodu kullan"
+
+msgid "link.use_recovery_code"
+msgstr "Bir kurtarma kodu kullan"
+
+msgid "login.or_use_password"
+msgstr "veya şifrenizi kullanın"
+
+msgid "login.subtitle"
+msgstr "BunkerWeb hesabınıza giriş yapın"
+
+msgid "login.title"
+msgstr "Giriş Yap"
+
+msgid "logs.all_sources"
+msgstr "Tüm kaynaklar (canlı)"
+
+msgid "logs.annotation_error"
+msgstr "Hata"
+
+msgid "logs.annotation_warning"
+msgstr "Uyarı"
+
+msgid "logs.collapse"
+msgstr "Daralt"
+
+msgid "logs.expand"
+msgstr "Genişlet"
+
+msgid "logs.filter_levels"
+msgstr "Seviyeler"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s hata, %(warnings)s uyarı"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Let's Encrypt Günlükleri"
+
+msgid "logs.level_all"
+msgstr "Tüm günlükler"
+
+msgid "logs.level_critical"
+msgstr "Kritik"
+
+msgid "logs.level_debug"
+msgstr "Hata ayıklama"
+
+msgid "logs.level_error"
+msgstr "Hata"
+
+msgid "logs.level_errors_only"
+msgstr "Yalnızca hatalar"
+
+msgid "logs.level_info"
+msgstr "Bilgi"
+
+msgid "logs.level_notice"
+msgstr "Bildirim"
+
+msgid "logs.level_security_only"
+msgstr "Yalnızca güvenlik"
+
+msgid "logs.level_warning"
+msgstr "Uyarı"
+
+msgid "logs.lines_all"
+msgstr "Tümü"
+
+msgid "logs.lines_label"
+msgstr "Satırlar"
+
+msgid "logs.live_title"
+msgstr "Canlı günlükler"
+
+msgid "logs.main_logs"
+msgstr "Ana Günlükler"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s satır · değiştirildi %(when)s"
+
+msgid "logs.new_lines"
+msgstr "yeni satırlar"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s yeni günlük satırı"
+
+msgid "logs.no_log_files"
+msgstr "Görüntülemek için hiçbir günlük dosyası yok, daha fazla bilgi için belgeleri kontrol edin."
+
+msgid "logs.pause"
+msgstr "Duraklat"
+
+msgid "logs.resume"
+msgstr "Sürdür"
+
+msgid "logs.select_file_prompt"
+msgstr "İçeriğini görüntülemek için bir günlük dosyasını seçin"
+
+msgid "logs.showing_all"
+msgstr "%(total)s satır"
+
+msgid "logs.showing_some"
+msgstr "%(total)s içinden %(shown)s gösteriliyor"
+
+msgid "logs.tailing_sources"
+msgstr "Takip ediliyor · %(count)s kaynak"
+
+msgid "logs.taller"
+msgstr "Daha yüksek"
+
+msgid "logs.trimmed_notice"
+msgstr "--- Performans için %(count)s eski günlük satırı kaldırıldı ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın."
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "Eşleşen %(count)s rapordaki IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez engellenir."
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "Seçili özel yapılandırmaları dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "Seçili özel yapılandırmaları %(state)s olarak dönüştürmek istediğinizden emin misiniz?"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "Seçili servisleri dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_next_step"
+msgstr "Bir sonraki adıma geçmek istediğinizden emin misiniz?"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "Seçili eklentiyi silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "%(name)s şablonunu silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "Seçili örneği silmek istediğinizden emin misiniz?"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "Seçili örneği silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "Seçilen bir veya daha fazla şablon servislere atanmış (toplam %(services_count)s servis). Bunları kaldırmak, bu atamaları temizleyecektir. Devam etmek istiyor musunuz?"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "Bu adımı silmek istediğinizden emin misiniz?"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "İçerik"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "Adım"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "Küresel ayarlar tarafından kullanılıyor"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "Servisler tarafından kullanılıyor: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "Seçilen hizmetler dışa aktarılacak. Ekli özel yapılandırmalarını bir .zip arşivine eklemek için aşağıdaki seçeneği etkinleştirin."
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "Bu, genel ayarları alıp mevcut şablona uygulayacaktır."
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "Yalnızca bu şablonda bulunan ayarlar güncellenir."
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "Varsayılanlarla aynı olan değerler yok sayılır."
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME asla üzerine yazılmaz."
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "Özel yapılandırma dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir dosya seçmek için tıklayın."
+
+msgid "modal.body.import_configs_warning"
+msgstr "scheduler, autoconf veya templates tarafından oluşturulan özel yapılandırmalar her zaman korunur. Yalnızca UI/API yapılandırmalarının üzerine yazılabilir."
+
+msgid "modal.body.import_services_dropzone"
+msgstr "Hizmet dışa aktarma dosyanızı buraya sürükleyip bırakın veya bir dosya seçmek için tıklayın."
+
+msgid "modal.body.import_services_warning"
+msgstr "Hizmetlerin içe aktarılması, dışa aktarma dosyasından yeni arayüz hizmetleri oluşturacaktır. Mevcut hizmetler atlanır."
+
+msgid "modal.body.instance_creation_alert"
+msgstr "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır."
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz."
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "Bu kurtarma kodları yalnızca bir kez gösterilir. Lütfen güvenli bir şekilde sakladığınızdan emin olun."
+
+msgid "modal.body.reset_template_alert"
+msgstr "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "Seçili servisleri dönüştürmek istediğinizden emin misiniz?"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "Seçili servisleri silmek istediğinizden emin misiniz?"
+
+#. plural pair; 1 form(s) for tr, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "Eşleşen %(count)s yasağın tümünü kaldırmak istediğinizden emin misiniz?"
+
+msgid "modal.body.update_duration_alert"
+msgstr "Seçili yasaklamalar için yeni bir süre seçin:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "Eşleşen %(count)s yasağın tümü için yeni süre seçin:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "Genel ayarları uygula"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "Şablon Yapılandırmasını Sıfırla"
+
+msgid "modal.section.ban_details"
+msgstr "Yasaklama Detayları"
+
+msgid "modal.section.ban_scope"
+msgstr "Yasaklama Kapsamı"
+
+msgid "modal.section.delete"
+msgstr "Sil"
+
+msgid "modal.title.add_bans"
+msgstr "Yasaklama ekle"
+
+msgid "modal.title.add_plugins"
+msgstr "Eklenti Ekle"
+
+msgid "modal.title.confirm_conversion"
+msgstr "Dönüştürmeyi Onayla"
+
+msgid "modal.title.confirm_deletion"
+msgstr "Silme İşlemini Onayla"
+
+msgid "modal.title.confirm_unban"
+msgstr "Yasağı Kaldırmayı Onayla"
+
+msgid "modal.title.create_new_instance"
+msgstr "Yeni Örnek Oluştur"
+
+msgid "modal.title.create_template"
+msgstr "Şablon oluştur"
+
+msgid "modal.title.delete_instance"
+msgstr "Örnekleri Sil"
+
+msgid "modal.title.delete_step"
+msgstr "Adımı Sil"
+
+msgid "modal.title.delete_template"
+msgstr "Şablonları sil"
+
+msgid "modal.title.edit_template"
+msgstr "Şablonu düzenle: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "Hizmetleri dışa aktar"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "Genel ayarlar uygulansın mı?"
+
+msgid "modal.title.from_plugin"
+msgstr "eklenti üzerinden"
+
+msgid "modal.title.full_url"
+msgstr "Tam URL"
+
+msgid "modal.title.import_configs"
+msgstr "Özel yapılandırmaları içe aktar"
+
+msgid "modal.title.import_services"
+msgstr "Hizmetleri içe aktar"
+
+msgid "modal.title.job_history"
+msgstr "Son 10 İş Çalıştırması"
+
+msgid "modal.title.job_history_count"
+msgstr "İşin son %(count)s çalıştırması"
+
+msgid "modal.title.multiselect_selected"
+msgstr "Seçilen öğeler"
+
+msgid "modal.title.recovery_codes"
+msgstr "Kurtarma Kodları"
+
+msgid "modal.title.reset_template_config"
+msgstr "Şablon Yapılandırması Sıfırlansın mı?"
+
+msgid "modal.title.security_report_details"
+msgstr "Güvenlik Raporu Detayları"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "Sunucu Adı Benzersiz Değil"
+
+msgid "modal.title.update_duration"
+msgstr "Yasaklama Süresini Güncelle"
+
+msgid "mode.advanced"
+msgstr "Gelişmiş"
+
+msgid "mode.compose"
+msgstr "Yaz"
+
+msgid "mode.easy"
+msgstr "Kolay"
+
+msgid "mode.raw"
+msgstr "Ham"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "PRO'ya Yükselt"
+
+msgid "navbar.dropdown.logout"
+msgstr "Çıkış Yap"
+
+msgid "navbar.link.documentation"
+msgstr "Dokümantasyon"
+
+msgid "navbar.version"
+msgstr "Versiyon"
+
+msgid "navigation.about"
+msgstr "Hakkında"
+
+msgid "navigation.bans"
+msgstr "Yasaklamalar"
+
+msgid "navigation.cache"
+msgstr "Önbellek"
+
+msgid "navigation.certificates"
+msgstr "Sertifikalar"
+
+msgid "navigation.configs"
+msgstr "Yapılandırmalar"
+
+msgid "navigation.configure"
+msgstr "Yapılandır"
+
+msgid "navigation.edition_community"
+msgstr "Topluluk"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "Ek sayfalar"
+
+msgid "navigation.global_settings"
+msgstr "Genel ayarlar"
+
+msgid "navigation.groups"
+msgstr "Kaynak grupları"
+
+msgid "navigation.home"
+msgstr "Ana sayfa"
+
+msgid "navigation.instances"
+msgstr "Örnekler"
+
+msgid "navigation.jobs"
+msgstr "İşler"
+
+msgid "navigation.logs"
+msgstr "Kayıtlar"
+
+msgid "navigation.misc"
+msgstr "Çeşitli"
+
+msgid "navigation.mode_selection"
+msgstr "Mod seçimi"
+
+msgid "navigation.more"
+msgstr "Daha fazla..."
+
+msgid "navigation.operate"
+msgstr "İşlet"
+
+msgid "navigation.overview"
+msgstr "Genel bakış"
+
+msgid "navigation.plugin_activated"
+msgstr "Eklenti Etkinleştirildi"
+
+msgid "navigation.plugin_activated_global"
+msgstr "Eklenti Küresel Olarak Etkinleştirildi"
+
+msgid "navigation.plugin_deactivated"
+msgstr "Eklenti Devre Dışı Bırakıldı"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "Eklenti Küresel Olarak Devre Dışı Bırakıldı"
+
+msgid "navigation.plugins"
+msgstr "Eklentiler"
+
+msgid "navigation.plugins_pages"
+msgstr "Eklenti sayfaları"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "Yönlendirmeler"
+
+msgid "navigation.reports"
+msgstr "Raporlar"
+
+msgid "navigation.services"
+msgstr "Servisler"
+
+msgid "navigation.support"
+msgstr "Destek"
+
+msgid "navigation.system"
+msgstr "Sistem"
+
+msgid "navigation.templates"
+msgstr "Şablonlar"
+
+msgid "navigation.threatmap"
+msgstr "Tehdit haritası"
+
+msgid "navigation.timings"
+msgstr "Süreler"
+
+msgid "navigation.upstreams"
+msgstr "Upstream sunucuları"
+
+msgid "navigation.web_cache"
+msgstr "Web önbelleği"
+
+msgid "navigation.workflows"
+msgstr "İş akışları"
+
+msgid "news.image_alt"
+msgstr "Haber görseli"
+
+msgid "news.posted_on"
+msgstr "Yayınlanma tarihi"
+
+msgid "news.slide"
+msgstr "Kaydırma"
+
+msgid "newsletter.legal_agreement"
+msgstr "Bültene abone olmak istiyorum ve şunları okudum ve kabul ediyorum:"
+
+msgid "newsletter.title"
+msgstr "Bültene Katıl"
+
+msgid "onboarding.dismiss"
+msgstr "Kapat"
+
+msgid "onboarding.error"
+msgstr "Tanıtım turu yüklenemedi."
+
+msgid "onboarding.hint.bans"
+msgstr "Yasaklar, BunkerWeb'in şu anda reddettiği istemcilerdir. Her satır nedeni ve ne zaman sona ereceğini gösterir."
+
+msgid "onboarding.hint.home"
+msgstr "Bu panel mevcut durumu gösterir: çalışan örnekler, sunulan servisler ve BunkerWeb'in işlediği trafik."
+
+msgid "onboarding.hint.logs"
+msgstr "Tüm örneklerden canlı günlükler; örneğe ve önem düzeyine göre filtrelenebilir."
+
+msgid "onboarding.hint.reports"
+msgstr "Engellenen her istek burada görünür. Hangi güvenlik denetiminin neden engellediğini görmek için birini açın."
+
+msgid "onboarding.hint.title"
+msgstr "Hızlı tur"
+
+msgid "onboarding.item.first_block"
+msgstr "BunkerWeb'in bir şeyi engellediğini gör"
+
+msgid "onboarding.item.https"
+msgstr "HTTPS'i çalışır hale getir"
+
+msgid "onboarding.item.install"
+msgstr "BunkerWeb'i 1+ ana makineye kurun"
+
+msgid "onboarding.item.mfa"
+msgstr "MFA'yı etkinleştir"
+
+msgid "onboarding.item.pro"
+msgstr "BunkerWeb PRO'yu etkinleştir"
+
+msgid "onboarding.item.read_bans"
+msgstr "Kimin ne zamana kadar yasaklı olduğunu gör"
+
+msgid "onboarding.item.read_home"
+msgstr "Panoyu oku: şu anda ne sağlıklı"
+
+msgid "onboarding.item.read_logs"
+msgstr "Tüm örneklerdeki canlı günlükleri izle"
+
+msgid "onboarding.item.read_reports"
+msgstr "Bir isteğin neden engellendiğini öğren"
+
+msgid "onboarding.item.service"
+msgstr "İlk hizmetinizi kaydedin"
+
+msgid "onboarding.item.workflow"
+msgstr "Bir güvenlik iş akışı ekle"
+
+msgid "onboarding.not_saved"
+msgstr "Kaydedilemedi."
+
+msgid "onboarding.pro_tips"
+msgstr "PRO ipuçları"
+
+msgid "onboarding.restart"
+msgstr "Turu yeniden başlat"
+
+msgid "onboarding.restart_help"
+msgstr "Başlangıç adımlarını üst çubukta yeniden göster."
+
+msgid "onboarding.subtitle"
+msgstr "BunkerWeb'in hizmetlerinizi koruması için birkaç adım."
+
+msgid "onboarding.title"
+msgstr "Başlarken"
+
+msgid "pagination.page"
+msgstr "Sayfa"
+
+msgid "plan.free"
+msgstr "ÜCRETSİZ"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "Eklenti devre dışı; bu nedenle bilgi mevcut değil."
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "Bu eklenti, henüz yüklenmemiş özel bir sayfada yönetilir. Erişmek için web arayüzünü yeniden başlatın."
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "Metrik eklentisi etkin değil; bu nedenle bilgi mevcut değil."
+
+msgid "plugin.page.status.no_content"
+msgstr "Bu eklenti gömülü bir sayfa sunmaz."
+
+msgid "plugin.page.status.not_available"
+msgstr "Eklenti sayfası beta aşamasında henüz mevcut değil."
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "Ön işleme hatası"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "Bu eklenti kendi sayfasını içerir, bu da eklenti kodunu çalıştırır. Sadece yöneticiler yükleyebilir."
+
+msgid "plugin.type.all"
+msgstr "Tümü"
+
+msgid "plugin.type.core"
+msgstr "Çekirdek"
+
+msgid "plugin.type.external"
+msgstr "Harici"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "Etkin"
+
+msgid "plugins.marketplace.always_on"
+msgstr "Çekirdek / her zaman açık"
+
+msgid "plugins.marketplace.disabled"
+msgstr "Devre dışı"
+
+msgid "plugins.marketplace.enabled"
+msgstr "Etkin"
+
+msgid "plugins.marketplace.inactive"
+msgstr "Etkin değil"
+
+msgid "plugins.marketplace.no_match"
+msgstr "Filtrelerinizle eşleşen eklenti yok"
+
+msgid "plugins.marketplace.search"
+msgstr "Eklenti ara..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "Tümü"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "Topluluk"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "Devre dışı"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "Etkin"
+
+msgid "plugins.multivalue.more_value"
+msgstr "daha fazla değer"
+
+msgid "plugins.multivalue.more_values"
+msgstr "daha fazla değer"
+
+msgid "plugins.multivalue.show_less"
+msgstr "Daha az göster"
+
+msgid "pro.alert.overlapped_1"
+msgstr "Lisansınızın izin verdiğinden daha fazla aktif servise sahipsiniz!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "Servis sayısını %(pro_services)s sınırına indirmek için bazı servisleri silin veya taslak moduna alın."
+
+msgid "pro.button.all_features_available"
+msgstr "Tüm Özellikler Mevcut"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "Uyumluluk Bekleniyor..."
+
+msgid "pro.button.renew_license"
+msgstr "Lisansı Yenile"
+
+msgid "pro.button.suspended_license"
+msgstr "Lisans Askıya Alındı"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "PRO'ya Yükselt"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "Bitiş süresi"
+
+msgid "pro.expiration_date.title"
+msgstr "Pro Bitiş Tarihi"
+
+msgid "pro.expiration_date.unknown"
+msgstr "Bilinmeyen bitiş tarihi"
+
+msgid "pro.force_check.description"
+msgstr "PRO eklentilerini yeniden denetlemeye zorlar. Yeni sürümler varsa eklentiler yeniden indirilir."
+
+msgid "pro.force_check.title"
+msgstr "Denetimi zorla"
+
+msgid "pro.force_update.description"
+msgstr "Denetimleri atlayıp PRO eklentilerini indirmeye zorlar. Bu mümkün değilse mevcut durum korunur."
+
+msgid "pro.force_update.title"
+msgstr "Güncellemeyi zorla"
+
+msgid "pro.key.title.activate"
+msgstr "Anahtarı Etkinleştir"
+
+msgid "pro.key.title.update"
+msgstr "Anahtarı Güncelle"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Pro Özelliği"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "Bu özelliğe erişmek için Pro'ya yükseltin"
+
+msgid "pro.status.draft_services_count"
+msgstr "%(draft_services)s Taslak servis"
+
+msgid "pro.status.expired"
+msgstr "SÜRESİ DOLDU"
+
+msgid "pro.status.free_version"
+msgstr "ÜCRETSİZ Sürüm"
+
+msgid "pro.status.overlapped"
+msgstr "AŞIM"
+
+msgid "pro.status.pro_version"
+msgstr "PRO Sürüm"
+
+msgid "pro.status.services_count"
+msgstr "%(online_services)s Çevrimiçi Servis / %(pro_services)s PRO Servis"
+
+msgid "pro.status.suspended"
+msgstr "ASKIYA ALINDI"
+
+msgid "pro.status.title"
+msgstr "Durum"
+
+msgid "pro.title"
+msgstr "Pro lisansı"
+
+msgid "profile.2fa.disable_title"
+msgstr "2FA'yı Devre Dışı Bırak"
+
+msgid "profile.2fa.enable_title"
+msgstr "2FA'yı Etkinleştir"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "Kurtarma kodlarınızı yenilemek, önceki kodları geçersiz kılacaktır."
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA Devre Dışı"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "2FA Etkin"
+
+msgid "profile.card.coming_soon"
+msgstr "Çok Yakında"
+
+msgid "profile.card.title.2fa"
+msgstr "İki Faktörlü Kimlik Doğrulama (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "Şifreyi Değiştir"
+
+msgid "profile.card.title.change_theme"
+msgstr "Temayı Değiştir"
+
+msgid "profile.card.title.coming_soon"
+msgstr "Çok Yakında"
+
+msgid "profile.card.title.edit_profile"
+msgstr "Profili Düzenle"
+
+msgid "profile.card.title.passkeys"
+msgstr "Parola anahtarları"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "Kurtarma Kodlarını Yenile"
+
+msgid "profile.card.title.sessions"
+msgstr "Oturumlar"
+
+msgid "profile.help.photo_extensions"
+msgstr "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "Bu, hesabınızdaki her diğer aktif oturumu anında kapatır. Onaylamak için şifrenizi girin."
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "Diğer oturumları sil?"
+
+msgid "profile.passkey.added"
+msgstr "Eklendi"
+
+msgid "profile.passkey.empty"
+msgstr "Henüz kayıtlı parola anahtarı yok."
+
+msgid "profile.passkey.help"
+msgstr "Parola anahtarı, cihazınızın ekran kilidini veya bir güvenlik anahtarını kullanarak şifresiz giriş yapmanızı sağlar."
+
+msgid "profile.passkey.last_used"
+msgstr "son kullanım"
+
+msgid "profile.passkey.never_used"
+msgstr "hiç kullanılmadı"
+
+msgid "profile.passkey.unsupported"
+msgstr "Bu tarayıcı parola anahtarlarını desteklemiyor."
+
+msgid "profile.session.browser"
+msgstr "Tarayıcı"
+
+msgid "profile.session.creation_date"
+msgstr "Oluşturulma Tarihi"
+
+msgid "profile.session.current_session"
+msgstr "Mevcut Oturum"
+
+msgid "profile.session.device"
+msgstr "Cihaz"
+
+msgid "profile.session.ip_address"
+msgstr "IP Adresi"
+
+msgid "profile.session.last_activity"
+msgstr "Son Aktivite"
+
+msgid "profile.session.os"
+msgstr "İşletim Sistemi"
+
+msgid "profile.session.title"
+msgstr "Oturum"
+
+msgid "profile.session.wipe_help"
+msgstr "Hesabınızdaki her diğer aktif oturumu kapatın. Burada oturum açmış olacaksınız."
+
+msgid "profile.subtitle"
+msgstr "Hesabınızı, güvenliği ve aktif oturumları yönetin."
+
+msgid "profile.tab.profile"
+msgstr "Profil"
+
+msgid "profile.tab.security"
+msgstr "Güvenlik"
+
+msgid "profile.tab.sessions"
+msgstr "Oturumlar"
+
+msgid "range_picker.1h"
+msgstr "Son saat"
+
+msgid "range_picker.24h"
+msgstr "Son 24 saat"
+
+msgid "range_picker.30d"
+msgstr "Son 30 gün"
+
+msgid "range_picker.7d"
+msgstr "Son hafta"
+
+msgid "range_picker.aria_label"
+msgstr "Zaman aralığı"
+
+msgid "range_picker.custom"
+msgstr "Özel"
+
+msgid "redirects.all"
+msgstr "Tümü"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "İstenen URI'yi hedefe ekle"
+
+msgid "redirects.attach"
+msgstr "Bağla"
+
+msgid "redirects.attach_copy"
+msgstr "%(name)s'i (%(from)s → %(to)s) bir veya daha fazla servise ekle."
+
+msgid "redirects.code.301"
+msgstr "301 — Kalıcı olarak taşındı"
+
+msgid "redirects.code.302"
+msgstr "302 — Bulundu"
+
+msgid "redirects.code.303"
+msgstr "303 — Diğerleri"
+
+msgid "redirects.code.307"
+msgstr "307 — Geçici yönlendirme"
+
+msgid "redirects.code.308"
+msgstr "308 — Kalıcı yönlendirme"
+
+msgid "redirects.create"
+msgstr "Yönlendirme oluştur"
+
+msgid "redirects.delete_confirm_title"
+msgstr "Bu yönlendirmeyi sil?"
+
+msgid "redirects.delete_copy"
+msgstr "%(name)s yönlendirmesini sil?"
+
+msgid "redirects.delete_help"
+msgstr "Bir servise bağlı olan bir yönlendirme silinemez. Önce ayırın."
+
+msgid "redirects.edit"
+msgstr "Yönlendirmeyi düzenle"
+
+msgid "redirects.edit_shared"
+msgstr "Bu yönlendirme hizmetlere bağlıdır (sayı: %(count)s): %(services)s. Kaydetmek tümünü değiştirir."
+
+msgid "redirects.empty_text"
+msgstr "Bir yönlendirme, bir veya daha fazla servise eklediğiniz adlandırılmış bir kuraldır. REDIRECT_* ayarları, bu ile birlikte çalışmaya devam eder."
+
+msgid "redirects.empty_title"
+msgstr "Henüz yönlendirme yok"
+
+msgid "redirects.from_path"
+msgstr "Yönlendir:"
+
+msgid "redirects.from_path_help"
+msgstr "Bağlı servislerdeki kaynak yolu, örneğin /old."
+
+msgid "redirects.new"
+msgstr "Yeni yönlendirme"
+
+msgid "redirects.not_attached"
+msgstr "Bağlı değil"
+
+msgid "redirects.readonly"
+msgstr "Veritabanı salt okunurdur. Yönlendirmeler incelenebilir, ancak değiştirilemez."
+
+msgid "redirects.save"
+msgstr "Yönlendirmeyi kaydet"
+
+msgid "redirects.search"
+msgstr "Ad, kaynak yolu veya hedefi arayın..."
+
+msgid "redirects.services_help"
+msgstr "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Yönlendirme daha sonra bağlanabilir."
+
+msgid "redirects.status_code"
+msgstr "Durum kodu"
+
+msgid "redirects.to_url"
+msgstr "Yönlendir"
+
+msgid "redirects.truncated"
+msgstr "Sadece ilk 500 yönlendirme görüntülenir. Tam sonucu görmek için API ile listeyi daraltın."
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "Kötü davranış aktivitesi tespit edildi"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "Bu istekler, kötü davranış eşiğini aştı ve bir araya toplandı."
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "Kaydedildi"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP adresi"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "Bu rapor için herhangi bir kötü davranış detayı kaydedilmedi."
+
+msgid "reports.bad_behavior_request_id"
+msgstr "İstek Kimliği"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "İstek"
+
+msgid "reports.bad_behavior_server"
+msgstr "Sunucu"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "Şüpheli istekler"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "Saldırı aileleri"
+
+msgid "reports.card.recent.title"
+msgstr "En son olaylar"
+
+msgid "reports.card.top_asn.title"
+msgstr "En üstteki ASN'ler"
+
+msgid "reports.card.top_offenders.title"
+msgstr "En üstteki saldırganlar"
+
+msgid "reports.card.top_rules.title"
+msgstr "En çok tetiklenen ModSecurity kuralları"
+
+msgid "reports.chart.timeseries.series"
+msgstr "Engellendi"
+
+msgid "reports.chart.timeseries.title"
+msgstr "Zaman içinde engellenen istekler"
+
+msgid "reports.security_incident"
+msgstr "Güvenlik Olayı"
+
+msgid "reports.security_report_data"
+msgstr "Güvenlik Raporu Verisi"
+
+msgid "reports.subtitle"
+msgstr "BunkerWeb örneklerinizdeki engellenen isteklerden oluşturulan güvenlik raporları — tablodan doğrudan arama, filtreleme, dışa aktarma ve suçlu IP'leri engelleme."
+
+msgid "reports.tab.eventlog"
+msgstr "Olay günlüğü"
+
+msgid "reports.tab.offenders"
+msgstr "En üstteki saldırganlar"
+
+msgid "reports.tab.overview"
+msgstr "Genel Bakış"
+
+msgid "reports.tab.patterns"
+msgstr "Saldırı kalıpları"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "Engellemeler"
+
+msgid "reports.table.country"
+msgstr "Ülke"
+
+msgid "reports.table.fires"
+msgstr "Tetiklemeler"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "Kural"
+
+msgid "reports.table.top_rule"
+msgstr "En üstteki kural"
+
+msgid "reports.tile.asns"
+msgstr "En üstteki saldırgan ASN'ler"
+
+msgid "reports.tile.blocked"
+msgstr "Engellenen istekler"
+
+msgid "reports.tile.blocked_rate"
+msgstr "Önceki döneme göre eğilim"
+
+msgid "reports.tile.bot"
+msgstr "Bot / tarayıcı"
+
+msgid "reports.tile.countries"
+msgstr "En üstteki saldırgan ülkeler"
+
+msgid "reports.tile.peak_hour"
+msgstr "Tepe saat"
+
+msgid "reports.tile.rce"
+msgstr "RCE / komut"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "Tekrar edenler (en üst 10)"
+
+msgid "reports.tile.sqli"
+msgstr "SQL enjeksiyonu"
+
+msgid "reports.tile.unique_ips"
+msgstr "En üst saldırı IP'leri"
+
+msgid "reports.tile.unique_offenders"
+msgstr "En üstteki saldırganlar"
+
+msgid "request_path.client"
+msgstr "Müşteri"
+
+msgid "request_path.source"
+msgstr "%(phase)s aşaması için eklenti yürütme sırası, %(setting)s'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil."
+
+msgid "request_path.terminal.inline"
+msgstr "Arka uç"
+
+msgid "request_path.terminal.none"
+msgstr "Hiçbir şey sunulmadı"
+
+msgid "request_path.terminal.pool"
+msgstr "Ana havuz"
+
+msgid "request_path.terminal.root"
+msgstr "Yerel dosyalar"
+
+msgid "request_path.title"
+msgstr "İstek yolu"
+
+msgid "request_path.unordered"
+msgstr "%(phase)s aşamasında ilan edilmemiş bir konum; sıralı eklentilerden sonra çalışır."
+
+msgid "resource_groups.add_entry"
+msgstr "Ekle"
+
+msgid "resource_groups.add_to_setting"
+msgstr "Bir kaynak grubu ekle…"
+
+msgid "resource_groups.add_values"
+msgstr "Değerleri ekle"
+
+msgid "resource_groups.alias"
+msgstr "Takma ad"
+
+msgid "resource_groups.alias_help"
+msgstr "Harfler, rakamlar, alt çizgiler ve tireler. Mevcut takma adlar yeniden adlandırılamaz."
+
+msgid "resource_groups.bulk_import"
+msgstr "Toplu import"
+
+msgid "resource_groups.clone"
+msgstr "Kaynak grubunu kopyala"
+
+msgid "resource_groups.clone_copy"
+msgstr "@%(name)s için düzenlenebilir bir kopyasını oluştur."
+
+msgid "resource_groups.collapse_all"
+msgstr "Tümünü gizle"
+
+msgid "resource_groups.comment"
+msgstr "Yorum"
+
+msgid "resource_groups.delete"
+msgstr "Kaynak grubunu sil"
+
+msgid "resource_groups.delete_confirm"
+msgstr "@%(name)s'i mi silsin? Bu geri alınamaz."
+
+msgid "resource_groups.delete_help"
+msgstr "Bir ayar bu takma ada referans veriyorsa, silme engellenecektir."
+
+msgid "resource_groups.editor_edit"
+msgstr "@%(name)s'i düzenle"
+
+msgid "resource_groups.editor_new"
+msgstr "Yeni kaynak grubu"
+
+msgid "resource_groups.editor_title"
+msgstr "Kaynak grubu"
+
+msgid "resource_groups.empty"
+msgstr "Hiç kaynak grubu yok"
+
+msgid "resource_groups.empty_help"
+msgstr "Eşit uyumlu ayarlar arasında yazılan değerleri paylaşmak için yeniden kullanılabilir bir takma ad oluştur."
+
+msgid "resource_groups.entries"
+msgstr "Eklemler"
+
+msgid "resource_groups.expand_all"
+msgstr "Tümünü aç"
+
+msgid "resource_groups.global_configuration"
+msgstr "Global yapılandırma"
+
+msgid "resource_groups.import_extension"
+msgstr ".txt veya .csv dosyası seçin."
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "TXT/CSV importları 256 KiB ile sınırlıdır."
+
+msgid "resource_groups.kind"
+msgstr "Tür"
+
+msgid "resource_groups.kinds"
+msgstr "Türler"
+
+msgid "resource_groups.loading_references"
+msgstr "Referanslar yükleniyor..."
+
+msgid "resource_groups.max_entries"
+msgstr "Bir kaynak grubu %(max)s girdiden fazla içermemelidir."
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s tür · %(values)s değer · %(usages)s kullanım"
+
+msgid "resource_groups.new"
+msgstr "Yeni grup"
+
+msgid "resource_groups.new_alias"
+msgstr "Yeni kısaltma"
+
+msgid "resource_groups.no_entries"
+msgstr "Girdiler yok"
+
+msgid "resource_groups.no_entries_help"
+msgstr "Girdileri tek tek ekleyin veya aşağıdaki toplu importör'ü kullanın."
+
+msgid "resource_groups.no_references"
+msgstr "Referans yok"
+
+msgid "resource_groups.readonly"
+msgstr "Veritabanı salt okunurdur. Kaynak grupları incelenebilir ve dışa aktarılabilir, ancak değiştirilemez."
+
+msgid "resource_groups.references_error"
+msgstr "Referanslar yüklenemedi"
+
+msgid "resource_groups.save"
+msgstr "Grup kaydet"
+
+msgid "resource_groups.search"
+msgstr "Kısaltmaları, açıklamaları, türleri veya değerleri arayın…"
+
+msgid "resource_groups.showing_count"
+msgstr "Toplam %(total)s grubun %(visible)s tanesi gösteriliyor"
+
+msgid "resource_groups.subtitle"
+msgstr "IP'ler, ülkeler, ASNL'ler, ters DNS adları, kullanıcı ajitleri ve URL'ler için yeniden kullanılabilir, tipli kısaltmalar."
+
+msgid "resource_groups.template_configuration"
+msgstr "Şablon %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "Kullanım"
+
+msgid "resource_groups.value"
+msgstr "Değer"
+
+msgid "resource_groups.values"
+msgstr "Değerler"
+
+msgid "scope.all_services"
+msgstr "Tüm Servisler"
+
+msgid "scope.global"
+msgstr "Küresel"
+
+msgid "scope.global_all_services"
+msgstr "Küresel (tüm servisler)"
+
+msgid "scope.permanent"
+msgstr "Kalıcı"
+
+msgid "scope.service_specific"
+msgstr "Servise özel"
+
+msgid "searchpane.active"
+msgstr "Aktif"
+
+msgid "searchpane.async"
+msgstr "Asenkron"
+
+msgid "searchpane.ban_scope"
+msgstr "Yasaklama Kapsamı"
+
+msgid "searchpane.clear"
+msgstr "Tümünü Temizle"
+
+msgid "searchpane.collapse_0"
+msgstr "Arama Panelleri"
+
+msgid "searchpane.collapse_message"
+msgstr "Tümünü Daralt"
+
+msgid "searchpane.collapse_plural"
+msgstr "Arama Panelleri (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "Ülke"
+
+msgid "searchpane.created"
+msgstr "Oluşturulma"
+
+msgid "searchpane.data"
+msgstr "Veri"
+
+msgid "searchpane.date"
+msgstr "Tarih"
+
+msgid "searchpane.empty"
+msgstr "Kullanılabilir arama paneli yok"
+
+msgid "searchpane.end_date"
+msgstr "Bitiş Tarihi"
+
+msgid "searchpane.first_seen"
+msgstr "İlk Görülme"
+
+msgid "searchpane.future_30d"
+msgstr "30 günden fazla kaldı"
+
+msgid "searchpane.health"
+msgstr "Sağlık"
+
+msgid "searchpane.interval"
+msgstr "Aralık"
+
+msgid "searchpane.ip_address"
+msgstr "IP Adresi"
+
+msgid "searchpane.job_name"
+msgstr "İş Adı"
+
+msgid "searchpane.last_24h"
+msgstr "Son 24 saat"
+
+msgid "searchpane.last_30d"
+msgstr "Son 30 gün"
+
+msgid "searchpane.last_7d"
+msgstr "Son 7 gün"
+
+msgid "searchpane.last_run"
+msgstr "Son Çalıştırma Durumu"
+
+msgid "searchpane.last_seen"
+msgstr "Son Görülme"
+
+msgid "searchpane.last_update"
+msgstr "Son Güncelleme"
+
+msgid "searchpane.loading"
+msgstr "Arama panelleri yükleniyor..."
+
+msgid "searchpane.method"
+msgstr "Yöntem"
+
+msgid "searchpane.next_24h"
+msgstr "Sonraki 24 saat"
+
+msgid "searchpane.next_30d"
+msgstr "Sonraki 30 gün"
+
+msgid "searchpane.next_7d"
+msgstr "Sonraki 7 gün"
+
+msgid "searchpane.older_30d"
+msgstr "30 günden daha eski"
+
+msgid "searchpane.one_or_more"
+msgstr "Bir veya daha fazla"
+
+msgid "searchpane.permanent"
+msgstr "Kalıcı"
+
+msgid "searchpane.plugin"
+msgstr "Eklenti"
+
+msgid "searchpane.protocol"
+msgstr "Protokol"
+
+msgid "searchpane.reason"
+msgstr "Sebep"
+
+msgid "searchpane.reload"
+msgstr "Yeniden Yükleme Gerekli"
+
+msgid "searchpane.scope"
+msgstr "Kapsam"
+
+msgid "searchpane.security_mode"
+msgstr "Güvenlik Modu"
+
+msgid "searchpane.server_name"
+msgstr "Sunucu Adı"
+
+msgid "searchpane.service"
+msgstr "Servis"
+
+msgid "searchpane.show_message"
+msgstr "Tümünü Göster"
+
+msgid "searchpane.start_date"
+msgstr "Başlangıç Tarihi"
+
+msgid "searchpane.status"
+msgstr "Durum"
+
+msgid "searchpane.status_code"
+msgstr "Durum Kodu"
+
+msgid "searchpane.steps"
+msgstr "Adımlar"
+
+msgid "searchpane.stream"
+msgstr "Akış Desteği"
+
+msgid "searchpane.template"
+msgstr "Şablon"
+
+msgid "searchpane.title_0"
+msgstr "Aktif Filtre Yok"
+
+msgid "searchpane.title_1"
+msgstr "Aktif Filtre - 1"
+
+msgid "searchpane.title_plural"
+msgstr "Aktif Filtreler - %d"
+
+msgid "searchpane.type"
+msgstr "Tür"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "Versiyon"
+
+msgid "searchpane.zero"
+msgstr "Hiçbiri"
+
+msgid "security_mode.block"
+msgstr "Engelle"
+
+msgid "security_mode.detect"
+msgstr "Tespit Et"
+
+msgid "service.resources.attach"
+msgstr "Bağla"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s, %(path)s'i kendi %(family)s ayarlarıyla zaten sunmaktadır. %(path)s için bu ayarları temizleyin veya farklı bir yol kullanın."
+
+msgid "service.resources.conflict.primary"
+msgstr "\"%(name)s\", şu anda bu servis için ana sertifikadır ve daha fazla uyarı olmadan düşürülecektir. Ana, aslında dağıtılan sertifikadır."
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s, %(kind)s'in \"%(name)s\" aracılığıyla %(path)s'i zaten sunmaktadır. \"%(name)s\"'i ayırın veya onlardan birine farklı bir yol verin."
+
+msgid "service.resources.conflict.stream"
+msgstr "Bir akış servisi, her bağlantıyı tek bir arka uçta yönlendirir ve %(service)s, zaten \"%(name)s\"'i kullanmaktadır. Önce onu ayırın."
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "%(service)s, REVERSE_PROXY_HOST içinde kendi backend'ine zaten sahip. Upstream'in kontrolü devralması için bu ayarı temizleyin."
+
+msgid "service.resources.detach"
+msgstr "Ayır"
+
+msgid "service.resources.family.certificate"
+msgstr "Sertifikalar"
+
+msgid "service.resources.family.redirect"
+msgstr "Yönlendirmeler"
+
+msgid "service.resources.family.template"
+msgstr "Şablon"
+
+msgid "service.resources.family.upstream"
+msgstr "Upstream sunucuları"
+
+msgid "service.resources.family.workflow"
+msgstr "İş akışları"
+
+msgid "service.resources.match_path"
+msgstr "Yol"
+
+msgid "service.resources.none"
+msgstr "Hiçbir şey bağlanmadı"
+
+msgid "service.resources.primary"
+msgstr "Ana sertifika"
+
+msgid "service.resources.template.none"
+msgstr "Şablon yok"
+
+msgid "service.resources.template.note"
+msgstr "Kaynak değil: bir şablon bir ayardır. Kaydetmede uygulanır ve değiştirildiğinde birçok ayar aynı anda değiştirilir."
+
+msgid "service.resources.template.pending"
+msgstr "Kaydetmede uygulanır"
+
+msgid "service.resources.template.switching"
+msgstr "Kaydetmek, bu servisi \"%(from)s\"'den \"%(to)s\"'e geçirir. Mevcut şablon tarafından sağlanan değerler silinir ve \"%(to)s\"'in değerleri uygulanır — birçok ayar aynı anda değiştirilir."
+
+msgid "service.resources.template.unwired"
+msgstr "Bu sayfa USE_TEMPLATE'i yayınlamaz, bu nedenle şablon burada değiştirilemez."
+
+msgid "service.resources.title"
+msgstr "Bağlı kaynaklar"
+
+msgid "service.resources.unavailable"
+msgstr "Kullanılamıyor"
+
+msgid "services.draft"
+msgstr "Taslak hizmetler"
+
+msgid "services.online"
+msgstr "Çevrimiçi"
+
+msgid "services.subtitle"
+msgstr "BunkerWeb ile korunan çoklu site hizmetlerini yönetin: oluşturun, düzenleyin, taslağa dönüştürün veya silin."
+
+msgid "services.total"
+msgstr "Toplam hizmetler"
+
+msgid "services.with_configs"
+msgstr "Özel yapılandırmalarla"
+
+msgid "settings.custom_config.title"
+msgstr "Özel Yapılandırma"
+
+msgid "settings.multiple.description"
+msgstr "Bu eklenti için ayarların birden fazla örneğini burada yapılandırabilirsiniz."
+
+msgid "settings.multiple.title"
+msgstr "Çoklu Ayarlar"
+
+msgid "setup.status.admin_user_exists"
+msgstr "Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin."
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "Bir PRO lisans anahtarı zaten yapılandırılmış, lütfen bir sonraki adıma geçin."
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin."
+
+msgid "setup.status.secure_password"
+msgstr "Güvenli Şifre"
+
+msgid "setup.status.unique_server_name"
+msgstr "Benzersiz Sunucu Adı"
+
+msgid "setup.step1.subtitle"
+msgstr "Yönetici hesabınızı oluşturun."
+
+msgid "setup.step1.title"
+msgstr "Yönetici Kullanıcı"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "Sertifika Yetkilisi Seçici"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "Standart ACME düzenlemesi için Let's Encrypt kullanın. Test ve entegrasyon kontrolleri için hazırlık ortamı kullanılabilir."
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "Boş bırakılırsa ZeroSSL hesap kaydı için yapılandırılmış e-postayı kullanır."
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "zerossl-bot ile ZeroSSL kullanın. Hesap oluşturma ve anahtar tabanlı yeniden düzenleme takibi için bir hesap e-postası veya API anahtarı sağlayın."
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "Özel Sertifika"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "Gerçek IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "Ters Proxy"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "Web arayüzüne özel ayarları yapılandırın."
+
+msgid "setup.step2.title"
+msgstr "UI Ayarları"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "PRO Avantajları"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "Gelişmiş güvenlik, performans ve yönetim araçları dahil tüm gelişmiş özelliklerin kilidini açın."
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "Tüm PRO özelliklerine erişim"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "Herhangi bir sorun veya sorunuz için BunkerWeb ekibinden öncelikli destek alın."
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "Bakımcılardan teknik destek"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "Özel ihtiyaçlarınızı karşılamak için özel çözümler."
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "Özel geliştirme"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "BunkerWeb kurulumunuzu optimize etmek için uzman tavsiyesi."
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "Özel danışmanlık"
+
+msgid "setup.step3.subtitle"
+msgstr "Gelişmiş özelliklerin kilidini açın ve BunkerWeb'den en iyi şekilde yararlanın."
+
+msgid "setup.step3.title"
+msgstr "PRO'ya Yükselt"
+
+msgid "setup.step4.label.final_url"
+msgstr "BunkerWeb UI URL'si"
+
+msgid "setup.step4.subtitle"
+msgstr "Kurulumu tamamlamadan önce ayarlarınızı gözden geçirin."
+
+msgid "setup.step4.title"
+msgstr "Genel Bakış"
+
+msgid "setup.subtitle"
+msgstr "Kurulum sihirbazını tamamlamak için adımları izleyin."
+
+msgid "setup.title"
+msgstr "Kurulum Sihirbazı"
+
+msgid "status.active"
+msgstr "Aktif"
+
+msgid "status.admin_user_exists"
+msgstr "Bir admin kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin."
+
+msgid "status.all_valid"
+msgstr "Tüm geçerli"
+
+msgid "status.blog_connection_fail"
+msgstr "Haber güncellemeleri için bloga bağlanılamadı."
+
+msgid "status.default_server"
+msgstr "varsayılan sunucu"
+
+msgid "status.done"
+msgstr "Tamamlandı"
+
+msgid "status.down"
+msgstr "Kapalı"
+
+msgid "status.draft"
+msgstr "Taslak"
+
+msgid "status.error_deleting_template"
+msgstr "Şablon silinirken bir hata oluştu."
+
+msgid "status.error_loading_bans"
+msgstr "Yasaklamalar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
+
+msgid "status.error_loading_data"
+msgstr "Veri yüklenemedi"
+
+msgid "status.error_loading_template"
+msgstr "Şablon verileri yüklenemedi."
+
+msgid "status.error_saving_template"
+msgstr "Şablon kaydedilirken bir hata oluştu."
+
+msgid "status.expired"
+msgstr "Geçerlilik süresi dolmuş"
+
+msgid "status.expiring"
+msgstr "Sonlanıyor"
+
+msgid "status.failed"
+msgstr "Başarısız"
+
+msgid "status.invalid_json_payload"
+msgstr "Geçersiz JSON yükü."
+
+msgid "status.loading"
+msgstr "Yükleniyor..."
+
+msgid "status.loading_bans"
+msgstr "Yasaklamalar yükleniyor..."
+
+msgid "status.loading_cache_file"
+msgstr "Önbellek dosyası yükleniyor..."
+
+msgid "status.loading_cache_files"
+msgstr "Önbellek dosyaları yükleniyor..."
+
+msgid "status.loading_custom_config"
+msgstr "Özel yapılandırma yükleniyor..."
+
+msgid "status.loading_custom_configs"
+msgstr "Özel yapılandırmalar yükleniyor..."
+
+msgid "status.loading_instances"
+msgstr "Örnekler yükleniyor..."
+
+msgid "status.loading_items"
+msgstr "Öğeler yükleniyor..."
+
+msgid "status.loading_jobs"
+msgstr "İşler yükleniyor..."
+
+msgid "status.loading_logs"
+msgstr "Kayıtlar yükleniyor..."
+
+msgid "status.loading_plugins"
+msgstr "Eklentiler yükleniyor..."
+
+msgid "status.loading_reports"
+msgstr "Raporlar yükleniyor..."
+
+msgid "status.loading_services"
+msgstr "Servisler yükleniyor..."
+
+msgid "status.loading_templates"
+msgstr "Şablonlar yükleniyor..."
+
+msgid "status.missing_template_information"
+msgstr "Şablon bilgisi eksik."
+
+msgid "status.news_connection_error"
+msgstr "Haber güncellemeleri için bloga bağlanılamadı."
+
+msgid "status.no"
+msgstr "Hayır"
+
+msgid "status.no_data"
+msgstr "Veri yok"
+
+msgid "status.no_history"
+msgstr "Geçmiş yok."
+
+msgid "status.no_item"
+msgstr "Öğe Yok"
+
+msgid "status.no_notifications"
+msgstr "Gösterilecek bildirim yok."
+
+msgid "status.no_search_results"
+msgstr "Öğe bulunamadı."
+
+msgid "status.no_settings"
+msgstr "Bu eklenti, bu kapsam için ayarlar içermiyor."
+
+msgid "status.no_steps"
+msgstr "Adım Yok"
+
+msgid "status.no_steps_description"
+msgstr "Bu şablonda yapılandırılacak adım yok."
+
+msgid "status.not_applicable"
+msgstr "N/A"
+
+msgid "status.online"
+msgstr "Çevrimiçi"
+
+msgid "status.optional"
+msgstr "İsteğe bağlı"
+
+msgid "status.partial"
+msgstr "Kısmi"
+
+msgid "status.pending"
+msgstr "Bekleyen"
+
+msgid "status.pinging_instances"
+msgstr "Örneklere ping atılıyor, lütfen bekleyin..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "Eklenti devre dışı; bu nedenle bilgi mevcut değil."
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "Metrik eklentisi etkin değil; bu nedenle bilgi mevcut değil."
+
+msgid "status.plugin_page.status.not_available"
+msgstr "Eklenti sayfası beta aşamasında henüz mevcut değil."
+
+msgid "status.reverse_proxy_configured"
+msgstr "Web arayüzü için bir ters proxy zaten yapılandırılmış. Lütfen bir sonraki adıma geçin."
+
+msgid "status.secure_password"
+msgstr "Güvenli Şifre"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "BunkerWeb kuruluyor, lütfen bekleyin..."
+
+msgid "status.success"
+msgstr "Başarılı"
+
+msgid "status.template_in_use"
+msgstr "Bu servis şu anda \"%(template)s\" şablonunu kullanıyor ve \"%(method)s\" ile yönetiliyor."
+
+msgid "status.template_in_use_description"
+msgstr "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikleri mevcut şablon üzerinden yapın veya Gelişmiş/Ham moda geçin."
+
+msgid "status.unique_server_name"
+msgstr "Benzersiz Sunucu Adı"
+
+msgid "status.up"
+msgstr "Açık"
+
+msgid "status.yes"
+msgstr "Evet"
+
+msgid "step.next"
+msgstr "İleri"
+
+msgid "step.previous"
+msgstr "Geri"
+
+msgid "support.card.download_logs.help"
+msgstr "Tüm özel veriler anonimleştirilecektir."
+
+msgid "support.card.download_logs.title"
+msgstr "Kayıtları İndir"
+
+msgid "support.card.extract_config.title"
+msgstr "Yapılandırmayı Çıkar"
+
+msgid "support.card.support_link.title"
+msgstr "Destek Bağlantısı"
+
+msgid "support.subtitle"
+msgstr "Hata günlüklerini indirin, yapılandırmanızı çıkarın ve BunkerWeb ekibinden yardım alın."
+
+msgid "support.title"
+msgstr "Destek"
+
+msgid "tab.custom_certificate"
+msgstr "Özel Sertifika"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "Aksiyonlar"
+
+msgid "table.header.active"
+msgstr "Aktif"
+
+msgid "table.header.async"
+msgstr "Asenkron"
+
+msgid "table.header.bytes_received"
+msgstr "Alınan Bayt"
+
+msgid "table.header.bytes_sent"
+msgstr "Gönderilen Bayt"
+
+msgid "table.header.checksum"
+msgstr "Sağlama"
+
+msgid "table.header.client_port"
+msgstr "İstemci Portu"
+
+msgid "table.header.configs"
+msgstr "Yapılandırmalar"
+
+msgid "table.header.country"
+msgstr "Ülke"
+
+msgid "table.header.created"
+msgstr "Oluşturulma"
+
+msgid "table.header.current_time_left"
+msgstr "Mevcut Kalan Süre"
+
+msgid "table.header.data"
+msgstr "Veri"
+
+msgid "table.header.date"
+msgstr "Tarih"
+
+msgid "table.header.description"
+msgstr "Açıklama"
+
+msgid "table.header.end_date"
+msgstr "Bitiş Tarihi"
+
+msgid "table.header.file_name"
+msgstr "Dosya Adı"
+
+msgid "table.header.health"
+msgstr "Sağlık"
+
+msgid "table.header.hostname"
+msgstr "Ana bilgisayar adı"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "Aralık"
+
+msgid "table.header.ip_address"
+msgstr "IP Adresi"
+
+msgid "table.header.job_name"
+msgstr "İş Adı"
+
+msgid "table.header.last_run"
+msgstr "Son Çalıştırma"
+
+msgid "table.header.last_seen"
+msgstr "Son Görülme"
+
+msgid "table.header.last_update"
+msgstr "Son Güncelleme"
+
+msgid "table.header.listen_port"
+msgstr "Dinleme Portu"
+
+msgid "table.header.method"
+msgstr "Yöntem"
+
+msgid "table.header.name"
+msgstr "Ad"
+
+msgid "table.header.plugin"
+msgstr "Eklenti"
+
+msgid "table.header.protocol"
+msgstr "Protokol"
+
+msgid "table.header.reason"
+msgstr "Sebep"
+
+msgid "table.header.reload"
+msgstr "Yeniden Yükle"
+
+msgid "table.header.request_id"
+msgstr "İstek Kimliği"
+
+msgid "table.header.scope"
+msgstr "Kapsam"
+
+msgid "table.header.security_mode"
+msgstr "Güvenlik Modu"
+
+msgid "table.header.server_name"
+msgstr "Sunucu Adı"
+
+msgid "table.header.service"
+msgstr "Servis"
+
+msgid "table.header.service_name"
+msgstr "Servis Adı"
+
+msgid "table.header.session_time"
+msgstr "Oturum Süresi"
+
+msgid "table.header.settings"
+msgstr "Ayarlar"
+
+msgid "table.header.status"
+msgstr "Durum"
+
+msgid "table.header.status_code"
+msgstr "Durum Kodu"
+
+msgid "table.header.steps"
+msgstr "Adımlar"
+
+msgid "table.header.stream"
+msgstr "Akış"
+
+msgid "table.header.template"
+msgstr "Şablon"
+
+msgid "table.header.templates"
+msgstr "Şablonlar"
+
+msgid "table.header.time_left"
+msgstr "Kalan Süre"
+
+msgid "table.header.type"
+msgstr "Tür"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "Değer"
+
+msgid "table.header.version"
+msgstr "Versiyon"
+
+msgid "template.editor.button_add_config"
+msgstr "Yapılandırma ekle"
+
+msgid "template.editor.button_add_setting"
+msgstr "Ayar ekle"
+
+msgid "template.editor.button_add_step"
+msgstr "Adım ekle"
+
+msgid "template.editor.button_move_down"
+msgstr "Aşağı taşı"
+
+msgid "template.editor.button_move_up"
+msgstr "Yukarı taşı"
+
+msgid "template.editor.button_remove"
+msgstr "Kaldır"
+
+msgid "template.editor.clone_badge"
+msgstr "%(template)s şablonundan kopyalandı"
+
+msgid "template.editor.configs"
+msgstr "Özel yapılandırmalar"
+
+msgid "template.editor.configs_help"
+msgstr "Bu şablona isteğe bağlı özel yapılandırma parçacıkları ekleyin."
+
+msgid "template.editor.delete_step_confirm"
+msgstr "Bu adımı silmek istediğinizden emin misiniz?"
+
+msgid "template.editor.details"
+msgstr "Şablon detayları"
+
+msgid "template.editor.details_help"
+msgstr "Bu şablon için temel bilgileri ayarlayın."
+
+msgid "template.editor.drag_handle"
+msgstr "Sıralamak için sürükleyin"
+
+msgid "template.editor.empty_configs"
+msgstr "Henüz özel yapılandırma yok."
+
+msgid "template.editor.empty_settings"
+msgstr "Henüz ayar yok. İlk ayarınızı ekleyin."
+
+msgid "template.editor.empty_steps"
+msgstr "Henüz adım yok. İlk adımınızı ekleyin."
+
+msgid "template.editor.error_generic"
+msgstr "Bir şeyler ters gitti. Lütfen tekrar deneyin."
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "Gönderim uç noktası belirlenemiyor."
+
+msgid "template.editor.heading_create"
+msgstr "Şablon oluştur"
+
+msgid "template.editor.heading_edit"
+msgstr "%(id)s şablonunu düzenle"
+
+msgid "template.editor.label_config_data"
+msgstr "Veri"
+
+msgid "template.editor.label_config_name"
+msgstr "Ad"
+
+msgid "template.editor.label_config_order"
+msgstr "Sıra"
+
+msgid "template.editor.label_config_type"
+msgstr "Tür"
+
+msgid "template.editor.label_setting_key"
+msgstr "Ayar anahtarı"
+
+msgid "template.editor.label_setting_value"
+msgstr "Varsayılan değer"
+
+msgid "template.editor.label_step_configs"
+msgstr "Bu adımdaki yapılandırmalar"
+
+msgid "template.editor.label_step_settings"
+msgstr "Bu adımdaki ayarlar"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "Adım alt başlığı"
+
+msgid "template.editor.label_step_title"
+msgstr "Adım başlığı"
+
+msgid "template.editor.missing_configs_body"
+msgstr "İçe aktarılan şablon henüz yüklenmemiş özel yapılandırmalara referans veriyor. Şablon kurulumunu tamamlamak için lütfen bu yapılandırmaları içe aktarın:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "Dosya seç"
+
+msgid "template.editor.missing_configs_done"
+msgstr "Bitti"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "Yapılandırma dosyalarını buraya sürükleyip bırakın (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "veya"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "Yüklenen dosyalar şablonunuza otomatik olarak eklenecektir. Dosya adlarının yukarıda listelenen eksik yapılandırmalarla eşleştiğinden emin olun."
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "İpucu:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "Tüm eksik yapılandırmalar yüklendi! Şablon başarıyla içe aktarıldı."
+
+msgid "template.editor.missing_configs_title"
+msgstr "Eksik Özel Yapılandırmalar"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "Yapılandırma dosyaları yüklenemedi"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "Eksik yapılandırmaları yükle (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "%(total)s yapılandırmadan %(uploaded)s tanesi yüklendi. Hâlâ eksik: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "%(count)s yapılandırma dosyası başarıyla yüklendi"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "Seçenekleri belirleyin"
+
+msgid "template.editor.multiselect_summary"
+msgstr "%(count)s seçildi"
+
+msgid "template.editor.multivalue_add"
+msgstr "Değer ekle"
+
+msgid "template.editor.multivalue_helper"
+msgstr "Satır başına bir değer.%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "Genel Bakış"
+
+msgid "template.editor.panel_overview_help"
+msgstr "Önemli bilgileri takip edin ve bölümler arasında gezinin."
+
+msgid "template.editor.placeholder_config_data"
+msgstr "Veri"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "Ad"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "core"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "Anahtar"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "Varsayılan değer"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "Adım alt başlığı"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "Adım başlığı"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "sablon-kimligi"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "Benim şablonum"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "Dosya seç"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "Yapılandırma dosyalarını buraya sürükleyip bırakın veya göz atmak için tıklayın (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "Desteklenen formatlar: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "Henüz yapılandırma dosyası yüklenmedi"
+
+msgid "template.editor.raw_configs_help"
+msgstr "<code>configs</code>'e girdiler eklemek için yapılandırma dosyalarını (.conf, .cfg, .txt) yükleyin. Türler varsayılan olarak <code>server_http</code> değerini kullanır; gerekirse JSON içinde ayarlayın."
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "Mevcut JSON geçersiz olduğu için yapılandırmalar içe aktarılamıyor."
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "Hiçbir yapılandırma içe aktarılmadı."
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "%(count)s yapılandırma dosyası içe aktarıldı."
+
+msgid "template.editor.raw_configs_note"
+msgstr "İçe aktarılan dosyalar JSON düzenleyicisine eklenir. Kaydetmeden önce inceleyin ve ayarlayın."
+
+msgid "template.editor.raw_configs_title"
+msgstr "Özel yapılandırma içe aktarımları"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "Yapılandırma dosyalarını yükle"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "Seçilen dosyalardan biri okunamadı."
+
+msgid "template.editor.raw_editor_aria"
+msgstr "Ham şablon JSON düzenleyici"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "Mevcut içeriği değiştirmek için bir şablon JSON dosyası (.json) bırakın."
+
+msgid "template.editor.raw_editor_help"
+msgstr "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir."
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "Şablon başarıyla içe aktarıldı!"
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "Bu dosyanın içe aktarılması mevcut şablon JSON'unu tamamen değiştirecektir. Düzenleyicide yapılan değişiklikler kaybolacaktır. Devam etmek istiyor musunuz?"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "Şablonu değiştir"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "Şablon JSON değiştirilsin mi?"
+
+msgid "template.editor.raw_editor_title"
+msgstr "Ham şablon JSON"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "Yüklenen dosya boş."
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "Seçilen dosya okunamadı."
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "Şablon JSON yükle (sadece .json)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "Geçersiz yapılandırma tanımı."
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "Yapılandırma girişleri nesne olmalıdır."
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "%(configs)s yapılandırmaları herhangi bir adıma atanmamış."
+
+msgid "template.editor.raw_validation_empty"
+msgstr "Şablon JSON boş olamaz."
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "Geçersiz JSON yükü: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "Şablon yükü bir JSON nesnesi olmalıdır."
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "Ayar anahtarları boş olmayan dizeler olmalıdır."
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "Ayarlar bir nesne olarak sağlanmalıdır."
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "%(settings)s ayarları herhangi bir adıma atanmamış."
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "%(config)s yapılandırması birden fazla adıma atanmış."
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "%(index)s adımı geçersiz bir yapılandırma referansı içeriyor."
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "%(index)s adımı bilinmeyen %(config)s yapılandırmasına referans veriyor."
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "%(index)s adımı bir nesne olmalıdır."
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "%(setting)s ayarı birden fazla adıma atanmış."
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "%(index)s adımı geçersiz bir ayar referansı içeriyor."
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "%(index)s adımı bilinmeyen %(setting)s ayarına referans veriyor."
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "%(index)s adımının bir başlığı olmalıdır."
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "Bir şablon en az bir adım içermelidir."
+
+msgid "template.editor.readonly_db"
+msgstr "Veritabanı şu anda salt okunur moddadır. Şablonlar değiştirilemez."
+
+msgid "template.editor.readonly_method"
+msgstr "Bu şablon %(method)s süreci tarafından oluşturuldu ve kullanıcı arayüzünden düzenlenemez."
+
+msgid "template.editor.readonly_title"
+msgstr "Salt okunur"
+
+msgid "template.editor.readonly_user"
+msgstr "Yalnızca okuma izniniz var. Yazma erişimi istemek için bir yöneticiyle iletişime geçin."
+
+msgid "template.editor.select_config_placeholder"
+msgstr "Bir yapılandırma seçin"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "Bir tür seçin"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "Bir ayar seçin"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "Bu ayarı şablondan kaldırmak istediğinizden emin misiniz?"
+
+msgid "template.editor.setting_remove_key"
+msgstr "Ayar"
+
+msgid "template.editor.setting_remove_title"
+msgstr "Ayarı kaldır"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "Seçileni Ekle"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "Gelişmiş"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "Zaten eklendi"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "Aramayı temizle"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "Eşleşen tüm ayarlar zaten eklendi."
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "Görüntülenecek ayar yok."
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "Kullanılabilir ayar: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s mevcut, %(used)s zaten eklendi"
+
+msgid "template.editor.setting_selector_default"
+msgstr "Varsayılan"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "Belgeleri görüntüle"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "Mevcut filtrelere uyan ayar yok."
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "Eklenti"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "Tüm eklentiler"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "Tür"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "Tüm türler"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "Yalnızca çoklu site ayarları mevcuttur. Listeyi daraltmak için filtreleri kullanın."
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "Çoklu"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "Desen"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "Bir çoklu site ayarı bul"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "Etiket, anahtar veya eklentiye göre ara"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "Etkin"
+
+msgid "template.editor.settings"
+msgstr "Ayarlar"
+
+msgid "template.editor.settings_help"
+msgstr "Bu şablon tarafından sunulan ayarları ve varsayılan değerlerini tanımlayın."
+
+msgid "template.editor.step_configs_empty"
+msgstr "Bu adıma henüz yapılandırma eklenmedi."
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "Mevcut yapılandırmaları seçin"
+
+msgid "template.editor.step_default_title"
+msgstr "Başlıksız adım"
+
+msgid "template.editor.step_prefix"
+msgstr "Adım"
+
+msgid "template.editor.step_settings_empty"
+msgstr "Bu adıma henüz ayar eklenmedi."
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "Mevcut ayarları seçin"
+
+msgid "template.editor.steps"
+msgstr "Adımlar"
+
+msgid "template.editor.steps_help"
+msgstr "Ayarları rehberli adımlar halinde düzenleyin. Her adıma hangi ayarların veya yapılandırmaların ait olduğunu seçin."
+
+msgid "template.editor.summary_clone_info"
+msgstr "Şu anda %(template)s şablonundan kopyalanıyor."
+
+msgid "template.editor.summary_counts_configs"
+msgstr "Yapılandırmalar"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "Ayarlar"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "Adımlar"
+
+msgid "template.editor.summary_counts_title"
+msgstr "İçerik"
+
+msgid "template.editor.summary_link_configs"
+msgstr "Özel yapılandırmalar"
+
+msgid "template.editor.summary_link_details"
+msgstr "Şablon detayları"
+
+msgid "template.editor.summary_link_settings"
+msgstr "Ayarlar"
+
+msgid "template.editor.summary_link_steps"
+msgstr "Adımlar"
+
+msgid "template.editor.summary_links_title"
+msgstr "Hızlı bağlantılar"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "Oluşturuldu"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "Yöntem"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "Meta veriler"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "Mevcut değil"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "Son güncelleme"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "Bir yapılandırma tanımlandığında yapılandırma adı gereklidir."
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "Yapılandırma türü, çoklu site uyumlu türlerden biri olmalıdır."
+
+msgid "template.editor.validation_config_type_required"
+msgstr "Bir yapılandırma tanımlandığında yapılandırma türü gereklidir."
+
+msgid "template.editor.validation_configs_unique"
+msgstr "Her yapılandırma adı benzersiz olmalıdır."
+
+msgid "template.editor.validation_id_required"
+msgstr "Şablon kimliği gereklidir."
+
+msgid "template.editor.validation_setting_key"
+msgstr "Her ayarın bir anahtarı olmalıdır."
+
+msgid "template.editor.validation_settings_unique"
+msgstr "Her ayar anahtarı benzersiz olmalıdır."
+
+msgid "template.none"
+msgstr "Şablon Yok"
+
+msgid "templates.gallery.delete_selected"
+msgstr "Seçilenleri sil"
+
+msgid "templates.gallery.empty_message"
+msgstr "Yeniden kullanmak üzere ayarları, adımları ve özel yapılandırmaları bir araya getiren ilk şablonunuzu oluşturun."
+
+msgid "templates.gallery.empty_title"
+msgstr "Henüz şablon yok"
+
+msgid "templates.gallery.select"
+msgstr "Seç"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "Yüksek güvenlik"
+
+msgid "templates.name.low"
+msgstr "Düşük güvenlik"
+
+msgid "templates.name.medium"
+msgstr "Orta güvenlik"
+
+msgid "templates.name.ui"
+msgstr "Web arayüzü"
+
+msgid "templates.subtitle"
+msgstr "Hizmetleriniz için yeniden kullanılabilir yapılandırma şablonları — ayarları, adımları ve özel yapılandırmaları bir araya getirin, ardından oluşturun, kopyalayın veya silin."
+
+msgid "templates.tag.config"
+msgstr "Özel yapılandırma: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "Yerleşik özellik: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "Eklenti: %(name)s"
+
+msgid "templates.title"
+msgstr "Hizmet şablonları"
+
+msgid "theme.dark"
+msgstr "Koyu"
+
+msgid "theme.light"
+msgstr "Açık"
+
+msgid "threatmap.attacks_today"
+msgstr "Bugünkü saldırılar"
+
+msgid "threatmap.countries"
+msgstr "Kaynak ülkeler"
+
+msgid "threatmap.disabled_help"
+msgstr "Tehdit haritası, Raporlar sayfasıyla aynı kayıtlı raporları okur. Kaydetmeye başlamak için METRICS_PERSIST_TO_DB değerini yes yapın."
+
+msgid "threatmap.disabled_title"
+msgstr "Rapor kalıcılığı kapalı"
+
+msgid "threatmap.empty_help"
+msgstr "Ya son 24 saatte hiçbir istek engellenmedi ya da raporlar henüz toplanmadı."
+
+msgid "threatmap.empty_title"
+msgstr "Bu aralıkta hiçbir şey engellenmedi"
+
+msgid "threatmap.error_help"
+msgstr "Harita yükleyebildiği son değerleri korur ve bir sonraki yenilemede tekrar dener."
+
+msgid "threatmap.error_title"
+msgstr "Metrik servisine ulaşılamadı"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "Tam ekrandan çık"
+
+msgid "threatmap.freshness"
+msgstr "Raporlar veritabanına yaklaşık dakikada bir ulaşır, bu yüzden harita gerçek trafiğin bir iki dakika gerisindedir."
+
+msgid "threatmap.fullscreen"
+msgstr "Tam ekran"
+
+msgid "threatmap.map_sub"
+msgstr "Yaylar kesin bir konumu değil, kaynak ülkeyi gösterir"
+
+msgid "threatmap.map_title"
+msgstr "Engellenen trafiğin kaynağı"
+
+msgid "threatmap.more_hidden"
+msgstr "diğerleri gösterilmiyor"
+
+msgid "threatmap.not_localised"
+msgstr "konum belirlenemedi"
+
+msgid "threatmap.open_live"
+msgstr "Canlı görünüm"
+
+msgid "threatmap.show_less"
+msgstr "Yalnızca %(count)s göster"
+
+msgid "threatmap.show_more"
+msgstr "Tümünü göster (%(count)s)"
+
+msgid "threatmap.stale"
+msgstr "Bu veriler artık güncellenmiyor. Metrik servisi yanıt vermiyor."
+
+msgid "threatmap.subtitle"
+msgstr "Örneklerinizin son 24 saatte engellediği trafiğin nereden geldiği."
+
+msgid "threatmap.ticker_title"
+msgstr "Canlı olaylar"
+
+msgid "threatmap.top_origins"
+msgstr "Başlıca kaynaklar"
+
+msgid "threatmap.top_reason"
+msgstr "Başlıca sebep"
+
+msgid "threatmap.top_reasons"
+msgstr "Başlıca sebepler"
+
+msgid "threatmap.top_target"
+msgstr "Başlıca hedef"
+
+msgid "threatmap.top_targets"
+msgstr "Başlıca hedefler"
+
+msgid "threatmap.updated"
+msgstr "Güncellendi"
+
+msgid "timings.calls"
+msgstr "Çağrılar"
+
+msgid "timings.disabled_help"
+msgstr "Her eklentinin süresini ölçmek için METRICS_COLLECT_TIMINGS değerini yes yapın. İsteğin toplam süresi her durumda toplanır."
+
+msgid "timings.disabled_title"
+msgstr "Eklenti süreleri kapalı"
+
+msgid "timings.max"
+msgstr "En fazla"
+
+msgid "timings.max_request"
+msgstr "En yavaş istek"
+
+msgid "timings.mean"
+msgstr "Ortalama"
+
+msgid "timings.mean_request"
+msgstr "Ortalama istek"
+
+msgid "timings.partial"
+msgstr "Bazı örnekler yanıt vermedi. Aşağıdaki rakamlar yanıt verenleri kapsar."
+
+msgid "timings.phase"
+msgstr "Aşama"
+
+msgid "timings.phases"
+msgstr "Eklenti aşamaları"
+
+msgid "timings.plugin"
+msgstr "Eklenti"
+
+msgid "timings.reporting_instances"
+msgstr "Raporlayan örnekler"
+
+msgid "timings.requests_measured"
+msgstr "Ölçülen istekler"
+
+msgid "timings.share"
+msgstr "Pay"
+
+msgid "timings.share_help"
+msgstr "Pay, eklentinin toplam süresinin toplam istek süresine oranıdır. İstek başına bir kez çalışmayan aşamaların — worker başlatma, arka plan zamanlayıcısı ve dahili API — payı yoktur ve çizgi gösterilir."
+
+msgid "timings.subtitle"
+msgstr "Her eklentinin her istek aşamasında harcadığı süre, tüm örneklerden canlı okunup birleştirilir."
+
+msgid "timings.total"
+msgstr "Toplam"
+
+msgid "timings.unreachable_help"
+msgstr "Süreler örneklerin kendisinden okunur; dolayısıyla hiçbiri yanıt vermedi — ya da henüz hiçbiri bir istek sunmadı."
+
+msgid "timings.unreachable_title"
+msgstr "Hiçbir örnek süre bildirmedi"
+
+msgid "timings.volatile"
+msgstr "Süreler her örneğin paylaşımlı belleğinde tutulur ve istek üzerine okunur — saklanmaz ve örnek yeniden başlatıldığında sıfırlanır."
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır."
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "Bunun nedeni, servisin yönteminin 'autoconf' olmasıdır ve bu, yapılandırma çakışmalarını önlemek için tasarlanmıştır."
+
+msgid "toast.ban_updated"
+msgstr "Yasaklama süresi başarıyla güncellendi!"
+
+msgid "toast.body.ping_succeed"
+msgstr "Örnekler: %(instances)s"
+
+msgid "toast.copied"
+msgstr "Kopyalandı!"
+
+msgid "toast.disclaimer_title"
+msgstr "Uyarı"
+
+msgid "toast.global_settings_applied_body"
+msgstr "Genel ayarlar başarıyla alındı ve mevcut forma uygulandı."
+
+msgid "toast.global_settings_applied_title"
+msgstr "Genel ayarlar uygulandı"
+
+msgid "toast.global_settings_failed_body"
+msgstr "Genel ayarlar alınırken bir hata oluştu."
+
+msgid "toast.global_settings_failed_title"
+msgstr "Genel ayarlar alınamadı"
+
+msgid "toast.header.ping_failed"
+msgstr "Ping başarısız"
+
+msgid "toast.header.ping_succeed"
+msgstr "Ping başarılı"
+
+msgid "toast.ip_unbanned"
+msgstr "IP adresinin yasağı başarıyla kaldırıldı!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği."
+
+msgid "tooltip.button.ban_ip"
+msgstr "Bu IP adresini yasakla"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "%(name)s yapılandırmasını taslağa dönüştür"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "%(name)s yapılandırmasını çevrimiçi yap"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "Servisi Taslağa Dönüştür: %(name)s"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "Servisi Çevrimiçine Dönüştür: %(name)s"
+
+msgid "tooltip.button.delete_config"
+msgstr "Özel Yapılandırmayı Sil: %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "Önbellek Dosyasını Sil: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "Örneği Sil: %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "Eklentiyi Sil: %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "Servisi Sil: %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "Şablonu Sil: %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "Bir kontrol planlar; yalnızca güncellemeler varsa indirir."
+
+msgid "tooltip.button.force_update"
+msgstr "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur."
+
+msgid "tooltip.button.ping_instance"
+msgstr "Örneğe Ping At: %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "Örneği Yeniden Yükle: %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "Varsayılana sıfırla"
+
+msgid "tooltip.button.reset_global"
+msgstr "Küresel değere sıfırla"
+
+msgid "tooltip.button.run_job"
+msgstr "İşi Çalıştır: %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "Yalnızca seçilenleri göster"
+
+msgid "tooltip.button.stop_instance"
+msgstr "Örneği Durdur: %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "%(ip)s yasağını kaldır"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "Yasak süresini güncelleyin"
+
+msgid "tooltip.button.value_from_global"
+msgstr "Genel ayarlardan gelen değer"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "Orijinal Yasaklama girdisi silinemez."
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz."
+
+msgid "tooltip.certificate_priority"
+msgstr "Sertifikanın dosya yolundan mı yoksa base64 verisinden mi öncelikli alınacağını seçin."
+
+msgid "tooltip.challenge_type"
+msgstr "Let's Encrypt doğrulaması için kullanılacak doğrulama türü (http veya dns)."
+
+msgid "tooltip.collapse_multiline"
+msgstr "Çok satırlı girdileri daralt (tracebackler, payloadlar)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "Çok satırlı değerleri daralt (sertifikalar, anahtarlar)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "OWASP Core Rule Set eklentileri yüklendikten sonra uygulanan yapılandırmalar."
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "OWASP Core Rule Set eklentileri yüklenmeden önce uygulanan yapılandırmalar."
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Nginx'in Sunucu seviyesinde, özellikle 'varsayılan sunucu' bloğu için yapılan yapılandırmalar; istemci isteği herhangi bir yapılandırılmış sunucu adıyla eşleşmediğinde kullanılır."
+
+msgid "tooltip.config_type.http"
+msgstr "Nginx'in HTTP seviyesinde küresel olarak uygulanan yapılandırmalar."
+
+msgid "tooltip.config_type.modsec"
+msgstr "OWASP Core Rule Set yüklendikten sonra veya Core Rule Set yüklenmediyse uygulanan ModSecurity yapılandırmaları."
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "OWASP Core Rule Set yüklenmeden önce uygulanan ModSecurity yapılandırmaları."
+
+msgid "tooltip.config_type.server_http"
+msgstr "Nginx'in HTTP Sunucu (sanal host) seviyesinde uygulanan yapılandırmalar."
+
+msgid "tooltip.config_type.server_stream"
+msgstr "Nginx'in Akış Sunucu seviyesinde uygulanan yapılandırmalar."
+
+msgid "tooltip.config_type.stream"
+msgstr "Nginx'in Akış seviyesinde küresel olarak uygulanan yapılandırmalar."
+
+msgid "tooltip.confirm_password_match"
+msgstr "Şifreler eşleşmelidir."
+
+msgid "tooltip.copied"
+msgstr "Kopyalandı!"
+
+msgid "tooltip.copy_https_only"
+msgstr "Kopyalama özelliği yalnızca HTTPS üzerinden kullanılabilir."
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "Özel SSL sertifikası verisi (PEM formatında veya Base64 kodlu)."
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "Özel SSL sertifika dosyasının yolu."
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "Özel SSL özel anahtar verisi (PEM formatında veya Base64 kodlu)."
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "Özel SSL özel anahtar dosyasının yolu."
+
+msgid "tooltip.different_from_template"
+msgstr "Değer, şablon varsayılanından farklı"
+
+msgid "tooltip.disabled_by_method"
+msgstr "Devre dışı: '%(method)s' yöntemiyle yönetiliyor."
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "Devre dışı: Veritabanı salt okunur modda."
+
+msgid "tooltip.disabled_draft"
+msgstr "Devre dışı: Servis Taslak modunda."
+
+msgid "tooltip.disabled_readonly"
+msgstr "Devre dışı: Salt okunur mod aktif."
+
+msgid "tooltip.dns_check_url"
+msgstr "Sayfada 'ok' görünüyorsa, sunucu adı muhtemelen kullanılabilir."
+
+msgid "tooltip.dns_credential_items"
+msgstr "DNS sağlayıcısı için kimlik bilgileri, DNS doğrulaması için kullanılır (örn. 'cloudflare_api_token=123456'). Gerekli format sağlayıcıya bağlıdır."
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "Kimlik bilgileri yalnızca DNS doğrulamaları için geçerlidir."
+
+msgid "tooltip.dns_propagation"
+msgstr "DNS doğrulamalarında DNS değişikliklerinin yayılması için bekleme süresi (saniye cinsinden)."
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "DNS yayılma gecikmesi yalnızca DNS doğrulamaları için geçerlidir."
+
+msgid "tooltip.dns_provider"
+msgstr "Let's Encrypt DNS doğrulamaları için kullanılacak DNS sağlayıcısı."
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "DNS sağlayıcı seçimi yalnızca DNS doğrulamaları için geçerlidir."
+
+msgid "tooltip.download_file"
+msgstr "Dosyayı indir"
+
+msgid "tooltip.download_log"
+msgstr "Bu günlük dosyasını indir"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "Taslak modu yalnızca UI üzerinden oluşturulan servisler için değiştirilebilir."
+
+msgid "tooltip.email_length"
+msgstr "E-posta 1 ile 256 karakter arasında olmalıdır."
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi."
+
+msgid "tooltip.fetch_global_settings"
+msgstr "Genel ayarları al ve bunları mevcut şablona uygula"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "Takip modu sadece son sayfada kullanılabilir"
+
+msgid "tooltip.global_settings_source"
+msgstr "Değer genel ayarlardan miras alınmıştır."
+
+msgid "tooltip.instance_not_up"
+msgstr "Örnek %(hostname)s şu anda yanıt vermiyor ('açık' değil)."
+
+msgid "tooltip.issue_count"
+msgstr "Bu görünümdeki hatalar ve uyarılar"
+
+msgid "tooltip.latest_version_installed"
+msgstr "En son sürümü kullanıyorsunuz."
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt için kullanılacak özel profil (örn. 'my_custom_profile')."
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "Genel Sonek Listesi (Public Suffix List) ile eşleşen alan adları için sertifika isteklerini devre dışı bırak (önerilir)."
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived)."
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "Sağlayıcıya özel ayarları göstermek için sertifika sağlayıcınızı seçin."
+
+msgid "tooltip.license_key"
+msgstr "BunkerWeb PRO lisans anahtarınız."
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "%(name)s Sayfasına Eriş"
+
+msgid "tooltip.link.access_service"
+msgstr "%(name)s Servisine Eriş"
+
+msgid "tooltip.link.clone_config"
+msgstr "%(name)s Özel Yapılandırmasını Klonla"
+
+msgid "tooltip.link.clone_service"
+msgstr "%(name)s Servisini Klonla"
+
+msgid "tooltip.link.clone_template"
+msgstr "%(template)s Şablonunu Klonla"
+
+msgid "tooltip.link.download_file"
+msgstr "%(filename)s İndir"
+
+msgid "tooltip.link.edit_config"
+msgstr "%(name)s Özel Yapılandırmasını Düzenle"
+
+msgid "tooltip.link.edit_service"
+msgstr "%(service)s Servisini Düzenle"
+
+msgid "tooltip.link.edit_template"
+msgstr "%(template)s Şablonunu Düzenle"
+
+msgid "tooltip.link.export_config"
+msgstr "%(name)s özel yapılandırmasını dışa aktar"
+
+msgid "tooltip.link.export_service"
+msgstr "%(service)s Servis Yapılandırmasını Dışa Aktar"
+
+msgid "tooltip.link.manage_activation"
+msgstr "%(name)s'i küresel ayarlarda etkinleştir"
+
+msgid "tooltip.link.view_config"
+msgstr "%(name)s Özel Yapılandırmasını Görüntüle"
+
+msgid "tooltip.link.view_file"
+msgstr "%(filename)s Görüntüle"
+
+msgid "tooltip.link.view_service"
+msgstr "%(service)s Servisini Görüntüle"
+
+msgid "tooltip.link.view_template"
+msgstr "%(template)s Şablonunu Görüntüle"
+
+msgid "tooltip.local_time"
+msgstr "Zaman damgalarını yerel saatinizde göster"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "Tam URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "Bu bir çoklu site ayarıdır, küresel olarak tanımlanırsa birden fazla servisi etkiler."
+
+msgid "tooltip.new_version_available"
+msgstr "Yeni bir sürüm mevcut!"
+
+msgid "tooltip.next_issue"
+msgstr "Sonraki hata veya uyarıya git"
+
+msgid "tooltip.no_cache"
+msgstr "Bu iş için önbellek dosyası bulunamadı."
+
+msgid "tooltip.no_history"
+msgstr "Bu iş için çalıştırma geçmişi bulunamadı."
+
+msgid "tooltip.no_log_files"
+msgstr "Kayıt dosyası yok."
+
+msgid "tooltip.no_page_available"
+msgstr "Bu eklenti için özel bir sayfa yok."
+
+msgid "tooltip.password_requirements"
+msgstr "Şifre en az 8 karakter uzunluğunda olmalı ve 1 büyük harf, 1 rakam ve 1 özel karakter içermelidir."
+
+msgid "tooltip.prev_issue"
+msgstr "Önceki hata veya uyarıya git"
+
+msgid "tooltip.pro_feature"
+msgstr "Bu bir PRO özelliğidir."
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "Devre dışı: Veritabanı salt okunur modda."
+
+msgid "tooltip.readonly_mode"
+msgstr "Bu işlem, yalnızca okuma modunda izin verilmemiştir."
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "Devre dışı: Hesabınız salt okunur, '%(action)s' işlemi devre dışı."
+
+msgid "tooltip.real_ip_from"
+msgstr "Proxy isteklerinin geldiği güvenilir IP'lerin/ağların boşlukla ayrılmış listesi."
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "Proxy isteklerinin geldiği güvenilir IP'leri/ağları içeren URL'lerin boşlukla ayrılmış listesi. Ayrıca file:// URL'lerini ve http://user:pass@url şemasını kullanan temel kimlik doğrulamasını destekler."
+
+msgid "tooltip.real_ip_header"
+msgstr "Gerçek IP'yi veya PROXY protokolü için özel değeri (proxy_protocol) içeren HTTP başlığı."
+
+msgid "tooltip.real_ip_recursive"
+msgstr "Başlık kapsayıcısındaki IP adresinde yinelemeli bir arama yapın."
+
+msgid "tooltip.remove_ban_entry"
+msgstr "Bu yasaklama kaydını listeden kaldır."
+
+msgid "tooltip.reset_template_settings"
+msgstr "Mevcut şablon görünümündeki tüm ayarları varsayılanlara sıfırla."
+
+msgid "tooltip.search_logs"
+msgstr "Günlüklerde ara (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "Takip modunu etkinleştirmek için bir dosya seçin"
+
+msgid "tooltip.server_name"
+msgstr "Bu servisin birincil alan adı veya sunucu adı."
+
+msgid "tooltip.stream_support.no"
+msgstr "Akış modunu desteklemez."
+
+msgid "tooltip.stream_support.partial"
+msgstr "Akış modunu kısmen destekler."
+
+msgid "tooltip.stream_support.yes"
+msgstr "Akış modunu destekler."
+
+msgid "tooltip.table.bans.actions"
+msgstr "Bu Yasaklama için mevcut aksiyonlar"
+
+msgid "tooltip.table.bans.country"
+msgstr "Yasaklanan IP adresinin ülkesi"
+
+msgid "tooltip.table.bans.date"
+msgstr "Yasaklamanın oluşturulma tarihi ve saati"
+
+msgid "tooltip.table.bans.details"
+msgstr "Yasaklama detaylarını göster"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "Yasaklamanın sona ereceği tarih ve saat"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "Yasaklanan IP adresi"
+
+msgid "tooltip.table.bans.reason"
+msgstr "Yasaklama sebebi"
+
+msgid "tooltip.table.bans.scope"
+msgstr "Yasaklama kapsamı (Küresel veya Servise özel)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "Tüm Yasaklamaları seç"
+
+msgid "tooltip.table.bans.service"
+msgstr "Yasaklamanın uygulandığı servis (kapsam Servise özel ise)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "Yasaklamanın sona ermesine kalan süre"
+
+msgid "tooltip.table.cache.actions"
+msgstr "Bu önbellek dosyası için mevcut aksiyonlar"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "Önbellek dosyasının sağlama değeri"
+
+msgid "tooltip.table.cache.details"
+msgstr "Önbellek dosyası detaylarını göster"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "Önbellek dosyasının adı"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "Bu önbellek dosyasını oluşturan iş"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "Önbellek dosyasının son güncellenme tarihi ve saati"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "Önbellek dosyasını oluşturan işle ilişkili eklenti"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "Tüm Cache dosyalarını seçin"
+
+msgid "tooltip.table.cache.service"
+msgstr "Bu önbellek dosyasıyla ilişkili servis (veya Küresel)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "Bu Özel Yapılandırma için mevcut aksiyonlar"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "Özel Yapılandırma içeriğinin sağlama değeri"
+
+msgid "tooltip.table.configs.details"
+msgstr "Özel Yapılandırma detaylarını göster"
+
+msgid "tooltip.table.configs.method"
+msgstr "Özel Yapılandırmanın oluşturulma yöntemi (örn. ui, dosya)"
+
+msgid "tooltip.table.configs.name"
+msgstr "Özel Yapılandırmanın adı"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "Tüm Özel Yapılandırmaları seç"
+
+msgid "tooltip.table.configs.service"
+msgstr "Özel Yapılandırmayla ilişkili servis (veya Küresel)"
+
+msgid "tooltip.table.configs.status"
+msgstr "Özel yapılandırmanın taslak durumu"
+
+msgid "tooltip.table.configs.template"
+msgstr "Özel Yapılandırmanın bir şablondan gelip gelmediğini belirtir"
+
+msgid "tooltip.table.configs.type"
+msgstr "Özel Yapılandırmanın türü veya bağlamı (örn. HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "Bu Örnek için mevcut aksiyonlar"
+
+msgid "tooltip.table.instances.created"
+msgstr "Örneğin ilk kaydedildiği tarih ve saati"
+
+msgid "tooltip.table.instances.details"
+msgstr "Örnek detaylarını göster"
+
+msgid "tooltip.table.instances.health"
+msgstr "Örneğin sağlık durumu (Açık, Kapalı, Yükleniyor)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "Örneğin Ana Bilgisayar Adı veya URL'si"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "Örneğin en son görüldüğü tarih ve saat"
+
+msgid "tooltip.table.instances.method"
+msgstr "Örneğin oluşturulma yöntemi (örn. ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "Kullanıcı tanımlı veya otomatik oluşturulan Örnek adı"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "Tüm Örnekleri seç"
+
+msgid "tooltip.table.instances.type"
+msgstr "Örnek türü (örn. Konteyner, Statik)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "Bu İş için mevcut aksiyonlar"
+
+msgid "tooltip.table.jobs.async"
+msgstr "İşin asenkron çalışıp çalışmadığını belirtir"
+
+msgid "tooltip.table.jobs.details"
+msgstr "İş detaylarını göster"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "İşin çalıştırılma sıklığı"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "Son İş çalıştırmasının durumu (Başarılı/Başarısız)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "İşin adı"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "İş ile ilişkili eklenti"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "İşin BunkerWeb'i yeniden yükleyip yüklemediğini belirtir"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "Tüm İşleri seç"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "Bu Eklenti için mevcut aksiyonlar"
+
+msgid "tooltip.table.plugins.description"
+msgstr "Eklentinin açıklaması"
+
+msgid "tooltip.table.plugins.details"
+msgstr "Eklenti detaylarını göster"
+
+msgid "tooltip.table.plugins.id"
+msgstr "Eklentinin benzersiz kimliği"
+
+msgid "tooltip.table.plugins.method"
+msgstr "Eklentinin oluşturulma yöntemi (örn. ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "Eklentinin adı"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "Tüm Eklentileri seç"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "Eklentinin akış modunu destekleyip desteklemediğini belirtir"
+
+msgid "tooltip.table.plugins.type"
+msgstr "Eklenti türü (Çekirdek, Harici, Pro, UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "Eklentinin versiyonu"
+
+msgid "tooltip.table.reports.actions"
+msgstr "Bu Rapor için mevcut işlemler"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "Yalnızca Akış: oturum boyunca istemciden alınan bayt"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "Yalnızca Akış: oturum boyunca istemciye gönderilen bayt"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "Yalnızca Akış: istemcinin kaynak portu"
+
+msgid "tooltip.table.reports.country"
+msgstr "Raporlanan IP adresinin ülkesi"
+
+msgid "tooltip.table.reports.data"
+msgstr "Raporla ilgili ek veri"
+
+msgid "tooltip.table.reports.date"
+msgstr "Raporun oluşturulduğu tarih ve saat"
+
+msgid "tooltip.table.reports.details"
+msgstr "Rapor detaylarını göster"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "Raporu tetikleyen IP adresi"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "Yalnızca Akış: oturumun geldiği port"
+
+msgid "tooltip.table.reports.method"
+msgstr "Raporlanan isteğin HTTP yöntemi"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP isteği veya TCP/UDP Akış oturumu"
+
+msgid "tooltip.table.reports.reason"
+msgstr "Raporun oluşturulma sebebi"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "İsteğin benzersiz kimliği"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "Rapor oluşturulurken aktif olan güvenlik modu"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "Tüm Raporları seç"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "Raporu oluşturan sunucu adı (vhost)"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "Yalnızca Akış: oturumun saniye cinsinden süresi"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "Raporlanan istek için dönen HTTP durum kodu"
+
+msgid "tooltip.table.reports.url"
+msgstr "Raporlanan istekte hedeflenen URL"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "Raporlanan isteğin User-Agent bilgisi"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "Bir işlem yapmak için lütfen bir veya daha fazla satır seçin."
+
+msgid "tooltip.table.services.actions"
+msgstr "Bu Servis için mevcut aksiyonlar"
+
+msgid "tooltip.table.services.created"
+msgstr "Servisin oluşturulduğu tarih ve saat"
+
+msgid "tooltip.table.services.details"
+msgstr "Servis detaylarını göster"
+
+msgid "tooltip.table.services.last_update"
+msgstr "Servisin en son güncellendiği tarih ve saati"
+
+msgid "tooltip.table.services.method"
+msgstr "Servisin oluşturulma yöntemi (örn. ui, dosya)"
+
+msgid "tooltip.table.services.name"
+msgstr "Servisin adı"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "Hizmetin güvenlik modu (Engelle veya Tespit Et)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "Tüm Servisleri Seç"
+
+msgid "tooltip.table.services.template"
+msgstr "Hizmet tarafından kullanılan şablon"
+
+msgid "tooltip.table.services.type"
+msgstr "Servis Türü (Çevrimiçi/Taslak)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "Bu Şablon için mevcut işlemler"
+
+msgid "tooltip.table.templates.configs"
+msgstr "Şablonun yapılandırma sayısı"
+
+msgid "tooltip.table.templates.created"
+msgstr "Şablonun oluşturulma tarihi"
+
+msgid "tooltip.table.templates.details"
+msgstr "Şablon ayrıntılarını göster"
+
+msgid "tooltip.table.templates.id"
+msgstr "Şablonun kimliği"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "Şablonun son güncelleme tarihi"
+
+msgid "tooltip.table.templates.method"
+msgstr "Şablonun oluşturulma yöntemi"
+
+msgid "tooltip.table.templates.name"
+msgstr "Kullanıcı tanımlı veya otomatik oluşturulan Şablon adı"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "Şablonu içeren Eklenti"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "Tüm Şablonları seç"
+
+msgid "tooltip.table.templates.settings"
+msgstr "Şablonun ayar sayısı"
+
+msgid "tooltip.table.templates.steps"
+msgstr "Şablonun adım sayısı"
+
+msgid "tooltip.toggle_level"
+msgstr "%(level)s satırlarını göster / gizle"
+
+msgid "tooltip.toggle_wrap"
+msgstr "Satır kaydırmayı değiştir"
+
+msgid "tooltip.ui_host"
+msgstr "BunkerWeb kullanıcı arayüzünü ters proxy üzerinden sunacak ana bilgisayar adı veya IP adresi."
+
+msgid "tooltip.ui_url"
+msgstr "BunkerWeb kullanıcı arayüzüne ters proxy üzerinden erişmek için kullanılan URL yolu."
+
+msgid "tooltip.ui_url_security"
+msgstr "Standart dışı, tahmin edilmesi zor bir URL yolu kullanmak güvenliği artırır."
+
+msgid "tooltip.use_custom_ssl"
+msgstr "Let's Encrypt yerine özel bir SSL sertifikası kullanılıp kullanılmayacağı."
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "Test için Let's Encrypt hazırlık ortamının kullanılıp kullanılmayacağı (güvenilmeyen sertifikalar üretir)."
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "Let's Encrypt hazırlık ortamı yalnızca Let's Encrypt sunucusu kullanıldığında kullanılabilir."
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "PROXY protokolü iletişimini etkinleştirin."
+
+msgid "tooltip.use_real_ip"
+msgstr "Gerçek IP Kullan"
+
+msgid "tooltip.username_length"
+msgstr "Kullanıcı adı 1 ile 256 karakter arasında olmalıdır."
+
+msgid "tooltip.value_from_global"
+msgstr "Genel ayarlardan değer alın"
+
+msgid "tooltip.view_full_url"
+msgstr "Tam URL'yi görüntülemek için tıklayın"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "Wildcard sertifikalar (*.alanadiniz.com) oluşturun. DNS doğrulaması gerektirir."
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir."
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı."
+
+msgid "tooltip.zerossl_api_key"
+msgstr "zerossl-bot tarafından kullanılan isteğe bağlı ZeroSSL API anahtarı."
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre."
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "ZeroSSL API istekleri için yeniden deneme sayısı (0 yeniden denemeyi devre dışı bırakır)."
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme."
+
+msgid "totp.cant_access"
+msgstr "Kimlik doğrulama kodunuza erişemiyor musunuz?"
+
+msgid "totp.or_use_security_key"
+msgstr "veya güvenlik anahtarınızı kullanın"
+
+msgid "totp.prompt"
+msgstr "Lütfen TOTP kodunuzu girin."
+
+msgid "totp.signing_in"
+msgstr "BunkerWeb'e giriş yap"
+
+msgid "totp.subtitle"
+msgstr "Kimlik doğrulama uygulamasından kodu girin."
+
+msgid "totp.subtitle_security_key"
+msgstr "Güvenlik anahtarınızla kimliğinizi doğrulayın."
+
+msgid "totp.title"
+msgstr "İki Faktörlü Kimlik Doğrulama"
+
+msgid "upstreams.add_server"
+msgstr "Sunucu ekle"
+
+msgid "upstreams.all"
+msgstr "Tümü"
+
+msgid "upstreams.attach"
+msgstr "Bağla"
+
+msgid "upstreams.attach_copy"
+msgstr "%(name)s (%(servers)s) upstream'ini bir veya daha fazla hizmete bağla."
+
+msgid "upstreams.backend_ssl"
+msgstr "TLS ile sunucularla (https:// / grpcs://) konuş"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "IP hash — aynı istemci, aynı arka uç"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "En az bağlantılar"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "Döngü (varsayılan)"
+
+msgid "upstreams.create"
+msgstr "Üst akış oluştur"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "Bu üst akışı sil?"
+
+msgid "upstreams.delete_copy"
+msgstr "%(name)s üst akışını sil?"
+
+msgid "upstreams.delete_help"
+msgstr "Bir hizmete hala bağlı olan bir üst akış silinemez. Önce ayırın."
+
+msgid "upstreams.edit"
+msgstr "Üst akışı düzenle"
+
+msgid "upstreams.edit_shared"
+msgstr "Bu upstream hizmetlere bağlıdır (sayı: %(count)s): %(services)s. Kaydetmek tümünü değiştirir."
+
+msgid "upstreams.empty_text"
+msgstr "Upstream, reverse proxy yolunda bir veya daha fazla hizmete bağlanan adlandırılmış bir backend havuzudur. REVERSE_PROXY_HOST ayarları bununla birlikte çalışmaya devam eder."
+
+msgid "upstreams.empty_title"
+msgstr "Henüz üst akış yok"
+
+msgid "upstreams.keepalive"
+msgstr "Keepalive"
+
+msgid "upstreams.keepalive_help"
+msgstr "Her işçi başına tutulan boş bağlantılar. Sadece HTTP ve gRPC; devre dışı bırakmak için boş bırakın."
+
+msgid "upstreams.match_path"
+msgstr "Ters yönlendirme yolu"
+
+msgid "upstreams.match_path_help"
+msgstr "Seçilen hizmetlerin bu havuzdan yönlendirdiği yer. Bir akış havuzu için, tüm hizmet kullanılır."
+
+msgid "upstreams.method"
+msgstr "Yük dengeleme"
+
+msgid "upstreams.name_help"
+msgstr "Sadece harfler, rakamlar, tireler ve alt çizgiler. Noktalar reddedildiğinden, bir havuz adı asla gerçek bir ana sunucuyu gölgede tutamaz."
+
+msgid "upstreams.new"
+msgstr "Yeni upstream"
+
+msgid "upstreams.not_attached"
+msgstr "Bağlanmamış"
+
+msgid "upstreams.protocol"
+msgstr "Protokol"
+
+msgid "upstreams.protocol_help"
+msgstr "HTTP ve gRPC havuzları bir yola bağlıdır; bir akış havuzu, tüm TCP/UDP hizmetini devralır."
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "Akış (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "Veritabanı salt okunurdur. Upstream havuzları incelenebilir ancak değiştirilemez."
+
+msgid "upstreams.role.backup"
+msgstr "Yedek"
+
+msgid "upstreams.role.down"
+msgstr "Kapalı"
+
+msgid "upstreams.role.primary"
+msgstr "Ana"
+
+msgid "upstreams.save"
+msgstr "Ana sunucuyu kaydet"
+
+msgid "upstreams.search"
+msgstr "Ad, açıklama veya sunucu'yu arayın..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "Başarısızlık zaman aşımı"
+
+msgid "upstreams.server_host"
+msgstr "Sunucu"
+
+msgid "upstreams.server_max_fails"
+msgstr "Maksimum başarısızlıklar"
+
+msgid "upstreams.server_role"
+msgstr "Rol"
+
+msgid "upstreams.server_weight"
+msgstr "Ağırlık"
+
+msgid "upstreams.servers"
+msgstr "Sunucular"
+
+msgid "upstreams.services_help"
+msgstr "Çoklu hizmetleri seçmek için Ctrl veya Command kullanın. Bir ana sunucu daha sonra bağlanabilir."
+
+msgid "upstreams.services_hidden"
+msgstr "Gizlenen hizmet sayısı: %(count)s. %(protocol)s upstream yalnızca eşleşen bir hizmete bağlanabilir."
+
+msgid "upstreams.truncated"
+msgstr "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
+
+msgid "validation.default_field_name"
+msgstr "Bu alan"
+
+msgid "validation.invalid_date"
+msgstr "Geçersiz tarih"
+
+msgid "validation.ip_global_duplicate"
+msgstr "Bu IP adresi zaten küresel olarak yasaklanmış."
+
+msgid "validation.ip_invalid"
+msgstr "Geçersiz IP adresi formatı."
+
+msgid "validation.ip_required"
+msgstr "IP adresi gereklidir."
+
+msgid "validation.ip_service_duplicate"
+msgstr "Bu IP adresi seçili servis için zaten yasaklanmış (%(service)s)."
+
+msgid "validation.pattern"
+msgstr "Lütfen %(field)s için geçerli bir değer girin."
+
+msgid "validation.required"
+msgstr "%(field)s gereklidir."
+
+msgid "validation.service_required_for_ban"
+msgstr "Servise özel bir yasaklama için bir servis seçilmelidir."
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
+
+msgid "web_cache.available"
+msgstr "Mevcut"
+
+msgid "web_cache.cache_state"
+msgstr "Durum"
+
+msgid "web_cache.cached_files"
+msgstr "Önbelleğe alınmış dosyalar"
+
+msgid "web_cache.deployment"
+msgstr "Dağıtım"
+
+msgid "web_cache.disabled"
+msgstr "Devre dışı"
+
+msgid "web_cache.disk_usage"
+msgstr "Disk kullanımı"
+
+msgid "web_cache.empty"
+msgstr "Boş"
+
+msgid "web_cache.enabled"
+msgstr "Etkin"
+
+msgid "web_cache.enabled_instances"
+msgstr "Önbelleğe alma etkin"
+
+msgid "web_cache.enabled_services"
+msgstr "Etkin hizmetler"
+
+msgid "web_cache.error"
+msgstr "Hata"
+
+msgid "web_cache.hit_rate"
+msgstr "Islem oranı"
+
+msgid "web_cache.instance"
+msgstr "Örnek"
+
+msgid "web_cache.metrics"
+msgstr "Örneklerin toplam / başarısız dağılımı"
+
+msgid "web_cache.metrics_scope"
+msgstr "Ölçümler, tüm önbelleğe alınmış hizmetler üzerinden örnek başına toplanır."
+
+msgid "web_cache.not_reporting"
+msgstr "Raporlanmıyor"
+
+msgid "web_cache.path"
+msgstr "Yol"
+
+msgid "web_cache.purge"
+msgstr "Önbelleğe alınmış yanıtları temizle"
+
+msgid "web_cache.purge_all"
+msgstr "Tümünü temizle"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "Bu işlem, erişilebilen tüm örneklerdeki tüm hizmetlerin önbelleğe alınmış yanıtlarını siler. Bu işlem geri alınamaz."
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "Tamamen önbelleği temizle?"
+
+msgid "web_cache.purge_help"
+msgstr "Erişilebilir örneklerdeki işlemler hemen çalıştırılır. Erişilemeyen örnekler atlanır ve herhangi bir işlem kuyruğa alınmaz."
+
+msgid "web_cache.purge_key"
+msgstr "Etkili önbellek anahtarı"
+
+msgid "web_cache.purge_key_help"
+msgstr "Varsayılan $scheme$host$request_uri için önbellek anahtarını boş bırakın. Hizmet PROXY_CACHE_KEY'i geçersiz kılıyorsa, burada etkili değerini yapıştırın; desteklenmeyen, yalnızca istek değişkenleri farklı bir girişin temizlenmesi yerine reddedilir."
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "Etkili PROXY_CACHE_KEY (isteğe bağlı)"
+
+msgid "web_cache.purge_url"
+msgstr "URL'yi temizle"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "Raporlayan örnekler"
+
+msgid "web_cache.service"
+msgstr "Servis"
+
+msgid "web_cache.services"
+msgstr "Hizmetin etkinleştirilmesi"
+
+msgid "web_cache.status"
+msgstr "Örnek depolama"
+
+msgid "web_cache.subtitle"
+msgstr "Ters proxy önbelleği durumu, toplu olarak isabet oran metrikleri ve anında temizleme kontrolleri."
+
+msgid "whatsnew.missing_action"
+msgstr "Değişiklik günlüğünü GitHub'da aç"
+
+msgid "whatsnew.missing_message"
+msgstr "CHANGELOG.md bu derlemeye dahil edilmemiş. Sürüm notları GitHub'da mevcut."
+
+msgid "whatsnew.missing_title"
+msgstr "Bu kurulumda değişiklik günlüğü yok"
+
+msgid "whatsnew.modal.intro"
+msgstr "Kullandığınız sürümden bu yana değişenler."
+
+msgid "whatsnew.modal.title"
+msgstr "Yenilikler"
+
+msgid "whatsnew.subtitle"
+msgstr "BunkerWeb'in tüm sürümleri, en yenisi başta olmak üzere, bu kurulumla gelen değişiklik günlüğünden."
+
+msgid "workflows.act_block"
+msgstr "Engelle"
+
+msgid "workflows.act_challenge"
+msgstr "Doğrulama"
+
+msgid "workflows.act_code"
+msgstr "Durum"
+
+msgid "workflows.act_denyDefault"
+msgstr "Örneğin reddetme durumu"
+
+msgid "workflows.act_denyShort"
+msgstr "reddetme durumu"
+
+msgid "workflows.act_provider"
+msgstr "Antibot sağlayıcısı"
+
+msgid "workflows.act_redirect"
+msgstr "Yönlendir"
+
+msgid "workflows.act_status"
+msgstr "Reddetme durumu"
+
+msgid "workflows.act_terminal"
+msgstr "Her kuralda tek bir eylem vardır ve bu eylem değerlendirmeyi sonlandırır; kuraldan doğru/yanlış yolu çıkmaz."
+
+msgid "workflows.act_url"
+msgstr "Hedef URL"
+
+msgid "workflows.action"
+msgstr "Sonra"
+
+msgid "workflows.add_rule"
+msgstr "Kural ekle"
+
+msgid "workflows.all"
+msgstr "Tümü"
+
+msgid "workflows.aria.collapse"
+msgstr "Daralt"
+
+msgid "workflows.aria.combinator"
+msgstr "Birleştiriciyi değiştir, şu anda"
+
+msgid "workflows.aria.conditionType"
+msgstr "Koşul türü"
+
+msgid "workflows.aria.denyStatus"
+msgstr "Reddetme durumu"
+
+msgid "workflows.aria.drag"
+msgstr "Yeniden sıralamak için sürükle"
+
+msgid "workflows.aria.expand"
+msgstr "Genişlet"
+
+msgid "workflows.aria.groupKind"
+msgstr "Grup türü"
+
+msgid "workflows.aria.insertAt"
+msgstr "%(n)s konumuna bir kural ekle"
+
+msgid "workflows.aria.more"
+msgstr "Daha fazla"
+
+msgid "workflows.aria.moveDown"
+msgstr "Aşağı taşı — daha sonra çalışır"
+
+msgid "workflows.aria.moveRule"
+msgstr "Kuralı taşı"
+
+msgid "workflows.aria.moveUp"
+msgstr "Yukarı taşı — daha önce çalışır"
+
+msgid "workflows.aria.openRule"
+msgstr "%(n)s kuralını aç"
+
+msgid "workflows.aria.provider"
+msgstr "Antibot sağlayıcısı"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "Yönlendirme durumu"
+
+msgid "workflows.aria.removeCondition"
+msgstr "Koşulu kaldır"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "Eşiği kaldır"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "Hız eşiğini kaldır"
+
+msgid "workflows.aria.removeValue"
+msgstr "Değeri kaldır"
+
+msgid "workflows.aria.requestCount"
+msgstr "İstek sayısı"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "Kaynak grubu"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "Bu kuraldaki doğrulama sorunu sayısı: %(count)s"
+
+msgid "workflows.aria.ruleName"
+msgstr "%(n)s numaralı kuralın adı"
+
+msgid "workflows.aria.terminalAction"
+msgstr "Sonlandırıcı eylem"
+
+msgid "workflows.aria.uriMatch"
+msgstr "URI eşleşme modu"
+
+msgid "workflows.aria.uriValue"
+msgstr "URI değeri"
+
+msgid "workflows.aria.window"
+msgstr "Saniye cinsinden pencere"
+
+msgid "workflows.attach"
+msgstr "Hizmetlere ekle"
+
+msgid "workflows.attach_help"
+msgstr "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır."
+
+msgid "workflows.attached_notice"
+msgstr "Kaydetme işlemi bu kuralları bağlı %(count)s hizmete uygular."
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "Soldan sağa. İlk eşleşen kazanır."
+
+msgid "workflows.canvas.auxList"
+msgstr "Üstten alta. İlk eşleşen kazanır."
+
+msgid "workflows.canvas.close"
+msgstr "Kapat"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "Çalışma sırası: %(n)s / %(total)s"
+
+msgid "workflows.canvas.dropHint"
+msgstr "Öncelik ayarlamak için bırak — bir kuralın zincirdeki yeri, anlamayabileceği tek şeydir"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "Kuralları olmayan bir iş akışı hiçbir şeyi değiştirmez — her istek doğrudan bir sonraki bağlı iş akışına geçer."
+
+msgid "workflows.canvas.emptyCta"
+msgstr "İlk kuralı ekle"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "Henüz hiçbir kural yok"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "Kurallar soldan sağa çalışır."
+
+msgid "workflows.canvas.entry_title"
+msgstr "Her istek"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "Bir sonraki bağlı iş akışına devam eder."
+
+msgid "workflows.canvas.exit_title"
+msgstr "Hiçbir kural eşleşmedi"
+
+msgid "workflows.canvas.fit"
+msgstr "Görüneğe uygun"
+
+msgid "workflows.canvas.gateTip"
+msgstr "Bir eşleşme kapısı, bir eylem değil: eşik değerinin altında kural eşleşmez ve bir sonraki kural değerlendirilir."
+
+msgid "workflows.canvas.hint"
+msgstr "Sırayı yeniden düzenlemek için bir düğmeyi sürükle · pan yapmak için tahtayı sürükle · odaklanmış bir düğmede Alt + ← / →"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "Okunabilir — etrafı görmek için pan yap, sıranın değiştirilemeyeceği"
+
+msgid "workflows.canvas.insert"
+msgstr "Buraya bir kural ekle"
+
+msgid "workflows.canvas.open"
+msgstr "Kuralı aç"
+
+msgid "workflows.canvas.skipped"
+msgstr "Devre dışı — zincirde olmadığı gibi tamamen atlanır."
+
+msgid "workflows.canvas.stopTail"
+msgstr ", değerlendirme burada durur — bundan sonra hiçbir kurala ulaşılmaz."
+
+msgid "workflows.canvas.title"
+msgstr "Kural sırası"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "Yakınlaştır"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "Uzaklaştır"
+
+msgid "workflows.capacity"
+msgstr "%(maxRules)s kuraldan %(count)s tanesi · en büyük kural %(maxPredicates)s yüklemden %(worst)s tanesini kullanıyor · bu iş akışında %(regexes)s düzenli ifade var"
+
+msgid "workflows.clone"
+msgstr "İş akışını kopyala"
+
+msgid "workflows.clone_help"
+msgstr "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz."
+
+msgid "workflows.clone_name"
+msgstr "Kopyanın adı"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
+
+msgid "workflows.copySuffix"
+msgstr " (kopya)"
+
+msgid "workflows.delete"
+msgstr "İş akışını sil"
+
+msgid "workflows.delete_confirm"
+msgstr "Bu iş akışı ve tüm kuralları kalıcı olarak silinir."
+
+msgid "workflows.empty_text"
+msgstr "Bir iş akışı, hizmetlere eklediğiniz kuralların sıralı bir listesidir: bir koşul ağacı, isteğe bağlı bir hız eşiği ve bir eylem — meydan okuma, engelle veya yönlendirme."
+
+msgid "workflows.empty_title"
+msgstr "Henüz hiç iş akışı yok"
+
+msgid "workflows.entry_sub"
+msgstr "İş akışları bağlanma sırasına göre, içlerindeki kurallar ise yukarıdan aşağıya çalışır."
+
+msgid "workflows.entry_title"
+msgstr "Bağlı bir hizmete gelen her istek"
+
+msgid "workflows.err.save"
+msgstr "Kaydedilemedi"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "Kaydetme uç noktasına ulaşılamadı"
+
+msgid "workflows.err.validate"
+msgstr "Doğrulanamadı"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "Doğrulama uç noktasına ulaşılamadı"
+
+msgid "workflows.errors.body"
+msgstr "Hiçbir şey uygulanmaz; çalışan politika değişmeden kalır."
+
+msgid "workflows.errors.count"
+msgstr "%(count)s sorun kaydetmeyi engelliyor."
+
+msgid "workflows.errors.rule"
+msgstr "Kural %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "Kural %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "Bu iş akışı"
+
+msgid "workflows.exit_sub"
+msgstr "İstek bir sonraki bağlı iş akışına, ardından güvenlik yığınının geri kalanına devam eder."
+
+msgid "workflows.exit_title"
+msgstr "Hiçbir kural eşleşmedi"
+
+msgid "workflows.gate.and"
+msgstr "ve yalnızca aynı istemci IP'si şundan fazla istekte bulunduğunda"
+
+msgid "workflows.gate.chip"
+msgstr "eşleşme eşiği"
+
+msgid "workflows.gate.help"
+msgstr "Her istemci IP'si için ayrı sayılır. Eşiğin altında bu kural eşleşmez ve değerlendirme sonraki kuralla devam eder; tek başına hiçbir zaman hız sınırlaması yapmaz."
+
+msgid "workflows.legend.fall"
+msgstr "Eşleşme yoksa sonraki kurala geçilir"
+
+msgid "workflows.legend.gate"
+msgstr "Hız eşiği eşleşmeyi koşullandırır; bir eylem değildir"
+
+msgid "workflows.legend.move"
+msgstr "Yeniden sıralamak için sürükleyin, okları kullanın veya Alt + ↑ / ↓ tuşlarına basın"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "Sırayı yeniden düzenlemek için sürükle, numaralı simgeyi kullan veya Alt + ← / →'yi bas"
+
+msgid "workflows.legend.stop"
+msgstr "Eşleşme tek bir eylem çalıştırır ve durur"
+
+msgid "workflows.link.entry"
+msgstr "her istek"
+
+msgid "workflows.link.noMatch"
+msgstr "eşleşme yok"
+
+msgid "workflows.menu.bottom"
+msgstr "En son çalıştır"
+
+msgid "workflows.menu.delete"
+msgstr "Kuralı sil"
+
+msgid "workflows.menu.disable"
+msgstr "Kuralı devre dışı bırak"
+
+msgid "workflows.menu.duplicate"
+msgstr "Altına çoğalt"
+
+msgid "workflows.menu.enable"
+msgstr "Kuralı etkinleştir"
+
+msgid "workflows.menu.top"
+msgstr "İlk çalıştır"
+
+msgid "workflows.move.first"
+msgstr "İlk çalıştır"
+
+msgid "workflows.move.last"
+msgstr "En son çalıştır"
+
+msgid "workflows.new"
+msgstr "Yeni iş akışı"
+
+msgid "workflows.no_rules"
+msgstr "Henüz hiç kural yok. Bu politikayı oluşturmaya başlamak için bir tane ekleyin."
+
+msgid "workflows.not_attached"
+msgstr "Bağlı değil"
+
+msgid "workflows.not_attached_notice"
+msgstr "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle kuralları henüz hiçbir yerde uygulanmıyor."
+
+msgid "workflows.not_validated"
+msgstr "Henüz doğrulanmadı"
+
+msgid "workflows.order_help"
+msgstr "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir hız eşiğine sahip bir kural, eşik aşıldığında yalnızca bir kez eşleşir, bu nedenle daha düşük bir kural, eşiğinin altında trafiği yakalayabilir."
+
+msgid "workflows.readonly"
+msgstr "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez."
+
+msgid "workflows.rule.disabled"
+msgstr "Devre dışı"
+
+msgid "workflows.rule.if"
+msgstr "Eğer"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "Kural adı"
+
+msgid "workflows.rule.noun"
+msgstr "Kural"
+
+msgid "workflows.rule.onMatch"
+msgstr "Eşleşirse"
+
+msgid "workflows.rule.skipped"
+msgstr "Devre dışı — listede yokmuş gibi tamamen atlanır."
+
+msgid "workflows.rule.stopTail"
+msgstr ", değerlendirme burada durur; altındaki hiçbir kurala ulaşılmaz."
+
+msgid "workflows.rules"
+msgstr "Kurallar"
+
+msgid "workflows.say.actionChanged"
+msgstr "Eylem %(type)s olarak değiştirildi. Hâlâ tek eylemdir ve değerlendirmeyi durdurmaya devam eder."
+
+msgid "workflows.say.added"
+msgstr "Kural %(n)s konumuna, en sona eklendi; bu nedenle üstündeki tüm kurallar önce denetlenir."
+
+msgid "workflows.say.deleted"
+msgstr "Kural silindi. %(count)s kural kaldı."
+
+msgid "workflows.say.duplicated"
+msgstr "Kopya %(n)s konumuna eklendi. Üstündeki özgün kural etkin olduğu sürece hiçbir zaman eşleşemez."
+
+msgid "workflows.say.gateAdded"
+msgstr "Eşleşmeye hız eşiği eklendi. Eşiğin altında kural eşleşmez ve değerlendirme devam eder."
+
+msgid "workflows.say.inserted"
+msgstr "%(total)s'nun %(n)s konumuna bir kural eklendi. Bundan önceki tüm kurallar önce kontrol edilir."
+
+msgid "workflows.say.inspecting"
+msgstr "%(total)s'nun %(n)s kuralını düzenle — %(name)s."
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "Son değer kaldırıldı — bu koşul bir değer içermeden kaydedilemez."
+
+msgid "workflows.say.moved"
+msgstr "%(name)s, %(total)s konumdan %(to)s konumuna taşındı%(how)s. Artık %(where)s çalışır."
+
+msgid "workflows.say.predicateCap"
+msgstr "Bu kural zaten en fazla %(max)s koşul içeriyor."
+
+msgid "workflows.say.ruleAbove"
+msgstr "üstteki kural"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s devre dışı bırakıldı — tamamen atlanır ve altındaki kurallar artık bu istekleri görür."
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s etkinleştirildi — %(n)s konumunda yeniden değerlendirilir."
+
+msgid "workflows.say.runsAfter"
+msgstr "%(name)s sonrasında"
+
+msgid "workflows.say.runsFirst"
+msgstr "ilk"
+
+msgid "workflows.say.runsLast"
+msgstr "son"
+
+msgid "workflows.say.saved"
+msgstr "Kurallar kaydedildi ve bağlı hizmetlere gönderildi."
+
+msgid "workflows.say.theRule"
+msgstr "Kural"
+
+msgid "workflows.say.valuesDropped"
+msgstr "Koşul %(type)s olarak değiştirildi — içerdiği %(count)s değer aktarılamadı."
+
+msgid "workflows.say.via.drag"
+msgstr "sürükleyerek"
+
+msgid "workflows.say.via.keyboard"
+msgstr "klavyeyle"
+
+msgid "workflows.say.viewCanvas"
+msgstr "Canvas görünümü. Kurallar soldan sağa çalışır; ilk eşleşen kazanır."
+
+msgid "workflows.say.viewList"
+msgstr "Liste görünümü. Kurallar üstten alta çalışır; ilk eşleşen kazanır."
+
+msgid "workflows.search"
+msgstr "Ad veya açıklama arayın..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "Başarısız bir ASN sorgusunu benzetmek için boş bırakın."
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN bir sayı olmalıdır"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "İstemcinin izin listesinde olmadığını varsayar."
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "%(request_number)s istek numarası bir ölçüm değil, sizin girdinizdir."
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "Örneğin düzenli ifade bütçesinin tükenmediğini varsayar."
+
+msgid "workflows.test.assumptions"
+msgstr "Varsayımlar"
+
+msgid "workflows.test.country"
+msgstr "Ülke"
+
+msgid "workflows.test.detail_challenge"
+msgstr "Doğrulama denetimi devralır; güvenlik yığınının geri kalanı çalışmaya devam eder."
+
+msgid "workflows.test.detail_detect"
+msgstr "Bu hizmet algılama modunda olduğundan gerçekte hiçbir şey uygulanmaz."
+
+msgid "workflows.test.detail_status"
+msgstr "İstemci %(status)s durumunu görür."
+
+msgid "workflows.test.failed"
+msgstr "Test çalıştırılamadı"
+
+msgid "workflows.test.geo"
+msgstr "GeoIP sorgusu"
+
+msgid "workflows.test.geo_help"
+msgstr "Kullanılamaz durumu, ülke ve ASN kurallarını BİLİNMİYOR yapar; bu yüzden hiçbir zaman eşleşemezler."
+
+msgid "workflows.test.geo_local"
+msgstr "Yerel / özel adres"
+
+msgid "workflows.test.geo_resolved"
+msgstr "Çözümlendi"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "Veritabanı kullanılamıyor"
+
+msgid "workflows.test.intro"
+msgstr "Hizmete bağlı her iş akışını sırayla, örneğin yaptığı biçimde değerlendirir."
+
+msgid "workflows.test.invalid"
+msgstr "Test etmeden önce yukarıdaki sorunları düzeltin."
+
+msgid "workflows.test.ip"
+msgstr "İstemci IP'si"
+
+msgid "workflows.test.method"
+msgstr "Yöntem"
+
+msgid "workflows.test.number"
+msgstr "İstek numarası"
+
+msgid "workflows.test.number_help"
+msgstr "Bu istemcinin penceredeki N'inci isteği. Sizin sağladığınız bir varsayım, ölçüm değil."
+
+msgid "workflows.test.open"
+msgstr "Bir isteği test et"
+
+msgid "workflows.test.other_matched"
+msgstr "burada eşleşti"
+
+msgid "workflows.test.other_no_match"
+msgstr "hiçbir kural eşleşmedi"
+
+msgid "workflows.test.other_unreached"
+msgstr "ulaşılmadı"
+
+msgid "workflows.test.other_workflows"
+msgstr "Bu hizmetteki diğer iş akışları"
+
+msgid "workflows.test.out_draft"
+msgstr "Bu hizmet taslak durumunda — henüz onun için bir iş akışı derlenmedi."
+
+msgid "workflows.test.out_match"
+msgstr "%(workflow)s · %(rule)s eşleşti ve isteği %(action)s."
+
+msgid "workflows.test.out_no_match"
+msgstr "Hiçbir kural eşleşmedi. İstek güvenlik yığınının geri kalanına devam eder."
+
+msgid "workflows.test.out_not_attached"
+msgstr "Bu iş akışı hiçbir hizmete bağlı değil; bu nedenle değerlendirilecek bir kural sırası yok."
+
+msgid "workflows.test.out_whitelisted"
+msgstr "İzin listesinde — tüm iş akışı atlanır ve hiçbir kural değerlendirilmez."
+
+msgid "workflows.test.run"
+msgstr "Testi çalıştır"
+
+msgid "workflows.test.service"
+msgstr "Hizmet"
+
+msgid "workflows.test.title"
+msgstr "Bir isteği test et"
+
+msgid "workflows.test.unreachable"
+msgstr "Test uç noktasına ulaşılamadı"
+
+msgid "workflows.test.uri"
+msgstr "URI yolu"
+
+msgid "workflows.test.uri_help"
+msgstr "Yalnızca yol — $uri hiçbir zaman sorgu dizesi içermez."
+
+msgid "workflows.test.v_gate"
+msgstr "koşullar eşleşiyor · eşik %(count)s isteğin %(n)s tanesinde kapalı"
+
+msgid "workflows.test.v_match"
+msgstr "EŞLEŞTİ"
+
+msgid "workflows.test.v_unknown"
+msgstr "BİLİNMİYOR"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "Bu kuralın gerektirdiği bir bilgi belirlenemedi; bu nedenle kural hiçbir zaman eşleşemez."
+
+msgid "workflows.test.whitelisted"
+msgstr "Bu istemci izin listesinde"
+
+msgid "workflows.threshold"
+msgstr "Sadece bir hızın üzerinde"
+
+msgid "workflows.threshold_count"
+msgstr "İstekler"
+
+msgid "workflows.threshold_window"
+msgstr "saniye içinde"
+
+msgid "workflows.tree.addCondition"
+msgstr "Koşul"
+
+msgid "workflows.tree.addGroup"
+msgstr "Grup"
+
+msgid "workflows.tree.all"
+msgstr "Tümü"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)s koşul — tümü doğru olmalıdır"
+
+msgid "workflows.tree.and"
+msgstr "ve"
+
+msgid "workflows.tree.any"
+msgstr "Herhangi biri"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)s koşul — en az biri doğru olmalıdır"
+
+msgid "workflows.tree.empty"
+msgstr "Boş grup — bir koşul ekleyin; bu hâliyle kaydedilemez."
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "hiçbir grup %(kind)s girdisi içermiyor"
+
+msgid "workflows.tree.noneMeta"
+msgstr "bunların hiçbiri doğru olmadığında eşleşir"
+
+msgid "workflows.tree.not"
+msgstr "Hiçbiri"
+
+msgid "workflows.tree.or"
+msgstr "veya"
+
+msgid "workflows.tree.removeGroup"
+msgstr "Grubu kaldır"
+
+msgid "workflows.truncated"
+msgstr "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için API'i kullanın."
+
+msgid "workflows.untitled"
+msgstr "Adsız kural"
+
+msgid "workflows.value.add"
+msgstr "Değer"
+
+msgid "workflows.values.fewer"
+msgstr "Daha az göster"
+
+msgid "workflows.values.more"
+msgstr "+%(n)s daha"
+
+msgid "workflows.verb.asn"
+msgstr "şudur"
+
+msgid "workflows.verb.country"
+msgstr "şudur"
+
+msgid "workflows.verb.group"
+msgstr "gruptadır"
+
+msgid "workflows.verb.ip"
+msgstr "şunun içindedir"
+
+msgid "workflows.verb.isIn"
+msgstr "şunun içindedir"
+
+msgid "workflows.verb.isOneOf"
+msgstr "şunlardan biridir"
+
+msgid "workflows.verb.method"
+msgstr "şudur"
+
+msgid "workflows.verb.uri"
+msgstr "ile eşleşir"
+
+msgid "workflows.view.canvas"
+msgstr "Canvas"
+
+msgid "workflows.view.list"
+msgstr "Liste"
+

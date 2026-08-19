@@ -11,7 +11,7 @@
        copies the ACE editor's selected text;
      - plugins_settings_raw.html's `.copy-settings` -- its own inline handler in
        pages/settings-raw.js, copies the raw editor value, already uses
-       i18next's "tooltip.copied" key for the feedback text.
+       the "tooltip.copied" key for the feedback text.
    All three show the same feedback (swap data-bs-original-title and
    `.tooltip("show")`, restore after ~2s) via three separate hand-rolled click
    handlers. This macro generalizes that into one drop-in trigger with a single
@@ -53,7 +53,7 @@
      label          visible label text (English fallback). variant='button'
                     only -- omit for an icon-only button. 'addon' is always
                     icon-only, matching the existing input-group affordance.
-     label_i18n     data-i18n key for label. Defaults to the existing
+     label_i18n     catalog key for label. Defaults to the existing
                     "button.copy" key ("Copy").
      aria_label     English fallback for the trigger's accessible name. Only
                     meaningful when there's no visible label (variant='addon',
@@ -62,18 +62,18 @@
                     is ignored unless icon-only. Falls back to "Copy" when
                     icon-only and omitted -- never silently ships an unlabeled
                     icon-only control.
-     aria_i18n      data-i18n key for aria_label. Falls back to the existing
+     aria_i18n      catalog key for aria_label. Falls back to the existing
                     "button.copy" key ONLY when icon-only and BOTH aria_label
                     and aria_i18n are omitted (the fully-default case). Once
                     a caller passes a custom aria_label, this default is
-                    dropped too -- otherwise i18next would silently overwrite
-                    the custom text with the generic "Copy" translation on
-                    every page load. Pass your own aria_i18n alongside a
+                    dropped too -- otherwise the generic "Copy" translation
+                    would silently overwrite the custom text. Pass your own aria_i18n alongside a
                     custom aria_label if it also needs translating.
      copied_label   English fallback swapped into the tooltip on success.
                     Default "Copied!".
-     copied_i18n    i18next key (NOT a data-i18n scan target -- read directly
-                    by copy-button.js at click time) for copied_label.
+     copied_i18n    catalog key for copied_label. Stays a client-side key:
+                    copy-button.js resolves it at click time, long after the
+                    server rendered the page.
                     Defaults to the existing "tooltip.copied" key, already
                     used by pages/settings-raw.js for the same feedback text.
      disabled       renders the trigger disabled. variant='button' gets the
@@ -121,11 +121,10 @@
     {%- set trigger_classes = (base_cls ~ " js-copy-button" ~ (" disabled" if disabled else "") ~ (" " ~ classes if classes else "")) | trim -%}
     {#- icon-only always needs an accessible name, so it falls back to "Copy" /
        "button.copy" when the caller supplies neither. A labelled button only
-       gets aria-label/data-i18n when the caller explicitly overrides it --
-       otherwise it relies on its own visible text, same as components/button.html.
-       Once the caller DOES pass a custom aria_label, the "button.copy" i18n
-       default is dropped too, so i18next never silently overwrites custom
-       copy with the generic "Copy" translation. #}
+       gets an aria-label when the caller explicitly overrides it -- otherwise it
+       relies on its own visible text, same as components/button.html. Once the
+       caller DOES pass a custom aria_label, the "button.copy" key is dropped too,
+       so the custom copy is never replaced by the generic "Copy" translation. #}
     {%- set effective_aria_label = aria_label or ("Copy" if icon_only else none) -%}
     {%- set effective_aria_i18n = aria_i18n or (("button.copy" if not aria_label else none) if icon_only else none) -%}
     <{{ "button" if variant == "button" else "span" }}
@@ -139,9 +138,9 @@
         data-bs-toggle="tooltip"
         data-bs-placement="top"
         data-bs-original-title=""
-        {%- if effective_aria_label %} aria-label="{{ effective_aria_label }}"{% if effective_aria_i18n %} data-i18n="{{ effective_aria_i18n }}"{% endif %}{% endif %}
+        {%- if effective_aria_label %} aria-label="{{ _(effective_aria_i18n) if effective_aria_i18n else effective_aria_label }}"{% endif %}
         {%- if disabled %}{% if variant == "button" %} disabled{% else %} aria-disabled="true"{% endif %}{% endif %}>
         <i class="bx {{ icon }}{% if size == 'sm' and variant == 'button' %} bx-xs{% endif %}" aria-hidden="true"></i>
-        {%- if label %}<span class="d-none d-md-inline">&nbsp;<span data-i18n="{{ label_i18n }}">{{ label }}</span></span>{% endif -%}
+        {%- if label %}<span class="d-none d-md-inline">&nbsp;<span>{{ _(label_i18n) if label_i18n else label }}</span></span>{% endif -%}
     </{{ "button" if variant == "button" else "span" }}>
 {%- endmacro %}

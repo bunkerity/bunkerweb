@@ -49,7 +49,7 @@
        a Save button that silently wipes activation is not. #}
     <div class="alert alert-danger" role="alert" id="compose-unavailable">
         <i class="bx bx-error-circle me-1" aria-hidden="true"></i>
-        <span data-i18n="compose.unavailable">The plugin list could not be loaded, so this page cannot be edited safely. Reload once the API answers.</span>
+        <span>{{ _("compose.unavailable") }}</span>
     </div>
 {% else %}
 <form method="POST"
@@ -94,28 +94,28 @@
                     <span class="d-none d-lg-inline">&nbsp;<span>Override services</span></span>
                 </button>
             {% else %}
-                <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                <div {% if current_endpoint != 'new' and not is_editable_method(service_method) %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.draft_toggle_disabled") }}"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft {% if current_endpoint != 'new' and not is_editable_method(service_method) %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
-                                <span data-i18n="status.draft">Draft</span>
+                                <span>{{ _("status.draft") }}</span>
                             {% else %}
-                                <span data-i18n="status.online">Online</span>
+                                <span>{{ _("status.online") }}</span>
                             {% endif %}
                         </span>
                     </button>
                 </div>
             {% endif %}
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
                  {% endif %}>
                 {# `type="submit"`, and deliberately NOT `.save-settings` -- see the header. #}
                 <button type="submit"
                         class="btn btn-sm btn-primary don-jose compose-save"
                         {% if is_readonly %}disabled{% endif %}>
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    <span class="d-none d-md-inline">&nbsp;<span>{{ _("button.save") }}</span></span>
                 </button>
             </div>
         </div>
@@ -132,7 +132,7 @@
                 <div class="col-12 col-md-6">
                     <label for="compose-server-name"
                            class="form-label"
-                           data-i18n="form.label.server_name">Server Name</label>
+                          >{{ _("form.label.server_name") }}</label>
                     <input type="text"
                            class="form-control"
                            id="compose-server-name"
@@ -146,9 +146,9 @@
                 <div class="col-12 col-md-6">
                     <label for="compose-template"
                            class="form-label"
-                           data-i18n="navigation.templates">Templates</label>
+                          >{{ _("navigation.templates") }}</label>
                     <select class="form-select" id="compose-template" name="USE_TEMPLATE">
-                        <option value="" data-i18n="badge.no_template">No Template</option>
+                        <option value="">{{ _("badge.no_template") }}</option>
                         {% for template in (templates | default({})) if template != "ui" %}
                             <option value="{{ template }}" {% if template == (current_template | default("low")) %}selected{% endif %}>{{ template | capitalize }}</option>
                         {% endfor %}

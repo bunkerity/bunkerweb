@@ -16,6 +16,7 @@ this pass.
 import re
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 from app.utils import can_delete_service, is_editable_method, is_ui_api_method  # type: ignore
@@ -93,42 +94,92 @@ def _services_context(is_draft=False, is_readonly=False, user_readonly=False, me
     )
 
 
-def test_services_row_actions_use_icon_btn_and_keep_behavioral_hooks():
-    html = _render_dashboard_page("services.html", **_services_context())
-
-    assert 'class="row-actions"' in html
-    assert re.search(r'class="icon-btn[^"]*\bconvert-service\b[^"]*"\s+data-service-id="www\.example\.com"', html)
-    assert re.search(r'class="icon-btn[^"]*\bexport-service\b[^"]*"\s+data-service-id="www\.example\.com"', html)
-    assert re.search(r'class="icon-btn[^"]*\bdelete-service\b[^"]*"', html)
-    assert 'data-service-id="www.example.com"' in html
-    # danger/info color variants land on the right actions
-    assert re.search(r'class="icon-btn danger delete-service', html)
-    assert re.search(r'class="icon-btn info export-service', html)
-    # no leftover colored btn-outline-* action classes on the row itself (scoped past
-    # the row-actions marker so the page-head band's own "Create service"/"Import
-    # services" CTAs -- legitimately colored buttons living earlier on the page --
-    # don't produce a false positive here).
-    after_actions = html.split('class="row-actions"', 1)[1]
-    assert "btn-outline-primary btn-sm" not in after_actions
-    assert "btn-outline-danger btn-sm" not in after_actions
-    assert "btn btn-primary btn-sm" not in after_actions
-    # actions column carries the shared right-align chrome
-    assert 'class="actions-col"' in html
-    # Draft/Online stays a plain badge (not the live-state status() pill): no status-dot
-    assert 'data-value="online"' in html
-    assert "status-dot" not in html
+# services.html no longer renders the six row actions: they were ~4.8 KB of near-identical
+# markup per row, 73% of the page and 2.4 MB of it at 500 services, so the column renderer in
+# `static/js/pages/services.js` builds them for the rows on screen instead (Lot C). The cell
+# carries the four per-row facts as a `|`-packed payload. The behavioural hooks these tests
+# exist to protect therefore live in the JS now, and that is where they are asserted.
+SERVICES_JS = TEMPLATES.parent / "static" / "js" / "pages" / "services.js"
 
 
-def test_services_draft_disables_access_action_visually():
-    html = _render_dashboard_page("services.html", **_services_context(is_draft=True))
+def _renderer_source(js):
+    """Just the renderer, so an assertion cannot be satisfied by an unrelated part of the file."""
+    start = js.index("function renderRowActions")
+    end = js.index("const selectedServices")
+    return js[start:end]
 
-    assert re.search(r'class="icon-btn disabled"\s+href="https://www\.example\.com"', html)
+
+def test_services_row_actions_keep_their_behavioral_hooks():
+    js = SERVICES_JS.read_text(encoding="utf-8")
+    actions = _renderer_source(js)
+
+    assert 'class="row-actions"' in actions
+    # The classes `$(document).on("click", ...)` is delegated to, and the attribute those
+    # handlers read. Delegation is why moving the markup needs no rebinding.
+    for hook in ("convert-service", "export-service", "delete-service"):
+        assert hook in actions, hook
+        assert f'$(document).on("click", ".{hook}"' in js, f"{hook} handler must stay delegated"
+    assert 'data-service-id="${safeId}"' in actions
+    # danger/info colour variants land on the right actions
+    assert "icon-btn danger delete-service" in actions
+    assert "icon-btn info export-service" in actions
+    # no colored btn-outline-* action classes crept back in
+    assert "btn-outline-primary btn-sm" not in actions
+    assert "btn-outline-danger btn-sm" not in actions
+
+
+def test_services_draft_disables_access_action():
+    js = SERVICES_JS.read_text(encoding="utf-8")
+    actions = _renderer_source(js)
+
+    # The renderer is handed the row object the `/services/fetch` endpoint returns, not the packed
+    # `id|draft|method|deletable` string the template used to put in the cell. Same fact, one less
+    # encoding to keep in step between Python and JavaScript.
+    assert 'const isDraft = row.type === "draft";' in actions
+    assert 'class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}"' in actions
+
+
+def test_the_page_ships_no_rows_at_all():
+    """The table is `serverSide` now, so the row facts arrive from `/services/fetch` as JSON —
+    they are asserted in `test_services_fetch.py`, against the endpoint that produces them.
+
+    What belongs here is the other half of that move: the document itself carries no row. At 500
+    services the old markup was 868 KB of a 1089 KB page and 10 711 DOM nodes, of which DataTables
+    kept ten. One row creeping back into the template puts all of it back."""
+    html = _render_dashboard_page("services.html", **_services_context(method="ui"))
+
+    assert "<tbody></tbody>" in html
+    assert "www.example.com" not in html
+    # (`modal-delete-services`, the bulk confirmation dialog, is a page-level element and stays —
+    # hence the class, not a substring.)
+    assert 'class="row-actions"' not in html
+    assert 'class="icon-btn danger delete-service"' not in html
+
+
+def test_the_row_object_never_reaches_search_or_sort():
+    """`display` only. Indexed, a search for "yes" would match every deletable service and a
+    search for "ui" every ui-managed one — against a column that shows no text at all."""
+    js = SERVICES_JS.read_text(encoding="utf-8")
+
+    # Whitespace-normalised: prettier reflows this arrow depending on how long the line gets.
+    assert 'render: (data, type, row) => type === "display" ? renderRowActions(row) : ""' in " ".join(js.split())
+
+
+def test_the_draft_and_online_badge_stays_a_plain_badge():
+    """Rendered in `services.js` now that the rows arrive as JSON. `data-value` is not decoration:
+    the bulk-conversion filter reads it off `#type-<name>` to skip services already in the target
+    state, and the confirm list clones the badge out of the row."""
+    js = SERVICES_JS.read_text(encoding="utf-8")
+    render_type = js[js.index("function renderType") : js.index("function renderSecurityMode")]  # noqa: E203
+
+    assert 'id="type-${escapeAttr(idFor(name))}" data-value="${draft ? "draft" : "online"}"' in render_type
+    assert "status-dot" not in render_type
 
 
 def test_services_actions_header_is_right_aligned():
     html = _render_dashboard_page("services.html", **_services_context())
 
-    assert re.search(r'<th class="actions-col"[^>]*data-i18n="tooltip\.table\.services\.actions"', html)
+    assert re.search(r'<th class="actions-col"[^>]*' + re.escape(english("tooltip.table.services.actions")), html)
 
 
 # --------------------------------------------------------------------------------------
@@ -276,8 +327,8 @@ def test_configs_page_still_has_its_title_header():
 
     assert re.search(r"<h1[^>]*>\s*Configs\s*</h1>", html)
     assert "bw-page-head-title" in html
-    assert 'data-i18n="navigation.configs"' in html
-    assert 'data-i18n="button.create_config"' in html
+    assert english("navigation.configs") in html
+    assert english("button.create_config") in html
 
 
 # --------------------------------------------------------------------------------------
@@ -363,9 +414,9 @@ def test_jobs_last_run_pill_uses_status_macro_and_keeps_searchpane_icon_hooks():
     html_failed = _render_dashboard_page("jobs.html", **_jobs_context(success=False))
 
     # status() macro's dot + i18n-backed pill
-    assert 'data-i18n="status.success"' in html_success
+    assert english("status.success") in html_success
     assert "status-dot" in html_success
-    assert 'data-i18n="status.failed"' in html_failed
+    assert english("status.failed") in html_failed
 
     # static/js/pages/jobs.js's searchPanes filter for this column matches raw cell HTML
     # containing "bx-check"/"bx-x" (jobs.js:365-372) -- not touched by this pass, so the
@@ -377,5 +428,5 @@ def test_jobs_last_run_pill_uses_status_macro_and_keeps_searchpane_icon_hooks():
 def test_jobs_no_history_still_shows_plain_text():
     html = _render_dashboard_page("jobs.html", **_jobs_context(has_history=False))
 
-    assert 'data-i18n="status.no_history"' in html
+    assert english("status.no_history") in html
     assert re.search(r'class="icon-btn show-history disabled"', html)

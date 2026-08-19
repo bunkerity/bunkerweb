@@ -6,11 +6,11 @@
    line. No colour-coded value, no accent top-border (killed in the round-3 restyle).
 
    Params:
-     title        (required) English fallback label shown before i18next rewrites it.
+     title        (required) literal label, used when `i18n_key` is not given.
      value        (required) big number/string rendered in navy Don Jose. Caller
                   pre-formats it (filters, string concat, conditional "--", etc.) -- the
                   macro never touches formatting/i18n of the value itself.
-     title_i18n   data-i18n key for the label, e.g. "web_cache.hit_rate". Omit for the
+     title_i18n   catalog key for the label, e.g. "web_cache.hit_rate". Omit for the
                   rare case of untranslated text.
      color        retained for backward compatibility (callers still pass "primary",
                   "danger", etc.). Emitted as a bw-kpi-tile-<color> hook class but no
@@ -20,7 +20,7 @@
      icon_color   optional extra class on the icon, e.g. "text-danger"; defaults to the
                   muted label colour when omitted.
      caption      optional small caption line under the value, e.g. "IPs + CIDRs".
-     caption_i18n data-i18n key for the caption.
+     caption_i18n catalog key for the caption.
      id           optional id attribute on the outer card, e.g. for JS to target/update
                   the tile later.
      classes      extra utility classes appended to the card, e.g. "mb-2".
@@ -32,10 +32,10 @@
 {% macro tile(title, value, title_i18n=none, color='primary', icon=none, icon_color=none, caption=none, caption_i18n=none, id=none, classes='') -%}
     <div{% if id %} id="{{ id }}"{% endif %}
          class="card bw-kpi-tile p-4 position-relative h-100{% if color %} bw-kpi-tile-{{ color }}{% endif %}{% if classes %} {{ classes }}{% endif %}">
-        <p class="bw-kpi-label mb-0">{% if icon %}<i class="bx {{ icon }}{% if icon_color %} {{ icon_color }}{% endif %}" aria-hidden="true"></i>{% endif %}<span{% if title_i18n %} data-i18n="{{ title_i18n }}"{% endif %}>{{ title }}</span></p>
+        <p class="bw-kpi-label mb-0">{% if icon %}<i class="bx {{ icon }}{% if icon_color %} {{ icon_color }}{% endif %}" aria-hidden="true"></i>{% endif %}<span>{{ _(title_i18n) if title_i18n else title }}</span></p>
         <span class="don-jose bw-kpi-value">{{ value }}</span>
         {% if caption %}
-            <small class="bw-kpi-caption d-block"{% if caption_i18n %} data-i18n="{{ caption_i18n }}"{% endif %}>{{ caption }}</small>
+            <small class="bw-kpi-caption d-block">{{ _(caption_i18n) if caption_i18n else caption }}</small>
         {% endif %}
     </div>
 {%- endmacro %}

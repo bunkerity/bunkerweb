@@ -1,0 +1,7033 @@
+# Chinese translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh\n"
+"Language-Team: zh <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "构建工具"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero 通用公共许可证 v3.0"
+
+msgid "about.license_title"
+msgstr "许可证"
+
+msgid "about.social.discord"
+msgstr "Discord"
+
+msgid "about.social.instagram"
+msgstr "Instagram"
+
+msgid "about.social.linkedin"
+msgstr "LinkedIn"
+
+msgid "about.social.reddit"
+msgstr "Reddit"
+
+msgid "about.socials"
+msgstr "社交媒体"
+
+msgid "about.tagline"
+msgstr "强大保护，化繁为简"
+
+msgid "about.title"
+msgstr "关于 BunkerWeb"
+
+msgid "about.version"
+msgstr "版本：%(version)s"
+
+msgid "accordion.body.tls"
+msgstr "自动颁发和续订证书。"
+
+msgid "accordion.title.tls"
+msgstr "TLS & 证书"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "请上传一个有效的自定义配置导出文件 (.json)。"
+
+msgid "alert.custom_end_date_required"
+msgstr "请选择一个自定义结束日期。"
+
+msgid "alert.important"
+msgstr "重要"
+
+msgid "alert.no_changes_detected"
+msgstr "未检测到任何更改。"
+
+msgid "alert.notice"
+msgstr "注意"
+
+msgid "alert.ping_error"
+msgstr "Ping 实例时发生错误。"
+
+msgid "alert.readonly_mode"
+msgstr "此操作在只读模式下被禁用。"
+
+msgid "aria.label.clear_search"
+msgstr "清除搜索"
+
+msgid "aria.label.close"
+msgstr "关闭"
+
+msgid "aria.label.collapse_multiline"
+msgstr "折叠多行条目"
+
+msgid "aria.label.configs_dropzone"
+msgstr "选择自定义配置导出文件或将其拖放到此处"
+
+msgid "aria.label.copy"
+msgstr "复制日志"
+
+msgid "aria.label.download_log"
+msgstr "下载此日志文件"
+
+msgid "aria.label.follow"
+msgstr "跟随"
+
+msgid "aria.label.hide_value"
+msgstr "隐藏值"
+
+msgid "aria.label.issue_count"
+msgstr "错误和警告计数"
+
+msgid "aria.label.level_filter"
+msgstr "按级别筛选日志行"
+
+msgid "aria.label.local_time"
+msgstr "以本地时间显示时间戳"
+
+msgid "aria.label.next_issue"
+msgstr "下一个错误或警告"
+
+msgid "aria.label.passkey_name"
+msgstr "通行密钥名称"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "选择插件压缩包或将其拖放到此处"
+
+msgid "aria.label.prev_issue"
+msgstr "上一个错误或警告"
+
+msgid "aria.label.raw_configuration"
+msgstr "原始配置"
+
+msgid "aria.label.remove_value"
+msgstr "删除值"
+
+msgid "aria.label.reveal_value"
+msgstr "显示值"
+
+msgid "aria.label.search_logs"
+msgstr "搜索日志"
+
+msgid "aria.label.select_file"
+msgstr "选择文件"
+
+msgid "aria.label.select_page"
+msgstr "选择页面"
+
+msgid "aria.label.services_dropzone"
+msgstr "选择服务导出文件或将其拖放到此处"
+
+msgid "aria.label.toggle_wrap"
+msgstr "切换自动换行"
+
+msgid "aria.label.user_avatar"
+msgstr "用户头像"
+
+msgid "aria.label.view_selected_items"
+msgstr "查看选定的项目"
+
+msgid "badge.from_template"
+msgstr "来自模板"
+
+msgid "badge.managed_via_api"
+msgstr "通过 API 管理"
+
+msgid "badge.new_version"
+msgstr "新版本"
+
+msgid "badge.no_template"
+msgstr "无模板"
+
+msgid "badge.unread_news"
+msgstr "未读新闻"
+
+msgid "badge.unread_notifications"
+msgstr "未读通知"
+
+msgid "banner.community"
+msgstr "加入 Bunker 社区，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>并在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上关注我们。"
+
+msgid "banner.link.here"
+msgstr "这里"
+
+msgid "banner.pro"
+msgstr "升级至 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。"
+
+msgid "banner.support"
+msgstr "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
+
+msgid "bans.stats.card.by_reason"
+msgstr "按原因统计封禁"
+
+msgid "bans.stats.tile.active"
+msgstr "有效封禁"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "国家/地区"
+
+msgid "bans.stats.tile.expiring"
+msgstr "≤ 1 小时后失效"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "自动轮换"
+
+msgid "bans.stats.tile.permanent"
+msgstr "永久封禁"
+
+msgid "bans.subtitle"
+msgstr "在您的 BunkerWeb 实例中禁用的 IP 地址 — 添加、删除或调整禁用的时长。"
+
+msgid "breadcrumb.about"
+msgstr "关于"
+
+msgid "breadcrumb.bans"
+msgstr "封禁"
+
+msgid "breadcrumb.cache"
+msgstr "缓存"
+
+msgid "breadcrumb.configs"
+msgstr "配置"
+
+msgid "breadcrumb.extra_pages"
+msgstr "附加页面"
+
+msgid "breadcrumb.global_config"
+msgstr "全局配置"
+
+msgid "breadcrumb.global_settings"
+msgstr "全局设置"
+
+msgid "breadcrumb.groups"
+msgstr "资源组"
+
+msgid "breadcrumb.home"
+msgstr "主页"
+
+msgid "breadcrumb.instances"
+msgstr "实例"
+
+msgid "breadcrumb.jobs"
+msgstr "任务"
+
+msgid "breadcrumb.logs"
+msgstr "日志"
+
+msgid "breadcrumb.misc"
+msgstr "杂项"
+
+msgid "breadcrumb.mode_selection"
+msgstr "模式选择"
+
+msgid "breadcrumb.more"
+msgstr "更多..."
+
+msgid "breadcrumb.new"
+msgstr "新建"
+
+msgid "breadcrumb.plugins"
+msgstr "插件"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "插件页面"
+
+msgid "breadcrumb.pro"
+msgstr "Pro"
+
+msgid "breadcrumb.profile"
+msgstr "个人资料"
+
+msgid "breadcrumb.reports"
+msgstr "报告"
+
+msgid "breadcrumb.services"
+msgstr "服务"
+
+msgid "breadcrumb.support"
+msgstr "支持"
+
+msgid "breadcrumb.templates"
+msgstr "模板"
+
+msgid "breadcrumb.threatmap"
+msgstr "威胁地图"
+
+msgid "breadcrumb.timings"
+msgstr "执行时间"
+
+msgid "breadcrumb.web_cache"
+msgstr "Web 缓存"
+
+msgid "breadcrumb.whats_new"
+msgstr "新增内容"
+
+msgid "button.actions"
+msgstr "操作"
+
+msgid "button.activate_key"
+msgstr "激活密钥"
+
+msgid "button.add"
+msgstr "插入"
+
+msgid "button.add_ban_plural"
+msgstr "添加封禁"
+
+msgid "button.add_passkey"
+msgstr "添加通行密钥"
+
+msgid "button.add_plugin_plural"
+msgstr "添加插件"
+
+msgid "button.add_plugins"
+msgstr "添加插件"
+
+msgid "button.auto_refresh"
+msgstr "自动刷新"
+
+msgid "button.ban"
+msgstr "封禁"
+
+msgid "button.ban_all_filtered"
+msgstr "封禁所有匹配报告"
+
+msgid "button.ban_selected"
+msgstr "封禁所选"
+
+msgid "button.cache"
+msgstr "缓存"
+
+msgid "button.cancel"
+msgstr "取消"
+
+msgid "button.clear"
+msgstr "清除"
+
+msgid "button.clone"
+msgstr "克隆"
+
+msgid "button.close"
+msgstr "关闭"
+
+msgid "button.collapse_multiline"
+msgstr "折叠"
+
+msgid "button.columns"
+msgstr "列"
+
+msgid "button.convert_configs"
+msgstr "转换配置"
+
+msgid "button.convert_configs_to"
+msgstr "转换为 %(state)s"
+
+msgid "button.convert_services"
+msgstr "转换服务"
+
+msgid "button.copy"
+msgstr "复制"
+
+msgid "button.copy_codes"
+msgstr "复制代码"
+
+msgid "button.copy_raw"
+msgstr "复制原始数据"
+
+msgid "button.copy_visible"
+msgstr "复制可见"
+
+msgid "button.create_config"
+msgstr "创建自定义配置"
+
+msgid "button.create_instance"
+msgstr "创建实例"
+
+msgid "button.create_service"
+msgstr "创建新服务"
+
+msgid "button.create_template"
+msgstr "创建模板"
+
+msgid "button.delete"
+msgstr "删除"
+
+msgid "button.delete_instance"
+msgstr "删除实例"
+
+msgid "button.disable_totp"
+msgstr "禁用 TOTP"
+
+msgid "button.download"
+msgstr "下载"
+
+msgid "button.edit"
+msgstr "编辑"
+
+msgid "button.enable_totp"
+msgstr "启用 TOTP"
+
+msgid "button.entire_config"
+msgstr "完整配置"
+
+msgid "button.export"
+msgstr "导出"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "获取全局设置"
+
+msgid "button.filtered_actions"
+msgstr "筛选后的操作"
+
+msgid "button.filters_suffix"
+msgstr " 过滤器"
+
+msgid "button.follow"
+msgstr "跟随"
+
+msgid "button.force_check"
+msgstr "强制检查"
+
+msgid "button.force_update"
+msgstr "强制更新"
+
+msgid "button.github_stars"
+msgstr "星标"
+
+msgid "button.go"
+msgstr "前往 →"
+
+msgid "button.go_back"
+msgstr "返回"
+
+msgid "button.got_it"
+msgstr "知道了"
+
+msgid "button.hide"
+msgstr "隐藏"
+
+msgid "button.history"
+msgstr "历史记录"
+
+msgid "button.import_configs"
+msgstr "导入自定义配置"
+
+msgid "button.import_services"
+msgstr "导入服务"
+
+msgid "button.local_time"
+msgstr "本地时间"
+
+msgid "button.login"
+msgstr "登录"
+
+msgid "button.multiple_add"
+msgstr "添加"
+
+msgid "button.multiple_hide"
+msgstr "隐藏"
+
+msgid "button.multiple_remove"
+msgstr "移除"
+
+msgid "button.multiple_show"
+msgstr "显示"
+
+msgid "button.need_help"
+msgstr "需要帮助？"
+
+msgid "button.news"
+msgstr "新闻"
+
+msgid "button.notifications"
+msgstr "通知"
+
+msgid "button.open_support_ticket"
+msgstr "提交支持工单"
+
+msgid "button.order_support"
+msgstr "订购支持"
+
+msgid "button.ping"
+msgstr "Ping"
+
+msgid "button.plugin_page"
+msgstr "插件页面"
+
+msgid "button.proceed"
+msgstr "继续"
+
+msgid "button.refresh"
+msgstr "刷新"
+
+msgid "button.refresh_recovery_codes"
+msgstr "刷新恢复代码"
+
+msgid "button.reload"
+msgstr "重新加载"
+
+msgid "button.rename"
+msgstr "重命名"
+
+msgid "button.reset"
+msgstr "重置"
+
+msgid "button.reset_columns"
+msgstr "重置列"
+
+msgid "button.retry"
+msgstr "重试"
+
+msgid "button.return_to_safety"
+msgstr "返回安全区域"
+
+msgid "button.run"
+msgstr "运行"
+
+msgid "button.run_selected_jobs"
+msgstr "运行选定任务"
+
+msgid "button.save"
+msgstr "保存"
+
+msgid "button.save_changes"
+msgstr "保存更改"
+
+msgid "button.search"
+msgstr "搜索"
+
+msgid "button.see_all_releases"
+msgstr "查看所有版本"
+
+msgid "button.select_file"
+msgstr "选择文件"
+
+msgid "button.select_page"
+msgstr "选择页面"
+
+msgid "button.service"
+msgstr "服务"
+
+msgid "button.set_1h"
+msgstr "设置 1 小时"
+
+msgid "button.set_1w"
+msgstr "设置 1 周"
+
+msgid "button.set_24h"
+msgstr "设置 24 小时"
+
+msgid "button.set_permanent"
+msgstr "设置永久"
+
+msgid "button.setup"
+msgstr "设置"
+
+msgid "button.show"
+msgstr "显示"
+
+msgid "button.show_me"
+msgstr "带我看看"
+
+msgid "button.sign_in_with_passkey"
+msgstr "使用通行密钥登录"
+
+msgid "button.stop"
+msgstr "停止"
+
+msgid "button.submit"
+msgstr "提交"
+
+msgid "button.subscribe"
+msgstr "订阅"
+
+msgid "button.unban"
+msgstr "解禁"
+
+msgid "button.unban_all_filtered"
+msgstr "解除所有匹配的封禁"
+
+msgid "button.update_duration"
+msgstr "更新封禁期限"
+
+msgid "button.update_duration_all_filtered"
+msgstr "更新所有匹配封禁的时长"
+
+msgid "button.update_key"
+msgstr "更新密钥"
+
+msgid "button.upload_photo"
+msgstr "上传新照片"
+
+msgid "button.use_security_key"
+msgstr "使用安全密钥"
+
+msgid "button.use_template"
+msgstr "使用模板"
+
+msgid "button.verify"
+msgstr "验证"
+
+msgid "button.view"
+msgstr "查看"
+
+msgid "button.view_details"
+msgstr "查看详情"
+
+msgid "button.view_raw_data"
+msgstr "查看原始数据"
+
+msgid "button.wipe_other_sessions"
+msgstr "注销其他会话"
+
+msgid "button.wrap"
+msgstr "换行"
+
+msgid "cache.kpi_files"
+msgstr "文件"
+
+msgid "cache.kpi_per_service"
+msgstr "按服务"
+
+msgid "cache.subtitle"
+msgstr "由计划任务生成的缓存文件（黑名单、GeoIP 数据库等） — 针对每个服务和插件进行检查、下载或删除。"
+
+msgid "cache.title"
+msgstr "缓存文件"
+
+msgid "certificates.acme_help"
+msgstr "选择已启用并配置 Let's Encrypt 的现有设置的服务。此操作仅安排该配置；证书详情和挑战凭据在此处未输入。"
+
+msgid "certificates.active"
+msgstr "活动证书"
+
+msgid "certificates.algorithm"
+msgstr "算法"
+
+msgid "certificates.all"
+msgstr "全部"
+
+msgid "certificates.assignment_notice"
+msgstr "分配关系用于整理集中式证书清单；TLS 部署仍由各服务的证书设置控制。"
+
+msgid "certificates.assignments"
+msgstr "分配库存"
+
+msgid "certificates.assignments_help"
+msgstr "这些分配不会更改实时 TLS 设置。"
+
+msgid "certificates.attach"
+msgstr "分配"
+
+msgid "certificates.attach_all"
+msgstr "此证书已附加到所有可用的服务。"
+
+msgid "certificates.attach_copy"
+msgstr "将“%(name)s”分配给中心库存中的一个服务。"
+
+msgid "certificates.browse_certificate"
+msgstr "浏览证书"
+
+msgid "certificates.browse_key"
+msgstr "浏览私钥"
+
+msgid "certificates.common_name"
+msgstr "通用名称"
+
+msgid "certificates.confirm"
+msgstr "确认"
+
+msgid "certificates.confirm_action"
+msgstr "确认证书操作"
+
+msgid "certificates.confirm_delete"
+msgstr "删除“%(name)s”？此操作无法撤销。"
+
+msgid "certificates.confirm_generic"
+msgstr "确认此证书操作？"
+
+msgid "certificates.confirm_renew"
+msgstr "续订“%(name)s”？"
+
+msgid "certificates.confirm_renew_due"
+msgstr "检查所有证书并续订当前到期的证书？"
+
+msgid "certificates.create"
+msgstr "创建证书"
+
+msgid "certificates.download_chain"
+msgstr "下载链"
+
+msgid "certificates.download_leaf"
+msgstr "下载叶片"
+
+msgid "certificates.edit_help"
+msgstr "这只会更改库存元数据，而不是证书材料或实时 TLS 设置。"
+
+msgid "certificates.edit_metadata"
+msgstr "编辑证书元数据"
+
+msgid "certificates.empty"
+msgstr "无证书"
+
+msgid "certificates.empty_help"
+msgstr "创建自签名证书，安排 ACME 颁发，或上传现有的 PEM 证书和密钥。"
+
+msgid "certificates.expired_help"
+msgstr "需要注意"
+
+msgid "certificates.expires"
+msgstr "到期"
+
+msgid "certificates.expiring_help"
+msgstr "30 天或更短"
+
+msgid "certificates.file_extensions"
+msgstr "使用以下文件扩展名：%(extensions)s。"
+
+msgid "certificates.file_select"
+msgstr "选择一个 PEM 文件。"
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "该文件不得超过 1 MiB。"
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 指纹"
+
+msgid "certificates.issuer"
+msgstr "颁发者"
+
+msgid "certificates.issuers"
+msgstr "顶级颁发者"
+
+msgid "certificates.key_drop"
+msgstr "在此处拖动匹配的私钥"
+
+msgid "certificates.key_limit"
+msgstr "最多 1 MiB；在休息状态下加密，且无法下载"
+
+msgid "certificates.last_error"
+msgstr "上次错误"
+
+msgid "certificates.make_primary"
+msgstr "将其标记为此服务的首选库存分配"
+
+msgid "certificates.managed"
+msgstr "管理证书"
+
+msgid "certificates.new_selfsigned"
+msgstr "新的自签名证书"
+
+msgid "certificates.no_issuers"
+msgstr "无颁发者数据"
+
+msgid "certificates.none_due"
+msgstr "缺少证书"
+
+msgid "certificates.orphan_account"
+msgstr "账户"
+
+msgid "certificates.orphan_badge"
+msgstr "缺少 ACME 账户"
+
+msgid "certificates.orphan_help"
+msgstr "此续订记录引用了不再存在的 ACME 账户。续订将保持阻止状态，直到提供商状态得到修复。"
+
+msgid "certificates.orphan_server"
+msgstr "ACME 服务器"
+
+msgid "certificates.orphan_title"
+msgstr "缺少 ACME 账户"
+
+msgid "certificates.pem_certificate"
+msgstr "PEM 证书或链"
+
+msgid "certificates.pem_drop"
+msgstr "在此处拖动公共 PEM 证书或链"
+
+msgid "certificates.pem_limit"
+msgstr "最多 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "PEM 私钥"
+
+msgid "certificates.primary"
+msgstr "首选分配"
+
+msgid "certificates.primary_help"
+msgstr "将其标记为所选服务的首选库存分配"
+
+msgid "certificates.readonly"
+msgstr "数据库只读。可以检查和下载证书，但不能修改。"
+
+msgid "certificates.renew_due"
+msgstr "检查/续订到期"
+
+msgid "certificates.sans"
+msgstr "主题替代名称"
+
+msgid "certificates.save_metadata"
+msgstr "保存元数据"
+
+msgid "certificates.schedule"
+msgstr "安排颁发"
+
+msgid "certificates.schedule_acme"
+msgstr "安排 ACME 颁发"
+
+msgid "certificates.search"
+msgstr "搜索名称、通用名称、SAN、颁发者或指纹…"
+
+msgid "certificates.serial"
+msgstr "序列号"
+
+msgid "certificates.services"
+msgstr "服务"
+
+msgid "certificates.services_help"
+msgstr "使用 Ctrl 或 Command 选择多个服务。"
+
+msgid "certificates.showing_count"
+msgstr "显示 %(visible)s / %(total)s 个证书"
+
+msgid "certificates.source.customcert"
+msgstr "自定义"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "自签名"
+
+msgid "certificates.source_label"
+msgstr "来源"
+
+msgid "certificates.status.expired"
+msgstr "已过期"
+
+msgid "certificates.status.expiring_soon"
+msgstr "即将过期"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "尚未有效"
+
+msgid "certificates.status.revoked"
+msgstr "已撤销"
+
+msgid "certificates.status.valid"
+msgstr "有效"
+
+msgid "certificates.subtitle"
+msgstr "在中央库存中，发布、上传、分配、续订和检查证书。"
+
+msgid "certificates.total"
+msgstr "总计"
+
+msgid "certificates.truncated"
+msgstr "仅显示前 500 个证书。通过 API 获取完整结果。"
+
+msgid "certificates.unassigned"
+msgstr "未分配"
+
+msgid "certificates.upcoming"
+msgstr "即将到期"
+
+msgid "certificates.upcoming_help"
+msgstr "已过期或在 30 天的续订窗口内"
+
+msgid "certificates.upload"
+msgstr "上传证书"
+
+msgid "certificates.upload_custom"
+msgstr "上传自定义证书"
+
+msgid "certificates.upload_invalid"
+msgstr "选择有效的公钥和对应的私钥。"
+
+msgid "certificates.valid_days"
+msgstr "有效天数"
+
+msgid "certificates.valid_from"
+msgstr "从"
+
+msgid "certificates.valid_to"
+msgstr "到"
+
+msgid "compose.always_on"
+msgstr "始终开启"
+
+msgid "compose.count"
+msgstr "%(on)s 已启用 · %(total)s 可用 · %(locked)s 已锁定"
+
+msgid "compose.entries"
+msgstr "%(count)s 已配置"
+
+msgid "compose.filter.all"
+msgstr "全部"
+
+msgid "compose.filter.changed"
+msgstr "已更改"
+
+msgid "compose.filter.on"
+msgstr "开启"
+
+msgid "compose.locked"
+msgstr "此处无控制"
+
+msgid "compose.provenance.api"
+msgstr "通过 API 管理"
+
+msgid "compose.provenance.attachment"
+msgstr "来自附件"
+
+msgid "compose.provenance.clone"
+msgstr "克隆"
+
+msgid "compose.provenance.default"
+msgstr "默认"
+
+msgid "compose.provenance.edited"
+msgstr "在此编辑"
+
+msgid "compose.provenance.global"
+msgstr "来自全局"
+
+msgid "compose.provenance.managed"
+msgstr "由 %(method)s 设置"
+
+msgid "compose.provenance.template"
+msgstr "来自模板"
+
+msgid "compose.set_value"
+msgstr "设置值…"
+
+msgid "compose.show_more"
+msgstr "显示更多 %(count)s"
+
+msgid "compose.unavailable"
+msgstr "插件列表无法加载，因此此页面无法安全编辑。 等待 API 响应后重新加载。"
+
+msgid "configs.subtitle"
+msgstr "面向您服务的自定义 NGINX 配置片段——创建、编辑并管理 HTTP、ModSecurity 和 stream 层级的覆盖配置。"
+
+msgid "country.AD"
+msgstr "安道尔"
+
+msgid "country.AE"
+msgstr "阿拉伯联合酋长国"
+
+msgid "country.AF"
+msgstr "阿富汗"
+
+msgid "country.AG"
+msgstr "安提瓜和巴布达"
+
+msgid "country.AI"
+msgstr "安圭拉"
+
+msgid "country.AL"
+msgstr "阿尔巴尼亚"
+
+msgid "country.AM"
+msgstr "亚美尼亚"
+
+msgid "country.AO"
+msgstr "安哥拉"
+
+msgid "country.AQ"
+msgstr "南极洲"
+
+msgid "country.AR"
+msgstr "阿根廷"
+
+msgid "country.AS"
+msgstr "美属萨摩亚"
+
+msgid "country.AT"
+msgstr "奥地利"
+
+msgid "country.AU"
+msgstr "澳大利亚"
+
+msgid "country.AW"
+msgstr "阿鲁巴"
+
+msgid "country.AX"
+msgstr "奥兰群岛"
+
+msgid "country.AZ"
+msgstr "阿塞拜疆"
+
+msgid "country.BA"
+msgstr "波斯尼亚和黑塞哥维那"
+
+msgid "country.BB"
+msgstr "巴巴多斯"
+
+msgid "country.BD"
+msgstr "孟加拉国"
+
+msgid "country.BE"
+msgstr "比利时"
+
+msgid "country.BF"
+msgstr "布基纳法索"
+
+msgid "country.BG"
+msgstr "保加利亚"
+
+msgid "country.BH"
+msgstr "巴林"
+
+msgid "country.BI"
+msgstr "布隆迪"
+
+msgid "country.BJ"
+msgstr "贝宁"
+
+msgid "country.BL"
+msgstr "圣巴泰勒米"
+
+msgid "country.BM"
+msgstr "百慕大"
+
+msgid "country.BN"
+msgstr "文莱达鲁萨兰国"
+
+msgid "country.BO"
+msgstr "玻利维亚"
+
+msgid "country.BQ"
+msgstr "荷兰加勒比区"
+
+msgid "country.BR"
+msgstr "巴西"
+
+msgid "country.BS"
+msgstr "巴哈马"
+
+msgid "country.BT"
+msgstr "不丹"
+
+msgid "country.BV"
+msgstr "布韦岛"
+
+msgid "country.BW"
+msgstr "博茨瓦纳"
+
+msgid "country.BY"
+msgstr "白俄罗斯"
+
+msgid "country.BZ"
+msgstr "伯利兹"
+
+msgid "country.CA"
+msgstr "加拿大"
+
+msgid "country.CC"
+msgstr "科科斯（基林）群岛"
+
+msgid "country.CD"
+msgstr "刚果民主共和国"
+
+msgid "country.CF"
+msgstr "中非共和国"
+
+msgid "country.CG"
+msgstr "刚果共和国"
+
+msgid "country.CH"
+msgstr "瑞士"
+
+msgid "country.CI"
+msgstr "科特迪瓦"
+
+msgid "country.CK"
+msgstr "库克群岛"
+
+msgid "country.CL"
+msgstr "智利"
+
+msgid "country.CM"
+msgstr "喀麦隆"
+
+msgid "country.CN"
+msgstr "中国"
+
+msgid "country.CO"
+msgstr "哥伦比亚"
+
+msgid "country.CR"
+msgstr "哥斯达黎加"
+
+msgid "country.CU"
+msgstr "古巴"
+
+msgid "country.CV"
+msgstr "佛得角"
+
+msgid "country.CW"
+msgstr "库拉索"
+
+msgid "country.CX"
+msgstr "圣诞岛"
+
+msgid "country.CY"
+msgstr "塞浦路斯"
+
+msgid "country.CZ"
+msgstr "捷克共和国"
+
+msgid "country.DE"
+msgstr "德国"
+
+msgid "country.DJ"
+msgstr "吉布提"
+
+msgid "country.DK"
+msgstr "丹麦"
+
+msgid "country.DM"
+msgstr "多米尼克"
+
+msgid "country.DO"
+msgstr "多米尼加共和国"
+
+msgid "country.DZ"
+msgstr "阿尔及利亚"
+
+msgid "country.EC"
+msgstr "厄瓜多尔"
+
+msgid "country.EE"
+msgstr "爱沙尼亚"
+
+msgid "country.EG"
+msgstr "埃及"
+
+msgid "country.EH"
+msgstr "西撒哈拉"
+
+msgid "country.ER"
+msgstr "厄立特里亚"
+
+msgid "country.ES"
+msgstr "西班牙"
+
+msgid "country.ET"
+msgstr "埃塞俄比亚"
+
+msgid "country.EU"
+msgstr "欧洲"
+
+msgid "country.FI"
+msgstr "芬兰"
+
+msgid "country.FJ"
+msgstr "斐济"
+
+msgid "country.FK"
+msgstr "福克兰群岛（马尔维纳斯）"
+
+msgid "country.FM"
+msgstr "密克罗尼西亚"
+
+msgid "country.FO"
+msgstr "法罗群岛"
+
+msgid "country.FR"
+msgstr "法国"
+
+msgid "country.GA"
+msgstr "加蓬"
+
+msgid "country.GB"
+msgstr "英国"
+
+msgid "country.GD"
+msgstr "格林纳达"
+
+msgid "country.GE"
+msgstr "格鲁吉亚"
+
+msgid "country.GF"
+msgstr "法属圭亚那"
+
+msgid "country.GG"
+msgstr "根西岛"
+
+msgid "country.GH"
+msgstr "加纳"
+
+msgid "country.GI"
+msgstr "直布罗陀"
+
+msgid "country.GL"
+msgstr "格陵兰"
+
+msgid "country.GM"
+msgstr "冈比亚"
+
+msgid "country.GN"
+msgstr "几内亚"
+
+msgid "country.GP"
+msgstr "瓜德罗普"
+
+msgid "country.GQ"
+msgstr "赤道几内亚"
+
+msgid "country.GR"
+msgstr "希腊"
+
+msgid "country.GS"
+msgstr "南乔治亚和南桑威奇群岛"
+
+msgid "country.GT"
+msgstr "危地马拉"
+
+msgid "country.GU"
+msgstr "关岛"
+
+msgid "country.GW"
+msgstr "几内亚比绍"
+
+msgid "country.GY"
+msgstr "圭亚那"
+
+msgid "country.HK"
+msgstr "香港"
+
+msgid "country.HM"
+msgstr "赫德岛和麦克唐纳群岛"
+
+msgid "country.HN"
+msgstr "洪都拉斯"
+
+msgid "country.HR"
+msgstr "克罗地亚"
+
+msgid "country.HT"
+msgstr "海地"
+
+msgid "country.HU"
+msgstr "匈牙利"
+
+msgid "country.ID"
+msgstr "印度尼西亚"
+
+msgid "country.IE"
+msgstr "爱尔兰"
+
+msgid "country.IL"
+msgstr "以色列"
+
+msgid "country.IM"
+msgstr "马恩岛"
+
+msgid "country.IN"
+msgstr "印度"
+
+msgid "country.IO"
+msgstr "英属印度洋领地"
+
+msgid "country.IQ"
+msgstr "伊拉克"
+
+msgid "country.IR"
+msgstr "伊朗"
+
+msgid "country.IS"
+msgstr "冰岛"
+
+msgid "country.IT"
+msgstr "意大利"
+
+msgid "country.JE"
+msgstr "泽西岛"
+
+msgid "country.JM"
+msgstr "牙买加"
+
+msgid "country.JO"
+msgstr "约旦"
+
+msgid "country.JP"
+msgstr "日本"
+
+msgid "country.KE"
+msgstr "肯尼亚"
+
+msgid "country.KG"
+msgstr "吉尔吉斯斯坦"
+
+msgid "country.KH"
+msgstr "柬埔寨"
+
+msgid "country.KI"
+msgstr "基里巴斯"
+
+msgid "country.KM"
+msgstr "科摩罗"
+
+msgid "country.KN"
+msgstr "圣基茨和尼维斯"
+
+msgid "country.KP"
+msgstr "朝鲜"
+
+msgid "country.KR"
+msgstr "韩国"
+
+msgid "country.KW"
+msgstr "科威特"
+
+msgid "country.KY"
+msgstr "开曼群岛"
+
+msgid "country.KZ"
+msgstr "哈萨克斯坦"
+
+msgid "country.LA"
+msgstr "老挝"
+
+msgid "country.LB"
+msgstr "黎巴嫩"
+
+msgid "country.LC"
+msgstr "圣卢西亚"
+
+msgid "country.LI"
+msgstr "列支敦士登"
+
+msgid "country.LK"
+msgstr "斯里兰卡"
+
+msgid "country.LR"
+msgstr "利比里亚"
+
+msgid "country.LS"
+msgstr "莱索托"
+
+msgid "country.LT"
+msgstr "立陶宛"
+
+msgid "country.LU"
+msgstr "卢森堡"
+
+msgid "country.LV"
+msgstr "拉脱维亚"
+
+msgid "country.LY"
+msgstr "利比亚"
+
+msgid "country.MA"
+msgstr "摩洛哥"
+
+msgid "country.MC"
+msgstr "摩纳哥"
+
+msgid "country.MD"
+msgstr "摩尔多瓦"
+
+msgid "country.ME"
+msgstr "黑山"
+
+msgid "country.MF"
+msgstr "圣马丁"
+
+msgid "country.MG"
+msgstr "马达加斯加"
+
+msgid "country.MH"
+msgstr "马绍尔群岛"
+
+msgid "country.MK"
+msgstr "北马其顿"
+
+msgid "country.ML"
+msgstr "马里"
+
+msgid "country.MM"
+msgstr "缅甸"
+
+msgid "country.MN"
+msgstr "蒙古"
+
+msgid "country.MO"
+msgstr "澳门"
+
+msgid "country.MP"
+msgstr "北马里亚纳群岛"
+
+msgid "country.MQ"
+msgstr "马提尼克"
+
+msgid "country.MR"
+msgstr "毛里塔尼亚"
+
+msgid "country.MS"
+msgstr "蒙特塞拉特"
+
+msgid "country.MT"
+msgstr "马耳他"
+
+msgid "country.MU"
+msgstr "毛里求斯"
+
+msgid "country.MV"
+msgstr "马尔代夫"
+
+msgid "country.MW"
+msgstr "马拉维"
+
+msgid "country.MX"
+msgstr "墨西哥"
+
+msgid "country.MY"
+msgstr "马来西亚"
+
+msgid "country.MZ"
+msgstr "莫桑比克"
+
+msgid "country.NA"
+msgstr "纳米比亚"
+
+msgid "country.NC"
+msgstr "新喀里多尼亚"
+
+msgid "country.NE"
+msgstr "尼日尔"
+
+msgid "country.NF"
+msgstr "诺福克岛"
+
+msgid "country.NG"
+msgstr "尼日利亚"
+
+msgid "country.NI"
+msgstr "尼加拉瓜"
+
+msgid "country.NL"
+msgstr "荷兰"
+
+msgid "country.NO"
+msgstr "挪威"
+
+msgid "country.NP"
+msgstr "尼泊尔"
+
+msgid "country.NR"
+msgstr "瑙鲁"
+
+msgid "country.NU"
+msgstr "纽埃"
+
+msgid "country.NZ"
+msgstr "新西兰"
+
+msgid "country.OM"
+msgstr "阿曼"
+
+msgid "country.PA"
+msgstr "巴拿马"
+
+msgid "country.PE"
+msgstr "秘鲁"
+
+msgid "country.PF"
+msgstr "法属波利尼西亚"
+
+msgid "country.PG"
+msgstr "巴布亚新几内亚"
+
+msgid "country.PH"
+msgstr "菲律宾"
+
+msgid "country.PK"
+msgstr "巴基斯坦"
+
+msgid "country.PL"
+msgstr "波兰"
+
+msgid "country.PM"
+msgstr "圣皮埃尔和密克隆"
+
+msgid "country.PN"
+msgstr "皮特凯恩"
+
+msgid "country.PR"
+msgstr "波多黎各"
+
+msgid "country.PS"
+msgstr "巴勒斯坦"
+
+msgid "country.PT"
+msgstr "葡萄牙"
+
+msgid "country.PW"
+msgstr "帕劳"
+
+msgid "country.PY"
+msgstr "巴拉圭"
+
+msgid "country.QA"
+msgstr "卡塔尔"
+
+msgid "country.RE"
+msgstr "留尼汪"
+
+msgid "country.RO"
+msgstr "罗马尼亚"
+
+msgid "country.RS"
+msgstr "塞尔维亚"
+
+msgid "country.RU"
+msgstr "俄罗斯联邦"
+
+msgid "country.RW"
+msgstr "卢旺达"
+
+msgid "country.SA"
+msgstr "沙特阿拉伯"
+
+msgid "country.SB"
+msgstr "所罗门群岛"
+
+msgid "country.SC"
+msgstr "塞舌尔"
+
+msgid "country.SD"
+msgstr "苏丹"
+
+msgid "country.SE"
+msgstr "瑞典"
+
+msgid "country.SG"
+msgstr "新加坡"
+
+msgid "country.SH"
+msgstr "圣赫勒拿、阿森松和特里斯坦-达库尼亚"
+
+msgid "country.SI"
+msgstr "斯洛文尼亚"
+
+msgid "country.SJ"
+msgstr "斯瓦尔巴和扬马延"
+
+msgid "country.SK"
+msgstr "斯洛伐克"
+
+msgid "country.SL"
+msgstr "塞拉利昂"
+
+msgid "country.SM"
+msgstr "圣马力诺"
+
+msgid "country.SN"
+msgstr "塞内加尔"
+
+msgid "country.SO"
+msgstr "索马里"
+
+msgid "country.SR"
+msgstr "苏里南"
+
+msgid "country.SS"
+msgstr "南苏丹"
+
+msgid "country.ST"
+msgstr "圣多美和普林西比"
+
+msgid "country.SV"
+msgstr "萨尔瓦多"
+
+msgid "country.SX"
+msgstr "圣马丁（荷兰部分）"
+
+msgid "country.SY"
+msgstr "叙利亚"
+
+msgid "country.SZ"
+msgstr "斯威士兰"
+
+msgid "country.TC"
+msgstr "特克斯和凯科斯群岛"
+
+msgid "country.TD"
+msgstr "乍得"
+
+msgid "country.TF"
+msgstr "法属南方领土"
+
+msgid "country.TG"
+msgstr "多哥"
+
+msgid "country.TH"
+msgstr "泰国"
+
+msgid "country.TJ"
+msgstr "塔吉克斯坦"
+
+msgid "country.TK"
+msgstr "托克劳"
+
+msgid "country.TL"
+msgstr "东帝汶"
+
+msgid "country.TM"
+msgstr "土库曼斯坦"
+
+msgid "country.TN"
+msgstr "突尼斯"
+
+msgid "country.TO"
+msgstr "汤加"
+
+msgid "country.TR"
+msgstr "土耳其"
+
+msgid "country.TT"
+msgstr "特立尼达和多巴哥"
+
+msgid "country.TV"
+msgstr "图瓦卢"
+
+msgid "country.TW"
+msgstr "台湾"
+
+msgid "country.TZ"
+msgstr "坦桑尼亚"
+
+msgid "country.UA"
+msgstr "乌克兰"
+
+msgid "country.UG"
+msgstr "乌干达"
+
+msgid "country.UM"
+msgstr "美国本土外小岛屿"
+
+msgid "country.US"
+msgstr "美国"
+
+msgid "country.UY"
+msgstr "乌拉圭"
+
+msgid "country.UZ"
+msgstr "乌兹别克斯坦"
+
+msgid "country.VA"
+msgstr "梵蒂冈城国"
+
+msgid "country.VC"
+msgstr "圣文森特和格林纳丁斯"
+
+msgid "country.VE"
+msgstr "委内瑞拉"
+
+msgid "country.VG"
+msgstr "英属维尔京群岛"
+
+msgid "country.VI"
+msgstr "美属维尔京群岛"
+
+msgid "country.VN"
+msgstr "越南"
+
+msgid "country.VU"
+msgstr "瓦努阿图"
+
+msgid "country.WF"
+msgstr "瓦利斯和富图纳"
+
+msgid "country.WS"
+msgstr "萨摩亚"
+
+msgid "country.XK"
+msgstr "科索沃"
+
+msgid "country.YE"
+msgstr "也门"
+
+msgid "country.YT"
+msgstr "马约特"
+
+msgid "country.ZA"
+msgstr "南非"
+
+msgid "country.ZM"
+msgstr "赞比亚"
+
+msgid "country.ZW"
+msgstr "津巴布韦"
+
+msgid "country.not_applicable"
+msgstr "不适用"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "被阻止的请求"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "被阻止的唯一 IP"
+
+msgid "dashboard.card.certificates.title"
+msgstr "证书"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s 运行中 / %(down)s 已停止 / %(loading)s 加载中"
+
+msgid "dashboard.card.instances.title"
+msgstr "实例"
+
+msgid "dashboard.card.news.title"
+msgstr "新闻"
+
+msgid "dashboard.card.plan.title"
+msgstr "计划"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s 核心 / %(pro)s PRO / %(external)s 外部"
+
+msgid "dashboard.card.plugins.title"
+msgstr "插件"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "严重：系统内存即将耗尽！"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "内存充足，适合生产环境"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "建议升级到 16GB+ 以用于生产环境"
+
+msgid "dashboard.card.ram.title"
+msgstr "系统内存"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% 已使用"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "警告：内存不足可能影响性能"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s 在线 / %(draft)s 草稿"
+
+msgid "dashboard.card.services.title"
+msgstr "服务"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "主要拦截原因"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "总请求数"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "即将推出"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "上游"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "按国家/地区阻止的请求"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "被阻止的请求"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "数量"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "随时间变化的被阻止请求"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "时间"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "阻止状态随时间变化"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "被阻止的请求"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "请求状态分布"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "已拦截"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "一段时间内的已拦截请求（所选范围）"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "被阻止最多的 IP"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "前 10 名被阻止的 IP"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "被阻止的请求"
+
+msgid "dashboard.map.hover_info"
+msgstr "将鼠标悬停在国家/地区上"
+
+msgid "dashboard.map.legend"
+msgstr "图例"
+
+msgid "dashboard.map.no_data"
+msgstr "无数据"
+
+msgid "dashboard.mini.across_countries"
+msgstr "在 %(count)s 国家"
+
+msgid "dashboard.mini.enforced"
+msgstr "目前生效"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% 被阻止"
+
+msgid "dashboard.mini.scheduled"
+msgstr "计划"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "已拦截与已允许"
+
+msgid "dashboard.panel.map_sub"
+msgstr "悬停查看详情"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "按触发规则"
+
+msgid "dashboard.panel.status_sub"
+msgstr "HTTP 响应码"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "所选范围"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "按请求数"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "已阻止 %(total)s 总计"
+
+msgid "dashboard.status.free_plan"
+msgstr "免费计划"
+
+msgid "dashboard.status.renews"
+msgstr "续订"
+
+msgid "dashboard.status.services_licensed"
+msgstr "%(count)s 服务已授权"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "与前次比较"
+
+msgid "dashboard.status.vs_prev"
+msgstr "与前次比较"
+
+msgid "dashboard.tile.bans_active"
+msgstr "有效封禁"
+
+msgid "dashboard.tile.jobs"
+msgstr "计划任务"
+
+msgid "dashboard.tile.trend"
+msgstr "已拦截请求趋势"
+
+msgid "dashboard.welcome.greeting"
+msgstr "欢迎回来，"
+
+msgid "dashboard.welcome.title"
+msgstr "欢迎回来，%(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "最近 %(days)s 天"
+
+msgid "dashboard.window.title"
+msgstr "仪表板窗口"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "所有 %(count)s 个匹配的 %(entity)s 均已选中。"
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "选择所有 %(count)s 个匹配的 %(entity)s"
+
+msgid "datatable.bulk_select_clear"
+msgstr "清除选择"
+
+msgid "datatable.bulk_select_page"
+msgstr "此页面上的所有 %(count)s 个 %(entity)s 均已选中。"
+
+msgid "datatable.info_bans"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 条封禁"
+
+msgid "datatable.info_cache"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个缓存文件"
+
+msgid "datatable.info_configs"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 条自定义配置"
+
+msgid "datatable.info_empty_bans"
+msgstr "无可用封禁"
+
+msgid "datatable.info_empty_cache"
+msgstr "无可用缓存文件"
+
+msgid "datatable.info_empty_configs"
+msgstr "无可用自定义配置"
+
+msgid "datatable.info_empty_instances"
+msgstr "无可用实例"
+
+msgid "datatable.info_empty_items"
+msgstr "无可用项目"
+
+msgid "datatable.info_empty_jobs"
+msgstr "无可用任务"
+
+msgid "datatable.info_empty_plugins"
+msgstr "无可用插件"
+
+msgid "datatable.info_empty_reports"
+msgstr "无可用报告"
+
+msgid "datatable.info_empty_services"
+msgstr "无可用服务"
+
+msgid "datatable.info_empty_templates"
+msgstr "没有可用的模板"
+
+msgid "datatable.info_filtered_bans"
+msgstr "（从 _MAX_ 条总封禁中筛选）"
+
+msgid "datatable.info_filtered_cache"
+msgstr "（从 _MAX_ 个总缓存文件中筛选）"
+
+msgid "datatable.info_filtered_configs"
+msgstr "（从 _MAX_ 条总自定义配置中筛选）"
+
+msgid "datatable.info_filtered_instances"
+msgstr "（从 _MAX_ 个总实例中筛选）"
+
+msgid "datatable.info_filtered_items"
+msgstr "（从 _MAX_ 个总项目中筛选）"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "（从 _MAX_ 个总任务中筛选）"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "（从 _MAX_ 个总插件中筛选）"
+
+msgid "datatable.info_filtered_reports"
+msgstr "（从 _MAX_ 个总报告中筛选）"
+
+msgid "datatable.info_filtered_services"
+msgstr "（从 _MAX_ 个总服务中筛选）"
+
+msgid "datatable.info_filtered_templates"
+msgstr "（从 _MAX_ 个总模板中筛选）"
+
+msgid "datatable.info_instances"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个实例"
+
+msgid "datatable.info_items"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个项目"
+
+msgid "datatable.info_jobs"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个任务"
+
+msgid "datatable.info_plugins"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个插件"
+
+msgid "datatable.info_reports"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个报告"
+
+msgid "datatable.info_services"
+msgstr "显示 %(start)s 到 %(end)s 条，共 %(total)s 个服务"
+
+msgid "datatable.info_templates"
+msgstr "显示 %(start)s 到 %(end)s 个模板，共 %(total)s 个"
+
+msgid "datatable.length_all"
+msgstr "全部"
+
+msgid "datatable.length_menu_bans"
+msgstr "显示 _MENU_ 条封禁"
+
+msgid "datatable.length_menu_cache"
+msgstr "显示 _MENU_ 个缓存文件"
+
+msgid "datatable.length_menu_configs"
+msgstr "显示 _MENU_ 条自定义配置"
+
+msgid "datatable.length_menu_instances"
+msgstr "显示 _MENU_ 个实例"
+
+msgid "datatable.length_menu_items"
+msgstr "显示 _MENU_ 个项目"
+
+msgid "datatable.length_menu_jobs"
+msgstr "显示 _MENU_ 个任务"
+
+msgid "datatable.length_menu_plugins"
+msgstr "显示 _MENU_ 个插件"
+
+msgid "datatable.length_menu_reports"
+msgstr "显示 _MENU_ 个报告"
+
+msgid "datatable.length_menu_services"
+msgstr "显示 _MENU_ 个服务"
+
+msgid "datatable.length_menu_templates"
+msgstr "显示 _MENU_ 个模板"
+
+msgid "datatable.paginate.first"
+msgstr "首页"
+
+msgid "datatable.paginate.last"
+msgstr "末页"
+
+msgid "datatable.paginate.next"
+msgstr "下一页"
+
+msgid "datatable.paginate.previous"
+msgstr "上一页"
+
+msgid "datatable.processing"
+msgstr "处理中..."
+
+msgid "datatable.search"
+msgstr "搜索："
+
+msgid "datatable.select_rows_bans_0"
+msgstr "未选择封禁"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "已选择 1 条封禁"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "已选择 %d 条封禁"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "未选择缓存文件"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "已选择 1 个缓存文件"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "已选择 %d 个缓存文件"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "未选择自定义配置"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "已选择 1 条自定义配置"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "已选择 %d 条自定义配置"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "未选择实例"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "已选择 1 个实例"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "已选择 %d 个实例"
+
+msgid "datatable.select_rows_items_0"
+msgstr "未选择项目"
+
+msgid "datatable.select_rows_items_1"
+msgstr "已选择 1 个项目"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "已选择 %d 个项目"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "未选择任务"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "已选择 1 个任务"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "已选择 %d 个任务"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "未选择插件"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "已选择 1 个插件"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "已选择 %d 个插件"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "未选择报告"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "已选择 1 个报告"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "已选择 %d 个报告"
+
+msgid "datatable.select_rows_services_0"
+msgstr "未选择服务"
+
+msgid "datatable.select_rows_services_1"
+msgstr "已选择 1 个服务"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "已选择 %d 个服务"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "未选择模板"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "选择了 1 个模板"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "选择了 %d 个模板"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s 已选中"
+
+msgid "datatable.selected_list_empty"
+msgstr "未选中 %(entity)s。"
+
+msgid "datatable.zero_records_bans"
+msgstr "未找到匹配的封禁"
+
+msgid "datatable.zero_records_cache"
+msgstr "未找到匹配的缓存文件"
+
+msgid "datatable.zero_records_configs"
+msgstr "未找到匹配的自定义配置"
+
+msgid "datatable.zero_records_instances"
+msgstr "未找到匹配的实例"
+
+msgid "datatable.zero_records_items"
+msgstr "未找到匹配的项目"
+
+msgid "datatable.zero_records_jobs"
+msgstr "未找到匹配的任务"
+
+msgid "datatable.zero_records_plugins"
+msgstr "未找到匹配的插件"
+
+msgid "datatable.zero_records_reports"
+msgstr "未找到匹配的报告"
+
+msgid "datatable.zero_records_services"
+msgstr "未找到匹配的服务"
+
+msgid "datatable.zero_records_templates"
+msgstr "未找到匹配的模板"
+
+msgid "dev_log.copy_failed"
+msgstr "复制文本失败："
+
+msgid "dev_log.news_fetch_fail"
+msgstr "获取新闻失败："
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "跳过格式错误的行：%(line)s"
+
+msgid "duration.1_hour"
+msgstr "1 小时"
+
+msgid "duration.1_week"
+msgstr "1 周"
+
+msgid "duration.24_hours"
+msgstr "24 小时"
+
+msgid "duration.custom"
+msgstr "自定义"
+
+msgid "duration.permanent"
+msgstr "永久"
+
+msgid "error.401.help"
+msgstr "您必须登录才能访问此资源。"
+
+msgid "error.401.message"
+msgstr "请登录后继续。"
+
+msgid "error.401.title"
+msgstr "需要身份验证"
+
+msgid "error.403.help"
+msgstr "请验证您的凭据，如果您认为这是一个错误，请联系管理员。"
+
+msgid "error.403.message"
+msgstr "您无权访问此页面。"
+
+msgid "error.403.title"
+msgstr "访问被拒绝"
+
+msgid "error.404.help"
+msgstr "请检查 URL 是否正确，如果您认为这是一个错误，请联系管理员。"
+
+msgid "error.404.message"
+msgstr "找不到请求的资源。"
+
+msgid "error.404.title"
+msgstr "未找到"
+
+msgid "error.5xx.help"
+msgstr "请稍后重试，如果问题仍然存在，请联系管理员。"
+
+msgid "error.5xx.message"
+msgstr "发生意外的服务器错误。"
+
+msgid "error.5xx.title"
+msgstr "服务器错误"
+
+msgid "error.ban_update_failed"
+msgstr "更新封禁期限失败。请重试。"
+
+msgid "error.reports_load_error"
+msgstr "加载报告时出错。请尝试刷新页面。"
+
+msgid "error.unban_failed"
+msgstr "解禁 IP 地址失败。请重试。"
+
+msgid "flash.easter_egg"
+msgstr "如果你读到了这条信息，说明你很好奇"
+
+msgid "flash.error"
+msgstr "错误"
+
+msgid "flash.message"
+msgstr "信息"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "您的服务数量超出了 PRO 许可证允许的范围。请升级许可证，或将部分服务转换为草稿模式以解锁您的 PRO 许可证。"
+
+msgid "flash.time.just_now"
+msgstr "刚才"
+
+msgid "flash.warning"
+msgstr "警告"
+
+msgid "footer.blog"
+msgstr "博客"
+
+msgid "footer.documentation"
+msgstr "文档"
+
+msgid "footer.license"
+msgstr "许可证"
+
+msgid "footer.made_by"
+msgstr "由"
+
+msgid "footer.privacy"
+msgstr "隐私"
+
+msgid "footer.support"
+msgstr "支持"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "包含附加的自定义配置"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "覆盖现有 UI/API 自定义配置"
+
+msgid "form.checkbox.remember_me"
+msgstr "记住我"
+
+msgid "form.help.ban_specific_service"
+msgstr "封禁将仅适用于此特定服务。"
+
+msgid "form.help.hostname_length_limit"
+msgstr "主机名限制为 256 个字符。"
+
+msgid "form.help.hostname_special_chars"
+msgstr "协议/端口规范中只允许使用 `/` 和 `:`。"
+
+msgid "form.help.multivalue_separator"
+msgstr "值的分隔符："
+
+msgid "form.help.permanent_ban"
+msgstr "如果选中，封禁将永久有效，直到手动移除为止。"
+
+msgid "form.help.photo_extensions"
+msgstr "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+
+msgid "form.label.2fa_code"
+msgstr "2FA 代码"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "2FA 代码或恢复代码"
+
+msgid "form.label.admin_email"
+msgstr "管理员邮箱"
+
+msgid "form.label.admin_password"
+msgstr "管理员密码"
+
+msgid "form.label.admin_username"
+msgstr "管理员用户名"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "自动 Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "封禁范围"
+
+msgid "form.label.certificate_authority"
+msgstr "证书颁发机构"
+
+msgid "form.label.certificate_priority"
+msgstr "证书优先级"
+
+msgid "form.label.challenge_type"
+msgstr "质询类型"
+
+msgid "form.label.config_type"
+msgstr "配置类型"
+
+msgid "form.label.configuration_name"
+msgstr "配置名称"
+
+msgid "form.label.confirm_password"
+msgstr "确认密码"
+
+msgid "form.label.current_password"
+msgstr "当前密码"
+
+msgid "form.label.custom_config"
+msgstr "配置"
+
+msgid "form.label.custom_end_date"
+msgstr "自定义结束日期"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "自定义 SSL 证书"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "自定义 SSL 证书数据 (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "自定义 SSL 密钥"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "自定义 SSL 密钥数据 (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Let's Encrypt DNS 凭证项"
+
+msgid "form.label.dns_propagation"
+msgstr "DNS 传播延迟"
+
+msgid "form.label.dns_provider"
+msgstr "DNS 提供商"
+
+msgid "form.label.email"
+msgstr "邮箱"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "用于 Let's Encrypt 的邮箱"
+
+msgid "form.label.end_date"
+msgstr "结束日期"
+
+msgid "form.label.hostname"
+msgstr "主机名"
+
+msgid "form.label.instance_id"
+msgstr "实例 ID"
+
+msgid "form.label.ip_address"
+msgstr "IP 地址"
+
+msgid "form.label.keywords"
+msgstr "关键词"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt 自定义配置文件"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "禁用公共后缀（PSL 黑名单）"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Let's Encrypt DNS 凭证项"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Let's Encrypt 配置文件"
+
+msgid "form.label.license_key"
+msgstr "许可证密钥"
+
+msgid "form.label.make_permanent"
+msgstr "设为永久"
+
+msgid "form.label.name"
+msgstr "名称"
+
+msgid "form.label.new_duration"
+msgstr "新期限"
+
+msgid "form.label.new_password"
+msgstr "新密码"
+
+msgid "form.label.optional"
+msgstr "（可选）"
+
+msgid "form.label.passkey_name"
+msgstr "通行密钥名称"
+
+msgid "form.label.password"
+msgstr "密码"
+
+msgid "form.label.permanent_ban"
+msgstr "永久封禁"
+
+msgid "form.label.plugin_id"
+msgstr "插件"
+
+msgid "form.label.raw_configuration"
+msgstr "原始配置"
+
+msgid "form.label.real_ip_from"
+msgstr "真实 IP 来源"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "真实 IP 来源 (URLs)"
+
+msgid "form.label.real_ip_header"
+msgstr "真实 IP 标头"
+
+msgid "form.label.real_ip_recursive"
+msgstr "递归搜索真实 IP"
+
+msgid "form.label.reason"
+msgstr "原因"
+
+msgid "form.label.secret_token"
+msgstr "密钥"
+
+msgid "form.label.server_name"
+msgstr "服务器名称"
+
+msgid "form.label.service_name"
+msgstr "服务名称"
+
+msgid "form.label.template_id"
+msgstr "模板 ID"
+
+msgid "form.label.theme"
+msgstr "主题"
+
+msgid "form.label.type"
+msgstr "类型"
+
+msgid "form.label.ui_host"
+msgstr "UI 主机"
+
+msgid "form.label.ui_url"
+msgstr "UI URL"
+
+msgid "form.label.use_custom_ssl"
+msgstr "使用自定义 SSL"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "使用 Let's Encrypt Staging"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "使用 PROXY 协议"
+
+msgid "form.label.use_real_ip"
+msgstr "使用真实 IP"
+
+msgid "form.label.username"
+msgstr "用户名"
+
+msgid "form.label.wildcard_certificates"
+msgstr "通配符证书"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 连接超时"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API 密钥"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "ZeroSSL API 最大时长"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "ZeroSSL API 重试次数"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 重试延迟"
+
+msgid "form.placeholder.2fa_code"
+msgstr "输入代码"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "输入代码或恢复代码"
+
+msgid "form.placeholder.config_name"
+msgstr "我的自定义配置"
+
+msgid "form.placeholder.current_password"
+msgstr "当前密码"
+
+msgid "form.placeholder.enter_username"
+msgstr "输入您的用户名"
+
+msgid "form.placeholder.keywords"
+msgstr "关键词..."
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "输入值..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "搜索插件..."
+
+msgid "form.placeholder.search"
+msgstr "搜索..."
+
+msgid "form.placeholder.secret_token"
+msgstr "密钥"
+
+msgid "form.placeholder.select_service"
+msgstr "选择服务"
+
+msgid "form.placeholder.username_example"
+msgstr "张三"
+
+msgid "form.validation.confirm_password_match"
+msgstr "密码不匹配。"
+
+msgid "form.validation.password_length"
+msgstr "密码必须至少包含 8 个字符。"
+
+msgid "form.validation.password_number"
+msgstr "密码必须至少包含 1 个数字。"
+
+msgid "form.validation.password_special"
+msgstr "密码必须至少包含 1 个特殊字符。"
+
+msgid "form.validation.password_uppercase"
+msgstr "密码必须至少包含 1 个大写字母。"
+
+msgid "input_list.view_all_settings"
+msgstr "查看所有 %(count)s 设置"
+
+msgid "instance.type.container"
+msgstr "容器"
+
+msgid "instance.type.pod"
+msgstr "Pod"
+
+msgid "instance.type.static"
+msgstr "静态"
+
+msgid "instances.down"
+msgstr "已停止"
+
+msgid "instances.loading"
+msgstr "正在加载"
+
+msgid "instances.subtitle"
+msgstr "管理与此 UI 关联的 BunkerWeb 实例：创建、ping、重新加载、停止或删除它们。"
+
+msgid "instances.total"
+msgstr "总实例数"
+
+msgid "instances.up"
+msgstr "运行中"
+
+msgid "interval.day"
+msgstr "每天"
+
+msgid "interval.hour"
+msgstr "每小时"
+
+msgid "interval.minute"
+msgstr "每分钟"
+
+msgid "interval.once"
+msgstr "一次"
+
+msgid "interval.week"
+msgstr "每周"
+
+msgid "job.history.end_date"
+msgstr "结束日期"
+
+msgid "job.history.start_date"
+msgstr "开始日期"
+
+msgid "job.history.success"
+msgstr "成功"
+
+msgid "jobs.subtitle"
+msgstr "由 BunkerWeb 调度器运行的计划任务和一次性任务 — 跟踪其状态并按需运行。"
+
+msgid "jobs.tile.async"
+msgstr "异步"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "上次运行失败"
+
+msgid "jobs.tile.reload_required"
+msgstr "需要重新加载"
+
+msgid "jobs.tile.total"
+msgstr "总任务数"
+
+msgid "legend.locked_settings_annotation"
+msgstr "已锁定 (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "锁定的设置会突出显示"
+
+msgid "link.back_to_login"
+msgstr "返回登录"
+
+msgid "link.forgot_password"
+msgstr "忘记密码？"
+
+msgid "link.get_support"
+msgstr "获取支持"
+
+msgid "link.here"
+msgstr "这里"
+
+msgid "link.more_info"
+msgstr "更多信息"
+
+msgid "link.more_news"
+msgstr "更多新闻"
+
+msgid "link.opens_new_tab"
+msgstr "（在新标签页中打开）"
+
+msgid "link.privacy_policy"
+msgstr "隐私政策"
+
+msgid "link.read_more"
+msgstr "阅读更多"
+
+msgid "link.see_more"
+msgstr "查看更多"
+
+msgid "link.upgrade"
+msgstr "升级？"
+
+msgid "link.use_authenticator_code"
+msgstr "使用身份验证码"
+
+msgid "link.use_recovery_code"
+msgstr "使用恢复码"
+
+msgid "login.or_use_password"
+msgstr "或使用您的密码"
+
+msgid "login.subtitle"
+msgstr "登录到您的 BunkerWeb 帐户"
+
+msgid "login.title"
+msgstr "登录"
+
+msgid "logs.all_sources"
+msgstr "所有来源（实时）"
+
+msgid "logs.annotation_error"
+msgstr "错误"
+
+msgid "logs.annotation_warning"
+msgstr "警告"
+
+msgid "logs.collapse"
+msgstr "折叠"
+
+msgid "logs.expand"
+msgstr "展开"
+
+msgid "logs.filter_levels"
+msgstr "级别"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s 个错误，%(warnings)s 个警告"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Let's Encrypt 日志"
+
+msgid "logs.level_all"
+msgstr "所有日志"
+
+msgid "logs.level_critical"
+msgstr "严重"
+
+msgid "logs.level_debug"
+msgstr "调试"
+
+msgid "logs.level_error"
+msgstr "错误"
+
+msgid "logs.level_errors_only"
+msgstr "仅错误"
+
+msgid "logs.level_info"
+msgstr "信息"
+
+msgid "logs.level_notice"
+msgstr "通知"
+
+msgid "logs.level_security_only"
+msgstr "仅安全日志"
+
+msgid "logs.level_warning"
+msgstr "警告"
+
+msgid "logs.lines_all"
+msgstr "全部"
+
+msgid "logs.lines_label"
+msgstr "行"
+
+msgid "logs.live_title"
+msgstr "实时日志"
+
+msgid "logs.main_logs"
+msgstr "主日志"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s 行 · 修改于 %(when)s"
+
+msgid "logs.new_lines"
+msgstr "新行"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s 行新日志"
+
+msgid "logs.no_log_files"
+msgstr "没有日志文件可显示，请查阅文档以获取更多关于如何启用日志记录的信息"
+
+msgid "logs.pause"
+msgstr "暂停"
+
+msgid "logs.resume"
+msgstr "继续"
+
+msgid "logs.select_file_prompt"
+msgstr "选择一个日志文件以查看其内容"
+
+msgid "logs.showing_all"
+msgstr "%(total)s 行"
+
+msgid "logs.showing_some"
+msgstr "显示 %(shown)s / %(total)s"
+
+msgid "logs.tailing_sources"
+msgstr "正在跟踪 · %(count)s 个来源"
+
+msgid "logs.taller"
+msgstr "增高"
+
+msgid "logs.trimmed_notice"
+msgstr "--- 为提高性能，已删除 %(count)s 条较早的日志行 ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "将您的插件存档拖放到此处或单击以选择文件。"
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "要封禁所有 %(count)s 个匹配报告中的 IP 吗？重复目标只会应用一次。"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "您确定要删除选定的缓存文件吗？"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "确定要转换所选的自定义配置吗？"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "确定将选定的自定义配置转换为 %(state)s 吗？"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "您确定要删除选定的自定义配置吗？"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "您确定要转换选定的服务吗？"
+
+msgid "modal.body.confirm_next_step"
+msgstr "您确定要继续下一步吗？"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "您确定要删除选定的插件吗？"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "您确定要删除模板 %(name)s 吗？"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "您确定要删除选定的实例吗？"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "您确定要删除选定的实例吗？"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "一个或多个选定的模板已分配给服务（总共 %(services_count)s 个服务）。删除它们将清除这些分配。您想继续吗？"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "您确定要删除此步骤吗？"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "内容"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "步骤"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "由全局设置使用"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "由服务使用：%(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "将导出所选服务。启用下面的选项可将其附加的自定义配置打包到 .zip 存档中。"
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "这将获取全局设置并将其应用到当前模板。"
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "仅更新本模板中存在的设置。"
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "与默认值相同的值会被忽略。"
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME 永不会被覆盖。"
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "将您的自定义配置导出文件拖放到此处，或单击以选择文件。"
+
+msgid "modal.body.import_configs_warning"
+msgstr "由 scheduler、autoconf 或 templates 创建的自定义配置始终会保留。只能覆盖 UI/API 配置。"
+
+msgid "modal.body.import_services_dropzone"
+msgstr "将您的服务导出文件拖放到此处，或单击以选择文件。"
+
+msgid "modal.body.import_services_warning"
+msgstr "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。"
+
+msgid "modal.body.instance_creation_alert"
+msgstr "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。"
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "如果遇到问题，您可以手动接受不安全的证书："
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。"
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "这些恢复代码仅显示一次。请确保将其安全保存。"
+
+msgid "modal.body.reset_template_alert"
+msgstr "您确定要重置当前模板设置和自定义配置吗？"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "您确定要转换选定的服务吗？"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "您确定要删除选定的服务吗？"
+
+#. plural pair; 1 form(s) for zh, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "您确定要解禁选定的 IP 地址吗？"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "确定要解除所有 %(count)s 个匹配的封禁吗？"
+
+msgid "modal.body.update_duration_alert"
+msgstr "请为选定的封禁选择新的期限："
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "为所有 %(count)s 个匹配的封禁选择新时长："
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "应用全局设置"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "重置模板配置"
+
+msgid "modal.section.ban_details"
+msgstr "封禁详情"
+
+msgid "modal.section.ban_scope"
+msgstr "封禁范围"
+
+msgid "modal.section.delete"
+msgstr "删除"
+
+msgid "modal.title.add_bans"
+msgstr "添加封禁"
+
+msgid "modal.title.add_plugins"
+msgstr "添加插件"
+
+msgid "modal.title.confirm_conversion"
+msgstr "确认转换"
+
+msgid "modal.title.confirm_deletion"
+msgstr "确认删除"
+
+msgid "modal.title.confirm_unban"
+msgstr "确认解禁"
+
+msgid "modal.title.create_new_instance"
+msgstr "创建新实例"
+
+msgid "modal.title.create_template"
+msgstr "创建模板"
+
+msgid "modal.title.delete_instance"
+msgstr "删除实例"
+
+msgid "modal.title.delete_step"
+msgstr "删除步骤"
+
+msgid "modal.title.delete_template"
+msgstr "删除模板"
+
+msgid "modal.title.edit_template"
+msgstr "编辑模板：%(name)s"
+
+msgid "modal.title.export_services"
+msgstr "导出服务"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "应用全局设置？"
+
+msgid "modal.title.from_plugin"
+msgstr "来自插件"
+
+msgid "modal.title.full_url"
+msgstr "完整 URL"
+
+msgid "modal.title.import_configs"
+msgstr "导入自定义配置"
+
+msgid "modal.title.import_services"
+msgstr "导入服务"
+
+msgid "modal.title.job_history"
+msgstr "最近 10 次任务执行"
+
+msgid "modal.title.job_history_count"
+msgstr "任务 %(count)s 次执行"
+
+msgid "modal.title.multiselect_selected"
+msgstr "选定的项目"
+
+msgid "modal.title.recovery_codes"
+msgstr "恢复代码"
+
+msgid "modal.title.reset_template_config"
+msgstr "重置模板配置？"
+
+msgid "modal.title.security_report_details"
+msgstr "安全报告详情"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "服务器名称不是唯一的"
+
+msgid "modal.title.update_duration"
+msgstr "更新封禁期限"
+
+msgid "mode.advanced"
+msgstr "高级"
+
+msgid "mode.compose"
+msgstr "撰写"
+
+msgid "mode.easy"
+msgstr "简单"
+
+msgid "mode.raw"
+msgstr "原始"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "升级到 PRO"
+
+msgid "navbar.dropdown.logout"
+msgstr "登出"
+
+msgid "navbar.link.documentation"
+msgstr "文档"
+
+msgid "navbar.version"
+msgstr "版本"
+
+msgid "navigation.about"
+msgstr "关于"
+
+msgid "navigation.bans"
+msgstr "封禁"
+
+msgid "navigation.cache"
+msgstr "缓存"
+
+msgid "navigation.certificates"
+msgstr "证书"
+
+msgid "navigation.configs"
+msgstr "配置"
+
+msgid "navigation.configure"
+msgstr "配置"
+
+msgid "navigation.edition_community"
+msgstr "社区版"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "附加页面"
+
+msgid "navigation.global_settings"
+msgstr "全局设置"
+
+msgid "navigation.groups"
+msgstr "资源组"
+
+msgid "navigation.home"
+msgstr "主页"
+
+msgid "navigation.instances"
+msgstr "实例"
+
+msgid "navigation.jobs"
+msgstr "任务"
+
+msgid "navigation.logs"
+msgstr "日志"
+
+msgid "navigation.misc"
+msgstr "杂项"
+
+msgid "navigation.mode_selection"
+msgstr "模式选择"
+
+msgid "navigation.more"
+msgstr "更多..."
+
+msgid "navigation.operate"
+msgstr "运维"
+
+msgid "navigation.overview"
+msgstr "概览"
+
+msgid "navigation.plugin_activated"
+msgstr "插件已激活"
+
+msgid "navigation.plugin_activated_global"
+msgstr "插件已全局激活"
+
+msgid "navigation.plugin_deactivated"
+msgstr "插件已停用"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "插件已全局停用"
+
+msgid "navigation.plugins"
+msgstr "插件"
+
+msgid "navigation.plugins_pages"
+msgstr "插件页面"
+
+msgid "navigation.pro"
+msgstr "Pro"
+
+msgid "navigation.redirects"
+msgstr "重定向"
+
+msgid "navigation.reports"
+msgstr "报告"
+
+msgid "navigation.services"
+msgstr "服务"
+
+msgid "navigation.support"
+msgstr "支持"
+
+msgid "navigation.system"
+msgstr "系统"
+
+msgid "navigation.templates"
+msgstr "模板"
+
+msgid "navigation.threatmap"
+msgstr "威胁地图"
+
+msgid "navigation.timings"
+msgstr "执行时间"
+
+msgid "navigation.upstreams"
+msgstr "上游"
+
+msgid "navigation.web_cache"
+msgstr "Web 缓存"
+
+msgid "navigation.workflows"
+msgstr "工作流程"
+
+msgid "news.image_alt"
+msgstr "新闻图片"
+
+msgid "news.posted_on"
+msgstr "发布于"
+
+msgid "news.slide"
+msgstr "滑动"
+
+msgid "newsletter.legal_agreement"
+msgstr "我想要订阅新闻通讯，并且我已经阅读并同意："
+
+msgid "newsletter.title"
+msgstr "加入新闻通讯"
+
+msgid "onboarding.dismiss"
+msgstr "忽略"
+
+msgid "onboarding.error"
+msgstr "无法加载引导。"
+
+msgid "onboarding.hint.bans"
+msgstr "封禁列表显示 BunkerWeb 当前拒绝的客户端；每一行都会列出原因和到期时间。"
+
+msgid "onboarding.hint.home"
+msgstr "此仪表板显示当前运行状况：运行中的实例、正在提供服务的服务，以及 BunkerWeb 已处理的流量。"
+
+msgid "onboarding.hint.logs"
+msgstr "来自所有实例的实时日志，可按实例和严重级别筛选。"
+
+msgid "onboarding.hint.reports"
+msgstr "每个被拦截的请求都会出现在这里。打开其中一条即可查看是哪项安全检查拦截了它以及原因。"
+
+msgid "onboarding.hint.title"
+msgstr "快速导览"
+
+msgid "onboarding.item.first_block"
+msgstr "看到 BunkerWeb 拦截请求"
+
+msgid "onboarding.item.https"
+msgstr "让 HTTPS 正常工作"
+
+msgid "onboarding.item.install"
+msgstr "在一台或多台主机上安装 BunkerWeb"
+
+msgid "onboarding.item.mfa"
+msgstr "启用 MFA"
+
+msgid "onboarding.item.pro"
+msgstr "启用 BunkerWeb PRO"
+
+msgid "onboarding.item.read_bans"
+msgstr "查看谁被封禁，以及封禁到何时"
+
+msgid "onboarding.item.read_home"
+msgstr "在仪表盘中查看当前运行状况"
+
+msgid "onboarding.item.read_logs"
+msgstr "跨实例查看实时日志"
+
+msgid "onboarding.item.read_reports"
+msgstr "了解请求被拦截的原因"
+
+msgid "onboarding.item.service"
+msgstr "注册首个服务"
+
+msgid "onboarding.item.workflow"
+msgstr "附加一个安全工作流"
+
+msgid "onboarding.not_saved"
+msgstr "无法保存。"
+
+msgid "onboarding.pro_tips"
+msgstr "PRO 提示"
+
+msgid "onboarding.restart"
+msgstr "重新开始引导"
+
+msgid "onboarding.restart_help"
+msgstr "在顶部栏重新显示入门步骤。"
+
+msgid "onboarding.subtitle"
+msgstr "只需几步，即可让 BunkerWeb 开始保护您的服务。"
+
+msgid "onboarding.title"
+msgstr "开始使用"
+
+msgid "pagination.page"
+msgstr "页"
+
+msgid "plan.free"
+msgstr "免费"
+
+msgid "plan.pro"
+msgstr "PRO"
+
+msgid "plugin.page.status.deactivated"
+msgstr "插件已停用；因此，没有可用信息。"
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "此插件在专属页面中管理，该页面尚未加载。请重启 Web UI 以访问。"
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "指标插件未激活；因此，没有可用信息。"
+
+msgid "plugin.page.status.no_content"
+msgstr "此插件不提供嵌入式页面。"
+
+msgid "plugin.page.status.not_available"
+msgstr "插件页面在 Beta 阶段尚不可用。"
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "预渲染错误"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "此插件自带页面，运行插件代码。只有管理员才能加载。"
+
+msgid "plugin.type.all"
+msgstr "全部"
+
+msgid "plugin.type.core"
+msgstr "核心"
+
+msgid "plugin.type.external"
+msgstr "外部"
+
+msgid "plugin.type.pro"
+msgstr "Pro"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "已启用"
+
+msgid "plugins.marketplace.always_on"
+msgstr "核心/始终启用"
+
+msgid "plugins.marketplace.disabled"
+msgstr "已禁用"
+
+msgid "plugins.marketplace.enabled"
+msgstr "已启用"
+
+msgid "plugins.marketplace.inactive"
+msgstr "未启用"
+
+msgid "plugins.marketplace.no_match"
+msgstr "没有插件符合筛选条件"
+
+msgid "plugins.marketplace.search"
+msgstr "搜索插件..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "全部"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "社区版"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "已禁用"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "已启用"
+
+msgid "plugins.multivalue.more_value"
+msgstr "更多值"
+
+msgid "plugins.multivalue.more_values"
+msgstr "更多值"
+
+msgid "plugins.multivalue.show_less"
+msgstr "显示较少"
+
+msgid "pro.alert.overlapped_1"
+msgstr "您的活动服务数量超出了许可证允许的范围！"
+
+msgid "pro.alert.overlapped_2"
+msgstr "删除或将某些服务转换为草稿模式，以达到 %(pro_services)s 个服务的限制。"
+
+msgid "pro.button.all_features_available"
+msgstr "所有功能可用"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "等待合规..."
+
+msgid "pro.button.renew_license"
+msgstr "续订许可证"
+
+msgid "pro.button.suspended_license"
+msgstr "许可证已暂停"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "升级到 PRO"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "有效期至"
+
+msgid "pro.expiration_date.title"
+msgstr "Pro 到期日期"
+
+msgid "pro.expiration_date.unknown"
+msgstr "未知的到期日期"
+
+msgid "pro.force_check.description"
+msgstr "强制重新检查 PRO 插件。如果有新版本，将重新下载插件。"
+
+msgid "pro.force_check.title"
+msgstr "强制检查"
+
+msgid "pro.force_update.description"
+msgstr "跳过检查并强制下载 PRO 插件。如果无法强制执行，则保留当前状态。"
+
+msgid "pro.force_update.title"
+msgstr "强制更新"
+
+msgid "pro.key.title.activate"
+msgstr "激活密钥"
+
+msgid "pro.key.title.update"
+msgstr "更新密钥"
+
+msgid "pro.overlay.pro_feature"
+msgstr "Pro 功能"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "升级到 Pro 以访问此功能"
+
+msgid "pro.status.draft_services_count"
+msgstr "%(draft_services)s 个草稿服务"
+
+msgid "pro.status.expired"
+msgstr "已过期"
+
+msgid "pro.status.free_version"
+msgstr "免费版本"
+
+msgid "pro.status.overlapped"
+msgstr "已超额"
+
+msgid "pro.status.pro_version"
+msgstr "PRO 版本"
+
+msgid "pro.status.services_count"
+msgstr "%(online_services)s 个在线服务 / %(pro_services)s 个 PRO 服务"
+
+msgid "pro.status.suspended"
+msgstr "已暂停"
+
+msgid "pro.status.title"
+msgstr "状态"
+
+msgid "pro.title"
+msgstr "Pro 许可证"
+
+msgid "profile.2fa.disable_title"
+msgstr "禁用 2FA"
+
+msgid "profile.2fa.enable_title"
+msgstr "启用 2FA"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "刷新恢复代码将使之前的代码失效。"
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA 已禁用"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "启用双因素认证"
+
+msgid "profile.card.coming_soon"
+msgstr "即将推出"
+
+msgid "profile.card.title.2fa"
+msgstr "双因素身份验证 (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "更改密码"
+
+msgid "profile.card.title.change_theme"
+msgstr "更改主题"
+
+msgid "profile.card.title.coming_soon"
+msgstr "即将推出"
+
+msgid "profile.card.title.edit_profile"
+msgstr "编辑个人资料"
+
+msgid "profile.card.title.passkeys"
+msgstr "通行密钥"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "刷新恢复代码"
+
+msgid "profile.card.title.sessions"
+msgstr "会话"
+
+msgid "profile.help.photo_extensions"
+msgstr "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "这会立即注销您帐户上的所有其他活动会话。 输入您的密码以确认。"
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "注销其他活动会话？"
+
+msgid "profile.passkey.added"
+msgstr "添加于"
+
+msgid "profile.passkey.empty"
+msgstr "尚未注册任何通行密钥。"
+
+msgid "profile.passkey.help"
+msgstr "通行密钥可让您免密码登录，只需使用设备的屏幕锁定或安全密钥。"
+
+msgid "profile.passkey.last_used"
+msgstr "上次使用"
+
+msgid "profile.passkey.never_used"
+msgstr "从未使用"
+
+msgid "profile.passkey.unsupported"
+msgstr "此浏览器不支持通行密钥。"
+
+msgid "profile.session.browser"
+msgstr "浏览器"
+
+msgid "profile.session.creation_date"
+msgstr "创建日期"
+
+msgid "profile.session.current_session"
+msgstr "当前会话"
+
+msgid "profile.session.device"
+msgstr "设备"
+
+msgid "profile.session.ip_address"
+msgstr "IP 地址"
+
+msgid "profile.session.last_activity"
+msgstr "最后活动"
+
+msgid "profile.session.os"
+msgstr "操作系统"
+
+msgid "profile.session.title"
+msgstr "会话"
+
+msgid "profile.session.wipe_help"
+msgstr "注销您帐户上的所有其他活动会话。 您将在这里保持登录状态。"
+
+msgid "profile.subtitle"
+msgstr "管理您的帐户、安全和活动会话。"
+
+msgid "profile.tab.profile"
+msgstr "个人资料"
+
+msgid "profile.tab.security"
+msgstr "安全"
+
+msgid "profile.tab.sessions"
+msgstr "会话"
+
+msgid "range_picker.1h"
+msgstr "过去1小时"
+
+msgid "range_picker.24h"
+msgstr "过去24小时"
+
+msgid "range_picker.30d"
+msgstr "过去 30 天"
+
+msgid "range_picker.7d"
+msgstr "过去一周"
+
+msgid "range_picker.aria_label"
+msgstr "时间范围"
+
+msgid "range_picker.custom"
+msgstr "自定义"
+
+msgid "redirects.all"
+msgstr "全部"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "将请求的 URI 添加到目标"
+
+msgid "redirects.attach"
+msgstr "附加"
+
+msgid "redirects.attach_copy"
+msgstr "将 %(name)s (%(from)s → %(to)s) 附加到一个或多个服务。"
+
+msgid "redirects.code.301"
+msgstr "301 — 永久移动"
+
+msgid "redirects.code.302"
+msgstr "302 — 已找到"
+
+msgid "redirects.code.303"
+msgstr "303 — 查看其他"
+
+msgid "redirects.code.307"
+msgstr "307 — 临时重定向"
+
+msgid "redirects.code.308"
+msgstr "308 — 永久重定向"
+
+msgid "redirects.create"
+msgstr "创建重定向"
+
+msgid "redirects.delete_confirm_title"
+msgstr "删除此重定向？"
+
+msgid "redirects.delete_copy"
+msgstr "删除 %(name)s 重定向？"
+
+msgid "redirects.delete_help"
+msgstr "附加到服务的重定向无法删除。 先将其分离。"
+
+msgid "redirects.edit"
+msgstr "编辑重定向"
+
+msgid "redirects.edit_shared"
+msgstr "此重定向已关联 %(count)s 个服务：%(services)s。保存后，变更会应用到所有这些服务。"
+
+msgid "redirects.empty_text"
+msgstr "重定向是一种名称规则，您将其附加到一个或多个服务。 嵌入式 REDIRECT_* 设置将继续与其一起工作。"
+
+msgid "redirects.empty_title"
+msgstr "还没有重定向"
+
+msgid "redirects.from_path"
+msgstr "从"
+
+msgid "redirects.from_path_help"
+msgstr "附加服务的源路径，例如 /old."
+
+msgid "redirects.new"
+msgstr "新建重定向"
+
+msgid "redirects.not_attached"
+msgstr "未附加"
+
+msgid "redirects.readonly"
+msgstr "数据库只读。 可以查看重定向，但不能更改。"
+
+msgid "redirects.save"
+msgstr "保存重定向"
+
+msgid "redirects.search"
+msgstr "搜索名称、源路径或目标..."
+
+msgid "redirects.services_help"
+msgstr "使用 Ctrl 或 Command 选择多个服务。 稍后可以添加重定向。"
+
+msgid "redirects.status_code"
+msgstr "状态码"
+
+msgid "redirects.to_url"
+msgstr "重定向到"
+
+msgid "redirects.truncated"
+msgstr "仅显示前 500 个重定向。 通过 API 获取完整结果，缩小列表。"
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "检测到异常行为"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "这些请求超过了异常行为阈值，并被组合在一起。"
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "捕获时间"
+
+msgid "reports.bad_behavior_ip"
+msgstr "IP地址"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "此报告未捕获任何异常行为详情。"
+
+msgid "reports.bad_behavior_request_id"
+msgstr "请求 ID"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "请求"
+
+msgid "reports.bad_behavior_server"
+msgstr "服务器"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "可疑请求"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "攻击类型"
+
+msgid "reports.card.recent.title"
+msgstr "最近事件"
+
+msgid "reports.card.top_asn.title"
+msgstr "主要攻击来源 ASN"
+
+msgid "reports.card.top_offenders.title"
+msgstr "主要攻击者"
+
+msgid "reports.card.top_rules.title"
+msgstr "触发最多的ModSecurity规则"
+
+msgid "reports.chart.timeseries.series"
+msgstr "已阻止"
+
+msgid "reports.chart.timeseries.title"
+msgstr "拦截请求趋势"
+
+msgid "reports.security_incident"
+msgstr "安全事件"
+
+msgid "reports.security_report_data"
+msgstr "安全报告数据"
+
+msgid "reports.subtitle"
+msgstr "从您的所有BunkerWeb实例中生成的安全报告——搜索、过滤、导出，并直接从表中阻止可疑IP地址。"
+
+msgid "reports.tab.eventlog"
+msgstr "事件日志"
+
+msgid "reports.tab.offenders"
+msgstr "主要攻击者"
+
+msgid "reports.tab.overview"
+msgstr "概览"
+
+msgid "reports.tab.patterns"
+msgstr "攻击模式"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "阻止"
+
+msgid "reports.table.country"
+msgstr "国家/地区"
+
+msgid "reports.table.fires"
+msgstr "触发"
+
+msgid "reports.table.ip"
+msgstr "IP"
+
+msgid "reports.table.rule"
+msgstr "规则"
+
+msgid "reports.table.top_rule"
+msgstr "最常触发的规则"
+
+msgid "reports.tile.asns"
+msgstr "主要攻击来源 ASN"
+
+msgid "reports.tile.blocked"
+msgstr "已阻止的请求"
+
+msgid "reports.tile.blocked_rate"
+msgstr "与前一期间的趋势比较"
+
+msgid "reports.tile.bot"
+msgstr "机器人/爬虫"
+
+msgid "reports.tile.countries"
+msgstr "主要攻击来源国家/地区"
+
+msgid "reports.tile.peak_hour"
+msgstr "高峰时段"
+
+msgid "reports.tile.rce"
+msgstr "RCE / 命令"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "重复攻击来源（前 10）"
+
+msgid "reports.tile.sqli"
+msgstr "SQL注入"
+
+msgid "reports.tile.unique_ips"
+msgstr "顶级攻击者IP"
+
+msgid "reports.tile.unique_offenders"
+msgstr "主要攻击者"
+
+msgid "request_path.client"
+msgstr "客户端"
+
+msgid "request_path.source"
+msgstr "%(phase)s阶段的插件执行顺序，从%(setting)s开始——显示顺序，而不是按请求跟踪。"
+
+msgid "request_path.terminal.inline"
+msgstr "后端"
+
+msgid "request_path.terminal.none"
+msgstr "未提供服务"
+
+msgid "request_path.terminal.pool"
+msgstr "上游池"
+
+msgid "request_path.terminal.root"
+msgstr "本地文件"
+
+msgid "request_path.title"
+msgstr "请求路径"
+
+msgid "request_path.unordered"
+msgstr "未在 %(phase)s 阶段声明位置；它会在已排序的插件之后按字母顺序运行。"
+
+msgid "resource_groups.add_entry"
+msgstr "添加条目"
+
+msgid "resource_groups.add_to_setting"
+msgstr "添加资源组…"
+
+msgid "resource_groups.add_values"
+msgstr "添加值"
+
+msgid "resource_groups.alias"
+msgstr "别名"
+
+msgid "resource_groups.alias_help"
+msgstr "字母、数字、下划线和短横线。现有别名不能重命名。"
+
+msgid "resource_groups.bulk_import"
+msgstr "批量导入"
+
+msgid "resource_groups.clone"
+msgstr "克隆资源组"
+
+msgid "resource_groups.clone_copy"
+msgstr "创建可编辑的 @%(name)s 的副本。"
+
+msgid "resource_groups.collapse_all"
+msgstr "折叠所有"
+
+msgid "resource_groups.comment"
+msgstr "注释"
+
+msgid "resource_groups.delete"
+msgstr "删除资源组"
+
+msgid "resource_groups.delete_confirm"
+msgstr "删除 @%(name)s？ 无法撤销。"
+
+msgid "resource_groups.delete_help"
+msgstr "在设置引用此别名时，删除将被阻止。"
+
+msgid "resource_groups.editor_edit"
+msgstr "编辑 @%(name)s"
+
+msgid "resource_groups.editor_new"
+msgstr "新建资源组"
+
+msgid "resource_groups.editor_title"
+msgstr "资源组"
+
+msgid "resource_groups.empty"
+msgstr "没有资源组"
+
+msgid "resource_groups.empty_help"
+msgstr "创建可重用的别名，以便在兼容的设置之间共享输入值。"
+
+msgid "resource_groups.entries"
+msgstr "条目"
+
+msgid "resource_groups.expand_all"
+msgstr "展开所有"
+
+msgid "resource_groups.global_configuration"
+msgstr "全局配置"
+
+msgid "resource_groups.import_extension"
+msgstr "选择一个 .txt 或 .csv 文件。"
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "TXT/CSV 导入限制为 256 KiB。"
+
+msgid "resource_groups.kind"
+msgstr "类型"
+
+msgid "resource_groups.kinds"
+msgstr "类型"
+
+msgid "resource_groups.loading_references"
+msgstr "正在加载引用..."
+
+msgid "resource_groups.max_entries"
+msgstr "一个资源组不能包含超过 %(max)s 条条目。"
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s 种类型 · %(values)s 个值 · %(usages)s 次使用"
+
+msgid "resource_groups.new"
+msgstr "新建组"
+
+msgid "resource_groups.new_alias"
+msgstr "新建别名"
+
+msgid "resource_groups.no_entries"
+msgstr "没有条目"
+
+msgid "resource_groups.no_entries_help"
+msgstr "逐个添加条目或使用下面的批量导入功能。"
+
+msgid "resource_groups.no_references"
+msgstr "没有引用"
+
+msgid "resource_groups.readonly"
+msgstr "数据库只读。 可以查看和导出资源组，但不能修改。"
+
+msgid "resource_groups.references_error"
+msgstr "无法加载引用"
+
+msgid "resource_groups.save"
+msgstr "保存组"
+
+msgid "resource_groups.search"
+msgstr "搜索别名、描述、类型或值..."
+
+msgid "resource_groups.showing_count"
+msgstr "显示 %(visible)s / %(total)s 个组"
+
+msgid "resource_groups.subtitle"
+msgstr "可重用的数据类型别名，用于 IP、国家、ASN、反向 DNS 名称、用户代理和 URL。"
+
+msgid "resource_groups.template_configuration"
+msgstr "模板 %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "使用情况"
+
+msgid "resource_groups.value"
+msgstr "值"
+
+msgid "resource_groups.values"
+msgstr "值"
+
+msgid "scope.all_services"
+msgstr "所有服务"
+
+msgid "scope.global"
+msgstr "全局"
+
+msgid "scope.global_all_services"
+msgstr "全局（所有服务）"
+
+msgid "scope.permanent"
+msgstr "永久"
+
+msgid "scope.service_specific"
+msgstr "特定服务"
+
+msgid "searchpane.active"
+msgstr "启用"
+
+msgid "searchpane.async"
+msgstr "异步"
+
+msgid "searchpane.ban_scope"
+msgstr "封禁范围"
+
+msgid "searchpane.clear"
+msgstr "清除全部"
+
+msgid "searchpane.collapse_0"
+msgstr "搜索窗格"
+
+msgid "searchpane.collapse_message"
+msgstr "全部折叠"
+
+msgid "searchpane.collapse_plural"
+msgstr "搜索窗格 (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "国家/地区"
+
+msgid "searchpane.created"
+msgstr "创建时间"
+
+msgid "searchpane.data"
+msgstr "数据"
+
+msgid "searchpane.date"
+msgstr "日期"
+
+msgid "searchpane.empty"
+msgstr "无可用搜索窗格"
+
+msgid "searchpane.end_date"
+msgstr "结束日期"
+
+msgid "searchpane.first_seen"
+msgstr "首次出现"
+
+msgid "searchpane.future_30d"
+msgstr "超过 30 天后"
+
+msgid "searchpane.health"
+msgstr "健康状况"
+
+msgid "searchpane.interval"
+msgstr "间隔"
+
+msgid "searchpane.ip_address"
+msgstr "IP 地址"
+
+msgid "searchpane.job_name"
+msgstr "任务名称"
+
+msgid "searchpane.last_24h"
+msgstr "过去 24 小时"
+
+msgid "searchpane.last_30d"
+msgstr "过去 30 天"
+
+msgid "searchpane.last_7d"
+msgstr "过去 7 天"
+
+msgid "searchpane.last_run"
+msgstr "上次运行"
+
+msgid "searchpane.last_seen"
+msgstr "最后出现"
+
+msgid "searchpane.last_update"
+msgstr "最后更新"
+
+msgid "searchpane.loading"
+msgstr "正在加载搜索窗格..."
+
+msgid "searchpane.method"
+msgstr "方法"
+
+msgid "searchpane.next_24h"
+msgstr "未来 24 小时"
+
+msgid "searchpane.next_30d"
+msgstr "未来 30 天"
+
+msgid "searchpane.next_7d"
+msgstr "未来 7 天"
+
+msgid "searchpane.older_30d"
+msgstr "超过 30 天前"
+
+msgid "searchpane.one_or_more"
+msgstr "一个或多个"
+
+msgid "searchpane.permanent"
+msgstr "永久"
+
+msgid "searchpane.plugin"
+msgstr "插件"
+
+msgid "searchpane.protocol"
+msgstr "协议"
+
+msgid "searchpane.reason"
+msgstr "原因"
+
+msgid "searchpane.reload"
+msgstr "需要重新加载"
+
+msgid "searchpane.scope"
+msgstr "范围"
+
+msgid "searchpane.security_mode"
+msgstr "安全模式"
+
+msgid "searchpane.server_name"
+msgstr "服务器名称"
+
+msgid "searchpane.service"
+msgstr "服务"
+
+msgid "searchpane.show_message"
+msgstr "全部显示"
+
+msgid "searchpane.start_date"
+msgstr "开始日期"
+
+msgid "searchpane.status"
+msgstr "状态"
+
+msgid "searchpane.status_code"
+msgstr "状态码"
+
+msgid "searchpane.steps"
+msgstr "步骤"
+
+msgid "searchpane.stream"
+msgstr "流支持"
+
+msgid "searchpane.template"
+msgstr "模板"
+
+msgid "searchpane.title_0"
+msgstr "无活动过滤器"
+
+msgid "searchpane.title_1"
+msgstr "活动过滤器 - 1"
+
+msgid "searchpane.title_plural"
+msgstr "活动过滤器 - %d"
+
+msgid "searchpane.type"
+msgstr "类型"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "版本"
+
+msgid "searchpane.zero"
+msgstr "无"
+
+msgid "security_mode.block"
+msgstr "阻止"
+
+msgid "security_mode.detect"
+msgstr "检测"
+
+msgid "service.resources.attach"
+msgstr "附加"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s 已经通过自己的 %(family)s 设置为 %(path)s 提供服务。清除 %(path)s 的设置，或使用不同的路径。"
+
+msgid "service.resources.conflict.primary"
+msgstr "“%(name)s” 目前是此服务的首选证书，并且将不再使用，无需进一步警告。首选证书是指实际部署的证书。"
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s 已经通过 %(kind)s 的“%(name)s”为 %(path)s 提供服务。分离“%(name)s”，或为它们指定不同的路径。"
+
+msgid "service.resources.conflict.stream"
+msgstr "流式服务代理所有连接到一个后端，而 %(service)s 已经使用了上游“%(name)s”。首先分离它。"
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "%(service)s 在 REVERSE_PROXY_HOST 中已经有自己的后端。清除该设置，让上游接管。"
+
+msgid "service.resources.detach"
+msgstr "分离"
+
+msgid "service.resources.family.certificate"
+msgstr "证书"
+
+msgid "service.resources.family.redirect"
+msgstr "重定向"
+
+msgid "service.resources.family.template"
+msgstr "模板"
+
+msgid "service.resources.family.upstream"
+msgstr "上游"
+
+msgid "service.resources.family.workflow"
+msgstr "工作流程"
+
+msgid "service.resources.match_path"
+msgstr "路径"
+
+msgid "service.resources.none"
+msgstr "未附加"
+
+msgid "service.resources.primary"
+msgstr "首选证书"
+
+msgid "service.resources.template.none"
+msgstr "未有模板"
+
+msgid "service.resources.template.note"
+msgstr "不是资源：模板是一个设置。它在保存时生效，并且切换模板会同时更改许多设置。"
+
+msgid "service.resources.template.pending"
+msgstr "在保存时生效"
+
+msgid "service.resources.template.switching"
+msgstr "保存时，此服务从“%(from)s”切换到“%(to)s”。当前模板提供的所有值将被删除，并应用 %(to)s 的值——许多设置同时更改。"
+
+msgid "service.resources.template.unwired"
+msgstr "此页面无法更改 USE_TEMPLATE，因此模板无法在此处更改。"
+
+msgid "service.resources.title"
+msgstr "附加的资源"
+
+msgid "service.resources.unavailable"
+msgstr "不可用"
+
+msgid "services.draft"
+msgstr "草稿服务"
+
+msgid "services.online"
+msgstr "在线"
+
+msgid "services.subtitle"
+msgstr "管理使用 BunkerWeb 保护的多站点服务：创建、编辑、转换为草稿或删除它们。"
+
+msgid "services.total"
+msgstr "总服务"
+
+msgid "services.with_configs"
+msgstr "带有自定义配置"
+
+msgid "settings.custom_config.title"
+msgstr "自定义配置"
+
+msgid "settings.multiple.description"
+msgstr "在此配置此插件的多个设置实例。"
+
+msgid "settings.multiple.title"
+msgstr "多个设置"
+
+msgid "setup.status.admin_user_exists"
+msgstr "管理员用户已存在。请继续下一步。"
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "PRO 许可证密钥已配置，请继续下一步。"
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "Web 界面已配置反向代理。请继续下一步。"
+
+msgid "setup.status.secure_password"
+msgstr "安全密码"
+
+msgid "setup.status.unique_server_name"
+msgstr "唯一服务器名称"
+
+msgid "setup.step1.subtitle"
+msgstr "创建您的管理员帐户。"
+
+msgid "setup.step1.title"
+msgstr "管理员用户"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "证书颁发机构选择器"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "使用 Let's Encrypt 进行标准 ACME 签发。可使用 staging 环境进行测试和集成检查。"
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "若留空，ZeroSSL 将使用已配置的邮箱进行账户注册。"
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "使用 zerossl-bot 配合 ZeroSSL。请提供账户邮箱或 API 密钥，用于账户签发和基于密钥的重新签发跟踪。"
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "自定义证书"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "真实 IP"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "反向代理"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "配置 Web UI 特定设置。"
+
+msgid "setup.step2.title"
+msgstr "UI 设置"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "PRO 权益"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "解锁所有高级功能，包括增强的安全性、性能和管理工具。"
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "访问所有 PRO 功能"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "对于您可能遇到的任何问题或疑问，从 BunkerWeb 团队获得优先支持。"
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "来自维护者的技术支持"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "量身定制的解决方案，满足您的特定需求。"
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "定制开发"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "优化您的 BunkerWeb 设置的专家建议。"
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "定制咨询"
+
+msgid "setup.step3.subtitle"
+msgstr "解锁高级功能，充分利用 BunkerWeb。"
+
+msgid "setup.step3.title"
+msgstr "升级到 PRO"
+
+msgid "setup.step4.label.final_url"
+msgstr "BunkerWeb UI URL"
+
+msgid "setup.step4.subtitle"
+msgstr "在完成设置前检查您的设置。"
+
+msgid "setup.step4.title"
+msgstr "概览"
+
+msgid "setup.subtitle"
+msgstr "按照步骤完成设置向导。"
+
+msgid "setup.title"
+msgstr "设置向导"
+
+msgid "status.active"
+msgstr "有效"
+
+msgid "status.admin_user_exists"
+msgstr "管理员用户已存在。请继续下一步。"
+
+msgid "status.all_valid"
+msgstr "全部有效"
+
+msgid "status.blog_connection_fail"
+msgstr "无法连接到博客获取新闻更新。"
+
+msgid "status.default_server"
+msgstr "默认服务器"
+
+msgid "status.done"
+msgstr "已完成"
+
+msgid "status.down"
+msgstr "已停止"
+
+msgid "status.draft"
+msgstr "草稿"
+
+msgid "status.error_deleting_template"
+msgstr "删除模板时发生错误。"
+
+msgid "status.error_loading_bans"
+msgstr "加载封禁时出错。请尝试刷新页面。"
+
+msgid "status.error_loading_data"
+msgstr "无法加载数据"
+
+msgid "status.error_loading_template"
+msgstr "无法加载模板数据。"
+
+msgid "status.error_saving_template"
+msgstr "保存模板时发生错误。"
+
+msgid "status.expired"
+msgstr "已过期"
+
+msgid "status.expiring"
+msgstr "即将到期"
+
+msgid "status.failed"
+msgstr "失败"
+
+msgid "status.invalid_json_payload"
+msgstr "无效的 JSON 负载。"
+
+msgid "status.loading"
+msgstr "加载中..."
+
+msgid "status.loading_bans"
+msgstr "正在加载封禁..."
+
+msgid "status.loading_cache_file"
+msgstr "正在加载缓存文件..."
+
+msgid "status.loading_cache_files"
+msgstr "正在加载缓存文件..."
+
+msgid "status.loading_custom_config"
+msgstr "正在加载自定义配置..."
+
+msgid "status.loading_custom_configs"
+msgstr "正在加载自定义配置..."
+
+msgid "status.loading_instances"
+msgstr "正在加载实例..."
+
+msgid "status.loading_items"
+msgstr "正在加载项目..."
+
+msgid "status.loading_jobs"
+msgstr "正在加载任务..."
+
+msgid "status.loading_logs"
+msgstr "正在加载日志..."
+
+msgid "status.loading_plugins"
+msgstr "正在加载插件..."
+
+msgid "status.loading_reports"
+msgstr "正在加载报告..."
+
+msgid "status.loading_services"
+msgstr "正在加载服务..."
+
+msgid "status.loading_templates"
+msgstr "正在加载模板..."
+
+msgid "status.missing_template_information"
+msgstr "缺少模板信息。"
+
+msgid "status.news_connection_error"
+msgstr "无法连接到博客获取新闻更新。"
+
+msgid "status.no"
+msgstr "否"
+
+msgid "status.no_data"
+msgstr "无数据"
+
+msgid "status.no_history"
+msgstr "无可用历史记录。"
+
+msgid "status.no_item"
+msgstr "无项目"
+
+msgid "status.no_notifications"
+msgstr "无通知显示。"
+
+msgid "status.no_search_results"
+msgstr "未找到项目。"
+
+msgid "status.no_settings"
+msgstr "此插件在该范围内没有设置。"
+
+msgid "status.no_steps"
+msgstr "无可用步骤"
+
+msgid "status.no_steps_description"
+msgstr "此模板没有任何可配置的步骤。"
+
+msgid "status.not_applicable"
+msgstr "不适用"
+
+msgid "status.online"
+msgstr "在线"
+
+msgid "status.optional"
+msgstr "可选"
+
+msgid "status.partial"
+msgstr "部分"
+
+msgid "status.pending"
+msgstr "待处理"
+
+msgid "status.pinging_instances"
+msgstr "正在 Ping 实例，请稍候..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "插件已停用；因此，没有可用信息。"
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "指标插件未激活；因此，没有可用信息。"
+
+msgid "status.plugin_page.status.not_available"
+msgstr "插件页面在 Beta 阶段尚不可用。"
+
+msgid "status.reverse_proxy_configured"
+msgstr "Web 界面已配置反向代理。请继续下一步。"
+
+msgid "status.secure_password"
+msgstr "安全密码"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "正在设置您的 BunkerWeb，请稍候..."
+
+msgid "status.success"
+msgstr "成功"
+
+msgid "status.template_in_use"
+msgstr "此服务当前使用通过“%(method)s”管理的模板“%(template)s”。"
+
+msgid "status.template_in_use_description"
+msgstr "不允许在当前模板之外进行更改。请使用当前模板进行更改或切换到高级/原始模式。"
+
+msgid "status.unique_server_name"
+msgstr "唯一服务器名称"
+
+msgid "status.up"
+msgstr "运行中"
+
+msgid "status.yes"
+msgstr "是"
+
+msgid "step.next"
+msgstr "下一步"
+
+msgid "step.previous"
+msgstr "上一步"
+
+msgid "support.card.download_logs.help"
+msgstr "所有私人数据将被匿名化。"
+
+msgid "support.card.download_logs.title"
+msgstr "下载日志"
+
+msgid "support.card.extract_config.title"
+msgstr "提取配置"
+
+msgid "support.card.support_link.title"
+msgstr "支持链接"
+
+msgid "support.subtitle"
+msgstr "下载调试日志，提取您的配置，并向 BunkerWeb 团队寻求帮助。"
+
+msgid "support.title"
+msgstr "支持"
+
+msgid "tab.custom_certificate"
+msgstr "自定义证书"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "操作"
+
+msgid "table.header.active"
+msgstr "启用"
+
+msgid "table.header.async"
+msgstr "异步"
+
+msgid "table.header.bytes_received"
+msgstr "接收字节数"
+
+msgid "table.header.bytes_sent"
+msgstr "发送字节数"
+
+msgid "table.header.checksum"
+msgstr "校验和"
+
+msgid "table.header.client_port"
+msgstr "客户端端口"
+
+msgid "table.header.configs"
+msgstr "配置"
+
+msgid "table.header.country"
+msgstr "国家/地区"
+
+msgid "table.header.created"
+msgstr "创建时间"
+
+msgid "table.header.current_time_left"
+msgstr "当前剩余时间"
+
+msgid "table.header.data"
+msgstr "数据"
+
+msgid "table.header.date"
+msgstr "日期"
+
+msgid "table.header.description"
+msgstr "描述"
+
+msgid "table.header.end_date"
+msgstr "结束日期"
+
+msgid "table.header.file_name"
+msgstr "文件名"
+
+msgid "table.header.health"
+msgstr "健康状况"
+
+msgid "table.header.hostname"
+msgstr "主机名"
+
+msgid "table.header.id"
+msgstr "ID"
+
+msgid "table.header.interval"
+msgstr "间隔"
+
+msgid "table.header.ip_address"
+msgstr "IP 地址"
+
+msgid "table.header.job_name"
+msgstr "任务名称"
+
+msgid "table.header.last_run"
+msgstr "上次运行"
+
+msgid "table.header.last_seen"
+msgstr "最后出现"
+
+msgid "table.header.last_update"
+msgstr "最后更新"
+
+msgid "table.header.listen_port"
+msgstr "监听端口"
+
+msgid "table.header.method"
+msgstr "方法"
+
+msgid "table.header.name"
+msgstr "名称"
+
+msgid "table.header.plugin"
+msgstr "插件"
+
+msgid "table.header.protocol"
+msgstr "协议"
+
+msgid "table.header.reason"
+msgstr "原因"
+
+msgid "table.header.reload"
+msgstr "重新加载"
+
+msgid "table.header.request_id"
+msgstr "请求 ID"
+
+msgid "table.header.scope"
+msgstr "范围"
+
+msgid "table.header.security_mode"
+msgstr "安全模式"
+
+msgid "table.header.server_name"
+msgstr "服务器名称"
+
+msgid "table.header.service"
+msgstr "服务"
+
+msgid "table.header.service_name"
+msgstr "服务名称"
+
+msgid "table.header.session_time"
+msgstr "会话时长"
+
+msgid "table.header.settings"
+msgstr "设置"
+
+msgid "table.header.status"
+msgstr "状态"
+
+msgid "table.header.status_code"
+msgstr "状态码"
+
+msgid "table.header.steps"
+msgstr "步骤"
+
+msgid "table.header.stream"
+msgstr "流"
+
+msgid "table.header.template"
+msgstr "模板"
+
+msgid "table.header.templates"
+msgstr "模板"
+
+msgid "table.header.time_left"
+msgstr "剩余时间"
+
+msgid "table.header.type"
+msgstr "类型"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "User-Agent"
+
+msgid "table.header.value"
+msgstr "值"
+
+msgid "table.header.version"
+msgstr "版本"
+
+msgid "template.editor.button_add_config"
+msgstr "添加配置"
+
+msgid "template.editor.button_add_setting"
+msgstr "添加设置"
+
+msgid "template.editor.button_add_step"
+msgstr "添加步骤"
+
+msgid "template.editor.button_move_down"
+msgstr "下移"
+
+msgid "template.editor.button_move_up"
+msgstr "上移"
+
+msgid "template.editor.button_remove"
+msgstr "移除"
+
+msgid "template.editor.clone_badge"
+msgstr "克隆自 %(template)s"
+
+msgid "template.editor.configs"
+msgstr "自定义配置"
+
+msgid "template.editor.configs_help"
+msgstr "为此模板附加可选的自定义配置片段。"
+
+msgid "template.editor.delete_step_confirm"
+msgstr "您确定要删除此步骤吗？"
+
+msgid "template.editor.details"
+msgstr "模板详情"
+
+msgid "template.editor.details_help"
+msgstr "设置此模板的基本信息。"
+
+msgid "template.editor.drag_handle"
+msgstr "拖动以重新排序"
+
+msgid "template.editor.empty_configs"
+msgstr "暂无自定义配置。"
+
+msgid "template.editor.empty_settings"
+msgstr "暂无设置。添加你的第一个设置。"
+
+msgid "template.editor.empty_steps"
+msgstr "暂无步骤。添加你的第一个步骤。"
+
+msgid "template.editor.error_generic"
+msgstr "发生错误，请重试。"
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "无法确定提交端点。"
+
+msgid "template.editor.heading_create"
+msgstr "创建模板"
+
+msgid "template.editor.heading_edit"
+msgstr "编辑模板 %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "数据"
+
+msgid "template.editor.label_config_name"
+msgstr "名称"
+
+msgid "template.editor.label_config_order"
+msgstr "顺序"
+
+msgid "template.editor.label_config_type"
+msgstr "类型"
+
+msgid "template.editor.label_setting_key"
+msgstr "设置键"
+
+msgid "template.editor.label_setting_value"
+msgstr "默认值"
+
+msgid "template.editor.label_step_configs"
+msgstr "此步骤中的配置"
+
+msgid "template.editor.label_step_settings"
+msgstr "此步骤中的设置"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "步骤副标题"
+
+msgid "template.editor.label_step_title"
+msgstr "步骤标题"
+
+msgid "template.editor.missing_configs_body"
+msgstr "导入的模板引用了尚未上传的自定义配置。请导入这些配置以完成模板设置："
+
+msgid "template.editor.missing_configs_browse"
+msgstr "浏览文件"
+
+msgid "template.editor.missing_configs_done"
+msgstr "完成"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "将配置文件拖放到此处 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "或"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "上传的文件将自动添加到您的模板。请确保文件名与上面列出的缺少配置相匹配。"
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "提示:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "所有缺少的配置已上传！模板导入成功。"
+
+msgid "template.editor.missing_configs_title"
+msgstr "缺少自定义配置"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "上传配置文件失败"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "上传缺少的配置 (.conf, .cfg, .txt)"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "已上传 %(total)s 个配置中的 %(uploaded)s 个。仍然缺少: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "已成功上传 %(count)s 个配置文件"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "选择选项"
+
+msgid "template.editor.multiselect_summary"
+msgstr "已选择 %(count)s 项"
+
+msgid "template.editor.multivalue_add"
+msgstr "添加值"
+
+msgid "template.editor.multivalue_helper"
+msgstr "每行一个值。%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "概览"
+
+msgid "template.editor.panel_overview_help"
+msgstr "跟踪关键信息并在各部分之间导航。"
+
+msgid "template.editor.placeholder_config_data"
+msgstr "数据"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "名称"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "核心"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "键"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "默认值"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "步骤副标题"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "步骤标题"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "模板ID"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "我的模板"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "浏览文件"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "将配置文件拖放到此处或单击以浏览 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "支持的格式: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "尚无导入的配置文件。新文件将显示在下方。"
+
+msgid "template.editor.raw_configs_help"
+msgstr "上传配置文件 (.conf, .cfg, .txt) 以将条目附加到 <code>configs</code>。类型默认为 <code>server_http</code>；如有需要，请在 JSON 中进行调整。"
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "由于当前 JSON 无效，无法导入配置。"
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "未导入任何配置。"
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "已导入 %(count)s 个配置文件。"
+
+msgid "template.editor.raw_configs_note"
+msgstr "导入的文件已添加到 JSON 编辑器。保存前请进行审阅和调整。"
+
+msgid "template.editor.raw_configs_title"
+msgstr "自定义配置导入"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "上传配置文件 (.conf, .cfg, .txt)"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "无法读取所选文件之一。"
+
+msgid "template.editor.raw_editor_aria"
+msgstr "原始模板 JSON 编辑器"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "拖放模板 JSON 文件（仅限 .json）以替换当前内容。"
+
+msgid "template.editor.raw_editor_help"
+msgstr "将完整的模板定义编辑为 JSON。切换回简单模式会验证并重新加载可视化编辑器。"
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "模板 JSON 成功导入。"
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "导入此文件将完全替换当前模板 JSON。在编辑器中所做的更改将丢失。您要继续吗？"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "替换模板"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "替换模板 JSON 吗？"
+
+msgid "template.editor.raw_editor_title"
+msgstr "原始模板 JSON"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "上传的文件为空。"
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "无法读取所选文件。"
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "上传模板 JSON (仅限 .json)"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "无效的配置定义。"
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "配置条目必须是对象。"
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "配置 %(configs)s 未分配给任何步骤。"
+
+msgid "template.editor.raw_validation_empty"
+msgstr "模板 JSON 不能为空。"
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "无效的 JSON 负载: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "模板负载必须是 JSON 对象。"
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "设置键必须是非空字符串。"
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "设置必须以对象形式提供。"
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "设置 %(settings)s 未分配给任何步骤。"
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "配置 %(config)s 已分配给多个步骤。"
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "步骤 %(index)s 包含无效的配置引用。"
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "步骤 %(index)s 引用了未知配置 %(config)s。"
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "步骤 %(index)s 必须是一个对象。"
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "设置 %(setting)s 已分配给多个步骤。"
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "步骤 %(index)s 包含无效的设置引用。"
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "步骤 %(index)s 引用了未知设置 %(setting)s。"
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "步骤 %(index)s 必须有一个标题。"
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "模板必须至少包含一个步骤。"
+
+msgid "template.editor.readonly_db"
+msgstr "数据库当前为只读。无法更改模板。"
+
+msgid "template.editor.readonly_method"
+msgstr "此模板由 %(method)s 流程创建，无法从 UI 编辑。"
+
+msgid "template.editor.readonly_title"
+msgstr "只读"
+
+msgid "template.editor.readonly_user"
+msgstr "您具有只读权限。请联系管理员以申请写入权限。"
+
+msgid "template.editor.select_config_placeholder"
+msgstr "选择一个配置"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "选择类型"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "选择一个设置"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "您确定要从模板中移除此设置吗？"
+
+msgid "template.editor.setting_remove_key"
+msgstr "设置"
+
+msgid "template.editor.setting_remove_title"
+msgstr "移除设置"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "添加所选"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "高级"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "已添加"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "清除搜索"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "所有匹配的设置都已添加。"
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "没有可显示的设置。"
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "可用设置：%(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)s 个可用，%(used)s 个已添加"
+
+msgid "template.editor.setting_selector_default"
+msgstr "默认"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "查看文档"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "没有符合当前筛选条件的设置。"
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "插件"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "所有插件"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "类型"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "所有类型"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "仅提供多站点设置。使用筛选器缩小列表范围。"
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "多个"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "模式"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "查找多站点设置"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "按标签、键或插件搜索"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "已启用"
+
+msgid "template.editor.settings"
+msgstr "设置"
+
+msgid "template.editor.settings_help"
+msgstr "定义此模板公开的设置及其默认值。"
+
+msgid "template.editor.step_configs_empty"
+msgstr "此步骤尚未添加任何配置。"
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "选择现有配置"
+
+msgid "template.editor.step_default_title"
+msgstr "未命名步骤"
+
+msgid "template.editor.step_prefix"
+msgstr "步骤"
+
+msgid "template.editor.step_settings_empty"
+msgstr "此步骤尚未添加任何设置。"
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "选择现有设置"
+
+msgid "template.editor.steps"
+msgstr "步骤"
+
+msgid "template.editor.steps_help"
+msgstr "将设置组织到引导步骤中。选择每个步骤包含哪些设置或配置。"
+
+msgid "template.editor.summary_clone_info"
+msgstr "当前从 %(template)s 克隆。"
+
+msgid "template.editor.summary_counts_configs"
+msgstr "配置"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "设置"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "步骤"
+
+msgid "template.editor.summary_counts_title"
+msgstr "内容"
+
+msgid "template.editor.summary_link_configs"
+msgstr "自定义配置"
+
+msgid "template.editor.summary_link_details"
+msgstr "模板详情"
+
+msgid "template.editor.summary_link_settings"
+msgstr "设置"
+
+msgid "template.editor.summary_link_steps"
+msgstr "步骤"
+
+msgid "template.editor.summary_links_title"
+msgstr "快速链接"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "创建时间"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "方法"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "元数据"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "不可用"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "最后更新"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "定义配置时必须指定名称。"
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "配置类型必须是多站点兼容的类型之一。"
+
+msgid "template.editor.validation_config_type_required"
+msgstr "定义配置时必须指定类型。"
+
+msgid "template.editor.validation_configs_unique"
+msgstr "每个配置名称必须唯一。"
+
+msgid "template.editor.validation_id_required"
+msgstr "模板 ID 为必填项。"
+
+msgid "template.editor.validation_setting_key"
+msgstr "每个设置必须有一个键。"
+
+msgid "template.editor.validation_settings_unique"
+msgstr "每个设置键必须唯一。"
+
+msgid "template.none"
+msgstr "无模板"
+
+msgid "templates.gallery.delete_selected"
+msgstr "删除所选项"
+
+msgid "templates.gallery.empty_message"
+msgstr "创建首个模板，将设置、步骤和自定义配置组合起来以便复用。"
+
+msgid "templates.gallery.empty_title"
+msgstr "暂无模板"
+
+msgid "templates.gallery.select"
+msgstr "选择"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "高安全性"
+
+msgid "templates.name.low"
+msgstr "低安全性"
+
+msgid "templates.name.medium"
+msgstr "中等安全性"
+
+msgid "templates.name.ui"
+msgstr "Web 界面"
+
+msgid "templates.subtitle"
+msgstr "可重用配置模板，用于您的服务：捆绑设置、步骤和自定义配置，然后创建、克隆或删除它们。"
+
+msgid "templates.tag.config"
+msgstr "自定义配置：%(name)s"
+
+msgid "templates.tag.feature"
+msgstr "内置功能：%(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "插件：%(name)s"
+
+msgid "templates.title"
+msgstr "服务模板"
+
+msgid "theme.dark"
+msgstr "深色"
+
+msgid "theme.light"
+msgstr "浅色"
+
+msgid "threatmap.attacks_today"
+msgstr "今日攻击"
+
+msgid "threatmap.countries"
+msgstr "来源国家/地区"
+
+msgid "threatmap.disabled_help"
+msgstr "威胁地图读取与「报告」页面相同的已存报告。将 METRICS_PERSIST_TO_DB 设为 yes 即可开始记录。"
+
+msgid "threatmap.disabled_title"
+msgstr "报告持久化已关闭"
+
+msgid "threatmap.empty_help"
+msgstr "可能是过去 24 小时内没有请求被拦截，也可能是报告尚未采集。"
+
+msgid "threatmap.empty_title"
+msgstr "此时间段内没有拦截记录"
+
+msgid "threatmap.error_help"
+msgstr "地图会保留最后一次成功加载的数据，并在下次刷新时重试。"
+
+msgid "threatmap.error_title"
+msgstr "无法连接指标服务"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "退出全屏"
+
+msgid "threatmap.freshness"
+msgstr "报告大约每分钟写入数据库一次，因此地图比真实流量滞后约一到两分钟。"
+
+msgid "threatmap.fullscreen"
+msgstr "全屏"
+
+msgid "threatmap.map_sub"
+msgstr "弧线表示来源国家/地区，而非精确位置"
+
+msgid "threatmap.map_title"
+msgstr "被拦截流量的来源"
+
+msgid "threatmap.more_hidden"
+msgstr "项未显示"
+
+msgid "threatmap.not_localised"
+msgstr "未定位"
+
+msgid "threatmap.open_live"
+msgstr "实时视图"
+
+msgid "threatmap.show_less"
+msgstr "仅显示前 %(count)s 项"
+
+msgid "threatmap.show_more"
+msgstr "显示全部 %(count)s 项"
+
+msgid "threatmap.stale"
+msgstr "这些数据已停止更新。指标服务没有响应。"
+
+msgid "threatmap.subtitle"
+msgstr "过去 24 小时内您的实例所拦截流量的来源。"
+
+msgid "threatmap.ticker_title"
+msgstr "实时事件"
+
+msgid "threatmap.top_origins"
+msgstr "主要来源"
+
+msgid "threatmap.top_reason"
+msgstr "主要原因"
+
+msgid "threatmap.top_reasons"
+msgstr "主要原因"
+
+msgid "threatmap.top_target"
+msgstr "主要目标"
+
+msgid "threatmap.top_targets"
+msgstr "主要目标"
+
+msgid "threatmap.updated"
+msgstr "更新于"
+
+msgid "timings.calls"
+msgstr "调用次数"
+
+msgid "timings.disabled_help"
+msgstr "将 METRICS_COLLECT_TIMINGS 设为 yes 以测量每个插件所需的时间。无论如何都会收集完整请求时长。"
+
+msgid "timings.disabled_title"
+msgstr "插件计时已关闭"
+
+msgid "timings.max"
+msgstr "最大"
+
+msgid "timings.max_request"
+msgstr "最慢请求"
+
+msgid "timings.mean"
+msgstr "平均"
+
+msgid "timings.mean_request"
+msgstr "平均请求时间"
+
+msgid "timings.partial"
+msgstr "部分实例没有响应。以下数据仅涵盖已响应的实例。"
+
+msgid "timings.phase"
+msgstr "阶段"
+
+msgid "timings.phases"
+msgstr "插件阶段"
+
+msgid "timings.plugin"
+msgstr "插件"
+
+msgid "timings.reporting_instances"
+msgstr "正在上报的实例"
+
+msgid "timings.requests_measured"
+msgstr "已测量请求"
+
+msgid "timings.share"
+msgstr "占比"
+
+msgid "timings.share_help"
+msgstr "占比是插件总时间相对于请求总时间的比例。并非每个请求执行一次的阶段（worker 启动、后台计时器和内部 API）没有占比，并显示短横线。"
+
+msgid "timings.subtitle"
+msgstr "每个插件在各请求阶段所需的时间，从所有实例实时读取并合并。"
+
+msgid "timings.total"
+msgstr "总计"
+
+msgid "timings.unreachable_help"
+msgstr "执行时间从实例本身读取，因此没有实例响应，或尚未有实例处理请求。"
+
+msgid "timings.unreachable_title"
+msgstr "没有实例报告执行时间"
+
+msgid "timings.volatile"
+msgstr "执行时间保存在各实例的共享内存中并按需读取；不会持久存储，实例重启时会重置。"
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "如果服务被移除或重启，您的 UI 配置将会丢失。"
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "这是因为服务的创建方法是 'autoconf'，旨在防止配置冲突。"
+
+msgid "toast.ban_updated"
+msgstr "封禁期限已成功更新！"
+
+msgid "toast.body.ping_succeed"
+msgstr "实例：%(instances)s"
+
+msgid "toast.copied"
+msgstr "已复制！"
+
+msgid "toast.disclaimer_title"
+msgstr "免责声明"
+
+msgid "toast.global_settings_applied_body"
+msgstr "已成功获取全局设置并应用到当前表单。"
+
+msgid "toast.global_settings_applied_title"
+msgstr "全局设置已应用"
+
+msgid "toast.global_settings_failed_body"
+msgstr "获取全局设置时发生错误。"
+
+msgid "toast.global_settings_failed_title"
+msgstr "获取全局设置失败"
+
+msgid "toast.header.ping_failed"
+msgstr "Ping 失败"
+
+msgid "toast.header.ping_succeed"
+msgstr "Ping 成功"
+
+msgid "toast.ip_unbanned"
+msgstr "IP 地址已成功解禁！"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "是否自动请求 Let's Encrypt 证书。"
+
+msgid "tooltip.button.ban_ip"
+msgstr "封禁此 IP 地址"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "将配置 %(name)s 转为草稿"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "将配置 %(name)s 转为上线"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "将服务 %(name)s 转换为草稿"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "将服务 %(name)s 转换为在线"
+
+msgid "tooltip.button.delete_config"
+msgstr "删除自定义配置 %(name)s"
+
+msgid "tooltip.button.delete_file"
+msgstr "删除缓存文件：%(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "删除实例 %(hostname)s"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "删除插件 %(name)s"
+
+msgid "tooltip.button.delete_service"
+msgstr "删除服务 %(name)s"
+
+msgid "tooltip.button.delete_template"
+msgstr "删除模板 %(name)s"
+
+msgid "tooltip.button.force_check"
+msgstr "安排检查；仅在有更新时下载。"
+
+msgid "tooltip.button.force_update"
+msgstr "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
+
+msgid "tooltip.button.ping_instance"
+msgstr "Ping 实例 %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "重新加载实例 %(hostname)s"
+
+msgid "tooltip.button.reset_default"
+msgstr "重置为默认值"
+
+msgid "tooltip.button.reset_global"
+msgstr "重置为全局值"
+
+msgid "tooltip.button.run_job"
+msgstr "运行任务 %(job)s"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "仅显示所选项"
+
+msgid "tooltip.button.stop_instance"
+msgstr "停止实例 %(hostname)s"
+
+msgid "tooltip.button.unban_ip"
+msgstr "解禁 %(ip)s"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "更新禁令时长"
+
+msgid "tooltip.button.value_from_global"
+msgstr "来自全局设置的值"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "无法删除原始封禁条目。"
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "无法移除，因为一个或多个设置被禁用。"
+
+msgid "tooltip.certificate_priority"
+msgstr "选择是优先使用文件路径中的证书还是 base64 数据中的证书。"
+
+msgid "tooltip.challenge_type"
+msgstr "用于 Let's Encrypt 验证的质询类型（http 或 dns）。"
+
+msgid "tooltip.collapse_multiline"
+msgstr "折叠多行条目（traceback、payload）"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "折叠多行值（证书、密钥）"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "在加载 OWASP 核心规则集插件后应用的配置。"
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "在加载 OWASP 核心规则集插件前应用的配置。"
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Nginx 服务器级别的配置，特别用于“默认服务器”块，当客户端请求与任何配置的服务器名称不匹配时使用。"
+
+msgid "tooltip.config_type.http"
+msgstr "全局应用于 Nginx HTTP 级别的配置。"
+
+msgid "tooltip.config_type.modsec"
+msgstr "在加载 OWASP 核心规则集后应用的 ModSecurity 配置，或者在未加载核心规则集时使用。"
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "在加载 OWASP 核心规则集前应用的 ModSecurity 配置。"
+
+msgid "tooltip.config_type.server_http"
+msgstr "应用于 Nginx HTTP 服务器（虚拟主机）级别的配置。"
+
+msgid "tooltip.config_type.server_stream"
+msgstr "应用于 Nginx 流服务器级别的配置。"
+
+msgid "tooltip.config_type.stream"
+msgstr "全局应用于 Nginx 流级别的配置。"
+
+msgid "tooltip.confirm_password_match"
+msgstr "确认密码必须与上面输入的密码匹配。"
+
+msgid "tooltip.copied"
+msgstr "已复制！"
+
+msgid "tooltip.copy_https_only"
+msgstr "复制功能仅在 HTTPS 下可用。"
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "自定义 SSL 证书数据（PEM 格式或 Base64 编码）。"
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "自定义 SSL 证书文件的路径。"
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "自定义 SSL 私钥数据（PEM 格式或 Base64 编码）。"
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "自定义 SSL 私钥文件的路径。"
+
+msgid "tooltip.different_from_template"
+msgstr "值与模板默认值不同"
+
+msgid "tooltip.disabled_by_method"
+msgstr "已禁用：通过方法 '%(method)s' 管理。"
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "已禁用：数据库处于只读模式。"
+
+msgid "tooltip.disabled_draft"
+msgstr "已禁用：服务处于草稿模式。"
+
+msgid "tooltip.disabled_readonly"
+msgstr "已禁用：只读模式已激活。"
+
+msgid "tooltip.dns_check_url"
+msgstr "如果页面显示 'ok'，则服务器名称很可能可用。"
+
+msgid "tooltip.dns_credential_items"
+msgstr "DNS 提供商的凭证，用于 DNS 质询（例如 'cloudflare_api_token=123456'）。所需格式取决于提供商。"
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "凭证仅适用于 DNS 质询。"
+
+msgid "tooltip.dns_propagation"
+msgstr "在 DNS 质询期间等待 DNS 更改传播的时间（秒）。"
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "DNS 传播延迟仅适用于 DNS 质询。"
+
+msgid "tooltip.dns_provider"
+msgstr "用于 Let's Encrypt DNS 质询的 DNS 提供商。"
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "DNS 提供商选择仅适用于 DNS 质询。"
+
+msgid "tooltip.download_file"
+msgstr "下载文件"
+
+msgid "tooltip.download_log"
+msgstr "下载此日志文件"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "草稿模式只能在通过 UI 创建的服务上切换。"
+
+msgid "tooltip.email_length"
+msgstr "电子邮件必须在 1 到 256 个字符之间。"
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。"
+
+msgid "tooltip.fetch_global_settings"
+msgstr "获取全局设置并应用于当前模板"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "跟随模式仅在最新页面可用"
+
+msgid "tooltip.global_settings_source"
+msgstr "值继承自全局设置。"
+
+msgid "tooltip.instance_not_up"
+msgstr "实例 %(hostname)s 当前未响应 ('up')。"
+
+msgid "tooltip.issue_count"
+msgstr "此视图中的错误和警告"
+
+msgid "tooltip.latest_version_installed"
+msgstr "您正在运行最新版本。"
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。"
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "禁用针对符合公共后缀列表的域名的证书请求（推荐）。"
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。"
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "选择您的证书提供商以显示提供商特定设置。"
+
+msgid "tooltip.license_key"
+msgstr "您的 BunkerWeb PRO 许可证密钥。"
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "访问 %(name)s 页面"
+
+msgid "tooltip.link.access_service"
+msgstr "访问服务 %(name)s"
+
+msgid "tooltip.link.clone_config"
+msgstr "克隆自定义配置 %(name)s"
+
+msgid "tooltip.link.clone_service"
+msgstr "克隆服务 %(name)s"
+
+msgid "tooltip.link.clone_template"
+msgstr "克隆模板 %(template)s"
+
+msgid "tooltip.link.download_file"
+msgstr "下载 %(filename)s"
+
+msgid "tooltip.link.edit_config"
+msgstr "编辑自定义配置 %(name)s"
+
+msgid "tooltip.link.edit_service"
+msgstr "编辑服务 %(service)s"
+
+msgid "tooltip.link.edit_template"
+msgstr "编辑模板 %(template)s"
+
+msgid "tooltip.link.export_config"
+msgstr "导出自定义配置 %(name)s"
+
+msgid "tooltip.link.export_service"
+msgstr "导出服务 %(service)s 配置"
+
+msgid "tooltip.link.manage_activation"
+msgstr "在全局设置中管理 %(name)s 的激活"
+
+msgid "tooltip.link.view_config"
+msgstr "查看自定义配置 %(name)s"
+
+msgid "tooltip.link.view_file"
+msgstr "查看 %(filename)s"
+
+msgid "tooltip.link.view_service"
+msgstr "查看服务 %(service)s"
+
+msgid "tooltip.link.view_template"
+msgstr "查看模板 %(template)s"
+
+msgid "tooltip.local_time"
+msgstr "以你的本地时间显示时间戳"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "完整 URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "这是一个多站点设置，如果全局定义，将影响多个服务。"
+
+msgid "tooltip.new_version_available"
+msgstr "有新版本可用！"
+
+msgid "tooltip.next_issue"
+msgstr "跳转到下一个错误或警告"
+
+msgid "tooltip.no_cache"
+msgstr "未找到此任务的缓存文件。"
+
+msgid "tooltip.no_history"
+msgstr "未找到此任务的执行历史记录。"
+
+msgid "tooltip.no_log_files"
+msgstr "无可用日志文件。"
+
+msgid "tooltip.no_page_available"
+msgstr "此插件无专用页面。"
+
+msgid "tooltip.password_requirements"
+msgstr "密码必须至少包含 8 个字符，并包括 1 个大写字母、1 个数字和 1 个特殊字符。"
+
+msgid "tooltip.prev_issue"
+msgstr "跳转到上一个错误或警告"
+
+msgid "tooltip.pro_feature"
+msgstr "这是一个 PRO 功能。"
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "已禁用：数据库处于只读模式。"
+
+msgid "tooltip.readonly_mode"
+msgstr "此操作在只读模式下不允许。"
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "已禁用：您的帐户是只读的，操作 '%(action)s' 已禁用。"
+
+msgid "tooltip.real_ip_from"
+msgstr "受信任的 IP / 网络列表（以空格分隔），代理请求的来源。"
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "包含受信任的 IP / 网络的 URL 列表（以空格分隔），代理请求的来源。还支持 file:// URL 和使用 http://user:pass@url 格式的基本身份验证。"
+
+msgid "tooltip.real_ip_header"
+msgstr "包含真实 IP 或 PROXY 协议的特殊值 proxy_protocol 的 HTTP 标头。"
+
+msgid "tooltip.real_ip_recursive"
+msgstr "在包含 IP 地址的标头中执行递归搜索。"
+
+msgid "tooltip.remove_ban_entry"
+msgstr "从列表中移除此封禁条目。"
+
+msgid "tooltip.reset_template_settings"
+msgstr "将当前模板视图中的所有设置重置为其默认值。"
+
+msgid "tooltip.search_logs"
+msgstr "搜索日志 (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "选择一个文件以启用跟随模式"
+
+msgid "tooltip.server_name"
+msgstr "此服务的主域名或服务器名称。"
+
+msgid "tooltip.stream_support.no"
+msgstr "不支持 STREAM 模式。"
+
+msgid "tooltip.stream_support.partial"
+msgstr "部分支持 STREAM 模式。"
+
+msgid "tooltip.stream_support.yes"
+msgstr "支持 STREAM 模式。"
+
+msgid "tooltip.table.bans.actions"
+msgstr "此封禁可用的操作"
+
+msgid "tooltip.table.bans.country"
+msgstr "被封禁 IP 地址的国家/地区"
+
+msgid "tooltip.table.bans.date"
+msgstr "封禁创建的日期和时间"
+
+msgid "tooltip.table.bans.details"
+msgstr "显示封禁详情"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "封禁到期的日期和时间"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "被封禁的 IP 地址"
+
+msgid "tooltip.table.bans.reason"
+msgstr "封禁的原因"
+
+msgid "tooltip.table.bans.scope"
+msgstr "封禁的范围（全局或特定服务）"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "选择所有封禁"
+
+msgid "tooltip.table.bans.service"
+msgstr "封禁来源的服务（如果范围是特定服务）"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "封禁到期前的剩余时间"
+
+msgid "tooltip.table.cache.actions"
+msgstr "此缓存文件可用的操作"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "缓存文件的校验和"
+
+msgid "tooltip.table.cache.details"
+msgstr "显示缓存文件详情"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "缓存文件的名称"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "生成此缓存文件的任务"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "缓存文件最后更新的日期和时间"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "与生成此缓存文件的任务关联的插件"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "选择所有缓存文件"
+
+msgid "tooltip.table.cache.service"
+msgstr "与此缓存文件关联的服务（或全局）"
+
+msgid "tooltip.table.configs.actions"
+msgstr "此自定义配置可用的操作"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "自定义配置内容的校验和"
+
+msgid "tooltip.table.configs.details"
+msgstr "显示自定义配置详情"
+
+msgid "tooltip.table.configs.method"
+msgstr "自定义配置的创建方法（例如，ui, file）"
+
+msgid "tooltip.table.configs.name"
+msgstr "自定义配置的名称"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "选择所有自定义配置"
+
+msgid "tooltip.table.configs.service"
+msgstr "与自定义配置关联的服务（或全局）"
+
+msgid "tooltip.table.configs.status"
+msgstr "自定义配置的草稿状态"
+
+msgid "tooltip.table.configs.template"
+msgstr "指示自定义配置是否源自模板"
+
+msgid "tooltip.table.configs.type"
+msgstr "自定义配置的类型或上下文（例如，HTTP, MODSEC）"
+
+msgid "tooltip.table.instances.actions"
+msgstr "此实例可用的操作"
+
+msgid "tooltip.table.instances.created"
+msgstr "实例首次注册的日期和时间"
+
+msgid "tooltip.table.instances.details"
+msgstr "显示实例详情"
+
+msgid "tooltip.table.instances.health"
+msgstr "实例的健康状况（运行中、已停止、加载中）"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "实例的主机名或 URL"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "实例最后出现的日期和时间"
+
+msgid "tooltip.table.instances.method"
+msgstr "实例的创建方法（例如，ui, autoconf）"
+
+msgid "tooltip.table.instances.name"
+msgstr "用户定义或自动生成的实例名称"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "选择所有实例"
+
+msgid "tooltip.table.instances.type"
+msgstr "实例的类型（例如，容器、静态）"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "此任务可用的操作"
+
+msgid "tooltip.table.jobs.async"
+msgstr "指示任务是否异步运行"
+
+msgid "tooltip.table.jobs.details"
+msgstr "显示任务详情"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "任务的执行频率"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "上次任务执行的状态（成功/失败）"
+
+msgid "tooltip.table.jobs.name"
+msgstr "任务的名称"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "与任务关联的插件"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "指示任务是否触发 BunkerWeb 重新加载"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "选择所有任务"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "此插件可用的操作"
+
+msgid "tooltip.table.plugins.description"
+msgstr "插件的描述"
+
+msgid "tooltip.table.plugins.details"
+msgstr "显示插件详情"
+
+msgid "tooltip.table.plugins.id"
+msgstr "插件的唯一标识符"
+
+msgid "tooltip.table.plugins.method"
+msgstr "插件的创建方法（例如，ui, core）"
+
+msgid "tooltip.table.plugins.name"
+msgstr "插件的名称"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "选择所有插件"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "指示插件是否支持流模式"
+
+msgid "tooltip.table.plugins.type"
+msgstr "插件的类型（核心、外部、Pro、UI）"
+
+msgid "tooltip.table.plugins.version"
+msgstr "插件的版本"
+
+msgid "tooltip.table.reports.actions"
+msgstr "此报告可用的操作"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "仅限流：会话期间从客户端接收的字节数"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "仅限流：会话期间发送给客户端的字节数"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "仅限流：客户端的源端口"
+
+msgid "tooltip.table.reports.country"
+msgstr "与报告的 IP 地址关联的国家/地区"
+
+msgid "tooltip.table.reports.data"
+msgstr "与报告相关的附加数据"
+
+msgid "tooltip.table.reports.date"
+msgstr "报告生成的日期和时间"
+
+msgid "tooltip.table.reports.details"
+msgstr "显示报告详情"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "触发报告的 IP 地址"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "仅限流：会话进入的端口"
+
+msgid "tooltip.table.reports.method"
+msgstr "报告的请求的 HTTP 方法"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP 请求，或 TCP/UDP 流会话"
+
+msgid "tooltip.table.reports.reason"
+msgstr "生成报告的原因"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "请求的唯一标识符"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "生成报告时活动的安全模式"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "选择所有报告"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "生成报告的服务器名称 (vhost)"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "仅限流：会话持续时间（秒）"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "为报告的请求返回的 HTTP 状态码"
+
+msgid "tooltip.table.reports.url"
+msgstr "报告的请求中针对的 URL"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "报告的请求中的 User-Agent 字符串"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "请选择一行或多行以执行操作。"
+
+msgid "tooltip.table.services.actions"
+msgstr "此服务可用的操作"
+
+msgid "tooltip.table.services.created"
+msgstr "服务创建的日期和时间"
+
+msgid "tooltip.table.services.details"
+msgstr "显示服务详情"
+
+msgid "tooltip.table.services.last_update"
+msgstr "服务最后更新的日期和时间"
+
+msgid "tooltip.table.services.method"
+msgstr "服务的创建方法（例如，ui, file）"
+
+msgid "tooltip.table.services.name"
+msgstr "服务的名称"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "服务的安全模式（阻止或检测）"
+
+msgid "tooltip.table.services.select_all"
+msgstr "选择所有服务"
+
+msgid "tooltip.table.services.template"
+msgstr "服务使用的模板"
+
+msgid "tooltip.table.services.type"
+msgstr "服务类型（在线/草稿）"
+
+msgid "tooltip.table.templates.actions"
+msgstr "此模板可用的操作"
+
+msgid "tooltip.table.templates.configs"
+msgstr "模板的配置数量"
+
+msgid "tooltip.table.templates.created"
+msgstr "模板的创建日期"
+
+msgid "tooltip.table.templates.details"
+msgstr "显示模板详细信息"
+
+msgid "tooltip.table.templates.id"
+msgstr "模板 ID"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "模板的最后更新日期"
+
+msgid "tooltip.table.templates.method"
+msgstr "模板的创建方式"
+
+msgid "tooltip.table.templates.name"
+msgstr "用户定义或自动生成的模板名称"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "包含该模板的插件"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "选择所有模板"
+
+msgid "tooltip.table.templates.settings"
+msgstr "模板的设置数量"
+
+msgid "tooltip.table.templates.steps"
+msgstr "模板的步骤数量"
+
+msgid "tooltip.toggle_level"
+msgstr "显示 / 隐藏 %(level)s 行"
+
+msgid "tooltip.toggle_wrap"
+msgstr "切换自动换行"
+
+msgid "tooltip.ui_host"
+msgstr "将通过反向代理提供 BunkerWeb UI 的主机名或 IP 地址。"
+
+msgid "tooltip.ui_url"
+msgstr "通过反向代理访问 BunkerWeb UI 的 URL 路径。"
+
+msgid "tooltip.ui_url_security"
+msgstr "使用非标准、难以猜测的 URL 路径可增强安全性。"
+
+msgid "tooltip.use_custom_ssl"
+msgstr "是否使用自定义 SSL 证书而不是 Let's Encrypt。"
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "是否使用 Let's Encrypt 的 staging 环境进行测试（生成不受信任的证书）。"
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "仅在使用 Let's Encrypt 服务器时才可使用 Let's Encrypt staging。"
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "启用 PROXY 协议通信。"
+
+msgid "tooltip.use_real_ip"
+msgstr "使用真实 IP"
+
+msgid "tooltip.username_length"
+msgstr "用户名必须在 1 到 256 个字符之间。"
+
+msgid "tooltip.value_from_global"
+msgstr "来自全局设置的值"
+
+msgid "tooltip.view_full_url"
+msgstr "点击查看完整 URL"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "生成通配符证书 (*.domain.com)。需要 DNS 质询。"
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "通配符证书仅支持 DNS 质询类型。"
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API 调用的连接超时秒数。"
+
+msgid "tooltip.zerossl_api_key"
+msgstr "由 zerossl-bot 使用的可选 ZeroSSL API 密钥。"
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "每个 ZeroSSL API 请求的最大总时长（秒）。"
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "ZeroSSL API 请求的重试次数（0 表示禁用重试）。"
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "ZeroSSL API 重试之间的延迟秒数。"
+
+msgid "totp.cant_access"
+msgstr "无法访问您的身份验证器？"
+
+msgid "totp.or_use_security_key"
+msgstr "或使用您的安全密钥"
+
+msgid "totp.prompt"
+msgstr "请输入您的 TOTP 代码。"
+
+msgid "totp.signing_in"
+msgstr "登录 BunkerWeb"
+
+msgid "totp.subtitle"
+msgstr "输入来自您的身份验证器应用程序的代码。"
+
+msgid "totp.subtitle_security_key"
+msgstr "请使用安全密钥确认您的身份。"
+
+msgid "totp.title"
+msgstr "双重验证"
+
+msgid "upstreams.add_server"
+msgstr "添加服务器"
+
+msgid "upstreams.all"
+msgstr "全部"
+
+msgid "upstreams.attach"
+msgstr "附加"
+
+msgid "upstreams.attach_copy"
+msgstr "将 %(name)s (%(servers)s) 附加到一个或多个服务。"
+
+msgid "upstreams.backend_ssl"
+msgstr "与服务器进行 TLS 通信（https:// / grpcs://）"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "1 IP 哈希 — 相同客户端，相同后端"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "最少连接"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "轮询（默认）"
+
+msgid "upstreams.create"
+msgstr "创建上游"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "删除此上游？"
+
+msgid "upstreams.delete_copy"
+msgstr "删除上游 %(name)s？"
+
+msgid "upstreams.delete_help"
+msgstr "与服务关联的上游无法删除。首先将其断开连接。"
+
+msgid "upstreams.edit"
+msgstr "编辑上游"
+
+msgid "upstreams.edit_shared"
+msgstr "此上游已关联 %(count)s 个服务：%(services)s。保存后，变更会应用到所有这些服务。"
+
+msgid "upstreams.empty_text"
+msgstr "上游是一个名称的后端池，您将其连接到一个或多个服务，位于反向代理路径上。 REVERSE_PROXY_HOST 设置与此一起保持工作。"
+
+msgid "upstreams.empty_title"
+msgstr "尚无上游"
+
+msgid "upstreams.keepalive"
+msgstr "保持连接"
+
+msgid "upstreams.keepalive_help"
+msgstr "每工作进程保持的空闲连接。仅适用于 HTTP 和 gRPC；留空以禁用。"
+
+msgid "upstreams.match_path"
+msgstr "反向代理路径"
+
+msgid "upstreams.match_path_help"
+msgstr "选择的服务将流量代理到此池的位置。对于流池，整个服务将被使用。"
+
+msgid "upstreams.method"
+msgstr "负载均衡"
+
+msgid "upstreams.name_help"
+msgstr "只能是字母、数字、连字符和下划线。不允许使用点，因此池名不能与真实主机重叠。"
+
+msgid "upstreams.new"
+msgstr "新的上游"
+
+msgid "upstreams.not_attached"
+msgstr "未连接"
+
+msgid "upstreams.protocol"
+msgstr "协议"
+
+msgid "upstreams.protocol_help"
+msgstr "HTTP 和 gRPC 池连接到一个路径；一个流池继承整个 TCP/UDP 服务。"
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "流 (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "数据库是只读的。上游可以查看，但不能修改。"
+
+msgid "upstreams.role.backup"
+msgstr "备份"
+
+msgid "upstreams.role.down"
+msgstr "已停止"
+
+msgid "upstreams.role.primary"
+msgstr "主"
+
+msgid "upstreams.save"
+msgstr "保存上游"
+
+msgid "upstreams.search"
+msgstr "搜索名称、描述或服务器..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "超时时间"
+
+msgid "upstreams.server_host"
+msgstr "服务器"
+
+msgid "upstreams.server_max_fails"
+msgstr "最大失败次数"
+
+msgid "upstreams.server_role"
+msgstr "角色"
+
+msgid "upstreams.server_weight"
+msgstr "权重"
+
+msgid "upstreams.servers"
+msgstr "服务器"
+
+msgid "upstreams.services_help"
+msgstr "使用 Ctrl 或 Command 选择多个服务。上游可以稍后连接。"
+
+msgid "upstreams.services_hidden"
+msgstr "已隐藏 %(count)s 个服务：%(protocol)s 上游只能关联协议匹配的服务。"
+
+msgid "upstreams.truncated"
+msgstr "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
+
+msgid "validation.default_field_name"
+msgstr "此字段"
+
+msgid "validation.invalid_date"
+msgstr "无效日期"
+
+msgid "validation.ip_global_duplicate"
+msgstr "此 IP 地址已被全局封禁。"
+
+msgid "validation.ip_invalid"
+msgstr "IP 地址格式无效。"
+
+msgid "validation.ip_required"
+msgstr "需要 IP 地址。"
+
+msgid "validation.ip_service_duplicate"
+msgstr "此 IP 地址已针对所选服务 (%(service)s) 被封禁。"
+
+msgid "validation.pattern"
+msgstr "请输入有效的 %(field)s 值。"
+
+msgid "validation.required"
+msgstr "%(field)s 是必填项。"
+
+msgid "validation.service_required_for_ban"
+msgstr "对于特定于服务的封禁，必须选择一个服务。"
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。"
+
+msgid "web_cache.available"
+msgstr "可用"
+
+msgid "web_cache.cache_state"
+msgstr "状态"
+
+msgid "web_cache.cached_files"
+msgstr "缓存文件"
+
+msgid "web_cache.deployment"
+msgstr "部署"
+
+msgid "web_cache.disabled"
+msgstr "禁用"
+
+msgid "web_cache.disk_usage"
+msgstr "磁盘使用量"
+
+msgid "web_cache.empty"
+msgstr "为空"
+
+msgid "web_cache.enabled"
+msgstr "已启用"
+
+msgid "web_cache.enabled_instances"
+msgstr "启用缓存"
+
+msgid "web_cache.enabled_services"
+msgstr "启用服务"
+
+msgid "web_cache.error"
+msgstr "错误"
+
+msgid "web_cache.hit_rate"
+msgstr "命中率"
+
+msgid "web_cache.instance"
+msgstr "实例"
+
+msgid "web_cache.metrics"
+msgstr "聚合命中/未命中分布"
+
+msgid "web_cache.metrics_scope"
+msgstr "计数器按实例在所有启用的缓存服务中进行聚合。"
+
+msgid "web_cache.not_reporting"
+msgstr "未报告"
+
+msgid "web_cache.path"
+msgstr "路径"
+
+msgid "web_cache.purge"
+msgstr "清除缓存响应"
+
+msgid "web_cache.purge_all"
+msgstr "清除所有"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "这将删除所有服务的所有可访问实例上的所有缓存响应。 无法撤销。"
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "清除整个缓存？"
+
+msgid "web_cache.purge_help"
+msgstr "立即在可访问的实例上执行清除操作。 不可访问的实例将被跳过，并且不会有任何操作排队。"
+
+msgid "web_cache.purge_key"
+msgstr "实际生效的缓存键"
+
+msgid "web_cache.purge_key_help"
+msgstr "仅在使用默认 $scheme$host$request_uri 时将缓存键留空。如果服务覆盖了 PROXY_CACHE_KEY，请在此粘贴实际生效的值；不支持的仅在请求处理期间可用的变量会被拒绝，以免清除其他缓存条目。"
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "实际生效的 PROXY_CACHE_KEY（可选）"
+
+msgid "web_cache.purge_url"
+msgstr "清除 URL"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "正在上报的实例"
+
+msgid "web_cache.service"
+msgstr "服务"
+
+msgid "web_cache.services"
+msgstr "服务启用情况"
+
+msgid "web_cache.status"
+msgstr "实例存储空间"
+
+msgid "web_cache.subtitle"
+msgstr "反向代理缓存状态，汇总命中率指标和立即清除控制。"
+
+msgid "whatsnew.missing_action"
+msgstr "在 GitHub 上打开变更日志"
+
+msgid "whatsnew.missing_message"
+msgstr "此构建未包含 CHANGELOG.md。版本说明可在 GitHub 上查看。"
+
+msgid "whatsnew.missing_title"
+msgstr "此安装中没有变更日志"
+
+msgid "whatsnew.modal.intro"
+msgstr "以下是自您上次使用的版本以来的变化。"
+
+msgid "whatsnew.modal.title"
+msgstr "新增内容"
+
+msgid "whatsnew.subtitle"
+msgstr "BunkerWeb 的所有版本，最新在前，直接来自本安装附带的变更日志。"
+
+msgid "workflows.act_block"
+msgstr "阻止"
+
+msgid "workflows.act_challenge"
+msgstr "质询"
+
+msgid "workflows.act_code"
+msgstr "状态码"
+
+msgid "workflows.act_denyDefault"
+msgstr "实例的拒绝状态码"
+
+msgid "workflows.act_denyShort"
+msgstr "拒绝状态码"
+
+msgid "workflows.act_provider"
+msgstr "反机器人验证提供商"
+
+msgid "workflows.act_redirect"
+msgstr "重定向"
+
+msgid "workflows.act_status"
+msgstr "拒绝状态码"
+
+msgid "workflows.act_terminal"
+msgstr "每条规则只能执行一个操作，并会结束评估，不会从规则产生真/假分支。"
+
+msgid "workflows.act_url"
+msgstr "目标 URL"
+
+msgid "workflows.action"
+msgstr "然后"
+
+msgid "workflows.add_rule"
+msgstr "添加规则"
+
+msgid "workflows.all"
+msgstr "全部"
+
+msgid "workflows.aria.collapse"
+msgstr "折叠"
+
+msgid "workflows.aria.combinator"
+msgstr "更改组合方式，当前为"
+
+msgid "workflows.aria.conditionType"
+msgstr "条件类型"
+
+msgid "workflows.aria.denyStatus"
+msgstr "拒绝状态码"
+
+msgid "workflows.aria.drag"
+msgstr "拖动以重新排序"
+
+msgid "workflows.aria.expand"
+msgstr "展开"
+
+msgid "workflows.aria.groupKind"
+msgstr "组类型"
+
+msgid "workflows.aria.insertAt"
+msgstr "在 %(n)s 位置插入规则"
+
+msgid "workflows.aria.more"
+msgstr "更多"
+
+msgid "workflows.aria.moveDown"
+msgstr "下移，稍后运行"
+
+msgid "workflows.aria.moveRule"
+msgstr "移动规则"
+
+msgid "workflows.aria.moveUp"
+msgstr "上移，提前运行"
+
+msgid "workflows.aria.openRule"
+msgstr "打开规则 %(n)s"
+
+msgid "workflows.aria.provider"
+msgstr "反机器人验证提供商"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "重定向状态码"
+
+msgid "workflows.aria.removeCondition"
+msgstr "删除条件"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "删除阈值"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "删除速率阈值"
+
+msgid "workflows.aria.removeValue"
+msgstr "删除值"
+
+msgid "workflows.aria.requestCount"
+msgstr "请求数"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "资源组"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "%(count)s 规则中的验证问题"
+
+msgid "workflows.aria.ruleName"
+msgstr "规则 %(n)s 的名称"
+
+msgid "workflows.aria.terminalAction"
+msgstr "终止操作"
+
+msgid "workflows.aria.uriMatch"
+msgstr "URI 匹配模式"
+
+msgid "workflows.aria.uriValue"
+msgstr "URI 值"
+
+msgid "workflows.aria.window"
+msgstr "时间窗口（秒）"
+
+msgid "workflows.attach"
+msgstr "附加到服务"
+
+msgid "workflows.attach_help"
+msgstr "规则仅在工作流程附加到的服务上执行。"
+
+msgid "workflows.attached_notice"
+msgstr "保存后会将这些规则应用到 %(count)s 个已关联服务。"
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "从左到右。第一个匹配的规则生效。"
+
+msgid "workflows.canvas.auxList"
+msgstr "从上到下。第一个匹配的规则生效。"
+
+msgid "workflows.canvas.close"
+msgstr "关闭"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "在 %(total)s 的 %(n)s 位置运行"
+
+msgid "workflows.canvas.dropHint"
+msgstr "通过拖动来设置优先级 — 规则在链中的位置是它唯一可以表示的内容"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "没有规则的工作流程不会改变任何内容 — 所有的请求都直接流向下一个附加的工作流程。"
+
+msgid "workflows.canvas.emptyCta"
+msgstr "添加第一个规则"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "还没有规则"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "规则从左到右执行。"
+
+msgid "workflows.canvas.entry_title"
+msgstr "每个请求"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "继续到下一个附加的工作流程。"
+
+msgid "workflows.canvas.exit_title"
+msgstr "没有规则匹配"
+
+msgid "workflows.canvas.fit"
+msgstr "适应视图"
+
+msgid "workflows.canvas.gateTip"
+msgstr "一个匹配门，而不是一个动作：低于阈值时，规则不匹配，并且下一个规则将被评估。"
+
+msgid "workflows.canvas.hint"
+msgstr "拖动节点来重新排序 · 拖动面板来浏览 · 在焦点节点上，Alt + ← / →"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "只读 — 浏览 · 顺序不能更改"
+
+msgid "workflows.canvas.insert"
+msgstr "在此处插入规则"
+
+msgid "workflows.canvas.open"
+msgstr "打开规则"
+
+msgid "workflows.canvas.skipped"
+msgstr "已禁用 — 完全跳过，就像它不在链中一样。"
+
+msgid "workflows.canvas.stopTail"
+msgstr "，评估在此停止 — 没有后续规则被执行"
+
+msgid "workflows.canvas.title"
+msgstr "规则顺序"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "放大"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "缩小"
+
+msgid "workflows.capacity"
+msgstr "共 %(maxRules)s 条规则，已有 %(count)s 条；最大规则使用 %(maxPredicates)s 个谓词中的 %(worst)s 个；此工作流中有 %(regexes)s 个正则表达式"
+
+msgid "workflows.clone"
+msgstr "克隆工作流程"
+
+msgid "workflows.clone_help"
+msgstr "规则会被复制，但服务附加不会被复制。"
+
+msgid "workflows.clone_name"
+msgstr "副本名称"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "删除此规则？其下的所有规则都将上移一位。"
+
+msgid "workflows.copySuffix"
+msgstr "（副本）"
+
+msgid "workflows.delete"
+msgstr "删除工作流程"
+
+msgid "workflows.delete_confirm"
+msgstr "此工作流程及其所有规则将被永久删除。"
+
+msgid "workflows.empty_text"
+msgstr "工作流程是一个规则的有序列表，您将其附加到服务上：一个条件树、可选的速率阈值和一个动作——挑战、阻止或重定向。"
+
+msgid "workflows.empty_title"
+msgstr "目前没有工作流程"
+
+msgid "workflows.entry_sub"
+msgstr "工作流按关联顺序运行；其中的规则从上到下运行。"
+
+msgid "workflows.entry_title"
+msgstr "对已关联服务的每个请求"
+
+msgid "workflows.err.save"
+msgstr "无法保存"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "无法访问保存端点"
+
+msgid "workflows.err.validate"
+msgstr "无法验证"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "无法访问验证端点"
+
+msgid "workflows.errors.body"
+msgstr "未应用任何内容，运行中的策略保持不变。"
+
+msgid "workflows.errors.count"
+msgstr "有 %(count)s 个问题阻止保存。"
+
+msgid "workflows.errors.rule"
+msgstr "规则 %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "规则 %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "此工作流"
+
+msgid "workflows.exit_sub"
+msgstr "请求将继续进入下一个已关联工作流，然后进入安全栈的其余部分。"
+
+msgid "workflows.exit_title"
+msgstr "没有规则匹配"
+
+msgid "workflows.gate.and"
+msgstr "并且仅当同一客户端 IP 的请求数超过"
+
+msgid "workflows.gate.chip"
+msgstr "匹配门槛"
+
+msgid "workflows.gate.help"
+msgstr "按客户端 IP 计数。低于阈值时，此规则完全不匹配，评估将继续到下一条规则；它本身不会执行速率限制。"
+
+msgid "workflows.legend.fall"
+msgstr "不匹配时转到下一条规则"
+
+msgid "workflows.legend.gate"
+msgstr "速率阈值控制是否匹配，它不是操作"
+
+msgid "workflows.legend.move"
+msgstr "拖动、使用箭头或按 Alt + ↑ / ↓ 重新排序"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "通过拖动、使用编号标签或按 Alt + ← / → 来重新排序"
+
+msgid "workflows.legend.stop"
+msgstr "匹配后执行一个操作并停止"
+
+msgid "workflows.link.entry"
+msgstr "每个请求"
+
+msgid "workflows.link.noMatch"
+msgstr "不匹配"
+
+msgid "workflows.menu.bottom"
+msgstr "最后运行"
+
+msgid "workflows.menu.delete"
+msgstr "删除规则"
+
+msgid "workflows.menu.disable"
+msgstr "禁用规则"
+
+msgid "workflows.menu.duplicate"
+msgstr "在下方复制"
+
+msgid "workflows.menu.enable"
+msgstr "启用规则"
+
+msgid "workflows.menu.top"
+msgstr "最先运行"
+
+msgid "workflows.move.first"
+msgstr "最先运行"
+
+msgid "workflows.move.last"
+msgstr "最后运行"
+
+msgid "workflows.new"
+msgstr "新建工作流程"
+
+msgid "workflows.no_rules"
+msgstr "目前没有规则。添加一个以开始构建此策略。"
+
+msgid "workflows.not_attached"
+msgstr "未附加"
+
+msgid "workflows.not_attached_notice"
+msgstr "此工作流未关联到任何服务，因此这些规则尚未在任何位置生效。"
+
+msgid "workflows.not_validated"
+msgstr "尚未验证"
+
+msgid "workflows.order_help"
+msgstr "规则按顺序评估，首个匹配的规则生效。带请求率阈值的规则仅在超过阈值后匹配，因此下方规则仍可处理未达到该阈值的流量。"
+
+msgid "workflows.readonly"
+msgstr "数据库是只读的。可以查看工作流程，但不能修改。"
+
+msgid "workflows.rule.disabled"
+msgstr "已禁用"
+
+msgid "workflows.rule.if"
+msgstr "如果"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "规则名称"
+
+msgid "workflows.rule.noun"
+msgstr "规则"
+
+msgid "workflows.rule.onMatch"
+msgstr "如果匹配"
+
+msgid "workflows.rule.skipped"
+msgstr "已禁用，完全跳过，就像它不在列表中一样。"
+
+msgid "workflows.rule.stopTail"
+msgstr "，评估在此停止，不会到达下方的规则。"
+
+msgid "workflows.rules"
+msgstr "规则"
+
+msgid "workflows.say.actionChanged"
+msgstr "操作已更改为 %(type)s。它仍是唯一操作，并仍会停止评估。"
+
+msgid "workflows.say.added"
+msgstr "规则已添加到第 %(n)s 位，即最后一位，因此会先检查其上方的所有规则。"
+
+msgid "workflows.say.deleted"
+msgstr "规则已删除。还剩 %(count)s 条规则。"
+
+msgid "workflows.say.duplicated"
+msgstr "副本已插入第 %(n)s 位。只要上方的原规则处于启用状态，它就永远无法匹配。"
+
+msgid "workflows.say.gateAdded"
+msgstr "已向匹配添加速率阈值。低于阈值时规则不匹配，评估继续。"
+
+msgid "workflows.say.inserted"
+msgstr "在 %(total)s 的 %(n)s 位置添加规则。 检查所有之前的规则。"
+
+msgid "workflows.say.inspecting"
+msgstr "编辑 %(total)s 的 %(n)s 规则 — %(name)s。"
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s：%(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "最后一个值已删除；此条件必须包含一个值才能保存。"
+
+msgid "workflows.say.moved"
+msgstr "%(name)s 已移至第 %(to)s 位，共 %(total)s 位%(how)s。现在它在%(where)s运行。"
+
+msgid "workflows.say.predicateCap"
+msgstr "此规则已有 %(max)s 个条件，已达到上限。"
+
+msgid "workflows.say.ruleAbove"
+msgstr "上方规则"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s 已禁用，将被完全跳过，下方规则现在会处理这些请求。"
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s 已启用，将再次在第 %(n)s 位接受评估。"
+
+msgid "workflows.say.runsAfter"
+msgstr "%(name)s 之后"
+
+msgid "workflows.say.runsFirst"
+msgstr "最先"
+
+msgid "workflows.say.runsLast"
+msgstr "最后"
+
+msgid "workflows.say.saved"
+msgstr "规则已保存并推送到已关联服务。"
+
+msgid "workflows.say.theRule"
+msgstr "该规则"
+
+msgid "workflows.say.valuesDropped"
+msgstr "条件已更改为 %(type)s；原有的 %(count)s 个值无法保留。"
+
+msgid "workflows.say.via.drag"
+msgstr "通过拖动"
+
+msgid "workflows.say.via.keyboard"
+msgstr "通过键盘"
+
+msgid "workflows.say.viewCanvas"
+msgstr "画布视图。规则从左到右运行；第一个匹配的规则生效。"
+
+msgid "workflows.say.viewList"
+msgstr "列表视图。规则从上到下运行；第一个匹配的规则生效。"
+
+msgid "workflows.search"
+msgstr "搜索名称或描述..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "留空可模拟 ASN 查询失败。"
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN 必须是数字"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "假定客户端不在白名单中。"
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "请求编号 %(request_number)s 是输入值，不是测量结果。"
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "假定实例的正则表达式预算尚未耗尽。"
+
+msgid "workflows.test.assumptions"
+msgstr "假设条件"
+
+msgid "workflows.test.country"
+msgstr "国家/地区"
+
+msgid "workflows.test.detail_challenge"
+msgstr "质询将接管处理；安全栈的其余部分仍会运行。"
+
+msgid "workflows.test.detail_detect"
+msgstr "此服务处于检测模式，因此不会实际执行任何操作。"
+
+msgid "workflows.test.detail_status"
+msgstr "客户端会看到 %(status)s。"
+
+msgid "workflows.test.failed"
+msgstr "无法运行测试"
+
+msgid "workflows.test.geo"
+msgstr "GeoIP 查询"
+
+msgid "workflows.test.geo_help"
+msgstr "不可用时，国家/地区和 ASN 规则会变为“未知”，因此永远无法匹配。"
+
+msgid "workflows.test.geo_local"
+msgstr "本地/私有地址"
+
+msgid "workflows.test.geo_resolved"
+msgstr "已解析"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "数据库不可用"
+
+msgid "workflows.test.intro"
+msgstr "严格按照实例的处理方式，依次评估关联到此服务的每个工作流。"
+
+msgid "workflows.test.invalid"
+msgstr "请先修复上述问题再测试。"
+
+msgid "workflows.test.ip"
+msgstr "客户端 IP"
+
+msgid "workflows.test.method"
+msgstr "方法"
+
+msgid "workflows.test.number"
+msgstr "请求编号"
+
+msgid "workflows.test.number_help"
+msgstr "此客户端在时间窗口内的第 N 个请求。这是您提供的假设值，不是测量结果。"
+
+msgid "workflows.test.open"
+msgstr "测试请求"
+
+msgid "workflows.test.other_matched"
+msgstr "在此匹配"
+
+msgid "workflows.test.other_no_match"
+msgstr "没有规则匹配"
+
+msgid "workflows.test.other_unreached"
+msgstr "未到达"
+
+msgid "workflows.test.other_workflows"
+msgstr "此服务上的其他工作流"
+
+msgid "workflows.test.out_draft"
+msgstr "此服务是草稿，尚未为其编译工作流。"
+
+msgid "workflows.test.out_match"
+msgstr "%(workflow)s · %(rule)s 已匹配，并对请求执行了%(action)s。"
+
+msgid "workflows.test.out_no_match"
+msgstr "没有规则匹配。请求将继续进入安全栈的其余部分。"
+
+msgid "workflows.test.out_not_attached"
+msgstr "此工作流未关联到任何服务，因此没有可评估的规则链。"
+
+msgid "workflows.test.out_whitelisted"
+msgstr "已列入白名单；将跳过整个工作流，不评估任何规则。"
+
+msgid "workflows.test.run"
+msgstr "运行测试"
+
+msgid "workflows.test.service"
+msgstr "服务"
+
+msgid "workflows.test.title"
+msgstr "测试请求"
+
+msgid "workflows.test.unreachable"
+msgstr "无法访问测试端点"
+
+msgid "workflows.test.uri"
+msgstr "URI 路径"
+
+msgid "workflows.test.uri_help"
+msgstr "仅限路径；$uri 从不包含查询字符串。"
+
+msgid "workflows.test.v_gate"
+msgstr "条件匹配；门槛在 %(n)s/%(count)s 时关闭"
+
+msgid "workflows.test.v_match"
+msgstr "已匹配"
+
+msgid "workflows.test.v_unknown"
+msgstr "未知"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "无法确定此规则所需的信息，因此规则永远无法匹配。"
+
+msgid "workflows.test.whitelisted"
+msgstr "此客户端在白名单中"
+
+msgid "workflows.threshold"
+msgstr "仅高于速率"
+
+msgid "workflows.threshold_count"
+msgstr "请求"
+
+msgid "workflows.threshold_window"
+msgstr "每（秒）"
+
+msgid "workflows.tree.addCondition"
+msgstr "条件"
+
+msgid "workflows.tree.addGroup"
+msgstr "组"
+
+msgid "workflows.tree.all"
+msgstr "全部满足"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)s 个条件，必须全部为真"
+
+msgid "workflows.tree.and"
+msgstr "且"
+
+msgid "workflows.tree.any"
+msgstr "任一满足"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)s 个条件，至少一个必须为真"
+
+msgid "workflows.tree.empty"
+msgstr "空组；请添加条件，当前状态无法保存。"
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "没有组包含 %(kind)s 个条目"
+
+msgid "workflows.tree.noneMeta"
+msgstr "这些条件均不为真时匹配"
+
+msgid "workflows.tree.not"
+msgstr "全部不满足"
+
+msgid "workflows.tree.or"
+msgstr "或"
+
+msgid "workflows.tree.removeGroup"
+msgstr "删除组"
+
+msgid "workflows.truncated"
+msgstr "仅显示前500个工作流程。通过API获取完整结果。"
+
+msgid "workflows.untitled"
+msgstr "未命名规则"
+
+msgid "workflows.value.add"
+msgstr "值"
+
+msgid "workflows.values.fewer"
+msgstr "收起"
+
+msgid "workflows.values.more"
+msgstr "另外 %(n)s 个"
+
+msgid "workflows.verb.asn"
+msgstr "是"
+
+msgid "workflows.verb.country"
+msgstr "是"
+
+msgid "workflows.verb.group"
+msgstr "属于组"
+
+msgid "workflows.verb.ip"
+msgstr "属于"
+
+msgid "workflows.verb.isIn"
+msgstr "属于"
+
+msgid "workflows.verb.isOneOf"
+msgstr "是以下值之一"
+
+msgid "workflows.verb.method"
+msgstr "是"
+
+msgid "workflows.verb.uri"
+msgstr "匹配"
+
+msgid "workflows.view.canvas"
+msgstr "画布"
+
+msgid "workflows.view.list"
+msgstr "列表"
+

@@ -23,7 +23,7 @@
     {% set profile_url = url_for('profile') %}
     {% set total_pages = (total_sessions // 3) + (1 if total_sessions % 3 > 0 else 0) %}
     {% set readonly_tooltip = "Disabled: The database is in read-only mode." %}
-    <p class="text-muted mb-4" data-i18n="profile.subtitle">Manage your account, security and active sessions.</p>
+    <p class="text-muted mb-4">{{ _("profile.subtitle") }}</p>
     <!-- Profile header -->
     <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
         {{ avatar(label=current_user.get_id(), src=avatar_url, shape="circle", size="lg", status="online") }}
@@ -102,11 +102,10 @@
                             <div class="button-wrapper"
                                  data-bs-toggle="tooltip"
                                  data-bs-placement="top"
-                                 data-bs-original-title=""
-                                 data-i18n="profile.card.coming_soon">
+                                 data-bs-original-title="{{ _("profile.card.coming_soon") }}">
                                 <label for="upload" class="btn btn-primary me-3 mb-4 disabled" tabindex="0">
                                     <i class="bx bx-upload me-0 me-sm-1"></i>
-                                    <span class="d-none d-sm-block" data-i18n="button.upload_photo">Upload new photo</span>
+                                    <span class="d-none d-sm-block">{{ _("button.upload_photo") }}</span>
                                     <input type="file"
                                            id="upload"
                                            class="account-file-input"
@@ -114,18 +113,18 @@
                                            accept="image/png, image/jpeg, image/gif">
                                 </label>
                                 {{ button(label="Reset", i18n_key="button.reset", variant="outline-secondary", icon="bx-reset", classes="account-image-reset mb-4 disabled") }}
-                                <div data-i18n="profile.help.photo_extensions">Allowed JPG, GIF, or PNG. Max size: 800KB.</div>
+                                <div>{{ _("profile.help.photo_extensions") }}</div>
                             </div>
                         </div>
                         <form method="POST" action="{{ profile_url }}/edit">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="row g-3">
                                 <div class="col-md-6"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ text(id="username", label="Username", label_i18n="form.label.username", value=current_user.get_id(), placeholder="John Doe", placeholder_i18n="form.placeholder.username_example", required=true, disabled=is_readonly) }}
                                 </div>
                                 <div class="col-md-6"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ ui_label(for_id="email", text="E-mail", text_i18n="form.label.email") }}
                                     <input class="form-control"
                                            type="email"
@@ -137,7 +136,7 @@
                                            {% if is_readonly %}disabled{% endif %} />
                                 </div>
                                 <div class="col-md-12"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ password(id="edit-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                 </div>
                             </div>
@@ -157,7 +156,7 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="row g-3">
                                 <div class="col-md-12"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ native_select(id="theme-toggle", name="theme", label="Theme", label_i18n="form.label.theme", value=theme, options=[{"value": "light", "text": "Light", "i18n_key": "theme.light"}, {"value": "dark", "text": "Dark", "i18n_key": "theme.dark"}], disabled=is_readonly) }}
                                 </div>
                             </div>
@@ -175,6 +174,48 @@
                         </script>
                     {% endcall %}
                     <!-- /Theme -->
+                    <!-- Guided walkthrough -->
+                    {# The only way back once the walkthrough is dismissed or finished: the pill
+                       and drawer are not rendered at all in that state, so there is nothing left
+                       to click in the chrome. #}
+                    {% call card(classes="mt-4", title="Guided walkthrough", title_key="onboarding.title", icon="bx-rocket") %}
+                        <p class="text-muted small">{{ _("onboarding.restart_help") }}</p>
+                        <div class="d-flex justify-content-center">
+                            {{ button(id="onboarding-restart", type="button", label="Restart walkthrough", i18n_key="onboarding.restart", variant="outline-primary", disabled=db_readonly) }}
+                        </div>
+                        <div id="onboarding-restart-feedback" class="small text-muted mt-2 text-center" role="status"></div>
+                        {# Inline rather than in js/pages/onboarding.js: that file only loads while
+                           the walkthrough is active, which is exactly when this button is not
+                           needed. Same shape as the theme-toggle bootstrap above. #}
+                        <script nonce="{{ script_nonce }}">
+  document.getElementById("onboarding-restart")?.addEventListener("click", function () {
+    const button = this;
+    const feedback = document.getElementById("onboarding-restart-feedback");
+    button.disabled = true;
+    fetch("{{ url_for('onboarding.onboarding_state') }}", {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: JSON.stringify({ restart: true }),
+    })
+      .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+      .then((result) => {
+        // A read-only database answers 200 with saved:false; do not claim it worked.
+        if (result && result.saved === false) {
+          feedback.textContent = result.message || "This could not be saved.";
+          button.disabled = false;
+          return;
+        }
+        window.location.reload();
+      })
+      .catch(() => {
+        feedback.textContent = "This could not be saved.";
+        button.disabled = false;
+      });
+  });
+                        </script>
+                    {% endcall %}
+                    <!-- /Guided walkthrough -->
                 </div>
             </div>
         {% endcall %}
@@ -187,35 +228,31 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <div class="row g-3">
                                 <div class="col-md-12"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ password(id="new_password", label="New Password", label_i18n="form.label.new_password", autocomplete="off", maxlength=72, pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$", disabled=is_readonly) }}
                                     <div class="mt-3">
                                         <ul class="list-unstyled" id="password-requirements">
                                             <li id="length-check">
-                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_length">Your password must
-                                                have at least 8 characters.</span>
+                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_length") }}</span>
                                             </li>
                                             <li id="uppercase-check">
-                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_uppercase">Your password must
-                                                have at least 1 uppercase letter.</span>
+                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_uppercase") }}</span>
                                             </li>
                                             <li id="number-check">
-                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_number">Your password must
-                                                have at least 1 number.</span>
+                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_number") }}</span>
                                             </li>
                                             <li id="special-check">
-                                                <i class="bx bx-x text-danger"></i> <span data-i18n="form.validation.password_special">Your password must
-                                                have at least 1 special character.</span>
+                                                <i class="bx bx-x text-danger"></i> <span>{{ _("form.validation.password_special") }}</span>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
                                 <div class="col-md-12"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ password(id="new_password_confirm", label="Confirm Password", label_i18n="form.label.confirm_password", autocomplete="off", maxlength=72, pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]).{8,}$", disabled=is_readonly) }}
                                 </div>
                                 <div class="col-md-12"
-                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                     {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                     {{ password(id="password-change-current", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                 </div>
                             </div>
@@ -237,7 +274,7 @@
                                 <div class="row g-3">
                                     <!-- QR Code Section -->
                                     <div class="col-md-12 text-center">
-                                        <h5 class="mb-0" data-i18n="profile.2fa.enable_title">Enable 2FA</h5>
+                                        <h5 class="mb-0">{{ _("profile.2fa.enable_title") }}</h5>
                                         <img class="img-fluid qr-code"
                                              src="{{ totp_qr_image }}"
                                              alt="2FA QR Code"
@@ -251,9 +288,8 @@
                                                    id="secret_token_input"
                                                    name="secret_token"
                                                    class="form-control"
-                                                   placeholder="Secret Token"
+                                                   placeholder="{{ _("form.placeholder.secret_token") }}"
                                                    value="{{ totp_secret }}"
-                                                   data-i18n="form.placeholder.secret_token"
                                                    readonly />
                                             {% if request.is_secure %}
                                                 {{ copy_button(target="#secret_token_input", variant="addon") }}
@@ -264,11 +300,11 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ text(id="totp-enable-code", name="totp_token", label="2FA Code", label_i18n="form.label.2fa_code", placeholder="Enter code", placeholder_i18n="form.placeholder.2fa_code", autocomplete="one-time-code", required=true, disabled=is_readonly) }}
                                     </div>
                                     <div class="col-md-12"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ password(id="totp-enable-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                     </div>
                                 </div>
@@ -283,14 +319,14 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
                                     <div class="col-md-12 text-center">
-                                        <h5 class="mb-0" data-i18n="profile.2fa.disable_title">Disable 2FA</h5>
+                                        <h5 class="mb-0">{{ _("profile.2fa.disable_title") }}</h5>
                                     </div>
                                     <div class="col-md-12"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ text(id="totp-disable-code", name="totp_token", label="2FA Code or Recovery Code", label_i18n="form.label.2fa_code_or_recovery", placeholder="Enter code", placeholder_i18n="form.placeholder.2fa_or_recovery", autocomplete="one-time-code", required=true, disabled=is_readonly) }}
                                     </div>
                                     <div class="col-md-12"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ password(id="totp-disable-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                     </div>
                                 </div>
@@ -312,7 +348,7 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <div class="row g-3">
                                     <div class="col-md-12"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ password(id="recovery-refresh-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                     </div>
                                 </div>
@@ -326,8 +362,8 @@
                     {% if webauthn_enabled %}
                         <!-- Passkeys -->
                         {% call card(classes="mb-4", title="Passkeys", title_key="profile.card.title.passkeys", icon="bx-fingerprint") %}
-                            <p class="text-muted" data-i18n="profile.passkey.help">
-                                A passkey signs you in without a password, using your device's screen lock or a security key.
+                            <p class="text-muted">
+                                {{ _("profile.passkey.help") }}
                             </p>
                             {% if webauthn_credentials %}
                                 <ul class="list-group list-group-flush mb-3" id="passkey-list">
@@ -336,11 +372,11 @@
                                             <div>
                                                 <div class="fw-semibold">{{ credential.name }}</div>
                                                 <small class="text-muted">
-                                                    <span data-i18n="profile.passkey.added">Added</span> {{ credential.creation_date[:10] }}
+                                                    <span>{{ _("profile.passkey.added") }}</span> {{ credential.creation_date[:10] }}
                                                     {% if credential.last_used %}
-                                                        &middot; <span data-i18n="profile.passkey.last_used">last used</span> {{ credential.last_used[:10] }}
+                                                        &middot; <span>{{ _("profile.passkey.last_used") }}</span> {{ credential.last_used[:10] }}
                                                     {% else %}
-                                                        &middot; <span data-i18n="profile.passkey.never_used">never used</span>
+                                                        &middot; <span>{{ _("profile.passkey.never_used") }}</span>
                                                     {% endif %}
                                                 </small>
                                             </div>
@@ -358,8 +394,7 @@
                                                            name="name"
                                                            value="{{ credential.name }}"
                                                            maxlength="256"
-                                                           aria-label="Passkey name"
-                                                           data-i18n-aria-label="aria.label.passkey_name"
+                                                           aria-label="{{ _("aria.label.passkey_name") }}"
                                                            {% if is_readonly %}disabled{% endif %}
                                                            required />
                                                     {{ button(type="submit", label="Rename", i18n_key="button.rename", variant="outline-primary", size="sm", disabled=is_readonly) }}
@@ -375,11 +410,9 @@
                                                     <input type="password"
                                                            class="form-control form-control-sm"
                                                            name="password"
-                                                           placeholder="Current password"
-                                                           data-i18n-placeholder="form.placeholder.current_password"
+                                                           placeholder="{{ _("form.placeholder.current_password") }}"
                                                            autocomplete="current-password"
-                                                           aria-label="Current password"
-                                                           data-i18n-aria-label="form.label.current_password"
+                                                           aria-label="{{ _("form.label.current_password") }}"
                                                            {% if is_readonly %}disabled{% endif %}
                                                            required />
                                                     {{ button(type="submit", label="Delete", i18n_key="button.delete", variant="danger", size="sm", disabled=is_readonly) }}
@@ -389,7 +422,7 @@
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                <p class="text-muted fst-italic" data-i18n="profile.passkey.empty">No passkey registered yet.</p>
+                                <p class="text-muted fst-italic">{{ _("profile.passkey.empty") }}</p>
                             {% endif %}
                             <!-- Revealed by js/pages/profile.js once the browser confirms WebAuthn support -->
                             <form id="passkey-register-form"
@@ -402,7 +435,7 @@
                                         {{ text(id="passkey-name", name="name", label="Passkey name", label_i18n="form.label.passkey_name", value="", disabled=is_readonly) }}
                                     </div>
                                     <div class="col-md-6"
-                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                                         {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                                         {{ password(id="passkey-password", name="password", label="Current password", label_i18n="form.label.current_password", disabled=is_readonly) }}
                                     </div>
                                 </div>
@@ -416,7 +449,7 @@
                             </form>
                             <p class="text-muted fst-italic d-none"
                                id="passkey-unsupported"
-                               data-i18n="profile.passkey.unsupported">This browser doesn't support passkeys.</p>
+                              >{{ _("profile.passkey.unsupported") }}</p>
                         {% endcall %}
                         <!-- /Passkeys -->
                     {% endif %}
@@ -427,11 +460,11 @@
             <div class="d-flex row g-2 justify-content-center">
                 <div class="col-md-4">
                     {% call card(classes="mb-4", title="Sessions", title_key="profile.card.title.sessions", icon="bx-log-out") %}
-                        <p class="text-muted" data-i18n="profile.session.wipe_help">
-                            End every other active session on your account. You'll stay signed in here.
+                        <p class="text-muted">
+                            {{ _("profile.session.wipe_help") }}
                         </p>
                         <div class="d-flex justify-content-center"
-                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ readonly_tooltip }}" data-i18n="tooltip.disabled_db_readonly"{% endif %}>
+                             {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
                             {{ button(id="wipe-sessions-trigger", label="Wipe other sessions", i18n_key="button.wipe_other_sessions", variant="danger", icon="bx-log-out", modal_target="wipe-sessions-confirm", disabled=is_readonly) }}
                         </div>
                     {% endcall %}
@@ -465,7 +498,7 @@
                                     <div class="list-group-item d-flex align-items-center gap-2">
                                         <strong class="d-flex align-items-center gap-1 {{ items_classes }}">
                                             <i class="bx bx-network-chart" aria-hidden="true"></i>
-                                            <span data-i18n="profile.session.ip_address">IP Address</span>:
+                                            <span>{{ _("profile.session.ip_address") }}</span>:
                                         </strong>
                                         {{ secret_field(value=session['ip'], id="ip-" ~ loop.index0) }}
                                     </div>

@@ -24,10 +24,10 @@
      title        optional English fallback header title. When set, renders a
                   <div class="card-header"> with a <h5 class="card-title"> and the outer
                   <div> gets role="region" aria-label="{title}".
-     title_key    data-i18n key for title, e.g. "web_cache.purge". Omit for text with no
+     title_key    catalog key for title, e.g. "web_cache.purge". Omit for text with no
                   translation.
      subtitle     optional caption under the title (<p class="card-subtitle">).
-     subtitle_key data-i18n key for subtitle.
+     subtitle_key catalog key for subtitle.
      icon         optional Boxicons class rendered before the title, e.g. "bx-line-chart".
      header_right raw HTML rendered at the right of the header (e.g. a badge() call) --
                   caller is responsible for escaping/rendering it; passed through | safe.
@@ -50,8 +50,8 @@
                     {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif %}
                     {%- if title %}
                         <div class="d-flex flex-column">
-                            <h5 class="card-title mb-0{% if uppercase %} bw-panel-title{% endif %}"{% if title_key %} data-i18n="{{ title_key }}"{% endif %}>{{ title }}</h5>
-                            {%- if subtitle %}<p class="card-subtitle text-muted mb-0{% if uppercase %} bw-panel-sub{% endif %}"{% if subtitle_key %} data-i18n="{{ subtitle_key }}"{% endif %}>{{ subtitle }}</p>{% endif -%}
+                            <h5 class="card-title mb-0{% if uppercase %} bw-panel-title{% endif %}">{{ _(title_key) if title_key else title }}</h5>
+                            {%- if subtitle %}<p class="card-subtitle text-muted mb-0{% if uppercase %} bw-panel-sub{% endif %}">{{ _(subtitle_key) if subtitle_key else subtitle }}</p>{% endif -%}
                         </div>
                     {%- endif %}
                 </div>

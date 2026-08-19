@@ -16,7 +16,7 @@
                          { id, i18n, label, icon=None, count=None }
                          - id:    used to build "{id}-tab-{item.id}" /
                                   "{id}-pane-{item.id}"
-                         - i18n:  data-i18n key for the label (real key must
+                         - i18n:  catalog key for the label (real key must
                                   exist in static/locales/en.json)
                          - label: English fallback shown before i18n loads
                          - icon:  optional boxicons name, e.g. "bx-user"
@@ -53,7 +53,7 @@
                         aria-controls="{{ id }}-pane-{{ item.id }}"
                         aria-selected="{{ 'true' if is_active else 'false' }}">
                     {% if item.icon %}<i class="tf-icons bx {{ item.icon }} bx-sm" aria-hidden="true"></i>{% endif %}
-                    <span{% if item.icon %} class="d-none d-sm-inline"{% endif %}>{% if item.icon %}&nbsp;{% endif %}<span data-i18n="{{ item.i18n }}">{{ item.label }}</span></span>
+                    <span{% if item.icon %} class="d-none d-sm-inline"{% endif %}>{% if item.icon %}&nbsp;{% endif %}<span>{{ _(item.i18n) if item.i18n else item.label }}</span></span>
                     {% if item.count is defined and item.count not in (none, "") %}
                         <span class="badge rounded-pill bg-label-secondary ms-2">{{ item.count }}</span>
                     {% endif %}

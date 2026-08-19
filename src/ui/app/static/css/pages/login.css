@@ -411,6 +411,23 @@
   display: flex;
   flex-direction: column;
 }
+
+/* The setup wizard keeps auth-legacy.css loaded for its centring wrapper, and that
+   sheet paints its own decorative SVGs on `.authentication-inner`'s ::before/::after.
+   With the shared kit deco now in the page they would stack two ornament sets on top
+   of each other, so the legacy pair is switched off wherever the kit shell is used. */
+.setup-screen .authentication-inner::before,
+.setup-screen .authentication-inner::after {
+  content: none;
+}
+
+/* `.sw-vertical-text` sits in a 78px left gutter, which only exists beside the narrow
+   login/TOTP cards. The wizard card is full-width, so the tagline would run underneath
+   it and get clipped — it is dropped there rather than repositioned, the same call the
+   narrow-viewport media query already makes for the other two pages. */
+.setup-screen:has(.authentication-wrapper) .sw-vertical-text {
+  display: none;
+}
 .login-card,
 .totp-card {
   width: 100%;

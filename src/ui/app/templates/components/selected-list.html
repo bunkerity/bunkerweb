@@ -70,7 +70,7 @@
      columns      None (default, simple mode) or a list of
                   { key, i18n=None, label, bold=False }:
                     key    -- attribute read off each item for this column.
-                    i18n   -- data-i18n key for the header label (reuse an
+                    i18n   -- catalog key for the header label (reuse an
                               existing "table.header.*" key when one fits).
                     label  -- English fallback header text.
                     bold   -- wrap the cell value in a <div class="fw-bold">
@@ -107,9 +107,7 @@
     {%- if show_count %}
     <div class="d-flex align-items-center gap-2 mb-2">
         <i class="bx bx-list-check" aria-hidden="true"></i>
-        <span data-selected-count
-              data-i18n="datatable.selected_list_count"
-              data-i18n-options='{{ {"count": _count, "entity": entity} | tojson }}'>{{ _count }} {{ entity }} selected</span>
+        <span data-selected-count>{{ _("datatable.selected_list_count", count=_count, entity=entity) }}</span>
     </div>
     {%- endif %}
     {%- if _count %}
@@ -119,7 +117,7 @@
                 {%- for col in columns %}
                 <li class="list-group-item bg-secondary text-white bw-selected-list-cell">
                     <div class="ms-2 me-auto">
-                        <div class="fw-bold"{% if col.i18n %} data-i18n="{{ col.i18n }}"{% endif %}>{{ col.label }}</div>
+                        <div class="fw-bold">{{ _(col.i18n) if col.i18n else col.label }}</div>
                     </div>
                 </li>
                 {%- endfor %}
@@ -153,9 +151,7 @@
         </ul>
         {%- endif %}
     {%- else %}
-    <p class="text-muted mb-0" data-selected-empty
-       data-i18n="datatable.selected_list_empty"
-       data-i18n-options='{{ {"entity": entity} | tojson }}'>{{ _empty }}</p>
+    <p class="text-muted mb-0" data-selected-empty>{{ _("datatable.selected_list_empty", entity=entity) }}</p>
     {%- endif %}
     {%- if hidden_mode == "csv" %}
     <input type="hidden" name="{{ name }}" data-selected-input value="{{ items | map(attribute=id_key) | list | join(',') }}" />

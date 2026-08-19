@@ -145,7 +145,6 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
             }
         }
     }
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(totp_secret="a-secret"))
     captured = _render_and_capture(module, monkeypatch)
 
     with app.test_request_context("/home"):
@@ -155,7 +154,6 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     assert captured["template"] == "home.html"
     assert captured["is_initialized"] is True
     assert captured["first_config_saved"] is True
-    assert captured["mfa_enabled"] is True
     assert captured["jobs_count"] == 2
     assert captured["bans_active"] == 2
     assert captured["upstreams_total"] == 3
@@ -187,7 +185,6 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
     client.get_services.return_value = []
     client.get_metadata.side_effect = module.ApiUnavailableError("metadata down")
     client.get_jobs.side_effect = module.ApiClientError("jobs down")
-    monkeypatch.setattr(module, "current_user", SimpleNamespace(totp_secret=None))
     captured = _render_and_capture(module, monkeypatch)
 
     with app.test_request_context("/home"):
@@ -195,7 +192,6 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
 
     assert captured["is_initialized"] is False
     assert captured["first_config_saved"] is False
-    assert captured["mfa_enabled"] is False
     assert captured["jobs_count"] == 0
     assert captured["bans_active"] == 0
 

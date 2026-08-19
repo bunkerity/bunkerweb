@@ -97,13 +97,12 @@
         <button type="button"
                 class="btn-close text-reset"
                 data-bs-dismiss="offcanvas"
-                aria-label="Close"
-                data-i18n="aria.label.close"></button>
+                aria-label="{{ _('aria.label.close') }}"></button>
     </div>
     {{ caller() }}
     {%- if newsletter %}
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
-        <h5 class="mb-3 text-primary" data-i18n="newsletter.title">Join the Newsletter</h5>
+        <h5 class="mb-3 text-primary">{{ _("newsletter.title") }}</h5>
         <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
               method="POST"
               target="_blank">
@@ -126,17 +125,17 @@
                        name="OPT_IN"
                        required />
                 <label class="form-check-label" for="{{ id }}-privacyPolicyCheck">
-                    <span data-i18n="newsletter.legal_agreement">I want to subscribe to the newsletter and I've read and agree to the:&nbsp;</span>
+                    <span>{{ _("newsletter.legal_agreement") }}</span>
                     <a class="fst-italic"
                        href="https://www.bunkerity.com/en/privacy-policy?utm_campaign=self&utm_source=ui"
                        target="_blank"
                        rel="noopener"
-                       data-i18n="link.privacy_policy">privacy policy</a>
+                      >{{ _("link.privacy_policy") }}</a>
                 </label>
             </div>
             <button type="submit"
                     class="btn btn-primary w-100 text-uppercase don-jose"
-                    data-i18n="button.subscribe">Subscribe</button>
+                   >{{ _("button.subscribe") }}</button>
         </form>
     </div>
     {%- endif %}

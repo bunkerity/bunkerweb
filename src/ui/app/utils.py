@@ -46,6 +46,18 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # authorization middleware, so the two never drift.
 STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
 
+# Pages whose templates read the *declared settings schema* off the shared `plugins` context:
+# the compose shelf and its request-path strip (models/compose_pane.html, included by
+# global_settings.html and service_settings.html) and the plugin grid's "manage activation"
+# gate (plugins.html:172). Everywhere else -- the sidebar plugin list, the template editor's
+# plugin badge -- only needs each plugin's identity.
+#
+# That schema is 95% of the /plugins payload (216 KB of 228 KB on a stock install), fetched
+# once per render, so every other page asks for the slim shape. Adding a page that renders
+# settings from this context means adding its prefix here; `tests/unit/ui/test_plugins_payload.py`
+# fails if a template starts reading settings from a page that is not listed.
+SETTINGS_HUNGRY_PATH_PREFIXES = ("/global-config", "/global-settings", "/services", "/plugins")
+
 # Characters that could break out of a quoted string when a username is embedded in
 # Datalog/Biscuit source. Token construction binds usernames as parameters already; this is a
 # defense-in-depth gate applied at user creation/rename/import (and SSO provisioning).

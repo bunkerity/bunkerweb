@@ -180,16 +180,13 @@
          data-request-order-source="{{ order_setting }}">
         <div class="card-body">
             <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
-                <span class="fw-semibold" data-i18n="request_path.title">Request path</span>
+                <span class="fw-semibold">{{ _("request_path.title") }}</span>
                 <span class="text-muted small"
-                      data-i18n="request_path.source"
-                      data-i18n-options='{{ {"phase": phase, "setting": order_setting} | tojson }}'>
-                    Plugin execution order for the {{ phase }} phase, from {{ order_setting }} — a display order, not a per-request trace.
-                </span>
+                      >{{ _("request_path.source", phase=phase, setting=order_setting) }}</span>
             </div>
             <ol class="list-unstyled d-flex flex-nowrap align-items-center gap-1 mb-0 overflow-auto pb-1">
                 <li class="d-inline-flex align-items-center gap-1" data-request-node="client" data-request-node-kind="client">
-                    <span class="badge rounded-pill bg-secondary-subtle text-body" data-i18n="request_path.client">Client</span>
+                    <span class="badge rounded-pill bg-secondary-subtle text-body">{{ _("request_path.client") }}</span>
                 </li>
                 {% for plugin in nodes %}
                     {% set unordered = loop.index0 >= ordered_count %}
@@ -201,9 +198,7 @@
                            element has both -- which is what this badge needs, since its text is a
                            plugin NAME and only the tooltip is translatable. #}
                         <span class="badge rounded-pill {{ 'bg-body-secondary text-muted border border-secondary-subtle border-opacity-50' if unordered else 'bg-primary-subtle text-body' }}"
-                              {% if unordered %}title="No declared position in the {{ phase }} phase; it runs after the ordered plugins, alphabetically."
-                              data-i18n="request_path.unordered"
-                              data-i18n-options='{{ {"phase": phase} | tojson }}'{% endif %}>
+                              {% if unordered %}title="{{ _("request_path.unordered", phase=phase) }}"{% endif %}>
                             {{ plugins[plugin].get("name", plugin) }}
                         </span>
                     </li>
@@ -215,7 +210,7 @@
                     <i class="bx bx-chevron-right text-muted" aria-hidden="true"></i>
                     {% if backend %}
                         <span class="badge rounded-pill bg-success-subtle text-body">
-                            <span data-i18n="request_path.terminal.{{ backend.kind }}">{{ "Upstream pool" if backend.kind == "pool" else "Backend" }}</span>
+                            <span>{{ _("request_path.terminal." ~ backend.kind) }}</span>
                             <span class="fw-semibold">{{ backend.label }}</span>
                             {% if backend.path %}<code>{{ backend.path }}</code>{% endif %}
                             <span class="text-muted">{{ backend.protocol }}</span>
@@ -224,13 +219,13 @@
                         {# misc/confs/server-http/serve-files.conf:1-2 -- ROOT_FOLDER when set,
                            otherwise /var/www/html/<first server name>. #}
                         <span class="badge rounded-pill bg-success-subtle text-body">
-                            <span data-i18n="request_path.terminal.root">Local files</span>
+                            <span>{{ _("request_path.terminal.root") }}</span>
                             <code>{{ (config.get("ROOT_FOLDER") or {}).get("value", "") or ("/var/www/html/" ~ service_id) }}</code>
                         </span>
                     {% else %}
                         {# `SERVE_FILES=no` renders `root /nowhere;`, and a stream server with no
                            pool and no REVERSE_PROXY_HOST proxies nothing at all. #}
-                        <span class="badge rounded-pill bg-warning-subtle text-body" data-i18n="request_path.terminal.none">Nothing served</span>
+                        <span class="badge rounded-pill bg-warning-subtle text-body">{{ _("request_path.terminal.none") }}</span>
                     {% endif %}
                 </li>
             </ol>

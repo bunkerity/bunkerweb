@@ -22,9 +22,9 @@
            rel="noopener">
             <i class="bx bx-support bx-xs me-1" aria-hidden="true"></i>
             {% if pro_status == "inactive" %}
-                <span data-i18n="button.open_support_ticket">Open a Support Ticket</span>
+                <span>{{ _("button.open_support_ticket") }}</span>
             {% else %}
-                <span data-i18n="button.order_support">Order Support</span>
+                <span>{{ _("button.order_support") }}</span>
             {% endif %}
         </a>
     {% endcall %}
@@ -40,9 +40,9 @@
                        target="_blank"
                        rel="noopener">
                         <span class="bx bx-download me-0 me-md-2" aria-hidden="true"></span>
-                        <span class="d-none d-md-inline" data-i18n="button.download">Download</span>
+                        <span class="d-none d-md-inline">{{ _("button.download") }}</span>
                     </a>
-                    <small class="text-muted" data-i18n="support.card.download_logs.help">All private data will be anonymized.</small>
+                    <small class="text-muted">{{ _("support.card.download_logs.help") }}</small>
                 </div>
             {% endcall %}
         </div>
@@ -60,7 +60,7 @@
                        target="_blank"
                        rel="noopener">
                         <i class="bx bx-cog me-0 me-md-2" aria-hidden="true"></i>
-                        <span class="d-none d-md-inline" data-i18n="button.entire_config">Entire Config</span>
+                        <span class="d-none d-md-inline">{{ _("button.entire_config") }}</span>
                     </a>
                     {% call dropdown_menu(id="services-dropdown-menu", items=service_items, label="Service", i18n_key="button.service", icon="bx-cube", variant="outline-primary", label_classes="d-none d-md-inline", menu_classes="nav-pills max-vh-60 overflow-auto pt-0") %}
                         {{ search(id="service-search", i18n_key="form.placeholder.search", variant="merge", classes="mb-2") }}

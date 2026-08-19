@@ -48,11 +48,10 @@
                 {% endif %}
                 <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
                     {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
-                    <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"{% if check_i18n %} data-i18n="breadcrumb.{{ breadcrumb | lower | replace('-', '_') }}"{% endif %}
+                    <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"
                        {% elif loop.index == 2 and check_i18n %}
                        href="#"
-                       data-i18n="breadcrumb.{{ current_endpoint | replace('-', '_') }}"
-                       {% endif %}>{{ breadcrumb }}</a>
+                       {% endif %}>{{ _("breadcrumb." ~ breadcrumb | lower | replace('-', '_')) if check_i18n else breadcrumb }}</a>
                 </li>
             {% endfor %}
         {% endwith %}

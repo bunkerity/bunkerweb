@@ -1,0 +1,7038 @@
+# Bangla translations for BunkerWeb UI.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the BunkerWeb UI project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BunkerWeb UI VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: bn\n"
+"Language-Team: bn <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "about.build_with"
+msgstr "নির্মিত"
+
+msgid "about.gnu_license"
+msgstr "GNU Affero জেনারেল পাবলিক লাইসেন্স v3.0"
+
+msgid "about.license_title"
+msgstr "লাইসেন্স"
+
+msgid "about.social.discord"
+msgstr "ডিসকর্ড"
+
+msgid "about.social.instagram"
+msgstr "ইনস্টাগ্রাম"
+
+msgid "about.social.linkedin"
+msgstr "লিঙ্কডইন"
+
+msgid "about.social.reddit"
+msgstr "রেডিট"
+
+msgid "about.socials"
+msgstr "সামাজিক মাধ্যম"
+
+msgid "about.tagline"
+msgstr "শক্তিশালী সুরক্ষা, সরলীকৃত"
+
+msgid "about.title"
+msgstr "BunkerWeb সম্পর্কে"
+
+msgid "about.version"
+msgstr "সংস্করণ: %(version)s"
+
+msgid "accordion.body.tls"
+msgstr "স্বয়ংক্রিয়ভাবে সার্টিফিকেট ইস্যু এবং নবায়ন করুন।"
+
+msgid "accordion.title.tls"
+msgstr "TLS & সার্টিফিকেট"
+
+msgid "alert.configs_import_invalid_file"
+msgstr "অনুগ্রহ করে একটি বৈধ কাস্টম কনফিগারেশন এক্সপোর্ট ফাইল (.json) আপলোড করুন।"
+
+msgid "alert.custom_end_date_required"
+msgstr "অনুগ্রহ করে একটি কাস্টম শেষ তারিখ নির্বাচন করুন।"
+
+msgid "alert.important"
+msgstr "গুরুত্বপূর্ণ"
+
+msgid "alert.no_changes_detected"
+msgstr "কোনো পরিবর্তন সনাক্ত করা হয়নি।"
+
+msgid "alert.notice"
+msgstr "বিজ্ঞপ্তি"
+
+msgid "alert.ping_error"
+msgstr "ইনস্ট্যান্স পিং করার সময় একটি ত্রুটি ঘটেছে।"
+
+msgid "alert.readonly_mode"
+msgstr "এই ক্রিয়াটি শুধুমাত্র পঠন মোডে নিষ্ক্রিয় করা হয়েছে।"
+
+msgid "aria.label.clear_search"
+msgstr "অনুসন্ধান মুছুন"
+
+msgid "aria.label.close"
+msgstr "বন্ধ করুন"
+
+msgid "aria.label.collapse_multiline"
+msgstr "বহু-লাইন এন্ট্রি সংকুচিত করুন"
+
+msgid "aria.label.configs_dropzone"
+msgstr "একটি কাস্টম কনফিগারেশন এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন"
+
+msgid "aria.label.copy"
+msgstr "লগ কপি করুন"
+
+msgid "aria.label.download_log"
+msgstr "এই লগ ফাইলটি ডাউনলোড করুন"
+
+msgid "aria.label.follow"
+msgstr "অনুসরণ করুন"
+
+msgid "aria.label.hide_value"
+msgstr "মান লুকান"
+
+msgid "aria.label.issue_count"
+msgstr "ত্রুটি ও সতর্কতার সংখ্যা"
+
+msgid "aria.label.level_filter"
+msgstr "স্তর অনুযায়ী লগ লাইন ফিল্টার করুন"
+
+msgid "aria.label.local_time"
+msgstr "স্থানীয় সময়ে টাইমস্ট্যাম্প দেখান"
+
+msgid "aria.label.next_issue"
+msgstr "পরবর্তী ত্রুটি বা সতর্কতা"
+
+msgid "aria.label.passkey_name"
+msgstr "পাসকির নাম"
+
+msgid "aria.label.plugins_dropzone"
+msgstr "প্লাগইন আর্কাইভ নির্বাচন করুন বা এখানে ড্রপ করুন"
+
+msgid "aria.label.prev_issue"
+msgstr "পূর্ববর্তী ত্রুটি বা সতর্কতা"
+
+msgid "aria.label.raw_configuration"
+msgstr "কাঁচা কনফিগারেশন"
+
+msgid "aria.label.remove_value"
+msgstr "মান সরান"
+
+msgid "aria.label.reveal_value"
+msgstr "মান প্রদর্শন করুন"
+
+msgid "aria.label.search_logs"
+msgstr "লগ অনুসন্ধান করুন"
+
+msgid "aria.label.select_file"
+msgstr "ফাইল নির্বাচন করুন"
+
+msgid "aria.label.select_page"
+msgstr "পৃষ্ঠা নির্বাচন করুন"
+
+msgid "aria.label.services_dropzone"
+msgstr "একটি পরিষেবা এক্সপোর্ট ফাইল নির্বাচন করুন বা এখানে ড্রপ করুন"
+
+msgid "aria.label.toggle_wrap"
+msgstr "লাইন মোড়ানো চালু/বন্ধ করুন"
+
+msgid "aria.label.user_avatar"
+msgstr "ব্যবহারকারীর প্রতিকৃতি"
+
+msgid "aria.label.view_selected_items"
+msgstr "নির্বাচিত আইটেম দেখুন"
+
+msgid "badge.from_template"
+msgstr "টেমপ্লেট থেকে"
+
+msgid "badge.managed_via_api"
+msgstr "API এর মাধ্যমে পরিচালিত"
+
+msgid "badge.new_version"
+msgstr "নতুন সংস্করণ"
+
+msgid "badge.no_template"
+msgstr "কোনো টেমপ্লেট নেই"
+
+msgid "badge.unread_news"
+msgstr "অপঠিত সংবাদ"
+
+msgid "badge.unread_notifications"
+msgstr "অপঠিত বিজ্ঞপ্তি"
+
+msgid "banner.community"
+msgstr "Bunker কমিউনিটির অংশ হোন <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord চ্যাটে</a> যোগ দিয়ে এবং <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>-এ আমাদের ফলো করে।"
+
+msgid "banner.link.here"
+msgstr "এখানে"
+
+msgid "banner.pro"
+msgstr "PRO সংস্করণে আপগ্রেড করে BunkerWeb-এর সর্বাধিক সুবিধা নিন। আরও তথ্য এবং বিনামূল্যে ট্রায়ালের জন্য <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">এখানে</a> ক্লিক করুন।"
+
+msgid "banner.support"
+msgstr "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
+
+msgid "bans.stats.card.by_reason"
+msgstr "কারণ অনুযায়ী ব্লক"
+
+msgid "bans.stats.tile.active"
+msgstr "সক্রিয় ব্লক"
+
+msgid "bans.stats.tile.active_caption"
+msgstr "IP + CIDR"
+
+msgid "bans.stats.tile.countries"
+msgstr "দেশসমূহ"
+
+msgid "bans.stats.tile.expiring"
+msgstr "≤ 1 ঘণ্টায় মেয়াদ শেষ"
+
+msgid "bans.stats.tile.expiring_caption"
+msgstr "স্বয়ংক্রিয় পরিবর্তন"
+
+msgid "bans.stats.tile.permanent"
+msgstr "স্থায়ী ব্লক"
+
+msgid "bans.subtitle"
+msgstr "আপনার BunkerWeb ইনস্ট্যান্স জুড়ে নিষিদ্ধ IP ঠিকানা — যোগ, অপসারণ, অথবা নিষিদ্ধ সময়কাল পরিবর্তন করুন।"
+
+msgid "breadcrumb.about"
+msgstr "সম্পর্কে"
+
+msgid "breadcrumb.bans"
+msgstr "নিষেধাজ্ঞা"
+
+msgid "breadcrumb.cache"
+msgstr "ক্যাশ"
+
+msgid "breadcrumb.configs"
+msgstr "কনফিগারেশন"
+
+msgid "breadcrumb.extra_pages"
+msgstr "অতিরিক্ত পৃষ্ঠা"
+
+msgid "breadcrumb.global_config"
+msgstr "সার্বিক কনফিগারেশন"
+
+msgid "breadcrumb.global_settings"
+msgstr "গ্লোবাল সেটিংস"
+
+msgid "breadcrumb.groups"
+msgstr "সম্পদ গ্রুপ"
+
+msgid "breadcrumb.home"
+msgstr "হোম"
+
+msgid "breadcrumb.instances"
+msgstr "ইনস্ট্যান্স"
+
+msgid "breadcrumb.jobs"
+msgstr "কার্য"
+
+msgid "breadcrumb.logs"
+msgstr "লগ"
+
+msgid "breadcrumb.misc"
+msgstr "বিবিধ"
+
+msgid "breadcrumb.mode_selection"
+msgstr "মোড নির্বাচন"
+
+msgid "breadcrumb.more"
+msgstr "আরও..."
+
+msgid "breadcrumb.new"
+msgstr "নতুন"
+
+msgid "breadcrumb.plugins"
+msgstr "প্লাগইন"
+
+msgid "breadcrumb.plugins_pages"
+msgstr "প্লাগইন পৃষ্ঠা"
+
+msgid "breadcrumb.pro"
+msgstr "প্রো"
+
+msgid "breadcrumb.profile"
+msgstr "প্রোফাইল"
+
+msgid "breadcrumb.reports"
+msgstr "রিপোর্ট"
+
+msgid "breadcrumb.services"
+msgstr "পরিষেবা"
+
+msgid "breadcrumb.support"
+msgstr "সমর্থন"
+
+msgid "breadcrumb.templates"
+msgstr "টেমপ্লেট"
+
+msgid "breadcrumb.threatmap"
+msgstr "হুমকি মানচিত্র"
+
+msgid "breadcrumb.timings"
+msgstr "সময় পরিমাপ"
+
+msgid "breadcrumb.web_cache"
+msgstr "ওয়েব ক্যাশে"
+
+msgid "breadcrumb.whats_new"
+msgstr "নতুন কী"
+
+msgid "button.actions"
+msgstr "কার্যকলাপ"
+
+msgid "button.activate_key"
+msgstr "কী সক্রিয় করুন"
+
+msgid "button.add"
+msgstr "সন্নিবেশ"
+
+msgid "button.add_ban_plural"
+msgstr "ব্যান যোগ করুন"
+
+msgid "button.add_passkey"
+msgstr "পাসকি যোগ করুন"
+
+msgid "button.add_plugin_plural"
+msgstr "প্লাগইন যোগ করুন"
+
+msgid "button.add_plugins"
+msgstr "প্লাগইন যোগ করুন"
+
+msgid "button.auto_refresh"
+msgstr "স্বয়ংক্রিয় রিফ্রেশ"
+
+msgid "button.ban"
+msgstr "নিষিদ্ধ করুন"
+
+msgid "button.ban_all_filtered"
+msgstr "সব মিলে যাওয়া রিপোর্ট ব্লক করুন"
+
+msgid "button.ban_selected"
+msgstr "নির্বাচিতগুলি নিষিদ্ধ করুন"
+
+msgid "button.cache"
+msgstr "ক্যাশ"
+
+msgid "button.cancel"
+msgstr "বাতিল করুন"
+
+msgid "button.clear"
+msgstr "পরিষ্কার"
+
+msgid "button.clone"
+msgstr "ক্লোন"
+
+msgid "button.close"
+msgstr "বন্ধ করুন"
+
+msgid "button.collapse_multiline"
+msgstr "সংকুচিত করুন"
+
+msgid "button.columns"
+msgstr "কলাম"
+
+msgid "button.convert_configs"
+msgstr "কনফিগ রূপান্তর করুন"
+
+msgid "button.convert_configs_to"
+msgstr "%(state)s এ রূপান্তর করুন"
+
+msgid "button.convert_services"
+msgstr "পরিষেবা রূপান্তর করুন"
+
+msgid "button.copy"
+msgstr "কপি করুন"
+
+msgid "button.copy_codes"
+msgstr "কোড কপি করুন"
+
+msgid "button.copy_raw"
+msgstr "কাঁচা ডেটা কপি করুন"
+
+msgid "button.copy_visible"
+msgstr "দৃশ্যমান কপি করুন"
+
+msgid "button.create_config"
+msgstr "কাস্টম কনফিগারেশন তৈরি করুন"
+
+msgid "button.create_instance"
+msgstr "ইনস্ট্যান্স তৈরি করুন"
+
+msgid "button.create_service"
+msgstr "নতুন পরিষেবা তৈরি করুন"
+
+msgid "button.create_template"
+msgstr "টেমপ্লেট তৈরি করুন"
+
+msgid "button.delete"
+msgstr "মুছুন"
+
+msgid "button.delete_instance"
+msgstr "ইনস্ট্যান্স মুছুন"
+
+msgid "button.disable_totp"
+msgstr "TOTP নিষ্ক্রিয় করুন"
+
+msgid "button.download"
+msgstr "ডাউনলোড করুন"
+
+msgid "button.edit"
+msgstr "সম্পাদনা"
+
+msgid "button.enable_totp"
+msgstr "TOTP সক্ষম করুন"
+
+msgid "button.entire_config"
+msgstr "সম্পূর্ণ কনফিগারেশন"
+
+msgid "button.export"
+msgstr "রপ্তানি করুন"
+
+msgid "button.export_csv"
+msgstr "CSV"
+
+msgid "button.export_excel"
+msgstr "Excel"
+
+msgid "button.fetch_global"
+msgstr "গ্লোবাল সেটিংস আনুন"
+
+msgid "button.filtered_actions"
+msgstr "ফিল্টার করা কাজ"
+
+msgid "button.filters_suffix"
+msgstr " ফিল্টার"
+
+msgid "button.follow"
+msgstr "অনুসরণ করুন"
+
+msgid "button.force_check"
+msgstr "চেক করতে বাধ্য করুন"
+
+msgid "button.force_update"
+msgstr "জোর করে হালনাগাদ"
+
+msgid "button.github_stars"
+msgstr "স্টার"
+
+msgid "button.go"
+msgstr "যান →"
+
+msgid "button.go_back"
+msgstr "ফিরে যান"
+
+msgid "button.got_it"
+msgstr "বুঝেছি"
+
+msgid "button.hide"
+msgstr "লুকান"
+
+msgid "button.history"
+msgstr "ইতিহাস"
+
+msgid "button.import_configs"
+msgstr "কাস্টম কনফিগারেশন আমদানি করুন"
+
+msgid "button.import_services"
+msgstr "পরিষেবা আমদানি করুন"
+
+msgid "button.local_time"
+msgstr "স্থানীয় সময়"
+
+msgid "button.login"
+msgstr "লগইন করুন"
+
+msgid "button.multiple_add"
+msgstr "যোগ করুন"
+
+msgid "button.multiple_hide"
+msgstr "লুকান"
+
+msgid "button.multiple_remove"
+msgstr "সরান"
+
+msgid "button.multiple_show"
+msgstr "দেখানো"
+
+msgid "button.need_help"
+msgstr "সাহায্য প্রয়োজন?"
+
+msgid "button.news"
+msgstr "সংবাদ"
+
+msgid "button.notifications"
+msgstr "বিজ্ঞপ্তি"
+
+msgid "button.open_support_ticket"
+msgstr "সাপোর্ট টিকিট খুলুন"
+
+msgid "button.order_support"
+msgstr "সমর্থন অর্ডার করুন"
+
+msgid "button.ping"
+msgstr "পিং"
+
+msgid "button.plugin_page"
+msgstr "প্লাগইন পৃষ্ঠা"
+
+msgid "button.proceed"
+msgstr "এগিয়ে যান"
+
+msgid "button.refresh"
+msgstr "রিফ্রেশ"
+
+msgid "button.refresh_recovery_codes"
+msgstr "পুনরুদ্ধার কোড রিফ্রেশ করুন"
+
+msgid "button.reload"
+msgstr "পুনরায় লোড করুন"
+
+msgid "button.rename"
+msgstr "নাম পরিবর্তন"
+
+msgid "button.reset"
+msgstr "রিসেট করুন"
+
+msgid "button.reset_columns"
+msgstr "কলাম রিসেট করুন"
+
+msgid "button.retry"
+msgstr "আবার চেষ্টা করুন"
+
+msgid "button.return_to_safety"
+msgstr "নিরাপত্তায় ফিরে যান"
+
+msgid "button.run"
+msgstr "চালান"
+
+msgid "button.run_selected_jobs"
+msgstr "নির্বাচিত কার্যগুলি চালান"
+
+msgid "button.save"
+msgstr "সংরক্ষণ করুন"
+
+msgid "button.save_changes"
+msgstr "পরিবর্তন সংরক্ষণ করুন"
+
+msgid "button.search"
+msgstr "অনুসন্ধান"
+
+msgid "button.see_all_releases"
+msgstr "সব রিলিজ দেখুন"
+
+msgid "button.select_file"
+msgstr "ফাইল নির্বাচন করুন"
+
+msgid "button.select_page"
+msgstr "পৃষ্ঠা নির্বাচন করুন"
+
+msgid "button.service"
+msgstr "পরিষেবা"
+
+msgid "button.set_1h"
+msgstr "১ ঘণ্টা সেট করুন"
+
+msgid "button.set_1w"
+msgstr "১ সপ্তাহ সেট করুন"
+
+msgid "button.set_24h"
+msgstr "২৪ ঘণ্টা সেট করুন"
+
+msgid "button.set_permanent"
+msgstr "স্থায়ী সেট করুন"
+
+msgid "button.setup"
+msgstr "সেটআপ"
+
+msgid "button.show"
+msgstr "দেখানো"
+
+msgid "button.show_me"
+msgstr "দেখান"
+
+msgid "button.sign_in_with_passkey"
+msgstr "পাসকি দিয়ে সাইন ইন করুন"
+
+msgid "button.stop"
+msgstr "বন্ধ করুন"
+
+msgid "button.submit"
+msgstr "জমা দিন"
+
+msgid "button.subscribe"
+msgstr "সাবস্ক্রাইব করুন"
+
+msgid "button.unban"
+msgstr "নিষেধাজ্ঞা সরান"
+
+msgid "button.unban_all_filtered"
+msgstr "সব মিলে যাওয়া ব্লক তুলে নিন"
+
+msgid "button.update_duration"
+msgstr "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
+
+msgid "button.update_duration_all_filtered"
+msgstr "সব মিলে যাওয়া ব্লকের সময়কাল বদলান"
+
+msgid "button.update_key"
+msgstr "কী আপডেট করুন"
+
+msgid "button.upload_photo"
+msgstr "নতুন ছবি আপলোড করুন"
+
+msgid "button.use_security_key"
+msgstr "সিকিউরিটি কী ব্যবহার করুন"
+
+msgid "button.use_template"
+msgstr "টেমপ্লেট ব্যবহার করুন"
+
+msgid "button.verify"
+msgstr "যাচাই করুন"
+
+msgid "button.view"
+msgstr "দেখুন"
+
+msgid "button.view_details"
+msgstr "বিস্তারিত দেখুন"
+
+msgid "button.view_raw_data"
+msgstr "কাঁচা ডেটা দেখুন"
+
+msgid "button.wipe_other_sessions"
+msgstr "অন্যান্য সেশন থেকে সাইন আউট করুন"
+
+msgid "button.wrap"
+msgstr "মোড়ানো"
+
+msgid "cache.kpi_files"
+msgstr "ফাইল"
+
+msgid "cache.kpi_per_service"
+msgstr "প্রতি পরিষেবা"
+
+msgid "cache.subtitle"
+msgstr "পরিকল্পিত কাজের দ্বারা তৈরি ক্যাশে ফাইল (ব্লকলিস্ট, জিওআইপি ডাটাবেস, এবং আরও) — প্রতিটি পরিষেবার জন্য এবং প্লাগিনের জন্য পরিদর্শন, ডাউনলোড, অথবা মুছে ফেলুন।"
+
+msgid "cache.title"
+msgstr "ক্যাশ ফাইল"
+
+msgid "certificates.acme_help"
+msgstr "এমন পরিষেবাগুলি নির্বাচন করুন যাদের বিদ্যমান সেটিংস ইতিমধ্যে Let's Encrypt সক্রিয় এবং কনফিগার করে। এই কাজটি শুধুমাত্র সেই কনফিগারেশন নির্ধারণ করে; শংসাপত্রের বিবরণ এবং চ্যালেঞ্জের ক্রেডেনশিয়াল এখানে প্রবেশ করানো হবে না।"
+
+msgid "certificates.active"
+msgstr "সক্রিয় শংসাপত্র"
+
+msgid "certificates.algorithm"
+msgstr "অ্যালগরিদম"
+
+msgid "certificates.all"
+msgstr "সব"
+
+msgid "certificates.assignment_notice"
+msgstr "অ্যাসাইনমেন্টগুলি কেন্দ্রীয় ইনভেন্টরিকে সংগঠিত করে; TLS স্থাপনা প্রতিটি পরিষেবার শংসাপত্রের সেটিংস দ্বারা নিয়ন্ত্রিত থাকে।"
+
+msgid "certificates.assignments"
+msgstr "ইনভেন্টরি অ্যাসাইনমেন্ট"
+
+msgid "certificates.assignments_help"
+msgstr "এই অ্যাসাইনমেন্টগুলি লাইভ TLS সেটিংস পরিবর্তন করে না।"
+
+msgid "certificates.attach"
+msgstr "অ্যাসাইন করুন"
+
+msgid "certificates.attach_all"
+msgstr "এই শংসাপত্রটি ইতিমধ্যে প্রতিটি উপলব্ধ পরিষেবার সাথে সংযুক্ত।"
+
+msgid "certificates.attach_copy"
+msgstr "কেন্দ্রীয় ইনভেন্টরিতে \"%(name)s\" একটি পরিষেবাতে অ্যাসাইন করুন।"
+
+msgid "certificates.browse_certificate"
+msgstr "শংসাপত্র দেখুন"
+
+msgid "certificates.browse_key"
+msgstr "ব্যক্তিগত কী দেখুন"
+
+msgid "certificates.common_name"
+msgstr "সাধারণ নাম"
+
+msgid "certificates.confirm"
+msgstr "নিশ্চিত করুন"
+
+msgid "certificates.confirm_action"
+msgstr "শংসাপত্রের ক্রিয়া নিশ্চিত করুন"
+
+msgid "certificates.confirm_delete"
+msgstr "\"%(name)s\" মুছে ফেলুন? এটি বাতিল করা যাবে না।"
+
+msgid "certificates.confirm_generic"
+msgstr "এই শংসাপত্রের ক্রিয়া নিশ্চিত করুন?"
+
+msgid "certificates.confirm_renew"
+msgstr "\"%(name)s\" নবায়ন করুন?"
+
+msgid "certificates.confirm_renew_due"
+msgstr "প্রতিটি সার্টিফিকেট পরীক্ষা করে যেগুলোর নবায়নের সময় হয়েছে সেগুলো নবায়ন করবেন?"
+
+msgid "certificates.create"
+msgstr "শংসাপত্র তৈরি করুন"
+
+msgid "certificates.download_chain"
+msgstr "চেইন ডাউনলোড করুন"
+
+msgid "certificates.download_leaf"
+msgstr "লিফ ডাউনলোড করুন"
+
+msgid "certificates.edit_help"
+msgstr "এটি শুধু ইনভেন্টরির মেটাডেটা বদলায়, সার্টিফিকেটের উপাদান বা সক্রিয় TLS সেটিংস নয়।"
+
+msgid "certificates.edit_metadata"
+msgstr "শংসাপত্রের মেটাডেটা সম্পাদনা করুন"
+
+msgid "certificates.empty"
+msgstr "কোনো সার্টিফিকেট নেই"
+
+msgid "certificates.empty_help"
+msgstr "স্ব-স্বাক্ষরিত সার্টিফিকেট তৈরি করুন, ACME ইস্যু নির্ধারণ করুন, অথবা বিদ্যমান PEM সার্টিফিকেট ও কী আপলোড করুন।"
+
+msgid "certificates.expired_help"
+msgstr "মনোযোগ প্রয়োজন"
+
+msgid "certificates.expires"
+msgstr "মেয়াদ উত্তীর্ণ"
+
+msgid "certificates.expiring_help"
+msgstr "30 দিন বা তার কম"
+
+msgid "certificates.file_extensions"
+msgstr "এই ফাইল এক্সটেনশনগুলির মধ্যে একটি ব্যবহার করুন: %(extensions)s।"
+
+msgid "certificates.file_select"
+msgstr "একটি PEM ফাইল নির্বাচন করুন।"
+
+msgid "certificates.file_selected"
+msgstr "%(name)s (%(size)s KiB)"
+
+msgid "certificates.file_size_limit"
+msgstr "ফাইলটি 1 MiB অতিক্রম করতে পারবে না।"
+
+msgid "certificates.fingerprint"
+msgstr "SHA-256 ফিঙ্গারপ্রিন্ট"
+
+msgid "certificates.issuer"
+msgstr "ইস্যুকারী"
+
+msgid "certificates.issuers"
+msgstr "শীর্ষ ইস্যুকারী"
+
+msgid "certificates.key_drop"
+msgstr "এখানে সংশ্লিষ্ট প্রাইভেট কী ড্রপ করুন"
+
+msgid "certificates.key_limit"
+msgstr "সর্বোচ্চ 1 MiB; সংরক্ষিত অবস্থায় এনক্রিপ্ট করা এবং কখনো ডাউনলোড করা যাবে না"
+
+msgid "certificates.last_error"
+msgstr "শেষ ত্রুটি"
+
+msgid "certificates.make_primary"
+msgstr "এই সার্ভিসের জন্য প্রাথমিক ইনভেন্টরি অ্যাসাইনমেন্ট হিসাবে চিহ্নিত করুন"
+
+msgid "certificates.managed"
+msgstr "ব্যবস্থাপিত সার্টিফিকেট"
+
+msgid "certificates.new_selfsigned"
+msgstr "নতুন স্ব-স্বাক্ষরিত সার্টিফিকেট"
+
+msgid "certificates.no_issuers"
+msgstr "কোনো ইস্যুকারীর ডেটা নেই"
+
+msgid "certificates.none_due"
+msgstr "কোনো সার্টিফিকেটের নবায়নের সময় হয়নি"
+
+msgid "certificates.orphan_account"
+msgstr "অ্যাকাউন্ট"
+
+msgid "certificates.orphan_badge"
+msgstr "ACME অ্যাকাউন্ট অনুপস্থিত"
+
+msgid "certificates.orphan_help"
+msgstr "এই নবায়ন রেকর্ড এমন ACME অ্যাকাউন্ট উল্লেখ করে যা আর নেই। প্রদানকারীর অবস্থা ঠিক না হওয়া পর্যন্ত নবায়ন বন্ধ থাকবে।"
+
+msgid "certificates.orphan_server"
+msgstr "ACME সার্ভার"
+
+msgid "certificates.orphan_title"
+msgstr "ACME অ্যাকাউন্ট অনুপস্থিত"
+
+msgid "certificates.pem_certificate"
+msgstr "PEM সার্টিফিকেট অথবা চেইন"
+
+msgid "certificates.pem_drop"
+msgstr "এখানে পাবলিক PEM সার্টিফিকেট অথবা চেইন ড্রপ করুন"
+
+msgid "certificates.pem_limit"
+msgstr "সর্বোচ্চ 1 MiB"
+
+msgid "certificates.pem_private_key"
+msgstr "PEM প্রাইভেট কী"
+
+msgid "certificates.primary"
+msgstr "প্রাথমিক অ্যাসাইনমেন্ট"
+
+msgid "certificates.primary_help"
+msgstr "নির্বাচিত পরিষেবাগুলির জন্য প্রাথমিক ইনভেন্টরি অ্যাসাইনমেন্ট হিসাবে চিহ্নিত করুন"
+
+msgid "certificates.readonly"
+msgstr "ডেটাবেস শুধু পাঠযোগ্য। সার্টিফিকেট দেখা ও ডাউনলোড করা যাবে, বদলানো যাবে না।"
+
+msgid "certificates.renew_due"
+msgstr "চেক/রিনিউ ড্যু"
+
+msgid "certificates.sans"
+msgstr "সাবজেক্ট অল্টারনেটিভ নেইম"
+
+msgid "certificates.save_metadata"
+msgstr "মেটাডেটা সংরক্ষণ করুন"
+
+msgid "certificates.schedule"
+msgstr "ইস্যু করার সময়সূচী তৈরি করুন"
+
+msgid "certificates.schedule_acme"
+msgstr "ACME ইস্যু করার সময়সূচী তৈরি করুন"
+
+msgid "certificates.search"
+msgstr "নাম, সাধারণ নাম, SAN, ইস্যুকারী অথবা ফিঙ্গারপ্রিন্ট অনুসন্ধান করুন…"
+
+msgid "certificates.serial"
+msgstr "সিরিয়াল নম্বর"
+
+msgid "certificates.services"
+msgstr "পরিষেবা"
+
+msgid "certificates.services_help"
+msgstr "একাধিক পরিষেবা নির্বাচন করতে Ctrl অথবা Command ব্যবহার করুন।"
+
+msgid "certificates.showing_count"
+msgstr "মোট %(total)s এর মধ্যে %(visible)s সার্টিফিকেট দেখানো হচ্ছে"
+
+msgid "certificates.source.customcert"
+msgstr "কাস্টম"
+
+msgid "certificates.source.letsencrypt"
+msgstr "Let's Encrypt"
+
+msgid "certificates.source.selfsigned"
+msgstr "নিজস্ব"
+
+msgid "certificates.source_label"
+msgstr "উৎস"
+
+msgid "certificates.status.expired"
+msgstr "মেয়াদ উত্তীর্ণ"
+
+msgid "certificates.status.expiring_soon"
+msgstr "শীঘ্রই মেয়াদ শেষ"
+
+msgid "certificates.status.not_yet_valid"
+msgstr "এখনো বৈধ নয়"
+
+msgid "certificates.status.revoked"
+msgstr "বাতিল"
+
+msgid "certificates.status.valid"
+msgstr "বৈধ"
+
+msgid "certificates.subtitle"
+msgstr "কেন্দ্রীয় ইনভেন্টরিতে সার্টিফিকেট ইস্যু, আপলোড, নির্ধারণ, নবায়ন এবং পরিদর্শন করুন।"
+
+msgid "certificates.total"
+msgstr "মোট"
+
+msgid "certificates.truncated"
+msgstr "শুধু প্রথম 500টি সার্টিফিকেট দেখানো হয়েছে। সম্পূর্ণ ফলের জন্য API দিয়ে ইনভেন্টরি সীমিত করুন।"
+
+msgid "certificates.unassigned"
+msgstr "অনির্ধারিত"
+
+msgid "certificates.upcoming"
+msgstr "আসন্ন নবায়ন"
+
+msgid "certificates.upcoming_help"
+msgstr "মেয়াদ উত্তীর্ণ অথবা 30 দিনের নবায়ন উইন্ডোর মধ্যে"
+
+msgid "certificates.upload"
+msgstr "সার্টিফিকেট আপলোড করুন"
+
+msgid "certificates.upload_custom"
+msgstr "কাস্টম সার্টিফিকেট আপলোড করুন"
+
+msgid "certificates.upload_invalid"
+msgstr "একটি বৈধ পাবলিক সার্টিফিকেট এবং এর সাথে সম্পর্কিত প্রাইভেট কী নির্বাচন করুন।"
+
+msgid "certificates.valid_days"
+msgstr "দিনের সংখ্যা"
+
+msgid "certificates.valid_from"
+msgstr "থেকে বৈধ"
+
+msgid "certificates.valid_to"
+msgstr "পর্যন্ত বৈধ"
+
+msgid "compose.always_on"
+msgstr "সবসময় চালু"
+
+msgid "compose.count"
+msgstr "%(on)s সক্রিয় · %(total)s উপলব্ধ · %(locked)s বন্ধ"
+
+msgid "compose.entries"
+msgstr "%(count)s কনফিগার করা হয়েছে"
+
+msgid "compose.filter.all"
+msgstr "সব"
+
+msgid "compose.filter.changed"
+msgstr "পরিবর্তিত"
+
+msgid "compose.filter.on"
+msgstr "হ্যাঁ"
+
+msgid "compose.locked"
+msgstr "এখানে কোনো নিয়ন্ত্রণ নেই"
+
+msgid "compose.provenance.api"
+msgstr "API এর মাধ্যমে পরিচালিত"
+
+msgid "compose.provenance.attachment"
+msgstr "সংযুক্তি থেকে"
+
+msgid "compose.provenance.clone"
+msgstr "ক্লোন করা"
+
+msgid "compose.provenance.default"
+msgstr "ডিফল্ট"
+
+msgid "compose.provenance.edited"
+msgstr "এখানে সম্পাদনা করা হয়েছে"
+
+msgid "compose.provenance.global"
+msgstr "বিশ্বব্যাপী"
+
+msgid "compose.provenance.managed"
+msgstr "%(method)s দ্বারা সেট করা হয়েছে"
+
+msgid "compose.provenance.template"
+msgstr "টেমপ্লেট থেকে"
+
+msgid "compose.set_value"
+msgstr "একটি মান সেট করুন…"
+
+msgid "compose.show_more"
+msgstr "%(count)s বেশি দেখান"
+
+msgid "compose.unavailable"
+msgstr "প্লাগইন তালিকা লোড করা যায়নি, তাই এই পৃষ্ঠাটি নিরাপদে সম্পাদনা করা সম্ভব নয়। API এর উত্তর পাওয়ার পরে একবার রিফ্রেশ করুন।"
+
+msgid "configs.subtitle"
+msgstr "আপনার পরিষেবাগুলির জন্য কাস্টম NGINX কনফিগারেশন স্নিপেট — তৈরি, সম্পাদনা, এবং HTTP, ModSecurity, এবং স্ট্রিম-লেভেল ওভাররাইডগুলি পরিচালনা করুন।"
+
+msgid "country.AD"
+msgstr "অ্যান্ডোরা"
+
+msgid "country.AE"
+msgstr "সংযুক্ত আরব আমিরাত"
+
+msgid "country.AF"
+msgstr "আফগানিস্তান"
+
+msgid "country.AG"
+msgstr "অ্যান্টিগুয়া ও বার্বুডা"
+
+msgid "country.AI"
+msgstr "অ্যাঙ্গুইলা"
+
+msgid "country.AL"
+msgstr "আলবেনিয়া"
+
+msgid "country.AM"
+msgstr "আর্মেনিয়া"
+
+msgid "country.AO"
+msgstr "অ্যাঙ্গোলা"
+
+msgid "country.AQ"
+msgstr "অ্যান্টার্কটিকা"
+
+msgid "country.AR"
+msgstr "আর্জেন্টিনা"
+
+msgid "country.AS"
+msgstr "আমেরিকান সামোয়া"
+
+msgid "country.AT"
+msgstr "অস্ট্রিয়া"
+
+msgid "country.AU"
+msgstr "অস্ট্রেলিয়া"
+
+msgid "country.AW"
+msgstr "আরুবা"
+
+msgid "country.AX"
+msgstr "অলান্দ দ্বীপপুঞ্জ"
+
+msgid "country.AZ"
+msgstr "আজারবাইজান"
+
+msgid "country.BA"
+msgstr "বসনিয়া ও হার্জেগোভিনা"
+
+msgid "country.BB"
+msgstr "বার্বাডোস"
+
+msgid "country.BD"
+msgstr "বাংলাদেশ"
+
+msgid "country.BE"
+msgstr "বেলজিয়াম"
+
+msgid "country.BF"
+msgstr "বুর্কিনা ফাসো"
+
+msgid "country.BG"
+msgstr "বুলগেরিয়া"
+
+msgid "country.BH"
+msgstr "বাহরাইন"
+
+msgid "country.BI"
+msgstr "বুরুন্ডি"
+
+msgid "country.BJ"
+msgstr "বেনিন"
+
+msgid "country.BL"
+msgstr "সেন্ট বার্থেলেমি"
+
+msgid "country.BM"
+msgstr "বারমুডা"
+
+msgid "country.BN"
+msgstr "ব্রুনাই দারুসসালাম"
+
+msgid "country.BO"
+msgstr "বলিভিয়া"
+
+msgid "country.BQ"
+msgstr "ক্যারিবিয়ান নেদারল্যান্ডস"
+
+msgid "country.BR"
+msgstr "ব্রাজিল"
+
+msgid "country.BS"
+msgstr "বাহামা"
+
+msgid "country.BT"
+msgstr "ভুটান"
+
+msgid "country.BV"
+msgstr "বুভেট দ্বীপ"
+
+msgid "country.BW"
+msgstr "বতসোয়ানা"
+
+msgid "country.BY"
+msgstr "বেলারুশ"
+
+msgid "country.BZ"
+msgstr "বেলিজ"
+
+msgid "country.CA"
+msgstr "কানাডা"
+
+msgid "country.CC"
+msgstr "কোকোস (কিলিং) দ্বীপপুঞ্জ"
+
+msgid "country.CD"
+msgstr "কঙ্গো গণতান্ত্রিক প্রজাতন্ত্র"
+
+msgid "country.CF"
+msgstr "মধ্য আফ্রিকান প্রজাতন্ত্র"
+
+msgid "country.CG"
+msgstr "কঙ্গো প্রজাতন্ত্র"
+
+msgid "country.CH"
+msgstr "সুইজারল্যান্ড"
+
+msgid "country.CI"
+msgstr "আইভরি কোস্ট"
+
+msgid "country.CK"
+msgstr "কুক দ্বীপপুঞ্জ"
+
+msgid "country.CL"
+msgstr "চিলি"
+
+msgid "country.CM"
+msgstr "ক্যামেরুন"
+
+msgid "country.CN"
+msgstr "চীন"
+
+msgid "country.CO"
+msgstr "কলম্বিয়া"
+
+msgid "country.CR"
+msgstr "কোস্টারিকা"
+
+msgid "country.CU"
+msgstr "কিউবা"
+
+msgid "country.CV"
+msgstr "কেপ ভার্দে"
+
+msgid "country.CW"
+msgstr "কুরাকাও"
+
+msgid "country.CX"
+msgstr "ক্রিসমাস দ্বীপ"
+
+msgid "country.CY"
+msgstr "সাইপ্রাস"
+
+msgid "country.CZ"
+msgstr "চেক প্রজাতন্ত্র"
+
+msgid "country.DE"
+msgstr "জার্মানি"
+
+msgid "country.DJ"
+msgstr "জিবুতি"
+
+msgid "country.DK"
+msgstr "ডেনমার্ক"
+
+msgid "country.DM"
+msgstr "ডোমিনিকা"
+
+msgid "country.DO"
+msgstr "ডোমিনিকান প্রজাতন্ত্র"
+
+msgid "country.DZ"
+msgstr "আলজেরিয়া"
+
+msgid "country.EC"
+msgstr "ইকুয়েডর"
+
+msgid "country.EE"
+msgstr "এস্তোনিয়া"
+
+msgid "country.EG"
+msgstr "মিশর"
+
+msgid "country.EH"
+msgstr "পশ্চিম সাহারা"
+
+msgid "country.ER"
+msgstr "ইরিত্রিয়া"
+
+msgid "country.ES"
+msgstr "স্পেন"
+
+msgid "country.ET"
+msgstr "ইথিওপিয়া"
+
+msgid "country.EU"
+msgstr "ইউরোপ"
+
+msgid "country.FI"
+msgstr "ফিনল্যান্ড"
+
+msgid "country.FJ"
+msgstr "ফিজি"
+
+msgid "country.FK"
+msgstr "ফকল্যান্ড দ্বীপপুঞ্জ (মালভিনাস)"
+
+msgid "country.FM"
+msgstr "মাইক্রোনেশিয়া"
+
+msgid "country.FO"
+msgstr "ফ্যারো দ্বীপপুঞ্জ"
+
+msgid "country.FR"
+msgstr "ফ্রান্স"
+
+msgid "country.GA"
+msgstr "গ্যাবন"
+
+msgid "country.GB"
+msgstr "যুক্তরাজ্য"
+
+msgid "country.GD"
+msgstr "গ্রেনাডা"
+
+msgid "country.GE"
+msgstr "জর্জিয়া"
+
+msgid "country.GF"
+msgstr "ফরাসি গায়ানা"
+
+msgid "country.GG"
+msgstr "গার্নসি"
+
+msgid "country.GH"
+msgstr "ঘানা"
+
+msgid "country.GI"
+msgstr "জিব্রাল্টার"
+
+msgid "country.GL"
+msgstr "গ্রিনল্যান্ড"
+
+msgid "country.GM"
+msgstr "গাম্বিয়া"
+
+msgid "country.GN"
+msgstr "গিনি"
+
+msgid "country.GP"
+msgstr "গুয়াদেলুপ"
+
+msgid "country.GQ"
+msgstr "নিরক্ষীয় গিনি"
+
+msgid "country.GR"
+msgstr "গ্রীস"
+
+msgid "country.GS"
+msgstr "দক্ষিণ জর্জিয়া এবং দক্ষিণ স্যান্ডউইচ দ্বীপপুঞ্জ"
+
+msgid "country.GT"
+msgstr "গুয়াতেমালা"
+
+msgid "country.GU"
+msgstr "গুয়াম"
+
+msgid "country.GW"
+msgstr "গিনি-বিসাউ"
+
+msgid "country.GY"
+msgstr "গায়ানা"
+
+msgid "country.HK"
+msgstr "হংকং"
+
+msgid "country.HM"
+msgstr "হার্ড দ্বীপ এবং ম্যাকডোনাল্ড দ্বীপপুঞ্জ"
+
+msgid "country.HN"
+msgstr "হন্ডুরাস"
+
+msgid "country.HR"
+msgstr "ক্রোয়েশিয়া"
+
+msgid "country.HT"
+msgstr "হাইতি"
+
+msgid "country.HU"
+msgstr "হাঙ্গেরি"
+
+msgid "country.ID"
+msgstr "ইন্দোনেশিয়া"
+
+msgid "country.IE"
+msgstr "আয়ারল্যান্ড"
+
+msgid "country.IL"
+msgstr "ইসরায়েল"
+
+msgid "country.IM"
+msgstr "আইল অফ ম্যান"
+
+msgid "country.IN"
+msgstr "ভারত"
+
+msgid "country.IO"
+msgstr "ব্রিটিশ ভারত মহাসাগরীয় অঞ্চল"
+
+msgid "country.IQ"
+msgstr "ইরাক"
+
+msgid "country.IR"
+msgstr "ইরান"
+
+msgid "country.IS"
+msgstr "আইসল্যান্ড"
+
+msgid "country.IT"
+msgstr "ইতালি"
+
+msgid "country.JE"
+msgstr "জার্সি"
+
+msgid "country.JM"
+msgstr "জামাইকা"
+
+msgid "country.JO"
+msgstr "জর্ডান"
+
+msgid "country.JP"
+msgstr "জাপান"
+
+msgid "country.KE"
+msgstr "কেনিয়া"
+
+msgid "country.KG"
+msgstr "কিরগিজস্তান"
+
+msgid "country.KH"
+msgstr "কম্বোডিয়া"
+
+msgid "country.KI"
+msgstr "কিরিবাতি"
+
+msgid "country.KM"
+msgstr "কমোরোস"
+
+msgid "country.KN"
+msgstr "সেন্ট কিটস ও নেভিস"
+
+msgid "country.KP"
+msgstr "উত্তর কোরিয়া"
+
+msgid "country.KR"
+msgstr "দক্ষিণ কোরিয়া"
+
+msgid "country.KW"
+msgstr "কুয়েত"
+
+msgid "country.KY"
+msgstr "কেম্যান দ্বীপপুঞ্জ"
+
+msgid "country.KZ"
+msgstr "কাজাখস্তান"
+
+msgid "country.LA"
+msgstr "লাওস"
+
+msgid "country.LB"
+msgstr "লেবানন"
+
+msgid "country.LC"
+msgstr "সেন্ট লুসিয়া"
+
+msgid "country.LI"
+msgstr "লিচেনস্টাইন"
+
+msgid "country.LK"
+msgstr "শ্রীলঙ্কা"
+
+msgid "country.LR"
+msgstr "লাইবেরিয়া"
+
+msgid "country.LS"
+msgstr "লেসোথো"
+
+msgid "country.LT"
+msgstr "লিথুয়ানিয়া"
+
+msgid "country.LU"
+msgstr "লুক্সেমবার্গ"
+
+msgid "country.LV"
+msgstr "লাটভিয়া"
+
+msgid "country.LY"
+msgstr "লিবিয়া"
+
+msgid "country.MA"
+msgstr "মরক্কো"
+
+msgid "country.MC"
+msgstr "মোনাকো"
+
+msgid "country.MD"
+msgstr "মলদোভা"
+
+msgid "country.ME"
+msgstr "মন্টিনিগ্রো"
+
+msgid "country.MF"
+msgstr "সেন্ট মার্টিন"
+
+msgid "country.MG"
+msgstr "মাদাগাস্কার"
+
+msgid "country.MH"
+msgstr "মার্শাল দ্বীপপুঞ্জ"
+
+msgid "country.MK"
+msgstr "উত্তর মেসেডোনিয়া"
+
+msgid "country.ML"
+msgstr "মালি"
+
+msgid "country.MM"
+msgstr "মায়ানমার"
+
+msgid "country.MN"
+msgstr "মঙ্গোলিয়া"
+
+msgid "country.MO"
+msgstr "ম্যাকাও"
+
+msgid "country.MP"
+msgstr "উত্তর মারিয়ানা দ্বীপপুঞ্জ"
+
+msgid "country.MQ"
+msgstr "মার্টিনিক"
+
+msgid "country.MR"
+msgstr "মৌরিতানিয়া"
+
+msgid "country.MS"
+msgstr "মন্টসেরাট"
+
+msgid "country.MT"
+msgstr "মাল্টা"
+
+msgid "country.MU"
+msgstr "মরিশাস"
+
+msgid "country.MV"
+msgstr "মালদ্বীপ"
+
+msgid "country.MW"
+msgstr "মালাউই"
+
+msgid "country.MX"
+msgstr "মেক্সিকো"
+
+msgid "country.MY"
+msgstr "মালয়েশিয়া"
+
+msgid "country.MZ"
+msgstr "মোজাম্বিক"
+
+msgid "country.NA"
+msgstr "নামিবিয়া"
+
+msgid "country.NC"
+msgstr "নিউ ক্যালেডোনিয়া"
+
+msgid "country.NE"
+msgstr "নাইজার"
+
+msgid "country.NF"
+msgstr "নরফোক দ্বীপ"
+
+msgid "country.NG"
+msgstr "নাইজেরিয়া"
+
+msgid "country.NI"
+msgstr "নিকারাগুয়া"
+
+msgid "country.NL"
+msgstr "নেদারল্যান্ডস"
+
+msgid "country.NO"
+msgstr "নরওয়ে"
+
+msgid "country.NP"
+msgstr "নেপাল"
+
+msgid "country.NR"
+msgstr "নাউরু"
+
+msgid "country.NU"
+msgstr "নিউই"
+
+msgid "country.NZ"
+msgstr "নিউজিল্যান্ড"
+
+msgid "country.OM"
+msgstr "ওমান"
+
+msgid "country.PA"
+msgstr "পানামা"
+
+msgid "country.PE"
+msgstr "পেরু"
+
+msgid "country.PF"
+msgstr "ফরাসি পলিনেশিয়া"
+
+msgid "country.PG"
+msgstr "পাপুয়া নিউ গিনি"
+
+msgid "country.PH"
+msgstr "ফিলিপাইন"
+
+msgid "country.PK"
+msgstr "পাকিস্তান"
+
+msgid "country.PL"
+msgstr "পোল্যান্ড"
+
+msgid "country.PM"
+msgstr "সেন্ট পিয়ের ও মিকুয়েলন"
+
+msgid "country.PN"
+msgstr "পিটকেয়ার্ন"
+
+msgid "country.PR"
+msgstr "পুয়ের্তো রিকো"
+
+msgid "country.PS"
+msgstr "ফিলিস্তিন"
+
+msgid "country.PT"
+msgstr "পর্তুগাল"
+
+msgid "country.PW"
+msgstr "পালাউ"
+
+msgid "country.PY"
+msgstr "প্যারাগুয়ে"
+
+msgid "country.QA"
+msgstr "কাতার"
+
+msgid "country.RE"
+msgstr "রিইউনিয়ন"
+
+msgid "country.RO"
+msgstr "রোমানিয়া"
+
+msgid "country.RS"
+msgstr "সার্বিয়া"
+
+msgid "country.RU"
+msgstr "রাশিয়ান ফেডারেশন"
+
+msgid "country.RW"
+msgstr "রুয়ান্ডা"
+
+msgid "country.SA"
+msgstr "সৌদি আরব"
+
+msgid "country.SB"
+msgstr "সলোমন দ্বীপপুঞ্জ"
+
+msgid "country.SC"
+msgstr "সেশেলস"
+
+msgid "country.SD"
+msgstr "সুদান"
+
+msgid "country.SE"
+msgstr "সুইডেন"
+
+msgid "country.SG"
+msgstr "সিঙ্গাপুর"
+
+msgid "country.SH"
+msgstr "সেন্ট হেলেনা, অ্যাসেনশন ও ত্রিস্তান দা কুনহা"
+
+msgid "country.SI"
+msgstr "স্লোভেনিয়া"
+
+msgid "country.SJ"
+msgstr "স্বালবার্ড ও জান মায়েন"
+
+msgid "country.SK"
+msgstr "স্লোভাকিয়া"
+
+msgid "country.SL"
+msgstr "সিয়েরা লিওন"
+
+msgid "country.SM"
+msgstr "সান মারিনো"
+
+msgid "country.SN"
+msgstr "সেনেগাল"
+
+msgid "country.SO"
+msgstr "সোমালিয়া"
+
+msgid "country.SR"
+msgstr "সুরিনাম"
+
+msgid "country.SS"
+msgstr "দক্ষিণ সুদান"
+
+msgid "country.ST"
+msgstr "সাও টোমে ও প্রিন্সিপে"
+
+msgid "country.SV"
+msgstr "এল সালভাদর"
+
+msgid "country.SX"
+msgstr "সিন্ট মার্টেন (ডাচ অংশ)"
+
+msgid "country.SY"
+msgstr "সিরিয়া"
+
+msgid "country.SZ"
+msgstr "ইসোয়াতিনি"
+
+msgid "country.TC"
+msgstr "তুর্কস ও কাইকোস দ্বীপপুঞ্জ"
+
+msgid "country.TD"
+msgstr "চাদ"
+
+msgid "country.TF"
+msgstr "ফরাসি দক্ষিণ অঞ্চল"
+
+msgid "country.TG"
+msgstr "টোগো"
+
+msgid "country.TH"
+msgstr "থাইল্যান্ড"
+
+msgid "country.TJ"
+msgstr "তাজিকিস্তান"
+
+msgid "country.TK"
+msgstr "টোকেলাউ"
+
+msgid "country.TL"
+msgstr "পূর্ব তিমুর"
+
+msgid "country.TM"
+msgstr "তুর্কমেনিস্তান"
+
+msgid "country.TN"
+msgstr "তিউনিসিয়া"
+
+msgid "country.TO"
+msgstr "টোঙ্গা"
+
+msgid "country.TR"
+msgstr "তুরস্ক"
+
+msgid "country.TT"
+msgstr "ত্রিনিদাদ ও টোবাগো"
+
+msgid "country.TV"
+msgstr "টুভালু"
+
+msgid "country.TW"
+msgstr "তাইওয়ান"
+
+msgid "country.TZ"
+msgstr "তানজানিয়া"
+
+msgid "country.UA"
+msgstr "ইউক্রেন"
+
+msgid "country.UG"
+msgstr "উগান্ডা"
+
+msgid "country.UM"
+msgstr "মার্কিন যুক্তরাষ্ট্র ক্ষুদ্র outlying দ্বীপপুঞ্জ"
+
+msgid "country.US"
+msgstr "যুক্তরাষ্ট্র"
+
+msgid "country.UY"
+msgstr "উরুগুয়ে"
+
+msgid "country.UZ"
+msgstr "উজবেকিস্তান"
+
+msgid "country.VA"
+msgstr "ভ্যাটিকান সিটি স্টেট"
+
+msgid "country.VC"
+msgstr "সেন্ট ভিনসেন্ট ও গ্রেনাডাইনস"
+
+msgid "country.VE"
+msgstr "ভেনেজুয়েলা"
+
+msgid "country.VG"
+msgstr "ব্রিটিশ ভার্জিন দ্বীপপুঞ্জ"
+
+msgid "country.VI"
+msgstr "মার্কিন ভার্জিন দ্বীপপুঞ্জ"
+
+msgid "country.VN"
+msgstr "ভিয়েতনাম"
+
+msgid "country.VU"
+msgstr "ভানুয়াতু"
+
+msgid "country.WF"
+msgstr "ওয়ালিস ও ফুটুনা"
+
+msgid "country.WS"
+msgstr "সামোয়া"
+
+msgid "country.XK"
+msgstr "কসোভো"
+
+msgid "country.YE"
+msgstr "ইয়েমেন"
+
+msgid "country.YT"
+msgstr "মায়োত্তে"
+
+msgid "country.ZA"
+msgstr "দক্ষিণ আফ্রিকা"
+
+msgid "country.ZM"
+msgstr "জাম্বিয়া"
+
+msgid "country.ZW"
+msgstr "জিম্বাবুয়ে"
+
+msgid "country.not_applicable"
+msgstr "প্রযোজ্য নয়"
+
+msgid "dashboard.card.blocked_requests.title"
+msgstr "অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.card.blocked_unique_ips.title"
+msgstr "অবরুদ্ধ অনন্য আইপি"
+
+msgid "dashboard.card.certificates.title"
+msgstr "সার্টিফিকেট"
+
+msgid "dashboard.card.instances.status"
+msgstr "%(up)s চালু / %(down)s বন্ধ / %(loading)s লোড হচ্ছে"
+
+msgid "dashboard.card.instances.title"
+msgstr "ইনস্ট্যান্স"
+
+msgid "dashboard.card.news.title"
+msgstr "সংবাদ"
+
+msgid "dashboard.card.plan.title"
+msgstr "প্ল্যান"
+
+msgid "dashboard.card.plugins.status"
+msgstr "%(core)s কোর / %(pro)s প্রো / %(external)s বাহ্যিক"
+
+msgid "dashboard.card.plugins.title"
+msgstr "প্লাগইন"
+
+msgid "dashboard.card.ram.critical_high"
+msgstr "গুরুতর: সিস্টেমের মেমোরি প্রায় শেষ!"
+
+msgid "dashboard.card.ram.good_high"
+msgstr "প্রোডাকশন পরিবেশের জন্য চমৎকার মেমোরি"
+
+msgid "dashboard.card.ram.info_medium"
+msgstr "প্রোডাকশন ব্যবহারের জন্য ১৬জিবি+ আপগ্রেড বিবেচনা করুন"
+
+msgid "dashboard.card.ram.title"
+msgstr "সিস্টেম RAM"
+
+msgid "dashboard.card.ram.usage"
+msgstr "%(percent)s%% ব্যবহৃত"
+
+msgid "dashboard.card.ram.warning_low"
+msgstr "সতর্কতা: কম মেমোরি পারফরম্যান্সে প্রভাব ফেলতে পারে"
+
+msgid "dashboard.card.services.status"
+msgstr "%(online)s অনলাইন / %(draft)s খসড়া"
+
+msgid "dashboard.card.services.title"
+msgstr "পরিষেবা"
+
+msgid "dashboard.card.top_reasons.title"
+msgstr "ব্লকের প্রধান কারণ"
+
+msgid "dashboard.card.total_requests.title"
+msgstr "মোট অনুরোধ"
+
+msgid "dashboard.card.upstreams.planned"
+msgstr "শীঘ্রই আসছে"
+
+msgid "dashboard.card.upstreams.title"
+msgstr "আপস্ট্রিম"
+
+msgid "dashboard.chart.blocked_request_countries.title"
+msgstr "দেশ অনুযায়ী অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.chart.blocking_status.blocked_requests"
+msgstr "অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.chart.blocking_status.count"
+msgstr "সংখ্যা"
+
+msgid "dashboard.chart.blocking_status.subtitle"
+msgstr "সময়ের সাথে অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.chart.blocking_status.time"
+msgstr "সময়"
+
+msgid "dashboard.chart.blocking_status.title"
+msgstr "সময়ের সাথে অবরুদ্ধ অবস্থা"
+
+msgid "dashboard.chart.request_status.blocked"
+msgstr "অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.chart.request_status.title"
+msgstr "অনুরোধ স্থিতি বিতরণ"
+
+msgid "dashboard.chart.timeseries.series"
+msgstr "ব্লক করা"
+
+msgid "dashboard.chart.timeseries.title"
+msgstr "সময়ের সাথে ব্লক করা অনুরোধ (নির্বাচিত সীমা)"
+
+msgid "dashboard.chart.top_blocked_ips.most_blocked"
+msgstr "সবচেয়ে বেশি অবরুদ্ধ আইপি"
+
+msgid "dashboard.chart.top_blocked_ips.title"
+msgstr "শীর্ষ ১০ অবরুদ্ধ আইপি"
+
+msgid "dashboard.map.blocked_requests"
+msgstr "অবরুদ্ধ অনুরোধ"
+
+msgid "dashboard.map.hover_info"
+msgstr "একটি দেশের উপর হোভার করুন"
+
+msgid "dashboard.map.legend"
+msgstr "লিজেন্ড"
+
+msgid "dashboard.map.no_data"
+msgstr "কোনো ডেটা নেই"
+
+msgid "dashboard.mini.across_countries"
+msgstr "%(count)s দেশগুলিতে"
+
+msgid "dashboard.mini.enforced"
+msgstr "বর্তমানে প্রয়োগ করা"
+
+msgid "dashboard.mini.pct_blocked"
+msgstr "%(percent)s%% ব্লক করা"
+
+msgid "dashboard.mini.scheduled"
+msgstr "পরিকল্পিত"
+
+msgid "dashboard.panel.blocking_sub"
+msgstr "ব্লক করা ও অনুমোদিত"
+
+msgid "dashboard.panel.map_sub"
+msgstr "বিস্তারিত দেখতে কার্সর রাখুন"
+
+msgid "dashboard.panel.reasons_sub"
+msgstr "সক্রিয়কারী নিয়ম অনুযায়ী"
+
+msgid "dashboard.panel.status_sub"
+msgstr "HTTP প্রতিক্রিয়া কোড"
+
+msgid "dashboard.panel.timeseries_sub"
+msgstr "নির্বাচিত সীমা"
+
+msgid "dashboard.panel.top_ips_sub"
+msgstr "অনুরোধের সংখ্যা অনুযায়ী"
+
+msgid "dashboard.status.blocked_of_total"
+msgstr "%(total)s মোট"
+
+msgid "dashboard.status.free_plan"
+msgstr "ফ্রি প্ল্যান"
+
+msgid "dashboard.status.renews"
+msgstr "পুনরায় সক্রিয় করুন"
+
+msgid "dashboard.status.services_licensed"
+msgstr "%(count)s পরিষেবা লাইসেন্স করা"
+
+msgid "dashboard.status.trend_vs_prev"
+msgstr "এর আগের"
+
+msgid "dashboard.status.vs_prev"
+msgstr "এর আগের"
+
+msgid "dashboard.tile.bans_active"
+msgstr "সক্রিয় ব্লক"
+
+msgid "dashboard.tile.jobs"
+msgstr "নির্ধারিত কাজ"
+
+msgid "dashboard.tile.trend"
+msgstr "ব্লক করা অনুরোধের প্রবণতা"
+
+msgid "dashboard.welcome.greeting"
+msgstr "আবার স্বাগতম,"
+
+msgid "dashboard.welcome.title"
+msgstr "আবার স্বাগতম, %(user)s"
+
+msgid "dashboard.window.last_days"
+msgstr "গত %(days)s দিন"
+
+msgid "dashboard.window.title"
+msgstr "ড্যাশবোর্ডের সময়সীমা"
+
+msgid "datatable.bulk_select_all_done"
+msgstr "মিল থাকা সব %(count)sটি %(entity)s নির্বাচিত হয়েছে।"
+
+msgid "datatable.bulk_select_all_filtered"
+msgstr "মিল থাকা সব %(count)sটি %(entity)s নির্বাচন করুন"
+
+msgid "datatable.bulk_select_clear"
+msgstr "নির্বাচন পরিষ্কার করুন"
+
+msgid "datatable.bulk_select_page"
+msgstr "এই পৃষ্ঠার সব %(count)sটি %(entity)s নির্বাচিত হয়েছে।"
+
+msgid "datatable.info_bans"
+msgstr "মোট %(total)s নিষেধাজ্ঞার মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_cache"
+msgstr "মোট %(total)s ক্যাশ ফাইলের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_configs"
+msgstr "মোট %(total)s কাস্টম কনফিগারেশনের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_empty_bans"
+msgstr "কোনো নিষেধাজ্ঞা উপলব্ধ নেই"
+
+msgid "datatable.info_empty_cache"
+msgstr "কোনো ক্যাশ ফাইল উপলব্ধ নেই"
+
+msgid "datatable.info_empty_configs"
+msgstr "কোনো কাস্টম কনফিগারেশন উপলব্ধ নেই"
+
+msgid "datatable.info_empty_instances"
+msgstr "কোনো ইনস্ট্যান্স উপলব্ধ নেই"
+
+msgid "datatable.info_empty_items"
+msgstr "কোনো আইটেম উপলব্ধ নেই"
+
+msgid "datatable.info_empty_jobs"
+msgstr "কোনো কার্য উপলব্ধ নেই"
+
+msgid "datatable.info_empty_plugins"
+msgstr "কোনো প্লাগইন উপলব্ধ নেই"
+
+msgid "datatable.info_empty_reports"
+msgstr "কোনো রিপোর্ট উপলব্ধ নেই"
+
+msgid "datatable.info_empty_services"
+msgstr "কোনো পরিষেবা উপলব্ধ নেই"
+
+msgid "datatable.info_empty_templates"
+msgstr "কোনো টেমপ্লেট উপলব্ধ নেই"
+
+msgid "datatable.info_filtered_bans"
+msgstr "(মোট _MAX_ নিষেধাজ্ঞা থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_cache"
+msgstr "(মোট _MAX_ ক্যাশ ফাইল থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_configs"
+msgstr "(মোট _MAX_ কাস্টম কনফিগারেশন থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_instances"
+msgstr "(মোট _MAX_ ইনস্ট্যান্স থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_items"
+msgstr "(মোট _MAX_ আইটেম থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_jobs"
+msgstr "(মোট _MAX_ কার্য থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_plugins"
+msgstr "(মোট _MAX_ প্লাগইন থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_reports"
+msgstr "(মোট _MAX_ রিপোর্ট থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_services"
+msgstr "(মোট _MAX_ পরিষেবা থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_filtered_templates"
+msgstr "(মোট _MAX_ টেমপ্লেট থেকে ফিল্টার করা হয়েছে)"
+
+msgid "datatable.info_instances"
+msgstr "মোট %(total)s ইনস্ট্যান্সের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_items"
+msgstr "মোট %(total)s আইটেমের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_jobs"
+msgstr "মোট %(total)s কার্যের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_plugins"
+msgstr "মোট %(total)s প্লাগইনের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_reports"
+msgstr "মোট %(total)s রিপোর্টের মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_services"
+msgstr "মোট %(total)s পরিষেবার মধ্যে %(start)s থেকে %(end)s দেখানো হচ্ছে"
+
+msgid "datatable.info_templates"
+msgstr "মোট %(total)s টেমপ্লেটের মধ্যে %(start)s থেকে %(end)s প্রদর্শিত হচ্ছে"
+
+msgid "datatable.length_all"
+msgstr "সব"
+
+msgid "datatable.length_menu_bans"
+msgstr "দেখান _MENU_ নিষেধাজ্ঞা"
+
+msgid "datatable.length_menu_cache"
+msgstr "দেখান _MENU_ ক্যাশ ফাইল"
+
+msgid "datatable.length_menu_configs"
+msgstr "দেখান _MENU_ কাস্টম কনফিগারেশন"
+
+msgid "datatable.length_menu_instances"
+msgstr "দেখান _MENU_ ইনস্ট্যান্স"
+
+msgid "datatable.length_menu_items"
+msgstr "দেখান _MENU_ আইটেম"
+
+msgid "datatable.length_menu_jobs"
+msgstr "দেখান _MENU_ কার্য"
+
+msgid "datatable.length_menu_plugins"
+msgstr "দেখান _MENU_ প্লাগইন"
+
+msgid "datatable.length_menu_reports"
+msgstr "দেখান _MENU_ রিপোর্ট"
+
+msgid "datatable.length_menu_services"
+msgstr "দেখান _MENU_ পরিষেবা"
+
+msgid "datatable.length_menu_templates"
+msgstr "_MENU_ টেমপ্লেট প্রদর্শন করুন"
+
+msgid "datatable.paginate.first"
+msgstr "প্রথম"
+
+msgid "datatable.paginate.last"
+msgstr "শেষ"
+
+msgid "datatable.paginate.next"
+msgstr "পরবর্তী"
+
+msgid "datatable.paginate.previous"
+msgstr "পূর্ববর্তী"
+
+msgid "datatable.processing"
+msgstr "প্রসেসিং চলছে..."
+
+msgid "datatable.search"
+msgstr "অনুসন্ধান:"
+
+msgid "datatable.select_rows_bans_0"
+msgstr "কোনো নিষেধাজ্ঞা নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_bans_1"
+msgstr "১টি নিষেধাজ্ঞা নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_bans_plural"
+msgstr "%dটি নিষেধাজ্ঞা নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_cache_0"
+msgstr "কোনো ক্যাশ ফাইল নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_cache_1"
+msgstr "১টি ক্যাশ ফাইল নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_cache_plural"
+msgstr "%dটি ক্যাশ ফাইল নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_configs_0"
+msgstr "কোনো কাস্টম কনফিগারেশন নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_configs_1"
+msgstr "১টি কাস্টম কনফিগারেশন নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_configs_plural"
+msgstr "%dটি কাস্টম কনফিগারেশন নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_instances_0"
+msgstr "কোনো ইনস্ট্যান্স নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_instances_1"
+msgstr "১টি ইনস্ট্যান্স নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_instances_plural"
+msgstr "%dটি ইনস্ট্যান্স নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_items_0"
+msgstr "কোনো আইটেম নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_items_1"
+msgstr "১টি আইটেম নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_items_plural"
+msgstr "%dটি আইটেম নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_jobs_0"
+msgstr "কোনো কার্য নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_jobs_1"
+msgstr "১টি কার্য নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_jobs_plural"
+msgstr "%dটি কার্য নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_plugins_0"
+msgstr "কোনো প্লাগইন নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_plugins_1"
+msgstr "১টি প্লাগইন নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_plugins_plural"
+msgstr "%dটি প্লাগইন নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_reports_0"
+msgstr "কোনো রিপোর্ট নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_reports_1"
+msgstr "১টি রিপোর্ট নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_reports_plural"
+msgstr "%dটি রিপোর্ট নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_services_0"
+msgstr "কোনো পরিষেবা নির্বাচন করা হয়নি"
+
+msgid "datatable.select_rows_services_1"
+msgstr "১টি পরিষেবা নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_services_plural"
+msgstr "%dটি পরিষেবা নির্বাচন করা হয়েছে"
+
+msgid "datatable.select_rows_templates_0"
+msgstr "কোনো টেমপ্লেট নির্বাচিত নয়"
+
+msgid "datatable.select_rows_templates_1"
+msgstr "১টি টেমপ্লেট নির্বাচিত হয়েছে"
+
+msgid "datatable.select_rows_templates_plural"
+msgstr "%dটি টেমপ্লেট নির্বাচিত হয়েছে"
+
+msgid "datatable.selected_list_count"
+msgstr "%(count)s %(entity)s নির্বাচিত"
+
+msgid "datatable.selected_list_empty"
+msgstr "কোনো %(entity)s নির্বাচিত নয়।"
+
+msgid "datatable.zero_records_bans"
+msgstr "কোনো মেলানো নিষেধাজ্ঞা পাওয়া যায়নি"
+
+msgid "datatable.zero_records_cache"
+msgstr "কোনো মেলানো ক্যাশ ফাইল পাওয়া যায়নি"
+
+msgid "datatable.zero_records_configs"
+msgstr "কোনো মেলানো কাস্টম কনফিগারেশন পাওয়া যায়নি"
+
+msgid "datatable.zero_records_instances"
+msgstr "কোনো মেলানো ইনস্ট্যান্স পাওয়া যায়নি"
+
+msgid "datatable.zero_records_items"
+msgstr "কোনো মেলানো আইটেম পাওয়া যায়নি"
+
+msgid "datatable.zero_records_jobs"
+msgstr "কোনো মেলানো কার্য পাওয়া যায়নি"
+
+msgid "datatable.zero_records_plugins"
+msgstr "কোনো মেলানো প্লাগইন পাওয়া যায়নি"
+
+msgid "datatable.zero_records_reports"
+msgstr "কোনো মেলানো রিপোর্ট পাওয়া যায়নি"
+
+msgid "datatable.zero_records_services"
+msgstr "কোনো মেলানো পরিষেবা পাওয়া যায়নি"
+
+msgid "datatable.zero_records_templates"
+msgstr "মেলে এমন কোনো টেমপ্লেট পাওয়া যায়নি"
+
+msgid "dev_log.copy_failed"
+msgstr "টেক্সট কপি করতে ব্যর্থ:"
+
+msgid "dev_log.news_fetch_fail"
+msgstr "সংবাদ আনতে ব্যর্থ:"
+
+msgid "dev_log.skipping_malformed_line"
+msgstr "ত্রুটিপূর্ণ লাইন উপেক্ষা করা হচ্ছে: %(line)s"
+
+msgid "duration.1_hour"
+msgstr "১ ঘণ্টা"
+
+msgid "duration.1_week"
+msgstr "১ সপ্তাহ"
+
+msgid "duration.24_hours"
+msgstr "২৪ ঘণ্টা"
+
+msgid "duration.custom"
+msgstr "কাস্টম"
+
+msgid "duration.permanent"
+msgstr "স্থায়ী"
+
+msgid "error.401.help"
+msgstr "এই রিসোর্সে অ্যাক্সেস করার জন্য আপনাকে অবশ্যই লগইন করতে হবে।"
+
+msgid "error.401.message"
+msgstr "চালিয়ে যাওয়ার জন্য অনুগ্রহ করে লগইন করুন।"
+
+msgid "error.401.title"
+msgstr "প্রমাণীকরণ প্রয়োজন"
+
+msgid "error.403.help"
+msgstr "অনুগ্রহ করে আপনার শংসাপত্র যাচাই করুন অথবা যদি আপনি মনে করেন এটি একটি ত্রুটি তবে প্রশাসকের সাথে যোগাযোগ করুন।"
+
+msgid "error.403.message"
+msgstr "আপনার এই পৃষ্ঠা অ্যাক্সেস করার অনুমতি নেই।"
+
+msgid "error.403.title"
+msgstr "অ্যাক্সেস নিষিদ্ধ"
+
+msgid "error.404.help"
+msgstr "অনুগ্রহ করে পরীক্ষা করুন URLটি সঠিক কিনা অথবা যদি আপনি মনে করেন এটি একটি ত্রুটি তবে প্রশাসকের সাথে যোগাযোগ করুন।"
+
+msgid "error.404.message"
+msgstr "অনুরোধ করা রিসোর্স খুঁজে পাওয়া যায়নি।"
+
+msgid "error.404.title"
+msgstr "খুঁজে পাওয়া যায়নি"
+
+msgid "error.5xx.help"
+msgstr "অনুগ্রহ করে পরে আবার চেষ্টা করুন অথবা যদি সমস্যাটি অব্যাহত থাকে তবে প্রশাসকের সাথে যোগাযোগ করুন।"
+
+msgid "error.5xx.message"
+msgstr "একটি অপ্রত্যাশিত সার্ভার ত্রুটি ঘটেছে।"
+
+msgid "error.5xx.title"
+msgstr "সার্ভার ত্রুটি"
+
+msgid "error.ban_update_failed"
+msgstr "নিষেধাজ্ঞার সময়কাল আপডেট করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
+
+msgid "error.reports_load_error"
+msgstr "রিপোর্ট লোড করার সময় ত্রুটি ঘটেছে। অনুগ্রহ করে পৃষ্ঠাটি রিফ্রেশ করার চেষ্টা করুন।"
+
+msgid "error.unban_failed"
+msgstr "আইপি ঠিকানা থেকে নিষেধাজ্ঞা সরাতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
+
+msgid "flash.easter_egg"
+msgstr "যদি আপনি এটি পড়েন, তার মানে আপনি কৌতূহলী"
+
+msgid "flash.error"
+msgstr "ত্রুটি"
+
+msgid "flash.message"
+msgstr "তথ্য"
+
+msgid "flash.pro"
+msgstr "BunkerWeb PRO"
+
+msgid "flash.pro_services_exceeded"
+msgstr "আপনার PRO লাইসেন্সের অনুমতির চেয়ে বেশি পরিষেবা রয়েছে। আপনার লাইসেন্স আপগ্রেড করুন অথবা কিছু পরিষেবা খসড়া মোডে স্থানান্তর করে আপনার PRO লাইসেন্স আনলক করুন।"
+
+msgid "flash.time.just_now"
+msgstr "এইমাত্র"
+
+msgid "flash.warning"
+msgstr "সতর্কতা"
+
+msgid "footer.blog"
+msgstr "ব্লগ"
+
+msgid "footer.documentation"
+msgstr "ডকুমেন্টেশন"
+
+msgid "footer.license"
+msgstr "লাইসেন্স"
+
+msgid "footer.made_by"
+msgstr "নির্মিত"
+
+msgid "footer.privacy"
+msgstr "গোপনীয়তা"
+
+msgid "footer.support"
+msgstr "সমর্থন"
+
+msgid "form.checkbox.include_attached_configs"
+msgstr "সংযুক্ত কাস্টম কনফিগারেশন অন্তর্ভুক্ত করুন"
+
+msgid "form.checkbox.overwrite_existing_configs"
+msgstr "বিদ্যমান UI/API কাস্টম কনফিগারেশন ওভাররাইট করুন"
+
+msgid "form.checkbox.remember_me"
+msgstr "আমাকে মনে রাখুন"
+
+msgid "form.help.ban_specific_service"
+msgstr "নিষেধাজ্ঞা শুধুমাত্র এই নির্দিষ্ট পরিষেবার জন্য প্রযোজ্য হবে।"
+
+msgid "form.help.hostname_length_limit"
+msgstr "হোস্টনাম ২৫৬ অক্ষরের মধ্যে সীমাবদ্ধ।"
+
+msgid "form.help.hostname_special_chars"
+msgstr "প্রোটোকল/পোর্ট স্পেসিফিকেশনের জন্য শুধুমাত্র `/` এবং `:` অনুমোদিত।"
+
+msgid "form.help.multivalue_separator"
+msgstr "মানগুলি দ্বারা পৃথক করা হয়েছে:"
+
+msgid "form.help.permanent_ban"
+msgstr "যদি নির্বাচন করা হয়, নিষেধাজ্ঞাটি ম্যানুয়ালি অপসারণ না করা পর্যন্ত কখনোই মেয়াদোত্তীর্ণ হবে না।"
+
+msgid "form.help.photo_extensions"
+msgstr "অনুমোদিত JPG, GIF, বা PNG। সর্বোচ্চ আকার: 800KB।"
+
+msgid "form.label.2fa_code"
+msgstr "2FA কোড"
+
+msgid "form.label.2fa_code_or_recovery"
+msgstr "2FA কোড বা পুনরুদ্ধার কোড"
+
+msgid "form.label.admin_email"
+msgstr "অ্যাডমিন ইমেল"
+
+msgid "form.label.admin_password"
+msgstr "অ্যাডমিন পাসওয়ার্ড"
+
+msgid "form.label.admin_username"
+msgstr "অ্যাডমিন ব্যবহারকারীর নাম"
+
+msgid "form.label.auto_lets_encrypt"
+msgstr "স্বয়ংক্রিয় Let's Encrypt"
+
+msgid "form.label.ban_scope"
+msgstr "নিষেধাজ্ঞার পরিধি"
+
+msgid "form.label.certificate_authority"
+msgstr "সার্টিফিকেট অথরিটি"
+
+msgid "form.label.certificate_priority"
+msgstr "শংসাপত্র অগ্রাধিকার"
+
+msgid "form.label.challenge_type"
+msgstr "চ্যালেঞ্জের প্রকার"
+
+msgid "form.label.config_type"
+msgstr "কনফিগারেশনের প্রকার"
+
+msgid "form.label.configuration_name"
+msgstr "কনফিগারেশনের নাম"
+
+msgid "form.label.confirm_password"
+msgstr "পাসওয়ার্ড নিশ্চিত করুন"
+
+msgid "form.label.current_password"
+msgstr "বর্তমান পাসওয়ার্ড"
+
+msgid "form.label.custom_config"
+msgstr "কনফিগারেশন"
+
+msgid "form.label.custom_end_date"
+msgstr "কাস্টম শেষ তারিখ"
+
+msgid "form.label.custom_ssl_certificate"
+msgstr "কাস্টম SSL শংসাপত্র"
+
+msgid "form.label.custom_ssl_certificate_data"
+msgstr "কাস্টম SSL শংসাপত্রের ডেটা (Base64/PEM)"
+
+msgid "form.label.custom_ssl_key"
+msgstr "কাস্টম SSL কী"
+
+msgid "form.label.custom_ssl_key_data"
+msgstr "কাস্টম SSL কী ডেটা (Base64/PEM)"
+
+msgid "form.label.dns_credential_items"
+msgstr "Let's Encrypt DNS ক্রেডেনশিয়াল আইটেম"
+
+msgid "form.label.dns_propagation"
+msgstr "DNS প্রচার বিলম্ব"
+
+msgid "form.label.dns_provider"
+msgstr "DNS প্রদানকারী"
+
+msgid "form.label.email"
+msgstr "ইমেল"
+
+msgid "form.label.email_for_lets_encrypt"
+msgstr "Let's Encrypt-এর জন্য ইমেল"
+
+msgid "form.label.end_date"
+msgstr "শেষ তারিখ"
+
+msgid "form.label.hostname"
+msgstr "হোস্টনাম"
+
+msgid "form.label.instance_id"
+msgstr "ইনস্ট্যান্স আইডি"
+
+msgid "form.label.ip_address"
+msgstr "আইপি ঠিকানা"
+
+msgid "form.label.keywords"
+msgstr "কীওয়ার্ড"
+
+msgid "form.label.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt কাস্টম প্রোফাইল"
+
+msgid "form.label.lets_encrypt_disable_public_suffixes"
+msgstr "পাবলিক সাফিক্স (PSL ব্ল্যাকলিস্ট) নিষ্ক্রিয় করুন"
+
+msgid "form.label.lets_encrypt_dns_credential_items"
+msgstr "Let's Encrypt DNS ক্রেডেনশিয়াল আইটেম"
+
+msgid "form.label.lets_encrypt_profile"
+msgstr "Let's Encrypt প্রোফাইল"
+
+msgid "form.label.license_key"
+msgstr "লাইসেন্স কী"
+
+msgid "form.label.make_permanent"
+msgstr "স্থায়ী করুন"
+
+msgid "form.label.name"
+msgstr "নাম"
+
+msgid "form.label.new_duration"
+msgstr "নতুন সময়কাল"
+
+msgid "form.label.new_password"
+msgstr "নতুন পাসওয়ার্ড"
+
+msgid "form.label.optional"
+msgstr "(ঐচ্ছিক)"
+
+msgid "form.label.passkey_name"
+msgstr "পাসকির নাম"
+
+msgid "form.label.password"
+msgstr "পাসওয়ার্ড"
+
+msgid "form.label.permanent_ban"
+msgstr "স্থায়ী নিষেধাজ্ঞা"
+
+msgid "form.label.plugin_id"
+msgstr "প্লাগইন"
+
+msgid "form.label.raw_configuration"
+msgstr "কাঁচা কনফিগারেশন"
+
+msgid "form.label.real_ip_from"
+msgstr "আসল আইপি থেকে"
+
+msgid "form.label.real_ip_from_urls"
+msgstr "আসল আইপি থেকে (URL-গুলি)"
+
+msgid "form.label.real_ip_header"
+msgstr "আসল আইপি হেডার"
+
+msgid "form.label.real_ip_recursive"
+msgstr "আসল আইপি রিকার্সিভ"
+
+msgid "form.label.reason"
+msgstr "কারণ"
+
+msgid "form.label.secret_token"
+msgstr "গোপন টোকেন"
+
+msgid "form.label.server_name"
+msgstr "সার্ভারের নাম"
+
+msgid "form.label.service_name"
+msgstr "পরিষেবার নাম"
+
+msgid "form.label.template_id"
+msgstr "টেমপ্লেট আইডি"
+
+msgid "form.label.theme"
+msgstr "থিম"
+
+msgid "form.label.type"
+msgstr "প্রকার"
+
+msgid "form.label.ui_host"
+msgstr "UI হোস্ট"
+
+msgid "form.label.ui_url"
+msgstr "UI URL"
+
+msgid "form.label.use_custom_ssl"
+msgstr "কাস্টম SSL ব্যবহার করুন"
+
+msgid "form.label.use_lets_encrypt_staging"
+msgstr "Let's Encrypt Staging ব্যবহার করুন"
+
+msgid "form.label.use_proxy_protocol"
+msgstr "PROXY প্রোটোকল ব্যবহার করুন"
+
+msgid "form.label.use_real_ip"
+msgstr "আসল আইপি ব্যবহার করুন"
+
+msgid "form.label.username"
+msgstr "ব্যবহারকারীর নাম"
+
+msgid "form.label.wildcard_certificates"
+msgstr "ওয়াইল্ডকার্ড শংসাপত্র"
+
+msgid "form.label.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API সংযোগ টাইমআউট"
+
+msgid "form.label.zerossl_api_key"
+msgstr "ZeroSSL API কী"
+
+msgid "form.label.zerossl_api_max_time"
+msgstr "ZeroSSL API সর্বোচ্চ সময়"
+
+msgid "form.label.zerossl_api_retry"
+msgstr "ZeroSSL API পুনরায় চেষ্টা"
+
+msgid "form.label.zerossl_api_retry_delay"
+msgstr "ZeroSSL API পুনরায় চেষ্টার বিলম্ব"
+
+msgid "form.placeholder.2fa_code"
+msgstr "কোড লিখুন"
+
+msgid "form.placeholder.2fa_or_recovery"
+msgstr "কোড বা পুনরুদ্ধার কোড লিখুন"
+
+msgid "form.placeholder.config_name"
+msgstr "আমার-কাস্টম-কনফিগ"
+
+msgid "form.placeholder.current_password"
+msgstr "বর্তমান পাসওয়ার্ড"
+
+msgid "form.placeholder.enter_username"
+msgstr "আপনার ব্যবহারকারীর নাম লিখুন"
+
+msgid "form.placeholder.keywords"
+msgstr "কীওয়ার্ড..."
+
+msgid "form.placeholder.multivalue_enter_value"
+msgstr "মান প্রবেশ করুন..."
+
+msgid "form.placeholder.plugin_search"
+msgstr "প্লাগইন অনুসন্ধান করুন..."
+
+msgid "form.placeholder.search"
+msgstr "অনুসন্ধান করুন..."
+
+msgid "form.placeholder.secret_token"
+msgstr "গোপন টোকেন"
+
+msgid "form.placeholder.select_service"
+msgstr "পরিষেবা নির্বাচন করুন"
+
+msgid "form.placeholder.username_example"
+msgstr "রহিমকরিম"
+
+msgid "form.validation.confirm_password_match"
+msgstr "পাসওয়ার্ড মেলেনি।"
+
+msgid "form.validation.password_length"
+msgstr "পাসওয়ার্ড অন্তত ৮ অক্ষর দীর্ঘ হতে হবে।"
+
+msgid "form.validation.password_number"
+msgstr "পাসওয়ার্ডে অন্তত ১টি সংখ্যা থাকতে হবে।"
+
+msgid "form.validation.password_special"
+msgstr "পাসওয়ার্ডে অন্তত ১টি বিশেষ অক্ষর থাকতে হবে।"
+
+msgid "form.validation.password_uppercase"
+msgstr "পাসওয়ার্ডে অন্তত ১টি বড় হাতের অক্ষর থাকতে হবে।"
+
+msgid "input_list.view_all_settings"
+msgstr "সমস্ত %(count)s সেটিংস দেখুন"
+
+msgid "instance.type.container"
+msgstr "কন্টেইনার"
+
+msgid "instance.type.pod"
+msgstr "পড"
+
+msgid "instance.type.static"
+msgstr "স্ট্যাটিক"
+
+msgid "instances.down"
+msgstr "বন্ধ"
+
+msgid "instances.loading"
+msgstr "লোড হচ্ছে"
+
+msgid "instances.subtitle"
+msgstr "এই ইউআই-এর সাথে সংযুক্ত BunkerWeb ইনস্ট্যান্সগুলি পরিচালনা করুন: তৈরি করুন, পিং করুন, রিফ্রেশ করুন, বন্ধ করুন অথবা সরান।"
+
+msgid "instances.total"
+msgstr "মোট ইনস্ট্যান্স"
+
+msgid "instances.up"
+msgstr "চালু"
+
+msgid "interval.day"
+msgstr "দৈনিক"
+
+msgid "interval.hour"
+msgstr "প্রতি ঘণ্টা"
+
+msgid "interval.minute"
+msgstr "প্রতি মিনিটে"
+
+msgid "interval.once"
+msgstr "একবার"
+
+msgid "interval.week"
+msgstr "সাপ্তাহিক"
+
+msgid "job.history.end_date"
+msgstr "শেষ তারিখ"
+
+msgid "job.history.start_date"
+msgstr "শুরুর তারিখ"
+
+msgid "job.history.success"
+msgstr "সফল"
+
+msgid "jobs.subtitle"
+msgstr "BunkerWeb শিডিউলার দ্বারা চালানো সময়সূচী এবং এককালীন কাজ — তাদের অবস্থা ট্র্যাক করুন এবং প্রয়োজন অনুযায়ী চালান।"
+
+msgid "jobs.tile.async"
+msgstr "অসিঙ্ক্রোনাস"
+
+msgid "jobs.tile.failed_last_run"
+msgstr "শেষবার চালানো ব্যর্থ"
+
+msgid "jobs.tile.reload_required"
+msgstr "রিফ্রেশ প্রয়োজন"
+
+msgid "jobs.tile.total"
+msgstr "মোট কাজ"
+
+msgid "legend.locked_settings_annotation"
+msgstr "লক করা হয়েছে (%(method)s)"
+
+msgid "legend.locked_settings_hint"
+msgstr "লক করা সেটিংস হাইলাইট করা হয়েছে"
+
+msgid "link.back_to_login"
+msgstr "লগইনে ফিরে যান"
+
+msgid "link.forgot_password"
+msgstr "পাসওয়ার্ড ভুলে গেছেন?"
+
+msgid "link.get_support"
+msgstr "সহায়তা নিন"
+
+msgid "link.here"
+msgstr "এখানে"
+
+msgid "link.more_info"
+msgstr "আরও তথ্য"
+
+msgid "link.more_news"
+msgstr "আরও সংবাদ"
+
+msgid "link.opens_new_tab"
+msgstr "(নতুন ট্যাবে খুলুন)"
+
+msgid "link.privacy_policy"
+msgstr "গোপনীয়তা নীতি"
+
+msgid "link.read_more"
+msgstr "আরও পড়ুন"
+
+msgid "link.see_more"
+msgstr "আরও দেখুন"
+
+msgid "link.upgrade"
+msgstr "আপগ্রেড করবেন?"
+
+msgid "link.use_authenticator_code"
+msgstr "একটি প্রমাণীকরণ কোড ব্যবহার করুন"
+
+msgid "link.use_recovery_code"
+msgstr "একটি পুনরুদ্ধার কোড ব্যবহার করুন"
+
+msgid "login.or_use_password"
+msgstr "অথবা আপনার পাসওয়ার্ড ব্যবহার করুন"
+
+msgid "login.subtitle"
+msgstr "আপনার BunkerWeb অ্যাকাউন্টে সাইন ইন করুন"
+
+msgid "login.title"
+msgstr "লগইন করুন"
+
+msgid "logs.all_sources"
+msgstr "সব উৎস (সরাসরি)"
+
+msgid "logs.annotation_error"
+msgstr "ত্রুটি"
+
+msgid "logs.annotation_warning"
+msgstr "সতর্কতা"
+
+msgid "logs.collapse"
+msgstr "সংকুচিত করুন"
+
+msgid "logs.expand"
+msgstr "প্রসারিত করুন"
+
+msgid "logs.filter_levels"
+msgstr "স্তর"
+
+msgid "logs.grep_placeholder"
+msgstr "grep…"
+
+msgid "logs.issue_summary"
+msgstr "%(errors)s ত্রুটি, %(warnings)s সতর্কতা"
+
+msgid "logs.letsencrypt_logs"
+msgstr "Let's Encrypt লগ"
+
+msgid "logs.level_all"
+msgstr "সব লগ"
+
+msgid "logs.level_critical"
+msgstr "গুরুতর"
+
+msgid "logs.level_debug"
+msgstr "ডিবাগ"
+
+msgid "logs.level_error"
+msgstr "ত্রুটি"
+
+msgid "logs.level_errors_only"
+msgstr "শুধু ত্রুটি"
+
+msgid "logs.level_info"
+msgstr "তথ্য"
+
+msgid "logs.level_notice"
+msgstr "বিজ্ঞপ্তি"
+
+msgid "logs.level_security_only"
+msgstr "শুধু নিরাপত্তা"
+
+msgid "logs.level_warning"
+msgstr "সতর্কতা"
+
+msgid "logs.lines_all"
+msgstr "সব"
+
+msgid "logs.lines_label"
+msgstr "লাইন"
+
+msgid "logs.live_title"
+msgstr "সরাসরি লগ"
+
+msgid "logs.main_logs"
+msgstr "প্রধান লগ"
+
+msgid "logs.meta"
+msgstr "%(size)s · %(lines)s লাইন · পরিবর্তিত %(when)s"
+
+msgid "logs.new_lines"
+msgstr "নতুন লাইন"
+
+msgid "logs.new_lines_sr"
+msgstr "%(count)s নতুন লগ লাইন"
+
+msgid "logs.no_log_files"
+msgstr "কোনো লগ ফাইল প্রদর্শনের জন্য উপলব্ধ নয়, আরও তথ্যের জন্য ডকুমেন্টেশন দেখুন যে কীভাবে লগিং সক্ষম করতে হয়"
+
+msgid "logs.pause"
+msgstr "বিরতি"
+
+msgid "logs.resume"
+msgstr "চালিয়ে যান"
+
+msgid "logs.select_file_prompt"
+msgstr "একটি লগ ফাইল নির্বাচন করে তার বিষয়বস্তু দেখুন"
+
+msgid "logs.showing_all"
+msgstr "%(total)s লাইন"
+
+msgid "logs.showing_some"
+msgstr "%(total)s এর মধ্যে %(shown)s দেখানো হচ্ছে"
+
+msgid "logs.tailing_sources"
+msgstr "অনুসরণ করা হচ্ছে · %(count)sটি উৎস"
+
+msgid "logs.taller"
+msgstr "আরও উঁচু"
+
+msgid "logs.trimmed_notice"
+msgstr "--- %(count)s পুরানো লগ লাইন পারফরম্যান্সের জন্য সরানো হয়েছে ---"
+
+msgid "modal.body.add_plugin_dropzone"
+msgstr "আপনার প্লাগইন আর্কাইভটি এখানে টেনে আনুন অথবা ফাইল নির্বাচন করতে ক্লিক করুন।"
+
+msgid "modal.body.ban_filtered_confirmation"
+msgstr "সব %(count)sটি মিলে যাওয়া রিপোর্টের IP ব্লক করবেন? একই লক্ষ্য একবারই প্রয়োগ হবে।"
+
+#. plural pair; 2 form(s) for bn, singular in slot 0
+msgid "modal.body.confirm_cache_deletion_alert"
+msgid_plural "modal.body.confirm_cache_deletion_alert_plural"
+msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইল মুছতে চান?"
+msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইলগুলি মুছতে চান?"
+
+msgid "modal.body.confirm_configs_conversion"
+msgstr "নির্বাচিত কাস্টম কনফিগারেশনগুলো রূপান্তর করতে চান?"
+
+msgid "modal.body.confirm_configs_conversion_to"
+msgstr "আপনি কি নির্বাচিত কাস্টম কনফিগারেশনগুলোকে %(state)s এ রূপান্তর করতে নিশ্চিত?"
+
+#. plural pair; 2 form(s) for bn, singular in slot 0
+msgid "modal.body.confirm_configs_deletion_alert"
+msgid_plural "modal.body.confirm_configs_deletion_alert_plural"
+msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশন মুছতে চান?"
+msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশনগুলি মুছতে চান?"
+
+msgid "modal.body.confirm_conversion_confirmation"
+msgstr "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি রূপান্তর করতে চান?"
+
+msgid "modal.body.confirm_next_step"
+msgstr "আপনি কি নিশ্চিত যে আপনি পরবর্তী ধাপে যেতে চান?"
+
+#. plural pair; 2 form(s) for bn, singular in slot 0
+msgid "modal.body.confirm_plugin_deletion"
+msgid_plural "modal.body.confirm_plugin_deletion_plural"
+msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইন মুছতে চান?"
+msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত প্লাগইনগুলি মুছতে চান?"
+
+msgid "modal.body.confirm_template_deletion"
+msgstr "আপনি কি নিশ্চিত যে টেমপ্লেট %(name)s মুছে ফেলতে চান?"
+
+msgid "modal.body.confirmation_instance_deletion"
+msgstr "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?"
+
+#. plural pair; 2 form(s) for bn, singular in slot 0
+msgid "modal.body.delete_confirmation_alert"
+msgid_plural "modal.body.delete_confirmation_alert_plural"
+msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্স মুছতে চান?"
+msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ইনস্ট্যান্সগুলি মুছতে চান?"
+
+msgid "modal.body.delete_confirmation_template_used"
+msgstr "নির্বাচিত টেমপ্লেটগুলির এক বা একাধিকটি পরিষেবাগুলিতে যুক্ত আছে (মোট %(services_count)sটি পরিষেবা)। এগুলি সরালে সেই নিয়োগ মুছে যাবে। আপনি কি চালিয়ে যেতে চান?"
+
+msgid "modal.body.delete_step_confirmation"
+msgstr "আপনি কি নিশ্চিত যে আপনি এই ধাপটি মুছে ফেলতে চান?"
+
+msgid "modal.body.delete_step_content_label"
+msgstr "বিষয়বস্তু"
+
+msgid "modal.body.delete_step_name_label"
+msgstr "ধাপ"
+
+msgid "modal.body.delete_template_global_usage"
+msgstr "গ্লোবাল সেটিংস দ্বারা ব্যবহৃত"
+
+msgid "modal.body.delete_template_services_list"
+msgstr "এই পরিষেবাগুলি ব্যবহার করছে: %(services)s"
+
+msgid "modal.body.export_services_intro"
+msgstr "নির্বাচিত পরিষেবাগুলি রপ্তানি করা হবে। তাদের সংযুক্ত কাস্টম কনফিগারেশন একটি .zip আর্কাইভে অন্তর্ভুক্ত করতে নিচের বিকল্পটি সক্রিয় করুন।"
+
+msgid "modal.body.fetch_global_settings_bold"
+msgstr "এটি গ্লোবাল সেটিংস আনবে এবং বর্তমান টেমপ্লেটে প্রয়োগ করবে।"
+
+msgid "modal.body.fetch_global_settings_point_1"
+msgstr "শুধুমাত্র এই টেমপ্লেটে থাকা সেটিংস আপডেট হবে।"
+
+msgid "modal.body.fetch_global_settings_point_2"
+msgstr "ডিফল্টের সাথে একই মান উপেক্ষা করা হবে।"
+
+msgid "modal.body.fetch_global_settings_point_3"
+msgstr "SERVER_NAME কখনও ওভাররাইট করা হবে না।"
+
+msgid "modal.body.import_configs_dropzone"
+msgstr "আপনার কাস্টম কনফিগারেশন এক্সপোর্ট ফাইলটি এখানে টেনে এনে ছেড়ে দিন বা একটি ফাইল নির্বাচন করতে ক্লিক করুন।"
+
+msgid "modal.body.import_configs_warning"
+msgstr "scheduler, autoconf, বা templates দ্বারা তৈরি কাস্টম কনফিগারেশন সবসময় সংরক্ষিত থাকে। শুধুমাত্র UI/API কনফিগারেশন ওভাররাইট করা যেতে পারে।"
+
+msgid "modal.body.import_services_dropzone"
+msgstr "আপনার পরিষেবা এক্সপোর্ট ফাইলটি এখানে টেনে আনুন এবং ড্রপ করুন বা একটি ফাইল নির্বাচন করতে ক্লিক করুন৷"
+
+msgid "modal.body.import_services_warning"
+msgstr "পরিষেবাগুলি আমদানি করা এক্সপোর্ট ফাইল থেকে নতুন UI পরিষেবা তৈরি করবে৷ বিদ্যমান পরিষেবাগুলি বাদ দেওয়া হয়েছে৷"
+
+msgid "modal.body.instance_creation_alert"
+msgstr "আপনাকে পোর্ট বা সার্ভারের নাম প্রদান করতে হবে না; ইনস্ট্যান্স কনফিগারেশনের জন্য `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` এবং `API_SERVER_NAME`-এর মান ব্যবহার করা হবে।"
+
+msgid "modal.body.next_step_in_case_of_issue"
+msgstr "যদি সমস্যা দেখা দেয়, তাহলে আপনি ম্যানুয়ালি অসুরক্ষিত শংসাপত্র গ্রহণ করতে পারেন:"
+
+msgid "modal.body.recovery_codes_save_alert"
+msgstr "অনুগ্রহ করে এই পুনরুদ্ধার কোডগুলি একটি নিরাপদ স্থানে সংরক্ষণ করুন (যেমন একটি পাসওয়ার্ড ম্যানেজার বা বাঙ্কার)। যদি আপনি আপনার প্রমাণীকরণ ডিভাইস হারিয়ে ফেলেন তবে আপনি আপনার অ্যাকাউন্টে অ্যাক্সেস করতে এগুলি ব্যবহার করতে পারেন।"
+
+msgid "modal.body.recovery_codes_shown_once_alert"
+msgstr "এই পুনরুদ্ধার কোডগুলি কেবল একবার দেখানো হয়। অনুগ্রহ করে নিশ্চিত করুন যে আপনি সেগুলি নিরাপদে সংরক্ষণ করেছেন।"
+
+msgid "modal.body.reset_template_alert"
+msgstr "আপনি কি নিশ্চিত যে আপনি বর্তমান টেমপ্লেট সেটিংস এবং কাস্টম কনফিগারেশন রিসেট করতে চান?"
+
+msgid "modal.body.services_conversion_confirmation"
+msgstr "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি রূপান্তর করতে চান?"
+
+msgid "modal.body.services_deletion_confirmation"
+msgstr "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি মুছতে চান?"
+
+#. plural pair; 2 form(s) for bn, singular in slot 0
+msgid "modal.body.unban_confirmation_alert"
+msgid_plural "modal.body.unban_confirmation_alert_plural"
+msgstr[0] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?"
+msgstr[1] "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?"
+
+msgid "modal.body.unban_filtered_confirmation"
+msgstr "সব %(count)sটি মিলে যাওয়া ব্লক তুলে নিতে চান?"
+
+msgid "modal.body.update_duration_alert"
+msgstr "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
+
+msgid "modal.body.update_filtered_duration_alert"
+msgstr "সব %(count)sটি মিলে যাওয়া ব্লকের জন্য নতুন সময়কাল বাছুন:"
+
+msgid "modal.button.fetch_global_settings_confirm"
+msgstr "গ্লোবাল সেটিংস প্রয়োগ করুন"
+
+msgid "modal.button.reset_template_confirm"
+msgstr "টেমপ্লেট কনফিগারেশন রিসেট করুন"
+
+msgid "modal.section.ban_details"
+msgstr "নিষেধাজ্ঞার বিবরণ"
+
+msgid "modal.section.ban_scope"
+msgstr "নিষেধাজ্ঞার পরিধি"
+
+msgid "modal.section.delete"
+msgstr "মুছুন"
+
+msgid "modal.title.add_bans"
+msgstr "নিষেধাজ্ঞা যোগ করুন"
+
+msgid "modal.title.add_plugins"
+msgstr "প্লাগইন যোগ করুন"
+
+msgid "modal.title.confirm_conversion"
+msgstr "রূপান্তর নিশ্চিত করুন"
+
+msgid "modal.title.confirm_deletion"
+msgstr "মোছা নিশ্চিত করুন"
+
+msgid "modal.title.confirm_unban"
+msgstr "নিষেধাজ্ঞা অপসারণ নিশ্চিত করুন"
+
+msgid "modal.title.create_new_instance"
+msgstr "নতুন ইনস্ট্যান্স তৈরি করুন"
+
+msgid "modal.title.create_template"
+msgstr "টেমপ্লেট তৈরি করুন"
+
+msgid "modal.title.delete_instance"
+msgstr "ইনস্ট্যান্স মুছুন"
+
+msgid "modal.title.delete_step"
+msgstr "ধাপ মুছুন"
+
+msgid "modal.title.delete_template"
+msgstr "টেমপ্লেটগুলি মুছুন"
+
+msgid "modal.title.edit_template"
+msgstr "টেমপ্লেট সম্পাদনা করুন: %(name)s"
+
+msgid "modal.title.export_services"
+msgstr "পরিষেবা রপ্তানি করুন"
+
+msgid "modal.title.fetch_global_settings"
+msgstr "গ্লোবাল সেটিংস প্রয়োগ করবেন?"
+
+msgid "modal.title.from_plugin"
+msgstr "প্লাগইন থেকে"
+
+msgid "modal.title.full_url"
+msgstr "সম্পূর্ণ URL"
+
+msgid "modal.title.import_configs"
+msgstr "কাস্টম কনফিগারেশন আমদানি করুন"
+
+msgid "modal.title.import_services"
+msgstr "পরিষেবা আমদানি করুন"
+
+msgid "modal.title.job_history"
+msgstr "শেষ ১০টি কার্য সম্পাদন"
+
+msgid "modal.title.job_history_count"
+msgstr "কার্যের শেষ %(count)sটি সম্পাদন"
+
+msgid "modal.title.multiselect_selected"
+msgstr "নির্বাচিত আইটেম"
+
+msgid "modal.title.recovery_codes"
+msgstr "পুনরুদ্ধার কোড"
+
+msgid "modal.title.reset_template_config"
+msgstr "টেমপ্লেট কনফিগারেশন রিসেট করবেন?"
+
+msgid "modal.title.security_report_details"
+msgstr "নিরাপত্তা রিপোর্ট বিবরণ"
+
+msgid "modal.title.server_name_not_unique"
+msgstr "সার্ভারের নাম অনন্য নয়"
+
+msgid "modal.title.update_duration"
+msgstr "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
+
+msgid "mode.advanced"
+msgstr "উন্নত"
+
+msgid "mode.compose"
+msgstr "তৈরি করুন"
+
+msgid "mode.easy"
+msgstr "সহজ"
+
+msgid "mode.raw"
+msgstr "র"
+
+msgid "navbar.button.upgrade_to_pro"
+msgstr "PRO-তে আপগ্রেড করুন"
+
+msgid "navbar.dropdown.logout"
+msgstr "লগ আউট"
+
+msgid "navbar.link.documentation"
+msgstr "ডকুমেন্টেশন"
+
+msgid "navbar.version"
+msgstr "সংস্করণ"
+
+msgid "navigation.about"
+msgstr "সম্পর্কে"
+
+msgid "navigation.bans"
+msgstr "নিষেধাজ্ঞা"
+
+msgid "navigation.cache"
+msgstr "ক্যাশ"
+
+msgid "navigation.certificates"
+msgstr "সার্টিফিকেট"
+
+msgid "navigation.configs"
+msgstr "কনফিগারেশন"
+
+msgid "navigation.configure"
+msgstr "কনফিগার"
+
+msgid "navigation.edition_community"
+msgstr "কমিউনিটি"
+
+msgid "navigation.edition_pro"
+msgstr "Pro"
+
+msgid "navigation.extra_pages"
+msgstr "অতিরিক্ত পৃষ্ঠা"
+
+msgid "navigation.global_settings"
+msgstr "গ্লোবাল সেটিংস"
+
+msgid "navigation.groups"
+msgstr "সম্পদ গ্রুপ"
+
+msgid "navigation.home"
+msgstr "হোম"
+
+msgid "navigation.instances"
+msgstr "ইনস্ট্যান্স"
+
+msgid "navigation.jobs"
+msgstr "কার্য"
+
+msgid "navigation.logs"
+msgstr "লগ"
+
+msgid "navigation.misc"
+msgstr "বিবিধ"
+
+msgid "navigation.mode_selection"
+msgstr "মোড নির্বাচন"
+
+msgid "navigation.more"
+msgstr "আরও..."
+
+msgid "navigation.operate"
+msgstr "পরিচালনা"
+
+msgid "navigation.overview"
+msgstr "সারসংক্ষেপ"
+
+msgid "navigation.plugin_activated"
+msgstr "প্লাগইন সক্রিয় হয়েছে"
+
+msgid "navigation.plugin_activated_global"
+msgstr "প্লাগইন গ্লোবালি সক্রিয় হয়েছে"
+
+msgid "navigation.plugin_deactivated"
+msgstr "প্লাগইন নিষ্ক্রিয় হয়েছে"
+
+msgid "navigation.plugin_deactivated_global"
+msgstr "প্লাগইন গ্লোবালি নিষ্ক্রিয় হয়েছে"
+
+msgid "navigation.plugins"
+msgstr "প্লাগইন"
+
+msgid "navigation.plugins_pages"
+msgstr "প্লাগইন পৃষ্ঠা"
+
+msgid "navigation.pro"
+msgstr "প্রো"
+
+msgid "navigation.redirects"
+msgstr "রিডাইরেক্টসমূহ"
+
+msgid "navigation.reports"
+msgstr "রিপোর্ট"
+
+msgid "navigation.services"
+msgstr "পরিষেবা"
+
+msgid "navigation.support"
+msgstr "সমর্থন"
+
+msgid "navigation.system"
+msgstr "সিস্টেম"
+
+msgid "navigation.templates"
+msgstr "টেমপ্লেট"
+
+msgid "navigation.threatmap"
+msgstr "হুমকি মানচিত্র"
+
+msgid "navigation.timings"
+msgstr "সময় পরিমাপ"
+
+msgid "navigation.upstreams"
+msgstr "আপস্ট্রিম"
+
+msgid "navigation.web_cache"
+msgstr "ওয়েব ক্যাশে"
+
+msgid "navigation.workflows"
+msgstr "ওয়ার্কফ্লো"
+
+msgid "news.image_alt"
+msgstr "সংবাদের ছবি"
+
+msgid "news.posted_on"
+msgstr "পোস্ট করা হয়েছে"
+
+msgid "news.slide"
+msgstr "স্লাইড"
+
+msgid "newsletter.legal_agreement"
+msgstr "আমি নিউজলেটারে সাবস্ক্রাইব করতে চাই, এবং আমি পড়েছি এবং সম্মত হয়েছি:"
+
+msgid "newsletter.title"
+msgstr "নিউজলেটারে যোগ দিন"
+
+msgid "onboarding.dismiss"
+msgstr "বাতিল করুন"
+
+msgid "onboarding.error"
+msgstr "গাইডটি লোড করা যায়নি।"
+
+msgid "onboarding.hint.bans"
+msgstr "ব্যান হলো সেই ক্লায়েন্ট যাদের BunkerWeb এখন ফিরিয়ে দিচ্ছে। প্রতিটি সারিতে কারণ ও মেয়াদ শেষের সময় দেখা যায়।"
+
+msgid "onboarding.hint.home"
+msgstr "এই ড্যাশবোর্ড বর্তমান অবস্থা দেখায়: চালু ইনস্ট্যান্স, পরিবেশিত সার্ভিস এবং BunkerWeb যে ট্রাফিক সামলেছে।"
+
+msgid "onboarding.hint.logs"
+msgstr "প্রতিটি ইনস্ট্যান্সের লাইভ লগ, ইনস্ট্যান্স ও গুরুত্ব অনুযায়ী ফিল্টার করা যায়।"
+
+msgid "onboarding.hint.reports"
+msgstr "প্রতিটি ব্লক করা অনুরোধ এখানে আসে। একটি খুলে দেখুন কোন নিরাপত্তা পরীক্ষা সেটি থামিয়েছে এবং কেন।"
+
+msgid "onboarding.hint.title"
+msgstr "দ্রুত পরিচিতি"
+
+msgid "onboarding.item.first_block"
+msgstr "BunkerWeb কিছু ব্লক করছে তা দেখুন"
+
+msgid "onboarding.item.https"
+msgstr "HTTPS চালু করুন"
+
+msgid "onboarding.item.install"
+msgstr "1+ হোস্টে BunkerWeb ইনস্টল করুন"
+
+msgid "onboarding.item.mfa"
+msgstr "MFA সক্রিয় করুন"
+
+msgid "onboarding.item.pro"
+msgstr "BunkerWeb PRO সক্রিয় করুন"
+
+msgid "onboarding.item.read_bans"
+msgstr "কে নিষিদ্ধ এবং কত সময় পর্যন্ত দেখুন"
+
+msgid "onboarding.item.read_home"
+msgstr "ড্যাশবোর্ড পড়ুন: এখন কী ঠিক আছে"
+
+msgid "onboarding.item.read_logs"
+msgstr "সব ইনস্ট্যান্সের লাইভ লগ দেখুন"
+
+msgid "onboarding.item.read_reports"
+msgstr "কেন একটি অনুরোধ ব্লক হয়েছে জানুন"
+
+msgid "onboarding.item.service"
+msgstr "প্রথম পরিষেবা নিবন্ধন করুন"
+
+msgid "onboarding.item.workflow"
+msgstr "একটি নিরাপত্তা ওয়ার্কফ্লো যুক্ত করুন"
+
+msgid "onboarding.not_saved"
+msgstr "সংরক্ষণ করা যায়নি।"
+
+msgid "onboarding.pro_tips"
+msgstr "PRO টিপস"
+
+msgid "onboarding.restart"
+msgstr "গাইড আবার শুরু করুন"
+
+msgid "onboarding.restart_help"
+msgstr "শুরুর ধাপগুলো আবার উপরের বারে দেখান।"
+
+msgid "onboarding.subtitle"
+msgstr "কয়েকটি ধাপেই BunkerWeb আপনার সার্ভিস সুরক্ষিত করবে।"
+
+msgid "onboarding.title"
+msgstr "শুরু করুন"
+
+msgid "pagination.page"
+msgstr "পৃষ্ঠা"
+
+msgid "plan.free"
+msgstr "ফ্রি"
+
+msgid "plan.pro"
+msgstr "প্রো"
+
+msgid "plugin.page.status.deactivated"
+msgstr "প্লাগইনটি নিষ্ক্রিয় করা হয়েছে; তাই, কোনো তথ্য উপলব্ধ নেই।"
+
+msgid "plugin.page.status.dedicated_page_unavailable"
+msgstr "এই প্লাগইনটি একটি ডেডিকেটেড পেজে পরিচালিত হয় যা এখনও লোড হয়নি। এতে প্রবেশ করতে ওয়েব UI পুনরায় চালু করুন।"
+
+msgid "plugin.page.status.metrics_deactivated"
+msgstr "মেট্রিক্স প্লাগইন সক্রিয় করা হয়নি; তাই, কোনো তথ্য উপলব্ধ নেই।"
+
+msgid "plugin.page.status.no_content"
+msgstr "এই প্লাগইনটি কোনো এমবেডেড পেজ প্রদান করে না।"
+
+msgid "plugin.page.status.not_available"
+msgstr "বিটা পর্যায়ে প্লাগইন পৃষ্ঠাটি এখনও উপলব্ধ নয়।"
+
+msgid "plugin.page.status.pre_render_error"
+msgstr "প্রি-রেন্ডারিং ত্রুটি"
+
+msgid "plugin.page.status.restricted_to_admins"
+msgstr "এই প্লাগইনটি তার নিজস্ব পৃষ্ঠা চালায়, যা প্লাগইন কোড চালায়। শুধুমাত্র প্রশাসক এটি লোড করতে পারে।"
+
+msgid "plugin.type.all"
+msgstr "সব"
+
+msgid "plugin.type.core"
+msgstr "কোর"
+
+msgid "plugin.type.external"
+msgstr "বাহ্যিক"
+
+msgid "plugin.type.pro"
+msgstr "প্রো"
+
+msgid "plugin.type.ui"
+msgstr "UI"
+
+msgid "plugins.marketplace.active"
+msgstr "সক্রিয়"
+
+msgid "plugins.marketplace.always_on"
+msgstr "মূল / সবসময় চালু"
+
+msgid "plugins.marketplace.disabled"
+msgstr "নিষ্ক্রিয়"
+
+msgid "plugins.marketplace.enabled"
+msgstr "সক্রিয়"
+
+msgid "plugins.marketplace.inactive"
+msgstr "সক্রিয় নয়"
+
+msgid "plugins.marketplace.no_match"
+msgstr "কোনো প্লাগইন আপনার ফিল্টারের সঙ্গে মেলে না"
+
+msgid "plugins.marketplace.search"
+msgstr "প্লাগইন খুঁজুন..."
+
+msgid "plugins.marketplace.tab_all"
+msgstr "সব"
+
+msgid "plugins.marketplace.tab_community"
+msgstr "কমিউনিটি"
+
+msgid "plugins.marketplace.tab_disabled"
+msgstr "নিষ্ক্রিয়"
+
+msgid "plugins.marketplace.tab_enabled"
+msgstr "সক্রিয়"
+
+msgid "plugins.multivalue.more_value"
+msgstr "আরও মান"
+
+msgid "plugins.multivalue.more_values"
+msgstr "আরও মান"
+
+msgid "plugins.multivalue.show_less"
+msgstr "কম দেখান"
+
+msgid "pro.alert.overlapped_1"
+msgstr "আপনার লাইসেন্সের অনুমতির চেয়ে বেশি সক্রিয় পরিষেবা রয়েছে!"
+
+msgid "pro.alert.overlapped_2"
+msgstr "%(pro_services)s পরিষেবা সীমাতে পৌঁছানোর জন্য কিছু পরিষেবা মুছুন বা খসড়া মোডে রূপান্তর করুন।"
+
+msgid "pro.button.all_features_available"
+msgstr "সমস্ত বৈশিষ্ট্য উপলব্ধ"
+
+msgid "pro.button.awaiting_compliance"
+msgstr "সম্মতির অপেক্ষায়..."
+
+msgid "pro.button.renew_license"
+msgstr "লাইসেন্স নবায়ন করুন"
+
+msgid "pro.button.suspended_license"
+msgstr "লাইসেন্স স্থগিত"
+
+msgid "pro.button.upgrade_to_pro"
+msgstr "PRO-তে আপগ্রেড করুন"
+
+msgid "pro.expiration_date.expires_in"
+msgstr "মেয়াদ শেষ হবে"
+
+msgid "pro.expiration_date.title"
+msgstr "প্রো মেয়াদ শেষের তারিখ"
+
+msgid "pro.expiration_date.unknown"
+msgstr "অজানা মেয়াদ শেষের তারিখ"
+
+msgid "pro.force_check.description"
+msgstr "PRO প্লাগইন নতুন করে পরীক্ষা করুন। নতুন সংস্করণ থাকলে প্লাগইন আবার ডাউনলোড হবে।"
+
+msgid "pro.force_check.title"
+msgstr "জোর করে পরীক্ষা"
+
+msgid "pro.force_update.description"
+msgstr "পরীক্ষা এড়িয়ে PRO প্লাগইন জোর করে ডাউনলোড করুন। তা সম্ভব না হলে বর্তমান অবস্থা রাখা হবে।"
+
+msgid "pro.force_update.title"
+msgstr "জোর করে হালনাগাদ"
+
+msgid "pro.key.title.activate"
+msgstr "কী সক্রিয় করুন"
+
+msgid "pro.key.title.update"
+msgstr "কী আপডেট করুন"
+
+msgid "pro.overlay.pro_feature"
+msgstr "প্রো বৈশিষ্ট্য"
+
+msgid "pro.overlay.upgrade_required"
+msgstr "এই বৈশিষ্ট্যটি অ্যাক্সেস করতে প্রো-তে আপগ্রেড করুন"
+
+msgid "pro.status.draft_services_count"
+msgstr "খসড়া পরিষেবা: %(draft_services)s"
+
+msgid "pro.status.expired"
+msgstr "মেয়াদোত্তীর্ণ"
+
+msgid "pro.status.free_version"
+msgstr "ফ্রি সংস্করণ"
+
+msgid "pro.status.overlapped"
+msgstr "অতিরিক্ত"
+
+msgid "pro.status.pro_version"
+msgstr "প্রো সংস্করণ"
+
+msgid "pro.status.services_count"
+msgstr "অনলাইন পরিষেবা: %(online_services)s / PRO পরিষেবা: %(pro_services)s"
+
+msgid "pro.status.suspended"
+msgstr "স্থগিত"
+
+msgid "pro.status.title"
+msgstr "অবস্থা"
+
+msgid "pro.title"
+msgstr "Pro লাইসেন্স"
+
+msgid "profile.2fa.disable_title"
+msgstr "2FA নিষ্ক্রিয় করুন"
+
+msgid "profile.2fa.enable_title"
+msgstr "2FA সক্ষম করুন"
+
+msgid "profile.alert.refresh_recovery_codes"
+msgstr "আপনার পুনরুদ্ধার কোড রিফ্রেশ করলে পূর্ববর্তী কোডগুলি অবৈধ হয়ে যাবে।"
+
+msgid "profile.badge.2fa_disabled"
+msgstr "2FA নিষ্ক্রিয়"
+
+msgid "profile.badge.2fa_enabled"
+msgstr "2FA সক্রিয়"
+
+msgid "profile.card.coming_soon"
+msgstr "শীঘ্রই আসছে"
+
+msgid "profile.card.title.2fa"
+msgstr "দ্বি-ফ্যাক্টর প্রমাণীকরণ (2FA)"
+
+msgid "profile.card.title.change_password"
+msgstr "পাসওয়ার্ড পরিবর্তন করুন"
+
+msgid "profile.card.title.change_theme"
+msgstr "থিম পরিবর্তন করুন"
+
+msgid "profile.card.title.coming_soon"
+msgstr "শীঘ্রই আসছে"
+
+msgid "profile.card.title.edit_profile"
+msgstr "প্রোফাইল সম্পাদনা করুন"
+
+msgid "profile.card.title.passkeys"
+msgstr "পাসকি"
+
+msgid "profile.card.title.refresh_recovery_codes"
+msgstr "পুনরুদ্ধার কোড রিফ্রেশ করুন"
+
+msgid "profile.card.title.sessions"
+msgstr "সেশন"
+
+msgid "profile.help.photo_extensions"
+msgstr "অনুমোদিত JPG, GIF, বা PNG। সর্বোচ্চ আকার: 800KB।"
+
+msgid "profile.modal.body.wipe_sessions_confirm"
+msgstr "এটি আপনার অ্যাকাউন্টের প্রতিটি অন্যান্য সক্রিয় সেশনকে অবিলম্বে লগ আউট করে। নিশ্চিত করতে আপনার পাসওয়ার্ড লিখুন।"
+
+msgid "profile.modal.title.wipe_sessions"
+msgstr "অন্যান্য সেশনগুলি মুছে ফেলুন?"
+
+msgid "profile.passkey.added"
+msgstr "যোগ করা হয়েছে"
+
+msgid "profile.passkey.empty"
+msgstr "এখনও কোনো পাসকি নিবন্ধিত হয়নি।"
+
+msgid "profile.passkey.help"
+msgstr "পাসকি আপনার ডিভাইসের স্ক্রিন লক বা সিকিউরিটি কী ব্যবহার করে পাসওয়ার্ড ছাড়াই আপনাকে সাইন ইন করায়।"
+
+msgid "profile.passkey.last_used"
+msgstr "সর্বশেষ ব্যবহার"
+
+msgid "profile.passkey.never_used"
+msgstr "কখনও ব্যবহার করা হয়নি"
+
+msgid "profile.passkey.unsupported"
+msgstr "এই ব্রাউজার পাসকি সমর্থন করে না।"
+
+msgid "profile.session.browser"
+msgstr "ব্রাউজার"
+
+msgid "profile.session.creation_date"
+msgstr "তৈরির তারিখ"
+
+msgid "profile.session.current_session"
+msgstr "বর্তমান সেশন"
+
+msgid "profile.session.device"
+msgstr "ডিভাইস"
+
+msgid "profile.session.ip_address"
+msgstr "আইপি ঠিকানা"
+
+msgid "profile.session.last_activity"
+msgstr "শেষ কার্যকলাপ"
+
+msgid "profile.session.os"
+msgstr "অপারেটিং সিস্টেম"
+
+msgid "profile.session.title"
+msgstr "সেশন"
+
+msgid "profile.session.wipe_help"
+msgstr "আপনার অ্যাকাউন্টের প্রতিটি অন্যান্য সক্রিয় সেশন বন্ধ করুন। আপনি এখানে লগইন করে থাকবেন।"
+
+msgid "profile.subtitle"
+msgstr "আপনার অ্যাকাউন্ট, নিরাপত্তা এবং সক্রিয় সেশনগুলি পরিচালনা করুন।"
+
+msgid "profile.tab.profile"
+msgstr "প্রোফাইল"
+
+msgid "profile.tab.security"
+msgstr "নিরাপত্তা"
+
+msgid "profile.tab.sessions"
+msgstr "সেশন"
+
+msgid "range_picker.1h"
+msgstr "গত ১ ঘণ্টা"
+
+msgid "range_picker.24h"
+msgstr "গত ২৪ ঘণ্টা"
+
+msgid "range_picker.30d"
+msgstr "শেষ ৩০ দিন"
+
+msgid "range_picker.7d"
+msgstr "গত সপ্তাহ"
+
+msgid "range_picker.aria_label"
+msgstr "সময়সীমা"
+
+msgid "range_picker.custom"
+msgstr "কাস্টম"
+
+msgid "redirects.all"
+msgstr "সব"
+
+msgid "redirects.append_badge"
+msgstr "+ URI"
+
+msgid "redirects.append_request_uri"
+msgstr "লক্ষ্যটিতে URI যোগ করুন"
+
+msgid "redirects.attach"
+msgstr "সংযুক্ত করুন"
+
+msgid "redirects.attach_copy"
+msgstr "%(name)s (%(from)s → %(to)s) এক বা একাধিক পরিষেবাতে সংযুক্ত করুন।"
+
+msgid "redirects.code.301"
+msgstr "301 — স্থায়ীভাবে স্থানান্তরিত"
+
+msgid "redirects.code.302"
+msgstr "302 — পাওয়া গেছে"
+
+msgid "redirects.code.303"
+msgstr "303 — অন্য দেখুন"
+
+msgid "redirects.code.307"
+msgstr "307 — অস্থায়ী পুনঃনির্দেশ"
+
+msgid "redirects.code.308"
+msgstr "308 — স্থায়ী পুনঃনির্দেশ"
+
+msgid "redirects.create"
+msgstr "পুনঃনির্দেশ তৈরি করুন"
+
+msgid "redirects.delete_confirm_title"
+msgstr "এই পুনঃনির্দেশটি মুছতে চান?"
+
+msgid "redirects.delete_copy"
+msgstr "%(name)s পুনঃনির্দেশটি মুছতে চান?"
+
+msgid "redirects.delete_help"
+msgstr "যদি কোনো পরিষেবাতে পুনঃনির্দেশ সংযুক্ত থাকে, তবে সেটি মুছে ফেলা যাবে না। প্রথমে এটি থেকে সংযোগ বিচ্ছিন্ন করুন।"
+
+msgid "redirects.edit"
+msgstr "পুনঃনির্দেশ সম্পাদনা করুন"
+
+msgid "redirects.edit_shared"
+msgstr "এই রিডাইরেক্টটি %(count)sটি পরিষেবায় সংযুক্ত: %(services)s। সংরক্ষণ করলে সবগুলোর ওপর পরিবর্তন প্রযোজ্য হবে।"
+
+msgid "redirects.empty_text"
+msgstr "পুনঃনির্দেশ হল একটি নামের নিয়ম যা আপনি এক বা একাধিক পরিষেবাতে সংযুক্ত করেন। ইনলাইন REDIRECT_* সেটিংস এটি সহ কাজ করে।"
+
+msgid "redirects.empty_title"
+msgstr "এখন পর্যন্ত কোনো পুনঃনির্দেশ নেই"
+
+msgid "redirects.from_path"
+msgstr "থেকে পুনঃনির্দেশ করুন"
+
+msgid "redirects.from_path_help"
+msgstr "সংযুক্ত পরিষেবাগুলিতে উৎস পথ, যেমন /old."
+
+msgid "redirects.new"
+msgstr "নতুন পুনঃনির্দেশ"
+
+msgid "redirects.not_attached"
+msgstr "সংযুক্ত নয়"
+
+msgid "redirects.readonly"
+msgstr "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। পুনঃনির্দেশগুলি দেখা যেতে পারে, কিন্তু পরিবর্তন করা যায় না।"
+
+msgid "redirects.save"
+msgstr "পুনঃনির্দেশ সংরক্ষণ করুন"
+
+msgid "redirects.search"
+msgstr "নাম, উৎস পথ অথবা গন্তব্য অনুসন্ধান করুন..."
+
+msgid "redirects.services_help"
+msgstr "Ctrl অথবা Command ব্যবহার করে একাধিক পরিষেবা নির্বাচন করুন। পরবর্তীতে রিডাইরেক্ট যুক্ত করা যেতে পারে।"
+
+msgid "redirects.status_code"
+msgstr "স্ট্যাটাস কোড"
+
+msgid "redirects.to_url"
+msgstr "রিডাইরেক্ট করুন"
+
+msgid "redirects.truncated"
+msgstr "শুধুমাত্র প্রথম 500 রিডাইরেক্ট প্রদর্শিত হচ্ছে। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সংকুচিত করুন।"
+
+msgid "reports.bad_behavior_activity_detected"
+msgstr "খারাপ আচরণের কার্যকলাপ সনাক্ত করা হয়েছে"
+
+msgid "reports.bad_behavior_activity_explanation"
+msgstr "এই অনুরোধগুলি খারাপ আচরণের সীমা অতিক্রম করেছে এবং একসাথে গ্রুপ করা হয়েছে।"
+
+msgid "reports.bad_behavior_captured_at"
+msgstr "সংগ্রহ করা হয়েছে"
+
+msgid "reports.bad_behavior_ip"
+msgstr "আইপি ঠিকানা"
+
+msgid "reports.bad_behavior_no_details"
+msgstr "এই রিপোর্টের জন্য কোনো খারাপ আচরণের বিবরণ সংগ্রহ করা হয়নি।"
+
+msgid "reports.bad_behavior_request_id"
+msgstr "অনুরোধ আইডি"
+
+msgid "reports.bad_behavior_request_label"
+msgstr "অনুরোধ"
+
+msgid "reports.bad_behavior_server"
+msgstr "সার্ভার"
+
+msgid "reports.bad_behavior_total_requests"
+msgstr "সন্দেহজনক অনুরোধ"
+
+msgid "reports.bad_behavior_url"
+msgstr "URL"
+
+msgid "reports.card.attack_families.title"
+msgstr "আক্রমণ পরিবার"
+
+msgid "reports.card.recent.title"
+msgstr "সর্বশেষ ঘটনা"
+
+msgid "reports.card.top_asn.title"
+msgstr "শীর্ষ ASN"
+
+msgid "reports.card.top_offenders.title"
+msgstr "শীর্ষ অপরাধী"
+
+msgid "reports.card.top_rules.title"
+msgstr "শীর্ষ ModSecurity নিয়মগুলি সক্রিয়"
+
+msgid "reports.chart.timeseries.series"
+msgstr "ব্লক করা"
+
+msgid "reports.chart.timeseries.title"
+msgstr "সময়ের সাথে অবরুদ্ধ অনুরোধ"
+
+msgid "reports.security_incident"
+msgstr "নিরাপত্তা ঘটনা"
+
+msgid "reports.security_report_data"
+msgstr "নিরাপত্তা রিপোর্টের ডেটা"
+
+msgid "reports.subtitle"
+msgstr "আপনার BunkerWeb ইনস্ট্যান্সে ব্লক হওয়া অনুরোধ থেকে তৈরি নিরাপত্তা রিপোর্ট — টেবিল থেকেই খুঁজুন, ফিল্টার ও এক্সপোর্ট করুন এবং আক্রমণকারী IP ঠিকানাগুলো ব্যান করুন।"
+
+msgid "reports.tab.eventlog"
+msgstr "ইভেন্ট লগ"
+
+msgid "reports.tab.offenders"
+msgstr "শীর্ষ অপরাধী"
+
+msgid "reports.tab.overview"
+msgstr "সংক্ষিপ্ত বিবরণ"
+
+msgid "reports.tab.patterns"
+msgstr "আক্রমণ প্যাটার্ন"
+
+msgid "reports.table.asn"
+msgstr "ASN"
+
+msgid "reports.table.blocks"
+msgstr "ব্লক"
+
+msgid "reports.table.country"
+msgstr "দেশ"
+
+msgid "reports.table.fires"
+msgstr "ফায়ার"
+
+msgid "reports.table.ip"
+msgstr "আইপি"
+
+msgid "reports.table.rule"
+msgstr "নিয়ম"
+
+msgid "reports.table.top_rule"
+msgstr "শীর্ষ নিয়ম"
+
+msgid "reports.tile.asns"
+msgstr "শীর্ষ অপরাধী ASN"
+
+msgid "reports.tile.blocked"
+msgstr "ব্লক করা অনুরোধ"
+
+msgid "reports.tile.blocked_rate"
+msgstr "পূর্ববর্তী সময়ের সাথে তুলনা"
+
+msgid "reports.tile.bot"
+msgstr "বট / স্ক্র্যাপার"
+
+msgid "reports.tile.countries"
+msgstr "শীর্ষ অপরাধী দেশ"
+
+msgid "reports.tile.peak_hour"
+msgstr "চরম সময়"
+
+msgid "reports.tile.rce"
+msgstr "RCE / কমান্ড"
+
+msgid "reports.tile.repeat_offenders"
+msgstr "পুনরাবৃত্তিমূলক অপরাধী (শীর্ষ 10)"
+
+msgid "reports.tile.sqli"
+msgstr "SQL ইনজেকশন"
+
+msgid "reports.tile.unique_ips"
+msgstr "শীর্ষ আক্রমণকারী আইপি"
+
+msgid "reports.tile.unique_offenders"
+msgstr "শীর্ষ অপরাধী"
+
+msgid "request_path.client"
+msgstr "ক্লায়েন্ট"
+
+msgid "request_path.source"
+msgstr "%(phase)s পর্যায়ের প্লাগইন এক্সিকিউশন ক্রম, %(setting)s থেকে - একটি প্রদর্শনের ক্রম, প্রতিটি অনুরোধের ট্র্যাক নয়।"
+
+msgid "request_path.terminal.inline"
+msgstr "ব্যাকএন্ড"
+
+msgid "request_path.terminal.none"
+msgstr "কোনো পরিষেবা উপলব্ধ নয়"
+
+msgid "request_path.terminal.pool"
+msgstr "আপস্ট্রিম পুল"
+
+msgid "request_path.terminal.root"
+msgstr "স্থানীয় ফাইল"
+
+msgid "request_path.title"
+msgstr "অনুরোধের পথ"
+
+msgid "request_path.unordered"
+msgstr "%(phase)s পর্যায়ে কোনো নির্দিষ্ট অবস্থান ঘোষণা করা হয়নি; এটি সাজানো প্লাগইনগুলোর পরে চলে।"
+
+msgid "resource_groups.add_entry"
+msgstr "এন্ট্রি যোগ করুন"
+
+msgid "resource_groups.add_to_setting"
+msgstr "একটি রিসোর্স গ্রুপ যোগ করুন…"
+
+msgid "resource_groups.add_values"
+msgstr "মান যোগ করুন"
+
+msgid "resource_groups.alias"
+msgstr "অ্যালিয়াস"
+
+msgid "resource_groups.alias_help"
+msgstr "অক্ষর, সংখ্যা, আন্ডারস্কোর এবং ড্যাশ। বিদ্যমান অ্যালিয়াসগুলি পরিবর্তন করা যায় না।"
+
+msgid "resource_groups.bulk_import"
+msgstr "বাল্ক ইম্পোর্ট"
+
+msgid "resource_groups.clone"
+msgstr "রিসোর্স গ্রুপ ক্লোন করুন"
+
+msgid "resource_groups.clone_copy"
+msgstr "@%(name)s এর একটি সম্পাদনাযোগ্য অনুলিপি তৈরি করুন।"
+
+msgid "resource_groups.collapse_all"
+msgstr "সবগুলি সংকুচিত করুন"
+
+msgid "resource_groups.comment"
+msgstr "মন্তব্য"
+
+msgid "resource_groups.delete"
+msgstr "রিসোর্স গ্রুপ মুছে ফেলুন"
+
+msgid "resource_groups.delete_confirm"
+msgstr "@%(name)s মুছে ফেলবেন? এটি বাতিল করা যায় না।"
+
+msgid "resource_groups.delete_help"
+msgstr "যখন কোনো সেটিংস এই অ্যালিয়াসের উল্লেখ করে, তখন মুছে ফেলা বন্ধ করা হয়েছে।"
+
+msgid "resource_groups.editor_edit"
+msgstr "@%(name)s সম্পাদনা করুন"
+
+msgid "resource_groups.editor_new"
+msgstr "নতুন রিসোর্স গ্রুপ"
+
+msgid "resource_groups.editor_title"
+msgstr "রিসোর্স গ্রুপ"
+
+msgid "resource_groups.empty"
+msgstr "কোন রিসোর্স গ্রুপ নেই"
+
+msgid "resource_groups.empty_help"
+msgstr "একটি পুনর্ব্যবহারযোগ্য অ্যালিয়াস তৈরি করুন যাতে সামঞ্জস্যপূর্ণ সেটিংস জুড়ে টাইপ করা মানগুলি শেয়ার করা যায়।"
+
+msgid "resource_groups.entries"
+msgstr "এন্ট্রি"
+
+msgid "resource_groups.expand_all"
+msgstr "সবগুলি প্রসারিত করুন"
+
+msgid "resource_groups.global_configuration"
+msgstr "বিশ্বব্যাপী কনফিগারেশন"
+
+msgid "resource_groups.import_extension"
+msgstr "একটি .txt অথবা .csv ফাইল নির্বাচন করুন।"
+
+msgid "resource_groups.import_file"
+msgstr "TXT/CSV"
+
+msgid "resource_groups.import_size"
+msgstr "TXT/CSV ইম্পোর্ট 256 KiB পর্যন্ত সীমাবদ্ধ।"
+
+msgid "resource_groups.kind"
+msgstr "প্রকার"
+
+msgid "resource_groups.kinds"
+msgstr "প্রকারসমূহ"
+
+msgid "resource_groups.loading_references"
+msgstr "রেফারেন্স লোড হচ্ছে..."
+
+msgid "resource_groups.max_entries"
+msgstr "একটি রিসোর্স গ্রুপে %(max)s এর বেশি এন্ট্রি থাকতে পারবে না।"
+
+msgid "resource_groups.meta_line"
+msgstr "%(kinds)s ধরন · %(values)s মান · %(usages)s ব্যবহার"
+
+msgid "resource_groups.new"
+msgstr "নতুন গ্রুপ"
+
+msgid "resource_groups.new_alias"
+msgstr "নতুন অ্যালাইস"
+
+msgid "resource_groups.no_entries"
+msgstr "কোন এন্ট্রি নেই"
+
+msgid "resource_groups.no_entries_help"
+msgstr "এন্ট্রিগুলো আলাদাভাবে যোগ করুন অথবা নিচের বাল্ক ইম্পোর্টার ব্যবহার করুন।"
+
+msgid "resource_groups.no_references"
+msgstr "কোন রেফারেন্স নেই"
+
+msgid "resource_groups.readonly"
+msgstr "ডেটাবেস শুধু পাঠযোগ্য। রিসোর্স গ্রুপ দেখা ও এক্সপোর্ট করা যাবে, বদলানো যাবে না।"
+
+msgid "resource_groups.references_error"
+msgstr "রেফারেন্স লোড করা যায়নি"
+
+msgid "resource_groups.save"
+msgstr "গ্রুপ সেভ করুন"
+
+msgid "resource_groups.search"
+msgstr "অ্যালাইস, বর্ণনা, প্রকার অথবা মান অনুসন্ধান করুন…"
+
+msgid "resource_groups.showing_count"
+msgstr "%(visible)s টি এর মধ্যে %(total)s গ্রুপ দেখানো হচ্ছে"
+
+msgid "resource_groups.subtitle"
+msgstr "IP, দেশ, ASN, বিপরীত DNS নাম, ইউজার এজেন্ট ও URI-এর পুনর্ব্যবহারযোগ্য টাইপ করা উপনাম।"
+
+msgid "resource_groups.template_configuration"
+msgstr "টেমপ্লেট %(template)s"
+
+msgid "resource_groups.usage"
+msgstr "ব্যবহার"
+
+msgid "resource_groups.value"
+msgstr "মান"
+
+msgid "resource_groups.values"
+msgstr "মানসমূহ"
+
+msgid "scope.all_services"
+msgstr "সকল পরিষেবা"
+
+msgid "scope.global"
+msgstr "গ্লোবাল"
+
+msgid "scope.global_all_services"
+msgstr "গ্লোবাল (সকল পরিষেবা)"
+
+msgid "scope.permanent"
+msgstr "স্থায়ী"
+
+msgid "scope.service_specific"
+msgstr "পরিষেবা-নির্দিষ্ট"
+
+msgid "searchpane.active"
+msgstr "সক্রিয়"
+
+msgid "searchpane.async"
+msgstr "অ্যাসিঙ্ক্রোনাস"
+
+msgid "searchpane.ban_scope"
+msgstr "নিষেধাজ্ঞার পরিধি"
+
+msgid "searchpane.clear"
+msgstr "সব পরিষ্কার করুন"
+
+msgid "searchpane.collapse_0"
+msgstr "অনুসন্ধান প্যান"
+
+msgid "searchpane.collapse_message"
+msgstr "সব সংকুচিত করুন"
+
+msgid "searchpane.collapse_plural"
+msgstr "অনুসন্ধান প্যান (%d)"
+
+msgid "searchpane.count"
+msgstr "{total}"
+
+msgid "searchpane.countFiltered"
+msgstr "{shown} ({total})"
+
+msgid "searchpane.country"
+msgstr "দেশ"
+
+msgid "searchpane.created"
+msgstr "তৈরি করা হয়েছে"
+
+msgid "searchpane.data"
+msgstr "ডেটা"
+
+msgid "searchpane.date"
+msgstr "তারিখ"
+
+msgid "searchpane.empty"
+msgstr "কোনো অনুসন্ধান প্যান উপলব্ধ নেই"
+
+msgid "searchpane.end_date"
+msgstr "শেষ তারিখ"
+
+msgid "searchpane.first_seen"
+msgstr "প্রথম দেখা হয়েছে"
+
+msgid "searchpane.future_30d"
+msgstr "৩০ দিনের বেশি দূরে"
+
+msgid "searchpane.health"
+msgstr "স্বাস্থ্য"
+
+msgid "searchpane.interval"
+msgstr "ব্যবধান"
+
+msgid "searchpane.ip_address"
+msgstr "আইপি ঠিকানা"
+
+msgid "searchpane.job_name"
+msgstr "কার্যের নাম"
+
+msgid "searchpane.last_24h"
+msgstr "শেষ ২৪ ঘণ্টা"
+
+msgid "searchpane.last_30d"
+msgstr "শেষ ৩০ দিন"
+
+msgid "searchpane.last_7d"
+msgstr "শেষ ৭ দিন"
+
+msgid "searchpane.last_run"
+msgstr "শেষ রানের অবস্থা"
+
+msgid "searchpane.last_seen"
+msgstr "শেষ দেখা হয়েছে"
+
+msgid "searchpane.last_update"
+msgstr "শেষ আপডেট"
+
+msgid "searchpane.loading"
+msgstr "অনুসন্ধান প্যান লোড হচ্ছে..."
+
+msgid "searchpane.method"
+msgstr "পদ্ধতি"
+
+msgid "searchpane.next_24h"
+msgstr "পরবর্তী ২৪ ঘণ্টা"
+
+msgid "searchpane.next_30d"
+msgstr "পরবর্তী ৩০ দিন"
+
+msgid "searchpane.next_7d"
+msgstr "পরবর্তী ৭ দিন"
+
+msgid "searchpane.older_30d"
+msgstr "৩০ দিনের বেশি আগে"
+
+msgid "searchpane.one_or_more"
+msgstr "এক বা একাধিক"
+
+msgid "searchpane.permanent"
+msgstr "স্থায়ী"
+
+msgid "searchpane.plugin"
+msgstr "প্লাগইন"
+
+msgid "searchpane.protocol"
+msgstr "প্রোটোকল"
+
+msgid "searchpane.reason"
+msgstr "কারণ"
+
+msgid "searchpane.reload"
+msgstr "পুনরায় লোড প্রয়োজন"
+
+msgid "searchpane.scope"
+msgstr "পরিধি"
+
+msgid "searchpane.security_mode"
+msgstr "নিরাপত্তা মোড"
+
+msgid "searchpane.server_name"
+msgstr "সার্ভারের নাম"
+
+msgid "searchpane.service"
+msgstr "পরিষেবা"
+
+msgid "searchpane.show_message"
+msgstr "সব দেখান"
+
+msgid "searchpane.start_date"
+msgstr "শুরুর তারিখ"
+
+msgid "searchpane.status"
+msgstr "স্ট্যাটাস"
+
+msgid "searchpane.status_code"
+msgstr "স্ট্যাটাস কোড"
+
+msgid "searchpane.steps"
+msgstr "ধাপ"
+
+msgid "searchpane.stream"
+msgstr "স্ট্রিম সমর্থন"
+
+msgid "searchpane.template"
+msgstr "টেমপ্লেট"
+
+msgid "searchpane.title_0"
+msgstr "কোনো সক্রিয় ফিল্টার নেই"
+
+msgid "searchpane.title_1"
+msgstr "সক্রিয় ফিল্টার - ১"
+
+msgid "searchpane.title_plural"
+msgstr "সক্রিয় ফিল্টার - %d"
+
+msgid "searchpane.type"
+msgstr "প্রকার"
+
+msgid "searchpane.url"
+msgstr "URL"
+
+msgid "searchpane.version"
+msgstr "সংস্করণ"
+
+msgid "searchpane.zero"
+msgstr "কোনো নয়"
+
+msgid "security_mode.block"
+msgstr "অবরোধ"
+
+msgid "security_mode.detect"
+msgstr "সনাক্ত"
+
+msgid "service.resources.attach"
+msgstr "সংযুক্ত করুন"
+
+msgid "service.resources.conflict.inline"
+msgstr "%(service)s বর্তমানে %(path)s-কে তার নিজস্ব %(family)s সেটিংসের মাধ্যমে পরিবেশন করছে। %(path)s-এর জন্য এই সেটিংসগুলি পরিষ্কার করুন, অথবা অন্য কোনো পথ ব্যবহার করুন।"
+
+msgid "service.resources.conflict.primary"
+msgstr "\"%(name)s\" বর্তমানে এই পরিষেবার প্রাথমিক সার্টিফিকেট; আর কোনো সতর্কতা ছাড়াই এটি প্রাথমিক অবস্থান হারাবে। প্রাথমিক সার্টিফিকেটটিই আসলে ডিপ্লয় করা হয়।"
+
+msgid "service.resources.conflict.resource"
+msgstr "%(service)s বর্তমানে %(path)s-কে %(kind)s-এর \"%(name)s\" এর মাধ্যমে পরিবেশন করছে। \"%(name)s\" কে আলাদা করুন, অথবা তাদের মধ্যে যেকোনো একটিকে অন্য কোনো পথ দিন।"
+
+msgid "service.resources.conflict.stream"
+msgstr "একটি স্ট্রীম পরিষেবা প্রতিটি সংযোগকে একটি একক ব্যাকএন্ডে প্রক্সি করে, এবং %(service)s বর্তমানে আপস্ট্রিমের \"%(name)s\" ব্যবহার করছে। প্রথমে এটিকে আলাদা করুন।"
+
+msgid "service.resources.conflict.stream_inline"
+msgstr "%(service)s-এর নিজস্ব ব্যাকএন্ড REVERSE_PROXY_HOST-এ রয়েছে। এই সেটিংস পরিষ্কার করে আপস্ট্রিমকে নিয়ন্ত্রণ করতে দিন।"
+
+msgid "service.resources.detach"
+msgstr "আলাদা করুন"
+
+msgid "service.resources.family.certificate"
+msgstr "সার্টিফিকেট"
+
+msgid "service.resources.family.redirect"
+msgstr "রিডাইরেক্টসমূহ"
+
+msgid "service.resources.family.template"
+msgstr "টেমপ্লেট"
+
+msgid "service.resources.family.upstream"
+msgstr "আপস্ট্রিম"
+
+msgid "service.resources.family.workflow"
+msgstr "ওয়ার্কফ্লো"
+
+msgid "service.resources.match_path"
+msgstr "পাথ"
+
+msgid "service.resources.none"
+msgstr "কোনোটি সংযুক্ত নয়"
+
+msgid "service.resources.primary"
+msgstr "প্রধান সার্টিফিকেট"
+
+msgid "service.resources.template.none"
+msgstr "কোনো টেমপ্লেট নেই"
+
+msgid "service.resources.template.note"
+msgstr "এটি কোনো রিসোর্স নয়: টেমপ্লেট একটি সেটিংস। এটি সংরক্ষণ করার সময় এবং পরিবর্তন করলে অনেক সেটিংস একসাথে পরিবর্তিত হয়।"
+
+msgid "service.resources.template.pending"
+msgstr "সংরক্ষণ করার সময় প্রযোজ্য"
+
+msgid "service.resources.template.switching"
+msgstr "সংরক্ষণ করলে এই পরিষেবা \"%(from)s\" থেকে \"%(to)s\"-এ পরিবর্তিত হবে। বর্তমান টেমপ্লেট দ্বারা দেওয়া মানগুলি বাতিল করা হবে এবং %(to)s-এর মানগুলি প্রয়োগ করা হবে - একসাথে অনেক সেটিংস পরিবর্তিত হবে।"
+
+msgid "service.resources.template.unwired"
+msgstr "এই পেজটি USE_TEMPLATE পোস্ট করে না, তাই এখান থেকে টেমপ্লেট পরিবর্তন করা যায় না।"
+
+msgid "service.resources.title"
+msgstr "সংযুক্ত রিসোর্স"
+
+msgid "service.resources.unavailable"
+msgstr "উপলব্ধ নয়"
+
+msgid "services.draft"
+msgstr "নকশা পরিষেবা"
+
+msgid "services.online"
+msgstr "অনলাইন"
+
+msgid "services.subtitle"
+msgstr "BunkerWeb সুরক্ষিত মাল্টিসাইট পরিষেবাগুলো তৈরি, সম্পাদনা, খসড়ায় রূপান্তর বা মুছে পরিচালনা করুন।"
+
+msgid "services.total"
+msgstr "মোট পরিষেবা"
+
+msgid "services.with_configs"
+msgstr "কাস্টম কনফিগারেশন সহ"
+
+msgid "settings.custom_config.title"
+msgstr "কাস্টম কনফিগারেশন"
+
+msgid "settings.multiple.description"
+msgstr "এই প্লাগইনের জন্য এখানে একাধিক সেটিংস ইনস্ট্যান্স কনফিগার করুন।"
+
+msgid "settings.multiple.title"
+msgstr "একাধিক সেটিংস"
+
+msgid "setup.status.admin_user_exists"
+msgstr "একজন অ্যাডমিন ব্যবহারকারী ইতিমধ্যে বিদ্যমান। অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
+
+msgid "setup.status.pro_license_key_exists"
+msgstr "একটি PRO লাইসেন্স কী ইতিমধ্যে কনফিগার করা হয়েছে, অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
+
+msgid "setup.status.reverse_proxy_configured"
+msgstr "ওয়েব ইন্টারফেসের জন্য একটি রিভার্স প্রক্সি ইতিমধ্যে কনফিগার করা হয়েছে। অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
+
+msgid "setup.status.secure_password"
+msgstr "নিরাপদ পাসওয়ার্ড"
+
+msgid "setup.status.unique_server_name"
+msgstr "অনন্য সার্ভারের নাম"
+
+msgid "setup.step1.subtitle"
+msgstr "আপনার অ্যাডমিনিস্ট্রেটর অ্যাকাউন্ট তৈরি করুন।"
+
+msgid "setup.step1.title"
+msgstr "অ্যাডমিন ব্যবহারকারী"
+
+msgid "setup.step2.lets_encrypt.certificate_authority_selector"
+msgstr "সার্টিফিকেট অথরিটি নির্বাচক"
+
+msgid "setup.step2.lets_encrypt.letsencrypt_description"
+msgstr "স্ট্যান্ডার্ড ACME ইস্যুর জন্য Let's Encrypt ব্যবহার করুন। পরীক্ষা ও ইন্টিগ্রেশন যাচাইয়ের জন্য স্টেজিং উপলব্ধ।"
+
+msgid "setup.step2.lets_encrypt.zerossl_api_key_hint"
+msgstr "ফাঁকা থাকলে, ZeroSSL অ্যাকাউন্ট নিবন্ধনের জন্য কনফিগার করা ইমেল ব্যবহার করবে।"
+
+msgid "setup.step2.lets_encrypt.zerossl_description"
+msgstr "zerossl-bot সহ ZeroSSL ব্যবহার করুন। অ্যাকাউন্ট ইস্যু এবং কী-ভিত্তিক পুনরায় ইস্যু ট্র্যাকিংয়ের জন্য একটি অ্যাকাউন্ট ইমেল বা API কী দিন।"
+
+msgid "setup.step2.section.custom_certificate"
+msgstr "কাস্টম শংসাপত্র"
+
+msgid "setup.step2.section.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "setup.step2.section.real_ip"
+msgstr "আসল আইপি"
+
+msgid "setup.step2.section.reverse_proxy"
+msgstr "রিভার্স প্রক্সি"
+
+msgid "setup.step2.section.zerossl"
+msgstr "ZeroSSL"
+
+msgid "setup.step2.subtitle"
+msgstr "ওয়েব UI নির্দিষ্ট সেটিংস কনফিগার করুন।"
+
+msgid "setup.step2.title"
+msgstr "UI সেটিংস"
+
+msgid "setup.step3.label.pro_benefits"
+msgstr "PRO সুবিধা"
+
+msgid "setup.step3.pro_benefit_1_description"
+msgstr "বর্ধিত নিরাপত্তা, পারফরম্যান্স এবং ব্যবস্থাপনা সরঞ্জাম সহ সমস্ত উন্নত বৈশিষ্ট্য আনলক করুন।"
+
+msgid "setup.step3.pro_benefit_1_title"
+msgstr "সমস্ত PRO বৈশিষ্ট্য অ্যাক্সেস"
+
+msgid "setup.step3.pro_benefit_2_description"
+msgstr "আপনার যেকোনো সমস্যা বা প্রশ্নের জন্য BunkerWeb টিম থেকে অগ্রাধিকারমূলক সমর্থন পান।"
+
+msgid "setup.step3.pro_benefit_2_title"
+msgstr "পরিচালকদের থেকে প্রযুক্তিগত সহায়তা"
+
+msgid "setup.step3.pro_benefit_3_description"
+msgstr "আপনার নির্দিষ্ট চাহিদা মেটাতে উপযোগী সমাধান।"
+
+msgid "setup.step3.pro_benefit_3_title"
+msgstr "কাস্টম ডেভেলপমেন্ট"
+
+msgid "setup.step3.pro_benefit_4_description"
+msgstr "আপনার BunkerWeb সেটআপ অপ্টিমাইজ করার জন্য বিশেষজ্ঞ পরামর্শ।"
+
+msgid "setup.step3.pro_benefit_4_title"
+msgstr "কাস্টম পরামর্শ"
+
+msgid "setup.step3.subtitle"
+msgstr "উন্নত বৈশিষ্ট্য আনলক করুন এবং BunkerWeb থেকে সর্বাধিক সুবিধা পান।"
+
+msgid "setup.step3.title"
+msgstr "PRO-তে আপগ্রেড করুন"
+
+msgid "setup.step4.label.final_url"
+msgstr "BunkerWeb UI URL"
+
+msgid "setup.step4.subtitle"
+msgstr "সেটআপ সম্পন্ন করার আগে আপনার সেটিংস পর্যালোচনা করুন।"
+
+msgid "setup.step4.title"
+msgstr "সংক্ষিপ্ত বিবরণ"
+
+msgid "setup.subtitle"
+msgstr "সেটআপ উইজার্ড সম্পন্ন করতে ধাপগুলি অনুসরণ করুন।"
+
+msgid "setup.title"
+msgstr "সেটআপ উইজার্ড"
+
+msgid "status.active"
+msgstr "সক্রিয়"
+
+msgid "status.admin_user_exists"
+msgstr "একজন অ্যাডমিন ব্যবহারকারী ইতিমধ্যে বিদ্যমান। অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
+
+msgid "status.all_valid"
+msgstr "সব বৈধ"
+
+msgid "status.blog_connection_fail"
+msgstr "সংবাদ আপডেটের জন্য ব্লগের সাথে সংযোগ স্থাপন করা যায়নি।"
+
+msgid "status.default_server"
+msgstr "ডিফল্ট সার্ভার"
+
+msgid "status.done"
+msgstr "সম্পন্ন"
+
+msgid "status.down"
+msgstr "বন্ধ"
+
+msgid "status.draft"
+msgstr "খসড়া"
+
+msgid "status.error_deleting_template"
+msgstr "টেমপ্লেট মুছে ফেলতে গিয়ে একটি ত্রুটি ঘটেছে।"
+
+msgid "status.error_loading_bans"
+msgstr "নিষেধাজ্ঞা লোড করতে ত্রুটি। অনুগ্রহ করে পৃষ্ঠাটি রিফ্রেশ করার চেষ্টা করুন।"
+
+msgid "status.error_loading_data"
+msgstr "ডেটা লোড করা যায়নি"
+
+msgid "status.error_loading_template"
+msgstr "টেমপ্লেট ডেটা লোড করা যাচ্ছে না।"
+
+msgid "status.error_saving_template"
+msgstr "টেমপ্লেট সংরক্ষণ করার সময় একটি ত্রুটি ঘটেছে।"
+
+msgid "status.expired"
+msgstr "মেয়াদ উত্তীর্ণ"
+
+msgid "status.expiring"
+msgstr "মেয়াদ শেষ"
+
+msgid "status.failed"
+msgstr "ব্যর্থ"
+
+msgid "status.invalid_json_payload"
+msgstr "অবৈধ JSON পেলোড।"
+
+msgid "status.loading"
+msgstr "লোড হচ্ছে..."
+
+msgid "status.loading_bans"
+msgstr "নিষেধাজ্ঞা লোড হচ্ছে..."
+
+msgid "status.loading_cache_file"
+msgstr "ক্যাশ ফাইল লোড হচ্ছে..."
+
+msgid "status.loading_cache_files"
+msgstr "ক্যাশ ফাইল লোড হচ্ছে..."
+
+msgid "status.loading_custom_config"
+msgstr "কাস্টম কনফিগারেশন লোড হচ্ছে..."
+
+msgid "status.loading_custom_configs"
+msgstr "কাস্টম কনফিগারেশন লোড হচ্ছে..."
+
+msgid "status.loading_instances"
+msgstr "ইনস্ট্যান্স লোড হচ্ছে..."
+
+msgid "status.loading_items"
+msgstr "আইটেম লোড হচ্ছে..."
+
+msgid "status.loading_jobs"
+msgstr "কার্য লোড হচ্ছে..."
+
+msgid "status.loading_logs"
+msgstr "লগ লোড হচ্ছে..."
+
+msgid "status.loading_plugins"
+msgstr "প্লাগইন লোড হচ্ছে..."
+
+msgid "status.loading_reports"
+msgstr "রিপোর্ট লোড হচ্ছে..."
+
+msgid "status.loading_services"
+msgstr "পরিষেবা লোড হচ্ছে..."
+
+msgid "status.loading_templates"
+msgstr "টেমপ্লেট লোড হচ্ছে..."
+
+msgid "status.missing_template_information"
+msgstr "টেমপ্লেট তথ্য অনুপস্থিত।"
+
+msgid "status.news_connection_error"
+msgstr "সংবাদ আপডেটের জন্য ব্লগের সাথে সংযোগ স্থাপন করা যায়নি।"
+
+msgid "status.no"
+msgstr "না"
+
+msgid "status.no_data"
+msgstr "কোনো ডেটা নেই"
+
+msgid "status.no_history"
+msgstr "কোনো ইতিহাস উপলব্ধ নেই।"
+
+msgid "status.no_item"
+msgstr "কোনো আইটেম নেই"
+
+msgid "status.no_notifications"
+msgstr "দেখানোর জন্য কোনো বিজ্ঞপ্তি নেই।"
+
+msgid "status.no_search_results"
+msgstr "কোনো আইটেম পাওয়া যায়নি।"
+
+msgid "status.no_settings"
+msgstr "এই প্লাগইনে এই পরিধির জন্য কোনো সেটিংস নেই।"
+
+msgid "status.no_steps"
+msgstr "কোনো ধাপ উপলব্ধ নেই"
+
+msgid "status.no_steps_description"
+msgstr "এই টেমপ্লেটে কনফিগার করার জন্য কোনো ধাপ নেই।"
+
+msgid "status.not_applicable"
+msgstr "প্রযোজ্য নয়"
+
+msgid "status.online"
+msgstr "অনলাইন"
+
+msgid "status.optional"
+msgstr "ঐচ্ছিক"
+
+msgid "status.partial"
+msgstr "আংশিক"
+
+msgid "status.pending"
+msgstr "অপেক্ষমান"
+
+msgid "status.pinging_instances"
+msgstr "ইনস্ট্যান্স পিং করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন..."
+
+msgid "status.plugin_page.status.deactivated"
+msgstr "প্লাগইনটি নিষ্ক্রিয় করা হয়েছে; তাই, কোনো তথ্য উপলব্ধ নেই।"
+
+msgid "status.plugin_page.status.metrics_deactivated"
+msgstr "মেট্রিক্স প্লাগইন সক্রিয় করা হয়নি; তাই, কোনো তথ্য উপলব্ধ নেই।"
+
+msgid "status.plugin_page.status.not_available"
+msgstr "বিটা পর্যায়ে প্লাগইন পৃষ্ঠাটি এখনও উপলব্ধ নয়।"
+
+msgid "status.reverse_proxy_configured"
+msgstr "ওয়েব ইন্টারফেসের জন্য একটি রিভার্স প্রক্সি ইতিমধ্যে কনফিগার করা হয়েছে। অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
+
+msgid "status.secure_password"
+msgstr "নিরাপদ পাসওয়ার্ড"
+
+msgid "status.setting_up_bunkerweb"
+msgstr "আপনার BunkerWeb সেটআপ করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন..."
+
+msgid "status.success"
+msgstr "সফল"
+
+msgid "status.template_in_use"
+msgstr "এই পরিষেবাটি বর্তমানে \"%(template)s\" টেমপ্লেট ব্যবহার করছে যা \"%(method)s\" পদ্ধতির মাধ্যমে পরিচালিত হয়।"
+
+msgid "status.template_in_use_description"
+msgstr "বর্তমান টেমপ্লেটের বাইরে পরিবর্তন অনুমোদিত নয়। অনুগ্রহ করে বর্তমান টেমপ্লেট ব্যবহার করে পরিবর্তন করুন অথবা অ্যাডভান্সড/র মোডে স্যুইচ করুন।"
+
+msgid "status.unique_server_name"
+msgstr "অনন্য সার্ভারের নাম"
+
+msgid "status.up"
+msgstr "চালু"
+
+msgid "status.yes"
+msgstr "হ্যাঁ"
+
+msgid "step.next"
+msgstr "পরবর্তী"
+
+msgid "step.previous"
+msgstr "পূর্ববর্তী"
+
+msgid "support.card.download_logs.help"
+msgstr "সমস্ত ব্যক্তিগত ডেটা বেনামী করা হবে।"
+
+msgid "support.card.download_logs.title"
+msgstr "লগ ডাউনলোড করুন"
+
+msgid "support.card.extract_config.title"
+msgstr "কনফিগারেশন এক্সট্র্যাক্ট করুন"
+
+msgid "support.card.support_link.title"
+msgstr "সমর্থন লিঙ্ক"
+
+msgid "support.subtitle"
+msgstr "ডিবাগ লগ ডাউনলোড করুন, আপনার কনফিগারেশন নিষ্কাশন করুন এবং BunkerWeb টিমের কাছ থেকে সহায়তা নিন।"
+
+msgid "support.title"
+msgstr "সহায়তা"
+
+msgid "tab.custom_certificate"
+msgstr "কাস্টম শংসাপত্র"
+
+msgid "tab.lets_encrypt"
+msgstr "Let's Encrypt"
+
+msgid "table.header.actions"
+msgstr "কার্যকলাপ"
+
+msgid "table.header.active"
+msgstr "সক্রিয়"
+
+msgid "table.header.async"
+msgstr "অ্যাসিঙ্ক্রোনাস"
+
+msgid "table.header.bytes_received"
+msgstr "প্রাপ্ত বাইট"
+
+msgid "table.header.bytes_sent"
+msgstr "প্রেরিত বাইট"
+
+msgid "table.header.checksum"
+msgstr "চেকসাম"
+
+msgid "table.header.client_port"
+msgstr "ক্লায়েন্ট পোর্ট"
+
+msgid "table.header.configs"
+msgstr "কনফিগারেশন"
+
+msgid "table.header.country"
+msgstr "দেশ"
+
+msgid "table.header.created"
+msgstr "তৈরি করা হয়েছে"
+
+msgid "table.header.current_time_left"
+msgstr "বর্তমান অবশিষ্ট সময়"
+
+msgid "table.header.data"
+msgstr "ডেটা"
+
+msgid "table.header.date"
+msgstr "তারিখ"
+
+msgid "table.header.description"
+msgstr "বিবরণ"
+
+msgid "table.header.end_date"
+msgstr "শেষ তারিখ"
+
+msgid "table.header.file_name"
+msgstr "ফাইলের নাম"
+
+msgid "table.header.health"
+msgstr "স্বাস্থ্য"
+
+msgid "table.header.hostname"
+msgstr "হোস্টনাম"
+
+msgid "table.header.id"
+msgstr "আইডি"
+
+msgid "table.header.interval"
+msgstr "ব্যবধান"
+
+msgid "table.header.ip_address"
+msgstr "আইপি ঠিকানা"
+
+msgid "table.header.job_name"
+msgstr "কার্যের নাম"
+
+msgid "table.header.last_run"
+msgstr "শেষ রান"
+
+msgid "table.header.last_seen"
+msgstr "শেষ দেখা হয়েছে"
+
+msgid "table.header.last_update"
+msgstr "শেষ আপডেট"
+
+msgid "table.header.listen_port"
+msgstr "লিসেন পোর্ট"
+
+msgid "table.header.method"
+msgstr "পদ্ধতি"
+
+msgid "table.header.name"
+msgstr "নাম"
+
+msgid "table.header.plugin"
+msgstr "প্লাগইন"
+
+msgid "table.header.protocol"
+msgstr "প্রোটোকল"
+
+msgid "table.header.reason"
+msgstr "কারণ"
+
+msgid "table.header.reload"
+msgstr "পুনরায় লোড"
+
+msgid "table.header.request_id"
+msgstr "অনুরোধ আইডি"
+
+msgid "table.header.scope"
+msgstr "পরিধি"
+
+msgid "table.header.security_mode"
+msgstr "নিরাপত্তা মোড"
+
+msgid "table.header.server_name"
+msgstr "সার্ভারের নাম"
+
+msgid "table.header.service"
+msgstr "পরিষেবা"
+
+msgid "table.header.service_name"
+msgstr "পরিষেবার নাম"
+
+msgid "table.header.session_time"
+msgstr "সেশনের সময়"
+
+msgid "table.header.settings"
+msgstr "সেটিংস"
+
+msgid "table.header.status"
+msgstr "স্ট্যাটাস"
+
+msgid "table.header.status_code"
+msgstr "স্ট্যাটাস কোড"
+
+msgid "table.header.steps"
+msgstr "ধাপ"
+
+msgid "table.header.stream"
+msgstr "স্ট্রিম"
+
+msgid "table.header.template"
+msgstr "টেমপ্লেট"
+
+msgid "table.header.templates"
+msgstr "টেমপ্লেটসমূহ"
+
+msgid "table.header.time_left"
+msgstr "অবশিষ্ট সময়"
+
+msgid "table.header.type"
+msgstr "প্রকার"
+
+msgid "table.header.url"
+msgstr "URL"
+
+msgid "table.header.user_agent"
+msgstr "ব্যবহারকারী এজেন্ট"
+
+msgid "table.header.value"
+msgstr "মান"
+
+msgid "table.header.version"
+msgstr "সংস্করণ"
+
+msgid "template.editor.button_add_config"
+msgstr "কনফিগারেশন যোগ করুন"
+
+msgid "template.editor.button_add_setting"
+msgstr "সেটিং যোগ করুন"
+
+msgid "template.editor.button_add_step"
+msgstr "ধাপ যোগ করুন"
+
+msgid "template.editor.button_move_down"
+msgstr "নিচে সরান"
+
+msgid "template.editor.button_move_up"
+msgstr "উপরে সরান"
+
+msgid "template.editor.button_remove"
+msgstr "সরান"
+
+msgid "template.editor.clone_badge"
+msgstr "%(template)s থেকে ক্লোন করা হয়েছে"
+
+msgid "template.editor.configs"
+msgstr "কাস্টম কনফিগারেশন"
+
+msgid "template.editor.configs_help"
+msgstr "এই টেমপ্লেটে ঐচ্ছিক কাস্টম কনফিগারেশন স্নিপেট সংযুক্ত করুন।"
+
+msgid "template.editor.delete_step_confirm"
+msgstr "আপনি কি নিশ্চিত যে আপনি এই ধাপটি মুছে ফেলতে চান?"
+
+msgid "template.editor.details"
+msgstr "টেমপ্লেটের বিবরণ"
+
+msgid "template.editor.details_help"
+msgstr "এই টেমপ্লেটের জন্য প্রাথমিক তথ্য সেট করুন।"
+
+msgid "template.editor.drag_handle"
+msgstr "পুনরায় সাজাতে টেনে আনুন"
+
+msgid "template.editor.empty_configs"
+msgstr "এখনও কোন কাস্টম কনফিগারেশন নেই।"
+
+msgid "template.editor.empty_settings"
+msgstr "এখনও কোন সেটিংস নেই। আপনার প্রথম সেটিং যোগ করুন।"
+
+msgid "template.editor.empty_steps"
+msgstr "এখনও কোন ধাপ নেই। আপনার প্রথম ধাপ যোগ করুন।"
+
+msgid "template.editor.error_generic"
+msgstr "কিছু একটা ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+
+msgid "template.editor.error_missing_endpoint"
+msgstr "জমা দেওয়ার এন্ডপয়েন্ট নির্ধারণ করা যায়নি।"
+
+msgid "template.editor.heading_create"
+msgstr "টেমপ্লেট তৈরি করুন"
+
+msgid "template.editor.heading_edit"
+msgstr "টেমপ্লেট সম্পাদনা করুন %(id)s"
+
+msgid "template.editor.label_config_data"
+msgstr "ডেটা"
+
+msgid "template.editor.label_config_name"
+msgstr "নাম"
+
+msgid "template.editor.label_config_order"
+msgstr "ক্রম"
+
+msgid "template.editor.label_config_type"
+msgstr "প্রকার"
+
+msgid "template.editor.label_setting_key"
+msgstr "সেটিং কী"
+
+msgid "template.editor.label_setting_value"
+msgstr "ডিফল্ট মান"
+
+msgid "template.editor.label_step_configs"
+msgstr "এই ধাপের কনফিগারেশন"
+
+msgid "template.editor.label_step_settings"
+msgstr "এই ধাপের সেটিংস"
+
+msgid "template.editor.label_step_subtitle"
+msgstr "ধাপের উপশিরোনাম"
+
+msgid "template.editor.label_step_title"
+msgstr "ধাপের শিরোনাম"
+
+msgid "template.editor.missing_configs_body"
+msgstr "আমদানি করা টেমপ্লেটটি কাস্টম কনফিগগুলি নির্দেশ করে যা এখনও আপলোড করা হয়নি। টেমপ্লেট সেটআপ সম্পূর্ণ করতে অনুগ্রহ করে এই কনফিগগুলি আমদানি করুন:"
+
+msgid "template.editor.missing_configs_browse"
+msgstr "ফাইল ব্রাউজ করুন"
+
+msgid "template.editor.missing_configs_done"
+msgstr "সম্পন্ন"
+
+msgid "template.editor.missing_configs_drop_hint"
+msgstr "কনফিগ ফাইল (.conf, .cfg, .txt) এখানে টেনে আনুন বা ফেলুন"
+
+msgid "template.editor.missing_configs_drop_or"
+msgstr "বা"
+
+msgid "template.editor.missing_configs_hint_body"
+msgstr "আপলোড করা ফাইলগুলি স্বয়ংক্রিয়ভাবে আপনার টেমপ্লেটে যোগ হবে। নিশ্চিত করুন যে ফাইলের নামগুলি উপরে তালিকাভুক্ত অনুপস্থিত কনফিগগুলির সাথে মেলে।"
+
+msgid "template.editor.missing_configs_hint_title"
+msgstr "টিপ:"
+
+msgid "template.editor.missing_configs_resolved"
+msgstr "সমস্ত অনুপস্থিত কনফিগ আপলোড করা হয়েছে! টেমপ্লেট সফলভাবে আমদানি করা হয়েছে।"
+
+msgid "template.editor.missing_configs_title"
+msgstr "অনুপস্থিত কাস্টম কনফিগ"
+
+msgid "template.editor.missing_configs_upload_failed"
+msgstr "কনফিগ ফাইল আপলোড করতে ব্যর্থ হয়েছে"
+
+msgid "template.editor.missing_configs_upload_label"
+msgstr "অনুপস্থিত কনফিগ (.conf, .cfg, .txt) আপলোড করুন"
+
+msgid "template.editor.missing_configs_upload_partial"
+msgstr "মোট %(total)s কনফিগের মধ্যে %(uploaded)s টি আপলোড করা হয়েছে। এখনও অনুপস্থিত: %(missing)s"
+
+msgid "template.editor.missing_configs_upload_success"
+msgstr "%(count)s টি কনফিগ ফাইল সফলভাবে আপলোড করা হয়েছে"
+
+msgid "template.editor.multiselect_placeholder"
+msgstr "বিকল্পগুলি নির্বাচন করুন"
+
+msgid "template.editor.multiselect_summary"
+msgstr "%(count)s টি নির্বাচিত"
+
+msgid "template.editor.multivalue_add"
+msgstr "মান যোগ করুন"
+
+msgid "template.editor.multivalue_helper"
+msgstr "প্রতি লাইনে একটি মান।%(separatorNote)s"
+
+msgid "template.editor.panel_overview"
+msgstr "সংক্ষিপ্ত বিবরণ"
+
+msgid "template.editor.panel_overview_help"
+msgstr "মূল তথ্য ট্র্যাক করুন এবং বিভাগগুলির মধ্যে নেভিগেট করুন।"
+
+msgid "template.editor.placeholder_config_data"
+msgstr "ডেটা"
+
+msgid "template.editor.placeholder_config_name"
+msgstr "নাম"
+
+msgid "template.editor.placeholder_plugin_id"
+msgstr "কোর"
+
+msgid "template.editor.placeholder_setting_key"
+msgstr "কী"
+
+msgid "template.editor.placeholder_setting_value"
+msgstr "ডিফল্ট মান"
+
+msgid "template.editor.placeholder_step_subtitle"
+msgstr "ধাপের উপশিরোনাম"
+
+msgid "template.editor.placeholder_step_title"
+msgstr "ধাপের শিরোনাম"
+
+msgid "template.editor.placeholder_template_id"
+msgstr "টেমপ্লেট-আইডি"
+
+msgid "template.editor.placeholder_template_name"
+msgstr "আমার টেমপ্লেট"
+
+msgid "template.editor.raw_configs_browse"
+msgstr "ফাইল ব্রাউজ করুন"
+
+msgid "template.editor.raw_configs_drop_hint"
+msgstr "কনফিগ ফাইল (.conf, .cfg, .txt) এখানে টেনে আনুন বা ব্রাউজ করতে ক্লিক করুন"
+
+msgid "template.editor.raw_configs_drop_supported"
+msgstr "সমর্থিত ফরম্যাট: .conf, .cfg, .txt"
+
+msgid "template.editor.raw_configs_empty"
+msgstr "এখনও কোনো আমদানি করা কনফিগ ফাইল নেই। নতুন ফাইলগুলি নিচে প্রদর্শিত হবে।"
+
+msgid "template.editor.raw_configs_help"
+msgstr "কনফিগ ফাইল (.conf, .cfg, .txt) আপলোড করুন <code>configs</code>-এ এন্ট্রি যুক্ত করতে। টাইপ ডিফল্টরূপে <code>server_http</code>; প্রয়োজন হলে JSON-এ সামঞ্জস্য করুন।"
+
+msgid "template.editor.raw_configs_import_invalid"
+msgstr "বর্তমান JSON অবৈধ হওয়ায় কনফিগ আমদানি করা যায়নি।"
+
+msgid "template.editor.raw_configs_import_none"
+msgstr "কোনো কনফিগ আমদানি করা হয়নি।"
+
+msgid "template.editor.raw_configs_import_success"
+msgstr "%(count)s টি কনফিগ ফাইল আমদানি করা হয়েছে।"
+
+msgid "template.editor.raw_configs_note"
+msgstr "আমদানি করা ফাইলগুলি JSON এডিটরে যোগ করা হয়েছে। সংরক্ষণের আগে পর্যালোচনা করুন এবং সামঞ্জস্য করুন।"
+
+msgid "template.editor.raw_configs_title"
+msgstr "কাস্টম কনফিগ আমদানি"
+
+msgid "template.editor.raw_configs_upload"
+msgstr "কনফিগ ফাইল (.conf, .cfg, .txt) আপলোড করুন"
+
+msgid "template.editor.raw_configs_upload_failed"
+msgstr "নির্বাচিত ফাইলগুলির মধ্যে একটি পড়া যায়নি।"
+
+msgid "template.editor.raw_editor_aria"
+msgstr "র টেমপ্লেট JSON এডিটর"
+
+msgid "template.editor.raw_editor_drop_hint"
+msgstr "বর্তমান বিষয়বস্তু প্রতিস্থাপন করতে একটি টেমপ্লেট JSON ফাইল (.json শুধুমাত্র) ফেলুন।"
+
+msgid "template.editor.raw_editor_help"
+msgstr "সম্পূর্ণ টেমপ্লেট সংজ্ঞা JSON হিসেবে সম্পাদনা করুন। ইজি মোডে ফিরে গেলে ভিজ্যুয়াল এডিটর যাচাই এবং পুনরায় লোড হবে।"
+
+msgid "template.editor.raw_editor_import_success"
+msgstr "টেমপ্লেট JSON সফলভাবে আমদানি করা হয়েছে।"
+
+msgid "template.editor.raw_editor_override_body"
+msgstr "এই ফাইলটি আমদানি করলে বর্তমান টেমপ্লেট JSON সম্পূর্ণরূপে প্রতিস্থাপিত হবে। এডিটরে করা পরিবর্তনগুলি হারিয়ে যাবে। আপনি কি চালিয়ে যেতে চান?"
+
+msgid "template.editor.raw_editor_override_confirm"
+msgstr "টেমপ্লেট প্রতিস্থাপন করুন"
+
+msgid "template.editor.raw_editor_override_title"
+msgstr "টেমপ্লেট JSON প্রতিস্থাপন করবেন?"
+
+msgid "template.editor.raw_editor_title"
+msgstr "র টেমপ্লেট JSON"
+
+msgid "template.editor.raw_editor_upload_empty"
+msgstr "আপলোড করা ফাইলটি খালি।"
+
+msgid "template.editor.raw_editor_upload_failed"
+msgstr "নির্বাচিত ফাইলটি পড়া যায়নি।"
+
+msgid "template.editor.raw_editor_upload_template"
+msgstr "টেমপ্লেট JSON (.json শুধুমাত্র) আপলোড করুন"
+
+msgid "template.editor.raw_validation_config_definition"
+msgstr "অবৈধ কনফিগ সংজ্ঞা।"
+
+msgid "template.editor.raw_validation_config_object"
+msgstr "কনফিগ এন্ট্রি অবশ্যই অবজেক্ট হতে হবে।"
+
+msgid "template.editor.raw_validation_configs_unassigned"
+msgstr "কনফিগ %(configs)s কোনো ধাপে নির্ধারিত নয়।"
+
+msgid "template.editor.raw_validation_empty"
+msgstr "টেমপ্লেট JSON খালি হতে পারে না।"
+
+msgid "template.editor.raw_validation_invalid_json"
+msgstr "অবৈধ JSON পেলোড: %(error)s"
+
+msgid "template.editor.raw_validation_object"
+msgstr "টেমপ্লেট পেলোড অবশ্যই একটি JSON অবজেক্ট হতে হবে।"
+
+msgid "template.editor.raw_validation_setting_key"
+msgstr "সেটিংস কী অবশ্যই অ-খালি স্ট্রিং হতে হবে।"
+
+msgid "template.editor.raw_validation_settings_object"
+msgstr "সেটিংস একটি অবজেক্ট হিসাবে সরবরাহ করতে হবে।"
+
+msgid "template.editor.raw_validation_settings_unassigned"
+msgstr "সেটিংস %(settings)s কোনো ধাপে নির্ধারিত নয়।"
+
+msgid "template.editor.raw_validation_step_config_duplicate"
+msgstr "কনফিগ %(config)s একাধিক ধাপে নির্ধারিত।"
+
+msgid "template.editor.raw_validation_step_config_reference"
+msgstr "ধাপ %(index)s-এ একটি অবৈধ কনফিগ রেফারেন্স রয়েছে।"
+
+msgid "template.editor.raw_validation_step_config_unknown"
+msgstr "ধাপ %(index)s অজানা কনফিগ %(config)s-কে নির্দেশ করে।"
+
+msgid "template.editor.raw_validation_step_object"
+msgstr "ধাপ %(index)s অবশ্যই একটি অবজেক্ট হতে হবে।"
+
+msgid "template.editor.raw_validation_step_setting_duplicate"
+msgstr "সেটিং %(setting)s একাধিক ধাপে নির্ধারিত।"
+
+msgid "template.editor.raw_validation_step_setting_reference"
+msgstr "ধাপ %(index)s-এ একটি অবৈধ সেটিং রেফারেন্স রয়েছে।"
+
+msgid "template.editor.raw_validation_step_setting_unknown"
+msgstr "ধাপ %(index)s অজানা সেটিং %(setting)s-কে নির্দেশ করে।"
+
+msgid "template.editor.raw_validation_step_title"
+msgstr "ধাপ %(index)s-এর একটি শিরোনাম থাকতে হবে।"
+
+msgid "template.editor.raw_validation_steps_required"
+msgstr "একটি টেমপ্লেটে অন্তত একটি ধাপ থাকতে হবে।"
+
+msgid "template.editor.readonly_db"
+msgstr "ডাটাবেস বর্তমানে শুধুমাত্র পঠনযোগ্য। টেমপ্লেট পরিবর্তন করা যাবে না।"
+
+msgid "template.editor.readonly_method"
+msgstr "এই টেমপ্লেটটি %(method)s প্রক্রিয়া দ্বারা তৈরি করা হয়েছে এবং UI থেকে সম্পাদনা করা যাবে না।"
+
+msgid "template.editor.readonly_title"
+msgstr "শুধুমাত্র পঠনযোগ্য"
+
+msgid "template.editor.readonly_user"
+msgstr "আপনার শুধুমাত্র পঠনযোগ্য অনুমতি আছে। লেখার অনুমতি অনুরোধ করতে একজন প্রশাসকের সাথে যোগাযোগ করুন।"
+
+msgid "template.editor.select_config_placeholder"
+msgstr "একটি কনফিগারেশন নির্বাচন করুন"
+
+msgid "template.editor.select_config_type_placeholder"
+msgstr "একটি প্রকার নির্বাচন করুন"
+
+msgid "template.editor.select_setting_placeholder"
+msgstr "একটি সেটিং নির্বাচন করুন"
+
+msgid "template.editor.setting_remove_confirm"
+msgstr "আপনি কি নিশ্চিত যে আপনি এই টেমপ্লেট থেকে এই সেটিংটি সরাতে চান?"
+
+msgid "template.editor.setting_remove_key"
+msgstr "সেটিং"
+
+msgid "template.editor.setting_remove_title"
+msgstr "সেটিং সরান"
+
+msgid "template.editor.setting_selector_add_selected"
+msgstr "নির্বাচিত যোগ করুন"
+
+msgid "template.editor.setting_selector_advanced"
+msgstr "উন্নত"
+
+msgid "template.editor.setting_selector_already_added"
+msgstr "ইতিমধ্যে যোগ করা হয়েছে"
+
+msgid "template.editor.setting_selector_clear"
+msgstr "অনুসন্ধান মুছুন"
+
+msgid "template.editor.setting_selector_count_all_used"
+msgstr "সমস্ত মিলে যাওয়া সেটিংস ইতিমধ্যে যোগ করা হয়েছে।"
+
+msgid "template.editor.setting_selector_count_empty"
+msgstr "দেখানোর জন্য কোনো সেটিংস নেই।"
+
+msgid "template.editor.setting_selector_count_only_available"
+msgstr "উপলভ্য সেটিংস: %(count)s"
+
+msgid "template.editor.setting_selector_count_with_used"
+msgstr "%(available)sটি উপলব্ধ, %(used)sটি ইতিমধ্যে যোগ করা হয়েছে"
+
+msgid "template.editor.setting_selector_default"
+msgstr "ডিফল্ট"
+
+msgid "template.editor.setting_selector_docs"
+msgstr "ডকুমেন্টেশন দেখুন"
+
+msgid "template.editor.setting_selector_empty"
+msgstr "বর্তমান ফিল্টারের সাথে কোনো সেটিংস মেলে না।"
+
+msgid "template.editor.setting_selector_filter_plugin"
+msgstr "প্লাগইন"
+
+msgid "template.editor.setting_selector_filter_plugin_all"
+msgstr "সমস্ত প্লাগইন"
+
+msgid "template.editor.setting_selector_filter_type"
+msgstr "প্রকার"
+
+msgid "template.editor.setting_selector_filter_type_all"
+msgstr "সমস্ত প্রকার"
+
+msgid "template.editor.setting_selector_helper"
+msgstr "শুধুমাত্র মাল্টিসাইট সেটিংস উপলব্ধ। তালিকাটি ছোট করতে ফিল্টার ব্যবহার করুন।"
+
+msgid "template.editor.setting_selector_multiple"
+msgstr "একাধিক"
+
+msgid "template.editor.setting_selector_pattern"
+msgstr "প্যাটার্ন"
+
+msgid "template.editor.setting_selector_search_label"
+msgstr "একটি মাল্টিসাইট সেটিং খুঁজুন"
+
+msgid "template.editor.setting_selector_search_placeholder"
+msgstr "লেবেল, কী বা প্লাগইন দ্বারা অনুসন্ধান করুন"
+
+msgid "template.editor.setting_toggle_enabled"
+msgstr "সক্ষম"
+
+msgid "template.editor.settings"
+msgstr "সেটিংস"
+
+msgid "template.editor.settings_help"
+msgstr "এই টেমপ্লেট দ্বারা প্রকাশিত সেটিংস এবং তাদের ডিফল্ট মান নির্ধারণ করুন।"
+
+msgid "template.editor.step_configs_empty"
+msgstr "এই ধাপে এখনও কোন কনফিগারেশন যোগ করা হয়নি।"
+
+msgid "template.editor.step_configs_selection_title"
+msgstr "বিদ্যমান কনফিগারেশন নির্বাচন করুন"
+
+msgid "template.editor.step_default_title"
+msgstr "শিরোনামহীন ধাপ"
+
+msgid "template.editor.step_prefix"
+msgstr "ধাপ"
+
+msgid "template.editor.step_settings_empty"
+msgstr "এই ধাপে এখনও কোন সেটিংস যোগ করা হয়নি।"
+
+msgid "template.editor.step_settings_selection_title"
+msgstr "বিদ্যমান সেটিংস নির্বাচন করুন"
+
+msgid "template.editor.steps"
+msgstr "ধাপ"
+
+msgid "template.editor.steps_help"
+msgstr "নির্দেশিত ধাপে সেটিংস সংগঠিত করুন। প্রতিটি ধাপে কোন সেটিংস বা কনফিগারেশন থাকবে তা নির্বাচন করুন।"
+
+msgid "template.editor.summary_clone_info"
+msgstr "বর্তমানে %(template)s থেকে ক্লোন করা হচ্ছে।"
+
+msgid "template.editor.summary_counts_configs"
+msgstr "কনফিগারেশন"
+
+msgid "template.editor.summary_counts_settings"
+msgstr "সেটিংস"
+
+msgid "template.editor.summary_counts_steps"
+msgstr "ধাপ"
+
+msgid "template.editor.summary_counts_title"
+msgstr "বিষয়বস্তু"
+
+msgid "template.editor.summary_link_configs"
+msgstr "কাস্টম কনফিগারেশন"
+
+msgid "template.editor.summary_link_details"
+msgstr "টেমপ্লেটের বিবরণ"
+
+msgid "template.editor.summary_link_settings"
+msgstr "সেটিংস"
+
+msgid "template.editor.summary_link_steps"
+msgstr "ধাপ"
+
+msgid "template.editor.summary_links_title"
+msgstr "দ্রুত লিঙ্ক"
+
+msgid "template.editor.summary_metadata_created"
+msgstr "তৈরি করা হয়েছে"
+
+msgid "template.editor.summary_metadata_method"
+msgstr "পদ্ধতি"
+
+msgid "template.editor.summary_metadata_title"
+msgstr "মেটাডেটা"
+
+msgid "template.editor.summary_metadata_unknown"
+msgstr "উপলব্ধ নয়"
+
+msgid "template.editor.summary_metadata_updated"
+msgstr "শেষ আপডেট"
+
+msgid "template.editor.validation_config_name_required"
+msgstr "কনফিগারেশন সংজ্ঞায়িত করার সময় কনফিগারেশনের নাম প্রয়োজন।"
+
+msgid "template.editor.validation_config_type_multisite"
+msgstr "কনফিগারেশনের প্রকার অবশ্যই মাল্টিসাইট-সামঞ্জস্যপূর্ণ প্রকারগুলির মধ্যে একটি হতে হবে।"
+
+msgid "template.editor.validation_config_type_required"
+msgstr "কনফিগারেশন সংজ্ঞায়িত করার সময় কনফিগারেশনের প্রকার প্রয়োজন।"
+
+msgid "template.editor.validation_configs_unique"
+msgstr "প্রতিটি কনফিগারেশনের নাম অবশ্যই অনন্য হতে হবে।"
+
+msgid "template.editor.validation_id_required"
+msgstr "টেমপ্লেট আইডি প্রয়োজন।"
+
+msgid "template.editor.validation_setting_key"
+msgstr "প্রতিটি সেটিং এর একটি কী থাকতে হবে।"
+
+msgid "template.editor.validation_settings_unique"
+msgstr "প্রতিটি সেটিং কী অবশ্যই অনন্য হতে হবে।"
+
+msgid "template.none"
+msgstr "কোন টেমপ্লেট নেই"
+
+msgid "templates.gallery.delete_selected"
+msgstr "নির্বাচিতগুলো মুছুন"
+
+msgid "templates.gallery.empty_message"
+msgstr "সেটিংস, ধাপ ও কাস্টম কনফিগ একত্র করে পুনরায় ব্যবহারের জন্য প্রথম টেমপ্লেট তৈরি করুন।"
+
+msgid "templates.gallery.empty_title"
+msgstr "এখনো কোনো টেমপ্লেট নেই"
+
+msgid "templates.gallery.select"
+msgstr "নির্বাচন"
+
+msgid "templates.gallery.svc_suffix"
+msgstr "svc"
+
+msgid "templates.name.api"
+msgstr "API"
+
+msgid "templates.name.high"
+msgstr "উচ্চ নিরাপত্তা"
+
+msgid "templates.name.low"
+msgstr "নিম্ন নিরাপত্তা"
+
+msgid "templates.name.medium"
+msgstr "মাঝারি নিরাপত্তা"
+
+msgid "templates.name.ui"
+msgstr "ওয়েব UI"
+
+msgid "templates.subtitle"
+msgstr "আপনার পরিষেবাগুলির জন্য পুনরায় ব্যবহারযোগ্য কনফিগারেশন টেমপ্লেট — সেটিংস, পদক্ষেপ এবং কাস্টম কনফিগারেশন একত্রিত করুন, তারপর তৈরি করুন, ক্লোন করুন অথবা মুছে ফেলুন।"
+
+msgid "templates.tag.config"
+msgstr "কাস্টম কনফিগ: %(name)s"
+
+msgid "templates.tag.feature"
+msgstr "অন্তর্নির্মিত সুবিধা: %(name)s"
+
+msgid "templates.tag.plugin"
+msgstr "প্লাগইন: %(name)s"
+
+msgid "templates.title"
+msgstr "পরিষেবার টেমপ্লেট"
+
+msgid "theme.dark"
+msgstr "ডার্ক"
+
+msgid "theme.light"
+msgstr "লাইট"
+
+msgid "threatmap.attacks_today"
+msgstr "আজকের আক্রমণ"
+
+msgid "threatmap.countries"
+msgstr "উৎস দেশ"
+
+msgid "threatmap.disabled_help"
+msgstr "হুমকি মানচিত্র রিপোর্ট পৃষ্ঠার মতো একই সংরক্ষিত রিপোর্ট পড়ে। রেকর্ড শুরু করতে METRICS_PERSIST_TO_DB কে yes করুন।"
+
+msgid "threatmap.disabled_title"
+msgstr "রিপোর্ট সংরক্ষণ বন্ধ আছে"
+
+msgid "threatmap.empty_help"
+msgstr "হয় গত ২৪ ঘণ্টায় কোনো অনুরোধ ব্লক হয়নি, নয়তো রিপোর্ট এখনও সংগ্রহ করা হয়নি।"
+
+msgid "threatmap.empty_title"
+msgstr "এই সময়ে কিছুই ব্লক হয়নি"
+
+msgid "threatmap.error_help"
+msgstr "মানচিত্রটি শেষবার লোড করা সংখ্যাগুলি রাখে এবং পরবর্তী রিফ্রেশে আবার চেষ্টা করবে।"
+
+msgid "threatmap.error_title"
+msgstr "মেট্রিক্স সার্ভিসে পৌঁছানো যায়নি"
+
+msgid "threatmap.exit_fullscreen"
+msgstr "পূর্ণ স্ক্রিন থেকে বেরিয়ে যান"
+
+msgid "threatmap.freshness"
+msgstr "রিপোর্ট প্রায় প্রতি মিনিটে ডেটাবেসে পৌঁছায়, তাই মানচিত্রটি প্রকৃত ট্র্যাফিকের চেয়ে প্রায় এক থেকে দুই মিনিট পিছিয়ে থাকে।"
+
+msgid "threatmap.fullscreen"
+msgstr "পূর্ণ স্ক্রিন"
+
+msgid "threatmap.map_sub"
+msgstr "চাপগুলি উৎস দেশ দেখায়, নির্দিষ্ট অবস্থান নয়"
+
+msgid "threatmap.map_title"
+msgstr "ব্লক করা ট্র্যাফিকের উৎস"
+
+msgid "threatmap.more_hidden"
+msgstr "আরও দেখানো হয়নি"
+
+msgid "threatmap.not_localised"
+msgstr "অবস্থান অজানা"
+
+msgid "threatmap.open_live"
+msgstr "লাইভ ভিউ"
+
+msgid "threatmap.show_less"
+msgstr "শুধু শীর্ষ %(count)s দেখুন"
+
+msgid "threatmap.show_more"
+msgstr "সবগুলি (%(count)s) দেখুন"
+
+msgid "threatmap.stale"
+msgstr "এই সংখ্যাগুলি আর আপডেট হচ্ছে না। মেট্রিক্স সার্ভিস সাড়া দিচ্ছে না।"
+
+msgid "threatmap.subtitle"
+msgstr "গত ২৪ ঘণ্টায় আপনার ইনস্ট্যান্সগুলি যে ট্র্যাফিক ব্লক করেছে তা কোথা থেকে এসেছে।"
+
+msgid "threatmap.ticker_title"
+msgstr "লাইভ ইভেন্ট"
+
+msgid "threatmap.top_origins"
+msgstr "প্রধান উৎস"
+
+msgid "threatmap.top_reason"
+msgstr "প্রধান কারণ"
+
+msgid "threatmap.top_reasons"
+msgstr "প্রধান কারণ"
+
+msgid "threatmap.top_target"
+msgstr "প্রধান লক্ষ্য"
+
+msgid "threatmap.top_targets"
+msgstr "প্রধান লক্ষ্য"
+
+msgid "threatmap.updated"
+msgstr "আপডেট হয়েছে"
+
+msgid "timings.calls"
+msgstr "কল"
+
+msgid "timings.disabled_help"
+msgstr "প্রতিটি প্লাগইনের সময় মাপতে METRICS_COLLECT_TIMINGS-কে yes করুন। সম্পূর্ণ অনুরোধের সময় যেকোনোভাবেই সংগ্রহ করা হয়।"
+
+msgid "timings.disabled_title"
+msgstr "প্লাগইনের সময় পরিমাপ বন্ধ"
+
+msgid "timings.max"
+msgstr "সর্বোচ্চ"
+
+msgid "timings.max_request"
+msgstr "সবচেয়ে ধীর অনুরোধ"
+
+msgid "timings.mean"
+msgstr "গড়"
+
+msgid "timings.mean_request"
+msgstr "গড় অনুরোধ"
+
+msgid "timings.partial"
+msgstr "কিছু ইনস্ট্যান্স সাড়া দেয়নি। নিচের পরিসংখ্যানে শুধু সাড়া দেওয়া ইনস্ট্যান্সগুলো আছে।"
+
+msgid "timings.phase"
+msgstr "পর্যায়"
+
+msgid "timings.phases"
+msgstr "প্লাগইন পর্যায়"
+
+msgid "timings.plugin"
+msgstr "প্লাগইন"
+
+msgid "timings.reporting_instances"
+msgstr "রিপোর্টকারী ইনস্ট্যান্স"
+
+msgid "timings.requests_measured"
+msgstr "পরিমাপ করা অনুরোধ"
+
+msgid "timings.share"
+msgstr "শেয়ার"
+
+msgid "timings.share_help"
+msgstr "শেয়ার হলো মোট অনুরোধ সময়ের তুলনায় প্লাগইনের মোট সময়। প্রতি অনুরোধে একবার চলে না এমন পর্যায় — ওয়ার্কার চালু হওয়া, ব্যাকগ্রাউন্ড টাইমার ও অভ্যন্তরীণ API —-এর শেয়ার নেই এবং ড্যাশ দেখায়।"
+
+msgid "timings.subtitle"
+msgstr "প্রতিটি অনুরোধ পর্যায়ে প্রতিটি প্লাগইনের সময়, সব ইনস্ট্যান্স থেকে সরাসরি পড়ে একত্র করা হয়।"
+
+msgid "timings.total"
+msgstr "মোট"
+
+msgid "timings.unreachable_help"
+msgstr "সময়গুলো ইনস্ট্যান্স থেকেই পড়া হয়, তাই কোনোটিই সাড়া দেয়নি — অথবা এখনো কোনো অনুরোধ পরিবেশন করেনি।"
+
+msgid "timings.unreachable_title"
+msgstr "কোনো ইনস্ট্যান্স সময় জানায়নি"
+
+msgid "timings.volatile"
+msgstr "সময়গুলো প্রতিটি ইনস্ট্যান্সের শেয়ার্ড মেমরিতে থাকে এবং চাহিদামতো পড়া হয় — সংরক্ষণ করা হয় না, আর ইনস্ট্যান্স পুনরায় চালু হলে শূন্য হয়।"
+
+msgid "toast.autoconf_disclaimer_bold"
+msgstr "যদি পরিষেবাটি সরানো হয় বা পুনরায় চালু করা হয়, আপনার UI কনফিগারেশন হারিয়ে যাবে।"
+
+msgid "toast.autoconf_disclaimer_detail"
+msgstr "এর কারণ হল পরিষেবাটির পদ্ধতি 'autoconf', যা কনফিগারেশন দ্বন্দ্ব প্রতিরোধ করার জন্য ডিজাইন করা হয়েছে।"
+
+msgid "toast.ban_updated"
+msgstr "নিষেধাজ্ঞার সময়কাল সফলভাবে আপডেট করা হয়েছে!"
+
+msgid "toast.body.ping_succeed"
+msgstr "ইনস্ট্যান্স: %(instances)s"
+
+msgid "toast.copied"
+msgstr "কপি করা হয়েছে!"
+
+msgid "toast.disclaimer_title"
+msgstr "দাবিত্যাগ"
+
+msgid "toast.global_settings_applied_body"
+msgstr "গ্লোবাল সেটিংস সফলভাবে আনা হয়েছে এবং বর্তমান ফর্মে প্রয়োগ করা হয়েছে।"
+
+msgid "toast.global_settings_applied_title"
+msgstr "গ্লোবাল সেটিংস প্রয়োগ হয়েছে"
+
+msgid "toast.global_settings_failed_body"
+msgstr "গ্লোবাল সেটিংস আনতে গিয়ে একটি ত্রুটি ঘটেছে।"
+
+msgid "toast.global_settings_failed_title"
+msgstr "গ্লোবাল সেটিংস আনতে ব্যর্থ"
+
+msgid "toast.header.ping_failed"
+msgstr "পিং ব্যর্থ হয়েছে"
+
+msgid "toast.header.ping_succeed"
+msgstr "পিং সফল হয়েছে"
+
+msgid "toast.ip_unbanned"
+msgstr "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!"
+
+msgid "tooltip.auto_lets_encrypt"
+msgstr "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।"
+
+msgid "tooltip.button.ban_ip"
+msgstr "এই IP ঠিকানাটি নিষিদ্ধ করুন"
+
+msgid "tooltip.button.convert_config_to_draft"
+msgstr "কনফিগ %(name)s-কে খসড়ায় রূপান্তর করুন"
+
+msgid "tooltip.button.convert_config_to_online"
+msgstr "কনফিগ %(name)s-কে অনলাইনে রূপান্তর করুন"
+
+msgid "tooltip.button.convert_service_to_draft"
+msgstr "পরিষেবা %(name)s কে খসড়াতে রূপান্তর করুন"
+
+msgid "tooltip.button.convert_service_to_online"
+msgstr "পরিষেবা %(name)s কে অনলাইনে রূপান্তর করুন"
+
+msgid "tooltip.button.delete_config"
+msgstr "কাস্টম কনফিগারেশন %(name)s মুছুন"
+
+msgid "tooltip.button.delete_file"
+msgstr "ক্যাশ ফাইল মুছুন: %(filename)s"
+
+msgid "tooltip.button.delete_instance"
+msgstr "ইনস্ট্যান্স %(hostname)s মুছুন"
+
+msgid "tooltip.button.delete_plugin"
+msgstr "প্লাগইন %(name)s মুছুন"
+
+msgid "tooltip.button.delete_service"
+msgstr "পরিষেবা %(name)s মুছুন"
+
+msgid "tooltip.button.delete_template"
+msgstr "টেমপ্লেট %(name)s মুছুন"
+
+msgid "tooltip.button.force_check"
+msgstr "একটি চেক নির্ধারণ করে; শুধুমাত্র আপডেট থাকলে ডাউনলোড করে।"
+
+msgid "tooltip.button.force_update"
+msgstr "চেকগুলি স্কিপ করে PRO প্লাগইন জোরপূর্বক ডাউনলোড করে; ব্যর্থ হলে বর্তমান অবস্থা অপরিবর্তিত থাকে।"
+
+msgid "tooltip.button.ping_instance"
+msgstr "পিং ইনস্ট্যান্স %(hostname)s"
+
+msgid "tooltip.button.reload_instance"
+msgstr "ইনস্ট্যান্স %(hostname)s পুনরায় লোড করুন"
+
+msgid "tooltip.button.reset_default"
+msgstr "ডিফল্ট মানে রিসেট করুন"
+
+msgid "tooltip.button.reset_global"
+msgstr "গ্লোবাল মানে রিসেট করুন"
+
+msgid "tooltip.button.run_job"
+msgstr "কার্য %(job)s চালান"
+
+msgid "tooltip.button.show_selected_only"
+msgstr "শুধুমাত্র নির্বাচিত দেখান"
+
+msgid "tooltip.button.stop_instance"
+msgstr "ইনস্ট্যান্স %(hostname)s বন্ধ করুন"
+
+msgid "tooltip.button.unban_ip"
+msgstr "%(ip)s থেকে নিষেধাজ্ঞা সরান"
+
+msgid "tooltip.button.update_ban_duration"
+msgstr "বাণ সময়কাল আপডেট করুন"
+
+msgid "tooltip.button.value_from_global"
+msgstr "গ্লোবাল সেটিংস থেকে মান"
+
+msgid "tooltip.cannot_delete_original_ban"
+msgstr "মূল নিষেধাজ্ঞা এন্ট্রি মুছতে পারে না।"
+
+msgid "tooltip.cannot_remove_disabled"
+msgstr "অপসারণ করা যাবে না কারণ এক বা একাধিক সেটিংস নিষ্ক্রিয়।"
+
+msgid "tooltip.certificate_priority"
+msgstr "ফাইল পাথ থেকে শংসাপত্রকে অগ্রাধিকার দিতে হবে নাকি base64 ডেটা থেকে তা চয়ন করুন।"
+
+msgid "tooltip.challenge_type"
+msgstr "Let's Encrypt যাচাইকরণের জন্য ব্যবহার করার চ্যালেঞ্জের প্রকার (http বা dns)।"
+
+msgid "tooltip.collapse_multiline"
+msgstr "বহু-লাইন এন্ট্রি সংকুচিত করুন (ট্রেসব্যাক, পেলোড)"
+
+msgid "tooltip.collapse_raw_values"
+msgstr "বহু-লাইন মান সংকুচিত করুন (সার্টিফিকেট, কী)"
+
+msgid "tooltip.config_type.crs_plugins_after"
+msgstr "OWASP কোর রুল সেট প্লাগইন লোড হওয়ার পরে প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.config_type.crs_plugins_before"
+msgstr "OWASP কোর রুল সেট প্লাগইন লোড হওয়ার আগে প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.config_type.default_server_http"
+msgstr "Nginx-এর সার্ভার স্তরের কনফিগারেশন, বিশেষভাবে 'default server' ব্লকের জন্য, যখন ক্লায়েন্ট অনুরোধ কোনো কনফিগার করা সার্ভারের নামের সাথে মেলে না তখন ব্যবহৃত হয়।"
+
+msgid "tooltip.config_type.http"
+msgstr "Nginx-এর HTTP স্তরে বিশ্বব্যাপী প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.config_type.modsec"
+msgstr "OWASP কোর রুল সেট লোড হওয়ার পরে প্রয়োগ করা ModSecurity কনফিগারেশন, অথবা কোর রুল সেট লোড না হলে ব্যবহৃত হয়।"
+
+msgid "tooltip.config_type.modsec_crs"
+msgstr "OWASP কোর রুল সেট লোড হওয়ার আগে প্রয়োগ করা ModSecurity কনফিগারেশন।"
+
+msgid "tooltip.config_type.server_http"
+msgstr "Nginx-এর HTTP সার্ভার (ভার্চুয়াল হোস্ট) স্তরে প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.config_type.server_stream"
+msgstr "Nginx-এর স্ট্রিম সার্ভার স্তরে প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.config_type.stream"
+msgstr "Nginx-এর স্ট্রিম স্তরে বিশ্বব্যাপী প্রয়োগ করা কনফিগারেশন।"
+
+msgid "tooltip.confirm_password_match"
+msgstr "নিশ্চিতকরণ পাসওয়ার্ড অবশ্যই উপরে প্রবেশ করা পাসওয়ার্ডের সাথে মিলতে হবে।"
+
+msgid "tooltip.copied"
+msgstr "কপি করা হয়েছে!"
+
+msgid "tooltip.copy_https_only"
+msgstr "কপি বৈশিষ্ট্যটি কেবল HTTPS এর মাধ্যমে উপলব্ধ।"
+
+msgid "tooltip.custom_ssl_cert_data"
+msgstr "কাস্টম SSL শংসাপত্রের ডেটা (PEM ফর্ম্যাট বা Base64 এনকোডেড)।"
+
+msgid "tooltip.custom_ssl_cert_path"
+msgstr "কাস্টম SSL শংসাপত্র ফাইলের পাথ।"
+
+msgid "tooltip.custom_ssl_key_data"
+msgstr "কাস্টম SSL ব্যক্তিগত কী ডেটা (PEM ফর্ম্যাট বা Base64 এনকোডেড)।"
+
+msgid "tooltip.custom_ssl_key_path"
+msgstr "কাস্টম SSL ব্যক্তিগত কী ফাইলের পাথ।"
+
+msgid "tooltip.different_from_template"
+msgstr "মান টেমপ্লেটের ডিফল্ট থেকে ভিন্ন"
+
+msgid "tooltip.disabled_by_method"
+msgstr "নিষ্ক্রিয়: পদ্ধতি '%(method)s' এর মাধ্যমে পরিচালিত।"
+
+msgid "tooltip.disabled_db_readonly"
+msgstr "নিষ্ক্রিয়: ডাটাবেস শুধুমাত্র পঠন মোডে আছে।"
+
+msgid "tooltip.disabled_draft"
+msgstr "নিষ্ক্রিয়: পরিষেবাটি খসড়া মোডে আছে।"
+
+msgid "tooltip.disabled_readonly"
+msgstr "নিষ্ক্রিয়: শুধুমাত্র পঠন মোড সক্রিয় আছে।"
+
+msgid "tooltip.dns_check_url"
+msgstr "যদি পৃষ্ঠাটি 'ok' দেখায়, তবে সার্ভারের নামটি সম্ভবত উপলব্ধ।"
+
+msgid "tooltip.dns_credential_items"
+msgstr "DNS প্রদানকারীর জন্য শংসাপত্র, DNS চ্যালেঞ্জের জন্য ব্যবহৃত (যেমন, 'cloudflare_api_token=123456')। প্রয়োজনীয় ফর্ম্যাট প্রদানকারীর উপর নির্ভর করে।"
+
+msgid "tooltip.dns_credentials_dns_only"
+msgstr "শংসাপত্রগুলি কেবল DNS চ্যালেঞ্জের জন্য প্রযোজ্য।"
+
+msgid "tooltip.dns_propagation"
+msgstr "DNS চ্যালেঞ্জের সময় DNS পরিবর্তনের প্রচারের জন্য অপেক্ষা করার সময় (সেকেন্ডে)।"
+
+msgid "tooltip.dns_propagation_dns_only"
+msgstr "DNS প্রচার বিলম্ব কেবল DNS চ্যালেঞ্জের জন্য প্রযোজ্য।"
+
+msgid "tooltip.dns_provider"
+msgstr "Let's Encrypt DNS চ্যালেঞ্জের জন্য ব্যবহার করার DNS প্রদানকারী।"
+
+msgid "tooltip.dns_provider_dns_only"
+msgstr "DNS প্রদানকারী নির্বাচন কেবল DNS চ্যালেঞ্জের জন্য প্রযোজ্য।"
+
+msgid "tooltip.download_file"
+msgstr "ফাইল ডাউনলোড করুন"
+
+msgid "tooltip.download_log"
+msgstr "এই লগ ফাইলটি ডাউনলোড করুন"
+
+msgid "tooltip.draft_toggle_disabled"
+msgstr "খসড়া মোড কেবল UI এর মাধ্যমে তৈরি করা পরিষেবাগুলিতে টগল করা যেতে পারে।"
+
+msgid "tooltip.email_length"
+msgstr "ইমেল অবশ্যই ১ থেকে ২৫৬ অক্ষরের মধ্যে হতে হবে।"
+
+msgid "tooltip.email_lets_encrypt"
+msgstr "শংসাপত্র পরিচালনা এবং বিজ্ঞপ্তির জন্য Let's Encrypt-এর সাথে নিবন্ধন করার ইমেল ঠিকানা।"
+
+msgid "tooltip.fetch_global_settings"
+msgstr "গ্লোবাল সেটিংস আনুন এবং সেগুলি বর্তমান টেমপ্লেটে প্রয়োগ করুন"
+
+msgid "tooltip.follow_latest_page_only"
+msgstr "ফলো মোড শুধুমাত্র সর্বশেষ পৃষ্ঠায় উপলব্ধ"
+
+msgid "tooltip.global_settings_source"
+msgstr "মান গ্লোবাল সেটিংস থেকে উত্তরাধিকার সূত্রে প্রাপ্ত।"
+
+msgid "tooltip.instance_not_up"
+msgstr "ইনস্ট্যান্স %(hostname)s বর্তমানে প্রতিক্রিয়া দিচ্ছে না ('up')।"
+
+msgid "tooltip.issue_count"
+msgstr "এই ভিউতে ত্রুটি ও সতর্কতা"
+
+msgid "tooltip.latest_version_installed"
+msgstr "আপনি সর্বশেষ সংস্করণটি চালাচ্ছেন।"
+
+msgid "tooltip.lets_encrypt_custom_profile"
+msgstr "Let's Encrypt-এর জন্য ব্যবহারের কাস্টম প্রোফাইল (যেমন 'my_custom_profile')।"
+
+msgid "tooltip.lets_encrypt_disable_public_suffixes"
+msgstr "পাবলিক সাফিক্স লিস্টের সাথে মিলে যাওয়া ডোমেইনের জন্য শংসাপত্র অনুরোধ নিষ্ক্রিয় করুন (প্রস্তাবিত)।"
+
+msgid "tooltip.lets_encrypt_profile"
+msgstr "Let's Encrypt-এর জন্য ব্যবহার করার প্রোফাইল (classic, tlsserver, shortlived)।"
+
+msgid "tooltip.lets_encrypt_server"
+msgstr "প্রদানকারী-নির্দিষ্ট সেটিংস দেখাতে আপনার সার্টিফিকেট প্রদানকারী নির্বাচন করুন।"
+
+msgid "tooltip.license_key"
+msgstr "আপনার BunkerWeb PRO লাইসেন্স কী।"
+
+msgid "tooltip.link.access_plugin_page"
+msgstr "%(name)s পৃষ্ঠা অ্যাক্সেস করুন"
+
+msgid "tooltip.link.access_service"
+msgstr "পরিষেবা %(name)s অ্যাক্সেস করুন"
+
+msgid "tooltip.link.clone_config"
+msgstr "কাস্টম কনফিগারেশন %(name)s ক্লোন করুন"
+
+msgid "tooltip.link.clone_service"
+msgstr "পরিষেবা %(name)s ক্লোন করুন"
+
+msgid "tooltip.link.clone_template"
+msgstr "টেমপ্লেট %(template)s ক্লোন করুন"
+
+msgid "tooltip.link.download_file"
+msgstr "%(filename)s ডাউনলোড করুন"
+
+msgid "tooltip.link.edit_config"
+msgstr "কাস্টম কনফিগারেশন %(name)s সম্পাদনা করুন"
+
+msgid "tooltip.link.edit_service"
+msgstr "পরিষেবা %(service)s সম্পাদনা করুন"
+
+msgid "tooltip.link.edit_template"
+msgstr "টেমপ্লেট %(template)s সম্পাদনা করুন"
+
+msgid "tooltip.link.export_config"
+msgstr "কাস্টম কনফিগারেশন %(name)s রপ্তানি করুন"
+
+msgid "tooltip.link.export_service"
+msgstr "পরিষেবা %(service)s কনফিগারেশন রপ্তানি করুন"
+
+msgid "tooltip.link.manage_activation"
+msgstr "%(name)s-এর বিশ্বব্যাপী সেটিংস-এ সক্রিয়করণ পরিচালনা করুন"
+
+msgid "tooltip.link.view_config"
+msgstr "কাস্টম কনফিগারেশন %(name)s দেখুন"
+
+msgid "tooltip.link.view_file"
+msgstr "%(filename)s দেখুন"
+
+msgid "tooltip.link.view_service"
+msgstr "পরিষেবা %(service)s দেখুন"
+
+msgid "tooltip.link.view_template"
+msgstr "টেমপ্লেট %(template)s দেখুন"
+
+msgid "tooltip.local_time"
+msgstr "আপনার স্থানীয় সময়ে টাইমস্ট্যাম্প দেখান"
+
+msgid "tooltip.modal.title.full_url"
+msgstr "সম্পূর্ণ URL"
+
+msgid "tooltip.multisite_setting"
+msgstr "এটি একটি মাল্টিসাইট সেটিং, যদি বিশ্বব্যাপী সংজ্ঞায়িত করা হয় তবে একাধিক পরিষেবাকে প্রভাবিত করে।"
+
+msgid "tooltip.new_version_available"
+msgstr "একটি নতুন সংস্করণ উপলব্ধ!"
+
+msgid "tooltip.next_issue"
+msgstr "পরবর্তী ত্রুটি বা সতর্কতায় যান"
+
+msgid "tooltip.no_cache"
+msgstr "এই কার্যের জন্য কোনো ক্যাশ ফাইল পাওয়া যায়নি।"
+
+msgid "tooltip.no_history"
+msgstr "এই কার্যের জন্য কোনো সম্পাদন ইতিহাস পাওয়া যায়নি।"
+
+msgid "tooltip.no_log_files"
+msgstr "কোনো লগ ফাইল উপলব্ধ নেই।"
+
+msgid "tooltip.no_page_available"
+msgstr "এই প্লাগইনের জন্য কোনো ডেডিকেটেড পৃষ্ঠা উপলব্ধ নেই।"
+
+msgid "tooltip.password_requirements"
+msgstr "পাসওয়ার্ড অন্তত ৮ অক্ষর দীর্ঘ হতে হবে এবং এতে ১টি বড় হাতের অক্ষর, ১টি সংখ্যা এবং ১টি বিশেষ অক্ষর অন্তর্ভুক্ত থাকতে হবে।"
+
+msgid "tooltip.prev_issue"
+msgstr "পূর্ববর্তী ত্রুটি বা সতর্কতায় যান"
+
+msgid "tooltip.pro_feature"
+msgstr "এটি একটি প্রো বৈশিষ্ট্য।"
+
+msgid "tooltip.readonly_db_action_disabled"
+msgstr "নিষ্ক্রিয়: ডাটাবেস শুধুমাত্র পঠন মোডে আছে।"
+
+msgid "tooltip.readonly_mode"
+msgstr "এই কাজটি শুধুমাত্র পঠন-ক্ষম মোডে অনুমোদিত নয়।"
+
+msgid "tooltip.readonly_user_action_disabled"
+msgstr "নিষ্ক্রিয়: আপনার অ্যাকাউন্ট শুধুমাত্র পঠনযোগ্য, ক্রিয়া '%(action)s' নিষ্ক্রিয়।"
+
+msgid "tooltip.real_ip_from"
+msgstr "বিশ্বস্ত আইপি/নেটওয়ার্কের তালিকা, স্পেস দ্বারা পৃথক, যেখান থেকে প্রক্সি করা অনুরোধ আসে।"
+
+msgid "tooltip.real_ip_from_urls"
+msgstr "বিশ্বস্ত আইপি/নেটওয়ার্ক ধারণকারী ইউআরএল-এর তালিকা, স্পেস দ্বারা পৃথক, যেখান থেকে প্রক্সি করা অনুরোধ আসে। এটি file:// ইউআরএল এবং http://user:pass@url স্কিম ব্যবহার করে বেসিক প্রমাণীকরণও সমর্থন করে।"
+
+msgid "tooltip.real_ip_header"
+msgstr "PROXY প্রোটোকলের জন্য আসল আইপি বা বিশেষ মান proxy_protocol ধারণকারী HTTP হেডার।"
+
+msgid "tooltip.real_ip_recursive"
+msgstr "হেডার কন্টেইনার আইপি ঠিকানায় একটি পুনরাবৃত্তিমূলক অনুসন্ধান সঞ্চালন করুন।"
+
+msgid "tooltip.remove_ban_entry"
+msgstr "তালিকা থেকে এই নিষেধাজ্ঞা এন্ট্রি সরান।"
+
+msgid "tooltip.reset_template_settings"
+msgstr "বর্তমান টেমপ্লেট ভিউয়ের সমস্ত সেটিংস তাদের ডিফল্টে রিসেট করুন।"
+
+msgid "tooltip.search_logs"
+msgstr "লগ অনুসন্ধান করুন (Ctrl+F)"
+
+msgid "tooltip.select_file_to_follow"
+msgstr "ফলো মোড সক্ষম করতে একটি ফাইল নির্বাচন করুন"
+
+msgid "tooltip.server_name"
+msgstr "এই পরিষেবার জন্য প্রাথমিক ডোমেন নাম বা সার্ভারের নাম।"
+
+msgid "tooltip.stream_support.no"
+msgstr "স্ট্রিম মোড সমর্থন করে না।"
+
+msgid "tooltip.stream_support.partial"
+msgstr "আংশিকভাবে স্ট্রিম মোড সমর্থন করে।"
+
+msgid "tooltip.stream_support.yes"
+msgstr "স্ট্রিম মোড সমর্থন করে।"
+
+msgid "tooltip.table.bans.actions"
+msgstr "এই নিষেধাজ্ঞার জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.bans.country"
+msgstr "নিষিদ্ধ আইপি ঠিকানার দেশ"
+
+msgid "tooltip.table.bans.date"
+msgstr "নিষেধাজ্ঞা তৈরির তারিখ এবং সময়"
+
+msgid "tooltip.table.bans.details"
+msgstr "নিষেধাজ্ঞার বিবরণ দেখান"
+
+msgid "tooltip.table.bans.end_date"
+msgstr "নিষেধাজ্ঞা শেষ হওয়ার তারিখ এবং সময়"
+
+msgid "tooltip.table.bans.ip_address"
+msgstr "নিষিদ্ধ আইপি ঠিকানা"
+
+msgid "tooltip.table.bans.reason"
+msgstr "নিষেধাজ্ঞার কারণ"
+
+msgid "tooltip.table.bans.scope"
+msgstr "নিষেধাজ্ঞার পরিধি (গ্লোবাল বা পরিষেবা-নির্দিষ্ট)"
+
+msgid "tooltip.table.bans.select_all"
+msgstr "সব নিষেধাজ্ঞা নির্বাচন করুন"
+
+msgid "tooltip.table.bans.service"
+msgstr "যে পরিষেবা থেকে নিষেধাজ্ঞা এসেছে (যদি পরিধি নির্দিষ্ট হয়)"
+
+msgid "tooltip.table.bans.time_left"
+msgstr "নিষেধাজ্ঞা শেষ হওয়ার অবশিষ্ট সময়"
+
+msgid "tooltip.table.cache.actions"
+msgstr "এই ক্যাশ ফাইলের জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.cache.checksum"
+msgstr "ক্যাশ ফাইলের চেকসাম"
+
+msgid "tooltip.table.cache.details"
+msgstr "ক্যাশ ফাইলের বিবরণ দেখান"
+
+msgid "tooltip.table.cache.file_name"
+msgstr "ক্যাশ ফাইলের নাম"
+
+msgid "tooltip.table.cache.job_name"
+msgstr "এই ক্যাশ ফাইলটি তৈরি করা কার্য"
+
+msgid "tooltip.table.cache.last_update"
+msgstr "ক্যাশ ফাইলটি শেষ আপডেট করার তারিখ এবং সময়"
+
+msgid "tooltip.table.cache.plugin"
+msgstr "এই ক্যাশ ফাইলটি তৈরি করা কার্যের সাথে সম্পর্কিত প্লাগইন"
+
+msgid "tooltip.table.cache.select_all"
+msgstr "সমস্ত ক্যাশে ফাইল নির্বাচন করুন"
+
+msgid "tooltip.table.cache.service"
+msgstr "এই ক্যাশ ফাইলের সাথে সম্পর্কিত পরিষেবা (বা গ্লোবাল)"
+
+msgid "tooltip.table.configs.actions"
+msgstr "এই কাস্টম কনফিগারেশনের জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.configs.checksum"
+msgstr "কাস্টম কনফিগারেশন সামগ্রীর চেকসাম"
+
+msgid "tooltip.table.configs.details"
+msgstr "কাস্টম কনফিগারেশনের বিবরণ দেখান"
+
+msgid "tooltip.table.configs.method"
+msgstr "কাস্টম কনফিগারেশন তৈরির পদ্ধতি (যেমন ui, file)"
+
+msgid "tooltip.table.configs.name"
+msgstr "কাস্টম কনফিগারেশনের নাম"
+
+msgid "tooltip.table.configs.select_all"
+msgstr "সব কাস্টম কনফিগারেশন নির্বাচন করুন"
+
+msgid "tooltip.table.configs.service"
+msgstr "কাস্টম কনফিগারেশনের সাথে সম্পর্কিত পরিষেবা (বা গ্লোবাল)"
+
+msgid "tooltip.table.configs.status"
+msgstr "কাস্টম কনফিগারেশনের খসড়া অবস্থা"
+
+msgid "tooltip.table.configs.template"
+msgstr "কাস্টম কনফিগারেশন একটি টেমপ্লেট থেকে উদ্ভূত কিনা তা নির্দেশ করে"
+
+msgid "tooltip.table.configs.type"
+msgstr "কাস্টম কনফিগারেশনের প্রকার বা প্রসঙ্গ (যেমন HTTP, MODSEC)"
+
+msgid "tooltip.table.instances.actions"
+msgstr "এই ইনস্ট্যান্সের জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.instances.created"
+msgstr "ইনস্ট্যান্স প্রথম নিবন্ধিত হওয়ার তারিখ এবং সময়"
+
+msgid "tooltip.table.instances.details"
+msgstr "ইনস্ট্যান্সের বিবরণ দেখান"
+
+msgid "tooltip.table.instances.health"
+msgstr "ইনস্ট্যান্সের স্বাস্থ্য স্থিতি (চালু, বন্ধ, লোড হচ্ছে)"
+
+msgid "tooltip.table.instances.hostname"
+msgstr "ইনস্ট্যান্সের হোস্টনাম বা URL"
+
+msgid "tooltip.table.instances.last_seen"
+msgstr "ইনস্ট্যান্স শেষবার দেখার তারিখ এবং সময়"
+
+msgid "tooltip.table.instances.method"
+msgstr "ইনস্ট্যান্স তৈরির পদ্ধতি (যেমন ui, autoconf)"
+
+msgid "tooltip.table.instances.name"
+msgstr "ব্যবহারকারী-সংজ্ঞায়িত বা স্বয়ংক্রিয়ভাবে তৈরি ইনস্ট্যান্সের নাম"
+
+msgid "tooltip.table.instances.select_all"
+msgstr "সব ইনস্ট্যান্স নির্বাচন করুন"
+
+msgid "tooltip.table.instances.type"
+msgstr "ইনস্ট্যান্সের প্রকার (যেমন কন্টেইনার, স্ট্যাটিক)"
+
+msgid "tooltip.table.jobs.actions"
+msgstr "এই কার্যের জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.jobs.async"
+msgstr "কার্যটি অ্যাসিঙ্ক্রোনাসভাবে চলে কিনা তা নির্দেশ করে"
+
+msgid "tooltip.table.jobs.details"
+msgstr "কার্যের বিবরণ দেখান"
+
+msgid "tooltip.table.jobs.interval"
+msgstr "কার্যের সম্পাদন ফ্রিকোয়েন্সি"
+
+msgid "tooltip.table.jobs.last_run"
+msgstr "শেষ কার্য সম্পাদনের স্থিতি (সফল/ব্যর্থ)"
+
+msgid "tooltip.table.jobs.name"
+msgstr "কার্যের নাম"
+
+msgid "tooltip.table.jobs.plugin"
+msgstr "কার্যের সাথে সম্পর্কিত প্লাগইন"
+
+msgid "tooltip.table.jobs.reload"
+msgstr "কার্যটি BunkerWeb পুনরায় লোড ট্রিগার করে কিনা তা নির্দেশ করে"
+
+msgid "tooltip.table.jobs.select_all"
+msgstr "সব কার্য নির্বাচন করুন"
+
+msgid "tooltip.table.plugins.actions"
+msgstr "এই প্লাগইনের জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.plugins.description"
+msgstr "প্লাগইনের বিবরণ"
+
+msgid "tooltip.table.plugins.details"
+msgstr "প্লাগইনের বিবরণ দেখান"
+
+msgid "tooltip.table.plugins.id"
+msgstr "প্লাগইনের অনন্য শনাক্তকারী"
+
+msgid "tooltip.table.plugins.method"
+msgstr "প্লাগইন তৈরির পদ্ধতি (যেমন ui, core)"
+
+msgid "tooltip.table.plugins.name"
+msgstr "প্লাগইনের নাম"
+
+msgid "tooltip.table.plugins.select_all"
+msgstr "সব প্লাগইন নির্বাচন করুন"
+
+msgid "tooltip.table.plugins.stream"
+msgstr "প্লাগইনটি স্ট্রিম মোড সমর্থন করে কিনা তা নির্দেশ করে"
+
+msgid "tooltip.table.plugins.type"
+msgstr "প্লাগইনের প্রকার (কোর, বাহ্যিক, প্রো, UI)"
+
+msgid "tooltip.table.plugins.version"
+msgstr "প্লাগইনের সংস্করণ"
+
+msgid "tooltip.table.reports.actions"
+msgstr "এই রিপোর্টের জন্য উপলভ্য কর্মসমূহ"
+
+msgid "tooltip.table.reports.bytes_received"
+msgstr "শুধু স্ট্রিম: সেশন চলাকালে ক্লায়েন্ট থেকে প্রাপ্ত বাইট"
+
+msgid "tooltip.table.reports.bytes_sent"
+msgstr "শুধু স্ট্রিম: সেশন চলাকালে ক্লায়েন্টকে পাঠানো বাইট"
+
+msgid "tooltip.table.reports.client_port"
+msgstr "শুধু স্ট্রিম: ক্লায়েন্টের উৎস পোর্ট"
+
+msgid "tooltip.table.reports.country"
+msgstr "রিপোর্ট করা আইপি ঠিকানার সাথে সম্পর্কিত দেশ"
+
+msgid "tooltip.table.reports.data"
+msgstr "রিপোর্টের সাথে সম্পর্কিত অতিরিক্ত ডেটা"
+
+msgid "tooltip.table.reports.date"
+msgstr "রিপোর্ট তৈরির তারিখ এবং সময়"
+
+msgid "tooltip.table.reports.details"
+msgstr "রিপোর্টের বিবরণ দেখান"
+
+msgid "tooltip.table.reports.ip_address"
+msgstr "রিপোর্ট ট্রিগার করা আইপি ঠিকানা"
+
+msgid "tooltip.table.reports.listen_port"
+msgstr "শুধু স্ট্রিম: যে পোর্টে সেশনটি এসেছে"
+
+msgid "tooltip.table.reports.method"
+msgstr "রিপোর্ট করা অনুরোধের HTTP পদ্ধতি"
+
+msgid "tooltip.table.reports.protocol"
+msgstr "HTTP অনুরোধ, বা TCP/UDP স্ট্রিম সেশন"
+
+msgid "tooltip.table.reports.reason"
+msgstr "রিপোর্ট তৈরির কারণ"
+
+msgid "tooltip.table.reports.request_id"
+msgstr "অনুরোধের জন্য অনন্য শনাক্তকারী"
+
+msgid "tooltip.table.reports.security_mode"
+msgstr "রিপোর্ট তৈরির সময় সক্রিয় নিরাপত্তা মোড"
+
+msgid "tooltip.table.reports.select_all"
+msgstr "সব রিপোর্ট নির্বাচন করুন"
+
+msgid "tooltip.table.reports.server_name"
+msgstr "রিপোর্ট তৈরি করা সার্ভারের নাম (vhost)"
+
+msgid "tooltip.table.reports.session_time"
+msgstr "শুধু স্ট্রিম: সেশন কত সেকেন্ড স্থায়ী হয়েছে"
+
+msgid "tooltip.table.reports.status_code"
+msgstr "রিপোর্ট করা অনুরোধের জন্য ফেরত দেওয়া HTTP স্ট্যাটাস কোড"
+
+msgid "tooltip.table.reports.url"
+msgstr "রিপোর্ট করা অনুরোধে লক্ষ্যযুক্ত URL"
+
+msgid "tooltip.table.reports.user_agent"
+msgstr "রিপোর্ট করা অনুরোধ থেকে User-Agent স্ট্রিং"
+
+msgid "tooltip.table.select_rows_for_action"
+msgstr "একটি কার্যকলাপ সম্পাদন করতে অনুগ্রহ করে এক বা একাধিক সারি নির্বাচন করুন।"
+
+msgid "tooltip.table.services.actions"
+msgstr "এই পরিষেবার জন্য উপলব্ধ কার্যকলাপ"
+
+msgid "tooltip.table.services.created"
+msgstr "পরিষেবা তৈরির তারিখ এবং সময়"
+
+msgid "tooltip.table.services.details"
+msgstr "পরিষেবার বিবরণ দেখান"
+
+msgid "tooltip.table.services.last_update"
+msgstr "পরিষেবা শেষ আপডেট করার তারিখ এবং সময়"
+
+msgid "tooltip.table.services.method"
+msgstr "পরিষেবা তৈরির পদ্ধতি (যেমন ui, file)"
+
+msgid "tooltip.table.services.name"
+msgstr "পরিষেবার নাম"
+
+msgid "tooltip.table.services.security_mode"
+msgstr "পরিষেবার নিরাপত্তা মোড (অবরোধ বা সনাক্ত)"
+
+msgid "tooltip.table.services.select_all"
+msgstr "সমস্ত পরিষেবা নির্বাচন করুন"
+
+msgid "tooltip.table.services.template"
+msgstr "পরিষেবা দ্বারা ব্যবহৃত টেমপ্লেট"
+
+msgid "tooltip.table.services.type"
+msgstr "পরিষেবার ধরণ (অনলাইন/খসড়া)"
+
+msgid "tooltip.table.templates.actions"
+msgstr "এই টেমপ্লেটের জন্য উপলব্ধ ক্রিয়াগুলি"
+
+msgid "tooltip.table.templates.configs"
+msgstr "টেমপ্লেটের কনফিগারেশনের সংখ্যা"
+
+msgid "tooltip.table.templates.created"
+msgstr "টেমপ্লেট তৈরির তারিখ"
+
+msgid "tooltip.table.templates.details"
+msgstr "টেমপ্লেটের বিবরণ দেখান"
+
+msgid "tooltip.table.templates.id"
+msgstr "টেমপ্লেটের আইডি"
+
+msgid "tooltip.table.templates.last_update"
+msgstr "টেমপ্লেটের সর্বশেষ আপডেটের তারিখ"
+
+msgid "tooltip.table.templates.method"
+msgstr "টেমপ্লেট তৈরির পদ্ধতি"
+
+msgid "tooltip.table.templates.name"
+msgstr "ব্যবহারকারী-নির্ধারিত বা স্বয়ংক্রিয়ভাবে তৈরি টেমপ্লেটের নাম"
+
+msgid "tooltip.table.templates.plugin"
+msgstr "যে প্লাগইনে টেমপ্লেটটি রয়েছে"
+
+msgid "tooltip.table.templates.select_all"
+msgstr "সব টেমপ্লেট নির্বাচন করুন"
+
+msgid "tooltip.table.templates.settings"
+msgstr "টেমপ্লেটের সেটিংসের সংখ্যা"
+
+msgid "tooltip.table.templates.steps"
+msgstr "টেমপ্লেটের ধাপের সংখ্যা"
+
+msgid "tooltip.toggle_level"
+msgstr "%(level)s লাইন দেখান / লুকান"
+
+msgid "tooltip.toggle_wrap"
+msgstr "লাইন মোড়ানো চালু/বন্ধ করুন"
+
+msgid "tooltip.ui_host"
+msgstr "রিভার্স প্রক্সির মাধ্যমে BunkerWeb UI পরিবেশনকারী হোস্টনাম বা আইপি ঠিকানা।"
+
+msgid "tooltip.ui_url"
+msgstr "রিভার্স প্রক্সির মাধ্যমে BunkerWeb UI অ্যাক্সেস করার জন্য ব্যবহৃত URL পাথ।"
+
+msgid "tooltip.ui_url_security"
+msgstr "একটি অ-মানক, অনুমান করা কঠিন URL পাথ ব্যবহার নিরাপত্তা বাড়ায়।"
+
+msgid "tooltip.use_custom_ssl"
+msgstr "Let's Encrypt-এর পরিবর্তে কাস্টম SSL শংসাপত্র ব্যবহার করতে হবে কিনা।"
+
+msgid "tooltip.use_lets_encrypt_staging"
+msgstr "পরীক্ষার জন্য Let's Encrypt স্টেজিং পরিবেশ ব্যবহার করতে হবে কিনা (অবিশ্বস্ত শংসাপত্র তৈরি করে)।"
+
+msgid "tooltip.use_lets_encrypt_staging_letsencrypt_only"
+msgstr "Let's Encrypt স্টেজিং শুধু তখনই উপলব্ধ যখন Let's Encrypt সার্ভার ব্যবহার করা হয়।"
+
+msgid "tooltip.use_proxy_protocol"
+msgstr "PROXY প্রোটোকল যোগাযোগ সক্ষম করুন।"
+
+msgid "tooltip.use_real_ip"
+msgstr "আসল আইপি ব্যবহার করুন"
+
+msgid "tooltip.username_length"
+msgstr "ব্যবহারকারীর নাম অবশ্যই ১ থেকে ২৫৬ অক্ষরের মধ্যে হতে হবে।"
+
+msgid "tooltip.value_from_global"
+msgstr "গ্লোবাল সেটিংস থেকে মান"
+
+msgid "tooltip.view_full_url"
+msgstr "সম্পূর্ণ URL দেখতে ক্লিক করুন"
+
+msgid "tooltip.wildcard_certificates"
+msgstr "ওয়াইল্ডকার্ড শংসাপত্র তৈরি করুন (*.domain.com)। DNS চ্যালেঞ্জ প্রয়োজন।"
+
+msgid "tooltip.wildcard_dns_only"
+msgstr "ওয়াইল্ডকার্ড শংসাপত্রগুলি কেবল DNS চ্যালেঞ্জ প্রকারের সাথে সমর্থিত।"
+
+msgid "tooltip.zerossl_api_connect_timeout"
+msgstr "ZeroSSL API কলের জন্য সেকেন্ডে সংযোগ টাইমআউট।"
+
+msgid "tooltip.zerossl_api_key"
+msgstr "zerossl-bot দ্বারা ব্যবহৃত ঐচ্ছিক ZeroSSL API কী।"
+
+msgid "tooltip.zerossl_api_max_time"
+msgstr "প্রতি ZeroSSL API অনুরোধের জন্য সেকেন্ডে সর্বোচ্চ মোট সময়।"
+
+msgid "tooltip.zerossl_api_retry"
+msgstr "ZeroSSL API অনুরোধের পুনরায় চেষ্টার সংখ্যা (0 দিলে পুনরায় চেষ্টা বন্ধ হবে)।"
+
+msgid "tooltip.zerossl_api_retry_delay"
+msgstr "ZeroSSL API পুনরায় চেষ্টার মধ্যে সেকেন্ডে বিলম্ব।"
+
+msgid "totp.cant_access"
+msgstr "আপনার প্রমাণীকরণ কোড অ্যাক্সেস করতে পারছেন না?"
+
+msgid "totp.or_use_security_key"
+msgstr "অথবা আপনার সিকিউরিটি কী ব্যবহার করুন"
+
+msgid "totp.prompt"
+msgstr "অনুগ্রহ করে আপনার TOTP কোড লিখুন।"
+
+msgid "totp.signing_in"
+msgstr "BunkerWeb-এ লগইন করছেন"
+
+msgid "totp.subtitle"
+msgstr "আপনার প্রমাণীকরণ অ্যাপ থেকে কোডটি প্রবেশ করুন।"
+
+msgid "totp.subtitle_security_key"
+msgstr "আপনার সিকিউরিটি কী দিয়ে পরিচয় নিশ্চিত করুন।"
+
+msgid "totp.title"
+msgstr "দ্বি-স্তর"
+
+msgid "upstreams.add_server"
+msgstr "সার্ভার যোগ করুন"
+
+msgid "upstreams.all"
+msgstr "সব"
+
+msgid "upstreams.attach"
+msgstr "সংযুক্ত করুন"
+
+msgid "upstreams.attach_copy"
+msgstr "%(name)s (%(servers)s) এক বা একাধিক পরিষেবাতে সংযুক্ত করুন।"
+
+msgid "upstreams.backend_ssl"
+msgstr "TLS ব্যবহার করে সার্ভারের সাথে কথা বলুন (https:// / grpcs://)"
+
+msgid "upstreams.balancing.ip_hash"
+msgstr "IP হ্যাশ — একই ক্লায়েন্ট, একই ব্যাকএন্ড"
+
+msgid "upstreams.balancing.least_conn"
+msgstr "সবচেয়ে কম সংযোগ"
+
+msgid "upstreams.balancing.round_robin"
+msgstr "রাউন্ড রবিন (ডিফল্ট)"
+
+msgid "upstreams.create"
+msgstr "আপস্ট্রিম তৈরি করুন"
+
+msgid "upstreams.delete_confirm_title"
+msgstr "এই আপস্ট্রিম মুছে ফেলুন?"
+
+msgid "upstreams.delete_copy"
+msgstr "আপস্ট্রিম %(name)s মুছে ফেলুন?"
+
+msgid "upstreams.delete_help"
+msgstr "একটি আপস্ট্রিম যা কোনো পরিষেবাতে সংযুক্ত আছে, সেটি মুছে ফেলা যায় না। প্রথমে এটি থেকে সংযোগ বিচ্ছিন্ন করুন।"
+
+msgid "upstreams.edit"
+msgstr "আপস্ট্রিম সম্পাদনা করুন"
+
+msgid "upstreams.edit_shared"
+msgstr "এই আপস্ট্রিমটি %(count)sটি পরিষেবায় সংযুক্ত: %(services)s। সংরক্ষণ করলে সবগুলোর ওপর পরিবর্তন প্রযোজ্য হবে।"
+
+msgid "upstreams.empty_text"
+msgstr "আপস্ট্রিম হলো একটি নামের ব্যাকএন্ড পুল যা আপনি একটি বা একাধিক পরিষেবাতে রিভার্স প্রক্সি পথে সংযুক্ত করেন। REVERSE_PROXY_HOST সেটিংস এর সাথে এটি কাজ করে।"
+
+msgid "upstreams.empty_title"
+msgstr "এখন পর্যন্ত কোনো আপস্ট্রিম নেই"
+
+msgid "upstreams.keepalive"
+msgstr "Keepalive"
+
+msgid "upstreams.keepalive_help"
+msgstr "প্রতিটি কর্মীর জন্য ধরে রাখা নিষ্ক্রিয় সংযোগ। শুধুমাত্র HTTP এবং gRPC; বন্ধ করতে খালি রাখুন।"
+
+msgid "upstreams.match_path"
+msgstr "রিভার্স প্রক্সি পথ"
+
+msgid "upstreams.match_path_help"
+msgstr "এই পুলের দিকে নির্বাচিত পরিষেবাগুলি প্রক্সি করে। একটি স্ট্রিম পুলের জন্য, এটি সম্পূর্ণ পরিষেবাটিকে গ্রহণ করে।"
+
+msgid "upstreams.method"
+msgstr "লোড ব্যালেন্সিং"
+
+msgid "upstreams.name_help"
+msgstr "শুধুমাত্র অক্ষর, সংখ্যা, হাইফেন এবং আন্ডারস্কোর ব্যবহার করুন। ডটগুলি প্রত্যাখ্যান করা হয়, তাই একটি পুলের নাম কখনই কোনও আসল হোস্টকে প্রভাবিত করতে পারে না।"
+
+msgid "upstreams.new"
+msgstr "নতুন আপস্ট্রিম"
+
+msgid "upstreams.not_attached"
+msgstr "সংযুক্ত নয়"
+
+msgid "upstreams.protocol"
+msgstr "প্রোটোকল"
+
+msgid "upstreams.protocol_help"
+msgstr "HTTP এবং gRPC পুলগুলি একটি পথে সংযুক্ত; একটি স্ট্রিম পুল পুরো TCP/UDP পরিষেবাটি গ্রহণ করে।"
+
+msgid "upstreams.protocols.grpc"
+msgstr "gRPC"
+
+msgid "upstreams.protocols.http"
+msgstr "HTTP"
+
+msgid "upstreams.protocols.stream"
+msgstr "স্ট্রিম (TCP/UDP)"
+
+msgid "upstreams.readonly"
+msgstr "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। আপস্ট্রিমগুলি পরিদর্শন করা যেতে পারে, তবে পরিবর্তন করা যায় না।"
+
+msgid "upstreams.role.backup"
+msgstr "ব্যাকআপ"
+
+msgid "upstreams.role.down"
+msgstr "বন্ধ"
+
+msgid "upstreams.role.primary"
+msgstr "প্রাথমিক"
+
+msgid "upstreams.save"
+msgstr "আপস্ট্রিম সংরক্ষণ করুন"
+
+msgid "upstreams.search"
+msgstr "নাম, বর্ণনা বা সার্ভার অনুসন্ধান করুন..."
+
+msgid "upstreams.server_fail_timeout"
+msgstr "ব্যর্থতার সময়সীমা"
+
+msgid "upstreams.server_host"
+msgstr "সার্ভার"
+
+msgid "upstreams.server_max_fails"
+msgstr "সর্বোচ্চ ব্যর্থতা"
+
+msgid "upstreams.server_role"
+msgstr "ভূমিকা"
+
+msgid "upstreams.server_weight"
+msgstr "ওজন"
+
+msgid "upstreams.servers"
+msgstr "সার্ভার"
+
+msgid "upstreams.services_help"
+msgstr "একাধিক পরিষেবা নির্বাচন করতে Ctrl অথবা Command ব্যবহার করুন। একটি আপস্ট্রিম পরে সংযুক্ত করা যেতে পারে।"
+
+msgid "upstreams.services_hidden"
+msgstr "লুকানো পরিষেবা: %(count)s। %(protocol)s আপস্ট্রিম শুধুমাত্র একটি উপযুক্ত পরিষেবাতে সংযুক্ত হতে পারে।"
+
+msgid "upstreams.truncated"
+msgstr "শুধুমাত্র প্রথম 500 আপস্ট্রিম প্রদর্শিত। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সরু করুন।"
+
+msgid "validation.default_field_name"
+msgstr "এই ক্ষেত্রটি"
+
+msgid "validation.invalid_date"
+msgstr "অবৈধ তারিখ"
+
+msgid "validation.ip_global_duplicate"
+msgstr "এই আইপি ঠিকানাটি ইতিমধ্যে বিশ্বব্যাপী নিষিদ্ধ।"
+
+msgid "validation.ip_invalid"
+msgstr "অবৈধ আইপি ঠিকানা বিন্যাস।"
+
+msgid "validation.ip_required"
+msgstr "আইপি ঠিকানা প্রয়োজন।"
+
+msgid "validation.ip_service_duplicate"
+msgstr "এই আইপি ঠিকানাটি নির্বাচিত পরিষেবার (%(service)s) জন্য ইতিমধ্যে নিষিদ্ধ।"
+
+msgid "validation.pattern"
+msgstr "অনুগ্রহ করে %(field)s এর জন্য একটি বৈধ মান লিখুন।"
+
+msgid "validation.required"
+msgstr "%(field)s প্রয়োজন।"
+
+msgid "validation.service_required_for_ban"
+msgstr "পরিষেবা-নির্দিষ্ট নিষেধাজ্ঞার জন্য একটি পরিষেবা নির্বাচন করতে হবে।"
+
+msgid "validation.zerossl_email_or_api_key_required"
+msgstr "ZeroSSL-এর জন্য একটি ইমেল বা ZeroSSL API কী-এর যেকোনো একটি প্রয়োজন।"
+
+msgid "web_cache.available"
+msgstr "উপলব্ধ"
+
+msgid "web_cache.cache_state"
+msgstr "অবস্থা"
+
+msgid "web_cache.cached_files"
+msgstr "ক্যাশে করা ফাইল"
+
+msgid "web_cache.deployment"
+msgstr "ডিপ্লয়মেন্ট"
+
+msgid "web_cache.disabled"
+msgstr "অক্ষম"
+
+msgid "web_cache.disk_usage"
+msgstr "ডিস্ক ব্যবহার"
+
+msgid "web_cache.empty"
+msgstr "খালি"
+
+msgid "web_cache.enabled"
+msgstr "সক্ষম"
+
+msgid "web_cache.enabled_instances"
+msgstr "ক্যাশে সক্রিয়"
+
+msgid "web_cache.enabled_services"
+msgstr "সক্রিয় পরিষেবা"
+
+msgid "web_cache.error"
+msgstr "ত্রুটি"
+
+msgid "web_cache.hit_rate"
+msgstr "হিট রেট"
+
+msgid "web_cache.instance"
+msgstr "ইনস্ট্যান্স"
+
+msgid "web_cache.metrics"
+msgstr "হিট / মিস বিতরণ"
+
+msgid "web_cache.metrics_scope"
+msgstr "সমস্ত ক্যাশে-সক্ষম পরিষেবাগুলির মধ্যে প্রতিটি ইনস্ট্যান্সের জন্য কাউন্টারগুলি একত্রিত করা হয়।"
+
+msgid "web_cache.not_reporting"
+msgstr "রিপোর্টিং হচ্ছে না"
+
+msgid "web_cache.path"
+msgstr "পাথ"
+
+msgid "web_cache.purge"
+msgstr "ক্যাশে করা প্রতিক্রিয়া পরিষ্কার করুন"
+
+msgid "web_cache.purge_all"
+msgstr "সব"
+
+msgid "web_cache.purge_all_confirm_body"
+msgstr "এটি পৌঁছানো যায় এমন প্রতিটি ইনস্ট্যান্সের প্রতিটি পরিষেবার সব ক্যাশ করা প্রতিক্রিয়া মুছে দেয়। এটি ফেরানো যাবে না।"
+
+msgid "web_cache.purge_all_confirm_title"
+msgstr "পুরো ক্যাশে পরিষ্কার করবেন?"
+
+msgid "web_cache.purge_help"
+msgstr "পৌঁছানো যায় এমন ইনস্ট্যান্সে মুছে ফেলার কাজ সঙ্গে সঙ্গে চলে। অগম্য ইনস্ট্যান্স বাদ যায় এবং কোনো কাজ সারিতে থাকে না।"
+
+msgid "web_cache.purge_key"
+msgstr "কার্যকর ক্যাশে কী"
+
+msgid "web_cache.purge_key_help"
+msgstr "শুধু ডিফল্ট $scheme$host$request_uri-এর জন্য ক্যাশ কী খালি রাখুন। পরিষেবা PROXY_CACHE_KEY বদলালে তার কার্যকর মান এখানে দিন; অসমর্থিত request-only ভেরিয়েবল অন্য এন্ট্রি মুছে ফেলার বদলে প্রত্যাখ্যাত হবে।"
+
+msgid "web_cache.purge_key_placeholder"
+msgstr "কার্যকর PROXY_CACHE_KEY (ঐচ্ছিক)"
+
+msgid "web_cache.purge_url"
+msgstr "URL পরিষ্কার করুন"
+
+msgid "web_cache.purge_url_placeholder"
+msgstr "https://www.example.com/asset.js"
+
+msgid "web_cache.reporting_instances"
+msgstr "রিপোর্টকারী ইনস্ট্যান্স"
+
+msgid "web_cache.service"
+msgstr "পরিষেবা"
+
+msgid "web_cache.services"
+msgstr "সার্ভিস সক্রিয়করণ"
+
+msgid "web_cache.status"
+msgstr "ইনস্ট্যান্স স্টোরেজ"
+
+msgid "web_cache.subtitle"
+msgstr "রিভার্স-প্রক্সি ক্যাশের অবস্থা, সম্মিলিত হিট-রেট মেট্রিক ও তাৎক্ষণিক মুছে ফেলার নিয়ন্ত্রণ।"
+
+msgid "whatsnew.missing_action"
+msgstr "GitHub-এ চেঞ্জলগ খুলুন"
+
+msgid "whatsnew.missing_message"
+msgstr "এই বিল্ডে CHANGELOG.md অন্তর্ভুক্ত করা হয়নি। রিলিজ নোট GitHub-এ পাওয়া যাবে।"
+
+msgid "whatsnew.missing_title"
+msgstr "এই ইনস্টলেশনে কোনো চেঞ্জলগ নেই"
+
+msgid "whatsnew.modal.intro"
+msgstr "আপনি সর্বশেষ যে সংস্করণ ব্যবহার করেছেন তার পর যা যা বদলেছে।"
+
+msgid "whatsnew.modal.title"
+msgstr "নতুন কী"
+
+msgid "whatsnew.subtitle"
+msgstr "এই ইনস্টলেশনের সঙ্গে আসা চেঞ্জলগ থেকে সরাসরি, BunkerWeb-এর সব রিলিজ, নতুনটি আগে।"
+
+msgid "workflows.act_block"
+msgstr "ব্লক করুন"
+
+msgid "workflows.act_challenge"
+msgstr "চ্যালেঞ্জ"
+
+msgid "workflows.act_code"
+msgstr "স্ট্যাটাস কোড"
+
+msgid "workflows.act_denyDefault"
+msgstr "ইনস্ট্যান্সের প্রত্যাখ্যান স্ট্যাটাস"
+
+msgid "workflows.act_denyShort"
+msgstr "প্রত্যাখ্যান স্ট্যাটাস"
+
+msgid "workflows.act_provider"
+msgstr "অ্যান্টিবট প্রদানকারী"
+
+msgid "workflows.act_redirect"
+msgstr "রিডাইরেক্ট করুন"
+
+msgid "workflows.act_status"
+msgstr "প্রত্যাখ্যান স্ট্যাটাস"
+
+msgid "workflows.act_terminal"
+msgstr "প্রতি নিয়মে একটি কাজ, এবং সেটিই মূল্যায়ন শেষ করে — নিয়ম থেকে সত্য / মিথ্যা কোনো পথ বের হয় না।"
+
+msgid "workflows.act_url"
+msgstr "গন্তব্য URL"
+
+msgid "workflows.action"
+msgstr "তারপর"
+
+msgid "workflows.add_rule"
+msgstr "নিয়ম যোগ করুন"
+
+msgid "workflows.all"
+msgstr "সব"
+
+msgid "workflows.aria.collapse"
+msgstr "সংকুচিত করুন"
+
+msgid "workflows.aria.combinator"
+msgstr "সমন্বয়কারী পরিবর্তন করুন, বর্তমানে"
+
+msgid "workflows.aria.conditionType"
+msgstr "শর্তের ধরন"
+
+msgid "workflows.aria.denyStatus"
+msgstr "প্রত্যাখ্যান স্ট্যাটাস"
+
+msgid "workflows.aria.drag"
+msgstr "ক্রম বদলাতে টেনে আনুন"
+
+msgid "workflows.aria.expand"
+msgstr "প্রসারিত করুন"
+
+msgid "workflows.aria.groupKind"
+msgstr "গ্রুপের ধরন"
+
+msgid "workflows.aria.insertAt"
+msgstr "%(n)s অবস্থানে একটি নিয়ম যোগ করুন"
+
+msgid "workflows.aria.more"
+msgstr "আরও"
+
+msgid "workflows.aria.moveDown"
+msgstr "নিচে সরান — পরে চলবে"
+
+msgid "workflows.aria.moveRule"
+msgstr "নিয়ম সরান"
+
+msgid "workflows.aria.moveUp"
+msgstr "উপরে সরান — আগে চলবে"
+
+msgid "workflows.aria.openRule"
+msgstr "%(n)s নিয়মটি খুলুন"
+
+msgid "workflows.aria.provider"
+msgstr "অ্যান্টিবট প্রদানকারী"
+
+msgid "workflows.aria.redirectStatus"
+msgstr "রিডাইরেক্ট স্ট্যাটাস"
+
+msgid "workflows.aria.removeCondition"
+msgstr "শর্ত সরান"
+
+msgid "workflows.aria.removeThreshold"
+msgstr "সীমা সরান"
+
+msgid "workflows.aria.removeThresholdLong"
+msgstr "হারের সীমা সরান"
+
+msgid "workflows.aria.removeValue"
+msgstr "মান সরান"
+
+msgid "workflows.aria.requestCount"
+msgstr "অনুরোধের সংখ্যা"
+
+msgid "workflows.aria.resourceGroup"
+msgstr "রিসোর্স গ্রুপ"
+
+msgid "workflows.aria.ruleErrors"
+msgstr "%(count)s নিয়মের বৈধতা সমস্যা"
+
+msgid "workflows.aria.ruleName"
+msgstr "নিয়ম %(n)s-এর নাম"
+
+msgid "workflows.aria.terminalAction"
+msgstr "চূড়ান্ত কাজ"
+
+msgid "workflows.aria.uriMatch"
+msgstr "URI মিলের মোড"
+
+msgid "workflows.aria.uriValue"
+msgstr "URI মান"
+
+msgid "workflows.aria.window"
+msgstr "সেকেন্ডে সময়সীমা"
+
+msgid "workflows.attach"
+msgstr "পরিষেবার সাথে যুক্ত করুন"
+
+msgid "workflows.attach_help"
+msgstr "নিয়মগুলি শুধুমাত্র সেই পরিষেবাগুলিতে প্রয়োগ করা হয় যেগুলিতে একটি ওয়ার্কফ্লো যুক্ত করা হয়েছে।"
+
+msgid "workflows.attached_notice"
+msgstr "সংরক্ষণ করলে এই নিয়মগুলো %(count)sটি সংযুক্ত পরিষেবায় প্রয়োগ হবে।"
+
+msgid "workflows.canvas.auxCanvas"
+msgstr "বাম থেকে ডানে। প্রথম ম্যাচটি জেতে।"
+
+msgid "workflows.canvas.auxList"
+msgstr "উপর থেকে নিচে। প্রথম ম্যাচটি জেতে।"
+
+msgid "workflows.canvas.close"
+msgstr "বন্ধ করুন"
+
+msgid "workflows.canvas.drawerSub"
+msgstr "%(total)s এর %(n)s অবস্থানে চলে"
+
+msgid "workflows.canvas.dropHint"
+msgstr "অগ্রাধিকার সেট করার জন্য ড্রপ করুন — একটি নিয়মের অবস্থান চেইনে তার অর্থ একমাত্র জিনিস"
+
+msgid "workflows.canvas.emptyBody"
+msgstr "কোনো নিয়ম নেই এমন একটি ওয়ার্কফ্লো কিছুই পরিবর্তন করে না — প্রতিটি অনুরোধ সরাসরি পরবর্তী সংযুক্ত ওয়ার্কফ্লোতে চলে যায়।"
+
+msgid "workflows.canvas.emptyCta"
+msgstr "প্রথম নিয়মটি যোগ করুন"
+
+msgid "workflows.canvas.emptyTitle"
+msgstr "এখনো কোনো নিয়ম নেই"
+
+msgid "workflows.canvas.entry_sub"
+msgstr "নিয়মগুলি বাম থেকে ডানে চলে।"
+
+msgid "workflows.canvas.entry_title"
+msgstr "প্রতিটি অনুরোধ"
+
+msgid "workflows.canvas.exit_sub"
+msgstr "পরবর্তী সংযুক্ত ওয়ার্কফ্লোতে চলে যায়।"
+
+msgid "workflows.canvas.exit_title"
+msgstr "কোনো নিয়ম মেলেনি"
+
+msgid "workflows.canvas.fit"
+msgstr "ভিউ-এর সাথে মানানসই করুন"
+
+msgid "workflows.canvas.gateTip"
+msgstr "একটি ম্যাচ গেট, কোনো অ্যাকশন নয়: থ্রেশহোল্ডের নিচে নিয়মটি মেলে না এবং পরবর্তী নিয়মটি মূল্যায়ন করা হয়।"
+
+msgid "workflows.canvas.hint"
+msgstr "পুনরায় সাজাতে নোড টানুন · প্যান করতে বোর্ডটি টানুন · ফোকাস করা নোডে Alt + ← / → ব্যবহার করুন"
+
+msgid "workflows.canvas.hintReadonly"
+msgstr "শুধু-পঠন — চারপাশ দেখতে প্যান করুন; ক্রম পরিবর্তন করা যাবে না।"
+
+msgid "workflows.canvas.insert"
+msgstr "এখানে একটি নিয়ম যোগ করুন"
+
+msgid "workflows.canvas.open"
+msgstr "নিয়মটি খুলুন"
+
+msgid "workflows.canvas.skipped"
+msgstr "নিষ্ক্রিয় — সম্পূর্ণরূপে বাদ দেওয়া হয়েছে, যেন এটি চেইনে না থাকে।"
+
+msgid "workflows.canvas.stopTail"
+msgstr ", মূল্যায়ন এখানে বন্ধ — এরপর কোনো নিয়ম পৌঁছানো যায় না।"
+
+msgid "workflows.canvas.title"
+msgstr "নিয়মের ক্রম"
+
+msgid "workflows.canvas.zoomIn"
+msgstr "জুম ইন"
+
+msgid "workflows.canvas.zoomOut"
+msgstr "জুম আউট"
+
+msgid "workflows.capacity"
+msgstr "%(maxRules)sটির মধ্যে %(count)sটি নিয়ম · সবচেয়ে বড় নিয়ম %(maxPredicates)sটির মধ্যে %(worst)sটি শর্ত ব্যবহার করে · এই ওয়ার্কফ্লোতে %(regexes)sটি রেগেক্স"
+
+msgid "workflows.clone"
+msgstr "ওয়ার্কফ্লো ক্লোন করুন"
+
+msgid "workflows.clone_help"
+msgstr "নিয়মগুলি কপি করা হয়েছে; পরিষেবাগুলির সংযুক্তি কপি করা হয়নি।"
+
+msgid "workflows.clone_name"
+msgstr "কপির নাম"
+
+msgid "workflows.confirm.deleteRule"
+msgstr "এই নিয়মটি মুছবেন? এর নিচের সবকিছু এক ধাপ উপরে উঠবে।"
+
+msgid "workflows.copySuffix"
+msgstr " (অনুলিপি)"
+
+msgid "workflows.delete"
+msgstr "ওয়ার্কফ্লো মুছুন"
+
+msgid "workflows.delete_confirm"
+msgstr "এই ওয়ার্কফ্লো এবং এর সমস্ত নিয়মগুলি স্থায়ীভাবে মুছে যাবে।"
+
+msgid "workflows.empty_text"
+msgstr "একটি ওয়ার্কফ্লো হল পরিষেবাগুলিতে যুক্ত করা নিয়মগুলির একটি সাজানো তালিকা: একটি শর্ত গাছ, একটি ঐচ্ছিক হার থ্রেশহোল্ড এবং একটি অ্যাকশন - চ্যালেঞ্জ, ব্লক বা রিডাইরেক্ট।"
+
+msgid "workflows.empty_title"
+msgstr "এখন পর্যন্ত কোনো ওয়ার্কফ্লো নেই"
+
+msgid "workflows.entry_sub"
+msgstr "ওয়ার্কফ্লোগুলো সংযুক্তির ক্রমে চলে; এর ভেতরের নিয়মগুলো ওপর থেকে নিচে চলে।"
+
+msgid "workflows.entry_title"
+msgstr "সংযুক্ত পরিষেবায় প্রতিটি অনুরোধ"
+
+msgid "workflows.err.save"
+msgstr "সংরক্ষণ করা যায়নি"
+
+msgid "workflows.err.saveUnreachable"
+msgstr "সংরক্ষণ এন্ডপয়েন্টে পৌঁছানো যায়নি"
+
+msgid "workflows.err.validate"
+msgstr "যাচাই করা যায়নি"
+
+msgid "workflows.err.validateUnreachable"
+msgstr "যাচাই এন্ডপয়েন্টে পৌঁছানো যায়নি"
+
+msgid "workflows.errors.body"
+msgstr "কিছুই প্রয়োগ হয়নি — চলমান নীতি অপরিবর্তিত আছে।"
+
+msgid "workflows.errors.count"
+msgstr "%(count)sটি সমস্যা সংরক্ষণে বাধা দিচ্ছে।"
+
+msgid "workflows.errors.rule"
+msgstr "নিয়ম %(n)s"
+
+msgid "workflows.errors.ruleNamed"
+msgstr "নিয়ম %(n)s — %(name)s"
+
+msgid "workflows.errors.whole"
+msgstr "এই ওয়ার্কফ্লো"
+
+msgid "workflows.exit_sub"
+msgstr "অনুরোধটি পরের সংযুক্ত ওয়ার্কফ্লো, তারপর নিরাপত্তা স্ট্যাকের বাকি অংশে যাবে।"
+
+msgid "workflows.exit_title"
+msgstr "কোনো নিয়ম মেলেনি"
+
+msgid "workflows.gate.and"
+msgstr "এবং শুধু একই ক্লায়েন্ট IP এর চেয়ে বেশি অনুরোধ করলে"
+
+msgid "workflows.gate.chip"
+msgstr "মিলের গেট"
+
+msgid "workflows.gate.help"
+msgstr "প্রতি ক্লায়েন্ট IP অনুযায়ী গণনা হয়। সীমার নিচে এই নিয়ম একেবারেই মেলে না এবং মূল্যায়ন পরের নিয়মে যায়; এটি নিজে থেকে হার সীমিত করে না।"
+
+msgid "workflows.legend.fall"
+msgstr "না মিললে পরের নিয়মে যায়"
+
+msgid "workflows.legend.gate"
+msgstr "হারের সীমা মিল নিয়ন্ত্রণ করে, এটি কোনো কাজ নয়"
+
+msgid "workflows.legend.move"
+msgstr "ক্রম বদলাতে টানুন, তীর ব্যবহার করুন বা Alt + ↑ / ↓ চাপুন"
+
+msgid "workflows.legend.moveCanvas"
+msgstr "পুনরায় সাজানোর জন্য, নম্বরযুক্ত ব্যাজ ব্যবহার করুন অথবা Alt + ← / → টি চাপুন"
+
+msgid "workflows.legend.stop"
+msgstr "মিললে একটি কাজ চালিয়ে থেমে যায়"
+
+msgid "workflows.link.entry"
+msgstr "প্রতিটি অনুরোধ"
+
+msgid "workflows.link.noMatch"
+msgstr "মেলেনি"
+
+msgid "workflows.menu.bottom"
+msgstr "শেষে চালান"
+
+msgid "workflows.menu.delete"
+msgstr "নিয়ম মুছুন"
+
+msgid "workflows.menu.disable"
+msgstr "নিয়ম নিষ্ক্রিয় করুন"
+
+msgid "workflows.menu.duplicate"
+msgstr "নিচে অনুলিপি করুন"
+
+msgid "workflows.menu.enable"
+msgstr "নিয়ম সক্রিয় করুন"
+
+msgid "workflows.menu.top"
+msgstr "প্রথমে চালান"
+
+msgid "workflows.move.first"
+msgstr "প্রথমে চালান"
+
+msgid "workflows.move.last"
+msgstr "শেষে চালান"
+
+msgid "workflows.new"
+msgstr "নতুন ওয়ার্কফ্লো"
+
+msgid "workflows.no_rules"
+msgstr "এখন কোনো নিয়ম নেই। এই নীতি তৈরি করা শুরু করার জন্য একটি যোগ করুন।"
+
+msgid "workflows.not_attached"
+msgstr "যুক্ত নয়"
+
+msgid "workflows.not_attached_notice"
+msgstr "এই ওয়ার্কফ্লো কোনো পরিষেবায় সংযুক্ত নয়, তাই নিয়মগুলো এখনো কোথাও প্রয়োগ হচ্ছে না।"
+
+msgid "workflows.not_validated"
+msgstr "এখনো যাচাই করা হয়নি"
+
+msgid "workflows.order_help"
+msgstr "নিয়মগুলি ক্রমানুসারে মূল্যায়ন করা হয় এবং প্রথম যেটির সাথে মিলে যায় সেটি কার্যকর হবে। একটি হার থ্রেশহোল্ড সহ একটি নিয়ম শুধুমাত্র তখনই মিলে যায় যখন থ্রেশহোল্ড অতিক্রম করা হয়, তাই একটি নিম্ন নিয়মটি সেই ট্র্যাফিককে ধরতে পারে যা এটির নিচে রয়েছে।"
+
+msgid "workflows.readonly"
+msgstr "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। ওয়ার্কফ্লোগুলি পরিদর্শন করা যেতে পারে কিন্তু পরিবর্তন করা যায় না।"
+
+msgid "workflows.rule.disabled"
+msgstr "নিষ্ক্রিয়"
+
+msgid "workflows.rule.if"
+msgstr "যদি"
+
+msgid "workflows.rule.namePlaceholder"
+msgstr "নিয়মের নাম"
+
+msgid "workflows.rule.noun"
+msgstr "নিয়ম"
+
+msgid "workflows.rule.onMatch"
+msgstr "মিললে"
+
+msgid "workflows.rule.skipped"
+msgstr "নিষ্ক্রিয় — তালিকায় না থাকার মতো সম্পূর্ণভাবে এড়িয়ে যাওয়া হয়।"
+
+msgid "workflows.rule.stopTail"
+msgstr ", মূল্যায়ন এখানেই থামে — নিচের কোনো নিয়মে পৌঁছায় না।"
+
+msgid "workflows.rules"
+msgstr "নিয়ম"
+
+msgid "workflows.say.actionChanged"
+msgstr "কাজটি %(type)s-এ বদলেছে। এটি এখনো একমাত্র কাজ এবং মূল্যায়ন থামায়।"
+
+msgid "workflows.say.added"
+msgstr "নিয়মটি %(n)s নম্বর, অর্থাৎ শেষ স্থানে যোগ হয়েছে; তাই ওপরের সব নিয়ম আগে পরীক্ষা হবে।"
+
+msgid "workflows.say.deleted"
+msgstr "নিয়ম মুছে ফেলা হয়েছে। %(count)sটি নিয়ম বাকি।"
+
+msgid "workflows.say.duplicated"
+msgstr "অনুলিপিটি %(n)s নম্বর স্থানে ঢোকানো হয়েছে। ওপরের মূল নিয়ম সক্রিয় থাকা পর্যন্ত এটি কখনো মিলবে না।"
+
+msgid "workflows.say.gateAdded"
+msgstr "মিলে হারের সীমা যোগ হয়েছে। এর নিচে নিয়ম মেলে না এবং মূল্যায়ন চলতে থাকে।"
+
+msgid "workflows.say.inserted"
+msgstr "%(total)s এর %(n)s অবস্থানে একটি নিয়ম যোগ করা হয়েছে। এটি আগের সমস্ত নিয়মগুলি প্রথমে পরীক্ষা করে।"
+
+msgid "workflows.say.inspecting"
+msgstr "%(total)s এর %(n)s নিয়মটি সম্পাদনা করুন — %(name)s।"
+
+msgid "workflows.say.jumped"
+msgstr "%(where)s: %(message)s"
+
+msgid "workflows.say.lastValueRemoved"
+msgstr "শেষ মান সরানো হয়েছে — একটি মান না থাকা পর্যন্ত এই শর্ত সংরক্ষণ করা যাবে না।"
+
+msgid "workflows.say.moved"
+msgstr "%(name)s-কে %(total)sটির মধ্যে %(to)s নম্বর স্থানে সরানো হয়েছে%(how)s। এখন এটি %(where)s চলে।"
+
+msgid "workflows.say.predicateCap"
+msgstr "এই নিয়মে ইতিমধ্যে সর্বোচ্চ %(max)sটি শর্ত আছে।"
+
+msgid "workflows.say.ruleAbove"
+msgstr "ওপরের নিয়ম"
+
+msgid "workflows.say.ruleDisabled"
+msgstr "%(name)s নিষ্ক্রিয় — এটি পুরোপুরি এড়িয়ে যায় এবং নিচের নিয়মগুলো এখন সেই অনুরোধগুলো দেখে।"
+
+msgid "workflows.say.ruleEnabled"
+msgstr "%(name)s সক্রিয় — এটি %(n)s নম্বর স্থানে আবার মূল্যায়িত হয়।"
+
+msgid "workflows.say.runsAfter"
+msgstr "%(name)s-এর পরে"
+
+msgid "workflows.say.runsFirst"
+msgstr "প্রথমে"
+
+msgid "workflows.say.runsLast"
+msgstr "শেষে"
+
+msgid "workflows.say.saved"
+msgstr "নিয়মগুলো সংরক্ষণ করে সংযুক্ত পরিষেবায় পাঠানো হয়েছে।"
+
+msgid "workflows.say.theRule"
+msgstr "নিয়মটি"
+
+msgid "workflows.say.valuesDropped"
+msgstr "শর্তটি %(type)s-এ বদলেছে — এর %(count)sটি মান বহন করা যায়নি।"
+
+msgid "workflows.say.via.drag"
+msgstr "টেনে"
+
+msgid "workflows.say.via.keyboard"
+msgstr "কীবোর্ড দিয়ে"
+
+msgid "workflows.say.viewCanvas"
+msgstr "ক্যানভাস ভিউ। নিয়মগুলি বাম থেকে ডানে চলে; প্রথম ম্যাচটি জেতে।"
+
+msgid "workflows.say.viewList"
+msgstr "লিস্ট ভিউ। নিয়মগুলি উপরে থেকে নিচে চলে; প্রথম ম্যাচটি জেতে।"
+
+msgid "workflows.search"
+msgstr "নাম বা বর্ণনা অনুসন্ধান করুন..."
+
+msgid "workflows.test.asn"
+msgstr "ASN"
+
+msgid "workflows.test.asn_help"
+msgstr "ব্যর্থ ASN অনুসন্ধান অনুকরণ করতে ফাঁকা রাখুন।"
+
+msgid "workflows.test.asn_invalid"
+msgstr "ASN একটি সংখ্যা হতে হবে"
+
+msgid "workflows.test.assume_not_whitelisted"
+msgstr "ধরে নেয় ক্লায়েন্ট অনুমোদিত তালিকায় নেই।"
+
+msgid "workflows.test.assume_rate_counter"
+msgstr "অনুরোধ নম্বর %(request_number)s আপনার ইনপুট, কোনো পরিমাপ নয়।"
+
+msgid "workflows.test.assume_regex_budget"
+msgstr "ধরে নেয় ইনস্ট্যান্সের রেগেক্স সীমা শেষ হয়নি।"
+
+msgid "workflows.test.assumptions"
+msgstr "অনুমান"
+
+msgid "workflows.test.country"
+msgstr "দেশ"
+
+msgid "workflows.test.detail_challenge"
+msgstr "চ্যালেঞ্জ নিয়ন্ত্রণ নেয়; নিরাপত্তা স্ট্যাকের বাকি অংশ তবুও চলে।"
+
+msgid "workflows.test.detail_detect"
+msgstr "এই পরিষেবাটি শনাক্তকরণ মোডে আছে, তাই বাস্তবে কিছুই প্রয়োগ হয় না।"
+
+msgid "workflows.test.detail_status"
+msgstr "ক্লায়েন্ট %(status)s দেখবে।"
+
+msgid "workflows.test.failed"
+msgstr "পরীক্ষা চালানো যায়নি"
+
+msgid "workflows.test.geo"
+msgstr "GeoIP অনুসন্ধান"
+
+msgid "workflows.test.geo_help"
+msgstr "অনুপলভ্য হলে দেশ ও ASN নিয়ম অজানা হয়, তাই কখনো মিলতে পারে না।"
+
+msgid "workflows.test.geo_local"
+msgstr "স্থানীয় / ব্যক্তিগত ঠিকানা"
+
+msgid "workflows.test.geo_resolved"
+msgstr "সমাধান হয়েছে"
+
+msgid "workflows.test.geo_unavailable"
+msgstr "ডেটাবেস অনুপলভ্য"
+
+msgid "workflows.test.intro"
+msgstr "ইনস্ট্যান্স যেমন করবে ঠিক তেমনভাবে পরিষেবায় সংযুক্ত প্রতিটি ওয়ার্কফ্লো ক্রমানুসারে মূল্যায়ন করে।"
+
+msgid "workflows.test.invalid"
+msgstr "পরীক্ষার আগে ওপরের সমস্যাগুলো ঠিক করুন।"
+
+msgid "workflows.test.ip"
+msgstr "ক্লায়েন্ট IP"
+
+msgid "workflows.test.method"
+msgstr "পদ্ধতি"
+
+msgid "workflows.test.number"
+msgstr "অনুরোধ নম্বর"
+
+msgid "workflows.test.number_help"
+msgstr "সময়সীমায় এই ক্লায়েন্টের Nতম অনুরোধ। এটি আপনার দেওয়া অনুমান, পরিমাপ নয়।"
+
+msgid "workflows.test.open"
+msgstr "একটি অনুরোধ পরীক্ষা করুন"
+
+msgid "workflows.test.other_matched"
+msgstr "এখানে মিলেছে"
+
+msgid "workflows.test.other_no_match"
+msgstr "কোনো নিয়ম মেলেনি"
+
+msgid "workflows.test.other_unreached"
+msgstr "পৌঁছায়নি"
+
+msgid "workflows.test.other_workflows"
+msgstr "এই পরিষেবার অন্যান্য ওয়ার্কফ্লো"
+
+msgid "workflows.test.out_draft"
+msgstr "এই পরিষেবাটি খসড়া — এর জন্য এখনো কোনো ওয়ার্কফ্লো কম্পাইল হয়নি।"
+
+msgid "workflows.test.out_match"
+msgstr "%(workflow)s · %(rule)s মিলেছে এবং অনুরোধে %(action)s কাজ করেছে।"
+
+msgid "workflows.test.out_no_match"
+msgstr "কোনো নিয়ম মেলেনি। অনুরোধ নিরাপত্তা স্ট্যাকের বাকি অংশে যাবে।"
+
+msgid "workflows.test.out_not_attached"
+msgstr "এই ওয়ার্কফ্লো কোনো পরিষেবায় সংযুক্ত নয়, তাই মূল্যায়নের কোনো নিয়ম-ধাপ নেই।"
+
+msgid "workflows.test.out_whitelisted"
+msgstr "অনুমোদিত তালিকায় — পুরো ওয়ার্কফ্লো এড়িয়ে যায় এবং কোনো নিয়ম মূল্যায়িত হয় না।"
+
+msgid "workflows.test.run"
+msgstr "পরীক্ষা চালান"
+
+msgid "workflows.test.service"
+msgstr "পরিষেবা"
+
+msgid "workflows.test.title"
+msgstr "একটি অনুরোধ পরীক্ষা করুন"
+
+msgid "workflows.test.unreachable"
+msgstr "পরীক্ষা এন্ডপয়েন্টে পৌঁছানো যায়নি"
+
+msgid "workflows.test.uri"
+msgstr "URI পাথ"
+
+msgid "workflows.test.uri_help"
+msgstr "শুধু পাথ — $uri-তে কখনো কোয়েরি স্ট্রিং থাকে না।"
+
+msgid "workflows.test.v_gate"
+msgstr "শর্ত মিলেছে · %(count)sটির মধ্যে %(n)s-এ গেট বন্ধ"
+
+msgid "workflows.test.v_match"
+msgstr "মিলেছে"
+
+msgid "workflows.test.v_unknown"
+msgstr "অজানা"
+
+msgid "workflows.test.v_unknown_help"
+msgstr "এই নিয়মের প্রয়োজনীয় তথ্য নির্ধারণ করা যায়নি, তাই এটি কখনো মিলতে পারে না।"
+
+msgid "workflows.test.whitelisted"
+msgstr "এই ক্লায়েন্ট অনুমোদিত তালিকায় আছে"
+
+msgid "workflows.threshold"
+msgstr "শুধুমাত্র একটি নির্দিষ্ট হার"
+
+msgid "workflows.threshold_count"
+msgstr "অনুরোধ"
+
+msgid "workflows.threshold_window"
+msgstr "প্রতি (সেকেন্ড)"
+
+msgid "workflows.tree.addCondition"
+msgstr "শর্ত"
+
+msgid "workflows.tree.addGroup"
+msgstr "গ্রুপ"
+
+msgid "workflows.tree.all"
+msgstr "সবগুলো"
+
+msgid "workflows.tree.allMeta"
+msgstr "%(count)sটি শর্ত — সব সত্য হতে হবে"
+
+msgid "workflows.tree.and"
+msgstr "এবং"
+
+msgid "workflows.tree.any"
+msgstr "যেকোনোটি"
+
+msgid "workflows.tree.anyMeta"
+msgstr "%(count)sটি শর্ত — অন্তত একটি সত্য হতে হবে"
+
+msgid "workflows.tree.empty"
+msgstr "খালি গ্রুপ — একটি শর্ত যোগ করুন; এভাবে সংরক্ষণ করা যাবে না।"
+
+msgid "workflows.tree.noGroupHolds"
+msgstr "কোনো গ্রুপে %(kind)s এন্ট্রি নেই"
+
+msgid "workflows.tree.noneMeta"
+msgstr "এগুলোর কোনোটিই সত্য না হলে মেলে"
+
+msgid "workflows.tree.not"
+msgstr "কোনোটিই নয়"
+
+msgid "workflows.tree.or"
+msgstr "অথবা"
+
+msgid "workflows.tree.removeGroup"
+msgstr "গ্রুপ সরান"
+
+msgid "workflows.truncated"
+msgstr "শুধুমাত্র প্রথম 500 ওয়ার্কফ্লো দেখানো হচ্ছে। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সংকুচিত করুন।"
+
+msgid "workflows.untitled"
+msgstr "শিরোনামহীন নিয়ম"
+
+msgid "workflows.value.add"
+msgstr "মান"
+
+msgid "workflows.values.fewer"
+msgstr "কম দেখান"
+
+msgid "workflows.values.more"
+msgstr "+%(n)sটি আরও"
+
+msgid "workflows.verb.asn"
+msgstr "হয়"
+
+msgid "workflows.verb.country"
+msgstr "হয়"
+
+msgid "workflows.verb.group"
+msgstr "গ্রুপে আছে"
+
+msgid "workflows.verb.ip"
+msgstr "এর মধ্যে আছে"
+
+msgid "workflows.verb.isIn"
+msgstr "এর মধ্যে আছে"
+
+msgid "workflows.verb.isOneOf"
+msgstr "এগুলোর একটি"
+
+msgid "workflows.verb.method"
+msgstr "হয়"
+
+msgid "workflows.verb.uri"
+msgstr "এর সঙ্গে মেলে"
+
+msgid "workflows.view.canvas"
+msgstr "ক্যানভাস"
+
+msgid "workflows.view.list"
+msgstr "লিস্ট"
+

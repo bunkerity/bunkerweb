@@ -1836,44 +1836,28 @@ $(document).ready(function () {
     return html;
   }
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => {
-      const dt = initializeDataTable(reports_config);
-      dt.on("column-visibility.dt", function (e, settings, column, state) {
-        updateHeaderTooltips(dt.table().header(), headers);
-        $(".tooltip").remove();
-      });
-      dt.on("draw.dt", function () {
-        window.BWCountryFlag.updateTooltips();
-        updateHeaderTooltips(dt.table().header(), headers);
-        // Re-init tooltips for dynamic elements
-        $(".tooltip").remove();
-        $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-        // Hide waiting message and show table
-        $("#reports-waiting").addClass("visually-hidden");
-        $("#reports").removeClass("d-none");
-      });
-      // Ensure tooltips are set after initialization
-      updateHeaderTooltips(dt.table().header(), headers);
-      $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
-      // Hide waiting message and show table
-      $("#reports-waiting").addClass("visually-hidden");
-      $("#reports").removeClass("d-none");
-      return dt;
-    });
-  }
-
+  const dt = initializeDataTable(reports_config);
+  dt.on("column-visibility.dt", function (e, settings, column, state) {
+    updateHeaderTooltips(dt.table().header(), headers);
+    $(".tooltip").remove();
+  });
+  dt.on("draw.dt", function () {
+    window.BWCountryFlag.updateTooltips();
+    updateHeaderTooltips(dt.table().header(), headers);
+    // Re-init tooltips for dynamic elements
+    $(".tooltip").remove();
+    $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+    // Hide waiting message and show table
+    $("#reports-waiting").addClass("visually-hidden");
+    $("#reports").removeClass("d-none");
+  });
+  // Ensure tooltips are set after initialization
+  updateHeaderTooltips(dt.table().header(), headers);
+  $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
+  // Hide waiting message and show table
+  $("#reports-waiting").addClass("visually-hidden");
+  $("#reports").removeClass("d-none");
+  return dt;
   // The #reports DataTable initializes inside the eventlog tab pane, which is
   // not the default-active pane (overview is) -- it first renders while
   // display:none, so column widths/Responsive collapse are computed against a

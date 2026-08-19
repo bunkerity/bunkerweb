@@ -31,6 +31,7 @@ from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -1012,7 +1013,7 @@ def test_template_in_use_notice_replaces_the_stepper_but_not_the_control_block(r
     """Dropping the control block behind an `{% if template_editable %}` would look correct and
     would delete USE_UI on every save of a locked service."""
     html = render_template_page(selected_template="high", template_method="scheduler")
-    assert 'data-i18n="status.template_in_use"' in html
+    assert english("status.template_in_use", template="high", method="scheduler") in html
     assert 'class="ps-1 pe-1 tab-pane fade' not in html
     assert set(_named_enabled_controls(html)) == {"csrf_token", *CONTROL_KEYS}
     assert 'name="USE_TEMPLATE" value="high"' in html

@@ -39,7 +39,7 @@
                                             aria-expanded="false"
                                             aria-label="Toggle navigation">
                                         <i class="bx bx-xs bx-menu"></i>&nbsp;
-                                        <span class="don-jose" data-i18n="navigation.mode_selection">Mode selection</span>
+                                        <span class="don-jose">{{ _("navigation.mode_selection") }}</span>
                                     </button>
                                     <!-- Collapsible floating menu -->
                                     <div class="collapse mt-2" id="mode-selection-floating">
@@ -64,6 +64,8 @@
                     {% include "footer.html" %}
                     {% include "sidebar-notifications.html" %}
                     {% include "sidebar-news.html" %}
+                    {% if onboarding_active %}{% include "models/onboarding_drawer.html" %}{% endif %}
+{% if whatsnew_releases %}{% include "models/whats_new_modal.html" %}{% endif %}
                     <div class="content-backdrop fade"></div>
                 </div>
                 <!-- Content wrapper -->

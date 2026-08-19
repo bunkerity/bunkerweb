@@ -16,6 +16,7 @@ from pathlib import Path
 from types import ModuleType
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -141,9 +142,9 @@ def test_gallery_svc_chip_always_rendered_including_zero():
     tpl_b_card = _card_slice(html, "tpl-b")
 
     # Chip shows real usage for every card, including "0 svc" (kit tplCard always has it).
-    assert "templates.gallery.svc_suffix" in tpl_a_card
+    assert english("templates.gallery.svc_suffix") in tpl_a_card
     assert "3&nbsp;" in tpl_a_card
-    assert "templates.gallery.svc_suffix" in tpl_b_card
+    assert english("templates.gallery.svc_suffix") in tpl_b_card
     assert "0&nbsp;" in tpl_b_card
 
 
@@ -157,10 +158,9 @@ def test_gallery_badge_order_is_plugin_then_config_then_feature():
     assert plugin_idx < config_idx < feature_idx
 
     # Each badge's typed tooltip key + interpolated name is present.
-    assert 'data-i18n="templates.tag.plugin"' in tpl_a_card
-    assert 'data-i18n="templates.tag.config"' in tpl_a_card
-    assert 'data-i18n="templates.tag.feature"' in tpl_a_card
-    assert '{"name": "Antibot"}' in tpl_a_card
+    # Each chip's tooltip names its own badge: the key is typed and the name interpolated.
+    for badge in _BADGES_A:
+        assert english(f"templates.tag.{badge['type']}", name=badge["text"]) in tpl_a_card
 
 
 def test_gallery_i18n_keys_all_resolve_in_en_json():
@@ -172,17 +172,28 @@ def test_gallery_i18n_keys_all_resolve_in_en_json():
         "templates.gallery.select",
         "templates.gallery.delete_selected",
         "templates.gallery.svc_suffix",
+        "button.create_template",
+    ):
+        assert english(key) in html, key
+        assert _resolves_in_locale(locale, key), key
+
+    # The tag chips interpolate a name, so they are checked where that name is known
+    # (test_gallery_badge_order_is_plugin_then_config_then_feature) -- here only that they resolve.
+    # Interpolated keys: asserted with their variable where the value is known
+    # (the chips in test_gallery_badge_order..., the row tooltips below), resolvable here.
+    for key in (
         "templates.tag.plugin",
         "templates.tag.config",
         "templates.tag.feature",
-        "tooltip.link.view_template",
-        "tooltip.link.edit_template",
         "tooltip.link.clone_template",
         "tooltip.button.delete_template",
-        "button.create_template",
     ):
-        assert f'data-i18n="{key}"' in html, key
         assert _resolves_in_locale(locale, key), key
+
+    for key in ("tooltip.link.view_template", "tooltip.link.edit_template"):
+        assert _resolves_in_locale(locale, key), key
+    assert english("tooltip.link.edit_template", template="tpl-a") in html
+    assert english("tooltip.link.clone_template", template="tpl-a") in html
 
     # Core-template name keys are only emitted for the 5 built-in ids, so they need not
     # appear in this render (tpl-a/tpl-b are custom) -- but they must resolve in en.json.
@@ -205,7 +216,7 @@ def test_gallery_card_title_is_short_id_and_description_is_full_name():
     )
     html = _render_dashboard_page("templates.html", **core)
     card = _card_slice(html, "low")
-    assert 'data-i18n="templates.name.low"' in card
+    assert english("templates.name.low") in card
     assert "Low security" in card  # English fallback for the short title
     assert 'class="bw-tpl-desc' in card
     assert "Basic security level for web apps" in card  # long name = description
@@ -232,8 +243,8 @@ def test_gallery_empty_state_when_no_templates():
 
     assert 'id="templates-gallery-empty"' in html
     assert 'id="templates-grid"' not in html
-    assert 'data-i18n="templates.gallery.empty_title"' in html
-    assert 'data-i18n="templates.gallery.empty_message"' in html
+    assert english("templates.gallery.empty_title") in html
+    assert english("templates.gallery.empty_message") in html
     # Bulk-select toolbar only ever makes sense with templates to select.
     assert 'id="templates-select-toggle"' not in html
 

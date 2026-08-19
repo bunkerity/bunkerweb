@@ -10,8 +10,8 @@ from json import dumps, loads
 from operator import itemgetter
 from os import getenv, getpid, sep
 from os.path import abspath, join
-from re import fullmatch, split as resplit
-from secrets import token_urlsafe
+from re import compile as re_compile, fullmatch, split as resplit
+from secrets import token_hex, token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
 from threading import Lock
@@ -45,6 +45,7 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
+    SETTINGS_HUNGRY_PATH_PREFIXES,
     STATIC_PATH_PREFIXES,
     _sanitize_internal_next,
     flash,
@@ -61,6 +62,7 @@ from app.utils import (
     stop,
     restart_workers,
 )
+from app.i18n import browser_catalog, init_i18n
 from app.lang_config import SUPPORTED_LANGUAGES
 
 from app.routes.about import about
@@ -78,6 +80,11 @@ from app.routes.jobs import jobs
 from app.routes.login import login
 from app.routes.logout import logout, logout_page
 from app.routes.logs import logs
+from app.routes.onboarding import onboarding
+from app.routes.whats_new import pending_releases, whats_new
+from app import perf
+from base_api_client import REQUEST_ID  # type: ignore
+from app.models.onboarding import PREFERENCE_KEY as ONBOARDING_PREFERENCE_KEY
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
@@ -114,6 +121,7 @@ BLUEPRINTS = (
     web_cache,
     timings,
     threatmap,
+    whats_new,
     logs,
     login,
     configs,
@@ -121,6 +129,7 @@ BLUEPRINTS = (
     bans,
     setup,
     support,
+    onboarding,
 )
 
 signal(SIGINT, handle_stop)
@@ -600,6 +609,10 @@ with app.app_context():
 
     app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
 
+    # Server-side translation. Templates that have been converted render already translated;
+    # the rest still carry `data-i18n` and are handled by i18next in the browser. See app/i18n.py.
+    init_i18n(app)
+
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
     app.config["SECRET_KEY"] = FLASK_SECRET
 
@@ -769,7 +782,7 @@ with app.app_context():
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
-                if endpoint not in ("static", "index", "loading", "check", "check_reloading") and not endpoint.endswith("_page"):
+                if endpoint not in ("static", "index", "loading", "check", "check_reloading", "i18n_catalog") and not endpoint.endswith("_page"):
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
             except BuildError as e:
@@ -1095,6 +1108,12 @@ def _host_allowed(host: str, allowed: list) -> bool:
     return False
 
 
+# An inbound correlation id is whatever the caller sent. It is echoed in a response header and
+# written to the logs of two services, so it is accepted only in this shape and generated
+# otherwise — never trusted verbatim.
+_REQUEST_ID_RE = re_compile(r"[A-Za-z0-9._-]{1,64}")
+
+
 @app.before_request
 def before_request():
     # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
@@ -1107,6 +1126,14 @@ def before_request():
     if allowed_hosts and not _host_allowed(request.host, allowed_hosts):
         LOGGER.warning(f"Blocking UI request with disallowed Host header: {request.host!r}")
         return make_response(jsonify({"message": "Invalid host"}), 400)
+
+    # Opened before anything else this request does, so the totals cover the whole render and
+    # not just the part after the checks above. `token_hex(8)` rather than a uuid: it lands in
+    # a response header and in two services' logs, and 16 characters are enough to grep for.
+    inbound = request.headers.get("X-Request-ID", "")
+    request_id = inbound if _REQUEST_ID_RE.fullmatch(inbound) else token_hex(8)
+    perf.start(request_id)
+    REQUEST_ID.set(request_id)
 
     DATA.load_from_file()
     if DATA.get("SERVER_STOPPING", False):
@@ -1305,12 +1332,43 @@ def before_request():
                     )
 
         try:
-            plugins = BW_CONFIG.get_plugins()
+            # Identities only unless this page actually renders settings from them — see
+            # SETTINGS_HUNGRY_PATH_PREFIXES. The schema is 95% of the payload and every page
+            # was paying for it to draw a sidebar list of plugin names.
+            plugins = BW_CONFIG.get_plugins(with_settings=request.path.startswith(SETTINGS_HUNGRY_PATH_PREFIXES))
         except Exception:
             plugins = {}
 
         bw_version = metadata.get("version", "unknown")
         pro_expire_val = metadata.get("pro_expire")
+
+        # Whether to render the walkthrough pill + drawer at all. Cached in the session so a
+        # page render costs no extra API call: the blob only changes through
+        # /onboarding/state, which clears the flag itself. A user who finished or dismissed
+        # the walkthrough therefore downloads none of that markup and issues no request.
+        onboarding_active = session.get("onboarding_active")
+        onboarding_autoopen = False
+        if onboarding_active is None:
+            try:
+                blob = API_CLIENT.get_user_preferences(current_user.get_id(), ONBOARDING_PREFERENCE_KEY) or {}
+            except Exception:
+                blob = {}
+            onboarding_active = not (blob.get("dismissed_at") or blob.get("completed_at"))
+            # Opens itself exactly once, the first time this session resolves the flag and
+            # the user has never opened it. The drawer PATCHes `opened` and it stops.
+            onboarding_autoopen = onboarding_active and not blob.get("opened_at")
+            session["onboarding_active"] = onboarding_active
+
+        # The post-upgrade recap. Resolved once per session like the walkthrough flag; the
+        # releases themselves come from a parsed-and-cached CHANGELOG.md, so the extra cost
+        # of a pending recap is a dict lookup, and of a caught-up user nothing at all.
+        whatsnew_releases = ()
+        if session.get("whatsnew_pending") is not False:
+            releases, stored = pending_releases(current_user.get_id(), bw_version)
+            session["whatsnew_pending"] = bool(releases)
+            if releases:
+                whatsnew_releases = releases
+                LOGGER.debug(f"What's new: {len(releases)} release(s) between {stored} and {bw_version} for {current_user.get_id()}")
 
         data = dict(
             current_endpoint=current_endpoint,
@@ -1336,6 +1394,9 @@ def before_request():
             extra_pages=app.config["EXTRA_PAGES"],
             extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
             extra_styles=DATA.get("EXTRA_STYLES", []),
+            onboarding_active=onboarding_active,
+            onboarding_autoopen=onboarding_autoopen,
+            whatsnew_releases=whatsnew_releases,
         )
 
         try:
@@ -1439,6 +1500,15 @@ def set_security_headers(response):
         "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(self), publickey-credentials-get=(self), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
     )
 
+    # What this page cost, where a browser can read it without any tooling. Deliberately not
+    # gated on DEBUG: a number you have to switch on is a number nobody has when it matters.
+    timing = perf.server_timing()
+    if timing:
+        response.headers["Server-Timing"] = timing
+        response.headers["X-Request-ID"] = g.request_id
+        calls, api_ms, total_ms = perf.totals()
+        LOGGER.debug(f"{request.method} {request.path} rid={g.request_id} api_calls={calls} api_ms={api_ms:.1f} total_ms={total_ms:.1f}")
+
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
             resp = hook(response)
@@ -1452,6 +1522,10 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
+    # Runs even when before_request returned early, which is what keeps a reused worker thread
+    # from starting its next request holding the previous one's memo.
+    perf.finish()
+
     with suppress(AssertionError, RuntimeError):
         if not request.path.startswith(STATIC_PATH_PREFIXES) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
@@ -1562,22 +1636,61 @@ def set_theme():
 
 
 @app.route("/set_language", methods=["POST"])
-@login_required
 def set_language():
+    """Record the chosen language, in the session always and on the user when that is possible.
+
+    No `@login_required`, and no early return on a read-only database: since the chrome is
+    rendered server-side, this endpoint is the *only* way the server can learn which language to
+    render in. Refusing it would leave three kinds of user unable to change language at all —
+    someone on the login page, someone whose database is read-only, and someone whose API write
+    fails. The session is not the database, so recording it there is always allowed.
+
+    Saving to the user record is the part that needs an account and a writable database; it is
+    what makes the choice follow them to another browser.
+    """
     allowed_languages = {lang["code"] for lang in SUPPORTED_LANGUAGES}
-    lang = request.form["language"].lower()
-    if DATA.get("READONLY_MODE", False):
-        return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
-    elif lang not in allowed_languages:
+    lang = (request.form.get("language") or "").lower()
+    if lang not in allowed_languages:
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
+    # Read by `app/i18n.resolve_locale` on the very next request — including the reload the
+    # language switcher issues, which is what makes the change visible at all.
+    session["language"] = lang
+
+    if not current_user.is_authenticated or DATA.get("READONLY_MODE", False):
+        return Response(status=200, response=dumps({"message": "ok", "saved": False}), content_type="application/json")
 
     try:
         API_CLIENT.update_user(current_user.get_id(), language=lang)
     except Exception as e:
-        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {e}")
-        return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
+        # The session already carries the choice, so the language does change; it just will not
+        # outlive the session. Worth a log, not worth failing the request.
+        LOGGER.error(f"Couldn't save the language preference of user {current_user.get_id()}: {e}")
+        return Response(status=200, response=dumps({"message": "ok", "saved": False}), content_type="application/json")
 
-    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+    # Saved: drop the session override so it can never shadow a *newer* choice made from another
+    # browser. The user record is the durable answer from here on.
+    session.pop("language", None)
+
+    return Response(status=200, response=dumps({"message": "ok", "saved": True}), content_type="application/json")
+
+
+@app.route("/locales/<string:lang>.js")
+def i18n_catalog(lang: str):
+    """The message catalog as a synchronous script, so `t()` is defined before any page script runs.
+
+    Public by construction: `/locales/` is in `STATIC_PATH_PREFIXES`, so this is reachable from
+    the login page and the setup wizard, which need it as much as any authenticated page does.
+    """
+    catalog = browser_catalog(app.static_folder or "", lang)
+    if catalog is None:
+        return Response(status=404)
+
+    # Explicit charset: the catalogs are full of non-ASCII copy and a script tag with no
+    # charset inherits the document's, which is not always what the file is.
+    response = Response(catalog, content_type="application/javascript; charset=utf-8")
+    response.headers["Cache-Control"] = f"public, max-age={app.config['SEND_FILE_MAX_AGE_DEFAULT']}"
+    return response
 
 
 @app.route("/set_columns_preferences", methods=["POST"])

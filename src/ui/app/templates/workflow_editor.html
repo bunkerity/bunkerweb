@@ -35,8 +35,7 @@
        that the ladder they are carefully building is currently enforced nowhere. #}
     {% if workflow.services %}
         {% call alert(variant="secondary", icon="bx-broadcast", classes="mb-4") %}
-            <span data-i18n="workflows.attached_notice"
-                  data-i18n-options='{{ {"count": workflow.services | length} | tojson }}'>Saving applies these rules to {{ workflow.services | length }} attached service(s).</span>
+            <span >{{ _("workflows.attached_notice", count=workflow.services | length) }}</span>
             <span class="d-block small text-muted">{{ workflow.services | join(", ") }}</span>
         {% endcall %}
     {% else %}
@@ -51,14 +50,14 @@
            edit the same rules through the same markup, so the choice is only which axis the
            operator wants priority laid out on. #}
         <div class="wf-canvas-hd">
-            <span class="title"><i class="bx bx-git-commit" aria-hidden="true"></i><span data-i18n="workflows.canvas.title">Rule order</span></span>
-            <span class="aux" id="wf-view-aux" data-i18n="workflows.canvas.auxList">Top to bottom. First match wins.</span>
+            <span class="title"><i class="bx bx-git-commit" aria-hidden="true"></i><span>{{ _("workflows.canvas.title") }}</span></span>
+            <span class="aux" id="wf-view-aux">{{ _("workflows.canvas.auxList") }}</span>
             <div class="wf-vtoggle" role="group" aria-label="View">
                 <button type="button" class="wf-vbtn" data-wf-view="canvas" aria-pressed="false">
-                    <i class="bx bx-network-chart" aria-hidden="true"></i><span data-i18n="workflows.view.canvas">Canvas</span>
+                    <i class="bx bx-network-chart" aria-hidden="true"></i><span>{{ _("workflows.view.canvas") }}</span>
                 </button>
                 <button type="button" class="wf-vbtn is-on" data-wf-view="list" aria-pressed="true">
-                    <i class="bx bx-list-ul" aria-hidden="true"></i><span data-i18n="workflows.view.list">List</span>
+                    <i class="bx bx-list-ul" aria-hidden="true"></i><span>{{ _("workflows.view.list") }}</span>
                 </button>
             </div>
         </div>
@@ -68,16 +67,16 @@
         <div class="wf-canvas" id="wf-rules"></div>
         <div id="wf-empty" class="text-center text-muted py-5 d-none">
             <i class="bx bx-git-commit display-6 d-block mb-2" aria-hidden="true"></i>
-            <span data-i18n="workflows.no_rules">No rule yet. Add one to start building this policy.</span>
+            <span>{{ _("workflows.no_rules") }}</span>
         </div>
         <div class="wf-cap" id="wf-cap"></div>
         {# The two directional lines are rewritten by paintViewToggle() when the view flips —
            the legend has to describe the axis actually on screen. #}
         <div class="wf-legend">
-            <span><i class="bx bx-down-arrow-alt" id="wf-legend-fall" aria-hidden="true"></i><span data-i18n="workflows.legend.fall">No match falls to the next rule</span></span>
-            <span><i class="bx bx-check-circle" aria-hidden="true"></i><span data-i18n="workflows.legend.stop">A match runs one action and stops</span></span>
-            <span><i class="bx bx-filter" aria-hidden="true"></i><span data-i18n="workflows.legend.gate">A rate threshold gates the match, it is not an action</span></span>
-            <span><i class="bx bx-move-vertical" aria-hidden="true"></i><span id="wf-legend-move" data-i18n="workflows.legend.move">Drag, use the arrows, or press Alt + ↑ / ↓ to reorder</span></span>
+            <span><i class="bx bx-down-arrow-alt" id="wf-legend-fall" aria-hidden="true"></i><span>{{ _("workflows.legend.fall") }}</span></span>
+            <span><i class="bx bx-check-circle" aria-hidden="true"></i><span>{{ _("workflows.legend.stop") }}</span></span>
+            <span><i class="bx bx-filter" aria-hidden="true"></i><span>{{ _("workflows.legend.gate") }}</span></span>
+            <span><i class="bx bx-move-vertical" aria-hidden="true"></i><span id="wf-legend-move">{{ _("workflows.legend.move") }}</span></span>
         </div>
     {% endcall %}
 
@@ -99,59 +98,59 @@
        behind it, and backdrop=false keeps that ladder visible and interactive. #}
     {% call drawer(id="wf-tester", social=false, newsletter=false) %}
         <div class="offcanvas-body wf-test">
-            <h5 data-i18n="workflows.test.title">Test a request</h5>
-            <p class="text-muted small" data-i18n="workflows.test.intro">
-                Evaluates every workflow attached to the service, in order, exactly as the instance would.
+            <h5>{{ _("workflows.test.title") }}</h5>
+            <p class="text-muted small">
+                {{ _("workflows.test.intro") }}
             </p>
 
             <form id="wf-test-form" class="wf-test-form">
-                <label for="wf-test-ip" data-i18n="workflows.test.ip">Client IP</label>
+                <label for="wf-test-ip">{{ _("workflows.test.ip") }}</label>
                 <input id="wf-test-ip" class="form-control form-control-sm" value="203.0.113.7" spellcheck="false" />
 
-                <label for="wf-test-geo" data-i18n="workflows.test.geo">GeoIP lookup</label>
+                <label for="wf-test-geo">{{ _("workflows.test.geo") }}</label>
                 <select id="wf-test-geo" class="form-select form-select-sm">
-                    <option value="resolved" data-i18n="workflows.test.geo_resolved">Resolved</option>
-                    <option value="local" data-i18n="workflows.test.geo_local">Local / private address</option>
-                    <option value="unavailable" data-i18n="workflows.test.geo_unavailable">Database unavailable</option>
+                    <option value="resolved">{{ _("workflows.test.geo_resolved") }}</option>
+                    <option value="local">{{ _("workflows.test.geo_local") }}</option>
+                    <option value="unavailable">{{ _("workflows.test.geo_unavailable") }}</option>
                 </select>
-                <p class="wf-test-help" id="wf-test-geo-help" data-i18n="workflows.test.geo_help">
-                    Unavailable makes country and ASN rules UNKNOWN, so they can never match.
+                <p class="wf-test-help" id="wf-test-geo-help">
+                    {{ _("workflows.test.geo_help") }}
                 </p>
 
                 <div id="wf-test-geo-fields">
-                    <label for="wf-test-country" data-i18n="workflows.test.country">Country</label>
+                    <label for="wf-test-country">{{ _("workflows.test.country") }}</label>
                     <input id="wf-test-country" class="form-control form-control-sm" value="FR" maxlength="8" />
 
-                    <label for="wf-test-asn" data-i18n="workflows.test.asn">ASN</label>
+                    <label for="wf-test-asn">{{ _("workflows.test.asn") }}</label>
                     <input id="wf-test-asn" class="form-control form-control-sm" inputmode="numeric" placeholder="64496" />
-                    <p class="wf-test-help" data-i18n="workflows.test.asn_help">Leave empty to simulate a failed ASN lookup.</p>
+                    <p class="wf-test-help">{{ _("workflows.test.asn_help") }}</p>
                 </div>
 
-                <label for="wf-test-method" data-i18n="workflows.test.method">Method</label>
+                <label for="wf-test-method">{{ _("workflows.test.method") }}</label>
                 <select id="wf-test-method" class="form-select form-select-sm">
                     {% for verb in ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"] %}
                         <option value="{{ verb }}">{{ verb }}</option>
                     {% endfor %}
                 </select>
 
-                <label for="wf-test-uri" data-i18n="workflows.test.uri">URI path</label>
+                <label for="wf-test-uri">{{ _("workflows.test.uri") }}</label>
                 <input id="wf-test-uri" class="form-control form-control-sm" value="/" spellcheck="false" />
-                <p class="wf-test-help" data-i18n="workflows.test.uri_help">Path only — $uri never carries a query string.</p>
+                <p class="wf-test-help">{{ _("workflows.test.uri_help") }}</p>
 
-                <label for="wf-test-number" data-i18n="workflows.test.number">Request number</label>
+                <label for="wf-test-number">{{ _("workflows.test.number") }}</label>
                 <input id="wf-test-number" class="form-control form-control-sm" type="number" min="1" max="100000" value="1" />
-                <p class="wf-test-help" data-i18n="workflows.test.number_help">
-                    This client's Nth request in the window. An assumption you supply, not a measurement.
+                <p class="wf-test-help">
+                    {{ _("workflows.test.number_help") }}
                 </p>
 
-                <label for="wf-test-service" data-i18n="workflows.test.service">Service</label>
+                <label for="wf-test-service">{{ _("workflows.test.service") }}</label>
                 <select id="wf-test-service" class="form-select form-select-sm">
                     {% for service in workflow.services or [] %}<option value="{{ service }}">{{ service }}</option>{% endfor %}
                 </select>
 
                 <div class="form-check mt-2">
                     <input class="form-check-input" type="checkbox" id="wf-test-whitelisted" />
-                    <label class="form-check-label" for="wf-test-whitelisted" data-i18n="workflows.test.whitelisted">This client is whitelisted</label>
+                    <label class="form-check-label" for="wf-test-whitelisted">{{ _("workflows.test.whitelisted") }}</label>
                 </div>
 
                 {{ button(label="Run test", i18n_key="workflows.test.run", size="sm", icon="bx-play", id="wf-test-run", classes="mt-3 w-100") }}

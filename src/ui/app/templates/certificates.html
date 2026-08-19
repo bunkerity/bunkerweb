@@ -9,6 +9,7 @@
 {% from "components/search.html" import search %}
 {% from "components/tile.html" import tile %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/service-options.html" import service_options with context %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
@@ -20,47 +21,46 @@
 {% block content %}
     {% set readonly = is_readonly if is_readonly is defined else readonly | default(false) %}
     {% macro service_select(id, services, required) -%}
-        <label class="form-label" for="{{ id }}" data-i18n="certificates.services">Services</label>
-        <select class="form-select" id="{{ id }}" name="service_ids" multiple size="4"{% if required %} required{% endif %}>
-            {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+        <label class="form-label" for="{{ id }}">{{ _("certificates.services") }}</label>
+        <select class="form-select" id="{{ id }}" name="service_ids" multiple size="4"{% if required %} required{% endif %} data-bw-service-options>
         </select>
-        <div class="form-text" data-i18n="certificates.services_help">Use Ctrl or Command to select multiple services.</div>
+        <div class="form-text">{{ _("certificates.services_help") }}</div>
     {%- endmacro %}
 
     {% macro primary_switch(id) -%}
         <div class="form-check form-switch mb-2">
             <input class="form-check-input" type="checkbox" role="switch" id="{{ id }}" name="primary" checked />
-            <label class="form-check-label" for="{{ id }}" data-i18n="certificates.primary_help">Mark as the primary inventory assignment for selected services</label>
+            <label class="form-check-label" for="{{ id }}">{{ _("certificates.primary_help") }}</label>
         </div>
     {%- endmacro %}
 
     {% macro selfsigned_form_fields(services) -%}
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="certificate-selfsigned-name" data-i18n="table.header.name">Name</label>
+                <label class="form-label" for="certificate-selfsigned-name">{{ _("table.header.name") }}</label>
                 <input class="form-control" id="certificate-selfsigned-name" name="name" maxlength="256" required />
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="certificate-selfsigned-cn" data-i18n="certificates.common_name">Common name</label>
+                <label class="form-label" for="certificate-selfsigned-cn">{{ _("certificates.common_name") }}</label>
                 <input class="form-control" id="certificate-selfsigned-cn" name="common_name" maxlength="253" required />
             </div>
             <div class="col-12">
-                <label class="form-label" for="certificate-selfsigned-description" data-i18n="table.header.description">Description</label>
+                <label class="form-label" for="certificate-selfsigned-description">{{ _("table.header.description") }}</label>
                 <input class="form-control" id="certificate-selfsigned-description" name="description" maxlength="4096" />
             </div>
             <div class="col-12">
-                <label class="form-label" for="certificate-selfsigned-sans" data-i18n="certificates.sans">Subject alternative names</label>
+                <label class="form-label" for="certificate-selfsigned-sans">{{ _("certificates.sans") }}</label>
                 <textarea class="form-control" id="certificate-selfsigned-sans" name="sans" rows="2" placeholder="www.example.com, api.example.com"></textarea>
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="certificate-selfsigned-key-type" data-i18n="certificates.algorithm">Key type</label>
+                <label class="form-label" for="certificate-selfsigned-key-type">{{ _("certificates.algorithm") }}</label>
                 <select class="form-select" id="certificate-selfsigned-key-type" name="key_type">
                     <option value="ec">ECDSA</option>
                     <option value="rsa">RSA</option>
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label" for="certificate-selfsigned-valid-days" data-i18n="certificates.valid_days">Validity in days</label>
+                <label class="form-label" for="certificate-selfsigned-valid-days">{{ _("certificates.valid_days") }}</label>
                 <input class="form-control" type="number" id="certificate-selfsigned-valid-days" name="valid_days" min="1" max="825" value="365" required />
             </div>
             <div class="col-md-8">{{ service_select("certificate-selfsigned-services", services, false) }}</div>
@@ -156,15 +156,15 @@
                 {{ search(id="certificates-search", placeholder="Search name, common name, SAN, issuer, or fingerprint...", i18n_key="certificates.search", size="sm", clearable=true, clear_id="certificates-search-clear") }}
             </div>
             <div>
-                <label class="form-label small" for="certificates-source-filter" data-i18n="certificates.source_label">Source</label>
+                <label class="form-label small" for="certificates-source-filter">{{ _("certificates.source_label") }}</label>
                 <select class="form-select form-select-sm" id="certificates-source-filter">
-                    <option value="" data-i18n="certificates.all">All</option>
+                    <option value="">{{ _("certificates.all") }}</option>
                     {# Sources come from the plugins that declare one, so a pro or external provider is
                        listed too. Only the built-ins carry a locale key; anything else falls back to the
-                       label the plugin declared, because i18next renders the raw key when it is missing. #}
+                       label the plugin declared, because gettext renders the raw key when it is missing. #}
                     {% for source_id, source in (sources or {}) | dictsort %}
                         {% if source_id in ["letsencrypt", "customcert", "selfsigned"] %}
-                            <option value="{{ source_id }}" data-i18n="certificates.source.{{ source_id }}">{{ source.label or source_id }}</option>
+                            <option value="{{ source_id }}">{{ _("certificates.source." ~ source_id) }}</option>
                         {% else %}
                             <option value="{{ source_id }}">{{ source.label or source_id }}</option>
                         {% endif %}
@@ -172,19 +172,18 @@
                 </select>
             </div>
             <div>
-                <label class="form-label small" for="certificates-status-filter" data-i18n="table.header.status">Status</label>
+                <label class="form-label small" for="certificates-status-filter">{{ _("table.header.status") }}</label>
                 <select class="form-select form-select-sm" id="certificates-status-filter">
-                    <option value="" data-i18n="certificates.all">All</option>
+                    <option value="">{{ _("certificates.all") }}</option>
                     {% for status in ["valid", "expiring_soon", "expired", "not_yet_valid", "revoked"] %}
-                        <option value="{{ status }}" data-i18n="certificates.status.{{ status }}">{{ status | replace("_", " ") | title }}</option>
+                        <option value="{{ status }}">{{ _("certificates.status." ~ status) }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div>
-                <label class="form-label small" for="certificates-service-filter" data-i18n="table.header.service">Service</label>
-                <select class="form-select form-select-sm" id="certificates-service-filter">
-                    <option value="" data-i18n="certificates.all">All</option>
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label small" for="certificates-service-filter">{{ _("table.header.service") }}</label>
+                <select class="form-select form-select-sm" id="certificates-service-filter" data-bw-service-options>
+                    <option value="">{{ _("certificates.all") }}</option>
                 </select>
             </div>
         </div>
@@ -195,14 +194,14 @@
                     <thead>
                         <tr>
                             <th class="certificate-expand-column"><span class="visually-hidden">Details</span></th>
-                            <th data-i18n="table.header.name">Name</th>
-                            <th data-i18n="certificates.common_name">Common name</th>
-                            <th data-i18n="certificates.issuer">Issuer</th>
-                            <th data-i18n="certificates.algorithm">Algorithm</th>
-                            <th data-i18n="certificates.expires">Expires</th>
-                            <th data-i18n="table.header.status">Status</th>
-                            <th data-i18n="table.header.service">Services</th>
-                            <th class="text-end" data-i18n="table.header.actions">Actions</th>
+                            <th>{{ _("table.header.name") }}</th>
+                            <th>{{ _("certificates.common_name") }}</th>
+                            <th>{{ _("certificates.issuer") }}</th>
+                            <th>{{ _("certificates.algorithm") }}</th>
+                            <th>{{ _("certificates.expires") }}</th>
+                            <th>{{ _("table.header.status") }}</th>
+                            <th>{{ _("table.header.service") }}</th>
+                            <th class="text-end">{{ _("table.header.actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -261,34 +260,34 @@
                                             <section class="certificate-detail-panel h-100" aria-label="Certificate public details">
                                                 {% if certificate.is_orphan %}
                                                     {% call alert(title="ACME account missing", title_key="certificates.orphan_title", variant="warning", icon="bx-error-circle", role=none, classes="mb-3") %}
-                                                        <p class="mb-2" data-i18n="certificates.orphan_help">This renewal record references an ACME account that is no longer present. Renewal remains blocked until the provider state is repaired.</p>
+                                                        <p class="mb-2">{{ _("certificates.orphan_help") }}</p>
                                                         <dl class="row mb-0 small">
-                                                            <dt class="col-sm-4" data-i18n="certificates.orphan_account">Account</dt>
+                                                            <dt class="col-sm-4">{{ _("certificates.orphan_account") }}</dt>
                                                             <dd class="col-sm-8"><code class="text-break">{{ certificate.orphan_state.account }}</code></dd>
-                                                            <dt class="col-sm-4" data-i18n="certificates.orphan_server">ACME server</dt>
+                                                            <dt class="col-sm-4">{{ _("certificates.orphan_server") }}</dt>
                                                             <dd class="col-sm-8"><code class="text-break">{{ certificate.orphan_state.server }}</code></dd>
                                                         </dl>
                                                     {% endcall %}
                                                 {% endif %}
                                                 <dl class="row mb-0 small">
-                                                    <dt class="col-sm-4" data-i18n="table.header.description">Description</dt>
+                                                    <dt class="col-sm-4">{{ _("table.header.description") }}</dt>
                                                     <dd class="col-sm-8">{{ certificate.description or "—" }}</dd>
-                                                    <dt class="col-sm-4" data-i18n="certificates.serial">Serial number</dt>
+                                                    <dt class="col-sm-4">{{ _("certificates.serial") }}</dt>
                                                     <dd class="col-sm-8"><code class="text-break">{{ certificate.serial_number }}</code></dd>
-                                                    <dt class="col-sm-4" data-i18n="certificates.fingerprint">SHA-256 fingerprint</dt>
+                                                    <dt class="col-sm-4">{{ _("certificates.fingerprint") }}</dt>
                                                     <dd class="col-sm-8"><code class="text-break">{{ certificate.fingerprint }}</code></dd>
-                                                    <dt class="col-sm-4" data-i18n="certificates.valid_from">Valid from</dt>
+                                                    <dt class="col-sm-4">{{ _("certificates.valid_from") }}</dt>
                                                     <dd class="col-sm-8"><time class="certificate-date" datetime="{{ certificate.valid_from }}">{{ certificate.valid_from }}</time></dd>
-                                                    <dt class="col-sm-4" data-i18n="certificates.valid_to">Valid until</dt>
+                                                    <dt class="col-sm-4">{{ _("certificates.valid_to") }}</dt>
                                                     <dd class="col-sm-8"><time class="certificate-date" datetime="{{ certificate.valid_to }}">{{ certificate.valid_to }}</time></dd>
-                                                    <dt class="col-sm-4" data-i18n="certificates.sans">Subject alternative names</dt>
+                                                    <dt class="col-sm-4">{{ _("certificates.sans") }}</dt>
                                                     <dd class="col-sm-8">
                                                         <div class="d-flex flex-wrap gap-1">
                                                             {% for san in certificate.sans %}{{ badge(text=san, variant="secondary") }}{% else %}—{% endfor %}
                                                         </div>
                                                     </dd>
                                                     {% if certificate.last_error %}
-                                                        <dt class="col-sm-4 text-danger" data-i18n="certificates.last_error">Last error</dt>
+                                                        <dt class="col-sm-4 text-danger">{{ _("certificates.last_error") }}</dt>
                                                         <dd class="col-sm-8 text-danger text-break">{{ certificate.last_error }}</dd>
                                                     {% endif %}
                                                 </dl>
@@ -302,8 +301,8 @@
                                             <section class="certificate-detail-panel h-100" aria-label="Certificate inventory assignments">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <div>
-                                                        <h6 class="mb-1" data-i18n="certificates.assignments">Inventory assignments</h6>
-                                                        <small class="text-muted" data-i18n="certificates.assignments_help">These assignments do not change live TLS settings.</small>
+                                                        <h6 class="mb-1">{{ _("certificates.assignments") }}</h6>
+                                                        <small class="text-muted">{{ _("certificates.assignments_help") }}</small>
                                                     </div>
                                                     {{ button(label="Assign", i18n_key="certificates.attach", variant="outline-primary", size="sm", icon="bx-link", disabled=readonly, classes="certificate-attach") }}
                                                 </div>
@@ -339,8 +338,7 @@
             <p id="certificates-count"
                class="text-muted small mb-0 mt-3"
                aria-live="polite"
-               data-i18n="certificates.showing_count"
-               data-i18n-options='{{ {"visible": certificates | length, "total": certificates | length} | tojson }}'>Showing {{ certificates | length }} of {{ certificates | length }} certificates</p>
+               >{{ _("certificates.showing_count", visible=certificates | length, total=certificates | length) }}</p>
         {% else %}
             {{ empty_state(title="No certificates", title_key="certificates.empty", message="Create a self-signed certificate, schedule ACME issuance, or upload an existing PEM certificate and key.", message_key="certificates.empty_help", icon="bxs-certification", bordered=true) }}
         {% endif %}
@@ -382,21 +380,21 @@
             <div class="modal-body">
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label class="form-label" for="certificate-upload-name" data-i18n="table.header.name">Name</label>
+                        <label class="form-label" for="certificate-upload-name">{{ _("table.header.name") }}</label>
                         <input class="form-control" id="certificate-upload-name" name="name" maxlength="256" required />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label" for="certificate-upload-description" data-i18n="table.header.description">Description</label>
+                        <label class="form-label" for="certificate-upload-description">{{ _("table.header.description") }}</label>
                         <input class="form-control" id="certificate-upload-description" name="description" maxlength="4096" />
                     </div>
                 </div>
                 <div class="row g-3">
                     <div class="col-lg-6">
-                        <h6 id="certificate-pem-label" data-i18n="certificates.pem_certificate">PEM certificate or chain</h6>
+                        <h6 id="certificate-pem-label">{{ _("certificates.pem_certificate") }}</h6>
                         {{ file_upload(id="certificate-pem-dropzone", input_id="certificate-pem-input", name="certificate", accept=".pem,.crt,.cer,application/x-pem-file", hint="Drop the public PEM certificate or chain here", hint_i18n_key="certificates.pem_drop", sub_hint="Maximum 1 MiB", sub_hint_i18n_key="certificates.pem_limit", show_browse_button=true, browse_label="Browse certificate", browse_label_i18n_key="certificates.browse_certificate", feedback_id="certificate-pem-feedback", attrs='aria-labelledby="certificate-pem-label" aria-describedby="certificate-pem-feedback"') }}
                     </div>
                     <div class="col-lg-6">
-                        <h6 id="certificate-key-label" data-i18n="certificates.pem_private_key">PEM private key</h6>
+                        <h6 id="certificate-key-label">{{ _("certificates.pem_private_key") }}</h6>
                         {{ file_upload(id="certificate-key-dropzone", input_id="certificate-key-input", name="private_key", accept=".pem,.key,application/x-pem-file", hint="Drop the matching private key here", hint_i18n_key="certificates.key_drop", sub_hint="Maximum 1 MiB; encrypted at rest and never downloadable", sub_hint_i18n_key="certificates.key_limit", show_browse_button=true, browse_label="Browse private key", browse_label_i18n_key="certificates.browse_key", feedback_id="certificate-key-feedback", attrs='aria-labelledby="certificate-key-label" aria-describedby="certificate-key-feedback"') }}
                     </div>
                 </div>
@@ -418,13 +416,13 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="certificate_id" id="certificate-edit-id" />
             <div class="modal-body">
-                <p class="text-muted small" data-i18n="certificates.edit_help">This changes inventory metadata only, not certificate material or live TLS settings.</p>
+                <p class="text-muted small">{{ _("certificates.edit_help") }}</p>
                 <div class="mb-3">
-                    <label class="form-label" for="certificate-edit-name" data-i18n="table.header.name">Name</label>
+                    <label class="form-label" for="certificate-edit-name">{{ _("table.header.name") }}</label>
                     <input class="form-control" id="certificate-edit-name" name="name" maxlength="256" required />
                 </div>
                 <div>
-                    <label class="form-label" for="certificate-edit-description" data-i18n="table.header.description">Description</label>
+                    <label class="form-label" for="certificate-edit-description">{{ _("table.header.description") }}</label>
                     <textarea class="form-control" id="certificate-edit-description" name="description" maxlength="4096" rows="3"></textarea>
                 </div>
             </div>
@@ -441,14 +439,13 @@
             <input type="hidden" name="certificate_id" id="certificate-attach-id" />
             <div class="modal-body">
                 <p id="certificate-attach-copy" class="text-muted"></p>
-                <label class="form-label" for="certificate-attach-service" data-i18n="table.header.service">Service</label>
-                <select class="form-select" id="certificate-attach-service" name="service_id" required>
-                    <option value="" data-i18n="form.placeholder.select_service">Select a service</option>
-                    {% for service in services %}<option value="{{ service.id }}">{{ service.id }}</option>{% endfor %}
+                <label class="form-label" for="certificate-attach-service">{{ _("table.header.service") }}</label>
+                <select class="form-select" id="certificate-attach-service" name="service_id" required data-bw-service-options>
+                    <option value="">{{ _("form.placeholder.select_service") }}</option>
                 </select>
                 <div class="form-check form-switch mt-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="certificate-attach-primary" name="primary" checked />
-                    <label class="form-check-label" for="certificate-attach-primary" data-i18n="certificates.make_primary">Mark as the primary inventory assignment for this service</label>
+                    <label class="form-check-label" for="certificate-attach-primary">{{ _("certificates.make_primary") }}</label>
                 </div>
             </div>
             <div class="modal-footer">
@@ -467,7 +464,7 @@
             <div class="modal-body">
                 <p id="certificate-action-copy"></p>
                 <div id="certificate-renew-days" hidden>
-                    <label class="form-label" for="certificate-action-valid-days" data-i18n="certificates.valid_days">Validity in days</label>
+                    <label class="form-label" for="certificate-action-valid-days">{{ _("certificates.valid_days") }}</label>
                     <input class="form-control" type="number" id="certificate-action-valid-days" name="valid_days" min="1" max="825" value="365" />
                 </div>
             </div>
@@ -477,6 +474,8 @@
             </div>
         </form>
     {% endcall %}
+    {# Every service picker on this page is filled from here (components/service-options.html). #}
+    {{ service_options(services) }}
 {% endblock %}
 
 {% block scripts %}

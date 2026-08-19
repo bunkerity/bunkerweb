@@ -25,13 +25,19 @@
                  text      (required) English fallback copy for the item.
                  done      item is finished -- renders the green bx-check-circle.
                            Default false (neutral bx-circle, muted text).
-                 i18n_key  data-i18n key for text. Omit for untranslated copy.
+                 i18n_key  catalog key for text. Omit for untranslated copy.
                  id        optional id on that item's <li>.
+                 href      optional link for a pending item -- renders a trailing
+                           "Go ->" affordance. Ignored when the item is done: a
+                           finished task has nowhere left to send the reader.
+                 action_key catalog key for that link's label. Defaults to
+                           "button.go".
      id        optional id on the outer <ul>.
      classes   extra utility classes appended to the outer <ul>.
 
    Not covered: toggling state client-side -- this is a display component, the
-   caller decides `done` before render. For a live pass/fail checklist wired to a
+   caller decides `done` before render. `href` only adds navigation; it never
+   changes an item's state, which stays derived by the caller. For a live pass/fail checklist wired to a
    form input (password rules, etc.) keep using the profile.html/setup.html
    pattern above instead. For a checkable, submitted list use
    components/checkbox.html per item -- this macro's icon is decorative
@@ -41,8 +47,11 @@
         {%- for it in items %}
         <li{% if it.id %} id="{{ it.id }}"{% endif %} class="d-flex align-items-center gap-2{% if not it.done %} text-muted{% endif %}" role="listitem">
             <i class="bx {{ 'bx-check-circle text-success' if it.done else 'bx-circle' }} flex-shrink-0" aria-hidden="true"></i>
-            <span class="visually-hidden" data-i18n="{{ 'status.done' if it.done else 'status.pending' }}">{{ 'Completed' if it.done else 'Pending' }}</span>
-            <span{% if it.i18n_key %} data-i18n="{{ it.i18n_key }}"{% endif %}>{{ it.text }}</span>
+            <span class="visually-hidden">{{ _("status.done" if it.done else "status.pending") }}</span>
+            <span>{{ _(it.i18n_key) if it.i18n_key else it.text }}</span>
+            {%- if it.href and not it.done %}
+            <a class="ms-auto small text-nowrap" href="{{ it.href }}">{{ _(it.action_key or "button.go") }}</a>
+            {%- endif %}
         </li>
         {%- endfor %}
     </ul>

@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 from app.utils import human_readable_number
@@ -52,7 +53,6 @@ def _base_context(**overrides):
         home_stats_days=7,
         is_initialized=False,
         first_config_saved=False,
-        mfa_enabled=False,
         jobs_count=0,
         bans_active=0,
         top_reasons=[],
@@ -91,7 +91,7 @@ def test_home_page_renders_welcome_header_and_range_picker():
     # The welcome name now lives in a Don Jose accent span that is a *sibling* of the
     # data-i18n greeting span (i18n.js applyTranslations() uses .text(), which would
     # otherwise flatten a child accent span away), so the header carries the greeting key.
-    assert 'data-i18n="dashboard.welcome.greeting"' in html
+    assert english("dashboard.welcome.greeting") in html
     assert "admin" in html
     assert 'id="home-range"' in html
     for preset_key in ("range_picker.1h", "range_picker.24h", "range_picker.7d", "range_picker.30d"):
@@ -134,13 +134,13 @@ def test_home_page_renders_trend_chip_and_timeseries_chart_mounts():
 
     assert 'id="home-blocked-trend"' in html
     trend_chip = html.split('id="home-blocked-trend"', 1)[1].split("</span>", 1)[0]
-    assert 'data-i18n="dashboard.status.trend_vs_prev"' in trend_chip
+    assert english("dashboard.status.trend_vs_prev") in trend_chip
     assert 'id="home-timeseries-chart"' in html
     # chart-area.html emits the hidden `<id>-data` div the chart script reads its series from.
     assert 'id="home-timeseries-chart-data"' in html
 
     for i18n_key in ("dashboard.status.trend_vs_prev", "dashboard.tile.bans_active", "dashboard.tile.jobs", "dashboard.chart.timeseries.title"):
-        assert f'data-i18n="{i18n_key}"' in html, i18n_key
+        assert english(i18n_key) in html, i18n_key
         assert _resolves_in_locale(LOCALE, i18n_key), i18n_key
 
 
@@ -166,7 +166,7 @@ def test_home_page_top_reasons_card_is_a_client_filled_mount():
     """
     html = _render_home(top_reasons=[{"reason": "modsecurity", "count": 30, "pct": 75.0}])
 
-    assert 'data-i18n="dashboard.card.top_reasons.title"' in html
+    assert english("dashboard.card.top_reasons.title") in html
     assert _resolves_in_locale(LOCALE, "dashboard.card.top_reasons.title")
     # The async wrapper home.js hides the spinner on, and the empty tbody it fills.
     assert 'id="requests-reasons-async"' in html
@@ -182,32 +182,16 @@ def test_home_page_top_reasons_card_is_a_client_filled_mount():
 # ── "Getting started" checklist -- flips per item, hides once all done ─────────────
 
 
-def test_home_page_checklist_shows_pending_items_when_nothing_done():
-    html = _render_home(is_initialized=False, first_config_saved=False, services=[], mfa_enabled=False, is_pro_version=False)
+def test_home_no_longer_renders_a_hardcoded_getting_started_checklist():
+    """The four-entry static card is gone: no persistence, no links, and identical for every
+    role -- it told a `reader` to activate PRO, which a reader cannot do. Its replacement
+    follows the user across pages (models/onboarding_drawer.html), so re-adding a per-page
+    copy would put two disagreeing checklists in front of the same operator."""
+    html = _render_home(is_initialized=False, first_config_saved=False, services=[], is_pro_version=False)
 
-    assert 'data-i18n="onboarding.title"' in html
-    checklist_block = html.split('data-i18n="onboarding.title"', 1)[1]
-    for i18n_key in ("onboarding.item.install", "onboarding.item.service", "onboarding.item.mfa", "onboarding.item.pro"):
-        assert f'data-i18n="{i18n_key}"' in checklist_block, i18n_key
-        assert _resolves_in_locale(LOCALE, i18n_key), i18n_key
-    # None of the 4 items are done -- no bx-check-circle should appear for this list.
-    assert "bx-check-circle" not in checklist_block.split("</ul>", 1)[0]
-
-
-def test_home_page_checklist_flips_items_independently():
-    html = _render_home(
-        is_initialized=True,
-        first_config_saved=True,
-        services=[{"id": "svc1", "is_draft": False}],
-        mfa_enabled=True,
-        is_pro_version=False,
-    )
-
-    assert 'data-i18n="onboarding.title"' in html
-    checklist_block = html.split('data-i18n="onboarding.title"', 1)[1].split("</ul>", 1)[0]
-    # Install/service/MFA are done (green check), PRO is still pending (neutral circle).
-    assert checklist_block.count("bx-check-circle") == 3
-    assert "bx-circle" in checklist_block
+    assert 'data-i18n="onboarding.title"' not in html
+    assert 'data-i18n="onboarding.item.install"' not in html
+    assert "checklist" not in html
 
 
 def test_home_page_checklist_hidden_once_everything_is_done():
@@ -215,7 +199,6 @@ def test_home_page_checklist_hidden_once_everything_is_done():
         is_initialized=True,
         first_config_saved=True,
         services=[{"id": "svc1", "is_draft": False}],
-        mfa_enabled=True,
         is_pro_version=True,
     )
 
@@ -231,14 +214,14 @@ def test_home_page_existing_widgets_still_render_and_are_relabeled_last_days():
     # The legacy period-floating badge is gone (replaced by the welcome header + picker).
     assert "home-period-floating" not in html
     # A plain "last N days" caption now precedes the untouched legacy block.
-    assert 'data-i18n="dashboard.window.last_days"' in html
+    assert english("dashboard.window.last_days", days=7) in html
     assert "Last 7 days" in html
     # The untouched widgets (donuts, geo-map, blocking-status chart, news) are all
     # still present and unmodified.
     assert 'id="requests-stats"' in html
     assert 'id="requests-map"' in html
     assert 'id="requests-blocking"' in html
-    assert 'data-i18n="dashboard.card.news.title"' in html
+    assert english("dashboard.card.news.title") in html
 
 
 def test_home_page_source_never_touches_reports_files():

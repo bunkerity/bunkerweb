@@ -10,9 +10,9 @@
    plain <a> and manages no click/JS state.
 
    Params:
-     label       (required) English fallback copy shown before i18next rewrites it.
+     label       (required) literal copy, used when `i18n_key` is not given.
      href        (required) link target.
-     i18n_key    data-i18n key for label. Omit for text that has no translation (rare).
+     i18n_key    catalog key for label. Omit for text that has no translation (rare).
      color       'primary' | 'secondary' | 'warning' | 'danger' | 'muted'. Maps directly onto
                  the existing .text-<color> utility (muted -> .text-muted). Default 'primary'.
      size        'xs' | 'sm' | 'md' | 'lg'. Default 'md' (matches the body font-size). None of
@@ -65,5 +65,5 @@
        class="{{ outer_classes }}"
        {%- if external %} target="_blank" rel="noopener noreferrer"{% endif %}
        {%- if disabled %} aria-disabled="true" tabindex="-1"{% endif %}
-       {%- if aria_label %} aria-label="{{ aria_label }}"{% endif %}>{% if left_icon %}<i class="bx {{ left_icon }}" aria-hidden="true"></i>{% endif %}<span{% if i18n_key %} data-i18n="{{ i18n_key }}"{% endif %}>{{ label }}</span>{% if right_icon %}<i class="bx {{ right_icon }}" aria-hidden="true"></i>{% endif %}{% if external %}<span class="visually-hidden" data-i18n="link.opens_new_tab">(opens in a new tab)</span>{% endif %}</a>
+       {%- if aria_label %} aria-label="{{ aria_label }}"{% endif %}>{% if left_icon %}<i class="bx {{ left_icon }}" aria-hidden="true"></i>{% endif %}<span>{{ _(i18n_key) if i18n_key else label }}</span>{% if right_icon %}<i class="bx {{ right_icon }}" aria-hidden="true"></i>{% endif %}{% if external %}<span class="visually-hidden">{{ _("link.opens_new_tab") }}</span>{% endif %}</a>
 {%- endmacro %}

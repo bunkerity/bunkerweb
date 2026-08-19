@@ -124,17 +124,15 @@
                         <span class="input-group-text border-0 bg-transparent"><i class="bx bx-search bx-sm"></i></span>
                         <input type="text"
                                class="form-control border-0 multiselect-search"
-                               placeholder="Search..."
-                               aria-label="Search..."
-                               data-i18n="form.placeholder.search"
+                               placeholder="{{ _("form.placeholder.search") }}"
+                               aria-label="{{ _("form.placeholder.search") }}"
                                {%- if disabled %} disabled{% endif %}>
                     </div>
                     <button type="button"
                             class="btn btn-sm multiselect-selected-only-btn"
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            data-bs-original-title="Show selected only"
-                            data-i18n="tooltip.button.show_selected_only"
+                            data-bs-original-title="{{ _("tooltip.button.show_selected_only") }}"
                             aria-pressed="false">
                         <i class="bx bx-check-double bx-xs"></i>
                     </button>
@@ -158,14 +156,13 @@
                     </label>
                 {% endfor %}
                 <div class="dropdown-item no-options-message border-0 p-3 text-center small d-none">
-                    <span data-i18n="status.no_search_results">No items found.</span>
+                    <span>{{ _("status.no_search_results") }}</span>
                 </div>
             </div>
             <div class="p-2 border-top text-center">
                 <small class="text-muted"
                        data-selected-count
-                       data-i18n="template.editor.multiselect_summary"
-                       data-i18n-options='{"count": 0}'>0 selected</small>
+                       >{{ _("template.editor.multiselect_summary", count=0) }}</small>
             </div>
         </div>
         {% if multiselect_chips %}
@@ -206,8 +203,7 @@
                     {% endfor %}
                 </div>
                 <p class="text-muted mb-0 multiselect-selected-empty{% if selected_values %} d-none{% endif %}"
-                   data-i18n="datatable.selected_list_empty"
-                   data-i18n-options='{"entity": "items"}'>No items selected.</p>
+                   >{{ _("datatable.selected_list_empty", entity="items") }}</p>
             </div>
         {% endcall %}
     {% endif %}

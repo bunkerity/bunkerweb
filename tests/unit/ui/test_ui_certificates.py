@@ -9,7 +9,9 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, call, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
+
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader, select_autoescape
 
@@ -691,6 +693,6 @@ def test_plugin_declared_source_renders_its_label_not_a_raw_i18n_key():
     )
 
     assert '<option value="acme">ACME</option>' in rendered
-    assert 'data-i18n="certificates.source.acme"' not in rendered
+    assert "certificates.source.acme" not in rendered  # no key leaks as text for a declared source
     # The built-in keeps its translation key.
-    assert 'data-i18n="certificates.source.selfsigned"' in rendered
+    assert f'<option value="selfsigned">{english("certificates.source.selfsigned")}</option>' in rendered

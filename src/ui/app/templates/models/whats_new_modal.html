@@ -1,0 +1,48 @@
+{# Post-upgrade recap, raised once per user per version.
+
+   Rendered only when `whatsnew_releases` is non-empty, which the context processor computes
+   under the silent-stamp rule: a user with no stored version is stamped and shown nothing, so
+   the day this ships nobody is met with the whole history. Closing it — by any means — stamps
+   the running version, and /whats-new keeps everything permanently. #}
+{% from "components/modal.html" import modal %}
+{% from "components/release-notes.html" import release_entries %}
+
+{% call modal(id="whats-new-modal",
+    title_key="whatsnew.modal.title",
+    title="What's new",
+    size="lg",
+    static_backdrop=false,
+    scrollable=true) %}
+    <div class="modal-body">
+        <p class="text-muted">{{ _("whatsnew.modal.intro") }}</p>
+        <p class="mb-4">
+            <span class="badge bg-label-primary">{{ bw_version }}</span>
+        </p>
+
+        {% for release in whatsnew_releases %}
+            <h6 class="mb-1">
+                {{ release.version }}
+                {% if release.date %}<small class="text-muted fw-normal">· {{ release.date }}</small>{% endif %}
+            </h6>
+            {{ release_entries(release) }}
+            {% if not loop.last %}<div class="my-4"></div>{% endif %}
+        {% endfor %}
+    </div>
+    <div class="modal-footer">
+        <a class="btn btn-outline-secondary btn-sm"
+           href="{{ url_for('whats_new.whats_new_page') }}"
+          >{{ _("button.see_all_releases") }}</a>
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                data-bs-dismiss="modal"
+               >{{ _("button.got_it") }}</button>
+    </div>
+{% endcall %}
+
+<div id="whats-new-root"
+     data-state-url="{{ url_for('whats_new.update_whats_new_state') }}"
+     data-version="{{ bw_version }}"></div>
+
+<script src="{{ url_for('static', filename='js/pages/whats-new.js') }}"
+        nonce="{{ script_nonce }}"
+        defer></script>

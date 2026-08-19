@@ -2,6 +2,7 @@ import json
 import re
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
 TEMPLATES = Path(__file__).parents[3] / "src" / "ui" / "app" / "templates"
@@ -63,7 +64,7 @@ def test_reports_page_renders_four_tabs_with_event_log_table_intact():
     locale = json.loads((STATIC / "locales" / "en.json").read_text(encoding="utf-8"))
     for tab_key in ("overview", "patterns", "offenders", "eventlog"):
         i18n_key = f"reports.tab.{tab_key}"
-        assert f'data-i18n="{i18n_key}"' in html
+        assert english(i18n_key) in html
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # Event log pane still carries the pre-existing table/toolbar/modals unchanged.
@@ -129,7 +130,7 @@ def test_reports_overview_tab_renders_kpi_chart_and_incident_mount_points():
         "reports.card.recent.title",
         "reports.card.top_asn.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in overview_pane, i18n_key
+        assert english(i18n_key) in overview_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # The range picker (Task 7) is rendered into the content block.
@@ -284,7 +285,7 @@ def test_reports_patterns_tab_renders_kpi_and_card_mount_points():
         "reports.card.top_rules.title",
         "reports.card.attack_families.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in patterns_pane, i18n_key
+        assert english(i18n_key) in patterns_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # reports-patterns.js must load after reports-overview.js (it consumes the shared
@@ -368,7 +369,7 @@ def test_reports_offenders_tab_renders_kpi_and_table_mount_points():
         "reports.tile.asns",
         "reports.card.top_offenders.title",
     ):
-        assert f'data-i18n="{i18n_key}"' in offenders_pane, i18n_key
+        assert english(i18n_key) in offenders_pane, i18n_key
         assert _resolves_in_locale(locale, i18n_key), i18n_key
 
     # reports-offenders.js must load after reports-patterns.js (it consumes the same

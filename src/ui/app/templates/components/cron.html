@@ -16,8 +16,8 @@
    instead of overloading it with a second, incompatible data shape.
 
    Tooltip wiring reuses the app-wide `[data-bs-toggle="tooltip"]` init already in main.js
-   (re-initialized after i18next translation in i18n.js -- see components/label.html's
-   help_as_tooltip for the same data-bs-original-title + data-i18n pairing) -- no companion
+   (see components/label.html's help_as_tooltip for the same translated
+   data-bs-original-title) -- no companion
    JS file. `tabindex="0"` is added only when a tooltip is present, so the chip becomes a
    keyboard/focus target (Bootstrap tooltips show on focus as well as hover) without adding a
    pointless tab stop when there's nothing to reveal.
@@ -30,7 +30,7 @@
                     is unpronounceable and otherwise inaccessible to screen readers -- only
                     omit it when the chip sits in a table whose column header already spells
                     out the format.
-     tooltip_i18n   data-i18n key for tooltip. Omit for the rare untranslated case.
+     tooltip_i18n   catalog key for tooltip. Omit for the rare untranslated case.
      size           'sm' | 'md' | 'lg'. Default 'md'. Adds bw-cron-sm / bw-cron-lg
                     (overrides.css) -- same sm/md/lg convention as the sibling
                     bw-code-editor-* / bw-lottie-* component classes it sits next to there.
@@ -47,8 +47,7 @@
          {%- if tooltip %}
          data-bs-toggle="tooltip"
          data-bs-placement="top"
-         data-bs-original-title="{{ tooltip }}"
-         {%- if tooltip_i18n %} data-i18n="{{ tooltip_i18n }}"{% endif %}
+         data-bs-original-title="{{ _(tooltip_i18n) if tooltip_i18n else tooltip }}"
          tabindex="0"
          {%- endif %}
          >{{ value }}</span>

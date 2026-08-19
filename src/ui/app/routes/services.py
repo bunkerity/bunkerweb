@@ -1,13 +1,15 @@
 import zipfile
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from io import BytesIO
+from html import escape
+from io import BytesIO, StringIO
 from functools import lru_cache
 from itertools import chain
 from json import dumps, loads
 from time import time
 from typing import Any, Dict, List, Optional, Set, Tuple
-from flask import Blueprint, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from regex import search, sub
 
@@ -17,9 +19,19 @@ from app.models.save_scope import control_keys, restore_unowned_settings
 from app.models.service_attachments import attached_ids, failed_families, get_service_attachments, resource_conflict_context
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
-from app.routes.utils import CUSTOM_CONF_RX, extract_file_setting_names, handle_error, verify_data_in_form, wait_applying
+from app.routes.utils import (
+    CUSTOM_CONF_RX,
+    cors_required,
+    extract_file_setting_names,
+    handle_error,
+    parse_search_panes_dict,
+    verify_data_in_form,
+    wait_applying,
+)
 from app.utils import (
     LOGGER,
+    csv_safe,
+    csv_writer,
     _SYNTHESIZED_ALWAYS_ON,
     flash,
     can_delete_service,
@@ -86,12 +98,6 @@ def services_page():
         flash("Could not fetch services from the API.", "error")
         services_list = []
 
-    try:
-        templates_data = API_CLIENT.get_templates()
-    except (ApiClientError, ApiUnavailableError):
-        flash("Could not fetch templates from the API.", "error")
-        templates_data = {}
-
     services_with_configs: List[str] = []
     try:
         api_configs = API_CLIENT.get_configs(with_drafts=True, with_data=False)
@@ -114,8 +120,350 @@ def services_page():
     return render_template(
         "services.html",
         services=services_list,
-        templates=templates_data,
         services_with_configs=services_with_configs,
+    )
+
+
+# The data columns of the services table, in the order DataTables sends them. Two non-data
+# columns sit in front of these in the DOM (the details-control and the select checkbox), which is
+# why `order[0][column]` has to be shifted by two before it means anything here.
+_SERVICE_COLUMNS = ("name", "type", "method", "security_mode", "template", "creation_date", "last_update")
+
+# How long a "recent" bucket is, for the created/updated SearchPanes. Same buckets the client-side
+# panes used, kept identical so the filter means the same thing after the table moved server-side.
+_DATE_BUCKETS = (("last_24h", 86400), ("last_7d", 604800), ("last_30d", 2592000))
+
+
+def _local_iso(value) -> str:
+    """A timestamp as local-offset ISO, or "" — never a crash on one malformed date.
+
+    The API answers naive UTC, and a browser reads an ISO string with no offset as *local* time:
+    handing `2026-08-19T06:00:00` straight to the page shifts every date by the viewer's offset.
+    This is the same normalisation the `to_iso` Jinja filter did while the rows were still
+    rendered server-side, moved to where the rows are built now.
+    """
+    if not value:
+        return ""
+    try:
+        moment = value if isinstance(value, datetime) else datetime.fromisoformat(str(value))
+    except ValueError:
+        return ""
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone().isoformat()
+
+
+def _service_rows(services_list) -> List[Dict[str, Any]]:
+    """One flat dict per service, holding the facts a row is built from and nothing else.
+
+    The markup is not built here. `services.js` renders each column from these fields, so a row on
+    the wire is a few hundred bytes instead of the ~5 KB of near-identical HTML the template used
+    to emit — which is the whole point of moving the table server-side.
+    """
+    rows = []
+    for service in services_list:
+        rows.append(
+            {
+                "name": service["id"],
+                "type": "draft" if service.get("is_draft") else "online",
+                "method": service.get("method") or "",
+                "security_mode": service.get("security_mode") or "block",
+                "template": service.get("template") or "",
+                "creation_date": _local_iso(service.get("creation_date")),
+                "last_update": _local_iso(service.get("last_update")),
+                "deletable": can_delete_service(service),
+            }
+        )
+    return rows
+
+
+def _matches_date_bucket(value, selected) -> bool:
+    """Whether a row's timestamp falls in any of the selected age buckets."""
+    if not value:
+        return False
+    try:
+        moment = value if isinstance(value, datetime) else datetime.fromisoformat(str(value))
+    except ValueError:
+        return False
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - moment).total_seconds()
+    for name, window in _DATE_BUCKETS:
+        if name in selected and age < window:
+            return True
+    return "older_30d" in selected and age >= 2592000
+
+
+def _filter_and_sort_services(rows, search_value, search_panes, order_column_index, order_direction):
+    """The full filtered, sorted list — no pagination.
+
+    Split out from the endpoint because the CSV and Excel exports have to apply exactly the same
+    filter. A `serverSide` table only holds the page it is showing, so DataTables' own export
+    buttons would otherwise write ten rows and call it the file, silently.
+    """
+    filtered = rows
+
+    for field, selected in search_panes.items():
+        if not selected:
+            continue
+        if field in ("creation_date", "last_update"):
+            filtered = [row for row in filtered if _matches_date_bucket(row.get(field), selected)]
+        elif field == "template":
+            # An empty template is a real state ("no template"), and the pane names it explicitly.
+            filtered = [row for row in filtered if (row.get("template") or "none") in selected]
+        else:
+            filtered = [row for row in filtered if str(row.get(field, "")) in selected]
+
+    if search_value:
+        needle = search_value.lower()
+        filtered = [row for row in filtered if any(needle in str(row.get(field, "")).lower() for field in _SERVICE_COLUMNS)]
+
+    try:
+        key = _SERVICE_COLUMNS[order_column_index]
+    except IndexError:
+        key = _SERVICE_COLUMNS[0]
+
+    def sort_key(row):
+        value = row.get(key)
+        if key in ("creation_date", "last_update"):
+            # A service with no timestamp sorts as the oldest rather than blowing up the compare.
+            return str(value or "")
+        return str(value or "").lower()
+
+    return sorted(filtered, key=sort_key, reverse=order_direction == "desc")
+
+
+def _service_pane_options(rows, filtered):
+    """SearchPanes counts, computed over every service rather than the page being shown.
+
+    `total` counts the whole set and `count` the current selection — the two numbers DataTables
+    shows side by side. Client-side panes derived these from the rendered cells; with the rows
+    gone from the document they have to come from here.
+    """
+    filtered_names = {row["name"] for row in filtered}
+    counts = defaultdict(lambda: defaultdict(lambda: {"total": 0, "count": 0}))
+
+    for row in rows:
+        selected = row["name"] in filtered_names
+        for field in ("type", "method", "security_mode"):
+            bucket = counts[field][str(row.get(field, ""))]
+            bucket["total"] += 1
+            bucket["count"] += 1 if selected else 0
+        template = counts["template"][row.get("template") or "none"]
+        template["total"] += 1
+        template["count"] += 1 if selected else 0
+
+    def date_pane(field):
+        options = []
+        for name, _ in _DATE_BUCKETS + (("older_30d", 0),):
+            options.append(
+                {
+                    "label": f'<span data-i18n="searchpane.{name}">{name}</span>',
+                    "value": name,
+                    "total": sum(1 for row in rows if _matches_date_bucket(row.get(field), (name,))),
+                    "count": sum(1 for row in filtered if _matches_date_bucket(row.get(field), (name,))),
+                }
+            )
+        return options
+
+    labels = {
+        "type": {
+            "online": '<i class="bx bx-xs bx-globe"></i>&nbsp;<span data-i18n="status.online">Online</span>',
+            "draft": '<i class="bx bx-xs bx-file-blank"></i>&nbsp;<span data-i18n="status.draft">Draft</span>',
+        },
+        "security_mode": {
+            "block": '<i class="bx bx-xs bx-shield-alt-2"></i>&nbsp;<span data-i18n="security_mode.block">Block</span>',
+            "detect": '<i class="bx bx-xs bx-show"></i>&nbsp;<span data-i18n="security_mode.detect">Detect</span>',
+        },
+        "template": {"none": '<span data-i18n="badge.no_template">No template</span>'},
+    }
+
+    options = {}
+    for field in ("type", "method", "security_mode", "template"):
+        options[field] = [
+            {
+                "label": labels.get(field, {}).get(value, escape(str(value))),
+                "value": value,
+                "total": bucket["total"],
+                "count": bucket["count"],
+            }
+            for value, bucket in counts[field].items()
+        ]
+    options["creation_date"] = date_pane("creation_date")
+    options["last_update"] = date_pane("last_update")
+    return options
+
+
+@services.route("/services/fetch", methods=["POST"])
+@login_required
+@cors_required
+def services_fetch():
+    """One page of the services table, for DataTables in `serverSide` mode.
+
+    The page used to ship all 501 rows in its HTML — 868 KB of the 1089 KB document and 10 711 DOM
+    nodes, of which DataTables kept ten and discarded the rest. Compression hides that on the wire
+    (1089 KB gzips to 31 KB, because the rows are near-identical) but not on the main thread, where
+    it measured 260 ms of table initialisation. This endpoint is the fix for that half.
+    """
+    try:
+        services_list = API_CLIENT.get_services(with_drafts=True)
+    except Exception as e:
+        # Deliberately broader than the two API errors the page-render path catches: this endpoint
+        # is polled by the table, and its only failure state is a spinner that never stops. An
+        # empty result at least renders the table's own "no services" message.
+        LOGGER.error(f"Could not fetch services from the API for the services table: {e}")
+        services_list = []
+
+    rows = _service_rows(services_list)
+
+    draw = int(request.form.get("draw", 1))
+    start = max(0, int(request.form.get("start", 0)))
+    length = int(request.form.get("length", 10))
+    search_value = request.form.get("search[value]", "")
+    try:
+        order_column_index = max(int(request.form.get("order[0][column]", 2)) - 2, 0)
+    except ValueError:
+        order_column_index = 0
+    order_direction = request.form.get("order[0][dir]", "asc")
+    search_panes = parse_search_panes_dict(request.form)
+
+    filtered = _filter_and_sort_services(rows, search_value, search_panes, order_column_index, order_direction)
+    page = filtered if length == -1 else filtered[start : start + max(1, length)]  # noqa: E203
+
+    return jsonify(
+        {
+            "draw": draw,
+            "recordsTotal": len(rows),
+            "recordsFiltered": len(filtered),
+            "data": page,
+            "searchPanes": {"options": _service_pane_options(rows, filtered)},
+        }
+    )
+
+
+# The columns the export writes, matching what the table shows: the details-control, the select
+# checkbox and the actions cell are not data and are excluded, exactly as the DataTables export
+# buttons excluded them before the table moved server-side.
+_SERVICE_EXPORT_HEADERS = ("Name", "Type", "Method", "Security Mode", "Template", "Created", "Last Update")
+_SERVICE_EXPORT_FIELDS = ("name", "type", "method", "security_mode", "template", "creation_date", "last_update")
+
+
+def _services_export_rows() -> List[Dict[str, Any]]:
+    """Every row the current filter selects — not just the page the table is showing.
+
+    This is the whole reason the exports moved server-side. DataTables' own `csv`/`excel` buttons
+    write what the table holds, and a `serverSide` table holds one page: they would have produced a
+    ten-row file with no error and no sign that 491 services were missing.
+    """
+    services_list = API_CLIENT.get_services(with_drafts=True)
+    rows = _service_rows(services_list)
+
+    search_value = request.args.get("search", "")
+    order_direction = request.args.get("order_dir", "asc").strip().lower()
+    if order_direction not in ("asc", "desc"):
+        order_direction = "asc"
+    order_column = request.args.get("order_column", "name").strip().lower()
+    try:
+        order_column_index = _SERVICE_COLUMNS.index(order_column)
+    except ValueError:
+        order_column_index = 0
+
+    filtered = _filter_and_sort_services(rows, search_value, parse_search_panes_dict(request.args), order_column_index, order_direction)
+
+    exported = []
+    for row in filtered:
+        exported.append(
+            {
+                "name": row["name"],
+                "type": row["type"],
+                "method": row["method"],
+                "security_mode": row["security_mode"],
+                # The table renders an empty template as a "No template" badge; a blank cell in a
+                # spreadsheet reads as missing data rather than as a deliberate state.
+                "template": row["template"] or "none",
+                "creation_date": _export_timestamp(row.get("creation_date")),
+                "last_update": _export_timestamp(row.get("last_update")),
+            }
+        )
+    return exported
+
+
+def _export_timestamp(value) -> str:
+    """The row's timestamp as the spreadsheet should read it — "N/A" rather than an empty cell,
+    which a reader takes for missing data instead of for a service that has never been updated."""
+    return _local_iso(value) or "N/A"
+
+
+@services.route("/services/export/csv", methods=["GET"])
+@login_required
+def services_export_csv():
+    """The filtered service list as CSV — every row, not the page on screen."""
+    try:
+        rows = _services_export_rows()
+    except Exception as e:
+        LOGGER.error(f"Error collecting services for CSV export: {e}")
+        return jsonify({"error": "Failed to export services"}), 500
+
+    output = StringIO()
+    # `csv_writer`, not `csv.writer`: a server name is user-controlled and one starting with `=`
+    # is a formula to a spreadsheet (CWE-1236).
+    writer = csv_writer(output)
+    writer.writerow(_SERVICE_EXPORT_HEADERS)
+    for row in rows:
+        writer.writerow([row[field] for field in _SERVICE_EXPORT_FIELDS])
+
+    output.seek(0)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=bunkerweb_services_{timestamp}.csv"},
+    )
+
+
+@services.route("/services/export/excel", methods=["GET"])
+@login_required
+def services_export_excel():
+    """The filtered service list as XLSX — every row, not the page on screen."""
+    try:
+        rows = _services_export_rows()
+    except Exception as e:
+        LOGGER.error(f"Error collecting services for Excel export: {e}")
+        return jsonify({"error": "Failed to export services"}), 500
+
+    # Imported here rather than at module scope: openpyxl is only needed by this one endpoint, and
+    # six unit-test modules load this file for unrelated routes. A top-level import makes every one
+    # of them carry a dependency the unit venv does not have.
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Services"
+
+    sheet.append(list(_SERVICE_EXPORT_HEADERS))
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+
+    for row in rows:
+        # openpyxl does no escaping of its own, so each cell goes through the same formula guard.
+        sheet.append([csv_safe(row[field]) for field in _SERVICE_EXPORT_FIELDS])
+
+    for column in sheet.columns:
+        width = max((len(str(cell.value)) for cell in column if cell.value), default=0)
+        sheet.column_dimensions[column[0].column_letter].width = min(width + 2, 50)
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"bunkerweb_services_{timestamp}.xlsx",
     )
 
 

@@ -35,13 +35,13 @@
                     reasoning components/label.html documents for its own `id`/`for_id`.
      label          optional header caption above the list (English fallback), rendered
                     via components/title.html (level="h6").
-     label_i18n     data-i18n key for label.
+     label_i18n     catalog key for label.
      subtitle       optional secondary caption under label (components/title.html).
-     subtitle_i18n  data-i18n key for subtitle.
+     subtitle_i18n  catalog key for subtitle.
      help_text      optional line under the list ("form-text text-muted", same markup
                     components/label.html/components/checkbox.html use for their own
                     `help` param).
-     help_i18n      data-i18n key for help_text.
+     help_i18n      catalog key for help_text.
      is_multisite   show the circular bx-server "multisite setting" badge next to the
                     header (same markup/tooltip copy as components/label.html's own
                     `multisite` param -- label.html isn't reused directly here because
@@ -113,8 +113,7 @@
             <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1"
                   data-bs-toggle="tooltip"
                   data-bs-placement="top"
-                  data-bs-original-title="This is a multisite setting, affecting multiple services if defined globally."
-                  data-i18n="tooltip.multisite_setting">
+                  data-bs-original-title="{{ _('tooltip.multisite_setting') }}">
                 <span class="bx bx-server bx-xs" aria-hidden="true"></span>
             </span>
             {%- endif %}
@@ -125,9 +124,7 @@
                     data-il-settings='{{ settings | tojson }}'
                     aria-controls="{{ id }}-modal"
                     aria-haspopup="dialog"
-                    aria-label="View all {{ _count }} settings"
-                    data-i18n="input_list.view_all_settings"
-                    data-i18n-options='{{ {"count": _count} | tojson }}'>
+                    aria-label="{{ _("input_list.view_all_settings", count=_count) }}">
                 <i class="bx bx-show bx-xs" aria-hidden="true"></i>
             </button>
             {%- endif %}
@@ -142,15 +139,15 @@
             aria-controls="{{ id }}-modal"
             aria-haspopup="dialog">
         <i class="bx bx-show" aria-hidden="true"></i>
-        <span data-i18n="input_list.view_all_settings" data-i18n-options='{{ {"count": _count} | tojson }}'>View all {{ _count }} settings</span>
+        <span>{{ _("input_list.view_all_settings", count=_count) }}</span>
     </button>
     {%- endif %}
     <div class="bw-input-list-scroll bw-input-list-{{ size }}">
         <table class="table table-sm mb-0">
             <thead>
                 <tr>
-                    <th data-i18n="table.header.name">Name</th>
-                    <th data-i18n="table.header.value">Value</th>
+                    <th>{{ _("table.header.name") }}</th>
+                    <th>{{ _("table.header.value") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -167,14 +164,14 @@
                 </tr>
                 {%- else %}
                 <tr>
-                    <td colspan="2" class="text-center text-muted py-3" data-i18n="status.no_data">No data</td>
+                    <td colspan="2" class="text-center text-muted py-3">{{ _("status.no_data") }}</td>
                 </tr>
                 {%- endfor %}
             </tbody>
         </table>
     </div>
     {%- if help_text %}
-    <div class="form-text text-muted mt-1"{% if help_i18n %} data-i18n="{{ help_i18n }}"{% endif %}>{{ help_text }}</div>
+    <div class="form-text text-muted mt-1">{{ _(help_i18n) if help_i18n else help_text }}</div>
     {%- endif %}
 </div>
 
@@ -184,13 +181,13 @@
             <table class="table table-sm mb-0">
                 <thead>
                     <tr>
-                        <th data-i18n="table.header.name">Name</th>
-                        <th data-i18n="table.header.value">Value</th>
+                        <th>{{ _("table.header.name") }}</th>
+                        <th>{{ _("table.header.value") }}</th>
                     </tr>
                 </thead>
                 <tbody data-il-modal-body>
                     <tr>
-                        <td colspan="2" class="text-center text-muted py-3" data-i18n="status.no_data">No data</td>
+                        <td colspan="2" class="text-center text-muted py-3">{{ _("status.no_data") }}</td>
                     </tr>
                 </tbody>
             </table>

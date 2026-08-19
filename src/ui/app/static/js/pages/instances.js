@@ -494,7 +494,7 @@ $(document).ready(function () {
                   "Up",
                 )}</span>`,
                 value: function (rowData, rowIdx) {
-                  return rowData[5].includes("status.up");
+                  return rowData[5].includes('data-value="up"');
                 },
               },
               {
@@ -503,7 +503,7 @@ $(document).ready(function () {
                   "Down",
                 )}</span>`,
                 value: function (rowData, rowIdx) {
-                  return rowData[5].includes("status.down");
+                  return rowData[5].includes('data-value="down"');
                 },
               },
               {
@@ -512,7 +512,7 @@ $(document).ready(function () {
                   "Loading",
                 )}</span>`,
                 value: function (rowData, rowIdx) {
-                  return rowData[5].includes("status.loading");
+                  return rowData[5].includes('data-value="loading"');
                 },
               },
             ],
@@ -531,7 +531,7 @@ $(document).ready(function () {
                   "instance.type.static",
                   "Static",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("instance.type.static"),
+                value: (rowData) => rowData[6].includes('data-value="static"'),
               },
               {
                 label: `<i class="bx bx-xs bxl-docker"></i> <span data-i18n="instance.type.container">${t(
@@ -539,14 +539,14 @@ $(document).ready(function () {
                   "Container",
                 )}</span>`,
                 value: (rowData) =>
-                  rowData[6].includes("instance.type.container"),
+                  rowData[6].includes('data-value="container"'),
               },
               {
                 label: `<i class="bx bx-xs bxl-kubernetes"></i> <span data-i18n="instance.type.pod">${t(
                   "instance.type.pod",
                   "Pod",
                 )}</span>`,
-                value: (rowData) => rowData[6].includes("instance.type.pod"),
+                value: (rowData) => rowData[6].includes('data-value="pod"'),
               },
             ],
             combiner: "or",
@@ -673,20 +673,7 @@ $(document).ready(function () {
     },
   };
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => initializeDataTable(instances_config));
-  }
-
+  initializeDataTable(instances_config);
   // Event handlers for individual row actions
   $(document).on("click", ".ping-instance", function () {
     if (actionLock) return;

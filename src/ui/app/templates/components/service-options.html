@@ -1,0 +1,61 @@
+{# usage: {% from "components/service-options.html" import service_options with context %}
+
+          `with context` is not optional: `script_nonce` comes from a context processor, and an
+          imported macro does not see those unless the import asks for them. Without it the
+          `<script>` renders with an empty nonce and the page's CSP blocks it — the options never
+          reach the pickers, and the only sign is one console error.
+
+          <select id="thing-services" name="service_ids" multiple data-bw-service-options>
+              an "All services" placeholder here stays, and the list is appended after it
+          </select>
+          ...
+          service_options(services), once per page, AFTER every picker
+
+   The service list, rendered once instead of once per picker.
+
+   `/certificates` carried five `<select>`s of every service, `/upstreams` three, `/redirects`
+   three — the same names serialised over and over into one document. At 501 services that was
+   160 KB of the 314 KB `/certificates` page, 174 KB of `/upstreams`, 96 KB of `/redirects`, and
+   every one of those pages had **zero** rows to show: the cost is paid before any certificate or
+   upstream exists. It also grows multiplicatively — services × pickers — so the next modal with
+   a service picker silently adds another 32 KB and nobody writing it would notice.
+
+   So: one `<template>` holds the options, and each `<select>` marked `data-bw-service-options`
+   gets a clone of it. A `<template>`'s content is inert — not rendered, not submitted, not
+   matched by `document.querySelector` — so the one copy costs markup and nothing else.
+
+   Options a picker needs *before* the list (a placeholder, an "All services" row) stay written in
+   the `<select>` itself; the clone is appended after them, so their order is preserved.
+
+   `data-server-type` rides along because `/upstreams` filters on it (a stream service cannot serve
+   an HTTP upstream), which is what lets every page share one template rather than keep a variant
+   each. It is emitted **only for non-http services**: `upstreams.js` tests
+   `option.dataset.serverType === "stream"`, so an absent attribute already reads as http, and
+   writing it on every option cost 26 bytes x 501 services on five pages for no information at all.
+
+   That mattered more than it sounds. `/bans` has a *single* picker, so moving it to a shared
+   template trades one inline list for one template list — no saving — and the redundant attribute
+   turned that break-even into a **13 KB regression**. Emit only what carries information.
+
+   **Call this after the pickers it fills** — the end of the content block. The script runs where
+   it is parsed, not on DOMContentLoaded, which is the only ordering that holds: page scripts are
+   `defer`red, and deferred scripts run *before* DOMContentLoaded, as do jQuery's `$(document).ready`
+   callbacks (jQuery registers its own listener when it loads, ahead of anything in the body). A
+   listener here would therefore fire *after* the page code that reads or presets a select's value.
+   Parse-time execution puts the options in place before any of it runs. #}
+{% macro service_options(services) -%}
+{#- Two shapes reach this macro. Most pages pass the API's service dicts; `/bans` passes a plain
+    list of names, because it reads them out of `SERVER_NAME` rather than from `get_services()`.
+    `service.id` on a string is undefined in Jinja, so `is defined` distinguishes them without a
+    type test — and a page that starts passing the other shape keeps working. -#}
+<template id="bw-service-options">{% for service in services %}{% set name = service.id if service.id is defined else service %}{% set kind = service.server_type if service.id is defined else none %}<option value="{{ name }}"{% if kind and kind != 'http' %} data-server-type="{{ kind }}"{% endif %}>{{ name }}</option>{% endfor %}</template>
+<script nonce="{{ script_nonce }}">
+  (function () {
+    const source = document.getElementById("bw-service-options");
+    if (!source) return;
+    document.querySelectorAll("select[data-bw-service-options]").forEach(function (select) {
+      select.appendChild(source.content.cloneNode(true));
+    });
+  })();
+</script>
+{%- endmacro %}

@@ -14,6 +14,7 @@ import json
 from html.parser import HTMLParser
 from pathlib import Path
 
+from conftest import english  # what a converted template renders for a key
 import pytest
 from jinja2 import Environment, FileSystemLoader
 
@@ -510,7 +511,7 @@ def test_the_strip_names_the_source_of_its_order(render_strip):
     order for the access phase and no more precise than that. The card names which setting and
     which phase it read rather than implying a per-request trace."""
     html = render_strip().html
-    assert 'data-i18n="request_path.source"' in html
+    assert english("request_path.source", phase="access", setting="PLUGINS_ORDER_ACCESS") in html
     assert "PLUGINS_ORDER_ACCESS" in html and "access phase" in html
     assert "not a per-request trace" in html
 
@@ -531,7 +532,21 @@ def test_every_i18n_key_the_strip_uses_exists_in_en_json(render_strip):
             {"config": {"SERVE_FILES": {"value": "no"}}},
         )
     )
-    keys = {key for key in re.findall(r'data-i18n="([^"]+)"', html) if key.startswith("request_path.")}
+    # The strip is server-translated, so its keys live in `_("...")` calls in the source rather
+    # than in attributes of the output. Composed keys contribute their prefix.
+    source = (REPO_ROOT / "src" / "ui" / "app" / "templates" / "models" / "request_path_strip.html").read_text(encoding="utf-8")
+    keys = {key for key in re.findall(r'_\(\s*"([^"]+)"', source) if key.startswith("request_path.")}
+    # `_("request_path.terminal." ~ backend.kind)` contributes only its prefix; the four kinds it
+    # can build are checked as a group instead.
+    prefixes = {key for key in keys if key.endswith(".")}
+    keys -= prefixes
+    for prefix in prefixes:
+        node = locales
+        for part in prefix.rstrip(".").split("."):
+            assert isinstance(node, dict) and part in node, f"missing en.json branch: {prefix}*"
+            node = node[part]
+        assert isinstance(node, dict) and node, f"{prefix}* names no keys"
+    assert html, "the strip rendered nothing"
     assert keys, "the strip declared no i18n keys at all"
     for key in keys:
         node = locales

@@ -2,7 +2,7 @@
           {{ empty_state(id="web-cache-metrics-empty", title_key="status.no_data") }} #}
 
 {# Centered "nothing to render" placeholder -- superset of the ad-hoc
-   <p class="text-muted mb-0" data-i18n="status.no_data">No data</p> snippet duplicated
+   <p class="text-muted mb-0">No data</p> snippet duplicated
    across home.html, plugin_page.html and web_cache.html. Covers three states:
 
      state="empty"    zero results / no data yet (default) -- what every call site above
@@ -25,13 +25,13 @@
                      and the ARIA role ("status" for loading, "alert" for error).
      title           English fallback title text. Defaults to the state's own text ("No
                      data", "Loading...", "Couldn't load data").
-     title_key       data-i18n key for title. Defaults to the state's existing key
+     title_key       catalog key for title. Defaults to the state's existing key
                      ("status.no_data", "status.loading", "status.error_loading_data") --
                      the first two are the very keys home.html/plugin_page.html/
                      web_cache.html already use today, not new copy.
      message         optional secondary explanatory line (English fallback). No default --
                      none of today's call sites have one, so nothing is forced on them.
-     message_key     data-i18n key for message.
+     message_key     catalog key for message.
      icon            Boxicons class override, e.g. "bx-shield-x". Ignored for
                      state="loading" (spinner instead). Pass "none" to hide the icon
                      entirely. Defaults to "bx-folder-open" (empty) / "bx-error-circle"
@@ -43,7 +43,7 @@
                      rounded-3, all pre-existing utilities -- see .border-dashed in
                      overrides.css) for standalone zones that aren't already inside a card.
      action_label    primary action's visible label. Omit to render no action.
-     action_key      data-i18n key for action_label.
+     action_key      catalog key for action_label.
      action_icon     leading Boxicons class for the primary action, e.g. "bx-plus",
                      "bx-refresh".
      action_href     set -> primary action renders as a link (<a role="button">); omit ->
@@ -102,9 +102,9 @@
     {%- elif _icon != "none" %}
         <i class="bx {{ _icon }} {{ _icon_size }} d-block mb-2 {{ 'text-danger' if state == 'error' else 'text-muted' }}" aria-hidden="true"></i>
     {%- endif %}
-    <p class="fw-semibold mb-0"{% if _title_key %} data-i18n="{{ _title_key }}"{% endif %}>{{ _title }}</p>
+    <p class="fw-semibold mb-0">{{ _(_title_key) if _title_key else _title }}</p>
     {%- if message %}
-        <p class="text-muted small mb-0 mt-1"{% if message_key %} data-i18n="{{ message_key }}"{% endif %}>{{ message }}</p>
+        <p class="text-muted small mb-0 mt-1">{{ _(message_key) if message_key else message }}</p>
     {%- endif %}
     {%- if action_label or secondary_label %}
         <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">

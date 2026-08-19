@@ -29,7 +29,7 @@
                     id="log-pause"
                     class="btn btn-sm btn-outline-secondary"
                     aria-pressed="false">
-                <i class="bx bx-pause" aria-hidden="true"></i>&nbsp;<span class="log-pause-label" data-i18n="logs.pause">Pause</span>
+                <i class="bx bx-pause" aria-hidden="true"></i>&nbsp;<span class="log-pause-label">{{ _("logs.pause") }}</span>
             </button>
         {% endif %}
     {% endcall %}
@@ -38,16 +38,16 @@
         <div class="d-flex flex-wrap justify-content-around align-items-center logs-toolbar">
             <div class="d-flex justify-content-start logs-toolbar-files">
                 <div class="dropdown btn-group"
-                     {% if not files.main and not files.letsencrypt %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
+                     {% if not files.main and not files.letsencrypt %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.no_log_files") }}"{% endif %}>
                     <button id="types-dropdown-menu-toggle"
                             type="button"
                             class="btn btn-outline-primary dropdown-toggle{% if not files.main and not files.letsencrypt %} disabled{% endif %}"
                             data-bs-toggle="dropdown"
                             aria-haspopup="true"
                             aria-expanded="false"
-                            {% if current_file %}aria-label="{{ display_file }}"{% else %}data-i18n="aria.label.select_file" aria-label="Select File"{% endif %}>
+                            {% if current_file %}aria-label="{{ display_file }}"{% else %}aria-label="{{ _("aria.label.select_file") }}"{% endif %}>
                         <i class="bx bx-file" aria-hidden="true"></i>
-                        <span class="logs-file-text d-none d-md-inline">&nbsp;{% if current_file %}<span class="logs-file-label align-bottom" title="{{ display_file }}">{{ display_file }}</span>{% else %}<span data-i18n="button.select_file">Select File</span>{% endif %}</span>
+                        <span class="logs-file-text d-none d-md-inline">&nbsp;{% if current_file %}<span class="logs-file-label align-bottom" title="{{ display_file }}">{{ display_file }}</span>{% else %}<span>{{ _("button.select_file") }}</span>{% endif %}</span>
                     </button>
                     <ul id="types-dropdown-menu"
                         class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -59,14 +59,14 @@
                                    href="{{ url_for('logs') }}"
                                    class="dropdown-item{% if not current_file %} active{% endif %}"
                                    {% if not current_file %}aria-current="true"{% endif %}>
-                                    <i class="bx bx-broadcast" aria-hidden="true"></i>&nbsp;<span data-i18n="logs.all_sources">All sources (live)</span>
+                                    <i class="bx bx-broadcast" aria-hidden="true"></i>&nbsp;<span>{{ _("logs.all_sources") }}</span>
                                 </a>
                             </li>
                             <li role="presentation">
                                 <hr class="dropdown-divider">
                             </li>
                             <li role="presentation">
-                                <h6 class="dropdown-header" data-i18n="logs.main_logs">Main Logs</h6>
+                                <h6 class="dropdown-header">{{ _("logs.main_logs") }}</h6>
                             </li>
                             {% for file in files.main %}
                                 <li role="presentation">
@@ -86,7 +86,7 @@
                                 </li>
                             {% endif %}
                             <li role="presentation">
-                                <h6 class="dropdown-header" data-i18n="logs.letsencrypt_logs">Let's Encrypt Logs</h6>
+                                <h6 class="dropdown-header">{{ _("logs.letsencrypt_logs") }}</h6>
                             </li>
                             {% for file in files.letsencrypt %}
                                 <li role="presentation">
@@ -118,7 +118,7 @@
                                    href="{% if loop.index == 1 %}{{ url_for('logs', file=current_file) }}{% else %}{{ url_for('logs', file=current_file, page=page) }}{% endif %}"
                                    class="dropdown-item{% if current_page == page %} active{% endif %}"
                                    {% if current_page == page %}aria-current="true"{% endif %}>
-                                    <span data-i18n="pagination.page">Page</span> {{ page }}
+                                    <span>{{ _("pagination.page") }}</span> {{ page }}
                                 </a>
                             </li>
                         {% endfor %}
@@ -129,16 +129,14 @@
             <div class="d-flex flex-wrap align-items-center justify-content-end my-1 logs-toolbar-actions">
                 <div class="btn-group me-2 my-1"
                      role="group"
-                     aria-label="Error and warning count"
-                     data-i18n="aria.label.issue_count">
+                     aria-label="{{ _("aria.label.issue_count") }}">
                     <button id="logs-prev-issue"
                             type="button"
                             class="btn btn-outline-secondary"
                             disabled
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            data-bs-original-title="Jump to previous error or warning"
-                            data-i18n="tooltip.prev_issue"
+                            data-bs-original-title="{{ _("tooltip.prev_issue") }}"
                             aria-label="Previous error or warning">
                         <i class="bx bx-chevron-up" aria-hidden="true"></i>
                     </button>
@@ -156,8 +154,7 @@
                             disabled
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            data-bs-original-title="Jump to next error or warning"
-                            data-i18n="tooltip.next_issue"
+                            data-bs-original-title="{{ _("tooltip.next_issue") }}"
                             aria-label="Next error or warning">
                         <i class="bx bx-chevron-down" aria-hidden="true"></i>
                     </button>
@@ -170,8 +167,7 @@
                             aria-pressed="true"
                             data-bs-toggle="tooltip"
                             data-bs-placement="top"
-                            data-bs-original-title="Toggle line wrapping"
-                            data-i18n="tooltip.toggle_wrap"
+                            data-bs-original-title="{{ _("tooltip.toggle_wrap") }}"
                             aria-label="Toggle line wrapping">
                         <i class="bx bx-text" aria-hidden="true"></i>
                     </button>
@@ -204,18 +200,17 @@
         </div>
         {% if current_file %}
         <div class="d-flex flex-wrap align-items-center gap-2 px-2 pb-1 pt-2 mt-1 border-top logs-filterbar">
-            <span class="small text-muted" data-i18n="logs.filter_levels">Levels</span>
+            <span class="small text-muted">{{ _("logs.filter_levels") }}</span>
             <div id="logs-level-chips"
                  class="d-flex flex-wrap align-items-center"
                  role="group"
-                 aria-label="Filter log lines by level"
-                 data-i18n="aria.label.level_filter"></div>
+                 aria-label="{{ _("aria.label.level_filter") }}"></div>
             <span id="logs-showing" class="small text-muted"></span>
             <div class="ms-auto d-flex flex-wrap align-items-center gap-2 logs-filterbar-opts">
                 <div class="d-flex align-items-center">
                     <label for="logs-tail"
                            class="small text-muted me-1 mb-0"
-                           data-i18n="logs.lines_label">Lines</label>
+                          >{{ _("logs.lines_label") }}</label>
                     {{ native_select(id="logs-tail",
                                      options=[{"value": "0", "text": "All", "i18n_key": "logs.lines_all"},
                                               {"value": "1000", "text": "1000"},
@@ -229,11 +224,10 @@
                         aria-pressed="false"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-bs-original-title="Show timestamps in your local time"
-                        data-i18n="tooltip.local_time"
+                        data-bs-original-title="{{ _("tooltip.local_time") }}"
                         aria-label="Show timestamps in local time">
                     <i class="bx bx-time-five" aria-hidden="true"></i>
-                    <span class="d-none d-lg-inline">&nbsp;<span data-i18n="button.local_time">Local time</span></span>
+                    <span class="d-none d-lg-inline">&nbsp;<span>{{ _("button.local_time") }}</span></span>
                 </button>
                 <button id="logs-collapse"
                         type="button"
@@ -241,11 +235,10 @@
                         aria-pressed="false"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        data-bs-original-title="Collapse multi-line entries (tracebacks, payloads)"
-                        data-i18n="tooltip.collapse_multiline"
+                        data-bs-original-title="{{ _("tooltip.collapse_multiline") }}"
                         aria-label="Collapse multi-line entries">
                     <i class="bx bx-collapse-vertical" aria-hidden="true"></i>
-                    <span class="d-none d-lg-inline">&nbsp;<span data-i18n="button.collapse_multiline">Collapse</span></span>
+                    <span class="d-none d-lg-inline">&nbsp;<span>{{ _("button.collapse_multiline") }}</span></span>
                 </button>
                 {% if file_meta %}
                     <small id="logs-meta"
@@ -266,7 +259,7 @@
                 type="button"
                 class="logs-new-pill btn btn-sm btn-primary shadow d-none">
             <i class="bx bx-down-arrow-alt" aria-hidden="true"></i>
-            <span id="logs-new-count">0</span>&nbsp;<span data-i18n="logs.new_lines">new lines</span>
+            <span id="logs-new-count">0</span>&nbsp;<span>{{ _("logs.new_lines") }}</span>
         </button>
         <span id="logs-sr-status"
               class="visually-hidden"
@@ -281,7 +274,7 @@
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3 logs-live-toolbar">
             <span class="badge rounded-pill text-bg-primary d-inline-flex align-items-center gap-1">
                 <i class="bx bx-broadcast" aria-hidden="true"></i>
-                <span data-i18n="logs.all_sources">All sources (live)</span>
+                <span>{{ _("logs.all_sources") }}</span>
             </span>
             {{ native_select(id="log-level-filter",
                              options=[{"value": "all", "text": "All logs", "i18n_key": "logs.level_all"},
@@ -295,8 +288,7 @@
                 <input type="search"
                        id="log-grep"
                        class="form-control"
-                       placeholder="grep…"
-                       data-i18n="logs.grep_placeholder"
+                       placeholder="{{ _("logs.grep_placeholder") }}"
                        aria-label="Filter log lines">
             </div>
             <div class="d-flex align-items-center gap-2 ms-auto">
@@ -308,7 +300,7 @@
                         id="log-expand"
                         class="btn btn-sm btn-outline-secondary"
                         aria-label="Expand log window">
-                    <i class="bx bx-expand" aria-hidden="true"></i>&nbsp;<span data-i18n="logs.expand">Expand</span>
+                    <i class="bx bx-expand" aria-hidden="true"></i>&nbsp;<span>{{ _("logs.expand") }}</span>
                 </button>
             </div>
         </div>
@@ -317,8 +309,7 @@
              data-sources="{{ files.main | join(',') }}"
              role="log"
              aria-live="polite"
-             aria-label="Live logs"
-             data-i18n="logs.live_title"></div>
+             aria-label="{{ _("logs.live_title") }}"></div>
     {% endcall %}
     {% else %}
     {% call card(classes="p-4 min-vh-70 position-relative") %}

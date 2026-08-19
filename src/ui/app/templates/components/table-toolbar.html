@@ -35,7 +35,7 @@
                     forwards as-is -- columns_preferences_defaults[id] and
                     columns_preferences go straight into the hidden <textarea> state
                     dataTableInit.js reads on init.
-     loading_key    data-i18n key for the waiting text, e.g. "status.loading_services"
+     loading_key    catalog key for the waiting text, e.g. "status.loading_services"
                     -- required, must be a real key already in en.json (this macro
                     introduces no new copy).
      loading_default  English fallback text for the waiting paragraph -- required.
@@ -80,7 +80,7 @@
     <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" />
     <p id="{{ id }}-waiting"
        class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-       data-i18n="{{ loading_key }}">{{ loading_default }}</p>
+       >{{ _(loading_key) if loading_key else loading_default }}</p>
     <table id="{{ id }}" class="{{ table_classes }}">
         {{ caller() }}
     </table>

@@ -100,7 +100,7 @@
                              (data-upload-label / data-manual-label -- settings-widgets.js, and
                              setup.js on the wizard, swap the visible tooltip between them at
                              runtime).
-     toggle_i18n_key         data-i18n key applied to the toggle button (translates whichever
+     toggle_i18n_key         catalog key applied to the toggle button (translates whichever
                              label is showing at initial render, i.e. toggle_upload_label -- see
                              "Not covered" below for the runtime-relabeling gap).
      status_id               id for the status <small>. Defaults to `id ~ "-status"`.
@@ -115,9 +115,8 @@
        rendering that button yourself right after the macro call, same as today.
      - Runtime i18n relabeling of the inline toggle's tooltip when the mode flips (upload <->
        manual) -- settings-widgets.js swaps `data-bs-original-title` between the two
-       data-*-label values directly; i18next's data-i18n only retranslates the label shown at
-       initial render. Not solved here -- flag it if a caller actually needs live-relabeled
-       tooltips on language switch.
+       data-*-label values directly, and those two stay in the language the page was rendered
+       in. Not solved here -- flag it if a caller actually needs live-relabeled tooltips.
      - Populating/validating the dropzone's upload list or feedback text -- that's real business
        logic (file type checks, reading archives, etc.) and stays page-specific JS, same as
        plugins.js / template_edit.js today. #}
@@ -202,9 +201,8 @@
                     data-manual-label="{{ toggle_manual_label }}"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
-                    data-bs-original-title="{{ toggle_upload_label }}"
-                    aria-label="{{ toggle_upload_label }}"
-                    {%- if toggle_i18n_key %} data-i18n="{{ toggle_i18n_key }}"{% endif %}
+                    data-bs-original-title="{{ _(toggle_i18n_key) if toggle_i18n_key else toggle_upload_label }}"
+                    aria-label="{{ _(toggle_i18n_key) if toggle_i18n_key else toggle_upload_label }}"
                     {%- if disabled %} disabled{% endif %}>
                 <i class="bx bx-edit-alt" aria-hidden="true"></i>
             </button>
@@ -223,8 +221,7 @@
     {%- endif %}
     <small class="text-muted d-block mt-1 plugin-setting-file-status"
            id="{{ status_id or (id ~ '-status') }}"
-           data-empty-text="{{ empty_text }}"
-           {%- if empty_text_i18n_key %} data-i18n-empty-text="{{ empty_text_i18n_key }}"{% endif %}>
+           data-empty-text="{{ _(empty_text_i18n_key) if empty_text_i18n_key else empty_text }}">
         {%- if status_text -%}
             {{ status_text }}
         {%- elif has_value and file_name -%}
@@ -245,19 +242,19 @@
      role="button"
      tabindex="{{ '-1' if disabled else '0' }}"
      aria-disabled="{{ 'true' if disabled else 'false' }}"
-     {%- if aria_label %} aria-label="{{ aria_label }}"{% if aria_label_i18n_key %} data-i18n="{{ aria_label_i18n_key }}"{% endif %}{% endif %}
+     {%- if aria_label %} aria-label="{{ _(aria_label_i18n_key) if aria_label_i18n_key else aria_label }}"{% endif %}
      {%- if attrs %} {{ attrs | safe }}{% endif %}>
     <i class="{{ icon_class }}" aria-hidden="true"></i>
     {%- if hint %}
-    <p class="{{ hint_class }}"{% if hint_i18n_key %} data-i18n="{{ hint_i18n_key }}"{% endif %}>{{ hint }}</p>
+    <p class="{{ hint_class }}">{{ _(hint_i18n_key) if hint_i18n_key else hint }}</p>
     {%- endif %}
     {%- if sub_hint %}
-    <p class="{{ sub_hint_class }}"{% if sub_hint_i18n_key %} data-i18n="{{ sub_hint_i18n_key }}"{% endif %}>{{ sub_hint }}</p>
+    <p class="{{ sub_hint_class }}">{{ _(sub_hint_i18n_key) if sub_hint_i18n_key else sub_hint }}</p>
     {%- endif %}
     {%- if show_browse_button %}
     <span {%- if browse_id %} id="{{ browse_id }}"{% endif %}
           class="btn btn-sm btn-outline-primary{% if disabled %} disabled{% endif %}"
-          {%- if browse_label_i18n_key %} data-i18n="{{ browse_label_i18n_key }}"{% endif %}>{{ browse_label }}</span>
+          >{{ _(browse_label_i18n_key) if browse_label_i18n_key else browse_label }}</span>
     {%- endif %}
 </div>
 <input type="file"

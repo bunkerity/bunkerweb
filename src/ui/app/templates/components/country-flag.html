@@ -36,9 +36,9 @@
      flag_base    base path flag SVGs are served from. Default "/static/img/flags" (this
                   app's own static files) -- NEVER point this at flagcdn.com or another
                   third-party host, see the CSP note above. Trailing slash tolerated.
-     name         override the pre-i18next fallback text. Default: the uppercased ISO code,
+     name         override the fallback text. Default: the uppercased ISO code,
                   or "N/A" for not-applicable. The actual localized country name (e.g.
-                  "France") comes from i18next translating data-i18n="country.<ISO>" at
+                  "France") comes from translating "country.<ISO>" at
                   runtime -- both that key and "country.not_applicable" already exist for all
                   252 codes in en.json, so this param is for the rare caller that wants a
                   different fallback string, not for supplying the real name.
@@ -47,7 +47,7 @@
                   (visually-hidden) instead of dropping it -- e.g. a compact avatar-style
                   icon strip.
      tooltip      attach the Bootstrap `data-bs-toggle="tooltip"` wiring (title = the same
-                  label text, kept in sync after i18next translation by
+                  label text, kept in sync by
                   static/js/components/country-flag.js's `updateTooltips()`). Default true.
      height       flag <img> height in px (width is automatic -- the SVGs are pre-cropped to
                   a flag aspect ratio). Default 17, matching every existing call site.
@@ -58,14 +58,14 @@
    flag+name+ISO-code) and per-size flag dimensions (sm/md/lg) -- no call site in this app
    uses anything but flag+name at a single fixed height, so those variants aren't wired up
    here; add them if a real caller needs them. Also not covered: a NAMES lookup table for the
-   pre-i18next fallback text -- en.json already has every country name keyed by ISO code, so
+   fallback text -- en.json already has every country name keyed by ISO code, so
    a second copy of that data baked into this template or its JS companion would just be a
    second place for it to drift out of sync.
 
    Companion JS lives in static/js/components/country-flag.js -- `BWCountryFlag.html()`
    renders this same markup for DataTables `render()` callbacks, and
-   `BWCountryFlag.updateTooltips()` re-translates every `[data-country]` cell's tooltip after
-   i18next (re)translates the page. Include it once on any page using either. #}
+   `BWCountryFlag.updateTooltips()` translates every `[data-country]` cell's tooltip on rows
+   DataTables built after the server render. Include it once on any page using either. #}
 {% macro country_flag(
     code,
     flag_base="/static/img/flags",
@@ -95,6 +95,6 @@
          loading="lazy"
          alt=""
          aria-hidden="true" />
-    <span{% if not show_label %} class="visually-hidden"{% endif %} data-i18n="{{ _i18n_key }}">{{ _label }}</span>
+    <span{% if not show_label %} class="visually-hidden"{% endif %}>{{ _(_i18n_key) if _i18n_key else _label }}</span>
 </span>
 {%- endmacro %}

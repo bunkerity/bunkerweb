@@ -11,12 +11,12 @@
         <div class="mt-2">
             <label class="visually-hidden"
                    for="{{ target_id }}-resource-group"
-                   data-i18n="resource_groups.add_to_setting">Add a resource group</label>
+                  >{{ _("resource_groups.add_to_setting") }}</label>
             <select id="{{ target_id }}-resource-group"
                     class="form-select form-select-sm resource-group-picker"
                     data-target="#{{ target_id }}"
                     {% if disabled %}disabled{% endif %}>
-                <option value="" selected data-i18n="resource_groups.add_to_setting">Add a resource group…</option>
+                <option value="" selected>{{ _("resource_groups.add_to_setting") }}</option>
                 {%- for group in compatible | sort(attribute="name") %}
                     <option value="@{{ group.name }}">@{{ group.name }} ({{ group.count }})</option>
                 {%- endfor %}

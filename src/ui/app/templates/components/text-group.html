@@ -22,8 +22,8 @@
                     decides what to pass when there's no value (e.g. the
                     "Not available" fallback template_edit.html renders itself) --
                     this macro never invents an empty-state placeholder.
-     top_i18n       data-i18n key for top, e.g. "template.editor.summary_metadata_created".
-     bottom_i18n    data-i18n key for bottom.
+     top_i18n       catalog key for top, e.g. "template.editor.summary_metadata_created".
+     bottom_i18n    catalog key for bottom.
      icon           optional Boxicons class suffix, e.g. "bx-time", "bx-cog".
                     Rendered left of the text stack, aria-hidden (decorative --
                     the label text already carries the meaning).
@@ -58,9 +58,9 @@
     <div{% if id %} id="{{ id }}"{% endif %} class="d-flex align-items-center gap-2{% if classes %} {{ classes }}{% endif %}">
         {%- if icon %}<i class="bx {{ icon }}" aria-hidden="true"></i>{% endif %}
         <div>
-            <div{% if top_id %} id="{{ top_id }}"{% endif %} class="{{ top_cls }}"{% if top_i18n %} data-i18n="{{ top_i18n }}"{% endif %}>{{ top }}</div>
+            <div{% if top_id %} id="{{ top_id }}"{% endif %} class="{{ top_cls }}">{{ _(top_i18n) if top_i18n else top }}</div>
             {%- if bottom %}
-            <div{% if bottom_id %} id="{{ bottom_id }}"{% endif %} class="{{ bottom_cls }}"{% if bottom_i18n %} data-i18n="{{ bottom_i18n }}"{% endif %}>{{ bottom }}</div>
+            <div{% if bottom_id %} id="{{ bottom_id }}"{% endif %} class="{{ bottom_cls }}">{{ _(bottom_i18n) if bottom_i18n else bottom }}</div>
             {%- endif %}
         </div>
     </div>

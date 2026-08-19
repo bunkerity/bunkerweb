@@ -8,9 +8,11 @@ and there's no collision in a combined run.
 """
 
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 import pytest
+from jinja2.defaults import DEFAULT_NAMESPACE
 
 _UI_ROOT = str(Path(__file__).resolve().parents[3] / "src" / "ui")
 if _UI_ROOT not in sys.path:
@@ -50,3 +52,71 @@ def ui_db(db_engine, tmp_path, quiet_logger, _clean_env):
         yield database
     finally:
         database.close()
+
+
+# --------------------------------------------------------------------------------------
+# Server-side translation in the standalone Jinja harnesses
+# --------------------------------------------------------------------------------------
+# Templates converted to native i18n (see test_i18n_migration.CONVERTED) call `_()`, which
+# Flask-Babel installs as a Jinja global. The harnesses in this directory build a bare
+# `Environment` to render one template without booting the app, so they need it too — otherwise
+# the render dies with `'_' is undefined`.
+#
+# Installing it into Jinja's own default namespace (below) covers every one of them, including the
+# envs built inline inside a single assertion. The alternative — patching each harness — was tried
+# first and does not hold: converting one shared macro broke 27 tests across 4 files, and the next
+# conversion would break a different set.
+#
+# It reads the *real* compiled English catalog rather than faking one, so a harness sees the same
+# string production would render, `%(name)s` placeholders and all.
+_TRANSLATIONS = Path(__file__).resolve().parents[3] / "src" / "ui" / "translations"
+
+
+@lru_cache(maxsize=1)
+def _english_catalog():
+    from babel.messages.pofile import read_po
+
+    with (_TRANSLATIONS / "en" / "LC_MESSAGES" / "messages.po").open("rb") as handle:
+        catalog = read_po(handle, locale="en")
+    return {message.id: message.string for message in catalog if message.id and not message.pluralizable}
+
+
+def babel_globals():
+    """`{"_": ..., "gettext": ..., "ngettext": ...}` for a harness's `env.globals.update(...)`.
+
+    Mirrors `flask_babel.Domain.gettext`: `%`-formats only when variables are passed, which is
+    the rule that decides whether a literal `%` in a message is escaped.
+    """
+
+    def gettext(key, **variables):
+        text = _english_catalog().get(key, key)
+        return text % variables if variables else text
+
+    def ngettext(singular, plural, num, **variables):
+        variables.setdefault("num", num)
+        text = _english_catalog().get(singular if num == 1 else plural, singular)
+        return text % variables
+
+    return {"_": gettext, "gettext": gettext, "ngettext": ngettext}
+
+
+def english(key, **variables):
+    """What a converted template *renders* for `key`: the English catalog string, HTML-escaped,
+    or the key itself when the catalog has none — which is also what gettext does at runtime.
+
+    Tests that used to assert `data-i18n="<key>"` in the markup assert this instead: the
+    translation now happens before the HTML leaves the server, so the key is no longer there.
+
+    Escaped because that is what reaches the page: Jinja autoescaping turns the apostrophe in
+    "the plugin's total time" into `&#39;`, and comparing the raw catalog string against rendered
+    HTML fails for every message that contains one.
+    """
+    from markupsafe import escape
+
+    return str(escape(babel_globals()["_"](key, **variables)))
+
+
+# Jinja copies this dict into `Environment.globals` at construction, so every environment built
+# after this module is imported — and conftest is imported before any test module — carries `_`,
+# exactly as the real app does.
+DEFAULT_NAMESPACE.update(babel_globals())

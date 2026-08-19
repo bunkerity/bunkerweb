@@ -19,10 +19,9 @@
                     {{ button(tag="a", href=url_for('templates.templates_page'), variant="outline-secondary", size="sm", icon="bx-arrow-back", label="Go Back", i18n_key="button.go_back") }}
                     {% if editor_mode == 'edit' %}
                         <h2 class="h5 mb-0"
-                            data-i18n="template.editor.heading_edit"
-                            data-i18n-options='{{ {"id": template_id}|tojson }}'>Edit template {{ template_id }}</h2>
+                            >{{ _("template.editor.heading_edit", id=template_id) }}</h2>
                     {% else %}
-                        <h2 class="h5 mb-0" data-i18n="template.editor.heading_create">Create template</h2>
+                        <h2 class="h5 mb-0">{{ _("template.editor.heading_create") }}</h2>
                     {% endif %}
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
@@ -32,17 +31,16 @@
         {% endcall %}
         {% if edit_restrictions %}
             {% call alert(variant="warning", icon="bx-error-circle", classes="shadow-sm") %}
-                <strong data-i18n="template.editor.readonly_title">Read-only</strong>
+                <strong>{{ _("template.editor.readonly_title") }}</strong>
                 <ul class="mb-0 ps-3">
                     {% for reason in edit_restrictions %}
                         <li>
                             {% if reason == 'database' %}
-                                <span data-i18n="template.editor.readonly_db">The database is currently read-only. Templates cannot be changed.</span>
+                                <span>{{ _("template.editor.readonly_db") }}</span>
                             {% elif reason == 'user' %}
-                                <span data-i18n="template.editor.readonly_user">You have read-only permissions. Contact an administrator to request write access.</span>
+                                <span>{{ _("template.editor.readonly_user") }}</span>
                             {% elif reason == 'method' %}
-                                <span data-i18n="template.editor.readonly_method"
-                                      data-i18n-options='{{ {"method": template_meta_serialized.get('method', 'ui') }|tojson }}'>This template was created outside the UI and cannot be edited.</span>
+                                <span>{{ _("template.editor.readonly_method", method=template_meta_serialized.get('method', 'ui')) }}</span>
                             {% endif %}
                         </li>
                     {% endfor %}
@@ -64,42 +62,39 @@
                             <div class="card-body d-flex flex-column gap-4">
                                 <div>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <h5 class="card-title mb-0" data-i18n="template.editor.panel_overview">Overview</h5>
+                                        <h5 class="card-title mb-0">{{ _("template.editor.panel_overview") }}</h5>
                                     </div>
                                     <p class="text-muted small mb-0"
-                                       data-i18n="template.editor.panel_overview_help">
-                                        Track key information and navigate between sections.
+                                      >
+                                        {{ _("template.editor.panel_overview_help") }}
                                     </p>
                                 </div>
                                 {% if clone_meta %}
                                     <div class="alert alert-info border-0 shadow-sm small mb-0"
-                                         data-i18n="template.editor.summary_clone_info"
-                                         data-i18n-options='{{ {"template": clone_meta.source_id}|tojson }}'>
-                                        Currently cloning from {{ clone_meta.source_id }}.
-                                    </div>
+                                         >{{ _("template.editor.summary_clone_info", template=clone_meta.source_id) }}</div>
                                 {% endif %}
                                 <div>
                                     <h6 class="text-uppercase text-muted small mb-2"
-                                        data-i18n="template.editor.summary_metadata_title">Metadata</h6>
+                                       >{{ _("template.editor.summary_metadata_title") }}</h6>
                                     <div class="vstack gap-2 small">
                                         {% set summary_method = template_meta_serialized.get('method') %}
                                         <div class="d-flex align-items-center justify-content-between px-3 py-2 border rounded-3">
                                             <span class="d-flex align-items-center gap-2 text-muted">
                                                 <i class="bx bx-cog" aria-hidden="true"></i>
-                                                <span data-i18n="template.editor.summary_metadata_method">Method</span>
+                                                <span>{{ _("template.editor.summary_metadata_method") }}</span>
                                             </span>
                                             {% if summary_method %}
                                                 <span class="badge bg-label-primary text-uppercase">{{ summary_method }}</span>
                                             {% else %}
                                                 <span class="text-muted"
-                                                      data-i18n="template.editor.summary_metadata_unknown">Not available</span>
+                                                     >{{ _("template.editor.summary_metadata_unknown") }}</span>
                                             {% endif %}
                                         </div>
                                         {% set creation_date = template_meta_serialized.get('creation_date') %}
                                         <div class="d-flex align-items-center justify-content-between px-3 py-2 border rounded-3">
                                             <span class="d-flex align-items-center gap-2 text-muted">
                                                 <i class="bx bx-time"></i>
-                                                <span data-i18n="template.editor.summary_metadata_created">Created</span>
+                                                <span>{{ _("template.editor.summary_metadata_created") }}</span>
                                             </span>
                                             {% if creation_date %}
                                                 <time class="fw-semibold text-nowrap"
@@ -107,14 +102,14 @@
                                                       id="summary-created-value">{{ creation_date }}</time>
                                             {% else %}
                                                 <span class="text-muted"
-                                                      data-i18n="template.editor.summary_metadata_unknown">Not available</span>
+                                                     >{{ _("template.editor.summary_metadata_unknown") }}</span>
                                             {% endif %}
                                         </div>
                                         {% set updated_date = template_meta_serialized.get('last_update') %}
                                         <div class="d-flex align-items-center justify-content-between px-3 py-2 border rounded-3">
                                             <span class="d-flex align-items-center gap-2 text-muted">
                                                 <i class="bx bx-refresh"></i>
-                                                <span data-i18n="template.editor.summary_metadata_updated">Last update</span>
+                                                <span>{{ _("template.editor.summary_metadata_updated") }}</span>
                                             </span>
                                             {% if updated_date %}
                                                 <time class="fw-semibold text-nowrap"
@@ -122,33 +117,33 @@
                                                       id="summary-updated-value">{{ updated_date }}</time>
                                             {% else %}
                                                 <span class="text-muted"
-                                                      data-i18n="template.editor.summary_metadata_unknown">Not available</span>
+                                                     >{{ _("template.editor.summary_metadata_unknown") }}</span>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <h6 class="text-uppercase text-muted small mb-2"
-                                        data-i18n="template.editor.summary_counts_title">Content</h6>
+                                       >{{ _("template.editor.summary_counts_title") }}</h6>
                                     <ul class="list-group list-group-flush border rounded-3 shadow-sm overflow-hidden">
                                         <li class="list-group-item d-flex align-items-center justify-content-between">
                                             <span class="d-flex align-items-center gap-2">
                                                 <i class="bx bx-slider"></i>
-                                                <span data-i18n="template.editor.summary_counts_settings">Settings</span>
+                                                <span>{{ _("template.editor.summary_counts_settings") }}</span>
                                             </span>
                                             {{ badge(text=template_data.settings|length, variant="primary", pill=false, id="summary-settings-count") }}
                                         </li>
                                         <li class="list-group-item d-flex align-items-center justify-content-between">
                                             <span class="d-flex align-items-center gap-2">
                                                 <i class="bx bx-map"></i>
-                                                <span data-i18n="template.editor.summary_counts_steps">Steps</span>
+                                                <span>{{ _("template.editor.summary_counts_steps") }}</span>
                                             </span>
                                             {{ badge(text=template_data.steps|length, variant="primary", pill=false, id="summary-steps-count") }}
                                         </li>
                                         <li class="list-group-item d-flex align-items-center justify-content-between">
                                             <span class="d-flex align-items-center gap-2">
                                                 <i class="bx bx-code-curly"></i>
-                                                <span data-i18n="template.editor.summary_counts_configs">Configs</span>
+                                                <span>{{ _("template.editor.summary_counts_configs") }}</span>
                                             </span>
                                             {{ badge(text=template_data.configs|length, variant="primary", pill=false, id="summary-configs-count") }}
                                         </li>
@@ -156,31 +151,31 @@
                                 </div>
                                 <div>
                                     <h6 class="text-uppercase text-muted small mb-2"
-                                        data-i18n="template.editor.summary_links_title">Quick links</h6>
+                                       >{{ _("template.editor.summary_links_title") }}</h6>
                                     <div class="d-grid gap-2">
                                         <button type="button"
                                                 class="btn btn-outline-secondary btn-sm text-start"
                                                 data-scroll-target="#section-details">
                                             <i class="bx bx-spreadsheet me-2"></i>
-                                            <span data-i18n="template.editor.summary_link_details">Template details</span>
+                                            <span>{{ _("template.editor.summary_link_details") }}</span>
                                         </button>
                                         <button type="button"
                                                 class="btn btn-outline-secondary btn-sm text-start"
                                                 data-scroll-target="#section-settings">
                                             <i class="bx bx-slider-alt me-2"></i>
-                                            <span data-i18n="template.editor.summary_link_settings">Settings</span>
+                                            <span>{{ _("template.editor.summary_link_settings") }}</span>
                                         </button>
                                         <button type="button"
                                                 class="btn btn-outline-secondary btn-sm text-start"
                                                 data-scroll-target="#section-steps">
                                             <i class="bx bx-list-ol me-2"></i>
-                                            <span data-i18n="template.editor.summary_link_steps">Steps</span>
+                                            <span>{{ _("template.editor.summary_link_steps") }}</span>
                                         </button>
                                         <button type="button"
                                                 class="btn btn-outline-secondary btn-sm text-start"
                                                 data-scroll-target="#section-configs">
                                             <i class="bx bx-code-block me-2"></i>
-                                            <span data-i18n="template.editor.summary_link_configs">Custom configs</span>
+                                            <span>{{ _("template.editor.summary_link_configs") }}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -195,10 +190,10 @@
                                 <div class="card-header bg-transparent border-0 pb-0">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                         <div>
-                                            <h5 class="mb-1" data-i18n="template.editor.details">Template details</h5>
+                                            <h5 class="mb-1">{{ _("template.editor.details") }}</h5>
                                             <p class="text-muted small mb-0"
-                                               data-i18n="template.editor.details_help">
-                                                Set the basic information for this template.
+                                              >
+                                                {{ _("template.editor.details_help") }}
                                             </p>
                                         </div>
                                     </div>
@@ -218,10 +213,10 @@
                                 <div class="card-header bg-transparent border-0 pb-0">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                         <div>
-                                            <h5 class="mb-1" data-i18n="template.editor.settings">Settings</h5>
+                                            <h5 class="mb-1">{{ _("template.editor.settings") }}</h5>
                                             <p class="text-muted small mb-0"
-                                               data-i18n="template.editor.settings_help">
-                                                Define the settings exposed by this template and their default values.
+                                              >
+                                                {{ _("template.editor.settings_help") }}
                                             </p>
                                         </div>
                                         <div class="d-flex align-items-center">
@@ -232,7 +227,7 @@
                                                     aria-controls="setting-selector-modal"
                                                     aria-expanded="false">
                                                 <i class="bx bx-plus"></i>
-                                                <span data-i18n="template.editor.button_add_setting">Add setting</span>
+                                                <span>{{ _("template.editor.button_add_setting") }}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -246,9 +241,9 @@
                                 <div class="card-header bg-transparent border-0 pb-0">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                         <div>
-                                            <h5 class="mb-1" data-i18n="template.editor.steps">Steps</h5>
-                                            <p class="text-muted small mb-0" data-i18n="template.editor.steps_help">
-                                                Organize settings into guided steps. Select which settings or configs belong to each step.
+                                            <h5 class="mb-1">{{ _("template.editor.steps") }}</h5>
+                                            <p class="text-muted small mb-0">
+                                                {{ _("template.editor.steps_help") }}
                                             </p>
                                         </div>
                                         <div class="d-grid gap-2 d-md-flex">
@@ -265,10 +260,10 @@
                                 <div class="card-header bg-transparent border-0 pb-0">
                                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                         <div>
-                                            <h5 class="mb-1" data-i18n="template.editor.configs">Custom configs</h5>
+                                            <h5 class="mb-1">{{ _("template.editor.configs") }}</h5>
                                             <p class="text-muted small mb-0"
-                                               data-i18n="template.editor.configs_help">
-                                                Attach optional custom configuration snippets to this template.
+                                              >
+                                                {{ _("template.editor.configs_help") }}
                                             </p>
                                         </div>
                                         <div class="d-grid gap-2 d-md-flex">
@@ -295,10 +290,10 @@
                         <div class="card-header bg-transparent border-0 pb-0">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                 <div>
-                                    <h5 class="mb-1" data-i18n="template.editor.raw_editor_title">Raw template JSON</h5>
+                                    <h5 class="mb-1">{{ _("template.editor.raw_editor_title") }}</h5>
                                     <p class="text-muted small mb-0"
-                                       data-i18n="template.editor.raw_editor_help">
-                                        Edit the complete template definition as JSON. Switching back to Easy mode validates and reloads the visual editor.
+                                      >
+                                        {{ _("template.editor.raw_editor_help") }}
                                     </p>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
@@ -309,7 +304,7 @@
                                                accept=".json,application/json"
                                                {% if not can_edit_template %}disabled{% endif %}>
                                         <i class="bx bx-upload"></i>&nbsp;
-                                        <span data-i18n="template.editor.raw_editor_upload_template">Upload template JSON</span>
+                                        <span>{{ _("template.editor.raw_editor_upload_template") }}</span>
                                     </label>
                                 </div>
                             </div>
@@ -319,7 +314,7 @@
                                 <div class="raw-template-drop-target" aria-hidden="true">
                                     <div class="raw-template-drop-label">
                                         <i class="bx bx-import bx-lg mb-2"></i>
-                                        <span data-i18n="template.editor.raw_editor_drop_hint">Drop a template JSON file to replace the current content.</span>
+                                        <span>{{ _("template.editor.raw_editor_drop_hint") }}</span>
                                     </div>
                                 </div>
                                 {{ code_editor(id="raw-template-editor", language="json", read_only=not can_edit_template, height="none", aria_label="Raw template JSON editor", classes="raw-template-editor position-relative") }}
@@ -331,10 +326,9 @@
                         <div class="card-header bg-transparent border-0 pb-0">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                                 <div>
-                                    <h5 class="mb-1" data-i18n="template.editor.raw_configs_title">Custom config imports</h5>
-                                    <p class="text-muted small mb-0"
-                                       data-i18n="template.editor.raw_configs_help">
-                                        Upload config files to append entries to <code>configs</code>. Types default to <code>server_http</code>; adjust in the JSON if needed.
+                                    <h5 class="mb-1">{{ _("template.editor.raw_configs_title") }}</h5>
+                                    <p class="text-muted small mb-0">
+                                        {{ _("template.editor.raw_configs_help") }}
                                     </p>
                                 </div>
                             </div>
@@ -347,18 +341,18 @@
                                  aria-disabled="{{ 'true' if not can_edit_template else 'false' }}">
                                 <div class="raw-config-dropzone-content">
                                     <i class="bx bx-file-import bx-lg mb-3 text-primary"></i>
-                                    <p class="mb-1" data-i18n="template.editor.raw_configs_drop_hint">
-                                        Drag and drop config files here or click to browse.
+                                    <p class="mb-1">
+                                        {{ _("template.editor.raw_configs_drop_hint") }}
                                     </p>
                                     <p class="text-muted small mb-3"
-                                       data-i18n="template.editor.raw_configs_drop_supported">
-                                        Supported formats: .conf, .txt, .json, .lua, .tmpl, .cfg
+                                      >
+                                        {{ _("template.editor.raw_configs_drop_supported") }}
                                     </p>
                                     <button type="button"
                                             id="raw-config-browse"
                                             class="btn btn-sm btn-outline-primary raw-config-browse-btn"
                                             {% if not can_edit_template %}disabled{% endif %}
-                                            data-i18n="template.editor.raw_configs_browse">Browse files</button>
+                                           >{{ _("template.editor.raw_configs_browse") }}</button>
                                 </div>
                             </div>
                             <input type="file"
@@ -369,13 +363,13 @@
                                    {% if not can_edit_template %}disabled{% endif %}>
                             <p class="text-muted small mt-3 mb-2"
                                id="raw-configs-note"
-                               data-i18n="template.editor.raw_configs_note">
-                                Imported files are added to the JSON editor. Review and adjust before saving.
+                              >
+                                {{ _("template.editor.raw_configs_note") }}
                             </p>
                             <p id="raw-configs-empty"
                                class="text-muted small mb-2"
-                               data-i18n="template.editor.raw_configs_empty">
-                                No imported config files yet. New files will appear below.
+                              >
+                                {{ _("template.editor.raw_configs_empty") }}
                             </p>
                             <ul id="raw-configs-upload-list"
                                 class="list-group small d-none raw-configs-upload-list"
@@ -389,8 +383,8 @@
     </form>
     {% call modal(id="template-import-warning-modal", title_key="template.editor.raw_editor_override_title", title="Replace template JSON?", static_backdrop=false) %}
         <div class="modal-body">
-            <p class="mb-0" data-i18n="template.editor.raw_editor_override_body">
-                Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?
+            <p class="mb-0">
+                {{ _("template.editor.raw_editor_override_body") }}
             </p>
         </div>
         <div class="modal-footer border-0 justify-content-end gap-2">
@@ -400,14 +394,14 @@
     {% endcall %}
     {% call modal(id="missing-configs-modal", title_key="template.editor.missing_configs_title", title="Missing Custom Configs", static_backdrop=false) %}
         <div class="modal-body">
-            <p data-i18n="template.editor.missing_configs_body">
-                The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:
+            <p>
+                {{ _("template.editor.missing_configs_body") }}
             </p>
             <ul id="missing-configs-list" class="list-group small mb-3">
             </ul>
             <div class="mb-3">
                 <label class="form-label fw-semibold"
-                       data-i18n="template.editor.missing_configs_upload_label">Upload missing configs</label>
+                      >{{ _("template.editor.missing_configs_upload_label") }}</label>
                 <div id="missing-configs-dropzone"
                      class="missing-configs-dropzone text-center"
                      role="button"
@@ -416,15 +410,15 @@
                     <div class="missing-configs-dropzone-content">
                         <i class="bx bx-cloud-upload bx-lg mb-2 text-primary"></i>
                         <p class="mb-1 fw-semibold"
-                           data-i18n="template.editor.missing_configs_drop_hint">
-                            Drag and drop config files here
+                          >
+                            {{ _("template.editor.missing_configs_drop_hint") }}
                         </p>
                         <p class="text-muted small mb-3"
-                           data-i18n="template.editor.missing_configs_drop_or">or</p>
+                          >{{ _("template.editor.missing_configs_drop_or") }}</p>
                         <button type="button"
                                 id="missing-configs-browse"
                                 class="btn btn-sm btn-outline-primary"
-                                data-i18n="template.editor.missing_configs_browse">Browse Files</button>
+                               >{{ _("template.editor.missing_configs_browse") }}</button>
                     </div>
                 </div>
                 <input type="file"
@@ -435,10 +429,10 @@
                 <div id="missing-configs-upload-feedback" class="mt-2 small"></div>
             </div>
             {% call alert(variant="info", icon="bx-bulb", classes="mb-0") %}
-                <strong data-i18n="template.editor.missing_configs_hint_title">Tip:</strong>
+                <strong>{{ _("template.editor.missing_configs_hint_title") }}</strong>
                 <p class="mb-0 small"
-                   data-i18n="template.editor.missing_configs_hint_body">
-                    Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.
+                  >
+                    {{ _("template.editor.missing_configs_hint_body") }}
                 </p>
             {% endcall %}
         </div>
@@ -457,20 +451,19 @@
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title"
                         id="setting-selector-modal-title"
-                        data-i18n="template.editor.button_add_setting">Add setting</h5>
+                       >{{ _("template.editor.button_add_setting") }}</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
-                            aria-label="Close"
-                            data-i18n-aria-label="button.close"></button>
+                            aria-label="{{ _("button.close") }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="setting-selector-toolbar">
                         <div class="mb-3">
                             <label for="setting-selector-search"
                                    class="form-label text-uppercase small fw-semibold mb-1"
-                                   data-i18n="template.editor.setting_selector_search_label">
-                                Find a multisite setting
+                                  >
+                                {{ _("template.editor.setting_selector_search_label") }}
                             </label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text"><i class="bx bx-search"></i></span>
@@ -478,14 +471,11 @@
                                        class="form-control"
                                        id="setting-selector-search"
                                        autocomplete="off"
-                                       placeholder="Search by label, key, or plugin"
-                                       data-i18n="template.editor.setting_selector_search_placeholder"
-                                       data-i18n-attr="placeholder">
+                                       placeholder="{{ _("template.editor.setting_selector_search_placeholder") }}">
                                 <button type="button"
                                         class="btn btn-outline-secondary"
                                         id="setting-selector-clear"
-                                        aria-label="Clear search"
-                                        data-i18n-aria-label="template.editor.setting_selector_clear">
+                                        aria-label="{{ _("template.editor.setting_selector_clear") }}">
                                     <i class="bx bx-x"></i>
                                 </button>
                             </div>
@@ -494,27 +484,27 @@
                             <div class="col-12 col-lg-6">
                                 <label for="setting-selector-plugin"
                                        class="form-label text-uppercase small fw-semibold mb-1"
-                                       data-i18n="template.editor.setting_selector_filter_plugin">Plugin</label>
+                                      >{{ _("template.editor.setting_selector_filter_plugin") }}</label>
                                 <select id="setting-selector-plugin" class="form-select form-select-sm">
                                     <option value=""
-                                            data-i18n="template.editor.setting_selector_filter_plugin_all">
-                                        All plugins
+                                           >
+                                        {{ _("template.editor.setting_selector_filter_plugin_all") }}
                                     </option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-6">
                                 <label for="setting-selector-type"
                                        class="form-label text-uppercase small fw-semibold mb-1"
-                                       data-i18n="template.editor.setting_selector_filter_type">Type</label>
+                                      >{{ _("template.editor.setting_selector_filter_type") }}</label>
                                 <select id="setting-selector-type" class="form-select form-select-sm">
-                                    <option value="" data-i18n="template.editor.setting_selector_filter_type_all">All types</option>
+                                    <option value="">{{ _("template.editor.setting_selector_filter_type_all") }}</option>
                                 </select>
                             </div>
                         </div>
                         <p class="text-muted small mb-0 setting-selector-helper"
                            id="setting-selector-helper"
-                           data-i18n="template.editor.setting_selector_helper">
-                            Only multisite settings are available. Use the filters to narrow down the list.
+                          >
+                            {{ _("template.editor.setting_selector_helper") }}
                         </p>
                     </div>
                     <div class="list-group setting-selector-results"
@@ -523,8 +513,8 @@
                          aria-labelledby="setting-selector-search"></div>
                     <div class="text-muted small py-2 d-none"
                          id="setting-selector-empty"
-                         data-i18n="template.editor.setting_selector_empty">
-                        No settings match the current filters.
+                        >
+                        {{ _("template.editor.setting_selector_empty") }}
                     </div>
                 </div>
                 <div class="modal-footer border-0 d-flex justify-content-between align-items-center">
@@ -533,13 +523,13 @@
                         <button type="button"
                                 class="btn btn-outline-secondary btn-sm"
                                 data-bs-dismiss="modal"
-                                data-i18n="button.cancel">Cancel</button>
+                               >{{ _("button.cancel") }}</button>
                         <button type="button"
                                 class="btn btn-sm btn-bw-green"
                                 id="setting-selector-apply"
                                 disabled>
                             <i class="bx bx-plus"></i>
-                            <span data-i18n="template.editor.setting_selector_add_selected">Add selected</span>
+                            <span>{{ _("template.editor.setting_selector_add_selected") }}</span>
                         </button>
                     </div>
                 </div>
@@ -549,12 +539,12 @@
     {% call modal(id="setting-remove-modal", title_key="template.editor.setting_remove_title", title="Remove setting", static_backdrop=false) %}
         <div class="modal-body">
             <p class="text-muted mb-3"
-               data-i18n="template.editor.setting_remove_confirm">
-                Are you sure you want to remove this setting from the template?
+              >
+                {{ _("template.editor.setting_remove_confirm") }}
             </p>
             <div class="border rounded p-3 bg-light small">
                 <div class="fw-semibold text-uppercase text-muted"
-                     data-i18n="template.editor.setting_remove_key">Setting</div>
+                    >{{ _("template.editor.setting_remove_key") }}</div>
                 <div id="setting-remove-name" class="mt-1 fw-semibold"></div>
             </div>
         </div>

@@ -17,31 +17,178 @@ $(document).ready(function () {
   let toastNum = 0;
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
-  const templates = ($("#templates").val() || "").trim().split(" ");
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
   const importDragArea = $("#services-drag-area");
   const importFileInput = $("#services-import-file");
   const importFileList = $("#services-import-file-list");
 
-  const templatesSearchPanesOptions = [
-    {
-      label: `<span data-i18n="template.none">${t(
-        "template.none",
-        "no template",
-      )}</span>`,
-      value: (rowData) => rowData[6].includes("template.none"),
-    },
-  ];
+  // The row actions used to be rendered server-side for every service: ~4.8 KB of near-identical
+  // markup per row, 73% of the page and 2.4 MB of it at 500 services. They are built here on
+  // draw instead, so only the rows on the visible page exist. `services.html` passes the four
+  // per-row facts as data attributes on the (now empty) cell; everything else is page-level.
+  //
+  // The markup is deliberately identical to what the template emitted, and every string in it is
+  // resolved through `t()` as it is built — the catalog is loaded before this file runs, so there
+  // is nothing to wait for and nothing to re-translate. The click handlers are delegated on
+  // `document`, so nothing needs rebinding.
+  const servicesUrl = ($("#services_url").val() || "/services").replace(
+    /\/$/,
+    "",
+  );
+  const templatesUrl = ($("#templates_url").val() || "/templates").replace(
+    /\/$/,
+    "",
+  );
+  const escapeAttr = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
 
-  templates.forEach((template) => {
-    if (template) {
-      templatesSearchPanesOptions.push({
-        label: template,
-        value: (rowData) => $(rowData[6]).text().trim() === template,
-      });
+  // The name of a service is also an element id (`#type-<name>`, `#method-<name>`), and a dot is
+  // not valid in one. Same substitution the template did.
+  const idFor = (name) => String(name).replace(/\./g, "-");
+
+  function renderName(id) {
+    const safeId = escapeAttr(id);
+    const icon = isReadOnly ? "show" : "edit";
+    const key = isReadOnly
+      ? "tooltip.link.view_service"
+      : "tooltip.link.edit_service";
+    return `<a href="${servicesUrl}/${encodeURIComponent(id)}" class="d-flex align-items-center"
+       data-bs-toggle="tooltip" data-bs-placement="bottom"
+       data-bs-original-title="${escapeAttr(t(key, isReadOnly ? "View Service {{service}}" : "Edit Service {{service}}", { service: id }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${safeId}</a>`;
+  }
+
+  function renderType(type, name) {
+    const draft = type === "draft";
+    // `id` and `data-value` are both load-bearing: this file reads `#type-<name>`'s `data-value`
+    // when it filters a bulk conversion, and clones the element into the confirm list.
+    return `<span id="type-${escapeAttr(idFor(name))}" data-value="${draft ? "draft" : "online"}"
+       class="badge rounded-pill bg-label-${draft ? "secondary" : "primary"} d-inline-flex align-items-center"><i class="bx ${draft ? "bx-file-blank" : "bx-globe"} me-1" aria-hidden="true"></i><span>${escapeAttr(t(draft ? "status.draft" : "status.online", draft ? "Draft" : "Online"))}</span></span>`;
+  }
+
+  function renderSecurityMode(mode) {
+    const detect = mode === "detect";
+    return `<span data-value="${detect ? "detect" : "block"}"
+       class="badge rounded-pill bg-label-${detect ? "warning" : "primary"} d-inline-flex align-items-center"><i class="bx ${detect ? "bx-show" : "bx-shield-alt-2"} me-1" aria-hidden="true"></i><span>${escapeAttr(t(detect ? "security_mode.detect" : "security_mode.block", detect ? "Detect" : "Block"))}</span></span>`;
+  }
+
+  function renderTemplate(template) {
+    if (!template) {
+      return `<span data-value="none" class="badge rounded-pill bg-label-secondary">${escapeAttr(t("badge.no_template", "No template"))}</span>`;
     }
-  });
+    const safe = escapeAttr(template);
+    const readOnlyTemplate =
+      isReadOnly || ["low", "medium", "high", "ui", "api"].includes(template);
+    const icon = readOnlyTemplate ? "show" : "edit";
+    return `<a href="${templatesUrl}/${encodeURIComponent(template)}" class="d-flex align-items-center"
+       data-bs-toggle="tooltip" data-bs-placement="bottom"
+       data-bs-original-title="${escapeAttr(t(readOnlyTemplate ? "tooltip.link.view_template" : "tooltip.link.edit_template", readOnlyTemplate ? "View Template {{template}}" : "Edit Template {{template}}", { template: template }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${safe}</a>`;
+  }
+
+  function renderRowActions(row) {
+    const id = row.name;
+    if (!id) return "";
+    const safeId = escapeAttr(id);
+    const isDraft = row.type === "draft";
+    const safeMethod = escapeAttr(row.method || "");
+    const canDelete = row.deletable === true;
+    const method = row.method || "";
+    const editIcon = isReadOnly ? "show" : "edit";
+
+    // Same precedence as the template it replaced: a readonly *user* outranks a readonly
+    // database, which outranks a method that forbids deletion.
+    let deleteKey = "tooltip.button.delete_service";
+    let deleteOptions = `{"name": "${safeId}"}`;
+    if (userReadOnly) {
+      deleteKey = "tooltip.disabled_readonly";
+    } else if (isReadOnly) {
+      deleteKey = "tooltip.disabled_db_readonly";
+    } else if (!canDelete) {
+      deleteKey = "tooltip.disabled_by_method";
+      deleteOptions = `{"method": "${safeMethod}"}`;
+    }
+
+    const convertTo = isDraft ? "online" : "draft";
+
+    return `
+      <div class="row-actions">
+        <div${
+          isDraft
+            ? ` data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="${t(
+                "tooltip.disabled_draft",
+                "Disabled by draft mode",
+              )}" data-i18n="tooltip.disabled_draft"`
+            : ""
+        }>
+          <a role="button" class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}"
+             data-bs-toggle="tooltip" data-bs-placement="bottom"
+             data-bs-original-title="${t("tooltip.link.access_service", "Access service {{name}}", { name: id })}"
+             data-i18n="tooltip.link.access_service" data-i18n-options='{"name": "${safeId}"}'
+             target="_blank" rel="noreferrer"><i class="bx bx-link-external"></i></a>
+        </div>
+        <a role="button" class="icon-btn" href="${servicesUrl}/${encodeURIComponent(id)}"
+           data-bs-toggle="tooltip" data-bs-placement="bottom"
+           data-bs-original-title="${t(
+             isReadOnly
+               ? "tooltip.link.view_service"
+               : "tooltip.link.edit_service",
+             isReadOnly
+               ? "View service {{service}}"
+               : "Edit service {{service}}",
+             { service: id },
+           )}"
+           data-i18n="${isReadOnly ? "tooltip.link.view_service" : "tooltip.link.edit_service"}"
+           data-i18n-options='{"service": "${safeId}"}'><i class="bx bx-${editIcon}"></i></a>
+        <div${
+          isReadOnly
+            ? ` data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="${t(
+                "tooltip.disabled_readonly",
+                "Disabled by readonly",
+              )}"`
+            : ""
+        }>
+          <a role="button" class="icon-btn${isReadOnly ? " disabled" : ""}"
+             href="${servicesUrl}/new?clone=${encodeURIComponent(id)}"
+             data-bs-toggle="tooltip" data-bs-placement="bottom"
+             data-bs-original-title="${t("tooltip.link.clone_service", "Clone service {{name}}", { name: id })}"
+             data-i18n="tooltip.link.clone_service" data-i18n-options='{"name": "${safeId}"}'><i class="bx bx-copy-alt"></i></a>
+        </div>
+        <div${
+          isReadOnly
+            ? ` data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="${t(
+                "tooltip.disabled_readonly",
+                "Disabled by readonly",
+              )}" data-i18n="tooltip.disabled_readonly"`
+            : ""
+        }>
+          <button type="button" class="icon-btn convert-service${isReadOnly ? " disabled" : ""}"
+                  data-service-id="${safeId}" data-value="${convertTo}"
+                  data-bs-toggle="tooltip" data-bs-placement="bottom"
+                  data-bs-original-title="${t(
+                    `tooltip.button.convert_service_to_${convertTo}`,
+                    `Convert service {{name}} to ${convertTo}`,
+                    { name: id },
+                  )}"
+                  data-i18n="tooltip.button.convert_service_to_${convertTo}"
+                  data-i18n-options='{"name": "${safeId}"}'><i class="bx bx-transfer"></i></button>
+        </div>
+        <button type="button" class="icon-btn info export-service" data-service-id="${safeId}"
+                data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-original-title="${t("tooltip.link.export_service", "Export service {{service}} configuration", { service: id })}"
+                data-i18n="tooltip.link.export_service"
+                data-i18n-options='{"service": "${safeId}"}'><i class="bx bx-export" aria-hidden="true"></i></button>
+        <div data-bs-toggle="tooltip" data-bs-placement="bottom"
+             data-bs-original-title="${t(deleteKey, "Delete service {{name}}", { name: id, method: method })}"
+             data-i18n="${deleteKey}" data-i18n-options='${deleteOptions}'>
+          <button type="button" data-service-id="${safeId}"
+                  class="icon-btn danger delete-service${canDelete ? "" : " disabled"}"><i class="bx bx-trash"></i></button>
+        </div>
+      </div>`;
+  }
 
   // components/selected-list.html "columns" mode -- id_key "name" + hidden_mode
   // "csv" reproduces the old services.join(",") hidden value verbatim.
@@ -50,17 +197,29 @@ $(document).ready(function () {
     { key: "type", i18n: "table.header.type", label: "Type", safe: true },
   ];
 
-  // Clone each row's live status badge for the confirm-list "Type" column,
-  // stripping any DataTables search-highlight marks first.
+  // A `serverSide` table only holds the rows it is showing, so DataTables drops a selection the
+  // moment the user turns the page — and the bulk actions are exactly the thing someone builds
+  // across several pages. Keep the names here instead, with the type the confirm list shows: for
+  // a service that is no longer in the DOM there is no badge left to clone.
+  const selectedServices = new Map();
+
+  const typeOf = (service) =>
+    selectedServices.get(service) ||
+    $(`#type-${idFor(service)}`).data("value") ||
+    "online";
+
+  // The confirm list's "Type" column. An on-screen row's badge is cloned so it keeps any
+  // search-highlight styling; anything off-page is rendered from the remembered type.
   const serviceRows = (services) =>
     services.map((service) => {
-      const sanitizedService = service.replace(/\./g, "-");
-      const typeClone = $(`#type-${sanitizedService}`)
+      const badge = $(`#type-${idFor(service)}`)
         .clone()
         .removeClass("highlight");
       return {
         name: service,
-        type: typeClone.length ? typeClone[0].outerHTML : "",
+        type: badge.length
+          ? badge[0].outerHTML
+          : renderType(typeOf(service), service),
       };
     });
 
@@ -108,6 +267,16 @@ $(document).ready(function () {
     const modalInstance = new bootstrap.Modal(deleteModal);
     modalInstance.show();
   };
+
+  // DataTables' own `csv`/`excel` buttons write what the table holds, and a `serverSide` table
+  // holds one page: they would have produced a ten-row file, with no error and no sign that 491
+  // services were missing. The endpoint applies the same search, order and pane selections the
+  // user is looking at — `getDataTableStateParams` is what forwards them.
+  const buildServicesExportUrl = (dt, format) =>
+    `${servicesUrl}/export/${format}?${$.param({
+      ...getDataTableStateParams(dt),
+      csrf_token: $("#csrf_token").val(),
+    })}`;
 
   const layout = {
     top1: {
@@ -199,22 +368,17 @@ $(document).ready(function () {
           },
         },
         {
-          extend: "csv",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
-          bom: true,
-          filename: "bw_services",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-csv",
+          action: (e, dt) => {
+            window.location.href = buildServicesExportUrl(dt, "csv");
           },
         },
         {
-          extend: "excel",
           text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
-          filename: "bw_services",
-          exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+          className: "buttons-excel",
+          action: (e, dt) => {
+            window.location.href = buildServicesExportUrl(dt, "excel");
           },
         },
       ],
@@ -281,18 +445,22 @@ $(document).ready(function () {
     bootstrap.Modal.getInstance($modal[0]).hide();
   });
 
-  const getSelectedServices = () => {
-    if (!$.fn.dataTable.isDataTable("#services")) return [];
-    return $("#services")
-      .DataTable()
-      .rows({ selected: true })
-      .nodes()
-      .to$()
-      .map(function () {
-        return $(this).find("td:eq(2) a").text().trim();
-      })
-      .get();
-  };
+  const getSelectedServices = () => Array.from(selectedServices.keys());
+
+  // `select`/`deselect` are the only place the two views of a selection meet: DataTables owns the
+  // rows on screen, this map owns the rest.
+  $("#services").on("select.dt deselect.dt", function (e, dt, type, indexes) {
+    if (type !== "row") return;
+    dt.rows(indexes)
+      .data()
+      .each((row) => {
+        if (e.type === "select") {
+          selectedServices.set(row.name, row.type);
+        } else {
+          selectedServices.delete(row.name);
+        }
+      });
+  });
 
   // "Create service" moved to the page-head band as a real link (#services-create-btn,
   // href="{{ url_for('services.services_service_page', service='new') }}") -- no JS needed.
@@ -338,12 +506,9 @@ $(document).ready(function () {
         return;
       }
 
-      const filteredServices = services.filter((service) => {
-        const serviceType = $(`#type-${service.replace(/\./g, "-")}`).data(
-          "value",
-        );
-        return serviceType !== conversionType;
-      });
+      const filteredServices = services.filter(
+        (service) => typeOf(service) !== conversionType,
+      );
 
       if (filteredServices.length === 0) {
         const feedbackToast = $("#feedback-toast")
@@ -465,10 +630,23 @@ $(document).ready(function () {
           render: DataTable.render.select(),
           targets: 1,
         },
-        { orderable: false, targets: -1 },
+        {
+          orderable: false,
+          targets: -1,
+          // `display` only: the row object must never reach the search index or the sort
+          // comparator. Both run on the server now, but a client-side copy of either would still
+          // match on fields this column shows no text for.
+          render: (data, type, row) =>
+            type === "display" ? renderRowActions(row) : "",
+        },
+        {
+          targets: 2,
+          render: (data, type) =>
+            type === "display" ? renderName(data) : data,
+        },
         {
           targets: [7, 8],
-          render: function (data, type, row) {
+          render: function (data, type) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
               if (!isNaN(date.getTime())) {
@@ -482,22 +660,12 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             header: t("searchpane.type", "Type"),
-            options: [
-              {
-                label:
-                  '<i class="bx bx-xs bx-globe"></i>&nbsp;<span data-i18n="status.online">Online</span>',
-                value: (rowData) => rowData[3].includes("status.online"),
-              },
-              {
-                label:
-                  '<i class="bx bx-xs bx-file-blank"></i>&nbsp;<span data-i18n="status.draft">Draft</span>',
-                value: (rowData) => rowData[3].includes("status.draft"),
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
           targets: 3,
+          render: (data, type, row) =>
+            type === "display" ? renderType(data, row.name) : data,
         },
         {
           searchPanes: {
@@ -507,75 +675,38 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 4,
+          // A `<td>` id is not something a renderer can set — a renderer produces cell *content*.
+          // `#method-<name>` is a hook into this table, so it needs the one callback DataTables
+          // gives for the cell element itself.
+          createdCell: function (td, cellData, rowData) {
+            td.id = `method-${idFor(rowData.name)}`;
+          },
         },
         {
           searchPanes: {
             show: true,
             header: t("searchpane.security_mode", "Security Mode"),
-            options: [
-              {
-                label:
-                  '<i class="bx bx-xs bx-shield-alt-2"></i>&nbsp;<span data-i18n="security_mode.block">Block</span>',
-                value: (rowData) => rowData[5].includes("security_mode.block"),
-              },
-              {
-                label:
-                  '<i class="bx bx-xs bx-show"></i>&nbsp;<span data-i18n="security_mode.detect">Detect</span>',
-                value: (rowData) => rowData[5].includes("security_mode.detect"),
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
           targets: 5,
+          render: (data, type) =>
+            type === "display" ? renderSecurityMode(data) : data,
         },
         {
           searchPanes: {
             show: true,
             header: t("searchpane.template", "Template"),
             combiner: "or",
-            options: templatesSearchPanesOptions,
           },
           targets: 6,
+          render: (data, type) =>
+            type === "display" ? renderTemplate(data) : data,
         },
         {
           searchPanes: {
             show: true,
             header: t("searchpane.created", "Created"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[7]) >= 2592000000,
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
@@ -585,40 +716,6 @@ $(document).ready(function () {
           searchPanes: {
             show: true,
             header: t("searchpane.last_update", "Last update"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[8]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[8]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[8]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[8]) >= 2592000000,
-              },
-            ],
             combiner: "or",
             orderable: false,
           },
@@ -628,12 +725,56 @@ $(document).ready(function () {
       order: [[2, "asc"]],
       autoFill: false,
       responsive: true,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: `${servicesUrl}/fetch`,
+        type: "POST",
+        data: function (d) {
+          d.csrf_token = $("#csrf_token").val();
+          return d;
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("DataTables AJAX error:", textStatus, errorThrown);
+          $("#services").addClass("d-none");
+          $("#services-waiting")
+            .removeClass("visually-hidden")
+            .addClass("text-danger")
+            .text(t("status.error_loading_data", "Couldn't load data"));
+        },
+      },
+      // The `<thead>` stays in the template — it carries the translated headers, their tooltips
+      // and the colvis labels. These only name the field each column reads out of a row.
+      columns: [
+        { data: null, defaultContent: "", orderable: false },
+        { data: null, defaultContent: "", orderable: false },
+        { data: "name" },
+        { data: "type" },
+        { data: "method" },
+        { data: "security_mode" },
+        { data: "template" },
+        { data: "creation_date" },
+        { data: "last_update" },
+        { data: null, defaultContent: "", orderable: false },
+      ],
       select: {
         style: "multi+shift",
         selector: "td:nth-child(2)",
         headerCheckbox: "select-page",
       },
       layout: layout,
+      // main.js initialises tooltips once over the whole document at load; rows drawn after that
+      // — every page change, sort and filter — have to opt in or their buttons are silently
+      // title-less.
+      drawCallback: function () {
+        $("#services tbody [data-bs-toggle='tooltip']").tooltip();
+        // Rows arriving from a page change are new DOM: re-check the ones the user had already
+        // picked, or turning the page and coming back would look like the selection was dropped.
+        const api = this.api();
+        api.rows().every(function () {
+          if (selectedServices.has(this.data().name)) this.select();
+        });
+      },
       initComplete: function () {
         const $wrapper = $("#services_wrapper");
         $wrapper.find(".btn-secondary").removeClass("btn-secondary");
@@ -655,22 +796,7 @@ $(document).ready(function () {
     },
   };
 
-  // Wait for window.i18nextReady = true before continuing
-  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
-    const waitForI18next = (resolve) => {
-      if (window.i18nextReady) {
-        resolve();
-      } else {
-        setTimeout(() => waitForI18next(resolve), 50);
-      }
-    };
-    new Promise((resolve) => {
-      waitForI18next(resolve);
-    }).then(() => initializeDataTable(services_config));
-  } else {
-    initializeDataTable(services_config);
-  }
-
+  initializeDataTable(services_config);
   $(document).on("click", ".delete-service", function () {
     if (isReadOnly) {
       alert(

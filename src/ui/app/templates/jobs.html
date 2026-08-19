@@ -54,54 +54,45 @@
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the Jobs' details"
-                        data-i18n="tooltip.table.jobs.details"></th>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.details") }}"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all Jobs"
-                        data-i18n="tooltip.table.jobs.select_all"></th>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.select_all") }}"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's name"
-                        data-i18n="tooltip.table.jobs.name">
-                        <span data-i18n="table.header.name">Name</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.name") }}">
+                        <span>{{ _("table.header.name") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's Plugin"
-                        data-i18n="tooltip.table.jobs.plugin">
-                        <span data-i18n="table.header.plugin">Plugin</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.plugin") }}">
+                        <span>{{ _("table.header.plugin") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's interval"
-                        data-i18n="tooltip.table.jobs.interval">
-                        <span data-i18n="table.header.interval">Interval</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.interval") }}">
+                        <span>{{ _("table.header.interval") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the Job reloads BunkerWeb?"
-                        data-i18n="tooltip.table.jobs.reload">
-                        <span data-i18n="table.header.reload">Reload</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.reload") }}">
+                        <span>{{ _("table.header.reload") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the Job run asynchronously?"
-                        data-i18n="tooltip.table.jobs.async">
-                        <span data-i18n="table.header.async">Async</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.async") }}">
+                        <span>{{ _("table.header.async") }}</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the last Job's execution was successful?"
-                        data-i18n="tooltip.table.jobs.last_run">
-                        <span data-i18n="table.header.last_run">Last run</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.last_run") }}">
+                        <span>{{ _("table.header.last_run") }}</span>
                     </th>
                     <th class="actions-col"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Job"
-                        data-i18n="tooltip.table.jobs.actions">
-                        <span data-i18n="table.header.actions">Actions</span>
+                        data-bs-original-title="{{ _("tooltip.table.jobs.actions") }}">
+                        <span>{{ _("table.header.actions") }}</span>
                     </th>
                 </tr>
             </thead>
@@ -113,7 +104,7 @@
                         <td>{{ job }}</td>
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
-                            {{ badge(text=job_data['every'], i18n_key="interval." ~ job_data['every'], variant=interval_variants.get(job_data['every'], 'info'), icon=interval_icons.get(job_data['every'], 'bxs-hourglass')) }}
+                            {{ badge(text=job_data['every'], i18n_key="interval." ~ job_data['every'], data_value=job_data['every'], variant=interval_variants.get(job_data['every'], 'info'), icon=interval_icons.get(job_data['every'], 'bxs-hourglass')) }}
                         </td>
                         <td class="text-center">
                             {% if job_data['reload'] %}
@@ -142,16 +133,14 @@
                                     {{ status(type="failed") }}<i class="bx bx-x d-none" aria-hidden="true"></i>
                                 {% endif %}
                             {% else %}
-                                <span data-i18n="status.no_history">No history</span>
+                                <span>{{ _("status.no_history") }}</span>
                             {% endif %}
                         </td>
                         <td class="actions-col">
                             <div class="row-actions">
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="..."
-                                     data-i18n="{% if is_readonly %}tooltip.disabled_readonly{% else %}tooltip.button.run_job{% endif %}"
-                                     data-i18n-options='{"job": "{{ job }}"}'>
+                                     data-bs-original-title="{{ _("tooltip.disabled_readonly" if is_readonly else "tooltip.button.run_job", job=job) }}">
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
@@ -166,16 +155,16 @@
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
                                                 <div class="ms-2 me-auto">
-                                                    <div class="fw-bold" data-i18n="job.history.start_date">Start date</div>
+                                                    <div class="fw-bold">{{ _("job.history.start_date") }}</div>
                                                 </div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
-                                                <div class="fw-bold" data-i18n="job.history.end_date">End date</div>
+                                                <div class="fw-bold">{{ _("job.history.end_date") }}</div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
-                                                <div class="fw-bold" data-i18n="job.history.success">Success</div>
+                                                <div class="fw-bold">{{ _("job.history.success") }}</div>
                                             </li>
                                         </ul>
                                         {% for history in job_data['history'] %}
@@ -198,8 +187,7 @@
                                             data-plugin="{{ job_data['plugin_id'] }}"
                                             data-bs-toggle="tooltip"
                                             data-bs-placement="bottom"
-                                            data-bs-original-title="..."
-                                            data-i18n="button.history"
+                                            data-bs-original-title="{{ _("button.history") }}"
                                             class="icon-btn show-history">
                                         <i class="bx bx-history"></i>
                                     </button>
@@ -213,7 +201,7 @@
                                         </button>
                                     {% endcall %}
                                 {% endif %}
-                                {% call dropdown_menu(id="job-" ~ job ~ "-" ~ job_data['plugin_id'] ~ "-cache", items=[], label="Cache", i18n_key="button.cache", label_classes="d-none d-md-inline", icon="bx-data", variant="outline-secondary", size="sm", disabled=(not job_data['cache']), menu_classes="nav-pills max-vh-60 overflow-auto pt-0 pb-0", attrs=('data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No cache files found for this job." data-i18n="tooltip.no_cache"' if not job_data['cache'] else '')) %}
+                                {% call dropdown_menu(id="job-" ~ job ~ "-" ~ job_data['plugin_id'] ~ "-cache", items=[], label="Cache", i18n_key="button.cache", label_classes="d-none d-md-inline", icon="bx-data", variant="outline-secondary", size="sm", disabled=(not job_data['cache']), menu_classes="nav-pills max-vh-60 overflow-auto pt-0 pb-0", attrs=('data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ _("tooltip.no_cache") }}"' if not job_data['cache'] else '')) %}
                                     {% for cache in job_data['cache'] %}
                                         {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
                                         <li role="presentation">

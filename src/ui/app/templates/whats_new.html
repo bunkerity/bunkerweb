@@ -1,0 +1,42 @@
+{% extends "dashboard.html" %}
+{% from "components/accordion.html" import accordion, accordion_item %}
+{% from "components/empty-state.html" import empty_state %}
+{% from "components/page-head.html" import page_head %}
+{% from "components/release-notes.html" import release_entries %}
+
+{# The page-head band owns the breadcrumb + title. #}
+{% block page_head %}{% endblock %}
+{% block content %}
+    {{ page_head(title="What's new", title_i18n="breadcrumb.whats_new",
+                 breadcrumb=[("System", "navigation.system", none),
+                             ("What's new", "breadcrumb.whats_new", none)]) }}
+    <p class="text-muted mb-4">{{ _("whatsnew.subtitle") }}</p>
+
+    {% if changelog_missing %}
+        {# Not an error state to hide: an operator looking for release notes deserves to know
+           the file is absent from this build rather than to see an empty page. #}
+        {{ empty_state(state="empty",
+                       title="No changelog in this installation",
+                       title_key="whatsnew.missing_title",
+                       message="CHANGELOG.md was not bundled with this build. Release notes are available on GitHub.",
+                       message_key="whatsnew.missing_message",
+                       icon="bx-file-blank",
+                       action_label="Open the changelog on GitHub",
+                       action_key="whatsnew.missing_action",
+                       action_href="https://github.com/bunkerity/bunkerweb/blob/master/CHANGELOG.md",
+                       bordered=true) }}
+    {% else %}
+        {% call accordion(id="whats-new-releases") %}
+            {% for release in releases %}
+                {% call accordion_item(id="release-" ~ loop.index,
+                    parent_id="whats-new-releases",
+                    title=release.version,
+                    subtitle=release.date,
+                    open=loop.first,
+                    icon="bx-package") %}
+                    {{ release_entries(release) }}
+                {% endcall %}
+            {% endfor %}
+        {% endcall %}
+    {% endif %}
+{% endblock %}

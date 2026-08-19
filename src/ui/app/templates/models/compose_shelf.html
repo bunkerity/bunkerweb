@@ -329,12 +329,12 @@
             </span>
             {% if stream_excluded %}
                 <span class="badge rounded-pill bg-danger-subtle text-dark"
-                      title="Does not support STREAM mode."
-                      data-i18n="tooltip.stream_support.no">Does not support STREAM mode.</span>
+                      title="{{ _("tooltip.stream_support.no") }}"
+                     >{{ _("tooltip.stream_support.no") }}</span>
             {% endif %}
             <span class="shelf-control d-inline-flex align-items-center gap-2">
                 {% if kind == "always" %}
-                    <span class="text-muted small" data-i18n="compose.always_on">Always on</span>
+                    <span class="text-muted small">{{ _("compose.always_on") }}</span>
                 {% elif kind == "switch" %}
                     <span class="form-check form-switch mb-0">
                         {# value = the current one while the plugin is already on, so an untouched
@@ -376,15 +376,14 @@
                     </select>
                 {% elif kind == "delegated" %}
                     <a href="{{ plugin_page }}" class="btn btn-sm btn-outline-secondary shelf-open">
-                        <span data-i18n="compose.entries"
-                              data-i18n-options='{{ {"count": row.count} | tojson }}'>{{ row.count }} configured</span>
+                        <span >{{ _("compose.entries", count=row.count) }}</span>
                         <i class="bx bx-chevron-right" aria-hidden="true"></i>
                     </a>
                 {% elif kind == "opener" %}
                     <a href="{{ plugin_page }}" class="btn btn-sm btn-outline-secondary shelf-open"
-                       data-i18n="compose.set_value">Set a value…</a>
+                      >{{ _("compose.set_value") }}</a>
                 {% else %}
-                    <span class="text-muted small" data-i18n="compose.locked">No control here</span>
+                    <span class="text-muted small">{{ _("compose.locked") }}</span>
                 {% endif %}
                 {# Every remaining in-scope key, at its CURRENT value: the siblings a multi-key
                    switch rewrites on OFF. An opener reaches here with `keys` empty and emits
@@ -410,8 +409,7 @@
                           data-shelf-provenance-keys="{{ prov.detail | join('; ') }}"
                           title="{{ chip['title'] }}{% if prov_mixed %} The declared keys disagree — {{ prov.detail | join('; ') }}.{% endif %}">
                         <i class="bx {{ chip['icon'] }} bx-xs align-middle" aria-hidden="true"></i>
-                        <span data-i18n="compose.provenance.{{ best.rung }}"
-                              {% if best.rung == "managed" %}data-i18n-options='{{ {"method": prov.method} | tojson }}'{% endif %}>{{ chip_label }}</span>
+                        <span>{{ _("compose.provenance." ~ best.rung, method=prov.method) }}</span>
                         {% if prov_mixed %}<span aria-hidden="true">+</span>{% endif %}
                     </span>
                 {% endif %}
@@ -429,10 +427,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <span class="text-muted small"
                   id="compose-shelf-counts"
-                  data-i18n="compose.count"
-                  data-i18n-options='{{ {"on": counts.on, "total": counts.total, "locked": counts.locked} | tojson }}'>
-                {{ counts.on }} on · {{ counts.total }} available · {{ counts.locked }} locked
-            </span>
+                  >{{ _("compose.count", on=counts.on, total=counts.total, locked=counts.locked) }}</span>
             <div class="btn-group btn-group-sm" role="group" aria-label="Filter plugins">
                 {# "Changed" says WHICH default it means, because there are two: `entry["default"]`
                    is the plugin default on an inherited key and the GLOBAL VALUE on a service's
@@ -447,7 +442,7 @@
                             class="btn btn-outline-primary shelf-filter{% if value == 'all' %} active{% endif %}"
                             data-shelf-filter="{{ value }}"
                             title="{{ hint }}"
-                            data-i18n="{{ i18n_key }}">{{ label }}</button>
+                            >{{ _(i18n_key) if i18n_key else label }}</button>
                 {% endfor %}
             </div>
         </div>
@@ -456,8 +451,7 @@
             <button type="button"
                     class="btn btn-sm btn-link mt-2"
                     id="compose-shelf-show-more"
-                    data-i18n="compose.show_more"
-                    data-i18n-options='{{ {"count": counts.folded} | tojson }}'>Show {{ counts.folded }} more</button>
+                    >{{ _("compose.show_more", count=counts.folded) }}</button>
         {% endif %}
     </div>
 </div>

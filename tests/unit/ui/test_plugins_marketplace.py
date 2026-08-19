@@ -16,7 +16,9 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, patch
 
+from conftest import english  # what a converted template renders for a key
 import pytest
+
 from flask import Flask
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
@@ -166,7 +168,7 @@ class TestGridRender:
     def test_core_always_on_locked_chip_no_switch(self):
         html = _render(plugins={"general": ALL_PLUGINS["general"]}, config=CONFIG)
         card = _card_slice(html, "general")
-        assert "plugins.marketplace.always_on" in card
+        assert english("plugins.marketplace.always_on") in card
         assert "plugin-switch" not in card  # no toggle for always-on core
 
     # S5: a core card reports activation and links to the shelf; it never writes it. Before S5
@@ -184,8 +186,8 @@ class TestGridRender:
         html = _render(plugins={"antibot": ALL_PLUGINS["antibot"], "country": ALL_PLUGINS["country"]}, config=CONFIG)
         active = _card_slice(html, "antibot")  # USE_ANTIBOT=yes
         inactive = _card_slice(html, "country")  # USE_COUNTRY=no
-        assert "plugins.marketplace.active" in active
-        assert "plugins.marketplace.inactive" in inactive
+        assert english("plugins.marketplace.active") in active
+        assert english("plugins.marketplace.inactive") in inactive
         for plugin_id, card in (("antibot", active), ("country", inactive)):
             # `_url_for` collapses an endpoint to /<endpoint>, so the host part is the stub's,
             # not a real path; the fragment is what this test is about.
@@ -198,7 +200,7 @@ class TestGridRender:
         """There is nothing to manage: the plugin is on unconditionally, and a link into the shelf
         would land on a row that renders a locked chip rather than a control."""
         card = _card_slice(_render(plugins={"general": ALL_PLUGINS["general"]}, config=CONFIG), "general")
-        assert "plugins.marketplace.always_on" in card
+        assert english("plugins.marketplace.always_on") in card
         assert "plugin-activation-link" not in card
 
     def test_external_has_switch_without_setting(self):
@@ -221,7 +223,7 @@ class TestGridRender:
     def test_pro_tier_chip(self):
         html = _render(plugins={"mypro": ALL_PLUGINS["mypro"]}, config={})
         card = _card_slice(html, "mypro")
-        assert "plugin.type.pro" in card
+        assert english("plugin.type.pro") in card
         assert "bx-crown" in card
 
     def test_uninstall_only_for_ui_method(self):

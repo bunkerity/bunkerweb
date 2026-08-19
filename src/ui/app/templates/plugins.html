@@ -45,7 +45,7 @@
                             data-filter="{{ value }}"
                             role="tab"
                             aria-selected="{{ 'true' if value == 'all' else 'false' }}">
-                        <span data-i18n="{{ key }}">{{ label }}</span>
+                        <span>{{ _(key) if key else label }}</span>
                         <span class="badge rounded-pill bg-label-secondary ms-1 plugin-filter-count" data-filter-count="{{ value }}">0</span>
                     </button>
                 </li>
@@ -114,13 +114,13 @@
                         <span class="fw-bold text-truncate" title="{{ pname }}">{{ pname }}</span>
                         <span class="ms-auto">
                             {% if tier == 'pro' %}
-                                {{ badge(text="PRO", i18n_key="plugin.type.pro", variant="bw-green", icon="bx-crown") }}
+                                {{ badge(text="PRO", i18n_key="plugin.type.pro", data_value="pro", variant="bw-green", icon="bx-crown") }}
                             {% elif tier == 'core' %}
-                                {{ badge(text="Core", i18n_key="plugin.type.core", variant="secondary", icon="bx-shield") }}
+                                {{ badge(text="Core", i18n_key="plugin.type.core", data_value="core", variant="secondary", icon="bx-shield") }}
                             {% elif ptype == 'ui' %}
-                                {{ badge(text="UI", i18n_key="plugin.type.ui", variant="secondary", icon="bx-cloud-upload") }}
+                                {{ badge(text="UI", i18n_key="plugin.type.ui", data_value="ui", variant="secondary", icon="bx-cloud-upload") }}
                             {% else %}
-                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary", icon="bx-plug") }}
+                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", data_value="external", variant="secondary", icon="bx-plug") }}
                             {% endif %}
                         </span>
                     </div>
@@ -151,7 +151,7 @@
                                                {% if is_readonly or not user_admin %}disabled{% endif %}
                                                aria-label="Toggle {{ pname }}" />
                                         <span class="small plugin-switch-label"
-                                              data-i18n="{{ 'plugins.marketplace.enabled' if state_on else 'plugins.marketplace.disabled' }}">{{ 'Enabled' if state_on else 'Disabled' }}</span>
+                                              >{{ _('plugins.marketplace.enabled' if state_on else 'plugins.marketplace.disabled') }}</span>
                                     </label>
                                 </form>
                             {% endif %}
@@ -163,9 +163,7 @@
                                         data-plugin-id="{{ plugin }}"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="top"
-                                        data-bs-original-title="Uninstall {{ pname }}"
-                                        data-i18n="tooltip.button.delete_plugin"
-                                        data-i18n-options='{"name": "{{ pname }}"}'>
+                                        data-bs-original-title="{{ _("tooltip.button.delete_plugin", name=pname) }}">
                                     <i class="bx bx-trash bx-xs" aria-hidden="true"></i>
                                 </button>
                             {% endif %}
@@ -188,9 +186,7 @@
                                    href="{{ url_for('global_settings.global_settings_page') }}#shelf-row-{{ plugin }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
-                                   data-bs-original-title="Manage activation of {{ pname }} in global settings"
-                                   data-i18n="tooltip.link.manage_activation"
-                                   data-i18n-options='{"name": "{{ pname }}"}'>
+                                   data-bs-original-title="{{ _("tooltip.link.manage_activation", name=pname) }}">
                                     <i class="bx bx-toggle-left bx-xs" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -200,9 +196,7 @@
                                    href="{{ url_for('plugins') }}/{{ plugin }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
-                                   data-bs-original-title="Configure {{ pname }}"
-                                   data-i18n="tooltip.link.access_plugin_page"
-                                   data-i18n-options='{"name": "{{ pname }}"}'>
+                                   data-bs-original-title="{{ _("tooltip.link.access_plugin_page", name=pname) }}">
                                     <i class="bx bx-cog bx-xs" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
@@ -225,13 +219,12 @@
                          id="drag-area"
                          tabindex="0"
                          aria-controls="file-input"
-                         aria-label="Select plugin archives or drop them here"
-                         data-i18n="aria.label.select_file"
+                         aria-label="{{ _("aria.label.plugins_dropzone") }}"
                          class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
                         <div class="text-center">
                             <i class="bx bx-lg bxs-cloud-upload text-primary" aria-hidden="true"></i>
-                            <p class="mt-3 fs-5" data-i18n="modal.body.add_plugin_dropzone">
-                                Drag and drop your plugin here or click to select files.
+                            <p class="mt-3 fs-5">
+                                {{ _("modal.body.add_plugin_dropzone") }}
                             </p>
                         </div>
                     </div>
@@ -254,8 +247,8 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="alert alert-danger text-center"
                          role="alert"
-                         data-i18n="modal.body.confirm_plugin_deletion">
-                        Are you sure you want to delete the selected plugins?
+                        >
+                        {{ _("modal.body.confirm_plugin_deletion") }}
                     </div>
                     {{ selected_list(id="selected-plugins-delete", name="plugins", entity="plugins", hidden_mode="csv", classes="mb-3", columns=[
                         {"key": "name", "i18n": "table.header.name", "label": "Name", "bold": true},

@@ -43,8 +43,8 @@
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                   data-i18n="plugin.page.status.deactivated">
-                    Plugin is deactivated, therefore no information is available.
+                  >
+                    {{ _("plugin.page.status.deactivated") }}
                 </p>
             </div>
         </div>
@@ -52,8 +52,8 @@
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                   data-i18n="plugin.page.status.metrics_deactivated">
-                    Metrics plugin isn't activated, therefore no information is available.
+                  >
+                    {{ _("plugin.page.status.metrics_deactivated") }}
                 </p>
             </div>
         </div>
@@ -66,8 +66,8 @@
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                   data-i18n="plugin.page.status.restricted_to_admins">
-                    This plugin ships its own page, which runs plugin code. Only administrators can load it.
+                  >
+                    {{ _("plugin.page.status.restricted_to_admins") }}
                 </p>
             </div>
         </div>
@@ -75,8 +75,8 @@
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                   data-i18n="plugin.page.status.dedicated_page_unavailable">
-                    This plugin is managed on a dedicated page that isn't loaded yet. Restart the web UI to access it.
+                  >
+                    {{ _("plugin.page.status.dedicated_page_unavailable") }}
                 </p>
             </div>
         </div>
@@ -87,7 +87,7 @@
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold">
-                    <span data-i18n="plugin.page.status.pre_render_error">Pre-rendering error</span>
+                    <span>{{ _("plugin.page.status.pre_render_error") }}</span>
                     {% set pre_render_detail = pre_render.get("data", {}).get("error") if pre_render.get("data") is mapping else none %}
                     {% if pre_render_detail or pre_render.get("message") %}: {{ pre_render_detail or pre_render.get("message") }}{% endif %}
                 </p>
@@ -238,7 +238,7 @@
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
                                                 <p class="g-3 p-2 text-primary rounded-3 fw-bold"
-                                                   data-i18n="status.no_data">No data to show</p>
+                                                  >{{ _("status.no_data") }}</p>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -252,8 +252,8 @@
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
                     <p class="text-center position-relative w-100 p-2 text-primary rounded-3 fw-bold"
-                       data-i18n="plugin.page.status.no_content">
-                        This plugin does not provide an embedded page.
+                      >
+                        {{ _("plugin.page.status.no_content") }}
                     </p>
                 </div>
             </div>
