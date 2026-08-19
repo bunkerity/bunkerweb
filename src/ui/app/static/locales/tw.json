@@ -29,7 +29,11 @@
     "no_changes_detected": "未偵測到任何變更。",
     "notice": "注意",
     "ping_error": "Ping 執行個體時發生錯誤。",
-    "readonly_mode": "此操作在唯讀模式下被禁用。"
+    "readonly_mode": "此操作在唯讀模式下被禁用。",
+    "plugin_file_invalid": "請上傳有效的外掛程式封存檔（.zip、.tar.gz 或 .tar.xz）。",
+    "plugin_file_too_large": "外掛程式封存檔超過 50 MB 的限制。",
+    "plugin_upload_failed": "上傳外掛程式封存檔時發生錯誤。請再試一次。",
+    "services_import_invalid_file": "請上傳有效的服務匯出檔（.env 或 .zip）。"
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "選取服務匯出檔，或將檔案拖放到這裡",
       "toggle_wrap": "切換自動換行",
       "user_avatar": "使用者頭像",
-      "view_selected_items": "檢視已選取項目"
+      "view_selected_items": "檢視已選取項目",
+      "github_followers": "GitHub 追蹤者數：{{count}}",
+      "github_forks": "GitHub Fork 數：{{count}}",
+      "github_open_issues": "GitHub 未解決 Issue 數：{{count}}",
+      "github_stars": "GitHub Star 數：{{count}}",
+      "github_watchers": "GitHub 關注者數：{{count}}",
+      "secret_value": "機密值",
+      "value_hidden": "{{name}}（已隱藏）"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "已封鎖的請求",
-        "title": "請求狀態分佈"
+        "title": "請求狀態分佈",
+        "http_304": "304 未修改",
+        "http_404": "404 找不到",
+        "http_429": "429 請求頻率受限"
       },
       "top_blocked_ips": {
         "most_blocked": "被封鎖最多的 IP",
@@ -594,7 +608,7 @@
       "scheduled": "預約"
     },
     "status": {
-      "blocked_of_total": "已封鎖 {{total}} 總計",
+      "blocked_of_total": "個請求已封鎖，共 {{total}} 個",
       "free_plan": "免費方案",
       "renews": "續訂",
       "services_licensed": "{{count}} 服務已授權",
@@ -705,7 +719,7 @@
     "zero_records_plugins": "找不到相符的外掛程式",
     "zero_records_reports": "找不到相符的報告",
     "zero_records_services": "找不到相符的服務",
-    "zero_records_templates": "未找到匹配的範本"
+    "zero_records_templates": "找不到相符的範本"
   },
   "dev_log": {
     "copy_failed": "複製文字失敗：",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "更新封鎖期限失敗。請再試一次。",
     "reports_load_error": "載入報告時發生錯誤。請嘗試重新整理頁面。",
-    "unban_failed": "解除封鎖 IP 位址失敗。請再試一次。"
+    "unban_failed": "解除封鎖 IP 位址失敗。請再試一次。",
+    "passkey_registration_failed": "無法註冊此密碼金鑰。請再試一次。",
+    "passkey_sign_in_failed": "無法使用密碼金鑰登入。請再試一次。",
+    "report_copy_access_failed": "存取要複製的資料時發生錯誤。請嘗試重新整理頁面。",
+    "report_copy_failed": "複製到剪貼簿失敗。請嘗試使用下方的原始資料複製按鈕。",
+    "report_details_load_failed": "無法載入報告詳細資料。",
+    "report_identifier_missing": "缺少報告識別碼",
+    "security_key_verification_failed": "無法驗證安全金鑰。請再試一次。",
+    "webauthn_request_failed": "安全金鑰請求失敗。請再試一次。"
   },
   "flash": {
     "easter_egg": "如果你讀到這條訊息，表示你很好奇",
@@ -1001,7 +1023,7 @@
       "import_configs_dropzone": "將您的自訂設定匯出檔拖放到這裡，或按一下以選取檔案。",
       "import_configs_warning": "由 scheduler、autoconf 或 templates 建立的自訂設定一律會保留。只有 UI/API 設定可以被覆寫。",
       "import_services_dropzone": "將您的服務匯出檔案拖放到此處，或按一下以選取檔案。",
-      "import_services_warning": "匯入服務將從匯出檔案建立新的 UI 服務。現有服務將被略過。",
+      "import_services_warning": "匯入服務會從匯出檔建立新的 UI 服務。既有服務會略過。也支援含自訂設定的 .zip 匯出封存檔。",
       "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
       "next_step_in_case_of_issue": "如果遇到問題，您可以手動接受不安全的憑證：",
       "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
@@ -1113,7 +1135,7 @@
   },
   "news": {
     "image_alt": "新聞圖片",
-    "slide": "滑動",
+    "slide": "投影片",
     "posted_on": "發布於"
   },
   "newsletter": {
@@ -1154,7 +1176,7 @@
       "show_less": "顯示較少"
     },
     "marketplace": {
-    "active": "啟用中",
+      "active": "啟用中",
       "always_on": "核心/永遠啟用",
       "disabled": "已停用",
       "enabled": "已啟用",
@@ -1180,7 +1202,7 @@
       "upgrade_to_pro": "升級至 PRO"
     },
     "expiration_date": {
-      "expires_in": "有效期至",
+      "expires_in": "距到期尚有",
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
     },
@@ -1423,7 +1445,7 @@
   "services": {
     "draft": "草稿服務",
     "online": "線上",
-    "subtitle": "管理使用 BunkerWeb 提供的多網站服務：建立、編輯、轉換為草稿或刪除。",
+    "subtitle": "管理受 BunkerWeb 保護的多網站服務：建立、編輯、轉換為草稿或刪除。",
     "total": "總服務",
     "with_configs": "使用自訂設定"
   },
@@ -1488,7 +1510,15 @@
       "title": "概觀"
     },
     "subtitle": "按照步驟完成設定精靈。",
-    "title": "設定精靈"
+    "title": "設定精靈",
+    "error": {
+      "web_ui_setup_failed": "設定 Web UI 時發生錯誤。請再試一次。"
+    },
+    "file": {
+      "content_entered": "已輸入字元數：{{count}}",
+      "loaded_from": "已從 {{name}} 載入 · 字元數：{{count}}",
+      "read_error": "讀取檔案時發生錯誤"
+    }
   },
   "status": {
     "admin_user_exists": "管理員使用者已存在。請繼續下一步。",
@@ -1554,7 +1584,10 @@
     "expiring": "即將到期",
     "no_settings": "此外掛程式在此範圍內沒有設定。",
     "yes": "是",
-    "optional": "選用"
+    "optional": "選用",
+    "no_file_selected": "未選取檔案",
+    "no_url_available": "沒有可用的 URL",
+    "unknown": "未知"
   },
   "step": {
     "next": "下一步",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "每個設定檔名稱必須唯一。",
       "validation_id_required": "範本 ID 為必填。",
       "validation_setting_key": "每個設定必須有鍵。",
-      "validation_settings_unique": "每個設定鍵必須唯一。"
+      "validation_settings_unique": "每個設定鍵必須唯一。",
+      "missing_config_status_missing": "缺少",
+      "missing_config_status_uploaded": "已上傳"
     },
     "none": "無範本"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "無法連線至指標服務",
     "error_help": "地圖會保留最後一次成功載入的資料，並於下次重新整理時重試。",
     "open_live": "即時檢視",
-    "updated": "更新於"
+    "updated": "更新於",
+    "blocked_request": "遭封鎖的請求",
+    "blocked_requests": "遭封鎖的請求"
   },
   "toast": {
     "autoconf_disclaimer_bold": "如果服務被移除或重新啟動，您的 UI 設定將會遺失。",
     "autoconf_disclaimer_detail": "這是因為服務的建立方法是 'autoconf'，旨在防止設定衝突。",
     "ban_updated": "封鎖期限已成功更新！",
     "body": {
-      "ping_succeed": "執行個體：{{instances}}"
+      "ping_succeed": "執行個體：{{instances}}",
+      "selected_items_already_in_state": "所選項目已處於要求的狀態。"
     },
     "copied": "已複製！",
     "disclaimer_title": "免責聲明",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "取得全域設定失敗",
     "header": {
       "ping_failed": "Ping 失敗",
-      "ping_succeed": "Ping 成功"
+      "ping_succeed": "Ping 成功",
+      "conversion_failed": "轉換失敗"
     },
     "ip_unbanned": "IP 位址已成功解除封鎖！"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
       "update_ban_duration": "更新封鎖期限",
-      "value_from_global": "來自全域設定的值"
+      "value_from_global": "來自全域設定的值",
+      "back_to_file_upload": "返回檔案上傳",
+      "switch_to_text_editor": "切換至文字編輯器"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
@@ -2150,10 +2191,11 @@
     "zerossl_api_retry": "ZeroSSL API 請求的重試次數（0 代表停用重試）。",
     "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。",
     "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
-    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。"
+    "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。",
+    "config_global_types_available": "現在可為自訂設定選取全域類型。"
   },
   "totp": {
-    "cant_access": "無法存取您的驗證碼？",
+    "cant_access": "無法使用您的驗證器嗎？",
     "signing_in": "登入 BunkerWeb",
     "subtitle": "請輸入您驗證碼應用程式中的碼。",
     "title": "雙重驗證",
@@ -2167,8 +2209,8 @@
     "algorithm": "演算法",
     "all": "全部",
     "assignment_notice": "指派用於整理中央憑證清單；TLS 部署仍由各服務的憑證設定控制。",
-    "assignments": "任務組織",
-    "assignments_help": "這些任務不會更改現行的 TLS 設定。",
+    "assignments": "憑證指派",
+    "assignments_help": "這些指派不會變更現行的 TLS 設定。",
     "attach": "指定",
     "attach_all": "此憑證已連接到所有可用的服務。",
     "attach_copy": "將「{{name}}」指定給中央庫中的服務。",
@@ -2183,7 +2225,7 @@
     "confirm_renew_due": "檢查所有憑證並更新目前到期者？",
     "create": "建立憑證",
     "download_chain": "下載鏈",
-    "download_leaf": "下載葉",
+    "download_leaf": "下載葉憑證",
     "edit_help": "此操作僅更改庫元資料，不影響憑證材料或現行的 TLS 設定。",
     "edit_metadata": "編輯憑證元資料",
     "empty": "沒有憑證",
@@ -2205,7 +2247,7 @@
     "managed": "管理憑證",
     "new_selfsigned": "新的自簽憑證",
     "no_issuers": "沒有發行者資料",
-    "none_due": "憑證即將到期",
+    "none_due": "目前沒有需要續訂的憑證",
     "orphan_account": "帳戶",
     "orphan_badge": "缺少 ACME 帳戶",
     "orphan_help": "此續訂記錄參考一個已不存在的 ACME 帳戶。續訂將保持停用，直到供應商狀態修復。",
@@ -2249,7 +2291,7 @@
     "upcoming_help": "已過期或在 30 天的更新期限內",
     "upload": "上傳憑證",
     "upload_custom": "上傳自訂憑證",
-    "upload_invalid": "選擇有效的公鑰和對應的私鑰。",
+    "upload_invalid": "請選擇有效的公用憑證及相符的私密金鑰。",
     "valid_days": "有效期限（天）",
     "valid_from": "從...開始有效",
     "valid_to": "到...結束有效"
@@ -2310,7 +2352,18 @@
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
     "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。",
-    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。"
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要電子郵件或 ZeroSSL API 金鑰。",
+    "current_password_required_for_passkey": "請輸入目前的密碼以新增密碼金鑰。",
+    "custom_ssl_pair_required": "使用自訂 SSL 時，必須同時設定憑證與金鑰（透過檔案路徑或資料上傳）。",
+    "dns_challenge_field_required": "使用 DNS 挑戰時，此欄位為必填。",
+    "newsletter_email_invalid": "請輸入有效的電子郵件地址以訂閱新聞通訊。",
+    "newsletter_email_required": "如果要訂閱新聞通訊，此欄位為必填。",
+    "server_name_check_failed": "伺服器名稱檢查失敗",
+    "server_name_choose_different": "請選擇其他伺服器名稱。",
+    "server_name_invalid": "伺服器名稱無效。",
+    "server_name_not_unique": "伺服器名稱不唯一。",
+    "server_name_proceed": "您可以繼續進行設定。",
+    "server_name_unique": "伺服器名稱唯一。"
   },
   "web_cache": {
     "available": "可用",
@@ -2491,12 +2544,15 @@
       "removeValue": "移除值",
       "requestCount": "請求數",
       "resourceGroup": "資源群組",
-      "ruleErrors": "{{count}} 規則中存在驗證問題",
+      "ruleErrors": "此規則有 {{count}} 個驗證問題",
       "ruleName": "規則 {{n}} 的名稱",
       "terminalAction": "終止動作",
       "uriMatch": "URI 比對模式",
       "uriValue": "URI 值",
-      "window": "時間範圍（秒）"
+      "window": "時間範圍（秒）",
+      "changePosition": "規則 {{n}}／{{total}}，變更位置",
+      "newValue": "新值",
+      "positionMove": "位置 {{n}}／{{total}} — 點擊以移動"
     },
     "attach": "連接到服務",
     "attach_help": "規則僅在工作流程連接到的服務上執行。",
@@ -2577,7 +2633,9 @@
       "disable": "停用規則",
       "duplicate": "在下方複製",
       "enable": "啟用規則",
-      "top": "最先執行"
+      "top": "最先執行",
+      "moveTo": "移至位置 {{n}}",
+      "staysAt": "維持在位置 {{n}}"
     },
     "move": {
       "first": "最先執行",
@@ -2661,7 +2719,7 @@
       "out_draft": "此服務是草稿，尚未為其編譯工作流程。",
       "out_match": "{{workflow}} · {{rule}} 相符，並對請求執行了{{action}}。",
       "out_no_match": "沒有規則相符。請求會繼續進入安全堆疊的其餘部分。",
-      "out_not_attached": "此工作流程未連結至任何服務，因此沒有可評估的規則階梯。",
+      "out_not_attached": "此工作流程未連結至任何服務，因此沒有可評估的規則鏈。",
       "out_whitelisted": "已列入允許清單；會略過整個工作流程，且不評估任何規則。",
       "run": "執行測試",
       "service": "服務",
@@ -2675,7 +2733,7 @@
       "v_unknown_help": "無法判定此規則需要的資訊，因此它永遠不會相符。",
       "whitelisted": "此用戶端位於允許清單中"
     },
-    "threshold": "僅限於特定速率",
+    "threshold": "僅在超過請求率門檻時",
     "threshold_count": "請求",
     "threshold_window": "每 (秒)",
     "tree": {
@@ -2693,7 +2751,7 @@
       "or": "或",
       "removeGroup": "移除群組"
     },
-    "truncated": "僅顯示前 500 個工作流程。通過 API 獲取完整結果以縮小列表。",
+    "truncated": "僅顯示前 500 個工作流程。請透過 API 縮小查詢範圍以取得完整結果。",
     "untitled": "未命名規則",
     "value": {
       "add": "值"
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "畫布",
       "list": "列表"
+    },
+    "action_help": {
+      "block": "拒絕該請求",
+      "challenge": "驗證是否為真人",
+      "redirect": "傳送至其他位置"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP 方法",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "完全等於",
+      "prefix": "以此開頭",
+      "regex": "符合規則運算式"
     }
   },
   "request_path": {
@@ -2753,12 +2826,13 @@
       "template": {
         "none": "沒有範本",
         "note": "不是資源：範本是設定。它適用於儲存時，並且切換它會一次性更改許多設定。",
-        "pending": "適用於儲存",
+        "pending": "儲存時套用",
         "switching": "儲存時，此服務從「{{from}}」變為「{{to}}」。目前範本提供的值會被移除，並應用「{{to}}」的設定 — 許多設定會一次性更改。",
-        "unwired": "此頁面不會發佈「USE_TEMPLATE」，因此無法在此處更改範本。"
+        "unwired": "此頁面不會提交 USE_TEMPLATE，因此無法在此處變更範本。"
       },
       "title": "已連結資源",
-      "unavailable": "不可用"
+      "unavailable": "不可用",
+      "nothing_available": "沒有可連結的項目。"
     }
   },
   "onboarding": {

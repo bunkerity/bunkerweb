@@ -29,7 +29,11 @@
     "no_changes_detected": "감지된 변경 사항이 없습니다.",
     "notice": "알림",
     "ping_error": "인스턴스 핑(Ping) 전송 중 오류가 발생했습니다.",
-    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
+    "readonly_mode": "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다.",
+    "plugin_file_invalid": "유효한 플러그인 아카이브(.zip, .tar.gz 또는 .tar.xz)를 업로드하세요.",
+    "plugin_file_too_large": "플러그인 아카이브가 50 MB 제한을 초과합니다.",
+    "plugin_upload_failed": "플러그인 아카이브를 업로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "services_import_invalid_file": "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "서비스 내보내기 파일을 선택하거나 여기에 놓으세요",
       "toggle_wrap": "줄 바꿈 전환",
       "user_avatar": "사용자 아바타",
-      "view_selected_items": "선택된 항목 보기"
+      "view_selected_items": "선택된 항목 보기",
+      "github_followers": "GitHub 팔로워: {{count}}",
+      "github_forks": "GitHub 포크: {{count}}",
+      "github_open_issues": "GitHub 미해결 이슈: {{count}}",
+      "github_stars": "GitHub 스타: {{count}}",
+      "github_watchers": "GitHub Watch 사용자: {{count}}",
+      "secret_value": "비밀 값",
+      "value_hidden": "{{name}}(숨김)"
     }
   },
   "badge": {
@@ -502,10 +513,10 @@
         "title": "차단된 요청"
       },
       "blocked_unique_ips": {
-        "title": "차단된 순방문 IP"
+        "title": "차단된 고유 IP"
       },
       "instances": {
-        "status": "{{up}} 활성 / {{down}} 비활성 / {{loading}} 로딩 중",
+        "status": "{{up}} 실행 중 / {{down}} 중지 / {{loading}} 로딩 중",
         "title": "인스턴스"
       },
       "news": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "차단된 요청",
-        "title": "요청 상태 분포"
+        "title": "요청 상태 분포",
+        "http_304": "304 수정되지 않음",
+        "http_404": "404 찾을 수 없음",
+        "http_429": "429 요청 속도 제한됨"
       },
       "top_blocked_ips": {
         "most_blocked": "최다 차단 IP",
@@ -594,7 +608,7 @@
       "scheduled": "예정됨"
     },
     "status": {
-      "blocked_of_total": "{{total}} 전체 사용",
+      "blocked_of_total": "건 차단 / 전체 {{total}}건",
       "free_plan": "무료 플랜",
       "renews": "갱신",
       "services_licensed": "{{count}} 서비스 라이선스",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "차단 기간 업데이트 실패. 다시 시도해 주세요.",
     "reports_load_error": "보고서 로드 중 오류 발생. 페이지를 새로고침해 주세요.",
-    "unban_failed": "IP 주소 차단 해제 실패. 다시 시도해 주세요."
+    "unban_failed": "IP 주소 차단 해제 실패. 다시 시도해 주세요.",
+    "passkey_registration_failed": "이 패스키를 등록할 수 없습니다. 다시 시도해 주세요.",
+    "passkey_sign_in_failed": "패스키로 로그인할 수 없습니다. 다시 시도해 주세요.",
+    "report_copy_access_failed": "복사할 데이터에 접근하는 중 오류가 발생했습니다. 페이지를 새로 고쳐 보세요.",
+    "report_copy_failed": "클립보드에 복사하지 못했습니다. 아래의 원시 데이터 복사 버튼을 사용해 보세요.",
+    "report_details_load_failed": "보고서 세부 정보를 불러오지 못했습니다.",
+    "report_identifier_missing": "보고서 식별자가 없습니다",
+    "security_key_verification_failed": "보안 키를 확인할 수 없습니다. 다시 시도해 주세요.",
+    "webauthn_request_failed": "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
   },
   "flash": {
     "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요!",
@@ -779,7 +801,7 @@
     },
     "label": {
       "2fa_code": "2단계 인증 코드",
-      "2fa_code_or_recovery": "2단계 인증 또는 복구 코드",
+      "2fa_code_or_recovery": "2단계 인증 코드 또는 복구 코드",
       "admin_email": "관리자 이메일",
       "admin_password": "관리자 비밀번호",
       "admin_username": "관리자 이름",
@@ -795,9 +817,9 @@
       "custom_config": "구성",
       "custom_end_date": "사용자 정의 종료일",
       "custom_ssl_certificate": "사용자 정의 SSL 인증서",
-      "custom_ssl_certificate_data": "인증서 데이터 (Base64/PEM)",
+      "custom_ssl_certificate_data": "사용자 지정 SSL 인증서 데이터 (Base64/PEM)",
       "custom_ssl_key": "사용자 정의 SSL 키",
-      "custom_ssl_key_data": "인증서 키 데이터 (Base64/PEM)",
+      "custom_ssl_key_data": "사용자 지정 SSL 키 데이터 (Base64/PEM)",
       "dns_credential_items": "Let's Encrypt DNS 인증 정보",
       "dns_propagation": "DNS 전파 지연 시간",
       "dns_provider": "DNS 제공업체",
@@ -1001,7 +1023,7 @@
       "import_configs_dropzone": "사용자 지정 설정 내보내기 파일을 여기로 끌어다 놓거나 클릭하여 파일을 선택하세요.",
       "import_configs_warning": "scheduler, autoconf 또는 templates에서 만든 사용자 지정 설정은 항상 보존됩니다. UI/API 설정만 덮어쓸 수 있습니다.",
       "import_services_dropzone": "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요.",
-      "import_services_warning": "서비스를 가져오면 내보내기 파일로부터 새로운 UI 서비스가 생성됩니다. 이미 존재하는 서비스는 건너뜁니다.",
+      "import_services_warning": "서비스를 가져오면 내보내기 파일에서 새 UI 서비스가 생성됩니다. 기존 서비스는 건너뜁니다. 사용자 지정 설정과 함께 내보낸 .zip 아카이브도 지원됩니다.",
       "instance_creation_alert": "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다.",
       "next_step_in_case_of_issue": "문제가 발생할 경우, 수동으로 안전하지 않은 인증서를 수락할 수 있습니다:",
       "recovery_codes_save_alert": "이 복구 코드를 안전한 장소(비밀번호 관리자 등)에 저장하세요. 인증 기기를 분실했을 때 계정에 접근하는 데 필요합니다.",
@@ -1180,7 +1202,7 @@
       "upgrade_to_pro": "PRO로 업그레이드"
     },
     "expiration_date": {
-      "expires_in": "만료 기간:",
+      "expires_in": "만료까지",
       "title": "Pro 만료일",
       "unknown": "만료일 알 수 없음"
     },
@@ -1247,7 +1269,7 @@
         "wipe_sessions_confirm": "이것은 계정의 모든 활성 세션을 즉시 로그아웃합니다. 확인을 위해 비밀번호를 입력하세요."
       },
       "title": {
-        "wipe_sessions": "다른 세션 삭제?"
+        "wipe_sessions": "다른 세션에서 로그아웃할까요?"
       }
     },
     "passkey": {
@@ -1472,7 +1494,7 @@
       "pro_benefit_1_description": "강화된 보안, 성능 및 관리 도구를 포함한 모든 고급 기능이 제공됩니다.",
       "pro_benefit_1_title": "모든 PRO 기능에 접근",
       "pro_benefit_2_description": "문제나 문의 사항에 대해 BunkerWeb 팀으로부터 우선 지원을 받으세요.",
-      "pro_benefit_2_title": "관리자의 기술 지원",
+      "pro_benefit_2_title": "프로젝트 유지관리자의 기술 지원",
       "pro_benefit_3_description": "특수한 요구 사항을 충족하는 맞춤형 솔루션을 제공합니다.",
       "pro_benefit_3_title": "맞춤형 개발",
       "pro_benefit_4_description": "BunkerWeb 설정을 최적화하기 위한 전문가의 조언을 받으세요.",
@@ -1488,7 +1510,15 @@
       "title": "개요"
     },
     "subtitle": "설정 마법사의 단계에 따라 설정을 완료하세요.",
-    "title": "설정 마법사"
+    "title": "설정 마법사",
+    "error": {
+      "web_ui_setup_failed": "Web UI를 설정하는 중 오류가 발생했습니다. 다시 시도해 주세요."
+    },
+    "file": {
+      "content_entered": "입력한 문자 수: {{count}}",
+      "loaded_from": "{{name}}에서 불러옴 · 문자 수: {{count}}",
+      "read_error": "파일을 읽는 중 오류 발생"
+    }
   },
   "status": {
     "admin_user_exists": "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요.",
@@ -1554,7 +1584,10 @@
     "expiring": "만료 예정",
     "no_settings": "이 플러그인은 이 범위에 대한 설정이 없습니다.",
     "yes": "예",
-    "optional": "선택 사항"
+    "optional": "선택 사항",
+    "no_file_selected": "선택된 파일 없음",
+    "no_url_available": "사용 가능한 URL 없음",
+    "unknown": "알 수 없음"
   },
   "step": {
     "next": "다음",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "각 설정 이름은 고유해야 합니다.",
       "validation_id_required": "템플릿 ID는 필수입니다.",
       "validation_setting_key": "각 세팅에는 키가 있어야 합니다.",
-      "validation_settings_unique": "각 세팅 키는 고유해야 합니다."
+      "validation_settings_unique": "각 세팅 키는 고유해야 합니다.",
+      "missing_config_status_missing": "누락",
+      "missing_config_status_uploaded": "업로드됨"
     },
     "none": "템플릿 없음"
   },
@@ -1842,11 +1877,11 @@
     "disabled_title": "보고서 저장이 꺼져 있습니다",
     "disabled_help": "위협 지도는 보고서 페이지와 동일한 저장된 보고서를 읽습니다. 기록을 시작하려면 METRICS_PERSIST_TO_DB를 yes로 설정하세요.",
     "attacks_today": "오늘의 공격",
-    "countries": "출발 국가",
+    "countries": "출처 국가",
     "top_target": "주요 대상",
     "top_reason": "주요 사유",
     "map_title": "차단된 트래픽의 출처",
-    "map_sub": "호는 정확한 위치가 아니라 출발 국가를 나타냅니다",
+    "map_sub": "호는 정확한 위치가 아니라 출처 국가를 나타냅니다",
     "ticker_title": "실시간 이벤트",
     "top_origins": "주요 출처",
     "top_targets": "주요 대상",
@@ -1857,14 +1892,17 @@
     "error_title": "메트릭 서비스에 연결할 수 없습니다",
     "error_help": "지도는 마지막으로 불러온 수치를 유지하며 다음 새로 고침에 다시 시도합니다.",
     "open_live": "실시간 보기",
-    "updated": "업데이트됨"
+    "updated": "업데이트됨",
+    "blocked_request": "차단된 요청",
+    "blocked_requests": "차단된 요청"
   },
   "toast": {
     "autoconf_disclaimer_bold": "서비스가 제거되거나 재시작되면 UI 구성 내용이 손실됩니다.",
     "autoconf_disclaimer_detail": "이는 서비스 방식이 설정 충돌을 방지하도록 설계된 'autoconf'이기 때문입니다.",
     "ban_updated": "차단 기간이 성공적으로 업데이트되었습니다!",
     "body": {
-      "ping_succeed": "인스턴스: {{instances}}"
+      "ping_succeed": "인스턴스: {{instances}}",
+      "selected_items_already_in_state": "선택한 항목이 이미 요청한 상태입니다."
     },
     "copied": "복사되었습니다!",
     "disclaimer_title": "면책 조항",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "전역 설정 가져오기 실패",
     "header": {
       "ping_failed": "핑(Ping) 실패",
-      "ping_succeed": "핑(Ping) 성공"
+      "ping_succeed": "핑(Ping) 성공",
+      "conversion_failed": "전환 실패"
     },
     "ip_unbanned": "IP 주소 차단이 성공적으로 해제되었습니다!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "인스턴스 {{hostname}} 중지",
       "unban_ip": "{{ip}} 차단 해제",
       "update_ban_duration": "금지 기간 업데이트",
-      "value_from_global": "전역 설정에서 가져온 값"
+      "value_from_global": "전역 설정에서 가져온 값",
+      "back_to_file_upload": "파일 업로드로 돌아가기",
+      "switch_to_text_editor": "텍스트 편집기로 전환"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
     "cannot_remove_disabled": "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "ZeroSSL API 요청의 재시도 횟수입니다 (0이면 재시도를 비활성화).",
     "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
     "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
-    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다."
+    "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
+    "config_global_types_available": "이제 사용자 지정 설정에서 전역 유형을 선택할 수 있습니다."
   },
   "totp": {
     "cant_access": "인증 코드를 사용할 수 없으신가요?",
@@ -2167,7 +2209,7 @@
     "algorithm": "알고리즘",
     "all": "전체",
     "assignment_notice": "할당은 중앙 재고를 구성합니다. TLS 배포는 각 서비스의 인증서 설정에 의해 제어됩니다.",
-    "assignments": "재고 할당",
+    "assignments": "인증서 할당",
     "assignments_help": "이 할당은 실시간 TLS 설정을 변경하지 않습니다.",
     "attach": "할당",
     "attach_all": "이 인증서는 모든 사용 가능한 서비스에 이미 연결되어 있습니다.",
@@ -2184,7 +2226,7 @@
     "create": "인증서 생성",
     "download_chain": "체인 다운로드",
     "download_leaf": "리프 다운로드",
-    "edit_help": "이것은 인증서 또는 실시간 TLS 설정이 아닌 재고 메타데이터만 변경합니다.",
+    "edit_help": "이 작업은 인증서 목록의 메타데이터만 변경하며, 인증서 내용이나 실제 TLS 설정은 변경하지 않습니다.",
     "edit_metadata": "인증서 메타데이터 편집",
     "empty": "인증서 없음",
     "empty_help": "자체 서명 인증서를 생성하고, ACME 발급 일정을 예약하거나, 기존 PEM 인증서와 키를 업로드합니다.",
@@ -2199,13 +2241,13 @@
     "issuer": "발급 기관",
     "issuers": "주요 발급 기관",
     "key_drop": "해당하는 개인 키를 여기에 드롭합니다",
-    "key_limit": "최대 1 MiB; 휴식 시 암호화되며 다운로드할 수 없습니다",
+    "key_limit": "최대 1 MiB. 저장 시 암호화되며 다운로드할 수 없습니다.",
     "last_error": "마지막 오류",
     "make_primary": "이 서비스에 대한 주요 재고 할당으로 표시",
     "managed": "관리되는 인증서",
     "new_selfsigned": "새 자체 서명 인증서",
     "no_issuers": "발급 기관 정보 없음",
-    "none_due": "인증서 없음",
+    "none_due": "갱신 대상 인증서 없음",
     "orphan_account": "계정",
     "orphan_badge": "ACME 계정 누락",
     "orphan_help": "이 갱신 기록은 더 이상 존재하지 않는 ACME 계정을 참조합니다. 제공업체 상태가 복구될 때까지 갱신은 차단됩니다.",
@@ -2238,7 +2280,7 @@
       "expired": "만료",
       "expiring_soon": "곧 만료",
       "not_yet_valid": "아직 유효하지 않음",
-      "revoked": "취소",
+      "revoked": "폐기됨",
       "valid": "유효"
     },
     "subtitle": "중앙 재고에서 인증서 발급, 업로드, 할당, 갱신, 검사",
@@ -2310,7 +2352,18 @@
     "pattern": "{{field}}에 유효한 값을 입력해 주세요.",
     "required": "{{field}} 필드는 필수입니다.",
     "service_required_for_ban": "서비스별 차단을 위해서는 서비스를 선택해야 합니다.",
-    "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다."
+    "zerossl_email_or_api_key_required": "ZeroSSL은 이메일 또는 ZeroSSL API 키가 필요합니다.",
+    "current_password_required_for_passkey": "패스키를 추가하려면 현재 비밀번호를 입력하세요.",
+    "custom_ssl_pair_required": "사용자 지정 SSL을 사용할 때는 인증서와 키를 모두 설정해야 합니다(파일 경로 또는 데이터 업로드 사용).",
+    "dns_challenge_field_required": "DNS 챌린지를 사용할 때 이 필드는 필수입니다.",
+    "newsletter_email_invalid": "뉴스레터를 구독하려면 유효한 이메일 주소를 입력하세요.",
+    "newsletter_email_required": "뉴스레터를 구독하려면 이 필드를 입력해야 합니다.",
+    "server_name_check_failed": "서버 이름 확인 실패",
+    "server_name_choose_different": "다른 서버 이름을 선택하세요.",
+    "server_name_invalid": "유효하지 않은 서버 이름입니다.",
+    "server_name_not_unique": "서버 이름이 고유하지 않습니다.",
+    "server_name_proceed": "설정을 계속 진행할 수 있습니다.",
+    "server_name_unique": "서버 이름이 고유합니다."
   },
   "web_cache": {
     "available": "사용 가능",
@@ -2496,7 +2549,10 @@
       "terminalAction": "종료 작업",
       "uriMatch": "URI 일치 모드",
       "uriValue": "URI 값",
-      "window": "시간 범위(초)"
+      "window": "시간 범위(초)",
+      "changePosition": "규칙 {{n}} / {{total}}, 위치 변경",
+      "newValue": "새 값",
+      "positionMove": "위치 {{n}} / {{total}} — 클릭하여 이동"
     },
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
@@ -2577,7 +2633,9 @@
       "disable": "규칙 비활성화",
       "duplicate": "아래에 복제",
       "enable": "규칙 활성화",
-      "top": "첫 번째로 실행"
+      "top": "첫 번째로 실행",
+      "moveTo": "{{n}}번 위치로 이동",
+      "staysAt": "{{n}}번 위치 유지"
     },
     "move": {
       "first": "첫 번째로 실행",
@@ -2640,7 +2698,7 @@
       "country": "국가",
       "detail_challenge": "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다.",
       "detail_detect": "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다.",
-      "detail_status": "클라이언트에 {{status}}이(가) 표시됩니다.",
+      "detail_status": "클라이언트에 표시되는 상태: {{status}}.",
       "failed": "테스트를 실행할 수 없음",
       "geo": "GeoIP 조회",
       "geo_help": "사용할 수 없으면 국가 및 ASN 규칙이 '알 수 없음'이 되어 절대 일치할 수 없습니다.",
@@ -2659,7 +2717,7 @@
       "other_unreached": "도달하지 않음",
       "other_workflows": "이 서비스의 다른 워크플로",
       "out_draft": "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다.",
-      "out_match": "{{workflow}} · {{rule}}이(가) 일치하여 요청에 {{action}} 작업을 수행했습니다.",
+      "out_match": "일치한 항목: {{workflow}} · {{rule}}. 요청에 적용된 작업: {{action}}.",
       "out_no_match": "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다.",
       "out_not_attached": "이 워크플로는 어떤 서비스에도 연결되지 않아 평가할 규칙 체인이 없습니다.",
       "out_whitelisted": "허용 목록에 있음 — 전체 워크플로를 건너뛰고 어떤 규칙도 평가하지 않습니다.",
@@ -2689,7 +2747,7 @@
       "empty": "빈 그룹입니다. 조건을 추가해야 저장할 수 있습니다.",
       "noGroupHolds": "어떤 그룹에도 {{kind}} 항목이 없음",
       "noneMeta": "어느 조건도 참이 아닐 때 일치",
-      "not": "모두 아님",
+      "not": "어느 것도 아님",
       "or": "또는",
       "removeGroup": "그룹 제거"
     },
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "캔버스",
       "list": "목록"
+    },
+    "action_help": {
+      "block": "요청 거부",
+      "challenge": "사람인지 확인",
+      "redirect": "다른 위치로 전송"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP 메서드",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "정확히 일치",
+      "prefix": "다음으로 시작",
+      "regex": "정규식과 일치"
     }
   },
   "request_path": {
@@ -2736,8 +2809,8 @@
         "inline": "{{service}}은 자체 {{family}} 설정으로 {{path}}을 제공합니다. {{path}}에 대한 설정을 지우거나 다른 경로를 사용하십시오.",
         "primary": "“{{name}}”는 현재 이 서비스의 주요 인증서이며, 추가 경고 없이 강등됩니다. 주요 인증서는 실제로 배포된 것입니다.",
         "resource": "{{service}}은 {{kind}}의 “{{name}}”를 통해 {{path}}을 제공합니다. “{{name}}”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오.",
-        "stream": "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, {{service}}은 이미 상류 “{{name}}”를 사용합니다. 먼저 분리하십시오.",
-        "stream_inline": "{{service}}은 REVERSE_PROXY_HOST에 자체 백엔드를 가지고 있습니다. 상류가 제어하도록 설정 설정을 지우십시오."
+        "stream": "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, {{service}} 서비스는 이미 업스트림 “{{name}}”를 사용합니다. 먼저 분리하세요.",
+        "stream_inline": "{{service}} 서비스에는 REVERSE_PROXY_HOST로 설정된 자체 백엔드가 있습니다. 업스트림이 대신 처리하도록 해당 설정을 지우세요."
       },
       "detach": "분리",
       "family": {
@@ -2758,14 +2831,15 @@
         "unwired": "이 페이지는 USE_TEMPLATE을 게시하지 않으므로, 여기서 템플릿을 변경할 수 없습니다."
       },
       "title": "연결된 자원",
-      "unavailable": "사용 불가능"
+      "unavailable": "사용 불가능",
+      "nothing_available": "연결할 수 있는 항목이 없습니다."
     }
   },
   "onboarding": {
     "dismiss": "닫기",
     "error": "안내를 불러오지 못했습니다.",
     "hint": {
-      "bans": "차단 목록은 BunkerWeb이 현재 거부 중인 클라이언트입니다. 각 행에 사유와 만료 시점이 표시됩니다.",
+      "bans": "차단 목록에는 BunkerWeb이 현재 거부 중인 클라이언트가 표시됩니다. 각 행에 사유와 만료 시점이 표시됩니다.",
       "home": "이 대시보드에서 현재 정상 상태인 인스턴스, 제공 중인 서비스, BunkerWeb이 처리한 트래픽을 확인할 수 있습니다.",
       "logs": "모든 인스턴스의 실시간 로그이며 인스턴스와 심각도로 필터링할 수 있습니다.",
       "reports": "차단된 모든 요청이 여기에 기록됩니다. 항목을 열면 어떤 보안 검사가 왜 차단했는지 확인할 수 있습니다.",

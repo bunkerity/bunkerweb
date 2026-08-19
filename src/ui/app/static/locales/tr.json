@@ -29,7 +29,11 @@
     "no_changes_detected": "Değişiklik tespit edilmedi.",
     "notice": "Bildirim",
     "ping_error": "Instances pinglenirken bir hata oluştu.",
-    "readonly_mode": "Bu işlem salt okunur modda devre dışı."
+    "readonly_mode": "Bu işlem salt okunur modda devre dışı.",
+    "plugin_file_invalid": "Geçerli bir eklenti arşivi (.zip, .tar.gz veya .tar.xz) yükleyin.",
+    "plugin_file_too_large": "Eklenti arşivi 50 MB sınırını aşıyor.",
+    "plugin_upload_failed": "Eklenti arşivi yüklenirken bir hata oluştu. Tekrar deneyin.",
+    "services_import_invalid_file": "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Hizmet dışa aktarma dosyası seçin veya buraya bırakın",
       "toggle_wrap": "Satır kaydırmayı değiştir",
       "user_avatar": "Kullanıcı avatarı",
-      "view_selected_items": "Seçilen öğeleri görüntüle"
+      "view_selected_items": "Seçilen öğeleri görüntüle",
+      "github_followers": "GitHub takipçileri: {{count}}",
+      "github_forks": "GitHub çatalları: {{count}}",
+      "github_open_issues": "GitHub açık sorunları: {{count}}",
+      "github_stars": "GitHub yıldızları: {{count}}",
+      "github_watchers": "GitHub izleyenleri: {{count}}",
+      "secret_value": "Gizli değer",
+      "value_hidden": "{{name}} (gizli)"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Engellenen İstekler",
-        "title": "İstek Durumu Dağılımı"
+        "title": "İstek Durumu Dağılımı",
+        "http_304": "304 Değiştirilmedi",
+        "http_404": "404 Bulunamadı",
+        "http_429": "429 İstek hızı sınırlandı"
       },
       "top_blocked_ips": {
         "most_blocked": "En Çok Engellenen IP",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Yasaklama süresi güncellenemedi. Lütfen tekrar deneyin.",
     "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
-    "unban_failed": "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin."
+    "unban_failed": "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin.",
+    "passkey_registration_failed": "Bu parola anahtarı kaydedilemedi. Tekrar deneyin.",
+    "passkey_sign_in_failed": "Parola anahtarıyla giriş yapılamadı. Tekrar deneyin.",
+    "report_copy_access_failed": "Kopyalanacak verilere erişilirken hata oluştu. Sayfayı yenilemeyi deneyin.",
+    "report_copy_failed": "Panoya kopyalanamadı. Aşağıdaki ham veri kopyalama düğmesini kullanmayı deneyin.",
+    "report_details_load_failed": "Rapor ayrıntıları yüklenemedi.",
+    "report_identifier_missing": "Rapor tanımlayıcısı eksik",
+    "security_key_verification_failed": "Güvenlik anahtarınız doğrulanamadı. Tekrar deneyin.",
+    "webauthn_request_failed": "Güvenlik anahtarı isteği başarısız oldu. Tekrar deneyin."
   },
   "flash": {
     "easter_egg": "Bunu okuyorsan meraklısın demektir",
@@ -1488,7 +1510,15 @@
       "title": "Genel Bakış"
     },
     "subtitle": "Kurulum sihirbazını tamamlamak için adımları izleyin.",
-    "title": "Kurulum Sihirbazı"
+    "title": "Kurulum Sihirbazı",
+    "error": {
+      "web_ui_setup_failed": "Web arayüzü kurulurken hata oluştu. Tekrar deneyin."
+    },
+    "file": {
+      "content_entered": "Girilen karakter: {{count}}",
+      "loaded_from": "{{name}} kaynağından yüklendi · karakter: {{count}}",
+      "read_error": "Dosya okunurken hata oluştu"
+    }
   },
   "status": {
     "admin_user_exists": "Bir admin kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin.",
@@ -1554,7 +1584,10 @@
     "expiring": "Sonlanıyor",
     "no_settings": "Bu eklenti, bu kapsam için ayarlar içermiyor.",
     "yes": "Evet",
-    "optional": "İsteğe bağlı"
+    "optional": "İsteğe bağlı",
+    "no_file_selected": "Dosya seçilmedi",
+    "no_url_available": "Kullanılabilir URL yok",
+    "unknown": "Bilinmiyor"
   },
   "step": {
     "next": "İleri",
@@ -1711,7 +1744,7 @@
       "raw_editor_drop_hint": "Mevcut içeriği değiştirmek için bir şablon JSON dosyası (.json) bırakın.",
       "raw_editor_aria": "Ham şablon JSON düzenleyici",
       "raw_editor_help": "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir.",
-      "raw_editor_import_success": "Şablon başarıyla içe aktarıldı!",
+      "raw_editor_import_success": "Şablon JSON'u başarıyla içe aktarıldı.",
       "raw_editor_override_body": "Bu dosyanın içe aktarılması mevcut şablon JSON'unu tamamen değiştirecektir. Düzenleyicide yapılan değişiklikler kaybolacaktır. Devam etmek istiyor musunuz?",
       "raw_editor_override_confirm": "Şablonu değiştir",
       "raw_editor_override_title": "Şablon JSON değiştirilsin mi?",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Her yapılandırma adı benzersiz olmalıdır.",
       "validation_id_required": "Şablon kimliği gereklidir.",
       "validation_setting_key": "Her ayarın bir anahtarı olmalıdır.",
-      "validation_settings_unique": "Her ayar anahtarı benzersiz olmalıdır."
+      "validation_settings_unique": "Her ayar anahtarı benzersiz olmalıdır.",
+      "missing_config_status_missing": "Eksik",
+      "missing_config_status_uploaded": "Yüklendi"
     },
     "none": "Şablon Yok"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "Metrik servisine ulaşılamadı",
     "error_help": "Harita yükleyebildiği son değerleri korur ve bir sonraki yenilemede tekrar dener.",
     "open_live": "Canlı görünüm",
-    "updated": "Güncellendi"
+    "updated": "Güncellendi",
+    "blocked_request": "engellenen istek",
+    "blocked_requests": "engellenen istekler"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır.",
     "autoconf_disclaimer_detail": "Bunun nedeni, servisin yönteminin 'autoconf' olmasıdır ve bu, yapılandırma çakışmalarını önlemek için tasarlanmıştır.",
     "ban_updated": "Yasaklama süresi başarıyla güncellendi!",
     "body": {
-      "ping_succeed": "Örnekler: {{instances}}"
+      "ping_succeed": "Örnekler: {{instances}}",
+      "selected_items_already_in_state": "Seçili öğeler zaten istenen durumda."
     },
     "copied": "Kopyalandı!",
     "disclaimer_title": "Uyarı",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Genel ayarlar alınamadı",
     "header": {
       "ping_failed": "Ping başarısız",
-      "ping_succeed": "Ping başarılı"
+      "ping_succeed": "Ping başarılı",
+      "conversion_failed": "Dönüştürme başarısız oldu"
     },
     "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
       "update_ban_duration": "Yasak süresini güncelleyin",
-      "value_from_global": "Genel ayarlardan gelen değer"
+      "value_from_global": "Genel ayarlardan gelen değer",
+      "back_to_file_upload": "Dosya yüklemeye dön",
+      "switch_to_text_editor": "Metin düzenleyiciye geç"
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "ZeroSSL API istekleri için yeniden deneme sayısı (0 yeniden denemeyi devre dışı bırakır).",
     "zerossl_api_retry_delay": "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme.",
     "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
-    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre."
+    "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
+    "config_global_types_available": "Artık özel yapılandırmanız için genel türleri seçebilirsiniz."
   },
   "totp": {
     "cant_access": "Kimlik doğrulama kodunuza erişemiyor musunuz?",
@@ -2173,21 +2215,21 @@
     "attach_all": "Bu sertifika, mevcut tüm hizmetlere zaten bağlıdır.",
     "attach_copy": "Merkezi envanterdeki bir hizmete \"{{name}}\" atayın.",
     "browse_certificate": "Sertifikayı görüntüle",
-    "browse_key": "Gizli anahtıyı görüntüle",
+    "browse_key": "Özel anahtarı görüntüle",
     "common_name": "Ortak ad",
     "confirm": "Onayla",
     "confirm_action": "Sertifika eylemini onayla",
     "confirm_delete": "\"{{name}}\"i sil? Bu geri alınamaz.",
     "confirm_generic": "Bu sertifika eylemini onaylamak?",
     "confirm_renew": "\"{{name}}\"i yenile?",
-    "confirm_renew_due": "Her sertifikayı ve şu anda vadesi dolmuş olanları kontrol et?",
+    "confirm_renew_due": "Tüm sertifikalar kontrol edilsin ve yenileme zamanı gelenler yenilensin mi?",
     "create": "Sertifika oluştur",
     "download_chain": "Zinciri indirin",
     "download_leaf": "Yaprağı indirin",
     "edit_help": "Bu, yalnızca envanter meta verilerini değiştirir, sertifika malzemesini veya canlı TLS ayarlarını değiştirmez.",
     "edit_metadata": "Sertifika meta verilerini düzenle",
     "empty": "Sertifikalar yok",
-    "empty_help": "Kend imzalanmış bir sertifika oluşturun, ACME yayınını planlayın veya mevcut bir PEM sertifikası ve ana bilgisini yükleyin.",
+    "empty_help": "Kendinden imzalı bir sertifika oluşturun, ACME sertifika düzenleme işlemini planlayın veya mevcut bir PEM sertifikası ile anahtarını yükleyin.",
     "expired_help": "Dikkat gerektirir",
     "expires": "Son kullanma tarihi",
     "expiring_help": "30 gün veya daha az",
@@ -2196,23 +2238,23 @@
     "file_selected": "{{name}} ({{size}} KiB)",
     "file_size_limit": "Dosya 1 MiB'ı geçmemelidir.",
     "fingerprint": "SHA-256 parmak izi",
-    "issuer": "İşveren",
-    "issuers": "En çok kullanılan işverenler",
+    "issuer": "Düzenleyen",
+    "issuers": "En çok kullanılan düzenleyenler",
     "key_drop": "İlgili özel anahtarı buraya bırakın",
     "key_limit": "Maksimum 1 MiB; dinlenme halindeyken şifrelenmiş ve indirilemez",
     "last_error": "Son hata",
     "make_primary": "Bu hizmet için ana envanter atamasını işaretleyin",
     "managed": "Yönetilen sertifikalar",
     "new_selfsigned": "Yeni kend imzalanmış sertifika",
-    "no_issuers": "İşveren verisi yok",
-    "none_due": "Sertifikalar yok",
+    "no_issuers": "Düzenleyen verisi yok",
+    "none_due": "Yenileme zamanı gelen sertifika yok",
     "orphan_account": "Hesap",
     "orphan_badge": "ACME hesabı eksik",
     "orphan_help": "Bu yenileme kaydı, artık mevcut olmayan bir ACME hesabını işaret etmektedir. Yenileme, sağlayıcının durumu onarılana kadar bloke kalır.",
     "orphan_server": "ACME sunucusu",
     "orphan_title": "ACME hesabı eksik",
     "pem_certificate": "PEM sertifikası veya zincir",
-    "pem_drop": "Buraya halk PEM sertifikasını veya zinciri bırakın",
+    "pem_drop": "Açık PEM sertifikasını veya zincirini buraya bırakın",
     "pem_limit": "Maksimum 1 MiB",
     "pem_private_key": "PEM özel anahtar",
     "primary": "Ana atama",
@@ -2231,7 +2273,7 @@
     "source": {
       "customcert": "Özel",
       "letsencrypt": "Let's Encrypt",
-      "selfsigned": "Kendiliğinden imzalanmış"
+      "selfsigned": "Kendinden imzalı"
     },
     "source_label": "Kaynak",
     "status": {
@@ -2249,10 +2291,10 @@
     "upcoming_help": "Geçerlilik süresi dolmuş veya 30 günlük yenileme penceresi içinde",
     "upload": "Sertifikayı yükle",
     "upload_custom": "Özel sertifikayı yükle",
-    "upload_invalid": "Geçerli bir kamu sertifikası ve eşleşen özel anahtar seçin.",
+    "upload_invalid": "Geçerli bir açık sertifika ve eşleşen özel anahtar seçin.",
     "valid_days": "Gün cinsinden geçerlilik süresi",
-    "valid_from": "Geçerli olan",
-    "valid_to": "Geçerlilik süresi sona erecek"
+    "valid_from": "Şu tarihten itibaren geçerli",
+    "valid_to": "Şu tarihe kadar geçerli"
   },
   "resource_groups": {
     "add_entry": "Ekle",
@@ -2266,14 +2308,14 @@
     "comment": "Yorum",
     "collapse_all": "Tümünü gizle",
     "delete": "Kaynak grubunu sil",
-    "delete_confirm": "@{{name}}'i mi silsin? Bu geri alınamaz.",
+    "delete_confirm": "@{{name}} silinsin mi? Bu işlem geri alınamaz.",
     "delete_help": "Bir ayar bu takma ada referans veriyorsa, silme engellenecektir.",
     "editor_edit": "@{{name}}'i düzenle",
     "editor_new": "Yeni kaynak grubu",
     "editor_title": "Kaynak grubu",
     "empty": "Hiç kaynak grubu yok",
-    "empty_help": "Eşit uyumlu ayarlar arasında yazılan değerleri paylaşmak için yeniden kullanılabilir bir takma ad oluştur.",
-    "entries": "Eklemler",
+    "empty_help": "Uyumlu ayarlar arasında türü belirlenmiş değerleri paylaşmak için yeniden kullanılabilir bir takma ad oluşturun.",
+    "entries": "Girdiler",
     "expand_all": "Tümünü aç",
     "global_configuration": "Global yapılandırma",
     "import_extension": ".txt veya .csv dosyası seçin.",
@@ -2287,14 +2329,14 @@
     "new": "Yeni grup",
     "new_alias": "Yeni kısaltma",
     "no_entries": "Girdiler yok",
-    "no_entries_help": "Girdileri tek tek ekleyin veya aşağıdaki toplu importör'ü kullanın.",
+    "no_entries_help": "Girdileri tek tek ekleyin veya aşağıdaki toplu içe aktarma aracını kullanın.",
     "no_references": "Referans yok",
     "readonly": "Veritabanı salt okunurdur. Kaynak grupları incelenebilir ve dışa aktarılabilir, ancak değiştirilemez.",
     "references_error": "Referanslar yüklenemedi",
     "save": "Grup kaydet",
     "search": "Kısaltmaları, açıklamaları, türleri veya değerleri arayın…",
     "showing_count": "Toplam {{total}} grubun {{visible}} tanesi gösteriliyor",
-    "subtitle": "IP'ler, ülkeler, ASNL'ler, ters DNS adları, kullanıcı ajitleri ve URL'ler için yeniden kullanılabilir, tipli kısaltmalar.",
+    "subtitle": "IP'ler, ülkeler, ASN'ler, ters DNS adları, User-Agent değerleri ve URI'ler için yeniden kullanılabilir, türü belirlenmiş takma adlar.",
     "template_configuration": "Şablon {{template}}",
     "usage": "Kullanım",
     "value": "Değer",
@@ -2310,7 +2352,18 @@
     "pattern": "Lütfen {{field}} için geçerli bir değer girin.",
     "required": "{{field}} gereklidir.",
     "service_required_for_ban": "Servise özel bir yasaklama için bir servis seçilmelidir.",
-    "zerossl_email_or_api_key_required": "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir."
+    "zerossl_email_or_api_key_required": "ZeroSSL için e-posta veya ZeroSSL API anahtarından biri gereklidir.",
+    "current_password_required_for_passkey": "Parola anahtarı eklemek için mevcut parolanızı girin.",
+    "custom_ssl_pair_required": "Özel SSL kullanırken hem sertifika hem de anahtar ayarlanmalıdır (dosya yolu veya veri yükleme yoluyla).",
+    "dns_challenge_field_required": "DNS doğrulaması kullanılırken bu alan zorunludur.",
+    "newsletter_email_invalid": "Bültene abone olmak için geçerli bir e-posta adresi girin.",
+    "newsletter_email_required": "Bültene abone olmak istiyorsanız bu alan zorunludur.",
+    "server_name_check_failed": "Sunucu adı denetimi başarısız oldu",
+    "server_name_choose_different": "Farklı bir sunucu adı seçin.",
+    "server_name_invalid": "Geçersiz sunucu adı.",
+    "server_name_not_unique": "Sunucu adı benzersiz değil.",
+    "server_name_proceed": "Kuruluma devam edebilirsiniz.",
+    "server_name_unique": "Sunucu adı benzersiz."
   },
   "web_cache": {
     "available": "Mevcut",
@@ -2324,9 +2377,9 @@
     "enabled": "Etkin",
     "enabled_instances": "Önbelleğe alma etkin",
     "enabled_services": "Etkin hizmetler",
-    "hit_rate": "Islem oranı",
+    "hit_rate": "İsabet oranı",
     "instance": "Örnek",
-    "metrics": "Örneklerin toplam / başarısız dağılımı",
+    "metrics": "Toplu önbellek isabeti / kaçırması dağılımı",
     "metrics_scope": "Ölçümler, tüm önbelleğe alınmış hizmetler üzerinden örnek başına toplanır.",
     "not_reporting": "Raporlanmıyor",
     "path": "Yol",
@@ -2443,7 +2496,7 @@
       "down": "Kapalı",
       "primary": "Ana"
     },
-    "save": "Ana sunucuyu kaydet",
+    "save": "Upstream'i kaydet",
     "search": "Ad, açıklama veya sunucu'yu arayın...",
     "server_fail_timeout": "Başarısızlık zaman aşımı",
     "server_host": "Sunucu",
@@ -2451,9 +2504,9 @@
     "server_role": "Rol",
     "server_weight": "Ağırlık",
     "servers": "Sunucular",
-    "services_help": "Çoklu hizmetleri seçmek için Ctrl veya Command kullanın. Bir ana sunucu daha sonra bağlanabilir.",
+    "services_help": "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Upstream daha sonra bağlanabilir.",
     "services_hidden": "Gizlenen hizmet sayısı: {{count}}. {{protocol}} upstream yalnızca eşleşen bir hizmete bağlanabilir.",
-    "truncated": "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
+    "truncated": "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın."
   },
   "workflows": {
     "act_block": "Engelle",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Sonlandırıcı eylem",
       "uriMatch": "URI eşleşme modu",
       "uriValue": "URI değeri",
-      "window": "Saniye cinsinden pencere"
+      "window": "Saniye cinsinden pencere",
+      "changePosition": "Kural {{n}} / {{total}}, konumu değiştir",
+      "newValue": "Yeni değer",
+      "positionMove": "Konum {{n}} / {{total}} — taşımak için tıklayın"
     },
     "attach": "Hizmetlere ekle",
     "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
@@ -2577,7 +2633,9 @@
       "disable": "Kuralı devre dışı bırak",
       "duplicate": "Altına çoğalt",
       "enable": "Kuralı etkinleştir",
-      "top": "İlk çalıştır"
+      "top": "İlk çalıştır",
+      "moveTo": "{{n}}. konuma taşı",
+      "staysAt": "{{n}}. konumda kalır"
     },
     "move": {
       "first": "İlk çalıştır",
@@ -2715,15 +2773,30 @@
     "view": {
       "canvas": "Canvas",
       "list": "Liste"
+    },
+    "action_help": {
+      "block": "İsteği reddet",
+      "challenge": "İnsan olduğunu doğrula",
+      "redirect": "Başka bir yere gönder"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP yöntemi",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "tam olarak eşittir",
+      "prefix": "ile başlar",
+      "regex": "düzenli ifadeyle eşleşir"
     }
   },
   "request_path": {
-    "client": "Müşteri",
+    "client": "İstemci",
     "source": "{{phase}} aşaması için eklenti yürütme sırası, {{setting}}'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil.",
     "terminal": {
       "inline": "Arka uç",
       "none": "Hiçbir şey sunulmadı",
-      "pool": "Ana havuz",
+      "pool": "Upstream havuzu",
       "root": "Yerel dosyalar"
     },
     "title": "İstek yolu",
@@ -2758,7 +2831,8 @@
         "unwired": "Bu sayfa USE_TEMPLATE'i yayınlamaz, bu nedenle şablon burada değiştirilemez."
       },
       "title": "Bağlı kaynaklar",
-      "unavailable": "Kullanılamıyor"
+      "unavailable": "Kullanılamıyor",
+      "nothing_available": "Bağlanabilecek kaynak yok."
     }
   },
   "onboarding": {

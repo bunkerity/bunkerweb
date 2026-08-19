@@ -73,8 +73,20 @@ msgstr "Hinweis"
 msgid "alert.ping_error"
 msgstr "Beim Pingen der Instanzen ist ein Fehler aufgetreten."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Bitte laden Sie ein gültiges Plugin-Archiv (.zip, .tar.gz oder .tar.xz) hoch."
+
+msgid "alert.plugin_file_too_large"
+msgstr "Das Plugin-Archiv überschreitet die Grenze von 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Beim Hochladen des Plugin-Archivs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+
 msgid "alert.readonly_mode"
 msgstr "Diese Aktion ist im schreibgeschützten Modus deaktiviert."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Bitte laden Sie eine gültige Dienstexportdatei (.env oder .zip) hoch."
 
 msgid "aria.label.clear_search"
 msgstr "Suche löschen"
@@ -96,6 +108,21 @@ msgstr "Diese Protokolldatei herunterladen"
 
 msgid "aria.label.follow"
 msgstr "Folgen"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub-Follower: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub-Forks: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Offene GitHub-Issues: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub-Sterne: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub-Beobachter: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Wert ausblenden"
@@ -133,6 +160,9 @@ msgstr "Wert anzeigen"
 msgid "aria.label.search_logs"
 msgstr "Protokolle durchsuchen"
 
+msgid "aria.label.secret_value"
+msgstr "Geheimer Wert"
+
 msgid "aria.label.select_file"
 msgstr "Datei auswählen"
 
@@ -147,6 +177,9 @@ msgstr "Zeilenumbruch umschalten"
 
 msgid "aria.label.user_avatar"
 msgstr "Benutzeravatar"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (ausgeblendet)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Ausgewählte Elemente anzeigen"
@@ -692,7 +725,7 @@ msgid "certificates.download_chain"
 msgstr "Kette herunterladen"
 
 msgid "certificates.download_leaf"
-msgstr "Blatt herunterladen"
+msgstr "Endzertifikat herunterladen"
 
 msgid "certificates.edit_help"
 msgstr "Dies ändert nur die Inventar-Metadaten, nicht das Zertifikat oder die Live-TLS-Einstellungen."
@@ -758,7 +791,7 @@ msgid "certificates.no_issuers"
 msgstr "Keine Ausstellerdaten"
 
 msgid "certificates.none_due"
-msgstr "Keine Zertifikate vorhanden"
+msgstr "Keine Zertifikate fällig"
 
 msgid "certificates.orphan_account"
 msgstr "Konto"
@@ -839,7 +872,7 @@ msgid "certificates.source_label"
 msgstr "Quelle"
 
 msgid "certificates.status.expired"
-msgstr "Gültig abgelaufen"
+msgstr "Abgelaufen"
 
 msgid "certificates.status.expiring_soon"
 msgstr "Läuft bald ab"
@@ -848,7 +881,7 @@ msgid "certificates.status.not_yet_valid"
 msgstr "Noch nicht gültig"
 
 msgid "certificates.status.revoked"
-msgstr "Rückgängig"
+msgstr "Widerrufen"
 
 msgid "certificates.status.valid"
 msgstr "Gültig"
@@ -866,10 +899,10 @@ msgid "certificates.unassigned"
 msgstr "Nicht zugewiesen"
 
 msgid "certificates.upcoming"
-msgstr "Kommissarische Verlängerungen"
+msgstr "Anstehende Verlängerungen"
 
 msgid "certificates.upcoming_help"
-msgstr "Gültig oder innerhalb des 30-Tage-Verlängerungsfensters"
+msgstr "Abgelaufen oder innerhalb des 30-tägigen Verlängerungsfensters"
 
 msgid "certificates.upload"
 msgstr "Zertifikat hochladen"
@@ -1786,6 +1819,15 @@ msgstr "Blockierungsstatus über Zeit"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Blockierte Anfragen"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Nicht geändert"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Nicht gefunden"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Anfragerate begrenzt"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Verteilung der Anfragestatus"
 
@@ -2224,11 +2266,35 @@ msgstr "Serverfehler"
 msgid "error.ban_update_failed"
 msgstr "Fehler beim Aktualisieren der Sperrdauer. Bitte versuchen Sie es erneut."
 
+msgid "error.passkey_registration_failed"
+msgstr "Dieser Passkey konnte nicht registriert werden. Bitte versuchen Sie es erneut."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Die Anmeldung mit einem Passkey ist fehlgeschlagen. Bitte versuchen Sie es erneut."
+
+msgid "error.report_copy_access_failed"
+msgstr "Fehler beim Zugriff auf die zu kopierenden Daten. Bitte aktualisieren Sie die Seite."
+
+msgid "error.report_copy_failed"
+msgstr "Kopieren in die Zwischenablage fehlgeschlagen. Verwenden Sie bitte die Schaltfläche zum Kopieren der Rohdaten unten."
+
+msgid "error.report_details_load_failed"
+msgstr "Die Berichtsdetails konnten nicht geladen werden."
+
+msgid "error.report_identifier_missing"
+msgstr "Berichtskennung fehlt"
+
 msgid "error.reports_load_error"
 msgstr "Fehler beim Laden der Berichte. Bitte versuchen Sie, die Seite neu zu laden."
 
+msgid "error.security_key_verification_failed"
+msgstr "Ihr Sicherheitsschlüssel konnte nicht überprüft werden. Bitte versuchen Sie es erneut."
+
 msgid "error.unban_failed"
 msgstr "Fehler beim Entsperren der IP-Adresse. Bitte versuchen Sie es erneut."
+
+msgid "error.webauthn_request_failed"
+msgstr "Die Sicherheitsschlüssel-Anfrage ist fehlgeschlagen. Bitte versuchen Sie es erneut."
 
 msgid "flash.easter_egg"
 msgstr "Wenn du das liest, bist du neugierig"
@@ -3749,7 +3815,7 @@ msgid "request_path.title"
 msgstr "Anforderungs-Pfad"
 
 msgid "request_path.unordered"
-msgstr "Keine deklarierte Position in der %(phase)s-Phase; es wird nach den alphabetisch sortierten Plugins ausgeführt."
+msgstr "Keine festgelegte Position in der %(phase)s-Phase; das Plugin wird nach den Plugins mit festgelegter Position in alphabetischer Reihenfolge ausgeführt."
 
 msgid "resource_groups.add_entry"
 msgstr "Eintrag hinzufügen"
@@ -3776,7 +3842,7 @@ msgid "resource_groups.clone_copy"
 msgstr "Erstellen Sie eine bearbeitbare Kopie von @%(name)s."
 
 msgid "resource_groups.collapse_all"
-msgstr "Alle zusammenfassen"
+msgstr "Alle einklappen"
 
 msgid "resource_groups.comment"
 msgstr "Kommentar"
@@ -4117,6 +4183,9 @@ msgstr "Pfad"
 msgid "service.resources.none"
 msgstr "Kein angehängtes Element"
 
+msgid "service.resources.nothing_available"
+msgstr "Keine Ressource zum Zuordnen verfügbar."
+
 msgid "service.resources.primary"
 msgstr "Primäres Zertifikat"
 
@@ -4164,6 +4233,18 @@ msgstr "Konfigurieren Sie hier mehrere Instanzen von Einstellungen für dieses P
 
 msgid "settings.multiple.title"
 msgstr "Mehrfache Einstellungen"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Fehler beim Einrichten der Web-UI. Bitte versuchen Sie es erneut."
+
+msgid "setup.file.content_entered"
+msgstr "Eingegebene Zeichen: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Aus %(name)s geladen · Zeichen: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Fehler beim Lesen der Datei"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Ein Admin-Benutzer existiert bereits. Bitte fahren Sie mit dem nächsten Schritt fort."
@@ -4372,6 +4453,9 @@ msgstr "Nein"
 msgid "status.no_data"
 msgstr "Keine Daten"
 
+msgid "status.no_file_selected"
+msgstr "Keine Datei ausgewählt"
+
 msgid "status.no_history"
 msgstr "Kein Verlauf verfügbar."
 
@@ -4392,6 +4476,9 @@ msgstr "Keine Schritte verfügbar"
 
 msgid "status.no_steps_description"
 msgstr "Diese Vorlage hat keine Schritte zum Konfigurieren."
+
+msgid "status.no_url_available"
+msgstr "Keine URL verfügbar"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4440,6 +4527,9 @@ msgstr "Änderungen außerhalb der aktuellen Vorlage sind nicht erlaubt. Bitte n
 
 msgid "status.unique_server_name"
 msgstr "Eindeutiger Servername"
+
+msgid "status.unknown"
+msgstr "Unbekannt"
 
 msgid "status.up"
 msgstr "Aktiv"
@@ -4722,6 +4812,12 @@ msgstr "Schritt-Untertitel"
 
 msgid "template.editor.label_step_title"
 msgstr "Schritt-Titel"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Fehlt"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Hochgeladen"
 
 msgid "template.editor.missing_configs_body"
 msgstr "Die importierte Vorlage verweist auf benutzerdefinierte Konfigurationen, die noch nicht hochgeladen wurden. Bitte importieren Sie diese Konfigurationen, um die Vorlageneinrichtung abzuschließen:"
@@ -5176,6 +5272,12 @@ msgstr "Hell"
 msgid "threatmap.attacks_today"
 msgstr "Angriffe heute"
 
+msgid "threatmap.blocked_request"
+msgstr "blockierte Anfrage"
+
+msgid "threatmap.blocked_requests"
+msgstr "blockierte Anfragen"
+
 msgid "threatmap.countries"
 msgstr "Herkunftsländer"
 
@@ -5326,6 +5428,9 @@ msgstr "Sperrdauer erfolgreich aktualisiert!"
 msgid "toast.body.ping_succeed"
 msgstr "Instanzen: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Die ausgewählten Elemente befinden sich bereits im gewünschten Zustand."
+
 msgid "toast.copied"
 msgstr "Kopiert!"
 
@@ -5344,6 +5449,9 @@ msgstr "Beim Abrufen der globalen Einstellungen ist ein Fehler aufgetreten."
 msgid "toast.global_settings_failed_title"
 msgstr "Abrufen der globalen Einstellungen fehlgeschlagen"
 
+msgid "toast.header.conversion_failed"
+msgstr "Konvertierung fehlgeschlagen"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping fehlgeschlagen"
 
@@ -5355,6 +5463,9 @@ msgstr "IP-Adresse erfolgreich entsperrt!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Zurück zum Datei-Upload"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Diese IP-Adresse sperren"
@@ -5416,6 +5527,9 @@ msgstr "Nur ausgewählte anzeigen"
 msgid "tooltip.button.stop_instance"
 msgstr "Instanz %(hostname)s stoppen"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Zum Texteditor wechseln"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s entsperren"
 
@@ -5442,6 +5556,9 @@ msgstr "Mehrzeilige Einträge einklappen (Tracebacks, Payloads)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Mehrzeilige Werte einklappen (Zertifikate, Schlüssel)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Sie können jetzt globale Typen für Ihre benutzerdefinierte Konfiguration auswählen."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Konfigurationen, die nach dem Laden der OWASP Core Rule Set-Plugins angewendet werden."
@@ -6226,8 +6343,17 @@ msgstr "Ausgeblendete Dienste: %(count)s. Ein %(protocol)s-Upstream kann nur ein
 msgid "upstreams.truncated"
 msgstr "Nur die ersten 500 Upstreams werden angezeigt. Verkleinern Sie die Liste mit API, um das vollständige Ergebnis zu erhalten."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Geben Sie Ihr aktuelles Passwort ein, um einen Passkey hinzuzufügen."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Bei benutzerdefiniertem SSL müssen sowohl Zertifikat als auch Schlüssel festgelegt werden (über Dateipfad oder Daten-Upload)."
+
 msgid "validation.default_field_name"
 msgstr "Dieses Feld"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "Dieses Feld ist bei Verwendung der DNS-Challenge erforderlich."
 
 msgid "validation.invalid_date"
 msgstr "Ungültiges Datum"
@@ -6244,11 +6370,35 @@ msgstr "IP-Adresse ist erforderlich."
 msgid "validation.ip_service_duplicate"
 msgstr "Diese IP-Adresse ist bereits für den ausgewählten Dienst (%(service)s) gesperrt."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Geben Sie eine gültige E-Mail-Adresse für das Newsletter-Abonnement ein."
+
+msgid "validation.newsletter_email_required"
+msgstr "Dieses Feld ist erforderlich, wenn Sie den Newsletter abonnieren möchten."
+
 msgid "validation.pattern"
 msgstr "Bitte geben Sie einen gültigen Wert für %(field)s ein."
 
 msgid "validation.required"
 msgstr "%(field)s ist erforderlich."
+
+msgid "validation.server_name_check_failed"
+msgstr "Überprüfung des Servernamens fehlgeschlagen"
+
+msgid "validation.server_name_choose_different"
+msgstr "Wählen Sie bitte einen anderen Servernamen."
+
+msgid "validation.server_name_invalid"
+msgstr "Ungültiger Servername."
+
+msgid "validation.server_name_not_unique"
+msgstr "Der Servername ist nicht eindeutig."
+
+msgid "validation.server_name_proceed"
+msgstr "Sie können mit der Einrichtung fortfahren."
+
+msgid "validation.server_name_unique"
+msgstr "Der Servername ist eindeutig."
 
 msgid "validation.service_required_for_ban"
 msgstr "Für eine dienstspezifische Sperre muss ein Dienst ausgewählt werden."
@@ -6311,7 +6461,7 @@ msgid "web_cache.purge"
 msgstr "Zwischengespeicherte Antworten bereinigen"
 
 msgid "web_cache.purge_all"
-msgstr "Alle"
+msgstr "Alles leeren"
 
 msgid "web_cache.purge_all_confirm_body"
 msgstr "Dies löscht jede zwischengespeicherte Antwort für jeden Dienst auf jeder erreichbaren Instanz. Dies kann nicht rückgängig gemacht werden."
@@ -6403,11 +6553,23 @@ msgstr "Ziel-URL"
 msgid "workflows.action"
 msgstr "Dann"
 
+msgid "workflows.action_help.block"
+msgstr "Anfrage ablehnen"
+
+msgid "workflows.action_help.challenge"
+msgstr "Menschlichen Benutzer verifizieren"
+
+msgid "workflows.action_help.redirect"
+msgstr "An eine andere Stelle senden"
+
 msgid "workflows.add_rule"
 msgstr "Regel hinzufügen"
 
 msgid "workflows.all"
 msgstr "Alle"
+
+msgid "workflows.aria.changePosition"
+msgstr "Regel %(n)s von %(total)s, Position ändern"
 
 msgid "workflows.aria.collapse"
 msgstr "Einklappen"
@@ -6445,8 +6607,14 @@ msgstr "Regel verschieben"
 msgid "workflows.aria.moveUp"
 msgstr "Nach oben verschieben – wird früher ausgeführt"
 
+msgid "workflows.aria.newValue"
+msgstr "Neuer Wert"
+
 msgid "workflows.aria.openRule"
 msgstr "Öffne Regel %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Position %(n)s von %(total)s — zum Verschieben klicken"
 
 msgid "workflows.aria.provider"
 msgstr "Antibot-Anbieter"
@@ -6580,6 +6748,15 @@ msgstr "Die Regeln werden kopiert, die Dienstbeziehungen nicht."
 msgid "workflows.clone_name"
 msgstr "Name der Kopie"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP-Methode"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "Diese Regel löschen? Alle darunterliegenden Regeln rücken eine Position nach oben."
 
@@ -6681,6 +6858,12 @@ msgstr "Darunter duplizieren"
 
 msgid "workflows.menu.enable"
 msgstr "Regel aktivieren"
+
+msgid "workflows.menu.moveTo"
+msgstr "An Position %(n)s verschieben"
+
+msgid "workflows.menu.staysAt"
+msgstr "Bleibt an Position %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Zuerst ausführen"
@@ -6996,6 +7179,15 @@ msgstr "Nur die ersten 500 Workflows werden angezeigt. Verkleinern Sie die Liste
 
 msgid "workflows.untitled"
 msgstr "Unbenannte Regel"
+
+msgid "workflows.uri_match.exact"
+msgstr "ist genau gleich"
+
+msgid "workflows.uri_match.prefix"
+msgstr "beginnt mit"
+
+msgid "workflows.uri_match.regex"
+msgstr "entspricht dem regulären Ausdruck"
 
 msgid "workflows.value.add"
 msgstr "Wert"

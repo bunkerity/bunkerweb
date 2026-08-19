@@ -29,7 +29,11 @@
     "no_changes_detected": "未检测到任何更改。",
     "notice": "注意",
     "ping_error": "Ping 实例时发生错误。",
-    "readonly_mode": "此操作在只读模式下被禁用。"
+    "readonly_mode": "此操作在只读模式下被禁用。",
+    "plugin_file_invalid": "请上传有效的插件归档文件（.zip、.tar.gz 或 .tar.xz）。",
+    "plugin_file_too_large": "插件归档文件超过 50 MB 的限制。",
+    "plugin_upload_failed": "上传插件归档文件时发生错误。请重试。",
+    "services_import_invalid_file": "请上传有效的服务导出文件（.env 或 .zip）。"
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "选择服务导出文件或将其拖放到此处",
       "toggle_wrap": "切换自动换行",
       "user_avatar": "用户头像",
-      "view_selected_items": "查看选定的项目"
+      "view_selected_items": "查看选定的项目",
+      "github_followers": "GitHub 粉丝数：{{count}}",
+      "github_forks": "GitHub Fork 数：{{count}}",
+      "github_open_issues": "GitHub 未解决 Issue 数：{{count}}",
+      "github_stars": "GitHub Star 数：{{count}}",
+      "github_watchers": "GitHub 关注者数：{{count}}",
+      "secret_value": "机密值",
+      "value_hidden": "{{name}}（已隐藏）"
     }
   },
   "badge": {
@@ -77,7 +88,7 @@
     "support": "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
   },
   "bans": {
-    "subtitle": "在您的 BunkerWeb 实例中禁用的 IP 地址 — 添加、删除或调整禁用的时长。",
+    "subtitle": "您的 BunkerWeb 实例中被封禁的 IP 地址——添加、移除或调整封禁时长。",
     "stats": {
       "card": {
         "by_reason": "按原因统计封禁"
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "被阻止的请求",
-        "title": "请求状态分布"
+        "title": "请求状态分布",
+        "http_304": "304 未修改",
+        "http_404": "404 未找到",
+        "http_429": "429 请求速率受限"
       },
       "top_blocked_ips": {
         "most_blocked": "被阻止最多的 IP",
@@ -588,13 +602,13 @@
       "greeting": "欢迎回来，"
     },
     "mini": {
-      "across_countries": "在 {{count}} 国家",
+      "across_countries": "涉及 {{count}} 个国家/地区",
       "enforced": "目前生效",
       "pct_blocked": "{{percent}}% 被阻止",
       "scheduled": "计划"
     },
     "status": {
-      "blocked_of_total": "已阻止 {{total}} 总计",
+      "blocked_of_total": "个请求已拦截，共 {{total}} 个",
       "free_plan": "免费计划",
       "renews": "续订",
       "services_licensed": "{{count}} 服务已授权",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "更新封禁期限失败。请重试。",
     "reports_load_error": "加载报告时出错。请尝试刷新页面。",
-    "unban_failed": "解禁 IP 地址失败。请重试。"
+    "unban_failed": "解禁 IP 地址失败。请重试。",
+    "passkey_registration_failed": "无法注册此通行密钥。请重试。",
+    "passkey_sign_in_failed": "无法使用通行密钥登录。请重试。",
+    "report_copy_access_failed": "访问要复制的数据时出错。请尝试刷新页面。",
+    "report_copy_failed": "复制到剪贴板失败。请尝试使用下方的原始数据复制按钮。",
+    "report_details_load_failed": "加载报告详情失败。",
+    "report_identifier_missing": "缺少报告标识符",
+    "security_key_verification_failed": "无法验证安全密钥。请重试。",
+    "webauthn_request_failed": "安全密钥请求失败。请重试。"
   },
   "flash": {
     "easter_egg": "如果你读到了这条信息，说明你很好奇",
@@ -1001,7 +1023,7 @@
       "import_configs_dropzone": "将您的自定义配置导出文件拖放到此处，或单击以选择文件。",
       "import_configs_warning": "由 scheduler、autoconf 或 templates 创建的自定义配置始终会保留。只能覆盖 UI/API 配置。",
       "import_services_dropzone": "将您的服务导出文件拖放到此处，或单击以选择文件。",
-      "import_services_warning": "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。",
+      "import_services_warning": "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。也支持包含自定义配置的 .zip 导出归档。",
       "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
       "next_step_in_case_of_issue": "如果遇到问题，您可以手动接受不安全的证书：",
       "recovery_codes_save_alert": "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。",
@@ -1113,7 +1135,7 @@
   },
   "news": {
     "image_alt": "新闻图片",
-    "slide": "滑动",
+    "slide": "幻灯片",
     "posted_on": "发布于"
   },
   "newsletter": {
@@ -1154,7 +1176,7 @@
       "show_less": "显示较少"
     },
     "marketplace": {
-    "active": "已启用",
+      "active": "已启用",
       "always_on": "核心/始终启用",
       "disabled": "已禁用",
       "enabled": "已启用",
@@ -1180,7 +1202,7 @@
       "upgrade_to_pro": "升级到 PRO"
     },
     "expiration_date": {
-      "expires_in": "有效期至",
+      "expires_in": "距离到期还有",
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
     },
@@ -1488,7 +1510,15 @@
       "title": "概览"
     },
     "subtitle": "按照步骤完成设置向导。",
-    "title": "设置向导"
+    "title": "设置向导",
+    "error": {
+      "web_ui_setup_failed": "设置 Web UI 时出错。请重试。"
+    },
+    "file": {
+      "content_entered": "已输入字符数：{{count}}",
+      "loaded_from": "已从 {{name}} 加载 · 字符数：{{count}}",
+      "read_error": "读取文件时出错"
+    }
   },
   "status": {
     "admin_user_exists": "管理员用户已存在。请继续下一步。",
@@ -1554,7 +1584,10 @@
     "expiring": "即将到期",
     "no_settings": "此插件在该范围内没有设置。",
     "yes": "是",
-    "optional": "可选"
+    "optional": "可选",
+    "no_file_selected": "未选择文件",
+    "no_url_available": "没有可用的 URL",
+    "unknown": "未知"
   },
   "step": {
     "next": "下一步",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "每个配置名称必须唯一。",
       "validation_id_required": "模板 ID 为必填项。",
       "validation_setting_key": "每个设置必须有一个键。",
-      "validation_settings_unique": "每个设置键必须唯一。"
+      "validation_settings_unique": "每个设置键必须唯一。",
+      "missing_config_status_missing": "缺失",
+      "missing_config_status_uploaded": "已上传"
     },
     "none": "无模板"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "无法连接指标服务",
     "error_help": "地图会保留最后一次成功加载的数据，并在下次刷新时重试。",
     "open_live": "实时视图",
-    "updated": "更新于"
+    "updated": "更新于",
+    "blocked_request": "被拦截的请求",
+    "blocked_requests": "被拦截的请求"
   },
   "toast": {
     "autoconf_disclaimer_bold": "如果服务被移除或重启，您的 UI 配置将会丢失。",
     "autoconf_disclaimer_detail": "这是因为服务的创建方法是 'autoconf'，旨在防止配置冲突。",
     "ban_updated": "封禁期限已成功更新！",
     "body": {
-      "ping_succeed": "实例：{{instances}}"
+      "ping_succeed": "实例：{{instances}}",
+      "selected_items_already_in_state": "所选项目已处于请求的状态。"
     },
     "copied": "已复制！",
     "disclaimer_title": "免责声明",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "获取全局设置失败",
     "header": {
       "ping_failed": "Ping 失败",
-      "ping_succeed": "Ping 成功"
+      "ping_succeed": "Ping 成功",
+      "conversion_failed": "转换失败"
     },
     "ip_unbanned": "IP 地址已成功解禁！"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
       "update_ban_duration": "更新禁令时长",
-      "value_from_global": "来自全局设置的值"
+      "value_from_global": "来自全局设置的值",
+      "back_to_file_upload": "返回文件上传",
+      "switch_to_text_editor": "切换到文本编辑器"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "ZeroSSL API 请求的重试次数（0 表示禁用重试）。",
     "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。",
     "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
-    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。"
+    "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
+    "config_global_types_available": "现在可以为自定义配置选择全局类型。"
   },
   "totp": {
     "cant_access": "无法访问您的身份验证器？",
@@ -2167,7 +2209,7 @@
     "algorithm": "算法",
     "all": "全部",
     "assignment_notice": "分配关系用于整理集中式证书清单；TLS 部署仍由各服务的证书设置控制。",
-    "assignments": "分配库存",
+    "assignments": "证书分配",
     "assignments_help": "这些分配不会更改实时 TLS 设置。",
     "attach": "分配",
     "attach_all": "此证书已附加到所有可用的服务。",
@@ -2183,7 +2225,7 @@
     "confirm_renew_due": "检查所有证书并续订当前到期的证书？",
     "create": "创建证书",
     "download_chain": "下载链",
-    "download_leaf": "下载叶片",
+    "download_leaf": "下载叶证书",
     "edit_help": "这只会更改库存元数据，而不是证书材料或实时 TLS 设置。",
     "edit_metadata": "编辑证书元数据",
     "empty": "无证书",
@@ -2199,13 +2241,13 @@
     "issuer": "颁发者",
     "issuers": "顶级颁发者",
     "key_drop": "在此处拖动匹配的私钥",
-    "key_limit": "最多 1 MiB；在休息状态下加密，且无法下载",
+    "key_limit": "最大 1 MiB；静态存储时加密，且不可下载",
     "last_error": "上次错误",
     "make_primary": "将其标记为此服务的首选库存分配",
-    "managed": "管理证书",
+    "managed": "受管证书",
     "new_selfsigned": "新的自签名证书",
     "no_issuers": "无颁发者数据",
-    "none_due": "缺少证书",
+    "none_due": "目前没有需要续订的证书",
     "orphan_account": "账户",
     "orphan_badge": "缺少 ACME 账户",
     "orphan_help": "此续订记录引用了不再存在的 ACME 账户。续订将保持阻止状态，直到提供商状态得到修复。",
@@ -2249,7 +2291,7 @@
     "upcoming_help": "已过期或在 30 天的续订窗口内",
     "upload": "上传证书",
     "upload_custom": "上传自定义证书",
-    "upload_invalid": "选择有效的公钥和对应的私钥。",
+    "upload_invalid": "请选择有效的公有证书及其匹配的私钥。",
     "valid_days": "有效天数",
     "valid_from": "从",
     "valid_to": "到"
@@ -2310,7 +2352,18 @@
     "pattern": "请输入有效的 {{field}} 值。",
     "required": "{{field}} 是必填项。",
     "service_required_for_ban": "对于特定于服务的封禁，必须选择一个服务。",
-    "zerossl_email_or_api_key_required": "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。"
+    "zerossl_email_or_api_key_required": "ZeroSSL 需要邮箱或 ZeroSSL API 密钥。",
+    "current_password_required_for_passkey": "请输入当前密码以添加通行密钥。",
+    "custom_ssl_pair_required": "使用自定义 SSL 时，必须同时设置证书和密钥（通过文件路径或数据上传）。",
+    "dns_challenge_field_required": "使用 DNS 挑战时，此字段为必填项。",
+    "newsletter_email_invalid": "请输入有效的电子邮件地址以订阅新闻通讯。",
+    "newsletter_email_required": "如果要订阅新闻通讯，此字段为必填项。",
+    "server_name_check_failed": "服务器名称检查失败",
+    "server_name_choose_different": "请选择其他服务器名称。",
+    "server_name_invalid": "服务器名称无效。",
+    "server_name_not_unique": "服务器名称不唯一。",
+    "server_name_proceed": "您可以继续进行设置。",
+    "server_name_unique": "服务器名称唯一。"
   },
   "web_cache": {
     "available": "可用",
@@ -2491,12 +2544,15 @@
       "removeValue": "删除值",
       "requestCount": "请求数",
       "resourceGroup": "资源组",
-      "ruleErrors": "{{count}} 规则中的验证问题",
+      "ruleErrors": "此规则中有 {{count}} 个验证问题",
       "ruleName": "规则 {{n}} 的名称",
       "terminalAction": "终止操作",
       "uriMatch": "URI 匹配模式",
       "uriValue": "URI 值",
-      "window": "时间窗口（秒）"
+      "window": "时间窗口（秒）",
+      "changePosition": "规则 {{n}} / {{total}}，更改位置",
+      "newValue": "新值",
+      "positionMove": "位置 {{n}} / {{total}} — 点击移动"
     },
     "attach": "附加到服务",
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
@@ -2577,7 +2633,9 @@
       "disable": "禁用规则",
       "duplicate": "在下方复制",
       "enable": "启用规则",
-      "top": "最先运行"
+      "top": "最先运行",
+      "moveTo": "移动到位置 {{n}}",
+      "staysAt": "保持在位置 {{n}}"
     },
     "move": {
       "first": "最先运行",
@@ -2693,7 +2751,7 @@
       "or": "或",
       "removeGroup": "删除组"
     },
-    "truncated": "仅显示前500个工作流程。通过API获取完整结果。",
+    "truncated": "仅显示前 500 个工作流程。请通过 API 缩小查询范围以获取完整结果。",
     "untitled": "未命名规则",
     "value": {
       "add": "值"
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "画布",
       "list": "列表"
+    },
+    "action_help": {
+      "block": "拒绝该请求",
+      "challenge": "验证其是否为真人",
+      "redirect": "将其发送到其他位置"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP 方法",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "完全等于",
+      "prefix": "以此开头",
+      "regex": "与正则表达式匹配"
     }
   },
   "request_path": {
@@ -2758,7 +2831,8 @@
         "unwired": "此页面无法更改 USE_TEMPLATE，因此模板无法在此处更改。"
       },
       "title": "附加的资源",
-      "unavailable": "不可用"
+      "unavailable": "不可用",
+      "nothing_available": "没有可关联的项目。"
     }
   },
   "onboarding": {

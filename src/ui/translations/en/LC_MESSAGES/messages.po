@@ -73,8 +73,20 @@ msgstr "Notice"
 msgid "alert.ping_error"
 msgstr "An error occurred while pinging the instances."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Please upload a valid plugin archive (.zip, .tar.gz, or .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "The plugin archive exceeds the 50 MB limit."
+
+msgid "alert.plugin_upload_failed"
+msgstr "An error occurred while uploading the plugin archive. Please try again."
+
 msgid "alert.readonly_mode"
 msgstr "This action is disabled in read-only mode."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Please upload a valid services export file (.env or .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Clear search"
@@ -96,6 +108,21 @@ msgstr "Download this log file"
 
 msgid "aria.label.follow"
 msgstr "Follow"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub followers: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub forks: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub open issues: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub stars: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub watchers: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Hide value"
@@ -133,6 +160,9 @@ msgstr "Reveal value"
 msgid "aria.label.search_logs"
 msgstr "Search logs"
 
+msgid "aria.label.secret_value"
+msgstr "Secret value"
+
 msgid "aria.label.select_file"
 msgstr "Select File"
 
@@ -147,6 +177,9 @@ msgstr "Toggle line wrapping"
 
 msgid "aria.label.user_avatar"
 msgstr "User avatar"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (hidden)"
 
 msgid "aria.label.view_selected_items"
 msgstr "View selected items"
@@ -1786,6 +1819,15 @@ msgstr "Blocking Status Over Time"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Blocked Requests"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Not Modified"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Not Found"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Rate Limited"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Request Status Distribution"
 
@@ -2224,11 +2266,35 @@ msgstr "Server Error"
 msgid "error.ban_update_failed"
 msgstr "Failed to update ban duration. Please try again."
 
+msgid "error.passkey_registration_failed"
+msgstr "Couldn't register this passkey. Please try again."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Couldn't sign you in with a passkey. Please try again."
+
+msgid "error.report_copy_access_failed"
+msgstr "Error accessing data for copying. Please try refreshing the page."
+
+msgid "error.report_copy_failed"
+msgstr "Failed to copy to clipboard. Please try using the raw data copy button below."
+
+msgid "error.report_details_load_failed"
+msgstr "Failed to load report details."
+
+msgid "error.report_identifier_missing"
+msgstr "Missing report identifier"
+
 msgid "error.reports_load_error"
 msgstr "Error loading reports. Please try refreshing the page."
 
+msgid "error.security_key_verification_failed"
+msgstr "Couldn't verify your security key. Please try again."
+
 msgid "error.unban_failed"
 msgstr "Failed to unban IP address. Please try again."
+
+msgid "error.webauthn_request_failed"
+msgstr "The security-key request failed. Please try again."
 
 msgid "flash.easter_egg"
 msgstr "If you read this, it means that you're curious"
@@ -4117,6 +4183,9 @@ msgstr "Path"
 msgid "service.resources.none"
 msgstr "None attached"
 
+msgid "service.resources.nothing_available"
+msgstr "Nothing available to attach."
+
 msgid "service.resources.primary"
 msgstr "Primary certificate"
 
@@ -4164,6 +4233,18 @@ msgstr "Configure multiple instances of settings for this plugin here."
 
 msgid "settings.multiple.title"
 msgstr "Multiple Settings"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Error while setting up web UI. Please try again."
+
+msgid "setup.file.content_entered"
+msgstr "Entered characters: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Loaded from %(name)s · characters: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Error reading file"
 
 msgid "setup.status.admin_user_exists"
 msgstr "An admin user already exists. Please proceed to the next step."
@@ -4372,6 +4453,9 @@ msgstr "No"
 msgid "status.no_data"
 msgstr "No data"
 
+msgid "status.no_file_selected"
+msgstr "No file selected"
+
 msgid "status.no_history"
 msgstr "No history available."
 
@@ -4392,6 +4476,9 @@ msgstr "No Steps Available"
 
 msgid "status.no_steps_description"
 msgstr "This template does not have any steps to configure."
+
+msgid "status.no_url_available"
+msgstr "No URL available"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4440,6 +4527,9 @@ msgstr "Changes outside the current template are not allowed. Please make change
 
 msgid "status.unique_server_name"
 msgstr "Unique Server Name"
+
+msgid "status.unknown"
+msgstr "Unknown"
 
 msgid "status.up"
 msgstr "Up"
@@ -4722,6 +4812,12 @@ msgstr "Step subtitle"
 
 msgid "template.editor.label_step_title"
 msgstr "Step title"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Missing"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Uploaded"
 
 msgid "template.editor.missing_configs_body"
 msgstr "The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:"
@@ -5176,6 +5272,12 @@ msgstr "Light"
 msgid "threatmap.attacks_today"
 msgstr "Attacks today"
 
+msgid "threatmap.blocked_request"
+msgstr "blocked request"
+
+msgid "threatmap.blocked_requests"
+msgstr "blocked requests"
+
 msgid "threatmap.countries"
 msgstr "Countries of origin"
 
@@ -5326,6 +5428,9 @@ msgstr "Ban duration updated successfully!"
 msgid "toast.body.ping_succeed"
 msgstr "Instances: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "The selected items are already in the requested state."
+
 msgid "toast.copied"
 msgstr "Copied!"
 
@@ -5344,6 +5449,9 @@ msgstr "An error occurred while fetching global settings."
 msgid "toast.global_settings_failed_title"
 msgstr "Failed to fetch global settings"
 
+msgid "toast.header.conversion_failed"
+msgstr "Conversion failed"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping failed"
 
@@ -5355,6 +5463,9 @@ msgstr "IP address unbanned successfully!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Whether to automatically request a Let's Encrypt certificate."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Back to file upload"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Ban this IP address"
@@ -5416,6 +5527,9 @@ msgstr "Show selected only"
 msgid "tooltip.button.stop_instance"
 msgstr "Stop Instance %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Switch to text editor"
+
 msgid "tooltip.button.unban_ip"
 msgstr "Unban %(ip)s"
 
@@ -5442,6 +5556,9 @@ msgstr "Collapse multi-line entries (tracebacks, payloads)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Collapse multi-line values (certificates, keys)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "You can now select global types for your custom configuration."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Configurations applied after the OWASP Core Rule Set plugins are loaded."
@@ -5672,7 +5789,7 @@ msgid "tooltip.real_ip_from"
 msgstr "List of trusted IPs / networks, separated with spaces, where proxied requests come from."
 
 msgid "tooltip.real_ip_from_urls"
-msgstr "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme."
+msgstr "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and basic authentication using the http://user:pass@url scheme."
 
 msgid "tooltip.real_ip_header"
 msgstr "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol."
@@ -6226,8 +6343,17 @@ msgstr "Hidden services: %(count)s. A %(protocol)s upstream can only be attached
 msgid "upstreams.truncated"
 msgstr "Only the first 500 upstreams are displayed. Narrow the list through the API for the complete result."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Enter your current password to add a passkey."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "When using custom SSL, you must set both the certificate and the key (via file path or data upload)."
+
 msgid "validation.default_field_name"
 msgstr "This field"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "This field is required when using DNS challenge."
 
 msgid "validation.invalid_date"
 msgstr "Invalid date"
@@ -6244,11 +6370,35 @@ msgstr "IP address is required."
 msgid "validation.ip_service_duplicate"
 msgstr "This IP address is already banned for the selected service (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Please enter a valid email address to subscribe to the newsletter."
+
+msgid "validation.newsletter_email_required"
+msgstr "This field is required if you want to subscribe to the newsletter."
+
 msgid "validation.pattern"
 msgstr "Please enter a valid value for %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s is required."
+
+msgid "validation.server_name_check_failed"
+msgstr "Server name check failed"
+
+msgid "validation.server_name_choose_different"
+msgstr "Please choose a different server name."
+
+msgid "validation.server_name_invalid"
+msgstr "Invalid server name."
+
+msgid "validation.server_name_not_unique"
+msgstr "Server name is not unique."
+
+msgid "validation.server_name_proceed"
+msgstr "You can proceed with the setup."
+
+msgid "validation.server_name_unique"
+msgstr "Server name is unique."
 
 msgid "validation.service_required_for_ban"
 msgstr "A service must be selected for a service-specific ban."
@@ -6403,11 +6553,23 @@ msgstr "Destination URL"
 msgid "workflows.action"
 msgstr "Then"
 
+msgid "workflows.action_help.block"
+msgstr "Deny the request"
+
+msgid "workflows.action_help.challenge"
+msgstr "Prove it is human"
+
+msgid "workflows.action_help.redirect"
+msgstr "Send it elsewhere"
+
 msgid "workflows.add_rule"
 msgstr "Add rule"
 
 msgid "workflows.all"
 msgstr "All"
+
+msgid "workflows.aria.changePosition"
+msgstr "Rule %(n)s of %(total)s, change position"
 
 msgid "workflows.aria.collapse"
 msgstr "Collapse"
@@ -6445,8 +6607,14 @@ msgstr "Move rule"
 msgid "workflows.aria.moveUp"
 msgstr "Move up — runs earlier"
 
+msgid "workflows.aria.newValue"
+msgstr "New value"
+
 msgid "workflows.aria.openRule"
 msgstr "Open rule %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Position %(n)s of %(total)s — click to move"
 
 msgid "workflows.aria.provider"
 msgstr "Antibot provider"
@@ -6580,6 +6748,15 @@ msgstr "The rules are copied; the service attachments are not."
 msgid "workflows.clone_name"
 msgstr "Name of the copy"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP method"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "Delete this rule? Everything below it moves up one position."
 
@@ -6681,6 +6858,12 @@ msgstr "Duplicate below"
 
 msgid "workflows.menu.enable"
 msgstr "Enable rule"
+
+msgid "workflows.menu.moveTo"
+msgstr "Move to position %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Stays at position %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Run first"
@@ -6996,6 +7179,15 @@ msgstr "Only the first 500 workflows are displayed. Narrow the list through the 
 
 msgid "workflows.untitled"
 msgstr "Untitled rule"
+
+msgid "workflows.uri_match.exact"
+msgstr "is exactly"
+
+msgid "workflows.uri_match.prefix"
+msgstr "starts with"
+
+msgid "workflows.uri_match.regex"
+msgstr "matches the regex"
 
 msgid "workflows.value.add"
 msgstr "Value"

@@ -73,8 +73,20 @@ msgstr "Paunawa"
 msgid "alert.ping_error"
 msgstr "May naganap na error habang pina-ping ang mga instance."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Mangyaring mag-upload ng wastong plugin archive (.zip, .tar.gz, o .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "Lumampas sa limitasyong 50 MB ang plugin archive."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Nagkaroon ng error habang ina-upload ang plugin archive. Subukan muli."
+
 msgid "alert.readonly_mode"
 msgstr "Ang aksyong ito ay hindi pinagana sa read-only na mode."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Mangyaring mag-upload ng wastong services export file (.env o .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Linisin ang paghahanap"
@@ -96,6 +108,21 @@ msgstr "I-download ang log file na ito"
 
 msgid "aria.label.follow"
 msgstr "Subaybayan"
+
+msgid "aria.label.github_followers"
+msgstr "Mga follower sa GitHub: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "Mga fork sa GitHub: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Mga bukas na issue sa GitHub: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "Mga star sa GitHub: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "Mga watcher sa GitHub: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Itago ang halaga"
@@ -133,6 +160,9 @@ msgstr "Ipakita ang halaga"
 msgid "aria.label.search_logs"
 msgstr "Maghanap sa mga log"
 
+msgid "aria.label.secret_value"
+msgstr "Lihim na value"
+
 msgid "aria.label.select_file"
 msgstr "Pumili ng File"
 
@@ -147,6 +177,9 @@ msgstr "I-toggle ang pag-wrap ng linya"
 
 msgid "aria.label.user_avatar"
 msgstr "Avatar ng gumagamit"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (nakatago)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Tingnan ang napiling mga item"
@@ -1742,7 +1775,7 @@ msgid "dashboard.card.ram.title"
 msgstr "System RAM"
 
 msgid "dashboard.card.ram.usage"
-msgstr "%(percent)s%% nagagamit"
+msgstr "%(percent)s%% ginagamit"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "Babala: Ang mababang memorya ay maaaring makaapekto sa pagganap"
@@ -1786,6 +1819,15 @@ msgstr "Katayuan ng Pag-block sa Paglipas ng Panahon"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Mga Na-block na Kahilingan"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Hindi Binago"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Hindi Natagpuan"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Nilimitahan ang Rate"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Distribusyon ng Katayuan ng Kahilingan"
 
@@ -1814,7 +1856,7 @@ msgid "dashboard.map.no_data"
 msgstr "Walang data"
 
 msgid "dashboard.mini.across_countries"
-msgstr "sa mga bansa ng %(count)s"
+msgstr "sa %(count)s bansa"
 
 msgid "dashboard.mini.enforced"
 msgstr "kasalukuyang ipinapatupad"
@@ -1823,7 +1865,7 @@ msgid "dashboard.mini.pct_blocked"
 msgstr "%(percent)s%% na bloke"
 
 msgid "dashboard.mini.scheduled"
-msgstr "Nagschedule"
+msgstr "nakaiskedyul"
 
 msgid "dashboard.panel.blocking_sub"
 msgstr "Na-block at pinayagan"
@@ -1844,13 +1886,13 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "Ayon sa bilang ng request"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "Na-block ng %(total)s"
+msgstr "na-block sa kabuuang %(total)s"
 
 msgid "dashboard.status.free_plan"
 msgstr "Libreng plano"
 
 msgid "dashboard.status.renews"
-msgstr "Nag-renew"
+msgstr "Magre-renew"
 
 msgid "dashboard.status.services_licensed"
 msgstr "Mga serbisyo ng %(count)s na may lisensya"
@@ -2224,11 +2266,35 @@ msgstr "Error sa Server"
 msgid "error.ban_update_failed"
 msgstr "Nabigo ang pag-update ng tagal ng ban. Mangyaring subukan muli."
 
+msgid "error.passkey_registration_failed"
+msgstr "Hindi mairehistro ang passkey na ito. Subukan muli."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Hindi ka ma-sign in gamit ang passkey. Subukan muli."
+
+msgid "error.report_copy_access_failed"
+msgstr "Nagkaroon ng error sa pag-access ng data para kopyahin. Subukang i-refresh ang pahina."
+
+msgid "error.report_copy_failed"
+msgstr "Hindi nakopya sa clipboard. Subukang gamitin ang button sa ibaba para kopyahin ang raw data."
+
+msgid "error.report_details_load_failed"
+msgstr "Hindi ma-load ang mga detalye ng report."
+
+msgid "error.report_identifier_missing"
+msgstr "Nawawala ang identifier ng report"
+
 msgid "error.reports_load_error"
 msgstr "Error sa pag-load ng mga ulat. Mangyaring i-refresh ang pahina."
 
+msgid "error.security_key_verification_failed"
+msgstr "Hindi ma-verify ang iyong security key. Subukan muli."
+
 msgid "error.unban_failed"
 msgstr "Nabigo ang pag-unban ng IP address. Mangyaring subukan muli."
+
+msgid "error.webauthn_request_failed"
+msgstr "Nabigo ang request sa security key. Subukan muli."
 
 msgid "flash.easter_egg"
 msgstr "Kung nabasa mo ito, ibig sabihin ay mausisa ka"
@@ -2264,7 +2330,7 @@ msgid "footer.made_by"
 msgstr "ginawa ng"
 
 msgid "footer.privacy"
-msgstr "Privacy"
+msgstr "Pribasidad"
 
 msgid "footer.support"
 msgstr "Suporta"
@@ -4073,7 +4139,7 @@ msgid "security_mode.block"
 msgstr "I-block"
 
 msgid "security_mode.detect"
-msgstr "Tuklasin"
+msgstr "I-detect"
 
 msgid "service.resources.attach"
 msgstr "Ikabit"
@@ -4116,6 +4182,9 @@ msgstr "Path"
 
 msgid "service.resources.none"
 msgstr "Walang nakakabit"
+
+msgid "service.resources.nothing_available"
+msgstr "Walang available na maikakabit."
 
 msgid "service.resources.primary"
 msgstr "Pangunahing sertipiko"
@@ -4164,6 +4233,18 @@ msgstr "I-configure ang maraming instance ng mga setting para sa plugin na ito d
 
 msgid "settings.multiple.title"
 msgstr "Maramihang Mga Setting"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Nagkaroon ng error habang sine-set up ang web UI. Subukan muli."
+
+msgid "setup.file.content_entered"
+msgstr "Mga inilagay na character: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Na-load mula sa %(name)s · mga character: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Error sa pagbasa ng file"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang."
@@ -4372,6 +4453,9 @@ msgstr "Hindi"
 msgid "status.no_data"
 msgstr "Walang data"
 
+msgid "status.no_file_selected"
+msgstr "Walang napiling file"
+
 msgid "status.no_history"
 msgstr "Walang available na kasaysayan."
 
@@ -4393,6 +4477,9 @@ msgstr "Walang Available na Mga Hakbang"
 msgid "status.no_steps_description"
 msgstr "Ang template na ito ay walang mga hakbang na iko-configure."
 
+msgid "status.no_url_available"
+msgstr "Walang available na URL"
+
 msgid "status.not_applicable"
 msgstr "Hindi Naaangkop"
 
@@ -4403,7 +4490,7 @@ msgid "status.optional"
 msgstr "Opsyonal"
 
 msgid "status.partial"
-msgstr "Bahagyan"
+msgstr "Bahagyang suportado"
 
 msgid "status.pending"
 msgstr "Naka-antay"
@@ -4440,6 +4527,9 @@ msgstr "Ang mga pagbabago sa labas ng kasalukuyang template ay hindi pinapayagan
 
 msgid "status.unique_server_name"
 msgstr "Natatanging Pangalan ng Server"
+
+msgid "status.unknown"
+msgstr "Hindi alam"
 
 msgid "status.up"
 msgstr "Aktibo"
@@ -4722,6 +4812,12 @@ msgstr "Subtitle ng hakbang"
 
 msgid "template.editor.label_step_title"
 msgstr "Pamagat ng hakbang"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Nawawala"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Na-upload"
 
 msgid "template.editor.missing_configs_body"
 msgstr "Ang na-import na template ay may mga reference sa custom config na hindi pa na-upload. Mangyaring i-import ang mga config na ito upang makumpleto ang setup ng template:"
@@ -5156,7 +5252,7 @@ msgid "templates.subtitle"
 msgstr "Mga reusable na template ng configuration para sa iyong mga serbisyo — i-bundle ang mga setting, hakbang, at custom na configuration, pagkatapos ay lumikha, kopyahin, o tanggalin ang mga ito."
 
 msgid "templates.tag.config"
-msgstr "Custom config: %(name)s"
+msgstr "Pasadyang configuration: %(name)s"
 
 msgid "templates.tag.feature"
 msgstr "Built-in na feature: %(name)s"
@@ -5175,6 +5271,12 @@ msgstr "Maliwanag"
 
 msgid "threatmap.attacks_today"
 msgstr "Mga pag-atake ngayong araw"
+
+msgid "threatmap.blocked_request"
+msgstr "na-block na request"
+
+msgid "threatmap.blocked_requests"
+msgstr "mga na-block na request"
 
 msgid "threatmap.countries"
 msgstr "Mga bansang pinagmulan"
@@ -5326,6 +5428,9 @@ msgstr "Matagumpay na na-update ang tagal ng ban!"
 msgid "toast.body.ping_succeed"
 msgstr "Mga Instance: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Nasa hiniling na estado na ang mga napiling item."
+
 msgid "toast.copied"
 msgstr "Nakopya!"
 
@@ -5344,6 +5449,9 @@ msgstr "Naganap ang isang error habang kinukuha ang mga pandaigdigang setting."
 msgid "toast.global_settings_failed_title"
 msgstr "Nabigo ang pagkuha ng mga pandaigdigang setting"
 
+msgid "toast.header.conversion_failed"
+msgstr "Nabigo ang conversion"
+
 msgid "toast.header.ping_failed"
 msgstr "Nabigo ang ping"
 
@@ -5355,6 +5463,9 @@ msgstr "Matagumpay na na-unban ang IP address!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Kung awtomatikong hihilingin ang isang Let's Encrypt certificate."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Bumalik sa pag-upload ng file"
 
 msgid "tooltip.button.ban_ip"
 msgstr "I-ban ang IP address na ito"
@@ -5416,6 +5527,9 @@ msgstr "Ipakita ang mga napili lamang"
 msgid "tooltip.button.stop_instance"
 msgstr "Itigil ang Instance na %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Lumipat sa text editor"
+
 msgid "tooltip.button.unban_ip"
 msgstr "I-unban ang %(ip)s"
 
@@ -5442,6 +5556,9 @@ msgstr "I-collapse ang mga multi-line na entry (tracebacks, payloads)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "I-collapse ang mga multi-line na value (mga certificate, key)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Maaari ka nang pumili ng mga global na uri para sa iyong custom na configuration."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Mga configuration na inilalapat pagkatapos ma-load ang mga OWASP Core Rule Set plugin."
@@ -5672,7 +5789,7 @@ msgid "tooltip.real_ip_from"
 msgstr "Listahan ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan."
 
 msgid "tooltip.real_ip_from_urls"
-msgstr "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at auth basic gamit ang http://user:pass@url scheme."
+msgstr "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at pangunahing pagpapatotoo gamit ang iskema na http://user:pass@url."
 
 msgid "tooltip.real_ip_header"
 msgstr "HTTP header na naglalaman ng tunay na IP o espesyal na value na proxy_protocol para sa PROXY protocol."
@@ -5966,7 +6083,7 @@ msgid "tooltip.table.services.name"
 msgstr "Pangalan ng Serbisyo"
 
 msgid "tooltip.table.services.security_mode"
-msgstr "Mode ng seguridad ng Serbisyo (I-block o Tuklasin)"
+msgstr "Mode ng seguridad ng serbisyo (I-block o I-detect)"
 
 msgid "tooltip.table.services.select_all"
 msgstr "Piliin ang lahat ng Serbisyo"
@@ -6226,8 +6343,17 @@ msgstr "Ang serbisyo na %(count)s ay nakatago: ang isang upstream na %(protocol)
 msgid "upstreams.truncated"
 msgstr "Ang unang 500 upstream lamang ang ipinapakita. Limitahan ang listahan gamit ang API para sa kumpletong resulta."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Ilagay ang iyong kasalukuyang password upang magdagdag ng passkey."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Kapag gumagamit ng custom SSL, dapat itakda ang certificate at key (sa pamamagitan ng file path o pag-upload ng data)."
+
 msgid "validation.default_field_name"
 msgstr "Ang field na ito"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "Kinakailangan ang field na ito kapag gumagamit ng DNS challenge."
 
 msgid "validation.invalid_date"
 msgstr "Hindi valid na petsa"
@@ -6244,11 +6370,35 @@ msgstr "Kailangan ng IP address."
 msgid "validation.ip_service_duplicate"
 msgstr "Ang IP address na ito ay na-ban na para sa napiling serbisyo (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Maglagay ng wastong email address upang mag-subscribe sa newsletter."
+
+msgid "validation.newsletter_email_required"
+msgstr "Kinakailangan ang field na ito kung gusto mong mag-subscribe sa newsletter."
+
 msgid "validation.pattern"
 msgstr "Mangyaring magpasok ng valid na value para sa %(field)s."
 
 msgid "validation.required"
 msgstr "Kailangan ang %(field)s."
+
+msgid "validation.server_name_check_failed"
+msgstr "Nabigo ang pagsusuri sa pangalan ng server"
+
+msgid "validation.server_name_choose_different"
+msgstr "Pumili ng ibang pangalan ng server."
+
+msgid "validation.server_name_invalid"
+msgstr "Hindi wasto ang pangalan ng server."
+
+msgid "validation.server_name_not_unique"
+msgstr "Hindi natatangi ang pangalan ng server."
+
+msgid "validation.server_name_proceed"
+msgstr "Maaari kang magpatuloy sa setup."
+
+msgid "validation.server_name_unique"
+msgstr "Natatangi ang pangalan ng server."
 
 msgid "validation.service_required_for_ban"
 msgstr "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo."
@@ -6272,7 +6422,7 @@ msgid "web_cache.disabled"
 msgstr "Hindi naka-enable"
 
 msgid "web_cache.disk_usage"
-msgstr "Paglalaan ng disk"
+msgstr "Paggamit ng disk"
 
 msgid "web_cache.empty"
 msgstr "Walang laman"
@@ -6320,7 +6470,7 @@ msgid "web_cache.purge_all_confirm_title"
 msgstr "Tanggalin ang buong cache?"
 
 msgid "web_cache.purge_help"
-msgstr "Tanggalin ang mga aksyon na tumatakbo kaagad sa mga naa-access na instance. Ang mga hindi naa-access na instance ay hindi isinasagawa at walang aksyon na ina-queue."
+msgstr "Ang mga purge action ay agad na tumatakbo sa mga naa-access na instance. Nilalaktawan ang mga hindi naa-access na instance at walang aksyong inilalagay sa queue."
 
 msgid "web_cache.purge_key"
 msgstr "Epektibong susi ng cache"
@@ -6403,11 +6553,23 @@ msgstr "Patutunguhang URL"
 msgid "workflows.action"
 msgstr "Pagkatapos"
 
+msgid "workflows.action_help.block"
+msgstr "Tanggihan ang request"
+
+msgid "workflows.action_help.challenge"
+msgstr "Patunayang tao ito"
+
+msgid "workflows.action_help.redirect"
+msgstr "Ipadala ito sa ibang lugar"
+
 msgid "workflows.add_rule"
 msgstr "Magdagdag ng panuntunan"
 
 msgid "workflows.all"
 msgstr "Lahat"
+
+msgid "workflows.aria.changePosition"
+msgstr "Patakaran %(n)s sa %(total)s, baguhin ang posisyon"
 
 msgid "workflows.aria.collapse"
 msgstr "I-collapse"
@@ -6445,8 +6607,14 @@ msgstr "Ilipat ang patakaran"
 msgid "workflows.aria.moveUp"
 msgstr "Ilipat pataas — mas maagang tatakbo"
 
+msgid "workflows.aria.newValue"
+msgstr "Bagong value"
+
 msgid "workflows.aria.openRule"
 msgstr "Buksan ang patakaran %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Posisyon %(n)s sa %(total)s — i-click upang ilipat"
 
 msgid "workflows.aria.provider"
 msgstr "Tagapagbigay ng antibot"
@@ -6536,7 +6704,7 @@ msgid "workflows.canvas.exit_title"
 msgstr "Walang tumugmang patakaran"
 
 msgid "workflows.canvas.fit"
-msgstr "Fit to view"
+msgstr "Iakma sa view"
 
 msgid "workflows.canvas.gateTip"
 msgstr "Isang gate ng pagtutugma, hindi isang aksyon: kapag mas mababa sa threshold, hindi tumutugma ang patakaran at sinusuri ang susunod na patakaran."
@@ -6563,10 +6731,10 @@ msgid "workflows.canvas.title"
 msgstr "Pagkasunod-sunod ng patakaran"
 
 msgid "workflows.canvas.zoomIn"
-msgstr "Zoom in"
+msgstr "Mag-zoom in"
 
 msgid "workflows.canvas.zoomOut"
-msgstr "Zoom out"
+msgstr "Mag-zoom out"
 
 msgid "workflows.capacity"
 msgstr "%(count)s sa %(maxRules)s patakaran · gumagamit ang pinakamalaking patakaran ng %(worst)s sa %(maxPredicates)s predicate · %(regexes)s regex sa workflow na ito"
@@ -6579,6 +6747,15 @@ msgstr "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi
 
 msgid "workflows.clone_name"
 msgstr "Pangalan ng kopya"
+
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "Paraan ng HTTP"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Burahin ang patakarang ito? Aakyat nang isang puwesto ang lahat ng nasa ibaba nito."
@@ -6681,6 +6858,12 @@ msgstr "Kopyahin sa ibaba"
 
 msgid "workflows.menu.enable"
 msgstr "I-enable ang patakaran"
+
+msgid "workflows.menu.moveTo"
+msgstr "Ilipat sa posisyon %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Nananatili sa posisyon %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Patakbuhin muna"
@@ -6997,6 +7180,15 @@ msgstr "Ang unang 500 daloy ng trabaho lamang ang ipinapakita. Limitahan ang lis
 msgid "workflows.untitled"
 msgstr "Patakarang walang pamagat"
 
+msgid "workflows.uri_match.exact"
+msgstr "ay eksaktong"
+
+msgid "workflows.uri_match.prefix"
+msgstr "nagsisimula sa"
+
+msgid "workflows.uri_match.regex"
+msgstr "tumutugma sa regex"
+
 msgid "workflows.value.add"
 msgstr "Halaga"
 
@@ -7034,5 +7226,5 @@ msgid "workflows.view.canvas"
 msgstr "Canvas"
 
 msgid "workflows.view.list"
-msgstr "List"
+msgstr "Listahan"
 

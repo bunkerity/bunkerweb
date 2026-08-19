@@ -73,8 +73,20 @@ msgstr "Aviso"
 msgid "alert.ping_error"
 msgstr "Ocurrió un error al hacer ping a las instancias."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Sube un archivo de plugin válido (.zip, .tar.gz o .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "El archivo del plugin supera el límite de 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Se produjo un error al subir el archivo del plugin. Inténtalo de nuevo."
+
 msgid "alert.readonly_mode"
 msgstr "Esta acción está deshabilitada en modo de solo lectura."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Sube un archivo de exportación de servicios válido (.env o .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Limpiar búsqueda"
@@ -96,6 +108,21 @@ msgstr "Descargar este archivo de registro"
 
 msgid "aria.label.follow"
 msgstr "Seguir"
+
+msgid "aria.label.github_followers"
+msgstr "Seguidores en GitHub: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "Forks en GitHub: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Incidencias abiertas en GitHub: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "Estrellas en GitHub: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "Observadores en GitHub: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Ocultar valor"
@@ -133,6 +160,9 @@ msgstr "Mostrar valor"
 msgid "aria.label.search_logs"
 msgstr "Buscar registros"
 
+msgid "aria.label.secret_value"
+msgstr "Valor secreto"
+
 msgid "aria.label.select_file"
 msgstr "Seleccionar archivo"
 
@@ -147,6 +177,9 @@ msgstr "Alternar ajuste de línea"
 
 msgid "aria.label.user_avatar"
 msgstr "Avatar de usuario"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (oculto)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Ver elementos seleccionados"
@@ -1786,6 +1819,15 @@ msgstr "Estado de Bloqueo en el Tiempo"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Solicitudes Bloqueadas"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 No modificado"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 No encontrado"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Límite de solicitudes"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Distribución del Estado de Solicitudes"
 
@@ -2224,11 +2266,35 @@ msgstr "Error del Servidor"
 msgid "error.ban_update_failed"
 msgstr "Error al actualizar la duración del bloqueo. Por favor, inténtalo de nuevo."
 
+msgid "error.passkey_registration_failed"
+msgstr "No se pudo registrar esta clave de acceso. Inténtalo de nuevo."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "No se pudo iniciar sesión con una clave de acceso. Inténtalo de nuevo."
+
+msgid "error.report_copy_access_failed"
+msgstr "Error al acceder a los datos para copiarlos. Prueba a actualizar la página."
+
+msgid "error.report_copy_failed"
+msgstr "No se pudo copiar al portapapeles. Prueba el botón de copia de datos sin procesar que aparece debajo."
+
+msgid "error.report_details_load_failed"
+msgstr "No se pudieron cargar los detalles del informe."
+
+msgid "error.report_identifier_missing"
+msgstr "Falta el identificador del informe"
+
 msgid "error.reports_load_error"
 msgstr "Error al cargar los informes. Por favor, intenta refrescar la página."
 
+msgid "error.security_key_verification_failed"
+msgstr "No se pudo verificar la llave de seguridad. Inténtalo de nuevo."
+
 msgid "error.unban_failed"
 msgstr "Error al desbloquear la dirección IP. Por favor, inténtalo de nuevo."
+
+msgid "error.webauthn_request_failed"
+msgstr "Falló la solicitud de la llave de seguridad. Inténtalo de nuevo."
 
 msgid "flash.easter_egg"
 msgstr "Si lees esto, significa que eres curioso"
@@ -4117,6 +4183,9 @@ msgstr "Ruta"
 msgid "service.resources.none"
 msgstr "Ninguno adjunto"
 
+msgid "service.resources.nothing_available"
+msgstr "No hay nada disponible para asociar."
+
 msgid "service.resources.primary"
 msgstr "Certificado principal"
 
@@ -4164,6 +4233,18 @@ msgstr "Configura aquí múltiples instancias de configuración para este plugin
 
 msgid "settings.multiple.title"
 msgstr "Configuraciones Múltiples"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Error al configurar la UI web. Inténtalo de nuevo."
+
+msgid "setup.file.content_entered"
+msgstr "Caracteres introducidos: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Cargado desde %(name)s · caracteres: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Error al leer el archivo"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Ya existe un usuario administrador. Por favor, continúa al siguiente paso."
@@ -4372,6 +4453,9 @@ msgstr "No"
 msgid "status.no_data"
 msgstr "Sin datos"
 
+msgid "status.no_file_selected"
+msgstr "Ningún archivo seleccionado"
+
 msgid "status.no_history"
 msgstr "No hay historial disponible."
 
@@ -4392,6 +4476,9 @@ msgstr "No hay Pasos Disponibles"
 
 msgid "status.no_steps_description"
 msgstr "Esta plantilla no tiene pasos para configurar."
+
+msgid "status.no_url_available"
+msgstr "No hay ninguna URL disponible"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4440,6 +4527,9 @@ msgstr "No se permiten cambios fuera de la plantilla actual. Por favor, realiza 
 
 msgid "status.unique_server_name"
 msgstr "Nombre de Servidor Único"
+
+msgid "status.unknown"
+msgstr "Desconocido"
 
 msgid "status.up"
 msgstr "Activo"
@@ -4722,6 +4812,12 @@ msgstr "Subtítulo del paso"
 
 msgid "template.editor.label_step_title"
 msgstr "Título del paso"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Falta"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Subida"
 
 msgid "template.editor.missing_configs_body"
 msgstr "La plantilla importada hace referencia a configuraciones personalizadas que aún no se han subido. Por favor, importa estas configuraciones para completar la configuración de la plantilla:"
@@ -5176,6 +5272,12 @@ msgstr "Claro"
 msgid "threatmap.attacks_today"
 msgstr "Ataques hoy"
 
+msgid "threatmap.blocked_request"
+msgstr "solicitud bloqueada"
+
+msgid "threatmap.blocked_requests"
+msgstr "solicitudes bloqueadas"
+
 msgid "threatmap.countries"
 msgstr "Países de origen"
 
@@ -5258,10 +5360,10 @@ msgid "timings.calls"
 msgstr "Llamadas"
 
 msgid "timings.disabled_help"
-msgstr "Establece METRICS_COLLECT_TIMINGS en yes para medir cuánto tarda cada complemento. La duración total de la solicitud se recopila de todos modos."
+msgstr "Establece METRICS_COLLECT_TIMINGS en yes para medir cuánto tarda cada plugin. La duración total de la solicitud se recopila de todos modos."
 
 msgid "timings.disabled_title"
-msgstr "Los tiempos de los complementos están desactivados"
+msgstr "Los tiempos de los plugins están desactivados"
 
 msgid "timings.max"
 msgstr "Máximo"
@@ -5282,13 +5384,13 @@ msgid "timings.phase"
 msgstr "Fase"
 
 msgid "timings.phases"
-msgstr "Fases de los complementos"
+msgstr "Fases de los plugins"
 
 msgid "timings.plugin"
 msgstr "Plugin"
 
 msgid "timings.reporting_instances"
-msgstr "Instancias informantes"
+msgstr "Instancias que envían datos"
 
 msgid "timings.requests_measured"
 msgstr "Solicitudes medidas"
@@ -5297,16 +5399,16 @@ msgid "timings.share"
 msgstr "Proporción"
 
 msgid "timings.share_help"
-msgstr "La proporción es el tiempo total del complemento respecto al tiempo total de la solicitud. Las fases que no se ejecutan una vez por solicitud — inicio del worker, temporizador en segundo plano y API interna — no tienen proporción y muestran un guion."
+msgstr "La proporción es el tiempo total del plugin respecto al tiempo total de la solicitud. Las fases que no se ejecutan una vez por solicitud — inicio del worker, temporizador en segundo plano y API interna — no tienen proporción y muestran un guion."
 
 msgid "timings.subtitle"
-msgstr "Tiempo que tarda cada complemento en cada fase de la solicitud, leído en directo de todas las instancias y combinado."
+msgstr "Tiempo que tarda cada plugin en cada fase de la solicitud, leído en directo de todas las instancias y combinado."
 
 msgid "timings.total"
 msgstr "Total"
 
 msgid "timings.unreachable_help"
-msgstr "Los tiempos se leen de las propias instancias, por lo que ninguna respondió — o ninguna ha servido aún una solicitud."
+msgstr "Los tiempos se leen de las propias instancias, por lo que ninguna respondió — o ninguna ha procesado aún una solicitud."
 
 msgid "timings.unreachable_title"
 msgstr "Ninguna instancia informó de tiempos"
@@ -5326,6 +5428,9 @@ msgstr "¡Duración del bloqueo actualizada con éxito!"
 msgid "toast.body.ping_succeed"
 msgstr "Instancias: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Los elementos seleccionados ya están en el estado solicitado."
+
 msgid "toast.copied"
 msgstr "¡Copiado!"
 
@@ -5344,6 +5449,9 @@ msgstr "Se produjo un error al obtener los ajustes globales."
 msgid "toast.global_settings_failed_title"
 msgstr "Error al obtener los ajustes globales"
 
+msgid "toast.header.conversion_failed"
+msgstr "Error de conversión"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping fallido"
 
@@ -5355,6 +5463,9 @@ msgstr "¡Dirección IP desbloqueada con éxito!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Si se debe solicitar automáticamente un certificado Let's Encrypt."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Volver a la carga de archivos"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Bloquear esta dirección IP"
@@ -5416,6 +5527,9 @@ msgstr "Mostrar solo seleccionados"
 msgid "tooltip.button.stop_instance"
 msgstr "Detener Instancia %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Cambiar al editor de texto"
+
 msgid "tooltip.button.unban_ip"
 msgstr "Desbloquear %(ip)s"
 
@@ -5442,6 +5556,9 @@ msgstr "Contraer entradas de varias líneas (tracebacks, payloads)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Contraer valores de varias líneas (certificados, claves)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Ahora puedes seleccionar tipos globales para tu configuración personalizada."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Configuraciones aplicadas después de cargar los plugins de OWASP Core Rule Set."
@@ -6146,13 +6263,13 @@ msgid "upstreams.keepalive"
 msgstr "Mantener conexión"
 
 msgid "upstreams.keepalive_help"
-msgstr "Conexiones inactivas mantenidas por trabajador. HTTP y gRPC solo; dejar en blanco para desactivar."
+msgstr "Conexiones inactivas mantenidas por cada worker. Solo HTTP y gRPC; dejar en blanco para desactivar."
 
 msgid "upstreams.match_path"
 msgstr "Ruta de proxy inverso"
 
 msgid "upstreams.match_path_help"
-msgstr "La ubicación a la que los servicios seleccionados dirigen este grupo. Se ignora para un grupo de flujo, que toma todo el servicio."
+msgstr "La ruta por la que los servicios seleccionados envían tráfico a este pool. Se ignora para un pool de stream, que abarca todo el servicio."
 
 msgid "upstreams.method"
 msgstr "Balanceo de carga"
@@ -6226,8 +6343,17 @@ msgstr "Servicios ocultos: %(count)s. Un upstream %(protocol)s solo puede asocia
 msgid "upstreams.truncated"
 msgstr "Solo se muestran los primeros 500 upstream. Reduce la lista a través de API para obtener el resultado completo."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Introduce tu contraseña actual para añadir una clave de acceso."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Al usar SSL personalizado, debes configurar tanto el certificado como la clave (mediante una ruta de archivo o la carga de datos)."
+
 msgid "validation.default_field_name"
 msgstr "Este campo"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "Este campo es obligatorio al usar el desafío DNS."
 
 msgid "validation.invalid_date"
 msgstr "Fecha inválida"
@@ -6244,11 +6370,35 @@ msgstr "Se requiere la dirección IP."
 msgid "validation.ip_service_duplicate"
 msgstr "Esta dirección IP ya está bloqueada para el servicio seleccionado (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Introduce una dirección de correo electrónico válida para suscribirte al boletín."
+
+msgid "validation.newsletter_email_required"
+msgstr "Este campo es obligatorio si quieres suscribirte al boletín."
+
 msgid "validation.pattern"
 msgstr "Por favor, introduce un valor válido para %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s es obligatorio."
+
+msgid "validation.server_name_check_failed"
+msgstr "Falló la comprobación del nombre del servidor"
+
+msgid "validation.server_name_choose_different"
+msgstr "Elige otro nombre de servidor."
+
+msgid "validation.server_name_invalid"
+msgstr "Nombre de servidor no válido."
+
+msgid "validation.server_name_not_unique"
+msgstr "El nombre del servidor no es único."
+
+msgid "validation.server_name_proceed"
+msgstr "Puedes continuar con la configuración."
+
+msgid "validation.server_name_unique"
+msgstr "El nombre del servidor es único."
 
 msgid "validation.service_required_for_ban"
 msgstr "Se debe seleccionar un servicio para un bloqueo específico del servicio."
@@ -6338,7 +6488,7 @@ msgid "web_cache.purge_url_placeholder"
 msgstr "https://www.example.com/asset.js"
 
 msgid "web_cache.reporting_instances"
-msgstr "Instancias informantes"
+msgstr "Instancias que envían datos"
 
 msgid "web_cache.service"
 msgstr "Servicio"
@@ -6403,11 +6553,23 @@ msgstr "URL de destino"
 msgid "workflows.action"
 msgstr "Luego"
 
+msgid "workflows.action_help.block"
+msgstr "Denegar la solicitud"
+
+msgid "workflows.action_help.challenge"
+msgstr "Demostrar que es humano"
+
+msgid "workflows.action_help.redirect"
+msgstr "Enviarla a otro destino"
+
 msgid "workflows.add_rule"
 msgstr "Añadir regla"
 
 msgid "workflows.all"
 msgstr "Todos"
+
+msgid "workflows.aria.changePosition"
+msgstr "Regla %(n)s de %(total)s, cambiar de posición"
 
 msgid "workflows.aria.collapse"
 msgstr "Contraer"
@@ -6445,8 +6607,14 @@ msgstr "Mover regla"
 msgid "workflows.aria.moveUp"
 msgstr "Subir: se ejecuta antes"
 
+msgid "workflows.aria.newValue"
+msgstr "Nuevo valor"
+
 msgid "workflows.aria.openRule"
 msgstr "Abrir la regla %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Posición %(n)s de %(total)s — haz clic para mover"
 
 msgid "workflows.aria.provider"
 msgstr "Proveedor Antibot"
@@ -6580,6 +6748,15 @@ msgstr "Las reglas se copian; los adjuntos de servicio no."
 msgid "workflows.clone_name"
 msgstr "Nombre de la copia"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "Método HTTP"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "¿Eliminar esta regla? Todas las que estén debajo subirán una posición."
 
@@ -6681,6 +6858,12 @@ msgstr "Duplicar debajo"
 
 msgid "workflows.menu.enable"
 msgstr "Activar regla"
+
+msgid "workflows.menu.moveTo"
+msgstr "Mover a la posición %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Permanece en la posición %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Ejecutar primero"
@@ -6851,7 +7034,7 @@ msgid "workflows.test.geo"
 msgstr "Consulta GeoIP"
 
 msgid "workflows.test.geo_help"
-msgstr "No disponible hace que las reglas de país y ASN sean DESCONOCIDAS, por lo que nunca pueden coincidir."
+msgstr "Cuando la búsqueda GeoIP no está disponible, las reglas de país y ASN pasan a ser DESCONOCIDAS y, por tanto, nunca pueden coincidir."
 
 msgid "workflows.test.geo_local"
 msgstr "Dirección local / privada"
@@ -6899,7 +7082,7 @@ msgid "workflows.test.out_draft"
 msgstr "Este servicio es un borrador; todavía no se ha compilado ningún flujo de trabajo para él."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s coincidió y %(action)s la solicitud."
+msgstr "%(workflow)s · %(rule)s coincidió — acción: %(action)s."
 
 msgid "workflows.test.out_no_match"
 msgstr "Ninguna regla coincidió. La solicitud continúa con el resto de la pila de seguridad."
@@ -6996,6 +7179,15 @@ msgstr "Solo se muestran los primeros 500 flujos de trabajo. Refine la lista med
 
 msgid "workflows.untitled"
 msgstr "Regla sin título"
+
+msgid "workflows.uri_match.exact"
+msgstr "es exactamente"
+
+msgid "workflows.uri_match.prefix"
+msgstr "empieza por"
+
+msgid "workflows.uri_match.regex"
+msgstr "coincide con la expresión regular"
 
 msgid "workflows.value.add"
 msgstr "Valor"

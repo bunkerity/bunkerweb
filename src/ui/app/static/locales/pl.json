@@ -29,7 +29,11 @@
     "no_changes_detected": "Nie wykryto żadnych zmian.",
     "notice": "Uwaga",
     "ping_error": "Wystąpił błąd podczas pingowania instancji.",
-    "readonly_mode": "Ta czynność jest wyłączona w trybie tylko do odczytu."
+    "readonly_mode": "Ta czynność jest wyłączona w trybie tylko do odczytu.",
+    "plugin_file_invalid": "Prześlij prawidłowe archiwum wtyczki (.zip, .tar.gz lub .tar.xz).",
+    "plugin_file_too_large": "Archiwum wtyczki przekracza limit 50 MB.",
+    "plugin_upload_failed": "Podczas przesyłania archiwum wtyczki wystąpił błąd. Spróbuj ponownie.",
+    "services_import_invalid_file": "Prześlij prawidłowy plik eksportu usług (.env lub .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Wybierz plik eksportu usług albo upuść go tutaj",
       "toggle_wrap": "Przełącz zawijanie wierszy",
       "user_avatar": "Avatar użytkownika",
-      "view_selected_items": "Wyświetl wybrane elementy"
+      "view_selected_items": "Wyświetl wybrane elementy",
+      "github_followers": "Obserwujący na GitHubie: {{count}}",
+      "github_forks": "Rozwidlenia na GitHubie: {{count}}",
+      "github_open_issues": "Otwarte zgłoszenia na GitHubie: {{count}}",
+      "github_stars": "Gwiazdki na GitHubie: {{count}}",
+      "github_watchers": "Subskrybujący na GitHubie: {{count}}",
+      "secret_value": "Wartość poufna",
+      "value_hidden": "{{name}} (ukryto)"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Zablokowane żądania",
-        "title": "Rozkład statusów żądań"
+        "title": "Rozkład statusów żądań",
+        "http_304": "304 Nie zmodyfikowano",
+        "http_404": "404 Nie znaleziono",
+        "http_429": "429 Ograniczono częstotliwość"
       },
       "top_blocked_ips": {
         "most_blocked": "Najczęściej blokowane IP",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Nie udało się zaktualizować czasu trwania blokady. Spróbuj ponownie.",
     "reports_load_error": "Błąd podczas ładowania raportów. Spróbuj odświeżyć stronę.",
-    "unban_failed": "Nie udało się odblokować IP. Spróbuj ponownie."
+    "unban_failed": "Nie udało się odblokować IP. Spróbuj ponownie.",
+    "passkey_registration_failed": "Nie udało się zarejestrować tego klucza dostępu. Spróbuj ponownie.",
+    "passkey_sign_in_failed": "Nie udało się zalogować za pomocą klucza dostępu. Spróbuj ponownie.",
+    "report_copy_access_failed": "Błąd dostępu do danych do skopiowania. Spróbuj odświeżyć stronę.",
+    "report_copy_failed": "Nie udało się skopiować do schowka. Użyj poniższego przycisku kopiowania surowych danych.",
+    "report_details_load_failed": "Nie udało się wczytać szczegółów raportu.",
+    "report_identifier_missing": "Brak identyfikatora raportu",
+    "security_key_verification_failed": "Nie udało się zweryfikować klucza bezpieczeństwa. Spróbuj ponownie.",
+    "webauthn_request_failed": "Żądanie klucza bezpieczeństwa nie powiodło się. Spróbuj ponownie."
   },
   "flash": {
     "easter_egg": "Jeśli to czytasz, oznacza to, że jesteś ciekawy",
@@ -1488,7 +1510,15 @@
       "title": "Przegląd"
     },
     "subtitle": "Wykonaj poniższe czynności, aby zakończyć pracę kreatora konfiguracji.",
-    "title": "Kreator konfiguracji"
+    "title": "Kreator konfiguracji",
+    "error": {
+      "web_ui_setup_failed": "Błąd podczas konfigurowania interfejsu WWW. Spróbuj ponownie."
+    },
+    "file": {
+      "content_entered": "Wprowadzone znaki: {{count}}",
+      "loaded_from": "Wczytano z {{name}} · znaki: {{count}}",
+      "read_error": "Błąd odczytu pliku"
+    }
   },
   "status": {
     "admin_user_exists": "Użytkownik administracyjny już istnieje. Przejdź do następnego kroku.",
@@ -1554,7 +1584,10 @@
     "expiring": "Wygasające",
     "no_settings": "Ta wtyczka nie ma ustawień dla tego zakresu.",
     "yes": "Tak",
-    "optional": "Opcjonalne"
+    "optional": "Opcjonalne",
+    "no_file_selected": "Nie wybrano pliku",
+    "no_url_available": "Brak dostępnego URL",
+    "unknown": "Nieznane"
   },
   "step": {
     "next": "Dalej",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Każda nazwa konfiguracji musi być unikalna.",
       "validation_id_required": "Wymagany jest identyfikator szablonu.",
       "validation_setting_key": "Każde ustawienie musi mieć klucz.",
-      "validation_settings_unique": "Każdy klucz ustawienia musi być unikalny."
+      "validation_settings_unique": "Każdy klucz ustawienia musi być unikalny.",
+      "missing_config_status_missing": "Brak",
+      "missing_config_status_uploaded": "Przesłano"
     },
     "none": "Brak szablonu"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "Nie można połączyć się z usługą metryk",
     "error_help": "Mapa zachowuje ostatnio wczytane wartości i spróbuje ponownie przy następnym odświeżeniu.",
     "open_live": "Widok na żywo",
-    "updated": "Zaktualizowano"
+    "updated": "Zaktualizowano",
+    "blocked_request": "zablokowane żądanie",
+    "blocked_requests": "zablokowane żądania"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Jeśli usługa zostanie usunięta lub ponownie uruchomiona, konfiguracja interfejsu użytkownika zostanie utracona.",
     "autoconf_disclaimer_detail": "Wynika to z faktu, że metoda działania usługi to 'autoconf', która ma na celu zapobieganie konfliktom konfiguracyjnym.",
     "ban_updated": "Okres blokady został pomyślnie zaktualizowany!",
     "body": {
-      "ping_succeed": "Przykłady: {{instances}}"
+      "ping_succeed": "Przykłady: {{instances}}",
+      "selected_items_already_in_state": "Wybrane elementy są już w żądanym stanie."
     },
     "copied": "Skopiowano!",
     "disclaimer_title": "Zastrzeżenie",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Nie udało się pobrać ustawień globalnych",
     "header": {
       "ping_failed": "Ping nie powiodł się",
-      "ping_succeed": "Ping zakończony powodzeniem"
+      "ping_succeed": "Ping zakończony powodzeniem",
+      "conversion_failed": "Konwersja nie powiodła się"
     },
     "ip_unbanned": "IP został pomyślnie odblokowany!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Zatrzymaj instancję {{hostname}}",
       "unban_ip": "Odblokuj {{ip}}",
       "update_ban_duration": "Zaktualizuj czas trwania blokady",
-      "value_from_global": "Wartość z ustawień globalnych"
+      "value_from_global": "Wartość z ustawień globalnych",
+      "back_to_file_upload": "Wróć do przesyłania pliku",
+      "switch_to_text_editor": "Przełącz na edytor tekstu"
     },
     "cannot_delete_original_ban": "Nie można usunąć oryginalnego wpisu blokady.",
     "cannot_remove_disabled": "Nie można usunąć, ponieważ jedno lub więcej ustawień jest wyłączonych.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "Liczba ponowień żądań API ZeroSSL (0 wyłącza ponowienia).",
     "zerossl_api_retry_delay": "Opóźnienie w sekundach między ponowieniami API ZeroSSL.",
     "zerossl_api_connect_timeout": "Limit czasu połączenia w sekundach dla wywołań API ZeroSSL.",
-    "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL."
+    "zerossl_api_max_time": "Maksymalny łączny czas w sekundach dla każdego żądania API ZeroSSL.",
+    "config_global_types_available": "Możesz teraz wybierać typy globalne dla konfiguracji niestandardowej."
   },
   "totp": {
     "cant_access": "Nie możesz uzyskać dostępu do swojego kodu uwierzytelniania?",
@@ -2180,7 +2222,7 @@
     "confirm_delete": "Usuń „{{name}}”? Nie można tego cofnąć.",
     "confirm_generic": "Potwierdź akcję z certyfikatem?",
     "confirm_renew": "Odnow „{{name}}”?",
-    "confirm_renew_due": "Sprawdź każdy certyfikat i odnów te, które są do tego celu?",
+    "confirm_renew_due": "Sprawdzić wszystkie certyfikaty i odnowić te, dla których nadszedł termin odnowienia?",
     "create": "Utwórz certyfikat",
     "download_chain": "Pobierz łańcuch",
     "download_leaf": "Pobierz liść",
@@ -2189,13 +2231,13 @@
     "empty": "Brak certyfikatów",
     "empty_help": "Utwórz certyfikat samodzielnie podpisany, zaplanuj wydanie ACME lub załaduj istniejący certyfikat PEM i klucz.",
     "expired_help": "Wymaga uwagi",
-    "expires": "Wygaśnię",
+    "expires": "Wygasa",
     "expiring_help": "30 dni lub mniej",
     "file_extensions": "Użyj jednej z poniższych rozszerzeń plików: {{extensions}}.",
     "file_select": "Wybierz plik PEM.",
     "file_selected": "{{name}} ({{size}} KiB)",
     "file_size_limit": "Plik nie może przekroczyć 1 MiB.",
-    "fingerprint": "Ślad SHA-256",
+    "fingerprint": "Odcisk SHA-256",
     "issuer": "Emitent",
     "issuers": "Najpopularniejsi emitenci",
     "key_drop": "Wklej dopasowany klucz prywatny tutaj",
@@ -2205,7 +2247,7 @@
     "managed": "Certyfikaty zarządzane",
     "new_selfsigned": "Nowy certyfikat samodzielnie podpisany",
     "no_issuers": "Brak danych emitenta",
-    "none_due": "Brak certyfikatów",
+    "none_due": "Brak certyfikatów wymagających odnowienia",
     "orphan_account": "Konto",
     "orphan_badge": "Brak konta ACME",
     "orphan_help": "Ten rekord odnowienia odnosi się do konta ACME, które nie istnieje. Odnowienie pozostaje zablokowane, dopóki stan dostawcy nie zostanie naprawiony.",
@@ -2231,14 +2273,14 @@
     "source": {
       "customcert": "Niestandardowe",
       "letsencrypt": "Let's Encrypt",
-      "selfsigned": "Samosigner"
+      "selfsigned": "Samopodpisany"
     },
     "source_label": "Źródło",
     "status": {
-      "expired": "Ważny do",
-      "expiring_soon": "Ważny wkrótce",
+      "expired": "Wygasły",
+      "expiring_soon": "Wkrótce wygasa",
       "not_yet_valid": "Nie jeszcze ważny",
-      "revoked": "Odrzucony",
+      "revoked": "Unieważniony",
       "valid": "Ważny"
     },
     "subtitle": "Wydawanie, przesyłanie, przypisywanie, odnawianie i sprawdzanie certyfikatów w centralnym rejestrze.",
@@ -2246,7 +2288,7 @@
     "truncated": "Wyświetlane są tylko pierwsze 500 certyfikatów. Użyj API, aby uzyskać pełny wynik.",
     "unassigned": "Niezarejestrowany",
     "upcoming": "Nadchodzące odnowienia",
-    "upcoming_help": "Ważny lub w okresie 30-dniowego odnawiania",
+    "upcoming_help": "Wygasły lub w 30-dniowym okresie odnowienia",
     "upload": "Prześlij certyfikat",
     "upload_custom": "Prześlij niestandardowy certyfikat",
     "upload_invalid": "Wybierz ważny certyfikat publiczny i odpowiadający mu klucz prywatny.",
@@ -2259,7 +2301,7 @@
     "add_to_setting": "Dodaj grupę zasobów…",
     "add_values": "Dodaj wartości",
     "alias": "Alias",
-    "alias_help": "Litery, cyfry, podkreślenia i my. Istniejące aliasy nie można zmienić nazwy.",
+    "alias_help": "Litery, cyfry, podkreślenia i łączniki. Nie można zmieniać nazw istniejących aliasów.",
     "bulk_import": "Import masowy",
     "clone": "Skopiuj grupę zasobów",
     "clone_copy": "Utwórz edytowalną kopię @{{name}}.",
@@ -2285,7 +2327,7 @@
     "max_entries": "Grupa zasobów nie może zawierać więcej niż {{max}} wpisów.",
     "meta_line": "{{kinds}} rodzajów · {{values}} wartości · {{usages}} użyć",
     "new": "Nowa grupa",
-    "new_alias": "Nowa alias",
+    "new_alias": "Nowy alias",
     "no_entries": "Brak wpisów",
     "no_entries_help": "Dodaj wpisy pojedynczo lub użyj narzędzia do importu masowego poniżej.",
     "no_references": "Brak referencji",
@@ -2294,7 +2336,7 @@
     "save": "Zapisz grupę",
     "search": "Wyszukaj aliasy, opisy, typy lub wartości...",
     "showing_count": "Wyświetlane {{visible}} z {{total}} grup",
-    "subtitle": "Ponowne użycie aliasów z typami dla adresów IP, krajów, ASN, odwrotnych nazw DNS, agentów użytkownika i URL.",
+    "subtitle": "Wielokrotnego użytku aliasy typowane dla adresów IP, krajów, ASN, nazw reverse DNS, wartości User-Agent i URI.",
     "template_configuration": "Szablon {{template}}",
     "usage": "Użycie",
     "value": "Wartość",
@@ -2310,7 +2352,18 @@
     "pattern": "Wprowadź prawidłową wartość dla {{field}}.",
     "required": "{{field}} jest wymagane.",
     "service_required_for_ban": "Aby nałożyć blokadę na konkretną usługę, należy ją najpierw wybrać.",
-    "zerossl_email_or_api_key_required": "ZeroSSL wymaga adresu e-mail lub klucza API ZeroSSL."
+    "zerossl_email_or_api_key_required": "ZeroSSL wymaga adresu e-mail lub klucza API ZeroSSL.",
+    "current_password_required_for_passkey": "Wprowadź bieżące hasło, aby dodać klucz dostępu.",
+    "custom_ssl_pair_required": "Przy niestandardowym SSL należy ustawić zarówno certyfikat, jak i klucz (przez ścieżkę pliku lub przesłanie danych).",
+    "dns_challenge_field_required": "To pole jest wymagane podczas korzystania z wyzwania DNS.",
+    "newsletter_email_invalid": "Wprowadź prawidłowy adres e-mail, aby zapisać się do newslettera.",
+    "newsletter_email_required": "To pole jest wymagane, jeśli chcesz zapisać się do newslettera.",
+    "server_name_check_failed": "Sprawdzanie nazwy serwera nie powiodło się",
+    "server_name_choose_different": "Wybierz inną nazwę serwera.",
+    "server_name_invalid": "Nieprawidłowa nazwa serwera.",
+    "server_name_not_unique": "Nazwa serwera nie jest unikalna.",
+    "server_name_proceed": "Możesz kontynuować konfigurację.",
+    "server_name_unique": "Nazwa serwera jest unikalna."
   },
   "web_cache": {
     "available": "Dostępne",
@@ -2326,7 +2379,7 @@
     "enabled_services": "Aktywne usługi",
     "hit_rate": "Wskaźnik trafień",
     "instance": "Instancja",
-    "metrics": "Agregowana dystrybucja trafień / błędów",
+    "metrics": "Zbiorczy rozkład trafień i chybień",
     "metrics_scope": "Liczniki są agregowane dla każdej instancji w przypadku wszystkich usług z włączoną pamięcią podręczną.",
     "not_reporting": "Nie raportowane",
     "path": "Ścieżka",
@@ -2334,9 +2387,9 @@
     "purge_all": "Wyczyść wszystko",
     "purge_all_confirm_body": "Usuwa wszystkie zapisane odpowiedzi dla każdego serwisu na każdej dostępnej instancji. Nie można tego cofnąć.",
     "purge_all_confirm_title": "Czy chcesz wyczyścić całą pamięć podręczną?",
-    "purge_help": "Czy chcesz wykonać operacje natychmiast na dostępnych instancjach? Nieostępne instancje są pomijane i żaden działanie nie jest planowany.",
+    "purge_help": "Operacje czyszczenia są wykonywane natychmiast na dostępnych instancjach. Niedostępne instancje są pomijane i żadna operacja nie jest kolejkowana.",
     "purge_key": "Aktywny klucz pamięci podręcznej",
-    "purge_key_help": "Pozostaw klucz pamięci podręcznej pusty tylko dla domyślnego $scheme$host$request_uri. Jeśli serwus nadpisuje PROXY_CACHE_KEY, wklej jego aktywną wartość tutaj; nieobsługiwane zmienne tylko dla żądania są odrzucane zamiast usuwać inną wpis.",
+    "purge_key_help": "Pozostaw klucz pamięci podręcznej pusty tylko dla domyślnego $scheme$host$request_uri. Jeśli usługa nadpisuje PROXY_CACHE_KEY, wklej tutaj efektywną wartość; nieobsługiwane zmienne dostępne tylko podczas obsługi żądania są odrzucane, aby nie wyczyścić innego wpisu.",
     "purge_key_placeholder": "Aktywny PROXY_CACHE_KEY (opcjonalnie)",
     "purge_url": "Usuń URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Akcja końcowa",
       "uriMatch": "Tryb dopasowania URI",
       "uriValue": "Wartość URI",
-      "window": "Okno w sekundach"
+      "window": "Okno w sekundach",
+      "changePosition": "Reguła {{n}} z {{total}}, zmień pozycję",
+      "newValue": "Nowa wartość",
+      "positionMove": "Pozycja {{n}} z {{total}} — kliknij, aby przenieść"
     },
     "attach": "Dołącz do usług",
     "attach_help": "Reguły są egzekwowane tylko w usługach, do których przypisany jest przepływ pracy.",
@@ -2577,7 +2633,9 @@
       "disable": "Wyłącz regułę",
       "duplicate": "Duplikuj poniżej",
       "enable": "Włącz regułę",
-      "top": "Uruchom jako pierwszą"
+      "top": "Uruchom jako pierwszą",
+      "moveTo": "Przenieś na pozycję {{n}}",
+      "staysAt": "Pozostaje na pozycji {{n}}"
     },
     "move": {
       "first": "Uruchom jako pierwszą",
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "Płótno",
       "list": "Lista"
+    },
+    "action_help": {
+      "block": "Odrzuć żądanie",
+      "challenge": "Potwierdź, że użytkownik jest człowiekiem",
+      "redirect": "Wyślij w inne miejsce"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "Metoda HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "jest dokładnie równe",
+      "prefix": "zaczyna się od",
+      "regex": "pasuje do wyrażenia regularnego"
     }
   },
   "request_path": {
@@ -2723,7 +2796,7 @@
     "terminal": {
       "inline": "Serwer źródłowy",
       "none": "Żadnych danych nie wysłano",
-      "pool": "Pool upstreamowy",
+      "pool": "Pula serwerów upstream",
       "root": "Pliki lokalne"
     },
     "title": "Ścieżka żądania",
@@ -2758,7 +2831,8 @@
         "unwired": "Ta strona nie przesyła USE_TEMPLATE, więc nie można tutaj zmienić szablonu."
       },
       "title": "Przypisane zasoby",
-      "unavailable": "Niedostępne"
+      "unavailable": "Niedostępne",
+      "nothing_available": "Brak zasobów do przypisania."
     }
   },
   "onboarding": {
@@ -2800,7 +2874,7 @@
     "mean_request": "Średnie żądanie",
     "max_request": "Najwolniejsze żądanie",
     "phases": "Fazy wtyczek",
-    "share_help": "Udział to łączny czas wtyczki względem całkowitego czasu żądania. Fazy, które nie działają raz na żądanie — uruchomienie workera, licznik w tle i wewnętrzne API — nie mają udziału i pokazują kreskę.",
+    "share_help": "Udział to łączny czas wtyczki względem całkowitego czasu żądania. Fazy, które nie działają raz na żądanie — uruchomienie workera, timer działający w tle i wewnętrzne API — nie mają udziału i pokazują kreskę.",
     "plugin": "Wtyczka",
     "phase": "Faza",
     "calls": "Wywołania",

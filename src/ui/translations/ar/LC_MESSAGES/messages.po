@@ -73,8 +73,20 @@ msgstr "تنويه"
 msgid "alert.ping_error"
 msgstr "حدث خطأ أثناء اختبار اتصال المثيلات."
 
+msgid "alert.plugin_file_invalid"
+msgstr "يرجى تحميل أرشيف إضافة صالح (.zip أو .tar.gz أو .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "يتجاوز أرشيف الإضافة حد 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "حدث خطأ أثناء تحميل أرشيف الإضافة. حاول مرة أخرى."
+
 msgid "alert.readonly_mode"
 msgstr "هذا الإجراء معطل في وضع القراءة فقط."
+
+msgid "alert.services_import_invalid_file"
+msgstr "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "مسح البحث"
@@ -96,6 +108,21 @@ msgstr "تنزيل ملف السجل هذا"
 
 msgid "aria.label.follow"
 msgstr "متابعة"
+
+msgid "aria.label.github_followers"
+msgstr "متابعو GitHub: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "تفرعات GitHub: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "مشكلات GitHub المفتوحة: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "نجوم GitHub: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "مراقبو GitHub: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "إخفاء القيمة"
@@ -133,6 +160,9 @@ msgstr "إظهار القيمة"
 msgid "aria.label.search_logs"
 msgstr "البحث في السجلات"
 
+msgid "aria.label.secret_value"
+msgstr "قيمة سرية"
+
 msgid "aria.label.select_file"
 msgstr "اختر ملفًا"
 
@@ -147,6 +177,9 @@ msgstr "تبديل التفاف الأسطر"
 
 msgid "aria.label.user_avatar"
 msgstr "صورة المستخدم"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (مخفي)"
 
 msgid "aria.label.view_selected_items"
 msgstr "عرض العناصر المحددة"
@@ -893,7 +926,7 @@ msgid "compose.always_on"
 msgstr "دائمًا"
 
 msgid "compose.count"
-msgstr "%(on)s على · %(total)s متاح · %(locked)s مقفل"
+msgstr "%(on)s مُشغَّل · %(total)s متاح · %(locked)s مقفل"
 
 msgid "compose.entries"
 msgstr "%(count)s تم التكوين"
@@ -1786,6 +1819,15 @@ msgstr "حالة الحظر مع مرور الوقت"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "الطلبات المحظورة"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 لم يتم التعديل"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 غير موجود"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 تجاوز حد المعدل"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "توزيع حالة الطلبات"
 
@@ -1814,7 +1856,7 @@ msgid "dashboard.map.no_data"
 msgstr "لا توجد بيانات"
 
 msgid "dashboard.mini.across_countries"
-msgstr "في جميع أنحاء %(count)s"
+msgstr "عبر %(count)s من البلدان"
 
 msgid "dashboard.mini.enforced"
 msgstr "مطبق حاليًا"
@@ -2224,11 +2266,35 @@ msgstr "خطأ في الخادم"
 msgid "error.ban_update_failed"
 msgstr "فشل تحديث مدة الحظر. يرجى المحاولة مرة أخرى."
 
+msgid "error.passkey_registration_failed"
+msgstr "تعذر تسجيل مفتاح المرور هذا. حاول مرة أخرى."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "تعذر تسجيل دخولك باستخدام مفتاح مرور. حاول مرة أخرى."
+
+msgid "error.report_copy_access_failed"
+msgstr "حدث خطأ أثناء الوصول إلى البيانات لنسخها. حاول تحديث الصفحة."
+
+msgid "error.report_copy_failed"
+msgstr "تعذر النسخ إلى الحافظة. حاول استخدام زر نسخ البيانات الخام أدناه."
+
+msgid "error.report_details_load_failed"
+msgstr "تعذر تحميل تفاصيل التقرير."
+
+msgid "error.report_identifier_missing"
+msgstr "معرّف التقرير مفقود"
+
 msgid "error.reports_load_error"
 msgstr "حدث خطأ أثناء تحميل التقارير. يرجى محاولة تحديث الصفحة."
 
+msgid "error.security_key_verification_failed"
+msgstr "تعذر التحقق من مفتاح الأمان. حاول مرة أخرى."
+
 msgid "error.unban_failed"
 msgstr "فشل رفع الحظر عن عنوان IP. يرجى المحاولة مرة أخرى."
+
+msgid "error.webauthn_request_failed"
+msgstr "فشل طلب مفتاح الأمان. حاول مرة أخرى."
 
 msgid "flash.easter_egg"
 msgstr "إذا قرأت هذا، فهذا يعني أنك فضولي"
@@ -2883,7 +2949,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف."
 
 msgid "modal.body.import_services_warning"
-msgstr "سيؤدي استيراد الخدمات إلى إنشاء خدمات واجهة مستخدم جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة."
+msgstr "سيؤدي استيراد الخدمات إلى إنشاء خدمات UI جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة. كما يُقبل أرشيف .zip مُصدَّر مع التكوينات المخصصة."
 
 msgid "modal.body.instance_creation_alert"
 msgstr "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل."
@@ -2920,7 +2986,7 @@ msgid "modal.body.unban_filtered_confirmation"
 msgstr "هل تريد بالتأكيد إلغاء كل عمليات الحظر المطابقة وعددها %(count)s؟"
 
 msgid "modal.body.update_duration_alert"
-msgstr "حدد مدة جديدة للحظر (الحظر) المحدد:"
+msgstr "حدد مدة جديدة لعمليات الحظر المحددة:"
 
 msgid "modal.body.update_filtered_duration_alert"
 msgstr "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها %(count)s:"
@@ -3211,7 +3277,7 @@ msgid "onboarding.item.read_home"
 msgstr "اقرأ لوحة المعلومات: ما هو سليم الآن"
 
 msgid "onboarding.item.read_logs"
-msgstr "تابع السجلات المباشرة عبر جميع النسخ"
+msgstr "تابع السجلات المباشرة عبر جميع المثيلات"
 
 msgid "onboarding.item.read_reports"
 msgstr "اكتشف سبب حظر أحد الطلبات"
@@ -4137,6 +4203,9 @@ msgstr "المسار"
 msgid "service.resources.none"
 msgstr "لا يوجد مرفق"
 
+msgid "service.resources.nothing_available"
+msgstr "لا يوجد شيء متاح للربط."
+
 msgid "service.resources.primary"
 msgstr "الشهادة الرئيسية"
 
@@ -4184,6 +4253,18 @@ msgstr "قم بتكوين مثيلات متعددة من الإعدادات له
 
 msgid "settings.multiple.title"
 msgstr "إعدادات متعددة"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "حدث خطأ أثناء إعداد واجهة الويب. حاول مرة أخرى."
+
+msgid "setup.file.content_entered"
+msgstr "الأحرف المُدخلة: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "تم التحميل من %(name)s · عدد الأحرف: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "خطأ في قراءة الملف"
 
 msgid "setup.status.admin_user_exists"
 msgstr "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية."
@@ -4330,7 +4411,7 @@ msgid "status.expired"
 msgstr "منتهية الصلاحية"
 
 msgid "status.expiring"
-msgstr "منتهي الصلاحية"
+msgstr "قيد انتهاء الصلاحية"
 
 msgid "status.failed"
 msgstr "فشل"
@@ -4392,6 +4473,9 @@ msgstr "لا"
 msgid "status.no_data"
 msgstr "لا توجد بيانات"
 
+msgid "status.no_file_selected"
+msgstr "لم يتم تحديد ملف"
+
 msgid "status.no_history"
 msgstr "لا يوجد سجل متاح."
 
@@ -4412,6 +4496,9 @@ msgstr "لا توجد خطوات متاحة"
 
 msgid "status.no_steps_description"
 msgstr "لا يحتوي هذا القالب على أي خطوات للتكوين."
+
+msgid "status.no_url_available"
+msgstr "لا يتوفر URL"
 
 msgid "status.not_applicable"
 msgstr "غير متاح"
@@ -4460,6 +4547,9 @@ msgstr "لا يُسمح بإجراء تغييرات خارج القالب الح
 
 msgid "status.unique_server_name"
 msgstr "اسم خادم فريد"
+
+msgid "status.unknown"
+msgstr "مجهول"
 
 msgid "status.up"
 msgstr "قيد التشغيل"
@@ -4742,6 +4832,12 @@ msgstr "عنوان فرعي للخطوة"
 
 msgid "template.editor.label_step_title"
 msgstr "عنوان الخطوة"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "مفقود"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "تم التحميل"
 
 msgid "template.editor.missing_configs_body"
 msgstr "يشير القالب المستورد إلى تكوينات مخصصة لم يتم تحميلها بعد. يرجى استيراد هذه التكوينات لإكمال إعداد القالب:"
@@ -5196,6 +5292,12 @@ msgstr "فاتح"
 msgid "threatmap.attacks_today"
 msgstr "هجمات اليوم"
 
+msgid "threatmap.blocked_request"
+msgstr "طلب محظور"
+
+msgid "threatmap.blocked_requests"
+msgstr "طلبات محظورة"
+
 msgid "threatmap.countries"
 msgstr "بلدان المصدر"
 
@@ -5346,6 +5448,9 @@ msgstr "تم تحديث مدة الحظر بنجاح!"
 msgid "toast.body.ping_succeed"
 msgstr "المثيلات: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "العناصر المحددة في الحالة المطلوبة بالفعل."
+
 msgid "toast.copied"
 msgstr "تم النسخ!"
 
@@ -5364,6 +5469,9 @@ msgstr "حدث خطأ أثناء جلب الإعدادات العامة."
 msgid "toast.global_settings_failed_title"
 msgstr "فشل جلب الإعدادات العامة"
 
+msgid "toast.header.conversion_failed"
+msgstr "فشل التحويل"
+
 msgid "toast.header.ping_failed"
 msgstr "فشل اختبار الاتصال"
 
@@ -5375,6 +5483,9 @@ msgstr "تم رفع الحظر عن عنوان IP بنجاح!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "هل يجب طلب شهادة Let's Encrypt تلقائيًا."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "العودة إلى تحميل الملف"
 
 msgid "tooltip.button.ban_ip"
 msgstr "حظر عنوان الـIP هذا"
@@ -5436,6 +5547,9 @@ msgstr "إظهار المحددة فقط"
 msgid "tooltip.button.stop_instance"
 msgstr "إيقاف المثيل %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "التبديل إلى محرر النصوص"
+
 msgid "tooltip.button.unban_ip"
 msgstr "رفع الحظر عن %(ip)s"
 
@@ -5462,6 +5576,9 @@ msgstr "طي الإدخالات متعددة الأسطر (تتبعات الأخ
 
 msgid "tooltip.collapse_raw_values"
 msgstr "طي القيم متعددة الأسطر (الشهادات، المفاتيح)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "يمكنك الآن تحديد الأنواع العامة لتكوينك المخصص."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "التكوينات المطبقة بعد تحميل إضافات OWASP Core Rule Set."
@@ -6246,8 +6363,17 @@ msgstr "%(count)s من الخدمات مخفية: لا يمكن ربط مجمو�
 msgid "upstreams.truncated"
 msgstr "تُعرض أول 500 مجموعة خوادم خلفية فقط. ضيّق القائمة عبر API للحصول على النتيجة الكاملة."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "أدخل كلمة مرورك الحالية لإضافة مفتاح مرور."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "عند استخدام SSL مخصص، يجب تعيين كل من الشهادة والمفتاح (عبر مسار ملف أو تحميل بيانات)."
+
 msgid "validation.default_field_name"
 msgstr "هذا الحقل"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "هذا الحقل مطلوب عند استخدام تحدي DNS."
 
 msgid "validation.invalid_date"
 msgstr "تاريخ غير صالح"
@@ -6264,11 +6390,35 @@ msgstr "عنوان IP مطلوب."
 msgid "validation.ip_service_duplicate"
 msgstr "عنوان IP هذا محظور بالفعل للخدمة المحددة (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "أدخل عنوان بريد إلكتروني صالحًا للاشتراك في النشرة الإخبارية."
+
+msgid "validation.newsletter_email_required"
+msgstr "هذا الحقل مطلوب إذا كنت تريد الاشتراك في النشرة الإخبارية."
+
 msgid "validation.pattern"
 msgstr "يرجى إدخال قيمة صالحة لـ %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s مطلوب."
+
+msgid "validation.server_name_check_failed"
+msgstr "فشل التحقق من اسم الخادم"
+
+msgid "validation.server_name_choose_different"
+msgstr "اختر اسم خادم مختلفًا."
+
+msgid "validation.server_name_invalid"
+msgstr "اسم الخادم غير صالح."
+
+msgid "validation.server_name_not_unique"
+msgstr "اسم الخادم غير فريد."
+
+msgid "validation.server_name_proceed"
+msgstr "يمكنك متابعة الإعداد."
+
+msgid "validation.server_name_unique"
+msgstr "اسم الخادم فريد."
 
 msgid "validation.service_required_for_ban"
 msgstr "يجب تحديد خدمة لحظر خاص بالخدمة."
@@ -6304,7 +6454,7 @@ msgid "web_cache.enabled_instances"
 msgstr "تم تمكين التخزين المؤقت"
 
 msgid "web_cache.enabled_services"
-msgstr "الخدمات الممكنة"
+msgstr "الخدمات المُمكَّنة"
 
 msgid "web_cache.error"
 msgstr "خطأ"
@@ -6316,7 +6466,7 @@ msgid "web_cache.instance"
 msgstr "مثيل"
 
 msgid "web_cache.metrics"
-msgstr "توزيع التوزيع الصحيح / الخاطئ"
+msgstr "التوزيع الإجمالي للإصابات / الإخفاقات"
 
 msgid "web_cache.metrics_scope"
 msgstr "يتم تجميع العدادات لكل مثيل عبر جميع الخدمات التي تم تمكين التخزين المؤقت لها."
@@ -6423,11 +6573,23 @@ msgstr "عنوان URL للوجهة"
 msgid "workflows.action"
 msgstr "ثم"
 
+msgid "workflows.action_help.block"
+msgstr "رفض الطلب"
+
+msgid "workflows.action_help.challenge"
+msgstr "إثبات أنه إنسان"
+
+msgid "workflows.action_help.redirect"
+msgstr "إرساله إلى مكان آخر"
+
 msgid "workflows.add_rule"
 msgstr "أضف قاعدة"
 
 msgid "workflows.all"
 msgstr "الكل"
+
+msgid "workflows.aria.changePosition"
+msgstr "القاعدة %(n)s من %(total)s، تغيير الموضع"
 
 msgid "workflows.aria.collapse"
 msgstr "طي"
@@ -6465,8 +6627,14 @@ msgstr "نقل القاعدة"
 msgid "workflows.aria.moveUp"
 msgstr "نقل لأعلى — يعمل مبكرًا"
 
+msgid "workflows.aria.newValue"
+msgstr "قيمة جديدة"
+
 msgid "workflows.aria.openRule"
 msgstr "افتح القاعدة %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "الموضع %(n)s من %(total)s — انقر للنقل"
 
 msgid "workflows.aria.provider"
 msgstr "موفر مكافحة الروبوتات"
@@ -6600,6 +6768,15 @@ msgstr "يتم نسخ القواعد، ولكن ليس إرفاق الخدمات
 msgid "workflows.clone_name"
 msgstr "اسم النسخة"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "طريقة HTTP"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "هل تريد حذف هذه القاعدة؟ ستتحرك كل القواعد أسفلها موضعًا واحدًا إلى أعلى."
 
@@ -6701,6 +6878,12 @@ msgstr "تكرار أسفلها"
 
 msgid "workflows.menu.enable"
 msgstr "تمكين القاعدة"
+
+msgid "workflows.menu.moveTo"
+msgstr "النقل إلى الموضع %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "يبقى في الموضع %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "تشغيل أولًا"
@@ -6823,10 +7006,10 @@ msgid "workflows.say.via.keyboard"
 msgstr "بلوحة المفاتيح"
 
 msgid "workflows.say.viewCanvas"
-msgstr "عرض اللوحة. تعمل القواعد من اليسار إلى اليمين؛ والفائز الأول يفوز."
+msgstr "عرض اللوحة. تُنفذ القواعد من اليسار إلى اليمين؛ ويُعتمد أول تطابق."
 
 msgid "workflows.say.viewList"
-msgstr "عرض القائمة. تعمل القواعد من الأعلى إلى الأسفل؛ والفائز الأول يفوز."
+msgstr "عرض القائمة. تُنفذ القواعد من الأعلى إلى الأسفل؛ ويُعتمد أول تطابق."
 
 msgid "workflows.search"
 msgstr "ابحث عن الاسم أو الوصف..."
@@ -7016,6 +7199,15 @@ msgstr "يتم عرض أول 500 سير عمل فقط. لتقليل القائم
 
 msgid "workflows.untitled"
 msgstr "قاعدة بلا عنوان"
+
+msgid "workflows.uri_match.exact"
+msgstr "يساوي تمامًا"
+
+msgid "workflows.uri_match.prefix"
+msgstr "يبدأ بـ"
+
+msgid "workflows.uri_match.regex"
+msgstr "يطابق التعبير النمطي"
 
 msgid "workflows.value.add"
 msgstr "قيمة"

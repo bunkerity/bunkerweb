@@ -73,8 +73,20 @@ msgstr "Uwaga"
 msgid "alert.ping_error"
 msgstr "Wystąpił błąd podczas pingowania instancji."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Prześlij prawidłowe archiwum wtyczki (.zip, .tar.gz lub .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "Archiwum wtyczki przekracza limit 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Podczas przesyłania archiwum wtyczki wystąpił błąd. Spróbuj ponownie."
+
 msgid "alert.readonly_mode"
 msgstr "Ta czynność jest wyłączona w trybie tylko do odczytu."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Prześlij prawidłowy plik eksportu usług (.env lub .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Wyczyść wyszukiwanie"
@@ -96,6 +108,21 @@ msgstr "Pobierz ten plik logu"
 
 msgid "aria.label.follow"
 msgstr "Śledź"
+
+msgid "aria.label.github_followers"
+msgstr "Obserwujący na GitHubie: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "Rozwidlenia na GitHubie: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Otwarte zgłoszenia na GitHubie: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "Gwiazdki na GitHubie: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "Subskrybujący na GitHubie: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Ukryj wartość"
@@ -133,6 +160,9 @@ msgstr "Wyświetl wartość"
 msgid "aria.label.search_logs"
 msgstr "Szukaj w logach"
 
+msgid "aria.label.secret_value"
+msgstr "Wartość poufna"
+
 msgid "aria.label.select_file"
 msgstr "Wybierz plik"
 
@@ -147,6 +177,9 @@ msgstr "Przełącz zawijanie wierszy"
 
 msgid "aria.label.user_avatar"
 msgstr "Avatar użytkownika"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (ukryto)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Wyświetl wybrane elementy"
@@ -683,7 +716,7 @@ msgid "certificates.confirm_renew"
 msgstr "Odnow „%(name)s”?"
 
 msgid "certificates.confirm_renew_due"
-msgstr "Sprawdź każdy certyfikat i odnów te, które są do tego celu?"
+msgstr "Sprawdzić wszystkie certyfikaty i odnowić te, dla których nadszedł termin odnowienia?"
 
 msgid "certificates.create"
 msgstr "Utwórz certyfikat"
@@ -710,7 +743,7 @@ msgid "certificates.expired_help"
 msgstr "Wymaga uwagi"
 
 msgid "certificates.expires"
-msgstr "Wygaśnię"
+msgstr "Wygasa"
 
 msgid "certificates.expiring_help"
 msgstr "30 dni lub mniej"
@@ -728,7 +761,7 @@ msgid "certificates.file_size_limit"
 msgstr "Plik nie może przekroczyć 1 MiB."
 
 msgid "certificates.fingerprint"
-msgstr "Ślad SHA-256"
+msgstr "Odcisk SHA-256"
 
 msgid "certificates.issuer"
 msgstr "Emitent"
@@ -758,7 +791,7 @@ msgid "certificates.no_issuers"
 msgstr "Brak danych emitenta"
 
 msgid "certificates.none_due"
-msgstr "Brak certyfikatów"
+msgstr "Brak certyfikatów wymagających odnowienia"
 
 msgid "certificates.orphan_account"
 msgstr "Konto"
@@ -833,22 +866,22 @@ msgid "certificates.source.letsencrypt"
 msgstr "Let's Encrypt"
 
 msgid "certificates.source.selfsigned"
-msgstr "Samosigner"
+msgstr "Samopodpisany"
 
 msgid "certificates.source_label"
 msgstr "Źródło"
 
 msgid "certificates.status.expired"
-msgstr "Ważny do"
+msgstr "Wygasły"
 
 msgid "certificates.status.expiring_soon"
-msgstr "Ważny wkrótce"
+msgstr "Wkrótce wygasa"
 
 msgid "certificates.status.not_yet_valid"
 msgstr "Nie jeszcze ważny"
 
 msgid "certificates.status.revoked"
-msgstr "Odrzucony"
+msgstr "Unieważniony"
 
 msgid "certificates.status.valid"
 msgstr "Ważny"
@@ -869,7 +902,7 @@ msgid "certificates.upcoming"
 msgstr "Nadchodzące odnowienia"
 
 msgid "certificates.upcoming_help"
-msgstr "Ważny lub w okresie 30-dniowego odnawiania"
+msgstr "Wygasły lub w 30-dniowym okresie odnowienia"
 
 msgid "certificates.upload"
 msgstr "Prześlij certyfikat"
@@ -1786,6 +1819,15 @@ msgstr "Stan blokowania według czasu"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Zablokowane żądania"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Nie zmodyfikowano"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Nie znaleziono"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Ograniczono częstotliwość"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Rozkład statusów żądań"
 
@@ -2224,11 +2266,35 @@ msgstr "Błąd serwera"
 msgid "error.ban_update_failed"
 msgstr "Nie udało się zaktualizować czasu trwania blokady. Spróbuj ponownie."
 
+msgid "error.passkey_registration_failed"
+msgstr "Nie udało się zarejestrować tego klucza dostępu. Spróbuj ponownie."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Nie udało się zalogować za pomocą klucza dostępu. Spróbuj ponownie."
+
+msgid "error.report_copy_access_failed"
+msgstr "Błąd dostępu do danych do skopiowania. Spróbuj odświeżyć stronę."
+
+msgid "error.report_copy_failed"
+msgstr "Nie udało się skopiować do schowka. Użyj poniższego przycisku kopiowania surowych danych."
+
+msgid "error.report_details_load_failed"
+msgstr "Nie udało się wczytać szczegółów raportu."
+
+msgid "error.report_identifier_missing"
+msgstr "Brak identyfikatora raportu"
+
 msgid "error.reports_load_error"
 msgstr "Błąd podczas ładowania raportów. Spróbuj odświeżyć stronę."
 
+msgid "error.security_key_verification_failed"
+msgstr "Nie udało się zweryfikować klucza bezpieczeństwa. Spróbuj ponownie."
+
 msgid "error.unban_failed"
 msgstr "Nie udało się odblokować IP. Spróbuj ponownie."
+
+msgid "error.webauthn_request_failed"
+msgstr "Żądanie klucza bezpieczeństwa nie powiodło się. Spróbuj ponownie."
 
 msgid "flash.easter_egg"
 msgstr "Jeśli to czytasz, oznacza to, że jesteś ciekawy"
@@ -3745,7 +3811,7 @@ msgid "request_path.terminal.none"
 msgstr "Żadnych danych nie wysłano"
 
 msgid "request_path.terminal.pool"
-msgstr "Pool upstreamowy"
+msgstr "Pula serwerów upstream"
 
 msgid "request_path.terminal.root"
 msgstr "Pliki lokalne"
@@ -3769,7 +3835,7 @@ msgid "resource_groups.alias"
 msgstr "Alias"
 
 msgid "resource_groups.alias_help"
-msgstr "Litery, cyfry, podkreślenia i my. Istniejące aliasy nie można zmienić nazwy."
+msgstr "Litery, cyfry, podkreślenia i łączniki. Nie można zmieniać nazw istniejących aliasów."
 
 msgid "resource_groups.bulk_import"
 msgstr "Import masowy"
@@ -3847,7 +3913,7 @@ msgid "resource_groups.new"
 msgstr "Nowa grupa"
 
 msgid "resource_groups.new_alias"
-msgstr "Nowa alias"
+msgstr "Nowy alias"
 
 msgid "resource_groups.no_entries"
 msgstr "Brak wpisów"
@@ -3874,7 +3940,7 @@ msgid "resource_groups.showing_count"
 msgstr "Wyświetlane %(visible)s z %(total)s grup"
 
 msgid "resource_groups.subtitle"
-msgstr "Ponowne użycie aliasów z typami dla adresów IP, krajów, ASN, odwrotnych nazw DNS, agentów użytkownika i URL."
+msgstr "Wielokrotnego użytku aliasy typowane dla adresów IP, krajów, ASN, nazw reverse DNS, wartości User-Agent i URI."
 
 msgid "resource_groups.template_configuration"
 msgstr "Szablon %(template)s"
@@ -4122,6 +4188,9 @@ msgstr "Ścieżka"
 msgid "service.resources.none"
 msgstr "Brak przypisanych"
 
+msgid "service.resources.nothing_available"
+msgstr "Brak zasobów do przypisania."
+
 msgid "service.resources.primary"
 msgstr "Główny certyfikat"
 
@@ -4169,6 +4238,18 @@ msgstr "Skonfiguruj tutaj wiele instancji ustawień dla tej wtyczki."
 
 msgid "settings.multiple.title"
 msgstr "Wiele ustawień"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Błąd podczas konfigurowania interfejsu WWW. Spróbuj ponownie."
+
+msgid "setup.file.content_entered"
+msgstr "Wprowadzone znaki: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Wczytano z %(name)s · znaki: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Błąd odczytu pliku"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Użytkownik administracyjny już istnieje. Przejdź do następnego kroku."
@@ -4377,6 +4458,9 @@ msgstr "Nie"
 msgid "status.no_data"
 msgstr "Brak danych"
 
+msgid "status.no_file_selected"
+msgstr "Nie wybrano pliku"
+
 msgid "status.no_history"
 msgstr "Brak dostępnej historii."
 
@@ -4397,6 +4481,9 @@ msgstr "Brak dostępnych kroków"
 
 msgid "status.no_steps_description"
 msgstr "Ten szablon nie wymaga żadnych kroków konfiguracyjnych."
+
+msgid "status.no_url_available"
+msgstr "Brak dostępnego URL"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4445,6 +4532,9 @@ msgstr "Zmiany poza bieżącym szablonem są niedozwolone. Proszę wprowadzać z
 
 msgid "status.unique_server_name"
 msgstr "Unikalna nazwa serwera"
+
+msgid "status.unknown"
+msgstr "Nieznane"
 
 msgid "status.up"
 msgstr "Aktywny"
@@ -4727,6 +4817,12 @@ msgstr "Podtytuł kroku"
 
 msgid "template.editor.label_step_title"
 msgstr "Tytuł kroku"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Brak"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Przesłano"
 
 msgid "template.editor.missing_configs_body"
 msgstr "Zaimportowany szablon odwołuje się do niestandardowych konfiguracji, które nie zostały jeszcze przesłane. Zaimportuj te konfiguracje, aby dokończyć konfigurację szablonu:"
@@ -5181,6 +5277,12 @@ msgstr "Jasny"
 msgid "threatmap.attacks_today"
 msgstr "Ataki dzisiaj"
 
+msgid "threatmap.blocked_request"
+msgstr "zablokowane żądanie"
+
+msgid "threatmap.blocked_requests"
+msgstr "zablokowane żądania"
+
 msgid "threatmap.countries"
 msgstr "Kraje pochodzenia"
 
@@ -5302,7 +5404,7 @@ msgid "timings.share"
 msgstr "Udział"
 
 msgid "timings.share_help"
-msgstr "Udział to łączny czas wtyczki względem całkowitego czasu żądania. Fazy, które nie działają raz na żądanie — uruchomienie workera, licznik w tle i wewnętrzne API — nie mają udziału i pokazują kreskę."
+msgstr "Udział to łączny czas wtyczki względem całkowitego czasu żądania. Fazy, które nie działają raz na żądanie — uruchomienie workera, timer działający w tle i wewnętrzne API — nie mają udziału i pokazują kreskę."
 
 msgid "timings.subtitle"
 msgstr "Czas działania każdej wtyczki w poszczególnych fazach żądania, odczytywany na żywo ze wszystkich instancji i scalany."
@@ -5331,6 +5433,9 @@ msgstr "Okres blokady został pomyślnie zaktualizowany!"
 msgid "toast.body.ping_succeed"
 msgstr "Przykłady: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Wybrane elementy są już w żądanym stanie."
+
 msgid "toast.copied"
 msgstr "Skopiowano!"
 
@@ -5349,6 +5454,9 @@ msgstr "Wystąpił błąd podczas pobierania ustawień globalnych."
 msgid "toast.global_settings_failed_title"
 msgstr "Nie udało się pobrać ustawień globalnych"
 
+msgid "toast.header.conversion_failed"
+msgstr "Konwersja nie powiodła się"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping nie powiodł się"
 
@@ -5360,6 +5468,9 @@ msgstr "IP został pomyślnie odblokowany!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Czy automatycznie żądać certyfikatu Let's Encrypt."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Wróć do przesyłania pliku"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Zablokuj ten adres IP"
@@ -5421,6 +5532,9 @@ msgstr "Pokaż tylko zaznaczone"
 msgid "tooltip.button.stop_instance"
 msgstr "Zatrzymaj instancję %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Przełącz na edytor tekstu"
+
 msgid "tooltip.button.unban_ip"
 msgstr "Odblokuj %(ip)s"
 
@@ -5447,6 +5561,9 @@ msgstr "Zwiń wpisy wielowierszowe (tracebacki, payloady)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Zwiń wartości wielowierszowe (certyfikaty, klucze)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Możesz teraz wybierać typy globalne dla konfiguracji niestandardowej."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Konfiguracje stosowane po załadowaniu wtyczek OWASP Core Rule Set."
@@ -6231,8 +6348,17 @@ msgstr "Ukryte usługi: %(count)s. Upstream %(protocol)s może być przypisany t
 msgid "upstreams.truncated"
 msgstr "Wyświetlanych jest tylko pierwszych 500 upstreamów. Zawęź listę za pomocą API, aby uzyskać pełny wynik."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Wprowadź bieżące hasło, aby dodać klucz dostępu."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Przy niestandardowym SSL należy ustawić zarówno certyfikat, jak i klucz (przez ścieżkę pliku lub przesłanie danych)."
+
 msgid "validation.default_field_name"
 msgstr "To pole"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "To pole jest wymagane podczas korzystania z wyzwania DNS."
 
 msgid "validation.invalid_date"
 msgstr "Nieprawidłowa data"
@@ -6249,11 +6375,35 @@ msgstr "Adres IP jest wymagany."
 msgid "validation.ip_service_duplicate"
 msgstr "Ten adres IP jest już zablokowany dla wybranej usługi (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Wprowadź prawidłowy adres e-mail, aby zapisać się do newslettera."
+
+msgid "validation.newsletter_email_required"
+msgstr "To pole jest wymagane, jeśli chcesz zapisać się do newslettera."
+
 msgid "validation.pattern"
 msgstr "Wprowadź prawidłową wartość dla %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s jest wymagane."
+
+msgid "validation.server_name_check_failed"
+msgstr "Sprawdzanie nazwy serwera nie powiodło się"
+
+msgid "validation.server_name_choose_different"
+msgstr "Wybierz inną nazwę serwera."
+
+msgid "validation.server_name_invalid"
+msgstr "Nieprawidłowa nazwa serwera."
+
+msgid "validation.server_name_not_unique"
+msgstr "Nazwa serwera nie jest unikalna."
+
+msgid "validation.server_name_proceed"
+msgstr "Możesz kontynuować konfigurację."
+
+msgid "validation.server_name_unique"
+msgstr "Nazwa serwera jest unikalna."
 
 msgid "validation.service_required_for_ban"
 msgstr "Aby nałożyć blokadę na konkretną usługę, należy ją najpierw wybrać."
@@ -6301,7 +6451,7 @@ msgid "web_cache.instance"
 msgstr "Instancja"
 
 msgid "web_cache.metrics"
-msgstr "Agregowana dystrybucja trafień / błędów"
+msgstr "Zbiorczy rozkład trafień i chybień"
 
 msgid "web_cache.metrics_scope"
 msgstr "Liczniki są agregowane dla każdej instancji w przypadku wszystkich usług z włączoną pamięcią podręczną."
@@ -6325,13 +6475,13 @@ msgid "web_cache.purge_all_confirm_title"
 msgstr "Czy chcesz wyczyścić całą pamięć podręczną?"
 
 msgid "web_cache.purge_help"
-msgstr "Czy chcesz wykonać operacje natychmiast na dostępnych instancjach? Nieostępne instancje są pomijane i żaden działanie nie jest planowany."
+msgstr "Operacje czyszczenia są wykonywane natychmiast na dostępnych instancjach. Niedostępne instancje są pomijane i żadna operacja nie jest kolejkowana."
 
 msgid "web_cache.purge_key"
 msgstr "Aktywny klucz pamięci podręcznej"
 
 msgid "web_cache.purge_key_help"
-msgstr "Pozostaw klucz pamięci podręcznej pusty tylko dla domyślnego $scheme$host$request_uri. Jeśli serwus nadpisuje PROXY_CACHE_KEY, wklej jego aktywną wartość tutaj; nieobsługiwane zmienne tylko dla żądania są odrzucane zamiast usuwać inną wpis."
+msgstr "Pozostaw klucz pamięci podręcznej pusty tylko dla domyślnego $scheme$host$request_uri. Jeśli usługa nadpisuje PROXY_CACHE_KEY, wklej tutaj efektywną wartość; nieobsługiwane zmienne dostępne tylko podczas obsługi żądania są odrzucane, aby nie wyczyścić innego wpisu."
 
 msgid "web_cache.purge_key_placeholder"
 msgstr "Aktywny PROXY_CACHE_KEY (opcjonalnie)"
@@ -6408,11 +6558,23 @@ msgstr "Docelowy URL"
 msgid "workflows.action"
 msgstr "Następnie"
 
+msgid "workflows.action_help.block"
+msgstr "Odrzuć żądanie"
+
+msgid "workflows.action_help.challenge"
+msgstr "Potwierdź, że użytkownik jest człowiekiem"
+
+msgid "workflows.action_help.redirect"
+msgstr "Wyślij w inne miejsce"
+
 msgid "workflows.add_rule"
 msgstr "Dodaj regułę"
 
 msgid "workflows.all"
 msgstr "Wszystkie"
+
+msgid "workflows.aria.changePosition"
+msgstr "Reguła %(n)s z %(total)s, zmień pozycję"
 
 msgid "workflows.aria.collapse"
 msgstr "Zwiń"
@@ -6450,8 +6612,14 @@ msgstr "Przenieś regułę"
 msgid "workflows.aria.moveUp"
 msgstr "Przenieś w górę — uruchomi się wcześniej"
 
+msgid "workflows.aria.newValue"
+msgstr "Nowa wartość"
+
 msgid "workflows.aria.openRule"
 msgstr "Otwórz regułę %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Pozycja %(n)s z %(total)s — kliknij, aby przenieść"
 
 msgid "workflows.aria.provider"
 msgstr "Dostawca Antibot"
@@ -6585,6 +6753,15 @@ msgstr "Reguły są kopiowane, a przyłącza do usług nie."
 msgid "workflows.clone_name"
 msgstr "Nazwa klonu"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "Metoda HTTP"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "Usunąć tę regułę? Wszystkie reguły poniżej przesuną się o jedną pozycję w górę."
 
@@ -6686,6 +6863,12 @@ msgstr "Duplikuj poniżej"
 
 msgid "workflows.menu.enable"
 msgstr "Włącz regułę"
+
+msgid "workflows.menu.moveTo"
+msgstr "Przenieś na pozycję %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Pozostaje na pozycji %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Uruchom jako pierwszą"
@@ -7001,6 +7184,15 @@ msgstr "Wyświetlane są tylko pierwsze 500 przepływów pracy. W celu uzyskania
 
 msgid "workflows.untitled"
 msgstr "Reguła bez nazwy"
+
+msgid "workflows.uri_match.exact"
+msgstr "jest dokładnie równe"
+
+msgid "workflows.uri_match.prefix"
+msgstr "zaczyna się od"
+
+msgid "workflows.uri_match.regex"
+msgstr "pasuje do wyrażenia regularnego"
 
 msgid "workflows.value.add"
 msgstr "Wartość"

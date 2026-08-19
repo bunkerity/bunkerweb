@@ -73,8 +73,20 @@ msgstr "Bildirim"
 msgid "alert.ping_error"
 msgstr "Instances pinglenirken bir hata oluştu."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Geçerli bir eklenti arşivi (.zip, .tar.gz veya .tar.xz) yükleyin."
+
+msgid "alert.plugin_file_too_large"
+msgstr "Eklenti arşivi 50 MB sınırını aşıyor."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Eklenti arşivi yüklenirken bir hata oluştu. Tekrar deneyin."
+
 msgid "alert.readonly_mode"
 msgstr "Bu işlem salt okunur modda devre dışı."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin."
 
 msgid "aria.label.clear_search"
 msgstr "Aramayı temizle"
@@ -96,6 +108,21 @@ msgstr "Bu günlük dosyasını indir"
 
 msgid "aria.label.follow"
 msgstr "Takip et"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub takipçileri: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub çatalları: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub açık sorunları: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub yıldızları: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub izleyenleri: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Değeri gizle"
@@ -133,6 +160,9 @@ msgstr "Değeri göster"
 msgid "aria.label.search_logs"
 msgstr "Günlüklerde ara"
 
+msgid "aria.label.secret_value"
+msgstr "Gizli değer"
+
 msgid "aria.label.select_file"
 msgstr "Dosya seç"
 
@@ -147,6 +177,9 @@ msgstr "Satır kaydırmayı değiştir"
 
 msgid "aria.label.user_avatar"
 msgstr "Kullanıcı avatarı"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (gizli)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Seçilen öğeleri görüntüle"
@@ -662,7 +695,7 @@ msgid "certificates.browse_certificate"
 msgstr "Sertifikayı görüntüle"
 
 msgid "certificates.browse_key"
-msgstr "Gizli anahtıyı görüntüle"
+msgstr "Özel anahtarı görüntüle"
 
 msgid "certificates.common_name"
 msgstr "Ortak ad"
@@ -683,7 +716,7 @@ msgid "certificates.confirm_renew"
 msgstr "\"%(name)s\"i yenile?"
 
 msgid "certificates.confirm_renew_due"
-msgstr "Her sertifikayı ve şu anda vadesi dolmuş olanları kontrol et?"
+msgstr "Tüm sertifikalar kontrol edilsin ve yenileme zamanı gelenler yenilensin mi?"
 
 msgid "certificates.create"
 msgstr "Sertifika oluştur"
@@ -704,7 +737,7 @@ msgid "certificates.empty"
 msgstr "Sertifikalar yok"
 
 msgid "certificates.empty_help"
-msgstr "Kend imzalanmış bir sertifika oluşturun, ACME yayınını planlayın veya mevcut bir PEM sertifikası ve ana bilgisini yükleyin."
+msgstr "Kendinden imzalı bir sertifika oluşturun, ACME sertifika düzenleme işlemini planlayın veya mevcut bir PEM sertifikası ile anahtarını yükleyin."
 
 msgid "certificates.expired_help"
 msgstr "Dikkat gerektirir"
@@ -731,10 +764,10 @@ msgid "certificates.fingerprint"
 msgstr "SHA-256 parmak izi"
 
 msgid "certificates.issuer"
-msgstr "İşveren"
+msgstr "Düzenleyen"
 
 msgid "certificates.issuers"
-msgstr "En çok kullanılan işverenler"
+msgstr "En çok kullanılan düzenleyenler"
 
 msgid "certificates.key_drop"
 msgstr "İlgili özel anahtarı buraya bırakın"
@@ -755,10 +788,10 @@ msgid "certificates.new_selfsigned"
 msgstr "Yeni kend imzalanmış sertifika"
 
 msgid "certificates.no_issuers"
-msgstr "İşveren verisi yok"
+msgstr "Düzenleyen verisi yok"
 
 msgid "certificates.none_due"
-msgstr "Sertifikalar yok"
+msgstr "Yenileme zamanı gelen sertifika yok"
 
 msgid "certificates.orphan_account"
 msgstr "Hesap"
@@ -779,7 +812,7 @@ msgid "certificates.pem_certificate"
 msgstr "PEM sertifikası veya zincir"
 
 msgid "certificates.pem_drop"
-msgstr "Buraya halk PEM sertifikasını veya zinciri bırakın"
+msgstr "Açık PEM sertifikasını veya zincirini buraya bırakın"
 
 msgid "certificates.pem_limit"
 msgstr "Maksimum 1 MiB"
@@ -833,7 +866,7 @@ msgid "certificates.source.letsencrypt"
 msgstr "Let's Encrypt"
 
 msgid "certificates.source.selfsigned"
-msgstr "Kendiliğinden imzalanmış"
+msgstr "Kendinden imzalı"
 
 msgid "certificates.source_label"
 msgstr "Kaynak"
@@ -878,16 +911,16 @@ msgid "certificates.upload_custom"
 msgstr "Özel sertifikayı yükle"
 
 msgid "certificates.upload_invalid"
-msgstr "Geçerli bir kamu sertifikası ve eşleşen özel anahtar seçin."
+msgstr "Geçerli bir açık sertifika ve eşleşen özel anahtar seçin."
 
 msgid "certificates.valid_days"
 msgstr "Gün cinsinden geçerlilik süresi"
 
 msgid "certificates.valid_from"
-msgstr "Geçerli olan"
+msgstr "Şu tarihten itibaren geçerli"
 
 msgid "certificates.valid_to"
-msgstr "Geçerlilik süresi sona erecek"
+msgstr "Şu tarihe kadar geçerli"
 
 msgid "compose.always_on"
 msgstr "Her zaman açık"
@@ -1786,6 +1819,15 @@ msgstr "Zaman İçinde Engelleme Durumu"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Engellenen İstekler"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Değiştirilmedi"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Bulunamadı"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 İstek hızı sınırlandı"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "İstek Durumu Dağılımı"
 
@@ -2224,11 +2266,35 @@ msgstr "Sunucu Hatası"
 msgid "error.ban_update_failed"
 msgstr "Yasaklama süresi güncellenemedi. Lütfen tekrar deneyin."
 
+msgid "error.passkey_registration_failed"
+msgstr "Bu parola anahtarı kaydedilemedi. Tekrar deneyin."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Parola anahtarıyla giriş yapılamadı. Tekrar deneyin."
+
+msgid "error.report_copy_access_failed"
+msgstr "Kopyalanacak verilere erişilirken hata oluştu. Sayfayı yenilemeyi deneyin."
+
+msgid "error.report_copy_failed"
+msgstr "Panoya kopyalanamadı. Aşağıdaki ham veri kopyalama düğmesini kullanmayı deneyin."
+
+msgid "error.report_details_load_failed"
+msgstr "Rapor ayrıntıları yüklenemedi."
+
+msgid "error.report_identifier_missing"
+msgstr "Rapor tanımlayıcısı eksik"
+
 msgid "error.reports_load_error"
 msgstr "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
 
+msgid "error.security_key_verification_failed"
+msgstr "Güvenlik anahtarınız doğrulanamadı. Tekrar deneyin."
+
 msgid "error.unban_failed"
 msgstr "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin."
+
+msgid "error.webauthn_request_failed"
+msgstr "Güvenlik anahtarı isteği başarısız oldu. Tekrar deneyin."
 
 msgid "flash.easter_egg"
 msgstr "Bunu okuyorsan meraklısın demektir"
@@ -3723,7 +3789,7 @@ msgid "reports.tile.unique_offenders"
 msgstr "En üstteki saldırganlar"
 
 msgid "request_path.client"
-msgstr "Müşteri"
+msgstr "İstemci"
 
 msgid "request_path.source"
 msgstr "%(phase)s aşaması için eklenti yürütme sırası, %(setting)s'den — bir görüntüleme sırası, isteğe bağlı bir izleme değil."
@@ -3735,7 +3801,7 @@ msgid "request_path.terminal.none"
 msgstr "Hiçbir şey sunulmadı"
 
 msgid "request_path.terminal.pool"
-msgstr "Ana havuz"
+msgstr "Upstream havuzu"
 
 msgid "request_path.terminal.root"
 msgstr "Yerel dosyalar"
@@ -3780,7 +3846,7 @@ msgid "resource_groups.delete"
 msgstr "Kaynak grubunu sil"
 
 msgid "resource_groups.delete_confirm"
-msgstr "@%(name)s'i mi silsin? Bu geri alınamaz."
+msgstr "@%(name)s silinsin mi? Bu işlem geri alınamaz."
 
 msgid "resource_groups.delete_help"
 msgstr "Bir ayar bu takma ada referans veriyorsa, silme engellenecektir."
@@ -3798,10 +3864,10 @@ msgid "resource_groups.empty"
 msgstr "Hiç kaynak grubu yok"
 
 msgid "resource_groups.empty_help"
-msgstr "Eşit uyumlu ayarlar arasında yazılan değerleri paylaşmak için yeniden kullanılabilir bir takma ad oluştur."
+msgstr "Uyumlu ayarlar arasında türü belirlenmiş değerleri paylaşmak için yeniden kullanılabilir bir takma ad oluşturun."
 
 msgid "resource_groups.entries"
-msgstr "Eklemler"
+msgstr "Girdiler"
 
 msgid "resource_groups.expand_all"
 msgstr "Tümünü aç"
@@ -3843,7 +3909,7 @@ msgid "resource_groups.no_entries"
 msgstr "Girdiler yok"
 
 msgid "resource_groups.no_entries_help"
-msgstr "Girdileri tek tek ekleyin veya aşağıdaki toplu importör'ü kullanın."
+msgstr "Girdileri tek tek ekleyin veya aşağıdaki toplu içe aktarma aracını kullanın."
 
 msgid "resource_groups.no_references"
 msgstr "Referans yok"
@@ -3864,7 +3930,7 @@ msgid "resource_groups.showing_count"
 msgstr "Toplam %(total)s grubun %(visible)s tanesi gösteriliyor"
 
 msgid "resource_groups.subtitle"
-msgstr "IP'ler, ülkeler, ASNL'ler, ters DNS adları, kullanıcı ajitleri ve URL'ler için yeniden kullanılabilir, tipli kısaltmalar."
+msgstr "IP'ler, ülkeler, ASN'ler, ters DNS adları, User-Agent değerleri ve URI'ler için yeniden kullanılabilir, türü belirlenmiş takma adlar."
 
 msgid "resource_groups.template_configuration"
 msgstr "Şablon %(template)s"
@@ -4112,6 +4178,9 @@ msgstr "Yol"
 msgid "service.resources.none"
 msgstr "Hiçbir şey bağlanmadı"
 
+msgid "service.resources.nothing_available"
+msgstr "Bağlanabilecek kaynak yok."
+
 msgid "service.resources.primary"
 msgstr "Ana sertifika"
 
@@ -4159,6 +4228,18 @@ msgstr "Bu eklenti için ayarların birden fazla örneğini burada yapılandıra
 
 msgid "settings.multiple.title"
 msgstr "Çoklu Ayarlar"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Web arayüzü kurulurken hata oluştu. Tekrar deneyin."
+
+msgid "setup.file.content_entered"
+msgstr "Girilen karakter: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "%(name)s kaynağından yüklendi · karakter: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Dosya okunurken hata oluştu"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Bir yönetici kullanıcısı zaten mevcut. Lütfen bir sonraki adıma geçin."
@@ -4367,6 +4448,9 @@ msgstr "Hayır"
 msgid "status.no_data"
 msgstr "Veri yok"
 
+msgid "status.no_file_selected"
+msgstr "Dosya seçilmedi"
+
 msgid "status.no_history"
 msgstr "Geçmiş yok."
 
@@ -4387,6 +4471,9 @@ msgstr "Adım Yok"
 
 msgid "status.no_steps_description"
 msgstr "Bu şablonda yapılandırılacak adım yok."
+
+msgid "status.no_url_available"
+msgstr "Kullanılabilir URL yok"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4435,6 +4522,9 @@ msgstr "Mevcut şablon dışında değişiklik yapılamaz. Lütfen değişiklikl
 
 msgid "status.unique_server_name"
 msgstr "Benzersiz Sunucu Adı"
+
+msgid "status.unknown"
+msgstr "Bilinmiyor"
 
 msgid "status.up"
 msgstr "Açık"
@@ -4718,6 +4808,12 @@ msgstr "Adım alt başlığı"
 msgid "template.editor.label_step_title"
 msgstr "Adım başlığı"
 
+msgid "template.editor.missing_config_status_missing"
+msgstr "Eksik"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Yüklendi"
+
 msgid "template.editor.missing_configs_body"
 msgstr "İçe aktarılan şablon henüz yüklenmemiş özel yapılandırmalara referans veriyor. Şablon kurulumunu tamamlamak için lütfen bu yapılandırmaları içe aktarın:"
 
@@ -4848,7 +4944,7 @@ msgid "template.editor.raw_editor_help"
 msgstr "Ham şablon JSON'ını düzenleyin. Doğrulama otomatik olarak gerçekleştirilir."
 
 msgid "template.editor.raw_editor_import_success"
-msgstr "Şablon başarıyla içe aktarıldı!"
+msgstr "Şablon JSON'u başarıyla içe aktarıldı."
 
 msgid "template.editor.raw_editor_override_body"
 msgstr "Bu dosyanın içe aktarılması mevcut şablon JSON'unu tamamen değiştirecektir. Düzenleyicide yapılan değişiklikler kaybolacaktır. Devam etmek istiyor musunuz?"
@@ -5171,6 +5267,12 @@ msgstr "Açık"
 msgid "threatmap.attacks_today"
 msgstr "Bugünkü saldırılar"
 
+msgid "threatmap.blocked_request"
+msgstr "engellenen istek"
+
+msgid "threatmap.blocked_requests"
+msgstr "engellenen istekler"
+
 msgid "threatmap.countries"
 msgstr "Kaynak ülkeler"
 
@@ -5321,6 +5423,9 @@ msgstr "Yasaklama süresi başarıyla güncellendi!"
 msgid "toast.body.ping_succeed"
 msgstr "Örnekler: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Seçili öğeler zaten istenen durumda."
+
 msgid "toast.copied"
 msgstr "Kopyalandı!"
 
@@ -5339,6 +5444,9 @@ msgstr "Genel ayarlar alınırken bir hata oluştu."
 msgid "toast.global_settings_failed_title"
 msgstr "Genel ayarlar alınamadı"
 
+msgid "toast.header.conversion_failed"
+msgstr "Dönüştürme başarısız oldu"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping başarısız"
 
@@ -5350,6 +5458,9 @@ msgstr "IP adresinin yasağı başarıyla kaldırıldı!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Dosya yüklemeye dön"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Bu IP adresini yasakla"
@@ -5411,6 +5522,9 @@ msgstr "Yalnızca seçilenleri göster"
 msgid "tooltip.button.stop_instance"
 msgstr "Örneği Durdur: %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Metin düzenleyiciye geç"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s yasağını kaldır"
 
@@ -5437,6 +5551,9 @@ msgstr "Çok satırlı girdileri daralt (tracebackler, payloadlar)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Çok satırlı değerleri daralt (sertifikalar, anahtarlar)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Artık özel yapılandırmanız için genel türleri seçebilirsiniz."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "OWASP Core Rule Set eklentileri yüklendikten sonra uygulanan yapılandırmalar."
@@ -6189,7 +6306,7 @@ msgid "upstreams.role.primary"
 msgstr "Ana"
 
 msgid "upstreams.save"
-msgstr "Ana sunucuyu kaydet"
+msgstr "Upstream'i kaydet"
 
 msgid "upstreams.search"
 msgstr "Ad, açıklama veya sunucu'yu arayın..."
@@ -6213,16 +6330,25 @@ msgid "upstreams.servers"
 msgstr "Sunucular"
 
 msgid "upstreams.services_help"
-msgstr "Çoklu hizmetleri seçmek için Ctrl veya Command kullanın. Bir ana sunucu daha sonra bağlanabilir."
+msgstr "Birden fazla hizmet seçmek için Ctrl veya Command tuşunu kullanın. Upstream daha sonra bağlanabilir."
 
 msgid "upstreams.services_hidden"
 msgstr "Gizlenen hizmet sayısı: %(count)s. %(protocol)s upstream yalnızca eşleşen bir hizmete bağlanabilir."
 
 msgid "upstreams.truncated"
-msgstr "Sadece ilk 500 ana sunucu görüntülenir. Tam sonucu elde etmek için API ile listeyi daraltın."
+msgstr "Yalnızca ilk 500 upstream gösteriliyor. Tam sonuç için API üzerinden listeyi daraltın."
+
+msgid "validation.current_password_required_for_passkey"
+msgstr "Parola anahtarı eklemek için mevcut parolanızı girin."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Özel SSL kullanırken hem sertifika hem de anahtar ayarlanmalıdır (dosya yolu veya veri yükleme yoluyla)."
 
 msgid "validation.default_field_name"
 msgstr "Bu alan"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "DNS doğrulaması kullanılırken bu alan zorunludur."
 
 msgid "validation.invalid_date"
 msgstr "Geçersiz tarih"
@@ -6239,11 +6365,35 @@ msgstr "IP adresi gereklidir."
 msgid "validation.ip_service_duplicate"
 msgstr "Bu IP adresi seçili servis için zaten yasaklanmış (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Bültene abone olmak için geçerli bir e-posta adresi girin."
+
+msgid "validation.newsletter_email_required"
+msgstr "Bültene abone olmak istiyorsanız bu alan zorunludur."
+
 msgid "validation.pattern"
 msgstr "Lütfen %(field)s için geçerli bir değer girin."
 
 msgid "validation.required"
 msgstr "%(field)s gereklidir."
+
+msgid "validation.server_name_check_failed"
+msgstr "Sunucu adı denetimi başarısız oldu"
+
+msgid "validation.server_name_choose_different"
+msgstr "Farklı bir sunucu adı seçin."
+
+msgid "validation.server_name_invalid"
+msgstr "Geçersiz sunucu adı."
+
+msgid "validation.server_name_not_unique"
+msgstr "Sunucu adı benzersiz değil."
+
+msgid "validation.server_name_proceed"
+msgstr "Kuruluma devam edebilirsiniz."
+
+msgid "validation.server_name_unique"
+msgstr "Sunucu adı benzersiz."
 
 msgid "validation.service_required_for_ban"
 msgstr "Servise özel bir yasaklama için bir servis seçilmelidir."
@@ -6285,13 +6435,13 @@ msgid "web_cache.error"
 msgstr "Hata"
 
 msgid "web_cache.hit_rate"
-msgstr "Islem oranı"
+msgstr "İsabet oranı"
 
 msgid "web_cache.instance"
 msgstr "Örnek"
 
 msgid "web_cache.metrics"
-msgstr "Örneklerin toplam / başarısız dağılımı"
+msgstr "Toplu önbellek isabeti / kaçırması dağılımı"
 
 msgid "web_cache.metrics_scope"
 msgstr "Ölçümler, tüm önbelleğe alınmış hizmetler üzerinden örnek başına toplanır."
@@ -6398,11 +6548,23 @@ msgstr "Hedef URL"
 msgid "workflows.action"
 msgstr "Sonra"
 
+msgid "workflows.action_help.block"
+msgstr "İsteği reddet"
+
+msgid "workflows.action_help.challenge"
+msgstr "İnsan olduğunu doğrula"
+
+msgid "workflows.action_help.redirect"
+msgstr "Başka bir yere gönder"
+
 msgid "workflows.add_rule"
 msgstr "Kural ekle"
 
 msgid "workflows.all"
 msgstr "Tümü"
+
+msgid "workflows.aria.changePosition"
+msgstr "Kural %(n)s / %(total)s, konumu değiştir"
 
 msgid "workflows.aria.collapse"
 msgstr "Daralt"
@@ -6440,8 +6602,14 @@ msgstr "Kuralı taşı"
 msgid "workflows.aria.moveUp"
 msgstr "Yukarı taşı — daha önce çalışır"
 
+msgid "workflows.aria.newValue"
+msgstr "Yeni değer"
+
 msgid "workflows.aria.openRule"
 msgstr "%(n)s kuralını aç"
+
+msgid "workflows.aria.positionMove"
+msgstr "Konum %(n)s / %(total)s — taşımak için tıklayın"
 
 msgid "workflows.aria.provider"
 msgstr "Antibot sağlayıcısı"
@@ -6575,6 +6743,15 @@ msgstr "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz."
 msgid "workflows.clone_name"
 msgstr "Kopyanın adı"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP yöntemi"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşınır."
 
@@ -6676,6 +6853,12 @@ msgstr "Altına çoğalt"
 
 msgid "workflows.menu.enable"
 msgstr "Kuralı etkinleştir"
+
+msgid "workflows.menu.moveTo"
+msgstr "%(n)s. konuma taşı"
+
+msgid "workflows.menu.staysAt"
+msgstr "%(n)s. konumda kalır"
 
 msgid "workflows.menu.top"
 msgstr "İlk çalıştır"
@@ -6991,6 +7174,15 @@ msgstr "Sadece ilk 500 iş akışı görüntülenir. Tam sonucu elde etmek için
 
 msgid "workflows.untitled"
 msgstr "Adsız kural"
+
+msgid "workflows.uri_match.exact"
+msgstr "tam olarak eşittir"
+
+msgid "workflows.uri_match.prefix"
+msgstr "ile başlar"
+
+msgid "workflows.uri_match.regex"
+msgstr "düzenli ifadeyle eşleşir"
 
 msgid "workflows.value.add"
 msgstr "Değer"

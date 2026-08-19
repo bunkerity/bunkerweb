@@ -73,8 +73,20 @@ msgstr "نوٹس"
 msgid "alert.ping_error"
 msgstr "انسٹینسز کو پنگ کرتے وقت خرابی پیش آئی۔"
 
+msgid "alert.plugin_file_invalid"
+msgstr "براہ کرم درست پلگ ان آرکائیو اپ لوڈ کریں (.zip، .tar.gz، یا .tar.xz)۔"
+
+msgid "alert.plugin_file_too_large"
+msgstr "پلگ ان آرکائیو 50 MB کی حد سے بڑا ہے۔"
+
+msgid "alert.plugin_upload_failed"
+msgstr "پلگ ان آرکائیو اپ لوڈ کرتے وقت خرابی ہوئی۔ دوبارہ کوشش کریں۔"
+
 msgid "alert.readonly_mode"
 msgstr "یہ عمل صرف پڑھنے کے موڈ میں غیر فعال ہے۔"
+
+msgid "alert.services_import_invalid_file"
+msgstr "براہ کرم درست سروسز ایکسپورٹ فائل اپ لوڈ کریں (.env یا .zip)۔"
 
 msgid "aria.label.clear_search"
 msgstr "تلاش صاف کریں"
@@ -96,6 +108,21 @@ msgstr "یہ لاگ فائل ڈاؤن لوڈ کریں"
 
 msgid "aria.label.follow"
 msgstr "فالو کریں"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub فالوورز: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub فورکس: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub کے کھلے مسائل: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub اسٹارز: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub نگران: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "ظاہر نہ کریں"
@@ -133,6 +160,9 @@ msgstr "ظاہر کریں"
 msgid "aria.label.search_logs"
 msgstr "لاگز میں تلاش کریں"
 
+msgid "aria.label.secret_value"
+msgstr "خفیہ قدر"
+
 msgid "aria.label.select_file"
 msgstr "فائل منتخب کریں"
 
@@ -147,6 +177,9 @@ msgstr "لائن ریپنگ ٹوگل کریں"
 
 msgid "aria.label.user_avatar"
 msgstr "کاربر کا آواتار"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (مخفی)"
 
 msgid "aria.label.view_selected_items"
 msgstr "منتخب عناصر دیکھیں"
@@ -896,7 +929,7 @@ msgid "compose.count"
 msgstr "%(on)s فعال ہے · %(total)s دستیاب ہے · %(locked)s قفل ہے"
 
 msgid "compose.entries"
-msgstr "%(count)s کیمی"
+msgstr "%(count)s کنفیگر شدہ"
 
 msgid "compose.filter.all"
 msgstr "سب"
@@ -914,7 +947,7 @@ msgid "compose.provenance.api"
 msgstr "API کے ذریعے منظم"
 
 msgid "compose.provenance.attachment"
-msgstr "جوڑا سے"
+msgstr "منسلکہ سے"
 
 msgid "compose.provenance.clone"
 msgstr "کپی کیا گیا"
@@ -935,7 +968,7 @@ msgid "compose.provenance.template"
 msgstr "ٹیمپلیٹ سے"
 
 msgid "compose.set_value"
-msgstr "ایک قیمت مقرر کریں..."
+msgstr "ایک قدر مقرر کریں..."
 
 msgid "compose.show_more"
 msgstr "%(count)s کو مزید دکھائیں"
@@ -1786,6 +1819,15 @@ msgstr "وقت کے ساتھ بلاکنگ کی حالت"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "روکی گئی درخواستیں"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 تبدیل نہیں ہوا"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 نہیں ملا"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 درخواست کی شرح محدود"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "درخواست کی حالت کی تقسیم"
 
@@ -1817,7 +1859,7 @@ msgid "dashboard.mini.across_countries"
 msgstr "%(count)s کے ممالک میں"
 
 msgid "dashboard.mini.enforced"
-msgstr "مومنٹaneamente فعال"
+msgstr "فی الحال نافذ"
 
 msgid "dashboard.mini.pct_blocked"
 msgstr "%(percent)s%% بلاک"
@@ -1844,7 +1886,7 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "درخواستوں کی تعداد کے لحاظ سے"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "%(total)s کے ساتھ مکمل طور پر بلاک"
+msgstr "کل %(total)s میں سے بلاک شدہ"
 
 msgid "dashboard.status.free_plan"
 msgstr "مفت منصوبہ"
@@ -2224,11 +2266,35 @@ msgstr "سرور کی خرابی"
 msgid "error.ban_update_failed"
 msgstr "پابندی کی مدت اپ ڈیٹ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
 
+msgid "error.passkey_registration_failed"
+msgstr "یہ پاس کی رجسٹر نہیں ہو سکی۔ دوبارہ کوشش کریں۔"
+
+msgid "error.passkey_sign_in_failed"
+msgstr "پاس کی سے سائن ان نہیں ہو سکا۔ دوبارہ کوشش کریں۔"
+
+msgid "error.report_copy_access_failed"
+msgstr "کاپی کرنے کے لیے ڈیٹا تک رسائی میں خرابی ہوئی۔ صفحہ ریفریش کریں۔"
+
+msgid "error.report_copy_failed"
+msgstr "کلپ بورڈ پر کاپی نہیں ہو سکا۔ نیچے خام ڈیٹا کاپی کرنے والا بٹن استعمال کریں۔"
+
+msgid "error.report_details_load_failed"
+msgstr "رپورٹ کی تفصیلات لوڈ نہیں ہو سکیں۔"
+
+msgid "error.report_identifier_missing"
+msgstr "رپورٹ کا شناخت کنندہ موجود نہیں"
+
 msgid "error.reports_load_error"
 msgstr "رپورٹس لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔"
 
+msgid "error.security_key_verification_failed"
+msgstr "آپ کی سیکیورٹی کلید کی تصدیق نہیں ہو سکی۔ دوبارہ کوشش کریں۔"
+
 msgid "error.unban_failed"
 msgstr "IP ایڈریس سے پابندی ہٹانے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
+
+msgid "error.webauthn_request_failed"
+msgstr "سیکیورٹی کلید کی درخواست ناکام ہوئی۔ دوبارہ کوشش کریں۔"
 
 msgid "flash.easter_egg"
 msgstr "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں"
@@ -2867,7 +2933,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "اپنی خدمات کی برآمد فائل کو یہاں گھسیٹیں اور چھوڑیں یا فائل کو منتخب کرنے کے لیے کلک کریں۔"
 
 msgid "modal.body.import_services_warning"
-msgstr "خدمات درآمد کرنے سے برآمد فائل سے نئی UI خدمات بن جائیں گی۔ موجودہ خدمات کو چھوڑ دیا گیا ہے۔"
+msgstr "خدمات درآمد کرنے سے برآمد فائل سے نئی UI سروسز بنیں گی۔ موجودہ سروسز کو چھوڑ دیا جائے گا۔ کسٹم کنفیگریشنز کے ساتھ برآمد کردہ .zip آرکائیو بھی قبول کیا جاتا ہے۔"
 
 msgid "modal.body.instance_creation_alert"
 msgstr "آپ کو پورٹ یا سرور کا نام فراہم کرنے کی ضرورت نہیں ہے؛ انسٹینس کنفیگریشن کے لیے `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` اور `API_SERVER_NAME` کی قدریں استعمال ہوں گی۔"
@@ -3185,7 +3251,7 @@ msgid "onboarding.item.pro"
 msgstr "BunkerWeb PRO فعال کریں"
 
 msgid "onboarding.item.read_bans"
-msgstr "دیکھیں کون پابند ہے، اور کب تک"
+msgstr "دیکھیں کس پر پابندی ہے، اور کب تک"
 
 msgid "onboarding.item.read_home"
 msgstr "ڈیش بورڈ پڑھیں: اس وقت کیا ٹھیک ہے"
@@ -3587,7 +3653,7 @@ msgid "redirects.save"
 msgstr "ری ڈائریکٹ محفوظ کریں"
 
 msgid "redirects.search"
-msgstr "نام، منبع پرواز، یا ہدف تلاش کریں..."
+msgstr "نام، ماخذ پاتھ یا ہدف تلاش کریں..."
 
 msgid "redirects.services_help"
 msgstr "متعدد سروسز منتخب کرنے کے لیے Ctrl یا Command استعمال کریں۔ ری ڈائریکٹ بعد میں بھی منسلک کیا جا سکتا ہے۔"
@@ -3764,7 +3830,7 @@ msgid "resource_groups.alias"
 msgstr "آلیاس"
 
 msgid "resource_groups.alias_help"
-msgstr "حروف، اعداد، تحت خط، اور ہچ۔ موجودہ آلیاسز کو تبدیل نہیں کیا جا سکتا۔"
+msgstr "صرف حروف، اعداد، انڈر اسکور اور ڈیش۔ موجودہ عرفی ناموں کا نام تبدیل نہیں کیا جا سکتا۔"
 
 msgid "resource_groups.bulk_import"
 msgstr "بڑے پیمانے پر درآمد کریں"
@@ -4117,6 +4183,9 @@ msgstr "پاتھ"
 msgid "service.resources.none"
 msgstr "کوئی جوڑا نہیں"
 
+msgid "service.resources.nothing_available"
+msgstr "منسلک کرنے کے لیے کچھ دستیاب نہیں۔"
+
 msgid "service.resources.primary"
 msgstr "بنیادی سرٹیفکیٹ"
 
@@ -4164,6 +4233,18 @@ msgstr "اس پلگ ان کے لیے یہاں متعدد سیٹنگز انسٹی
 
 msgid "settings.multiple.title"
 msgstr "متعدد سیٹنگز"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "ویب UI سیٹ اپ کرتے وقت خرابی ہوئی۔ دوبارہ کوشش کریں۔"
+
+msgid "setup.file.content_entered"
+msgstr "درج کردہ حروف: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "%(name)s سے لوڈ کیا گیا · حروف: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "فائل پڑھنے میں خرابی"
 
 msgid "setup.status.admin_user_exists"
 msgstr "ایک ایڈمن صارف پہلے سے موجود ہے۔ براہ کرم اگلے مرحلے پر جائیں۔"
@@ -4307,7 +4388,7 @@ msgid "status.error_saving_template"
 msgstr "ٹیمپلیٹ کو محفوظ کرتے وقت ایک خرابی پیش آگئی۔"
 
 msgid "status.expired"
-msgstr "منطبق"
+msgstr "میعاد ختم"
 
 msgid "status.expiring"
 msgstr "ختم ہونے والے"
@@ -4372,6 +4453,9 @@ msgstr "نہیں"
 msgid "status.no_data"
 msgstr "کوئی ڈیٹا نہیں"
 
+msgid "status.no_file_selected"
+msgstr "کوئی فائل منتخب نہیں"
+
 msgid "status.no_history"
 msgstr "کوئی تاریخچہ دستیاب نہیں۔"
 
@@ -4392,6 +4476,9 @@ msgstr "کوئی قدم دستیاب نہیں"
 
 msgid "status.no_steps_description"
 msgstr "اس ٹیمپلیٹ میں کنفیگر کرنے کے لیے کوئی قدم نہیں ہیں۔"
+
+msgid "status.no_url_available"
+msgstr "کوئی URL دستیاب نہیں"
 
 msgid "status.not_applicable"
 msgstr "لاگو نہیں"
@@ -4440,6 +4527,9 @@ msgstr "موجودہ ٹیمپلیٹ سے باہر تبدیلیاں کرنے کی
 
 msgid "status.unique_server_name"
 msgstr "منفرد سرور نام"
+
+msgid "status.unknown"
+msgstr "نامعلوم"
 
 msgid "status.up"
 msgstr "فعال"
@@ -4723,6 +4813,12 @@ msgstr "مرحلے کا ذیلی عنوان"
 msgid "template.editor.label_step_title"
 msgstr "مرحلے کا عنوان"
 
+msgid "template.editor.missing_config_status_missing"
+msgstr "موجود نہیں"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "اپ لوڈ شدہ"
+
 msgid "template.editor.missing_configs_body"
 msgstr "درآمد شدہ ٹیمپلیٹ حسب ضرورت کنفیگریشنز کا حوالہ دیتا ہے جو ابھی تک اپ لوڈ نہیں کی گئی ہیں۔ ٹیمپلیٹ سیٹ اپ مکمل کرنے کے لیے براہ کرم ان کنفیگریشنز کو درآمد کریں:"
 
@@ -4769,10 +4865,10 @@ msgid "template.editor.multiselect_summary"
 msgstr "%(count)s منتخب شدہ"
 
 msgid "template.editor.multivalue_add"
-msgstr "قیمت شامل کریں"
+msgstr "قدر شامل کریں"
 
 msgid "template.editor.multivalue_helper"
-msgstr "فی سطر ایک قیمت۔%(separatorNote)s"
+msgstr "فی سطر ایک قدر۔%(separatorNote)s"
 
 msgid "template.editor.panel_overview"
 msgstr "جائزہ"
@@ -5176,6 +5272,12 @@ msgstr "روشن"
 msgid "threatmap.attacks_today"
 msgstr "آج کے حملے"
 
+msgid "threatmap.blocked_request"
+msgstr "بلاک شدہ درخواست"
+
+msgid "threatmap.blocked_requests"
+msgstr "بلاک شدہ درخواستیں"
+
 msgid "threatmap.countries"
 msgstr "ماخذ ممالک"
 
@@ -5326,6 +5428,9 @@ msgstr "پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی!"
 msgid "toast.body.ping_succeed"
 msgstr "انسٹینسز: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "منتخب آئٹمز پہلے ہی مطلوبہ حالت میں ہیں۔"
+
 msgid "toast.copied"
 msgstr "کاپی ہو گیا!"
 
@@ -5344,6 +5449,9 @@ msgstr "گلوبل سیٹنگز حاصل کرتے وقت ایک خرابی پی�
 msgid "toast.global_settings_failed_title"
 msgstr "گلوبل سیٹنگز حاصل کرنے میں ناکامی"
 
+msgid "toast.header.conversion_failed"
+msgstr "تبدیلی ناکام"
+
 msgid "toast.header.ping_failed"
 msgstr "پنگ ناکام"
 
@@ -5355,6 +5463,9 @@ msgstr "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔"
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "فائل اپ لوڈ پر واپس جائیں"
 
 msgid "tooltip.button.ban_ip"
 msgstr "اس IP پتے پر پابندی لگائیں"
@@ -5416,11 +5527,14 @@ msgstr "صرف منتخب دکھائیں"
 msgid "tooltip.button.stop_instance"
 msgstr "انسٹینس %(hostname)s روکیں"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "ٹیکسٹ ایڈیٹر پر جائیں"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s سے پابندی ہٹائیں"
 
 msgid "tooltip.button.update_ban_duration"
-msgstr "بنو کی مدت کو اپ ڈیٹ کریں"
+msgstr "پابندی کی مدت اپ ڈیٹ کریں"
 
 msgid "tooltip.button.value_from_global"
 msgstr "عالمی سیٹنگز سے قدر"
@@ -5442,6 +5556,9 @@ msgstr "کئی لائنوں والی اندراجات سمیٹیں (tracebacks،
 
 msgid "tooltip.collapse_raw_values"
 msgstr "کئی لائنوں والی قدریں سمیٹیں (سرٹیفکیٹس، کلیدیں)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "اب آپ اپنی کسٹم کنفیگریشن کے لیے عالمی اقسام منتخب کر سکتے ہیں۔"
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "OWASP کور رول سیٹ پلگ انز لوڈ ہونے کے بعد لاگو ہونے والی کنفیگریشنز۔"
@@ -5609,7 +5726,7 @@ msgid "tooltip.link.export_service"
 msgstr "سروس %(service)s کنفیگریشن برآمد کریں"
 
 msgid "tooltip.link.manage_activation"
-msgstr "%(name)s کو عالمی سیٹنگز میں فعال کریں"
+msgstr "عالمی سیٹنگز میں %(name)s کی فعالیت کا انتظام کریں"
 
 msgid "tooltip.link.view_config"
 msgstr "کسٹم کنفیگریشن %(name)s دیکھیں"
@@ -6226,8 +6343,17 @@ msgstr "%(count)s سروسز مخفی ہیں: %(protocol)s اپ اسٹریم ص�
 msgid "upstreams.truncated"
 msgstr "فقط پہلے 500 آپ اسٹریم دکھائے جاتے ہیں۔ مکمل نتائج کے لیے API کے ذریعے فہرست کو محدود کریں۔"
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "پاس کی شامل کرنے کے لیے موجودہ پاس ورڈ درج کریں۔"
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "کسٹم SSL استعمال کرتے وقت سرٹیفکیٹ اور کلید دونوں سیٹ کریں (فائل پاتھ یا ڈیٹا اپ لوڈ کے ذریعے)۔"
+
 msgid "validation.default_field_name"
 msgstr "یہ فیلڈ"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "DNS چیلنج استعمال کرتے وقت یہ فیلڈ درکار ہے۔"
 
 msgid "validation.invalid_date"
 msgstr "غلط تاریخ"
@@ -6244,11 +6370,35 @@ msgstr "IP ایڈریس درکار ہے۔"
 msgid "validation.ip_service_duplicate"
 msgstr "یہ IP ایڈریس منتخب کردہ سروس (%(service)s) کے لیے پہلے ہی پابندی عائد ہے۔"
 
+msgid "validation.newsletter_email_invalid"
+msgstr "نیوز لیٹر سبسکرائب کرنے کے لیے درست ای میل ایڈریس درج کریں۔"
+
+msgid "validation.newsletter_email_required"
+msgstr "اگر آپ نیوز لیٹر سبسکرائب کرنا چاہتے ہیں تو یہ فیلڈ درکار ہے۔"
+
 msgid "validation.pattern"
 msgstr "براہ کرم %(field)s کے لیے ایک درست قدر درج کریں۔"
 
 msgid "validation.required"
 msgstr "%(field)s درکار ہے۔"
+
+msgid "validation.server_name_check_failed"
+msgstr "سرور نام کی جانچ ناکام ہوئی"
+
+msgid "validation.server_name_choose_different"
+msgstr "کوئی مختلف سرور نام منتخب کریں۔"
+
+msgid "validation.server_name_invalid"
+msgstr "سرور نام درست نہیں۔"
+
+msgid "validation.server_name_not_unique"
+msgstr "سرور نام منفرد نہیں ہے۔"
+
+msgid "validation.server_name_proceed"
+msgstr "آپ سیٹ اپ جاری رکھ سکتے ہیں۔"
+
+msgid "validation.server_name_unique"
+msgstr "سرور نام منفرد ہے۔"
 
 msgid "validation.service_required_for_ban"
 msgstr "سروس-مخصوص پابندی کے لیے ایک سروس منتخب کرنی ضروری ہے۔"
@@ -6311,7 +6461,7 @@ msgid "web_cache.purge"
 msgstr "کاشڈ رسپانسز کو پاک کریں"
 
 msgid "web_cache.purge_all"
-msgstr "سب"
+msgstr "سب صاف کریں"
 
 msgid "web_cache.purge_all_confirm_body"
 msgstr "یہ ہر قابل رسائی انسٹیانس پر ہر سروس کے لیے محفوظ کردہ ہر رسپانس کو حذف کرتا ہے۔ اسے واپس نہیں کیا جا سکتا۔"
@@ -6320,16 +6470,16 @@ msgid "web_cache.purge_all_confirm_title"
 msgstr "کل کیش کو صاف کرنا؟"
 
 msgid "web_cache.purge_help"
-msgstr "قابل رسائی انسٹیانس پر عمل فوری طور پر چلائیں۔ غیر قابل رسائی انسٹیانس کو چھوڑ دیا جائے گا اور کوئی عمل queued نہیں کیا جائے گا۔"
+msgstr "صاف کرنے کی کارروائیاں قابلِ رسائی انسٹینسز پر فوراً چلتی ہیں۔ ناقابلِ رسائی انسٹینسز کو چھوڑ دیا جاتا ہے اور کوئی کارروائی قطار میں شامل نہیں ہوتی۔"
 
 msgid "web_cache.purge_key"
 msgstr "موثر کیش کی کلیدی"
 
 msgid "web_cache.purge_key_help"
-msgstr "کیش کی کلیدی خالی چھوڑیں صرف ڈیفالٹ $scheme$host$request_uri کے لیے۔ اگر سروس PROXY_CACHE_KEY پر کنٹرول ہے، تو یہاں اس کی موثر قدر کاپی کریں؛ غیر معاون درخواست کے لیے صرف متغیرات کو حذف کرنے کے بجائے رد کر دیا جاتا ہے۔"
+msgstr "کیش کلید صرف ڈیفالٹ $scheme$host$request_uri کے لیے خالی چھوڑیں۔ اگر سروس PROXY_CACHE_KEY کو اووررائیڈ کرتی ہے تو اس کی مؤثر قدر یہاں چسپاں کریں؛ غیر معاون request-only متغیرات کسی دوسرے اندراج کو صاف کرنے کے بجائے مسترد کیے جاتے ہیں۔"
 
 msgid "web_cache.purge_key_placeholder"
-msgstr "موثر PROXY_CACHE_KEY (اختصاری)"
+msgstr "مؤثر PROXY_CACHE_KEY (اختیاری)"
 
 msgid "web_cache.purge_url"
 msgstr "URL کو صاف کرنا"
@@ -6403,11 +6553,23 @@ msgstr "منزل کا URL"
 msgid "workflows.action"
 msgstr "پھر"
 
+msgid "workflows.action_help.block"
+msgstr "درخواست مسترد کریں"
+
+msgid "workflows.action_help.challenge"
+msgstr "ثابت کریں کہ یہ انسان ہے"
+
+msgid "workflows.action_help.redirect"
+msgstr "اسے کہیں اور بھیجیں"
+
 msgid "workflows.add_rule"
 msgstr "قواعد کو شامل کریں"
 
 msgid "workflows.all"
 msgstr "سب"
+
+msgid "workflows.aria.changePosition"
+msgstr "%(total)s میں سے اصول %(n)s، مقام تبدیل کریں"
 
 msgid "workflows.aria.collapse"
 msgstr "سکیڑیں"
@@ -6445,8 +6607,14 @@ msgstr "اصول منتقل کریں"
 msgid "workflows.aria.moveUp"
 msgstr "اوپر منتقل کریں — پہلے چلے گا"
 
+msgid "workflows.aria.newValue"
+msgstr "نئی قدر"
+
 msgid "workflows.aria.openRule"
 msgstr "%(n)s قانون کھولیں"
+
+msgid "workflows.aria.positionMove"
+msgstr "%(total)s میں سے مقام %(n)s — منتقل کرنے کے لیے کلک کریں"
 
 msgid "workflows.aria.provider"
 msgstr "اینٹی بوٹ فراہم کنندہ"
@@ -6512,7 +6680,7 @@ msgid "workflows.canvas.drawerSub"
 msgstr "%(total)s کی %(n)s کی جگہ پر چلتا ہے۔"
 
 msgid "workflows.canvas.dropHint"
-msgstr "پріورٹی طے کرنے کے لیے چھوڑیں - ایک قانون کا زنجیر میں مقام اس کا واحد معنی ہے۔"
+msgstr "ترجیح طے کرنے کے لیے یہاں چھوڑیں — زنجیر میں اصول کی جگہ ہی اس کی ترجیح متعین کرتی ہے۔"
 
 msgid "workflows.canvas.emptyBody"
 msgstr "ایک ورک فلو جس میں کوئی قوانین نہیں، کچھ نہیں کرتا - ہر درخواست براہ راست اگلے منسلک ورک فلو میں منتقل ہوتی ہے۔"
@@ -6539,7 +6707,7 @@ msgid "workflows.canvas.fit"
 msgstr "نظر میں فٹ کریں"
 
 msgid "workflows.canvas.gateTip"
-msgstr "ایک مطابقت دروازہ، ایک عمل نہیں: کم سے کم حد کے نیچے قانون مطابقت نہیں کرتا ہے اور اگلا قانون کا جائزہ لیا جاتا ہے۔"
+msgstr "یہ مطابقت کی شرط ہے، کارروائی نہیں: حد سے کم ہونے پر اصول مماثل نہیں ہوتا اور اگلے اصول کا جائزہ لیا جاتا ہے۔"
 
 msgid "workflows.canvas.hint"
 msgstr "دوبارہ ترتیب دینے کے لیے نوڈ کو گھسیٹیں · پین کرنے کے لیے بورڈ کو گھسیٹیں · منتخب نوڈ پر Alt + ← / → استعمال کریں"
@@ -6579,6 +6747,15 @@ msgstr "قوانین کاپی کیے جاتے ہیں، سروس کے جوڑ نہ
 
 msgid "workflows.clone_name"
 msgstr "کاپی کا نام"
+
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP طریقہ"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "یہ اصول حذف کریں؟ اس کے نیچے موجود سب اصول ایک درجہ اوپر آ جائیں گے۔"
@@ -6682,6 +6859,12 @@ msgstr "نیچے نقل بنائیں"
 msgid "workflows.menu.enable"
 msgstr "اصول فعال کریں"
 
+msgid "workflows.menu.moveTo"
+msgstr "مقام %(n)s پر منتقل کریں"
+
+msgid "workflows.menu.staysAt"
+msgstr "مقام %(n)s پر رہتا ہے"
+
 msgid "workflows.menu.top"
 msgstr "پہلے چلائیں"
 
@@ -6752,7 +6935,7 @@ msgid "workflows.say.gateAdded"
 msgstr "مماثلت میں شرح کی حد شامل ہوئی۔ اس سے نیچے اصول مماثل نہیں ہوتا اور جانچ جاری رہتی ہے۔"
 
 msgid "workflows.say.inserted"
-msgstr "%(total)s کی جگہ پر %(n)s پر قانون شامل کیا گیا۔ پہلے تمام قوانین کا جائزہ لیا جاتا ہے۔"
+msgstr "اصول %(total)s میں سے مقام %(n)s پر شامل کیا گیا۔ اس سے پہلے موجود ہر اصول کو پہلے جانچا جاتا ہے۔"
 
 msgid "workflows.say.inspecting"
 msgstr "%(total)s میں %(n)s قانون کی ترمیم کریں - %(name)s."
@@ -6996,6 +7179,15 @@ msgstr "فقط پہلے 500 ورک فلو دکھائے جاتے ہیں۔ مکم�
 
 msgid "workflows.untitled"
 msgstr "بے عنوان اصول"
+
+msgid "workflows.uri_match.exact"
+msgstr "بالکل یہی ہے"
+
+msgid "workflows.uri_match.prefix"
+msgstr "سے شروع ہوتا ہے"
+
+msgid "workflows.uri_match.regex"
+msgstr "ریجیکس سے مماثل ہے"
 
 msgid "workflows.value.add"
 msgstr "قدر"

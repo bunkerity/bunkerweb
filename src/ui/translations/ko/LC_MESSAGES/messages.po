@@ -73,8 +73,20 @@ msgstr "알림"
 msgid "alert.ping_error"
 msgstr "인스턴스 핑(Ping) 전송 중 오류가 발생했습니다."
 
+msgid "alert.plugin_file_invalid"
+msgstr "유효한 플러그인 아카이브(.zip, .tar.gz 또는 .tar.xz)를 업로드하세요."
+
+msgid "alert.plugin_file_too_large"
+msgstr "플러그인 아카이브가 50 MB 제한을 초과합니다."
+
+msgid "alert.plugin_upload_failed"
+msgstr "플러그인 아카이브를 업로드하는 중 오류가 발생했습니다. 다시 시도해 주세요."
+
 msgid "alert.readonly_mode"
 msgstr "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
+
+msgid "alert.services_import_invalid_file"
+msgstr "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요."
 
 msgid "aria.label.clear_search"
 msgstr "검색 지우기"
@@ -96,6 +108,21 @@ msgstr "이 로그 파일 다운로드"
 
 msgid "aria.label.follow"
 msgstr "따라가기"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub 팔로워: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub 포크: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub 미해결 이슈: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub 스타: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub Watch 사용자: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "값 숨기기"
@@ -133,6 +160,9 @@ msgstr "값 표시"
 msgid "aria.label.search_logs"
 msgstr "로그 검색"
 
+msgid "aria.label.secret_value"
+msgstr "비밀 값"
+
 msgid "aria.label.select_file"
 msgstr "파일 선택"
 
@@ -147,6 +177,9 @@ msgstr "줄 바꿈 전환"
 
 msgid "aria.label.user_avatar"
 msgstr "사용자 아바타"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s(숨김)"
 
 msgid "aria.label.view_selected_items"
 msgstr "선택된 항목 보기"
@@ -644,7 +677,7 @@ msgid "certificates.assignment_notice"
 msgstr "할당은 중앙 재고를 구성합니다. TLS 배포는 각 서비스의 인증서 설정에 의해 제어됩니다."
 
 msgid "certificates.assignments"
-msgstr "재고 할당"
+msgstr "인증서 할당"
 
 msgid "certificates.assignments_help"
 msgstr "이 할당은 실시간 TLS 설정을 변경하지 않습니다."
@@ -695,7 +728,7 @@ msgid "certificates.download_leaf"
 msgstr "리프 다운로드"
 
 msgid "certificates.edit_help"
-msgstr "이것은 인증서 또는 실시간 TLS 설정이 아닌 재고 메타데이터만 변경합니다."
+msgstr "이 작업은 인증서 목록의 메타데이터만 변경하며, 인증서 내용이나 실제 TLS 설정은 변경하지 않습니다."
 
 msgid "certificates.edit_metadata"
 msgstr "인증서 메타데이터 편집"
@@ -740,7 +773,7 @@ msgid "certificates.key_drop"
 msgstr "해당하는 개인 키를 여기에 드롭합니다"
 
 msgid "certificates.key_limit"
-msgstr "최대 1 MiB; 휴식 시 암호화되며 다운로드할 수 없습니다"
+msgstr "최대 1 MiB. 저장 시 암호화되며 다운로드할 수 없습니다."
 
 msgid "certificates.last_error"
 msgstr "마지막 오류"
@@ -758,7 +791,7 @@ msgid "certificates.no_issuers"
 msgstr "발급 기관 정보 없음"
 
 msgid "certificates.none_due"
-msgstr "인증서 없음"
+msgstr "갱신 대상 인증서 없음"
 
 msgid "certificates.orphan_account"
 msgstr "계정"
@@ -848,7 +881,7 @@ msgid "certificates.status.not_yet_valid"
 msgstr "아직 유효하지 않음"
 
 msgid "certificates.status.revoked"
-msgstr "취소"
+msgstr "폐기됨"
 
 msgid "certificates.status.valid"
 msgstr "유효"
@@ -1706,13 +1739,13 @@ msgid "dashboard.card.blocked_requests.title"
 msgstr "차단된 요청"
 
 msgid "dashboard.card.blocked_unique_ips.title"
-msgstr "차단된 순방문 IP"
+msgstr "차단된 고유 IP"
 
 msgid "dashboard.card.certificates.title"
 msgstr "인증서"
 
 msgid "dashboard.card.instances.status"
-msgstr "%(up)s 활성 / %(down)s 비활성 / %(loading)s 로딩 중"
+msgstr "%(up)s 실행 중 / %(down)s 중지 / %(loading)s 로딩 중"
 
 msgid "dashboard.card.instances.title"
 msgstr "인스턴스"
@@ -1786,6 +1819,15 @@ msgstr "시간별 차단 현황"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "차단된 요청"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 수정되지 않음"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 찾을 수 없음"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 요청 속도 제한됨"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "요청 상태 분포"
 
@@ -1844,7 +1886,7 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "요청 수 기준"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "%(total)s 전체 사용"
+msgstr "건 차단 / 전체 %(total)s건"
 
 msgid "dashboard.status.free_plan"
 msgstr "무료 플랜"
@@ -2224,11 +2266,35 @@ msgstr "서버 오류"
 msgid "error.ban_update_failed"
 msgstr "차단 기간 업데이트 실패. 다시 시도해 주세요."
 
+msgid "error.passkey_registration_failed"
+msgstr "이 패스키를 등록할 수 없습니다. 다시 시도해 주세요."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "패스키로 로그인할 수 없습니다. 다시 시도해 주세요."
+
+msgid "error.report_copy_access_failed"
+msgstr "복사할 데이터에 접근하는 중 오류가 발생했습니다. 페이지를 새로 고쳐 보세요."
+
+msgid "error.report_copy_failed"
+msgstr "클립보드에 복사하지 못했습니다. 아래의 원시 데이터 복사 버튼을 사용해 보세요."
+
+msgid "error.report_details_load_failed"
+msgstr "보고서 세부 정보를 불러오지 못했습니다."
+
+msgid "error.report_identifier_missing"
+msgstr "보고서 식별자가 없습니다"
+
 msgid "error.reports_load_error"
 msgstr "보고서 로드 중 오류 발생. 페이지를 새로고침해 주세요."
 
+msgid "error.security_key_verification_failed"
+msgstr "보안 키를 확인할 수 없습니다. 다시 시도해 주세요."
+
 msgid "error.unban_failed"
 msgstr "IP 주소 차단 해제 실패. 다시 시도해 주세요."
+
+msgid "error.webauthn_request_failed"
+msgstr "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
 
 msgid "flash.easter_egg"
 msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
@@ -2300,7 +2366,7 @@ msgid "form.label.2fa_code"
 msgstr "2단계 인증 코드"
 
 msgid "form.label.2fa_code_or_recovery"
-msgstr "2단계 인증 또는 복구 코드"
+msgstr "2단계 인증 코드 또는 복구 코드"
 
 msgid "form.label.admin_email"
 msgstr "관리자 이메일"
@@ -2348,13 +2414,13 @@ msgid "form.label.custom_ssl_certificate"
 msgstr "사용자 정의 SSL 인증서"
 
 msgid "form.label.custom_ssl_certificate_data"
-msgstr "인증서 데이터 (Base64/PEM)"
+msgstr "사용자 지정 SSL 인증서 데이터 (Base64/PEM)"
 
 msgid "form.label.custom_ssl_key"
 msgstr "사용자 정의 SSL 키"
 
 msgid "form.label.custom_ssl_key_data"
-msgstr "인증서 키 데이터 (Base64/PEM)"
+msgstr "사용자 지정 SSL 키 데이터 (Base64/PEM)"
 
 msgid "form.label.dns_credential_items"
 msgstr "Let's Encrypt DNS 인증 정보"
@@ -2863,7 +2929,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "서비스 내보내기 파일을 이곳에 드래그 앤 드롭하거나 클릭하여 선택하세요."
 
 msgid "modal.body.import_services_warning"
-msgstr "서비스를 가져오면 내보내기 파일로부터 새로운 UI 서비스가 생성됩니다. 이미 존재하는 서비스는 건너뜁니다."
+msgstr "서비스를 가져오면 내보내기 파일에서 새 UI 서비스가 생성됩니다. 기존 서비스는 건너뜁니다. 사용자 지정 설정과 함께 내보낸 .zip 아카이브도 지원됩니다."
 
 msgid "modal.body.instance_creation_alert"
 msgstr "포트나 서버 이름을 입력할 필요가 없습니다. 인스턴스 설정에는 `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, `API_SERVER_NAME`의 값이 사용됩니다."
@@ -3150,7 +3216,7 @@ msgid "onboarding.error"
 msgstr "안내를 불러오지 못했습니다."
 
 msgid "onboarding.hint.bans"
-msgstr "차단 목록은 BunkerWeb이 현재 거부 중인 클라이언트입니다. 각 행에 사유와 만료 시점이 표시됩니다."
+msgstr "차단 목록에는 BunkerWeb이 현재 거부 중인 클라이언트가 표시됩니다. 각 행에 사유와 만료 시점이 표시됩니다."
 
 msgid "onboarding.hint.home"
 msgstr "이 대시보드에서 현재 정상 상태인 인스턴스, 제공 중인 서비스, BunkerWeb이 처리한 트래픽을 확인할 수 있습니다."
@@ -3324,7 +3390,7 @@ msgid "pro.button.upgrade_to_pro"
 msgstr "PRO로 업그레이드"
 
 msgid "pro.expiration_date.expires_in"
-msgstr "만료 기간:"
+msgstr "만료까지"
 
 msgid "pro.expiration_date.title"
 msgstr "Pro 만료일"
@@ -3432,7 +3498,7 @@ msgid "profile.modal.body.wipe_sessions_confirm"
 msgstr "이것은 계정의 모든 활성 세션을 즉시 로그아웃합니다. 확인을 위해 비밀번호를 입력하세요."
 
 msgid "profile.modal.title.wipe_sessions"
-msgstr "다른 세션 삭제?"
+msgstr "다른 세션에서 로그아웃할까요?"
 
 msgid "profile.passkey.added"
 msgstr "추가일"
@@ -4083,10 +4149,10 @@ msgid "service.resources.conflict.resource"
 msgstr "%(service)s은 %(kind)s의 “%(name)s”를 통해 %(path)s을 제공합니다. “%(name)s”를 분리하거나, 둘 중 하나에 다른 경로를 지정하십시오."
 
 msgid "service.resources.conflict.stream"
-msgstr "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, %(service)s은 이미 상류 “%(name)s”를 사용합니다. 먼저 분리하십시오."
+msgstr "스트림 서비스는 모든 연결을 단일 백엔드로 프록시하며, %(service)s 서비스는 이미 업스트림 “%(name)s”를 사용합니다. 먼저 분리하세요."
 
 msgid "service.resources.conflict.stream_inline"
-msgstr "%(service)s은 REVERSE_PROXY_HOST에 자체 백엔드를 가지고 있습니다. 상류가 제어하도록 설정 설정을 지우십시오."
+msgstr "%(service)s 서비스에는 REVERSE_PROXY_HOST로 설정된 자체 백엔드가 있습니다. 업스트림이 대신 처리하도록 해당 설정을 지우세요."
 
 msgid "service.resources.detach"
 msgstr "분리"
@@ -4111,6 +4177,9 @@ msgstr "경로"
 
 msgid "service.resources.none"
 msgstr "연결 없음"
+
+msgid "service.resources.nothing_available"
+msgstr "연결할 수 있는 항목이 없습니다."
 
 msgid "service.resources.primary"
 msgstr "주요 인증서"
@@ -4159,6 +4228,18 @@ msgstr "이 플러그인에 대한 여러 설정 인스턴스를 여기에서 �
 
 msgid "settings.multiple.title"
 msgstr "다중 설정"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Web UI를 설정하는 중 오류가 발생했습니다. 다시 시도해 주세요."
+
+msgid "setup.file.content_entered"
+msgstr "입력한 문자 수: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "%(name)s에서 불러옴 · 문자 수: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "파일을 읽는 중 오류 발생"
 
 msgid "setup.status.admin_user_exists"
 msgstr "관리자 사용자가 이미 존재합니다. 다음 단계로 진행하세요."
@@ -4227,7 +4308,7 @@ msgid "setup.step3.pro_benefit_2_description"
 msgstr "문제나 문의 사항에 대해 BunkerWeb 팀으로부터 우선 지원을 받으세요."
 
 msgid "setup.step3.pro_benefit_2_title"
-msgstr "관리자의 기술 지원"
+msgstr "프로젝트 유지관리자의 기술 지원"
 
 msgid "setup.step3.pro_benefit_3_description"
 msgstr "특수한 요구 사항을 충족하는 맞춤형 솔루션을 제공합니다."
@@ -4367,6 +4448,9 @@ msgstr "아니요"
 msgid "status.no_data"
 msgstr "데이터 없음"
 
+msgid "status.no_file_selected"
+msgstr "선택된 파일 없음"
+
 msgid "status.no_history"
 msgstr "사용 가능한 기록이 없습니다."
 
@@ -4387,6 +4471,9 @@ msgstr "사용 가능한 단계 없음"
 
 msgid "status.no_steps_description"
 msgstr "이 템플릿에는 구성할 수 있는 단계가 없습니다."
+
+msgid "status.no_url_available"
+msgstr "사용 가능한 URL 없음"
 
 msgid "status.not_applicable"
 msgstr "해당 없음"
@@ -4435,6 +4522,9 @@ msgstr "현재 템플릿 외부에서의 변경은 허용되지 않습니다. �
 
 msgid "status.unique_server_name"
 msgstr "고유한 서버 이름"
+
+msgid "status.unknown"
+msgstr "알 수 없음"
 
 msgid "status.up"
 msgstr "활성"
@@ -4717,6 +4807,12 @@ msgstr "단계 소제목"
 
 msgid "template.editor.label_step_title"
 msgstr "단계 제목"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "누락"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "업로드됨"
 
 msgid "template.editor.missing_configs_body"
 msgstr "가져온 템플릿이 아직 업로드되지 않은 사용자 정의 설정을 참조하고 있습니다. 템플릿 설정을 완료하려면 다음 설정들을 가져오세요:"
@@ -5171,8 +5267,14 @@ msgstr "밝게"
 msgid "threatmap.attacks_today"
 msgstr "오늘의 공격"
 
+msgid "threatmap.blocked_request"
+msgstr "차단된 요청"
+
+msgid "threatmap.blocked_requests"
+msgstr "차단된 요청"
+
 msgid "threatmap.countries"
-msgstr "출발 국가"
+msgstr "출처 국가"
 
 msgid "threatmap.disabled_help"
 msgstr "위협 지도는 보고서 페이지와 동일한 저장된 보고서를 읽습니다. 기록을 시작하려면 METRICS_PERSIST_TO_DB를 yes로 설정하세요."
@@ -5202,7 +5304,7 @@ msgid "threatmap.fullscreen"
 msgstr "전체 화면"
 
 msgid "threatmap.map_sub"
-msgstr "호는 정확한 위치가 아니라 출발 국가를 나타냅니다"
+msgstr "호는 정확한 위치가 아니라 출처 국가를 나타냅니다"
 
 msgid "threatmap.map_title"
 msgstr "차단된 트래픽의 출처"
@@ -5321,6 +5423,9 @@ msgstr "차단 기간이 성공적으로 업데이트되었습니다!"
 msgid "toast.body.ping_succeed"
 msgstr "인스턴스: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "선택한 항목이 이미 요청한 상태입니다."
+
 msgid "toast.copied"
 msgstr "복사되었습니다!"
 
@@ -5339,6 +5444,9 @@ msgstr "전역 설정을 가져오는 중 오류가 발생했습니다."
 msgid "toast.global_settings_failed_title"
 msgstr "전역 설정 가져오기 실패"
 
+msgid "toast.header.conversion_failed"
+msgstr "전환 실패"
+
 msgid "toast.header.ping_failed"
 msgstr "핑(Ping) 실패"
 
@@ -5350,6 +5458,9 @@ msgstr "IP 주소 차단이 성공적으로 해제되었습니다!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Let's Encrypt 인증서를 자동으로 요청할지 여부입니다."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "파일 업로드로 돌아가기"
 
 msgid "tooltip.button.ban_ip"
 msgstr "이 IP 주소 차단"
@@ -5411,6 +5522,9 @@ msgstr "선택한 항목만 표시"
 msgid "tooltip.button.stop_instance"
 msgstr "인스턴스 %(hostname)s 중지"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "텍스트 편집기로 전환"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s 차단 해제"
 
@@ -5437,6 +5551,9 @@ msgstr "여러 줄 항목 접기(트레이스백, 페이로드)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "여러 줄 값 접기(인증서, 키)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "이제 사용자 지정 설정에서 전역 유형을 선택할 수 있습니다."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "OWASP 코어 규칙 세트(CRS) 플러그인이 로드된 후 적용되는 설정입니다."
@@ -6221,8 +6338,17 @@ msgstr "%(count)s개 서비스 숨김: %(protocol)s 업스트림은 프로토콜
 msgid "upstreams.truncated"
 msgstr "첫 500개의 업스트림만 표시됩니다. 완전한 결과를 얻기 위해 API을 사용하여 목록을 좁힙니다."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "패스키를 추가하려면 현재 비밀번호를 입력하세요."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "사용자 지정 SSL을 사용할 때는 인증서와 키를 모두 설정해야 합니다(파일 경로 또는 데이터 업로드 사용)."
+
 msgid "validation.default_field_name"
 msgstr "이 필드"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "DNS 챌린지를 사용할 때 이 필드는 필수입니다."
 
 msgid "validation.invalid_date"
 msgstr "유효하지 않은 날짜입니다."
@@ -6239,11 +6365,35 @@ msgstr "IP 주소는 필수입니다."
 msgid "validation.ip_service_duplicate"
 msgstr "이 IP 주소는 선택한 서비스(%(service)s)에 이미 차단되어 있습니다."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "뉴스레터를 구독하려면 유효한 이메일 주소를 입력하세요."
+
+msgid "validation.newsletter_email_required"
+msgstr "뉴스레터를 구독하려면 이 필드를 입력해야 합니다."
+
 msgid "validation.pattern"
 msgstr "%(field)s에 유효한 값을 입력해 주세요."
 
 msgid "validation.required"
 msgstr "%(field)s 필드는 필수입니다."
+
+msgid "validation.server_name_check_failed"
+msgstr "서버 이름 확인 실패"
+
+msgid "validation.server_name_choose_different"
+msgstr "다른 서버 이름을 선택하세요."
+
+msgid "validation.server_name_invalid"
+msgstr "유효하지 않은 서버 이름입니다."
+
+msgid "validation.server_name_not_unique"
+msgstr "서버 이름이 고유하지 않습니다."
+
+msgid "validation.server_name_proceed"
+msgstr "설정을 계속 진행할 수 있습니다."
+
+msgid "validation.server_name_unique"
+msgstr "서버 이름이 고유합니다."
 
 msgid "validation.service_required_for_ban"
 msgstr "서비스별 차단을 위해서는 서비스를 선택해야 합니다."
@@ -6398,11 +6548,23 @@ msgstr "대상 URL"
 msgid "workflows.action"
 msgstr "그 후"
 
+msgid "workflows.action_help.block"
+msgstr "요청 거부"
+
+msgid "workflows.action_help.challenge"
+msgstr "사람인지 확인"
+
+msgid "workflows.action_help.redirect"
+msgstr "다른 위치로 전송"
+
 msgid "workflows.add_rule"
 msgstr "규칙 추가"
 
 msgid "workflows.all"
 msgstr "전체"
+
+msgid "workflows.aria.changePosition"
+msgstr "규칙 %(n)s / %(total)s, 위치 변경"
 
 msgid "workflows.aria.collapse"
 msgstr "접기"
@@ -6440,8 +6602,14 @@ msgstr "규칙 이동"
 msgid "workflows.aria.moveUp"
 msgstr "위로 이동 — 먼저 실행"
 
+msgid "workflows.aria.newValue"
+msgstr "새 값"
+
 msgid "workflows.aria.openRule"
 msgstr "%(n)s 규칙 열기"
+
+msgid "workflows.aria.positionMove"
+msgstr "위치 %(n)s / %(total)s — 클릭하여 이동"
 
 msgid "workflows.aria.provider"
 msgstr "안티봇 제공자"
@@ -6575,6 +6743,15 @@ msgstr "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다
 msgid "workflows.clone_name"
 msgstr "복제 이름"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP 메서드"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 칸씩 위로 이동합니다."
 
@@ -6676,6 +6853,12 @@ msgstr "아래에 복제"
 
 msgid "workflows.menu.enable"
 msgstr "규칙 활성화"
+
+msgid "workflows.menu.moveTo"
+msgstr "%(n)s번 위치로 이동"
+
+msgid "workflows.menu.staysAt"
+msgstr "%(n)s번 위치 유지"
 
 msgid "workflows.menu.top"
 msgstr "첫 번째로 실행"
@@ -6837,7 +7020,7 @@ msgid "workflows.test.detail_detect"
 msgstr "이 서비스는 탐지 모드이므로 실제로 아무 작업도 적용되지 않습니다."
 
 msgid "workflows.test.detail_status"
-msgstr "클라이언트에 %(status)s이(가) 표시됩니다."
+msgstr "클라이언트에 표시되는 상태: %(status)s."
 
 msgid "workflows.test.failed"
 msgstr "테스트를 실행할 수 없음"
@@ -6894,7 +7077,7 @@ msgid "workflows.test.out_draft"
 msgstr "이 서비스는 초안이므로 아직 워크플로가 컴파일되지 않았습니다."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s이(가) 일치하여 요청에 %(action)s 작업을 수행했습니다."
+msgstr "일치한 항목: %(workflow)s · %(rule)s. 요청에 적용된 작업: %(action)s."
 
 msgid "workflows.test.out_no_match"
 msgstr "일치하는 규칙이 없습니다. 요청은 나머지 보안 스택으로 계속 진행됩니다."
@@ -6978,7 +7161,7 @@ msgid "workflows.tree.noneMeta"
 msgstr "어느 조건도 참이 아닐 때 일치"
 
 msgid "workflows.tree.not"
-msgstr "모두 아님"
+msgstr "어느 것도 아님"
 
 msgid "workflows.tree.or"
 msgstr "또는"
@@ -6991,6 +7174,15 @@ msgstr "총 500개의 워크플로우만 표시됩니다. 완전한 결과를 �
 
 msgid "workflows.untitled"
 msgstr "이름 없는 규칙"
+
+msgid "workflows.uri_match.exact"
+msgstr "정확히 일치"
+
+msgid "workflows.uri_match.prefix"
+msgstr "다음으로 시작"
+
+msgid "workflows.uri_match.regex"
+msgstr "정규식과 일치"
 
 msgid "workflows.value.add"
 msgstr "값"

@@ -29,7 +29,11 @@
     "no_changes_detected": "Keine Änderungen festgestellt.",
     "notice": "Hinweis",
     "ping_error": "Beim Pingen der Instanzen ist ein Fehler aufgetreten.",
-    "readonly_mode": "Diese Aktion ist im schreibgeschützten Modus deaktiviert."
+    "readonly_mode": "Diese Aktion ist im schreibgeschützten Modus deaktiviert.",
+    "plugin_file_invalid": "Bitte laden Sie ein gültiges Plugin-Archiv (.zip, .tar.gz oder .tar.xz) hoch.",
+    "plugin_file_too_large": "Das Plugin-Archiv überschreitet die Grenze von 50 MB.",
+    "plugin_upload_failed": "Beim Hochladen des Plugin-Archivs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "services_import_invalid_file": "Bitte laden Sie eine gültige Dienstexportdatei (.env oder .zip) hoch."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Eine Dienste-Exportdatei auswählen oder hier ablegen",
       "toggle_wrap": "Zeilenumbruch umschalten",
       "user_avatar": "Benutzeravatar",
-      "view_selected_items": "Ausgewählte Elemente anzeigen"
+      "view_selected_items": "Ausgewählte Elemente anzeigen",
+      "github_followers": "GitHub-Follower: {{count}}",
+      "github_forks": "GitHub-Forks: {{count}}",
+      "github_open_issues": "Offene GitHub-Issues: {{count}}",
+      "github_stars": "GitHub-Sterne: {{count}}",
+      "github_watchers": "GitHub-Beobachter: {{count}}",
+      "secret_value": "Geheimer Wert",
+      "value_hidden": "{{name}} (ausgeblendet)"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Blockierte Anfragen",
-        "title": "Verteilung der Anfragestatus"
+        "title": "Verteilung der Anfragestatus",
+        "http_304": "304 Nicht geändert",
+        "http_404": "404 Nicht gefunden",
+        "http_429": "429 Anfragerate begrenzt"
       },
       "top_blocked_ips": {
         "most_blocked": "Meistblockierte IP",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Fehler beim Aktualisieren der Sperrdauer. Bitte versuchen Sie es erneut.",
     "reports_load_error": "Fehler beim Laden der Berichte. Bitte versuchen Sie, die Seite neu zu laden.",
-    "unban_failed": "Fehler beim Entsperren der IP-Adresse. Bitte versuchen Sie es erneut."
+    "unban_failed": "Fehler beim Entsperren der IP-Adresse. Bitte versuchen Sie es erneut.",
+    "passkey_registration_failed": "Dieser Passkey konnte nicht registriert werden. Bitte versuchen Sie es erneut.",
+    "passkey_sign_in_failed": "Die Anmeldung mit einem Passkey ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "report_copy_access_failed": "Fehler beim Zugriff auf die zu kopierenden Daten. Bitte aktualisieren Sie die Seite.",
+    "report_copy_failed": "Kopieren in die Zwischenablage fehlgeschlagen. Verwenden Sie bitte die Schaltfläche zum Kopieren der Rohdaten unten.",
+    "report_details_load_failed": "Die Berichtsdetails konnten nicht geladen werden.",
+    "report_identifier_missing": "Berichtskennung fehlt",
+    "security_key_verification_failed": "Ihr Sicherheitsschlüssel konnte nicht überprüft werden. Bitte versuchen Sie es erneut.",
+    "webauthn_request_failed": "Die Sicherheitsschlüssel-Anfrage ist fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "flash": {
     "easter_egg": "Wenn du das liest, bist du neugierig",
@@ -1488,7 +1510,15 @@
       "title": "Übersicht"
     },
     "subtitle": "Folgen Sie den Schritten, um den Einrichtungsassistenten abzuschließen.",
-    "title": "Einrichtungsassistent"
+    "title": "Einrichtungsassistent",
+    "error": {
+      "web_ui_setup_failed": "Fehler beim Einrichten der Web-UI. Bitte versuchen Sie es erneut."
+    },
+    "file": {
+      "content_entered": "Eingegebene Zeichen: {{count}}",
+      "loaded_from": "Aus {{name}} geladen · Zeichen: {{count}}",
+      "read_error": "Fehler beim Lesen der Datei"
+    }
   },
   "status": {
     "admin_user_exists": "Ein Admin-Benutzer existiert bereits. Bitte fahren Sie mit dem nächsten Schritt fort.",
@@ -1554,7 +1584,10 @@
     "expiring": "Ablaufende",
     "no_settings": "Dieses Plugin hat keine Einstellungen für diesen Bereich.",
     "yes": "Ja",
-    "optional": "Optional"
+    "optional": "Optional",
+    "no_file_selected": "Keine Datei ausgewählt",
+    "no_url_available": "Keine URL verfügbar",
+    "unknown": "Unbekannt"
   },
   "step": {
     "next": "Weiter",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Jeder Konfigurationsname muss eindeutig sein.",
       "validation_id_required": "Vorlagen-ID ist erforderlich.",
       "validation_setting_key": "Jede Einstellung muss einen Schlüssel haben.",
-      "validation_settings_unique": "Jeder Einstellungsschlüssel muss eindeutig sein."
+      "validation_settings_unique": "Jeder Einstellungsschlüssel muss eindeutig sein.",
+      "missing_config_status_missing": "Fehlt",
+      "missing_config_status_uploaded": "Hochgeladen"
     },
     "none": "Keine Vorlage"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "Metrik-Dienst nicht erreichbar",
     "error_help": "Die Karte behält die zuletzt geladenen Werte und versucht es bei der nächsten Aktualisierung erneut.",
     "open_live": "Live-Ansicht",
-    "updated": "Aktualisiert"
+    "updated": "Aktualisiert",
+    "blocked_request": "blockierte Anfrage",
+    "blocked_requests": "blockierte Anfragen"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Wenn der Dienst entfernt oder neu gestartet wird, geht Ihre UI-Konfiguration verloren.",
     "autoconf_disclaimer_detail": "Dies liegt daran, dass die Methode des Dienstes 'autoconf' ist, die darauf ausgelegt ist, Konfigurationskonflikte zu verhindern.",
     "ban_updated": "Sperrdauer erfolgreich aktualisiert!",
     "body": {
-      "ping_succeed": "Instanzen: {{instances}}"
+      "ping_succeed": "Instanzen: {{instances}}",
+      "selected_items_already_in_state": "Die ausgewählten Elemente befinden sich bereits im gewünschten Zustand."
     },
     "copied": "Kopiert!",
     "disclaimer_title": "Haftungsausschluss",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Abrufen der globalen Einstellungen fehlgeschlagen",
     "header": {
       "ping_failed": "Ping fehlgeschlagen",
-      "ping_succeed": "Ping erfolgreich"
+      "ping_succeed": "Ping erfolgreich",
+      "conversion_failed": "Konvertierung fehlgeschlagen"
     },
     "ip_unbanned": "IP-Adresse erfolgreich entsperrt!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Instanz {{hostname}} stoppen",
       "unban_ip": "{{ip}} entsperren",
       "update_ban_duration": "Aktualisieren Sie die Sperrdauer",
-      "value_from_global": "Wert aus globalen Einstellungen"
+      "value_from_global": "Wert aus globalen Einstellungen",
+      "back_to_file_upload": "Zurück zum Datei-Upload",
+      "switch_to_text_editor": "Zum Texteditor wechseln"
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "Anzahl der Wiederholungen für ZeroSSL-API-Anfragen (0 deaktiviert Wiederholungen).",
     "zerossl_api_retry_delay": "Verzögerung in Sekunden zwischen ZeroSSL-API-Wiederholungen.",
     "zerossl_api_connect_timeout": "Verbindungs-Timeout in Sekunden für ZeroSSL-API-Aufrufe.",
-    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage."
+    "zerossl_api_max_time": "Maximale Gesamtzeit in Sekunden pro ZeroSSL-API-Anfrage.",
+    "config_global_types_available": "Sie können jetzt globale Typen für Ihre benutzerdefinierte Konfiguration auswählen."
   },
   "totp": {
     "cant_access": "Kann Ihren Authenticator nicht erreichen?",
@@ -2183,7 +2225,7 @@
     "confirm_renew_due": "Alle Zertifikate überprüfen und diejenigen, die fällig sind, erneuern?",
     "create": "Zertifikat erstellen",
     "download_chain": "Kette herunterladen",
-    "download_leaf": "Blatt herunterladen",
+    "download_leaf": "Endzertifikat herunterladen",
     "edit_help": "Dies ändert nur die Inventar-Metadaten, nicht das Zertifikat oder die Live-TLS-Einstellungen.",
     "edit_metadata": "Zertifikats-Metadaten bearbeiten",
     "empty": "Keine Zertifikate",
@@ -2205,7 +2247,7 @@
     "managed": "Verwaltete Zertifikate",
     "new_selfsigned": "Neues selbstsigniertes Zertifikat",
     "no_issuers": "Keine Ausstellerdaten",
-    "none_due": "Keine Zertifikate vorhanden",
+    "none_due": "Keine Zertifikate fällig",
     "orphan_account": "Konto",
     "orphan_badge": "ACME-Konto fehlt",
     "orphan_help": "Dieses Erneuerungseintrag verweist auf ein ACME-Konto, das nicht mehr vorhanden ist. Die Erneuerung bleibt blockiert, bis der Anbieterstatus repariert wurde.",
@@ -2235,18 +2277,18 @@
     },
     "source_label": "Quelle",
     "status": {
-      "expired": "Gültig abgelaufen",
+      "expired": "Abgelaufen",
       "expiring_soon": "Läuft bald ab",
       "not_yet_valid": "Noch nicht gültig",
-      "revoked": "Rückgängig",
+      "revoked": "Widerrufen",
       "valid": "Gültig"
     },
     "subtitle": "Zertifikate zentral verwalten, ausgeben, hochladen, zuweisen, erneuern und prüfen.",
     "total": "Gesamt",
     "truncated": "Nur die ersten 500 Zertifikate werden angezeigt. Verwenden Sie die API, um das vollständige Ergebnis zu erhalten.",
     "unassigned": "Nicht zugewiesen",
-    "upcoming": "Kommissarische Verlängerungen",
-    "upcoming_help": "Gültig oder innerhalb des 30-Tage-Verlängerungsfensters",
+    "upcoming": "Anstehende Verlängerungen",
+    "upcoming_help": "Abgelaufen oder innerhalb des 30-tägigen Verlängerungsfensters",
     "upload": "Zertifikat hochladen",
     "upload_custom": "Benutzerdefiniertes Zertifikat hochladen",
     "upload_invalid": "Wählen Sie ein gültiges öffentliches Zertifikat und den entsprechenden privaten Schlüssel.",
@@ -2264,7 +2306,7 @@
     "clone": "Ressourcen-Gruppe klonen",
     "clone_copy": "Erstellen Sie eine bearbeitbare Kopie von @{{name}}.",
     "comment": "Kommentar",
-    "collapse_all": "Alle zusammenfassen",
+    "collapse_all": "Alle einklappen",
     "delete": "Ressourcen-Gruppe löschen",
     "delete_confirm": "@{{name}} löschen? Dies kann nicht rückgängig gemacht werden.",
     "delete_help": "Löschung wird verhindert, solange eine Einstellung darauf verweist.",
@@ -2310,7 +2352,18 @@
     "pattern": "Bitte geben Sie einen gültigen Wert für {{field}} ein.",
     "required": "{{field}} ist erforderlich.",
     "service_required_for_ban": "Für eine dienstspezifische Sperre muss ein Dienst ausgewählt werden.",
-    "zerossl_email_or_api_key_required": "ZeroSSL erfordert entweder eine E-Mail-Adresse oder einen ZeroSSL-API-Schlüssel."
+    "zerossl_email_or_api_key_required": "ZeroSSL erfordert entweder eine E-Mail-Adresse oder einen ZeroSSL-API-Schlüssel.",
+    "current_password_required_for_passkey": "Geben Sie Ihr aktuelles Passwort ein, um einen Passkey hinzuzufügen.",
+    "custom_ssl_pair_required": "Bei benutzerdefiniertem SSL müssen sowohl Zertifikat als auch Schlüssel festgelegt werden (über Dateipfad oder Daten-Upload).",
+    "dns_challenge_field_required": "Dieses Feld ist bei Verwendung der DNS-Challenge erforderlich.",
+    "newsletter_email_invalid": "Geben Sie eine gültige E-Mail-Adresse für das Newsletter-Abonnement ein.",
+    "newsletter_email_required": "Dieses Feld ist erforderlich, wenn Sie den Newsletter abonnieren möchten.",
+    "server_name_check_failed": "Überprüfung des Servernamens fehlgeschlagen",
+    "server_name_choose_different": "Wählen Sie bitte einen anderen Servernamen.",
+    "server_name_invalid": "Ungültiger Servername.",
+    "server_name_not_unique": "Der Servername ist nicht eindeutig.",
+    "server_name_proceed": "Sie können mit der Einrichtung fortfahren.",
+    "server_name_unique": "Der Servername ist eindeutig."
   },
   "web_cache": {
     "available": "Verfügbar",
@@ -2331,7 +2384,7 @@
     "not_reporting": "Nicht gemeldet",
     "path": "Pfad",
     "purge": "Zwischengespeicherte Antworten bereinigen",
-    "purge_all": "Alle",
+    "purge_all": "Alles leeren",
     "purge_all_confirm_body": "Dies löscht jede zwischengespeicherte Antwort für jeden Dienst auf jeder erreichbaren Instanz. Dies kann nicht rückgängig gemacht werden.",
     "purge_all_confirm_title": "Gesamten Cache leeren?",
     "purge_help": "Aktionen werden sofort auf erreichbaren Instanzen ausgeführt. Unreichbare Instanzen werden übersprungen und keine Aktion wird in der Warteschlange gestellt.",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Abschließende Aktion",
       "uriMatch": "URI-Abgleichsmodus",
       "uriValue": "URI-Wert",
-      "window": "Zeitfenster in Sekunden"
+      "window": "Zeitfenster in Sekunden",
+      "changePosition": "Regel {{n}} von {{total}}, Position ändern",
+      "newValue": "Neuer Wert",
+      "positionMove": "Position {{n}} von {{total}} — zum Verschieben klicken"
     },
     "attach": "An den Diensten befestigen",
     "attach_help": "Die Regeln werden nur auf den Diensten angewendet, an die ein Workflow befestigt ist.",
@@ -2577,7 +2633,9 @@
       "disable": "Regel deaktivieren",
       "duplicate": "Darunter duplizieren",
       "enable": "Regel aktivieren",
-      "top": "Zuerst ausführen"
+      "top": "Zuerst ausführen",
+      "moveTo": "An Position {{n}} verschieben",
+      "staysAt": "Bleibt an Position {{n}}"
     },
     "move": {
       "first": "Zuerst ausführen",
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "Canvas",
       "list": "Liste"
+    },
+    "action_help": {
+      "block": "Anfrage ablehnen",
+      "challenge": "Menschlichen Benutzer verifizieren",
+      "redirect": "An eine andere Stelle senden"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP-Methode",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "ist genau gleich",
+      "prefix": "beginnt mit",
+      "regex": "entspricht dem regulären Ausdruck"
     }
   },
   "request_path": {
@@ -2727,7 +2800,7 @@
       "root": "Lokale Dateien"
     },
     "title": "Anforderungs-Pfad",
-    "unordered": "Keine deklarierte Position in der {{phase}}-Phase; es wird nach den alphabetisch sortierten Plugins ausgeführt."
+    "unordered": "Keine festgelegte Position in der {{phase}}-Phase; das Plugin wird nach den Plugins mit festgelegter Position in alphabetischer Reihenfolge ausgeführt."
   },
   "service": {
     "resources": {
@@ -2758,7 +2831,8 @@
         "unwired": "Diese Seite ändert nicht USE_TEMPLATE, daher kann die Vorlage nicht von hier aus geändert werden."
       },
       "title": "Angehängte Ressourcen",
-      "unavailable": "Nicht verfügbar"
+      "unavailable": "Nicht verfügbar",
+      "nothing_available": "Keine Ressource zum Zuordnen verfügbar."
     }
   },
   "onboarding": {

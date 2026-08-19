@@ -73,8 +73,20 @@ msgstr "सूचना"
 msgid "alert.ping_error"
 msgstr "इंस्टेंस को पिंग करते समय एक त्रुटि हुई।"
 
+msgid "alert.plugin_file_invalid"
+msgstr "कृपया एक मान्य प्लगइन आर्काइव अपलोड करें (.zip, .tar.gz, या .tar.xz)।"
+
+msgid "alert.plugin_file_too_large"
+msgstr "प्लगइन आर्काइव 50 MB की सीमा से अधिक है।"
+
+msgid "alert.plugin_upload_failed"
+msgstr "प्लगइन आर्काइव अपलोड करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।"
+
 msgid "alert.readonly_mode"
 msgstr "यह क्रिया रीड-ओनली मोड में अक्षम है।"
+
+msgid "alert.services_import_invalid_file"
+msgstr "कृपया एक मान्य सेवा निर्यात फ़ाइल अपलोड करें (.env या .zip)।"
 
 msgid "aria.label.clear_search"
 msgstr "खोज साफ़ करें"
@@ -96,6 +108,21 @@ msgstr "यह लॉग फ़ाइल डाउनलोड करें"
 
 msgid "aria.label.follow"
 msgstr "अनुसरण करें"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub फ़ॉलोअर: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub फ़ोर्क: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub के खुले इश्यू: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub स्टार: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub वॉचर: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "मूल्य छिपाएँ"
@@ -133,6 +160,9 @@ msgstr "मूल्य दिखाएँ"
 msgid "aria.label.search_logs"
 msgstr "लॉग खोजें"
 
+msgid "aria.label.secret_value"
+msgstr "गुप्त मान"
+
 msgid "aria.label.select_file"
 msgstr "फ़ाइल चुनें"
 
@@ -147,6 +177,9 @@ msgstr "लाइन रैपिंग टॉगल करें"
 
 msgid "aria.label.user_avatar"
 msgstr "उपयोगकर्ता अवतार"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (छिपा हुआ)"
 
 msgid "aria.label.view_selected_items"
 msgstr "चुने गए आइटम देखें"
@@ -893,7 +926,7 @@ msgid "compose.always_on"
 msgstr "हमेशा चालू"
 
 msgid "compose.count"
-msgstr "%(on)s पर · %(total)s उपलब्ध · %(locked)s लॉक"
+msgstr "%(on)s चालू · %(total)s उपलब्ध · %(locked)s लॉक"
 
 msgid "compose.entries"
 msgstr "%(count)s कॉन्फ़िगर किया गया"
@@ -905,7 +938,7 @@ msgid "compose.filter.changed"
 msgstr "बदला हुआ"
 
 msgid "compose.filter.on"
-msgstr "हाँ"
+msgstr "चालू"
 
 msgid "compose.locked"
 msgstr "यहाँ कोई नियंत्रण नहीं"
@@ -1786,6 +1819,15 @@ msgstr "समय के साथ अवरुद्ध स्थिति"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "अवरुद्ध अनुरोध"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 संशोधित नहीं"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 नहीं मिला"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 अनुरोध दर सीमित"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "अनुरोध स्थिति वितरण"
 
@@ -1844,7 +1886,7 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "अनुरोध संख्या के अनुसार"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "%(total)s के कुल द्वारा अवरुद्ध"
+msgstr "कुल %(total)s में से अवरुद्ध"
 
 msgid "dashboard.status.free_plan"
 msgstr "मुफ्त योजना"
@@ -2224,11 +2266,35 @@ msgstr "सर्वर त्रुटि"
 msgid "error.ban_update_failed"
 msgstr "प्रतिबंध अवधि अपडेट करने में विफल। कृपया पुनः प्रयास करें।"
 
+msgid "error.passkey_registration_failed"
+msgstr "यह पासकी पंजीकृत नहीं की जा सकी। कृपया फिर से प्रयास करें।"
+
+msgid "error.passkey_sign_in_failed"
+msgstr "पासकी से साइन इन नहीं किया जा सका। कृपया फिर से प्रयास करें।"
+
+msgid "error.report_copy_access_failed"
+msgstr "कॉपी करने के लिए डेटा एक्सेस करते समय त्रुटि हुई। पृष्ठ को रीफ़्रेश करें।"
+
+msgid "error.report_copy_failed"
+msgstr "क्लिपबोर्ड पर कॉपी नहीं किया जा सका। नीचे दिए गए रॉ डेटा कॉपी बटन का उपयोग करें।"
+
+msgid "error.report_details_load_failed"
+msgstr "रिपोर्ट का विवरण लोड नहीं किया जा सका।"
+
+msgid "error.report_identifier_missing"
+msgstr "रिपोर्ट पहचानकर्ता अनुपलब्ध"
+
 msgid "error.reports_load_error"
 msgstr "रिपोर्ट लोड करते समय त्रुटि हुई। कृपया पृष्ठ को ताज़ा करने का प्रयास करें।"
 
+msgid "error.security_key_verification_failed"
+msgstr "आपकी सुरक्षा कुंजी सत्यापित नहीं की जा सकी। कृपया फिर से प्रयास करें।"
+
 msgid "error.unban_failed"
 msgstr "आईपी पते का प्रतिबंध हटाने में विफल। कृपया पुनः प्रयास करें।"
+
+msgid "error.webauthn_request_failed"
+msgstr "सुरक्षा-कुंजी अनुरोध विफल रहा। कृपया फिर से प्रयास करें।"
 
 msgid "flash.easter_egg"
 msgstr "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं"
@@ -2867,7 +2933,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "अपनी सेवाओं की निर्यात फ़ाइल को यहाँ खींचें और छोड़ें (Drag and drop) या फ़ाइल चुनने के लिए क्लिक करें।"
 
 msgid "modal.body.import_services_warning"
-msgstr "सेवाओं को आयात करने से निर्यात फ़ाइल से नई UI सेवाएँ बन जाएँगी। मौजूदा सेवाओं को छोड़ दिया जाता है।"
+msgstr "सेवाएँ आयात करने पर निर्यात फ़ाइल से नई UI सेवाएँ बनेंगी। मौजूदा सेवाएँ छोड़ दी जाएँगी। कस्टम कॉन्फ़िगरेशन के साथ निर्यात किया गया .zip आर्काइव भी स्वीकार किया जाता है।"
 
 msgid "modal.body.instance_creation_alert"
 msgstr "आपको पोर्ट या सर्वर नाम प्रदान करने की आवश्यकता नहीं है; इंस्टेंस कॉन्फ़िगरेशन के लिए `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` और `API_SERVER_NAME` के मानों का उपयोग किया जाएगा।"
@@ -4117,6 +4183,9 @@ msgstr "पथ"
 msgid "service.resources.none"
 msgstr "कोई संलग्न नहीं"
 
+msgid "service.resources.nothing_available"
+msgstr "संलग्न करने के लिए कुछ उपलब्ध नहीं है।"
+
 msgid "service.resources.primary"
 msgstr "प्राथमिक प्रमाणपत्र"
 
@@ -4164,6 +4233,18 @@ msgstr "इस प्लगइन के लिए यहां कई सेट
 
 msgid "settings.multiple.title"
 msgstr "एकाधिक सेटिंग्स"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "वेब UI सेट करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।"
+
+msgid "setup.file.content_entered"
+msgstr "दर्ज अक्षर: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "%(name)s से लोड किया गया · अक्षर: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "फ़ाइल पढ़ने में त्रुटि"
 
 msgid "setup.status.admin_user_exists"
 msgstr "एक व्यवस्थापक उपयोगकर्ता पहले से मौजूद है। कृपया अगले चरण पर जाएं।"
@@ -4310,7 +4391,7 @@ msgid "status.expired"
 msgstr "समाप्त"
 
 msgid "status.expiring"
-msgstr "समाप्त"
+msgstr "जल्द समाप्त होने वाले"
 
 msgid "status.failed"
 msgstr "विफल"
@@ -4372,6 +4453,9 @@ msgstr "नहीं"
 msgid "status.no_data"
 msgstr "कोई डेटा नहीं"
 
+msgid "status.no_file_selected"
+msgstr "कोई फ़ाइल चयनित नहीं"
+
 msgid "status.no_history"
 msgstr "कोई इतिहास उपलब्ध नहीं।"
 
@@ -4392,6 +4476,9 @@ msgstr "कोई चरण उपलब्ध नहीं"
 
 msgid "status.no_steps_description"
 msgstr "इस टेम्पलेट में कॉन्फ़िगर करने के लिए कोई चरण नहीं हैं।"
+
+msgid "status.no_url_available"
+msgstr "कोई URL उपलब्ध नहीं"
 
 msgid "status.not_applicable"
 msgstr "लागू नहीं"
@@ -4440,6 +4527,9 @@ msgstr "वर्तमान टेम्पलेट के बाहर प�
 
 msgid "status.unique_server_name"
 msgstr "अद्वितीय सर्वर नाम"
+
+msgid "status.unknown"
+msgstr "अज्ञात"
 
 msgid "status.up"
 msgstr "चालू"
@@ -4722,6 +4812,12 @@ msgstr "चरण उपशीर्षक"
 
 msgid "template.editor.label_step_title"
 msgstr "चरण शीर्षक"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "अनुपस्थित"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "अपलोड किया गया"
 
 msgid "template.editor.missing_configs_body"
 msgstr "आयातित टेम्पलेट कस्टम कॉन्फ़िगरेशन को संदर्भित करता है जो अभी तक अपलोड नहीं किए गए हैं। टेम्पलेट सेटअप को पूरा करने के लिए कृपया इन कॉन्फ़िगरेशन को आयात करें:"
@@ -5176,6 +5272,12 @@ msgstr "लाइट"
 msgid "threatmap.attacks_today"
 msgstr "आज के हमले"
 
+msgid "threatmap.blocked_request"
+msgstr "अवरुद्ध अनुरोध"
+
+msgid "threatmap.blocked_requests"
+msgstr "अवरुद्ध अनुरोध"
+
 msgid "threatmap.countries"
 msgstr "मूल देश"
 
@@ -5326,6 +5428,9 @@ msgstr "प्रतिबंध अवधि सफलतापूर्वक 
 msgid "toast.body.ping_succeed"
 msgstr "इंस्टेंस: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "चयनित आइटम पहले से अनुरोधित स्थिति में हैं।"
+
 msgid "toast.copied"
 msgstr "कॉपी किया गया!"
 
@@ -5344,6 +5449,9 @@ msgstr "ग्लोबल सेटिंग्स प्राप्त कर
 msgid "toast.global_settings_failed_title"
 msgstr "ग्लोबल सेटिंग्स प्राप्त करने में विफल"
 
+msgid "toast.header.conversion_failed"
+msgstr "रूपांतरण विफल"
+
 msgid "toast.header.ping_failed"
 msgstr "पिंग विफल"
 
@@ -5355,6 +5463,9 @@ msgstr "आईपी पते का प्रतिबंध सफलता�
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।"
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "फ़ाइल अपलोड पर वापस जाएँ"
 
 msgid "tooltip.button.ban_ip"
 msgstr "इस IP पते को प्रतिबंधित करें"
@@ -5416,6 +5527,9 @@ msgstr "केवल चयनित दिखाएं"
 msgid "tooltip.button.stop_instance"
 msgstr "इंस्टेंस %(hostname)s रोकें"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "टेक्स्ट एडिटर पर जाएँ"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s का प्रतिबंध हटाएं"
 
@@ -5442,6 +5556,9 @@ msgstr "बहु-पंक्ति प्रविष्टियाँ सं
 
 msgid "tooltip.collapse_raw_values"
 msgstr "बहु-पंक्ति मान संक्षिप्त करें (प्रमाणपत्र, कुंजियाँ)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "अब आप अपनी कस्टम कॉन्फ़िगरेशन के लिए ग्लोबल प्रकार चुन सकते हैं।"
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "OWASP कोर रूल सेट प्लगइन्स लोड होने के बाद लागू की गई कॉन्फ़िगरेशन।"
@@ -6226,8 +6343,17 @@ msgstr "छिपी हुई सेवाएँ: %(count)s। %(protocol)s अ
 msgid "upstreams.truncated"
 msgstr "केवल पहले 500 अपस्ट्रीम प्रदर्शित होते हैं। पूर्ण परिणाम के लिए API का उपयोग करके सूची को संकीर्ण करें।"
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "पासकी जोड़ने के लिए अपना वर्तमान पासवर्ड दर्ज करें।"
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "कस्टम SSL का उपयोग करते समय प्रमाणपत्र और कुंजी दोनों सेट करें (फ़ाइल पथ या डेटा अपलोड के माध्यम से)।"
+
 msgid "validation.default_field_name"
 msgstr "यह फ़ील्ड"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "DNS चुनौती का उपयोग करते समय यह फ़ील्ड आवश्यक है।"
 
 msgid "validation.invalid_date"
 msgstr "अमान्य दिनांक"
@@ -6244,11 +6370,35 @@ msgstr "आईपी पता आवश्यक है।"
 msgid "validation.ip_service_duplicate"
 msgstr "यह आईपी पता चयनित सेवा (%(service)s) के लिए पहले से ही प्रतिबंधित है।"
 
+msgid "validation.newsletter_email_invalid"
+msgstr "न्यूज़लेटर की सदस्यता लेने के लिए एक मान्य ईमेल पता दर्ज करें।"
+
+msgid "validation.newsletter_email_required"
+msgstr "न्यूज़लेटर की सदस्यता लेने के लिए यह फ़ील्ड आवश्यक है।"
+
 msgid "validation.pattern"
 msgstr "कृपया %(field)s के लिए एक मान्य मान दर्ज करें।"
 
 msgid "validation.required"
 msgstr "%(field)s आवश्यक है।"
+
+msgid "validation.server_name_check_failed"
+msgstr "सर्वर नाम की जाँच विफल रही"
+
+msgid "validation.server_name_choose_different"
+msgstr "कृपया कोई दूसरा सर्वर नाम चुनें।"
+
+msgid "validation.server_name_invalid"
+msgstr "अमान्य सर्वर नाम।"
+
+msgid "validation.server_name_not_unique"
+msgstr "सर्वर नाम अद्वितीय नहीं है।"
+
+msgid "validation.server_name_proceed"
+msgstr "आप सेटअप जारी रख सकते हैं।"
+
+msgid "validation.server_name_unique"
+msgstr "सर्वर नाम अद्वितीय है।"
 
 msgid "validation.service_required_for_ban"
 msgstr "सेवा-विशिष्ट प्रतिबंध के लिए एक सेवा का चयन किया जाना चाहिए।"
@@ -6293,13 +6443,13 @@ msgid "web_cache.hit_rate"
 msgstr "हिट दर"
 
 msgid "web_cache.instance"
-msgstr "उदाहरण"
+msgstr "इंस्टेंस"
 
 msgid "web_cache.metrics"
-msgstr "उदाहरणों का समग्र हिट / मिस वितरण"
+msgstr "समग्र हिट / मिस वितरण"
 
 msgid "web_cache.metrics_scope"
-msgstr "काउंटर सभी कैश-सक्षम सेवाओं में उदाहरण के अनुसार एकत्रित किए जाते हैं।"
+msgstr "काउंटर सभी कैश-सक्षम सेवाओं के लिए प्रत्येक इंस्टेंस के अनुसार एकत्रित किए जाते हैं।"
 
 msgid "web_cache.not_reporting"
 msgstr "रिपोर्टिंग नहीं हो रही"
@@ -6326,7 +6476,7 @@ msgid "web_cache.purge_key"
 msgstr "प्रभावी कैश कुंजी"
 
 msgid "web_cache.purge_key_help"
-msgstr "केवल डिफ़ॉल्ट $scheme$host$request_uri के लिए कैश कुंजी को खाली छोड़ें। यदि सेवा PROXY_CACHE_KEY को ओवरराइड करती है, तो यहां प्रभावी मान पेस्ट करें; समर्थित अनुरोध-केवल चर को साफ़ करने के बजाय अस्वीकार कर दिया जाता है।"
+msgstr "कैश कुंजी को केवल डिफ़ॉल्ट $scheme$host$request_uri के लिए खाली छोड़ें। यदि सेवा PROXY_CACHE_KEY को ओवरराइड करती है, तो उसका प्रभावी मान यहाँ पेस्ट करें; असमर्थित request-only वेरिएबल किसी दूसरे कैश एंट्री को साफ़ करने के बजाय अस्वीकार किए जाते हैं।"
 
 msgid "web_cache.purge_key_placeholder"
 msgstr "प्रभावी PROXY_CACHE_KEY (वैकल्पिक)"
@@ -6403,11 +6553,23 @@ msgstr "गंतव्य URL"
 msgid "workflows.action"
 msgstr "फिर"
 
+msgid "workflows.action_help.block"
+msgstr "अनुरोध अस्वीकार करें"
+
+msgid "workflows.action_help.challenge"
+msgstr "साबित करें कि यह इंसान है"
+
+msgid "workflows.action_help.redirect"
+msgstr "इसे कहीं और भेजें"
+
 msgid "workflows.add_rule"
 msgstr "नियम जोड़ें"
 
 msgid "workflows.all"
 msgstr "सभी"
+
+msgid "workflows.aria.changePosition"
+msgstr "%(total)s में से नियम %(n)s, स्थिति बदलें"
 
 msgid "workflows.aria.collapse"
 msgstr "समेटें"
@@ -6445,8 +6607,14 @@ msgstr "नियम ले जाएँ"
 msgid "workflows.aria.moveUp"
 msgstr "ऊपर ले जाएँ — पहले चलेगा"
 
+msgid "workflows.aria.newValue"
+msgstr "नया मान"
+
 msgid "workflows.aria.openRule"
 msgstr "%(n)s नियम खोलें"
+
+msgid "workflows.aria.positionMove"
+msgstr "%(total)s में से स्थिति %(n)s — स्थानांतरित करने के लिए क्लिक करें"
 
 msgid "workflows.aria.provider"
 msgstr "एंटीबॉट प्रदाता"
@@ -6580,6 +6748,15 @@ msgstr "नियम कॉपी किए जाते हैं, लेकि
 msgid "workflows.clone_name"
 msgstr "प्रतिलिपि का नाम"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP विधि"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "यह नियम हटाएँ? इसके नीचे के सभी नियम एक स्थान ऊपर चले जाएँगे।"
 
@@ -6682,6 +6859,12 @@ msgstr "नीचे प्रतिलिपि बनाएँ"
 msgid "workflows.menu.enable"
 msgstr "नियम सक्षम करें"
 
+msgid "workflows.menu.moveTo"
+msgstr "स्थिति %(n)s पर ले जाएँ"
+
+msgid "workflows.menu.staysAt"
+msgstr "स्थिति %(n)s पर रहता है"
+
 msgid "workflows.menu.top"
 msgstr "पहले चलाएँ"
 
@@ -6752,7 +6935,7 @@ msgid "workflows.say.gateAdded"
 msgstr "मिलान में दर सीमा जोड़ी गई। इसके नीचे नियम मेल नहीं खाता और मूल्यांकन जारी रहता है।"
 
 msgid "workflows.say.inserted"
-msgstr "%(total)s पर %(n)s पर नियम जोड़ा गया। इससे पहले के सभी नियमों की पहले जांच की जाती है।"
+msgstr "%(total)s में से %(n)s स्थान पर नियम जोड़ा गया। उससे पहले के सभी नियम पहले जाँचे जाते हैं।"
 
 msgid "workflows.say.inspecting"
 msgstr "%(total)s के %(n)s नियम संपादित करें — %(name)s।"
@@ -6996,6 +7179,15 @@ msgstr "केवल पहले 500 वर्कफ़्लो प्रद�
 
 msgid "workflows.untitled"
 msgstr "बिना शीर्षक का नियम"
+
+msgid "workflows.uri_match.exact"
+msgstr "बिल्कुल समान है"
+
+msgid "workflows.uri_match.prefix"
+msgstr "से शुरू होता है"
+
+msgid "workflows.uri_match.regex"
+msgstr "रेगेक्स से मेल खाता है"
 
 msgid "workflows.value.add"
 msgstr "मान"

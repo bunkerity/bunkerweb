@@ -29,7 +29,11 @@
     "no_changes_detected": "Nessuna modifica rilevata.",
     "notice": "Avviso",
     "ping_error": "Si è verificato un errore durante il ping delle istanze.",
-    "readonly_mode": "Questa azione è disabilitata in modalità di sola lettura."
+    "readonly_mode": "Questa azione è disabilitata in modalità di sola lettura.",
+    "plugin_file_invalid": "Carica un archivio del plugin valido (.zip, .tar.gz o .tar.xz).",
+    "plugin_file_too_large": "L’archivio del plugin supera il limite di 50 MB.",
+    "plugin_upload_failed": "Si è verificato un errore durante il caricamento dell’archivio del plugin. Riprova.",
+    "services_import_invalid_file": "Carica un file di esportazione dei servizi valido (.env o .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Seleziona un file di esportazione dei servizi o rilascialo qui",
       "toggle_wrap": "Attiva/disattiva ritorno a capo",
       "user_avatar": "Avatar utente",
-      "view_selected_items": "Visualizza gli elementi selezionati"
+      "view_selected_items": "Visualizza gli elementi selezionati",
+      "github_followers": "Follower GitHub: {{count}}",
+      "github_forks": "Fork GitHub: {{count}}",
+      "github_open_issues": "Issue GitHub aperte: {{count}}",
+      "github_stars": "Stelle GitHub: {{count}}",
+      "github_watchers": "Watcher GitHub: {{count}}",
+      "secret_value": "Valore segreto",
+      "value_hidden": "{{name}} (nascosto)"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Richieste Bloccate",
-        "title": "Distribuzione Stato Richieste"
+        "title": "Distribuzione Stato Richieste",
+        "http_304": "304 Non modificato",
+        "http_404": "404 Non trovato",
+        "http_429": "429 Frequenza limitata"
       },
       "top_blocked_ips": {
         "most_blocked": "IP più bloccato",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Impossibile aggiornare la durata del blocco. Riprova.",
     "reports_load_error": "Errore durante il caricamento dei report. Riprova aggiornando la pagina.",
-    "unban_failed": "Impossibile sbloccare l'indirizzo IP. Riprova."
+    "unban_failed": "Impossibile sbloccare l'indirizzo IP. Riprova.",
+    "passkey_registration_failed": "Impossibile registrare questa passkey. Riprova.",
+    "passkey_sign_in_failed": "Impossibile accedere con una passkey. Riprova.",
+    "report_copy_access_failed": "Errore durante l’accesso ai dati da copiare. Prova ad aggiornare la pagina.",
+    "report_copy_failed": "Impossibile copiare negli appunti. Prova il pulsante qui sotto per copiare i dati non elaborati.",
+    "report_details_load_failed": "Impossibile caricare i dettagli del report.",
+    "report_identifier_missing": "Identificatore del report mancante",
+    "security_key_verification_failed": "Impossibile verificare la chiave di sicurezza. Riprova.",
+    "webauthn_request_failed": "La richiesta della chiave di sicurezza non è riuscita. Riprova."
   },
   "flash": {
     "easter_egg": "Se stai leggendo questo, significa che sei curioso",
@@ -883,7 +905,7 @@
   "instances": {
     "down": "Inattivo",
     "loading": "In caricamento",
-    "subtitle": "Gestisci le istanze di BunkerWeb connesse a questa interfaccia: creale, ping, ricaricale, fermale o eliminale.",
+    "subtitle": "Gestisci le istanze di BunkerWeb connesse a questa interfaccia: creale, verificane la connettività, ricaricale, arrestale o eliminale.",
     "total": "Numero totale di istanze",
     "up": "Attivo"
   },
@@ -1488,7 +1510,15 @@
       "title": "Riepilogo"
     },
     "subtitle": "Segui i passi per completare la procedura guidata di configurazione.",
-    "title": "Procedura Guidata di Configurazione"
+    "title": "Procedura Guidata di Configurazione",
+    "error": {
+      "web_ui_setup_failed": "Errore durante la configurazione dell’UI web. Riprova."
+    },
+    "file": {
+      "content_entered": "Caratteri inseriti: {{count}}",
+      "loaded_from": "Caricato da {{name}} · caratteri: {{count}}",
+      "read_error": "Errore durante la lettura del file"
+    }
   },
   "status": {
     "admin_user_exists": "Esiste già un utente amministratore. Procedi al passo successivo.",
@@ -1554,7 +1584,10 @@
     "expiring": "In scadenza",
     "no_settings": "Questo plugin non ha impostazioni per questo ambito.",
     "yes": "Sì",
-    "optional": "Facoltativo"
+    "optional": "Facoltativo",
+    "no_file_selected": "Nessun file selezionato",
+    "no_url_available": "Nessun URL disponibile",
+    "unknown": "Sconosciuto"
   },
   "step": {
     "next": "Successivo",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Ogni nome di configurazione deve essere unico.",
       "validation_id_required": "L'ID del modello è obbligatorio.",
       "validation_setting_key": "Ogni impostazione deve avere una chiave.",
-      "validation_settings_unique": "Ogni chiave di impostazione deve essere unica."
+      "validation_settings_unique": "Ogni chiave di impostazione deve essere unica.",
+      "missing_config_status_missing": "Mancante",
+      "missing_config_status_uploaded": "Caricata"
     },
     "none": "Nessun Modello"
   },
@@ -1853,18 +1888,21 @@
     "top_reasons": "Motivi principali",
     "not_localised": "non localizzato",
     "empty_title": "Nulla bloccato in questo intervallo",
-    "empty_help": "O nessuna richiesta è stata bloccata nelle ultime 24 ore, oppure i rapporti non sono ancora stati raccolti.",
+    "empty_help": "Nessuna richiesta è stata bloccata nelle ultime 24 ore, oppure i rapporti non sono ancora stati raccolti.",
     "error_title": "Servizio metriche irraggiungibile",
     "error_help": "La mappa mantiene gli ultimi dati caricati e riproverà al prossimo aggiornamento.",
     "open_live": "Vista in diretta",
-    "updated": "Aggiornato"
+    "updated": "Aggiornato",
+    "blocked_request": "richiesta bloccata",
+    "blocked_requests": "richieste bloccate"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Se il servizio viene rimosso o riavviato, la configurazione della UI andrà persa.",
     "autoconf_disclaimer_detail": "Questo perché il metodo del servizio è 'autoconf', progettato per prevenire conflitti di configurazione.",
     "ban_updated": "Durata del blocco aggiornata con successo!",
     "body": {
-      "ping_succeed": "Istanze: {{instances}}"
+      "ping_succeed": "Istanze: {{instances}}",
+      "selected_items_already_in_state": "Gli elementi selezionati sono già nello stato richiesto."
     },
     "copied": "Copiato!",
     "disclaimer_title": "Disclaimer",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Recupero impostazioni globali non riuscito",
     "header": {
       "ping_failed": "Ping fallito",
-      "ping_succeed": "Ping riuscito"
+      "ping_succeed": "Ping riuscito",
+      "conversion_failed": "Conversione non riuscita"
     },
     "ip_unbanned": "Indirizzo IP sbloccato con successo!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Ferma Istanza {{hostname}}",
       "unban_ip": "Sblocca {{ip}}",
       "update_ban_duration": "Aggiorna la durata del blocco",
-      "value_from_global": "Valore dalle impostazioni globali"
+      "value_from_global": "Valore dalle impostazioni globali",
+      "back_to_file_upload": "Torna al caricamento del file",
+      "switch_to_text_editor": "Passa all’editor di testo"
     },
     "cannot_delete_original_ban": "Impossibile eliminare la voce di blocco originale.",
     "cannot_remove_disabled": "Impossibile rimuovere perché una o più impostazioni sono disabilitate.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "Numero di tentativi per le richieste API ZeroSSL (0 disabilita i tentativi).",
     "zerossl_api_retry_delay": "Ritardo in secondi tra i tentativi API ZeroSSL.",
     "zerossl_api_connect_timeout": "Timeout di connessione in secondi per le chiamate API ZeroSSL.",
-    "zerossl_api_max_time": "Tempo totale massimo in secondi per ogni richiesta API ZeroSSL."
+    "zerossl_api_max_time": "Tempo totale massimo in secondi per ogni richiesta API ZeroSSL.",
+    "config_global_types_available": "Ora puoi selezionare tipi globali per la configurazione personalizzata."
   },
   "totp": {
     "cant_access": "Non riesci ad accedere al tuo autenticatore?",
@@ -2310,7 +2352,18 @@
     "pattern": "Inserisci un valore valido per {{field}}.",
     "required": "{{field}} è obbligatorio.",
     "service_required_for_ban": "È necessario selezionare un servizio per un blocco specifico del servizio.",
-    "zerossl_email_or_api_key_required": "ZeroSSL richiede un'email o una chiave API ZeroSSL."
+    "zerossl_email_or_api_key_required": "ZeroSSL richiede un'email o una chiave API ZeroSSL.",
+    "current_password_required_for_passkey": "Inserisci la password attuale per aggiungere una passkey.",
+    "custom_ssl_pair_required": "Quando usi SSL personalizzato, devi impostare sia il certificato sia la chiave (tramite percorso del file o caricamento dei dati).",
+    "dns_challenge_field_required": "Questo campo è obbligatorio quando si usa la sfida DNS.",
+    "newsletter_email_invalid": "Inserisci un indirizzo email valido per iscriverti alla newsletter.",
+    "newsletter_email_required": "Questo campo è obbligatorio per iscriversi alla newsletter.",
+    "server_name_check_failed": "Verifica del nome server non riuscita",
+    "server_name_choose_different": "Scegli un nome server diverso.",
+    "server_name_invalid": "Nome server non valido.",
+    "server_name_not_unique": "Il nome server non è univoco.",
+    "server_name_proceed": "Puoi continuare con la configurazione.",
+    "server_name_unique": "Il nome server è univoco."
   },
   "web_cache": {
     "available": "Disponibili",
@@ -2328,7 +2381,7 @@
     "instance": "Istanza",
     "metrics": "Distribuzione hit / miss",
     "metrics_scope": "I contatori sono aggregati per istanza su tutti i servizi con cache abilitata.",
-    "not_reporting": "Non in fase di report",
+    "not_reporting": "Nessun dato inviato",
     "path": "Percorso",
     "purge": "Elimina le risposte in cache",
     "purge_all": "Elimina tutto",
@@ -2336,7 +2389,7 @@
     "purge_all_confirm_title": "Eliminare l'intera cache?",
     "purge_help": "Eliminare le azioni eseguite immediatamente sulle istanze raggiungibili. Le istanze inaccessibili vengono ignorate e nessuna azione viene aggiunta alla coda.",
     "purge_key": "Chiave di cache efficace",
-    "purge_key_help": "Lasciare vuota la chiave di cache solo per il valore predefinito $scheme$host$request_uri. Se il servizio sovrascrive PROXY_CACHE_KEY, incolla il valore efficace qui; le variabili richieste non supportate vengono rifiutate invece di eliminare un'altra voce.",
+    "purge_key_help": "Lascia vuota la chiave di cache solo per il valore predefinito $scheme$host$request_uri. Se il servizio sovrascrive PROXY_CACHE_KEY, incolla qui il valore effettivo; le variabili non supportate e disponibili solo durante la richiesta vengono rifiutate per evitare di eliminare una voce diversa.",
     "purge_key_placeholder": "PROXY_CACHE_KEY efficace (opzionale)",
     "purge_url": "Eliminare URL",
     "purge_url_placeholder": "https://www.example.com/asset.js",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Azione terminale",
       "uriMatch": "Modalità di corrispondenza URI",
       "uriValue": "Valore URI",
-      "window": "Finestra in secondi"
+      "window": "Finestra in secondi",
+      "changePosition": "Regola {{n}} di {{total}}, cambia posizione",
+      "newValue": "Nuovo valore",
+      "positionMove": "Posizione {{n}} di {{total}} — fai clic per spostare"
     },
     "attach": "Allega ai servizi",
     "attach_help": "Le regole vengono applicate solo ai servizi a cui è collegato il flusso di lavoro.",
@@ -2517,7 +2573,7 @@
       "fit": "Adatta alla visualizzazione",
       "gateTip": "Una condizione di corrispondenza, non un'azione: al di sotto della soglia, la regola non corrisponde e viene valutata quella successiva.",
       "hint": "Trascina un nodo per riordinare · trascina il pannello per spostarti · Alt + ← / → su un nodo selezionato",
-      "hintReadonly": "Solo lettura — sposta per guardare, l'ordine non può essere modificato",
+      "hintReadonly": "Solo lettura — trascina per esplorare; l'ordine non può essere modificato",
       "insert": "Aggiungi una regola qui",
       "open": "Apri la regola",
       "skipped": "Disabilitato — saltato completamente, come se non fosse nella catena.",
@@ -2577,7 +2633,9 @@
       "disable": "Disattiva regola",
       "duplicate": "Duplica sotto",
       "enable": "Attiva regola",
-      "top": "Esegui per prima"
+      "top": "Esegui per prima",
+      "moveTo": "Sposta alla posizione {{n}}",
+      "staysAt": "Resta alla posizione {{n}}"
     },
     "move": {
       "first": "Esegui per prima",
@@ -2643,7 +2701,7 @@
       "detail_status": "Il client riceve {{status}}.",
       "failed": "Impossibile eseguire il test",
       "geo": "Ricerca GeoIP",
-      "geo_help": "Non disponibile rende le regole per paese e ASN SCONOSCIUTE, quindi non possono mai corrispondere.",
+      "geo_help": "Quando la ricerca GeoIP non è disponibile, le regole per paese e ASN diventano SCONOSCIUTE e quindi non possono mai corrispondere.",
       "geo_local": "Indirizzo locale / privato",
       "geo_resolved": "Risolto",
       "geo_unavailable": "Database non disponibile",
@@ -2659,7 +2717,7 @@
       "other_unreached": "non raggiunto",
       "other_workflows": "Altri flussi di lavoro di questo servizio",
       "out_draft": "Questo servizio è una bozza: non è ancora stato compilato alcun flusso di lavoro.",
-      "out_match": "{{workflow}} · {{rule}} ha trovato corrispondenza e {{action}} la richiesta.",
+      "out_match": "{{workflow}} · {{rule}} ha trovato corrispondenza — azione: {{action}}.",
       "out_no_match": "Nessuna regola corrisponde. La richiesta prosegue con il resto dello stack di sicurezza.",
       "out_not_attached": "Questo flusso di lavoro non è collegato ad alcun servizio, quindi non esiste una sequenza di regole da valutare.",
       "out_whitelisted": "Nella lista consentita: l’intero flusso di lavoro viene ignorato e nessuna regola viene valutata.",
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "Canvas",
       "list": "Lista"
+    },
+    "action_help": {
+      "block": "Nega la richiesta",
+      "challenge": "Dimostra di essere umano",
+      "redirect": "Inviala altrove"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "Metodo HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "è esattamente",
+      "prefix": "inizia con",
+      "regex": "corrisponde all’espressione regolare"
     }
   },
   "request_path": {
@@ -2758,7 +2831,8 @@
         "unwired": "Questa pagina non pubblica USE_TEMPLATE, quindi il modello non può essere modificato da qui."
       },
       "title": "Risorse allegate",
-      "unavailable": "Non disponibile"
+      "unavailable": "Non disponibile",
+      "nothing_available": "Nessuna risorsa disponibile da associare."
     }
   },
   "onboarding": {
@@ -2766,7 +2840,7 @@
     "error": "Impossibile caricare la guida.",
     "hint": {
       "bans": "I ban sono i client che BunkerWeb sta rifiutando. Ogni riga mostra il motivo e la scadenza.",
-      "home": "Questa dashboard mostra lo stato attuale: istanze attive, servizi serviti e il traffico gestito da BunkerWeb.",
+      "home": "Questa dashboard mostra lo stato attuale: istanze attive, servizi protetti e traffico gestito da BunkerWeb.",
       "logs": "Log in tempo reale di ogni istanza, filtrabili per istanza e livello.",
       "reports": "Ogni richiesta bloccata finisce qui. Aprine una per vedere quale controllo di sicurezza l'ha fermata e perché.",
       "title": "Tour rapido"
@@ -2782,7 +2856,7 @@
       "read_logs": "Seguire i log in tempo reale su tutte le istanze",
       "read_reports": "Scoprire perché una richiesta è stata bloccata",
       "service": "Registra il primo servizio",
-      "workflow": "Collegare un workflow di sicurezza"
+      "workflow": "Collegare un flusso di lavoro di sicurezza"
     },
     "not_saved": "Impossibile salvare.",
     "pro_tips": "Suggerimenti PRO",
@@ -2811,7 +2885,7 @@
     "disabled_title": "I tempi dei plugin sono disattivati",
     "disabled_help": "Imposta METRICS_COLLECT_TIMINGS su yes per misurare il tempo impiegato da ogni plugin. La durata totale della richiesta viene comunque raccolta.",
     "unreachable_title": "Nessuna istanza ha segnalato tempi",
-    "unreachable_help": "I tempi vengono letti dalle istanze stesse, quindi nessuna ha risposto — oppure nessuna ha ancora servito una richiesta."
+    "unreachable_help": "I tempi vengono letti dalle istanze stesse, quindi nessuna ha risposto — oppure nessuna ha ancora gestito una richiesta."
   },
   "whatsnew": {
     "missing_action": "Apri il changelog su GitHub",

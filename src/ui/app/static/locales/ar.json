@@ -29,7 +29,11 @@
     "no_changes_detected": "لم يتم اكتشاف أي تغييرات.",
     "notice": "تنويه",
     "ping_error": "حدث خطأ أثناء اختبار اتصال المثيلات.",
-    "readonly_mode": "هذا الإجراء معطل في وضع القراءة فقط."
+    "readonly_mode": "هذا الإجراء معطل في وضع القراءة فقط.",
+    "plugin_file_invalid": "يرجى تحميل أرشيف إضافة صالح (.zip أو .tar.gz أو .tar.xz).",
+    "plugin_file_too_large": "يتجاوز أرشيف الإضافة حد 50 MB.",
+    "plugin_upload_failed": "حدث خطأ أثناء تحميل أرشيف الإضافة. حاول مرة أخرى.",
+    "services_import_invalid_file": "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "حدد ملف تصدير الخدمات أو أفلت واحدًا هنا",
       "toggle_wrap": "تبديل التفاف الأسطر",
       "user_avatar": "صورة المستخدم",
-      "view_selected_items": "عرض العناصر المحددة"
+      "view_selected_items": "عرض العناصر المحددة",
+      "github_followers": "متابعو GitHub: {{count}}",
+      "github_forks": "تفرعات GitHub: {{count}}",
+      "github_open_issues": "مشكلات GitHub المفتوحة: {{count}}",
+      "github_stars": "نجوم GitHub: {{count}}",
+      "github_watchers": "مراقبو GitHub: {{count}}",
+      "secret_value": "قيمة سرية",
+      "value_hidden": "{{name}} (مخفي)"
     }
   },
   "badge": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "الطلبات المحظورة",
-        "title": "توزيع حالة الطلبات"
+        "title": "توزيع حالة الطلبات",
+        "http_304": "304 لم يتم التعديل",
+        "http_404": "404 غير موجود",
+        "http_429": "429 تجاوز حد المعدل"
       },
       "top_blocked_ips": {
         "most_blocked": "IP الأكثر حظرًا",
@@ -588,7 +602,7 @@
       "greeting": "مرحبًا بعودتك،"
     },
     "mini": {
-      "across_countries": "في جميع أنحاء {{count}}",
+      "across_countries": "عبر {{count}} من البلدان",
       "enforced": "مطبق حاليًا",
       "pct_blocked": "{{percent}}% محظور",
       "scheduled": "مجدولة"
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "فشل تحديث مدة الحظر. يرجى المحاولة مرة أخرى.",
     "reports_load_error": "حدث خطأ أثناء تحميل التقارير. يرجى محاولة تحديث الصفحة.",
-    "unban_failed": "فشل رفع الحظر عن عنوان IP. يرجى المحاولة مرة أخرى."
+    "unban_failed": "فشل رفع الحظر عن عنوان IP. يرجى المحاولة مرة أخرى.",
+    "passkey_registration_failed": "تعذر تسجيل مفتاح المرور هذا. حاول مرة أخرى.",
+    "passkey_sign_in_failed": "تعذر تسجيل دخولك باستخدام مفتاح مرور. حاول مرة أخرى.",
+    "report_copy_access_failed": "حدث خطأ أثناء الوصول إلى البيانات لنسخها. حاول تحديث الصفحة.",
+    "report_copy_failed": "تعذر النسخ إلى الحافظة. حاول استخدام زر نسخ البيانات الخام أدناه.",
+    "report_details_load_failed": "تعذر تحميل تفاصيل التقرير.",
+    "report_identifier_missing": "معرّف التقرير مفقود",
+    "security_key_verification_failed": "تعذر التحقق من مفتاح الأمان. حاول مرة أخرى.",
+    "webauthn_request_failed": "فشل طلب مفتاح الأمان. حاول مرة أخرى."
   },
   "flash": {
     "easter_egg": "إذا قرأت هذا، فهذا يعني أنك فضولي",
@@ -1001,7 +1023,7 @@
       "import_configs_dropzone": "اسحب وأفلت ملف تصدير التكوينات المخصصة هنا أو انقر لتحديد ملف.",
       "import_configs_warning": "يتم دائمًا الاحتفاظ بالتكوينات المخصصة التي أنشأها scheduler أو autoconf أو templates. يمكن فقط استبدال تكوينات UI/API.",
       "import_services_dropzone": "قم بسحب وإسقاط ملف تصدير الخدمات هنا أو انقر لتحديد ملف.",
-      "import_services_warning": "سيؤدي استيراد الخدمات إلى إنشاء خدمات واجهة مستخدم جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة.",
+      "import_services_warning": "سيؤدي استيراد الخدمات إلى إنشاء خدمات UI جديدة من ملف التصدير. يتم تخطي الخدمات الموجودة. كما يُقبل أرشيف .zip مُصدَّر مع التكوينات المخصصة.",
       "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل.",
       "next_step_in_case_of_issue": "إذا واجهت مشاكل، يمكنك قبول الشهادة غير الآمنة يدويًا:",
       "recovery_codes_save_alert": "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك.",
@@ -1011,7 +1033,7 @@
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
-      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
+      "update_duration_alert": "حدد مدة جديدة لعمليات الحظر المحددة:",
       "ban_filtered_confirmation": "هل تريد حظر عناوين IP من كل التقارير المطابقة وعددها {{count}}؟ ستُطبق الأهداف المكررة مرة واحدة.",
       "unban_filtered_confirmation": "هل تريد بالتأكيد إلغاء كل عمليات الحظر المطابقة وعددها {{count}}؟",
       "update_filtered_duration_alert": "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها {{count}}:"
@@ -1488,7 +1510,15 @@
       "title": "نظرة عامة"
     },
     "subtitle": "اتبع الخطوات لإكمال معالج الإعداد.",
-    "title": "معالج الإعداد"
+    "title": "معالج الإعداد",
+    "error": {
+      "web_ui_setup_failed": "حدث خطأ أثناء إعداد واجهة الويب. حاول مرة أخرى."
+    },
+    "file": {
+      "content_entered": "الأحرف المُدخلة: {{count}}",
+      "loaded_from": "تم التحميل من {{name}} · عدد الأحرف: {{count}}",
+      "read_error": "خطأ في قراءة الملف"
+    }
   },
   "status": {
     "admin_user_exists": "يوجد مستخدم مسؤول بالفعل. يرجى المتابعة إلى الخطوة التالية.",
@@ -1551,10 +1581,13 @@
     "active": "نشط",
     "all_valid": "جميعها صالحة",
     "expired": "منتهية الصلاحية",
-    "expiring": "منتهي الصلاحية",
+    "expiring": "قيد انتهاء الصلاحية",
     "no_settings": "هذه الإضافة ليس لديها إعدادات لهذا النطاق.",
     "yes": "نعم",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "no_file_selected": "لم يتم تحديد ملف",
+    "no_url_available": "لا يتوفر URL",
+    "unknown": "مجهول"
   },
   "step": {
     "next": "التالي",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "يجب أن يكون كل اسم تكوين فريدًا.",
       "validation_id_required": "معرف القالب مطلوب.",
       "validation_setting_key": "يجب أن يكون لكل إعداد مفتاح.",
-      "validation_settings_unique": "يجب أن يكون كل مفتاح إعداد فريدًا."
+      "validation_settings_unique": "يجب أن يكون كل مفتاح إعداد فريدًا.",
+      "missing_config_status_missing": "مفقود",
+      "missing_config_status_uploaded": "تم التحميل"
     },
     "none": "لا يوجد قالب"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "تعذَّر الوصول إلى خدمة المقاييس",
     "error_help": "تحتفظ الخريطة بآخر أرقام تمكّنت من تحميلها وستعيد المحاولة عند التحديث التالي.",
     "open_live": "عرض مباشر",
-    "updated": "آخر تحديث"
+    "updated": "آخر تحديث",
+    "blocked_request": "طلب محظور",
+    "blocked_requests": "طلبات محظورة"
   },
   "toast": {
     "autoconf_disclaimer_bold": "إذا تم إزالة الخدمة أو إعادة تشغيلها، فسيتم فقد تكوين واجهة المستخدم الخاص بك.",
     "autoconf_disclaimer_detail": "هذا لأن طريقة الخدمة هي 'autoconf'، المصممة لمنع تعارضات التكوين.",
     "ban_updated": "تم تحديث مدة الحظر بنجاح!",
     "body": {
-      "ping_succeed": "المثيلات: {{instances}}"
+      "ping_succeed": "المثيلات: {{instances}}",
+      "selected_items_already_in_state": "العناصر المحددة في الحالة المطلوبة بالفعل."
     },
     "copied": "تم النسخ!",
     "disclaimer_title": "إخلاء مسؤولية",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "فشل جلب الإعدادات العامة",
     "header": {
       "ping_failed": "فشل اختبار الاتصال",
-      "ping_succeed": "نجح اختبار الاتصال"
+      "ping_succeed": "نجح اختبار الاتصال",
+      "conversion_failed": "فشل التحويل"
     },
     "ip_unbanned": "تم رفع الحظر عن عنوان IP بنجاح!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "إيقاف المثيل {{hostname}}",
       "unban_ip": "رفع الحظر عن {{ip}}",
       "update_ban_duration": "تحديث مدة الحظر",
-      "value_from_global": "قيمة من الإعدادات العامة"
+      "value_from_global": "قيمة من الإعدادات العامة",
+      "back_to_file_upload": "العودة إلى تحميل الملف",
+      "switch_to_text_editor": "التبديل إلى محرر النصوص"
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
     "cannot_remove_disabled": "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "عدد محاولات إعادة طلبات واجهة برمجة تطبيقات ZeroSSL (القيمة 0 تعطل إعادة المحاولة).",
     "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
-    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL."
+    "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
+    "config_global_types_available": "يمكنك الآن تحديد الأنواع العامة لتكوينك المخصص."
   },
   "totp": {
     "cant_access": "هل لا يمكنك الوصول إلى رمز المصادقة الخاص بك؟",
@@ -2310,7 +2352,18 @@
     "pattern": "يرجى إدخال قيمة صالحة لـ {{field}}.",
     "required": "{{field}} مطلوب.",
     "service_required_for_ban": "يجب تحديد خدمة لحظر خاص بالخدمة.",
-    "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL."
+    "zerossl_email_or_api_key_required": "يتطلب ZeroSSL إما بريدًا إلكترونيًا أو مفتاح API لـ ZeroSSL.",
+    "current_password_required_for_passkey": "أدخل كلمة مرورك الحالية لإضافة مفتاح مرور.",
+    "custom_ssl_pair_required": "عند استخدام SSL مخصص، يجب تعيين كل من الشهادة والمفتاح (عبر مسار ملف أو تحميل بيانات).",
+    "dns_challenge_field_required": "هذا الحقل مطلوب عند استخدام تحدي DNS.",
+    "newsletter_email_invalid": "أدخل عنوان بريد إلكتروني صالحًا للاشتراك في النشرة الإخبارية.",
+    "newsletter_email_required": "هذا الحقل مطلوب إذا كنت تريد الاشتراك في النشرة الإخبارية.",
+    "server_name_check_failed": "فشل التحقق من اسم الخادم",
+    "server_name_choose_different": "اختر اسم خادم مختلفًا.",
+    "server_name_invalid": "اسم الخادم غير صالح.",
+    "server_name_not_unique": "اسم الخادم غير فريد.",
+    "server_name_proceed": "يمكنك متابعة الإعداد.",
+    "server_name_unique": "اسم الخادم فريد."
   },
   "web_cache": {
     "available": "متاح",
@@ -2323,10 +2376,10 @@
     "error": "خطأ",
     "enabled": "مُمكَّن",
     "enabled_instances": "تم تمكين التخزين المؤقت",
-    "enabled_services": "الخدمات الممكنة",
+    "enabled_services": "الخدمات المُمكَّنة",
     "hit_rate": "معدل النجاح",
     "instance": "مثيل",
-    "metrics": "توزيع التوزيع الصحيح / الخاطئ",
+    "metrics": "التوزيع الإجمالي للإصابات / الإخفاقات",
     "metrics_scope": "يتم تجميع العدادات لكل مثيل عبر جميع الخدمات التي تم تمكين التخزين المؤقت لها.",
     "not_reporting": "غير مُبلغ",
     "path": "المسار",
@@ -2348,7 +2401,7 @@
   },
   "compose": {
     "always_on": "دائمًا",
-    "count": "{{on}} على · {{total}} متاح · {{locked}} مقفل",
+    "count": "{{on}} مُشغَّل · {{total}} متاح · {{locked}} مقفل",
     "entries": "{{count}} تم التكوين",
     "filter": {
       "all": "الكل",
@@ -2496,7 +2549,10 @@
       "terminalAction": "الإجراء النهائي",
       "uriMatch": "وضع مطابقة URI",
       "uriValue": "قيمة URI",
-      "window": "النافذة بالثواني"
+      "window": "النافذة بالثواني",
+      "changePosition": "القاعدة {{n}} من {{total}}، تغيير الموضع",
+      "newValue": "قيمة جديدة",
+      "positionMove": "الموضع {{n}} من {{total}} — انقر للنقل"
     },
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
@@ -2577,7 +2633,9 @@
       "disable": "تعطيل القاعدة",
       "duplicate": "تكرار أسفلها",
       "enable": "تمكين القاعدة",
-      "top": "تشغيل أولًا"
+      "top": "تشغيل أولًا",
+      "moveTo": "النقل إلى الموضع {{n}}",
+      "staysAt": "يبقى في الموضع {{n}}"
     },
     "move": {
       "first": "تشغيل أولًا",
@@ -2625,8 +2683,8 @@
         "drag": "بالسحب",
         "keyboard": "بلوحة المفاتيح"
       },
-      "viewCanvas": "عرض اللوحة. تعمل القواعد من اليسار إلى اليمين؛ والفائز الأول يفوز.",
-      "viewList": "عرض القائمة. تعمل القواعد من الأعلى إلى الأسفل؛ والفائز الأول يفوز."
+      "viewCanvas": "عرض اللوحة. تُنفذ القواعد من اليسار إلى اليمين؛ ويُعتمد أول تطابق.",
+      "viewList": "عرض القائمة. تُنفذ القواعد من الأعلى إلى الأسفل؛ ويُعتمد أول تطابق."
     },
     "search": "ابحث عن الاسم أو الوصف...",
     "test": {
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "اللوحة",
       "list": "القائمة"
+    },
+    "action_help": {
+      "block": "رفض الطلب",
+      "challenge": "إثبات أنه إنسان",
+      "redirect": "إرساله إلى مكان آخر"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "طريقة HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "يساوي تمامًا",
+      "prefix": "يبدأ بـ",
+      "regex": "يطابق التعبير النمطي"
     }
   },
   "request_path": {
@@ -2758,7 +2831,8 @@
         "unwired": "لا تقوم هذه الصفحة بنشر USE_TEMPLATE، لذلك لا يمكن تغيير القالب من هنا."
       },
       "title": "الموارد المرفقة",
-      "unavailable": "غير متوفر"
+      "unavailable": "غير متوفر",
+      "nothing_available": "لا يوجد شيء متاح للربط."
     }
   },
   "onboarding": {
@@ -2779,7 +2853,7 @@
       "pro": "فعّل BunkerWeb PRO",
       "read_bans": "اعرف من المحظور وإلى متى",
       "read_home": "اقرأ لوحة المعلومات: ما هو سليم الآن",
-      "read_logs": "تابع السجلات المباشرة عبر جميع النسخ",
+      "read_logs": "تابع السجلات المباشرة عبر جميع المثيلات",
       "read_reports": "اكتشف سبب حظر أحد الطلبات",
       "service": "سجّل خدمتك الأولى",
       "workflow": "إرفاق سير عمل أمني"

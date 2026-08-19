@@ -73,8 +73,20 @@ msgstr "注意"
 msgid "alert.ping_error"
 msgstr "Ping 实例时发生错误。"
 
+msgid "alert.plugin_file_invalid"
+msgstr "请上传有效的插件归档文件（.zip、.tar.gz 或 .tar.xz）。"
+
+msgid "alert.plugin_file_too_large"
+msgstr "插件归档文件超过 50 MB 的限制。"
+
+msgid "alert.plugin_upload_failed"
+msgstr "上传插件归档文件时发生错误。请重试。"
+
 msgid "alert.readonly_mode"
 msgstr "此操作在只读模式下被禁用。"
+
+msgid "alert.services_import_invalid_file"
+msgstr "请上传有效的服务导出文件（.env 或 .zip）。"
 
 msgid "aria.label.clear_search"
 msgstr "清除搜索"
@@ -96,6 +108,21 @@ msgstr "下载此日志文件"
 
 msgid "aria.label.follow"
 msgstr "跟随"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub 粉丝数：%(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub Fork 数：%(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub 未解决 Issue 数：%(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub Star 数：%(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub 关注者数：%(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "隐藏值"
@@ -133,6 +160,9 @@ msgstr "显示值"
 msgid "aria.label.search_logs"
 msgstr "搜索日志"
 
+msgid "aria.label.secret_value"
+msgstr "机密值"
+
 msgid "aria.label.select_file"
 msgstr "选择文件"
 
@@ -147,6 +177,9 @@ msgstr "切换自动换行"
 
 msgid "aria.label.user_avatar"
 msgstr "用户头像"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s（已隐藏）"
 
 msgid "aria.label.view_selected_items"
 msgstr "查看选定的项目"
@@ -203,7 +236,7 @@ msgid "bans.stats.tile.permanent"
 msgstr "永久封禁"
 
 msgid "bans.subtitle"
-msgstr "在您的 BunkerWeb 实例中禁用的 IP 地址 — 添加、删除或调整禁用的时长。"
+msgstr "您的 BunkerWeb 实例中被封禁的 IP 地址——添加、移除或调整封禁时长。"
 
 msgid "breadcrumb.about"
 msgstr "关于"
@@ -644,7 +677,7 @@ msgid "certificates.assignment_notice"
 msgstr "分配关系用于整理集中式证书清单；TLS 部署仍由各服务的证书设置控制。"
 
 msgid "certificates.assignments"
-msgstr "分配库存"
+msgstr "证书分配"
 
 msgid "certificates.assignments_help"
 msgstr "这些分配不会更改实时 TLS 设置。"
@@ -692,7 +725,7 @@ msgid "certificates.download_chain"
 msgstr "下载链"
 
 msgid "certificates.download_leaf"
-msgstr "下载叶片"
+msgstr "下载叶证书"
 
 msgid "certificates.edit_help"
 msgstr "这只会更改库存元数据，而不是证书材料或实时 TLS 设置。"
@@ -740,7 +773,7 @@ msgid "certificates.key_drop"
 msgstr "在此处拖动匹配的私钥"
 
 msgid "certificates.key_limit"
-msgstr "最多 1 MiB；在休息状态下加密，且无法下载"
+msgstr "最大 1 MiB；静态存储时加密，且不可下载"
 
 msgid "certificates.last_error"
 msgstr "上次错误"
@@ -749,7 +782,7 @@ msgid "certificates.make_primary"
 msgstr "将其标记为此服务的首选库存分配"
 
 msgid "certificates.managed"
-msgstr "管理证书"
+msgstr "受管证书"
 
 msgid "certificates.new_selfsigned"
 msgstr "新的自签名证书"
@@ -758,7 +791,7 @@ msgid "certificates.no_issuers"
 msgstr "无颁发者数据"
 
 msgid "certificates.none_due"
-msgstr "缺少证书"
+msgstr "目前没有需要续订的证书"
 
 msgid "certificates.orphan_account"
 msgstr "账户"
@@ -878,7 +911,7 @@ msgid "certificates.upload_custom"
 msgstr "上传自定义证书"
 
 msgid "certificates.upload_invalid"
-msgstr "选择有效的公钥和对应的私钥。"
+msgstr "请选择有效的公有证书及其匹配的私钥。"
 
 msgid "certificates.valid_days"
 msgstr "有效天数"
@@ -1786,6 +1819,15 @@ msgstr "阻止状态随时间变化"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "被阻止的请求"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 未修改"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 未找到"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 请求速率受限"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "请求状态分布"
 
@@ -1814,7 +1856,7 @@ msgid "dashboard.map.no_data"
 msgstr "无数据"
 
 msgid "dashboard.mini.across_countries"
-msgstr "在 %(count)s 国家"
+msgstr "涉及 %(count)s 个国家/地区"
 
 msgid "dashboard.mini.enforced"
 msgstr "目前生效"
@@ -1844,7 +1886,7 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "按请求数"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "已阻止 %(total)s 总计"
+msgstr "个请求已拦截，共 %(total)s 个"
 
 msgid "dashboard.status.free_plan"
 msgstr "免费计划"
@@ -2224,11 +2266,35 @@ msgstr "服务器错误"
 msgid "error.ban_update_failed"
 msgstr "更新封禁期限失败。请重试。"
 
+msgid "error.passkey_registration_failed"
+msgstr "无法注册此通行密钥。请重试。"
+
+msgid "error.passkey_sign_in_failed"
+msgstr "无法使用通行密钥登录。请重试。"
+
+msgid "error.report_copy_access_failed"
+msgstr "访问要复制的数据时出错。请尝试刷新页面。"
+
+msgid "error.report_copy_failed"
+msgstr "复制到剪贴板失败。请尝试使用下方的原始数据复制按钮。"
+
+msgid "error.report_details_load_failed"
+msgstr "加载报告详情失败。"
+
+msgid "error.report_identifier_missing"
+msgstr "缺少报告标识符"
+
 msgid "error.reports_load_error"
 msgstr "加载报告时出错。请尝试刷新页面。"
 
+msgid "error.security_key_verification_failed"
+msgstr "无法验证安全密钥。请重试。"
+
 msgid "error.unban_failed"
 msgstr "解禁 IP 地址失败。请重试。"
+
+msgid "error.webauthn_request_failed"
+msgstr "安全密钥请求失败。请重试。"
 
 msgid "flash.easter_egg"
 msgstr "如果你读到了这条信息，说明你很好奇"
@@ -2863,7 +2929,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "将您的服务导出文件拖放到此处，或单击以选择文件。"
 
 msgid "modal.body.import_services_warning"
-msgstr "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。"
+msgstr "导入服务将从导出文件创建新的 UI 服务。现有服务将被跳过。也支持包含自定义配置的 .zip 导出归档。"
 
 msgid "modal.body.instance_creation_alert"
 msgstr "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。"
@@ -3135,7 +3201,7 @@ msgid "news.posted_on"
 msgstr "发布于"
 
 msgid "news.slide"
-msgstr "滑动"
+msgstr "幻灯片"
 
 msgid "newsletter.legal_agreement"
 msgstr "我想要订阅新闻通讯，并且我已经阅读并同意："
@@ -3324,7 +3390,7 @@ msgid "pro.button.upgrade_to_pro"
 msgstr "升级到 PRO"
 
 msgid "pro.expiration_date.expires_in"
-msgstr "有效期至"
+msgstr "距离到期还有"
 
 msgid "pro.expiration_date.title"
 msgstr "Pro 到期日期"
@@ -4112,6 +4178,9 @@ msgstr "路径"
 msgid "service.resources.none"
 msgstr "未附加"
 
+msgid "service.resources.nothing_available"
+msgstr "没有可关联的项目。"
+
 msgid "service.resources.primary"
 msgstr "首选证书"
 
@@ -4159,6 +4228,18 @@ msgstr "在此配置此插件的多个设置实例。"
 
 msgid "settings.multiple.title"
 msgstr "多个设置"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "设置 Web UI 时出错。请重试。"
+
+msgid "setup.file.content_entered"
+msgstr "已输入字符数：%(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "已从 %(name)s 加载 · 字符数：%(count)s"
+
+msgid "setup.file.read_error"
+msgstr "读取文件时出错"
 
 msgid "setup.status.admin_user_exists"
 msgstr "管理员用户已存在。请继续下一步。"
@@ -4367,6 +4448,9 @@ msgstr "否"
 msgid "status.no_data"
 msgstr "无数据"
 
+msgid "status.no_file_selected"
+msgstr "未选择文件"
+
 msgid "status.no_history"
 msgstr "无可用历史记录。"
 
@@ -4387,6 +4471,9 @@ msgstr "无可用步骤"
 
 msgid "status.no_steps_description"
 msgstr "此模板没有任何可配置的步骤。"
+
+msgid "status.no_url_available"
+msgstr "没有可用的 URL"
 
 msgid "status.not_applicable"
 msgstr "不适用"
@@ -4435,6 +4522,9 @@ msgstr "不允许在当前模板之外进行更改。请使用当前模板进行
 
 msgid "status.unique_server_name"
 msgstr "唯一服务器名称"
+
+msgid "status.unknown"
+msgstr "未知"
 
 msgid "status.up"
 msgstr "运行中"
@@ -4717,6 +4807,12 @@ msgstr "步骤副标题"
 
 msgid "template.editor.label_step_title"
 msgstr "步骤标题"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "缺失"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "已上传"
 
 msgid "template.editor.missing_configs_body"
 msgstr "导入的模板引用了尚未上传的自定义配置。请导入这些配置以完成模板设置："
@@ -5171,6 +5267,12 @@ msgstr "浅色"
 msgid "threatmap.attacks_today"
 msgstr "今日攻击"
 
+msgid "threatmap.blocked_request"
+msgstr "被拦截的请求"
+
+msgid "threatmap.blocked_requests"
+msgstr "被拦截的请求"
+
 msgid "threatmap.countries"
 msgstr "来源国家/地区"
 
@@ -5321,6 +5423,9 @@ msgstr "封禁期限已成功更新！"
 msgid "toast.body.ping_succeed"
 msgstr "实例：%(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "所选项目已处于请求的状态。"
+
 msgid "toast.copied"
 msgstr "已复制！"
 
@@ -5339,6 +5444,9 @@ msgstr "获取全局设置时发生错误。"
 msgid "toast.global_settings_failed_title"
 msgstr "获取全局设置失败"
 
+msgid "toast.header.conversion_failed"
+msgstr "转换失败"
+
 msgid "toast.header.ping_failed"
 msgstr "Ping 失败"
 
@@ -5350,6 +5458,9 @@ msgstr "IP 地址已成功解禁！"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "是否自动请求 Let's Encrypt 证书。"
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "返回文件上传"
 
 msgid "tooltip.button.ban_ip"
 msgstr "封禁此 IP 地址"
@@ -5411,6 +5522,9 @@ msgstr "仅显示所选项"
 msgid "tooltip.button.stop_instance"
 msgstr "停止实例 %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "切换到文本编辑器"
+
 msgid "tooltip.button.unban_ip"
 msgstr "解禁 %(ip)s"
 
@@ -5437,6 +5551,9 @@ msgstr "折叠多行条目（traceback、payload）"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "折叠多行值（证书、密钥）"
+
+msgid "tooltip.config_global_types_available"
+msgstr "现在可以为自定义配置选择全局类型。"
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "在加载 OWASP 核心规则集插件后应用的配置。"
@@ -6221,8 +6338,17 @@ msgstr "已隐藏 %(count)s 个服务：%(protocol)s 上游只能关联协议匹
 msgid "upstreams.truncated"
 msgstr "仅显示前 500 个上游。通过 API 缩小列表以获得完整结果。"
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "请输入当前密码以添加通行密钥。"
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "使用自定义 SSL 时，必须同时设置证书和密钥（通过文件路径或数据上传）。"
+
 msgid "validation.default_field_name"
 msgstr "此字段"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "使用 DNS 挑战时，此字段为必填项。"
 
 msgid "validation.invalid_date"
 msgstr "无效日期"
@@ -6239,11 +6365,35 @@ msgstr "需要 IP 地址。"
 msgid "validation.ip_service_duplicate"
 msgstr "此 IP 地址已针对所选服务 (%(service)s) 被封禁。"
 
+msgid "validation.newsletter_email_invalid"
+msgstr "请输入有效的电子邮件地址以订阅新闻通讯。"
+
+msgid "validation.newsletter_email_required"
+msgstr "如果要订阅新闻通讯，此字段为必填项。"
+
 msgid "validation.pattern"
 msgstr "请输入有效的 %(field)s 值。"
 
 msgid "validation.required"
 msgstr "%(field)s 是必填项。"
+
+msgid "validation.server_name_check_failed"
+msgstr "服务器名称检查失败"
+
+msgid "validation.server_name_choose_different"
+msgstr "请选择其他服务器名称。"
+
+msgid "validation.server_name_invalid"
+msgstr "服务器名称无效。"
+
+msgid "validation.server_name_not_unique"
+msgstr "服务器名称不唯一。"
+
+msgid "validation.server_name_proceed"
+msgstr "您可以继续进行设置。"
+
+msgid "validation.server_name_unique"
+msgstr "服务器名称唯一。"
 
 msgid "validation.service_required_for_ban"
 msgstr "对于特定于服务的封禁，必须选择一个服务。"
@@ -6398,11 +6548,23 @@ msgstr "目标 URL"
 msgid "workflows.action"
 msgstr "然后"
 
+msgid "workflows.action_help.block"
+msgstr "拒绝该请求"
+
+msgid "workflows.action_help.challenge"
+msgstr "验证其是否为真人"
+
+msgid "workflows.action_help.redirect"
+msgstr "将其发送到其他位置"
+
 msgid "workflows.add_rule"
 msgstr "添加规则"
 
 msgid "workflows.all"
 msgstr "全部"
+
+msgid "workflows.aria.changePosition"
+msgstr "规则 %(n)s / %(total)s，更改位置"
 
 msgid "workflows.aria.collapse"
 msgstr "折叠"
@@ -6440,8 +6602,14 @@ msgstr "移动规则"
 msgid "workflows.aria.moveUp"
 msgstr "上移，提前运行"
 
+msgid "workflows.aria.newValue"
+msgstr "新值"
+
 msgid "workflows.aria.openRule"
 msgstr "打开规则 %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "位置 %(n)s / %(total)s — 点击移动"
 
 msgid "workflows.aria.provider"
 msgstr "反机器人验证提供商"
@@ -6468,7 +6636,7 @@ msgid "workflows.aria.resourceGroup"
 msgstr "资源组"
 
 msgid "workflows.aria.ruleErrors"
-msgstr "%(count)s 规则中的验证问题"
+msgstr "此规则中有 %(count)s 个验证问题"
 
 msgid "workflows.aria.ruleName"
 msgstr "规则 %(n)s 的名称"
@@ -6575,6 +6743,15 @@ msgstr "规则会被复制，但服务附加不会被复制。"
 msgid "workflows.clone_name"
 msgstr "副本名称"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP 方法"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "删除此规则？其下的所有规则都将上移一位。"
 
@@ -6676,6 +6853,12 @@ msgstr "在下方复制"
 
 msgid "workflows.menu.enable"
 msgstr "启用规则"
+
+msgid "workflows.menu.moveTo"
+msgstr "移动到位置 %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "保持在位置 %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "最先运行"
@@ -6987,10 +7170,19 @@ msgid "workflows.tree.removeGroup"
 msgstr "删除组"
 
 msgid "workflows.truncated"
-msgstr "仅显示前500个工作流程。通过API获取完整结果。"
+msgstr "仅显示前 500 个工作流程。请通过 API 缩小查询范围以获取完整结果。"
 
 msgid "workflows.untitled"
 msgstr "未命名规则"
+
+msgid "workflows.uri_match.exact"
+msgstr "完全等于"
+
+msgid "workflows.uri_match.prefix"
+msgstr "以此开头"
+
+msgid "workflows.uri_match.regex"
+msgstr "与正则表达式匹配"
 
 msgid "workflows.value.add"
 msgstr "值"

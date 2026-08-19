@@ -29,7 +29,11 @@
     "no_changes_detected": "No changes detected.",
     "notice": "Notice",
     "ping_error": "An error occurred while pinging the instances.",
-    "readonly_mode": "This action is disabled in read-only mode."
+    "readonly_mode": "This action is disabled in read-only mode.",
+    "plugin_file_invalid": "Please upload a valid plugin archive (.zip, .tar.gz, or .tar.xz).",
+    "plugin_file_too_large": "The plugin archive exceeds the 50 MB limit.",
+    "plugin_upload_failed": "An error occurred while uploading the plugin archive. Please try again.",
+    "services_import_invalid_file": "Please upload a valid services export file (.env or .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Select a services export file or drop one here",
       "toggle_wrap": "Toggle line wrapping",
       "user_avatar": "User avatar",
-      "view_selected_items": "View selected items"
+      "view_selected_items": "View selected items",
+      "github_followers": "GitHub followers: {{count}}",
+      "github_forks": "GitHub forks: {{count}}",
+      "github_open_issues": "GitHub open issues: {{count}}",
+      "github_stars": "GitHub stars: {{count}}",
+      "github_watchers": "GitHub watchers: {{count}}",
+      "secret_value": "Secret value",
+      "value_hidden": "{{name}} (hidden)"
     }
   },
   "badge": {
@@ -581,7 +592,10 @@
       },
       "request_status": {
         "blocked": "Blocked Requests",
-        "title": "Request Status Distribution"
+        "title": "Request Status Distribution",
+        "http_304": "304 Not Modified",
+        "http_404": "404 Not Found",
+        "http_429": "429 Rate Limited"
       },
       "timeseries": {
         "series": "Blocked",
@@ -766,7 +780,15 @@
     },
     "ban_update_failed": "Failed to update ban duration. Please try again.",
     "reports_load_error": "Error loading reports. Please try refreshing the page.",
-    "unban_failed": "Failed to unban IP address. Please try again."
+    "unban_failed": "Failed to unban IP address. Please try again.",
+    "passkey_registration_failed": "Couldn't register this passkey. Please try again.",
+    "passkey_sign_in_failed": "Couldn't sign you in with a passkey. Please try again.",
+    "report_copy_access_failed": "Error accessing data for copying. Please try refreshing the page.",
+    "report_copy_failed": "Failed to copy to clipboard. Please try using the raw data copy button below.",
+    "report_details_load_failed": "Failed to load report details.",
+    "report_identifier_missing": "Missing report identifier",
+    "security_key_verification_failed": "Couldn't verify your security key. Please try again.",
+    "webauthn_request_failed": "The security-key request failed. Please try again."
   },
   "flash": {
     "easter_egg": "If you read this, it means that you're curious",
@@ -1542,7 +1564,15 @@
       "title": "Overview"
     },
     "subtitle": "Follow the steps to complete the setup wizard.",
-    "title": "Setup Wizard"
+    "title": "Setup Wizard",
+    "error": {
+      "web_ui_setup_failed": "Error while setting up web UI. Please try again."
+    },
+    "file": {
+      "content_entered": "Entered characters: {{count}}",
+      "loaded_from": "Loaded from {{name}} · characters: {{count}}",
+      "read_error": "Error reading file"
+    }
   },
   "status": {
     "active": "Active",
@@ -1608,7 +1638,10 @@
     "template_in_use_description": "Changes outside the current template are not allowed. Please make changes using the current template or switch to Advanced/Raw mode.",
     "unique_server_name": "Unique Server Name",
     "up": "Up",
-    "yes": "Yes"
+    "yes": "Yes",
+    "no_file_selected": "No file selected",
+    "no_url_available": "No URL available",
+    "unknown": "Unknown"
   },
   "step": {
     "next": "Next",
@@ -1853,7 +1886,9 @@
       "validation_configs_unique": "Each config name must be unique.",
       "validation_id_required": "Template ID is required.",
       "validation_setting_key": "Each setting must have a key.",
-      "validation_settings_unique": "Each setting key must be unique."
+      "validation_settings_unique": "Each setting key must be unique.",
+      "missing_config_status_missing": "Missing",
+      "missing_config_status_uploaded": "Uploaded"
     },
     "none": "No Template"
   },
@@ -1911,14 +1946,17 @@
     "error_title": "Couldn't reach the metrics service",
     "error_help": "The map keeps the last figures it managed to load and will retry on the next refresh.",
     "open_live": "Live view",
-    "updated": "Updated"
+    "updated": "Updated",
+    "blocked_request": "blocked request",
+    "blocked_requests": "blocked requests"
   },
   "toast": {
     "autoconf_disclaimer_bold": "If the service is removed or restarted, your UI configuration will be lost.",
     "autoconf_disclaimer_detail": "This is because the service's method is 'autoconf', which is designed to prevent configuration conflicts.",
     "ban_updated": "Ban duration updated successfully!",
     "body": {
-      "ping_succeed": "Instances: {{instances}}"
+      "ping_succeed": "Instances: {{instances}}",
+      "selected_items_already_in_state": "The selected items are already in the requested state."
     },
     "copied": "Copied!",
     "disclaimer_title": "Disclaimer",
@@ -1928,7 +1966,8 @@
     "global_settings_failed_title": "Failed to fetch global settings",
     "header": {
       "ping_failed": "Ping failed",
-      "ping_succeed": "Ping successful"
+      "ping_succeed": "Ping successful",
+      "conversion_failed": "Conversion failed"
     },
     "ip_unbanned": "IP address unbanned successfully!"
   },
@@ -1957,7 +1996,9 @@
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
       "update_ban_duration": "Update ban duration",
-      "value_from_global": "Value from global settings"
+      "value_from_global": "Value from global settings",
+      "back_to_file_upload": "Back to file upload",
+      "switch_to_text_editor": "Switch to text editor"
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
@@ -2042,7 +2083,7 @@
     "readonly_mode": "This action is not allowed in read-only mode.",
     "readonly_user_action_disabled": "Disabled: Your account is read-only, action '{{action}}' disabled.",
     "real_ip_from": "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
-    "real_ip_from_urls": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+    "real_ip_from_urls": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from. Also supports file:// URLs and basic authentication using the http://user:pass@url scheme.",
     "real_ip_header": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
     "real_ip_recursive": "Perform a recursive search in the header container IP address.",
     "remove_ban_entry": "Remove this ban entry from the list.",
@@ -2204,7 +2245,8 @@
     "zerossl_api_retry": "Number of retries for ZeroSSL API requests (0 disables retries).",
     "zerossl_api_retry_delay": "Delay in seconds between ZeroSSL API retries.",
     "zerossl_api_connect_timeout": "Connection timeout in seconds for ZeroSSL API calls.",
-    "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request."
+    "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request.",
+    "config_global_types_available": "You can now select global types for your custom configuration."
   },
   "totp": {
     "cant_access": "Can't access your authenticator?",
@@ -2434,7 +2476,10 @@
       "window": "Window in seconds",
       "insertAt": "Insert a rule at position {{n}}",
       "openRule": "Open rule {{n}}",
-      "ruleErrors": "{{count}} validation problems in this rule"
+      "ruleErrors": "{{count}} validation problems in this rule",
+      "changePosition": "Rule {{n}} of {{total}}, change position",
+      "newValue": "New value",
+      "positionMove": "Position {{n}} of {{total}} — click to move"
     },
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
@@ -2515,7 +2560,9 @@
       "disable": "Disable rule",
       "duplicate": "Duplicate below",
       "enable": "Enable rule",
-      "top": "Run first"
+      "top": "Run first",
+      "moveTo": "Move to position {{n}}",
+      "staysAt": "Stays at position {{n}}"
     },
     "move": {
       "first": "Run first",
@@ -2653,6 +2700,21 @@
     "view": {
       "canvas": "Canvas",
       "list": "List"
+    },
+    "action_help": {
+      "block": "Deny the request",
+      "challenge": "Prove it is human",
+      "redirect": "Send it elsewhere"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "HTTP method",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "is exactly",
+      "prefix": "starts with",
+      "regex": "matches the regex"
     }
   },
   "request_path": {
@@ -2723,7 +2785,18 @@
     "pattern": "Please enter a valid value for {{field}}.",
     "required": "{{field}} is required.",
     "service_required_for_ban": "A service must be selected for a service-specific ban.",
-    "zerossl_email_or_api_key_required": "ZeroSSL requires either an email or a ZeroSSL API key."
+    "zerossl_email_or_api_key_required": "ZeroSSL requires either an email or a ZeroSSL API key.",
+    "current_password_required_for_passkey": "Enter your current password to add a passkey.",
+    "custom_ssl_pair_required": "When using custom SSL, you must set both the certificate and the key (via file path or data upload).",
+    "dns_challenge_field_required": "This field is required when using DNS challenge.",
+    "newsletter_email_invalid": "Please enter a valid email address to subscribe to the newsletter.",
+    "newsletter_email_required": "This field is required if you want to subscribe to the newsletter.",
+    "server_name_check_failed": "Server name check failed",
+    "server_name_choose_different": "Please choose a different server name.",
+    "server_name_invalid": "Invalid server name.",
+    "server_name_not_unique": "Server name is not unique.",
+    "server_name_proceed": "You can proceed with the setup.",
+    "server_name_unique": "Server name is unique."
   },
   "web_cache": {
     "available": "Available",
@@ -2788,7 +2861,8 @@
         "unwired": "This page does not post USE_TEMPLATE, so the template cannot be changed from here."
       },
       "title": "Attached resources",
-      "unavailable": "Unavailable"
+      "unavailable": "Unavailable",
+      "nothing_available": "Nothing available to attach."
     }
   },
   "timings": {

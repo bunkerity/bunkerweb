@@ -73,8 +73,20 @@ msgstr "বিজ্ঞপ্তি"
 msgid "alert.ping_error"
 msgstr "ইনস্ট্যান্স পিং করার সময় একটি ত্রুটি ঘটেছে।"
 
+msgid "alert.plugin_file_invalid"
+msgstr "অনুগ্রহ করে একটি বৈধ প্লাগইন আর্কাইভ আপলোড করুন (.zip, .tar.gz, বা .tar.xz)।"
+
+msgid "alert.plugin_file_too_large"
+msgstr "প্লাগইন আর্কাইভটি 50 MB সীমা অতিক্রম করেছে।"
+
+msgid "alert.plugin_upload_failed"
+msgstr "প্লাগইন আর্কাইভ আপলোড করার সময় একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।"
+
 msgid "alert.readonly_mode"
 msgstr "এই ক্রিয়াটি শুধুমাত্র পঠন মোডে নিষ্ক্রিয় করা হয়েছে।"
+
+msgid "alert.services_import_invalid_file"
+msgstr "অনুগ্রহ করে একটি বৈধ সার্ভিস এক্সপোর্ট ফাইল আপলোড করুন (.env বা .zip)।"
 
 msgid "aria.label.clear_search"
 msgstr "অনুসন্ধান মুছুন"
@@ -96,6 +108,21 @@ msgstr "এই লগ ফাইলটি ডাউনলোড করুন"
 
 msgid "aria.label.follow"
 msgstr "অনুসরণ করুন"
+
+msgid "aria.label.github_followers"
+msgstr "GitHub ফলোয়ার: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "GitHub ফর্ক: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "GitHub-এর খোলা ইস্যু: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "GitHub স্টার: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "GitHub পর্যবেক্ষক: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "মান লুকান"
@@ -133,6 +160,9 @@ msgstr "মান প্রদর্শন করুন"
 msgid "aria.label.search_logs"
 msgstr "লগ অনুসন্ধান করুন"
 
+msgid "aria.label.secret_value"
+msgstr "গোপন মান"
+
 msgid "aria.label.select_file"
 msgstr "ফাইল নির্বাচন করুন"
 
@@ -147,6 +177,9 @@ msgstr "লাইন মোড়ানো চালু/বন্ধ করু�
 
 msgid "aria.label.user_avatar"
 msgstr "ব্যবহারকারীর প্রতিকৃতি"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (লুকানো)"
 
 msgid "aria.label.view_selected_items"
 msgstr "নির্বাচিত আইটেম দেখুন"
@@ -893,7 +926,7 @@ msgid "compose.always_on"
 msgstr "সবসময় চালু"
 
 msgid "compose.count"
-msgstr "%(on)s সক্রিয় · %(total)s উপলব্ধ · %(locked)s বন্ধ"
+msgstr "%(on)s সক্রিয় · %(total)s উপলব্ধ · %(locked)s লক করা"
 
 msgid "compose.entries"
 msgstr "%(count)s কনফিগার করা হয়েছে"
@@ -1786,6 +1819,15 @@ msgstr "সময়ের সাথে অবরুদ্ধ অবস্থা
 msgid "dashboard.chart.request_status.blocked"
 msgstr "অবরুদ্ধ অনুরোধ"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 পরিবর্তিত হয়নি"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 পাওয়া যায়নি"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 অনুরোধের হার সীমিত"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "অনুরোধ স্থিতি বিতরণ"
 
@@ -1844,13 +1886,13 @@ msgid "dashboard.panel.top_ips_sub"
 msgstr "অনুরোধের সংখ্যা অনুযায়ী"
 
 msgid "dashboard.status.blocked_of_total"
-msgstr "%(total)s মোট"
+msgstr "মোট %(total)sটির মধ্যে ব্লক"
 
 msgid "dashboard.status.free_plan"
 msgstr "ফ্রি প্ল্যান"
 
 msgid "dashboard.status.renews"
-msgstr "পুনরায় সক্রিয় করুন"
+msgstr "নবায়ন"
 
 msgid "dashboard.status.services_licensed"
 msgstr "%(count)s পরিষেবা লাইসেন্স করা"
@@ -2224,11 +2266,35 @@ msgstr "সার্ভার ত্রুটি"
 msgid "error.ban_update_failed"
 msgstr "নিষেধাজ্ঞার সময়কাল আপডেট করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
 
+msgid "error.passkey_registration_failed"
+msgstr "এই পাসকি নিবন্ধন করা যায়নি। আবার চেষ্টা করুন।"
+
+msgid "error.passkey_sign_in_failed"
+msgstr "পাসকি দিয়ে সাইন ইন করা যায়নি। আবার চেষ্টা করুন।"
+
+msgid "error.report_copy_access_failed"
+msgstr "কপি করার জন্য ডেটা অ্যাক্সেস করতে ত্রুটি হয়েছে। পৃষ্ঠাটি রিফ্রেশ করুন।"
+
+msgid "error.report_copy_failed"
+msgstr "ক্লিপবোর্ডে কপি করা যায়নি। নিচের কাঁচা ডেটা কপি বোতামটি ব্যবহার করুন।"
+
+msgid "error.report_details_load_failed"
+msgstr "রিপোর্টের বিবরণ লোড করা যায়নি।"
+
+msgid "error.report_identifier_missing"
+msgstr "রিপোর্ট শনাক্তকারী অনুপস্থিত"
+
 msgid "error.reports_load_error"
 msgstr "রিপোর্ট লোড করার সময় ত্রুটি ঘটেছে। অনুগ্রহ করে পৃষ্ঠাটি রিফ্রেশ করার চেষ্টা করুন।"
 
+msgid "error.security_key_verification_failed"
+msgstr "আপনার সিকিউরিটি কী যাচাই করা যায়নি। আবার চেষ্টা করুন।"
+
 msgid "error.unban_failed"
 msgstr "আইপি ঠিকানা থেকে নিষেধাজ্ঞা সরাতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।"
+
+msgid "error.webauthn_request_failed"
+msgstr "সিকিউরিটি-কী অনুরোধ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
 
 msgid "flash.easter_egg"
 msgstr "যদি আপনি এটি পড়েন, তার মানে আপনি কৌতূহলী"
@@ -2867,7 +2933,7 @@ msgid "modal.body.import_services_dropzone"
 msgstr "আপনার পরিষেবা এক্সপোর্ট ফাইলটি এখানে টেনে আনুন এবং ড্রপ করুন বা একটি ফাইল নির্বাচন করতে ক্লিক করুন৷"
 
 msgid "modal.body.import_services_warning"
-msgstr "পরিষেবাগুলি আমদানি করা এক্সপোর্ট ফাইল থেকে নতুন UI পরিষেবা তৈরি করবে৷ বিদ্যমান পরিষেবাগুলি বাদ দেওয়া হয়েছে৷"
+msgstr "পরিষেবা আমদানি করলে এক্সপোর্ট ফাইল থেকে নতুন UI পরিষেবা তৈরি হবে। বিদ্যমান পরিষেবাগুলো বাদ দেওয়া হবে। কাস্টম কনফিগারেশনসহ এক্সপোর্ট করা .zip আর্কাইভও গ্রহণ করা হয়।"
 
 msgid "modal.body.instance_creation_alert"
 msgstr "আপনাকে পোর্ট বা সার্ভারের নাম প্রদান করতে হবে না; ইনস্ট্যান্স কনফিগারেশনের জন্য `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` এবং `API_SERVER_NAME`-এর মান ব্যবহার করা হবে।"
@@ -4117,6 +4183,9 @@ msgstr "পাথ"
 msgid "service.resources.none"
 msgstr "কোনোটি সংযুক্ত নয়"
 
+msgid "service.resources.nothing_available"
+msgstr "সংযুক্ত করার মতো কিছু নেই।"
+
 msgid "service.resources.primary"
 msgstr "প্রধান সার্টিফিকেট"
 
@@ -4164,6 +4233,18 @@ msgstr "এই প্লাগইনের জন্য এখানে এক�
 
 msgid "settings.multiple.title"
 msgstr "একাধিক সেটিংস"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "ওয়েব UI সেট আপ করার সময় ত্রুটি হয়েছে। আবার চেষ্টা করুন।"
+
+msgid "setup.file.content_entered"
+msgstr "প্রবেশ করানো অক্ষর: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "%(name)s থেকে লোড করা হয়েছে · অক্ষর: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "ফাইল পড়তে ত্রুটি"
 
 msgid "setup.status.admin_user_exists"
 msgstr "একজন অ্যাডমিন ব্যবহারকারী ইতিমধ্যে বিদ্যমান। অনুগ্রহ করে পরবর্তী ধাপে এগিয়ে যান।"
@@ -4310,7 +4391,7 @@ msgid "status.expired"
 msgstr "মেয়াদ উত্তীর্ণ"
 
 msgid "status.expiring"
-msgstr "মেয়াদ শেষ"
+msgstr "শীঘ্রই মেয়াদ শেষ"
 
 msgid "status.failed"
 msgstr "ব্যর্থ"
@@ -4372,6 +4453,9 @@ msgstr "না"
 msgid "status.no_data"
 msgstr "কোনো ডেটা নেই"
 
+msgid "status.no_file_selected"
+msgstr "কোনো ফাইল নির্বাচন করা হয়নি"
+
 msgid "status.no_history"
 msgstr "কোনো ইতিহাস উপলব্ধ নেই।"
 
@@ -4392,6 +4476,9 @@ msgstr "কোনো ধাপ উপলব্ধ নেই"
 
 msgid "status.no_steps_description"
 msgstr "এই টেমপ্লেটে কনফিগার করার জন্য কোনো ধাপ নেই।"
+
+msgid "status.no_url_available"
+msgstr "কোনো URL উপলব্ধ নেই"
 
 msgid "status.not_applicable"
 msgstr "প্রযোজ্য নয়"
@@ -4440,6 +4527,9 @@ msgstr "বর্তমান টেমপ্লেটের বাইরে প
 
 msgid "status.unique_server_name"
 msgstr "অনন্য সার্ভারের নাম"
+
+msgid "status.unknown"
+msgstr "অজানা"
 
 msgid "status.up"
 msgstr "চালু"
@@ -4722,6 +4812,12 @@ msgstr "ধাপের উপশিরোনাম"
 
 msgid "template.editor.label_step_title"
 msgstr "ধাপের শিরোনাম"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "অনুপস্থিত"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "আপলোড হয়েছে"
 
 msgid "template.editor.missing_configs_body"
 msgstr "আমদানি করা টেমপ্লেটটি কাস্টম কনফিগগুলি নির্দেশ করে যা এখনও আপলোড করা হয়নি। টেমপ্লেট সেটআপ সম্পূর্ণ করতে অনুগ্রহ করে এই কনফিগগুলি আমদানি করুন:"
@@ -5176,6 +5272,12 @@ msgstr "লাইট"
 msgid "threatmap.attacks_today"
 msgstr "আজকের আক্রমণ"
 
+msgid "threatmap.blocked_request"
+msgstr "ব্লক করা অনুরোধ"
+
+msgid "threatmap.blocked_requests"
+msgstr "ব্লক করা অনুরোধগুলো"
+
 msgid "threatmap.countries"
 msgstr "উৎস দেশ"
 
@@ -5207,7 +5309,7 @@ msgid "threatmap.fullscreen"
 msgstr "পূর্ণ স্ক্রিন"
 
 msgid "threatmap.map_sub"
-msgstr "চাপগুলি উৎস দেশ দেখায়, নির্দিষ্ট অবস্থান নয়"
+msgstr "বক্ররেখাগুলো উৎস দেশ দেখায়, নির্দিষ্ট অবস্থান নয়"
 
 msgid "threatmap.map_title"
 msgstr "ব্লক করা ট্র্যাফিকের উৎস"
@@ -5326,6 +5428,9 @@ msgstr "নিষেধাজ্ঞার সময়কাল সফলভা�
 msgid "toast.body.ping_succeed"
 msgstr "ইনস্ট্যান্স: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "নির্বাচিত আইটেমগুলো ইতিমধ্যে অনুরোধ করা অবস্থায় আছে।"
+
 msgid "toast.copied"
 msgstr "কপি করা হয়েছে!"
 
@@ -5344,6 +5449,9 @@ msgstr "গ্লোবাল সেটিংস আনতে গিয়ে �
 msgid "toast.global_settings_failed_title"
 msgstr "গ্লোবাল সেটিংস আনতে ব্যর্থ"
 
+msgid "toast.header.conversion_failed"
+msgstr "রূপান্তর ব্যর্থ"
+
 msgid "toast.header.ping_failed"
 msgstr "পিং ব্যর্থ হয়েছে"
 
@@ -5355,6 +5463,9 @@ msgstr "আইপি ঠিকানা সফলভাবে নিষেধা
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।"
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "ফাইল আপলোডে ফিরে যান"
 
 msgid "tooltip.button.ban_ip"
 msgstr "এই IP ঠিকানাটি নিষিদ্ধ করুন"
@@ -5416,11 +5527,14 @@ msgstr "শুধুমাত্র নির্বাচিত দেখান"
 msgid "tooltip.button.stop_instance"
 msgstr "ইনস্ট্যান্স %(hostname)s বন্ধ করুন"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "টেক্সট এডিটরে যান"
+
 msgid "tooltip.button.unban_ip"
 msgstr "%(ip)s থেকে নিষেধাজ্ঞা সরান"
 
 msgid "tooltip.button.update_ban_duration"
-msgstr "বাণ সময়কাল আপডেট করুন"
+msgstr "ব্যানের সময়কাল আপডেট করুন"
 
 msgid "tooltip.button.value_from_global"
 msgstr "গ্লোবাল সেটিংস থেকে মান"
@@ -5442,6 +5556,9 @@ msgstr "বহু-লাইন এন্ট্রি সংকুচিত ক�
 
 msgid "tooltip.collapse_raw_values"
 msgstr "বহু-লাইন মান সংকুচিত করুন (সার্টিফিকেট, কী)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "এখন আপনার কাস্টম কনফিগারেশনের জন্য গ্লোবাল টাইপ নির্বাচন করতে পারবেন।"
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "OWASP কোর রুল সেট প্লাগইন লোড হওয়ার পরে প্রয়োগ করা কনফিগারেশন।"
@@ -6226,8 +6343,17 @@ msgstr "লুকানো পরিষেবা: %(count)s। %(protocol)s আ�
 msgid "upstreams.truncated"
 msgstr "শুধুমাত্র প্রথম 500 আপস্ট্রিম প্রদর্শিত। সম্পূর্ণ ফলাফলের জন্য API ব্যবহার করে তালিকাটি সরু করুন।"
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "পাসকি যোগ করতে আপনার বর্তমান পাসওয়ার্ড দিন।"
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "কাস্টম SSL ব্যবহার করলে সার্টিফিকেট ও কী দুটিই সেট করতে হবে (ফাইল পাথ বা ডেটা আপলোডের মাধ্যমে)।"
+
 msgid "validation.default_field_name"
 msgstr "এই ক্ষেত্রটি"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "DNS চ্যালেঞ্জ ব্যবহার করলে এই ফিল্ডটি আবশ্যক।"
 
 msgid "validation.invalid_date"
 msgstr "অবৈধ তারিখ"
@@ -6244,11 +6370,35 @@ msgstr "আইপি ঠিকানা প্রয়োজন।"
 msgid "validation.ip_service_duplicate"
 msgstr "এই আইপি ঠিকানাটি নির্বাচিত পরিষেবার (%(service)s) জন্য ইতিমধ্যে নিষিদ্ধ।"
 
+msgid "validation.newsletter_email_invalid"
+msgstr "নিউজলেটারে সাবস্ক্রাইব করতে একটি বৈধ ইমেল ঠিকানা দিন।"
+
+msgid "validation.newsletter_email_required"
+msgstr "নিউজলেটারে সাবস্ক্রাইব করতে চাইলে এই ফিল্ডটি আবশ্যক।"
+
 msgid "validation.pattern"
 msgstr "অনুগ্রহ করে %(field)s এর জন্য একটি বৈধ মান লিখুন।"
 
 msgid "validation.required"
 msgstr "%(field)s প্রয়োজন।"
+
+msgid "validation.server_name_check_failed"
+msgstr "সার্ভারের নাম যাচাই ব্যর্থ হয়েছে"
+
+msgid "validation.server_name_choose_different"
+msgstr "অন্য একটি সার্ভারের নাম বেছে নিন।"
+
+msgid "validation.server_name_invalid"
+msgstr "সার্ভারের নাম বৈধ নয়।"
+
+msgid "validation.server_name_not_unique"
+msgstr "সার্ভারের নামটি অনন্য নয়।"
+
+msgid "validation.server_name_proceed"
+msgstr "আপনি সেটআপ চালিয়ে যেতে পারেন।"
+
+msgid "validation.server_name_unique"
+msgstr "সার্ভারের নামটি অনন্য।"
 
 msgid "validation.service_required_for_ban"
 msgstr "পরিষেবা-নির্দিষ্ট নিষেধাজ্ঞার জন্য একটি পরিষেবা নির্বাচন করতে হবে।"
@@ -6311,7 +6461,7 @@ msgid "web_cache.purge"
 msgstr "ক্যাশে করা প্রতিক্রিয়া পরিষ্কার করুন"
 
 msgid "web_cache.purge_all"
-msgstr "সব"
+msgstr "সব ক্যাশ মুছুন"
 
 msgid "web_cache.purge_all_confirm_body"
 msgstr "এটি পৌঁছানো যায় এমন প্রতিটি ইনস্ট্যান্সের প্রতিটি পরিষেবার সব ক্যাশ করা প্রতিক্রিয়া মুছে দেয়। এটি ফেরানো যাবে না।"
@@ -6403,11 +6553,23 @@ msgstr "গন্তব্য URL"
 msgid "workflows.action"
 msgstr "তারপর"
 
+msgid "workflows.action_help.block"
+msgstr "অনুরোধটি প্রত্যাখ্যান করুন"
+
+msgid "workflows.action_help.challenge"
+msgstr "এটি মানুষ কিনা প্রমাণ করুন"
+
+msgid "workflows.action_help.redirect"
+msgstr "অন্যত্র পাঠান"
+
 msgid "workflows.add_rule"
 msgstr "নিয়ম যোগ করুন"
 
 msgid "workflows.all"
 msgstr "সব"
+
+msgid "workflows.aria.changePosition"
+msgstr "%(total)sটির মধ্যে %(n)s নম্বর নিয়ম, অবস্থান পরিবর্তন করুন"
 
 msgid "workflows.aria.collapse"
 msgstr "সংকুচিত করুন"
@@ -6445,8 +6607,14 @@ msgstr "নিয়ম সরান"
 msgid "workflows.aria.moveUp"
 msgstr "উপরে সরান — আগে চলবে"
 
+msgid "workflows.aria.newValue"
+msgstr "নতুন মান"
+
 msgid "workflows.aria.openRule"
 msgstr "%(n)s নিয়মটি খুলুন"
+
+msgid "workflows.aria.positionMove"
+msgstr "%(total)sটির মধ্যে %(n)s নম্বর অবস্থান — সরাতে ক্লিক করুন"
 
 msgid "workflows.aria.provider"
 msgstr "অ্যান্টিবট প্রদানকারী"
@@ -6580,6 +6748,15 @@ msgstr "নিয়মগুলি কপি করা হয়েছে; পরি�
 msgid "workflows.clone_name"
 msgstr "কপির নাম"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP পদ্ধতি"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "এই নিয়মটি মুছবেন? এর নিচের সবকিছু এক ধাপ উপরে উঠবে।"
 
@@ -6682,6 +6859,12 @@ msgstr "নিচে অনুলিপি করুন"
 msgid "workflows.menu.enable"
 msgstr "নিয়ম সক্রিয় করুন"
 
+msgid "workflows.menu.moveTo"
+msgstr "%(n)s নম্বর অবস্থানে সরান"
+
+msgid "workflows.menu.staysAt"
+msgstr "%(n)s নম্বর অবস্থানেই থাকে"
+
 msgid "workflows.menu.top"
 msgstr "প্রথমে চালান"
 
@@ -6752,7 +6935,7 @@ msgid "workflows.say.gateAdded"
 msgstr "মিলে হারের সীমা যোগ হয়েছে। এর নিচে নিয়ম মেলে না এবং মূল্যায়ন চলতে থাকে।"
 
 msgid "workflows.say.inserted"
-msgstr "%(total)s এর %(n)s অবস্থানে একটি নিয়ম যোগ করা হয়েছে। এটি আগের সমস্ত নিয়মগুলি প্রথমে পরীক্ষা করে।"
+msgstr "%(total)sটির মধ্যে %(n)s নম্বর স্থানে একটি নিয়ম যোগ করা হয়েছে। এর আগের প্রতিটি নিয়ম আগে পরীক্ষা করা হয়।"
 
 msgid "workflows.say.inspecting"
 msgstr "%(total)s এর %(n)s নিয়মটি সম্পাদনা করুন — %(name)s।"
@@ -6996,6 +7179,15 @@ msgstr "শুধুমাত্র প্রথম 500 ওয়ার্কফ্
 
 msgid "workflows.untitled"
 msgstr "শিরোনামহীন নিয়ম"
+
+msgid "workflows.uri_match.exact"
+msgstr "হুবহু মেলে"
+
+msgid "workflows.uri_match.prefix"
+msgstr "দিয়ে শুরু হয়"
+
+msgid "workflows.uri_match.regex"
+msgstr "রেগেক্সের সাথে মেলে"
 
 msgid "workflows.value.add"
 msgstr "মান"

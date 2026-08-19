@@ -73,8 +73,20 @@ msgstr "Avis"
 msgid "alert.ping_error"
 msgstr "Une erreur est survenue lors du ping des instances."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Veuillez téléverser une archive de plugin valide (.zip, .tar.gz ou .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "L’archive du plugin dépasse la limite de 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "Une erreur s’est produite lors du téléversement de l’archive du plugin. Veuillez réessayer."
+
 msgid "alert.readonly_mode"
 msgstr "Cette action est désactivée en mode lecture seule."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Veuillez téléverser un fichier d’exportation de services valide (.env ou .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Effacer la recherche"
@@ -96,6 +108,21 @@ msgstr "Télécharger ce fichier journal"
 
 msgid "aria.label.follow"
 msgstr "Suivre"
+
+msgid "aria.label.github_followers"
+msgstr "Abonnés GitHub : %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "Forks GitHub : %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Issues GitHub ouvertes : %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "Étoiles GitHub : %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "Observateurs GitHub : %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Masquer la valeur"
@@ -133,6 +160,9 @@ msgstr "Afficher la valeur"
 msgid "aria.label.search_logs"
 msgstr "Rechercher dans les journaux"
 
+msgid "aria.label.secret_value"
+msgstr "Valeur secrète"
+
 msgid "aria.label.select_file"
 msgstr "Sélectionner un fichier"
 
@@ -147,6 +177,9 @@ msgstr "Activer/désactiver le retour à la ligne"
 
 msgid "aria.label.user_avatar"
 msgstr "Avatar de l’utilisateur"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (valeur masquée)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Afficher les éléments sélectionnés"
@@ -1748,7 +1781,7 @@ msgid "dashboard.card.ram.warning_low"
 msgstr "Attention : une faible mémoire peut affecter les performances"
 
 msgid "dashboard.card.services.status"
-msgstr "%(online)s en ligne / %(draft)s brouillon"
+msgstr "%(online)s en ligne · %(draft)s en brouillon"
 
 msgid "dashboard.card.services.title"
 msgstr "Services"
@@ -1763,7 +1796,7 @@ msgid "dashboard.card.upstreams.planned"
 msgstr "Bientôt disponible"
 
 msgid "dashboard.card.upstreams.title"
-msgstr "Serveurs en amont"
+msgstr "Upstreams"
 
 msgid "dashboard.chart.blocked_request_countries.title"
 msgstr "Requêtes bloquées par pays"
@@ -1785,6 +1818,15 @@ msgstr "Évolution des blocages"
 
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Requêtes bloquées"
+
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Non modifié"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Introuvable"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Débit limité"
 
 msgid "dashboard.chart.request_status.title"
 msgstr "Répartition des statuts de requête"
@@ -2224,11 +2266,35 @@ msgstr "Erreur serveur"
 msgid "error.ban_update_failed"
 msgstr "Échec de la mise à jour de la durée du bannissement. Veuillez réessayer."
 
+msgid "error.passkey_registration_failed"
+msgstr "Impossible d’enregistrer cette clé d’accès. Veuillez réessayer."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Impossible de vous connecter avec une clé d’accès. Veuillez réessayer."
+
+msgid "error.report_copy_access_failed"
+msgstr "Erreur d’accès aux données à copier. Essayez d’actualiser la page."
+
+msgid "error.report_copy_failed"
+msgstr "Échec de la copie dans le presse-papiers. Essayez le bouton de copie des données brutes ci-dessous."
+
+msgid "error.report_details_load_failed"
+msgstr "Impossible de charger les détails du rapport."
+
+msgid "error.report_identifier_missing"
+msgstr "Identifiant du rapport manquant"
+
 msgid "error.reports_load_error"
 msgstr "Erreur lors du chargement des rapports. Essayez d’actualiser la page."
 
+msgid "error.security_key_verification_failed"
+msgstr "Impossible de vérifier votre clé de sécurité. Veuillez réessayer."
+
 msgid "error.unban_failed"
 msgstr "Échec du débannissement de l'adresse IP. Veuillez réessayer."
+
+msgid "error.webauthn_request_failed"
+msgstr "La requête de clé de sécurité a échoué. Veuillez réessayer."
 
 msgid "flash.easter_egg"
 msgstr "Si vous lisez ceci, c'est que vous êtes curieux"
@@ -3125,7 +3191,7 @@ msgid "navigation.timings"
 msgstr "Temps d’exécution"
 
 msgid "navigation.upstreams"
-msgstr "Serveurs en amont"
+msgstr "Upstreams"
 
 msgid "navigation.web_cache"
 msgstr "Cache web"
@@ -3536,7 +3602,7 @@ msgid "redirects.code.302"
 msgstr "302 — Trouvé"
 
 msgid "redirects.code.303"
-msgstr "303 — Voir autre"
+msgstr "303 — Voir ailleurs"
 
 msgid "redirects.code.307"
 msgstr "307 — Redirection temporaire"
@@ -3740,7 +3806,7 @@ msgid "request_path.terminal.none"
 msgstr "Aucun contenu servi"
 
 msgid "request_path.terminal.pool"
-msgstr "Groupe de serveurs en amont"
+msgstr "Pool upstream"
 
 msgid "request_path.terminal.root"
 msgstr "Fichiers locaux"
@@ -4088,10 +4154,10 @@ msgid "service.resources.conflict.resource"
 msgstr "%(service)s sert déjà %(path)s via le « %(kind)s » %(name)s. Dissociez « %(name)s », ou attribuez un chemin différent à l’un des deux."
 
 msgid "service.resources.conflict.stream"
-msgstr "Un service en mode Stream transmet chaque connexion à un seul serveur backend, et %(service)s utilise déjà le serveur en amont « %(name)s ». Dissociez-le d’abord."
+msgstr "Un service en mode Stream transmet chaque connexion à un seul serveur backend, et %(service)s utilise déjà l’upstream « %(name)s ». Dissociez-le d’abord."
 
 msgid "service.resources.conflict.stream_inline"
-msgstr "%(service)s possède déjà son propre serveur backend dans REVERSE_PROXY_HOST. Supprimez ce paramètre pour que le serveur en amont prenne le relais."
+msgstr "%(service)s possède déjà son propre serveur backend dans REVERSE_PROXY_HOST. Supprimez ce paramètre pour que l’upstream prenne le relais."
 
 msgid "service.resources.detach"
 msgstr "Dissocier"
@@ -4106,7 +4172,7 @@ msgid "service.resources.family.template"
 msgstr "Modèle"
 
 msgid "service.resources.family.upstream"
-msgstr "Serveurs en amont"
+msgstr "Upstreams"
 
 msgid "service.resources.family.workflow"
 msgstr "Flux de travail"
@@ -4116,6 +4182,9 @@ msgstr "Chemin"
 
 msgid "service.resources.none"
 msgstr "Aucun élément associé"
+
+msgid "service.resources.nothing_available"
+msgstr "Aucune ressource disponible à associer."
 
 msgid "service.resources.primary"
 msgstr "Certificat principal"
@@ -4164,6 +4233,18 @@ msgstr "Configurez ici plusieurs instances de paramètres pour ce plugin."
 
 msgid "settings.multiple.title"
 msgstr "Paramètres multiples"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Erreur lors de la configuration de l’UI Web. Veuillez réessayer."
+
+msgid "setup.file.content_entered"
+msgstr "Caractères saisis : %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Chargé depuis %(name)s · caractères : %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Erreur de lecture du fichier"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Un compte administrateur existe déjà. Passez à l'étape suivante."
@@ -4372,6 +4453,9 @@ msgstr "Non"
 msgid "status.no_data"
 msgstr "Aucune donnée"
 
+msgid "status.no_file_selected"
+msgstr "Aucun fichier sélectionné"
+
 msgid "status.no_history"
 msgstr "Aucun historique disponible."
 
@@ -4392,6 +4476,9 @@ msgstr "Aucune étape disponible"
 
 msgid "status.no_steps_description"
 msgstr "Ce modèle n'a aucune étape à configurer."
+
+msgid "status.no_url_available"
+msgstr "Aucune URL disponible"
 
 msgid "status.not_applicable"
 msgstr "N/A"
@@ -4440,6 +4527,9 @@ msgstr "Les modifications en dehors du modèle actuel ne sont pas autorisées. M
 
 msgid "status.unique_server_name"
 msgstr "Nom de serveur unique"
+
+msgid "status.unknown"
+msgstr "Inconnu"
 
 msgid "status.up"
 msgstr "Actif"
@@ -4722,6 +4812,12 @@ msgstr "Sous-titre de l'étape"
 
 msgid "template.editor.label_step_title"
 msgstr "Titre de l'étape"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Manquante"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Téléversée"
 
 msgid "template.editor.missing_configs_body"
 msgstr "Le modèle importé référence des configurations personnalisées qui n'ont pas encore été téléversées. Importez-les pour terminer la configuration du modèle :"
@@ -5176,6 +5272,12 @@ msgstr "Clair"
 msgid "threatmap.attacks_today"
 msgstr "Attaques aujourd'hui"
 
+msgid "threatmap.blocked_request"
+msgstr "requête bloquée"
+
+msgid "threatmap.blocked_requests"
+msgstr "requêtes bloquées"
+
 msgid "threatmap.countries"
 msgstr "Pays d'origine"
 
@@ -5258,10 +5360,10 @@ msgid "timings.calls"
 msgstr "Appels"
 
 msgid "timings.disabled_help"
-msgstr "Définissez METRICS_COLLECT_TIMINGS sur yes pour mesurer la durée de chaque extension. La durée totale de la requête est collectée dans tous les cas."
+msgstr "Définissez METRICS_COLLECT_TIMINGS sur yes pour mesurer la durée de chaque plugin. La durée totale de la requête est collectée dans tous les cas."
 
 msgid "timings.disabled_title"
-msgstr "Les temps des extensions sont désactivés"
+msgstr "Les temps des plugins sont désactivés"
 
 msgid "timings.max"
 msgstr "Maximum"
@@ -5282,7 +5384,7 @@ msgid "timings.phase"
 msgstr "Phase"
 
 msgid "timings.phases"
-msgstr "Phases des extensions"
+msgstr "Phases des plugins"
 
 msgid "timings.plugin"
 msgstr "Plugin"
@@ -5297,10 +5399,10 @@ msgid "timings.share"
 msgstr "Part"
 
 msgid "timings.share_help"
-msgstr "La part correspond au temps total de l’extension par rapport au temps total de la requête. Les phases qui ne s’exécutent pas une fois par requête — démarrage du worker, minuteur d’arrière-plan et API interne — n’ont pas de part et affichent un tiret."
+msgstr "La part correspond au temps total du plugin par rapport au temps total de la requête. Les phases qui ne s’exécutent pas une fois par requête — démarrage du worker, minuteur d’arrière-plan et API interne — n’ont pas de part et affichent un tiret."
 
 msgid "timings.subtitle"
-msgstr "Durée de chaque extension à chaque phase de la requête, lue en direct sur toutes les instances puis fusionnée."
+msgstr "Durée de chaque plugin à chaque phase de la requête, lue en direct sur toutes les instances puis fusionnée."
 
 msgid "timings.total"
 msgstr "Total"
@@ -5326,6 +5428,9 @@ msgstr "Durée du bannissement mise à jour avec succès !"
 msgid "toast.body.ping_succeed"
 msgstr "Instances : %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Les éléments sélectionnés sont déjà dans l’état demandé."
+
 msgid "toast.copied"
 msgstr "Copié !"
 
@@ -5344,6 +5449,9 @@ msgstr "Une erreur s'est produite lors de la récupération des paramètres glob
 msgid "toast.global_settings_failed_title"
 msgstr "Échec de la récupération des paramètres globaux"
 
+msgid "toast.header.conversion_failed"
+msgstr "Échec de la conversion"
+
 msgid "toast.header.ping_failed"
 msgstr "Échec du Ping"
 
@@ -5355,6 +5463,9 @@ msgstr "Adresse IP débannie avec succès !"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Indique s'il faut demander automatiquement un certificat Let's Encrypt."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Revenir au téléversement de fichier"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Bannir cette adresse IP"
@@ -5416,6 +5527,9 @@ msgstr "Afficher uniquement la sélection"
 msgid "tooltip.button.stop_instance"
 msgstr "Arrêter l'instance %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Passer à l’éditeur de texte"
+
 msgid "tooltip.button.unban_ip"
 msgstr "Débannir %(ip)s"
 
@@ -5442,6 +5556,9 @@ msgstr "Replier les entrées multilignes (traces d'erreur, charges utiles)"
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Replier les valeurs multilignes (certificats, clés)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Vous pouvez maintenant sélectionner des types globaux pour votre configuration personnalisée."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Configurations appliquées après le chargement des plugins OWASP Core Rule Set."
@@ -6119,28 +6236,28 @@ msgid "upstreams.balancing.round_robin"
 msgstr "Rotation (par défaut)"
 
 msgid "upstreams.create"
-msgstr "Créer un serveur en amont"
+msgstr "Créer un upstream"
 
 msgid "upstreams.delete_confirm_title"
-msgstr "Supprimer ce serveur en amont ?"
+msgstr "Supprimer cet upstream ?"
 
 msgid "upstreams.delete_copy"
-msgstr "Supprimer le serveur en amont %(name)s ?"
+msgstr "Supprimer l’upstream %(name)s ?"
 
 msgid "upstreams.delete_help"
-msgstr "Un serveur en amont encore associé à un service ne peut pas être supprimé. Dissociez-le d'abord."
+msgstr "Un upstream encore associé à un service ne peut pas être supprimé. Dissociez-le d’abord."
 
 msgid "upstreams.edit"
-msgstr "Modifier le serveur en amont"
+msgstr "Modifier l’upstream"
 
 msgid "upstreams.edit_shared"
-msgstr "Ce serveur en amont est associé aux services suivants (%(count)s) : %(services)s. L'enregistrer les modifiera tous."
+msgstr "Cet upstream est associé aux services suivants (%(count)s) : %(services)s. L’enregistrer les modifiera tous."
 
 msgid "upstreams.empty_text"
-msgstr "Un serveur en amont est un groupe nommé de serveurs backend que vous associez à un ou plusieurs services sur un chemin de proxy inverse. Les paramètres REVERSE_PROXY_HOST définis directement continuent de fonctionner avec lui."
+msgstr "Un upstream est un groupe nommé de serveurs backend que vous associez à un ou plusieurs services sur un chemin de proxy inverse. Les paramètres REVERSE_PROXY_HOST définis directement continuent de fonctionner avec lui."
 
 msgid "upstreams.empty_title"
-msgstr "Aucun serveur en amont pour le moment"
+msgstr "Aucun upstream pour le moment"
 
 msgid "upstreams.keepalive"
 msgstr "Connexions persistantes"
@@ -6161,7 +6278,7 @@ msgid "upstreams.name_help"
 msgstr "Lettres, chiffres, tirets et tirets bas uniquement. Les points sont interdits afin qu'un nom de groupe ne puisse jamais masquer un hôte réel."
 
 msgid "upstreams.new"
-msgstr "Nouveau serveur en amont"
+msgstr "Nouvel upstream"
 
 msgid "upstreams.not_attached"
 msgstr "Non associé"
@@ -6182,7 +6299,7 @@ msgid "upstreams.protocols.stream"
 msgstr "Stream (TCP/UDP)"
 
 msgid "upstreams.readonly"
-msgstr "La base de données est en lecture seule. Les serveurs en amont peuvent être consultés, mais pas modifiés."
+msgstr "La base de données est en lecture seule. Les upstreams peuvent être consultés, mais pas modifiés."
 
 msgid "upstreams.role.backup"
 msgstr "Secours"
@@ -6194,7 +6311,7 @@ msgid "upstreams.role.primary"
 msgstr "Principal"
 
 msgid "upstreams.save"
-msgstr "Enregistrer le serveur en amont"
+msgstr "Enregistrer l’upstream"
 
 msgid "upstreams.search"
 msgstr "Rechercher par nom, description ou serveur…"
@@ -6218,16 +6335,25 @@ msgid "upstreams.servers"
 msgstr "Serveurs"
 
 msgid "upstreams.services_help"
-msgstr "Utilisez Ctrl ou Command pour sélectionner plusieurs services. Le serveur en amont pourra être associé ultérieurement."
+msgstr "Utilisez Ctrl ou Command pour sélectionner plusieurs services. L’upstream pourra être associé ultérieurement."
 
 msgid "upstreams.services_hidden"
-msgstr "Services masqués : %(count)s. Un serveur en amont %(protocol)s ne peut être associé qu'à un service compatible."
+msgstr "Services masqués : %(count)s. Un upstream %(protocol)s ne peut être associé qu’à un service compatible."
 
 msgid "upstreams.truncated"
-msgstr "Seuls les 500 premiers serveurs en amont sont affichés. Affinez la liste via l'API pour obtenir le résultat complet."
+msgstr "Seuls les 500 premiers upstreams sont affichés. Affinez la liste via l’API pour obtenir le résultat complet."
+
+msgid "validation.current_password_required_for_passkey"
+msgstr "Saisissez votre mot de passe actuel pour ajouter une clé d’accès."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "Avec un SSL personnalisé, vous devez définir le certificat et la clé (par chemin de fichier ou téléversement de données)."
 
 msgid "validation.default_field_name"
 msgstr "Ce champ"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "Ce champ est obligatoire avec le défi DNS."
 
 msgid "validation.invalid_date"
 msgstr "Date invalide"
@@ -6244,11 +6370,35 @@ msgstr "L'adresse IP est requise."
 msgid "validation.ip_service_duplicate"
 msgstr "Cette adresse IP est déjà bannie pour le service sélectionné (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Saisissez une adresse e-mail valide pour vous abonner à la newsletter."
+
+msgid "validation.newsletter_email_required"
+msgstr "Ce champ est obligatoire pour vous abonner à la newsletter."
+
 msgid "validation.pattern"
 msgstr "Veuillez entrer une valeur valide pour %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s est requis."
+
+msgid "validation.server_name_check_failed"
+msgstr "Échec de la vérification du nom de serveur"
+
+msgid "validation.server_name_choose_different"
+msgstr "Choisissez un autre nom de serveur."
+
+msgid "validation.server_name_invalid"
+msgstr "Nom de serveur invalide."
+
+msgid "validation.server_name_not_unique"
+msgstr "Le nom de serveur n’est pas unique."
+
+msgid "validation.server_name_proceed"
+msgstr "Vous pouvez poursuivre la configuration."
+
+msgid "validation.server_name_unique"
+msgstr "Le nom de serveur est unique."
 
 msgid "validation.service_required_for_ban"
 msgstr "Un service doit être sélectionné pour un bannissement spécifique au service."
@@ -6302,7 +6452,7 @@ msgid "web_cache.metrics_scope"
 msgstr "Les compteurs sont agrégés par instance pour tous les services activés en cache."
 
 msgid "web_cache.not_reporting"
-msgstr "Ne pas signaler"
+msgstr "Aucune donnée transmise"
 
 msgid "web_cache.path"
 msgstr "Chemin"
@@ -6317,7 +6467,7 @@ msgid "web_cache.purge_all_confirm_body"
 msgstr "Cela supprime toutes les réponses mises en cache pour tous les services sur toutes les instances accessibles. Cela ne peut pas être annulé."
 
 msgid "web_cache.purge_all_confirm_title"
-msgstr "Effacer toute la cache ?"
+msgstr "Vider l’intégralité du cache ?"
 
 msgid "web_cache.purge_help"
 msgstr "Les actions de nettoyage s'exécutent immédiatement sur les instances accessibles. Les instances inaccessibles sont ignorées et aucune action n'est mise en file d'attente."
@@ -6326,7 +6476,7 @@ msgid "web_cache.purge_key"
 msgstr "Clé de cache efficace"
 
 msgid "web_cache.purge_key_help"
-msgstr "Laisser la clé de cache vide uniquement pour l'URL par défaut $scheme$host$request_uri. Si le service remplace PROXY_CACHE_KEY, collez sa valeur effective ici ; les variables uniquement pour la requête non prises en charge sont rejetées au lieu de supprimer une autre entrée."
+msgstr "Laissez la clé de cache vide uniquement pour la valeur par défaut $scheme$host$request_uri. Si le service remplace PROXY_CACHE_KEY, collez sa valeur effective ici ; les variables non prises en charge et disponibles uniquement pendant la requête sont rejetées afin d’éviter de supprimer une autre entrée."
 
 msgid "web_cache.purge_key_placeholder"
 msgstr "PROXY_CACHE_KEY efficace (facultatif)"
@@ -6403,11 +6553,23 @@ msgstr "URL de destination"
 msgid "workflows.action"
 msgstr "Ensuite"
 
+msgid "workflows.action_help.block"
+msgstr "Refuser la requête"
+
+msgid "workflows.action_help.challenge"
+msgstr "Prouver qu’il s’agit d’un humain"
+
+msgid "workflows.action_help.redirect"
+msgstr "L’envoyer ailleurs"
+
 msgid "workflows.add_rule"
 msgstr "Ajouter une règle"
 
 msgid "workflows.all"
 msgstr "Tous"
+
+msgid "workflows.aria.changePosition"
+msgstr "Règle %(n)s sur %(total)s, changer de position"
 
 msgid "workflows.aria.collapse"
 msgstr "Réduire"
@@ -6445,8 +6607,14 @@ msgstr "Déplacer la règle"
 msgid "workflows.aria.moveUp"
 msgstr "Monter : exécutée plus tôt"
 
+msgid "workflows.aria.newValue"
+msgstr "Nouvelle valeur"
+
 msgid "workflows.aria.openRule"
 msgstr "Ouvrir la règle %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Position %(n)s sur %(total)s — cliquer pour déplacer"
 
 msgid "workflows.aria.provider"
 msgstr "Fournisseur Antibot"
@@ -6512,7 +6680,7 @@ msgid "workflows.canvas.drawerSub"
 msgstr "S'exécute à la position %(n)s de %(total)s"
 
 msgid "workflows.canvas.dropHint"
-msgstr "Déposer pour définir la priorité — la position d'une règle dans la chaîne est la seule chose qu'elle peut signifier"
+msgstr "Déposez pour définir la priorité : la position de la règle dans la chaîne détermine sa priorité."
 
 msgid "workflows.canvas.emptyBody"
 msgstr "Un flux de travail sans règles n'a aucun effet : chaque requête passe directement au flux de travail suivant."
@@ -6539,13 +6707,13 @@ msgid "workflows.canvas.fit"
 msgstr "Ajuster à l'écran"
 
 msgid "workflows.canvas.gateTip"
-msgstr "Une porte de correspondance, pas une action : en dessous du seuil, la règle ne correspond pas et la règle suivante est évaluée."
+msgstr "Un critère de correspondance, pas une action : sous le seuil, la règle ne correspond pas et la suivante est évaluée."
 
 msgid "workflows.canvas.hint"
-msgstr "Faire glisser un nœud pour réorganiser · faire glisser la vue pour zoomer · Alt + ← / → sur un nœud sélectionné"
+msgstr "Faire glisser un nœud pour réorganiser · faire glisser le canevas pour le parcourir · Alt + ← / → sur un nœud sélectionné"
 
 msgid "workflows.canvas.hintReadonly"
-msgstr "Lecture seule — zoomer pour examiner, l'ordre ne peut pas être modifié"
+msgstr "Lecture seule — parcourez le canevas pour l’examiner ; l’ordre ne peut pas être modifié"
 
 msgid "workflows.canvas.insert"
 msgstr "Ajouter une règle ici"
@@ -6579,6 +6747,15 @@ msgstr "Les règles sont copiées, mais pas les associations aux services."
 
 msgid "workflows.clone_name"
 msgstr "Nom de la copie"
+
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "Méthode HTTP"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
 
 msgid "workflows.confirm.deleteRule"
 msgstr "Supprimer cette règle ? Toutes celles qui la suivent remonteront d’une position."
@@ -6638,13 +6815,13 @@ msgid "workflows.exit_title"
 msgstr "Aucune règle ne correspond"
 
 msgid "workflows.gate.and"
-msgstr "et seulement après que la même IP cliente a effectué plus de"
+msgstr "et seulement lorsque l’adresse IP du même client a effectué plus de"
 
 msgid "workflows.gate.chip"
 msgstr "seuil de correspondance"
 
 msgid "workflows.gate.help"
-msgstr "Compté par IP cliente. Sous le seuil, cette règle ne correspond pas et l’évaluation passe à la règle suivante ; elle ne limite jamais le débit à elle seule."
+msgstr "Comptage par adresse IP du client. Sous le seuil, cette règle ne correspond pas et l’évaluation passe à la suivante ; à elle seule, elle ne limite jamais le débit."
 
 msgid "workflows.legend.fall"
 msgstr "L’absence de correspondance passe à la règle suivante"
@@ -6681,6 +6858,12 @@ msgstr "Dupliquer en dessous"
 
 msgid "workflows.menu.enable"
 msgstr "Activer la règle"
+
+msgid "workflows.menu.moveTo"
+msgstr "Déplacer à la position %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Reste à la position %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Exécuter en premier"
@@ -6851,7 +7034,7 @@ msgid "workflows.test.geo"
 msgstr "Recherche GeoIP"
 
 msgid "workflows.test.geo_help"
-msgstr "Indisponible rend les règles de pays et d’ASN INCONNUES ; elles ne peuvent donc jamais correspondre."
+msgstr "Lorsque la recherche GeoIP est indisponible, les règles de pays et d’ASN deviennent INCONNUES et ne peuvent donc jamais correspondre."
 
 msgid "workflows.test.geo_local"
 msgstr "Adresse locale / privée"
@@ -6869,7 +7052,7 @@ msgid "workflows.test.invalid"
 msgstr "Corrigez les problèmes ci-dessus avant de tester."
 
 msgid "workflows.test.ip"
-msgstr "IP cliente"
+msgstr "Adresse IP du client"
 
 msgid "workflows.test.method"
 msgstr "Méthode"
@@ -6899,7 +7082,7 @@ msgid "workflows.test.out_draft"
 msgstr "Ce service est un brouillon : aucun flux de travail n’est encore compilé pour lui."
 
 msgid "workflows.test.out_match"
-msgstr "%(workflow)s · %(rule)s correspond et %(action)s la requête."
+msgstr "%(workflow)s · %(rule)s correspond — action : %(action)s."
 
 msgid "workflows.test.out_no_match"
 msgstr "Aucune règle ne correspond. La requête passe au reste de la pile de sécurité."
@@ -6996,6 +7179,15 @@ msgstr "Seuls les 500 premiers flux de travail sont affichés. Affinez la liste 
 
 msgid "workflows.untitled"
 msgstr "Règle sans titre"
+
+msgid "workflows.uri_match.exact"
+msgstr "est exactement"
+
+msgid "workflows.uri_match.prefix"
+msgstr "commence par"
+
+msgid "workflows.uri_match.regex"
+msgstr "correspond à l’expression régulière"
 
 msgid "workflows.value.add"
 msgstr "Valeur"

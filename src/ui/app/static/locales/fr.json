@@ -29,7 +29,11 @@
     "no_changes_detected": "Aucun changement détecté.",
     "notice": "Avis",
     "ping_error": "Une erreur est survenue lors du ping des instances.",
-    "readonly_mode": "Cette action est désactivée en mode lecture seule."
+    "readonly_mode": "Cette action est désactivée en mode lecture seule.",
+    "plugin_file_invalid": "Veuillez téléverser une archive de plugin valide (.zip, .tar.gz ou .tar.xz).",
+    "plugin_file_too_large": "L’archive du plugin dépasse la limite de 50 MB.",
+    "plugin_upload_failed": "Une erreur s’est produite lors du téléversement de l’archive du plugin. Veuillez réessayer.",
+    "services_import_invalid_file": "Veuillez téléverser un fichier d’exportation de services valide (.env ou .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Sélectionnez un fichier d'exportation de services ou déposez-le ici",
       "toggle_wrap": "Activer/désactiver le retour à la ligne",
       "user_avatar": "Avatar de l’utilisateur",
-      "view_selected_items": "Afficher les éléments sélectionnés"
+      "view_selected_items": "Afficher les éléments sélectionnés",
+      "github_followers": "Abonnés GitHub : {{count}}",
+      "github_forks": "Forks GitHub : {{count}}",
+      "github_open_issues": "Issues GitHub ouvertes : {{count}}",
+      "github_stars": "Étoiles GitHub : {{count}}",
+      "github_watchers": "Observateurs GitHub : {{count}}",
+      "secret_value": "Valeur secrète",
+      "value_hidden": "{{name}} (valeur masquée)"
     }
   },
   "badge": {
@@ -527,7 +538,7 @@
         "warning_low": "Attention : une faible mémoire peut affecter les performances"
       },
       "services": {
-        "status": "{{online}} en ligne / {{draft}} brouillon",
+        "status": "{{online}} en ligne · {{draft}} en brouillon",
         "title": "Services"
       },
       "total_requests": {
@@ -538,7 +549,7 @@
       },
       "upstreams": {
         "planned": "Bientôt disponible",
-        "title": "Serveurs en amont"
+        "title": "Upstreams"
       },
       "top_reasons": {
         "title": "Principaux motifs de blocage"
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Requêtes bloquées",
-        "title": "Répartition des statuts de requête"
+        "title": "Répartition des statuts de requête",
+        "http_304": "304 Non modifié",
+        "http_404": "404 Introuvable",
+        "http_429": "429 Débit limité"
       },
       "top_blocked_ips": {
         "most_blocked": "IP la plus bloquée",
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Échec de la mise à jour de la durée du bannissement. Veuillez réessayer.",
     "reports_load_error": "Erreur lors du chargement des rapports. Essayez d’actualiser la page.",
-    "unban_failed": "Échec du débannissement de l'adresse IP. Veuillez réessayer."
+    "unban_failed": "Échec du débannissement de l'adresse IP. Veuillez réessayer.",
+    "passkey_registration_failed": "Impossible d’enregistrer cette clé d’accès. Veuillez réessayer.",
+    "passkey_sign_in_failed": "Impossible de vous connecter avec une clé d’accès. Veuillez réessayer.",
+    "report_copy_access_failed": "Erreur d’accès aux données à copier. Essayez d’actualiser la page.",
+    "report_copy_failed": "Échec de la copie dans le presse-papiers. Essayez le bouton de copie des données brutes ci-dessous.",
+    "report_details_load_failed": "Impossible de charger les détails du rapport.",
+    "report_identifier_missing": "Identifiant du rapport manquant",
+    "security_key_verification_failed": "Impossible de vérifier votre clé de sécurité. Veuillez réessayer.",
+    "webauthn_request_failed": "La requête de clé de sécurité a échoué. Veuillez réessayer."
   },
   "flash": {
     "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux",
@@ -1107,7 +1129,7 @@
     "system": "Système",
     "edition_community": "Communauté",
     "redirects": "Redirections",
-    "upstreams": "Serveurs en amont",
+    "upstreams": "Upstreams",
     "workflows": "Flux de travail",
     "edition_pro": "Pro"
   },
@@ -1488,7 +1510,15 @@
       "title": "Aperçu"
     },
     "subtitle": "Suivez les étapes pour terminer l'assistant de configuration.",
-    "title": "Assistant de configuration"
+    "title": "Assistant de configuration",
+    "error": {
+      "web_ui_setup_failed": "Erreur lors de la configuration de l’UI Web. Veuillez réessayer."
+    },
+    "file": {
+      "content_entered": "Caractères saisis : {{count}}",
+      "loaded_from": "Chargé depuis {{name}} · caractères : {{count}}",
+      "read_error": "Erreur de lecture du fichier"
+    }
   },
   "status": {
     "admin_user_exists": "Un compte administrateur existe déjà. Passez à l'étape suivante.",
@@ -1554,7 +1584,10 @@
     "expiring": "Expiration",
     "no_settings": "Ce plugin n'a pas de paramètres pour cette portée.",
     "yes": "Oui",
-    "optional": "Facultatif"
+    "optional": "Facultatif",
+    "no_file_selected": "Aucun fichier sélectionné",
+    "no_url_available": "Aucune URL disponible",
+    "unknown": "Inconnu"
   },
   "step": {
     "next": "Suivant",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Chaque nom de configuration doit être unique.",
       "validation_id_required": "L'ID du modèle est requis.",
       "validation_setting_key": "Chaque paramètre doit avoir une clé.",
-      "validation_settings_unique": "Chaque clé de paramètre doit être unique."
+      "validation_settings_unique": "Chaque clé de paramètre doit être unique.",
+      "missing_config_status_missing": "Manquante",
+      "missing_config_status_uploaded": "Téléversée"
     },
     "none": "Aucun modèle"
   },
@@ -1857,14 +1892,17 @@
     "error_title": "Service de métriques injoignable",
     "error_help": "La carte conserve les derniers chiffres chargés et réessaiera au prochain rafraîchissement.",
     "open_live": "Vue en direct",
-    "updated": "Mis à jour"
+    "updated": "Mis à jour",
+    "blocked_request": "requête bloquée",
+    "blocked_requests": "requêtes bloquées"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Si le service est supprimé ou redémarré, votre configuration dans l'interface Web sera perdue.",
     "autoconf_disclaimer_detail": "Ceci est dû au fait que la méthode du service est 'autoconf', conçue pour éviter les conflits de configuration.",
     "ban_updated": "Durée du bannissement mise à jour avec succès !",
     "body": {
-      "ping_succeed": "Instances : {{instances}}"
+      "ping_succeed": "Instances : {{instances}}",
+      "selected_items_already_in_state": "Les éléments sélectionnés sont déjà dans l’état demandé."
     },
     "copied": "Copié !",
     "disclaimer_title": "Avertissement",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Échec de la récupération des paramètres globaux",
     "header": {
       "ping_failed": "Échec du Ping",
-      "ping_succeed": "Ping réussi"
+      "ping_succeed": "Ping réussi",
+      "conversion_failed": "Échec de la conversion"
     },
     "ip_unbanned": "Adresse IP débannie avec succès !"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Arrêter l'instance {{hostname}}",
       "unban_ip": "Débannir {{ip}}",
       "update_ban_duration": "Mettre à jour la durée de blocage",
-      "value_from_global": "Valeur provenant des paramètres globaux"
+      "value_from_global": "Valeur provenant des paramètres globaux",
+      "back_to_file_upload": "Revenir au téléversement de fichier",
+      "switch_to_text_editor": "Passer à l’éditeur de texte"
     },
     "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement d'origine.",
     "cannot_remove_disabled": "Impossible de supprimer car un ou plusieurs paramètres sont désactivés.",
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "Nombre de nouvelles tentatives pour les requêtes API ZeroSSL (0 les désactive).",
     "zerossl_api_retry_delay": "Délai en secondes entre les nouvelles tentatives d'appel à l'API ZeroSSL.",
     "zerossl_api_connect_timeout": "Délai de connexion en secondes pour les appels API ZeroSSL.",
-    "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL."
+    "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL.",
+    "config_global_types_available": "Vous pouvez maintenant sélectionner des types globaux pour votre configuration personnalisée."
   },
   "totp": {
     "cant_access": "Ne pouvez pas accéder à votre authentificateur ?",
@@ -2310,7 +2352,18 @@
     "pattern": "Veuillez entrer une valeur valide pour {{field}}.",
     "required": "{{field}} est requis.",
     "service_required_for_ban": "Un service doit être sélectionné pour un bannissement spécifique au service.",
-    "zerossl_email_or_api_key_required": "ZeroSSL nécessite une adresse e-mail ou une clé API ZeroSSL."
+    "zerossl_email_or_api_key_required": "ZeroSSL nécessite une adresse e-mail ou une clé API ZeroSSL.",
+    "current_password_required_for_passkey": "Saisissez votre mot de passe actuel pour ajouter une clé d’accès.",
+    "custom_ssl_pair_required": "Avec un SSL personnalisé, vous devez définir le certificat et la clé (par chemin de fichier ou téléversement de données).",
+    "dns_challenge_field_required": "Ce champ est obligatoire avec le défi DNS.",
+    "newsletter_email_invalid": "Saisissez une adresse e-mail valide pour vous abonner à la newsletter.",
+    "newsletter_email_required": "Ce champ est obligatoire pour vous abonner à la newsletter.",
+    "server_name_check_failed": "Échec de la vérification du nom de serveur",
+    "server_name_choose_different": "Choisissez un autre nom de serveur.",
+    "server_name_invalid": "Nom de serveur invalide.",
+    "server_name_not_unique": "Le nom de serveur n’est pas unique.",
+    "server_name_proceed": "Vous pouvez poursuivre la configuration.",
+    "server_name_unique": "Le nom de serveur est unique."
   },
   "web_cache": {
     "available": "Disponibles",
@@ -2328,15 +2381,15 @@
     "instance": "Instance",
     "metrics": "Répartition agrégée des succès / échecs",
     "metrics_scope": "Les compteurs sont agrégés par instance pour tous les services activés en cache.",
-    "not_reporting": "Ne pas signaler",
+    "not_reporting": "Aucune donnée transmise",
     "path": "Chemin",
     "purge": "Effacer les réponses mises en cache",
     "purge_all": "Effacer tout",
     "purge_all_confirm_body": "Cela supprime toutes les réponses mises en cache pour tous les services sur toutes les instances accessibles. Cela ne peut pas être annulé.",
-    "purge_all_confirm_title": "Effacer toute la cache ?",
+    "purge_all_confirm_title": "Vider l’intégralité du cache ?",
     "purge_help": "Les actions de nettoyage s'exécutent immédiatement sur les instances accessibles. Les instances inaccessibles sont ignorées et aucune action n'est mise en file d'attente.",
     "purge_key": "Clé de cache efficace",
-    "purge_key_help": "Laisser la clé de cache vide uniquement pour l'URL par défaut $scheme$host$request_uri. Si le service remplace PROXY_CACHE_KEY, collez sa valeur effective ici ; les variables uniquement pour la requête non prises en charge sont rejetées au lieu de supprimer une autre entrée.",
+    "purge_key_help": "Laissez la clé de cache vide uniquement pour la valeur par défaut $scheme$host$request_uri. Si le service remplace PROXY_CACHE_KEY, collez sa valeur effective ici ; les variables non prises en charge et disponibles uniquement pendant la requête sont rejetées afin d’éviter de supprimer une autre entrée.",
     "purge_key_placeholder": "PROXY_CACHE_KEY efficace (facultatif)",
     "purge_url": "URL de nettoyage",
     "purge_url_placeholder": "https://www.example.com/asset.js",
@@ -2379,7 +2432,7 @@
     "code": {
       "301": "301 — Déplacé de manière permanente",
       "302": "302 — Trouvé",
-      "303": "303 — Voir autre",
+      "303": "303 — Voir ailleurs",
       "307": "307 — Redirection temporaire",
       "308": "308 — Redirection permanente"
     },
@@ -2414,21 +2467,21 @@
       "least_conn": "Moins de connexions",
       "round_robin": "Rotation (par défaut)"
     },
-    "create": "Créer un serveur en amont",
-    "delete_confirm_title": "Supprimer ce serveur en amont ?",
-    "delete_copy": "Supprimer le serveur en amont {{name}} ?",
-    "delete_help": "Un serveur en amont encore associé à un service ne peut pas être supprimé. Dissociez-le d'abord.",
-    "edit": "Modifier le serveur en amont",
-    "edit_shared": "Ce serveur en amont est associé aux services suivants ({{count}}) : {{services}}. L'enregistrer les modifiera tous.",
-    "empty_text": "Un serveur en amont est un groupe nommé de serveurs backend que vous associez à un ou plusieurs services sur un chemin de proxy inverse. Les paramètres REVERSE_PROXY_HOST définis directement continuent de fonctionner avec lui.",
-    "empty_title": "Aucun serveur en amont pour le moment",
+    "create": "Créer un upstream",
+    "delete_confirm_title": "Supprimer cet upstream ?",
+    "delete_copy": "Supprimer l’upstream {{name}} ?",
+    "delete_help": "Un upstream encore associé à un service ne peut pas être supprimé. Dissociez-le d’abord.",
+    "edit": "Modifier l’upstream",
+    "edit_shared": "Cet upstream est associé aux services suivants ({{count}}) : {{services}}. L’enregistrer les modifiera tous.",
+    "empty_text": "Un upstream est un groupe nommé de serveurs backend que vous associez à un ou plusieurs services sur un chemin de proxy inverse. Les paramètres REVERSE_PROXY_HOST définis directement continuent de fonctionner avec lui.",
+    "empty_title": "Aucun upstream pour le moment",
     "keepalive": "Connexions persistantes",
     "keepalive_help": "Connexions inactives conservées par chaque processus worker. HTTP et gRPC uniquement ; laissez vide pour désactiver.",
     "match_path": "Chemin du proxy inverse",
     "match_path_help": "Emplacement auquel les services sélectionnés transmettent les requêtes vers ce groupe. Ignoré pour un groupe Stream, qui prend en charge l'ensemble du service.",
     "method": "Équilibrage de charge",
     "name_help": "Lettres, chiffres, tirets et tirets bas uniquement. Les points sont interdits afin qu'un nom de groupe ne puisse jamais masquer un hôte réel.",
-    "new": "Nouveau serveur en amont",
+    "new": "Nouvel upstream",
     "not_attached": "Non associé",
     "protocol": "Protocole",
     "protocol_help": "Les groupes HTTP et gRPC sont associés à un chemin ; un groupe Stream prend en charge l'ensemble du service TCP/UDP.",
@@ -2437,13 +2490,13 @@
       "http": "HTTP",
       "stream": "Stream (TCP/UDP)"
     },
-    "readonly": "La base de données est en lecture seule. Les serveurs en amont peuvent être consultés, mais pas modifiés.",
+    "readonly": "La base de données est en lecture seule. Les upstreams peuvent être consultés, mais pas modifiés.",
     "role": {
       "backup": "Secours",
       "down": "Indisponible",
       "primary": "Principal"
     },
-    "save": "Enregistrer le serveur en amont",
+    "save": "Enregistrer l’upstream",
     "search": "Rechercher par nom, description ou serveur…",
     "server_fail_timeout": "Délai d'échec",
     "server_host": "Serveur",
@@ -2451,9 +2504,9 @@
     "server_role": "Rôle",
     "server_weight": "Poids",
     "servers": "Serveurs",
-    "services_help": "Utilisez Ctrl ou Command pour sélectionner plusieurs services. Le serveur en amont pourra être associé ultérieurement.",
-    "services_hidden": "Services masqués : {{count}}. Un serveur en amont {{protocol}} ne peut être associé qu'à un service compatible.",
-    "truncated": "Seuls les 500 premiers serveurs en amont sont affichés. Affinez la liste via l'API pour obtenir le résultat complet."
+    "services_help": "Utilisez Ctrl ou Command pour sélectionner plusieurs services. L’upstream pourra être associé ultérieurement.",
+    "services_hidden": "Services masqués : {{count}}. Un upstream {{protocol}} ne peut être associé qu’à un service compatible.",
+    "truncated": "Seuls les 500 premiers upstreams sont affichés. Affinez la liste via l’API pour obtenir le résultat complet."
   },
   "workflows": {
     "act_block": "Bloquer",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Action terminale",
       "uriMatch": "Mode de correspondance URI",
       "uriValue": "Valeur URI",
-      "window": "Fenêtre en secondes"
+      "window": "Fenêtre en secondes",
+      "changePosition": "Règle {{n}} sur {{total}}, changer de position",
+      "newValue": "Nouvelle valeur",
+      "positionMove": "Position {{n}} sur {{total}} — cliquer pour déplacer"
     },
     "attach": "Associer aux services",
     "attach_help": "Les règles ne sont appliquées qu'aux services auxquels un flux de travail est associé.",
@@ -2506,7 +2562,7 @@
       "auxList": "De haut en bas. La première correspondance est prise en compte.",
       "close": "Fermer",
       "drawerSub": "S'exécute à la position {{n}} de {{total}}",
-      "dropHint": "Déposer pour définir la priorité — la position d'une règle dans la chaîne est la seule chose qu'elle peut signifier",
+      "dropHint": "Déposez pour définir la priorité : la position de la règle dans la chaîne détermine sa priorité.",
       "emptyBody": "Un flux de travail sans règles n'a aucun effet : chaque requête passe directement au flux de travail suivant.",
       "emptyCta": "Ajouter la première règle",
       "emptyTitle": "Aucune règle pour le moment",
@@ -2515,9 +2571,9 @@
       "exit_sub": "Passe au flux de travail associé suivant.",
       "exit_title": "Aucune règle ne correspond",
       "fit": "Ajuster à l'écran",
-      "gateTip": "Une porte de correspondance, pas une action : en dessous du seuil, la règle ne correspond pas et la règle suivante est évaluée.",
-      "hint": "Faire glisser un nœud pour réorganiser · faire glisser la vue pour zoomer · Alt + ← / → sur un nœud sélectionné",
-      "hintReadonly": "Lecture seule — zoomer pour examiner, l'ordre ne peut pas être modifié",
+      "gateTip": "Un critère de correspondance, pas une action : sous le seuil, la règle ne correspond pas et la suivante est évaluée.",
+      "hint": "Faire glisser un nœud pour réorganiser · faire glisser le canevas pour le parcourir · Alt + ← / → sur un nœud sélectionné",
+      "hintReadonly": "Lecture seule — parcourez le canevas pour l’examiner ; l’ordre ne peut pas être modifié",
       "insert": "Ajouter une règle ici",
       "open": "Ouvrir la règle",
       "skipped": "Désactivé — ignoré complètement, comme s'il n'était pas dans la chaîne.",
@@ -2556,9 +2612,9 @@
     "exit_sub": "La requête passe au flux de travail associé suivant, puis au reste de la pile de sécurité.",
     "exit_title": "Aucune règle ne correspond",
     "gate": {
-      "and": "et seulement après que la même IP cliente a effectué plus de",
+      "and": "et seulement lorsque l’adresse IP du même client a effectué plus de",
       "chip": "seuil de correspondance",
-      "help": "Compté par IP cliente. Sous le seuil, cette règle ne correspond pas et l’évaluation passe à la règle suivante ; elle ne limite jamais le débit à elle seule."
+      "help": "Comptage par adresse IP du client. Sous le seuil, cette règle ne correspond pas et l’évaluation passe à la suivante ; à elle seule, elle ne limite jamais le débit."
     },
     "legend": {
       "fall": "L’absence de correspondance passe à la règle suivante",
@@ -2577,7 +2633,9 @@
       "disable": "Désactiver la règle",
       "duplicate": "Dupliquer en dessous",
       "enable": "Activer la règle",
-      "top": "Exécuter en premier"
+      "top": "Exécuter en premier",
+      "moveTo": "Déplacer à la position {{n}}",
+      "staysAt": "Reste à la position {{n}}"
     },
     "move": {
       "first": "Exécuter en premier",
@@ -2643,13 +2701,13 @@
       "detail_status": "Le client reçoit {{status}}.",
       "failed": "Impossible d’exécuter le test",
       "geo": "Recherche GeoIP",
-      "geo_help": "Indisponible rend les règles de pays et d’ASN INCONNUES ; elles ne peuvent donc jamais correspondre.",
+      "geo_help": "Lorsque la recherche GeoIP est indisponible, les règles de pays et d’ASN deviennent INCONNUES et ne peuvent donc jamais correspondre.",
       "geo_local": "Adresse locale / privée",
       "geo_resolved": "Résolu",
       "geo_unavailable": "Base de données indisponible",
       "intro": "Évalue chaque flux de travail associé au service, dans l’ordre, exactement comme le ferait l’instance.",
       "invalid": "Corrigez les problèmes ci-dessus avant de tester.",
-      "ip": "IP cliente",
+      "ip": "Adresse IP du client",
       "method": "Méthode",
       "number": "Numéro de requête",
       "number_help": "Nième requête de ce client dans la fenêtre. Une hypothèse que vous fournissez, pas une mesure.",
@@ -2659,7 +2717,7 @@
       "other_unreached": "non atteint",
       "other_workflows": "Autres flux de travail de ce service",
       "out_draft": "Ce service est un brouillon : aucun flux de travail n’est encore compilé pour lui.",
-      "out_match": "{{workflow}} · {{rule}} correspond et {{action}} la requête.",
+      "out_match": "{{workflow}} · {{rule}} correspond — action : {{action}}.",
       "out_no_match": "Aucune règle ne correspond. La requête passe au reste de la pile de sécurité.",
       "out_not_attached": "Ce flux de travail n’est associé à aucun service ; aucune chaîne de règles ne peut donc être évaluée.",
       "out_whitelisted": "Sur liste blanche : tout le flux de travail est ignoré et aucune règle n’est évaluée.",
@@ -2715,6 +2773,21 @@
     "view": {
       "canvas": "Canevas",
       "list": "Liste"
+    },
+    "action_help": {
+      "block": "Refuser la requête",
+      "challenge": "Prouver qu’il s’agit d’un humain",
+      "redirect": "L’envoyer ailleurs"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "Méthode HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "est exactement",
+      "prefix": "commence par",
+      "regex": "correspond à l’expression régulière"
     }
   },
   "request_path": {
@@ -2723,7 +2796,7 @@
     "terminal": {
       "inline": "Serveur backend",
       "none": "Aucun contenu servi",
-      "pool": "Groupe de serveurs en amont",
+      "pool": "Pool upstream",
       "root": "Fichiers locaux"
     },
     "title": "Chemin de la requête",
@@ -2736,15 +2809,15 @@
         "inline": "{{service}} sert déjà {{path}} grâce à ses propres paramètres {{family}}. Supprimez ces paramètres pour {{path}}, ou utilisez un autre chemin.",
         "primary": "« {{name}} » est actuellement le certificat principal de ce service et perdra ce statut sans autre avertissement. Le certificat principal est celui qui est réellement déployé.",
         "resource": "{{service}} sert déjà {{path}} via le « {{kind}} » {{name}}. Dissociez « {{name}} », ou attribuez un chemin différent à l’un des deux.",
-        "stream": "Un service en mode Stream transmet chaque connexion à un seul serveur backend, et {{service}} utilise déjà le serveur en amont « {{name}} ». Dissociez-le d’abord.",
-        "stream_inline": "{{service}} possède déjà son propre serveur backend dans REVERSE_PROXY_HOST. Supprimez ce paramètre pour que le serveur en amont prenne le relais."
+        "stream": "Un service en mode Stream transmet chaque connexion à un seul serveur backend, et {{service}} utilise déjà l’upstream « {{name}} ». Dissociez-le d’abord.",
+        "stream_inline": "{{service}} possède déjà son propre serveur backend dans REVERSE_PROXY_HOST. Supprimez ce paramètre pour que l’upstream prenne le relais."
       },
       "detach": "Dissocier",
       "family": {
         "certificate": "Certificats",
         "redirect": "Redirections",
         "template": "Modèle",
-        "upstream": "Serveurs en amont",
+        "upstream": "Upstreams",
         "workflow": "Flux de travail"
       },
       "match_path": "Chemin",
@@ -2758,7 +2831,8 @@
         "unwired": "Cette page n'envoie pas le paramètre USE_TEMPLATE ; le modèle ne peut donc pas être modifié ici."
       },
       "title": "Ressources associées",
-      "unavailable": "Non disponible"
+      "unavailable": "Non disponible",
+      "nothing_available": "Aucune ressource disponible à associer."
     }
   },
   "onboarding": {
@@ -2792,15 +2866,15 @@
     "title": "Bien démarrer"
   },
   "timings": {
-    "subtitle": "Durée de chaque extension à chaque phase de la requête, lue en direct sur toutes les instances puis fusionnée.",
+    "subtitle": "Durée de chaque plugin à chaque phase de la requête, lue en direct sur toutes les instances puis fusionnée.",
     "volatile": "Les temps résident dans la mémoire partagée de chaque instance et sont lus à la demande — ils ne sont pas stockés et sont réinitialisés au redémarrage d’une instance.",
     "partial": "Certaines instances n’ont pas répondu. Les chiffres ci-dessous couvrent celles qui ont répondu.",
     "reporting_instances": "Instances répondantes",
     "requests_measured": "Requêtes mesurées",
     "mean_request": "Requête moyenne",
     "max_request": "Requête la plus lente",
-    "phases": "Phases des extensions",
-    "share_help": "La part correspond au temps total de l’extension par rapport au temps total de la requête. Les phases qui ne s’exécutent pas une fois par requête — démarrage du worker, minuteur d’arrière-plan et API interne — n’ont pas de part et affichent un tiret.",
+    "phases": "Phases des plugins",
+    "share_help": "La part correspond au temps total du plugin par rapport au temps total de la requête. Les phases qui ne s’exécutent pas une fois par requête — démarrage du worker, minuteur d’arrière-plan et API interne — n’ont pas de part et affichent un tiret.",
     "plugin": "Plugin",
     "phase": "Phase",
     "calls": "Appels",
@@ -2808,8 +2882,8 @@
     "max": "Maximum",
     "total": "Total",
     "share": "Part",
-    "disabled_title": "Les temps des extensions sont désactivés",
-    "disabled_help": "Définissez METRICS_COLLECT_TIMINGS sur yes pour mesurer la durée de chaque extension. La durée totale de la requête est collectée dans tous les cas.",
+    "disabled_title": "Les temps des plugins sont désactivés",
+    "disabled_help": "Définissez METRICS_COLLECT_TIMINGS sur yes pour mesurer la durée de chaque plugin. La durée totale de la requête est collectée dans tous les cas.",
     "unreachable_title": "Aucune instance n’a signalé de temps",
     "unreachable_help": "Les temps sont lus directement sur les instances ; aucune n’a donc répondu — ou aucune n’a encore traité de requête."
   },

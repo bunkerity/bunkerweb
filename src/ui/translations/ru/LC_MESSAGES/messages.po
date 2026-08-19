@@ -73,8 +73,20 @@ msgstr "Уведомление"
 msgid "alert.ping_error"
 msgstr "Произошла ошибка при пинге экземпляров."
 
+msgid "alert.plugin_file_invalid"
+msgstr "Загрузите корректный архив плагина (.zip, .tar.gz или .tar.xz)."
+
+msgid "alert.plugin_file_too_large"
+msgstr "Архив плагина превышает ограничение в 50 MB."
+
+msgid "alert.plugin_upload_failed"
+msgstr "При загрузке архива плагина произошла ошибка. Повторите попытку."
+
 msgid "alert.readonly_mode"
 msgstr "Это действие отключено в режиме только для чтения."
+
+msgid "alert.services_import_invalid_file"
+msgstr "Загрузите корректный файл экспорта сервисов (.env или .zip)."
 
 msgid "aria.label.clear_search"
 msgstr "Очистить поиск"
@@ -96,6 +108,21 @@ msgstr "Скачать этот файл журнала"
 
 msgid "aria.label.follow"
 msgstr "Следить"
+
+msgid "aria.label.github_followers"
+msgstr "Подписчики GitHub: %(count)s"
+
+msgid "aria.label.github_forks"
+msgstr "Форки GitHub: %(count)s"
+
+msgid "aria.label.github_open_issues"
+msgstr "Открытые задачи GitHub: %(count)s"
+
+msgid "aria.label.github_stars"
+msgstr "Звёзды GitHub: %(count)s"
+
+msgid "aria.label.github_watchers"
+msgstr "Наблюдатели GitHub: %(count)s"
 
 msgid "aria.label.hide_value"
 msgstr "Скрыть значение"
@@ -133,6 +160,9 @@ msgstr "Показать значение"
 msgid "aria.label.search_logs"
 msgstr "Поиск в журналах"
 
+msgid "aria.label.secret_value"
+msgstr "Секретное значение"
+
 msgid "aria.label.select_file"
 msgstr "Выбрать файл"
 
@@ -147,6 +177,9 @@ msgstr "Переключить перенос строк"
 
 msgid "aria.label.user_avatar"
 msgstr "Аватар пользователя"
+
+msgid "aria.label.value_hidden"
+msgstr "%(name)s (скрыто)"
 
 msgid "aria.label.view_selected_items"
 msgstr "Просмотреть выбранные элементы"
@@ -692,7 +725,7 @@ msgid "certificates.download_chain"
 msgstr "Скачать цепочку"
 
 msgid "certificates.download_leaf"
-msgstr "Скачать лист"
+msgstr "Скачать конечный сертификат"
 
 msgid "certificates.edit_help"
 msgstr "Это изменяет только метаданные инвентаря, а не сам сертификат или текущие настройки TLS."
@@ -740,13 +773,13 @@ msgid "certificates.key_drop"
 msgstr "Загрузите соответствующий приватный ключ здесь"
 
 msgid "certificates.key_limit"
-msgstr "Максимум 1 MiB; зашифровано в состоянии покоя и никогда не загружалось"
+msgstr "Не более 1 MiB; ключ хранится в зашифрованном виде и недоступен для скачивания"
 
 msgid "certificates.last_error"
 msgstr "Последняя ошибка"
 
 msgid "certificates.make_primary"
-msgstr "Отметить как основной элемент управления для этого сервиса"
+msgstr "Отметить как основное назначение в реестре для этого сервиса"
 
 msgid "certificates.managed"
 msgstr "Сертификаты, управляемые"
@@ -758,7 +791,7 @@ msgid "certificates.no_issuers"
 msgstr "Нет данных об эмитент"
 
 msgid "certificates.none_due"
-msgstr "Нет сертификатов в ожидании"
+msgstr "Нет сертификатов, требующих продления"
 
 msgid "certificates.orphan_account"
 msgstr "Аккаунт"
@@ -791,7 +824,7 @@ msgid "certificates.primary"
 msgstr "Основное назначение"
 
 msgid "certificates.primary_help"
-msgstr "Отметить выбранные сервисы как основной элемент управления"
+msgstr "Сделать это назначение основным в реестре для выбранных сервисов"
 
 msgid "certificates.readonly"
 msgstr "База данных только для чтения. Сертификаты можно просматривать и загружать, но не изменять."
@@ -845,7 +878,7 @@ msgid "certificates.status.expiring_soon"
 msgstr "Скоро истекает"
 
 msgid "certificates.status.not_yet_valid"
-msgstr "Недействительный"
+msgstr "Ещё не действителен"
 
 msgid "certificates.status.revoked"
 msgstr "Аннулирован"
@@ -1786,6 +1819,15 @@ msgstr "Статус блокировки по времени"
 msgid "dashboard.chart.request_status.blocked"
 msgstr "Заблокированные запросы"
 
+msgid "dashboard.chart.request_status.http_304"
+msgstr "304 Не изменено"
+
+msgid "dashboard.chart.request_status.http_404"
+msgstr "404 Не найдено"
+
+msgid "dashboard.chart.request_status.http_429"
+msgstr "429 Частота запросов ограничена"
+
 msgid "dashboard.chart.request_status.title"
 msgstr "Распределение статусов запросов"
 
@@ -2224,11 +2266,35 @@ msgstr "Ошибка сервера"
 msgid "error.ban_update_failed"
 msgstr "Не удалось обновить срок бана. Пожалуйста, попробуйте еще раз."
 
+msgid "error.passkey_registration_failed"
+msgstr "Не удалось зарегистрировать этот ключ доступа. Повторите попытку."
+
+msgid "error.passkey_sign_in_failed"
+msgstr "Не удалось войти с помощью ключа доступа. Повторите попытку."
+
+msgid "error.report_copy_access_failed"
+msgstr "Ошибка доступа к данным для копирования. Попробуйте обновить страницу."
+
+msgid "error.report_copy_failed"
+msgstr "Не удалось скопировать в буфер обмена. Используйте расположенную ниже кнопку копирования исходных данных."
+
+msgid "error.report_details_load_failed"
+msgstr "Не удалось загрузить сведения об отчёте."
+
+msgid "error.report_identifier_missing"
+msgstr "Отсутствует идентификатор отчёта"
+
 msgid "error.reports_load_error"
 msgstr "Ошибка при загрузке отчетов. Пожалуйста, попробуйте обновить страницу."
 
+msgid "error.security_key_verification_failed"
+msgstr "Не удалось проверить ключ безопасности. Повторите попытку."
+
 msgid "error.unban_failed"
 msgstr "Не удалось разбанить IP-адрес. Пожалуйста, попробуйте еще раз."
+
+msgid "error.webauthn_request_failed"
+msgstr "Запрос ключа безопасности завершился ошибкой. Повторите попытку."
 
 msgid "flash.easter_egg"
 msgstr "Если вы это читаете, значит, вы любопытны"
@@ -3739,13 +3805,13 @@ msgid "request_path.source"
 msgstr "Порядок выполнения плагинов для фазы %(phase)s, от %(setting)s — порядок отображения, а не отслеживание по каждому запросу."
 
 msgid "request_path.terminal.inline"
-msgstr "Сервер"
+msgstr "Бэкенд"
 
 msgid "request_path.terminal.none"
-msgstr "Сервис не работает"
+msgstr "Ничего не обслуживается"
 
 msgid "request_path.terminal.pool"
-msgstr "Внешний пул"
+msgstr "Пул апстрима"
 
 msgid "request_path.terminal.root"
 msgstr "Локальные файлы"
@@ -3808,7 +3874,7 @@ msgid "resource_groups.empty"
 msgstr "Нет групп ресурсов"
 
 msgid "resource_groups.empty_help"
-msgstr "Создайте переиспользуемый псевдоним для обмена типом значений в совместимых настройках."
+msgstr "Создайте переиспользуемый псевдоним для совместного использования типизированных значений в совместимых настройках."
 
 msgid "resource_groups.entries"
 msgstr "Записи"
@@ -3847,13 +3913,13 @@ msgid "resource_groups.new"
 msgstr "Новая группа"
 
 msgid "resource_groups.new_alias"
-msgstr "Новое алиас"
+msgstr "Новый псевдоним"
 
 msgid "resource_groups.no_entries"
 msgstr "Нет записей"
 
 msgid "resource_groups.no_entries_help"
-msgstr "Добавьте записи по отдельности или используйте массовый импортер ниже."
+msgstr "Добавьте записи по отдельности или используйте расположенную ниже форму массового импорта."
 
 msgid "resource_groups.no_references"
 msgstr "Нет ссылок"
@@ -3874,7 +3940,7 @@ msgid "resource_groups.showing_count"
 msgstr "Отображено %(visible)s из %(total)s групп"
 
 msgid "resource_groups.subtitle"
-msgstr "Переиспользуемые типы алиасов для IP-адресов, стран, ASN, обратных DNS-имен, пользовательских агентов и URL-адресов."
+msgstr "Переиспользуемые типизированные псевдонимы для IP-адресов, стран, ASN, имён обратного DNS, значений User-Agent и URI."
 
 msgid "resource_groups.template_configuration"
 msgstr "Шаблон %(template)s"
@@ -4122,6 +4188,9 @@ msgstr "Путь"
 msgid "service.resources.none"
 msgstr "Ничего не прикреплено"
 
+msgid "service.resources.nothing_available"
+msgstr "Нет доступных ресурсов для прикрепления."
+
 msgid "service.resources.primary"
 msgstr "Основной сертификат"
 
@@ -4169,6 +4238,18 @@ msgstr "Настройте здесь несколько экземпляров 
 
 msgid "settings.multiple.title"
 msgstr "Множественные настройки"
+
+msgid "setup.error.web_ui_setup_failed"
+msgstr "Ошибка при настройке веб-интерфейса. Повторите попытку."
+
+msgid "setup.file.content_entered"
+msgstr "Введено символов: %(count)s"
+
+msgid "setup.file.loaded_from"
+msgstr "Загружено из %(name)s · символов: %(count)s"
+
+msgid "setup.file.read_error"
+msgstr "Ошибка чтения файла"
 
 msgid "setup.status.admin_user_exists"
 msgstr "Пользователь администратора уже существует. Пожалуйста, перейдите к следующему шагу."
@@ -4377,6 +4458,9 @@ msgstr "Нет"
 msgid "status.no_data"
 msgstr "Нет данных"
 
+msgid "status.no_file_selected"
+msgstr "Файл не выбран"
+
 msgid "status.no_history"
 msgstr "История недоступна."
 
@@ -4397,6 +4481,9 @@ msgstr "Нет доступных шагов"
 
 msgid "status.no_steps_description"
 msgstr "Этот шаблон не имеет шагов для настройки."
+
+msgid "status.no_url_available"
+msgstr "URL недоступен"
 
 msgid "status.not_applicable"
 msgstr "Н/Д"
@@ -4445,6 +4532,9 @@ msgstr "Изменения вне текущего шаблона не допу�
 
 msgid "status.unique_server_name"
 msgstr "Уникальное имя сервера"
+
+msgid "status.unknown"
+msgstr "Неизвестно"
 
 msgid "status.up"
 msgstr "В сети"
@@ -4727,6 +4817,12 @@ msgstr "Подзаголовок шага"
 
 msgid "template.editor.label_step_title"
 msgstr "Заголовок шага"
+
+msgid "template.editor.missing_config_status_missing"
+msgstr "Отсутствует"
+
+msgid "template.editor.missing_config_status_uploaded"
+msgstr "Загружено"
 
 msgid "template.editor.missing_configs_body"
 msgstr "Импортированный шаблон ссылается на пользовательские конфигурации, которые еще не были загружены. Пожалуйста, импортируйте эти конфигурации для завершения настройки шаблона:"
@@ -5181,6 +5277,12 @@ msgstr "Светлая"
 msgid "threatmap.attacks_today"
 msgstr "Атак сегодня"
 
+msgid "threatmap.blocked_request"
+msgstr "заблокированный запрос"
+
+msgid "threatmap.blocked_requests"
+msgstr "заблокированные запросы"
+
 msgid "threatmap.countries"
 msgstr "Страны происхождения"
 
@@ -5331,6 +5433,9 @@ msgstr "Срок бана успешно обновлен!"
 msgid "toast.body.ping_succeed"
 msgstr "Экземпляры: %(instances)s"
 
+msgid "toast.body.selected_items_already_in_state"
+msgstr "Выбранные элементы уже находятся в запрошенном состоянии."
+
 msgid "toast.copied"
 msgstr "Скопировано!"
 
@@ -5349,6 +5454,9 @@ msgstr "Произошла ошибка при получении глобаль
 msgid "toast.global_settings_failed_title"
 msgstr "Не удалось получить глобальные настройки"
 
+msgid "toast.header.conversion_failed"
+msgstr "Преобразование не выполнено"
+
 msgid "toast.header.ping_failed"
 msgstr "Пинг не удался"
 
@@ -5360,6 +5468,9 @@ msgstr "IP-адрес успешно разбанен!"
 
 msgid "tooltip.auto_lets_encrypt"
 msgstr "Автоматически запрашивать сертификат Let's Encrypt."
+
+msgid "tooltip.button.back_to_file_upload"
+msgstr "Вернуться к загрузке файла"
 
 msgid "tooltip.button.ban_ip"
 msgstr "Забанить этот IP-адрес"
@@ -5421,6 +5532,9 @@ msgstr "Показывать только выбранные"
 msgid "tooltip.button.stop_instance"
 msgstr "Остановить экземпляр %(hostname)s"
 
+msgid "tooltip.button.switch_to_text_editor"
+msgstr "Переключиться на текстовый редактор"
+
 msgid "tooltip.button.unban_ip"
 msgstr "Разбанить %(ip)s"
 
@@ -5447,6 +5561,9 @@ msgstr "Свернуть многострочные записи (трассир
 
 msgid "tooltip.collapse_raw_values"
 msgstr "Свернуть многострочные значения (сертификаты, ключи)"
+
+msgid "tooltip.config_global_types_available"
+msgstr "Теперь для пользовательской конфигурации можно выбирать глобальные типы."
 
 msgid "tooltip.config_type.crs_plugins_after"
 msgstr "Конфигурации, применяемые после загрузки плагинов OWASP Core Rule Set."
@@ -6231,8 +6348,17 @@ msgstr "Скрыто сервисов: %(count)s. Апстрим %(protocol)s м
 msgid "upstreams.truncated"
 msgstr "Отображаются только первые 500 апстримов. Чтобы получить полный результат, сузьте список через API."
 
+msgid "validation.current_password_required_for_passkey"
+msgstr "Введите текущий пароль, чтобы добавить ключ доступа."
+
+msgid "validation.custom_ssl_pair_required"
+msgstr "При использовании пользовательского SSL необходимо указать и сертификат, и ключ (через путь к файлу или загрузку данных)."
+
 msgid "validation.default_field_name"
 msgstr "Это поле"
+
+msgid "validation.dns_challenge_field_required"
+msgstr "Это поле обязательно при использовании проверки DNS."
 
 msgid "validation.invalid_date"
 msgstr "Неверная дата"
@@ -6249,11 +6375,35 @@ msgstr "Требуется IP-адрес."
 msgid "validation.ip_service_duplicate"
 msgstr "Этот IP-адрес уже забанен для выбранного сервиса (%(service)s)."
 
+msgid "validation.newsletter_email_invalid"
+msgstr "Введите корректный адрес электронной почты для подписки на рассылку."
+
+msgid "validation.newsletter_email_required"
+msgstr "Это поле обязательно, если вы хотите подписаться на рассылку."
+
 msgid "validation.pattern"
 msgstr "Пожалуйста, введите допустимое значение для %(field)s."
 
 msgid "validation.required"
 msgstr "%(field)s обязательно для заполнения."
+
+msgid "validation.server_name_check_failed"
+msgstr "Не удалось проверить имя сервера"
+
+msgid "validation.server_name_choose_different"
+msgstr "Выберите другое имя сервера."
+
+msgid "validation.server_name_invalid"
+msgstr "Недопустимое имя сервера."
+
+msgid "validation.server_name_not_unique"
+msgstr "Имя сервера не уникально."
+
+msgid "validation.server_name_proceed"
+msgstr "Можно продолжить настройку."
+
+msgid "validation.server_name_unique"
+msgstr "Имя сервера уникально."
 
 msgid "validation.service_required_for_ban"
 msgstr "Для бана, специфичного для сервиса, необходимо выбрать сервис."
@@ -6408,11 +6558,23 @@ msgstr "URL назначения"
 msgid "workflows.action"
 msgstr "Затем"
 
+msgid "workflows.action_help.block"
+msgstr "Отклонить запрос"
+
+msgid "workflows.action_help.challenge"
+msgstr "Проверить, что это человек"
+
+msgid "workflows.action_help.redirect"
+msgstr "Перенаправить в другое место"
+
 msgid "workflows.add_rule"
 msgstr "Добавить правило"
 
 msgid "workflows.all"
 msgstr "Все"
+
+msgid "workflows.aria.changePosition"
+msgstr "Правило %(n)s из %(total)s, изменить позицию"
 
 msgid "workflows.aria.collapse"
 msgstr "Свернуть"
@@ -6450,8 +6612,14 @@ msgstr "Переместить правило"
 msgid "workflows.aria.moveUp"
 msgstr "Переместить вверх — выполняется раньше"
 
+msgid "workflows.aria.newValue"
+msgstr "Новое значение"
+
 msgid "workflows.aria.openRule"
 msgstr "Открыть правило %(n)s"
+
+msgid "workflows.aria.positionMove"
+msgstr "Позиция %(n)s из %(total)s — нажмите, чтобы переместить"
 
 msgid "workflows.aria.provider"
 msgstr "Поставщик антибот-проверки"
@@ -6585,6 +6753,15 @@ msgstr "Правила копируются, а прикрепления к се
 msgid "workflows.clone_name"
 msgstr "Название копии"
 
+msgid "workflows.condition.ip"
+msgstr "IP / CIDR"
+
+msgid "workflows.condition.method"
+msgstr "HTTP-метод"
+
+msgid "workflows.condition.uri"
+msgstr "URI"
+
 msgid "workflows.confirm.deleteRule"
 msgstr "Удалить это правило? Все правила ниже поднимутся на одну позицию."
 
@@ -6686,6 +6863,12 @@ msgstr "Создать копию ниже"
 
 msgid "workflows.menu.enable"
 msgstr "Включить правило"
+
+msgid "workflows.menu.moveTo"
+msgstr "Переместить на позицию %(n)s"
+
+msgid "workflows.menu.staysAt"
+msgstr "Остаётся на позиции %(n)s"
 
 msgid "workflows.menu.top"
 msgstr "Выполнять первым"
@@ -7001,6 +7184,15 @@ msgstr "Отображаются только первые 500 рабочих п
 
 msgid "workflows.untitled"
 msgstr "Правило без названия"
+
+msgid "workflows.uri_match.exact"
+msgstr "точно совпадает"
+
+msgid "workflows.uri_match.prefix"
+msgstr "начинается с"
+
+msgid "workflows.uri_match.regex"
+msgstr "соответствует регулярному выражению"
 
 msgid "workflows.value.add"
 msgstr "Значение"

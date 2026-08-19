@@ -29,7 +29,11 @@
     "no_changes_detected": "Walang nakitang pagbabago.",
     "notice": "Paunawa",
     "ping_error": "May naganap na error habang pina-ping ang mga instance.",
-    "readonly_mode": "Ang aksyong ito ay hindi pinagana sa read-only na mode."
+    "readonly_mode": "Ang aksyong ito ay hindi pinagana sa read-only na mode.",
+    "plugin_file_invalid": "Mangyaring mag-upload ng wastong plugin archive (.zip, .tar.gz, o .tar.xz).",
+    "plugin_file_too_large": "Lumampas sa limitasyong 50 MB ang plugin archive.",
+    "plugin_upload_failed": "Nagkaroon ng error habang ina-upload ang plugin archive. Subukan muli.",
+    "services_import_invalid_file": "Mangyaring mag-upload ng wastong services export file (.env o .zip)."
   },
   "aria": {
     "label": {
@@ -57,7 +61,14 @@
       "services_dropzone": "Pumili ng file ng export ng mga serbisyo o i-drop dito",
       "toggle_wrap": "I-toggle ang pag-wrap ng linya",
       "user_avatar": "Avatar ng gumagamit",
-      "view_selected_items": "Tingnan ang napiling mga item"
+      "view_selected_items": "Tingnan ang napiling mga item",
+      "github_followers": "Mga follower sa GitHub: {{count}}",
+      "github_forks": "Mga fork sa GitHub: {{count}}",
+      "github_open_issues": "Mga bukas na issue sa GitHub: {{count}}",
+      "github_stars": "Mga star sa GitHub: {{count}}",
+      "github_watchers": "Mga watcher sa GitHub: {{count}}",
+      "secret_value": "Lihim na value",
+      "value_hidden": "{{name}} (nakatago)"
     }
   },
   "badge": {
@@ -523,7 +534,7 @@
         "good_high": "Mahusay na memorya para sa mga production environment",
         "info_medium": "Isaalang-alang ang pag-upgrade sa 16GB+ para sa production",
         "title": "System RAM",
-        "usage": "{{percent}}% nagagamit",
+        "usage": "{{percent}}% ginagamit",
         "warning_low": "Babala: Ang mababang memorya ay maaaring makaapekto sa pagganap"
       },
       "services": {
@@ -557,7 +568,10 @@
       },
       "request_status": {
         "blocked": "Mga Na-block na Kahilingan",
-        "title": "Distribusyon ng Katayuan ng Kahilingan"
+        "title": "Distribusyon ng Katayuan ng Kahilingan",
+        "http_304": "304 Hindi Binago",
+        "http_404": "404 Hindi Natagpuan",
+        "http_429": "429 Nilimitahan ang Rate"
       },
       "top_blocked_ips": {
         "most_blocked": "Pinaka-block na IP",
@@ -588,15 +602,15 @@
       "greeting": "Maligayang pagbabalik,"
     },
     "mini": {
-      "across_countries": "sa mga bansa ng {{count}}",
+      "across_countries": "sa {{count}} bansa",
       "enforced": "kasalukuyang ipinapatupad",
       "pct_blocked": "{{percent}}% na bloke",
-      "scheduled": "Nagschedule"
+      "scheduled": "nakaiskedyul"
     },
     "status": {
-      "blocked_of_total": "Na-block ng {{total}}",
+      "blocked_of_total": "na-block sa kabuuang {{total}}",
       "free_plan": "Libreng plano",
-      "renews": "Nag-renew",
+      "renews": "Magre-renew",
       "services_licensed": "Mga serbisyo ng {{count}} na may lisensya",
       "trend_vs_prev": "kumpara sa nakaraang",
       "vs_prev": "kumpara sa nakaraang"
@@ -742,7 +756,15 @@
     },
     "ban_update_failed": "Nabigo ang pag-update ng tagal ng ban. Mangyaring subukan muli.",
     "reports_load_error": "Error sa pag-load ng mga ulat. Mangyaring i-refresh ang pahina.",
-    "unban_failed": "Nabigo ang pag-unban ng IP address. Mangyaring subukan muli."
+    "unban_failed": "Nabigo ang pag-unban ng IP address. Mangyaring subukan muli.",
+    "passkey_registration_failed": "Hindi mairehistro ang passkey na ito. Subukan muli.",
+    "passkey_sign_in_failed": "Hindi ka ma-sign in gamit ang passkey. Subukan muli.",
+    "report_copy_access_failed": "Nagkaroon ng error sa pag-access ng data para kopyahin. Subukang i-refresh ang pahina.",
+    "report_copy_failed": "Hindi nakopya sa clipboard. Subukang gamitin ang button sa ibaba para kopyahin ang raw data.",
+    "report_details_load_failed": "Hindi ma-load ang mga detalye ng report.",
+    "report_identifier_missing": "Nawawala ang identifier ng report",
+    "security_key_verification_failed": "Hindi ma-verify ang iyong security key. Subukan muli.",
+    "webauthn_request_failed": "Nabigo ang request sa security key. Subukan muli."
   },
   "flash": {
     "easter_egg": "Kung nabasa mo ito, ibig sabihin ay mausisa ka",
@@ -760,7 +782,7 @@
     "documentation": "Dokumentasyon",
     "license": "Lisensya",
     "made_by": "ginawa ng",
-    "privacy": "Privacy",
+    "privacy": "Pribasidad",
     "support": "Suporta"
   },
   "form": {
@@ -1418,7 +1440,7 @@
   },
   "security_mode": {
     "block": "I-block",
-    "detect": "Tuklasin"
+    "detect": "I-detect"
   },
   "services": {
     "draft": "Mga serbisyo sa draft",
@@ -1488,7 +1510,15 @@
       "title": "Pangkalahatang-tanaw"
     },
     "subtitle": "Sundin ang mga hakbang upang makumpleto ang setup wizard.",
-    "title": "Setup wizard"
+    "title": "Setup wizard",
+    "error": {
+      "web_ui_setup_failed": "Nagkaroon ng error habang sine-set up ang web UI. Subukan muli."
+    },
+    "file": {
+      "content_entered": "Mga inilagay na character: {{count}}",
+      "loaded_from": "Na-load mula sa {{name}} · mga character: {{count}}",
+      "read_error": "Error sa pagbasa ng file"
+    }
   },
   "status": {
     "admin_user_exists": "Mayroon nang admin user. Mangyaring magpatuloy sa susunod na hakbang.",
@@ -1530,7 +1560,7 @@
     "no_steps_description": "Ang template na ito ay walang mga hakbang na iko-configure.",
     "not_applicable": "Hindi Naaangkop",
     "online": "Online",
-    "partial": "Bahagyan",
+    "partial": "Bahagyang suportado",
     "pending": "Naka-antay",
     "pinging_instances": "Pina-ping ang mga instance, mangyaring maghintay...",
     "plugin_page": {
@@ -1554,7 +1584,10 @@
     "expiring": "Malapit nang mag-expire",
     "no_settings": "Ang plugin na ito ay walang setting para sa saklaw na ito.",
     "yes": "Oo",
-    "optional": "Opsyonal"
+    "optional": "Opsyonal",
+    "no_file_selected": "Walang napiling file",
+    "no_url_available": "Walang available na URL",
+    "unknown": "Hindi alam"
   },
   "step": {
     "next": "Susunod",
@@ -1799,7 +1832,9 @@
       "validation_configs_unique": "Ang bawat pangalan ng config ay dapat natatangi.",
       "validation_id_required": "Kailangan ng ID ng template.",
       "validation_setting_key": "Ang bawat setting ay dapat may key.",
-      "validation_settings_unique": "Ang bawat key ng setting ay dapat natatangi."
+      "validation_settings_unique": "Ang bawat key ng setting ay dapat natatangi.",
+      "missing_config_status_missing": "Nawawala",
+      "missing_config_status_uploaded": "Na-upload"
     },
     "none": "Walang Template"
   },
@@ -1820,7 +1855,7 @@
       "ui": "Web UI"
     },
     "tag": {
-      "config": "Custom config: {{name}}",
+      "config": "Pasadyang configuration: {{name}}",
       "feature": "Built-in na feature: {{name}}",
       "plugin": "Plugin: {{name}}"
     },
@@ -1857,14 +1892,17 @@
     "error_title": "Hindi maabot ang metrics service",
     "error_help": "Pinapanatili ng mapa ang huling datos na nakarga at susubok muli sa susunod na pag-refresh.",
     "open_live": "Live na view",
-    "updated": "Na-update"
+    "updated": "Na-update",
+    "blocked_request": "na-block na request",
+    "blocked_requests": "mga na-block na request"
   },
   "toast": {
     "autoconf_disclaimer_bold": "Kung aalisin o ire-restart ang serbisyo, mawawala ang iyong UI configuration.",
     "autoconf_disclaimer_detail": "Ito ay dahil ang paraan ng serbisyo ay 'autoconf', na idinisenyo upang maiwasan ang mga salungatan sa configuration.",
     "ban_updated": "Matagumpay na na-update ang tagal ng ban!",
     "body": {
-      "ping_succeed": "Mga Instance: {{instances}}"
+      "ping_succeed": "Mga Instance: {{instances}}",
+      "selected_items_already_in_state": "Nasa hiniling na estado na ang mga napiling item."
     },
     "copied": "Nakopya!",
     "disclaimer_title": "Paunawa",
@@ -1874,7 +1912,8 @@
     "global_settings_failed_title": "Nabigo ang pagkuha ng mga pandaigdigang setting",
     "header": {
       "ping_failed": "Nabigo ang ping",
-      "ping_succeed": "Matagumpay ang ping"
+      "ping_succeed": "Matagumpay ang ping",
+      "conversion_failed": "Nabigo ang conversion"
     },
     "ip_unbanned": "Matagumpay na na-unban ang IP address!"
   },
@@ -1903,7 +1942,9 @@
       "stop_instance": "Itigil ang Instance na {{hostname}}",
       "unban_ip": "I-unban ang {{ip}}",
       "update_ban_duration": "Baguhin ang tagal ng pagbabawal",
-      "value_from_global": "Value mula sa mga pandaigdigang setting"
+      "value_from_global": "Value mula sa mga pandaigdigang setting",
+      "back_to_file_upload": "Bumalik sa pag-upload ng file",
+      "switch_to_text_editor": "Lumipat sa text editor"
     },
     "cannot_delete_original_ban": "Hindi mabura ang orihinal na entry ng Ban.",
     "cannot_remove_disabled": "Hindi maaaring alisin dahil ang isa o higit pang setting ay hindi pinagana.",
@@ -1988,7 +2029,7 @@
     "readonly_mode": "Hindi pinapayagan ang aksyong ito sa mode na \"read-only\".",
     "readonly_user_action_disabled": "Hindi pinagana: Ang iyong account ay read-only, aksyon na '{{action}}' ay hindi pinagana.",
     "real_ip_from": "Listahan ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan.",
-    "real_ip_from_urls": "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at auth basic gamit ang http://user:pass@url scheme.",
+    "real_ip_from_urls": "Listahan ng mga URL na naglalaman ng mga pinagkakatiwalaang IP / network, pinaghihiwalay ng mga puwang, kung saan nagmumula ang mga proxied na kahilingan. Sinusuportahan din ang mga file:// URL at pangunahing pagpapatotoo gamit ang iskema na http://user:pass@url.",
     "real_ip_header": "HTTP header na naglalaman ng tunay na IP o espesyal na value na proxy_protocol para sa PROXY protocol.",
     "real_ip_recursive": "Magsagawa ng recursive na paghahanap sa header container IP address.",
     "remove_ban_entry": "Alisin ang entry ng ban na ito mula sa listahan.",
@@ -2113,7 +2154,7 @@
         "last_update": "Petsa at oras kung kailan huling na-update ang Serbisyo",
         "method": "Paraan ng paglikha ng Serbisyo (hal., ui, file)",
         "name": "Pangalan ng Serbisyo",
-        "security_mode": "Mode ng seguridad ng Serbisyo (I-block o Tuklasin)",
+        "security_mode": "Mode ng seguridad ng serbisyo (I-block o I-detect)",
         "select_all": "Piliin ang lahat ng Serbisyo",
         "template": "Ang template na ginagamit ng Serbisyo",
         "type": "Uri ng serbisyo (Online/Draft)"
@@ -2150,7 +2191,8 @@
     "zerossl_api_retry": "Bilang ng mga ulit para sa mga kahilingan ng ZeroSSL API (0 ang nagdi-disable ng mga ulit).",
     "zerossl_api_retry_delay": "Pagkaantala sa segundo sa pagitan ng mga ulit ng ZeroSSL API.",
     "zerossl_api_connect_timeout": "Connection timeout sa segundo para sa mga tawag ng ZeroSSL API.",
-    "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API."
+    "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API.",
+    "config_global_types_available": "Maaari ka nang pumili ng mga global na uri para sa iyong custom na configuration."
   },
   "totp": {
     "cant_access": "Hindi makakuha ng access sa iyong authenticator?",
@@ -2310,7 +2352,18 @@
     "pattern": "Mangyaring magpasok ng valid na value para sa {{field}}.",
     "required": "Kailangan ang {{field}}.",
     "service_required_for_ban": "Kailangan ng serbisyo para sa isang ban na tukoy sa serbisyo.",
-    "zerossl_email_or_api_key_required": "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key."
+    "zerossl_email_or_api_key_required": "Nangangailangan ang ZeroSSL ng email o ZeroSSL API key.",
+    "current_password_required_for_passkey": "Ilagay ang iyong kasalukuyang password upang magdagdag ng passkey.",
+    "custom_ssl_pair_required": "Kapag gumagamit ng custom SSL, dapat itakda ang certificate at key (sa pamamagitan ng file path o pag-upload ng data).",
+    "dns_challenge_field_required": "Kinakailangan ang field na ito kapag gumagamit ng DNS challenge.",
+    "newsletter_email_invalid": "Maglagay ng wastong email address upang mag-subscribe sa newsletter.",
+    "newsletter_email_required": "Kinakailangan ang field na ito kung gusto mong mag-subscribe sa newsletter.",
+    "server_name_check_failed": "Nabigo ang pagsusuri sa pangalan ng server",
+    "server_name_choose_different": "Pumili ng ibang pangalan ng server.",
+    "server_name_invalid": "Hindi wasto ang pangalan ng server.",
+    "server_name_not_unique": "Hindi natatangi ang pangalan ng server.",
+    "server_name_proceed": "Maaari kang magpatuloy sa setup.",
+    "server_name_unique": "Natatangi ang pangalan ng server."
   },
   "web_cache": {
     "available": "Available",
@@ -2318,7 +2371,7 @@
     "cached_files": "Mga naka-cache na file",
     "deployment": "Pag-deploy",
     "disabled": "Hindi naka-enable",
-    "disk_usage": "Paglalaan ng disk",
+    "disk_usage": "Paggamit ng disk",
     "empty": "Walang laman",
     "error": "Error",
     "enabled": "Pinagana",
@@ -2334,7 +2387,7 @@
     "purge_all": "Tanggalin ang lahat",
     "purge_all_confirm_body": "Ito ay nagtatanggal ng lahat ng naka-cache na tugon para sa bawat serbisyo sa bawat naa-access na instance. Hindi ito maaaring i-undo.",
     "purge_all_confirm_title": "Tanggalin ang buong cache?",
-    "purge_help": "Tanggalin ang mga aksyon na tumatakbo kaagad sa mga naa-access na instance. Ang mga hindi naa-access na instance ay hindi isinasagawa at walang aksyon na ina-queue.",
+    "purge_help": "Ang mga purge action ay agad na tumatakbo sa mga naa-access na instance. Nilalaktawan ang mga hindi naa-access na instance at walang aksyong inilalagay sa queue.",
     "purge_key": "Epektibong susi ng cache",
     "purge_key_help": "Iwanan ang susi ng cache na walang laman lamang para sa default na $scheme$host$request_uri. Kung ang serbisyo ay nag-o-override ng PROXY_CACHE_KEY, ilagay dito ang epektibong halaga; ang mga variable na may kaugnayan lamang sa kahilingan na hindi sinusuportahan ay tinatanggihan sa halip na tanggalin ang ibang entry.",
     "purge_key_placeholder": "Epektibong PROXY_CACHE_KEY (opsyonal)",
@@ -2496,7 +2549,10 @@
       "terminalAction": "Pangwakas na aksyon",
       "uriMatch": "Mode ng pagtutugma ng URI",
       "uriValue": "Value ng URI",
-      "window": "Window sa segundo"
+      "window": "Window sa segundo",
+      "changePosition": "Patakaran {{n}} sa {{total}}, baguhin ang posisyon",
+      "newValue": "Bagong value",
+      "positionMove": "Posisyon {{n}} sa {{total}} — i-click upang ilipat"
     },
     "attach": "Ikabit sa mga serbisyo",
     "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
@@ -2514,7 +2570,7 @@
       "entry_title": "Bawat kahilingan",
       "exit_sub": "Patuloy sa susunod na nakakabit na daloy ng trabaho.",
       "exit_title": "Walang tumugmang patakaran",
-      "fit": "Fit to view",
+      "fit": "Iakma sa view",
       "gateTip": "Isang gate ng pagtutugma, hindi isang aksyon: kapag mas mababa sa threshold, hindi tumutugma ang patakaran at sinusuri ang susunod na patakaran.",
       "hint": "I-drag ang isang node upang ayusin · i-drag ang board upang mag-pan · Alt + ← / → sa isang naka-focus na node",
       "hintReadonly": "Read-only — i-pan upang tingnan, hindi maaaring baguhin ang pagkakasunod-sunod",
@@ -2523,8 +2579,8 @@
       "skipped": "Naka-disable — hindi ginagamit, parang wala sa chain.",
       "stopTail": ", humihinto ang pagtatasa dito — walang patakaran pagkatapos nito ang naabot.",
       "title": "Pagkasunod-sunod ng patakaran",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out"
+      "zoomIn": "Mag-zoom in",
+      "zoomOut": "Mag-zoom out"
     },
     "capacity": "{{count}} sa {{maxRules}} patakaran · gumagamit ang pinakamalaking patakaran ng {{worst}} sa {{maxPredicates}} predicate · {{regexes}} regex sa workflow na ito",
     "clone": "Kopyahin ang daloy ng trabaho",
@@ -2577,7 +2633,9 @@
       "disable": "I-disable ang patakaran",
       "duplicate": "Kopyahin sa ibaba",
       "enable": "I-enable ang patakaran",
-      "top": "Patakbuhin muna"
+      "top": "Patakbuhin muna",
+      "moveTo": "Ilipat sa posisyon {{n}}",
+      "staysAt": "Nananatili sa posisyon {{n}}"
     },
     "move": {
       "first": "Patakbuhin muna",
@@ -2714,7 +2772,22 @@
     },
     "view": {
       "canvas": "Canvas",
-      "list": "List"
+      "list": "Listahan"
+    },
+    "action_help": {
+      "block": "Tanggihan ang request",
+      "challenge": "Patunayang tao ito",
+      "redirect": "Ipadala ito sa ibang lugar"
+    },
+    "condition": {
+      "ip": "IP / CIDR",
+      "method": "Paraan ng HTTP",
+      "uri": "URI"
+    },
+    "uri_match": {
+      "exact": "ay eksaktong",
+      "prefix": "nagsisimula sa",
+      "regex": "tumutugma sa regex"
     }
   },
   "request_path": {
@@ -2758,7 +2831,8 @@
         "unwired": "Ang pahinang ito ay hindi nagpo-post ng USE_TEMPLATE, kaya hindi maaaring baguhin ang template mula dito."
       },
       "title": "Mga nakakabit na mapagkukunan",
-      "unavailable": "Hindi magagamit"
+      "unavailable": "Hindi magagamit",
+      "nothing_available": "Walang available na maikakabit."
     }
   },
   "onboarding": {
