@@ -368,6 +368,57 @@ log {
 - Manage UI users, roles, sessions, TOTP with recovery codes, and passkeys (WebAuthn / FIDO2) for passwordless sign-in.
 - Upgrade to BunkerWeb PRO and inspect license status from the dedicated page.
 
+## Guided walkthrough
+
+A new install opens a **Getting started** drawer from the rocket icon in the top bar. It lists what
+is left to do, ticks each item off on its own, and disappears once everything is done — or as soon
+as you dismiss it.
+
+Nothing is stored about what you have *seen*: each item is re-derived from the running
+configuration every time the drawer opens. Register a service from the API, or from a Docker label,
+and the matching item is already ticked the next time you look. Conversely, deleting your last
+service brings its item back.
+
+What you are shown depends on your role:
+
+| Role | What the walkthrough offers |
+| --- | --- |
+| Admin | Install, first service, HTTPS, first blocked request, MFA, plus optional workflow and PRO items |
+| Writer | The same, minus the admin-only PRO item |
+| Reader | Orientation instead of tasks: where the dashboard, reports, bans and logs are, and how to read them |
+
+Readers get one short hint on each of those four pages the first time they visit; acknowledging it
+with **Got it** is what ticks the matching item. Any item pointing at a place in the interface also
+carries a **Show me** button that highlights it in the navigation.
+
+Optional items — a security workflow, PRO — never hold the counter back: a Community install reaches
+"all done" without them.
+
+!!! info "Dismissed by accident?"
+    **Profile → Guided walkthrough → Restart walkthrough** brings the drawer back. On a read-only
+    database the button is disabled, since nothing could be saved.
+
+## What's new after an upgrade
+
+After an upgrade, the first page you open shows a recap of what changed between the version you
+last used and the one now running. It is built from the `CHANGELOG.md` shipped inside the
+image — nothing is fetched from the internet, so an air-gapped installation shows the same
+recap as a connected one.
+
+The recap is per user and per version: closing it marks that version as seen for your account
+only. Everything stays available at **/whats-new**, reachable by clicking the version number at
+the bottom of the sidebar — dismissing the recap loses nothing.
+
+Two behaviours worth knowing:
+
+- **An account that has never seen a recap is marked as up to date silently.** Enabling this
+  feature does not greet existing users with the entire history; you start seeing recaps from
+  your next upgrade onwards.
+- **Downgrades show nothing.** Running an older build than the one recorded shows no recap,
+  rather than announcing releases the running binary does not contain.
+
+On a read-only database nothing can be stored, so the recap reappears at the next sign-in.
+
 ## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"

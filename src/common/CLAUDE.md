@@ -51,7 +51,7 @@ settings.json + plugin.json schemas
 - `Users`, `Roles`, `Permissions`, `RolesUsers`, `RolesPermissions` — RBAC for UI
 - `API_users`, `API_permissions` — fine-grained API access control
 - `UserSessions`, `UserRecoveryCodes` — 2FA support
-- `JSONText` TypeDecorator — stores JSON as text for `UserColumnsPreferences`
+- `JSONText` TypeDecorator — stores JSON as text for `UserPreferences`
 
 **Migrations** (`alembic/`): Separate version directories per DB engine — `mariadb_versions/`, `mysql_versions/`, `postgresql_versions/`, `sqlite_versions/`. Each migration must be written for all four.
 
