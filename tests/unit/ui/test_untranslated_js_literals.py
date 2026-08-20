@@ -15,12 +15,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _jsscan import (  # noqa: E402
     Source,
-    _IDENTIFIER_TAIL,
     _REGEX_MAY_START,
     _balanced,
     _skip_quoted,
     _skip_regex,
+    _starts_an_identifier,
+    _template_text,
     string_value,
+    track_substitutions,
 )
 
 REPO = Path(__file__).resolve().parents[3]
@@ -34,7 +36,6 @@ CATALOG_FALLBACKS = {
     ("modules/setting_controls.js", "Enabled"): "template.editor.setting_toggle_enabled via setContent()",
     ("modules/setting_controls.js", "Select options"): "template.editor.multiselect_placeholder via setContent()",
     ("modules/setting_controls.js", "{{count}} selected"): "template.editor.multiselect_summary via setContent()",
-    ("modules/setting_controls.js", "Show selected only"): "tooltip.button.show_selected_only via injected translator",
     ("modules/setting_controls.js", "No items found."): "status.no_search_results via setContent()",
     ("modules/setting_controls.js", "One value per line.{{separatorNote}}"): "template.editor.multivalue_helper via setContent()",
     ("modules/setting_controls.js", "Add value"): "template.editor.multivalue_add via setContent()",
@@ -73,7 +74,6 @@ CATALOG_FALLBACKS = {
     ("pages/plugin_page.js", "Status Code"): "searchpane.status_code fallback",
     ("pages/plugin_page.js", "Security Mode"): "searchpane.security_mode fallback",
     ("pages/plugin_page.js", "Ban Scope"): "searchpane.ban_scope fallback",
-    ("pages/reports-overview.js", "just now"): "flash.time.just_now fallback",
     ("pages/reports.js", "The date and time when the Report was created"): "tooltip.table.reports.date via data-i18n and applyTranslations()",
     ("pages/reports.js", "The unique identifier for the request"): "tooltip.table.reports.request_id via data-i18n and applyTranslations()",
     ("pages/reports.js", "The reported IP address"): "tooltip.table.reports.ip_address via data-i18n and applyTranslations()",
@@ -96,14 +96,6 @@ CATALOG_FALLBACKS = {
     ): "tooltip.table.reports.bytes_received via data-i18n and applyTranslations()",
     ("pages/reports.js", "Stream only: how long the session lasted, in seconds"): "tooltip.table.reports.session_time via data-i18n and applyTranslations()",
     ("pages/reports.js", "Actions available for this report"): "tooltip.table.reports.actions via data-i18n and applyTranslations()",
-    (
-        "pages/service-resources.js",
-        "{{service}} already serves {{path}} through its own {{family}} settings. Clear those settings for {{path}}, or use a different path.",
-    ): "service.resources.conflict.inline defaultValue",
-    (
-        "pages/service-resources.js",
-        "{{service}} already serves {{path}} through the {{kind}} “{{name}}”. Detach “{{name}}”, or give one of them a different path.",
-    ): "service.resources.conflict.resource defaultValue",
     ("pages/services.js", "Name"): "table.header.name via selected-list translator",
     ("pages/services.js", "Type"): "table.header.type via selected-list translator",
     ("pages/settings-raw.js", "Disclaimer"): "toast.disclaimer_title synchronous replacement",
@@ -139,14 +131,8 @@ CATALOG_FALLBACKS = {
     ("pages/workflow_editor.js", "Continues to the next attached workflow."): "workflows.canvas.exit_sub via data-i18n and runTranslations()",
     ("pages/workflow_editor.js", " rules · largest rule uses "): "workflows.capacity fallback fragment",
     ("pages/workflow_editor.js", " in this workflow</span>"): "workflows.capacity fallback fragment",
-    ("pages/workflow_editor.js", "This workflow"): "workflows.errors.whole fallback",
     ("pages/workflow_editor.js", " problem blocks the save."): "workflows.errors.count fallback fragment",
     ("pages/workflow_editor.js", " problems block the save."): "workflows.errors.count fallback fragment",
-    ("pages/workflow_editor.js", "Whitelisted — the whole workflow is skipped and no rule is evaluated."): "workflows.test.out_whitelisted fallback",
-    ("pages/workflow_editor.js", "This workflow is attached to no service, so there is no ladder to evaluate."): "workflows.test.out_not_attached fallback",
-    ("pages/workflow_editor.js", "This service is a draft — no workflow is compiled for it yet."): "workflows.test.out_draft fallback",
-    ("pages/workflow_editor.js", "No rule matched. The request continues to the rest of the security stack."): "workflows.test.out_no_match fallback",
-    ("pages/workflow_editor.js", "{{workflow}} · {{rule}} matched and {{action}} the request."): "workflows.test.out_match fallback",
     ("pages/workflow_editor.js", "Request number {{request_number}} is your input, not a measurement."): "workflows.test.assume_rate_counter fallback metadata",
     ("pages/workflow_editor.js", "Assumes the client is not whitelisted."): "workflows.test.assume_not_whitelisted fallback metadata",
     ("pages/workflow_editor.js", "Assumes the instance's regex budget is not exhausted."): "workflows.test.assume_regex_budget fallback metadata",
@@ -238,7 +224,11 @@ NON_COPY = {
     ("i18n.js", "Failed to parse supported languages JSON:"): "console-only diagnostic prefix",
     ("i18n.js", "CSRF token not found, cannot save language preference to server"): "console-only diagnostic",
     ("i18n.js", "Error saving language preference to server:"): "console-only diagnostic prefix",
+    ("helpers.js", "HTML"): "a DOM tagName compared against `el.tagName.toUpperCase()`, not copy",
+    ("helpers.js", "Event"): "the DOM interface name passed to `document.createEvent`",
+    ("helpers.js", "IEMobile"): "a user-agent token matched with `indexOf`",
     ("menu.js", "Cannot find `.menu-sub` element for the current `.menu-toggle`"): "developer exception for invalid menu markup",
+    ("menu.js", "Toggable "): "interpolated into a developer `Error()` about missing `.menu-item` markup",
     ("pages/bans.js", "Date"): "unused headers metadata",
     ("pages/bans.js", "IP Address"): "unused headers metadata",
     ("pages/bans.js", "Country"): "unused headers metadata",
@@ -311,142 +301,21 @@ NON_COPY = {
     ("utils.js", "There was a problem with the clear notifications operation:"): "console-only diagnostic prefix",
 }
 
-# Genuine untranslated occurrences awaiting the UI owner's call-site migration. This list starts
-# at 123 entries and is meant to reach zero. Each entry must still resolve to the exact literal at
-# the stated line; once a call site enters `t()`, its stale entry fails until it is deleted.
-PENDING = {
-    ("buttons.js", 420, " on GitHub"): "aria.label.github_{followers,stars,watchers,forks,open_issues}",
-    ("components/secret-field.js", 45, "Secret value"): "aria.label.secret_value + aria.label.value_hidden",
-    ("components/settings-widgets.js", 235, "No file selected"): "status.no_file_selected",
-    ("components/settings-widgets.js", 304, "Switch to text editor"): "tooltip.button.switch_to_text_editor",
-    ("components/settings-widgets.js", 305, "Back to file upload"): "tooltip.button.back_to_file_upload",
-    ("components/settings-widgets.js", 898, "Unable to read the selected file."): "template.editor.raw_editor_upload_failed",
-    ("components/webauthn.js", 62, "Request failed"): "error.webauthn_request_failed",
-    ("main.js", 293, "Invalid date"): "validation.invalid_date",
-    ("modules/setting_controls.js", 646, "No file selected"): "status.no_file_selected",
-    ("modules/setting_controls.js", 653, "No file selected"): "status.no_file_selected",
-    ("pages/config_edit.js", 166, "Global"): "scope.global",
-    ("pages/config_edit.js", 193, "Warning"): "flash.warning",
-    ("pages/config_edit.js", 248, "You can now select global types for your custom config."): "tooltip.config_global_types_available",
-    ("pages/config_edit.js", 289, "Draft"): "status.draft",
-    ("pages/config_edit.js", 292, "Online"): "status.online",
-    ("pages/config_edit.js", 308, "This action is not allowed in read-only mode."): "alert.readonly_mode",
-    ("pages/config_edit.js", 321, "No changes detected."): "alert.no_changes_detected",
-    ("pages/config_edit.js", 332, "A custom configuration name is required."): "validation.required",
-    ("pages/config_edit.js", 341, "Please enter a valid configuration name."): "validation.pattern",
-    ("pages/configs.js", 490, "Conversion failed"): "toast.header.conversion_failed",
-    ("pages/configs.js", 493, "The selected configs are already in the desired state."): "toast.body.selected_items_already_in_state",
-    ("pages/home.js", 720, "304 Not Modified"): "dashboard.chart.request_status.http_304",
-    ("pages/home.js", 723, "404 Not Found"): "dashboard.chart.request_status.http_404",
-    ("pages/home.js", 724, "429 Rate Limited"): "dashboard.chart.request_status.http_429",
-    ("pages/home.js", 892, "Status"): "table.header.status",
-    ("pages/home.js", 1091, "Unknown"): "status.unknown",
-    ("pages/login.js", 56, "Couldn't sign you in with a passkey, please try again"): "error.passkey_sign_in_failed",
-    ("pages/plugins-grid.js", 183, "File size exceeds 50 MB limit."): "alert.plugin_file_too_large",
-    ("pages/plugins-grid.js", 238, "An error occurred while uploading the file. Please try again."): "alert.plugin_upload_failed",
-    ("pages/plugins-grid.js", 267, "Please upload a valid plugin file (.zip, .tar.gz, .tar.xz)."): "alert.plugin_file_invalid",
-    ("pages/plugins.js", 93, "File size exceeds 50 MB limit."): "alert.plugin_file_too_large",
-    ("pages/plugins.js", 152, "An error occurred while uploading the file. Please try again."): "alert.plugin_upload_failed",
-    ("pages/plugins.js", 576, "Please upload a valid plugin file (.zip, .tar.gz, .tar.xz)."): "alert.plugin_file_invalid",
-    ("pages/profile-passkeys.js", 33, "Enter your current password to add a passkey."): "validation.current_password_required_for_passkey",
-    ("pages/profile-passkeys.js", 61, "Couldn't register this passkey, please try again"): "error.passkey_registration_failed",
-    ("pages/profile.js", 210, "Browser"): "profile.session.browser",
-    ("pages/profile.js", 212, "Operating System"): "profile.session.os",
-    ("pages/profile.js", 214, "Device"): "profile.session.device",
-    ("pages/profile.js", 216, "IP Address"): "profile.session.ip_address",
-    ("pages/profile.js", 218, "Creation date"): "profile.session.creation_date",
-    ("pages/profile.js", 220, "Last Activity"): "profile.session.last_activity",
-    ("pages/profile.js", 357, "Browser"): "profile.session.browser",
-    ("pages/profile.js", 358, "Operating System"): "profile.session.os",
-    ("pages/profile.js", 359, "Device"): "profile.session.device",
-    ("pages/profile.js", 369, "Creation date"): "profile.session.creation_date",
-    ("pages/profile.js", 375, "Last Activity"): "profile.session.last_activity",
-    ("pages/reports.js", 971, "No data available"): "status.no_data",
-    ("pages/reports.js", 990, "Failed to copy to clipboard. Please try using the raw data copy button below."): "error.report_copy_failed",
-    ("pages/reports.js", 996, "Error accessing data for copying. Please try refreshing the page."): "error.report_copy_access_failed",
-    ("pages/reports.js", 1006, "No URL available"): "status.no_url_available",
-    ("pages/reports.js", 1019, "Unknown"): "status.unknown",
-    ("pages/reports.js", 1042, "Missing report identifier"): "error.report_identifier_missing",
-    ("pages/reports.js", 1135, "Failed to load report details from server"): "error.report_details_load_failed",
-    ("pages/reports.js", 1152, "Failed to load report details."): "error.report_details_load_failed",
-    ("pages/reports.js", 1255, "No data available"): "status.no_data",
-    ("pages/service-resources.js", 261, "Nothing available to attach"): "service.resources.nothing_available",
-    ("pages/services.js", 518, "Conversion failed"): "toast.header.conversion_failed",
-    ("pages/services.js", 521, "The selected services are already in the desired state."): "toast.body.selected_items_already_in_state",
-    ("pages/services.js", 881, "Please upload a valid services export file (.env or .zip)."): "alert.services_import_invalid_file",
-    ("pages/setup.js", 153, "Server name check failed"): "validation.server_name_check_failed",
-    ("pages/setup.js", 172, "Invalid server name."): "validation.server_name_invalid",
-    ("pages/setup.js", 194, "Server name is not unique."): "validation.server_name_not_unique",
-    ("pages/setup.js", 197, "Server name is not unique."): "validation.server_name_not_unique",
-    ("pages/setup.js", 200, "Please choose a different server name."): "validation.server_name_choose_different",
-    ("pages/setup.js", 213, "Server name is unique."): "validation.server_name_unique",
-    ("pages/setup.js", 216, "You can proceed with the setup."): "validation.server_name_proceed",
-    ("pages/setup.js", 311, "This field"): "validation.default_field_name",
-    ("pages/setup.js", 467, "Passwords do not match."): "form.validation.confirm_password_match",
-    ("pages/setup.js", 483, "This field is required if you want to subscribe to the newsletter."): "validation.newsletter_email_required",
-    ("pages/setup.js", 510, "This field is required when using DNS challenge."): "validation.dns_challenge_field_required",
-    (
-        "pages/setup.js",
-        541,
-        "When using custom SSL, you must set both the certificate and the key (via file path or data upload).",
-    ): "validation.custom_ssl_pair_required",
-    ("pages/setup.js", 562, "Error"): "flash.error",
-    ("pages/setup.js", 568, "Server name is not unique"): "modal.title.server_name_not_unique",
-    ("pages/setup.js", 641, "Newsletter Subscription"): "newsletter.title",
-    ("pages/setup.js", 645, "Please enter a valid email address to subscribe to the newsletter."): "validation.newsletter_email_invalid",
-    ("pages/setup.js", 812, "Error"): "flash.error",
-    ("pages/setup.js", 815, "Error while setting up web UI. Please try again."): "setup.error.web_ui_setup_failed",
-    ("pages/setup.js", 923, "Wildcard certificates are only supported with DNS challenges."): "tooltip.wildcard_dns_only",
-    ("pages/setup.js", 930, "DNS provider is only supported with DNS challenges."): "tooltip.dns_provider_dns_only",
-    ("pages/setup.js", 937, "DNS propagation is only supported with DNS challenges."): "tooltip.dns_propagation_dns_only",
-    ("pages/setup.js", 944, "Credentials are only supported with DNS challenges."): "tooltip.dns_credentials_dns_only",
-    ("pages/setup.js", 1038, "Loaded from "): "setup.file.loaded_from",
-    ("pages/setup.js", 1047, "Error reading file"): "setup.file.read_error",
-    ("pages/setup.js", 1095, "Content entered ("): "setup.file.content_entered",
-    ("pages/setup.js", 1096, "No file selected"): "status.no_file_selected",
-    ("pages/template-settings-page.js", 398, "Unable to read the selected file."): "template.editor.raw_editor_upload_failed",
-    ("pages/template-settings-page.js", 962, "Success"): "status.success",
-    ("pages/template-settings-page.js", 965, "Global settings applied"): "toast.global_settings_applied_title",
-    (
-        "pages/template-settings-page.js",
-        970,
-        "Global settings have been successfully fetched and applied to the current form.",
-    ): "toast.global_settings_applied_body",
-    ("pages/template-settings-page.js", 984, "Error"): "flash.error",
-    ("pages/template-settings-page.js", 987, "Failed to fetch global settings"): "toast.global_settings_failed_title",
-    ("pages/template-settings-page.js", 991, "An error occurred while fetching global settings."): "toast.global_settings_failed_body",
-    ("pages/template_edit.js", 447, "Uploaded"): "template.editor.missing_config_status_uploaded",
-    ("pages/template_edit.js", 450, "Missing"): "template.editor.missing_config_status_missing",
-    ("pages/threatmap.js", 409, "not localised"): "threatmap.not_localised",
-    ("pages/threatmap.js", 468, " more not shown"): "threatmap.more_hidden",
-    ("pages/threatmap.js", 479, "No data"): "status.no_data",
-    ("pages/threatmap.js", 808, " blocked request"): "threatmap.blocked_request",
-    ("pages/threatmap.js", 808, " blocked requests"): "threatmap.blocked_requests",
-    ("pages/totp.js", 49, "Couldn't verify your security key, please try again"): "error.security_key_verification_failed",
-    ("pages/totp.js", 114, "Use an authenticator code"): "link.use_authenticator_code",
-    ("pages/totp.js", 118, "Use a recovery code"): "link.use_recovery_code",
-    ("pages/workflow_editor.js", 35, "IP / CIDR"): "workflows.condition.ip",
-    ("pages/workflow_editor.js", 39, "Country"): "workflows.test.country",
-    ("pages/workflow_editor.js", 40, "ASN"): "workflows.test.asn",
-    ("pages/workflow_editor.js", 41, "HTTP method"): "workflows.condition.method",
-    ("pages/workflow_editor.js", 42, "URI"): "workflows.condition.uri",
-    ("pages/workflow_editor.js", 50, "Prove it is human"): "workflows.action_help.challenge",
-    ("pages/workflow_editor.js", 51, "Deny the request"): "workflows.action_help.block",
-    ("pages/workflow_editor.js", 52, "Send it elsewhere"): "workflows.action_help.redirect",
-    ("pages/workflow_editor.js", 77, "is exactly"): "workflows.uri_match.exact",
-    ("pages/workflow_editor.js", 78, "starts with"): "workflows.uri_match.prefix",
-    ("pages/workflow_editor.js", 79, "matches the regex"): "workflows.uri_match.regex",
-    ("pages/workflow_editor.js", 96, "All of"): "workflows.tree.all",
-    ("pages/workflow_editor.js", 96, "Any of"): "workflows.tree.any",
-    ("pages/workflow_editor.js", 96, "None of"): "workflows.tree.not",
-    ("pages/workflow_editor.js", 1165, "Not validated yet"): "workflows.not_validated",
-    ("pages/workflow_editor.js", 1279, ' — click to move"'): "workflows.aria.positionMove",
-    ("pages/workflow_editor.js", 1284, ', change position">'): "workflows.aria.changePosition",
-    ("pages/workflow_editor.js", 1393, ', change position">'): "workflows.aria.changePosition",
-    ("pages/workflow_editor.js", 2238, "Stays at"): "workflows.menu.staysAt",
-    ("pages/workflow_editor.js", 2238, "Move to"): "workflows.menu.moveTo",
-    ("pages/workflow_editor.js", 2349, "New value"): "workflows.aria.newValue",
-}
+# Genuine untranslated occurrences awaiting the UI owner's call-site migration. This list started
+# at 123 entries and has reached zero. Each entry must still resolve to the exact literal at the
+# stated line; once a call site enters `t()`, its stale entry fails until it is deleted.
+#
+# The final entry was `buttons.js` (vendored github-buttons v2.29.0, BSD-2-Clause, forked at
+# c0d29cfb3), and it was the one entry marked *unmigratable* rather than merely unmigrated: its
+# line 10 is `t = window.Math`, so a bare `t("...")` there calls Math and throws, while
+# `window.t(...)` runs but hides behind a `.` the walker deliberately will not cross. No expression
+# both ran and satisfied the scan.
+#
+# It was not migrated in the end — it was removed. The widget is now a server-rendered link in
+# `about.html` reading `aria.label.github_stars`, with a star count from the hourly refresh in
+# `main.py`. The dict stays so a future untranslated call site is recorded deliberately rather
+# than slipping in silently.
+PENDING = {}
 
 TRANSLATION_KEY = re.compile(r"^[a-z][\w-]*(?:\.[\w-]+)+$")
 WORD = re.compile(r"[A-Za-z][A-Za-z'-]*")
@@ -463,9 +332,25 @@ def _scripts():
     return sorted(path for path in JS.rglob("*.js") if "libs" not in path.parts)
 
 
+def _resume_after_template(text, index, line, substitutions):
+    """Read template text from `index`; report where code resumes and what precedes it.
+
+    Both walkers below descend into `${...}` for the same reason `_jsscan` does: a
+    `${t("button.export", "Export")}` is a call site, and the fallback beside the key is a translated
+    default rather than untranslated copy. They keep their own loops on purpose — the assertion
+    at the end of `_translation_ranges` is only worth something while this file finds `t()`
+    independently of the shared walker.
+    """
+    index, line, opened = _template_text(text, index, line)
+    if opened:
+        substitutions.append(0)
+    return index, line, "{" if opened else "`"
+
+
 def _translation_ranges(text):
     """Return local translation-helper ranges and prove bare `t()` matches the shared walker."""
     ranges, bare_t = [], []
+    substitutions = []
     index, size, line, previous = 0, len(text), 1, "\n"
     while index < size:
         char = text[index]
@@ -484,20 +369,34 @@ def _translation_ranges(text):
                 index += 1
             index += 2
             continue
-        if char in "\"'`":
+        if char == "`":
+            index, line, previous = _resume_after_template(text, index + 1, line, substitutions)
+            continue
+        if char in "\"'":
             index, line = _skip_quoted(text, index, line)
             previous = char
+            continue
+        if char in "{}" and track_substitutions(substitutions, char):
+            index, line, previous = _resume_after_template(text, index + 1, line, substitutions)
             continue
         if char == "/" and previous in _REGEX_MAY_START:
             index = _skip_regex(text, index)
             previous = "/"
             continue
-        helper = next((name for name in ("translate", "t") if text.startswith(f"{name}(", index)), None)
-        if helper and not (previous.isalnum() or previous in _IDENTIFIER_TAIL):
+        # `this.t(` is the same helper reached through an injection — `class News { constructor(t) }`
+        # in `utils.js` stores the translator on the instance. The shared walker still refuses it,
+        # on the correct ground that `obj.t(` in general is not this function; here the definition
+        # is in the file and the fallback beside the key is a translated default, not loose copy.
+        helper = next((name for name in (".translate", "translate", "this.t", "t") if text.startswith(f"{name}(", index)), None)
+        # Same rule as `_jsscan._starts_an_identifier`, and it has to stay the same rule: the
+        # assertion below pins this walker against that one.
+        # A dotted helper is matched at its `.`, where the identifier rule would reject it — that is
+        # the whole reason the shared walker could not see these calls in the first place.
+        if helper and (helper.startswith(".") or _starts_an_identifier(text, index)):
             start = index + len(helper) + 1
             arguments = _balanced(text, start)
             ranges.append((index, start + len(arguments) + 1, line, arguments))
-            if helper == "t":
+            if helper in ("t", ".translate"):
                 bare_t.append((line, arguments))
         if not char.isspace():
             previous = char
@@ -510,6 +409,7 @@ def _translation_ranges(text):
 def _quoted_literals(path, text):
     """Yield ordinary quoted strings; template literals follow `_jsscan.py` and are skipped."""
     relative = str(path.relative_to(JS))
+    substitutions = []
     index, size, line, previous = 0, len(text), 1, "\n"
     while index < size:
         char = text[index]
@@ -528,14 +428,19 @@ def _quoted_literals(path, text):
                 index += 1
             index += 2
             continue
-        if char in "\"'`":
+        if char == "`":
+            index, line, previous = _resume_after_template(text, index + 1, line, substitutions)
+            continue
+        if char in "\"'":
             start, start_line = index, line
             index, line = _skip_quoted(text, index, line)
-            if char != "`":
-                value = string_value(text[start:index])
-                if value is not None:
-                    yield start, Literal(relative, start_line, value)
+            value = string_value(text[start:index])
+            if value is not None:
+                yield start, Literal(relative, start_line, value)
             previous = char
+            continue
+        if char in "{}" and track_substitutions(substitutions, char):
+            index, line, previous = _resume_after_template(text, index + 1, line, substitutions)
             continue
         if char == "/" and previous in _REGEX_MAY_START:
             index = _skip_regex(text, index)
@@ -614,7 +519,7 @@ def test_the_pending_migration_list_only_shrinks():
     *_, used = _classification()
     used_pending = used[-1]
 
-    assert len(PENDING) == 123, "the measured pending count changed; update the docstring and this assertion"
+    assert len(PENDING) == 0, "the pending list reached zero and is a ratchet now; migrate the call site instead of re-adding an entry"
     assert used_pending == set(PENDING), f"stale pending entries: {sorted(set(PENDING) - used_pending)}"
 
 

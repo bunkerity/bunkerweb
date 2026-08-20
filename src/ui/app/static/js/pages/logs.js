@@ -134,7 +134,10 @@ $(document).ready(function () {
     opts = opts || {};
     const visible = computeVisible();
     editor.setValue(visible.join("\n"), -1);
-    refreshAnnotations();
+    // While streaming this runs on every appended chunk, and the scan is a regex
+    // pass over up to MAX_LOG_LINES rows — debounce it instead.
+    if (isFollowing) scheduleAnnotationRefresh();
+    else refreshAnnotations();
     updateShowing(visible.length);
     if (state.collapse) editor.session.foldAll();
     if (opts.toBottom) scrollToBottom();
@@ -439,12 +442,18 @@ $(document).ready(function () {
   let autoScroll = true;
   let pendingNew = 0;
   function isAtBottom() {
+    // Geometry, not row numbers: with soft wrap and folds, screen rows and
+    // document rows diverge and getLastVisibleRow() is a document row.
+    const r = editor.renderer;
     return (
-      editor.renderer.getLastVisibleRow() >= editor.session.getLength() - 2
+      editor.session.getScrollTop() + r.$size.scrollerHeight >=
+      r.layerConfig.maxHeight - r.lineHeight
     );
   }
   function scrollToBottom() {
-    editor.gotoLine(editor.session.getLength(), 0, false);
+    // Screen-row scroll (wrap/fold aware). Overshooting is deliberate — the
+    // renderer clamps scrollTop to the true bottom on the next frame.
+    editor.renderer.scrollToRow(editor.session.getScreenLength());
   }
   function showPill() {
     const pill = document.getElementById("logs-new-pill");
@@ -467,14 +476,25 @@ $(document).ready(function () {
     const sr = document.getElementById("logs-sr-status");
     if (sr) sr.textContent = "";
   }
+  // ACE recomputes renderer.layerConfig inside its rAF render loop, so measuring
+  // during the synchronous changeScrollTop signal reads the PREVIOUS frame's
+  // geometry. Right after an append that always looks "not at bottom", which
+  // used to latch autoScroll off on the first chunk and stop follow from
+  // following. Check one frame later: ACE schedules its render callback first,
+  // so by then the geometry is current.
+  let scrollCheck = null;
   editor.session.on("changeScrollTop", () => {
-    if (!isFollowing) return;
-    if (isAtBottom()) {
-      autoScroll = true;
-      hidePill();
-    } else {
-      autoScroll = false;
-    }
+    if (!isFollowing || scrollCheck) return;
+    scrollCheck = requestAnimationFrame(() => {
+      scrollCheck = null;
+      if (!isFollowing) return;
+      if (isAtBottom()) {
+        autoScroll = true;
+        hidePill();
+      } else {
+        autoScroll = false;
+      }
+    });
   });
   const newPill = document.getElementById("logs-new-pill");
   if (newPill)
@@ -532,6 +552,11 @@ $(document).ready(function () {
     autoScroll = true;
     const $followBtn = $("#follow-logs");
     $followBtn.find("i").removeClass("bx-play").addClass("bx-stop");
+    // `find("span")` is unambiguous here: components/button.html renders exactly
+    // one label span. Upstream narrows this to `span[data-i18n]` because its
+    // button has two, but this UI translates server-side and emits no data-i18n
+    // at all, so that selector would match nothing and the label would silently
+    // stop updating. Pinned by test_logs.py::test_the_follow_button_has_exactly_one_label_span.
     $followBtn.find("span").text(t("button.stop", "Stop"));
     $followBtn.attr("aria-label", t("button.stop", "Stop"));
     $followBtn
@@ -638,6 +663,9 @@ $(document).ready(function () {
       eventSource.close();
       eventSource = null;
     }
+    // The debounced pass was just cancelled — resync the gutter and the issue
+    // counters so they are accurate at the moment the user stops.
+    refreshAnnotations();
     const $followBtn = $("#follow-logs");
     $followBtn.find("i").removeClass("bx-stop").addClass("bx-play");
     $followBtn.find("span").text(t("button.follow", "Follow"));

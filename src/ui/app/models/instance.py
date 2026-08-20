@@ -2,7 +2,7 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from heapq import heappush, heapreplace
-from json import loads
+from json import dumps as json_dumps, loads
 from operator import itemgetter
 from os import getenv
 from threading import Lock
@@ -20,7 +20,12 @@ from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 # Short-lived process-local cache for home page aggregates. /home recomputes a
 # full 7-day Redis aggregation on every load; caching it for a few seconds makes
 # repeated/concurrent loads near-instant. Per-process (each gunicorn worker has
-# its own); data can be up to _HOME_AGG_CACHE_TTL seconds stale.
+# its own), backed by a shared Redis snapshot (see _get/_set_shared_home_aggregates)
+# so workers reuse one computation. Without the shared tier two workers answering
+# /home within the same TTL can display DIFFERENT totals for the same dashboard --
+# that, not speed, is why this tier exists. Worst-case staleness is ~2x
+# _HOME_AGG_CACHE_TTL: a worker can adopt another's snapshot near its TTL edge and
+# hold it locally for a further TTL. Fine for a coarse 7-day dashboard.
 _HOME_AGG_CACHE: dict[tuple, tuple[float, dict]] = {}
 _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
@@ -1025,10 +1030,58 @@ class InstancesUtils:
             if hit is not None:
                 return _copy_home_aggregates(hit)
 
+            # Cross-worker shared cache: another gunicorn worker may have computed
+            # this within the TTL. Read it from Redis before paying the full O(N)
+            # scan, so N workers don't each rescan the whole requests list -- and,
+            # more importantly, so they agree on the number they display.
+            shared = self._get_shared_home_aggregates(redis_client, cache_key)
+            if shared is not None:
+                _HOME_AGG_CACHE[cache_key] = (monotonic(), shared)
+                return _copy_home_aggregates(shared)
+
             result = self._compute_home_aggregates(hours, top_ips_limit, redis_client)
             _HOME_AGG_CACHE[cache_key] = (monotonic(), result)
+            # ponytail: no distributed lock -- on a cold miss up to N workers may
+            # each compute once before the first write lands (same as the old
+            # per-worker behaviour); afterwards all workers read the shared key.
+            self._set_shared_home_aggregates(redis_client, cache_key, result)
             # Hand the caller a copy; the cached object stays private.
             return _copy_home_aggregates(result)
+
+    @staticmethod
+    def _home_agg_redis_key(cache_key: tuple) -> str:
+        hours, top_ips_limit = cache_key
+        return f"metrics:home_agg:{hours}:{top_ips_limit}"
+
+    def _get_shared_home_aggregates(self, redis_client, cache_key: tuple) -> Optional[dict]:
+        """Read a home-aggregates snapshot another worker stored in Redis.
+
+        Returns None on miss/error. ``request_statuses`` keys are ints in-process
+        but JSON stringifies them, so they are converted back.
+        """
+        if not redis_client:
+            return None
+        try:
+            raw = redis_client.get(self._home_agg_redis_key(cache_key))
+        except Exception:
+            return None
+        if not raw:
+            return None
+        try:
+            data = loads(raw)
+            statuses = data.get("request_statuses") or {}
+            data["request_statuses"] = {int(k): v for k, v in statuses.items()}
+            return data
+        except Exception:
+            return None
+
+    def _set_shared_home_aggregates(self, redis_client, cache_key: tuple, result: dict) -> None:
+        """Publish a home-aggregates snapshot to Redis with the same TTL as the
+        per-worker cache (volatile so it stays evictable under volatile-lru)."""
+        if not redis_client:
+            return
+        with suppress(Exception):
+            redis_client.set(self._home_agg_redis_key(cache_key), json_dumps(result), px=int(_HOME_AGG_CACHE_TTL * 1000))
 
     def _compute_home_aggregates(self, hours: int, top_ips_limit: int, redis_client: Any) -> dict[str, Any]:
         """Compute home aggregates from Redis (or the instance-API fallback).

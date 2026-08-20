@@ -101,7 +101,10 @@
                     "custom": "window-alt"
                 } %}
                 {% for config in configs %}
-                    {% set service_id = config['service_id'] if config['service_id'] else 'global' %}
+                    {# `service` is the API's own key and it is already the literal 'global' for a global
+                       config, so this is the URL path segment as-is. Never test it for truthiness:
+                       'global' is a non-empty string. #}
+                    {% set service_id = config['service'] %}
                     {% set config_id = config['type']|lower ~ '-' ~ service_id.replace('.', '_') ~ '-' ~ config['name'] %}
                     {% set normalized_config_type = config['type']|lower|replace('-', '_') %}
                     {% if normalized_config_type.startswith('crs') %}
@@ -133,12 +136,12 @@
                         </td>
                         <td>{{ config["method"] }}</td>
                         <td id="service-{{ config_id }}">
-                            {% if config["service_id"] %}
-                                <a href="{{ url_for("services") }}/{{ config['service_id'] }}"
+                            {% if config['service'] != 'global' %}
+                                <a href="{{ url_for("services") }}/{{ config['service'] }}"
                                    class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=config['service_id']) }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["service_id"] }}</a>
+                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=config['service']) }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config['service'] }}</a>
                             {% else %}
                                 {{ badge(text="Global", i18n_key="scope.global", data_value="global", variant="secondary") }}
                             {% endif %}
@@ -199,7 +202,7 @@
                                     <button type="button"
                                             data-config-name="{{ config['name'] }}"
                                             data-config-type="{{ config['type'] }}"
-                                            data-config-service="{{ config['service_id'] or 'global' }}"
+                                            data-config-service="{{ config['service'] }}"
                                             data-value="{{ 'online' if config.get('is_draft') else 'draft' }}"
                                             class="icon-btn convert-config{% if is_readonly %} disabled{% endif %}"
                                             data-bs-toggle="tooltip"
@@ -214,7 +217,7 @@
                                     <button type="button"
                                             data-config-name="{{ config['name'] }}"
                                             data-config-type="{{ config['type'] }}"
-                                            data-config-service="{{ config['service_id'] or 'global' }}"
+                                            data-config-service="{{ config['service'] }}"
                                             class="icon-btn danger delete-config{% if not can_edit_config or is_readonly %} disabled{% endif %}">
                                         <i class="bx bx-trash"></i>
                                     </button>

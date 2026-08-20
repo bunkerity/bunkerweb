@@ -119,9 +119,9 @@ function bwCsvSafe(value) {
   //
   // Wrapping ``action`` lets us mutate the resolved ``config`` immediately
   // before the export pipeline runs, which is the same call site every export
-  // button (CSV / Excel / clipboard copy) goes through. The mutation is
-  // idempotent because reassigning ``format.body`` to the same ``bwCsvSafe``
-  // reference is a no-op on subsequent clicks.
+  // button (CSV / Excel / clipboard copy) goes through. ``btn.action`` itself is
+  // wrapped once (``__bwCsvSafePatched``); the ``format`` assignment inside it
+  // runs per click and simply overwrites the previous one.
   ["csvHtml5", "excelHtml5", "copyHtml5"].forEach(function (name) {
     const btn = ext.buttons[name];
     if (!btn || typeof btn.action !== "function" || btn.__bwCsvSafePatched)
@@ -130,10 +130,44 @@ function bwCsvSafe(value) {
     btn.action = function (e, dt, button, config) {
       config = config || {};
       config.exportOptions = config.exportOptions || {};
+
+      // Buttons' own default formatters are what call ``stripData``, which is
+      // what removes the markup from a cell. Replacing them outright therefore
+      // exported raw ``innerHTML`` (badges, links, icons) into every CSV / XLSX
+      // / clipboard payload, so compose with it instead of overwriting it.
+      //
+      // ``stripData`` reads its flags from the second argument and skips a step
+      // whenever that object is *present* with the flag falsy — in the vendored
+      // bundle, ``n && !n.stripHtml || (t = stripHtml(t))``. Passing
+      // ``exportOptions`` alone would therefore silently disable stripping
+      // again, so the library defaults are restated here. Anything the page set
+      // explicitly still wins, because it is merged in last.
+      //
+      // ``escapeExcelFormula`` is deliberately left out: with it falsy,
+      // ``stripData`` skips its own ``^[=@\t\r]`` prefixing and ``bwCsvSafe``
+      // remains the single place formula injection is escaped — on a wider
+      // character set, and without double-prefixing.
+      const stripConfig = $.extend(
+        {
+          stripHtml: true,
+          stripNewlines: true,
+          decodeEntities: true,
+          trim: true,
+        },
+        config.exportOptions,
+      );
+      const stripThenEscape = function (value) {
+        return bwCsvSafe($.fn.dataTable.Buttons.stripData(value, stripConfig));
+      };
+
       config.exportOptions.format = $.extend(
         {},
         config.exportOptions.format || {},
-        { body: bwCsvSafe, header: bwCsvSafe, footer: bwCsvSafe },
+        {
+          body: stripThenEscape,
+          header: stripThenEscape,
+          footer: stripThenEscape,
+        },
       );
       return origAction.call(this, e, dt, button, config);
     };

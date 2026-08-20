@@ -165,3 +165,38 @@ def test_classifier_extraction_preserves_security_guard():
     assert './logs-classify.js"' in live_js
     # The old inline copy must be gone from logs.js (single source of truth).
     assert "function levelOf(line)" not in logs_js
+
+
+def test_the_new_lines_pill_is_centered_without_a_transform():
+    """The theme's `.btn:hover { transform: translateY(-1px) }` wins over `.logs-new-pill`.
+
+    `#logs-new-pill` carries `btn btn-sm btn-primary`, and `.btn:hover` is (0,2,0) against a plain
+    `.logs-new-pill` at (0,1,0). Centering the pill with `transform: translateX(-50%)` therefore
+    survives until the pointer touches it, at which point the theme replaces the whole `transform`
+    and the pill slides half its width sideways. Auto margins are not a transform and cannot be
+    clobbered by one.
+    """
+    css = (_SRC / "app" / "static" / "css" / "pages" / "logs.css").read_text(encoding="utf-8")
+    block = css.split(".logs-new-pill {", 1)[1].split("}", 1)[0]
+
+    assert "transform" not in block, "a transform here is overridden by .btn:hover on the theme"
+    assert "margin-inline: auto" in block
+    assert "width: fit-content" in block
+
+
+def test_the_follow_button_has_exactly_one_label_span():
+    """`logs.js` writes the Follow/Stop label with `find("span").text(...)`.
+
+    That is only safe while the button renders a single span. A second one — a wrapper, a badge, a
+    screen-reader span — would make `.text()` overwrite both and destroy the markup between them.
+    Upstream hit exactly that and narrowed its selector to `span[data-i18n]`; this UI translates
+    server-side and emits no `data-i18n`, so that selector would match nothing here and the label
+    would stop updating instead. The invariant this file relies on is the count, so assert it.
+    """
+    macro = (_SRC / "app" / "templates" / "components" / "button.html").read_text(encoding="utf-8")
+    # The non-loading branch is what a plain button renders; count its label spans.
+    body = macro.split("{% else %}", 1)[1]
+    assert body.count("<span") == 1, "the button macro grew a second span - see logs.js follow-label writes"
+
+    js = (_SRC / "app" / "static" / "js" / "pages" / "logs.js").read_text(encoding="utf-8")
+    assert 'find("span[data-i18n]")' not in js, "data-i18n was removed from this UI; that selector matches nothing"

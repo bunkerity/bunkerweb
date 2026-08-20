@@ -34,12 +34,19 @@
                             <p class="fs-6 mt-2 mb-2">{{ _("about.tagline") }}</p>
                             <p class="mt-2 mb-2"
                                >{{ _("about.version", version=bw_version) }}</p>
-                            <a class="github-button mt-2 mb-2"
+                            {# Star count comes from the hourly server-side refresh, not from the
+                               browser: the vendored github-buttons widget it replaces called
+                               api.github.com once per visitor and kept its label in a closed
+                               shadow root, where no translation could reach it. #}
+                            <a class="btn btn-outline-primary btn-sm mt-2 mb-2"
                                href="https://github.com/bunkerity/bunkerweb"
-                               data-icon="octicon-star"
-                               data-size="large"
-                               data-show-count="true"
-                               aria-label="{{ _("button.github_stars") }}">Stars</a>
+                               target="_blank"
+                               rel="noreferrer"
+                               {% if github_stars %}aria-label="{{ _("aria.label.github_stars", count=github_stars) }}"{% endif %}>
+                                <i class="bx bx-star text-warning" aria-hidden="true"></i>
+                                <span>{{ _("button.github_stars") }}</span>
+                                {% if github_stars %}<span class="ms-1 fw-bold">{{ github_stars }}</span>{% endif %}
+                            </a>
                         </div>
                     </div>
                 </div>

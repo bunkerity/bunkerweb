@@ -36,10 +36,10 @@
     </p>
     <!-- KPI row: counts derived from the already-fetched cache list (no size data
          on rows, so on-disk usage is intentionally omitted — 3 honest tiles). -->
-    {% set cache_global_count = caches | rejectattr('service_id') | list | length %}
-    {% set cache_service_count = caches | selectattr('service_id') | list | length %}
-    {% set cache_plugin_count = caches | map(attribute='plugin_id') | unique | list | length %}
-    {% set cache_service_names = caches | selectattr('service_id') | map(attribute='service_id') | unique | list %}
+    {% set cache_global_count = caches | selectattr('service', 'eq', 'global') | list | length %}
+    {% set cache_service_count = caches | selectattr('service', 'ne', 'global') | list | length %}
+    {% set cache_plugin_count = caches | map(attribute='plugin') | unique | list | length %}
+    {% set cache_service_names = caches | selectattr('service', 'ne', 'global') | map(attribute='service') | unique | list %}
     <div class="row row-cols-1 row-cols-sm-3 g-3 mb-4">
         <div class="col">
             {{ tile(title="Files", value=caches | length, title_i18n="cache.kpi_files", icon="bx-file-blank", caption="Across " ~ cache_plugin_count ~ " plugin" ~ ("s" if cache_plugin_count != 1 else "")) }}
@@ -110,26 +110,28 @@
             </thead>
             <tbody>
                 {% for cache in caches %}
-                    {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
+                    {# Already the literal 'global' for a global entry -- a URL path segment, not a service id.
+                       Never test it for truthiness. #}
+                    {% set service_id = cache['service'] %}
                     <tr>
                         <td></td>
                         <td></td>
                         <td>
-                            <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                            <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
                                data-bs-original-title="{{ _("tooltip.link.view_file", filename=cache['file_name']) }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
                         </td>
                         <td><span class="badge rounded-pill bg-label-secondary cache-job-pill">{{ cache['job_name'] }}</span></td>
-                        <td>{{ cache['plugin_id'] }}</td>
+                        <td>{{ cache['plugin'] }}</td>
                         <td id="service-{{ cache['job_name'] }}-{{ service_id.replace('.', '_') }}-{{ cache['file_name'].replace('.', '_') }}">
-                            {% if cache["service_id"] %}
-                                <a href="{{ url_for("services") }}/{{ cache['service_id'] }}"
+                            {% if cache['service'] != 'global' %}
+                                <a href="{{ url_for("services") }}/{{ cache['service'] }}"
                                    class="badge rounded-pill bg-label-primary cache-scope-service d-inline-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=cache['service_id']) }}"><i class="bx bx-edit bx-xs me-1" aria-hidden="true"></i>{{ cache["service_id"] }}</a>
+                                   data-bs-original-title="{{ _("tooltip.link.edit_service", service=cache['service']) }}"><i class="bx bx-edit bx-xs me-1" aria-hidden="true"></i>{{ cache['service'] }}</a>
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary cache-scope-global">{{ _("scope.global") }}</span>
                             {% endif %}
@@ -143,7 +145,7 @@
                                 <a role="button"
                                    class="icon-btn"
                                    aria-label="{{ _("tooltip.link.view_file", filename=cache['file_name']) }}"
-                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="{{ _("tooltip.link.view_file", filename=cache['file_name']) }}">
@@ -152,7 +154,7 @@
                                 <a role="button"
                                    class="icon-btn info"
                                    aria-label="{{ _("tooltip.link.download_file", filename=cache['file_name']) }}"
-                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
+                                   href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="{{ _("tooltip.link.download_file", filename=cache['file_name']) }}"
@@ -165,7 +167,7 @@
                                             class="icon-btn danger cache-delete-btn{% if is_readonly %} disabled{% endif %}"
                                             aria-label="{{ _("tooltip.button.delete_file", filename=cache['file_name']) }}"
                                             data-service="{{ service_id }}"
-                                            data-plugin="{{ cache['plugin_id'] }}"
+                                            data-plugin="{{ cache['plugin'] }}"
                                             data-job="{{ cache['job_name'] }}"
                                             data-file="{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                             data-bs-toggle="tooltip"

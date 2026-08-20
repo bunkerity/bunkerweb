@@ -18,7 +18,10 @@ from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 
 configs = Blueprint("configs", __name__)
 
-CONFIG_NAME_RX = r"^[\w_-]{1,255}$"
+# `\Z`, not `$`: Python's `$` also matches *before* a trailing newline, so `"name\n"` passed
+# validation and became a filename that breaks the line-based directory listing used when
+# pushing configs. Proven: re.match(r"^[\\w_-]{1,255}$", "name\\n") is True, `\\Z` is False.
+CONFIG_NAME_RX = r"^[\w_-]{1,255}\Z"
 EXPORT_FORMAT_VERSION = 1
 
 GLOBAL_CRS_SERVICE_SCOPED_MODSEC_CRS_ERROR = (

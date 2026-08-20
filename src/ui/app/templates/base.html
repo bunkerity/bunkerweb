@@ -233,10 +233,5 @@
                 {% if js_chunk %}<script nonce="{{ script_nonce }}">{{ js_chunk | safe }}</script>{% endif %}
             {% endfor %}
         {% endif %}
-        <!-- Buttons plugin -->
-        <script src="{{ url_for('static', filename='js/buttons.js') }}"
-                nonce="{{ script_nonce }}"
-                async
-                defer></script>
     </body>
 </html>

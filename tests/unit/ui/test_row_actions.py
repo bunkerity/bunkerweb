@@ -280,9 +280,13 @@ def test_instances_reload_stop_disabled_when_not_up():
 # configs.html
 # --------------------------------------------------------------------------------------
 def _configs_context(is_readonly=False, user_readonly=False, method="ui", is_draft=False):
+    # The API's shape, not the pre-migration one: `routers/configs.py:86` pops `service_id` and
+    # emits `service`, and a non-global value at that -- `None` was the one value for which the dead
+    # key and the live key render identically, which is why these tests stayed green through the
+    # `/configs`-renders-everything-as-Global defect. See test_template_api_key_contract.py.
     config = {
         "type": "http",
-        "service_id": None,
+        "service": "app1.example.com",
         "name": "my-config",
         "method": method,
         "template": None,
@@ -335,9 +339,11 @@ def test_configs_page_still_has_its_title_header():
 # cache.html
 # --------------------------------------------------------------------------------------
 def _cache_context(is_readonly=False):
+    # The API's shape: `routers/cache.py:54-61` builds rows with `service` and `plugin`, and a
+    # non-global service. Same reason as `_configs_context` above.
     cache = {
-        "service_id": None,
-        "plugin_id": "blacklist",
+        "service": "app1.example.com",
+        "plugin": "blacklist",
         "job_name": "download-blacklists",
         "file_name": "ip.list",
         "last_update": "2026-01-01",
@@ -358,11 +364,37 @@ def _cache_context(is_readonly=False):
     )
 
 
+# The KPI band is the sharp edge of the `"global"` sentinel: the API never sends `None`, so the
+# counts cannot be derived from truthiness and each filter names the literal. `rejectattr('service',
+# 'eq', 'global')` reads like a faithful translation of the old `rejectattr('service_id')` and counts
+# the exact opposite set -- a mistake made and caught once here, hence this test.
+def test_cache_kpi_band_counts_global_and_per_service_rows():
+    ctx = _cache_context()
+    ctx["caches"] = [
+        {**ctx["caches"][0], "service": "app1.example.com", "plugin": "blacklist"},
+        {**ctx["caches"][0], "service": "app2.example.com", "plugin": "blacklist", "file_name": "b.list"},
+        {**ctx["caches"][0], "service": "global", "plugin": "whitelist", "file_name": "c.list"},
+    ]
+    html = _render_dashboard_page("cache.html", **ctx)
+    tiles = re.findall(r"bw-kpi-label.*?<span>(.*?)</span>.*?bw-kpi-value\">(.*?)</span>", html, re.S)
+    counts = {label.strip(): value.strip() for label, value in tiles}
+
+    assert counts[english("cache.kpi_files")] == "3"
+    assert counts[english("scope.global")] == "1", "the Global tile counts global rows, not everything else"
+    assert counts[english("cache.kpi_per_service")] == "2"
+    assert "Across 2 plugins" in html
+    assert "2 services" in html
+
+
+# `data-service` asserts the fixture's own service, not `"global"`. It read `"global"` until
+# 2026-08-20 -- the template was reading a key the API had stopped emitting, so every row collapsed
+# to the global scope and this assertion passed for the wrong reason. The value below is the one the
+# correct render produces; see test_template_api_key_contract.py for the guard that pins the keys.
 def test_cache_row_actions_use_icon_btn_and_keep_behavioral_hooks():
     html = _render_dashboard_page("cache.html", **_cache_context())
 
     assert 'class="row-actions"' in html
-    assert re.search(r'class="icon-btn danger cache-delete-btn"[^>]*data-service="global"', html)
+    assert re.search(r'class="icon-btn danger cache-delete-btn"[^>]*data-service="app1\.example\.com"', html)
     assert 'data-plugin="blacklist"' in html
     assert 'data-job="download-blacklists"' in html
     assert 'data-file="ip.list"' in html

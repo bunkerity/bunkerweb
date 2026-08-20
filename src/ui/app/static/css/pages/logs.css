@@ -196,12 +196,18 @@
   opacity: 0.55;
 }
 
-/* "N new lines" pill shown during follow when the user has scrolled up. */
+/* "N new lines" pill shown during follow when the user has scrolled up.
+   Centered with auto margins, not translateX(-50%): the theme's
+   `.btn:hover { transform: translateY(-1px) }` (core.css) out-specifies a plain
+   `.logs-new-pill` transform and would replace it, dropping the centering and
+   sliding the pill half its width sideways on hover. */
 .logs-new-pill {
   position: absolute;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 1.5rem;
-  transform: translateX(-50%);
+  width: fit-content;
+  margin-inline: auto;
   z-index: 6;
   border-radius: 2rem;
 }

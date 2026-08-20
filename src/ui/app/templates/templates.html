@@ -129,7 +129,7 @@
                                     {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
                                     <div data-bs-toggle="tooltip"
                                          data-bs-placement="bottom"
-                                         data-bs-original-title="{{ _(delete_tooltip_key, name=template_data['id'], method=template_data['method']) }}">
+                                         data-bs-original-title="{{ _(delete_tooltip_key, name=template, method=template_data['method']) }}">
                                         <button type="button"
                                                 data-template-id="{{ template }}"
                                                 class="btn btn-sm bw-icon-btn bw-icon-btn-danger delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
