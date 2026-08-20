@@ -32,7 +32,19 @@ def job(tmp_path):
     instance.job_name = "geoip-asn"
     instance.logger = Mock()
     instance.db = Mock()
-    instance.db.get_jobs_cache_files.return_value = []
+    # One row, so the sweep runs at all: `restore_cache` now leaves the directory ALONE when the
+    # plugin has no cache rows, because an empty row set means the cache is unknown rather than
+    # unused (deleting one row in the web UI used to destroy the Let's Encrypt account tree).
+    # Neither test below is about emptiness -- it was only the fixture's way of making everything
+    # look stale -- and neither file they create is in this row set, so both are still swept.
+    #
+    # The service_id is load-bearing: a row without one restores into job_path itself, and
+    # `restore_cache` adds every restored file's PARENT to the ignore list. That would be job_path,
+    # so the sweep would skip the whole directory. Measured, not guessed: with `service_id: ""`
+    # both tests below fail.
+    instance.db.get_jobs_cache_files.return_value = [
+        {"service_id": "shared", "file_name": "asn.mmdb", "job_name": "geoip-asn", "data": b"payload"}
+    ]
     return instance
 
 
@@ -98,3 +110,28 @@ def test_ordinary_stale_files_are_still_removed(job):
     job.restore_cache(manual=False)
 
     assert not stale.exists(), "the sweep stopped removing genuinely stale files"
+
+
+def test_no_cache_rows_deletes_nothing(job):
+    """An empty row set means the cache is UNKNOWN, not that every file on disk is unused.
+
+    `restore_cache` deletes any file the database does not list. With no rows that is every file,
+    while the job still returns success -- so deleting a single cache row in the web UI wiped the
+    Let's Encrypt `accounts/`, `archive/` and `live/` tree, and the run reported that it worked.
+
+    The accepted consequence, deliberately not asserted away: a plugin with genuinely zero rows now
+    never sweeps, so orphaned files accumulate there. Lingering files are recoverable disk waste; a
+    destroyed ACME account tree is not.
+    """
+    job.db.get_jobs_cache_files.return_value = []
+    job.job_path.mkdir(parents=True, exist_ok=True)
+    account = job.job_path / "accounts" / "acme-v02.api.letsencrypt.org" / "directory" / "deadbeef"
+    account.mkdir(parents=True)
+    (account / "private_key.json").write_bytes(b"key material")
+    loose = job.job_path / "country.mmdb"
+    loose.write_bytes(b"not in the database either")
+
+    assert job.restore_cache(manual=False) is True
+
+    assert (account / "private_key.json").exists(), "the ACME account key was deleted by a sweep with no cache rows"
+    assert loose.exists(), "the sweep ran despite the plugin having no cache rows"
