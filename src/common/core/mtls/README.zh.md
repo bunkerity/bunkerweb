@@ -37,19 +37,19 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 | `MTLS_URL`                   |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
 | `MTLS_VERIFY_DEPTH`          | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                          |
 | `MTLS_FORWARD_CLIENT_HEADERS`| `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。 |
-| `MTLS_CRL`                   |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径。仅在成功加载 CA 证书包时生效。                                                         |
+| `MTLS_CRL`                   |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径。只要客户端证书校验处于启用状态即会生效，不会被静默跳过。                                                         |
 
 !!! tip "保持证书最新"
-    将 CA 证书包和吊销列表存放在 Scheduler 可读取的挂载卷中，以便重启时自动加载最新的信任锚。
+    将 CA 证书包和吊销列表存放在 **BunkerWeb 实例**可读取的挂载卷中：`MTLS_CA_CERTIFICATE` 和 `MTLS_CRL` 由 NGINX 自行打开，没有任何 job 会分发它们，因此在组件分离部署中，仅挂载到 Scheduler 所在位置是不够的。
 
 !!! warning "严格模式需提供 CA 证书包"
-    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，运行时必须存在 CA 文件。如果缺失，BunkerWeb 会跳过生成 mTLS 指令，避免服务因路径无效而启动失败。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。
+    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，必须提供 CA 证书包。如果 `MTLS_CA_CERTIFICATE` 为空，BunkerWeb 会拒绝该站点的 TLS 握手（`ssl_reject_handshake`），而不是在不校验客户端证书的情况下继续提供服务；明文 HTTP 仍会响应，因此 ACME `http-01` 续期不受影响。如果已设置路径但实例上的文件缺失或不可读，NGINX 将拒绝加载配置——重载时保留此前的配置，冷启动时实例无法启动。`MTLS_CRL` 同理：已配置的吊销列表一定会生效，不会被静默跳过。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。 被拒绝的握手**确实**会被记录为 `handshake rejected`，位置是 BunkerWeb 实例的 NGINX 错误日志（`ERROR_LOG`，默认 `/var/log/bunkerweb/error.log`），而不是 Scheduler 的日志。该记录的级别为 `info`，而 `LOG_LEVEL` 默认为 `notice`，因此需将 `LOG_LEVEL` 设为 `info` 才能看到。
 
 !!! info "受信证书与验证"
-    BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。
+    `ssl_client_certificate` 与 `ssl_trusted_certificate` 都是用于校验客户端证书的信任库，唯一区别在于前者会在 CertificateRequest 中向客户端声明其 CA，后者不会。BunkerWeb 此前把两者指向同一个文件，因此后者没有任何额外作用，现已移除。它同时也是启用 `ssl_stapling` 时用来校验 OCSP 响应的信任库——而 BunkerWeb 从不启用该功能，所以指向*客户端* CA 证书包时它始终无效，但这是一个陷阱，如今已经消除。
 
 !!! info "入站 `X-SSL-*` 请求头总是被剥离"
-    在请求到达您的应用之前，BunkerWeb 会移除客户端自行发送的每一个 `X-SSL-*` 请求头：适用于所有站点，无论是否启用 mTLS，HTTP/1.1、HTTP/2 与 HTTP/3 一视同仁。只有 BunkerWeb 从已验证的 TLS 握手中导出的值才会被转发，且仅当 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes` 时才转发，因此客户端无法伪造 `X-SSL-Client-Verify: SUCCESS`。
+    在请求到达您的应用之前，BunkerWeb 会移除客户端自行发送的每一个 `X-SSL-*` 请求头：适用于所有站点，无论是否启用 mTLS，HTTP/1.1、HTTP/2 与 HTTP/3 一视同仁。只有 BunkerWeb 从已验证的 TLS 握手中导出的值才会被转发，且仅当 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes` 时才转发，因此客户端无法伪造 `X-SSL-Client-Verify: SUCCESS`。 您的应用仍须校验 `X-SSL-Client-Verify` 是否为 `SUCCESS`：在 `MTLS_VERIFY_CLIENT=optional` 下，匿名请求同样会被转发，其 `X-SSL-Client-Verify` 为 `NONE` 且 `X-SSL-Client-DN` 为空，若把 DN 当作认证凭据就会放行该请求。
 
     如果 BunkerWeb 位于另一个自行终结 mTLS 并注入这些请求头的代理之后，请在剥离之前捕获该值并重新发布。添加一份自定义的 `server-http` 配置：
 

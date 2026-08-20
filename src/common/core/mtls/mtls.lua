@@ -115,10 +115,50 @@ function mtls:access()
 		return self:ret(true, "mTLS not enabled")
 	end
 
-	-- No per-path rules: server-wide enforcement is handled at the TLS layer.
+	-- No per-path rules: server-wide enforcement belongs to the TLS layer, and under a correct
+	-- config NGINX has already rejected certificate-less clients during the handshake. This is a
+	-- backstop for the case where it did not -- a config path that stopped emitting
+	-- ssl_verify_client would otherwise serve the whole site unauthenticated, silently, while
+	-- USE_MTLS still reads "yes". It never fires when the TLS layer is doing its job.
+	--
+	-- Scoped deliberately:
+	--   * MTLS_VERIFY_CLIENT=on only. "optional" is meant to let anonymous clients through, and
+	--     "optional_no_ca" performs no validation at all, so neither can be enforced here.
+	--   * TLS connections only. A plain-HTTP request has no handshake and no $ssl_client_verify;
+	--     denying those would break the HTTP-to-HTTPS redirect and the ACME http-01 challenge.
 	local urls = self.urls
 	if not urls or #urls == 0 then
-		return self:ret(true, "no per-path mTLS rules")
+		if self.variables["MTLS_VERIFY_CLIENT"] ~= "on" then
+			return self:ret(true, "no per-path mTLS rules")
+		end
+		local ssl_protocol = ngx.var.ssl_protocol
+		if not ssl_protocol or ssl_protocol == "" then
+			return self:ret(true, "no per-path mTLS rules (plain HTTP)")
+		end
+		local verify = ngx.var.ssl_client_verify
+		if verify == "SUCCESS" then
+			self:set_metric("counters", "passed_mtls", 1)
+			return self:ret(true, "valid client certificate")
+		end
+		-- Reaching here means ssl_verify_client did not run: NGINX would have rejected this
+		-- connection otherwise. Fail closed and say so loudly -- it is a configuration fault,
+		-- not a client fault.
+		self:log_throttled(
+			ERR,
+			"tls_layer_not_enforcing",
+			"USE_MTLS=yes and MTLS_VERIFY_CLIENT=on, but the TLS layer accepted a connection with"
+				.. " ssl_client_verify="
+				.. tostring(verify)
+				.. "; refusing the request. Check that MTLS_CA_CERTIFICATE is set and readable on this instance."
+		)
+		self:set_metric("counters", "failed_mtls", 1)
+		return self:ret(
+			true,
+			"mTLS is enabled but the TLS layer is not enforcing it (ssl_client_verify=" .. tostring(verify) .. ")",
+			get_deny_status(),
+			nil,
+			{ id = "mtls", error = "tls_layer_not_enforcing", verify = verify }
+		)
 	end
 
 	local uri = self.ctx.bw.uri or ""
