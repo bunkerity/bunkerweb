@@ -2731,6 +2731,15 @@ msgstr "Use um código de autenticação"
 msgid "link.use_recovery_code"
 msgstr "Use um código de recuperação"
 
+msgid "login.notice_password_changed"
+msgstr "A sua palavra-passe foi alterada. Inicie sessão com a nova palavra-passe."
+
+msgid "login.notice_session_expired"
+msgstr "A sua sessão terminou antes de a alteração poder ser guardada, pelo que nada foi alterado. Inicie sessão e tente novamente."
+
+msgid "login.notice_session_timeout"
+msgstr "A sua sessão foi terminada por ter atingido o limite de tempo. Inicie sessão para continuar."
+
 msgid "login.or_use_password"
 msgstr "ou utilize a sua palavra-passe"
 

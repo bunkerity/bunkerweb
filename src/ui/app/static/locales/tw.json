@@ -954,7 +954,10 @@
   "login": {
     "title": "登入",
     "subtitle": "登入您的 BunkerWeb 帳戶",
-    "or_use_password": "或使用您的密碼"
+    "or_use_password": "或使用您的密碼",
+    "notice_password_changed": "您的密碼已變更。請使用新密碼登入。",
+    "notice_session_expired": "您的工作階段在變更儲存前已結束，因此未做任何變更。請登入後重試。",
+    "notice_session_timeout": "您的工作階段已達時間上限，因此已登出。請登入以繼續。"
   },
   "logs": {
     "annotation_error": "錯誤",

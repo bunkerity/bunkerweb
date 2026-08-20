@@ -954,7 +954,10 @@
   "login": {
     "title": "Se connecter",
     "subtitle": "Connectez-vous à votre compte BunkerWeb",
-    "or_use_password": "ou utilisez votre mot de passe"
+    "or_use_password": "ou utilisez votre mot de passe",
+    "notice_password_changed": "Votre mot de passe a été modifié. Connectez-vous avec votre nouveau mot de passe.",
+    "notice_session_expired": "Votre session a pris fin avant que votre modification puisse être enregistrée ; rien n'a été modifié. Connectez-vous et réessayez.",
+    "notice_session_timeout": "Vous avez été déconnecté car votre session a atteint sa durée maximale. Connectez-vous pour continuer."
   },
   "logs": {
     "annotation_error": "Erreur",

@@ -954,7 +954,10 @@
   "login": {
     "title": "Iniciar Sessão",
     "subtitle": "Iniciar sessão na sua conta do BunkerWeb",
-    "or_use_password": "ou utilize a sua palavra-passe"
+    "or_use_password": "ou utilize a sua palavra-passe",
+    "notice_password_changed": "A sua palavra-passe foi alterada. Inicie sessão com a nova palavra-passe.",
+    "notice_session_expired": "A sua sessão terminou antes de a alteração poder ser guardada, pelo que nada foi alterado. Inicie sessão e tente novamente.",
+    "notice_session_timeout": "A sua sessão foi terminada por ter atingido o limite de tempo. Inicie sessão para continuar."
   },
   "logs": {
     "annotation_error": "Erro",

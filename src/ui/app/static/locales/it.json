@@ -954,7 +954,10 @@
   "login": {
     "title": "Accedi",
     "subtitle": "Accedi al tuo account BunkerWeb",
-    "or_use_password": "oppure usa la password"
+    "or_use_password": "oppure usa la password",
+    "notice_password_changed": "La tua password è stata modificata. Accedi con la nuova password.",
+    "notice_session_expired": "La sessione è terminata prima che la modifica potesse essere salvata, quindi non è stato modificato nulla. Accedi e riprova.",
+    "notice_session_timeout": "Sei stato disconnesso perché la sessione ha raggiunto il limite di tempo. Accedi per continuare."
   },
   "logs": {
     "annotation_error": "Errore",

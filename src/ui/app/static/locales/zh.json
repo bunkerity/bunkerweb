@@ -954,7 +954,10 @@
   "login": {
     "title": "登录",
     "subtitle": "登录到您的 BunkerWeb 帐户",
-    "or_use_password": "或使用您的密码"
+    "or_use_password": "或使用您的密码",
+    "notice_password_changed": "您的密码已更改。请使用新密码登录。",
+    "notice_session_expired": "您的会话在更改保存前已结束，因此未做任何更改。请登录后重试。",
+    "notice_session_timeout": "您的会话已达到时间上限，因此已退出登录。请登录以继续。"
   },
   "logs": {
     "annotation_error": "错误",

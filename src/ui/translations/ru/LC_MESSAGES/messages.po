@@ -2731,6 +2731,15 @@ msgstr "Используйте код аутентификатора"
 msgid "link.use_recovery_code"
 msgstr "Используйте код восстановления"
 
+msgid "login.notice_password_changed"
+msgstr "Ваш пароль изменён. Войдите с новым паролем."
+
+msgid "login.notice_session_expired"
+msgstr "Сеанс завершился до того, как изменение удалось сохранить, поэтому ничего не изменилось. Войдите и попробуйте снова."
+
+msgid "login.notice_session_timeout"
+msgstr "Вы вышли из системы, так как сеанс достиг предельного времени. Войдите, чтобы продолжить."
+
 msgid "login.or_use_password"
 msgstr "или используйте пароль"
 

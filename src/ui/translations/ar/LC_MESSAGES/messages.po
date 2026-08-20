@@ -2731,6 +2731,15 @@ msgstr "استخدم رمز المصادقة"
 msgid "link.use_recovery_code"
 msgstr "استخدم رمز الاسترداد"
 
+msgid "login.notice_password_changed"
+msgstr "تم تغيير كلمة المرور الخاصة بك. سجّل الدخول باستخدام كلمة المرور الجديدة."
+
+msgid "login.notice_session_expired"
+msgstr "انتهت جلستك قبل أن يُحفظ التغيير، لذلك لم يتغيّر أي شيء. سجّل الدخول وحاول مرة أخرى."
+
+msgid "login.notice_session_timeout"
+msgstr "تم تسجيل خروجك لأن جلستك بلغت الحد الزمني. سجّل الدخول للمتابعة."
+
 msgid "login.or_use_password"
 msgstr "أو استخدم كلمة المرور"
 

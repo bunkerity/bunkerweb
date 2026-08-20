@@ -2731,6 +2731,15 @@ msgstr "एक प्रमाणीकरण कोड का उपयोग �
 msgid "link.use_recovery_code"
 msgstr "एक रिकवरी कोड का उपयोग करें"
 
+msgid "login.notice_password_changed"
+msgstr "आपका पासवर्ड बदल दिया गया है। नए पासवर्ड से लॉग इन करें।"
+
+msgid "login.notice_session_expired"
+msgstr "आपका बदलाव सहेजे जाने से पहले ही आपका सत्र समाप्त हो गया, इसलिए कुछ भी नहीं बदला। लॉग इन करें और फिर से प्रयास करें।"
+
+msgid "login.notice_session_timeout"
+msgstr "आपका सत्र समय-सीमा तक पहुँच जाने के कारण आपको साइन आउट कर दिया गया। जारी रखने के लिए लॉग इन करें।"
+
 msgid "login.or_use_password"
 msgstr "या अपना पासवर्ड उपयोग करें"
 

@@ -2731,6 +2731,15 @@ msgstr "Verwenden Sie einen Authenticator-Code"
 msgid "link.use_recovery_code"
 msgstr "Verwenden Sie einen Wiederherstellungs-Code"
 
+msgid "login.notice_password_changed"
+msgstr "Ihr Passwort wurde geändert. Melden Sie sich mit Ihrem neuen Passwort an."
+
+msgid "login.notice_session_expired"
+msgstr "Ihre Sitzung endete, bevor Ihre Änderung gespeichert werden konnte, daher wurde nichts geändert. Melden Sie sich an und versuchen Sie es erneut."
+
+msgid "login.notice_session_timeout"
+msgstr "Sie wurden abgemeldet, weil Ihre Sitzung ihre Zeitbegrenzung erreicht hat. Melden Sie sich an, um fortzufahren."
+
 msgid "login.or_use_password"
 msgstr "oder Passwort verwenden"
 

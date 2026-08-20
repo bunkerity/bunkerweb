@@ -2731,6 +2731,15 @@ msgstr "Użyj kodu uwierzytelniania"
 msgid "link.use_recovery_code"
 msgstr "Użyj kodu odzyskiwania"
 
+msgid "login.notice_password_changed"
+msgstr "Twoje hasło zostało zmienione. Zaloguj się przy użyciu nowego hasła."
+
+msgid "login.notice_session_expired"
+msgstr "Twoja sesja zakończyła się, zanim zmiana mogła zostać zapisana, więc nic nie zostało zmienione. Zaloguj się i spróbuj ponownie."
+
+msgid "login.notice_session_timeout"
+msgstr "Nastąpiło wylogowanie, ponieważ sesja osiągnęła limit czasu. Zaloguj się, aby kontynuować."
+
 msgid "login.or_use_password"
 msgstr "lub użyj hasła"
 

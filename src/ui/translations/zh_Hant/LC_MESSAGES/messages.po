@@ -2731,6 +2731,15 @@ msgstr "使用驗證碼"
 msgid "link.use_recovery_code"
 msgstr "使用恢復碼"
 
+msgid "login.notice_password_changed"
+msgstr "您的密碼已變更。請使用新密碼登入。"
+
+msgid "login.notice_session_expired"
+msgstr "您的工作階段在變更儲存前已結束，因此未做任何變更。請登入後重試。"
+
+msgid "login.notice_session_timeout"
+msgstr "您的工作階段已達時間上限，因此已登出。請登入以繼續。"
+
 msgid "login.or_use_password"
 msgstr "或使用您的密碼"
 

@@ -2731,6 +2731,15 @@ msgstr "একটি প্রমাণীকরণ কোড ব্যবহা
 msgid "link.use_recovery_code"
 msgstr "একটি পুনরুদ্ধার কোড ব্যবহার করুন"
 
+msgid "login.notice_password_changed"
+msgstr "আপনার পাসওয়ার্ড পরিবর্তন করা হয়েছে। নতুন পাসওয়ার্ড দিয়ে লগ ইন করুন।"
+
+msgid "login.notice_session_expired"
+msgstr "আপনার পরিবর্তন সংরক্ষিত হওয়ার আগেই সেশন শেষ হয়ে গেছে, তাই কিছুই পরিবর্তন হয়নি। লগ ইন করে আবার চেষ্টা করুন।"
+
+msgid "login.notice_session_timeout"
+msgstr "আপনার সেশন সময়সীমায় পৌঁছানোয় আপনাকে সাইন আউট করা হয়েছে। চালিয়ে যেতে লগ ইন করুন।"
+
 msgid "login.or_use_password"
 msgstr "অথবা আপনার পাসওয়ার্ড ব্যবহার করুন"
 

@@ -954,7 +954,10 @@
   "login": {
     "title": "Mag-login",
     "subtitle": "Mag-log in sa iyong account ng BunkerWeb",
-    "or_use_password": "o gamitin ang iyong password"
+    "or_use_password": "o gamitin ang iyong password",
+    "notice_password_changed": "Nabago na ang iyong password. Mag-log in gamit ang bagong password.",
+    "notice_session_expired": "Natapos ang iyong session bago pa ma-save ang iyong pagbabago, kaya walang nabago. Mag-log in at subukang muli.",
+    "notice_session_timeout": "Na-sign out ka dahil naabot na ng iyong session ang limitasyon sa oras. Mag-log in upang magpatuloy."
   },
   "logs": {
     "annotation_error": "Error",

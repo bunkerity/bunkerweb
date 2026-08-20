@@ -954,7 +954,10 @@
   "login": {
     "title": "Anmelden",
     "subtitle": "Melden Sie sich bei Ihrem BunkerWeb-Konto an",
-    "or_use_password": "oder Passwort verwenden"
+    "or_use_password": "oder Passwort verwenden",
+    "notice_password_changed": "Ihr Passwort wurde geändert. Melden Sie sich mit Ihrem neuen Passwort an.",
+    "notice_session_expired": "Ihre Sitzung endete, bevor Ihre Änderung gespeichert werden konnte, daher wurde nichts geändert. Melden Sie sich an und versuchen Sie es erneut.",
+    "notice_session_timeout": "Sie wurden abgemeldet, weil Ihre Sitzung ihre Zeitbegrenzung erreicht hat. Melden Sie sich an, um fortzufahren."
   },
   "logs": {
     "annotation_error": "Fehler",

@@ -2731,6 +2731,15 @@ msgstr "ایک تصدیق کوڈ استعمال کریں"
 msgid "link.use_recovery_code"
 msgstr "ایک ریکووری کوڈ استعمال کریں"
 
+msgid "login.notice_password_changed"
+msgstr "آپ کا پاس ورڈ تبدیل کر دیا گیا ہے۔ نئے پاس ورڈ سے لاگ ان کریں۔"
+
+msgid "login.notice_session_expired"
+msgstr "آپ کی تبدیلی محفوظ ہونے سے پہلے آپ کا سیشن ختم ہو گیا، اس لیے کچھ بھی تبدیل نہیں ہوا۔ لاگ ان کریں اور دوبارہ کوشش کریں۔"
+
+msgid "login.notice_session_timeout"
+msgstr "آپ کا سیشن وقت کی حد کو پہنچ گیا، اس لیے آپ کو لاگ آؤٹ کر دیا گیا۔ جاری رکھنے کے لیے لاگ ان کریں۔"
+
 msgid "login.or_use_password"
 msgstr "یا اپنا پاس ورڈ استعمال کریں"
 

@@ -2731,6 +2731,15 @@ msgstr "使用身份验证码"
 msgid "link.use_recovery_code"
 msgstr "使用恢复码"
 
+msgid "login.notice_password_changed"
+msgstr "您的密码已更改。请使用新密码登录。"
+
+msgid "login.notice_session_expired"
+msgstr "您的会话在更改保存前已结束，因此未做任何更改。请登录后重试。"
+
+msgid "login.notice_session_timeout"
+msgstr "您的会话已达到时间上限，因此已退出登录。请登录以继续。"
+
 msgid "login.or_use_password"
 msgstr "或使用您的密码"
 

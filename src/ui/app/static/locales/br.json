@@ -954,7 +954,10 @@
   "login": {
     "title": "Entrar",
     "subtitle": "Faça login na sua conta do BunkerWeb",
-    "or_use_password": "ou use sua senha"
+    "or_use_password": "ou use sua senha",
+    "notice_password_changed": "Sua senha foi alterada. Faça login com a nova senha.",
+    "notice_session_expired": "Sua sessão terminou antes que a alteração pudesse ser salva, então nada foi alterado. Faça login e tente novamente.",
+    "notice_session_timeout": "Você foi desconectado porque sua sessão atingiu o limite de tempo. Faça login para continuar."
   },
   "logs": {
     "annotation_error": "Erro",

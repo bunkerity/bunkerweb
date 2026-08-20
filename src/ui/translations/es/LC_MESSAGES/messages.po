@@ -2731,6 +2731,15 @@ msgstr "Utilice un código de autenticación"
 msgid "link.use_recovery_code"
 msgstr "Utilice un código de recuperación"
 
+msgid "login.notice_password_changed"
+msgstr "Se ha cambiado tu contraseña. Inicia sesión con la nueva contraseña."
+
+msgid "login.notice_session_expired"
+msgstr "Tu sesión finalizó antes de que se pudiera guardar el cambio, por lo que no se modificó nada. Inicia sesión e inténtalo de nuevo."
+
+msgid "login.notice_session_timeout"
+msgstr "Se ha cerrado tu sesión porque alcanzó su límite de tiempo. Inicia sesión para continuar."
+
 msgid "login.or_use_password"
 msgstr "o usa tu contraseña"
 

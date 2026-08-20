@@ -2731,6 +2731,15 @@ msgstr "Bir kimlik doğrulama kodu kullan"
 msgid "link.use_recovery_code"
 msgstr "Bir kurtarma kodu kullan"
 
+msgid "login.notice_password_changed"
+msgstr "Parolanız değiştirildi. Yeni parolanızla giriş yapın."
+
+msgid "login.notice_session_expired"
+msgstr "Oturumunuz, değişikliğiniz kaydedilmeden önce sona erdi, bu nedenle hiçbir şey değişmedi. Giriş yapıp yeniden deneyin."
+
+msgid "login.notice_session_timeout"
+msgstr "Oturumunuz süre sınırına ulaştığı için çıkış yapıldı. Devam etmek için giriş yapın."
+
 msgid "login.or_use_password"
 msgstr "veya şifrenizi kullanın"
 

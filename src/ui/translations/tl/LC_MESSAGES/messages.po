@@ -2731,6 +2731,15 @@ msgstr "Gumamit ng code ng pag-authenticate"
 msgid "link.use_recovery_code"
 msgstr "Gumamit ng code ng pagbawi"
 
+msgid "login.notice_password_changed"
+msgstr "Nabago na ang iyong password. Mag-log in gamit ang bagong password."
+
+msgid "login.notice_session_expired"
+msgstr "Natapos ang iyong session bago pa ma-save ang iyong pagbabago, kaya walang nabago. Mag-log in at subukang muli."
+
+msgid "login.notice_session_timeout"
+msgstr "Na-sign out ka dahil naabot na ng iyong session ang limitasyon sa oras. Mag-log in upang magpatuloy."
+
 msgid "login.or_use_password"
 msgstr "o gamitin ang iyong password"
 

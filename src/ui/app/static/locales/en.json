@@ -976,6 +976,9 @@
     "get_support": "Get support"
   },
   "login": {
+    "notice_password_changed": "Your password was changed. Log in with your new password.",
+    "notice_session_expired": "Your session ended before your change could be saved, so nothing was changed. Log in and try again.",
+    "notice_session_timeout": "You were signed out because your session reached its time limit. Log in to continue.",
     "or_use_password": "or use your password",
     "subtitle": "Sign in to your BunkerWeb account",
     "title": "Sign In"

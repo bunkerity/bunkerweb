@@ -954,7 +954,10 @@
   "login": {
     "title": "Zaloguj się",
     "subtitle": "Zaloguj się do swojego konta BunkerWeb",
-    "or_use_password": "lub użyj hasła"
+    "or_use_password": "lub użyj hasła",
+    "notice_password_changed": "Twoje hasło zostało zmienione. Zaloguj się przy użyciu nowego hasła.",
+    "notice_session_expired": "Twoja sesja zakończyła się, zanim zmiana mogła zostać zapisana, więc nic nie zostało zmienione. Zaloguj się i spróbuj ponownie.",
+    "notice_session_timeout": "Nastąpiło wylogowanie, ponieważ sesja osiągnęła limit czasu. Zaloguj się, aby kontynuować."
   },
   "logs": {
     "annotation_error": "Błąd",
