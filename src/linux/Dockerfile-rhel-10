@@ -1,4 +1,4 @@
-FROM redhat/ubi10:10.2@sha256:59d8ba5a6824fc70d8e0c905ec91fb5830460a32e198e0d319c26dde0577ffe9 AS builder
+FROM redhat/ubi10:10.2@sha256:145a2d6e7e224d34fbe601832e3f133c11560e15b4074fad75c449387bb105a0 AS builder
 
 ENV OS=rhel
 ENV OS_VERSION=10
@@ -141,7 +141,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM redhat/ubi10:10.2@sha256:59d8ba5a6824fc70d8e0c905ec91fb5830460a32e198e0d319c26dde0577ffe9
+FROM redhat/ubi10:10.2@sha256:145a2d6e7e224d34fbe601832e3f133c11560e15b4074fad75c449387bb105a0
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

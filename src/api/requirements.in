@@ -10,4 +10,4 @@ python-multipart==0.0.32
 PyYAML==6.0.3
 regex==2026.7.19
 slowapi==0.1.10
-uvicorn[standard]==0.52.2
+uvicorn[standard]==0.52.4
