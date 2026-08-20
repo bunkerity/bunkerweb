@@ -3,7 +3,7 @@
   "stream": "no",
   "name": "CrowdSec",
   "description": "CrowdSec bouncer for BunkerWeb.",
-  "version": "1.9",
+  "version": "2.0",
   "settings": {
     "USE_CROWDSEC": {
       "context": "multisite",
@@ -15,7 +15,7 @@
       "type": "check"
     },
     "CROWDSEC_API": {
-      "context": "global",
+      "context": "multisite",
       "default": "http://crowdsec:8080",
       "help": "Address of the CrowdSec API.",
       "id": "crowdsec-api",
@@ -24,7 +24,7 @@
       "type": "text"
     },
     "CROWDSEC_API_KEY": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "Key for the CrowdSec API given by cscli bouncer add.",
       "id": "crowdsec-api-key",
@@ -33,7 +33,7 @@
       "type": "password"
     },
     "CROWDSEC_MODE": {
-      "context": "global",
+      "context": "multisite",
       "default": "live",
       "help": "Mode of the CrowdSec API (live or stream).",
       "id": "crowdsec-mode",
@@ -43,7 +43,7 @@
       "select": ["live", "stream"]
     },
     "CROWDSEC_ENABLE_INTERNAL": {
-      "context": "global",
+      "context": "multisite",
       "default": "no",
       "help": "Enable the analysis of the internal traffic.",
       "id": "crowdsec-enable-internal",
@@ -52,7 +52,7 @@
       "type": "check"
     },
     "CROWDSEC_REQUEST_TIMEOUT": {
-      "context": "global",
+      "context": "multisite",
       "default": "1000",
       "help": "Timeout in milliseconds for the HTTP requests done by the bouncer to query CrowdSec local API.",
       "id": "crowdsec-request-timeout",
@@ -61,7 +61,7 @@
       "type": "number"
     },
     "CROWDSEC_EXCLUDE_LOCATION": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "The locations to exclude while bouncing. It is a list of location, separated by commas.",
       "id": "crowdsec-exclude-location",
@@ -71,7 +71,7 @@
       "separator": ","
     },
     "CROWDSEC_CACHE_EXPIRATION": {
-      "context": "global",
+      "context": "multisite",
       "default": "1",
       "help": "The cache expiration, in second, for IPs that the bouncer store in cache in live mode.",
       "id": "crowdsec-cache-expiration",
@@ -80,7 +80,7 @@
       "type": "number"
     },
     "CROWDSEC_UPDATE_FREQUENCY": {
-      "context": "global",
+      "context": "multisite",
       "default": "10",
       "help": "The frequency of update, in second, to pull new/old IPs from the CrowdSec local API.",
       "id": "crowdsec-update-frequency",
@@ -89,7 +89,7 @@
       "type": "number"
     },
     "CROWDSEC_APPSEC_URL": {
-      "context": "global",
+      "context": "multisite",
       "default": "",
       "help": "URL of the Application Security Component.",
       "id": "crowdsec-appsec-url",
@@ -98,7 +98,7 @@
       "type": "text"
     },
     "CROWDSEC_APPSEC_FAILURE_ACTION": {
-      "context": "global",
+      "context": "multisite",
       "default": "passthrough",
       "help": "Behavior when the AppSec Component return a 500. Can let the request passthrough or deny it.",
       "id": "crowdsec-appsec-failure-action",
@@ -108,7 +108,7 @@
       "select": ["passthrough", "deny"]
     },
     "CROWDSEC_APPSEC_CONNECT_TIMEOUT": {
-      "context": "global",
+      "context": "multisite",
       "default": "100",
       "help": "The timeout in milliseconds of the connection between the remediation component and AppSec Component.",
       "id": "crowdsec-appsec-connect-timeout",
@@ -117,7 +117,7 @@
       "type": "number"
     },
     "CROWDSEC_APPSEC_SEND_TIMEOUT": {
-      "context": "global",
+      "context": "multisite",
       "default": "100",
       "help": "The timeout in milliseconds to send data from the remediation component to the AppSec Component.",
       "id": "crowdsec-appsec-send-timeout",
@@ -126,7 +126,7 @@
       "type": "number"
     },
     "CROWDSEC_APPSEC_PROCESS_TIMEOUT": {
-      "context": "global",
+      "context": "multisite",
       "default": "500",
       "help": "The timeout in milliseconds to process the request from the remediation component to the AppSec Component.",
       "id": "crowdsec-appsec-process-timeout",
@@ -135,7 +135,7 @@
       "type": "number"
     },
     "CROWDSEC_ALWAYS_SEND_TO_APPSEC": {
-      "context": "global",
+      "context": "multisite",
       "default": "no",
       "help": "Send the request to the AppSec Component even if there is a decision for the IP.",
       "id": "crowdsec-always-send-to-appsec",
@@ -144,7 +144,7 @@
       "type": "check"
     },
     "CROWDSEC_APPSEC_SSL_VERIFY": {
-      "context": "global",
+      "context": "multisite",
       "default": "no",
       "help": "Verify the AppSec Component SSL certificate validity.",
       "id": "crowdsec-appsec-ssl-verify",
@@ -158,7 +158,7 @@
       "name": "crowdsec-conf",
       "file": "crowdsec-conf.py",
       "every": "once",
-      "reload": false
+      "reload": true
     }
   ]
 }

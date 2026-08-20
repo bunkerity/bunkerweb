@@ -295,33 +295,50 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
 Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
-| Setting                     | Default                | Context   | Multiple | Description                                                                                                      |
-| --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `USE_CROWDSEC`              | `no`                   | multisite | no       | **Enable CrowdSec:** Set to `yes` to enable the CrowdSec bouncer.                                                |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service.                                             |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
+Every setting is `multisite`, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.
+
+| Setting                     | Default                | Context   | Multiple | Description                                                                                                     |
+| --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `USE_CROWDSEC`              | `no`                   | multisite | no       | **Enable CrowdSec:** Set to `yes` to enable the CrowdSec bouncer.                                               |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service. Leave empty to disable decision lookups.   |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
 
 #### Application Security Component Settings
 
-| Setting                           | Default       | Context | Multiple | Description                                                                                            |
-| --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
+| Setting                           | Default       | Context   | Multiple | Description                                                                                           |
+| --------------------------------- | ------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
     - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
+
+#### Per-service endpoints
+
+Because the endpoints are `multisite`, services on the same instance can use different CrowdSec components, or only some of them. The two features are independent:
+
+- **Decision lookups** are active when `CROWDSEC_API` is set. Set it to an empty string for a service to skip the Local API entirely.
+- **AppSec inspection** is active when `CROWDSEC_APPSEC_URL` is set. Set it to an empty string for a service to skip deep request inspection.
+
+A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, and the instance logs that neither endpoint is defined.
+
+!!! warning "One decision cache per instance"
+    Cached decisions live in a single shared memory zone for the whole instance, keyed by the Local API they came from. Services pointing at the same `CROWDSEC_API` reuse each other's cached decisions, which is what keeps the lookup cheap. Services pointing at different Local APIs never see each other's decisions. Sizing that zone is instance-wide, so a fleet with many distinct Local APIs and large decision lists shares one budget.
+
+!!! info "Bouncer key per Local API"
+    `CROWDSEC_API_KEY` is resolved per service like every other setting. When services target different Local APIs, give each one the key registered with `cscli bouncers add` on its own CrowdSec host, otherwise the lookups are rejected as unauthenticated.
 
 ### Example Configurations
 
@@ -355,8 +372,41 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Per-service Configuration"
+
+    AppSec on every public service, decision lookups on a subset, and one service left out entirely. The unprefixed values are the fleet-wide baseline and each service overrides only what differs:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline for every service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # No decision lookup unless a service asks for it
+    CROWDSEC_API_KEY: ""
+
+    # app1 adds the Local API decision lookup on top of AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 keeps AppSec only, inheriting the empty CROWDSEC_API baseline
+
+    # intranet is not checked at all
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    A service can also point at a different CrowdSec host altogether, with its own bouncer key:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Step&nbsp;3 – Validate the integration
 
 - In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- In the BunkerWeb instance logs, the init phase reports how many bouncers were built and how many services they cover. Services sharing an identical configuration share one bouncer, so the two counts differ when a fleet uses several distinct endpoints.
 - On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
 - In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.

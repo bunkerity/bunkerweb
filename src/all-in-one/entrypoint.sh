@@ -337,10 +337,26 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	cscli hub update
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Updated CrowdSec hub."
 
-	if [ ! -s /var/lib/crowdsec/online_api_credentials.yaml ]; then
-		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] No Central API credentials found. Registering machine..."
-		cscli capi register
-		log "ENTRYPOINT" "✅" "[CROWDSEC] Machine registered successfully."
+	# Same name as the official CrowdSec images, which drop the online_client block rather
+	# than emptying the credentials file.
+	if [[ "${DISABLE_ONLINE_API,,}" == "true" || "${DISABLE_ONLINE_API,,}" == "yes" ]]; then
+		if [ ! -f /etc/crowdsec/config.yaml.capi ]; then
+			cp /etc/crowdsec/config.yaml /etc/crowdsec/config.yaml.capi
+			sed -i '/^    online_client:$/,+1d' /etc/crowdsec/config.yaml
+		fi
+		rm -f /var/lib/crowdsec/online_api_credentials.yaml
+		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Central API disabled, skipping registration. No signal will be sent to CrowdSec and no community blocklist will be pulled."
+	else
+		# /etc/crowdsec survives a restart, so put the block back if a previous run removed it.
+		if [ -f /etc/crowdsec/config.yaml.capi ]; then
+			mv /etc/crowdsec/config.yaml.capi /etc/crowdsec/config.yaml
+			log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Central API re-enabled, restored the previous configuration."
+		fi
+		if [ ! -s /var/lib/crowdsec/online_api_credentials.yaml ]; then
+			log "ENTRYPOINT" "ℹ️" "[CROWDSEC] No Central API credentials found. Registering machine..."
+			cscli capi register
+			log "ENTRYPOINT" "✅" "[CROWDSEC] Machine registered successfully."
+		fi
 	fi
 
 	if [ ! -f /var/lib/crowdsec/local_api_credentials.yaml ] || ! grep -q "login" /var/lib/crowdsec/local_api_credentials.yaml; then
