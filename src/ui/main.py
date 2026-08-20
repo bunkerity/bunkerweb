@@ -46,7 +46,7 @@ from app.utils import (
     LIB_DIR,
     LOGGER,
     SETTINGS_HUNGRY_PATH_PREFIXES,
-    STATIC_PATH_PREFIXES,
+    is_static_path,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
@@ -1035,6 +1035,12 @@ def handle_csrf_error(_):
         return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
+    if request.method == "POST":
+        # A submitted form dies here rather than at the login check, because the CSRF token lives
+        # in the session that just went away. logout_page() clears the session and the response
+        # tells the browser to drop its cookies, so a flash would not survive: the reason has to
+        # travel in the URL. logout_page() cannot read it off this request, so it is set here.
+        response.headers["Location"] = url_for("login.login_page", reason="session_expired")
     return response
 
 
@@ -1180,7 +1186,7 @@ _REQUEST_ID_RE = re_compile(r"[A-Za-z0-9._-]{1,64}")
 def before_request():
     # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
     # returning None lets the static view still serve the file (after_request supplies the nonce).
-    if request.path.startswith(STATIC_PATH_PREFIXES):
+    if is_static_path(request.path):
         return
 
     # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
@@ -1221,7 +1227,7 @@ def before_request():
                     app.config["SESSION_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         try:
             metadata = API_CLIENT.get_metadata()
         except Exception:
@@ -1280,7 +1286,11 @@ def before_request():
 
             # Enforce absolute and rolling session lifetimes (mirrors lua-resty-session)
             if _enforce_session_lifetime():
-                return redirect(url_for("login.login_page"))
+                # The third producer of a session destroyed out from under the user, after the CSRF
+                # handler and the password change. `_enforce_session_lifetime` has just called
+                # `session.clear()`, so a flash cannot survive to explain it -- the reason travels
+                # in the URL, same mechanism, different message. See LOGIN_NOTICES.
+                return redirect(url_for("login.login_page", reason="session_timeout"))
 
             # Case not login page, keep on 2FA before any other access.
             #
@@ -1572,8 +1582,27 @@ def set_security_headers(response):
     # None of them grants access to data, hardware or the user's environment; all are reversible by
     # putting `fullscreen=()` / `screen-wake-lock=()` / `publickey-credentials-*=()` back.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(self), publickey-credentials-get=(self), screen-wake-lock=(self), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(self), publickey-credentials-get=(self), rewriter=(), screen-wake-lock=(self), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
+
+    # Out of search indexes. robots.txt stops a crawler fetching the page; it does not stop the URL
+    # being indexed once it has been discovered somewhere else, and this header does.
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    # Sever the opener relationship and refuse cross-origin embedding of any UI response.
+    # COEP is left out on purpose: it would break the third-party resources the CSP allows.
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # Keep authenticated pages out of the browser cache, so the back button cannot redraw the panel
+    # after a logout. Two exemptions, both deliberate:
+    #   * static assets keep the far-future max-age the static handler gave them -- no-store there
+    #     would re-download every asset on every page;
+    #   * `setdefault`, so a route that already answered this question wins. /plugins/<p>/icon
+    #     (private, max-age=3600), the log streams (no-cache) and logout (a stricter no-store) all
+    #     set their own, and this must not flatten them.
+    if not is_static_path(request.path):
+        response.headers.setdefault("Cache-Control", "no-store")
 
     # What this page cost, where a browser can read it without any tooling. Deliberately not
     # gated on DEBUG: a number you have to switch on is a number nobody has when it matters.
@@ -1599,7 +1628,7 @@ def set_security_headers(response):
     # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
     # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
     # ponytail: hard-coded name list; drop this block once no issued token can still be live.
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
             if legacy_cookie in request.cookies:
                 response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
@@ -1614,7 +1643,7 @@ def teardown_request(teardown):
     perf.finish()
 
     with suppress(AssertionError, RuntimeError):
-        if not request.path.startswith(STATIC_PATH_PREFIXES) and current_user.is_authenticated and "session_id" in session:
+        if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
@@ -1659,6 +1688,44 @@ def loading():
 def check():
     # deepcode ignore TooPermissiveCors: We need to allow all origins for the wizard
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/.well-known/security.txt", methods=["GET"])
+def security_txt():
+    """RFC 9116. Generated rather than shipped as a static file, because `Expires` is mandatory and
+    a stale one makes the whole document invalid -- a file committed today expires unattended."""
+    expires = (datetime.now().astimezone() + timedelta(days=365)).replace(microsecond=0).isoformat()
+    fields = [
+        "Contact: mailto:security@bunkerity.com",
+        "Contact: https://github.com/bunkerity/bunkerweb/security/advisories/new",
+        f"Expires: {expires}",
+        "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
+        "Preferred-Languages: en, fr",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/SECURITY.md",
+    ]
+
+    # Canonical is derived from the request, so it is only emitted once the Host header has been
+    # vetted against a real allowlist: this path is in STATIC_EXACT_PATHS, so `before_request`
+    # returns before its Host check ever runs, and "*" vets nothing. Unvetted, the field would
+    # echo whatever Host the caller sent back into a signed-looking security document.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and "*" not in allowed_hosts and _host_allowed(request.host, allowed_hosts):
+        fields.append(f"Canonical: {url_for('security_txt', _external=True)}")
+
+    return Response(content_type="text/plain; charset=utf-8", response="\n".join(fields) + "\n")
+
+
+@app.route("/security.txt", methods=["GET"])
+def security_txt_redirect():
+    # RFC 9116 keeps the root location for legacy fetchers and points it at the canonical one.
+    return redirect(url_for("security_txt"), 301)
+
+
+@app.route("/.well-known/change-password", methods=["GET"])
+def change_password_redirect():
+    # https://w3c.github.io/webappsec-change-password-url/ -- what a password manager follows to
+    # offer "change password". Not permanent on purpose: the page holding the form may move.
+    return redirect(url_for("profile.profile_page"))
 
 
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":

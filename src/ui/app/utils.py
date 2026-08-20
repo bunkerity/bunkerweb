@@ -45,6 +45,29 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
 # authorization middleware, so the two never drift.
 STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+# Public paths that carry no privilege either, matched whole and never as a prefix: every consumer
+# uses startswith, so listing a bare file name among the prefixes would also exempt /favicon.icoX
+# and /favicon.ico/anything from the host, authorization and revocation checks -- including the
+# Biscuit middleware in app/models/biscuit.py.
+#
+# The four beyond the favicon are public by contract: a scanner or a browser fetches them with no
+# account and often before one exists. robots.txt; RFC 9116's security.txt at both its canonical
+# /.well-known location and the legacy root one the RFC still allows; and the well-known
+# change-password URL a password manager follows. Answering any of them with a login redirect is
+# the failure -- and /.well-known/change-password only ever redirects, so it discloses nothing.
+STATIC_EXACT_PATHS = (
+    "/favicon.ico",
+    "/robots.txt",
+    "/security.txt",
+    "/.well-known/security.txt",
+    "/.well-known/change-password",
+)
+
+
+def is_static_path(path: str, *extra_prefixes: str) -> bool:
+    """True for the unprivileged static assets that skip the request pipeline."""
+    return path.startswith(STATIC_PATH_PREFIXES + extra_prefixes) or path in STATIC_EXACT_PATHS
+
 
 # Pages whose templates read the *declared settings schema* off the shared `plugins` context:
 # the compose shelf and its request-path strip (models/compose_pane.html, included by
