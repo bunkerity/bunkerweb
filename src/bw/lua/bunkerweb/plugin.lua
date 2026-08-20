@@ -8,6 +8,7 @@ local utils = require "bunkerweb.utils"
 local plugin = class("plugin")
 local cjson = require "cjson"
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local get_variable = utils.get_variable
 local get_ctx_obj = utils.get_ctx_obj
@@ -78,7 +79,11 @@ function plugin:initialize(id, ctx)
 	for k, v in pairs(metadata.settings) do
 		value, err = get_variable(k, v.context == "multisite" and self.is_request)
 		if value == nil then
-			self.logger:log(ERR, "can't get " .. k .. " variable : " .. err)
+			-- A setting declared on disk but absent from the generated config means the
+			-- database is out of sync, not that this request failed. Plugins treat a nil
+			-- value as "feature disabled", so throttle instead of logging per request.
+			-- The key set is bounded by the settings this plugin declares.
+			self:log_throttled(WARN, "missing_variable_" .. k, "can't get " .. k .. " variable : " .. err)
 		end
 		self.variables[k] = value
 	end

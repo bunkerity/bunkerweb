@@ -17,7 +17,7 @@ local unescape_uri = ngx.unescape_uri
 
 -- Default cap for the per-worker LRU: governs both the slot count (distinct
 -- counter/table keys held) and the per-key event-history array length. Overridden
--- per-worker from the MAX_LRU_HISTORY global setting once init_worker() runs and
+-- per-worker from the MAX_LRU_HISTORY global setting once init_workers() runs and
 -- self.variables is populated.
 local DEFAULT_MAX_LRU_HISTORY = 1000
 
@@ -488,11 +488,14 @@ function metrics:initialize(ctx)
 		datastore:new(subsystem == "http" and shared.metrics_stream_reports or shared.metrics_stream_reports_stream)
 end
 
-function metrics:init_worker()
+-- init_workers(), not init_worker(): the latter is gated behind a shared "misc_ready" flag
+-- and runs once per instance, so it would resize a single worker's LRU and leave every other
+-- one on the default. This is per-worker VM state, so it needs the per-worker phase.
+function metrics:init_workers()
 	-- Resize the per-worker LRU using the configured MAX_LRU_HISTORY (global setting).
 	-- Until this runs, the module-level default LRU sized at DEFAULT_MAX_LRU_HISTORY is
 	-- used. The resize is skipped when the configured value matches the default to avoid
-	-- dropping any entries collected between module load and init_worker.
+	-- dropping any entries collected between module load and here.
 	local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
@@ -978,111 +981,150 @@ function metrics:timer()
 		end
 	end
 
-	-- Loop on all keys
-	for _, key in ipairs(lru:get_keys()) do
+	-- Loop on all keys, coldest first. get_keys() hands them back hottest first and lru:get()
+	-- promotes what it reads, so walking forward reverses the whole queue on every cycle and
+	-- the next insertion evicts the hottest key instead of the coldest. Walking backwards
+	-- promotes them in the order they already had, leaving it unchanged.
+	local lru_keys = lru:get_keys()
+	for idx = #lru_keys, 1, -1 do
+		local key = lru_keys[idx]
 		-- Get LRU data
 		local value = lru:get(key)
-		if self.redis_ok then
-			if key == "requests" then
-				-- Stream workers only hand reports over. The HTTP worker that installs the
-				-- batch is the sole Redis owner, preventing the same report being pushed once
-				-- before handover and again after it.
-				if subsystem == "http" then
-					sync_request_buffer(self, value)
-					-- Update LRU cache
-					lru:set(key, value)
-				end
-			-- Timer aggregates are a {count, sum, max} hash. The list sync below iterates
-			-- table values with ipairs, so it would DEL the key and push nothing, leaving an
-			-- empty Redis key and burning a DEL per timer per tick. They are read from the
-			-- shm through GET /metrics/<plugin>, which needs no Redis, so skip them here.
-			-- ponytail: no cross-instance timer aggregation. Sync them as a Redis hash if a
-			-- consumer ever needs it.
-			elseif key == "baseline" or key:match("_timer_") then -- luacheck: ignore 542
-			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				-- Sync other metrics (counters and tables) to Redis with optimized data structures
-				local redis_key = "metrics:" .. key .. ":" .. wid
-				local ok
-				if type(value) == "table" then
-					-- Use Redis list for table values
-					ok, err = self:redis_call("del", redis_key)
-					if ok then
-						-- One RPUSH per chunk instead of one per item. Per-item error
-						-- attribution is lost, but the only actionable failure was the
-						-- socket one and the chunk result still reports that.
-						-- ponytail: 512 items per call -- LuaJIT's unpack() argument
-						-- ceiling is ~8000 and MAX_LRU_HISTORY accepts values like "1m".
-						local items = {}
-						for _, item in ipairs(value) do
-							items[#items + 1] = type(item) == "table" and encode(item) or tostring(item)
-						end
-						local total = #items
-						local first = 1
-						while first <= total do
-							local last = math_min(first + 511, total)
-							ok, err = self:redis_call("rpush", redis_key, unpack(items, first, last))
-							if not ok then
-								self:log_throttled(
-									ERR,
-									"sync_table_items",
-									"Can't push metric table items " .. key .. " to Redis: " .. err
-								)
-								break
+		-- get_keys() returns a snapshot and every redis_call below yields, so a
+		-- concurrent log() can evict this key from the (full) LRU in between. A miss
+		-- must never be written out: tostring(nil) stores the literal string "nil" in
+		-- Redis, and a nil datastore value deletes the entry. Skip it and let the next
+		-- cycle resync whatever is still live. The forward walk above made this the
+		-- common case rather than a rare one: it left every unvisited key the coldest.
+		if value ~= nil then
+			if self.redis_ok then
+				if key == "requests" then
+					-- Stream workers only hand reports over. The HTTP worker that installs the
+					-- batch is the sole Redis owner, preventing the same report being pushed once
+					-- before handover and again after it.
+					if subsystem == "http" then
+						sync_request_buffer(self, value)
+						-- Update LRU cache
+						lru:set(key, value)
+					end
+				-- Timer aggregates are a {count, sum, max} hash. The list sync below iterates
+				-- table values with ipairs, so it would DEL the key and push nothing, leaving an
+				-- empty Redis key and burning a DEL per timer per tick. They are read from the
+				-- shm through GET /metrics/<plugin>, which needs no Redis, so skip them here.
+				-- ponytail: no cross-instance timer aggregation. Sync them as a Redis hash if a
+				-- consumer ever needs it.
+				elseif key == "baseline" or key:match("_timer_") then -- luacheck: ignore 542
+				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+					-- Sync other metrics (counters and tables) to Redis with optimized data structures
+					local redis_key = "metrics:" .. key .. ":" .. wid
+					local ok
+					if type(value) == "table" then
+						-- Use Redis list for table values
+						ok, err = self:redis_call("del", redis_key)
+						if ok then
+							-- One RPUSH per chunk instead of one per item. Per-item error
+							-- attribution is lost, but the only actionable failure was the
+							-- socket one and the chunk result still reports that.
+							-- ponytail: 512 items per call -- LuaJIT's unpack() argument
+							-- ceiling is ~8000 and MAX_LRU_HISTORY accepts values like "1m".
+							local items = {}
+							for _, item in ipairs(value) do
+								items[#items + 1] = type(item) == "table" and encode(item) or tostring(item)
 							end
-							first = last + 1
+							local total = #items
+							local first = 1
+							while first <= total do
+								local last = math_min(first + 511, total)
+								ok, err = self:redis_call("rpush", redis_key, unpack(items, first, last))
+								if not ok then
+									self:log_throttled(
+										ERR,
+										"sync_table_items",
+										"Can't push metric table items " .. key .. " to Redis: " .. err
+									)
+									break
+								end
+								first = last + 1
+							end
+						else
+							self:log_throttled(
+								ERR,
+								"sync_table_clear",
+								"Can't clear metric table " .. key .. " in Redis: " .. err
+							)
+						end
+					elseif type(value) == "number" then
+						-- Use Redis string for numeric counters
+						ok, err = self:redis_call("set", redis_key, value)
+						if not ok then
+							self:log_throttled(
+								ERR,
+								"sync_counter",
+								"Can't sync metric counter " .. key .. " to Redis: " .. err
+							)
 						end
 					else
-						self:log_throttled(
-							ERR,
-							"sync_table_clear",
-							"Can't clear metric table " .. key .. " in Redis: " .. err
-						)
-					end
-				elseif type(value) == "number" then
-					-- Use Redis string for numeric counters
-					ok, err = self:redis_call("set", redis_key, value)
-					if not ok then
-						self:log_throttled(
-							ERR,
-							"sync_counter",
-							"Can't sync metric counter " .. key .. " to Redis: " .. err
-						)
-					end
-				else
-					-- Use Redis string for other types
-					ok, err = self:redis_call("set", redis_key, tostring(value))
-					if not ok then
-						self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
+						-- Use Redis string for other types
+						ok, err = self:redis_call("set", redis_key, tostring(value))
+						if not ok then
+							self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
+						end
 					end
 				end
 			end
-		end
-		if type(value) == "table" then
-			value = encode(value)
-		end
-		-- Push to dict (with LRU eviction if needed)
-		local ok
-		if key == "baseline" then
-			-- Baseline is best-effort model input. safe_set refuses to evict security reports
-			-- from the shared dict when the sampled buffer does not fit.
-			ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
-		else
-			ok, err = self.metrics_datastore:set_with_retries(
-				key .. "_" .. wid,
-				value,
-				nil,
-				tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
-			)
-		end
-		if not ok then
-			-- If there isn't enough memory : we fallback to delete everything
-			if err == "no memory" then
-				self.logger:log(INFO, "not enough memory in the metrics datastore, purging LRU key " .. key)
-				lru:delete(key)
+			if type(value) == "table" then
+				value = encode(value)
+			end
+			-- Push to dict (with LRU eviction if needed)
+			local ok
+			local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+			if key == "baseline" then
+				-- Baseline is best-effort model input. safe_set refuses to evict security reports
+				-- from the shared dict when the sampled buffer does not fit.
+				ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
 			else
-				ret = false
-				ret_err = err
-				self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value, nil, max_retries)
+			end
+			-- Shed the oldest half rather than the whole history: set_with_retries already
+			-- force-evicted, so "no memory" means the dict is undersized, and dropping every
+			-- stored entry to make one write fit loses far more than needed. The halving is
+			-- kept in the LRU, so later cycles start from the reduced size.
+			while not ok and err == "no memory" do
+				local live = lru:get(key)
+				if type(live) ~= "table" or #live < 2 then
+					break
+				end
+				for _ = 1, math.floor(#live / 2) do
+					table_remove(live, 1)
+				end
+				lru:set(key, live)
+				self:log_throttled(
+					WARN,
+					"datastore_shed_" .. key,
+					"not enough memory in the metrics datastore, halved LRU key "
+						.. key
+						.. " to "
+						.. #live
+						.. " entries : raise METRICS_MEMORY_SIZE"
+				)
+				-- max_retries, not the 5-arg default: METRICS_MEMORY_MAX_RETRIES is a documented
+				-- setting and the shed re-write is the same write, so it must honour it too.
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live), nil, max_retries)
+			end
+			if not ok then
+				-- Nothing left to shed : drop the key so the next cycle starts clean
+				if err == "no memory" then
+					self:log_throttled(
+						WARN,
+						"datastore_purge_" .. key,
+						"not enough memory in the metrics datastore, purging LRU key " .. key
+					)
+					lru:delete(key)
+				else
+					ret = false
+					ret_err = err
+					self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+				end
 			end
 		end
 	end
