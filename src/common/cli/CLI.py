@@ -141,11 +141,18 @@ class CLI(ApiCaller):
             self.__logger.debug("Unable to determine terminal size. Using default width.")
             self.__terminal_width = 80  # Default width for non-TTY environments
 
+        # API only falls back to the environment, which a shell running bwcli does not have.
+        # The token lives in the database (or in variables.env), so read it from there.
+        # This is a FALLBACK, not an override: API.from_instance prefers the per-instance
+        # credential (`instance.get("credential") or token`), so an instance that carries its
+        # own keeps using it.
+        api_token = self.__get_variable("API_TOKEN") or None
+
         if self.__db:
             for db_instance in self.__db.get_instances(with_credential=True):
                 try:
                     # Centralized builder handles scheme/port/host
-                    self.apis.append(API.from_instance(db_instance))
+                    self.apis.append(API.from_instance(db_instance, token=api_token))
                 except ValueError as e:
                     self.__logger.warning(f"Skipping invalid instance {db_instance.get('hostname', '<missing>')}: {e}")
         else:
@@ -157,7 +164,7 @@ class CLI(ApiCaller):
                 listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                 https_port=int(self.__get_variable("API_HTTPS_PORT", "5443") or "5443"),
             )
-            self.apis.append(API(endpoint, server_name))
+            self.apis.append(API(endpoint, server_name, token=api_token))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
@@ -216,13 +223,28 @@ class CLI(ApiCaller):
                     "No database reachable: this unban applies to the local instance only and will be reverted by the next ban sync. "
                     "Run bwcli from the scheduler, or use the web UI/API, to revoke it for good."
                 )
-            if self.send_to_apis("POST", "/unban", data=data):
+            # With no instance to talk to, send_to_apis never enters its loop and returns
+            # ret=True: a vacuous success. Ask the question before sending.
+            if not self.apis and not self.__db:
+                return False, self.__format_error(f"Failed to unban {ip}: no BunkerWeb instance to send the request to")
+
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok = False
+            if self.apis:
+                ok, _ = self.send_to_apis("POST", "/unban", data=data)
+
+            # The tombstone above is what makes a revoke durable on 1.7, so a failed push is not a
+            # failed unban: sync-bans (core/jobs/jobs/sync-bans.py:214) pushes the revoke to every
+            # instance on its next pass. Report what is true rather than what the push returned.
+            if ok or self.__db:
                 if service:
                     success_msg = (
                         f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from service {self.CYAN}{service}{self.RESET}"
                     )
                 else:
                     success_msg = f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned {self.GREEN}globally{self.RESET}"
+                if not ok:
+                    success_msg += f"\n{self.ICON_INFO} Revoked in the database; no instance applied it yet, the ban sync will push it."
                 return True, self.__format_success(success_msg)
         except BaseException as e:
             return False, self.__format_error(f"Failed to unban {ip}: {e}")
@@ -256,6 +278,7 @@ class CLI(ApiCaller):
                 ban_scope = "global"
                 service = "bwcli"
 
+        persisted = False
         try:
             data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
             if self.__db:
@@ -270,7 +293,23 @@ class CLI(ApiCaller):
                 )
                 if db_error:
                     self.__logger.error(f"Couldn't persist the ban for {ip}: {db_error}")
-            if self.send_to_apis("POST", "/ban", data=data):
+                else:
+                    persisted = True
+
+            # With no instance to talk to, send_to_apis never enters its loop and returns
+            # ret=True: a vacuous success. Ask the question before sending.
+            if not self.apis and not persisted:
+                return False, self.__format_error(f"Failed to ban {ip}: no BunkerWeb instance to send the request to")
+
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok = False
+            if self.apis:
+                ok, _ = self.send_to_apis("POST", "/ban", data=data)
+
+            # A persisted ban is already durable on 1.7, and sync-bans
+            # (core/jobs/jobs/sync-bans.py:139) pushes it to every instance on its next pass, so a
+            # failed push is not a failed ban. Say which of the two happened.
+            if ok or persisted:
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
                 if not exp:
                     duration = f"{self.RED}permanently{self.RESET}"
@@ -281,6 +320,8 @@ class CLI(ApiCaller):
                     f"{self.ICON_CLOCK} Duration: {duration}\n"
                     f"{self.ICON_INFO} Reason: {self.ITALIC}{reason}{self.RESET}"
                 )
+                if not ok:
+                    success_msg += f"\n{self.ICON_INFO} Recorded in the database; no instance applied it yet, the ban sync will push it."
                 return True, self.__format_success(success_msg)
         except BaseException as e:
             return False, self.__format_error(f"Failed to ban {ip}: {e}")
