@@ -194,6 +194,71 @@ def _canonicalize_stored_value(
     return value if canonical is None else canonical
 
 
+def _compute_anchored_slots(ctx: "_SaveConfigContext", cfg: Dict[str, str], cfg_template: str, suffix_rx) -> set:
+    """Multiple-group slots kept alive by a member the user actually set.
+
+    A slot ``(group, suffix>=1)`` is *anchored* when at least one of its members in the incoming
+    config differs from its template-or-plugin default. ``get_config`` re-materialises every member
+    of a detected slot at its default, so the scheduler round-trip re-ingests those default
+    siblings; an anchored slot survives on its non-default member's row, which makes the default
+    siblings spurious -- and persisting them renders the field disabled in the Web UI even though
+    the value was never touched. A slot with no anchor is a user-declared all-default slot and must
+    be kept, or it would vanish.
+    """
+    anchored = set()
+    for anchor_key, anchor_value in cfg.items():
+        anchor_suffix = 0
+        anchor_base = anchor_key
+        if suffix_rx.search(anchor_base):
+            anchor_suffix = int(anchor_base.split("_")[-1])
+            anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+        if anchor_suffix == 0:
+            continue
+        anchor_setting = ctx.settings_dict.get(anchor_base)
+        if not anchor_setting or not anchor_setting.get("multiple"):
+            continue
+        anchor_default = ctx.templates.get(cfg_template, {}).get((anchor_base, anchor_suffix)) if cfg_template else None
+        if anchor_default is None:
+            anchor_default = anchor_setting["default"]
+        if anchor_value != anchor_default:
+            anchored.add((anchor_setting["multiple"], anchor_suffix))
+    return anchored
+
+
+def _compute_template_slots(ctx: "_SaveConfigContext", cfg_template: str) -> set:
+    """Slots kept alive by a template that defines any member at that suffix.
+
+    ``get_config`` rebuilds such a slot from ``Template_settings`` with no row of its own, so its
+    default members must not be persisted either. Keyed per ``(group, suffix)`` so the partial case
+    works too: a template's ``HOST_1`` keeps its sibling ``TIMEOUT_1``'s slot alive.
+    """
+    slots = set()
+    for member_id, member_suffix in ctx.templates.get(cfg_template, {}):
+        if member_suffix and member_suffix > 0:
+            member_setting = ctx.settings_dict.get(member_id)
+            if member_setting and member_setting.get("multiple"):
+                slots.add((member_setting["multiple"], member_suffix))
+    return slots
+
+
+def _slot_flags(setting: dict, suffix: int, value: str, template_setting_default: Optional[str], alive_slots: set) -> Tuple[bool, bool]:
+    """``(is_spurious_default_sibling, is_anchorless_multiple_member)`` for a suffixed group member.
+
+    ``alive_slots`` are the slots kept alive by an anchor row or by a template.
+
+    * spurious   -- a default-valued member of a kept-alive slot: drop it, the slot survives via its
+      anchor member or its template and the field stays editable.
+    * anchorless -- a member of a slot kept alive by nothing: persist it even at its default, else
+      the whole user-declared all-default slot would vanish.
+    """
+    group = setting.get("multiple")
+    if suffix <= 0 or group is None:
+        return False, False
+    slot_default = template_setting_default if template_setting_default is not None else setting["default"]
+    alive = (group, suffix) in alive_slots
+    return (value == slot_default and alive), (not alive)
+
+
 class DatabaseConfigSaveMixin(DatabaseMixinBase):
     """Whole-configuration persistence (save_config)."""
 
@@ -1030,6 +1095,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 Settings.type,
                 Settings.separator,
                 Settings.case_insensitive,
+                Settings.multiple,
             )
         ).all()
         select_options = self._sc_load_select_options(session)
@@ -1041,6 +1107,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 "separator": s.separator,
                 "case_insensitive": s.case_insensitive,
                 "options": select_options.get(s.id),
+                # The multiple-group name, or None. The slot helpers use it to tell which suffixed
+                # keys belong to the same group.
+                "multiple": s.multiple,
             }
             for s in settings_data
         }
@@ -1065,15 +1134,18 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             for s in existing_service_settings
         }
 
-        # Collect template settings
+        # Collect template settings. The loop variable is deliberately NOT named ``template``: it
+        # used to be, and rebinding it left ``ctx.template`` holding the last Template_settings Row
+        # instead of the USE_TEMPLATE id. The core templates (low/medium/high/ui) always seed rows,
+        # so that happened on every multisite save. A Row is truthy and matches no lookup, so
+        # ``service_config.get("USE_TEMPLATE", ctx.template)`` stopped falling back to the global
+        # template -- services without their own USE_TEMPLATE lost its defaults -- and
+        # ``if ctx.template:`` in _sc_process_global_settings became always-true, setting
+        # local_service_template_change for every setting on every save.
+        # Fixed upstream in origin/dev 907b3aa93; the previous refactor preserved the defect on
+        # purpose and said so, which is why this is a rename rather than an investigation.
         templates = {}
-        # The loop variable deliberately reuses the name ``template``: in the original
-        # nested implementation this loop rebound the enclosing ``template`` variable,
-        # so when the query returns rows the downstream service/global processing sees
-        # the last Template_settings row instead of the USE_TEMPLATE string. Preserved
-        # as-is via ctx.template (pure structural refactor — zero behavior change).
-        template = ctx.template
-        for template in session.execute(
+        for template_row in session.execute(
             select(
                 Template_settings.template_id,
                 Template_settings.setting_id,
@@ -1081,10 +1153,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 Template_settings.default,
             ).order_by(Template_settings.order)
         ):
-            if template.template_id not in templates:
-                templates[template.template_id] = {}
-            templates[template.template_id][(template.setting_id, template.suffix or 0)] = template.default
-        ctx.template = template
+            if template_row.template_id not in templates:
+                templates[template_row.template_id] = {}
+            templates[template_row.template_id][(template_row.setting_id, template_row.suffix or 0)] = template_row.default
         ctx.templates = templates
 
     def _sc_process_service(
@@ -1107,6 +1178,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         local_service_template_change = False
 
         service_template = service_config.get("USE_TEMPLATE", ctx.template)
+        alive_slots = _compute_anchored_slots(ctx, service_config, service_template, self.SUFFIX_RX) | _compute_template_slots(ctx, service_template)
 
         for original_key, value in service_config.items():
             suffix = 0
@@ -1169,9 +1241,27 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 template_setting_default = ctx.templates.get(service_template, {}).get((key, suffix))
                 local_service_template_change = True
 
+            is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)
+            # A default-valued sibling of a slot that stays alive on its own (an anchor member, or a
+            # template defining the slot) is round-trip material, not user intent: drop it, and clear
+            # any stale row, so the field stays editable in the UI. The slot itself survives.
+            if is_spurious_default_sibling:
+                if service_setting and self._methods_are_compatible(
+                    ctx.method,
+                    service_setting["method"],
+                    allow_scheduler_override=_scheduler_can_override(ctx, f"{server_name}_{original_key}", value),
+                ):
+                    self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
+                    local_to_delete.append({"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}})
+                    if value_changed:
+                        local_changed_plugins.add(setting["plugin_id"])
+                continue
+
             # Determine if we need to add, update, or delete
             if not service_setting:
-                if _check_value(ctx, key, value, setting, template_setting_default, suffix):
+                # A member of an ANCHORLESS slot is persisted even at its default value: dropping it
+                # would make the whole user-declared all-default slot vanish.
+                if _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
                     continue
 
                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1200,7 +1290,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 if should_update_value:
                     local_changed_plugins.add(setting["plugin_id"])
 
-                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix):
+                # Editing a value back down to its default removes the row, defaults being implicit
+                # -- except for a member of an anchorless slot, where removing the last rows would
+                # vanish the whole user-declared slot; persist the default instead.
+                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                     local_to_delete.append(
                         {
@@ -1269,6 +1362,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         local_changed_plugins = set()
         local_service_template_change = False
 
+        alive_slots = _compute_anchored_slots(ctx, global_config, ctx.template, self.SUFFIX_RX) | _compute_template_slots(ctx, ctx.template)
+
         for original_key, value in global_config.items():
             suffix = 0
             key = deepcopy(original_key)
@@ -1313,8 +1408,24 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 template_setting_default = ctx.templates.get(ctx.template, {}).get((key, suffix))
                 local_service_template_change = True
 
+            is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)
+            # Same rule as the per-service pass, on the global settings page.
+            if is_spurious_default_sibling:
+                if global_value and self._methods_are_compatible(
+                    ctx.method,
+                    global_value.method,
+                    allow_scheduler_override=_scheduler_can_override(ctx, original_key, value),
+                ):
+                    self.logger.debug(f"Removing spurious default global multiple-group setting {key}_{suffix}")
+                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                    if value_changed:
+                        local_changed_plugins.add(setting["plugin_id"])
+                continue
+
             if not global_value:
-                if _check_value(ctx, key, value, setting, template_setting_default, suffix, True):
+                # A member of an ANCHORLESS slot is persisted even at its default value, else the
+                # whole user-declared all-default slot would never materialise.
+                if _check_value(ctx, key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
                     continue
 
                 self.logger.debug(f"Adding global setting {key}")
@@ -1332,7 +1443,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 if should_update_value:
                     local_changed_plugins.add(setting["plugin_id"])
 
-                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix, True):
+                # Editing back down to the default removes the row -- except for a member of an
+                # anchorless slot, where that would vanish the whole user-declared slot.
+                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
                     self.logger.debug(f"Removing global setting {key}")
                     local_to_delete.append(
                         {
@@ -1394,7 +1507,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         if not skip_service_management:
             server_name = ctx.config.get("SERVER_NAME", None)
             if ctx.template and server_name is None:
-                server_name = session.execute(select(Template_settings.value).filter_by(template_id=ctx.template, setting_id="SERVER_NAME").limit(1)).first()
+                # `Template_settings.value` does not exist -- the table stores the value in
+                # `default` -- so this raised AttributeError whenever a non-multisite config set
+                # USE_TEMPLATE without a SERVER_NAME. `.scalar()` and not `.first()`: the result is
+                # split on " " a few lines down, which a Row would not survive either.
+                server_name = session.execute(select(Template_settings.default).filter_by(template_id=ctx.template, setting_id="SERVER_NAME").limit(1)).scalar()
 
             if server_name is None or server_name:
                 server_name = server_name or "www.example.com"
@@ -1413,6 +1530,37 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         )
                     )
                     changed_services = True
+
+        # Anchor-awareness for multiple-group slots, mirroring _compute_anchored_slots in the
+        # multisite branch. This pass has no ctx.settings_dict, so the data is read here directly.
+        # A slot whose members are ALL at their default has no anchor row, so its default members
+        # must still be persisted or the whole user-declared slot vanishes.
+        # Assumes multiple-setting defaults are non-NULL strings (true for every core plugin); a
+        # NULL default would need _empty_if_none normalisation to match the per-key check below.
+        nm_multiple = {
+            s.id: (self._empty_if_none(s.default), s.multiple) for s in session.execute(select(Settings.id, Settings.default, Settings.multiple)).all()
+        }
+        nm_template_defaults = {}
+        nm_template_slots = set()  # (group, suffix) kept alive by the template -> must not be persisted
+        if ctx.template:
+            for ts in session.execute(
+                select(Template_settings.setting_id, Template_settings.suffix, Template_settings.default).filter_by(template_id=ctx.template)
+            ):
+                nm_template_defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
+                if ts.suffix and ts.suffix > 0 and ts.setting_id in nm_multiple and nm_multiple[ts.setting_id][1]:
+                    nm_template_slots.add((nm_multiple[ts.setting_id][1], ts.suffix))
+        nm_anchored_slots = set()
+        for anchor_key, anchor_value in ctx.config.items():
+            anchor_suffix = 0
+            anchor_base = anchor_key
+            if self.SUFFIX_RX.search(anchor_base):
+                anchor_suffix = int(anchor_base.split("_")[-1])
+                anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+            if anchor_suffix == 0 or anchor_base not in nm_multiple or not nm_multiple[anchor_base][1]:
+                continue
+            anchor_default = nm_template_defaults.get((anchor_base, anchor_suffix), nm_multiple[anchor_base][0])
+            if anchor_value != anchor_default:
+                nm_anchored_slots.add((nm_multiple[anchor_base][1], anchor_suffix))
 
         for original_key, value in ctx.config.items():
             key = deepcopy(original_key)
@@ -1471,8 +1619,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 ).first()
                 service_template_change = True
 
+            nm_mult = nm_multiple.get(key, (None, None))[1]
+            nm_is_anchorless = suffix > 0 and nm_mult is not None and (nm_mult, suffix) not in nm_anchored_slots and (nm_mult, suffix) not in nm_template_slots
+            nm_default = template_setting.default if template_setting is not None else setting.default
+
             if not global_value:
-                if value == (template_setting.default if template_setting is not None else setting.default):
+                # An anchorless slot's default member must be persisted, else the whole slot vanishes.
+                if value == nm_default and not nm_is_anchorless:
                     continue
 
                 self.logger.debug(f"Adding global setting {key}")
@@ -1490,7 +1643,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 if should_update_value:
                     changed_plugins.add(setting.plugin_id)
 
-                if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
+                if should_update_value and value == nm_default and not nm_is_anchorless:
                     self.logger.debug(f"Removing global setting {key}")
                     to_delete.append(
                         {

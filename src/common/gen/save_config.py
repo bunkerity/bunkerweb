@@ -19,8 +19,13 @@ from Database import Database  # type: ignore
 from Configurator import Configurator
 from API import API  # type: ignore
 
+# `\Z`, not `$`: `$` also matches immediately before a trailing newline, so an environment key
+# `CUSTOM_CONF_HTTP_x\n` matches here. `.` never matches a newline, so `name` is captured as `x`
+# either way -- what `$` buys is that the dirty key matches *at all* and then produces the same
+# custom config as the clean one, silently aliasing two environment variables onto one file.
+# The twin of this pattern lives in `src/ui/app/routes/utils.py`; the two have already drifted once.
 CUSTOM_CONF_RX = re_compile(
-    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
+    r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)\Z"
 )
 LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 

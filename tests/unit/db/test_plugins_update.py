@@ -52,6 +52,16 @@ class TestUpdateExternalPlugins:
         db.update_external_plugins([make_external_plugin("extplug", version="2.0")], _type="external")
         assert next(p for p in db.get_plugins(_type="external") if p["id"] == "extplug")["version"] == "2.0"
 
+    def test_job_schedule_update_uses_current_jobs_schema(self, db):
+        first = make_external_plugin("jobplug", version="1.0", checksum="sum-1")
+        first["jobs"] = [{"name": "jobplug-sync", "file": "sync.py", "every": "hour", "reload": False}]
+        assert db.update_external_plugins([first], _type="external") == ""
+
+        updated = make_external_plugin("jobplug", version="2.0", checksum="sum-2")
+        updated["jobs"] = [{"name": "jobplug-sync", "file": "sync.py", "every": "day", "reload": False}]
+        assert db.update_external_plugins([updated], _type="external") == ""
+        assert db.get_jobs()["jobplug-sync"]["every"] == "day"
+
     def test_delete_missing_prunes(self, db):
         db.update_external_plugins([make_external_plugin("e1"), make_external_plugin("e2")], _type="external")
         assert {"e1", "e2"} <= {p["id"] for p in db.get_plugins(_type="external")}

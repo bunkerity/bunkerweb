@@ -534,7 +534,11 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
 
                 if updates:
                     changed = True
-                    updates[Jobs.last_run] = None
+                    # No `updates[Jobs.last_run] = None` here: the column was dropped from bw_jobs in
+                    # the 1.6.0-beta migration and the attribute no longer exists, so evaluating it
+                    # raised AttributeError -- uncaught, aborting the whole plugin sync. The run
+                    # history is already cleared by the two deletes below, which is what resetting
+                    # last_run was for.
                     session.execute(delete(Jobs_runs).where(Jobs_runs.job_name == job["name"]))
                     session.execute(delete(Jobs_cache).where(Jobs_cache.job_name == job["name"]))
                     session.execute(update(Jobs).where(Jobs.name == job["name"]).values(updates))
