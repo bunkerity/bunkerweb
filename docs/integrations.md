@@ -1467,6 +1467,10 @@ docker run -d \
     2. **Install or upgrade** default collections & parsers.
     3. **Configure** the `crowdsec-bunkerweb-bouncer/v1.6` bouncer.
 
+!!! warning "Registration enrolls your instance with the CrowdSec Central API"
+
+    Step 1 registers the agent with CrowdSec's Central API (CAPI), which is a two-way exchange. Your instance **receives** the community blocklist, and it **sends** a signal for every alert raised by an unmodified hub scenario: the scenario name, hash and version, the decision timestamp, a machine identifier, and the offending IP address with geolocation data where available. Custom scenarios, modified scenarios, and manual decisions are not sent. See [Disable the Central API](#disable-the-central-api) if you want a local-only setup.
+
 ---
 
 #### Default Collections & Parsers
@@ -1524,14 +1528,14 @@ docker run -d \
 
 #### Disable Specific Parsers
 
-If you want to keep the default setup but explicitly disable one or more parsers, provide a space-separated list via `CROWDSEC_DISABLED_PARSERS`:
+If you want to keep the default setup but explicitly disable one or more parsers, provide a space-separated list via `CROWDSEC_DISABLE_PARSERS`:
 
 ```bash
 docker run -d \
   --name bunkerweb-aio \
   -v bw-storage:/data \
   -e USE_CROWDSEC=yes \
-  -e CROWDSEC_DISABLED_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
+  -e CROWDSEC_DISABLE_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
@@ -1541,6 +1545,31 @@ docker run -d \
 Notes:
 - The list is applied after required items are installed/updated; only the parsers you list are removed.
 - Use hub slugs as shown by `cscli parsers list` (e.g., `crowdsecurity/geoip-enrich`).
+
+---
+
+#### Disable the Central API
+
+To run CrowdSec entirely locally, with no registration and no traffic to CrowdSec's servers, set `DISABLE_ONLINE_API` to `true`:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e DISABLE_ONLINE_API=true \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+This is the same variable name used by the official CrowdSec images, so an existing configuration carries over.
+
+Notes:
+- Your instance stops **sending** attack signals and stops **receiving** the community blocklist. Local detection and remediation are unaffected: the scenarios you have installed keep running and keep banning.
+- The setting is read on every start, so you can turn it back on later. If the instance was already registered, the stored credentials are removed when you disable it, and a fresh registration is performed if you re-enable it.
+- Only applies when CrowdSec runs inside the container. If `CROWDSEC_API` points at a remote instance, the Central API setting of that instance is what counts.
 
 ---
 
@@ -2484,10 +2513,10 @@ Please ensure that you have **NGINX 1.30.4 installed before installing BunkerWeb
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora already provides NGINX 1.30.3 that we support
+    Fedora already provides NGINX 1.30.4 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.30.3
+    sudo dnf install -y --allowerasing nginx-1.30.4
     ```
 
     !!! example "Disable the setup wizard"

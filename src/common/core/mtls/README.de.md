@@ -36,7 +36,7 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 | `MTLS_VERIFY_CLIENT`          | `on`          | multisite | nein     | **Verifizierungsmodus:** Legen Sie fest, ob Zertifikate erforderlich sind (`on`), optional (`optional`) oder ohne CA-Prüfung akzeptiert werden (`optional_no_ca`).   |
 | `MTLS_URL`                    |               | multisite | ja       | **mTLS-URL:** Regex, der gegen die Anfrage-URI geprüft wird, um nur auf passenden Pfaden ein gültiges Client-Zertifikat zu verlangen (nur HTTP). Erfordert `MTLS_VERIFY_CLIENT` auf `optional` oder `optional_no_ca`. Leer lassen, um mTLS für die gesamte Site zu erzwingen. |
 | `MTLS_VERIFY_DEPTH`           | `2`           | multisite | nein     | **Verifizierungstiefe:** Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.                                                                        |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`         | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter. |
+| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`         | multisite | nein     | **Client-Header weiterleiten:** Gibt Verifizierungsergebnisse (`X-SSL-Client-*`-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter. Vom Client gesendete `X-SSL-*`-Header werden beim Eingang stets entfernt, sodass diese Werte nicht gefälscht werden können. |
 | `MTLS_CRL`                    |               | multisite | nein     | **Client-CRL-Pfad:** Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.                          |
 
 !!! tip "Zertifikate aktuell halten"
@@ -47,6 +47,17 @@ Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:
 
 !!! info "Vertrauensquelle und Verifizierung"
     BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.
+
+!!! info "Eingehende `X-SSL-*`-Header werden stets entfernt"
+    BunkerWeb entfernt jeden vom Client gesendeten `X-SSL-*`-Request-Header, bevor die Anfrage Ihre Anwendung erreicht – auf jeder Site, unabhängig davon, ob mTLS aktiviert ist, und gleichermaßen unter HTTP/1.1, HTTP/2 und HTTP/3. Weitergegeben werden nur die Werte, die BunkerWeb aus dem verifizierten TLS-Handshake ableitet, und auch nur dann, wenn `MTLS_FORWARD_CLIENT_HEADERS` auf `yes` steht. Ein Client kann `X-SSL-Client-Verify: SUCCESS` somit nicht fälschen.
+
+    Steht BunkerWeb hinter einem weiteren Proxy, der mTLS terminiert und diese Header selbst setzt, müssen Sie den Wert vor dem Entfernen sichern und erneut veröffentlichen. Legen Sie dazu eine eigene `server-http`-Konfiguration an:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    und geben Sie ihn anschließend mit `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"` weiter. `REVERSE_PROXY_HEADERS` allein genügt nicht: `$http_x_ssl_client_verify` ist bereits leer, wenn `proxy_set_header` ausgewertet wird, während `set` in der Server-Rewrite-Phase und damit vor dem Entfernen läuft.
 
 !!! warning "Pfadbezogenes mTLS erfordert den optionalen Modus"
     Die NGINX-Direktive `ssl_verify_client` ist nur im `server`-Kontext gültig – sie kann nicht in einem `location`-Block stehen. Um ein Zertifikat nur auf bestimmten Pfaden zu verlangen, setzen Sie `MTLS_VERIFY_CLIENT` auf `optional` (oder `optional_no_ca`), damit der Handshake für jeden Pfad abgeschlossen wird, und listen Sie die geschützten Pfade in `MTLS_URL_n` auf. BunkerWeb erzwingt das Zertifikat dann pro Anfrage in Lua auf den passenden URLs. Belassen Sie `MTLS_VERIFY_CLIENT` auf `on`, während Sie `MTLS_URL_n` setzen, weist NGINX Clients ohne Zertifikat bereits beim Handshake ab, bevor die pfadbezogene Logik greift – die Erzwingung bleibt dann site-weit.
