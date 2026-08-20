@@ -120,7 +120,10 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
 try:
     if not PATCH_SCRIPT.is_file():
         LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
-        sys_exit(1)
+        # 2, not 1: in the job contract 1 means "changed, ship the cache and reload the fleet"
+        # (src/worker/tasks.py:426), and `success = ret in (0, 1)` (:398) would also record this
+        # failure as a success. A failure must do neither.
+        sys_exit(2)
 
     # * Check if we're using a version of the Core Rule Set (CRS) compatible with plugins
     use_right_crs_version = False
@@ -229,7 +232,7 @@ try:
                             sleep(3)
                     if resp.status_code != 200:
                         LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
-                        sys_exit(1)
+                        sys_exit(2)
 
                     # Write content to BytesIO
                     for chunk in resp.iter_content(chunk_size=8192):
@@ -242,7 +245,7 @@ try:
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while downloading the registry:\n{e}")
-                    sys_exit(1)
+                    sys_exit(2)
 
                 # Extract table lines (lines starting with "|")
                 table_lines = [line for line in content.read().decode().splitlines() if line.startswith("|")]
@@ -505,7 +508,7 @@ try:
             except CalledProcessError as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")
-                sys_exit(1)
+                sys_exit(2)
 
             LOGGER.info(f"Successfully patched Core Rule Set (CRS) plugin {plugin_name}.")
 

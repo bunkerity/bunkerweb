@@ -84,7 +84,10 @@ try:
     latest_release = get_latest_stable_release()
 
     if not latest_release:
-        status = 1
+        # 2, not 1: in the job contract 1 means "changed, ship the cache and reload the fleet"
+        # (src/worker/tasks.py:426), and `success = ret in (0, 1)` (:398) would also record this
+        # failure as a success. A failure must do neither.
+        status = 2
         LOGGER.error("Failed to fetch latest release information")
         sys_exit(status)
 

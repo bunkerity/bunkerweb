@@ -25,13 +25,16 @@ try:
     by_age = DB.cleanup_metrics_by_age(int(getenv("METRICS_RETENTION_DAYS", "90")))
     if not by_age.startswith("Removed"):
         LOGGER.error(by_age)
-        sys_exit(1)
+        # 2, not 1: in the job contract 1 means "changed, ship the cache and reload the fleet"
+        # (src/worker/tasks.py:426), and `success = ret in (0, 1)` (:398) would also record this
+        # failure as a success. A failure must do neither.
+        sys_exit(2)
     LOGGER.info(by_age)
 
     by_count = DB.cleanup_metrics_by_count(int(getenv("METRICS_RETENTION_MAX_ROWS", "1000000")))
     if not by_count.startswith("Removed"):
         LOGGER.error(by_count)
-        sys_exit(1)
+        sys_exit(2)
     LOGGER.info(by_count)
 
     # The baseline has its own, tighter policy: it grows far faster than the blocked reports,
@@ -40,13 +43,13 @@ try:
     baseline_by_age = DB.cleanup_baseline_by_age(int(getenv("METRICS_BASELINE_RETENTION_DAYS", "14")))
     if not baseline_by_age.startswith("Removed"):
         LOGGER.error(baseline_by_age)
-        sys_exit(1)
+        sys_exit(2)
     LOGGER.info(baseline_by_age)
 
     baseline_by_count = DB.cleanup_baseline_by_count(int(getenv("METRICS_BASELINE_RETENTION_MAX_ROWS", "2000000")))
     if not baseline_by_count.startswith("Removed"):
         LOGGER.error(baseline_by_count)
-        sys_exit(1)
+        sys_exit(2)
     LOGGER.info(baseline_by_count)
 except SystemExit as e:
     status = e.code

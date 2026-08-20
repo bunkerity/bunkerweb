@@ -21,7 +21,10 @@ try:
     ret = DB.cleanup_expired_ui_sessions(max_age_days)
     if not ret.startswith("Removed"):
         LOGGER.error(ret)
-        sys_exit(1)
+        # 2, not 1: in the job contract 1 means "changed, ship the cache and reload the fleet"
+        # (src/worker/tasks.py:426), and `success = ret in (0, 1)` (:398) would also record this
+        # failure as a success. A failure must do neither.
+        sys_exit(2)
     LOGGER.info(ret)
 except SystemExit as e:
     status = e.code
