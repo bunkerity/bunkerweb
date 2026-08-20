@@ -417,7 +417,10 @@ def edit_profile():
             # session. Worth a log line, not worth stranding the user after a successful change.
             LOGGER.error(f"Couldn't delete the other session rows after the password change: {e.message}")
 
-        return redirect(url_for("logout.logout_page"))
+        # The success flash above cannot survive logout_page()'s session.clear(), so the only
+        # acknowledgement the user would otherwise get is silence on the login page. The reason
+        # rides out in the URL instead and login.py renders it -- see LOGIN_NOTICES.
+        return redirect(url_for("logout.logout_page", reason="password_changed"))
 
     return redirect(url_for("profile.profile_page"))
 

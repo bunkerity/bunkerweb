@@ -367,6 +367,30 @@ def get_github_stars():
     return response.json().get("stargazers_count")
 
 
+# Reasons a route may hand the login page, mapped to the message key it renders.
+#
+# This is `flash()`'s out-of-band twin, and it lives here for the same reason it exists at all:
+# anything that must outlive a logout cannot go through `flash()`. `logout_page()` calls
+# `session.clear()`, which empties BOTH stores below -- Flask's `_flashes` and our own
+# `session["flash_messages"]` -- and `_establish_session()` re-wipes the second on the way back in.
+# So the reason travels in the URL instead.
+#
+# It sits in `utils` rather than in `login.py` because `logout.py` needs it too, and
+# `login -> app.models.biscuit -> logout -> login` is a real import cycle (caught by
+# tests/unit/ui/test_login_notices.py). Both route modules already import from here.
+#
+# Looked up, never echoed: whatever is in the query string must not reach the page. The value is a
+# translation key rather than a sentence because this UI translates server-side (i18n Lot B).
+LOGIN_NOTICES = {
+    "password_changed": "login.notice_password_changed",
+    # Distinct from session_expired on purpose: that one says "your change was discarded", which is
+    # wrong here. The absolute-lifetime logout fires on a GET as often as a POST and usually
+    # discards nothing -- what the user needs to know is why they were signed out mid-session.
+    "session_timeout": "login.notice_session_timeout",
+    "session_expired": "login.notice_session_expired",
+}
+
+
 def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:
     if i18n_key:
         message = f'<span data-i18n="{i18n_key}">{message}</span>'

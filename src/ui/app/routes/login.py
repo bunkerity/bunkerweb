@@ -8,7 +8,7 @@ from flask_login import current_user, login_user
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.utils import cors_required
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash, _sanitize_internal_next
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, LOGIN_NOTICES, flash, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 from app.models.models import UiUsers
 from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
@@ -164,6 +164,10 @@ def login_page():
         "is_totp": bool(current_user.totp_secret),
         "webauthn_enabled": WEBAUTHN.enabled,
     } | ({"error": "Invalid username or password"} if fail else {})
+
+    notice = LOGIN_NOTICES.get(request.args.get("reason", ""))
+    if notice:
+        kwargs["notice"] = notice
 
     return render_template("login.html", **kwargs), 401 if fail else 200
 
