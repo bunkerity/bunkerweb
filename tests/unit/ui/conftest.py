@@ -120,3 +120,13 @@ def english(key, **variables):
 # after this module is imported — and conftest is imported before any test module — carries `_`,
 # exactly as the real app does.
 DEFAULT_NAMESPACE.update(babel_globals())
+
+# `endpoint_exists` is registered beside `url_for` in `main.py` and asked by the shared chrome
+# (`breadcrumb.html`), so a harness that renders any page template needs it the way it needs `_`.
+# Adding it once here rather than in each harness: when the breadcrumb started asking, eight tests
+# across three files broke on `UndefinedError`, and stubbing it eight times would have left the
+# ninth harness to break later.
+#
+# It answers False, so a template's own fallback is what gets exercised. A harness that cares which
+# routes exist passes its own — `test_breadcrumb.py` does.
+DEFAULT_NAMESPACE.setdefault("endpoint_exists", lambda endpoint: False)

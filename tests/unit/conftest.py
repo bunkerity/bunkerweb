@@ -120,10 +120,47 @@ def db(db_engine, tmp_path, quiet_logger, _clean_env):
         database.close()
 
 
-# --- the api_app lane is opt-in, and must stay that way ---------------------------
+# --- the api_app lane is opt-in and EXCLUSIVE, and must stay that way -------------
 # `api_app/` imports the API's `app` package. `ui/conftest.py` relies on `import app` resolving
-# uniquely to `src/ui/app`, so the two cannot share an interpreter: whichever is imported first
-# wins and the other silently gets the wrong module. Ignoring the directory unless the lane is
-# asked for by name makes that collision impossible rather than merely unlikely -- a convention
-# would be forgotten, an ignore is not.
-collect_ignore_glob = [] if os.getenv("BW_API_APP_LANE") == "1" else ["api_app/*"]
+# uniquely to `src/ui/app`, so the two cannot share an interpreter.
+#
+# What the collision actually looks like, measured rather than assumed: the loser raises
+# `ModuleNotFoundError` on its first import -- `app.auth` missing when the UI won,
+# `app.models.ui_database` missing when api_app won -- because the two packages have disjoint
+# submodules. It is loud in both directions, and it happens at *collection* time, so it does not
+# fail one test, it interrupts the whole run. (An earlier version of this comment said the wrong
+# module was picked up silently. It is not, and the difference matters: someone who measures it,
+# finds an error rather than the described silence, and concludes the warning was alarmist is
+# exactly who relaxes this guard.)
+#
+# Two things about the ignore itself, both measured, because the obvious spelling does neither:
+#
+#   * `"api_app"` ignores the DIRECTORY node, which is what stops a tree walk descending into it
+#     and loading `api_app/conftest.py`. Without it that conftest runs on every ordinary
+#     `pytest tests/unit`, inserting `src/api` at `sys.path[0]`; the suite then survives only
+#     because `ui/conftest.py` sorts later and re-inserts `src/ui` before anything imports `app`.
+#     Alphabetical luck is not a guard.
+#   * `"api_app/*"` ignores the test FILES, which is what still applies when the directory is
+#     named directly on the command line -- the directory pattern is not consulted for a path the
+#     user asked for by name. Without it, `pytest tests/unit/api_app` runs the lane with no flag.
+#
+# Both spellings are needed; each one alone leaves one of those two doors open.
+#
+# Exclusive, not merely opt-in: with the flag unset the lane is ignored, with it set everything
+# *else* is. An additive flag -- ignoring nothing when set -- meant `BW_API_APP_LANE=1 pytest
+# tests/unit` collected 0 of ~4100 tests and reported one error naming `app.models.ui_database`,
+# i.e. pointing at the UI rather than at the lane that caused it. A CI job that exports the flag
+# once in its environment gets a silent coverage hole that way.
+#
+# The dotfile/underscore filter is load-bearing, not tidiness: `.venv-unit/` lives inside
+# `tests/unit/`, so a bare `iterdir()` would emit an ignore for the virtualenv.
+collect_ignore_glob = (
+    [
+        _pattern
+        for _child in _HERE.iterdir()
+        if _child.is_dir() and not _child.name.startswith((".", "_")) and _child.name != "api_app"
+        for _pattern in (_child.name, f"{_child.name}/*")
+    ]
+    if os.getenv("BW_API_APP_LANE") == "1"
+    else ["api_app", "api_app/*"]
+)
