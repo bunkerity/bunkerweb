@@ -221,7 +221,9 @@ utils.get_variable = function(variable, site_search, ctx)
 		else
 			server_name = var.server_name
 		end
-		if variables[server_name] then
+		-- Keep the global value when the service has no entry of its own, otherwise a
+		-- partially populated per-service table hides settings that do exist globally.
+		if variables[server_name] and variables[server_name][variable] ~= nil then
 			value = variables[server_name][variable]
 		end
 	end
@@ -551,8 +553,13 @@ utils.get_reason = function(ctx)
 		end
 		return banned, {}, security_mode
 	end
-	-- unknown
-	if ngx.status == utils.get_deny_status() then
+	-- unknown BunkerWeb denial. $upstream_status is the tell: when the upstream itself answered
+	-- with the deny status, this was not our decision and labelling it "unknown" credits the WAF
+	-- with a block it never made -- in the access log, in Reports and in the metrics counters.
+	-- The last 3-digit group is the final attempt: nginx joins retries as "502, 200" / "502 : 200".
+	local upstream_status = var.upstream_status
+	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
+	if ngx.status == utils.get_deny_status() and not upstream_denied then
 		return "unknown", {}
 	end
 	return nil
