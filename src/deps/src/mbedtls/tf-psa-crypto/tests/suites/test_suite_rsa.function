@@ -4,7 +4,49 @@
 #include "bignum_core.h"
 #include "rsa_alt_helpers.h"
 #include "rsa_internal.h"
+#include "rsa_invasive.h"
 #include "test/bignum_codepath_check.h"
+#include <test/constant_flow.h>
+
+#if defined(MBEDTLS_TEST_HOOKS)
+static void pkcs1_v15_decode_raw(const unsigned char *input,
+                                 size_t input_size,
+                                 size_t output_size,
+                                 int expected_result,
+                                 size_t expected_plaintext_length)
+{
+    unsigned char *input_buf = NULL;
+    unsigned char *output_buf = NULL;
+    size_t olen = 0;
+
+    TEST_CALLOC(output_buf, output_size);
+
+    TEST_CALLOC(input_buf, input_size);
+    memcpy(input_buf, input, input_size);
+
+    TEST_CF_SECRET(input_buf, input_size);
+    TEST_EQUAL(expected_result,
+               mbedtls_ct_rsaes_pkcs1_v15_unpadding(
+                   input_buf, input_size,
+                   output_buf, output_size, &olen));
+    if (expected_result == 0) {
+        TEST_EQUAL(expected_plaintext_length, olen);
+    }
+
+exit:
+    mbedtls_free(input_buf);
+    mbedtls_free(output_buf);
+}
+
+static void test_cf_secret(const void *ptr, size_t size)
+{
+    /* In case TEST_CF_SECRET() expands to nothing */
+    (void) ptr;
+    (void) size;
+
+    TEST_CF_SECRET(ptr, size);
+}
+#endif /* MBEDTLS_TEST_HOOKS */
 
 #if defined(MBEDTLS_RSA_C) && defined(MBEDTLS_BIGNUM_C)
 
@@ -83,12 +125,12 @@ void rsa_invalid_param()
     TEST_EQUAL(mbedtls_rsa_set_padding(&ctx,
                                        invalid_padding,
                                        MBEDTLS_MD_NONE),
-               MBEDTLS_ERR_RSA_INVALID_PADDING);
+               PSA_ERROR_INVALID_PADDING);
 
     TEST_EQUAL(mbedtls_rsa_set_padding(&ctx,
                                        MBEDTLS_RSA_PKCS_V21,
                                        invalid_hash_id),
-               MBEDTLS_ERR_RSA_INVALID_PADDING);
+               PSA_ERROR_INVALID_PADDING);
 
     TEST_EQUAL(mbedtls_rsa_pkcs1_sign(&ctx, NULL,
                                       NULL, MBEDTLS_MD_NONE,
@@ -116,7 +158,7 @@ void rsa_invalid_param()
     TEST_EQUAL(mbedtls_rsa_set_padding(&ctx,
                                        MBEDTLS_RSA_PKCS_V15,
                                        MBEDTLS_MD_NONE),
-               MBEDTLS_ERR_RSA_INVALID_PADDING);
+               PSA_ERROR_INVALID_PADDING);
 #endif
 
 #if defined(MBEDTLS_PKCS1_V15)
@@ -149,7 +191,7 @@ void rsa_invalid_param()
     TEST_EQUAL(mbedtls_rsa_set_padding(&ctx,
                                        MBEDTLS_RSA_PKCS_V21,
                                        MBEDTLS_MD_NONE),
-               MBEDTLS_ERR_RSA_INVALID_PADDING);
+               PSA_ERROR_INVALID_PADDING);
 #endif
 
 #if defined(MBEDTLS_PKCS1_V21)
@@ -1035,19 +1077,25 @@ void pkcs1_rsaes_v15_decrypt(int mod, data_t *input_P, data_t *input_Q,
     TEST_ASSERT(mbedtls_rsa_get_len(&ctx) == (size_t) ((mod + 7) / 8));
     TEST_ASSERT(mbedtls_rsa_check_privkey(&ctx) == 0);
 
+#if defined(MBEDTLS_TEST_HOOKS)
+    mbedtls_rsa_cf_secret = test_cf_secret;
+#endif
+
     if (result_str->len == 0) {
-        TEST_ASSERT(mbedtls_rsa_pkcs1_decrypt(&ctx,
-                                              &mbedtls_test_rnd_pseudo_rand,
-                                              &rnd_info,
-                                              &output_len, message_str->x,
-                                              NULL, 0) == result);
+        TEST_EQUAL(mbedtls_rsa_pkcs1_decrypt(&ctx,
+                                             &mbedtls_test_rnd_pseudo_rand,
+                                             &rnd_info,
+                                             &output_len, message_str->x,
+                                             NULL, 0), result);
     } else {
-        TEST_ASSERT(mbedtls_rsa_pkcs1_decrypt(&ctx,
-                                              &mbedtls_test_rnd_pseudo_rand,
-                                              &rnd_info,
-                                              &output_len, message_str->x,
-                                              output, 1000) == result);
+        TEST_EQUAL(mbedtls_rsa_pkcs1_decrypt(&ctx,
+                                             &mbedtls_test_rnd_pseudo_rand,
+                                             &rnd_info,
+                                             &output_len, message_str->x,
+                                             output, 1000), result);
         if (result == 0) {
+            TEST_CF_PUBLIC(&output_len, sizeof(output_len));
+            TEST_CF_PUBLIC(output, output_len);
             TEST_ASSERT(mbedtls_test_hexcmp(output, result_str->x,
                                             output_len,
                                             result_str->len) == 0);
@@ -1055,6 +1103,9 @@ void pkcs1_rsaes_v15_decrypt(int mod, data_t *input_P, data_t *input_Q,
     }
 
 exit:
+#if defined(MBEDTLS_TEST_HOOKS)
+    mbedtls_rsa_cf_secret = NULL;
+#endif
     mbedtls_rsa_free(&ctx);
 }
 /* END_CASE */
@@ -1157,8 +1208,8 @@ void pkcs1_v15_decode(data_t *input,
         TEST_ASSERT(memcmp(original + sizeof(N) - output_length,
                            final,
                            output_length) == 0);
-    } else if (expected_result == MBEDTLS_ERR_RSA_INVALID_PADDING ||
-               expected_result == MBEDTLS_ERR_RSA_OUTPUT_TOO_LARGE) {
+    } else if (expected_result == PSA_ERROR_INVALID_PADDING ||
+               expected_result == PSA_ERROR_BUFFER_TOO_SMALL) {
         size_t max_payload_length =
             output_size > sizeof(N) - 11 ? sizeof(N) - 11 : output_size;
         size_t i;
@@ -1184,6 +1235,11 @@ void pkcs1_v15_decode(data_t *input,
          * that final wasn't overwritten. */
         TEST_ASSERT(count < 16);
     }
+
+#if defined(MBEDTLS_TEST_HOOKS) && !defined(MBEDTLS_RSA_ALT)
+    pkcs1_v15_decode_raw(original, sizeof(original), output_size,
+                         expected_result, expected_plaintext_length);
+#endif
 
 exit:
     mbedtls_rsa_free(&ctx);

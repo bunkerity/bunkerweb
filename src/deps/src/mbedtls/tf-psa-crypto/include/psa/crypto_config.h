@@ -2044,6 +2044,27 @@
  */
 //#define TF_PSA_CRYPTO_PQCP_MLDSA_87_ENABLED
 
+/**
+ * \def TF_PSA_CRYPTO_PQCP_OWN_SHAKE
+ *
+ * If this option is enabled, the MLDSA implementation from mldsa-native
+ * (#TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED) will use the SHAKE implementation
+ * that's bundled with mldsa-native. Otherwise mldsa-native will use the
+ * TF-PSA-Crypto SHAKE builtin that powers the PSA SHA3 and SHAKE APIs.
+ *
+ * The mldsa-native SHAKE implementation is significantly faster on
+ * processors that have vector instructions. On other architectures,
+ * your mileage may vary.
+ *
+ * \warning This option is experimental. It may change or be removed without
+ *          notice.
+ *
+ * Module:  drivers/pqcp/src/wrap_mldsa_native.c
+ *
+ * Uncomment to have mldsa-native use its own SHAKE.
+ */
+//#define TF_PSA_CRYPTO_PQCP_OWN_SHAKE
+
 /** \} name SECTION: Builtin drivers */
 
 /* Do not enable except for testing. Will be removed in a future minor version.

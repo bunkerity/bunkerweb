@@ -47,4 +47,12 @@
 #define PSA_WANT_ALG_ECB_NO_PADDING 1
 #endif
 
+/* If MLDSA needs our SHAKE, make sure it's enabled. */
+#if defined(MBEDTLS_PSA_CRYPTO_C) &&            \
+    !defined(TF_PSA_CRYPTO_PQCP_OWN_SHAKE) &&   \
+    defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)
+#define PSA_WANT_ALG_SHAKE128 1
+#define PSA_WANT_ALG_SHAKE256 1
+#endif
+
 #endif /* TF_PSA_CRYPTO_PRIVATE_CRYPTO_ADJUST_CONFIG_DEPENDENCIES_H */

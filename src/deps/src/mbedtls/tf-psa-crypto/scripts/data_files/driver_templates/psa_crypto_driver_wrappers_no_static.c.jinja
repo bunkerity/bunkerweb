@@ -144,6 +144,16 @@ data_length
 {% endwith -%}
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
             /* Fell through, meaning no accelerator supports this operation */
+
+#if defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)
+            if (psa_get_key_type(attributes) == PSA_KEY_TYPE_ML_DSA_KEY_PAIR) {
+                status = tf_psa_crypto_mldsa_export_public_key(
+                            attributes,
+                            key_buffer, key_buffer_size,
+                            data, data_size, data_length);
+                return status;
+            }
+#endif
             return( psa_export_public_key_internal( attributes,
                                                     key_buffer,
                                                     key_buffer_size,

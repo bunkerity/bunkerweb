@@ -43,6 +43,11 @@ component_tf_psa_crypto_test_default_out_of_box () {
     # Disable fancy stuff
     unset MBEDTLS_TEST_OUTCOME_FILE
 
+    # Unless explicitly requested, we expect the SHAKE implementation bundled
+    # with mldsa-native to be disabled.
+    not grep tf_psa_crypto_pqcp_mldsa_shake128 core/libtfpsacrypto.a
+    not grep tf_psa_crypto_pqcp_mldsa_shake256 core/libtfpsacrypto.a
+
     msg "test: main suites, default config (out-of-box)" # ~10s
     make test
 }
@@ -97,6 +102,11 @@ component_tf_psa_crypto_test_full_clang () {
     cd $OUT_OF_SOURCE_DIR
     cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang -DCMAKE_BUILD_TYPE:String=Release -DTEST_CPP=1 "$TF_PSA_CRYPTO_ROOT_DIR"
     make
+
+    # Unless explicitly requested, we expect the SHAKE implementation bundled
+    # with mldsa-native to be disabled.
+    not grep tf_psa_crypto_pqcp_mldsa_shake128 core/libtfpsacrypto.a
+    not grep tf_psa_crypto_pqcp_mldsa_shake256 core/libtfpsacrypto.a
 
     msg "test: main suites (full config, clang)" # ~ 5s
     make test

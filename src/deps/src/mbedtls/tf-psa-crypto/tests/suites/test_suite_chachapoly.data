@@ -19,6 +19,9 @@ mbedtls_chachapoly_dec:"1c9240a5eb55d38af333888604f6b5f0473917c1402b80099dca5cbc
 ChaCha20-Poly1305 State Flow
 chachapoly_state:
 
+ChaCha20-Poly1305 overlong generates the appropriate error
+chachapoly_update_too_long:
+
 ChaCha20-Poly1305 Selftest
 depends_on:MBEDTLS_SELF_TEST
 chachapoly_selftest:

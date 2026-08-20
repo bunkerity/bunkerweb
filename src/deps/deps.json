@@ -44,9 +44,9 @@
     },
     {
       "id": "lua-cjson",
-      "name": "lua-cjson v2.1.0.18",
+      "name": "lua-cjson v2.1.0.19",
       "url": "https://github.com/openresty/lua-cjson.git",
-      "commit": "fa418dcac3de13c9fe2ddc997bd53e92d793f0bc"
+      "commit": "5ce46a80b10ef9d380a45c9e6cff9ecffbe71ebb"
     },
     {
       "id": "lua-ffi-zlib",
@@ -90,9 +90,9 @@
     },
     {
       "id": "lua-resty-http",
-      "name": "lua-resty-http v0.17.2",
+      "name": "lua-resty-http v0.18.0",
       "url": "https://github.com/ledgetech/lua-resty-http.git",
-      "commit": "183310324026120ab7eaf5dd82b9be90ae63aadf",
+      "commit": "03995ff9a08194d48d446ed2fa099cd6de38fbef",
       "post_install": "rm -r src/deps/src/lua-resty-http/t"
     },
     {
@@ -125,9 +125,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.8.0",
+      "name": "lua-resty-openssl v1.9.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "16faff4c825eab8d5a78cfabe07adec69d9e2fa5",
+      "commit": "4ebee84ec3d829ef610005db1978ae591ed77a31",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260701",
+      "name": "LuaJIT v2.1-20260724",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "2802aafe24b7c3b2892e616c2bee97a61e9c026e",
+      "commit": "982cd8323eafd8604a9e5f2a916aa50b9f67d9ed",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -227,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v4.1.0",
+      "name": "Mbed TLS v4.2.0",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "0fe989b6b514192783c469039edd325fd0989806",
+      "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
       "submodules": true,
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },

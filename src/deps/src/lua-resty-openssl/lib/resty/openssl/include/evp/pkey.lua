@@ -98,8 +98,12 @@ if OPENSSL_3_UP then
   ffi.cdef [[
     int EVP_PKEY_CTX_set_rsa_padding(EVP_PKEY_CTX *ctx, int pad_mode);
 
-    int EVP_PKEY_get_base_id(const EVP_PKEY *pkey);
+    const char *EVP_PKEY_get0_type_name(const EVP_PKEY *key);
     int EVP_PKEY_get_size(const EVP_PKEY *pkey);
+    int EVP_PKEY_get_octet_string_param(const EVP_PKEY *pkey,
+                                        const char *key_name,
+                                        unsigned char *buf, size_t bsize,
+                                        size_t *out_len);
 
     int EVP_PKEY_CTX_set_ec_paramgen_curve_nid(EVP_PKEY_CTX *ctx, int nid);
     int EVP_PKEY_CTX_set_ec_param_enc(EVP_PKEY_CTX *ctx, int param_enc);
@@ -127,10 +131,37 @@ if OPENSSL_3_UP then
     EVP_PKEY_CTX *EVP_PKEY_CTX_new_from_name(OSSL_LIB_CTX *libctx,
                                          const char *name,
                                          const char *propquery);
+    EVP_PKEY_CTX *EVP_PKEY_CTX_new_from_pkey(OSSL_LIB_CTX *libctx,
+                                         EVP_PKEY *pkey,
+                                         const char *propquery);
+    EVP_PKEY *EVP_PKEY_new_raw_private_key_ex(OSSL_LIB_CTX *libctx,
+                                         const char *keytype,
+                                         const char *propq,
+                                         const unsigned char *priv,
+                                         size_t len);
+    EVP_PKEY *EVP_PKEY_new_raw_public_key_ex(OSSL_LIB_CTX *libctx,
+                                         const char *keytype,
+                                         const char *propq,
+                                         const unsigned char *pub,
+                                         size_t len);
     int EVP_PKEY_fromdata_init(EVP_PKEY_CTX *ctx);
     int EVP_PKEY_fromdata(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey, int selection,
                           OSSL_PARAM params[]);
     const OSSL_PARAM *EVP_PKEY_fromdata_settable(EVP_PKEY_CTX *ctx, int selection);
+
+    int EVP_PKEY_encapsulate_init(EVP_PKEY_CTX *ctx,
+                                  const OSSL_PARAM params[]);
+    int EVP_PKEY_encapsulate(EVP_PKEY_CTX *ctx,
+                             unsigned char *wrappedkey,
+                             size_t *wrappedkeylen,
+                             unsigned char *genkey, size_t *genkeylen);
+    int EVP_PKEY_decapsulate_init(EVP_PKEY_CTX *ctx,
+                                  const OSSL_PARAM params[]);
+    int EVP_PKEY_decapsulate(EVP_PKEY_CTX *ctx,
+                             unsigned char *unwrapped,
+                             size_t *unwrappedlen,
+                             const unsigned char *wrapped,
+                             size_t wrappedlen);
   ]]
 
   _M.EVP_PKEY_CTX_set_ec_paramgen_curve_nid = function(pctx, nid)

@@ -3,6 +3,9 @@
 """Generate C preprocessor code to check for bad configurations.
 """
 
+## Copyright The Mbed TLS Contributors
+## SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
+
 from typing import Iterator
 
 import framework_scripts_path # pylint: disable=unused-import
