@@ -8,6 +8,7 @@ local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
+local pushswap = require "bunkerweb.pushswap"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
 local utils = require "bunkerweb.utils"
@@ -342,46 +343,82 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	file:flush()
 	file:close()
-	local staging = "/var/tmp/bunkerweb/staging_" .. self.ctx.bw.uri:sub(2)
+	-- Staging lives INSIDE the destination, and that is load-bearing rather than tidy : every entry
+	-- leaves it via rename(2), and rename(2) across filesystems fails with EXDEV. /var/tmp and the
+	-- destination are routinely different mounts, so staging outside would send every single rename
+	-- down the copy fallback -- the swap would stop being atomic while looking exactly the same.
+	-- Do NOT "align" this with the /var/tmp convention used elsewhere in this file.
+	local staging = destination .. "/" .. pushswap.RESERVED_PREFIX .. "staging"
+	-- The backup is a copy, never a rename, so it has no such constraint and stays out of the tree.
 	local backup = "/var/tmp/bunkerweb/backup_" .. self.ctx.bw.uri:sub(2)
-	local cmds = {
-		-- Extract into a staging area first (validates the archive before touching destination)
-		"rm -rf " .. staging,
-		"mkdir -p " .. staging,
-		"tar xzf " .. tmp .. " -C " .. staging,
-		-- Create backup of current destination contents
-		"rm -rf " .. backup,
-		"mkdir -p " .. backup,
-		"cp -R " .. destination .. "/. " .. backup .. "/ 2>/dev/null; true",
-		-- Replace destination contents; if cp fails, restore from backup; only cleanup backup on success
-		"rm -rf "
-			.. destination
-			.. "/* && cp -R "
-			.. staging
-			.. "/. "
-			.. destination
-			.. "/ && rm -rf "
-			.. backup
-			.. " || { cp -R "
-			.. backup
-			.. "/. "
-			.. destination
-			.. "/ 2>/dev/null; false; }",
-		-- Cleanup temporaries (backup already removed on success above)
-		"rm -rf " .. staging,
-		"rm -f " .. tmp,
-	}
-	-- Hold the swap lock for the destructive part only : the upload above never touches the
-	-- destination. The TTL is the backstop for a worker that dies mid-swap -- without it a lost
-	-- unlock would block every reload for good.
+
+	-- Hold the swap lock across everything destructive -- backup, extract, swap AND any restore.
+	-- The upload above never touches the destination. Releasing between a failed swap and the
+	-- restore would open a reload window onto a half-undone tree. The TTL is the backstop for a
+	-- worker that dies mid-swap : without it a lost unlock would block every reload for good.
 	internalstore:set(SWAP_LOCK_KEY, tostring(ngx.now()), SWAP_LOCK_TTL)
-	for _, cmd in ipairs(cmds) do
-		local status = execute(cmd)
-		if status ~= 0 then
-			internalstore:delete(SWAP_LOCK_KEY)
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
-		end
+
+	local function fail(message)
+		execute("rm -rf " .. staging .. " " .. backup)
+		remove(tmp)
+		internalstore:delete(SWAP_LOCK_KEY)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", message)
 	end
+
+	-- Backup BEFORE extracting : staging now lives inside the destination, so backing up after it
+	-- exists would copy the incoming tree into the backup as well -- doubling the copy and making
+	-- the "pre-swap state" contain the post-swap payload.
+	--
+	-- The backup is the only complete pre-swap tree, and after an incomplete rollback it is the
+	-- only recovery there is, so a push that cannot establish its recovery point must not proceed
+	-- to the destructive part. Refusing to start beats failing halfway through a config swap.
+	-- (dev suppresses both the reason and the failure here with `2>/dev/null; true`.)
+	if execute("rm -rf " .. backup .. " && mkdir -p " .. backup .. " && cp -R " .. destination .. "/. " .. backup .. "/") ~= 0 then
+		return fail("cannot create the pre-swap backup, refusing to push")
+	end
+
+	-- Extract next : it validates the archive before any consumer-visible entry is touched.
+	if execute("rm -rf " .. staging .. " && mkdir -p " .. staging .. " && tar xzf " .. tmp .. " -C " .. staging) ~= 0 then
+		return fail("cannot extract archive")
+	end
+
+	local swapped, swap_err, rollback_incomplete = pushswap.swap(destination, staging)
+	if not swapped then
+		if not rollback_incomplete then
+			-- The ordered undo put the tree back to its pre-swap state. Restoring on top of that
+			-- could only make it worse, so the backup goes unused.
+			return fail("cannot swap configuration : " .. tostring(swap_err))
+		end
+		-- Last resort. Clear before replacing : the restore is a `cp -R`, which merges into an
+		-- existing directory rather than replacing it, and the destination is now a mix of old and
+		-- new entries. Merging over that would leave a directory holding the new files PLUS every
+		-- old file the new version deleted -- worse than either state alone.
+		-- pushswap.clear() deletes the non-reserved entries by name; it is used instead of
+		-- `rm -rf <destination>/*` so that keeping the parked originals in .bw-trash does not
+		-- depend on the unstated fact that a shell glob skips dotfiles.
+		local cleared, clear_err = pushswap.clear(destination)
+		local restored = cleared and execute("cp -R " .. backup .. "/. " .. destination .. "/") == 0
+		if not restored then
+			logger:log(
+				ERR,
+				"restore from backup FAILED after an incomplete rollback at "
+					.. destination
+					.. " : "
+					.. tostring(clear_err or "copy failed")
+					.. " -- originals are parked in "
+					.. destination
+					.. "/"
+					.. pushswap.RESERVED_PREFIX
+					.. "trash"
+			)
+			return fail("swap failed and the restore failed too : " .. tostring(swap_err))
+		end
+		logger:log(ERR, "swap rolled back incompletely at " .. destination .. ", restored from backup : " .. tostring(swap_err))
+		return fail("cannot swap configuration, restored from backup : " .. tostring(swap_err))
+	end
+
+	execute("rm -rf " .. backup)
+	remove(tmp)
 	internalstore:delete(SWAP_LOCK_KEY)
 
 	-- The configuration tree itself has landed, so a restart that was waiting for one is served.
