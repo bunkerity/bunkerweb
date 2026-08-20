@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from ipaddress import ip_address
 from logging import DEBUG
-from os import getenv
-from re import compile as re_compile, split as re_split
+from os import getenv, sep
+from pathlib import Path
+from re import split as re_split
 from threading import Lock, Thread
 from time import sleep, time
 from traceback import format_exc
@@ -14,6 +16,11 @@ from kubernetes.client import Configuration
 from kubernetes.client.exceptions import ApiException
 
 from controllers.Controller import Controller
+
+# Written by main.py once the event loop starts (:104), removed on exit (:111), cleared at boot by
+# entrypoint.sh, and checked by src/common/helpers/healthcheck-autoconf.sh. Dropping it is how a
+# controller whose watches have stopped streaming asks the orchestrator to restart it.
+HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 
 
 class KubernetesController(Controller):
@@ -48,7 +55,6 @@ class KubernetesController(Controller):
             self._logger.info("Using custom SSL CA certificate")
 
         self._corev1 = client.CoreV1Api()
-        self._ip_pattern = re_compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
 
         self._use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self._use_fqdn else 'IP'} as hostname")
@@ -554,6 +560,22 @@ class KubernetesController(Controller):
             self._logger.info(f"Detected Kubernetes changes: {summary}")
         self._event_summary.clear()
 
+    def _mark_unhealthy(self, why: str) -> None:
+        """Drop the health marker so the orchestrator can restart a controller whose
+        watches are no longer streaming. Rebuilding the process is what recovers a
+        credential the API server has started rejecting."""
+        self._logger.error(f"Marking autoconf unhealthy: {why}")
+        with suppress(OSError):
+            HEALTHY_PATH.unlink(missing_ok=True)
+
+    def _mark_healthy(self) -> None:
+        if HEALTHY_PATH.is_file():
+            return
+        with suppress(OSError):
+            HEALTHY_PATH.parent.mkdir(parents=True, exist_ok=True)
+            HEALTHY_PATH.write_text("ok")
+            self._logger.info("Kubernetes watch is streaming again, autoconf marked healthy")
+
     def _get_stream_with_retries(self, watch_type, what, retries=5):
         attempt = 0
         ignored = False
@@ -570,14 +592,25 @@ class KubernetesController(Controller):
                     attempt += 1
                     continue
                 self._logger.debug(format_exc())
-                self._logger.error(f"Unexpected ApiException while watching {watch_type}:\n{e}")
+                if e.status in (401, 403):
+                    self._logger.error(
+                        f"Kubernetes rejected our credentials while watching {watch_type} ({e.status} {e.reason}), "
+                        f"check the ServiceAccount token and its permissions:\n{e}"
+                    )
+                else:
+                    self._logger.error(f"Unexpected ApiException while watching {watch_type}:\n{e}")
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
             attempt += 1
             self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
             sleep(5)
-        self._logger.error(f"Failed to watch {watch_type} after {retries} retries.")
+        # Returning here would end the caller's for loop without an exception, which reads
+        # as a clean stream close: _watch's `error` stays False, so it re-enters the watch
+        # instantly with no 10s backoff, forever, while the controller reconciles nothing
+        # and the health marker still says everything is fine.
+        self._mark_unhealthy(f"watch for {watch_type} failed {retries} times in a row")
+        raise RuntimeError(f"Failed to watch {watch_type} after {retries} retries")
 
     def _get_watchers(self) -> Dict[str, Any]:
         raise NotImplementedError
@@ -590,6 +623,7 @@ class KubernetesController(Controller):
             applied = False
             try:
                 for event in self._get_stream_with_retries(watch_type, what):
+                    self._mark_healthy()
                     applied = False
                     self._internal_lock.acquire()
                     locked = True
@@ -910,6 +944,19 @@ class KubernetesController(Controller):
             self._logger.debug(format_exc())
 
         return None
+
+    @staticmethod
+    def _is_ip_address(address: str) -> bool:
+        """True for an IPv4 or IPv6 literal, False for a DNS name.
+
+        Kubernetes keeps addresses and hostnames in separate status fields and validates the
+        hostname one as an RFC 1123 name, so an IPv6 literal filed as a hostname is rejected
+        with a 422. `ip_address` accepts both families; anything it refuses is a real hostname.
+        """
+        with suppress(ValueError):
+            ip_address(address)
+            return True
+        return False
 
     def _status_patch_enabled(self) -> bool:
         return True

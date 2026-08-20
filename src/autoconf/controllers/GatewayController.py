@@ -522,7 +522,10 @@ class GatewayController(KubernetesController):
                         if isinstance(match, dict):
                             path = match.get("path")
                             if isinstance(path, dict) and path.get("value"):
-                                path_value = path.get("value")
+                                path_value = path["value"]
+                                # anchor regex paths so the template renders them as a regex location
+                                if path.get("type") == "RegularExpression" and not path_value.startswith("^"):
+                                    path_value = f"^{path_value}"
 
                         if listener_protocol == "TCP":
                             reverse_proxy_host = f"{backend_name}.{backend_namespace}.svc.{self._domain_name}"
@@ -801,8 +804,7 @@ class GatewayController(KubernetesController):
 
         # Add all IPs to the gateway status
         for ip in ips:
-            ip_match = self._ip_pattern.match(ip)
-            if ip_match:
+            if self._is_ip_address(ip):
                 patch_body["status"]["addresses"].append({"type": "IPAddress", "value": ip})
             else:
                 patch_body["status"]["addresses"].append({"type": "Hostname", "value": ip})
