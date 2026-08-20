@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Local agent guide for native Linux and FreeBSD packaging in `src/linux/`.
+Local agent guide for native Linux packaging (DEB, RPM) in `src/linux/`. FreeBSD is not packaged here — it is served by the official `www/bunkerweb` port.
 
 ## Read First
 
@@ -10,9 +10,9 @@ Local agent guide for native Linux and FreeBSD packaging in `src/linux/`.
 
 ## Critical Rules
 
-- Package builds use distro Dockerfiles plus `fpm-*` option files; FreeBSD builds natively, not in Docker.
-- Keep DEB, RPM, and FreeBSD lifecycle behavior aligned where applicable.
-- Linux packages ship Scheduler, Worker, API, UI, and BunkerWeb services; FreeBSD does not yet package the Celery worker.
+- Package builds use distro Dockerfiles plus `fpm-*` option files.
+- Keep DEB and RPM lifecycle behavior aligned where applicable.
+- Linux packages ship Scheduler, Worker, API, UI, and BunkerWeb services.
 - Service scripts source shared helpers and read `/etc/bunkerweb/*.env` files.
 - Preserve `MANAGER_MODE`, `WORKER_MODE`, and `SERVICE_*` enablement logic in postinstall scripts.
 - Shell scripts must pass ShellCheck and use the correct POSIX vs Bash shebang.

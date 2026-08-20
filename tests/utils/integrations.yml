@@ -8,7 +8,9 @@ staging:
       el/8: '["ubuntu-latest"]'
       el/9: '["ubuntu-latest"]'
       el/10: '["ubuntu-latest"]'
-      fedora/42: '["ubuntu-latest"]'
+      # fedora/42 had a live runner here after `a41583c35 drop fedora 42 support` removed
+      # src/linux/Dockerfile-fedora-42, so a staging run would have tried to build a target with
+      # no Dockerfile on either side.
       fedora/43: '["ubuntu-latest"]'
       fedora/44: '["ubuntu-latest"]'
     amd64:
@@ -16,13 +18,13 @@ staging:
       ubuntu/jammy: '["ubuntu-latest"]'
       debian/bookworm: '["ubuntu-latest"]'
       debian/trixie: '["ubuntu-latest"]'
-      freebsd/13: "TODO"
-      freebsd/14: "TODO"
+      # freebsd/13 and freebsd/14 were here until the PO dropped FreeBSD packaging on 2026-08-20.
+      # They never had a runner ("TODO") and now have no package to install either.
     aarch64:
       el/8: "TODO"
       el/9: "TODO"
       el/10: "TODO"
-      fedora/42: "TODO"
+      # fedora/42 dropped with `a41583c35`. fedora/44 has never been listed for aarch64.
       fedora/43: "TODO"
     arm64:
       ubuntu/noble: "TODO"
@@ -60,7 +62,7 @@ dev:
   Linux:
     amd64:
       ubuntu/noble: '["ubuntu-latest"]'
-      freebsd/14: "TODO"
+      # freebsd/14 was here too -- dropped with FreeBSD packaging on 2026-08-20.
   Docker:
     amd64: '["ubuntu-latest"]'
   Autoconf:

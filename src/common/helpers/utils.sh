@@ -421,6 +421,15 @@ function generate_api_server_cert() {
 # ============================================================================
 # Cross-platform init system detection and service management
 # Supports: systemd (Linux), rc.d (FreeBSD)
+#
+# DO NOT DELETE THE rc.d HALF ON A `grep -i freebsd` SWEEP.
+# The in-repo FreeBSD *packaging* lane was removed in 1.7 (FreeBSD is served by the
+# official www/bunkerweb port, which builds from the source tarball). The *runtime*
+# still targets FreeBSD, and this is shared code: detect_init_system() and every
+# rcd_* helper below serve the same call sites as the systemd path. Removing the
+# FreeBSD branches here would gut a Linux helper, not clean up a dead platform.
+# Same applies to src/common/confs/nginx.conf (kqueue), src/linux/scripts/start.sh
+# and src/bw/lua/bunkerweb/api.lua.
 # ============================================================================
 
 # Detect the init system in use

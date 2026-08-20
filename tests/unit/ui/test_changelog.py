@@ -193,8 +193,10 @@ def test_every_build_that_ships_the_ui_ships_the_changelog():
     assert not missing, f"these builds would serve an empty What's new page: {missing}"
 
 
-def test_the_freebsd_package_ships_it_too():
-    """FreeBSD builds by copying the tree by hand rather than with a Dockerfile."""
-    script = (REPO / "src" / "linux" / "build-freebsd.sh").read_text(encoding="utf-8")
-
-    assert 'cp "$REPO_ROOT/CHANGELOG.md" "$BW_DIR/"' in script
+# `test_the_freebsd_package_ships_it_too` stood here. FreeBSD was the one packaging target that
+# built by copying the tree by hand instead of through a Dockerfile, so it needed an assertion of
+# its own -- the derivation above only sees `src/**/Dockerfile*`. The PO dropped FreeBSD packaging
+# on 2026-08-20 and `src/linux/build-freebsd.sh` went with it, so the test read a file that no
+# longer exists. Every remaining target is a Dockerfile and is therefore covered by the derivation,
+# which needs no list to maintain: add a build that ships the UI without the changelog and it goes
+# red on its own.

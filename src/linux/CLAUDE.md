@@ -6,7 +6,9 @@ See also the [root CLAUDE.md](../../CLAUDE.md) for project-wide architecture, bu
 
 ## Purpose
 
-This directory contains everything needed to build native Linux and FreeBSD packages (DEB, RPM, FreeBSD `.pkg`) for BunkerWeb, plus the systemd/rc.d service definitions and lifecycle scripts that run on installed systems.
+This directory contains everything needed to build native Linux packages (DEB, RPM) for BunkerWeb, plus the systemd service definitions and lifecycle scripts that run on installed systems.
+
+FreeBSD is **not** packaged here. It is served by the official `www/bunkerweb` port, which builds from the source tarball with its own rc.d scripts and patches: <https://www.freshports.org/www/bunkerweb/>. The runtime still detects FreeBSD (`src/common/confs/nginx.conf` selects kqueue, `src/common/helpers/utils.sh` resolves the nginx paths and drives rc.d) — only the in-repo packaging lane is gone.
 
 ## Architecture
 
@@ -17,8 +19,6 @@ Each supported distro has three artifacts:
 1. **`Dockerfile-<distro>`** — Multi-stage Docker image that compiles NGINX, BunkerWeb dependencies (C libs + Python packages), minifies frontend assets, installs `fpm`, and produces the final packaging image.
 2. **`fpm-<distro>`** — fpm options file (`.fpm`) declaring package metadata, dependencies, and file mappings. Uses `%VERSION%` and `%ARCH%` placeholders replaced at build time.
 3. **`fpm.sh`** — Entrypoint script inside the Docker image that substitutes placeholders and runs `fpm` to produce the package.
-
-**FreeBSD** is special: it cannot be built in Docker. `build-freebsd.sh` runs natively on a FreeBSD host, stages the entire tree under `/tmp/bunkerweb-stage`, builds dependencies via `src/deps/install-freebsd.sh`, and calls `fpm` directly.
 
 ### Build Flow
 
@@ -59,7 +59,6 @@ bash src/linux/package.sh rhel-9 x86_64
 | RHEL 10                 | `Dockerfile-rhel-10`         | `fpm-rhel-10`         | RPM          |
 | Fedora 43               | `Dockerfile-fedora-43`       | `fpm-fedora-43`       | RPM          |
 | Fedora 44               | `Dockerfile-fedora-44`       | `fpm-fedora-44`       | RPM          |
-| FreeBSD                 | N/A (native build)           | `fpm-freebsd`         | FreeBSD pkg  |
 
 ### Systemd Services (Linux)
 
@@ -73,10 +72,6 @@ Five systemd units, all using `Type=simple` with `Restart=always`:
 | `bunkerweb-ui.service`        | `scripts/bunkerweb-ui.sh`        | `ui.pid` / `tmp-ui.pid` | Web UI (gunicorn)                                                                                                                                                                                       |
 | `bunkerweb-api.service`       | `scripts/bunkerweb-api.sh`       | `api.pid`               | REST API (gunicorn). The scheduler hard-requires it (shares a generated `API_TOKEN` via `variables.env`); enabled whenever the scheduler is enabled                                                     |
 
-### rc.d Services (FreeBSD)
-
-FreeBSD uses `rc.d/` scripts (`bunkerweb`, `bunkerweb_scheduler`, `bunkerweb_ui`, `bunkerweb_api`) that wrap the same `scripts/*.sh` via `/usr/sbin/daemon`. The Celery **worker is not yet packaged for FreeBSD** — there is no `bunkerweb_worker` rc.d script, `fpm-freebsd` declares no broker dependency, and `postinstall-freebsd.sh` does not install or enable it. (Linux DEB/RPM packages do ship `bunkerweb-worker.service` and a `redis-server` dependency.)
-
 ### Package Lifecycle Scripts
 
 | Script                            | When                   | Purpose                                                                                                                                                                                                |
@@ -85,9 +80,6 @@ FreeBSD uses `rc.d/` scripts (`bunkerweb`, `bunkerweb_scheduler`, `bunkerweb_ui`
 | `scripts/postinstall.sh`          | Post-install           | Decompresses deps, sets permissions, migrates config files from old locations, manages systemd services based on `MANAGER_MODE`/`WORKER_MODE`/`SERVICE_*` env vars, runs setup wizard on fresh install |
 | `scripts/afterRemoveDEB.sh`       | Post-remove (DEB)      | Handles remove vs purge vs upgrade; backs up env files and DB during upgrades                                                                                                                          |
 | `scripts/afterRemoveRPM.sh`       | Post-remove (RPM)      | Same logic adapted for RPM's `$1` argument convention (`0`=remove, `1`=upgrade)                                                                                                                        |
-| `scripts/postinstall-freebsd.sh`  | Post-install (FreeBSD) | FreeBSD-specific postinstall (delegated from `postinstall.sh`)                                                                                                                                         |
-| `scripts/beforeInstallFreeBSD.sh` | Pre-install (FreeBSD)  | FreeBSD-specific pre-install tasks                                                                                                                                                                     |
-| `scripts/afterRemoveFreeBSD.sh`   | Post-remove (FreeBSD)  | FreeBSD-specific cleanup (delegated from afterRemove scripts)                                                                                                                                          |
 
 ### Service Mode Logic (postinstall.sh)
 
@@ -122,8 +114,8 @@ All service scripts (`start.sh`, `bunkerweb-scheduler.sh`, `bunkerweb-worker.sh`
 
 ## Key Conventions
 
-- All shell scripts must pass `shellcheck`. Use `#!/bin/bash` for bash features, `#!/bin/sh` for POSIX-only scripts (FreeBSD rc.d).
-- Log rotation: `bunkerweb.logrotate` (Linux), `bunkerweb.newsyslog.conf` (FreeBSD).
+- All shell scripts must pass `shellcheck`. Use `#!/bin/bash` for bash features, `#!/bin/sh` for POSIX-only scripts.
+- Log rotation: `bunkerweb.logrotate`.
 - File ownership follows `root:nginx` for application files, `nginx:nginx` for runtime/data directories.
 - The `do_and_check_cmd` pattern is used throughout lifecycle scripts for checked command execution.
 - Dependencies are compressed as `deps.tar.gz` (using `pigz` when available) during build and decompressed during postinstall.

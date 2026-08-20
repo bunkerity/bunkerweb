@@ -34,11 +34,8 @@ packages_info:
     separator: "-"
     suffix: "-1."
     package: rpm
-  fedora/42:
-    name: "fedora-42"
-    separator: "-"
-    suffix: "-1."
-    package: rpm
+  # fedora/42 was declared here after `a41583c35 drop fedora 42 support` deleted
+  # src/linux/Dockerfile-fedora-42. The CI workflows never referenced it; only this manifest did.
   fedora/43:
     name: "fedora-43"
     separator: "-"
@@ -49,13 +46,6 @@ packages_info:
     separator: "-"
     suffix: "-1."
     package: rpm
-  freebsd/13:
-    name: "freebsd-13"
-    separator: "-"
-    suffix: "-"
-    package: pkg
-  freebsd/14:
-    name: "freebsd-14"
-    separator: "-"
-    suffix: "-"
-    package: pkg
+# freebsd/13 and freebsd/14 lived here until the PO dropped FreeBSD packaging on 2026-08-20.
+# There is no `pkg` artefact to install any more, so a target named here would be a manifest
+# entry nothing can build -- a lie the next reader believes, and one nothing fails on.
