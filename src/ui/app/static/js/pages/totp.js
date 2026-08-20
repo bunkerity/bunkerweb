@@ -46,7 +46,10 @@
         if (status) {
           status.textContent =
             error.message ||
-            "Couldn't verify your security key, please try again";
+            t(
+              "error.security_key_verification_failed",
+              "Couldn't verify your security key. Please try again.",
+            );
           status.classList.add("err"); // .sw-key-status.err, see css/pages/login.css
         }
       }
@@ -111,11 +114,17 @@
       if (recoveryMode) {
         wrap.innerHTML =
           '<input class="sw-input totp-recovery-input" type="text" name="totp_token" id="totp_token" placeholder="XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false" aria-label="Recovery code" required />';
-        recovery.textContent = "Use an authenticator code";
+        recovery.textContent = t(
+          "link.use_authenticator_code",
+          "Use an authenticator code",
+        );
         recovery.setAttribute("data-i18n", "link.use_authenticator_code");
       } else {
         wrap.innerHTML = codeHTML;
-        recovery.textContent = "Use a recovery code";
+        recovery.textContent = t(
+          "link.use_recovery_code",
+          "Use a recovery code",
+        );
         recovery.setAttribute("data-i18n", "link.use_recovery_code");
       }
       bind();

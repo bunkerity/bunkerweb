@@ -1095,7 +1095,9 @@ $(document).ready(function () {
                     "tooltip.readonly_mode",
                     "This action is not allowed in read-only mode.",
                   )
-                : t("tooltip.button.unban_ip", "Unban this IP address");
+                : t("tooltip.button.unban_ip", "Unban {{ip}}", {
+                    ip: row.ip,
+                  });
               const updateTooltip = isReadOnly
                 ? t(
                     "tooltip.readonly_mode",
@@ -1278,7 +1280,6 @@ $(document).ready(function () {
   // Hide waiting message and show table
   $("#bans-waiting").addClass("visually-hidden");
   $("#bans").removeClass("d-none");
-  return dt;
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
     $(selector)

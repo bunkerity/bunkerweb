@@ -290,7 +290,7 @@ $(document).ready(function () {
     } else {
       // Handle invalid date
       console.error(`Invalid date string: ${isoDateStr}`);
-      $(this).text("Invalid date");
+      $(this).text(t("validation.invalid_date", "Invalid date"));
     }
   });
 });

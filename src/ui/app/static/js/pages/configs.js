@@ -487,10 +487,17 @@ $(document).ready(function () {
           .clone()
           .attr("id", `feedback-toast-${toastNum++}`)
           .removeClass("d-none");
-        feedbackToast.find("span").text("Conversion failed");
+        feedbackToast
+          .find("span")
+          .text(t("toast.header.conversion_failed", "Conversion failed"));
         feedbackToast
           .find("div.toast-body")
-          .text("The selected configs are already in the desired state.");
+          .text(
+            t(
+              "toast.body.selected_items_already_in_state",
+              "The selected items are already in the requested state.",
+            ),
+          );
         feedbackToast.appendTo("#feedback-toast-container").toast("show");
         actionLock = false;
         return;
@@ -765,7 +772,6 @@ $(document).ready(function () {
       if (selectors.hide) $(selectors.hide).removeClass("d-none");
     }
   }
-  return dt;
   // Handle individual delete button click
   $(document).on("click", ".delete-config", function () {
     if (isReadOnly) {

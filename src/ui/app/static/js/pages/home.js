@@ -714,14 +714,18 @@ $(async function () {
     if (!Number.isFinite(statusCode)) {
       return String(statusCodeRaw);
     }
-    if (statusCode === 200) return "200 OK";
-    if (statusCode === 301) return "301 Moved";
-    if (statusCode === 302) return "302 Redirect";
-    if (statusCode === 304) return "304 Not Modified";
-    if (statusCode === 401) return "401 Unauthorized";
-    if (statusCode === 403) return "403 Blocked";
-    if (statusCode === 404) return "404 Not Found";
-    if (statusCode === 429) return "429 Rate Limited";
+    // Only these three have catalog entries; the rest are the status phrase as the RFC writes it.
+    const namedStatuses = {
+      200: "200 OK",
+      301: "301 Moved",
+      302: "302 Redirect",
+      304: t("dashboard.chart.request_status.http_304", "304 Not Modified"),
+      401: "401 Unauthorized",
+      403: "403 Blocked",
+      404: t("dashboard.chart.request_status.http_404", "404 Not Found"),
+      429: t("dashboard.chart.request_status.http_429", "429 Rate Limited"),
+    };
+    if (namedStatuses[statusCode]) return namedStatuses[statusCode];
     if (statusCode >= 500) return `${statusCode} Server Error`;
     if (statusCode >= 400) return `${statusCode} Client Error`;
     if (statusCode >= 300) return `${statusCode} Redirect`;
@@ -889,7 +893,10 @@ $(async function () {
         fillSeriesColor: false,
         custom: function ({ series, seriesIndex }) {
           const code = requestStatusCodes[seriesIndex] || "";
-          const label = requestStatusLabels[seriesIndex] || code || "Status";
+          const label =
+            requestStatusLabels[seriesIndex] ||
+            code ||
+            t("table.header.status", "Status");
           const color = requestStatusColors[seriesIndex] || "#8592a3";
           const value = parseInt(series[seriesIndex], 10) || 0;
           const percent =
@@ -1088,7 +1095,8 @@ $(async function () {
         theme: theme,
         fillSeriesColor: false,
         custom: function ({ series, seriesIndex }) {
-          const ipLabel = topIpsLabels[seriesIndex] || "Unknown";
+          const ipLabel =
+            topIpsLabels[seriesIndex] || t("status.unknown", "Unknown");
           const color = topIpsColors[seriesIndex] || "#0ea5e9";
           const value = parseInt(series[seriesIndex], 10) || 0;
           const pct = topBlockedTotal

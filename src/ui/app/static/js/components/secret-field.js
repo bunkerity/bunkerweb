@@ -42,8 +42,18 @@
     if (shown) {
       field.removeAttribute("aria-label");
     } else {
-      const name = field.getAttribute("data-secret-label") || "Secret value";
-      field.setAttribute("aria-label", name + " (hidden)");
+      const name =
+        field.getAttribute("data-secret-label") ||
+        t("aria.label.secret_value", "Secret value");
+      // escapeValue off: this goes through setAttribute, which escapes on its own — escaping here
+      // too would put a literal `&#39;` in the label a screen reader reads out.
+      field.setAttribute(
+        "aria-label",
+        t("aria.label.value_hidden", "{{name}} (hidden)", {
+          name,
+          interpolation: { escapeValue: false },
+        }),
+      );
     }
 
     const key = shown ? "aria.label.hide_value" : "aria.label.reveal_value";

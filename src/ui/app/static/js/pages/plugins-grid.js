@@ -180,7 +180,12 @@ $(document).ready(function () {
     const maxFileSize = 50 * 1024 * 1024; // 50 MB
     if (!validExtensions.some((ext) => fileName.endsWith(ext))) return false;
     if (file.size > maxFileSize) {
-      alert("File size exceeds 50 MB limit.");
+      alert(
+        t(
+          "alert.plugin_file_too_large",
+          "The plugin archive exceeds the 50 MB limit.",
+        ),
+      );
       return false;
     }
     return true;
@@ -235,7 +240,12 @@ $(document).ready(function () {
       error: function () {
         progressBar.addClass("bg-danger");
         fileItem.append('<span class="text-danger ms-2">Failed</span>');
-        alert("An error occurred while uploading the file. Please try again.");
+        alert(
+          t(
+            "alert.plugin_upload_failed",
+            "An error occurred while uploading the plugin archive. Please try again.",
+          ),
+        );
       },
     });
   };
@@ -264,7 +274,12 @@ $(document).ready(function () {
         const file = files[i];
         if (validateFile(file)) uploadFile(file);
         else
-          alert("Please upload a valid plugin file (.zip, .tar.gz, .tar.xz).");
+          alert(
+            t(
+              "alert.plugin_file_invalid",
+              "Please upload a valid plugin archive (.zip, .tar.gz, or .tar.xz).",
+            ),
+          );
       }, 500 * i);
     }
   });

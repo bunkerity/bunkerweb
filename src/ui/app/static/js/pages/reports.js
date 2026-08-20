@@ -968,7 +968,7 @@ $(document).ready(function () {
         }
       } else {
         console.warn("No raw data available in modal");
-        textToCopy = "No data available";
+        textToCopy = t("status.no_data", "No data");
       }
 
       navigator.clipboard
@@ -987,13 +987,19 @@ $(document).ready(function () {
           console.error("Failed to copy to clipboard:", clipboardError);
           // Fallback: show an alert or try alternative method
           alert(
-            "Failed to copy to clipboard. Please try using the raw data copy button below.",
+            t(
+              "error.report_copy_failed",
+              "Failed to copy to clipboard. Please try using the raw data copy button below.",
+            ),
           );
         });
     } catch (e) {
       console.error("Critical error in copy data functionality:", e);
       alert(
-        "Error accessing data for copying. Please try refreshing the page.",
+        t(
+          "error.report_copy_access_failed",
+          "Error accessing data for copying. Please try refreshing the page.",
+        ),
       );
     }
   });
@@ -1003,7 +1009,9 @@ $(document).ready(function () {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const url = button.data("url"); // Extract URL from data-url attribute
     // Use text() to safely set content without XSS risk
-    $("#fullUrlContent").text(url || "No URL available");
+    $("#fullUrlContent").text(
+      url || t("status.no_url_available", "No URL available"),
+    );
   });
 
   // Handler for the data modal to display formatted security report data
@@ -1016,7 +1024,10 @@ $(document).ready(function () {
       rowData = table.row($row.prev("tr")).data();
     }
 
-    const reason = rowData && rowData.reason ? rowData.reason : "Unknown";
+    const reason =
+      rowData && rowData.reason
+        ? rowData.reason
+        : t("status.unknown", "Unknown");
     const currentServerName =
       rowData && rowData.server_name ? decodeHtml(rowData.server_name) : "";
     const reportId =
@@ -1039,7 +1050,12 @@ $(document).ready(function () {
     $("#dataModal").data("raw-data", null);
 
     if (!reportId) {
-      const fallbackData = { error: "Missing report identifier" };
+      const fallbackData = {
+        error: t(
+          "error.report_identifier_missing",
+          "Missing report identifier",
+        ),
+      };
       $("#dataModal").data("raw-data", fallbackData);
       $("#dataContent").html(`
         <div class="alert alert-danger mb-3">
@@ -1132,7 +1148,10 @@ $(document).ready(function () {
           const fallbackData = {
             error:
               (response && response.message) ||
-              "Failed to load report details from server",
+              t(
+                "error.report_details_load_failed",
+                "Failed to load report details.",
+              ),
             report_id: reportId,
           };
           $("#dataModal").data("raw-data", fallbackData);
@@ -1149,7 +1168,10 @@ $(document).ready(function () {
         showReportData(response.data);
       },
       error: function (xhr) {
-        let errorMessage = "Failed to load report details.";
+        let errorMessage = t(
+          "error.report_details_load_failed",
+          "Failed to load report details.",
+        );
         if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
           errorMessage = xhr.responseJSON.message;
         }
@@ -1252,7 +1274,7 @@ $(document).ready(function () {
           textToCopy = String(rawData);
         }
       } else {
-        textToCopy = "No data available";
+        textToCopy = t("status.no_data", "No data");
       }
 
       navigator.clipboard
@@ -1857,7 +1879,6 @@ $(document).ready(function () {
   // Hide waiting message and show table
   $("#reports-waiting").addClass("visually-hidden");
   $("#reports").removeClass("d-none");
-  return dt;
   // The #reports DataTable initializes inside the eventlog tab pane, which is
   // not the default-active pane (overview is) -- it first renders while
   // display:none, so column widths/Responsive collapse are computed against a

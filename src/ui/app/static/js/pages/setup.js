@@ -150,7 +150,11 @@ $(document).ready(() => {
       if (response.status === 200 && text === "ok") {
         return true;
       } else if (text === "error") {
-        return "Server name check failed";
+        const checkFailed = t(
+          "validation.server_name_check_failed",
+          "Server name check failed",
+        );
+        return checkFailed;
       }
       return false;
     } catch (error) {
@@ -169,7 +173,9 @@ $(document).ready(() => {
 
     const serverName = getServerName();
     if (!serverName) {
-      $checkResultSpan.text("Invalid server name.");
+      $checkResultSpan.text(
+        t("validation.server_name_invalid", "Invalid server name."),
+      );
       return;
     }
 
@@ -191,13 +197,25 @@ $(document).ready(() => {
     const feedbackToast = $("#feedback-toast").clone(); // Clone the feedback toast
     feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the toast
     if (!isValid) {
-      setFeedback($input, "Server name is not unique.");
+      setFeedback(
+        $input,
+        t("validation.server_name_not_unique", "Server name is not unique."),
+      );
       feedbackToast.addClass("border-danger");
       feedbackToast.find(".toast-header").addClass("text-danger");
-      feedbackToast.find("span").text("Server name is not unique.");
+      feedbackToast
+        .find("span")
+        .text(
+          t("validation.server_name_not_unique", "Server name is not unique."),
+        );
       feedbackToast
         .find("div.toast-body")
-        .text("Please choose a different server name.");
+        .text(
+          t(
+            "validation.server_name_choose_different",
+            "Please choose a different server name.",
+          ),
+        );
       if (typeof result !== "string")
         $overviewUniqueServerName
           .find("i")
@@ -210,10 +228,17 @@ $(document).ready(() => {
       setFeedback($input, "");
       feedbackToast.addClass("border-primary");
       feedbackToast.find(".toast-header").addClass("text-primary");
-      feedbackToast.find("span").text("Server name is unique.");
+      feedbackToast
+        .find("span")
+        .text(t("validation.server_name_unique", "Server name is unique."));
       feedbackToast
         .find("div.toast-body")
-        .text("You can proceed with the setup.");
+        .text(
+          t(
+            "validation.server_name_proceed",
+            "You can proceed with the setup.",
+          ),
+        );
       $overviewUniqueServerName
         .find("i")
         .toggleClass("bx-check text-success", true)
@@ -308,7 +333,9 @@ $(document).ready(() => {
       const isRequired = $input.prop("required");
       const pattern = $input.attr("pattern");
       const fieldName =
-        $input.data("field-name") || $input.attr("name") || "This field";
+        $input.data("field-name") ||
+        $input.attr("name") ||
+        t("validation.default_field_name", "This field");
 
       let errorMessage = "";
       let isValid = true;
@@ -464,7 +491,13 @@ $(document).ready(() => {
 
         if (password !== confirmPassword) {
           $confirmPasswordInput.addClass("is-invalid");
-          setFeedback($confirmPasswordInput, "Passwords do not match.");
+          setFeedback(
+            $confirmPasswordInput,
+            t(
+              "form.validation.confirm_password_match",
+              "Passwords do not match.",
+            ),
+          );
           isStepValid = false;
         } else {
           $confirmPasswordInput.removeClass("is-invalid");
@@ -480,7 +513,10 @@ $(document).ready(() => {
           $email.addClass("is-invalid");
           setFeedback(
             $email,
-            "This field is required if you want to subscribe to the newsletter.",
+            t(
+              "validation.newsletter_email_required",
+              "This field is required if you want to subscribe to the newsletter.",
+            ),
           );
           isStepValid = false;
         }
@@ -506,8 +542,10 @@ $(document).ready(() => {
 
         if (autoLetsEncrypt && letsEncryptChallenge === "dns") {
           const $letsEncryptProvider = $("#LETS_ENCRYPT_DNS_PROVIDER");
-          const dnsRequiredMessage =
-            "This field is required when using DNS challenge.";
+          const dnsRequiredMessage = t(
+            "validation.dns_challenge_field_required",
+            "This field is required when using DNS challenge.",
+          );
           if (!$letsEncryptProvider.find(":selected").val()) {
             $letsEncryptProvider.addClass("is-invalid");
             setFeedback($letsEncryptProvider, dnsRequiredMessage);
@@ -537,8 +575,10 @@ $(document).ready(() => {
           const hasValidData = hasDataCert && hasDataKey;
 
           if (!hasValidPaths && !hasValidData) {
-            const errorMsg =
-              "When using custom SSL, you must set both the certificate and the key (via file path or data upload).";
+            const errorMsg = t(
+              "validation.custom_ssl_pair_required",
+              "When using custom SSL, you must set both the certificate and the key (via file path or data upload).",
+            );
             if (!hasPathCert) {
               $customSslCert.addClass("is-invalid");
               setFeedback($customSslCert, errorMsg);
@@ -559,13 +599,18 @@ $(document).ready(() => {
         isStepValid = false;
 
         if (typeof result === "string") {
-          $("#modal-confirm-dns-title").text("Error");
+          $("#modal-confirm-dns-title").text(t("flash.error", "Error"));
           $("#dns-check-result").html(
             `Are you sure you want to proceed to the next step?<br/>Error: ${result}`,
           );
           modal.modal("show");
         } else if (!result) {
-          $("#modal-confirm-dns-title").text("Server name is not unique");
+          $("#modal-confirm-dns-title").text(
+            t(
+              "modal.title.server_name_not_unique",
+              "Server Name Is Not Unique",
+            ),
+          );
           $("#dns-check-result").html(
             `Are you sure you want to proceed to the next step?<br/>Server name "${serverName}" is not unique.`,
           );
@@ -638,11 +683,16 @@ $(document).ready(() => {
         feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
         feedbackToast.addClass("border-warning");
         feedbackToast.find(".toast-header").addClass("text-warning");
-        feedbackToast.find("span").text("Newsletter Subscription");
+        feedbackToast
+          .find("span")
+          .text(t("newsletter.title", "Join the Newsletter"));
         feedbackToast
           .find("div.toast-body")
           .text(
-            "Please enter a valid email address to subscribe to the newsletter.",
+            t(
+              "validation.newsletter_email_invalid",
+              "Please enter a valid email address to subscribe to the newsletter.",
+            ),
           );
         feedbackToast.appendTo("#feedback-toast-container");
         feedbackToast.toast("show");
@@ -809,10 +859,15 @@ $(document).ready(() => {
         feedbackToast.attr("id", `feedback-toast-${toastNum++}`); // Corrected to set the ID for the failed toast
         feedbackToast.addClass("border-danger");
         feedbackToast.find(".toast-header").addClass("text-danger");
-        feedbackToast.find("span").text("Error");
+        feedbackToast.find("span").text(t("flash.error", "Error"));
         feedbackToast
           .find("div.toast-body")
-          .text("Error while setting up web UI. Please try again.");
+          .text(
+            t(
+              "setup.error.web_ui_setup_failed",
+              "Error while setting up web UI. Please try again.",
+            ),
+          );
         feedbackToast.appendTo("#feedback-toast-container"); // Ensure the toast is appended to the container
         feedbackToast.toast("show");
       }, 400);
@@ -920,28 +975,40 @@ $(document).ready(() => {
       $wildcardCheckbox.prop("checked", false).prop("disabled", true);
       applyTooltipState(
         $wildcardCol,
-        "Wildcard certificates are only supported with DNS challenges.",
+        t(
+          "tooltip.wildcard_dns_only",
+          "Wildcard certificates are only supported with the DNS challenge type.",
+        ),
         "tooltip.wildcard_dns_only",
       );
 
       $dnsProvider.prop("disabled", true);
       applyTooltipState(
         $dnsProviderParent,
-        "DNS provider is only supported with DNS challenges.",
+        t(
+          "tooltip.dns_provider_dns_only",
+          "DNS provider selection is only applicable for DNS challenges.",
+        ),
         "tooltip.dns_provider_dns_only",
       );
 
       $dnsPropagation.prop("disabled", true);
       applyTooltipState(
         $dnsPropagationParent,
-        "DNS propagation is only supported with DNS challenges.",
+        t(
+          "tooltip.dns_propagation_dns_only",
+          "DNS propagation delay is only applicable for DNS challenges.",
+        ),
         "tooltip.dns_propagation_dns_only",
       );
 
       $dnsCredentialItems.prop("disabled", true);
       applyTooltipState(
         $dnsCredentialItemsParent,
-        "Credentials are only supported with DNS challenges.",
+        t(
+          "tooltip.dns_credentials_dns_only",
+          "Credentials are only applicable for DNS challenges.",
+        ),
         "tooltip.dns_credentials_dns_only",
       );
     } else {
@@ -1035,7 +1102,15 @@ $(document).ready(() => {
       const $status = $wrapper.find(".plugin-setting-file-status");
       if ($status.length) {
         $status.text(
-          "Loaded from " + file.name + " (" + content.length + " chars)",
+          t(
+            "setup.file.loaded_from",
+            "Loaded from {{name}} \u00b7 characters: {{count}}",
+            {
+              name: file.name,
+              count: content.length,
+              interpolation: { escapeValue: false },
+            },
+          ),
         );
       }
       const $manual = $wrapper.find(".plugin-setting-file-manual");
@@ -1044,7 +1119,8 @@ $(document).ready(() => {
     reader.onerror = function () {
       const $wrapper = $hidden.closest(".plugin-file-setting-wrapper");
       const $status = $wrapper.find(".plugin-setting-file-status");
-      if ($status.length) $status.text("Error reading file");
+      if ($status.length)
+        $status.text(t("setup.file.read_error", "Error reading file"));
     };
     reader.readAsText(file);
   });
@@ -1092,8 +1168,12 @@ $(document).ready(() => {
     if ($status.length) {
       $status.text(
         content
-          ? "Content entered (" + content.length + " chars)"
-          : $status.data("emptyText") || "No file selected",
+          ? t("setup.file.content_entered", "Entered characters: {{count}}", {
+              count: content.length,
+              interpolation: { escapeValue: false },
+            })
+          : $status.data("emptyText") ||
+              t("status.no_file_selected", "No file selected"),
       );
     }
   });

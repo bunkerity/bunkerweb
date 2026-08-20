@@ -444,10 +444,16 @@ const updateMissingConfigItem = (configRef, status) => {
 
   if (status === "uploaded") {
     badge.className = "badge bg-success";
-    badge.textContent = "Uploaded";
+    badge.textContent = t(
+      "template.editor.missing_config_status_uploaded",
+      "Uploaded",
+    );
   } else if (status === "missing") {
     badge.className = "badge bg-warning text-dark";
-    badge.textContent = "Missing";
+    badge.textContent = t(
+      "template.editor.missing_config_status_missing",
+      "Missing",
+    );
   }
 };
 

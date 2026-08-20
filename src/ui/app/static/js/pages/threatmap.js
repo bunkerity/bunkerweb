@@ -406,7 +406,7 @@
           var hint = document.createElement("small");
           hint.className = "text-muted ms-1";
           hint.setAttribute("data-i18n", "threatmap.not_localised");
-          hint.textContent = "not localised";
+          hint.textContent = t("threatmap.not_localised", "not localised");
           label.appendChild(hint);
         }
       } else {
@@ -465,7 +465,8 @@
       var note = document.createElement("small");
       note.className = "text-muted ms-2";
       note.setAttribute("data-i18n", "threatmap.more_hidden");
-      note.textContent = distinct - fetched + " more not shown";
+      note.textContent =
+        distinct - fetched + " " + t("threatmap.more_hidden", "more not shown");
       row.appendChild(note);
     }
 
@@ -476,7 +477,7 @@
     var none = document.createElement("li");
     none.className = "text-muted small";
     none.setAttribute("data-i18n", "status.no_data");
-    none.textContent = "No data";
+    none.textContent = t("status.no_data", "No data");
     list.appendChild(none);
   }
 
@@ -805,7 +806,10 @@
                   escapeHtml(name) +
                   "</strong><br>" +
                   hits.toLocaleString() +
-                  (hits === 1 ? " blocked request" : " blocked requests")
+                  " " +
+                  (hits === 1
+                    ? t("threatmap.blocked_request", "blocked request")
+                    : t("threatmap.blocked_requests", "blocked requests"))
                 );
               },
               {

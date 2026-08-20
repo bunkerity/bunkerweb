@@ -59,7 +59,13 @@
       data = null;
     }
     if (!response.ok) {
-      throw new Error((data && data.message) || "Request failed");
+      throw new Error(
+        (data && data.message) ||
+          t(
+            "error.webauthn_request_failed",
+            "The security-key request failed. Please try again.",
+          ),
+      );
     }
     return data;
   }

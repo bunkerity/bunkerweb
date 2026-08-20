@@ -90,7 +90,12 @@ $(document).ready(function () {
     }
 
     if (file.size > maxFileSize) {
-      alert("File size exceeds 50 MB limit.");
+      alert(
+        t(
+          "alert.plugin_file_too_large",
+          "The plugin archive exceeds the 50 MB limit.",
+        ),
+      );
       return false;
     }
 
@@ -149,7 +154,12 @@ $(document).ready(function () {
       error: function () {
         progressBar.addClass("bg-danger");
         fileItem.append('<span class="text-danger ms-2">Failed</span>');
-        alert("An error occurred while uploading the file. Please try again.");
+        alert(
+          t(
+            "alert.plugin_upload_failed",
+            "An error occurred while uploading the plugin archive. Please try again.",
+          ),
+        );
       },
     });
   };
@@ -503,17 +513,15 @@ $(document).ready(function () {
           $("#plugins_wrapper .dt-buttons")
             .attr(
               "data-bs-original-title",
-              `${
-                userReadOnly
-                  ? t(
-                      "tooltip.readonly_user_action_disabled",
-                      "Your account is readonly, action disabled.",
-                    )
-                  : t(
-                      "tooltip.readonly_db_action_disabled",
-                      "The database is in readonly, action disabled.",
-                    )
-              }`,
+              userReadOnly
+                ? t(
+                    "tooltip.disabled_readonly",
+                    "Disabled: Read-only mode is active.",
+                  )
+                : t(
+                    "tooltip.disabled_db_readonly",
+                    "Disabled: The database is in read-only mode.",
+                  ),
             )
             .attr("data-bs-placement", "right")
             .tooltip();
@@ -573,7 +581,12 @@ $(document).ready(function () {
         if (validateFile(file)) {
           uploadFile(file);
         } else {
-          alert("Please upload a valid plugin file (.zip, .tar.gz, .tar.xz).");
+          alert(
+            t(
+              "alert.plugin_file_invalid",
+              "Please upload a valid plugin archive (.zip, .tar.gz, or .tar.xz).",
+            ),
+          );
         }
       }, 500 * i);
     }

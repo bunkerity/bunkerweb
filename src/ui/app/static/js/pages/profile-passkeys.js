@@ -30,7 +30,13 @@
     button.addEventListener("click", async function () {
       const password = passwordField ? passwordField.value : "";
       if (!password) {
-        setStatus("Enter your current password to add a passkey.", true);
+        setStatus(
+          t(
+            "validation.current_password_required_for_passkey",
+            "Enter your current password to add a passkey.",
+          ),
+          true,
+        );
         return;
       }
 
@@ -58,7 +64,11 @@
         button.disabled = false;
         if (window.BWWebAuthn.isCancellation(error)) return;
         setStatus(
-          error.message || "Couldn't register this passkey, please try again",
+          error.message ||
+            t(
+              "error.passkey_registration_failed",
+              "Couldn't register this passkey. Please try again.",
+            ),
           true,
         );
       } finally {

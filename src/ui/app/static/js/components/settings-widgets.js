@@ -232,7 +232,9 @@ $(document).ready(() => {
 
     if (value.trim() === "") {
       clearStoredFileSettingName($fileTextInput);
-      const emptyText = $status.data("emptyText") || "No file selected";
+      const emptyText =
+        $status.data("emptyText") ||
+        t("status.no_file_selected", "No file selected");
       $status.text(emptyText);
       syncPersistedFileNameDisplay($fileTextInput);
       return;
@@ -301,8 +303,11 @@ $(document).ready(() => {
 
     if ($toggle.length) {
       const uploadLabel =
-        $toggle.data("uploadLabel") || "Switch to text editor";
-      const manualLabel = $toggle.data("manualLabel") || "Back to file upload";
+        $toggle.data("uploadLabel") ||
+        t("tooltip.button.switch_to_text_editor", "Switch to text editor");
+      const manualLabel =
+        $toggle.data("manualLabel") ||
+        t("tooltip.button.back_to_file_upload", "Back to file upload");
       const nextLabel = isManual ? manualLabel : uploadLabel;
       $toggle.attr("data-mode", isManual ? "manual" : "upload");
       $toggle.attr("aria-pressed", isManual ? "true" : "false");
@@ -895,7 +900,10 @@ $(document).ready(() => {
         setFieldValidationState(
           $fileTextInput,
           false,
-          "Unable to read the selected file.",
+          t(
+            "template.editor.raw_editor_upload_failed",
+            "Unable to read the selected file.",
+          ),
         );
         setFileSettingStatus($fileTextInput, `Unable to read: ${file.name}`);
         // Clear on failure so the same file can be selected again immediately.
@@ -950,9 +958,10 @@ $(document).ready(() => {
   const moreValuesLabel = t("plugins.multivalue.more_values", {
     defaultValue: "more values",
   });
-  const multivalueEnterPlaceholder = t("placeholder.multivalue_enter_value", {
-    defaultValue: "Enter value...",
-  });
+  const multivalueEnterPlaceholder = t(
+    "form.placeholder.multivalue_enter_value",
+    { defaultValue: "Enter value..." },
+  );
   const multivalueRemoveLabel = t("aria.label.remove_value", {
     defaultValue: "Remove value",
   });

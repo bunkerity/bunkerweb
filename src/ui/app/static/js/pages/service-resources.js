@@ -258,7 +258,10 @@ $(function () {
       select.append(
         $("<option>", {
           value: "",
-          text: "Nothing available to attach",
+          text: t(
+            "service.resources.nothing_available",
+            "Nothing available to attach.",
+          ),
           disabled: true,
           selected: true,
         }),

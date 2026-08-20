@@ -642,15 +642,29 @@ class SettingControl {
     const status = document.createElement("small");
     status.className = "text-muted";
     status.textContent = value
-      ? `Current content loaded (${value.length} chars)`
-      : "No file selected";
+      ? this.translate(
+          "setup.file.content_entered",
+          "Entered characters: {{count}}",
+          {
+            count: value.length,
+            interpolation: { escapeValue: false },
+          },
+        )
+      : this.translate("status.no_file_selected", "No file selected");
 
     upload.addEventListener("change", () => {
       const file = upload.files && upload.files[0];
       if (!file) {
         status.textContent = hidden.value
-          ? `Current content loaded (${hidden.value.length} chars)`
-          : "No file selected";
+          ? this.translate(
+              "setup.file.content_entered",
+              "Entered characters: {{count}}",
+              {
+                count: hidden.value.length,
+                interpolation: { escapeValue: false },
+              },
+            )
+          : this.translate("status.no_file_selected", "No file selected");
         return;
       }
 
@@ -660,10 +674,21 @@ class SettingControl {
           .replace(/\r\n/g, "\n")
           .replace(/\r/g, "\n");
         hidden.value = content;
-        status.textContent = `Loaded: ${file.name} (${content.length} chars)`;
+        status.textContent = this.translate(
+          "setup.file.loaded_from",
+          "Loaded from {{name}} \u00b7 characters: {{count}}",
+          {
+            name: file.name,
+            count: content.length,
+            interpolation: { escapeValue: false },
+          },
+        );
       };
       reader.onerror = () => {
-        status.textContent = `Unable to read: ${file.name}`;
+        status.textContent = this.translate(
+          "setup.file.read_error",
+          "Error reading file",
+        );
         // Clear on failure so selecting the same file retriggers change.
         upload.value = "";
       };

@@ -515,10 +515,17 @@ $(document).ready(function () {
           .clone()
           .attr("id", `feedback-toast-${toastNum++}`)
           .removeClass("d-none");
-        feedbackToast.find("span").text("Conversion failed");
+        feedbackToast
+          .find("span")
+          .text(t("toast.header.conversion_failed", "Conversion failed"));
         feedbackToast
           .find("div.toast-body")
-          .text("The selected services are already in the desired state.");
+          .text(
+            t(
+              "toast.body.selected_items_already_in_state",
+              "The selected items are already in the requested state.",
+            ),
+          );
         feedbackToast.appendTo("#feedback-toast-container").toast("show");
         actionLock = false;
         return;
@@ -783,11 +790,15 @@ $(document).ready(function () {
             .find(".dt-buttons")
             .attr(
               "data-bs-original-title",
-              `${
-                userReadOnly
-                  ? "Your account is readonly"
-                  : "The database is in readonly"
-              }, therefore you cannot create new services.`,
+              userReadOnly
+                ? t(
+                    "tooltip.disabled_readonly",
+                    "Disabled: Read-only mode is active.",
+                  )
+                : t(
+                    "tooltip.disabled_db_readonly",
+                    "Disabled: The database is in read-only mode.",
+                  ),
             )
             .attr("data-bs-placement", "right")
             .tooltip();
@@ -878,7 +889,12 @@ $(document).ready(function () {
       return;
     }
     if (!validateImportFile(file)) {
-      alert("Please upload a valid services export file (.env or .zip).");
+      alert(
+        t(
+          "alert.services_import_invalid_file",
+          "Please upload a valid services export file (.env or .zip).",
+        ),
+      );
       importFileInput.val("");
       toggleConfigsImportOptions(null);
       return;

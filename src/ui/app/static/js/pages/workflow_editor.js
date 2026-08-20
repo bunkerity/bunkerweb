@@ -32,14 +32,29 @@
     conditions: [
       {
         op: "ip",
-        label: "IP / CIDR",
+        label: t("workflows.condition.ip", "IP / CIDR"),
         kind: "list",
         placeholder: "203.0.113.0/24",
       },
-      { op: "country", label: "Country", kind: "list", placeholder: "FR" },
-      { op: "asn", label: "ASN", kind: "list", placeholder: "AS64496" },
-      { op: "method", label: "HTTP method", kind: "list", placeholder: "POST" },
-      { op: "uri", label: "URI", kind: "uri" },
+      {
+        op: "country",
+        label: t("workflows.test.country", "Country"),
+        kind: "list",
+        placeholder: "FR",
+      },
+      {
+        op: "asn",
+        label: t("workflows.test.asn", "ASN"),
+        kind: "list",
+        placeholder: "AS64496",
+      },
+      {
+        op: "method",
+        label: t("workflows.condition.method", "HTTP method"),
+        kind: "list",
+        placeholder: "POST",
+      },
+      { op: "uri", label: t("workflows.condition.uri", "URI"), kind: "uri" },
       {
         op: "group",
         label: translate("workflows.aria.resourceGroup", "Resource group"),
@@ -47,9 +62,21 @@
       },
     ],
     actions: [
-      { type: "challenge", label: "Challenge", blurb: "Prove it is human" },
-      { type: "block", label: "Block", blurb: "Deny the request" },
-      { type: "redirect", label: "Redirect", blurb: "Send it elsewhere" },
+      {
+        type: "challenge",
+        label: "Challenge",
+        blurb: t("workflows.action_help.challenge", "Prove it is human"),
+      },
+      {
+        type: "block",
+        label: "Block",
+        blurb: t("workflows.action_help.block", "Deny the request"),
+      },
+      {
+        type: "redirect",
+        label: "Redirect",
+        blurb: t("workflows.action_help.redirect", "Send it elsewhere"),
+      },
     ],
   };
 
@@ -74,9 +101,9 @@
   var BLOCK_STATUSES = [429];
   var GROUP_KINDS = ["ip", "country", "asn"];
   var URI_MATCHES = {
-    exact: "is exactly",
-    prefix: "starts with",
-    regex: "matches the regex",
+    exact: t("workflows.uri_match.exact", "is exactly"),
+    prefix: t("workflows.uri_match.prefix", "starts with"),
+    regex: t("workflows.uri_match.regex", "matches the regex"),
   };
   var VALUE_CAP = 8;
 
@@ -93,7 +120,11 @@
     redirect: { icon: "bx-log-out-circle", tone: "t-redirect" },
     challenge: { icon: "bx-shield-quarter", tone: "t-challenge" },
   };
-  var OPS = { all: "All of", any: "Any of", not: "None of" };
+  var OPS = {
+    all: t("workflows.tree.all", "All of"),
+    any: t("workflows.tree.any", "Any of"),
+    not: t("workflows.tree.not", "None of"),
+  };
 
   var STATE = {
     rules: [],
@@ -1162,7 +1193,7 @@
       '" data-wf-summary="' +
       esc(rule.id) +
       '">' +
-      esc(summary || "Not validated yet") +
+      esc(summary || t("workflows.not_validated", "Not validated yet")) +
       "</div></div>" +
       actionBadge(rule) +
       '<div class="bw-flow-tools">' +
@@ -1272,16 +1303,31 @@
             '" data-wf-pos="' +
             esc(rule.id) +
             '" aria-haspopup="menu"' +
-            ' title="Position ' +
-            (index + 1) +
-            " of " +
-            STATE.rules.length +
-            ' — click to move"' +
-            ' aria-label="Rule ' +
-            (index + 1) +
-            " of " +
-            STATE.rules.length +
-            ', change position">' +
+            ' title="' +
+            esc(
+              t(
+                "workflows.aria.positionMove",
+                "Position {{n}} of {{total}} — click to move",
+                {
+                  n: index + 1,
+                  total: STATE.rules.length,
+                  interpolation: { escapeValue: false },
+                },
+              ),
+            ) +
+            '" aria-label="' +
+            esc(
+              t(
+                "workflows.aria.changePosition",
+                "Rule {{n}} of {{total}}, change position",
+                {
+                  n: index + 1,
+                  total: STATE.rules.length,
+                  interpolation: { escapeValue: false },
+                },
+              ),
+            ) +
+            '">' +
             (index + 1) +
             "</button>") +
         "</div>" +
@@ -1382,15 +1428,31 @@
       ? '<span class="fc-order" aria-hidden="true">' + position + "</span>"
       : '<button type="button" class="fc-order" data-wf-pos="' +
         esc(rule.id) +
-        '" aria-haspopup="menu" title="Position ' +
-        position +
-        " of " +
-        total +
-        ' — click to move" aria-label="Rule ' +
-        position +
-        " of " +
-        total +
-        ', change position">' +
+        '" aria-haspopup="menu" title="' +
+        esc(
+          t(
+            "workflows.aria.positionMove",
+            "Position {{n}} of {{total}} — click to move",
+            {
+              n: position,
+              total: total,
+              interpolation: { escapeValue: false },
+            },
+          ),
+        ) +
+        '" aria-label="' +
+        esc(
+          t(
+            "workflows.aria.changePosition",
+            "Rule {{n}} of {{total}}, change position",
+            {
+              n: position,
+              total: total,
+              interpolation: { escapeValue: false },
+            },
+          ),
+        ) +
+        '">' +
         position +
         "</button>";
 
@@ -2235,9 +2297,17 @@
                 : "bx-check") +
             '" aria-hidden="true"></i>' +
             "<span>" +
-            (position === index ? "Stays at" : "Move to") +
-            " position " +
-            (position + 1) +
+            esc(
+              position === index
+                ? t("workflows.menu.staysAt", "Stays at position {{n}}", {
+                    n: position + 1,
+                    interpolation: { escapeValue: false },
+                  })
+                : t("workflows.menu.moveTo", "Move to position {{n}}", {
+                    n: position + 1,
+                    interpolation: { escapeValue: false },
+                  }),
+            ) +
             "</span>" +
             '<span class="n">' +
             esc((rule.name || "untitled").slice(0, 18)) +
@@ -2346,7 +2416,7 @@
     var input = document.createElement("input");
     input.type = "text";
     input.className = "bw-flow-val-input";
-    input.setAttribute("aria-label", "New value");
+    input.setAttribute("aria-label", t("workflows.aria.newValue", "New value"));
     input.placeholder = conditionSpec(hit.node.op).placeholder || "";
     host.replaceWith(input);
     input.focus();

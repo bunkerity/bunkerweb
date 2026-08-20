@@ -395,7 +395,10 @@ $(document).ready(() => {
         Boolean($input.data("fileReadError"));
 
       if (hasFileReadError) {
-        errorMessage = "Unable to read the selected file.";
+        errorMessage = t(
+          "template.editor.raw_editor_upload_failed",
+          "Unable to read the selected file.",
+        );
         isValid = false;
       }
 
@@ -959,15 +962,20 @@ $(document).ready(() => {
 
         const feedbackToast = $("#feedback-toast").clone();
         feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
-        feedbackToast.find("span").text("Success");
+        feedbackToast.find("span").text(t("status.success", "Success"));
         feedbackToast
           .find(".fw-medium")
-          .text("Global settings applied")
+          .text(
+            t("toast.global_settings_applied_title", "Global settings applied"),
+          )
           .attr("data-i18n", "toast.global_settings_applied_title");
         feedbackToast
           .find("div.toast-body")
           .text(
-            "Global settings have been successfully fetched and applied to the current form.",
+            t(
+              "toast.global_settings_applied_body",
+              "Global settings have been successfully fetched and applied to the current form.",
+            ),
           )
           .attr("data-i18n", "toast.global_settings_applied_body");
         feedbackToast.removeClass("border-warning").addClass("border-success");
@@ -981,14 +989,24 @@ $(document).ready(() => {
       error: function () {
         const feedbackToast = $("#feedback-toast").clone();
         feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
-        feedbackToast.find("span").text("Error");
+        feedbackToast.find("span").text(t("flash.error", "Error"));
         feedbackToast
           .find(".fw-medium")
-          .text("Failed to fetch global settings")
+          .text(
+            t(
+              "toast.global_settings_failed_title",
+              "Failed to fetch global settings",
+            ),
+          )
           .attr("data-i18n", "toast.global_settings_failed_title");
         feedbackToast
           .find("div.toast-body")
-          .text("An error occurred while fetching global settings.")
+          .text(
+            t(
+              "toast.global_settings_failed_body",
+              "An error occurred while fetching global settings.",
+            ),
+          )
           .attr("data-i18n", "toast.global_settings_failed_body");
         feedbackToast.removeClass("border-warning").addClass("border-danger");
         feedbackToast

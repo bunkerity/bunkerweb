@@ -53,7 +53,10 @@
         if (window.BWWebAuthn.isCancellation(error)) return;
         setStatus(
           error.message ||
-            "Couldn't sign you in with a passkey, please try again",
+            t(
+              "error.passkey_sign_in_failed",
+              "Couldn't sign you in with a passkey. Please try again.",
+            ),
           true,
         );
       }

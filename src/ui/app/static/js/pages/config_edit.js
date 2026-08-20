@@ -163,7 +163,7 @@ $(document).ready(function () {
     selectedService = serviceName;
     const label =
       serviceName.toLowerCase() === "global"
-        ? "Global"
+        ? t("scope.global", "Global")
         : $serviceDropdownItems
             .filter((_, item) => {
               return (
@@ -190,7 +190,7 @@ $(document).ready(function () {
 
     setSelectedService("global");
     showFeedbackToast(
-      "Warning",
+      t("flash.warning", "Warning"),
       `${globalCrsServiceScopedModsecCrsError} The service was switched to Global.`,
       "warning",
     );
@@ -245,7 +245,10 @@ $(document).ready(function () {
     ) {
       showTemporaryTooltip(
         $("#select-type").parent(),
-        "You can now select global types for your custom config.",
+        t(
+          "tooltip.config_global_types_available",
+          "You can now select global types for your custom configuration.",
+        ),
         "info",
       );
     } else if (
@@ -286,10 +289,12 @@ $(document).ready(function () {
     const label = $draftToggle.find("span[data-i18n]");
     if (isDraft) {
       icon.attr("class", "bx bx-sm bx-file-blank");
-      label.attr("data-i18n", "status.draft").text("Draft");
+      label.attr("data-i18n", "status.draft").text(t("status.draft", "Draft"));
     } else {
       icon.attr("class", "bx bx-sm bx-globe");
-      label.attr("data-i18n", "status.online").text("Online");
+      label
+        .attr("data-i18n", "status.online")
+        .text(t("status.online", "Online"));
     }
   };
 
@@ -305,7 +310,9 @@ $(document).ready(function () {
 
   $(".save-config").on("click", function () {
     if (isReadOnly) {
-      alert("This action is not allowed in read-only mode.");
+      alert(
+        t("alert.readonly_mode", "This action is disabled in read-only mode."),
+      );
       return;
     }
     const value = editor.getValue().trim();
@@ -318,7 +325,7 @@ $(document).ready(function () {
       isDraft === originalDraft;
 
     if (noChanges) {
-      alert("No changes detected.");
+      alert(t("alert.no_changes_detected", "No changes detected."));
       return;
     }
 
@@ -327,9 +334,14 @@ $(document).ready(function () {
     const pattern = $configInput.attr("pattern");
     let errorMessage = "";
     let isValid = true;
+    // Same shape as template-settings-page.js: the generic validation messages take the field
+    // name, so the label has to be translated before it is interpolated into them.
+    const fieldLabel = t("form.label.configuration_name", "Configuration Name");
 
     if (!configName) {
-      errorMessage = "A custom configuration name is required.";
+      errorMessage = t("validation.required", "{{field}} is required.", {
+        field: fieldLabel,
+      });
       isValid = false;
     } else if (pattern && !new RegExp(pattern).test(configName))
       isValid = false;
@@ -338,7 +350,12 @@ $(document).ready(function () {
       $configInput
         .attr(
           "data-bs-original-title",
-          errorMessage || "Please enter a valid configuration name.",
+          errorMessage ||
+            t(
+              "validation.pattern",
+              "Please enter a valid value for {{field}}.",
+              { field: fieldLabel },
+            ),
         )
         .tooltip("show");
 

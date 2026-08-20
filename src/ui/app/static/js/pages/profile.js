@@ -207,17 +207,17 @@ $(document).ready(function () {
   function generatePlaceholderItems() {
     const items = [
       "bx-window-alt",
-      "Browser",
+      t("profile.session.browser", "Browser"),
       "bx-layer",
-      "Operating System",
+      t("profile.session.os", "Operating System"),
       "bx-devices",
-      "Device",
+      t("profile.session.device", "Device"),
       "bx-network-chart",
-      "IP Address",
+      t("profile.session.ip_address", "IP Address"),
       "bx-time",
-      "Creation date",
+      t("profile.session.creation_date", "Creation Date"),
       "bx-time",
-      "Last Activity",
+      t("profile.session.last_activity", "Last Activity"),
     ];
 
     return items
@@ -354,9 +354,24 @@ $(document).ready(function () {
       : otherItemsClasses;
 
     const head = [
-      ["bx-window-alt", "Browser", "profile.session.browser", session.browser],
-      ["bx-layer", "Operating System", "profile.session.os", session.os],
-      ["bx-devices", "Device", "profile.session.device", session.device],
+      [
+        "bx-window-alt",
+        t("profile.session.browser", "Browser"),
+        "profile.session.browser",
+        session.browser,
+      ],
+      [
+        "bx-layer",
+        t("profile.session.os", "Operating System"),
+        "profile.session.os",
+        session.os,
+      ],
+      [
+        "bx-devices",
+        t("profile.session.device", "Device"),
+        "profile.session.device",
+        session.device,
+      ],
     ]
       .map(([icon, label, i18nKey, value]) =>
         generateTextGroupItem(icon, label, i18nKey, value, itemsClasses),
@@ -366,13 +381,13 @@ $(document).ready(function () {
     const tail = [
       [
         "bx-time",
-        "Creation date",
+        t("profile.session.creation_date", "Creation Date"),
         "profile.session.creation_date",
         session.creation_date,
       ],
       [
         "bx-time",
-        "Last Activity",
+        t("profile.session.last_activity", "Last Activity"),
         "profile.session.last_activity",
         session.last_activity,
       ],
