@@ -32,7 +32,7 @@ Beyond the per-service settings below, a redirect can be stored once as a **name
 
 | Setting                   | Default | Context   | Multiple | Description                                                                                                       |
 | ------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected.                                                      |
+| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected. A value starting with `^` or ending with `$` is treated as a regex location. |
 | `REDIRECT_TO`             |         | multisite | yes      | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.        |
 | `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | yes      | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                    |
 | `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | yes      | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301`, `302`, `303`, `307`, or `308`. |

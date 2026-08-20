@@ -20,7 +20,7 @@ Comment ça marche :
 
 | Paramètre                 | Défaut | Contexte  | Multiple | Description                                                         |
 | ------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`    | multisite | oui      | Chemin source à rediriger.                                          |
+| `REDIRECT_FROM`           | `/`    | multisite | oui      | Chemin source à rediriger. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. |
 | `REDIRECT_TO`             |        | multisite | oui      | URL de destination. Laisser vide pour désactiver.                   |
 | `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | oui      | Conserver le chemin d'origine en l'ajoutant à l'URL de destination. |
 | `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code HTTP : `301`, `302`, `303`, `307` ou `308`.                    |

@@ -6,11 +6,18 @@ block, and NGINX refuses two ``location`` blocks with the same URI. A path is th
 across all three families at once — by an inline setting or by an attached resource alike — so
 every vertical that mounts something on a path checks here rather than only against its own
 kind. The render-time mirror of this lives in ``utils/location_claims.py``.
+
+⚠️ Both mirrors compare ``rendered_location()`` output, not the stored value: an anchored path
+renders as a regex ``location``, so ``^/api`` and ``~ ^/api`` are one location and must be one
+claim. **Normalizing only one mirror produces a false refusal** — the guard rejecting an attach
+NGINX would accept — which is what happened when the templates gained the rule and this file did
+not. ``tests/unit/db/test_redirects.py`` pins both directions.
 """
 
 from typing import Any, Dict, List, Optional, Tuple
 
 from model import Global_values, Redirects, ResourceAttachments, Resources, Services_settings, Upstreams  # type: ignore
+from location_claims import rendered_location  # type: ignore
 from sqlalchemy import select
 
 # label -> (setting whose non-empty value makes the location render, setting holding its path)
@@ -38,7 +45,7 @@ def inline_family_paths(session, service_id: str, trigger: str, path_setting: st
         for row in session.execute(scope):
             by_suffix.setdefault(row.suffix or 0, {})[row.setting_id] = row.value or ""
 
-    return {values.get(path_setting) or "/" for values in by_suffix.values() if values.get(trigger)}
+    return {rendered_location(path_setting, values.get(path_setting) or "/") for values in by_suffix.values() if values.get(trigger)}
 
 
 def inline_location_paths(session, service_id: str, *, families: Optional[Dict[str, Tuple[str, str]]] = None) -> Dict[str, str]:
@@ -93,17 +100,20 @@ def location_conflict(session, resource_id: str, path: str, service_ids: List[st
     """
     if not service_ids:
         return ""
+    # Compare what NGINX will receive, not what was stored; the messages keep the operator's own
+    # spelling, since that is what they have to go and change.
+    location = rendered_location("", path)
     for service_id, claimed, kind, name in resource_location_claims(session, service_ids, resource_id):
-        if claimed == path:
+        if rendered_location("", claimed) == location:
             return (
-                f"Cannot attach {subject}: {service_id} already serves {path} through the {kind} “{name}”. "
+                f"Cannot attach {subject}: {service_id} already serves {claimed} through the {kind} “{name}”. "
                 f"Detach “{name}” from {service_id}, or give one of them a different path."
             )
     for service_id in service_ids:
         inline = inline_location_paths(session, service_id)
-        if path in inline:
+        if location in inline:
             return (
-                f"Cannot attach {subject}: {service_id} already serves {path} through its own {inline[path]} settings. "
+                f"Cannot attach {subject}: {service_id} already serves {path} through its own {inline[location]} settings. "
                 f"Clear those settings for {path} on {service_id}, or use a different path."
             )
     return ""

@@ -22,7 +22,7 @@ Siga estos pasos para configurar y utilizar la función de Redirección:
 
 | Ajuste                    | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
 | ------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá.                                                                     |
+| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. |
 | `REDIRECT_TO`             |                   | multisite | yes      | **URL de destino:** La URL de destino a la que se redirigirá a los visitantes. Deje en blanco para deshabilitar la redirección. |
 | `REDIRECT_TO_REQUEST_URI` | `no`              | multisite | yes      | **Preservar ruta:** Cuando se establece en `yes`, agrega el URI de la solicitud original a la URL de destino.                   |
 | `REDIRECT_TO_STATUS_CODE` | `301`             | multisite | yes      | **Código de estado HTTP:** El código de estado HTTP a utilizar. Opciones: `301`, `302`, `303`, `307` o `308`.                   |

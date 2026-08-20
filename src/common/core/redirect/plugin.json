@@ -8,7 +8,7 @@
     "REDIRECT_FROM": {
       "context": "multisite",
       "default": "/",
-      "help": "Path to redirect from.",
+      "help": "Path to redirect from. A value starting with ^ or ending with $ is treated as a regex location.",
       "id": "redirect-from",
       "label": "Redirect from",
       "regex": "^.+",

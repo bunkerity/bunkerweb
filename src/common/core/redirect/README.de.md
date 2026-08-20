@@ -22,7 +22,7 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 
 | Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                |
 | ------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird.                                                           |
+| `REDIRECT_FROM`           | `/`      | multisite | ja       | **Pfad, von dem umgeleitet wird:** Der Pfad, der umgeleitet wird. Ein Wert, der mit `^` beginnt oder mit `$` endet, wird als Regex-Location behandelt. |
 | `REDIRECT_TO`             |          | multisite | ja       | **Ziel-URL:** Die Ziel-URL, zu der Besucher umgeleitet werden. Leer lassen, um die Umleitung zu deaktivieren.               |
 | `REDIRECT_TO_REQUEST_URI` | `no`     | multisite | ja       | **Pfad beibehalten:** Wenn auf `yes` gesetzt, wird die ursprüngliche Anfrage-URI an die Ziel-URL angehängt.                 |
 | `REDIRECT_TO_STATUS_CODE` | `301`    | multisite | ja       | **HTTP-Statuscode:** Der für die Umleitung zu verwendende HTTP-Statuscode. Optionen: `301`, `302`, `303`, `307` oder `308`. |

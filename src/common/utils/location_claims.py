@@ -24,6 +24,31 @@ LOCATION_FAMILIES = {
 }
 
 
+# The four modifiers NGINX accepts in a ``location``. Anything else in that slot is a literal URI.
+NGINX_LOCATION_MODIFIERS = ("~", "~*", "=", "^~")
+
+
+def rendered_location(path_setting: str, path: str) -> str:
+    """The ``location`` URI NGINX will actually see, so two spellings of one location collide.
+
+    All three templates render an anchored path as a regex location — the ``url_is_regex`` /
+    ``from_is_regex`` set in ``reverse-proxy.conf``, ``grpc.conf`` and ``redirect.conf`` — which
+    makes the ``~`` implicit, so ``^/api`` and ``~ ^/api`` both produce ``location ~ ^/api`` and
+    NGINX refuses the pair with *duplicate location*. Claiming the raw value lets both through
+    the conflict check and the service then fails to start.
+
+    ⚠️ ``db_methods/locations.py`` is the mutation-time mirror of this and calls this same
+    function. The two must move together: normalizing one alone produces a *false refusal*, and
+    ``tests/unit/db/test_redirects.py`` pins that.
+    """
+    parts = path.split()
+    if parts and parts[0] in NGINX_LOCATION_MODIFIERS:
+        return " ".join(parts)  # collapse the separator so "~  /a" and "~ /a" are one claim
+    if path.startswith("^") or path.endswith("$"):
+        return f"~ {path}"
+    return path
+
+
 def suffix_key(base: str, index: int) -> str:
     return base if index == 0 else f"{base}_{index}"
 
@@ -78,5 +103,5 @@ def claimed_paths(config: Dict[str, Any], prefixes: List[str], *, families: Opti
     claims: Dict[str, str] = {}
     for label, (trigger, path_setting) in (families or LOCATION_FAMILIES).items():
         for path in family_occupancy(config, prefixes, trigger, path_setting).values():
-            claims.setdefault(path, label)
+            claims.setdefault(rendered_location(path_setting, path), label)
     return claims

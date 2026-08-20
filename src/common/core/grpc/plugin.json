@@ -27,7 +27,7 @@
     "GRPC_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "Location URL that will be proxied to a gRPC upstream.",
+      "help": "Location URL that will be proxied to a gRPC upstream. A value starting with ^ or ending with $ is treated as a regex location.",
       "id": "grpc-url",
       "label": "gRPC URL",
       "regex": "^.+$",

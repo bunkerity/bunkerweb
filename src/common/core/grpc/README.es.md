@@ -23,7 +23,7 @@ El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HT
 | ---------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
 | `USE_GRPC`                   | `no`           | multisite | no       | **Habilitar gRPC:** Pon `yes` para habilitar el proxy gRPC.                                            |
 | `GRPC_HOST`                  |                | multisite | sí       | **Upstream gRPC:** Valor usado por `grpc_pass` (por ejemplo `grpc://service:50051` o `grpcs://...`).   |
-| `GRPC_URL`                   | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC.                                             |
+| `GRPC_URL`                   | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. |
 | `GRPC_CUSTOM_HOST`           |                | multisite | no       | **Cabecera Host personalizada:** Sobrescribe la cabecera `Host` enviada al upstream.                   |
 | `GRPC_HEADERS`               |                | multisite | sí       | **Cabeceras extra al upstream:** Lista separada por punto y coma de valores para `grpc_set_header`.    |
 | `GRPC_HIDE_HEADERS`          |                | multisite | sí       | **Cabeceras de respuesta ocultas:** Lista separada por espacios de valores para `grpc_hide_header`.    |

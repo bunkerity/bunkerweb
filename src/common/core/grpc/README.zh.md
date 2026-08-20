@@ -23,7 +23,7 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
 | ---------------------------- | ------ | --------- | ------ | -------------------------------------------------------------------------------------- |
 | `USE_GRPC`                   | `no`   | multisite | 否     | **启用 gRPC：** 设置为 `yes` 以启用 gRPC 代理。                                        |
 | `GRPC_HOST`                  |        | multisite | 是     | **gRPC 上游：** `grpc_pass` 使用的值（例如 `grpc://service:50051` 或 `grpcs://...`）。 |
-| `GRPC_URL`                   | `/`    | multisite | 是     | **Location URL：** 将被代理到 gRPC 上游的路径。                                        |
+| `GRPC_URL`                   | `/`    | multisite | 是     | **Location URL：** 将被代理到 gRPC 上游的路径。 以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。 |
 | `GRPC_CUSTOM_HOST`           |        | multisite | 否     | **自定义 Host 头：** 覆盖发送到上游的 `Host` 头。                                      |
 | `GRPC_HEADERS`               |        | multisite | 是     | **额外上游请求头：** 分号分隔的 `grpc_set_header` 值列表。                             |
 | `GRPC_HIDE_HEADERS`          |        | multisite | 是     | **隐藏响应头：** 空格分隔的 `grpc_hide_header` 值列表。                                |

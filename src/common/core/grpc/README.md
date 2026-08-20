@@ -29,7 +29,7 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
 | ---------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
 | `USE_GRPC`                   | `no`    | multisite | no       | **Enable gRPC:** Set to `yes` to enable gRPC proxying.                                              |
 | `GRPC_HOST`                  |         | multisite | yes      | **gRPC Upstream:** Value used by `grpc_pass` (for example `grpc://service:50051` or `grpcs://...`). |
-| `GRPC_URL`                   | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream.                                   |
+| `GRPC_URL`                   | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the gRPC upstream. A value starting with `^` or ending with `$` is treated as a regex location. |
 | `GRPC_CUSTOM_HOST`           |         | multisite | no       | **Custom Host Header:** Overrides `Host` header sent upstream.                                      |
 | `GRPC_HEADERS`               |         | multisite | yes      | **Extra Upstream Headers:** Semicolon-separated list of `grpc_set_header` values.                   |
 | `GRPC_HIDE_HEADERS`          |         | multisite | yes      | **Hidden Response Headers:** Space-separated list of `grpc_hide_header` values.                     |

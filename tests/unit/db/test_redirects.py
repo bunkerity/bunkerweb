@@ -196,6 +196,71 @@ def test_attach_refuses_a_path_an_inline_rule_already_serves(db):
     assert "already serves /docs through its own redirect settings" in db.attach_redirect(resource_id, "app1.example.com")
 
 
+def _seed_reverse_proxy_settings(db) -> None:
+    """The inline reverse-proxy settings the location guard reads.
+
+    ``REVERSE_PROXY_URL`` already comes from ``seed_minimal``; the host is the trigger the
+    template loops on and without it the guard sees no inline location at all.
+    """
+    with session(db) as s:
+        s.add(Plugins(id="reverseproxy", name="Reverse proxy", description="Reverse proxy settings.", version="1.0"))
+    add_setting(db, "REVERSE_PROXY_HOST", plugin_id="general", context="multisite", multiple="reverse-proxy")
+
+
+def test_from_path_takes_an_anchored_value(db):
+    """Unlike an upstream's ``match_path`` (``upstreams.py``: *must start with /*), a redirect's
+    ``from_path`` has no path validation — which is what lets a regex location reach the guard."""
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+
+    resource_id, error = db.create_redirect(name="rx", from_path="^/api", to_url="https://x.example.com")
+
+    assert error == "" and resource_id
+
+
+def test_an_anchored_path_is_claimed_as_the_regex_location_it_renders(db):
+    """The two location guards are mirrors and must normalize identically.
+
+    ``db_methods/locations.py`` refuses at mutation time, ``utils/location_claims.py`` claims at
+    render time, and each docstring names the other. All three templates now render an anchored
+    path as ``location ~ …``, so ``^/api`` and ``~ ^/api`` are ONE location.
+
+    **If only one mirror normalizes, this test fails**, and it fails in both directions:
+    normalize neither and the first assertion misses a real duplicate; normalize only the
+    render-time side and the guard produces a false refusal on a pair NGINX accepts.
+    """
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    _seed_reverse_proxy_settings(db)
+    add_service_setting(db, service_id="app1.example.com", setting_id="REVERSE_PROXY_HOST", value="http://a:80", suffix=1)
+    add_service_setting(db, service_id="app1.example.com", setting_id="REVERSE_PROXY_URL", value="^/api", suffix=1)
+
+    # Same location, spelled the other way: NGINX would refuse the pair, so the guard must too.
+    spelled_differently = _create(db, name="rx", from_path="~ ^/api")
+    assert "already serves" in db.attach_redirect(spelled_differently, "app1.example.com")
+
+    # A different regex on the same service renders a different location and stays free.
+    unrelated = _create(db, name="ry", from_path="^/other")
+    assert db.attach_redirect(unrelated, "app1.example.com") == ""
+
+
+def test_two_attached_resources_cannot_spell_one_regex_location_two_ways(db):
+    """The resource-vs-resource arm of the same rule.
+
+    ``location_conflict`` compares an incoming path against paths already mounted by *other*
+    attached resources, and that comparison needs the same normalization as the inline one — a
+    mutant that reverts only this arm leaves the inline test green.
+    """
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    first = _create(db, name="rx", from_path="^/api")
+    assert db.attach_redirect(first, "app1.example.com") == ""
+
+    second = _create(db, name="ry", from_path="~ ^/api")
+
+    assert "already serves" in db.attach_redirect(second, "app1.example.com")
+
+
 def test_a_blank_inline_target_does_not_reserve_the_path(db):
     seed_minimal(db)
     _seed_redirect_plugin(db)
