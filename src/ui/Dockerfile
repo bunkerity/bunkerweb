@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:26730869004e2b9c4b9ad09cab8625e81d256d1ce97e72df5520e806b1709f92 AS builder
+FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -65,7 +65,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.14-alpine@sha256:26730869004e2b9c4b9ad09cab8625e81d256d1ce97e72df5520e806b1709f92
+FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -82,7 +82,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client sqlite post
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "libpq>=18.5-r0" "postgresql18-client>=18.5-r0" # CVE-2026-6464 CVE-2026-6469 CVE-2026-6470 CVE-2026-6471 CVE-2026-14662 CVE-2026-14663 CVE-2026-14664 CVE-2026-14666 CVE-2026-14668 CVE-2026-14669 CVE-2026-14670 CVE-2026-14671 CVE-2026-14672 CVE-2026-14673 CVE-2026-14676 CVE-2026-14677 CVE-2026-14678 CVE-2026-14679 CVE-2026-14680 CVE-2026-15741 CVE-2026-15742 CVE-2026-16238 CVE-2026-16239 CVE-2026-16241 CVE-2026-18024 CVE-2026-18408 CVE-2026-19385
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
