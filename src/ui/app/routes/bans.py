@@ -11,8 +11,6 @@ from html import escape, unescape
 
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
@@ -601,6 +599,13 @@ def bans_export_excel():
         LOGGER.error(f"Error collecting bans for Excel export: {e}")
         LOGGER.debug(format_exc())
         return jsonify({"error": "Failed to export bans"}), 500
+
+    # openpyxl is imported here, not at module scope: it pulls 311 modules and ~120 ms of import
+    # time (measured in the UI image, 2026-08-19; 110-210 ms across runs), and this blueprint is
+    # registered at startup, so at module scope every UI worker pays that boot cost for an export
+    # almost nobody runs.
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
 
     wb = Workbook()
     ws = wb.active

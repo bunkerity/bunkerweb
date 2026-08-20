@@ -17,15 +17,26 @@ from app.utils import LOGGER, flash
 from common_utils import get_redis_client as get_common_redis_client  # type: ignore
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
-REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
+# `\Z`, not `$`: this validates the wizard's user-supplied `ui_host`, and `setup.py:226` then
+# writes the *original* string into `REVERSE_PROXY_HOST` -- which is rendered into an nginx
+# `proxy_pass`. With `$` a trailing newline passes validation and is carried through verbatim.
+REVERSE_PROXY_PATH = re_compile(
+    r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)\Z"
+)
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 # `\Z`, not `$`: `$` also matches before a trailing newline, so `"plugin\n"` would pass and
 # become a directory name. Same defect as the config-name regexes.
 PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}\Z")
+# `\Z` here too, though the consequence differs from the validators above: `.` never matches a
+# newline, so `name` is captured *without* it either way. What `$` buys is that
+# `CUSTOM_CONF_HTTP_x\n` matches at all -- and `services.py:1139` then derives the same
+# `http_x` key from it as the clean form, silently aliasing two form fields onto one config.
 CUSTOM_CONF_RX = re_compile(
-    r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
+    r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)\Z"
 )
-FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?$")
+# Same aliasing as `CUSTOM_CONF_RX`: with `$`, `SETTING__FILE_NAME\n` matches and
+# `extract_file_setting_names` derives the same `SETTING` key as the clean field.
+FILE_SETTING_NAME_RX = re_compile(r"^(?P<setting>.+)__FILE_NAME(?P<suffix>_\d+)?\Z")
 
 
 def _sanitize_filename(name: str) -> str:
