@@ -53,13 +53,20 @@ def _flatten_table_increments(raw_increments):
     return []
 
 
-def _build_counter_data(entries, field_name, label):
+def _url_path(value):
+    return value.split("?", 1)[0] or "/"
+
+
+def _build_counter_data(entries, field_name, label, normalize=None):
     counter = Counter()
     for entry in entries:
         value = entry.get(field_name)
         if value in (None, ""):
             value = "N/A"
-        counter[str(value)] += 1
+        value = str(value)
+        if normalize:
+            value = normalize(value)
+        counter[value] += 1
 
     formatted = {label: [], "count": []}
     for value, count in counter.most_common():
@@ -175,7 +182,10 @@ def pre_render(**kwargs):
         if filtered_events or apply_service_filter:
             ret["top_bad_behavior_status"]["data"] = _build_counter_data(filtered_events, "status", "code")
             ret["top_bad_behavior_ips"]["data"] = _build_counter_data(filtered_events, "ip", "ip")
-            ret["top_bad_behavior_urls"]["data"] = _build_counter_data(filtered_events, "url", "url")
+            # Count the path, not the full URI: a query string would mint a row per scanned
+            # parameter and drown the chart in single hits. The event keeps the full URI so
+            # the history table below still shows it.
+            ret["top_bad_behavior_urls"]["data"] = _build_counter_data(filtered_events, "url", "url", _url_path)
         else:
             format_data = [
                 {
@@ -191,36 +201,6 @@ def pre_render(**kwargs):
                 data["code"].append(item["code"])
                 data["count"].append(item["count"])
             ret["top_bad_behavior_status"]["data"] = data
-
-            format_data = [
-                {
-                    "ip": key.split("_")[2],
-                    "count": int(value),
-                }
-                for key, value in metrics.items()
-                if key.startswith("counter_ip_")
-            ]
-            format_data.sort(key=itemgetter("count"), reverse=True)
-            data = {"ip": [], "count": []}
-            for item in format_data:
-                data["ip"].append(item["ip"])
-                data["count"].append(item["count"])
-            ret["top_bad_behavior_ips"]["data"] = data
-
-            format_data = [
-                {
-                    "url": key.split("_", 2)[2],
-                    "count": int(value),
-                }
-                for key, value in metrics.items()
-                if key.startswith("counter_url_")
-            ]
-            format_data.sort(key=itemgetter("count"), reverse=True)
-            data = {"url": [], "count": []}
-            for item in format_data:
-                data["url"].append(item["url"])
-                data["count"].append(item["count"])
-            ret["top_bad_behavior_urls"]["data"] = data
 
     except BaseException as e:
         logger.debug(format_exc())

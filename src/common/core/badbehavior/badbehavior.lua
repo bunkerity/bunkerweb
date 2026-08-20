@@ -98,10 +98,12 @@ function badbehavior:log()
 		return self:ret(false, "can't add incr operation : " .. err)
 	end
 	self:set_metric("counters", "status_" .. status, 1)
-	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
 	local request_uri = self.ctx.bw.request_uri or "-"
-	self:set_metric("counters", "url_" .. request_uri, 1)
-	self:set_metric("tables", "increments_" .. self.ctx.bw.remote_addr, {
+	-- The client address and the URI are fields of the event record below, never part of a
+	-- metric key : a key built from request data mints one cache slot per attacker, which
+	-- evicts every other plugin's metrics under a scan flood. Top IPs and top URLs are
+	-- derived from these events instead.
+	self:set_metric("tables", "increments", {
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
 		ip = self.ctx.bw.remote_addr,
@@ -267,7 +269,10 @@ function badbehavior:timer()
 		end
 	end
 
-	-- Add bans if needed
+	-- Add bans if needed. The event ring is a single shared table now, so it is fetched and
+	-- indexed by IP once here : re-reading and rescanning it for every banned IP would be
+	-- quadratic in the number of bans, and a scan flood produces plenty of both.
+	local increments_by_ip
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
 			local wl_ip, wl_info = is_ip_whitelisted(data.ip, data.server_name)
@@ -294,7 +299,37 @@ function badbehavior:timer()
 				)
 			elseif data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
-				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
+				if not increments_by_ip then
+					increments_by_ip = {}
+					for _, increment in ipairs(self:get_metric("tables", "increments") or {}) do
+						local bucket = increments_by_ip[increment.ip]
+						if not bucket then
+							bucket = {}
+							increments_by_ip[increment.ip] = bucket
+						end
+						bucket[#bucket + 1] = increment
+					end
+				end
+				-- The ring is shared and bounded, so under a distributed flood an IP can be
+				-- banned with none of its own events left in it. Fall back to the counter that
+				-- triggered the ban so the report still carries why it happened.
+				local reason_data = increments_by_ip[data.ip]
+				if not reason_data or #reason_data == 0 then
+					reason_data = {
+						{
+							date = time(date("!*t")),
+							ip = data.ip,
+							country = data.country,
+							server_name = data.server_name,
+							status = data.status,
+							security_mode = data.security_mode,
+							ban_scope = data.ban_scope,
+							ban_time = data.ban_time,
+							threshold = data.threshold,
+							count_time = data.count_time,
+						},
+					}
+				end
 				local ok, err = add_ban(
 					data.ip,
 					"bad behavior",

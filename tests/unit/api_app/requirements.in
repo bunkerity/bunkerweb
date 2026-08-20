@@ -1,0 +1,20 @@
+# Dependencies for the api_app lane only -- deliberately NOT folded into
+# tests/unit/requirements.in.
+#
+# This lane runs in its own pytest invocation because it imports the API's `app` package, and
+# `tests/unit/ui/conftest.py` relies on `import app` resolving uniquely to `src/ui/app`. Keeping
+# the pins separate too means the main unit suite's install is unchanged: a runner that never
+# invokes this lane never installs these.
+#
+# Versions match src/api/requirements.in so the tests run what the API ships, with one deliberate
+# exception noted below.
+
+# src/api/requirements.in pins a GitHub source archive (commit c0fa698, labelled 0.4.1), which
+# needs a Rust toolchain to build -- src/api/Dockerfile installs `cargo` for exactly this. PyPI's
+# 0.4.0 is a prebuilt wheel and installs anywhere. The tests assert BunkerWeb's guard behaviour
+# (that it raises max_time and leaves max_facts/max_iterations alone), not biscuit internals, so
+# the one-patch drift does not touch what is under test -- and it keeps the lane installable on a
+# runner with no compiler.
+biscuit-python==0.4.0
+fastapi==0.141.1
+pydantic-settings==2.13.0

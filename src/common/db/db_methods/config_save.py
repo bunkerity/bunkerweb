@@ -25,9 +25,9 @@ from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 
 from sqlalchemy import delete, select, update
-from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 
-from .common import DatabaseMixinBase, canonicalize_setting_value, delete_service_rows
+from .common import EDITABLE_METHODS, DatabaseMixinBase, canonicalize_setting_value, delete_service_rows
 from .locations import server_type_attachment_conflict
 
 
@@ -91,6 +91,7 @@ def _log_ownership_refusal(logger, ctx: _SaveConfigContext, target: str, owner_m
     that is one line per customised setting per service per save. Hence debug for scheduler,
     warning for the callers that actually asked for a specific write and did not get it.
     """
+    # method-decision: deliberate: picks a log level, owns nothing. See the docstring above for why scheduler is quieter.
     message = f"Refusing to overwrite {target} (owned by method {owner_method}) with method {ctx.method}: value left unchanged"
     if ctx.method == "scheduler":
         logger.debug(message)
@@ -206,6 +207,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -228,10 +230,15 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                                      misleading: it does not restrict input to global
                                      settings, it only disables the service-management
                                      side-effects.
+            retry_on_conflict: Recompute and save once more when the flush hits a unique
+                               violation because another writer inserted the same rows
+                               between our read and our flush. Set False on the retry
+                               itself so a genuine conflict cannot loop.
         """
         to_put = []
         to_update = []
         to_delete = []
+        conflict = None
         changed_plugins = set()
         changed_services = False
         service_template_change = False
@@ -502,9 +509,34 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     session.delete(service_setting)
 
                 session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if not retry_on_conflict:
+                    return str(e)
+                conflict = str(e)
             except BaseException as e:
                 session.rollback()
                 return str(e)
+
+        if conflict is not None:
+            # Another writer inserted rows we had read as missing, between our read and our flush --
+            # the scheduler's first-run save against autoconf applying its initial configuration on
+            # a fresh database is the common one. Dropping the batch loses every setting the other
+            # writer does not send: they stay at their defaults, and the per-service rows a later
+            # save materialises from them then shadow the globals. Recompute against the committed
+            # state instead. Outside the session block: retrying inside it would nest one scoped
+            # session in another.
+            self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
+            return self.save_config(
+                config,
+                method,
+                changed,
+                file_names,
+                skip_service_management=skip_service_management,
+                disable_cleanup=disable_cleanup,
+                explicit_keys=explicit_keys,
+                retry_on_conflict=False,
+            )
 
         return changed_plugins
 
@@ -520,6 +552,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # autoconf services missing from the incoming SERVER_NAME so the services_settings
         # cleanup pass below leaves their rows in place (the service itself will be flipped
         # to is_draft=True further down instead of being deleted).
+        # method-decision: deliberate: AUTOCONF_DISABLE_CLEANUP is an autoconf-only flag; no other method drafts on teardown.
         drafted_service_ids: Set[str] = set()
         if disable_cleanup and ctx.method == "autoconf" and not skip_service_management:
             server_name_value = ctx.config.get("SERVER_NAME", "")
@@ -529,6 +562,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 incoming_service_ids = {s for s in server_name_value if s}
             else:
                 incoming_service_ids = set()
+            # method-decision: deliberate: the rows being spared are autoconf's own, by definition of the flag above.
             existing_autoconf_services = session.execute(select(Services.id).filter_by(method="autoconf")).all()
             drafted_service_ids = {row.id for row in existing_autoconf_services if row.id not in incoming_service_ids}
         return drafted_service_ids
@@ -547,7 +581,16 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # Collect global settings to delete
         global_settings_to_delete = []
         global_method_total = 0
-        for db_global_config in session.scalars(select(Global_values).filter_by(method=ctx.method)).all():
+        # Same rule as the service-settings cleanup below: the editable methods own one another's
+        # rows, so cleanup uses the same set the write path does, and every other caller keeps the
+        # exact match. The wizard writes global settings too (setup.py:289 hands base_config to
+        # new_service(override_method="wizard")), so without this a global setting the wizard wrote
+        # could be overwritten from the UI but never cleared -- the save reported success and the
+        # old value stayed.
+        # The scheduler wipe guard below is unaffected: it only fires for ctx.method == "scheduler",
+        # which is not in EDITABLE_METHODS, so global_method_total is still an exact-match count there.
+        cleanup_methods = EDITABLE_METHODS if ctx.method in EDITABLE_METHODS else {ctx.method}
+        for db_global_config in session.scalars(select(Global_values).filter(Global_values.method.in_(cleanup_methods))).all():
             global_method_total += 1
             key = db_global_config.setting_id
             if db_global_config.suffix:
@@ -580,6 +623,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # to include the current config in its payload — rather than a legitimate intent to
         # purge everything. Callers that really want to clear all scheduler-method globals
         # can do so explicitly by deleting individual rows or using the admin API.
+        # method-decision: deliberate. Scheduler-only, and not an EDITABLE_METHODS question at all: it exists for the
+        # variables.env / environment race at scheduler startup, where a transient empty environment
+        # would otherwise delete every config-as-code row. No other method has that failure mode.
         if ctx.method == "scheduler" and global_method_total > 0 and len(global_settings_to_delete) == global_method_total:
             self.logger.warning(
                 f"Refusing to delete all {global_method_total} scheduler-method global setting(s) via "
@@ -615,7 +661,18 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # Track per-service totals so we can detect would-wipe-the-whole-service deletions below.
         service_method_total: Dict[str, int] = defaultdict(int)
         service_method_to_delete: Dict[str, int] = defaultdict(int)
-        for db_service_config in ([] if skip_service_management else session.scalars(select(Services_settings).filter_by(method=ctx.method)).all()):
+        # Which rows this save may CLEAN UP. The editable methods own one another's rows -- that is
+        # what _is_method_compatible has always said, and 33f42592d added "wizard" to the set -- so
+        # cleanup has to use the same set the write path does. Matching only ctx.method meant a save
+        # could WRITE a sibling method's row but never CLEAR one: unchecking a setting on a
+        # wizard-created service reported success and silently kept the old value, and because a UI
+        # write does not migrate the row's method it never healed on a later edit either.
+        # scheduler and autoconf are deliberately NOT in EDITABLE_METHODS: config-as-code rows stay
+        # owned by the method that declared them, so an exact match is kept for every other caller.
+        cleanup_methods = EDITABLE_METHODS if ctx.method in EDITABLE_METHODS else {ctx.method}
+        for db_service_config in (
+            [] if skip_service_management else session.scalars(select(Services_settings).filter(Services_settings.method.in_(cleanup_methods))).all()
+        ):
             # Preserve settings of services about to be drafted by the autoconf disable_cleanup path
             # so they can be re-published when the orchestration object returns.
             if db_service_config.service_id in drafted_service_ids:
@@ -661,6 +718,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # (Advanced-mode form post missing keys, JS form rebuild race, plugin tab that failed
         # to render). Genuine service deletion drops the id from SERVER_NAME and flows
         # through the removal path further down, so this guard never blocks legitimate deletes.
+        # method-decision: deliberate. ("ui", "api") and not EDITABLE_METHODS, while the cleanup select above uses
+        # the wider set: this guard is pinned to that loop, which only ever yields rows the caller
+        # may clean up, so the only thing "wizard" would add here is guarding the setup wizard's own
+        # single, server-built save. No user action is silently discarded either way, and the wizard
+        # save path is exactly where this port has already regressed once today. Asymmetric on
+        # purpose -- do not "complete" it without a ruling. (manager, 12:18 CEST)
         if ctx.method in ("ui", "api") and service_method_to_delete and not skip_service_management:
             incoming_server_name = ctx.config.get("SERVER_NAME", "")
             if isinstance(incoming_server_name, str):
@@ -726,6 +789,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         services = [service for service in services if service]  # Clean up empty strings
 
+        # method-decision: deliberate: same flag, same reason.
         # Only meaningful for the autoconf method.
         disable_cleanup = disable_cleanup and ctx.method == "autoconf"
 
@@ -739,6 +803,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # the last Ingress and re-applying a new one gets stuck with stale services in the DB.
             # For other methods: protects against callers that omit SERVER_NAME entirely
             # (e.g. a global-only config update that forgot to set skip_service_management=True).
+            # method-decision: deliberate: DELETION ownership, not edit ownership -- this decides whose services an empty
+            # SERVER_NAME may remove. "wizard" stays out because the wizard service cannot be deleted
+            # at all (api/app/routers/services.py:240, 403). The autoconf branches below are autoconf's
+            # ingress-teardown semantics, covered by the same token.
             method_services = [s for s in db_services if s.method == ctx.method or (s.method in ("ui", "api") and ctx.method in ("ui", "api"))]
             if not services and method_services and (ctx.method == "autoconf" or "SERVER_NAME" not in ctx.config):
                 if ctx.method == "autoconf":
@@ -779,6 +847,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 missing_ids = [
                     service.id
                     for service in db_services
+                    # method-decision: deliberate: DELETION ownership again -- the removal path. Same reason as above: widening this
+                    # would make the undeletable wizard service deletable through a save that omits it.
                     if (service.method == ctx.method or (service.method in ("ui", "api") and ctx.method in ("ui", "api"))) and service.id not in services
                 ]
 
@@ -849,7 +919,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             missing_drafts = [
                 service.id
                 for service in db_services
-                if (service.method == ctx.method or (service.method in ("ui", "api") and ctx.method in ("ui", "api")))
+                if (service.method == ctx.method or (service.method in EDITABLE_METHODS and ctx.method in EDITABLE_METHODS))
                 and service.id not in drafts
                 and service.id not in missing_ids
             ]
@@ -877,7 +947,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                         )
                     )
                     db_ids[draft] = {"method": ctx.method, "is_draft": True}
-                elif db_ids[draft]["method"] == ctx.method or (db_ids[draft]["method"] in ("ui", "api") and ctx.method in ("ui", "api")):
+                elif db_ids[draft]["method"] == ctx.method or (db_ids[draft]["method"] in EDITABLE_METHODS and ctx.method in EDITABLE_METHODS):
                     self.logger.debug(f"Updating draft {draft}")
                     to_update.append(
                         {
@@ -1081,6 +1151,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             current_file_name = service_setting["file_name"] if service_setting else ""
             value_changed = bool(service_setting and service_setting["value"] != value)
             should_update_value = (
+                # method-decision: deliberate: the compatible-methods half is delegated to _methods_are_compatible
+                # (that is the EDITABLE_METHODS decision). The clause below it is autoconf's
+                # own escalation: autoconf adopts a row another method owns, which no other
+                # method may do.
                 value_changed
                 and self._methods_are_compatible(
                     ctx.method,
@@ -1221,6 +1295,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             current_file_name = self._empty_if_none(global_value.file_name) if global_value else ""
             value_changed = bool(global_value and global_value.value != value)
             should_update_value = (
+                # method-decision: deliberate: the compatible-methods half is delegated to _methods_are_compatible
+                # (that is the EDITABLE_METHODS decision). The clause below it is autoconf's
+                # own escalation: autoconf adopts a row another method owns, which no other
+                # method may do.
                 value_changed
                 and self._methods_are_compatible(
                     ctx.method,

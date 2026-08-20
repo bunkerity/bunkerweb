@@ -181,7 +181,12 @@ def create_app() -> FastAPI:
             with suppress(Exception):
                 LOGGER.debug(f"HTTPException 500: {exc}\n{format_exc()}")
         detail = exc.detail if isinstance(exc.detail, str) else "error"
-        return JSONResponse(status_code=exc.status_code, content={"status": "error", "message": detail})
+        # Inert today: nothing in this app raises a fastapi HTTPException carrying headers, and
+        # Starlette's own header-bearing 405 is a different class that never reaches this handler.
+        # Kept so that body normalization stays exactly that -- the handler it shadows forwards
+        # headers, and silently dropping them the day someone adds a WWW-Authenticate would be a
+        # bug found in production rather than here.
+        return JSONResponse(status_code=exc.status_code, content={"status": "error", "message": detail}, headers=exc.headers)
 
     # Log tracebacks for unexpected errors (500)
     @app.exception_handler(Exception)

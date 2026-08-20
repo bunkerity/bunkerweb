@@ -21,7 +21,9 @@ from common_utils import bytes_hash, create_plugin_tar_gz, plugin_icon_content_t
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
-_PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}$")
+# `\Z`, not `$`: this one guards a PATH-supplied `plugin_id` on four endpoints, so a trailing
+# newline is attacker-influenced input reaching a filesystem path, not a form typo.
+_PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}\Z")
 _RECOGNIZED_TYPES = {"all", "external", "ui", "pro"}
 
 TMP_UI_ROOT = Path(sep, "var", "tmp", "bunkerweb", "ui")

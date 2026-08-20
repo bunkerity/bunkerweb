@@ -57,7 +57,9 @@ def get_api_db(*, log: bool = True) -> APIDatabase:
     return _API_DB_INSTANCE
 
 
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
+# `\Z`, not `$`: `$` also matches before a trailing newline, so `"plugin\n"` would pass and
+# become a directory name. Same defect as the config-name regexes.
+PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_private_key")

@@ -26,6 +26,8 @@ LOGGER = getLogger("GENERATOR.SAVE_CONFIG")
 
 
 if __name__ == "__main__":
+    config_saved = False
+
     try:
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config saver")
@@ -236,8 +238,9 @@ if __name__ == "__main__":
         err = db.save_config(settings, args.method, changed=False, explicit_keys=config.explicit_keys)
 
         if isinstance(err, str):
-            LOGGER.warning(f"Couldn't save config to database : {err}, config may not work as expected")
+            LOGGER.error(f"Couldn't save config to database : {err}, config may not work as expected")
         else:
+            config_saved = True
             changed_plugins = err
             changes.append("config")
             LOGGER.info("Config successfully saved to database")
@@ -284,6 +287,12 @@ if __name__ == "__main__":
         sys_exit(e.code)
     except:
         LOGGER.error(f"Exception while executing config saver : {format_exc()}")
+        sys_exit(1)
+
+    # A failed save leaves the caller running on defaults for every setting it sent. Exiting 0 here
+    # made that indistinguishable from success: the scheduler's returncode check never fired and the
+    # log ended on "successfully executed".
+    if not config_saved:
         sys_exit(1)
 
     # We're done

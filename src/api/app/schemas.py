@@ -13,7 +13,10 @@ from re import compile as re_compile
 from urllib.parse import urlsplit
 
 # Shared helpers for Configs
-NAME_RX = re_compile(r"^[\w_-]{1,255}$")
+# `\Z`, not `$`: Python's `$` also matches *before* a trailing newline, so `"name\n"` passed
+# validation and became a filename that breaks the line-based directory listing used when
+# pushing configs. Proven: re.match(r"^[\\w_-]{1,255}$", "name\\n") is True, `\\Z` is False.
+NAME_RX = re_compile(r"^[\w_-]{1,255}\Z")
 
 
 def normalize_config_type(t: str) -> str:
