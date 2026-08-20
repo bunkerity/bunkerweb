@@ -211,9 +211,9 @@ def get_user_sessions(username: str, current_session_id: Optional[str] = None) -
 
 
 @router.delete("/{username}/sessions", dependencies=[Depends(guard)])
-def delete_user_sessions(username: str) -> JSONResponse:
-    """Delete old sessions for a user (keeps the most recent one)."""
-    ret = get_db().delete_ui_user_old_sessions(username)
+def delete_user_sessions(username: str, keep_session_id: Optional[int] = None) -> JSONResponse:
+    """Delete a user's sessions, keeping only ``keep_session_id`` (all of them when omitted)."""
+    ret = get_db().delete_ui_user_old_sessions(username, keep_session_id=keep_session_id)
     if ret:
         return JSONResponse(status_code=500, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})

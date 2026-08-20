@@ -518,8 +518,11 @@ class ApiClient(BaseApiClient):
             params["current_session_id"] = current_session_id
         return self._get(f"/users/{username}/sessions", params=params).get("sessions", [])
 
-    def delete_user_sessions(self, username):
-        return self._delete(f"/users/{username}/sessions")
+    def delete_user_sessions(self, username, keep_session_id=None):
+        params = {}
+        if keep_session_id is not None:
+            params["keep_session_id"] = keep_session_id
+        return self._delete(f"/users/{username}/sessions", params=params)
 
     def mark_user_login(self, username, ip, user_agent):
         return self._post(f"/users/{username}/login", json={"ip": ip, "user_agent": user_agent}).get("session_id")

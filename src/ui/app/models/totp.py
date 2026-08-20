@@ -67,7 +67,7 @@ class Totp:
             totp_secret = user.totp_secret
 
         try:
-            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
+            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user) if user else None)
             if user:
                 self.set_last_counter(user, tmatch)
             return True
@@ -82,10 +82,18 @@ class Totp:
         """Generate QRcode Using username, totp, generate the actual QRcode image."""
         totp_image = make(self.get_totp_uri(username, totp), image_factory=PilImage)
         with BytesIO() as virtual_file:
-            totp_image.save(virtual_file, format="JPEG")
+            # PNG, not JPEG: a QR code is flat black-on-white line art, which is the worst possible
+            # input for a lossy codec and the best possible one for PNG's run-length filtering. The
+            # same code is 29,528 bytes as JPEG and 996 as PNG — 39,372 vs 1,328 once base64'd into
+            # the data URI. JPEG also rings around the finder patterns, which is a scanning risk on
+            # a machine-readable target, for thirty times the bytes.
+            #
+            # The data URI stays a data URI: this image is a per-user secret generated at request
+            # time, so it must not become a cacheable URL the way a static asset would.
+            totp_image.save(virtual_file, format="PNG")
             image_as_str = b64encode(virtual_file.getvalue()).decode("ascii")
 
-        return f"data:image/jpeg;base64,{image_as_str}"
+        return f"data:image/png;base64,{image_as_str}"
 
     def get_last_counter(self, user: UiUsers) -> Optional[int]:
         """Fetch stored last_counter from cache."""
@@ -95,9 +103,10 @@ class Totp:
     def set_last_counter(self, user: UiUsers, tmatch: TotpMatch) -> None:
         """Cache last_counter."""
         DATA.load_from_file()
-        if "totp_last_counter" not in DATA:
-            DATA["totp_last_counter"] = {}
-        DATA["totp_last_counter"][user.get_id()] = tmatch.counter
+        # set_nested persists to disk; a plain nested assignment would only touch this worker's
+        # in-memory copy, and the very next load_from_file() would copy the stale mapping back
+        # over it -- so the counter never reached the replay check that reads it.
+        DATA.set_nested(["totp_last_counter", user.get_id()], tmatch.counter)
 
 
 totp = Totp()

@@ -23,6 +23,7 @@ for deps_path in [os_join(sep, "usr", "share", "bunkerweb", *paths) for paths in
 # to keep the module surface of `Database` backward compatible.
 from db_methods.common import (  # noqa: F401
     DEFAULT_POOL_MAX_OVERFLOW,
+    EDITABLE_METHODS,
     DEFAULT_POOL_PRE_PING,
     DEFAULT_POOL_RECYCLE,
     DEFAULT_POOL_SIZE,
@@ -62,6 +63,54 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import QueuePool
+
+# Greedy to the last "@" of the authority so an unencoded "@" inside the password is
+# covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
+# drag the host into the mask.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+
+
+def mask_db_uri(db_string: str) -> str:
+    """Return a database URI with its password replaced, safe to log.
+
+    Callers reach this on malformed input, which make_url() either rejects outright
+    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    """
+    if not db_string:
+        return db_string
+    masked = db_string
+    with suppress(BaseException):
+        masked = make_url(db_string).render_as_string(hide_password=True)
+    # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
+    # the part before it for the password and hides that, leaving the rest to reach the log.
+    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+
+
+# Same span as the mask above, captured instead of replaced.
+DB_URI_SECRET_RX = re_compile(r"://[^:/?#\[\]@]*:([^\s/?#]*)@")
+
+
+def scrub_db_secret(text: str, db_string: str) -> str:
+    """Redact credential material a driver echoed back inside its own error message.
+
+    Masking the URI is not enough on this path. A password holding an unencoded "@" makes the URL
+    parser split the authority at the *first* one, so the driver is handed the password's tail as
+    part of the hostname and prints it verbatim:
+
+        (2003, "Can't connect to MySQL server on 'ssw0rd!@127.0.0.1' ...")
+
+    Hence suffixes, not just the whole secret. Four characters is the floor: shorter fragments
+    collide with ordinary words in an exception and redacting those makes the message useless.
+    """
+    if not text or not db_string:
+        return text
+    match = DB_URI_SECRET_RX.search(db_string)
+    secret = match.group(1) if match else ""
+    for start in range(max(0, len(secret) - 3)):
+        fragment = secret[start:]
+        if fragment in text:
+            text = text.replace(fragment, "***")
+    return text
 
 
 class Database(
@@ -161,7 +210,7 @@ class Database(
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                 _exit(1)
 
             db_type = match.group("database")
@@ -189,8 +238,12 @@ class Database(
             if recommended_driver is not None:
                 try:
                     url = make_url(db_string)
-                except ArgumentError:
-                    self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                # ValueError as well as ArgumentError: SQLAlchemy calls int() on the port component
+                # before it validates anything, so a non-numeric port raises ValueError and used to
+                # walk straight past this handler -- the process died on a traceback instead of the
+                # message below.
+                except (ArgumentError, ValueError):
+                    self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                     _exit(1)
                 if "+" not in url.drivername:
                     url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
@@ -280,10 +333,10 @@ class Database(
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {e}")
+            self.logger.error(f"Error when trying to create the engine: {scrub_db_secret(str(e), sqlalchemy_string)}")
             error = True
         finally:
             if error:
@@ -306,6 +359,12 @@ class Database(
         not_connected = True
         fallback = False
 
+        # The retry lines named neither the target nor the reason, so nothing actionable was logged
+        # until DATABASE_RETRY_TIMEOUT expired, 60 seconds later by default. Masked, always: this is
+        # the same file that used to leak the password, and a diagnostic is not worth re-opening it.
+        connection_target = mask_db_uri(sqlalchemy_string)
+        reason_logged = False
+
         while not_connected:
             try:
                 if self.readonly:
@@ -321,13 +380,21 @@ class Database(
             except (OperationalError, DatabaseError) as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.logger.error(
+                            f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds. "
+                            "Falling back to read-only database connection"
+                        )
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
                         fallback = True
+                        connection_target = mask_db_uri(self.database_uri_readonly)
+                        reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(
+                        f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: "
+                        f"{scrub_db_secret(str(e), sqlalchemy_string)}"
+                    )
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -340,10 +407,14 @@ class Database(
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
+                    # Reason once, then the terse line: repeating the exception every 5 seconds is
+                    # noise, but withholding it for the whole window leaves nothing to act on.
+                    detail = "" if reason_logged else f" : {scrub_db_secret(str(e), sqlalchemy_string)}"
+                    reason_logged = True
+                    self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                self.logger.error(f"Error when trying to connect to the database: {scrub_db_secret(str(e), sqlalchemy_string)}")
                 exit(1)
 
         if log:
@@ -447,8 +518,8 @@ class Database(
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
-        - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+        - ui, api and wizard are interchangeable (see EDITABLE_METHODS).
+        - scheduler (env-var origin) overwrites those only when the caller asserts the
           setting was explicitly declared in the environment (allow_scheduler_override),
           so config-as-code stays authoritative without default-filled scheduler passes
           wiping UI/API customizations; the reverse stays blocked to protect in-session
@@ -462,9 +533,9 @@ class Database(
             return True
         if current_method == "autoconf":
             return new_method == "autoconf"
-        if {new_method, current_method} <= {"ui", "api"}:
+        if {new_method, current_method} <= EDITABLE_METHODS:
             return True
-        if new_method == "scheduler" and current_method in ("ui", "api"):
+        if new_method == "scheduler" and current_method in EDITABLE_METHODS:
             return allow_scheduler_override
         return new_method == current_method
 

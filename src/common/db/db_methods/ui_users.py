@@ -293,8 +293,13 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
             except BaseException as e:
                 return str(e)
 
-    def delete_ui_user_old_sessions(self, username: str) -> str:
-        """Delete ui user old sessions."""
+    def delete_ui_user_old_sessions(self, username: str, keep_session_id: Optional[int] = None) -> str:
+        """Delete every session of a ui user except ``keep_session_id``.
+
+        The caller's own session id must be passed explicitly: keeping the newest row instead
+        would spare an attacker who logged in more recently than the caller and delete the
+        caller's own session. ``None`` means there is no current row to keep, so all are deleted.
+        """
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -303,8 +308,10 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
             if not user:
                 return f"User {username} doesn't exist"
 
-            sessions_to_delete = session.scalars(select(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).offset(1)).all()
-            for session_to_delete in sessions_to_delete:
+            query = select(UserSessions).filter_by(user_name=username)
+            if keep_session_id is not None:
+                query = query.filter(UserSessions.id != keep_session_id)
+            for session_to_delete in session.scalars(query).all():
                 session.delete(session_to_delete)
 
             try:

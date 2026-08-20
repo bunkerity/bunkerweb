@@ -8,13 +8,57 @@ from user_agents import parse
 from app.models.totp import totp as TOTP
 from app.models.webauthn import WebauthnCeremonyError, WebauthnDisabledError, webauthn as WEBAUTHN
 
-from app.dependencies import API_CLIENT, DATA
+from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit
+from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, revoke_sessions
 
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
+
+# The enrolment secret is a *candidate*: minted for the QR code, promoted to the user's real secret
+# only once they prove they scanned it. Two properties have to hold at once, and the original code
+# held neither.
+#
+# **It must survive re-rendering the page.** `/profile` used to mint a new secret on every GET, so
+# any second render — a second tab, a refresh, a reload the product issues itself — silently
+# replaced the secret behind the QR the user was already looking at. The code from their
+# authenticator app was then checked against a secret that had never been displayed, and enrolment
+# could not be completed at all. Minting only when there is no candidate makes the flow immune to
+# any number of concurrent loads, which is the property that matters; "it works once the extra
+# render is gone" is not the same thing and would break again the next time something re-rendered.
+#
+# **It must not be supplied by the client.** The enrolment form posts `secret_token`, and verifying
+# against *that* would be the small fix — and would let anyone who can get a user to submit a
+# crafted form enrol a secret of the attacker's choosing, which is an account takeover dressed as a
+# convenience. The candidate is only ever read back out of the server-side session, keyed to the
+# user it was minted for so a session that outlives a user change cannot hand the next one a
+# foreign secret.
+
+
+def _stored_totp_candidate() -> str:
+    """The enrolment secret currently in flight for this user, or `""` when there is none."""
+    if session.get("tmp_totp_user") != current_user.get_id():
+        return ""
+    return session.get("tmp_totp_secret", "")
+
+
+def _issue_totp_candidate() -> str:
+    """The secret to put behind the QR code — the one already in flight, or a fresh one."""
+    secret = _stored_totp_candidate()
+    if not secret:
+        secret = TOTP.generate_totp_secret()
+        session["tmp_totp_secret"] = secret
+        session["tmp_totp_user"] = current_user.get_id()
+    return secret
+
+
+def _discard_totp_candidate() -> str:
+    """Consume the candidate so the next enrolment starts from a fresh secret."""
+    secret = _stored_totp_candidate()
+    session.pop("tmp_totp_secret", None)
+    session.pop("tmp_totp_user", None)
+    return secret
 
 
 def _list_credentials() -> list:
@@ -86,8 +130,7 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
 def profile_page():
     totp_qr_image = ""
     if not bool(current_user.totp_secret):
-        session["tmp_totp_secret"] = TOTP.generate_totp_secret()
-        totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), session["tmp_totp_secret"])
+        totp_qr_image = TOTP.generate_qrcode(current_user.get_id(), _issue_totp_candidate())
 
     last_sessions, total_sessions = get_last_sessions(1, 3)
 
@@ -97,7 +140,7 @@ def profile_page():
         totp_qr_image=totp_qr_image,
         totp_recovery_codes=session.pop("decrypted_recovery_codes", current_user.list_recovery_codes),
         is_recovery_refreshed=session.pop("totp_refreshed", False),
-        totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
+        totp_secret=TOTP.get_totp_pretty_key(_stored_totp_candidate()),
         last_sessions=last_sessions,
         total_sessions=total_sessions,
         webauthn_enabled=WEBAUTHN.enabled,
@@ -173,7 +216,10 @@ def totp_disable():
 
     verify_data_in_form(data={"totp_token": None}, err_message="Missing totp token parameter on /profile/totp-enable.", redirect_url="profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
+    # No candidate is in flight here — TOTP is already enabled — so this checks the *enrolled*
+    # secret. Passing None says that outright; the old `session.get("tmp_totp_secret", "")` reached
+    # the same place only because `verify_totp` falls back to the user's secret on an empty one.
+    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=None, user=current_user) and not TOTP.verify_recovery_code(
         request.form["totp_token"], user=current_user
     ):
         return handle_error("The totp token is invalid.", "profile")
@@ -210,13 +256,20 @@ def totp_enable():
     if not current_user.check_password(request.form["password"]):
         return handle_error("The current password is incorrect.", "profile")
 
-    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=session.get("tmp_totp_secret", ""), user=current_user) and not TOTP.verify_recovery_code(
+    candidate = _stored_totp_candidate()
+    if not candidate:
+        # Nothing in flight: the session was cleared, or this POST never had a matching render.
+        # Saying so beats falling through to `verify_totp`, which would treat an empty secret as
+        # "check the enrolled one" and look up a secret that does not exist yet.
+        return handle_error("The two-factor enrolment expired. Reload the page and scan the new QR code.", "profile")
+
+    if not TOTP.verify_totp(request.form["totp_token"], totp_secret=candidate, user=current_user) and not TOTP.verify_recovery_code(
         request.form["totp_token"], user=current_user
     ):
         return handle_error("The totp token is invalid.", "profile")
 
     totp_recovery_codes = TOTP.generate_recovery_codes()
-    totp_secret = session.pop("tmp_totp_secret", "")
+    totp_secret = _discard_totp_candidate()
 
     try:
         API_CLIENT.update_user(
@@ -323,6 +376,47 @@ def edit_profile():
     flash("The profile has been successfully updated.")
 
     if "new_password" in request.form:
+        # A password change has to take the user's other sessions with it. Without this, someone who
+        # changed their password *because* they believed it had leaked kept every session an attacker
+        # already held -- live for up to SESSION_ABSOLUTE_HOURS -- behind a success message that said
+        # nothing had survived.
+        try:
+            other_ids = [
+                db_session["id"] for db_session in API_CLIENT.get_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")
+            ]
+            err = revoke_sessions(other_ids)
+        except (ApiClientError, ApiUnavailableError) as e:
+            err = e.message
+
+        if err:
+            # Deliberate divergence from dev 9603eeb84, which logs and continues. Keep both halves:
+            #  * the log line reaches an operator who is not watching, while the only person who can
+            #    act -- log out everywhere, rotate again, call support -- is the user, and they would
+            #    otherwise be looking at an unqualified success message;
+            #  * the redirect goes to /profile rather than /logout because logout.py calls
+            #    session.clear(), which destroys Flask's _flashes *and* our own
+            #    session["flash_messages"] -- a warning flashed on the way out is never rendered
+            #    (measured: .cache/results-2026-08-20/flash-survives-logout.py). /profile is also
+            #    where "Wipe other sessions" is, i.e. the action this warning asks for.
+            # The password change itself stands either way; it already succeeded above.
+            LOGGER.error(f"Couldn't revoke the other sessions after the password change: {err}")
+            flash(
+                "Your password was changed, but your other sessions could not be revoked. "
+                'Use "Wipe other sessions" below and check the list of active sessions.',
+                "error",
+            )
+            # Returning here also means the session rows are deliberately NOT deleted. It is the
+            # revocation that stops a session, not the row: deleting the rows now would remove the
+            # list the user needs in order to act, while ending exactly nothing. Not an omission.
+            return redirect(url_for("profile.profile_page") + "#sessions")
+
+        try:
+            API_CLIENT.delete_user_sessions(current_user.username, keep_session_id=session.get("session_id"))
+        except (ApiClientError, ApiUnavailableError) as e:
+            # They are revoked already, so what is left stale is the session *list*, not a usable
+            # session. Worth a log line, not worth stranding the user after a successful change.
+            LOGGER.error(f"Couldn't delete the other session rows after the password change: {e.message}")
+
         return redirect(url_for("logout.logout_page"))
 
     return redirect(url_for("profile.profile_page"))
@@ -340,10 +434,13 @@ def wipe_old_sessions():
         return handle_error("The current password is incorrect.", "profile")
 
     try:
-        DATA["REVOKED_SESSIONS"] = [
-            db_session["id"] for db_session in API_CLIENT.get_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")
-        ]
-        API_CLIENT.delete_user_sessions(current_user.username)
+        other_ids = [db_session["id"] for db_session in API_CLIENT.get_user_sessions(current_user.username) if db_session["id"] != session.get("session_id")]
+        # Revoke before deleting: the ids come from the rows we are about to remove, and a failure
+        # here must abort rather than leave sessions deleted server-side but still presentable.
+        err = revoke_sessions(other_ids)
+        if err:
+            return handle_error(f"Couldn't revoke the other sessions: {err}", "profile")
+        API_CLIENT.delete_user_sessions(current_user.username, keep_session_id=session.get("session_id"))
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(f"Couldn't wipe the other sessions: {e.message}", "profile")
 

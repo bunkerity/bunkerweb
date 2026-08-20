@@ -64,7 +64,9 @@ def _establish_session(ui_user: UiUsers, user_data: dict, *, mfa_done: bool, rem
     if remember_me:
         session.permanent = True
 
-    if not login_user(ui_user, remember=remember_me):
+    # No remember= on purpose: the Flask-Login remember cookie is disabled (see main.py).
+    # "Remember me" is session.permanent above, i.e. a persistent server-side session.
+    if not login_user(ui_user):
         return False
 
     # Generate and add Biscuit token to session

@@ -51,6 +51,7 @@ from app.utils import (
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
+    get_github_stars,
     get_latest_stable_release,
     can_delete_service,
     get_multiples,
@@ -58,6 +59,7 @@ from app.utils import (
     human_readable_number,
     is_editable_method,
     is_plugin_active,
+    is_session_revoked,
     is_ui_api_method,
     stop,
     restart_workers,
@@ -660,12 +662,18 @@ with app.app_context():
     # Secure by default — auto-detection in before_request may downgrade if no proxy detected
     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
     app.config["SESSION_COOKIE_SECURE"] = True
-    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-    app.config["REMEMBER_COOKIE_SECURE"] = True
 
-    app.config["REMEMBER_COOKIE_PATH"] = "/"
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    # The Flask-Login remember cookie is disabled. It carried only the username, HMAC'd with a
+    # static secret, for 365 days, touched no server-side state, and so outlived logout, password
+    # change and session revocation. "Remember me" is now session.permanent (login.py), bounded by
+    # SESSION_LIFETIME_HOURS / SESSION_ABSOLUTE_HOURS and revocable like any other session.
+    # Pointing REMEMBER_COOKIE_NAME at a name no browser will ever send keeps has_cookie in
+    # flask_login's _load_user permanently False, so a legacy token already sitting in a browser is
+    # dead on the first request after upgrade rather than getting one free authenticated request.
+    # The name deliberately has no __Host- prefix: strong session protection can still emit a
+    # deletion header for it, which is inert unprefixed but would be rejected outright by the UA
+    # if prefixed.
+    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_disabled"
 
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
     default_max_content_length = 50 * 1024 * 1024  # 50 MB
@@ -779,15 +787,56 @@ with app.app_context():
 
     app.config["EXTRA_PAGES"] = []
 
-    def custom_url_for(endpoint, **values):
-        if endpoint:
+    # Templates name a *page* by its short name — `url_for("bans")` means `bans.bans_page` — which
+    # is why this exists at all. But an endpoint that is already fully qualified and is not a page
+    # (`onboarding.onboarding_state`, `plugins.plugin_icon`, `threatmap.threatmap_data`) does not
+    # fit that convention: expanding it produces `onboarding.onboarding_state.onboarding.
+    # onboarding_state_page`, which cannot build.
+    #
+    # The old version treated that as unresolvable and returned "#". That is not an inert
+    # placeholder — `fetch("#")` re-requests the *current page*, so the onboarding drawer was
+    # pulling a second full render of every page in the UI on every visit, ~118 KB and a complete
+    # server render thrown away, with nothing in the log above DEBUG to say so.
+    #
+    # So: try the page convention, then the endpoint exactly as written, and only then give up. And
+    # give up loudly — a "#" reaching a template is always a bug, either a wrong endpoint name or a
+    # blueprint that failed to register, and it is invisible in the rendered page.
+    ENDPOINTS_WITHOUT_A_PAGE_SUFFIX = ("static", "index", "loading", "check", "check_reloading", "i18n_catalog")
+
+    def _build_url(endpoint, **values):
+        """The URL for `endpoint` under the page convention, or None when nothing matches."""
+        if not endpoint:
+            return None
+
+        candidates = [endpoint]
+        if endpoint not in ENDPOINTS_WITHOUT_A_PAGE_SUFFIX and not endpoint.endswith("_page"):
+            candidates.insert(0, f"{endpoint}.{endpoint}_page")
+
+        for candidate in candidates:
             try:
-                if endpoint not in ("static", "index", "loading", "check", "check_reloading", "i18n_catalog") and not endpoint.endswith("_page"):
-                    return url_for(f"{endpoint}.{endpoint}_page", **values)
-                return url_for(endpoint, **values)
+                return url_for(candidate, **values)
             except BuildError as e:
-                LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
+                LOGGER.debug(f"Couldn't build the URL for {candidate}: {e}")
+        return None
+
+    def custom_url_for(endpoint, **values):
+        url = _build_url(endpoint, **values)
+        if url is not None:
+            return url
+        if endpoint:
+            LOGGER.warning(f"No route matches {endpoint!r}; rendering '#', which resolves to the current page when fetched")
         return "#"
+
+    def endpoint_exists(endpoint):
+        """Whether `endpoint` resolves, asked as a question rather than answered with a warning.
+
+        `menu.html` decides how to link a plugin by testing whether it has a page of its own. Asking
+        that with `url_for(plugin) == "#"` gave the right answer and logged a warning every time it
+        was no — one line per pageless plugin per page render, ~17 per render here, which is noise
+        that makes the real warnings unfindable. The warning is right for an *unintended* miss and
+        wrong for a deliberate probe, so the probe gets its own door.
+        """
+        return _build_url(endpoint) is not None
 
     # Declare functions for jinja2
     def to_iso(val):
@@ -808,6 +857,7 @@ with app.app_context():
         human_readable_number=human_readable_number,
         is_editable_method=is_editable_method,
         url_for=custom_url_for,
+        endpoint_exists=endpoint_exists,
         is_plugin_active=is_plugin_active,
         is_plugin_active_for_service=is_plugin_active_for_service,
         is_ui_api_method=is_ui_api_method,
@@ -988,10 +1038,22 @@ def handle_csrf_error(_):
     return response
 
 
-def update_latest_stable_release():
-    latest_release = get_latest_stable_release()
-    if latest_release:
-        DATA["LATEST_VERSION"] = latest_release
+def update_github_metadata():
+    """Refresh the values the UI shows from GitHub, on the hourly gate in `before_request`.
+
+    Each source is fetched independently: one being unreachable must not cost us the other, and
+    a failure leaves the previous value in place rather than blanking the page. Air-gapped
+    installs never reach GitHub at all, which is why the failure path logs at debug — an hourly
+    warning there would be noise about a deployment choice, not a fault.
+    """
+    for key, fetch in (("LATEST_VERSION", get_latest_stable_release), ("GITHUB_STARS", get_github_stars)):
+        try:
+            value = fetch()
+        except BaseException as e:  # noqa: B036 - a background refresh must never take a worker down
+            LOGGER.debug(f"Couldn't refresh {key} from GitHub: {e}")
+            continue
+        if value:
+            DATA[key] = value
 
 
 def check_api_readonly_state():
@@ -1153,15 +1215,10 @@ def before_request():
                 if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
                     app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = True
-                    app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = True
                 else:
                     app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
                     app.config["SESSION_COOKIE_SECURE"] = False
                     app.config["SESSION_COOKIE_DOMAIN"] = None
-                    app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
-                    app.config["REMEMBER_COOKIE_SECURE"] = False
-                    app.config["REMEMBER_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
     if not request.path.startswith(STATIC_PATH_PREFIXES):
@@ -1184,9 +1241,11 @@ def before_request():
                 else:
                     schedule_restart_workers()
 
+        # Stamped before the fetch is submitted, not after: a slow or failing refresh must not let
+        # every request in the meantime queue another one.
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
-            _periodic_tasks_executor.submit(update_latest_stable_release)
+            _periodic_tasks_executor.submit(update_github_metadata)
 
         # Periodic expired session file cleanup (FileSystemCache only, where _prune is disabled via threshold=0)
         if app.config.get("SESSION_TYPE") == "cachelib":
@@ -1246,7 +1305,7 @@ def before_request():
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
-            elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
+            elif "session_id" in session and is_session_revoked(session["session_id"]):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
@@ -1354,9 +1413,29 @@ def before_request():
             except Exception:
                 blob = {}
             onboarding_active = not (blob.get("dismissed_at") or blob.get("completed_at"))
-            # Opens itself exactly once, the first time this session resolves the flag and
-            # the user has never opened it. The drawer PATCHes `opened` and it stops.
-            onboarding_autoopen = onboarding_active and not blob.get("opened_at")
+            # Auto-open is off, and the mechanism below it is left intact so it can come back.
+            #
+            # The drawer is `offcanvas-end`: 400 px of fixed overlay pinned to the right edge,
+            # with no backdrop. The first page a session renders is whatever the user asked for —
+            # a bookmarked list page as readily as the dashboard — so it opened itself on top of
+            # that page's toolbar. Measured on the perf stack at 1920 and 1280 wide, with
+            # `document.elementFromPoint` at each control's centre rather than by eye:
+            #
+            #   /services  Create new service, Import services, Show/Hide filters, language picker
+            #   /configs   Create custom config, Actions, Show/Hide filters, language picker
+            #
+            # covered 100% and not clickable — the click lands on the drawer. `onboarding.js`
+            # already holds the rule this breaks: `spotlight()` hides the drawer before pointing
+            # at anything, because "the drawer covers the chrome it is pointing at". A panel
+            # teaching someone to create their first service must not sit on the button that
+            # creates it.
+            #
+            # The pill (`#onboarding-button`) is untouched, so the walkthrough stays one click
+            # away and every other surface — hints, spotlight, progress — is unaffected. Turning
+            # auto-open back on means giving the drawer somewhere to open *into*: the page would
+            # have to reflow, and the navbar it would push is `position: fixed` and shared by
+            # every page. That is a layout change, not a flag, and it is the PO's call.
+            onboarding_autoopen = False
             session["onboarding_active"] = onboarding_active
 
         # The post-upgrade recap. Resolved once per session like the walkthrough flag; the
@@ -1450,18 +1529,14 @@ def set_security_headers(response):
     response.headers["Content-Security-Policy"] = (
         "object-src 'none';"
         + " frame-ancestors 'self';"
-        + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com https://api.github.com;"
+        + " default-src https: http: 'self' https://www.bunkerweb.io https://assets.bunkerity.com https://bunkerity.us1.list-manage.com;"
         + f" script-src https: http: 'self' 'nonce-{script_nonce}' 'strict-dynamic' 'unsafe-inline';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: blob: https://www.bunkerweb.io https://assets.bunkerity.com https://*.tile.openstreetmap.org;"
         + " font-src 'self' data:;"
         + " base-uri 'self';"
         + " block-all-mixed-content;"
-        + (
-            " connect-src *;"
-            if request.path.startswith(("/check", "/setup"))
-            else " connect-src https: http: 'self' https://api.github.com/repos/bunkerity/bunkerweb https://www.bunkerweb.io/api/posts/0/3;"
-        )
+        + (" connect-src *;" if request.path.startswith(("/check", "/setup")) else " connect-src https: http: 'self' https://www.bunkerweb.io/api/posts/0/3;")
     )
 
     if request.headers.get("X-Forwarded-Proto") == "https":
@@ -1516,6 +1591,18 @@ def set_security_headers(response):
                 response = resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
+
+    # Evict a pre-upgrade Flask-Login remember token still sitting in a browser. It is already
+    # inert (REMEMBER_COOKIE_NAME points at a sentinel), so this is hygiene, not the fix itself.
+    # Done directly rather than through flask_login's _clear_cookie, which now targets the
+    # sentinel name and so cannot reach these two, and which omits secure= -- werkzeug's
+    # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
+    # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
+    # ponytail: hard-coded name list; drop this block once no issued token can still be live.
+    if not request.path.startswith(STATIC_PATH_PREFIXES):
+        for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
+            if legacy_cookie in request.cookies:
+                response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
 
     return response
 
