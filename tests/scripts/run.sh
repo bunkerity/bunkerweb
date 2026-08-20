@@ -173,6 +173,33 @@ for test in $tests ; do
             if [ $ret -ne 0 ] ; then
                 exit $ret
             fi
+
+            # A category may ship an extra instance that joins the stack once it is up --
+            # `instances` adds a second BunkerWeb for the UI to register. It cannot be started
+            # from the before hook: that runs before generate.py writes variables.env and before
+            # start.sh creates bw-universe, so on a host where neither exists yet compose refuses
+            # it ("env file .../variables.env not found") and the category dies before its first
+            # step. It only ever worked because an earlier category in the same session had left
+            # both behind, which made `instances` unrunnable as the first thing on a clean host.
+            # `up -d` is idempotent, so repeating it after every stack restart also brings the
+            # instance back when cleanup took it down along with the network.
+            if [ "$integration" == "Kubernetes" ] ; then
+                if [ -f "tests/scripts/before/$category.yml" ] ; then
+                    kubectl apply -f "tests/scripts/before/$category.yml"
+                    # shellcheck disable=SC2181
+                    if [ $? -ne 0 ] ; then
+                        log "RUN" "❌" "🧑‍🔧 Failed to start the extra instance for \"$category\""
+                        exit 1
+                    fi
+                fi
+            elif [ -f "tests/scripts/before/docker-$category.yml" ] ; then
+                docker compose -f "tests/scripts/before/docker-$category.yml" up -d
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "RUN" "❌" "🧑‍🔧 Failed to start the extra instance for \"$category\""
+                    exit 1
+                fi
+            fi
         fi
 
         python3 "tests/$type.py" "$test" "$integration"

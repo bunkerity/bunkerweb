@@ -10,8 +10,6 @@ if [ "$integration" == "Linux" ] && [ -f /etc/bunkerweb/variables.env ]; then
   fi
 fi
 
-if [ "$integration" == "Kubernetes" ]; then
-  kubectl apply -f tests/scripts/before/instances.yml
-else
-  docker compose -f tests/scripts/before/docker-instances.yml up -d
-fi
+# The extra BunkerWeb instance this category registers through the UI is started by run.sh once
+# the stack is up -- see the "extra instance" block there. It needs the generated variables.env
+# and the bw-universe network, and this hook runs before either exists.

@@ -710,19 +710,29 @@ function cleanup_stack () {
             return 1
         fi
 
-        docker network prune -f
+        # Scoped to this harness's own compose project. Unfiltered, this is a DAEMON-WIDE prune:
+        # it deleted `bwperf_default` -- another agent's perf stack network -- out of a run that
+        # had nothing to do with it. The prune still earns its place, because `down -v
+        # --remove-orphans` above only covers a run that ended normally and a crashed one leaves
+        # networks behind; the filter keeps that and removes the blast radius. Verified in both
+        # directions: a network labelled with this project is removed, one labelled with another
+        # project or unlabelled survives.
+        docker network prune -f --filter label=com.docker.compose.project=docker
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to prune networks"
             return 1
         fi
 
-        docker volume prune -f
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "UTILS" "❌" "🐳 Failed to prune volumes"
-            return 1
-        fi
+        # No volume prune here on purpose, and the same filter does NOT work for volumes.
+        # `docker volume prune` removes ANONYMOUS volumes, and Docker gives those only
+        # `com.docker.volume.anonymous` -- no `com.docker.compose.project` -- so the filtered form
+        # matches nothing and reclaims 0B, while the unfiltered form is free to take any other
+        # agent's stopped container's anonymous volume. Adding `-a` does make the filter bite, but
+        # on NAMED volumes instead, which would start deleting `bw-storage` -- the one this harness
+        # deliberately names so that prune skips it (see the comment in `full_clean`). The
+        # `down -v --remove-orphans` calls above already drop the anonymous volumes of a run that
+        # ended normally, which is what this was reaching for.
     fi
 
     if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then

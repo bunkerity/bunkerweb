@@ -18,6 +18,38 @@ actions:
         next_page: "instances"
         username: "admin"
         password: "P@ssw0rd"
+      # Regression guard for the onboarding drawer occlusion (fixed in src/ui/main.py by
+      # pinning `onboarding_autoopen` to False). The drawer is `offcanvas-end`: 400 px of
+      # fixed overlay with no backdrop, and when it auto-opened on the first page a session
+      # rendered it sat on this page's toolbar. Every existing assertion stayed green through
+      # that defect, because `type: find` with an xpath only proves the button is IN THE DOM --
+      # the button was findable and not clickable, and the click below failed with
+      # ElementClickIntercepted at the drawer's coordinates.
+      #
+      # So assert what the defect actually broke: the centre of the CTA hit-tests back to the
+      # CTA. `by: js` runs the expression in the page (utils/ui.py) and `find` fails the run
+      # when it returns null, so this reds on any overlay -- drawer, toast, modal backdrop --
+      # that takes the click, not just this one.
+      #
+      # The `#onboarding-button` check is the precondition, not decoration: the pill is
+      # rendered only while the walkthrough is active for the session, so without it this
+      # would pass vacuously on a user who had dismissed the walkthrough and would prove
+      # nothing about the first run. If the walkthrough is ever removed, this reds and that is
+      # the right outcome -- the guard has to be re-aimed, not silently kept green.
+      first_run_cta_receives_click:
+        type: find
+        by: "js"
+        selector: |-
+          (function () {
+            if (!document.getElementById('onboarding-button')) return null;
+            var el = document.getElementById('instances-create-btn');
+            if (!el) return null;
+            el.scrollIntoView({block: 'center', inline: 'center'});
+            var r = el.getBoundingClientRect();
+            if (r.width === 0 || r.height === 0) return null;
+            var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return (hit && (hit === el || el.contains(hit))) ? el : null;
+          })()
       open_invalid_port_modal:
         type: click
         selector: "//button[@id='instances-create-btn']"

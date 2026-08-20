@@ -20,6 +20,39 @@ actions:
         username: "admin"
         password: "P@ssw0rd"
 
+      # Regression guard for the onboarding drawer occlusion (fixed in src/ui/main.py by
+      # pinning `onboarding_autoopen` to False). The drawer is `offcanvas-end`: 400 px of
+      # fixed overlay with no backdrop, and when it auto-opened on the first page a session
+      # rendered it sat on this page's toolbar. Every existing assertion stayed green through
+      # that defect, because `type: find` with an xpath only proves the button is IN THE DOM --
+      # the button was findable and not clickable. Measured with `document.elementFromPoint` at
+      # each control's centre, the drawer covered this page's primary CTA 100% at 1920 and worse
+      # at 1280.
+      #
+      # So assert what the defect actually broke: the centre of the CTA hit-tests back to the
+      # CTA. `by: js` runs the expression in the page (utils/ui.py) and `find` fails the run
+      # when it returns null, so this reds on any overlay -- drawer, toast, modal backdrop --
+      # that takes the click, not just this one.
+      #
+      # The `#onboarding-button` check is the precondition, not decoration: the pill is
+      # rendered only while the walkthrough is active for the session, so without it this
+      # would pass vacuously on a user who had dismissed the walkthrough and would prove
+      # nothing about the first run. If the walkthrough is ever removed, this reds and that is
+      # the right outcome -- the guard has to be re-aimed, not silently kept green.
+      first_run_cta_receives_click:
+        type: find
+        by: "js"
+        selector: |-
+          (function () {
+            if (!document.getElementById('onboarding-button')) return null;
+            var el = document.querySelector('a[role="button"][href="/configs/new"]');
+            if (!el) return null;
+            el.scrollIntoView({block: 'center', inline: 'center'});
+            var r = el.getBoundingClientRect();
+            if (r.width === 0 || r.height === 0) return null;
+            var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return (hit && (hit === el || el.contains(hit))) ? el : null;
+          })()
       create_global_config:
         type: create
         item: "config"
@@ -126,6 +159,28 @@ actions:
         selector: '//span[contains(text(), "Not Found")]'
       close_global_service_tab_non_existent:
         type: close_tab
+
+      # `check_config_deletion` below is a `findable: false`, and a negative assertion that has
+      # never been seen to match is indistinguishable from one that cannot match. Asserting the
+      # link positively here, while the config still exists, is what tells the two apart.
+      #
+      # It does, and the answer is that the deletion check has never been able to match: the row
+      # is `/configs/global/server_http/my_global_config`, not `/configs/app1.example.com/...`.
+      # `update_global_config` above sets `new_service: app1.example.com` and the listing still
+      # reports the config as Global afterwards -- while `find_world_service_non_existent`, thirty
+      # seconds earlier in the same run, proves `www.example.com/hello` returns Not Found, which a
+      # config that were still global would serve. The behaviour moved; the listing did not.
+      # Whether that is the listing lying or the move silently not persisting is a product
+      # question, and it is with the PO -- so this asserts what the UI actually renders today, and
+      # `check_config_deletion` is deliberately left as it was rather than re-pointed at a shape
+      # nobody has confirmed is correct.
+      access_configs_before_delete:
+        type: access
+        url: "%BASE_URL%/configs"
+        sleep: 2.0
+      check_config_link_present:
+        type: find
+        selector: '//a[@href="/configs/global/server_http/my_global_config"]'
 
       delete_clone_service:
         type: delete

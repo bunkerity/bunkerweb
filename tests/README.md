@@ -140,6 +140,13 @@ Read the file first. It maps bare names — `redis`, `valkey`, `crowdsec`, `php-
 10.20.30.x, system-wide, which is fine on a throwaway CI host and less fine on a workstation
 that uses those names for something else.
 
+**Do not edit anything under `tests/scripts/` while a run is in flight.** Bash reads a script
+incrementally, by byte offset, so an insert above the point it has reached shifts the rest of the
+file under it and the running shell dies mid-command on a syntax error that is not in the file
+(`run.sh: line 234: syntax error near unexpected token 'fi'` while `bash -n run.sh` is clean).
+The spec's own verdict up to that point is still valid; everything after it — the final
+`All tests passed`, the exit code — is not.
+
 `BW_TESTS_ETC` roots the generated `variables.env`, `api.env`, `worker.env` and `ui.env`.
 It defaults to `/etc/bunkerweb`, which suits a throwaway CI host. On a machine that has
 BunkerWeb installed, that default overwrites your real config, so export the variable
@@ -161,6 +168,36 @@ running cluster afterwards. `build.sh` checks every host port in that list befor
 the process holding any of them, rather than letting docker fail on the first conflict 45 seconds in
 and leave a half-created node behind.
 
+**A bare container name will not fail loudly on a workstation — it will hang.** Actions the
+runner dials must use a `*.example.com` name (answered from `/etc/hosts`) or a published port on
+`127.0.0.1`, never a bare name like `custom-api`. The suite expects dnsmasq to answer those, but the
+runner asks the host's own resolver, and any `search` domain in `/etc/resolv.conf` turns the bare
+name into an FQDN in someone else's zone. If that zone answers wildcard — as the author's did —
+then *no* bare name can ever return NXDOMAIN: `custom-api`, `app1` and
+`definitely-not-a-real-host-xyz9` all resolve to a real host, the connection is attempted, and the
+action dies on a ten-second timeout that looks like anything except DNS. `ActionData.check_url` now
+rejects these at parse time, and the same check covers `tool` arguments and `script` argv. Settings
+in `config` are exempt on purpose: those are resolved inside the container network, where dnsmasq is
+authoritative and a bare name is correct.
+
+That guard is parse-time rather than a note because the same mechanism had already bitten this suite
+once, one layer down. `misc/conf/coredns.conf` carries a block whose comment describes it exactly —
+ndots:5 search-path escapes falling through to the host's upstream resolver, "e.g. dedyn.io wildcard
+DNS", resolving in-cluster service names to public IPs and stopping nginx from starting. It arrived
+with the framework in `71247ab38`, diagnosed and fixed for CoreDNS, while the runner-side path stayed
+open and failed months later in `bunkernet` for the same reason. A comment fixing one config file did
+not generalise to the next occurrence; a validator that refuses the shape does.
+
+**A running Kubernetes arm and any other arm are mutually exclusive on one workstation.** The
+minikube node publishes `127.0.0.1:80` and `127.0.0.1:443`, fixed at node creation, and Docker,
+Linux, Autoconf and All-in-one all want the same two ports. Starting one of those while the cluster
+is up fails 45 seconds in with `Bind for 127.0.0.1:80 failed: port is already allocated`, and the
+aborted start then runs a full clean that takes the framework's state Redis with it — so the last
+line on screen is `Could not connect to Redis at 127.0.0.1:6390`, which points nowhere near the
+cause. There is nothing to configure around this: two arms that both want the standard HTTP port
+cannot share it. Run `minikube stop` first — it frees both ports and keeps the node, so coming back
+is one `minikube start` rather than the full re-create `minikube delete` would cost.
+
 Outside CI (`IN_CICD` unset), `build.sh` builds any missing `bunkerity/<image>:tests` from
 the Dockerfiles in this checkout. It reuses an image that already exists, so the second run
 starts in seconds. Delete an image when you want it rebuilt. The framework starts its own
@@ -178,6 +215,13 @@ scripts by hand rather than through `test.sh`, remove it yourself between specs
 (`docker volume rm -f bw-storage`), or the next stack boots on the previous spec's global
 settings: a run that set `REDIS_HOST=valkey` leaves the following API answering 500 to every
 `/ping` while it waits on a container that is gone.
+
+A spec that brute-forces the product has no useful upper bound on wall-clock. `crowdsec`
+runs `dirb` through BunkerWeb at a wordlist, and CrowdSec rate-limits it as designed — the
+better the product works, the longer the action takes. One local run spent 24 minutes of
+elapsed time on 17 seconds of CPU there, and `dirb` buffers its output, so a silent log is
+not evidence of a stall: check `TIME` in `ps` before assuming a hang. CI bounds this with a
+job timeout that a workstation run does not have, so budget for it or run that spec last.
 
 Once a stack is up, you can drive narrower loops:
 
@@ -294,6 +338,17 @@ Three more traps a `ui` spec hits sooner or later, all handled in `utils/ui.py` 
   earlier in the document, so a loose selector clicks *that*, the click does nothing, and the step
   still reports success. Anchor these on
   `//div[contains(@class, "dt-button-collection")]//a[contains(@class, "dropdown-item")]`.
+- **`type: find` proves an element is in the DOM, never that it can be clicked.** The onboarding
+  drawer — `offcanvas-end`, 400 px of fixed overlay with no backdrop — used to auto-open on the
+  first page a session rendered and sat on that page's toolbar. Every `find` in every ui spec
+  stayed green throughout, because the buttons were findable the whole time; only the click reds,
+  and only on the page that happens to click. The assertion that catches it is `by: js`: the
+  expression returns the node only when `document.elementFromPoint` at its centre resolves back
+  to it, and `find` ends the run when the expression returns null. `first_run_cta_receives_click`
+  in `ui/instances.yml`, `ui/services.yml` and `ui/configs.yml` is that guard, and it checks
+  `#onboarding-button` first so it cannot pass vacuously on a session where the walkthrough is
+  not rendered at all. A visibility or `is_displayed()` check is **not** a substitute — both were
+  green during the defect.
 
 ## Integrations
 
@@ -358,8 +413,9 @@ One thing went with the deleted directories and had no replacement: `bwcli ban`,
 since `bans` reads the database first and treats it as the source of truth. `core/bwcli.yml`
 covers it now: a global ban and a service-scoped one, each listed back, then both lifted.
 
-It asserts the unban's own success message rather than the address being absent from a later
-listing, because the `bwcli` action carries a positive `result` substring and nothing else.
-A `not_result` would be a stronger check and a change to every spec's model, so it is not
-worth it for this one.
+Asserting the unban's own success message was not enough: the message is printed by the
+command, not derived from the ban store, so it would pass against a `bwcli` that reported
+success and removed nothing. The `bwcli` action now takes `not_result` beside `result` —
+either one, enforced by the model — and the spec lists the bans back after lifting them and
+requires each address to be absent. That is the check that fails if the unban is a no-op.
 
