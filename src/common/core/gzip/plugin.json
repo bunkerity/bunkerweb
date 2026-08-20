@@ -8,7 +8,7 @@
     "USE_GZIP": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable or disable Gzip compression.",
+      "help": "Enable or disable Gzip compression. Off by default, which is also NGINX's own default. The setting is per-service: leave it off for any service whose responses both carry a secret (a CSRF token, an API key) and echo back attacker-supplied input, since that combination is the BREACH precondition \u2014 and note that text/html is always compressed, whatever GZIP_TYPES lists. The BunkerWeb web UI is such a service.",
       "id": "use-gzip",
       "label": "Use gzip",
       "regex": "^(yes|no)$",

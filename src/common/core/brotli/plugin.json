@@ -8,7 +8,7 @@
     "USE_BROTLI": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable or disable Brotli compression.",
+      "help": "Enable or disable Brotli compression. Off by default, which is also the ngx_brotli module's own default. The setting is per-service: leave it off for any service whose responses both carry a secret (a CSRF token, an API key) and echo back attacker-supplied input, since that combination is the BREACH precondition \u2014 and note that text/html is always compressed, whatever BROTLI_TYPES lists. The BunkerWeb web UI is such a service.",
       "id": "use-brotli",
       "label": "Use brotli",
       "regex": "^(yes|no)$",
