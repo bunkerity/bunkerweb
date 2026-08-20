@@ -76,6 +76,16 @@ DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
 
+# Methods that mean "a human edited this through a first-class interface". They overwrite one
+# another freely. "wizard" belongs here: the setup wizard creates its service with that method and
+# then writes the service's settings as "ui", so the two must be interchangeable or every later
+# edit of that service is silently dropped -- setting edits (#3751) and draft/undraft alike.
+# What makes the wizard service special is that it cannot be deleted, which is enforced separately
+# (api/app/routers/services.py) and deliberately NOT by this set: the deletion-ownership gates in
+# config_save.py keep spelling ("ui", "api") on purpose.
+# Lives here rather than in Database.py so the mixins can import it without a circular import.
+EDITABLE_METHODS = frozenset({"ui", "api", "wizard"})
+
 
 def canonicalize_setting_value(
     setting_type: Optional[str],

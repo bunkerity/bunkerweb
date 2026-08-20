@@ -38,10 +38,7 @@ from resource_validation import (  # type: ignore
 
 from sqlalchemy import delete, select, update
 
-from .common import DatabaseMixinBase
-
-# Methods whose rows the UI/API may freely edit (mirrors is_editable_method in the UI layer).
-_EDITABLE_METHODS = ("ui", "api", "wizard")
+from .common import EDITABLE_METHODS as _EDITABLE_METHODS, DatabaseMixinBase  # noqa: F401
 
 
 class DatabaseResourceGroupsMixin(DatabaseMixinBase):
