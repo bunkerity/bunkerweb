@@ -6,7 +6,13 @@
             {% for breadcrumb in breadcrumbs %}
                 {% set check_i18n = breadcrumb not in extra_pages %}
                 {% set breadcrumb_prefix = "" %}
-                {% set breadcrumb_url = url_for(breadcrumb.replace('_', '-')) %}
+                {# Ask whether the segment names a route, rather than building a URL and reading the
+                   placeholder back: a path segment is not an endpoint name, and the branch below
+                   treats "#" as an expected answer. Building it logged a warning per render for
+                   every segment that does not resolve -- `/global-config` on every visit -- which
+                   is the same noise `menu.html` was making with its plugin probe. #}
+                {% set breadcrumb_endpoint = breadcrumb.replace('_', '-') %}
+                {% set breadcrumb_url = url_for(breadcrumb_endpoint) if endpoint_exists(breadcrumb_endpoint) else "#" %}
                 {% if breadcrumb == current_endpoint %}
                     {% set breadcrumb_url = breadcrumbs_url %}
                 {% endif %}
@@ -46,13 +52,20 @@
                         {% set check_i18n = false %}
                     {% endif %}
                 {% endif %}
-                <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
-                    {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
-                    <a {% if breadcrumb and breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"
-                       {% elif loop.index == 2 and check_i18n %}
-                       href="#"
-                       {% endif %}>{{ _("breadcrumb." ~ breadcrumb | lower | replace('-', '_')) if check_i18n else breadcrumb }}</a>
-                </li>
+                {# `request.path.split("/")` opens with an empty segment ("/profile" -> ["", "profile"]).
+                   It has no crumb: the key built for it ends at the dot, gettext cannot find it, so it echoes the key
+                   and every page showed a first crumb reading "breadcrumb." — which `common.js` then read
+                   into the document title. The loop still visits it, because the `loop.index` tests below
+                   for /configs and /cache are written against positions that count it. #}
+                {% if breadcrumb %}
+                    <li class="breadcrumb-item{% if breadcrumb == current_endpoint %} active{% endif %}"
+                        {% if breadcrumb == current_endpoint %}aria-current="page"{% endif %}>
+                        <a {% if breadcrumb_url or (current_endpoint == "new" and loop.index > 1) %}href="{{ breadcrumb_url }}{{ breadcrumb_prefix }}"
+                           {% elif loop.index == 2 and check_i18n %}
+                           href="#"
+                           {% endif %}>{{ _("breadcrumb." ~ breadcrumb | lower | replace('-', '_')) if check_i18n else breadcrumb }}</a>
+                    </li>
+                {% endif %}
             {% endfor %}
         {% endwith %}
     </ol>
