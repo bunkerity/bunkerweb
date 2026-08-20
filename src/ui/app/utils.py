@@ -30,10 +30,16 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
 # authorization middleware, so the two never drift.
 STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
-# Matched whole, never as a prefix: every consumer below uses startswith, so listing a bare file
-# name among the prefixes would also exempt /favicon.icoX and /favicon.ico/anything from the
-# host, authorization and revocation checks.
-STATIC_EXACT_PATHS = ("/favicon.ico", "/robots.txt", "/security.txt", "/.well-known/security.txt")
+# Public paths that carry no privilege either, matched whole and never as a prefix: every consumer
+# below uses startswith, so listing a bare file name among the prefixes would also exempt
+# /favicon.icoX and /favicon.ico/anything from the host, authorization and revocation checks.
+STATIC_EXACT_PATHS = (
+    "/favicon.ico",
+    "/robots.txt",
+    "/security.txt",
+    "/.well-known/security.txt",
+    "/.well-known/change-password",
+)
 
 
 def is_static_path(path: str, *extra_prefixes: str) -> bool:

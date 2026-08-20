@@ -1414,6 +1414,21 @@ def set_security_headers(response):
         "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
+    # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the
+    # indexing of a URL discovered elsewhere.
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    # * Cross-origin headers to sever the opener relationship and refuse cross-origin embedding.
+    # COEP is left out on purpose: it would break the third-party resources the CSP allows.
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
+    # cannot render the panel after a logout. Static assets keep theirs, and a route that already
+    # set its own value wins.
+    if not is_static_path(request.path):
+        response.headers.setdefault("Cache-Control", "no-store")
+
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
             resp = hook(response)
@@ -1508,6 +1523,12 @@ def security_txt():
 @app.route("/security.txt", methods=["GET"])
 def security_txt_redirect():
     return redirect(url_for("security_txt"), 301)
+
+
+@app.route("/.well-known/change-password", methods=["GET"])
+def change_password_redirect():
+    # Not permanent on purpose: the page holding the password form may move.
+    return redirect(url_for("profile.profile_page"))
 
 
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
