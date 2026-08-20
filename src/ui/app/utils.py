@@ -33,7 +33,7 @@ STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/",
 # Matched whole, never as a prefix: every consumer below uses startswith, so listing a bare file
 # name among the prefixes would also exempt /favicon.icoX and /favicon.ico/anything from the
 # host, authorization and revocation checks.
-STATIC_EXACT_PATHS = ("/favicon.ico",)
+STATIC_EXACT_PATHS = ("/favicon.ico", "/robots.txt", "/security.txt", "/.well-known/security.txt")
 
 
 def is_static_path(path: str, *extra_prefixes: str) -> bool:

@@ -1482,6 +1482,34 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+@app.route("/.well-known/security.txt", methods=["GET"])
+def security_txt():
+    # Expires is mandatory and must stay fresh, so it is generated per request instead of
+    # being shipped as a static file like robots.txt.
+    expires = (datetime.now().astimezone() + timedelta(days=365)).replace(microsecond=0).isoformat()
+    fields = [
+        "Contact: mailto:security@bunkerity.com",
+        "Contact: https://github.com/bunkerity/bunkerweb/security/advisories/new",
+        f"Expires: {expires}",
+        "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
+        "Preferred-Languages: en, fr",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/SECURITY.md",
+    ]
+
+    # Canonical is derived from the request, so it is only emitted once the Host header has been
+    # vetted against a real allowlist: this path skips the before_request check, and "*" vets nothing.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and "*" not in allowed_hosts and _host_allowed(request.host, allowed_hosts):
+        fields.append(f"Canonical: {url_for('security_txt', _external=True)}")
+
+    return Response(content_type="text/plain; charset=utf-8", response="\n".join(fields) + "\n")
+
+
+@app.route("/security.txt", methods=["GET"])
+def security_txt_redirect():
+    return redirect(url_for("security_txt"), 301)
+
+
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
 
     @app.route("/healthcheck", methods=["GET"])
