@@ -99,6 +99,71 @@ def defer_change_acknowledgement(keys: Tuple[str, ...], snapshot: Dict[str, Any]
     return ""
 
 
+# What the job that just ran asked to have re-dispatched, waiting for the worker to queue it.
+#
+# Same constraint as `_PENDING_ACKS` above -- a job cannot reach the broker, so it hands the
+# request over through this module -- plus one of its own: a job whose precondition is not met yet
+# must NOT wait for it in place. Waiting holds one of the worker's heavy prefork children
+# (`--concurrency=2` by default, `src/worker/entrypoint.sh`), and two jobs waiting on the same push
+# deadlock the lane against the very push they are waiting for. So the job returns immediately and
+# leaves the re-run here.
+_PENDING_REQUEUE: List[Dict[str, Any]] = []
+
+# How many times the worker honours one dispatch's requeue chain, whatever the job asks for. Jobs
+# include third-party plugin code, so the bound is enforced worker-side; the constant lives here so
+# a job can see the budget it is spending and decide what to do when it runs out.
+MAX_JOB_REQUEUES = 20
+
+# Environment variable the worker sets to tell the job which deferral of this dispatch it is on.
+JOB_REQUEUE_COUNT_ENV = "BW_JOB_REQUEUE_COUNT"
+
+
+def job_requeue_count() -> int:
+    """How many times this dispatch has already been deferred. 0 on its first run."""
+    try:
+        return max(0, int(getenv(JOB_REQUEUE_COUNT_ENV, "0")))
+    except ValueError:
+        return 0
+
+
+def can_requeue() -> bool:
+    """Whether anything will actually pick up a `request_requeue`.
+
+    The worker sets `JOB_REQUEUE_COUNT_ENV` on every job it runs, including the first. Absent, the
+    job is running with no dispatcher behind it -- a manual invocation, a future caller that runs
+    jobs in-process -- and deferring there means doing nothing and never coming back. A job must
+    gate on this before choosing to defer instead of doing its work.
+    """
+    return getenv(JOB_REQUEUE_COUNT_ENV) is not None
+
+
+def drain_requeue_request() -> Optional[Dict[str, Any]]:
+    """Take the re-run the job that just ran asked for, if any. Worker side.
+
+    Always drained, even when the job failed, so a request cannot leak into whatever runs next in
+    the same worker child.
+    """
+    request = _PENDING_REQUEUE[-1] if _PENDING_REQUEUE else None
+    _PENDING_REQUEUE.clear()
+    return request
+
+
+def request_requeue(delay_seconds: int, reason: str, logger: Logger) -> None:
+    """Ask for this job to be dispatched again in `delay_seconds`, and return NOW.
+
+    `reason` is logged at WARNING rather than DEBUG on purpose. A job that defers has, from the
+    outside, done nothing -- exactly like a job with nothing to do -- so a quiet deferral turns a
+    precondition that never becomes true (one instance permanently down, say) into a job that
+    silently never runs. The reason and the remaining budget have to be in the log for that state
+    to be diagnosable at all.
+
+    The caller keeps its own exit status: this only queues the re-run.
+    """
+    remaining = MAX_JOB_REQUEUES - job_requeue_count()
+    logger.warning(f"Deferring this run by {delay_seconds}s: {reason} (deferrals left: {max(0, remaining - 1)})")
+    _PENDING_REQUEUE.append({"delay": max(1, int(delay_seconds)), "reason": reason})
+
+
 def _write_atomic(target: Path, data: bytes) -> None:
     """Write data to target atomically to avoid partial files."""
     target.parent.mkdir(parents=True, exist_ok=True)

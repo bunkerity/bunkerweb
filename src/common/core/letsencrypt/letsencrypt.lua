@@ -157,6 +157,22 @@ local function build_wildcard_groups(domains)
 	return result
 end
 
+-- Resolve a hostname to the wildcard base whose certificate covers it, or nil.
+--
+-- RFC 6125 section 6.4.3: a `*.example.com` certificate covers exactly ONE label under the base,
+-- so `deep.app.example.com` is NOT covered by `*.example.com` and must fall through instead of
+-- being handed a certificate its own validation rejects. This used to test the suffix alone,
+-- which matched at any depth -- and `customcert.lua` (`resolve_wildcard_base` there) already
+-- applies the single-label rule, so the two plugins answered the same question differently in
+-- the same phase.
+--
+-- The exact-base branch is NOT the wildcard rule and is deliberately kept: in wildcard mode the
+-- lineage for `example.com` carries both `*.example.com` and `example.com` (see
+-- `build_wildcard_groups`), so the apex is genuinely covered by that certificate. customcert has
+-- no equivalent because it derives its bases from `*.` SAN entries alone.
+--
+-- `bases` is published longest-first, so a deeper base still wins where one exists; a base whose
+-- suffix matches but whose label test fails must keep looking rather than stop the search.
 local function resolve_wildcard_base(host, bases)
 	if not host or host == "" then
 		return nil
@@ -167,7 +183,10 @@ local function resolve_wildcard_base(host, bases)
 		end
 		local suffix = "." .. base
 		if #host > #suffix and host:sub(-#suffix) == suffix then
-			return base
+			local wildcard_label = host:sub(1, #host - #suffix)
+			if wildcard_label ~= "" and not wildcard_label:find(".", 1, true) then
+				return base
+			end
 		end
 	end
 	return nil
@@ -448,16 +467,12 @@ function letsencrypt:ssl_certificate()
 	if type(alias) == "string" and alias ~= "" then
 		server_name = alias
 	else
-		for _, base in ipairs(wildcard_bases) do
-			if server_name == base then
-				server_name = base
-				break
-			end
-			local suffix = "." .. base
-			if #server_name > #suffix and server_name:sub(-#suffix) == suffix then
-				server_name = base
-				break
-			end
+		-- Same resolver `init()` uses, rather than a second copy of the rule: the copy that used
+		-- to live here had drifted -- it matched a wildcard base at any depth, so a
+		-- `*.example.com` certificate was selected for `deep.app.example.com`.
+		local base = resolve_wildcard_base(server_name, wildcard_bases)
+		if base then
+			server_name = base
 		end
 	end
 	local data

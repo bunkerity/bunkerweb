@@ -3,10 +3,8 @@
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from base64 import b64decode
-from tempfile import NamedTemporaryFile
 from traceback import format_exc
 from typing import Tuple, Union, Optional, Literal
 
@@ -14,6 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from certificate_utils import certificate_status, parse_certificate  # type: ignore
 from common_utils import bytes_hash  # type: ignore
 from jobs import Job  # type: ignore
 from logger import getLogger  # type: ignore
@@ -96,29 +95,25 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                 return False, f"Key file {key_file} is not a valid file, ignoring the custom certificate"
             key_file = key_file.read_bytes()
 
-        # Write to temporary files for OpenSSL validation
-        with NamedTemporaryFile(delete=False) as cert_temp, NamedTemporaryFile(delete=False) as key_temp:
-            try:
-                cert_temp.write(cert_file)
-                key_temp.write(key_file)
-                cert_temp.flush()
-                key_temp.flush()
+        # Validate the pair through the same function the inventory path uses
+        # (`db_methods.certificates.create_certificate`), so a certificate supplied by setting
+        # is held to the checks as one uploaded through the API. The previous check ran
+        # `openssl x509 -noout` on the certificate alone and never looked at the key, so a
+        # malformed, encrypted or mismatched key was cached and pushed to every instance, and
+        # only failed later in Lua -- where the service silently falls back to the default
+        # certificate and the operator's first signal is a browser warning.
+        try:
+            parsed = parse_certificate(cert_file, key_file)
+        except (TypeError, ValueError) as e:
+            return False, str(e)
 
-                # Validate the certificate using OpenSSL
-                result = run(
-                    ["openssl", "x509", "-noout", "-in", cert_temp.name],
-                    stdin=DEVNULL,
-                    stderr=DEVNULL,
-                    check=False,
-                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                )
-
-                if result.returncode != 0:
-                    return False, "Certificate is invalid."
-            finally:
-                # Clean up temporary files
-                Path(cert_temp.name).unlink(missing_ok=True)
-                Path(key_temp.name).unlink(missing_ok=True)
+        # Expiry warns and never blocks: refusing a certificate that is currently being served
+        # would withdraw it and drop the service to the default one, which is worse than
+        # serving expired.
+        # Not named `status`: the job body below uses a module-level `status` as its exit code.
+        cert_state = certificate_status(parsed["valid_from"], parsed["valid_to"])
+        if cert_state != "valid":
+            LOGGER.warning(f"{first_server}: custom certificate is {cert_state.replace('_', ' ')} (valid from {parsed['valid_from']} to {parsed['valid_to']})")
 
         cert_hash = bytes_hash(cert_file)
         old_hash = JOB.cache_hash("cert.pem", service_id=first_server)

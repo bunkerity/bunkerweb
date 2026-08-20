@@ -3,6 +3,7 @@ import os
 from contextlib import suppress
 from datetime import datetime
 from typing import Optional
+from uuid import uuid4
 
 from worker.app import app, get_worker_db
 from worker.executor import JobExecutor
@@ -176,7 +177,14 @@ def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
 # Imported rather than duplicated: if the two sides ever named different keys nothing would error --
 # the job would write one key, the worker drain another, and the change flag would stay pinned while
 # the set grew. /usr/share/bunkerweb/utils is on PYTHONPATH in all three worker targets.
-from jobs import RELOAD_ACK_PENDING_KEY as ACK_PENDING_KEY, drain_pending_acks  # type: ignore # noqa: E402
+from job_queues import queue_for  # type: ignore # noqa: E402
+from jobs import (  # type: ignore # noqa: E402
+    JOB_REQUEUE_COUNT_ENV,
+    MAX_JOB_REQUEUES,
+    RELOAD_ACK_PENDING_KEY as ACK_PENDING_KEY,
+    drain_pending_acks,
+    drain_requeue_request,
+)
 
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
@@ -216,6 +224,46 @@ def _publish_deferred_acks(broker_url: str, logger) -> None:
         _broker_client(broker_url).sadd(ACK_PENDING_KEY, *pending)
     except BaseException as exc:
         logger.error(f"Could not queue the deferred acknowledgements, leaving those changes pending: {exc}")
+
+
+def _requeue_if_asked(job_data: dict, logger) -> None:
+    """Dispatch this job again later, because it told us its precondition is not met yet.
+
+    A NEW task id, not a Celery retry. `_delivery_attempt` counts deliveries per task id to bound
+    a job that keeps killing its worker, and `retry()` preserves the id -- a deferral chain would
+    then be abandoned with "it keeps killing its worker", which is a diagnosis it never earned.
+    Minting an id is also what the counter's own contract already says a rescheduled run does.
+
+    The countdown is served by the broker, so nothing is held in this process and no prefork child
+    is occupied while it waits.
+    """
+    request = drain_requeue_request()
+    if not request:
+        return
+
+    count = int(job_data.get("requeue_count") or 0) + 1
+    name = job_data.get("name", "unknown")
+    if count > MAX_JOB_REQUEUES:
+        # The job is told its budget (JOB_REQUEUE_COUNT_ENV) and is expected to stop asking, so
+        # reaching this means a job -- possibly third-party -- ignored it. Refuse loudly rather
+        # than re-dispatch forever.
+        logger.error(f"Job {name} asked to be deferred more than {MAX_JOB_REQUEUES} times; refusing to re-dispatch it again")
+        return
+
+    payload = dict(job_data)
+    payload["requeue_count"] = count
+    payload["run_id"] = str(uuid4())
+    try:
+        execute_job.apply_async(args=[payload], task_id=payload["run_id"], queue=queue_for(name), countdown=request["delay"])
+    except BaseException as exc:
+        # Nothing is lost that was not already lost: the job did no work, and the scheduler
+        # re-dispatches `once` jobs on the next change or restart.
+        logger.error(f"Could not re-dispatch {name} after it deferred: {exc}")
+        return
+
+    logger.warning(
+        f"Job {name} deferred ({request['reason']}); re-dispatched as {payload['run_id']} in {request['delay']}s (deferral {count}/{MAX_JOB_REQUEUES})"
+    )
 
 
 def _apply_deferred_acks(client, claimed, logger) -> None:
@@ -389,6 +437,9 @@ def execute_job(self, job_data: dict) -> dict:
         # retry then skips itself. Set after the config overlay so a stored setting cannot
         # shadow it, and before the per-job env so an explicit override still wins.
         os.environ["BW_JOB_RUN_ID"] = self.request.id or run_id
+        # Which deferral of this dispatch the job is on, so a job that gates itself on a
+        # precondition can tell "not ready yet" from "not ready after N tries" and stop waiting.
+        os.environ[JOB_REQUEUE_COUNT_ENV] = str(int(job_data.get("requeue_count") or 0))
 
         job_env = job_data.get("env")
         if isinstance(job_env, dict):
@@ -409,6 +460,9 @@ def execute_job(self, job_data: dict) -> dict:
         # After the restore: the job ran without CELERY_BROKER_URL in its environment, and this
         # needs it back.
         _publish_deferred_acks(broker_url, logger)
+        # Same reason as above -- re-dispatching needs the broker URL the job did not have. Drained
+        # unconditionally so a request cannot leak into whatever runs next in this worker child.
+        _requeue_if_asked(job_data, logger)
 
     end = datetime.now().astimezone()
     duration = (end - start).total_seconds()
