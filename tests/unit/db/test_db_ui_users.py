@@ -13,6 +13,7 @@ that reaches the BASE implementations — the ones the API `/users` router actua
 from datetime import datetime, timezone
 
 DT = datetime(2024, 1, 1, tzinfo=timezone.utc)
+LATER_DT = datetime(2024, 1, 2, tzinfo=timezone.utc)  # a session created after DT
 
 
 class TestBaseCreateGet:
@@ -147,12 +148,30 @@ class TestBaseSessions:
         assert len(ordered) == 2
         assert ordered[0]["id"] == s1  # the current session is returned first
 
-    def test_delete_old_sessions_keeps_newest(self, db):
+    def test_delete_old_sessions_keeps_the_named_session_not_the_newest(self, db):
+        """The session to keep is named by the caller, and it is not "the newest one".
+
+        This method used to keep the most recently created row unconditionally, which inverts
+        "wipe my other sessions": the row that survived was whoever logged in last -- an attacker
+        who signed in after the victim -- and the row deleted was the victim's own.
+        """
+        db.create_ui_user("bob", b"h", [])
+        mine = db.mark_ui_user_login("bob", DT, "1.1.1.1", "a")
+        theirs = db.mark_ui_user_login("bob", LATER_DT, "2.2.2.2", "b")
+
+        assert db.delete_ui_user_old_sessions("bob", keep_session_id=mine) == ""
+
+        remaining = [s["id"] for s in db.get_ui_user_sessions("bob")]
+        assert remaining == [mine], "the caller's own session must be the one that survives"
+        assert theirs not in remaining
+
+    def test_delete_old_sessions_with_nothing_to_keep_deletes_all(self, db):
+        """No current session id means there is no row to spare -- not "spare an arbitrary one"."""
         db.create_ui_user("bob", b"h", [])
         db.mark_ui_user_login("bob", DT, "1.1.1.1", "a")
-        db.mark_ui_user_login("bob", DT, "2.2.2.2", "b")
+        db.mark_ui_user_login("bob", LATER_DT, "2.2.2.2", "b")
         assert db.delete_ui_user_old_sessions("bob") == ""
-        assert len(db.get_ui_user_sessions("bob")) == 1
+        assert db.get_ui_user_sessions("bob") == []
 
     def test_delete_old_sessions_missing_user(self, db):
         assert db.delete_ui_user_old_sessions("ghost") == "User ghost doesn't exist"

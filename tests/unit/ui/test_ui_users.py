@@ -7,6 +7,7 @@ fine. ``create_ui_user`` requires any referenced roles to already exist.
 from datetime import datetime, timezone
 
 DT = datetime(2024, 1, 1, tzinfo=timezone.utc)
+LATER_DT = datetime(2024, 1, 2, tzinfo=timezone.utc)  # a session created after DT
 
 
 def _session_count(ui_db, username):
@@ -79,13 +80,31 @@ class TestSessions:
     def test_access_missing_session(self, ui_db):
         assert ui_db.mark_ui_user_access(999999, DT) == "Session 999999 doesn't exist"
 
-    def test_delete_old_sessions_keeps_newest(self, ui_db):
+    def test_delete_old_sessions_keeps_the_named_session_not_the_newest(self, ui_db):
+        """The session to keep is named by the caller, and it is not "the newest one".
+
+        This method used to keep the most recently created row unconditionally, which inverts
+        "wipe my other sessions": the row that survived was whoever logged in last -- an attacker
+        who signed in after the victim -- and the row deleted was the victim's own.
+        """
+        ui_db.create_ui_user("bob", b"h", [])
+        mine = ui_db.mark_ui_user_login("bob", DT, "1.2.3.4", "a")
+        theirs = ui_db.mark_ui_user_login("bob", LATER_DT, "5.6.7.8", "b")
+        assert _session_count(ui_db, "bob") == 2
+
+        assert ui_db.delete_ui_user_old_sessions("bob", keep_session_id=mine) == ""
+
+        remaining = [s["id"] for s in ui_db.get_ui_user_sessions("bob")]
+        assert remaining == [mine], "the caller's own session must be the one that survives"
+        assert theirs not in remaining
+
+    def test_delete_old_sessions_with_nothing_to_keep_deletes_all(self, ui_db):
+        """No current session id means there is no row to spare -- not "spare an arbitrary one"."""
         ui_db.create_ui_user("bob", b"h", [])
         ui_db.mark_ui_user_login("bob", DT, "1.2.3.4", "a")
-        ui_db.mark_ui_user_login("bob", DT, "1.2.3.4", "a")
-        assert _session_count(ui_db, "bob") == 2
+        ui_db.mark_ui_user_login("bob", LATER_DT, "5.6.7.8", "b")
         assert ui_db.delete_ui_user_old_sessions("bob") == ""
-        assert _session_count(ui_db, "bob") == 1
+        assert _session_count(ui_db, "bob") == 0
 
 
 class TestBaseUiUserMethods:

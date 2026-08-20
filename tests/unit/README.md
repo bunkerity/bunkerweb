@@ -22,6 +22,17 @@ Default SQLite suite:
 .venv-unit/bin/pytest
 ```
 
+The `api_app` lane -- separate invocation, separate pins, opt-in by design:
+
+```bash
+.venv-unit/bin/pip install --require-hashes -r tests/unit/api_app/requirements.txt
+BW_API_APP_LANE=1 .venv-unit/bin/pytest tests/unit/api_app
+```
+
+It imports the API's `app` package, which cannot share an interpreter with the UI's -- see
+`tests/unit/api_app/README.md`. Without the env var the directory is ignored even when named
+explicitly, so `.venv-unit/bin/pytest` above never collects it.
+
 Pure normalization helpers only:
 
 ```bash

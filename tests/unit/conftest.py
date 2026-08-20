@@ -118,3 +118,12 @@ def db(db_engine, tmp_path, quiet_logger, _clean_env):
         yield database
     finally:
         database.close()
+
+
+# --- the api_app lane is opt-in, and must stay that way ---------------------------
+# `api_app/` imports the API's `app` package. `ui/conftest.py` relies on `import app` resolving
+# uniquely to `src/ui/app`, so the two cannot share an interpreter: whichever is imported first
+# wins and the other silently gets the wrong module. Ignoring the directory unless the lane is
+# asked for by name makes that collision impossible rather than merely unlikely -- a convention
+# would be forgotten, an ignore is not.
+collect_ignore_glob = [] if os.getenv("BW_API_APP_LANE") == "1" else ["api_app/*"]
