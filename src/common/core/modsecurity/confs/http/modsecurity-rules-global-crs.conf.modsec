@@ -1,4 +1,6 @@
 {% if USE_MODSECURITY_GLOBAL_CRS == "yes" %}
+  {%- set pathlib = import("pathlib") -%}
+  {%- set json = import("json") -%}
   {%- set effective_crs_version = "4" if MODSECURITY_CRS_VERSION == "nightly" else MODSECURITY_CRS_VERSION -%}
 # Process rules with disruptive actions
   {% if SECURITY_MODE == "block" -%}
@@ -84,7 +86,7 @@ SecAction \
   nolog,\
   pass,\
   t:none,\
-  setvar:'tx.allowed_methods={{ allowed_methods_list | join(" ") }}'"
+  setvar:'tx.allowed_methods={{ (allowed_methods_list | join(" ")) or ALLOWED_METHODS.replace("|", " ") }}'"
   {% endif %}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
@@ -103,6 +105,42 @@ include /etc/bunkerweb/configs/crs-plugins-before/*.conf
       {% if is_custom_conf("/etc/nginx/crs-plugins-before") %}
 include /etc/nginx/crs-plugins-before/*.conf
       {% endif %}
+
+      {#- The downloaded CRS plugins. The per-service twin of this block keys off
+          `service_plugins.get(service_id, [])`, and there is no service_id here: global CRS is one
+          shared ruleset in the http context, so per-service plugin scoping would be incoherent.
+          The union of every service's plugins is what this mode already means. Without this block
+          `USE_MODSECURITY_GLOBAL_CRS=yes` downloads the plugins, ships them to every instance and
+          loads none of their rules. The whole file is already gated on global mode by the `if` on
+          line 1, which is what keeps this and the per-service block mutually exclusive -- do not
+          add a second gate, and do not port one without the other. -#}
+      {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+        {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+            {% with service_plugins = json.loads(plugins_file.read_text()) %}
+              {#- `sort` only so the include order is stable across renders. -#}
+              {% with all_plugins = service_plugins.values() | sum(start=[]) | unique | sort %}
+# include downloaded CRS plugins configurations and before rules
+                {% for plugin_id in all_plugins %}
+                  {% set plugin_dir = plugins_path.joinpath(plugin_id) %}
+                  {% if plugin_dir.is_dir() %}
+                    {% for config_file in plugin_dir.iterdir() %}
+                      {% if config_file.is_file() and config_file.name.endswith('-config.conf') %}
+include {{ config_file }}
+                      {% endif %}
+                    {% endfor %}
+                    {% for before_file in plugin_dir.iterdir() %}
+                      {% if before_file.is_file() and before_file.name.endswith('-before.conf') %}
+include {{ before_file }}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            {% endwith %}
+          {% endif %}
+        {% endwith %}
+      {% endwith %}
     {% endif %}
 
 # custom CRS configurations before loading rules (e.g. exclusions)
@@ -132,6 +170,28 @@ include /etc/bunkerweb/configs/crs-plugins-after/*.conf
       {% if is_custom_conf("/etc/nginx/crs-plugins-after") %}
 include /etc/nginx/crs-plugins-after/*.conf
       {% endif %}
+
+      {% with plugins_path = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs/plugins") %}
+        {% with plugins_file = pathlib.Path("/var/cache/bunkerweb/modsecurity/crs-plugins.json") %}
+          {% if plugins_path.is_dir() and plugins_file.is_file() %}
+# include downloaded CRS plugins after rules
+            {% with service_plugins = json.loads(plugins_file.read_text()) %}
+              {% with all_plugins = service_plugins.values() | sum(start=[]) | unique | sort %}
+                {% for plugin_id in all_plugins %}
+                  {% set plugin_dir = plugins_path.joinpath(plugin_id) %}
+                  {% if plugin_dir.is_dir() %}
+                    {% for after_file in plugin_dir.iterdir() %}
+                      {% if after_file.is_file() and after_file.name.endswith('-after.conf') %}
+include {{ after_file }}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endwith %}
+            {% endwith %}
+          {% endif %}
+        {% endwith %}
+      {% endwith %}
     {% endif %}
 
 # set reasons data tx vars

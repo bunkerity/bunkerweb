@@ -5,6 +5,59 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.29.0 - 2026-08-17
+
+## What's Changed
+
+### 🆕 New features and detections 🎉
+* fix(932): add backslash-prefix evasion to shell command detection by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4599
+* feat(unix): detect basic quote evasion attempts against known unix commands by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4649
+* feat(unix): detect stat command at pl-2+ by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4735
+* feat: Expand web shells (v1) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4626
+### 🧰 Other Changes
+* fix: allow optional json. prefix in rule 932171 ARGS_NAMES pattern by @fzipi in https://github.com/coreruleset/coreruleset/pull/4703
+* fix(942190): require operator or quote after '!' to cut natural-language FPs by @fzipi in https://github.com/coreruleset/coreruleset/pull/4704
+* fix(942200): tighten comma branch to cut UA/Referer false positives by @fzipi in https://github.com/coreruleset/coreruleset/pull/4665
+* fix(942390): remove bypassable length bound on quoted/unary literals by @fzipi in https://github.com/coreruleset/coreruleset/pull/4713
+* fix(953100): more FPs related to RESPONSE_BODY ("(inclusive)" and "must be a valid") by @azurit in https://github.com/coreruleset/coreruleset/pull/4697
+* fix(932): remove w from Unix no-arguments command list by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4592
+* fix(932): require arguments for base64, lastlog, lastlogin by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4593
+* fix(953100): FP with '> in all' in RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4736
+* feat(930120): restore node_modules coverage by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4681
+* fix(942190): Fix the message to reflect that the rule applies to all SQL DBs by @aryehb in https://github.com/coreruleset/coreruleset/pull/4671
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.28.0...v4.29.0
+
+## Version 4.28.0 - 2026-07-01
+
+## What's Changed
+
+### 🔒 Security
+* fix: inspect XML attribute values across attack-detection rules — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-6jp8-c2w2-x7wr
+* fix: remove catastrophic backtracking in unix-shell-evasion prefix — https://github.com/coreruleset/coreruleset/security/advisories/GHSA-f5qm-3h4p-8qhg
+### 🆕 New features and detections 🎉
+* feat: enable crs_validate_utf8_encoding by default by @fzipi in https://github.com/coreruleset/coreruleset/pull/4647
+* feat: added detection for quote evasion by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3813
+* feat(934): detect ORM lookup operator injection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4659
+* fix(932): detect uninitialized variable spacer in RCE evasion prefix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4652
+### 🧰 Other Changes
+* refactor: create 941170 `.ra` file by @fzipi in https://github.com/coreruleset/coreruleset/pull/4493
+* fix: Update restricted-files.data to include NPM subdirectories without causing FPs by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4653
+* fix: remove exponential backtracking in 933160/933161 comment suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4666
+* fix(941140): remove exponential backtracking in CSS url(javascript) detection by @fzipi in https://github.com/coreruleset/coreruleset/pull/4670
+* fix(933180): remove exponential backtracking in variable-function noise suffix by @fzipi in https://github.com/coreruleset/coreruleset/pull/4669
+* fix(942390): move to regex-assembly by @fzipi in https://github.com/coreruleset/coreruleset/pull/4011
+* feat(crs-setup): add default actions for phases 3-5 by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4675
+* fix(942522): avoid excessive backtracking by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4676
+* fix: 4RI-250413 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4672
+* fix: FPs related to RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4684
+
+## New Contributors
+* @Prateeksaini12 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4661
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.27.0...v4.28.0
+
 ## Version 4.27.0 - 2026-06-01
 
 ## What's Changed

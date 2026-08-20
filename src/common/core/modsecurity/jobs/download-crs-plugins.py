@@ -34,7 +34,7 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError
 
-from common_utils import safe_tar_extractall, safe_zip_extractall  # type: ignore
+from common_utils import bytes_hash, safe_tar_extractall, safe_zip_extractall  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -522,7 +522,17 @@ try:
     else:
         CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
-    cached, err = JOB.cache_file("crs-plugins.json", dumps({service: list(plugins) for service, plugins in service_plugins.items()}, indent=2).encode())
+    # sorted(), not list(): the template emits one include per entry in the order this mapping gives,
+    # so an unordered set would reshuffle the CRS plugin includes on every run and make the change
+    # test below fire every day for nothing.
+    plugins_json = dumps({service: sorted(plugins) for service, plugins in service_plugins.items()}, indent=2).encode()
+
+    # This mapping is the render input: an already-installed plugin id keeps its extracted directory
+    # untouched (the `move()` above), so the plugin files can only change when an id does, and an id
+    # carries its version. Read the previous fingerprint BEFORE cache_file overwrites it.
+    render_changed = bytes_hash(plugins_json) != JOB.cache_hash("crs-plugins.json")
+
+    cached, err = JOB.cache_file("crs-plugins.json", plugins_json)
     if not cached:
         LOGGER.error(f"Failed to cache crs-plugins.json :\n{err}")
         status = 2
@@ -536,6 +546,19 @@ try:
 
     if status == 0:
         status = 1
+
+    # A new plugin set needs a RE-RENDER, not just a push. The include lines are baked in at render
+    # time: confs/server-http/modsecurity-rules.conf.modsec:136-158 and :212-226 walk crs-plugins.json
+    # and emit one `include` per -config/-before/-after file. Exiting 1 buys this job a cache push and
+    # a reload (worker/tasks.py:426), and neither can apply its own output: reloading re-reads the
+    # *rendered* conf, which has no include for a plugin that did not exist when it was rendered.
+    # Flagging the plugin makes the scheduler dispatch push-configs (main.py:1131 -> :944), which
+    # re-renders first. Cold start is the same case: the conf is rendered before this job has ever
+    # run, so without the flag the downloaded plugins stay unreferenced until some unrelated change.
+    if render_changed and status == 1:
+        err = JOB.db.checked_changes(["config"], plugins_changes=["modsecurity"], value=True)
+        if err:
+            LOGGER.error(f"Couldn't flag modsecurity for regeneration, the CRS plugins will not be included : {err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:

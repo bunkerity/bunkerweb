@@ -15,7 +15,7 @@
 ##!
 ##! Note: Rule 943110 has a superset of these session names.
 ##! A shared include could be created in a future refactor.
-##!^ ^
+##!^ ^(?:json\.)?
 ##!$ $
 
 ##! Java/J2EE Session IDs

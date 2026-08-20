@@ -8,8 +8,17 @@
 ##! - SELECT * FROM orders WHERE product = 'item', (5)
 ##! - ,varname"
 
-##! Do not detect things like French addresses:
-##! 999, rue d'Arlon
+##! The numeric branch only matches MySQL hex literals (`0x...`) or a
+##! parenthesized number after the comma. A bare comma followed by a plain
+##! number/word run is not a reliable SQLi signal and is indistinguishable
+##! from common benign traffic (faceted-navigation list values, CSV field
+##! lists, version tokens in User-Agent/Referer), so it is intentionally
+##! not matched.
+
+##! Do not detect things like:
+##! - French addresses:                  999, rue d'Arlon
+##! - faceted navigation list values:    ?brand=5432,5646,5380
+##! - User-Agent version tokens:         iPhone11,2  /  Apple/Mac16,7
 
 ##!+ i
 
@@ -29,9 +38,8 @@
 ##! Main assembly
 ##!> assemble
   ##!> assemble
-    {{comma-plus}}{{hex-numbers}}
+    {{comma-plus}}0x{{hex-numbers}}
     {{comma-plus}}\({{hex-numbers}}\)
-    \([^,]+(?:,\s*{{hex-numbers}})+\)
     ##!=>
     $
     {{ticks-class}}$
@@ -41,8 +49,25 @@
     \r\n\z
     ##!=>
   ##!<
+  ##! Balanced: comma followed by a quoted string (e.g. ,'value' or ,"value")
   ##!> assemble
-    {{comma-plus}}{{ticks-class}}{{not-ticks-class}}+{{ticks-class}}
+    {{comma-plus}}{{ticks-class}}
+    ##!=>
+    {{not-ticks-class}}+{{ticks-class}}
+    ##!=>
+  ##!<
+  ##! Terminating: comma + compact non-space token + bare quote at end of input
+  ##! (e.g. `,varname"`) — `[^\s)]+` requires ≥1 non-whitespace char before the quote
+  ##! so natural-language sentences ending with a quote after a comma (`, words"`) are
+  ##! not matched
+  ##!> assemble
+    ,[^\s)]+{{ticks-class}}
+    ##!=>
+    $
+    \z
+    \n\z
+    \r\n\z
+    ##!=>
   ##!<
 ##!<
 

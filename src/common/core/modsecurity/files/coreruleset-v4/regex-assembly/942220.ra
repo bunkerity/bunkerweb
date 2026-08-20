@@ -10,7 +10,7 @@
 
 ##!+ i
 
-##!^ ^
+##!^ ^(?:json\.)?
 ##!$ $
 
 ##! 32-bit unsigned integer max / max+1
