@@ -17,6 +17,7 @@
 		<img src="https://www.bestpractices.dev/projects/8001/badge">
 	</a>
 	<a href="https://gitrated.com/bunkerity/bunkerweb"><img src="https://gitrated.com/bunkerity/bunkerweb/badge" alt="GitRated rating" /></a>
+	<a href="https://score.getplumber.io/github.com/bunkerity/bunkerweb"><img src="https://score.getplumber.io/github.com/bunkerity/bunkerweb.svg" alt="Plumber CI/CD security score" /></a>
 	<br />
 	<a href="https://www.star-history.com/bunkerity/bunkerweb">
 		<picture>

@@ -1,5 +1,9 @@
 name: Perform staging tests (REUSABLE)
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_call:
     inputs:
@@ -9,15 +13,23 @@ on:
       RUNS_ON:
         required: true
         type: string
-    # secrets:
-    #   PRIVATE_REGISTRY:
-    #     required: true
-    #   PRIVATE_REGISTRY_TOKEN:
-    #     required: true
-    #   TEST_DOMAINS:
-    #     required: true
-    #   ROOT_DOMAIN:
-    #     required: true
+    secrets:
+      # Every secret below is consumed behind an `inputs.TYPE` condition, so none
+      # is required on every call.
+      SECRET_KEY:
+        required: false
+      PRIVATE_REGISTRY:
+        required: false
+      ROOT_DOMAIN:
+        required: false
+      TEST_DOMAINS_DOCKER:
+        required: false
+      TEST_DOMAINS_AUTOCONF:
+        required: false
+      TEST_DOMAINS_KUBERNETES:
+        required: false
+      TEST_DOMAINS_LINUX:
+        required: false
 
 jobs:
   tests:

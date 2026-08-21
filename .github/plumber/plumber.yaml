@@ -12,3 +12,4 @@ github:
         - nick-fields/retry
         - iFaxity/wait-on-action
         - danielmundi/upload-packagecloud
+        - medyagh/setup-minikube

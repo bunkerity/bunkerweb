@@ -1,5 +1,8 @@
 name: Generate documentation PDF (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:

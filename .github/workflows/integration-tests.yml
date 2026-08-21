@@ -9,6 +9,11 @@ name: Integration tests (REUSABLE)
 #   * dependency install is scoped to tests/requirements.txt (a bare `find tests -name
 #     "requirements*.txt"` would also drag in the unrelated tests/unit pytest set)
 
+# Least privilege: `setup` only checks out and computes a matrix. `test` additionally logs in
+# to ghcr to PULL the `-tests` images (it pushes nothing), so it alone gets `packages: read`.
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -95,6 +100,9 @@ jobs:
           echo "linux_release=$INPUT_RELEASE" >> $GITHUB_OUTPUT
 
   test:
+    permissions:
+      contents: read
+      packages: read # docker/login-action pulls the -tests images from ghcr
     needs: setup
     runs-on: ${{ fromJSON(needs.setup.outputs.runs_on) }}
     steps:

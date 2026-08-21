@@ -1,5 +1,10 @@
 name: Build container (REUSABLE)
 
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
 on:
   workflow_call:
     inputs:

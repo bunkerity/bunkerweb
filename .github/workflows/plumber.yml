@@ -16,19 +16,23 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      id-token: write # OIDC identity required by score-push
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          sparse-checkout: .github
           persist-credentials: false
       - name: Run Plumber
         uses: getplumber/plumber@031bc86d1e5f661626e2000f4f8779912d608d5f # v0.4.39
         with:
-          sparse-checkout: .github
           verify-attestation: true
           config-file: .github/plumber/plumber.yaml
           min-score: C
           soft-fail: true
           upload-sarif: true
-          score-push: false
+          # Never publish from a pull_request: a fork PR gets a read-only token and no OIDC
+          # identity, so the push errors, and a same-repo PR would publish a score computed on
+          # unmerged branch code to the public badge.
+          score-push: ${{ github.event_name != 'pull_request' }}
           upload-artifacts: true
