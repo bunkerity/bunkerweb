@@ -67,6 +67,32 @@ GROUP_INDEX = {"office": {"ip": ["203.0.113.0/24"]}}
 
 HARNESS = """
 globalThis.window = globalThis;
+// The editor builds its condition and operator labels through `t()` at module scope, so the
+// translator has to exist before the file is required — same category of stub as `window`,
+// `document` and `localStorage` above.
+//
+// It mirrors `i18n.js:42` with no catalog loaded: the fallback string, its own {{...}} substituted,
+// and interpolated values HTML-escaped unless the caller passes escapeValue: false. The escaping
+// half is not what these tests assert, but a stub that is laxer than production is how a harness
+// starts passing things the browser would not.
+globalThis.t = function (key, fallback, options) {
+  const settings =
+    typeof fallback === "string"
+      ? Object.assign({ defaultValue: fallback }, options || {})
+      : fallback || {};
+  const message =
+    settings.defaultValue !== undefined ? settings.defaultValue : key;
+  const escape =
+    !settings.interpolation || settings.interpolation.escapeValue !== false;
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(message).replace(/{{\s*([\w.]+)\s*}}/g, (placeholder, name) =>
+    settings[name] === undefined
+      ? placeholder
+      : escape
+        ? String(settings[name]).replace(/[&<>"']/g, (c) => entities[c])
+        : String(settings[name]),
+  );
+};
 globalThis.document = { addEventListener() {} };
 require(process.argv[2]);
 const model = globalThis.window.BW_WORKFLOW_MODEL;
@@ -135,6 +161,32 @@ def test_a_not_leaf_survives_as_a_not_group(node, tmp_path):
 
 CONVERT_HARNESS = """
 globalThis.window = globalThis;
+// The editor builds its condition and operator labels through `t()` at module scope, so the
+// translator has to exist before the file is required — same category of stub as `window`,
+// `document` and `localStorage` above.
+//
+// It mirrors `i18n.js:42` with no catalog loaded: the fallback string, its own {{...}} substituted,
+// and interpolated values HTML-escaped unless the caller passes escapeValue: false. The escaping
+// half is not what these tests assert, but a stub that is laxer than production is how a harness
+// starts passing things the browser would not.
+globalThis.t = function (key, fallback, options) {
+  const settings =
+    typeof fallback === "string"
+      ? Object.assign({ defaultValue: fallback }, options || {})
+      : fallback || {};
+  const message =
+    settings.defaultValue !== undefined ? settings.defaultValue : key;
+  const escape =
+    !settings.interpolation || settings.interpolation.escapeValue !== false;
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(message).replace(/{{\s*([\w.]+)\s*}}/g, (placeholder, name) =>
+    settings[name] === undefined
+      ? placeholder
+      : escape
+        ? String(settings[name]).replace(/[&<>"']/g, (c) => entities[c])
+        : String(settings[name]),
+  );
+};
 globalThis.document = { addEventListener() {} };
 require(process.argv[2]);
 const model = globalThis.window.BW_WORKFLOW_MODEL;
@@ -193,6 +245,32 @@ function el(id) {
 }
 let ready;
 globalThis.window = globalThis;
+// The editor builds its condition and operator labels through `t()` at module scope, so the
+// translator has to exist before the file is required — same category of stub as `window`,
+// `document` and `localStorage` above.
+//
+// It mirrors `i18n.js:42` with no catalog loaded: the fallback string, its own {{...}} substituted,
+// and interpolated values HTML-escaped unless the caller passes escapeValue: false. The escaping
+// half is not what these tests assert, but a stub that is laxer than production is how a harness
+// starts passing things the browser would not.
+globalThis.t = function (key, fallback, options) {
+  const settings =
+    typeof fallback === "string"
+      ? Object.assign({ defaultValue: fallback }, options || {})
+      : fallback || {};
+  const message =
+    settings.defaultValue !== undefined ? settings.defaultValue : key;
+  const escape =
+    !settings.interpolation || settings.interpolation.escapeValue !== false;
+  const entities = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return String(message).replace(/{{\s*([\w.]+)\s*}}/g, (placeholder, name) =>
+    settings[name] === undefined
+      ? placeholder
+      : escape
+        ? String(settings[name]).replace(/[&<>"']/g, (c) => entities[c])
+        : String(settings[name]),
+  );
+};
 globalThis.addEventListener = function(){};
 globalThis.localStorage = { getItem(){ return process.argv[4] || null }, setItem(){} };
 globalThis.CSS = { escape: (s) => String(s) };

@@ -30,6 +30,19 @@ class TestMethodsAreCompatible:
             ("api", "autoconf", False),
             ("ui", "api", True),  # ui/api interchangeable
             ("api", "ui", True),
+            # `wizard` joined them in dev 33f42592d (#3751). The setup wizard creates its service
+            # with method "wizard" and then writes that service's settings as "ui"; while the two
+            # were incompatible, every later edit of a wizard-created service was DISCARDED --
+            # no error, and the old value redrawn, which reads as the save not having been clicked.
+            ("ui", "wizard", True),
+            ("wizard", "ui", True),
+            ("api", "wizard", True),
+            ("wizard", "api", True),
+            ("wizard", "wizard", True),
+            # ...and the widening stops there. `wizard` is editable, not privileged.
+            ("wizard", "autoconf", False),
+            ("wizard", "scheduler", False),
+            ("manual", "wizard", False),
             # scheduler (env-var origin) no longer unconditionally overwrites ui/api: a
             # default-filled scheduler pass must NOT clobber in-session UI/API edits. The
             # override is gated behind allow_scheduler_override (see test_scheduler_override).
@@ -53,8 +66,12 @@ class TestMethodsAreCompatible:
             # declared env key over an in-session UI/API edit).
             ("scheduler", "ui", True, True),
             ("scheduler", "api", True, True),
+            ("scheduler", "wizard", True, True),
             ("scheduler", "ui", False, False),
             ("scheduler", "api", False, False),
+            # The gate covers the wizard too: an env-var pass must not clobber a wizard-created
+            # service's settings any more than it may clobber a UI edit.
+            ("scheduler", "wizard", False, False),
             # It must not loosen any other rule.
             ("ui", "scheduler", True, False),
             ("ui", "api", True, True),

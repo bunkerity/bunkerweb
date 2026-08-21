@@ -102,6 +102,11 @@ package.loaded["bunkerweb.utils"] = {
         ban_calls = ban_calls + 1
         return BANNED, "ban", 60, {}
     end,
+    -- The ban branch re-reads the whitelist authoritatively: `is_whitelisted` above only
+    -- reflects the ctx cache, which nothing fills while the IP stays banned.
+    is_ip_whitelisted = function()
+        return IP_WHITELISTED, "test whitelist"
+    end,
     set_reason = function(id, data, _, mode)
         reason_calls = reason_calls + 1
         reason_id = id
@@ -131,6 +136,7 @@ def _run(
     *,
     whitelisted: bool,
     banned: bool = False,
+    ip_whitelisted: bool = False,
     security_mode: str = "detect",
 ) -> list[str]:
     settings = (
@@ -140,15 +146,10 @@ def _run(
         f"local INITIAL_WHITELISTED = {str(whitelisted and path == HTTP).lower()}\n"
         f"local HAS_WHITELIST = {str(path == STREAM).lower()}\n"
         f"local BANNED = {str(banned).lower()}\n"
+        f"local IP_WHITELISTED = {str(ip_whitelisted).lower()}\n"
         f'local SECURITY_MODE = "{security_mode}"\n'
     )
-    script = (
-        settings
-        + PREAMBLE
-        + "\nlocal function run()\n"
-        + _lua_block(path, directive)
-        + "\nend\n"
-        + r"""
+    script = settings + PREAMBLE + "\nlocal function run()\n" + _lua_block(path, directive) + "\nend\n" + r"""
 local result = run()
 print(table.concat({
     tostring(plugin_calls), tostring(whitelist_calls), tostring(ban_calls), tostring(reason_calls), tostring(reason_id),
@@ -156,7 +157,6 @@ print(table.concat({
     tostring(exit_status), tostring(result),
 }, "|"))
 """
-    )
     result = subprocess.run([LUA, "-"], input=script, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     return result.stdout.strip().split("|")
@@ -189,3 +189,28 @@ def test_stream_whitelist_skips_ban_lookup_and_block():
 def test_stream_ban_blocks_when_whitelist_does_not_allow():
     output = _run(STREAM, "preread", "preread", 0, whitelisted=False, banned=True, security_mode="block")
     assert output == ["1", "1", "1", "1", "ban", "block", "nil", "1", "444", "444"]
+
+
+def test_http_ban_blocks_when_whitelist_does_not_allow():
+    """The HTTP twin of the case above -- previously uncovered, and the ban branch just grew a
+    second exit path, so both phases need the negative control."""
+    output = _run(HTTP, "access", "access", 0, whitelisted=False, banned=True, security_mode="block")
+    assert output[2:] == ["1", "1", "ban", "block", "nil", "1", "444", "444"]
+
+
+@pytest.mark.parametrize(("path", "directive", "phase"), TARGETS)
+def test_a_whitelisted_ip_passes_straight_through_an_active_ban(path: Path, directive: str, phase: str):
+    """Whitelisting a banned IP must rescue it, and must change nothing else.
+
+    Asserted against the un-banned run rather than a hand-written tuple: ignoring the ban has to be
+    indistinguishable from never having been banned, apart from the ban lookup itself having
+    happened. A literal expectation here would pass just as well if the branch silently swallowed
+    the request instead of falling through.
+    """
+    reference = _run(path, directive, phase, 0, whitelisted=False, banned=False, security_mode="block")
+    rescued = _run(path, directive, phase, 0, whitelisted=False, banned=True, ip_whitelisted=True, security_mode="block")
+
+    # `ban_calls` counts the lookup, which happens either way -- so the two runs must be identical
+    # in every field, including that one. Anything less would let a swallowed request pass.
+    assert rescued[2] == "1", "the ban lookup must still run: the rescue happens after it, not instead of it"
+    assert rescued == reference, "a rescued request must be indistinguishable from one that was never banned"

@@ -9,6 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from conftest import english  # what a converted template renders for a key
+import re
+
 import pytest
 
 from jinja2 import ChainableUndefined, ChoiceLoader, DictLoader, Environment, FileSystemLoader
@@ -186,6 +188,32 @@ def test_acknowledging_a_hint_is_the_only_thing_that_writes():
 # The spotlight (L4)
 # --------------------------------------------------------------------------------------
 JS = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "js" / "pages" / "onboarding.js"
+
+
+def test_the_server_does_not_ask_the_drawer_to_open_itself_over_a_page():
+    """The drawer is a 400 px fixed overlay on the right edge with no backdrop, and the first page
+    a session renders is whatever the user asked for — a bookmarked list page as readily as the
+    dashboard. Auto-opened there it covered `Create new service` and `Create custom config`
+    completely; `document.elementFromPoint` at the button's centre returned the drawer, so the
+    click never reached the button.
+
+    `onboarding.js` already carries the rule this broke — `spotlight()` hides the drawer before
+    pointing at anything, because the drawer covers the chrome it points at.
+
+    The `data-autoopen` plumbing and the JS branch behind it stay (the parametrised test above
+    still covers both values); what this pins is that the *server* does not request it while the
+    drawer has nowhere to open into. Turning it back on is a layout change — the page must reflow
+    and the navbar it would push is `position: fixed` and shared by every page — not a flag flip,
+    so it should not come back by accident.
+    """
+    source = (Path(__file__).resolve().parents[3] / "src" / "ui" / "main.py").read_text(encoding="utf-8")
+    # The whole resolve-the-flag block, not the file: `onboarding_autoopen = False` also appears
+    # above it as the initialisation, and matching that one made an earlier version of this test
+    # pass against every mutation put to it.
+    block = source.split("if onboarding_active is None:", 1)[1].split("# The post-upgrade recap", 1)[0]
+    assignments = re.findall(r"onboarding_autoopen\s*=\s*(.+)", block)
+
+    assert assignments == ["False"], f"the server computes auto-open again: {assignments}"
 
 
 def test_the_spotlight_is_opt_in_and_survives_a_missing_anchor():

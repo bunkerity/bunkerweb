@@ -270,7 +270,9 @@ def test_changing_the_password_revokes_every_other_session(password_change):
     assert password_change.revoked == [1, 3], "every session but the caller's own must be revoked"
     assert password_change.client.delete_user_sessions.called, "the other session rows are never pruned"
     assert password_change.client.delete_user_sessions.call_args.kwargs["keep_session_id"] == 2
-    assert response.headers["Location"].endswith("/logout")
+    # The reason rides out in the URL because the logout destroys the flash queue the success
+    # message would otherwise use -- see tests/unit/ui/test_login_notices.py.
+    assert response.headers["Location"].endswith("/logout?reason=password_changed")
 
 
 def test_the_caller_is_not_revoked_out_from_under_themselves(password_change):

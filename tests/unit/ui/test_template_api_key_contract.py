@@ -531,6 +531,19 @@ def test_every_candidate_is_checked_or_excused():
     assert not stale, f"NOT_COVERABLE names pages that are no longer candidates: {stale}"
 
 
+def test_the_discovery_found_pages_to_cover():
+    """RULE 13 floor, `>=` because growth is COLLABORATION here: every new list page that gains an
+    API fetch route should join `COVERED` automatically, and a lane adding one must not have to
+    touch this number.
+
+    Measured rather than assumed: emptying `_candidates()` already gives `2 failed, 2 skipped`, so
+    this guard survived the mutant on its own. The floor is still stated explicitly, because the
+    catch was incidental — it fell out of the "at least one page is clean" control below rather than
+    from anything that says an empty discovery is a bug."""
+    assert len(COVERED) >= 5, f"the page discovery collapsed to {len(COVERED)}: {PAGE_IDS}"
+    assert len(PAGE_IDS) == len(COVERED), "PAGE_IDS drifted from COVERED"
+
+
 def test_at_least_one_covered_page_is_clean():
     """The control, as a test rather than as a habit. If every covered page were drifted, a guard
     that simply always failed would look identical to this one from the outside."""
@@ -551,8 +564,11 @@ def test_the_derivation_finds_something_on_both_sides(page, template):
 
 @pytest.mark.parametrize(("page", "template"), COVERED, ids=PAGE_IDS)
 def test_the_template_only_reads_keys_the_api_emits(page, template):
-    """FAILS ON `/configs`, `/cache` AND `/templates` BY DESIGN — see the module docstring. Do not
-    repoint, skip or xfail these; each names a real dead key and goes green when the fix lands."""
+    """Green since the Option A fix landed (2026-08-20, ~11:00). This docstring previously read
+    "FAILS ON /configs, /cache AND /templates BY DESIGN"; it named three real dead keys and said
+    they would go green when the fix landed. They did — the templates now read `service` and
+    `plugin`, the keys the API actually emits. Corrected rather than deleted so the next reader can
+    see what the guard was written against."""
     stem = Path(template).stem
     emitted = emitted_keys(page, stem)
     dead = sorted(keys_read(page, stem) - emitted)
