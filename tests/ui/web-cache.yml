@@ -35,11 +35,14 @@ actions:
         type: click
         selector: '//div[@id="purge-all"]//button[@type="submit"]'
         sleep: 0.5
-      # Exact wording from routes/web_cache.py: "Web cache purged (all entries)" on success, or a
-      # "Web cache purged on N instance(s)" warning when some instance was unreachable.
+      # Matching only "Web cache purged" passed on the partial branch too -- routes/web_cache.py
+      # flashes "Web cache purged on N instance(s); ..." as a *warning* when instances are
+      # unreachable, and that contains the shorter string. This stack has one instance, so a
+      # partial result is a real failure and has to red. Anchoring on the success branch's own
+      # wording, "(all entries)", is what makes that possible.
       assert_all_success:
         type: find
-        selector: '//div[contains(@class, "toast-body") and contains(text(), "Web cache purged")]'
+        selector: '//div[contains(@class, "toast-body") and contains(text(), "Web cache purged (all entries)")]'
       fill_url:
         type: send_keys
         selector: '//input[@name="url"]'

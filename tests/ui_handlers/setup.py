@@ -26,11 +26,17 @@ def handle(LOGGER: Logger, ctx, step_data: Any) -> str:
 
     LOGGER.info("🦊 setting up the integration with the setup wizard")
 
-    card_tile = safe_get_element(LOGGER, driver, By.CLASS_NAME, "card-title")
-    assert isinstance(card_tile, WebElement), "card title not found"
-
-    if card_tile.text.casefold() != "setup wizard":
-        LOGGER.error("The page isn't the wizard page, only the wizard page is compatible with a 'setup' step type.")
+    # The wizard heading is `<h4 class="sw-title">`, and `setup.html` carries no `card-title` at
+    # all since the 1.7 reskin -- nor does base.html or any partial it includes. So on the wizard
+    # itself the old selector matched nothing and `safe_get_element` exit(1)'d, reporting a missing
+    # element rather than the reskin. On a page that DOES carry `card-title` it was worse: the text
+    # comparison only logged, so a `setup` step aimed at the wrong page carried on and failed later,
+    # filling fields that were not there. `safe_get_element` exits on a miss, so
+    # finding this element IS the assertion, and it needs no text comparison -- the chrome is
+    # translated server-side now, and comparing against "setup wizard" would red on any browser
+    # that does not ask for English. A red here means the browser did not land on the wizard.
+    card_tile = safe_get_element(LOGGER, driver, By.CLASS_NAME, "sw-title")
+    assert isinstance(card_tile, WebElement), "wizard title not found"
 
     LOGGER.info("🦊 Filling admin user details ...")
 
