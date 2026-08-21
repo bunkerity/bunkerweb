@@ -134,6 +134,14 @@ spec:
               value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
             - name: API_TOKEN
               value: "changeme"
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
 ---
 apiVersion: apps/v1
 kind: Deployment
