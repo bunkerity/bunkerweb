@@ -40,6 +40,8 @@ class JobScheduler:
         self.__logger = logger or getLogger("SCHEDULER.JOB_SCHEDULER")
         self.api_client = api_client
         self.__base_env = os.environ.copy()
+        # The dict published as ``os.environ`` once the first config is set. See __set_env.
+        self.__job_env: Optional[Dict[str, Any]] = None
         self.__lock = lock
         self.__compiled_regexes = self.__compile_regexes()
         self.update_jobs()
@@ -57,8 +59,44 @@ class JobScheduler:
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        os.environ = self.__base_env.copy()
-        os.environ.update(env)
+        self.__set_env(env)
+
+    def __set_env(self, env: Dict[str, Any]) -> None:
+        """Publish ``base_env | env`` as ``os.environ`` without ever changing its identity.
+
+        Rebinding ``os.environ`` to a fresh dict is invisible to any module that did
+        ``from os import environ``: that name is bound to whichever object existed when the
+        module was first imported, and it keeps pointing at it forever. Three modules in this
+        process do exactly that and then read the binding at run time:
+
+            src/scheduler/main.py:190            handle_reload() builds the config-saver
+                                                 subprocess env from ``environ.items()``
+            src/common/db/db_methods/metadata.py:73   returns ``environ`` as the keyring source
+            src/common/utils/certificate_utils.py:29  ``values = values or environ``
+
+        So a rebind froze all three on the start-time snapshot: a service or a certificate key
+        added after startup was invisible to them until the scheduler was restarted. Mutating
+        the same dict instead keeps every existing binding live.
+
+        Never ``clear()`` first. ``handle_reload`` is the SIGHUP handler (main.py:172); it runs
+        in this thread between two arbitrary bytecodes and reads ``getenv("PATH")`` /
+        ``getenv("DATABASE_URI")`` plus ``environ.items()`` to build that subprocess env, so
+        ``os.environ`` must never be observable half-empty. Update, then prune.
+
+        The prune loop is load-bearing, not tidying: a deleted service must lose its
+        ``{service}_*`` keys, which rebinding from ``base_env`` used to do for free.
+
+        Callers must hold the main thread with no reload in flight -- this mutates a dict other
+        modules iterate directly, and a concurrent ``environ.items()`` raises RuntimeError.
+        """
+        new_env = self.__base_env | env
+        if self.__job_env is None:
+            self.__job_env = new_env
+            os.environ = self.__job_env  # single atomic rebind, already fully populated
+            return
+        self.__job_env.update(new_env)
+        for key in self.__job_env.keys() - new_env.keys():
+            del self.__job_env[key]
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -246,8 +284,7 @@ class JobScheduler:
     def reload(self, env: Dict[str, Any], *, changed_plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         """Reload the scheduler: update env, re-discover jobs, dispatch once-jobs, re-schedule periodic."""
         try:
-            os.environ = self.__base_env.copy()
-            os.environ.update(env)
+            self.__set_env(env)
             self.clear()
             self.update_jobs()
             success = self.run_once(changed_plugins, ignore_plugins)
