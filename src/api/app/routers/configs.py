@@ -100,7 +100,7 @@ def upload_configs(
     """Create new custom configs from uploaded files (method="api").
 
     The config name is derived from each file's basename (without extension),
-    sanitized to `^[\\w_-]{1,255}$`.
+    sanitized to `^[\\w_-]{1,255}\\Z`.
 
     Args:
         files: Config files to upload
@@ -211,7 +211,7 @@ def create_config(req: ConfigCreateRequest) -> JSONResponse:
     Body:
     - service: optional service id (use "global" or omit for global)
     - type: config type (e.g., http, server_http, modsec, ...)
-    - name: config name (^[\\w_-]{1,255}$)
+    - name: config name (^[\\w_-]{1,255}\\Z)
     - data: content as UTF-8 string
     """
     service = req.service
