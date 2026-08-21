@@ -32,6 +32,188 @@ actions:
     status: 200
     delay: 20
 
+  # Issue #3818, the reporter's scenario, run twice: once unbanning the service, once with the bare
+  # `bwcli unban <ip>` the issue actually reports. The unban used to lift the ban and leave the
+  # counter at the threshold, so the next watched status re-banned on the spot. What is asserted is
+  # the observable half of the fix -- after an unban it takes BAD_BEHAVIOR_THRESHOLD occurrences
+  # again, not one. Before the fix, `*_one_offence_is_not_enough` returns 403.
+  #
+  # The two groups are not redundant. The scope of the UNBAN is what `utils.remove_ban` branches on:
+  # `-service` takes the single-key path, the bare form takes the global one -- the sweep of the
+  # local zone plus the per-service derivation for Redis, which is all the code with logic in it.
+  # The BAN stays service-scoped in both groups (BAD_BEHAVIOR_BAN_SCOPE is a global-context setting,
+  # and changing it mid-block would need the stack restart this block must not do), so the bare
+  # group also covers the interesting case: a service counter cleared by a global unban.
+  #
+  # Placed before the permanent-ban group on purpose. Run after it, the block inherits a permanent
+  # ban on the runner's own address which now survives the restart in `bw_bans`, and only the
+  # USE_REAL_IP rewrite below keeps it from applying -- so a silent realip failure would surface as
+  # unexplained 403s rather than as a clean failure of the thing being tested. Here there is no
+  # permanent ban to inherit yet, which is cheaper than a `full_clean` rebuild and removes the
+  # dependency instead of paying to undo it.
+  #
+  # The client address is pinned through X-Forwarded-For because `bwcli unban` needs a literal IP
+  # and the runner's own source address is a Docker gateway the spec cannot know. 203.0.113.42 and
+  # .43 are TEST-NET-3, outside the default REAL_IP_FROM, so REAL_IP_RECURSIVE keeps them as the
+  # real IP. The groups use different addresses so the second never starts on the first's ban.
+  #
+  # Nothing inside the block may restart the stack: a restart empties the shared dict, which empties
+  # the counter, and every assertion below would then pass against unfixed code. Only the very last
+  # action restarts. BAN_TIME and COUNT_TIME are long for the same reason -- an expiry, rather than
+  # the unban, would otherwise be doing the work. This spec runs without Redis, so it exercises the
+  # local datastore branch only; the Redis branch is covered by the unit tests.
+  #
+  # `repeat: N` sends N+1 requests (`tests/core.py`: `for x in range(action.repeat + 1)`). Every
+  # count named below is a request count, not a repeat value.
+
+  # --- group 1: unban scoped to the service -------------------------------------------------
+  # 6 requests against a threshold of 5: one spare, so a single lost increment does not flake it.
+  unban_reaches_the_threshold:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+    config:
+      SERVER_NAME: "www.example.com app1.example.com"
+      MULTISITE: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+      USE_REAL_IP: "yes"
+      # Same idiom as antibot.yml : the default REAL_IP_FROM does not cover the peer on every
+      # integration (Linux runs `network_mode: host`, so the peer is 127.0.0.1), and an untrusted
+      # peer means the header is ignored and the ban lands on an address `bwcli` is not given.
+      REAL_IP_FROM: "0.0.0.0/0"
+      BAD_BEHAVIOR_THRESHOLD: "5"
+      BAD_BEHAVIOR_BAN_TIME: "3600"
+      BAD_BEHAVIOR_COUNT_TIME: "600"
+      BAD_BEHAVIOR_BAN_SCOPE: "service"
+  unban_is_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+  unban_the_ip:
+    type: bwcli
+    command: "unban 203.0.113.42 -service www.example.com"
+    result: "has been unbanned"
+    restart_stack: false
+  unban_lifted_the_ban:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+  # Exactly one request: `repeat` is omitted rather than set to 1, which would send two.
+  unban_one_offence:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+  # The assertion this block exists for: one offence after an unban must not be enough.
+  unban_one_offence_is_not_enough:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+  # ... and the counter restarted from zero rather than stopped counting: five more requests, six
+  # in total against a threshold of five, reach it again and the ban comes back.
+  unban_five_more_offences:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 4
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+  unban_the_threshold_bans_again:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.42"
+
+  # --- group 2: the issue's own command, bare `bwcli unban <ip>` ------------------------------
+  # Same shape on a second address, and the only difference that matters: no `-service`, so
+  # `utils.remove_ban` takes the global path. A bare unban is safe on a service ban -- a global
+  # revoke tombstones the service rows too (`src/common/db/db_methods/bans.py`, `revoke_ban`).
+  unban_global_reaches_the_threshold:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  unban_global_is_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  unban_global_the_ip:
+    type: bwcli
+    command: "unban 203.0.113.43"
+    result: "has been unbanned"
+    restart_stack: false
+  unban_global_lifted_the_ban:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  unban_global_one_offence:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  # The global path's own assertion: the sweep really cleared the counter, so one offence is not
+  # enough here either. This is the branch the issue reports and the one with the logic in it.
+  unban_global_one_offence_is_not_enough:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  unban_global_five_more_offences:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 4
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+  # Last action of the block: this one restarts the stack, so the next group's config applies.
+  unban_global_the_threshold_bans_again:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    headers:
+      X-Forwarded-For: "203.0.113.43"
+
   blocked_requests_1:
     type: status
     url: "http://www.example.com/?id=/etc/passwd"

@@ -67,6 +67,28 @@ local INTERNAL_API_TIMEOUT = 1000
 -- Short TTL for locally cached HTTP bans so unbans propagate from Redis.
 local BAN_LOCAL_CACHE_TTL = 30
 
+-- Bad Behavior's per-IP abuse counters, purged by remove_ban along with the ban they produced
+-- (issue #3818). The same state is spelled differently in the two stores, so both prefixes have
+-- to be known here : handling one shape only fixes the deployments that use that store.
+-- Knowing a plugin's key shapes inside utils is coupling in the wrong direction. The conception
+-- (Outline 2UuqIAeeha) describes the alternative : a registry each plugin declares its ban-linked
+-- state keys in, swept blind by remove_ban.
+-- ponytail: hard-coded because Bad Behavior is currently the only plugin with an accumulated
+-- abuse counter; move both prefixes to a plugin-declared registry as soon as a second one appears.
+--
+-- Known limitation, HTTP only : this purge cannot reach a Stream service's counter, so for a
+-- stream service running without Redis issue #3818 is NOT fixed. Bad Behavior declares
+-- `"stream": "yes"` and its timer runs in the Stream VM too (see init-stream-lua.conf), keeping
+-- its own plugin_badbehavior_count_* in the `datastore_stream` zone -- while add_ban/remove_ban
+-- forward Stream -> HTTP over the internal API, so the ban itself lives in the HTTP zone. The two
+-- lua_shared_dict namespaces are not addressable from one VM and the only channel runs one way,
+-- so an HTTP-side unban deletes the ban and cannot touch that counter. With Redis it self-heals :
+-- badbehavior:increase() prefers the Redis counter and overwrites the local one with it on the
+-- next hit. Closing it for the no-Redis case needs an HTTP -> Stream channel, or the counter
+-- deleted by its owner (badbehavior.lua) at ban time instead of here.
+local BADBEHAVIOR_LOCAL_COUNTER_PREFIX = "plugin_badbehavior_count_"
+local BADBEHAVIOR_REDIS_COUNTER_PREFIX = "plugin_bad_behavior_"
+
 local utils = {}
 
 local function ensure_ban_epoch()
@@ -1331,15 +1353,28 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 			local key = "bans_service_" .. service .. "_ip_" .. ip
 			keys_to_delete[#keys_to_delete + 1] = key
 			datastore:delete(key)
+			datastore:delete(BADBEHAVIOR_LOCAL_COUNTER_PREFIX .. service .. "_" .. ip)
 		else
 			local global_key = "bans_ip_" .. ip
 			keys_to_delete[#keys_to_delete + 1] = global_key
 			datastore:delete(global_key)
 
 			local suffix = "_ip_" .. ip
+			-- A global unban also clears every per-service counter, including the ones that never
+			-- reached the threshold and therefore have no ban key of their own : state is state.
+			-- The counter prefix already ends with "_", so the global counter key matches this
+			-- suffix too and needs no separate delete.
+			local counter_suffix = "_" .. ip
+			-- datastore:keys() is get_keys(0), the whole zone with no 1024-key cap -- the same
+			-- single pass the ban sweep above already pays for.
 			for _, key in ipairs(datastore:keys()) do
 				if key:sub(1, 13) == "bans_service_" and key:sub(-#suffix) == suffix then
 					keys_to_delete[#keys_to_delete + 1] = key
+					datastore:delete(key)
+				elseif
+					key:sub(1, #BADBEHAVIOR_LOCAL_COUNTER_PREFIX) == BADBEHAVIOR_LOCAL_COUNTER_PREFIX
+					and key:sub(-#counter_suffix) == counter_suffix
+				then
 					datastore:delete(key)
 				end
 			end
@@ -1391,6 +1426,31 @@ utils.remove_ban = function(ip, service, ban_scope, not_after)
 						break
 					end
 					seen_cursors[cursor] = true
+				end
+			end
+			-- Bad Behavior's counters ride the ban keys' DEL. No second SCAN : the service names
+			-- come from the ban keys collected above, locally swept or SCANned out of Redis. That
+			-- covers every service this IP was banned on and nothing else -- a per-service counter
+			-- still under the threshold has no ban key to be named by, so it survives here and
+			-- expires on its own COUNT_TIME. The local sweep above does not have that hole,
+			-- because it walks the zone rather than the ban keys.
+			local ban_key_count = #keys_to_delete
+			if ban_scope == "service" then
+				keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. service .. "_" .. ip
+			else
+				keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. ip
+				local ban_suffix = "_ip_" .. ip
+				local seen_services = {}
+				for index = 1, ban_key_count do
+					local key = keys_to_delete[index]
+					if key:sub(1, 13) == "bans_service_" and key:sub(-#ban_suffix) == ban_suffix then
+						-- 13 = #"bans_service_", so the name starts at 14.
+						local name = key:sub(14, #key - #ban_suffix)
+						if name ~= "" and not seen_services[name] then
+							seen_services[name] = true
+							keys_to_delete[#keys_to_delete + 1] = BADBEHAVIOR_REDIS_COUNTER_PREFIX .. name .. "_" .. ip
+						end
+					end
 				end
 			end
 			-- One DEL for the whole key set instead of one round-trip per key. Per-key
