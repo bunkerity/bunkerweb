@@ -88,10 +88,11 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!"
-          TOTP_ENCRYPTION_KEYS: "set-me"
+          # TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度必须为 43 个字符
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks: [bw-universe, bw-db]
 
@@ -121,6 +122,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
       bw-storage:
       bw-logs:
       bw-lib:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -180,6 +182,13 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
 !!! warning "错误的哈希会将你锁定"
     仅在知道哈希对应的明文时才使用。首次创建时使用有效但错误的哈希不可逆，重启也无法修复；需用不同的 `ADMIN_PASSWORD` 配合 `OVERRIDE_ADMIN_CREDS=yes` 恢复。
+
+!!! warning "重建容器后 2FA 会丢失"
+    TOTP 密钥以加密形式存储在数据库中，但用于解密它们的密钥保存在**磁盘上**，而不是数据库里。每次启动时，界面会采用第一个可用来源：`/var/lib/bunkerweb/.totp_encryption_keys.json`，然后是旧的 `.totp_secrets.json`，再然后是 `TOTP_ENCRYPTION_KEYS`（别名 `TOTP_SECRETS`）。若都不可用，它会生成一组新的随机密钥，已存储的密钥将无法再解密，管理员的绑定会从数据库中移除，所有用户都必须重新绑定。
+
+    重启容器没有影响。真正导致密钥丢失的是丢掉容器文件系统：先 `docker compose down` 再 `up`、镜像或环境变更后的重建、`docker rm`，或者一个新的 Pod。只需在 `bw-ui` 容器的 `/data` 上挂载持久卷即可，本页的每个示例都这样做——镜像中 `/var/lib/bunkerweb` 是指向 `/data/lib` 的符号链接——因此 `TOTP_ENCRYPTION_KEYS` 是可选的。
+
+    只有在该卷无法持久化，或需要自行控制轮换时，才手动设置该变量。若要设置，请注意长度：像 `changeme` 这样的占位符**不是**有效密钥——密钥长度为 43 个字符，由 `passlib` 的 `generate_secret()` 生成。无效值会被丢弃并替换为随机密钥；并且与未设置该变量不同，它还会阻止管理员绑定被重置，因此在手动清除之前 2FA 将一直不可用。轮换可通过 JSON 映射完成：把旧密钥与新密钥一并保留，已有的绑定仍然有效。
 
 ## 配置来源与优先级
 

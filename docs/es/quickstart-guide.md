@@ -125,6 +125,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -163,6 +165,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -176,6 +179,9 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       bw-db:
         name: bw-db
     ```
+
+    !!! info "El volumen `bw-ui-data` no es opcional"
+        Contiene las claves que descifran los secretos TOTP almacenados. Sin él, el 2FA se pierde en la siguiente recreación del contenedor — vea [El 2FA desaparece al recrear el contenedor](web-ui.md).
 
 === "Docker autoconf"
 
@@ -250,6 +256,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -288,6 +296,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -422,6 +431,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -450,6 +461,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

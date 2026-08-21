@@ -1,5 +1,8 @@
 # Actualización
 
+!!! warning "Recrear el contenedor de la interfaz sin un `/data` persistente pierde el 2FA"
+    `docker compose down` y luego `up` sustituye el sistema de ficheros del contenedor `bw-ui`, y allí viven las claves que descifran cada secreto TOTP almacenado. Sin un volumen montado en `/data`, la inscripción del administrador se descarta y todos los usuarios deben inscribirse de nuevo. Compruebe **antes** de actualizar que su servicio `bw-ui` tiene uno — vea [El 2FA desaparece al recrear el contenedor](web-ui.md).
+
 ## Actualización desde 1.6.X
 
 ### Procedimiento

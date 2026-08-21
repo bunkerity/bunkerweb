@@ -1,5 +1,8 @@
 # Aufrüsten
 
+!!! warning "Ein Neuerstellen des Web-UI-Containers ohne persistentes `/data` kostet die 2FA"
+    `docker compose down` und anschließend `up` ersetzt das Dateisystem des Containers `bw-ui`, und dort liegen die Schlüssel, die jedes gespeicherte TOTP-Geheimnis entschlüsseln. Ohne ein Volume auf `/data` wird die Admin-Registrierung verworfen und alle Benutzer müssen sich neu registrieren. Prüfen Sie **vor** dem Upgrade, dass Ihr `bw-ui`-Dienst eines hat — siehe [2FA ist nach dem Neuerstellen des Containers verloren](web-ui.md).
+
 ## Upgrade von 1.6.X
 
 ### Vorgehensweise

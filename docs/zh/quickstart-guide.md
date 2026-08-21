@@ -126,6 +126,8 @@
         image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -164,6 +166,7 @@
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -177,6 +180,9 @@
       bw-db:
         name: bw-db
     ```
+
+    !!! info "`bw-ui-data` 卷不是可选项"
+        它保存着解密已存储 TOTP 密钥所需的密钥。缺少它，下一次重建容器时 2FA 就会丢失——参见[重建容器后 2FA 会丢失](web-ui.md)。
 
 === "Docker autoconf"
 
@@ -251,6 +257,8 @@
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -289,6 +297,7 @@
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -423,6 +432,8 @@
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -451,6 +462,7 @@
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:

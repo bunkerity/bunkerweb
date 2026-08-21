@@ -1,5 +1,8 @@
 # Upgrading
 
+!!! warning "Recreating the Web UI container without a persistent `/data` loses 2FA"
+    `docker compose down` followed by `up` replaces the `bw-ui` container's filesystem, and the keys that decrypt every stored TOTP secret live there. Without a volume mounted on `/data`, the admin enrollment is dropped and every user has to enroll again. Check that your `bw-ui` service has one **before** upgrading — see [2FA is gone after recreating the container](web-ui.md).
+
 ## Upgrade from 1.6.X
 
 ### Breaking changes

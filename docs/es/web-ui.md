@@ -88,10 +88,11 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!"
-          TOTP_ENCRYPTION_KEYS: "set-me"
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks: [bw-universe, bw-db]
 
@@ -121,6 +122,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
       bw-storage:
       bw-logs:
       bw-lib:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -180,6 +182,13 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 !!! warning "Un hash incorrecto te bloquea"
     Usa un hash solo si conoces su texto plano. Un hash válido pero incorrecto en la primera creación no se puede revertir y un reinicio no lo arregla. Recupera con un `ADMIN_PASSWORD` distinto y `OVERRIDE_ADMIN_CREDS=yes`.
+
+!!! warning "El 2FA desaparece al recrear el contenedor"
+    Los secretos TOTP se guardan cifrados en la base de datos, pero las claves que los descifran viven **en disco**, no en la base de datos. En cada arranque la interfaz toma la primera fuente disponible: `/var/lib/bunkerweb/.totp_encryption_keys.json`, luego el antiguo `.totp_secrets.json`, y después `TOTP_ENCRYPTION_KEYS` (alias `TOTP_SECRETS`). Si ninguna sirve, genera un conjunto aleatorio nuevo, los secretos almacenados dejan de poder descifrarse, la inscripción del administrador se elimina de la base de datos y todos los usuarios deben inscribirse de nuevo.
+
+    Reiniciar un contenedor es inofensivo. Lo que pierde las claves es perder el sistema de ficheros del contenedor: `docker compose down` y luego `up`, una recreación tras cambiar la imagen o el entorno, `docker rm`, o un pod nuevo. Basta con montar un volumen persistente en `/data` en el contenedor `bw-ui`, y todos los ejemplos de esta página lo hacen — `/var/lib/bunkerweb` es un enlace simbólico a `/data/lib` en la imagen — lo que deja `TOTP_ENCRYPTION_KEYS` como opcional.
+
+    Defina la variable usted mismo solo si ese volumen no puede persistirse, o para controlar la rotación. Si lo hace, atienda a la longitud: un marcador como `changeme` **no** es una clave válida — las claves tienen 43 caracteres, tal como las produce `generate_secret()` de `passlib`. Un valor inválido se descarta y se sustituye por una clave aleatoria y, a diferencia de una variable sin definir, además impide que se restablezca la inscripción del administrador, de modo que el 2FA queda inutilizable hasta que se borre manualmente. La rotación es posible con un mapa JSON: conserve las claves antiguas junto a la nueva y las inscripciones existentes seguirán siendo válidas.
 
 ## Fuentes de configuración y prioridad
 
