@@ -40,7 +40,8 @@
       "id": "libmaxminddb",
       "name": "libmaxminddb v1.13.3",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3"
+      "commit": "09a0540fea89a16e5c6a9e21e93ee9aece6639e3",
+      "post_install": "rm -rf src/deps/src/libmaxminddb/t/libtap src/deps/src/libmaxminddb/t/maxmind-db"
     },
     {
       "id": "lua-cjson",
@@ -231,14 +232,14 @@
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
       "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
       "submodules": true,
-      "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
+      "post_install": "rm -rf src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs src/deps/src/mbedtls/framework"
     },
     {
       "id": "modsecurity",
       "name": "ModSecurity v3.0.16",
       "url": "https://github.com/owasp-modsecurity/ModSecurity.git",
       "commit": "7ea9fefbe0ba409d8733b4d682c8c4c059cd028d",
-      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
+      "post_install": "rm -rf src/deps/src/modsecurity/others/libinjection src/deps/src/modsecurity/others/mbedtls src/deps/src/modsecurity/bindings/python src/deps/src/modsecurity/test/test-cases/secrules-language-tests && patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch || rm src/deps/src/modsecurity/configure.ac.orig src/deps/src/modsecurity/configure.ac.rej && patch --forward src/deps/src/modsecurity/src/transaction.cc src/deps/misc/modsecurity-transaction-cc.patch || rm src/deps/src/modsecurity/src/transaction.cc.orig src/deps/src/modsecurity/src/transaction.cc.rej && patch --forward src/deps/src/modsecurity/headers/modsecurity/transaction.h src/deps/misc/modsecurity-transaction-h.patch || rm src/deps/src/modsecurity/headers/modsecurity/transaction.h.orig src/deps/src/modsecurity/headers/modsecurity/transaction.h.rej"
     },
     {
       "id": "modsecurity-nginx",
