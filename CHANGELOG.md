@@ -12,6 +12,8 @@
 - [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, as in the shared dictionary, instead of expiring at once.
 - [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the stored values. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
 - [BUGFIX] `ui`: Total Requests, Blocked Requests and the Request status chart say which window they show, instead of being read as *Last 7 days* while holding cumulative counters. (Refs #3775)
+- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins into the database instead of stopping at "All Pro plugins are up to date", which left the plugin pages and hooks missing until a manual database edit.
+- [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
 - [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
 - [DEPS] Updated Coreruleset version to v4.29.0 (v4)
 - [DEPS] Updated lua-resty-openssl version to v1.9.0
