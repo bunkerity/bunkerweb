@@ -54,6 +54,9 @@
                     </div>
                 </div>
             {% endif %}
+            {% if notice %}
+                <div class="alert alert-warning" role="alert">{{ _(notice) }}</div>
+            {% endif %}
             <form method="POST" id="login-form" class="login-fields">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="hidden"
