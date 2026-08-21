@@ -376,7 +376,7 @@ class Database:
                 else:
                     with self.sql_engine.connect() as conn:
                         table_name = uuid4().hex
-                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
                         conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
@@ -536,7 +536,7 @@ class Database:
         self.logger.debug("Testing write access to the database ...")
         with self._db_session() as session:
             table_name = uuid4().hex
-            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
 
@@ -567,7 +567,7 @@ class Database:
 
         table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
