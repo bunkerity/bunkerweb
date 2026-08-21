@@ -43,7 +43,8 @@ def resolve_env_placeholders(value: str):
             try:
                 from redis import Redis  # Lazy import to avoid heavy deps at module import time
 
-                r = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+                # Same store the export handler writes to: TESTS_REDIS_PORT (6390), not 6379.
+                r = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0, decode_responses=True)
                 if r.ping():
                     resolved = r.get(key)
             except Exception:

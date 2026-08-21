@@ -3,7 +3,7 @@
 
 from contextlib import suppress
 from logging import Logger
-from os import environ
+from os import environ, getenv
 from typing import Any, Dict
 
 from redis import Redis
@@ -49,7 +49,12 @@ def handle(LOGGER: Logger, action: Any) -> None:
 
     # Connect to Redis for cross-process availability of exported values
     try:
-        redis_client = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        # The framework's state Redis is TESTS_REDIS_PORT (6390), not the product's 6379 --
+        # see tests/misc/docker/redis.yml. Exported values are read back by generate.py, a
+        # SEPARATE process, so this Redis is the only channel between them: environ below
+        # does not survive the process boundary. Pointing it at 6379 silently exported
+        # nothing and every "${VAR}" reached the request verbatim.
+        redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0, decode_responses=True)
         redis_client.ping()
     except Exception:
         redis_client = None
