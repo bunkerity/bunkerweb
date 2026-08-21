@@ -144,8 +144,10 @@ function start() {
             [[ -z "$key" || "$key" =~ ^# ]] && continue
             # Trim whitespace from key
             key=$(echo "$key" | xargs)
-            # Only process recognized keys
-            if [[ -n "${defaults[$key]}" ]]; then
+            # Only process recognized keys. Test that the key EXISTS, not that its default is
+            # non-empty : API_TOKEN is declared with an empty default, so testing the value
+            # skipped it entirely and the temp config was generated with no token at all.
+            if [[ -v "defaults[$key]" ]]; then
                 # Set variable if defined and non-empty in the file
                 [[ -n "$value" ]] && eval "${key}=\"$value\""
             fi
