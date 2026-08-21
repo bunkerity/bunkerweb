@@ -85,6 +85,7 @@
     "add_plugins": "Add Plugins",
     "auto_refresh": "Auto Refresh",
     "ban": "Ban",
+    "ban_all_filtered": "Ban all matching reports",
     "ban_selected": "Ban selected",
     "cache": "Cache",
     "cancel": "Cancel",
@@ -112,6 +113,7 @@
     "export_csv": "CSV",
     "export_excel": "Excel",
     "fetch_global": "Fetch Global Settings",
+    "filtered_actions": "Filtered actions",
     "filters_suffix": " Filters",
     "follow": "Follow",
     "force_check": "Force check",
@@ -147,6 +149,7 @@
     "local_time": "Local time",
     "collapse_multiline": "Collapse",
     "search": "Search",
+    "validate_certificate": "Validate certificate",
     "wrap": "Wrap",
     "select_file": "Select File",
     "select_page": "Select Page",
@@ -161,7 +164,9 @@
     "submit": "Submit",
     "subscribe": "Subscribe",
     "unban": "Unban",
+    "unban_all_filtered": "Unban all matching bans",
     "update_duration": "Update Ban Duration",
+    "update_duration_all_filtered": "Update duration for all matching bans",
     "update_key": "Update Key",
     "upload_photo": "Upload New Photo",
     "view_details": "View Details",
@@ -487,6 +492,7 @@
       "no_data": "No data"
     },
     "window": {
+      "all_time": "All time",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }
@@ -840,9 +846,12 @@
       "recovery_codes_shown_once_alert": "These recovery codes are shown only once. Please ensure you save them securely.",
       "reset_template_alert": "Are you sure you want to reset the current template settings and custom configurations?",
       "services_deletion_confirmation": "Are you sure you want to delete the selected services?",
+      "ban_filtered_confirmation": "Ban IPs from all {{count}} matching reports? Duplicate targets will be applied once.",
       "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
       "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
-      "update_duration_alert": "Select a new duration for the selected bans:"
+      "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
+      "update_duration_alert": "Select a new duration for the selected bans:",
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
     },
     "button": {
       "fetch_global_settings_confirm": "Apply global settings",
@@ -1042,6 +1051,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Reports are a rolling in-memory buffer: the oldest entries are dropped once the configured limit is reached. Unless Redis is enabled, they are also cleared when BunkerWeb restarts.",
     "security_incident": "Security Incident",
     "security_report_data": "Security Report Data"
   },
@@ -1761,6 +1771,13 @@
     "prompt": "Please enter your TOTP code."
   },
   "validation": {
+    "certificate_checking": "Checking ...",
+    "certificate_expires_in": "expires in {{days}} days",
+    "certificate_failed": "The validation request failed.",
+    "certificate_file_mode": "Only pasted or uploaded data can be checked here. A certificate path is read by the scheduler, which the web UI has no access to.",
+    "certificate_missing": "Supply both the certificate and the key first.",
+    "certificate_subject": "Subject:",
+    "certificate_valid": "The certificate and the key match.",
     "default_field_name": "This field",
     "invalid_date": "Invalid date",
     "ip_global_duplicate": "This IP address is already globally banned.",

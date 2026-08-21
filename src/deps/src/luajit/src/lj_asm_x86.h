@@ -1112,10 +1112,12 @@ static void asm_tvptr(ASMState *as, Reg dest, IRRef ref, MSize mode)
     } else {
 #if LJ_GC64
       if (irref_isk(ref)) {
+	Reg tmp;
 	TValue k;
 	lj_ir_kvalue(as->J->L, &k, ir);
-	emit_movmroi(as, dest, 4, k.u32.hi);
-	emit_movmroi(as, dest, 0, k.u32.lo);
+	tmp = ra_scratch(as, rset_exclude(RSET_GPR, dest));
+	emit_rmro(as, XO_MOVto, tmp|REX_64, dest, 0);
+	emit_loadu64(as, tmp, k.u64);
       } else {
 	/* TODO: 64 bit store + 32 bit load-modify-store is suboptimal. */
 	Reg src = ra_alloc1(as, ref, rset_exclude(RSET_GPR, dest));
@@ -2318,9 +2320,10 @@ static void asm_bitshift(ASMState *as, IRIns *ir, x86Shift xs, x86Op xv)
   IRIns *irr = IR(rref);
   Reg dest;
   if (irref_isk(rref)) {  /* Constant shifts. */
-    int shift;
+    int32_t shift;
     dest = ra_dest(as, ir, RSET_GPR);
-    shift = irr->i & (irt_is64(ir->t) ? 63 : 31);
+    shift = (LJ_32 || irr->o == IR_KINT) ? irr->i : (int32_t)ir_kint64(irr)->u64;
+    shift &= (irt_is64(ir->t) ? 63 : 31);
     if (!xv && shift && (as->flags & JIT_F_BMI2)) {
       Reg left = asm_fuseloadm(as, ir->op1, RSET_GPR, irt_is64(ir->t));
       if (left != dest) {  /* BMI2 rotate right by constant. */
@@ -2786,8 +2789,9 @@ static void asm_stack_restore(ASMState *as, SnapShot *snap)
 	  emit_i32(as, -1);
 	  emit_rmro(as, XO_MOVmi, REX_64, RID_BASE, ofs);
 	} else {
-	  emit_movmroi(as, RID_BASE, ofs+4, k.u32.hi);
-	  emit_movmroi(as, RID_BASE, ofs, k.u32.lo);
+	  Reg tmp = ra_scratch(as, rset_exclude(RSET_GPR, RID_BASE));
+	  emit_rmro(as, XO_MOVto, tmp|REX_64, RID_BASE, ofs);
+	  emit_loadu64(as, tmp, k.u64);
 	}
 #else
       } else if (!irt_ispri(ir->t)) {

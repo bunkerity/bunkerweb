@@ -487,6 +487,7 @@
       "no_data": "Veri yok"
     },
     "window": {
+      "all_time": "Tüm zamanlar",
       "last_days": "Son {{days}} gün",
       "title": "Panel penceresi"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Raporlar bellekte tutulan dairesel bir arabellektir: yapılandırılan sınıra ulaşıldığında en eski kayıtlar silinir. Redis etkin değilse, BunkerWeb yeniden başlatıldığında da temizlenirler.",
     "security_incident": "Güvenlik Olayı",
     "security_report_data": "Güvenlik Raporu Verisi"
   },

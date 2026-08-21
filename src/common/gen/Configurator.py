@@ -81,8 +81,12 @@ class Configurator:
                 "SERVICE_UI",
                 "SERVICE_API",
                 "IGNORE_REGEX_CHECK",
+                # Read by the entrypoint before anything else runs, so it can only come from the
+                # environment or variables.env, never from the database.
+                "KEEP_CONFIG_ON_RESTART",
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
+                "DISABLE_ONLINE_API",
                 "HIDE_SERVICE_LOGS",
                 "LOG_TYPES",
                 "LOG_FILE_PATH",

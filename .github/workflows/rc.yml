@@ -11,6 +11,7 @@ jobs:
   build-containers:
     permissions:
       contents: read
+      packages: write
       security-events: write # Trivy SARIF upload
     strategy:
       fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
@@ -63,6 +64,10 @@ jobs:
 
   # Build arm64 + arm/v7 images
   build-containers-arm:
+    permissions:
+      contents: read
+      packages: write
+      security-events: write # Trivy SARIF upload
     needs: [create-arm]
     strategy:
       matrix:
@@ -106,6 +111,9 @@ jobs:
 
   # Build Linux packages
   build-packages:
+    permissions:
+      contents: read
+      packages: write
     needs: [create-arm]
     strategy:
       matrix:
@@ -168,7 +176,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"

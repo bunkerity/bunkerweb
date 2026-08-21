@@ -126,6 +126,14 @@ try:
             print(f"❌ Backup files count is not as expected, the rotation failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
             exit(1)
 
+    latest_backup = sorted(backup_files)[-1]
+    print(f"ℹ️ Restoring latest backup: {latest_backup}", flush=True)
+
+    result = exec_command(["bwcli", "plugin", "backup", "restore", str(Path(backup_dir, latest_backup))])
+    if result[0] != 0:
+        print(f"❌ Backup restore failed:\nstdout={result[1]}\nstderr={result[2]}", flush=True)
+        exit(1)
+
     print("✅ Backup tests completed successfully", flush=True)
 except SystemExit as se:
     exit(se.code)

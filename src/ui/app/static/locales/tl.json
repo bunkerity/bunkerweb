@@ -487,6 +487,7 @@
       "no_data": "Walang data"
     },
     "window": {
+      "all_time": "Buong panahon",
       "last_days": "Nakaraang {{days}} araw",
       "title": "Window ng Dashboard"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Ang mga ulat ay isang rolling in-memory buffer: inaalis ang pinakalumang mga entry kapag naabot na ang nakatakdang limitasyon. Maliban kung naka-enable ang Redis, nabubura rin ang mga ito kapag nag-restart ang BunkerWeb.",
     "security_incident": "Insidente ng Seguridad",
     "security_report_data": "Data ng Ulat ng Seguridad"
   },

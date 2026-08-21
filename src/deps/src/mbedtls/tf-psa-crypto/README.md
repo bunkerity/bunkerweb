@@ -97,8 +97,8 @@ To generate a local copy of the library documentation in HTML format:
 1. Run `cmake -B /path/to/build_dir /path/to/TF-PSA-Crypto/source`
 1. Run `cmake --build /path/to/build_dir --target tfpsacrypto-apidoc`
 1. Open one of the main generated HTML files:
-   * `apidoc/index.html`
-   * `apidoc/modules.html` or `apidoc/topics.html`
+   * `/path/to/build_dir/apidoc/index.html`
+   * `/path/to/build_dir/apidoc/modules.html`
 
 Compiling
 ---------

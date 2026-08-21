@@ -1,3 +1,5 @@
+import { initCertificateValidation } from "./modules/certificate-validation.js";
+
 $(document).ready(() => {
   // Ensure i18next is loaded before using it
   const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
@@ -3249,6 +3251,8 @@ $(document).ready(() => {
     setFileSettingMode($fileTextInput, "upload");
     setFileSettingStatus($fileTextInput);
   });
+
+  initCertificateValidation(t);
 
   $(document).on("click", ".plugin-setting-file-mode-toggle", function () {
     const $toggle = $(this);

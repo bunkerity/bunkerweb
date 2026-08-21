@@ -58,7 +58,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -112,13 +112,21 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.13
+          image: bunkerity/bunkerweb-autoconf:1.6.14
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
               value: "yes"
             - name: "DATABASE_URI"
               value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
+          livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -139,7 +147,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -239,7 +247,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.6.13
+          image: bunkerity/bunkerweb-ui:1.6.14
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE

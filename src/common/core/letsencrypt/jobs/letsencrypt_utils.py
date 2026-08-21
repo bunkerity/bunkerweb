@@ -1,5 +1,8 @@
 from base64 import b64decode
+from contextlib import suppress
 from json import loads as json_loads
+from logging import Formatter
+from logging.handlers import RotatingFileHandler
 from os import (
     O_CREAT,
     O_NOFOLLOW,
@@ -19,13 +22,16 @@ from os import (
 )
 from os.path import join
 from pathlib import Path
-from re import match as re_match
+from re import match as re_match, search as re_search
+from subprocess import TimeoutExpired
+from threading import Thread
 from traceback import format_exc
-from typing import Dict, List, Mapping, Optional, Type, Union
+from typing import Callable, Dict, List, Mapping, Optional, Type, Union
 
 from pydantic import ValidationError
 
 from common_utils import bytes_hash  # type: ignore
+from logger import DATE_FORMAT, LOG_FORMAT  # type: ignore
 from letsencrypt_providers import (
     BunnyNetProvider,
     ClouDNSProvider,
@@ -69,6 +75,10 @@ LETSENCRYPT_CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
 LETSENCRYPT_DATA_PATH = LETSENCRYPT_CACHE_PATH.joinpath("etc")
 LETSENCRYPT_WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LETSENCRYPT_LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
+
+# Name tagged on the per-job log handler so re-running a job cannot stack duplicates.
+JOB_LOG_HANDLER_NAME = "bw-letsencrypt-job-log"
+JOB_LOG_MAX_BYTES = 1_000_000
 
 LETSENCRYPT_PRODUCTION_DIRECTORY = "https://acme-v02.api.letsencrypt.org/directory"
 LETSENCRYPT_STAGING_DIRECTORY = "https://acme-staging-v02.api.letsencrypt.org/directory"
@@ -133,12 +143,20 @@ def extract_provider(
         if not env_value or not env_key.startswith(credential_key):
             continue
 
-        if " " not in env_value:
+        # Split on any run of whitespace, not a single literal space, and normalise the key. A
+        # leading space made the key empty and surrounding quotes made it unmatchable; either way
+        # the item was dropped by the model's extra="ignore" and the only report was a validation
+        # error with no field name. A value with no whitespace at all is still a JSON/base64 blob,
+        # which is why the split result is what decides, not the presence of a separator.
+        parts = env_value.strip().split(None, 1)
+        if len(parts) < 2:
             credential_items["json_data"] = env_value
             continue
 
-        key, value = env_value.split(" ", 1)
-        credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+        key, value = parts
+        # `key = value` and `key =value` both reach here with the `=` leading the value.
+        value = value.strip().removeprefix("=")
+        credential_items[key.strip("\"' \t").lower()] = value.replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
 
     # Handle JSON data
     if "json_data" in credential_items:
@@ -179,8 +197,15 @@ def extract_provider(
         if logger is not None:
             # Never log raw `ve`/`format_exc()`: pydantic v2's ValidationError stringification embeds
             # the raw input dict, which would leak the operator's DNS API token / secret key into the
-            # scheduler log. Log only the field locations and error types.
-            errors = [(".".join(str(part) for part in err["loc"]), err["type"]) for err in ve.errors()]
+            # scheduler log. The leak lives in `input` (the raw credential mapping) and in `ctx`
+            # (which carries the ValueError object), never in `msg` — so strip those structurally
+            # instead of by convention, and keep `msg`, the only field that says what is wrong.
+            # A model-level validator failure carries an empty `loc`, which is why this used to
+            # print `('', 'value_error')` and tell the operator nothing at all.
+            errors = [
+                (".".join(str(part) for part in err["loc"]) or "<credentials>", err["type"], err["msg"])
+                for err in ve.errors(include_url=False, include_context=False, include_input=False)
+            ]
             logger.error(f"[Service: {service}] Error while validating credentials, skipping generation: {errors}")
         return None
 
@@ -354,6 +379,60 @@ def build_certbot_env(job, deps_path: str, base_env: Optional[Dict[str, str]] = 
     return cmd_env
 
 
+def ensure_logs_dir(logs_dir: Union[str, Path], logger) -> Optional[Path]:
+    """Create the Let's Encrypt logs directory and return it, or ``None`` if unusable.
+
+    Split out of :func:`prepare_logs_dir` so a caller can get the directory without also
+    taking that function's process-global ``umask`` side effect.
+    """
+    logs_path = Path(logs_dir)
+    try:
+        logs_path.mkdir(parents=True, exist_ok=True)
+    except BaseException as e:
+        logger.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+        return None
+
+    try:
+        logs_path.chmod(0o2770)
+    except BaseException as e:
+        logger.debug(f"Failed to set permissions on {logs_path}: {e}")
+
+    return logs_path
+
+
+def attach_job_log_file(logger, file_name: str, logs_dir: Union[str, Path] = LETSENCRYPT_LOGS_DIR) -> None:
+    """Mirror ``logger``'s own records into ``<logs_dir>/<file_name>`` for the Web UI.
+
+    In Docker the scheduler logs only to stdout, so a refused or skipped issuance was
+    invisible outside ``docker logs``. The UI's Let's Encrypt log view globs
+    ``<logs_dir>/*.log*``, which until now only ever contained certbot's own log, and
+    certbot never runs on the skip paths. Child loggers (``<name>.CERTBOT``) propagate
+    here, so they are covered without attaching twice.
+
+    Idempotent: job modules are re-executed on every scheduler reload but ``getLogger``
+    returns the same object, so an unguarded call would stack a handler per reload.
+    """
+    if any(handler.get_name() == JOB_LOG_HANDLER_NAME for handler in logger.handlers):
+        return
+
+    logs_path = ensure_logs_dir(logs_dir, logger)
+    if logs_path is None:
+        return
+
+    try:
+        backup_count = max(0, int((environ.get("LETS_ENCRYPT_MAX_LOG_BACKUPS", "") or "50").strip()))
+    except ValueError:
+        backup_count = 50
+
+    try:
+        handler = RotatingFileHandler(logs_path.joinpath(file_name), maxBytes=JOB_LOG_MAX_BYTES, backupCount=backup_count)
+        handler.set_name(JOB_LOG_HANDLER_NAME)
+        handler.setFormatter(Formatter(LOG_FORMAT, DATE_FORMAT))
+        logger.addHandler(handler)
+    except BaseException as e:
+        logger.error(f"Failed to attach the Let's Encrypt job log file {logs_path.joinpath(file_name)}: {e}")
+
+
 def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
     """Ensure the Let's Encrypt logs directory is writable by the running user."""
     try:
@@ -361,17 +440,9 @@ def prepare_logs_dir(logs_dir: Union[str, Path], logger) -> None:
     except BaseException:
         logger.debug("Failed to set umask to 007 for letsencrypt logs")
 
-    logs_path = Path(logs_dir)
-    try:
-        logs_path.mkdir(parents=True, exist_ok=True)
-    except BaseException as e:
-        logger.error(f"Failed to create Let's Encrypt logs directory {logs_path}: {e}")
+    logs_path = ensure_logs_dir(logs_dir, logger)
+    if logs_path is None:
         return
-
-    try:
-        logs_path.chmod(0o2770)
-    except BaseException as e:
-        logger.debug(f"Failed to set permissions on {logs_path}: {e}")
 
     for log_file in logs_path.glob("*.log*"):
         try:
@@ -428,6 +499,164 @@ def resolve_certbot_entrypoint(
     return []
 
 
+def stream_certbot(process, logger_certbot, timeout: float, on_line: Optional[Callable[[str], None]] = None) -> bool:
+    """Log every line certbot writes to stderr, and enforce `timeout` on the run.
+
+    Reading has to happen in its own thread: a `select()` on the pipe reports the raw fd,
+    not the buffered reader in front of it, so once a burst has been pulled into the
+    userspace buffer the fd looks idle and the buffered lines are never drained. Whatever
+    is still buffered when the process exits is then lost, which silently swallows both
+    the certbot diagnostics and the stale-account marker `on_line` is watching for.
+
+    Returns False when the process had to be killed for exceeding `timeout`.
+    """
+
+    def drain():
+        # The pipe can be torn down under the reader once the process is killed.
+        with suppress(OSError, ValueError):
+            for line in process.stderr:
+                stripped = line.strip()
+                logger_certbot.info(stripped)
+                if on_line is not None:
+                    on_line(stripped)
+
+    reader = None
+    if process.stderr is not None:
+        reader = Thread(target=drain, daemon=True)
+        reader.start()
+
+    timed_out = False
+    try:
+        process.wait(timeout=timeout)
+    except TimeoutExpired:
+        timed_out = True
+        process.kill()
+        process.wait()
+    finally:
+        # Bounded on purpose: certbot's hooks inherit stderr, so a hook that outlives a
+        # killed certbot keeps the pipe open and the reader would never see EOF.
+        if reader is not None:
+            reader.join(timeout=5)
+        # Only once the reader has actually finished: close() takes the same buffer lock the
+        # blocked read holds, so closing under it hangs here forever rather than raising, which
+        # would defeat the bounded join above and take the whole job with it.
+        # When it is still blocked we deliberately leak the descriptor and the daemon thread
+        # holding it, for the lifetime of this process. That is the lesser evil against hanging,
+        # but it is a leak, not a fix: a hook that keeps stderr open past every certbot run will
+        # accumulate one of each per invocation.
+        if reader is not None and not reader.is_alive():
+            with suppress(OSError):
+                process.stderr.close()
+
+    return not timed_out
+
+
+STALE_ACCOUNT_MARKERS = ("validate JWS", "acme/acct")
+
+
+def is_stale_account_line(line: str) -> bool:
+    """True when the CA refuses the account itself, so retrying with it can never succeed.
+
+    Two different rejections mean the same thing for us, and they read nothing alike:
+
+        Unable to validate JWS :: Account "https://.../acme/acct/123" not found
+        Unable to validate JWS :: Account is not valid, has status "deactivated"
+
+    Only the first was matched before, so a deactivated account was retried forever. Note that
+    certbot's own `Account at <path> does not exist` is deliberately NOT matched here: that one is
+    a local directory that went missing, which repoint_orphan_renewals repairs without touching
+    the CA, and treating it as a rejection would delete an account the CA still considers valid.
+    """
+    if "Account" not in line or not any(marker in line for marker in STALE_ACCOUNT_MARKERS):
+        return False
+    return "not found" in line or "is not valid" in line
+
+
+def stale_account_uri(line: str) -> str:
+    """The ACME account URI a stale-account rejection names, or an empty string.
+
+    Only the "not found" phrasing carries one; the deactivated phrasing names no account at all,
+    which is why failed_renewal_cert exists as the other way to identify the offender.
+    """
+    match = re_search(r"https?://\S*?/acme/acct/[A-Za-z0-9_-]+", line)
+    return match.group(0) if match else ""
+
+
+def failed_renewal_cert(line: str) -> str:
+    """The lineage named by certbot's per-certificate renewal failure line, or an empty string.
+
+    `certbot renew` reports the lineage and the reason on one line, which is the only reliable way
+    to tell which account a rejection carrying no URI belongs to.
+    """
+    match = re_search(r"Failed to renew certificate (\S+) with error:", line)
+    return match.group(1) if match else ""
+
+
+def account_id_for_cert(data_path: Path, cert_name: str) -> str:
+    """The account id a renewal conf names, or an empty string."""
+    conf = data_path.joinpath("renewal", f"{cert_name}.conf")
+    with suppress(OSError):
+        for line in conf.read_text(encoding="utf-8", errors="replace").splitlines():
+            key, sep_char, value = line.partition("=")
+            if sep_char and key.strip() == "account":
+                account_id = value.strip()
+                return "" if account_id == "None" else account_id
+    return ""
+
+
+def purge_stale_account(data_path: Path, account_id: str, logger) -> bool:
+    """Remove the on-disk ACME account dir whose server-side record was pruned.
+
+    Walks for `<account_id>/regr.json` under accounts/ (CA-agnostic: LE 2-level, ZeroSSL 3-level)
+    and retires its parent. Best-effort: failures are logged, not raised, so a retry still runs.
+
+    Certbot records the account id in every renewal conf it writes and nothing rewrites those here,
+    so removing the directory strands each conf naming it. ensure_accounts_for_orphans registers a
+    replacement and repoint_orphan_renewals moves the confs onto it, both at the start of the next
+    job run. Name the stranded confs here anyway, or the cause and the symptom surface in different
+    runs and read as unrelated problems.
+    """
+    accounts_root = data_path.joinpath("accounts")
+    if not account_id or not accounts_root.is_dir():
+        return False
+    purged = False
+    try:
+        for regr in accounts_root.rglob("regr.json"):
+            if regr.parent.name == account_id:
+                logger.warning(f"Retiring ACME account {account_id} (the certificate authority no longer accepts it) so the next attempt re-registers.")
+                quarantine_account(regr.parent, logger)
+                purged = True
+                stranded = sorted(orphan["cert_name"] for orphan in detect_orphan_renewals(data_path) if orphan["account"] == account_id)
+                if stranded:
+                    logger.warning(
+                        f"Renewal conf(s) {stranded} still reference ACME account {account_id}; they will be repointed at "
+                        "the replacement account on the next Let's Encrypt job run."
+                    )
+    except OSError as e:
+        logger.error(f"Failed to purge stale account {account_id}: {e}")
+    return purged
+
+
+def purge_stale_account_by_uri(data_path: Path, account_uri: str, logger) -> bool:
+    """Purge the account whose regr.json records `account_uri`.
+
+    The renew job runs certbot over every lineage at once and pins no `--account`, so the local id
+    is not known up front. Certbot stores the account URI the CA assigned in regr.json
+    (`{"body": {}, "uri": ...}`), which is exactly what the rejection names, so the two can be
+    matched without guessing.
+    """
+    accounts_root = data_path.joinpath("accounts")
+    if not account_uri or not accounts_root.is_dir():
+        return False
+    with suppress(OSError):
+        for regr in accounts_root.rglob("regr.json"):
+            with suppress(OSError, ValueError):
+                if json_loads(regr.read_text(encoding="utf-8")).get("uri") == account_uri:
+                    return purge_stale_account(data_path, regr.parent.name, logger)
+    logger.error(f"CA rejected ACME account {account_uri} but no local account records that URI; cannot purge it automatically.")
+    return False
+
+
 def get_expected_acme_directory(server: str, staging: bool) -> str:
     if server == "zerossl":
         return ZEROSSL_DIRECTORY
@@ -440,4 +669,72 @@ def get_expected_acme_directory(server: str, staging: bool) -> str:
 # so the UI blueprint and the scheduler jobs share one source of truth. The previous
 # byte-identical UI copy already drifted multiple times — that bug class is closed by
 # re-exporting from a single module instead of maintaining parallel implementations.
-from letsencrypt_consistency import le_cache_write_lock, letsencrypt_cache_consistent  # noqa: E402,F401
+from letsencrypt_consistency import (  # noqa: E402,F401
+    detect_broken_lineages,
+    detect_orphan_renewals,
+    le_cache_write_lock,
+    letsencrypt_cache_consistent,
+    purge_lineage,
+    quarantine_account,
+    repoint_orphan_renewals,
+    sanitize_le_cache,
+)
+
+# Sentinel distinguishing "cache-row lookup failed" (degrade to persisting) from "row absent"
+# (checksum None, a legitimate value) in the optimistic-concurrency check below.
+_LE_READ_ERROR = object()
+
+
+def _le_cache_checksum(job, file_name: str):
+    """Return the LE cache row's current DB checksum, None if the row is absent, or
+    _LE_READ_ERROR if the lookup itself failed (caller then degrades to persisting)."""
+    try:
+        info = job.db.get_job_cache_file(job.job_name, file_name, with_info=True, with_data=False)
+    except BaseException:
+        return _LE_READ_ERROR
+    if isinstance(info, dict):
+        return info.get("checksum")
+    return None
+
+
+def sanitize_and_persist(job, data_path: Path, logger) -> List[str]:
+    """Repair the LE tree on disk and persist it back to the DB cache.
+
+    Two repairs, both of which stick only if they are written back: a broken lineage (see
+    detect_broken_lineages) makes `certbot certificates`/`renew` fail to parse, and a renewal conf
+    naming a deleted ACME account makes every renewal fail AccountNotFound. Because the whole etc/
+    tree is one DB cache blob restored on every job start, either break reappears forever unless it
+    is both fixed AND written back — and where there is no blob to restore from, as on a Kubernetes
+    node whose cache volume outlives the database, the damage on disk is all there is.
+
+    Returns the quarantined cert names — that value gates the "no live certs" data-loss check in
+    the callers, so repointed confs deliberately do not count towards it.
+    """
+    # Snapshot the cache-row checksum BEFORE repairing. Job.__init__ restored data_path OUTSIDE
+    # le_cache_write_lock, so a UI heal that rewrites the row after our restore must not be
+    # clobbered by persisting our stale pre-heal snapshot (which would resurrect a healed orphan).
+    file_name = f"folder:{data_path.as_posix()}.tgz"
+    before = _le_cache_checksum(job, file_name)
+    repointed = repoint_orphan_renewals(data_path, logger)
+    names = sanitize_le_cache(data_path, logger)
+    # A partial repair is persisted even when the tree is still inconsistent overall. A repoint only
+    # ever rewrites `account` to an id that exists, so it cannot add an orphan: the result is
+    # strictly closer to consistent than the row it replaces. Withholding the write instead threw
+    # away every conf that was repaired because of one that could not be, and since the whole tree
+    # is one blob restored on each job start, that repair was redone and discarded on every run.
+    if (names or repointed) and getattr(job, "restore_ok", False):
+        try:
+            with le_cache_write_lock():
+                # Re-read under the lock: if the row changed since our restore, our tree is stale.
+                current = _le_cache_checksum(job, file_name)
+                if _LE_READ_ERROR not in (before, current) and before != current:
+                    logger.warning("LE cache row changed since restore; skipping sanitize persist, will retry next run")
+                    return names
+                if _LE_READ_ERROR in (before, current):
+                    logger.debug("LE cache checksum unavailable; persisting sanitized cache without concurrency check")
+                cached, err = job.cache_dir(data_path)
+            if not cached:
+                logger.error(f"Failed to persist sanitized Let's Encrypt cache: {err}")
+        except BaseException as e:
+            logger.error(f"Exception while persisting sanitized Let's Encrypt cache: {e}")
+    return names

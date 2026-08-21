@@ -39,6 +39,30 @@
 #include LIBTESTDRIVER1_PSA_DRIVER_INTERNAL_HEADER(psa_crypto_rsa.h)
 #endif
 
+/* This file is part of the framework and needs to be compatible with all
+ * maintained branches of Mbed TLS and TF-PSA-Crypto.
+ *
+ * - Until shortly before TF-PSA-Crypto 1.1.0, ML-DSA does not exist at all.
+ * - In TF-PSA-Crypto 1.1.0, TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED exists, but
+ *   there is no driver dispatch for it yet, so this driver doesn't need to
+ *   worry about ML-DSA.
+ * - Shortly after TF-PSA-Crypto 1.1.0, in
+ *   https://github.com/Mbed-TLS/TF-PSA-Crypto/pull/700, we introduced
+ *   driver dispatch for ML-DSA, but the macro PSA_ALG_IS_ML_DSA is not
+ *   in the API yet, only in a private header. Including this private header
+ *   is a pain due to how our various build scripts set up include paths, so
+ *   we don't do it. Instead, define PSA_ALG_IS_ML_DSA manually: it's the
+ *   only thing we need.
+ * - Later we will add ML-DSA to the API, including the definition of
+ *   PSA_ALG_IS_ML_DSA. After that we may also add driver dispatch testing
+ *   for ML-DSA.
+ */
+#if !defined(PSA_ALG_IS_ML_DSA)
+/* Pure ML-DSA (hedged or deterministic) */
+#define PSA_ALG_IS_ML_DSA(alg)                          \
+    ((alg) == 0x06004400u || (alg) == 0x06004500u)
+#endif
+
 #include <string.h>
 
 mbedtls_test_driver_signature_hooks_t
@@ -213,6 +237,20 @@ psa_status_t mbedtls_test_transparent_signature_sign_message(
         return PSA_SUCCESS;
     }
 
+#if defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)
+    /* Pure ML-DSA is not a sign-the-hash algorithm. At the moment, this
+     * function only knows how to deal with sign-the-hash algorithms.
+     * So give up and let the next driver in the chain handle the algorithm.
+     * For pure ML-DSA, this will be the pqcp driver, which does not have
+     * a libtestdriver1 variant, meaning that we can't test "driver-only"
+     * builds for pure ML-DSA, but we can have ML-DSA enabled in builds that
+     * dispatch through the test driver.
+     */
+    if (PSA_ALG_IS_ML_DSA(alg)) {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+#endif
+
 #if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
     defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_HASH)
     status = libtestdriver1_mbedtls_psa_hash_compute(
@@ -279,6 +317,20 @@ psa_status_t mbedtls_test_transparent_signature_verify_message(
     if (mbedtls_test_driver_signature_verify_hooks.forced_status != PSA_SUCCESS) {
         return mbedtls_test_driver_signature_verify_hooks.forced_status;
     }
+
+#if defined(TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)
+    /* Pure ML-DSA is not a sign-the-hash algorithm. At the moment, this
+     * function only knows how to deal with sign-the-hash algorithms.
+     * So give up and let the next driver in the chain handle the algorithm.
+     * For pure ML-DSA, this will be the pqcp driver, which does not have
+     * a libtestdriver1 variant, meaning that we can't test "driver-only"
+     * builds for pure ML-DSA, but we can have ML-DSA enabled in builds that
+     * dispatch through the test driver.
+     */
+    if (PSA_ALG_IS_ML_DSA(alg)) {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+#endif
 
 #if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
     defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_HASH)

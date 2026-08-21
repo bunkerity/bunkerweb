@@ -487,6 +487,7 @@
       "no_data": "无数据"
     },
     "window": {
+      "all_time": "全部时间",
       "last_days": "最近 {{days}} 天",
       "title": "仪表板窗口"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "报告存储在内存中的循环缓冲区内：达到配置的上限后，最早的记录会被丢弃。除非启用 Redis，否则重启 BunkerWeb 时报告也会被清空。",
     "security_incident": "安全事件",
     "security_report_data": "安全报告数据"
   },

@@ -141,11 +141,15 @@ class CLI(ApiCaller):
             self.__logger.debug("Unable to determine terminal size. Using default width.")
             self.__terminal_width = 80  # Default width for non-TTY environments
 
+        # API only falls back to the environment, which a shell running bwcli does not have.
+        # The token lives in the database (or in variables.env), so read it from there.
+        api_token = self.__get_variable("API_TOKEN") or None
+
         if self.__db:
             for db_instance in self.__db.get_instances():
                 try:
                     # Centralized builder handles scheme/port/host
-                    self.apis.append(API.from_instance(db_instance))
+                    self.apis.append(API.from_instance(db_instance, token=api_token))
                 except ValueError as e:
                     self.__logger.warning(f"Skipping invalid instance {db_instance.get('hostname', '<missing>')}: {e}")
         else:
@@ -157,7 +161,7 @@ class CLI(ApiCaller):
                 listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                 https_port=int(self.__get_variable("API_HTTPS_PORT", "5443") or "5443"),
             )
-            self.apis.append(API(endpoint, server_name))
+            self.apis.append(API(endpoint, server_name, token=api_token))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
@@ -202,7 +206,11 @@ class CLI(ApiCaller):
             data = {"ip": ip, "ban_scope": ban_scope}
             if service:
                 data["service"] = service
-            if self.send_to_apis("POST", "/unban", data=data):
+            if not self.apis:
+                return False, self.__format_error(f"Failed to unban {ip}: no BunkerWeb instance to send the request to")
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok, _ = self.send_to_apis("POST", "/unban", data=data)
+            if ok:
                 if service:
                     success_msg = (
                         f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from service {self.CYAN}{service}{self.RESET}"
@@ -244,7 +252,11 @@ class CLI(ApiCaller):
 
         try:
             data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
-            if self.send_to_apis("POST", "/ban", data=data):
+            if not self.apis:
+                return False, self.__format_error(f"Failed to ban {ip}: no BunkerWeb instance to send the request to")
+            # send_to_apis returns (ok, responses); testing the tuple itself is always truthy
+            ok, _ = self.send_to_apis("POST", "/ban", data=data)
+            if ok:
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
                 if not exp:
                     duration = f"{self.RED}permanently{self.RESET}"
@@ -264,11 +276,14 @@ class CLI(ApiCaller):
         """Get all bans from the system"""
         servers = {}
 
+        if not self.apis:
+            return False, self.__format_error("Failed to retrieve ban information: no BunkerWeb instance to query")
+
         try:
             ret, resp = self.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
             return False, self.__format_error(f"Failed to get bans: {e}")
-        if not ret:
+        if not ret or not resp:
             return False, self.__format_error("Failed to retrieve ban information")
 
         for k, v in resp.items():

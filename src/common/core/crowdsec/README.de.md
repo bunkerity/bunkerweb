@@ -103,7 +103,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +120,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -294,26 +294,26 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
 | Parameter                   | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                             |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **CrowdSec aktivieren:** Auf `yes` setzen, um den CrowdSec-Bouncer zu aktivieren.                                                        |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes.                                                                     |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.                                |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.                                                  |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite    | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes.                                                                     |
+| `CROWDSEC_API_KEY`          |                        | multisite    | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
+| `CROWDSEC_MODE`             | `live`                 | multisite    | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite    | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.                                |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.                                                  |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. |
 
 #### Parameter der Anwendungssicherheitskomponente
 
 | Parameter                         | Standardwert  | Kontext | Mehrfach | Beschreibung                                                                                                                         |
 | --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.                                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.                                   |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.                   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
+| `CROWDSEC_APPSEC_URL`             |               | multisite  | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite  | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite  | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.                                      |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite  | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.                                   |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite  | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.                   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite  | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite  | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
 
 !!! info "Über die Betriebsmodi"
     - Der **Live-Modus** fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.

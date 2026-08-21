@@ -164,7 +164,6 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `AUTOCONF_MODE`          | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                       |
     | `SWARM_MODE`             | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                             |
     | `KUBERNETES_MODE`        | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                          |
-    | `KEEP_CONFIG_ON_RESTART` | `no`              | global    | No       | **Mantener Configuración al Reiniciar:** Mantener la configuración al reiniciar. Establecer a 'yes' para evitar el restablecimiento de la configuración al reiniciar. |
     | `USE_TEMPLATE`           |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos.                                           |
 
 === "Ajustes de Nginx"
@@ -1868,7 +1867,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1885,7 +1884,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -2919,23 +2918,24 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
         - **X-Frame-Options:** Bloquea los intentos de clickjacking controlando la incrustación de iframes.
         - **Referrer Policy:** Limita la fuga de información sensible a través de las cabeceras de referencia.
 
-| Ajuste                                | Valor por defecto                                                                                   | Contexto  | Múltiple | Descripción                                                                                                                                                     |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Impone conexiones HTTPS seguras, reduciendo los riesgos de ataques de intermediario (man-in-the-middle).                                              |
-| `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restringe la carga de recursos a fuentes de confianza, mitigando los ataques de cross-site scripting e inyección de datos.                             |
-| `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **Modo de Informe CSP:** Informa de las violaciones sin bloquear el contenido, ayudando a probar las políticas de seguridad mientras se capturan los registros. |
-| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed).                                                             |
-| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download).       |
-| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
-| `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
-| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
-| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
+| Ajuste                                | Valor por defecto                                                                                     | Contexto  | Múltiple | Descripción                                                                                                                                                     |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | no       | **HSTS:** Impone conexiones HTTPS seguras, reduciendo los riesgos de ataques de intermediario (man-in-the-middle).                                              |
+| `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | no       | **CSP:** Restringe la carga de recursos a fuentes de confianza, mitigando los ataques de cross-site scripting e inyección de datos.                             |
+| `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | no       | **Modo de Informe CSP:** Informa de las violaciones sin bloquear el contenido, ayudando a probar las políticas de seguridad mientras se capturan los registros. |
+| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | no       | **X-Frame-Options:** Previene el clickjacking controlando si su sitio puede ser enmarcado (framed).                                                             |
+| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | no       | **X-Content-Type-Options:** Evita que los navegadores realicen "MIME-sniffing", protegiendo contra ataques de descarga no autorizada (drive-by download).       |
+| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
+| `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
+| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
+| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
 
     !!! tip "Mejores Prácticas"
         - Revise y actualice regularmente sus cabeceras de seguridad para alinearse con los estándares de seguridad en evolución.
         - Use herramientas como [Mozilla Observatory](https://observatory.mozilla.org/) para validar la configuración de sus cabeceras.
         - Pruebe el CSP en modo `Report-Only` antes de aplicarlo para evitar romper la funcionalidad.
         - En modo `Report-Only`, una cabecera `Content-Security-Policy` o `Content-Security-Policy-Report-Only` enviada por el origen se conserva de forma predeterminada (`KEEP_UPSTREAM_HEADERS`); elimine el nombre de la cabecera de ese ajuste para que la propia política de BunkerWeb tenga prioridad.
+        - La `PERMISSIONS_POLICY` predeterminada también bloquea los client hints (directivas `ch-*`); si un servicio depende de `Accept-CH` (por ejemplo, imágenes responsivas basadas en client hints o la detección del modo oscuro mediante `Sec-CH-Prefers-Color-Scheme`), anule `PERMISSIONS_POLICY` para volver a permitir las funciones `ch-*` necesarias (por ejemplo, `ch-dpr=(self)`).
 
 === "Configuración de Cookies"
 
@@ -3683,6 +3683,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 !!! note "Almacenamiento Específico del Trabajador"
     Cada trabajador de NGINX mantiene sus propias métricas en la memoria. Al acceder a las métricas a través de la API, los datos de todos los trabajadores se agregan automáticamente para proporcionar una vista completa.
 
+!!! warning "Retención de los Informes"
+    Los informes de peticiones bloqueadas son un búfer circular, no un registro de auditoría. Una vez alcanzado el límite, los informes más antiguos se descartan para dejar sitio a los nuevos, por lo que el total mostrado en la interfaz web se estanca: sin Redis ese techo es `METRICS_MAX_BLOCKED_REQUESTS` multiplicado por el número de trabajadores de NGINX de cada instancia, y con Redis es `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Los informes residen en memoria compartida y se borran cada vez que BunkerWeb se reinicia, incluidas las actualizaciones de paquetes, salvo que Redis esté habilitado y sea persistente. Envíe los registros de NGINX a un servidor syslog o a un SIEM si necesita una retención a largo plazo.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"
@@ -3819,18 +3822,18 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
     Restringir los métodos HTTP solo a los requeridos por su aplicación es una medida de seguridad fundamental que se adhiere al principio de privilegio mínimo. Al definir explícitamente los métodos HTTP aceptables, puede minimizar el riesgo de explotación a través de métodos no utilizados o peligrosos.
 
-    Esta característica se configura utilizando el ajuste `ALLOWED_METHODS`, donde los métodos se enumeran y se separan por un `|` (predeterminado: `GET|POST|HEAD`). Si un cliente intenta utilizar un método no listado, el servidor responderá con un estado **405 - Método No Permitido**.
+    Esta característica se configura utilizando el ajuste `ALLOWED_METHODS`, donde los métodos se enumeran y se separan por un `|` (predeterminado: `GET|POST|HEAD|QUERY`). Si un cliente intenta utilizar un método no listado, el servidor responderá con un estado **405 - Método No Permitido**.
 
-    Para la mayoría de los sitios web, el predeterminado `GET|POST|HEAD` es suficiente. Si su aplicación utiliza API RESTful, es posible que deba incluir métodos como `PUT` y `DELETE`. Los métodos personalizados en mayúsculas también pueden contener guiones bajos y guiones para la compatibilidad con protocolos no estándar (p. ej., `CCM_POST`, `M-SEARCH`).
+    Para la mayoría de los sitios web, el predeterminado `GET|POST|HEAD|QUERY` es suficiente. Si su aplicación utiliza API RESTful, es posible que deba incluir métodos como `PUT` y `DELETE`. Los métodos personalizados en mayúsculas también pueden contener guiones bajos y guiones para la compatibilidad con protocolos no estándar (p. ej., `CCM_POST`, `M-SEARCH`).
 
     !!! success "Beneficios de Seguridad"
         -   Previene la explotación de métodos HTTP no utilizados o innecesarios
         -   Reduce la superficie de ataque al deshabilitar métodos potencialmente dañinos
         -   Bloquea las técnicas de enumeración de métodos HTTP utilizadas por los atacantes
 
-| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
-| ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
+| Ajuste            | Valor por defecto        | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
+| ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
         Si su aplicación admite [Intercambio de Recursos de Origen Cruzado (CORS)](#cors), debe incluir el método `OPTIONS` en el ajuste `ALLOWED_METHODS` para manejar las solicitudes de pre-vuelo. Esto garantiza la funcionalidad adecuada para los navegadores que realizan solicitudes de origen cruzado.
@@ -4102,8 +4105,8 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
-- **`3`**: Estable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Estable [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**predeterminada**).
+- **`3`**: Estable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
+- **`4`**: Estable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**predeterminada**).
 
 !!! warning "Compilación Nocturna Obsoleta"
     La opción `nightly` para `MODSECURITY_CRS_VERSION` está obsoleta ya que el proyecto OWASP Core Rule Set ha descontinuado las versiones nocturnas. Si su configuración aún utiliza `nightly`, se usará CRS v4 en su lugar. Por favor, actualice su configuración para usar `MODSECURITY_CRS_VERSION=4`.
@@ -4305,32 +4308,47 @@ BunkerWeb evalúa cada handshake TLS con base en el paquete de CA y en la polít
 Siga estos pasos para desplegar Mutual TLS con confianza:
 
 1. **Active la función:** Establezca `USE_MTLS` en `yes` en los sitios que necesitan autenticación por certificado.
-2. **Aporte el paquete de CA:** Guarde los emisores de confianza en un archivo PEM y apunte `MTLS_CA_CERTIFICATE` a su ruta absoluta.
+2. **Aporte el paquete de CA:** Configure `MTLS_CA_CERTIFICATE` con la ruta a un archivo PEM legible por el Scheduler, o proporcione el paquete directamente como datos base64/PEM con `MTLS_CA_CERTIFICATE_DATA`. El Scheduler valida, almacena en caché y distribuye el paquete a cada instancia, por lo que no es necesario montarlo en cada una.
 3. **Elija el modo de verificación:** Use `on` para exigir certificados, `optional` para permitir una ruta alternativa u `optional_no_ca` de manera temporal para diagnosticar.
 4. **Ajuste la profundidad de la cadena:** Modifique `MTLS_VERIFY_DEPTH` si su PKI incorpora varios intermedios.
 5. **Reenvíe resultados (opcional):** Mantenga `MTLS_FORWARD_CLIENT_HEADERS` en `yes` si los servicios posteriores necesitan inspeccionar el certificado.
-6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` para que BunkerWeb rechace certificados revocados.
+6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` (o `MTLS_CRL_DATA`) para que BunkerWeb rechace los certificados revocados.
 
 ### Parámetros de configuración
 
-| Parámetro                     | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                        |
-| ----------------------------- | -------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                                                                                                                                              |
-| `MTLS_CA_CERTIFICATE`         |                      | multisite | no       | **Paquete de CA de clientes:** ruta absoluta al paquete de CA de confianza (PEM). Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`; debe ser legible.                                                                                                                  |
-| `MTLS_VERIFY_CLIENT`          | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                          |
-| `MTLS_URL`                    |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio. |
-| `MTLS_VERIFY_DEPTH`           | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                        |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez).                                                                                                                       |
-| `MTLS_CRL`                    |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM. Solo se aplica cuando el paquete de CA se carga correctamente.                                                                                                             |
+| Parámetro                      | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                       |
+| ------------------------------ | -------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                                                                                                                                                             |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`               | multisite | no       | **Prioridad del paquete de CA de clientes:** origen del paquete de CA de clientes: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                           |
+| `MTLS_CA_CERTIFICATE`          |                      | multisite | no       | **Ruta del paquete de CA de clientes:** ruta al paquete de CA de confianza (PEM), legible por el Scheduler. Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`.                                                                                                                         |
+| `MTLS_CA_CERTIFICATE_DATA`     |                      | multisite | no       | **Datos del paquete de CA de clientes:** paquete de CA de confianza aportado directamente como base64 o PEM (p. ej. mediante la interfaz web).                                                                                                                                                    |
+| `MTLS_VERIFY_CLIENT`           | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                                         |
+| `MTLS_URL`                     |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio.                |
+| `MTLS_VERIFY_DEPTH`            | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                                       |
+| `MTLS_FORWARD_CLIENT_HEADERS`    | `yes`                 | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez). Las cabeceras `X-SSL-*` enviadas por el cliente siempre se eliminan en la entrada, de modo que estos valores no se pueden falsificar. |
+| `MTLS_CRL_PRIORITY`            | `file`               | multisite | no       | **Prioridad de la CRL de clientes:** origen de la CRL: `file` (ruta) o `data` (base64/PEM).                                                                                                                                                                                                       |
+| `MTLS_CRL`                     |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación. |
+| `MTLS_CRL_DATA`                |                      | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                                                                                                                                                                     |
 
-!!! tip "Mantén los certificados actualizados"
-    Guarde los paquetes de CA y las listas de revocación en un volumen montado que el Scheduler pueda leer, de modo que cada reinicio recupere los últimos anclajes de confianza.
+!!! tip "Configúralo una vez, distribuido en todas partes"
+    Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
 !!! warning "Paquete de CA obligatorio en modos estrictos"
-    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el archivo de CA debe existir en tiempo de ejecución. Si falta, BunkerWeb omite las directivas de mTLS para evitar que el servicio arranque con una ruta no válida. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación.
+    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Si no hay ninguno disponible, BunkerWeb omite las directivas de mTLS en cada instancia para que el servicio no se ejecute con una referencia de certificado inválida o inexistente. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, el mTLS permanece deshabilitado hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.
+
+!!! info "Las cabeceras `X-SSL-*` entrantes siempre se eliminan"
+    BunkerWeb elimina toda cabecera de petición `X-SSL-*` enviada por el cliente antes de que la petición llegue a su aplicación: en todos los sitios, esté o no habilitado mTLS, y por igual en HTTP/1.1, HTTP/2 y HTTP/3. Solo se reenvían los valores que BunkerWeb obtiene del handshake TLS verificado, y únicamente cuando `MTLS_FORWARD_CLIENT_HEADERS` es `yes`, así que un cliente no puede falsificar `X-SSL-Client-Verify: SUCCESS`.
+
+    Si BunkerWeb está detrás de otro proxy que termina mTLS e inyecta estas cabeceras por su cuenta, capture el valor antes de la eliminación y vuelva a publicarlo. Añada una configuración personalizada `server-http`:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    y luego reenvíelo con `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"`. `REVERSE_PROXY_HEADERS` por sí solo no funciona: `$http_x_ssl_client_verify` ya está vacío cuando `proxy_set_header` lo evalúa, mientras que `set` se ejecuta en la fase server-rewrite, antes de la eliminación.
 
 !!! warning "El mTLS por ruta requiere el modo opcional"
     La directiva `ssl_verify_client` de NGINX solo es válida en el contexto `server`: no puede colocarse dentro de un bloque `location`. Para exigir un certificado únicamente en algunas rutas, ponga `MTLS_VERIFY_CLIENT` en `optional` (u `optional_no_ca`) para que el handshake se complete en todas las rutas, y luego liste las rutas protegidas en `MTLS_URL_n`. BunkerWeb aplica entonces el certificado por solicitud, en Lua, sobre las URL coincidentes. Si deja `MTLS_VERIFY_CLIENT` en `on` mientras define `MTLS_URL_n`, NGINX rechaza a los clientes sin certificado durante el handshake, antes de que se aplique la lógica por ruta, por lo que la exigencia sigue siendo para todo el sitio.

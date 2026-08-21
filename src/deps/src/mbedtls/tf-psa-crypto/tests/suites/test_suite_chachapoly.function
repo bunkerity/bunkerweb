@@ -77,6 +77,39 @@ exit:
 /* END_CASE */
 
 /* BEGIN_CASE */
+void chachapoly_update_too_long()
+{
+    unsigned char key[32] = { 0 };
+    unsigned char nonce[12] = { 0 };
+    unsigned char input[65] = { 0 };
+    unsigned char output[65] = { 0 };
+    mbedtls_chachapoly_context ctx;
+    size_t i;
+
+    mbedtls_chachapoly_init(&ctx);
+
+    TEST_EQUAL(mbedtls_chachapoly_setkey(&ctx, key), 0);
+    TEST_EQUAL(mbedtls_chachapoly_starts(&ctx, nonce,
+                                         MBEDTLS_CHACHAPOLY_ENCRYPT), 0);
+
+    /* Force the next update to be too long without processing a huge buffer. */
+    ctx.chacha20_ctx.state[12] = UINT32_MAX;
+    /* Test that the failed update does not modify the output. This is a
+     * defense in depth assertion, however is not currently gauranteed by
+     * the API */
+    memset(output, 0x2a, sizeof(output));
+    TEST_EQUAL(mbedtls_chachapoly_update(&ctx, sizeof(input), input, output),
+               MBEDTLS_ERR_CHACHA20_BAD_INPUT_DATA);
+    for (i = 0; i < sizeof(output); i++) {
+        TEST_EQUAL(output[i], 0x2a);
+    }
+
+exit:
+    mbedtls_chachapoly_free(&ctx);
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
 void chachapoly_state()
 {
     unsigned char key[32];

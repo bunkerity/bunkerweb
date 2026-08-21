@@ -10,6 +10,11 @@ from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 
 login = Blueprint("login", __name__)
 
+# Reasons the app can redirect here with, mapped to what the user is told.
+LOGIN_NOTICES = {
+    "session_expired": "Your session ended before your change could be saved, so nothing was changed. Log in and try again.",
+}
+
 
 @login.route("/login", methods=["GET", "POST"])
 def login_page():
@@ -51,7 +56,9 @@ def login_page():
                     LOGGER.info("ALWAYS_REMEMBER is set to yes, so the sessions will always be remembered")
                 session.permanent = True
 
-            if not login_user(ui_user, remember=remember_me):
+            # No remember= on purpose: the Flask-Login remember cookie is disabled (see main.py).
+            # "Remember me" is session.permanent above, i.e. a persistent server-side session.
+            if not login_user(ui_user):
                 flask_flash("Couldn't log you in, please try again", "error")
                 return (render_template("login.html", error="Couldn't log you in, please try again"),)
 
@@ -112,5 +119,10 @@ def login_page():
     kwargs = {
         "is_totp": bool(current_user.totp_secret),
     } | ({"error": "Invalid username or password"} if fail else {})
+
+    # Looked up, never echoed: whatever is in the query string must not reach the page.
+    notice = LOGIN_NOTICES.get(request.args.get("reason", ""))
+    if notice:
+        kwargs["notice"] = notice
 
     return render_template("login.html", **kwargs), 401 if fail else 200

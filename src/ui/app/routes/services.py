@@ -6,9 +6,11 @@ from itertools import chain
 from json import dumps
 from time import time
 from typing import Dict, List, Optional, Tuple
-from flask import Blueprint, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from regex import sub
+
+from certificate_validation import normalize_pem, uncovered_server_names, validate_certificate_pair  # type: ignore
 
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 
@@ -236,6 +238,42 @@ def services_delete():
             message=f"Deleting service{'s' if len(services) > 1 else ''} {', '.join(services)}",
         )
     )
+
+
+@services.route("/services/validate-certificate", methods=["POST"])
+@login_required
+def services_validate_certificate():
+    """Check a custom certificate/key pair before the service is saved.
+
+    Custom certificates are loaded at runtime by ssl_certificate_by_lua, so a bad
+    pair does not fail nginx -t: it logs one line and the service falls back to the
+    default certificate. Without this the operator's first signal is a browser
+    warning. Nothing is stored here, the pair only reaches the same validator the
+    scheduler job uses.
+    """
+    cert_data = request.form.get("cert", "")
+    key_data = request.form.get("key", "")
+    if not cert_data or not key_data:
+        return jsonify({"ok": False, "error": "Both the certificate and the key are required.", "warnings": []}), 400
+
+    cert_pem, error = normalize_pem(cert_data, "cert")
+    if not cert_pem:
+        return jsonify({"ok": False, "error": error, "warnings": []})
+
+    key_pem, error = normalize_pem(key_data, "key")
+    if not key_pem:
+        return jsonify({"ok": False, "error": error, "warnings": []})
+
+    result = validate_certificate_pair(cert_pem, key_pem)
+
+    # Only meaningful on a service, the global config has no single server name.
+    server_names = request.form.get("server_name", "").split()
+    if result["ok"] and server_names:
+        uncovered = uncovered_server_names(result, server_names)
+        if uncovered:
+            result["warnings"].append(f"Certificate does not cover {', '.join(uncovered)}.")
+
+    return jsonify(result)
 
 
 @services.route("/services/<string:service>", methods=["GET", "POST"])

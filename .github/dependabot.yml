@@ -123,6 +123,43 @@ updates:
       prefix: "deps/ui"
     target-branch: "dev"
 
+  # API
+  - package-ecosystem: "docker"
+    directory: "/src/api"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/api"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/api"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/api"
+    target-branch: "dev"
+
+  # All-in-one
+  - package-ecosystem: "docker"
+    directory: "/src/all-in-one"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/all-in-one"
+    target-branch: "dev"
+
   # Misc
   - package-ecosystem: "pip"
     directory: "/src/deps"

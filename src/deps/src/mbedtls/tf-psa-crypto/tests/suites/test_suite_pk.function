@@ -694,7 +694,7 @@ void pk_can_do_ext(int opaque_key, int key_type, int key_usage, int key_alg,
 
 exit:
     psa_reset_key_attributes(&attributes);
-    PSA_ASSERT(psa_destroy_key(key));
+    psa_destroy_key(key);
     mbedtls_pk_free(&pk);
     PSA_DONE();
 }
@@ -781,7 +781,7 @@ void pk_can_do_psa(int test_number, int pk_type, int key_type, int curve_or_keyb
     TEST_EQUAL(mbedtls_pk_can_do_psa(&pk, alg_check, usage_check), result);
 
 exit:
-    PSA_ASSERT(psa_destroy_key(key));
+    psa_destroy_key(key);
     mbedtls_pk_free(&pk);
     PSA_DONE();
 }

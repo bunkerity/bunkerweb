@@ -487,6 +487,7 @@
       "no_data": "Brak danych"
     },
     "window": {
+      "all_time": "Cały okres",
       "last_days": "Ostatnie {{days}} dni",
       "title": "Okno pulpitu"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Raporty są buforem cyklicznym w pamięci: najstarsze wpisy są usuwane po osiągnięciu skonfigurowanego limitu. Jeśli Redis nie jest włączony, są one również czyszczone przy ponownym uruchomieniu BunkerWeb.",
     "security_incident": "Incydent bezpieczeństwa",
     "security_report_data": "Dane raportu bezpieczeństwa"
   },

@@ -117,6 +117,16 @@ function whitelist:init()
 				end
 				f:close()
 			end
+			-- Merge the manually configured entries. The stored lists are what
+			-- utils.is_ip_whitelisted and the default server read, and without this they
+			-- only ever contain what the URL download job wrote.
+			local setting = get_variable("WHITELIST_" .. kind, true, { bw = { server_name = key } })
+			if setting then
+				for data in setting:gmatch("%S+") do
+					table.insert(whitelists[kind], data)
+					i = i + 1
+				end
+			end
 			whitelists[kind] = deduplicate_list(whitelists[kind])
 		end
 

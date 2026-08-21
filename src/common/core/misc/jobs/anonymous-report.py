@@ -46,6 +46,7 @@ try:
 
     # Retrieve non-default settings and additional configuration.
     db_config = JOB.db.get_non_default_settings(methods=True, with_drafts=True)
+    ui_config = JOB.db.get_config(with_drafts=True, filtered_settings=("USE_UI",))
     services = db_config.get("SERVER_NAME", {"value": ""})["value"].split()
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
@@ -67,13 +68,13 @@ try:
     if multisite:
         for server in services:
             # Check if UI is enabled for any service.
-            if db_config.get(f"{server}_USE_UI", db_config.get("USE_UI", {"value": "no"}))["value"] == "yes":
+            if ui_config.get(f"{server}_USE_UI", ui_config.get("USE_UI", "no")) == "yes":
                 data["use_ui"] = "yes"
             # Count the number of draft services.
             if db_config.get(f"{server}_IS_DRAFT", db_config.get("IS_DRAFT", {"value": "no"}))["value"] == "yes":
                 data["draft_service_number"] += 1
     else:
-        if db_config.get("USE_UI", {"value": "no"})["value"] == "yes":
+        if ui_config.get("USE_UI", "no") == "yes":
             data["use_ui"] = "yes"
         if db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes":
             data["draft_service_number"] = 1
@@ -108,11 +109,11 @@ try:
                 break
         non_default_settings[stripped] = non_default_settings.get(stripped, 0) + 1
 
-        # Count usage of templates if the setting indicates one is used.
-        for server in services:
-            template_prefix = server + "_USE_TEMPLATE"
-            if setting.startswith(template_prefix) and setting_data.get("value"):
-                used_templates[setting_data["value"]] = used_templates.get(setting_data["value"], 0) + 1
+    template_keys = (f"{server}_USE_TEMPLATE" for server in services) if multisite else ("USE_TEMPLATE",)
+    for template_key in template_keys:
+        template = db_config.get(template_key, {}).get("value")
+        if template:
+            used_templates[template] = used_templates.get(template, 0) + 1
 
     # Convert counts to strings for consistency.
     data["non_default_settings"] = {k: str(v) for k, v in non_default_settings.items()}

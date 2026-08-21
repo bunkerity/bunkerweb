@@ -58,6 +58,7 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SAWarning,
@@ -93,6 +94,14 @@ DEFAULT_POOL_TIMEOUT = 5
 DEFAULT_POOL_RECYCLE = 1800
 DEFAULT_POOL_PRE_PING = True
 
+# Methods that mean "a human edited this through a first-class interface". They overwrite
+# one another freely. "wizard" belongs here: the setup wizard creates its service with that
+# method and then writes the service's settings as "ui", so the two must be interchangeable
+# or every later edit of that service is silently dropped. What makes the wizard service
+# special is that it cannot be deleted, which is enforced separately and deliberately not
+# by this set.
+EDITABLE_METHODS = frozenset({"ui", "api", "wizard"})
+
 
 def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
     @wraps(func)
@@ -114,6 +123,28 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
         raise RuntimeError("retry_on_transient_db_errors: unreachable code")
 
     return wrapper
+
+
+# Greedy to the last "@" of the authority so an unencoded "@" inside the password is
+# covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
+# drag the host into the mask.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+
+
+def mask_db_uri(db_string: str) -> str:
+    """Return a database URI with its password replaced, safe to log.
+
+    Callers reach this on malformed input, which make_url() either rejects outright
+    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    """
+    if not db_string:
+        return db_string
+    masked = db_string
+    with suppress(BaseException):
+        masked = make_url(db_string).render_as_string(hide_password=True)
+    # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
+    # the part before it for the password and hides that, leaving the rest to reach the log.
+    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
 
 
 class Database:
@@ -187,7 +218,7 @@ class Database:
 
             match = self.DB_STRING_RX.search(db_string)
             if not match:
-                self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                 _exit(1)
 
             db_type = match.group("database")
@@ -216,7 +247,7 @@ class Database:
                 try:
                     url = make_url(db_string)
                 except ArgumentError:
-                    self.logger.error(f"Invalid database string provided: {db_string}, exiting...")
+                    self.logger.error(f"Invalid database string provided: {mask_db_uri(db_string)}, exiting...")
                     _exit(1)
                 if "+" not in url.drivername:
                     url = url.set(drivername=f"{url.drivername}+{recommended_driver}")
@@ -307,7 +338,7 @@ class Database:
         try:
             self.sql_engine = create_engine(sqlalchemy_string, **self._engine_kwargs)
         except ArgumentError:
-            self.logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
             self.logger.error(f"Error when trying to create the engine: {e}")
@@ -332,6 +363,10 @@ class Database:
         current_time = datetime.now().astimezone()
         not_connected = True
         fallback = False
+        # The retry line named neither the target nor the reason, so nothing actionable was
+        # logged until DATABASE_RETRY_TIMEOUT expired, 60 seconds later by default.
+        connection_target = mask_db_uri(sqlalchemy_string)
+        reason_logged = False
 
         while not_connected:
             try:
@@ -341,20 +376,25 @@ class Database:
                 else:
                     with self.sql_engine.connect() as conn:
                         table_name = uuid4().hex
-                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
                         conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > DATABASE_RETRY_TIMEOUT:
                     if not fallback and self.database_uri_readonly:
-                        self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds. Falling back to read-only database connection")
+                        self.logger.error(
+                            f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds. "
+                            "Falling back to read-only database connection"
+                        )
                         self.sql_engine.dispose(close=True)
                         self.sql_engine = create_engine(self.database_uri_readonly, **self._engine_kwargs)
                         self.readonly = True
                         fallback = True
+                        connection_target = mask_db_uri(self.database_uri_readonly)
+                        reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -367,7 +407,11 @@ class Database:
                     not_connected = False
                     continue
                 elif log:
-                    self.logger.warning("Can't connect to database, retrying in 5 seconds ...")
+                    # Reason once, then the terse line: repeating the exception every 5 seconds is
+                    # noise, but withholding it for the whole window leaves nothing to act on.
+                    detail = "" if reason_logged else f" : {e}"
+                    reason_logged = True
+                    self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
                 self.logger.error(f"Error when trying to connect to the database: {e}")
@@ -443,8 +487,8 @@ class Database:
         """
         Compatibility rules for overwriting a setting's existing method:
         - autoconf wins over everything (and only autoconf overwrites autoconf).
-        - ui and api are interchangeable.
-        - scheduler (env-var origin) overwrites ui/api only when the caller asserts the
+        - ui, api and wizard are interchangeable (see EDITABLE_METHODS).
+        - scheduler (env-var origin) overwrites those only when the caller asserts the
           setting was explicitly declared in the environment (allow_scheduler_override),
           so config-as-code stays authoritative without default-filled scheduler passes
           wiping UI/API customizations; the reverse stays blocked to protect in-session
@@ -458,9 +502,9 @@ class Database:
             return True
         if current_method == "autoconf":
             return new_method == "autoconf"
-        if {new_method, current_method} <= {"ui", "api"}:
+        if {new_method, current_method} <= EDITABLE_METHODS:
             return True
-        if new_method == "scheduler" and current_method in ("ui", "api"):
+        if new_method == "scheduler" and current_method in EDITABLE_METHODS:
             return allow_scheduler_override
         return new_method == current_method
 
@@ -492,7 +536,7 @@ class Database:
         self.logger.debug("Testing write access to the database ...")
         with self._db_session() as session:
             table_name = uuid4().hex
-            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            session.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             session.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
             session.commit()
 
@@ -523,7 +567,7 @@ class Database:
 
         table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
@@ -663,7 +707,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.13"
+                return "1.6.14"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -697,7 +741,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.13",
+            "version": "1.6.14",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1633,6 +1677,7 @@ class Database:
         skip_service_management: bool = False,
         disable_cleanup: bool = False,
         explicit_keys: Optional[Set[str]] = None,
+        retry_on_conflict: bool = True,
     ) -> Union[str, Set[str]]:
         """Save the config in the database.
 
@@ -1655,10 +1700,15 @@ class Database:
                            set. None or empty means the scheduler never touches
                            ui/api-owned rows (the incoming config is treated as
                            default-filled, not user-declared).
+            retry_on_conflict: Recompute and save once more when the flush hits a unique
+                               violation because another writer inserted the same rows
+                               between our read and our flush. Set False on the retry
+                               itself so a genuine conflict cannot loop.
         """
         to_put = []
         to_update = []
         to_delete = []
+        conflict = None
         changed_plugins = set()
         changed_services = False
         service_template_change = False
@@ -2032,8 +2082,11 @@ class Database:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.multiple).all()
+                    settings_dict = {
+                        s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type, "multiple": s.multiple}
+                        for s in settings_data
+                    }
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
@@ -2053,16 +2106,71 @@ class Database:
                         for s in existing_service_settings
                     }
 
-                    # Collect template settings
+                    # Collect template settings. NB: use a distinct loop variable — reusing `template` here would
+                    # clobber the config's USE_TEMPLATE id (set above) with a row object, silently breaking the
+                    # service-template fallback and every `templates.get(template, ...)` lookup below.
                     templates = {}
-                    for template in (
+                    for template_row in (
                         session.query(Template_settings)
                         .with_entities(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
                         .order_by(Template_settings.order)
                     ):
-                        if template.template_id not in templates:
-                            templates[template.template_id] = {}
-                        templates[template.template_id][(template.setting_id, template.suffix or 0)] = template.default
+                        if template_row.template_id not in templates:
+                            templates[template_row.template_id] = {}
+                        templates[template_row.template_id][(template_row.setting_id, template_row.suffix or 0)] = template_row.default
+
+                    def compute_anchored_slots(cfg: Dict[str, str], cfg_template: str) -> set:
+                        # A multiple-group slot (group, suffix>=1) is "anchored" when at least one of its members in
+                        # the incoming config differs from its (template-or-plugin) default. get_config re-materialises
+                        # EVERY member of a detected slot at its default, so the config round-trip re-ingests those
+                        # default siblings; an anchored slot survives on its non-default member's row, so its default
+                        # siblings are spurious material and may be dropped (persisting them locks the field in the UI).
+                        # A slot with NO anchor is a user-declared all-default slot that must be kept, else it vanishes.
+                        anchored = set()
+                        for anchor_key, anchor_value in cfg.items():
+                            anchor_suffix = 0
+                            anchor_base = anchor_key
+                            if self.SUFFIX_RX.search(anchor_base):
+                                anchor_suffix = int(anchor_base.split("_")[-1])
+                                anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+                            if anchor_suffix == 0:
+                                continue
+                            anchor_setting = settings_dict.get(anchor_base)
+                            if not anchor_setting or not anchor_setting.get("multiple"):
+                                continue
+                            anchor_default = templates.get(cfg_template, {}).get((anchor_base, anchor_suffix)) if cfg_template else None
+                            if anchor_default is None:
+                                anchor_default = anchor_setting["default"]
+                            if anchor_value != anchor_default:
+                                anchored.add((anchor_setting["multiple"], anchor_suffix))
+                        return anchored
+
+                    def compute_template_slots(cfg_template: str) -> set:
+                        # A slot is ALSO kept alive by a template that defines ANY member at that suffix: get_config
+                        # rebuilds such a slot from Template_settings with no row, so its default members must NOT be
+                        # persisted (they would become spurious, field-locking rows). Keyed per (group, suffix) to also
+                        # cover the partial-template case (a template's HOST_1 keeps its sibling TIMEOUT_1's slot alive).
+                        slots = set()
+                        for member_id, member_suffix in templates.get(cfg_template, {}):
+                            if member_suffix and member_suffix > 0:
+                                member_setting = settings_dict.get(member_id)
+                                if member_setting and member_setting.get("multiple"):
+                                    slots.add((member_setting["multiple"], member_suffix))
+                        return slots
+
+                    def slot_flags(setting: dict, suffix: int, value: str, template_setting_default: Optional[str], alive_slots: set) -> Tuple[bool, bool]:
+                        # (is_spurious_default_sibling, is_anchorless_multiple_member) for a suffixed multiple member.
+                        # alive_slots = slots kept alive by an anchor row OR a template definition.
+                        #  - spurious   : a default-valued member of a KEPT-ALIVE slot -> drop it (stays editable; the
+                        #                 slot survives via its anchor member or its template).
+                        #  - anchorless : a member of a slot kept alive by NOTHING -> must be persisted even at its
+                        #                 default, else the whole user-declared all-default slot would vanish.
+                        group = setting.get("multiple")
+                        if suffix <= 0 or group is None:
+                            return False, False
+                        slot_default = template_setting_default if template_setting_default is not None else setting["default"]
+                        alive = (group, suffix) in alive_slots
+                        return (value == slot_default and alive), (not alive)
 
                     def process_service(server_name: str, service_config: Dict[str, str], db_ids: Dict[str, dict]):
                         local_to_put = []
@@ -2073,6 +2181,7 @@ class Database:
                         local_service_template_change = False
 
                         service_template = service_config.get("USE_TEMPLATE", template)
+                        alive_slots = compute_anchored_slots(service_config, service_template) | compute_template_slots(service_template)
 
                         for original_key, value in service_config.items():
                             suffix = 0
@@ -2116,9 +2225,28 @@ class Database:
                                 template_setting_default = templates.get(service_template, {}).get((key, suffix))
                                 local_service_template_change = True
 
+                            is_spurious_default_sibling, is_anchorless_multiple_member = slot_flags(
+                                setting, suffix, value, template_setting_default, alive_slots
+                            )
+                            # A default sibling of a kept-alive slot (anchor row or template) is spurious round-trip
+                            # material: drop it (and clean any stale row) so the field stays editable; the slot survives.
+                            if is_spurious_default_sibling:
+                                if service_setting and self._methods_are_compatible(
+                                    method, service_setting["method"], allow_scheduler_override=scheduler_can_override(f"{server_name}_{original_key}", value)
+                                ):
+                                    self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
+                                    local_to_delete.append(
+                                        {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
+                                    )
+                                    if value_changed:
+                                        local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
                             # Determine if we need to add, update, or delete
                             if not service_setting:
-                                if check_value(key, value, setting, template_setting_default, suffix):
+                                # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
+                                # the entire user-declared all-default slot would never materialise (vanish).
+                                if check_value(key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
                                     continue
 
                                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -2143,7 +2271,14 @@ class Database:
                                 if should_update_value:
                                     local_changed_plugins.add(setting["plugin_id"])
 
-                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix):
+                                # Editing a value down to its default removes the row (defaults are implicit) —
+                                # EXCEPT for a member of an anchorless slot, where dropping the last rows would vanish
+                                # the whole user-declared slot; there we persist the default value instead.
+                                if (
+                                    should_update_value
+                                    and check_value(key, value, setting, template_setting_default, suffix)
+                                    and not is_anchorless_multiple_member
+                                ):
                                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                                     local_to_delete.append(
                                         {"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}}
@@ -2175,6 +2310,8 @@ class Database:
                         local_to_delete = []
                         local_changed_plugins = set()
                         local_service_template_change = False
+
+                        alive_slots = compute_anchored_slots(global_config, template) | compute_template_slots(template)
 
                         for original_key, value in global_config.items():
                             suffix = 0
@@ -2208,8 +2345,25 @@ class Database:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
                                 local_service_template_change = True
 
+                            is_spurious_default_sibling, is_anchorless_multiple_member = slot_flags(
+                                setting, suffix, value, template_setting_default, alive_slots
+                            )
+                            # A default sibling of a kept-alive global multiple slot (anchor row or template) is
+                            # spurious round-trip material: drop it so the field stays editable on the global page.
+                            if is_spurious_default_sibling:
+                                if global_value and self._methods_are_compatible(
+                                    method, global_value.method, allow_scheduler_override=scheduler_can_override(original_key, value)
+                                ):
+                                    self.logger.debug(f"Removing spurious default global multiple-group setting {key}_{suffix}")
+                                    local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
+                                    if value_changed:
+                                        local_changed_plugins.add(setting["plugin_id"])
+                                continue
+
                             if not global_value:
-                                if check_value(key, value, setting, template_setting_default, suffix, True):
+                                # A member of an ANCHORLESS slot must be persisted even at its default value, otherwise
+                                # the entire user-declared all-default slot would never materialise (vanish).
+                                if check_value(key, value, setting, template_setting_default, suffix, True) and not is_anchorless_multiple_member:
                                     continue
 
                                 self.logger.debug(f"Adding global setting {key}")
@@ -2227,7 +2381,13 @@ class Database:
                                 if should_update_value:
                                     local_changed_plugins.add(setting["plugin_id"])
 
-                                if should_update_value and check_value(key, value, setting, template_setting_default, suffix, True):
+                                # Editing a value down to its default removes the row — except for a member of an
+                                # anchorless slot, where that would vanish the whole user-declared slot; persist instead.
+                                if (
+                                    should_update_value
+                                    and check_value(key, value, setting, template_setting_default, suffix, True)
+                                    and not is_anchorless_multiple_member
+                                ):
                                     self.logger.debug(f"Removing global setting {key}")
                                     local_to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                     continue
@@ -2304,6 +2464,38 @@ class Database:
                                 )
                                 changed_services = True
 
+                    # Anchor-awareness for multiple-group slots (mirrors compute_anchored_slots in the multisite
+                    # branch): a slot whose members are ALL at their default has no "anchor" row, so its default
+                    # members must still be persisted here, otherwise the whole user-declared slot would vanish.
+                    # Assumes multiple-setting defaults are non-NULL strings (true for all core plugins); a NULL
+                    # default would need _empty_if_none normalization to match the per-key check below.
+                    nm_multiple = {
+                        s.id: (self._empty_if_none(s.default), s.multiple) for s in session.query(Settings.id, Settings.default, Settings.multiple).all()
+                    }
+                    nm_template_defaults = {}
+                    nm_template_slots = set()  # (group, suffix) kept alive by the template -> must not be persisted
+                    if template:
+                        for ts in (
+                            session.query(Template_settings)
+                            .with_entities(Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                            .filter_by(template_id=template)
+                        ):
+                            nm_template_defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
+                            if ts.suffix and ts.suffix > 0 and ts.setting_id in nm_multiple and nm_multiple[ts.setting_id][1]:
+                                nm_template_slots.add((nm_multiple[ts.setting_id][1], ts.suffix))
+                    nm_anchored_slots = set()
+                    for anchor_key, anchor_value in config.items():
+                        anchor_suffix = 0
+                        anchor_base = anchor_key
+                        if self.SUFFIX_RX.search(anchor_base):
+                            anchor_suffix = int(anchor_base.split("_")[-1])
+                            anchor_base = anchor_base[: -len(str(anchor_suffix)) - 1]
+                        if anchor_suffix == 0 or anchor_base not in nm_multiple or not nm_multiple[anchor_base][1]:
+                            continue
+                        anchor_default = nm_template_defaults.get((anchor_base, anchor_suffix), nm_multiple[anchor_base][0])
+                        if anchor_value != anchor_default:
+                            nm_anchored_slots.add((nm_multiple[anchor_base][1], anchor_suffix))
+
                     for original_key, value in config.items():
                         key = deepcopy(original_key)
                         suffix = 0
@@ -2341,8 +2533,15 @@ class Database:
                             )
                             service_template_change = True
 
+                        nm_mult = nm_multiple.get(key, (None, None))[1]
+                        nm_is_anchorless = (
+                            suffix > 0 and nm_mult is not None and (nm_mult, suffix) not in nm_anchored_slots and (nm_mult, suffix) not in nm_template_slots
+                        )
+                        nm_default = template_setting.default if template_setting is not None else setting.default
+
                         if not global_value:
-                            if value == (template_setting.default if template_setting is not None else setting.default):
+                            # An anchorless slot's default member must be persisted, else the whole slot vanishes.
+                            if value == nm_default and not nm_is_anchorless:
                                 continue
 
                             self.logger.debug(f"Adding global setting {key}")
@@ -2360,7 +2559,7 @@ class Database:
                             if should_update_value:
                                 changed_plugins.add(setting.plugin_id)
 
-                            if should_update_value and value == (template_setting.default if template_setting is not None else setting.default):
+                            if should_update_value and value == nm_default and not nm_is_anchorless:
                                 self.logger.debug(f"Removing global setting {key}")
                                 to_delete.append({"model": Global_values, "filter": {"setting_id": key, "suffix": suffix}})
                                 continue
@@ -2414,9 +2613,34 @@ class Database:
                     session.delete(service_setting)
 
                 session.commit()
+            except IntegrityError as e:
+                session.rollback()
+                if not retry_on_conflict:
+                    return str(e)
+                conflict = str(e)
             except BaseException as e:
                 session.rollback()
                 return str(e)
+
+        if conflict is not None:
+            # Another writer inserted rows we had read as missing, between our read and our flush —
+            # the scheduler's first-run save against autoconf applying its initial configuration on
+            # a fresh database is the common one. Dropping the batch loses every setting the other
+            # writer does not send: they stay at their defaults, and the per-service rows a later
+            # save materialises from them then shadow the globals. Recompute against the committed
+            # state instead. Outside the session block: retrying inside it would nest one scoped
+            # session in another.
+            self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
+            return self.save_config(
+                config,
+                method,
+                changed,
+                file_names,
+                skip_service_management=skip_service_management,
+                disable_cleanup=disable_cleanup,
+                explicit_keys=explicit_keys,
+                retry_on_conflict=False,
+            )
 
         return changed_plugins
 
@@ -3588,6 +3812,11 @@ class Database:
                             session.query(Templates).filter(Templates.id == plugin_template.id).delete()
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
+                        # Pro license loss/downgrade: drop the custom UI page so the stale DB blob
+                        # (template.html + actions.py) can no longer be served or executed.
+                        # Settings, Global_values, Services_settings, Jobs, Jobs_cache and Templates
+                        # are deliberately preserved so user values survive a re-license.
+                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
 
                     if per_plugin_commit:
                         try:
@@ -3870,7 +4099,6 @@ class Database:
 
                             if updates:
                                 changes = True
-                                updates[Jobs.last_run] = None
                                 session.query(Jobs_runs).filter(Jobs_runs.job_name == job["name"]).delete()
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)

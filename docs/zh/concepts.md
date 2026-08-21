@@ -105,7 +105,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples) 目录中找到多站点模式的具体示例。
+    您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples) 目录中找到多站点模式的具体示例。
 
 ## 自定义配置 {#custom-configurations}
 
@@ -126,7 +126,7 @@ BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防�
 
 !!! info "更进一步"
 
-    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples) 目录中找到自定义配置的具体示例。
+    您将在文档的[高级用法](advanced.md#custom-configurations)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples) 目录中找到自定义配置的具体示例。
 
 ## 数据库
 
@@ -163,15 +163,15 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 ### 数据库兼容性矩阵
 
-| 集成             | PostgreSQL                                | MariaDB            | MySQL             | SQLite |
-| :--------------- | :---------------------------------------- | :----------------- | :---------------- | :----- |
-| **Docker**       | ✅ `v18` 及更早版本（all-in-one：✅ `v17`） | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
-| **Kubernetes**   | ✅ `v18` 及更早版本                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
-| **Autoconf**     | ✅ `v18` 及更早版本                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
-| **Linux 软件包** | 见下方说明                                | 见下方说明         | 见下方说明        | ✅ 支持 |
+| 集成             | PostgreSQL         | MariaDB            | MySQL             | SQLite |
+| :--------------- | :----------------- | :----------------- | :---------------- | :----- |
+| **Docker**       | ✅ `v18` 及更早版本 | ✅ `v12` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Kubernetes**   | ✅ `v18` 及更早版本 | ✅ `v12` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Autoconf**     | ✅ `v18` 及更早版本 | ✅ `v12` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Linux 软件包** | 见下方说明         | 见下方说明         | 见下方说明        | ✅ 支持 |
 
 !!! info "说明"
-    - **PostgreSQL**: 基于 Alpine 的软件包现在包含 `v18` 客户端，因此默认支持 `v18` 及更早版本；all-in-one 镜像仍然使用 `v17` 客户端，因此 `v18` 在该镜像中尚不受支持。
+    - **PostgreSQL**: 基于 Alpine 的镜像（包括 all-in-one）现已包含 `v18` 客户端，因此默认支持 `v18` 及更早版本。
     - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。
     - **SQLite**: 随软件包一起提供，可立即使用。
 
@@ -228,6 +228,10 @@ BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。�
     - **high**：一个高级模板，专注于强大的安全措施和全面的保护。
 
 - **自定义模板**：除了预定义模板外，BunkerWeb 还允许用户创建根据其特定要求量身定制的自定义模板。自定义模板可以对设置和自定义配置进行微调，确保 BunkerWeb 与用户的需求完美契合。
+
+!!! tip "即用型社区模板"
+
+    浏览 [BunkerWeb 模板仓库](https://github.com/bunkerity/bunkerweb-templates#installing-templates)并按照其安装指南操作。建议大多数用户使用 Web UI 方式；对于托管部署，文档中还介绍了插件目录结构。安装后，请通过简单模式或使用 `USE_TEMPLATE` 设置选择模板。
 
 使用 Web 用户界面时，当您添加或编辑服务时，可以通过**简单模式**使用模板：
 

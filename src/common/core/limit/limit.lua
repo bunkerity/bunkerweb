@@ -19,6 +19,19 @@ local date = os.date
 local encode = cjson.encode
 local decode = cjson.decode
 
+local function limit_global_delay(rate_time)
+	if rate_time == "s" then
+		return 1
+	elseif rate_time == "m" then
+		return 60
+	elseif rate_time == "h" then
+		return 3600
+	elseif rate_time == "d" then
+		return 86400
+	end
+	return 1
+end
+
 local limit_req_timestamps = function(rate_max, rate_time, timestamps)
 	-- Compute new timestamps
 	local updated = false
@@ -214,9 +227,13 @@ function limit:access()
 	-- Check if URI is limited
 	local uri = self.ctx.bw.uri
 	local rate = self.rules["/"]
+	-- Keep the rule that matched : the counter below is keyed by it rather than by the raw
+	-- URI, whose values come from the client and are unbounded.
+	local matched_rule = "/"
 	for pattern, r in pairs(self.rules) do
 		if pattern ~= "/" and regex_match(uri, pattern) then
 			rate = r
+			matched_rule = pattern
 			break
 		end
 	end
@@ -232,7 +249,7 @@ function limit:access()
 	end
 
 	if limited then
-		self:set_metric("counters", "limited_uri_" .. uri, 1)
+		self:set_metric("counters", "limited_uri_" .. matched_rule, 1)
 		local security_mode = get_security_mode(self.ctx)
 		local msg
 		if security_mode == "block" then
@@ -288,7 +305,7 @@ function limit:limit_req(rate_max, rate_time)
 			local ok, err = self.datastore:set_with_retries(
 				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 				encode(timestamps),
-				delay
+				limit_global_delay(rate_time)
 			)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
@@ -408,19 +425,6 @@ function limit:limit_req_redis(rate_max, rate_time)
 	-- Return timestamps
 	self.clusterstore:close()
 	return timestamps, "success"
-end
-
-local function limit_global_delay(rate_time)
-	if rate_time == "s" then
-		return 1
-	elseif rate_time == "m" then
-		return 60
-	elseif rate_time == "h" then
-		return 3600
-	elseif rate_time == "d" then
-		return 86400
-	end
-	return 1
 end
 
 -- Global (aggregate, per-service) rate limit : fixed-window counter, not the timestamp

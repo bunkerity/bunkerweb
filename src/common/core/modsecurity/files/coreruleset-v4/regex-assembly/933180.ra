@@ -13,13 +13,24 @@
 ##! Noise between variable name and function call (zero or more):
 ##! whitespace, array access [...], curly braces {...},
 ##! block comments /* ... */, line comments //..., hash comments #...
+##!
+##! The branches are kept mutually unambiguous (no two branches can match
+##! the same character) to avoid exponential backtracking (ReDoS):
+##!   - array access avoids a free `.+`; it allows one level of nesting via
+##!     two disjoint branches: a non-bracket character, or a nested `[...]`.
+##!   - curly braces match their body with `[^}]` instead of a free `.+`.
+##!   - block comments use the "unrolling-the-loop" form (Jeffrey Friedl,
+##!     "Mastering Regular Expressions", O'Reilly), not /\*.*\*/.
+##!   - line comments (// and #) must terminate at a line break, because a
+##!     line comment before the call is only reachable across a newline
+##!     (otherwise the rest of the line, including `(`, is the comment body).
 ##!> assemble
   \s
-  \[.+\]
-  {.+}
-  /\*.*\*/
-  //.*
-  #.*
+  \[(?:[^[\]]|\[[^\]]+\])+\]
+  \{[^}]+\}
+  /\*[^*]*\*+(?:[^/*][^*]*\*+)*/
+  //[^\n\r]*[\n\r]
+  #[^\n\r]*[\n\r]
   ##!=>
   *
   ##!=< noise
@@ -30,8 +41,9 @@
 ##!> assemble
   ##! PHP identifier (e.g., $varName, $$func, $__call)
   {{php-id-start}}{{php-id-chars}}*
-  ##! Curly brace expression (e.g., ${expr}, ${'func'})
-  \s*{.+}
+  ##! Curly brace expression (e.g., ${expr}, ${'func'}); bounded body
+  ##! ([^}] instead of a free `.+`) to avoid exponential backtracking.
+  \s*\{[^}]+\}
   ##!=>
   ##!=> noise
   ##!=>

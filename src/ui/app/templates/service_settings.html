@@ -11,6 +11,9 @@
            name="selected_mode"
            value="{{ mode }}">
     <input type="hidden"
+           id="validate-certificate-url"
+           value="{{ url_for("services") }}/validate-certificate">
+    <input type="hidden"
            id="used-template"
            name="used_template"
            {% if current_endpoint == "new" and not clone %}value="low"{% else %}value="{{ config.get('USE_TEMPLATE', {'value': 'low'})['value'] }}"{% endif %}>

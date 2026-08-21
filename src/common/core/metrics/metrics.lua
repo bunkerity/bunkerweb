@@ -8,13 +8,13 @@ local utils = require "bunkerweb.utils"
 local metrics = class("metrics", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
-local INFO = ngx.INFO
+local WARN = ngx.WARN
 local null = ngx.null
 local unescape_uri = ngx.unescape_uri
 
 -- Default cap for the per-worker LRU: governs both the slot count (distinct
 -- counter/table keys held) and the per-key event-history array length. Overridden
--- per-worker from the MAX_LRU_HISTORY global setting once init_worker() runs and
+-- per-worker from the MAX_LRU_HISTORY global setting once init_workers() runs and
 -- self.variables is populated.
 local DEFAULT_MAX_LRU_HISTORY = 1000
 
@@ -22,6 +22,10 @@ local lru, err_lru = lrucache.new(DEFAULT_MAX_LRU_HISTORY)
 if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
+
+-- Keys this worker wrote to Redis on the previous sync, so the next one can tell which
+-- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
+local synced_redis_keys = {}
 
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
@@ -34,6 +38,7 @@ local get_reason = utils.get_reason
 local get_country = utils.get_country
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
+local is_oom_error = utils.is_oom_error
 local encode = cjson.encode
 local decode = cjson.decode
 
@@ -43,8 +48,87 @@ local tonumber = tonumber
 local tostring = tostring
 local table_insert = table.insert
 local table_remove = table.remove
+-- Bound here rather than read as a global at call time, where a missing one would only surface
+-- when the branch first runs (the .luacheckrc whitelist hides bare global reads).
+local unpack = unpack
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
+
+-- RPUSH is denyoom and first: under OOM nothing is written, so the entry stays
+-- unsynced with no partial facets. ARGV[1]=json, ARGV[2..9]=facet values.
+local PUSH_SCRIPT = [==[
+  local pushed = redis.pcall('RPUSH', KEYS[1], ARGV[1])
+  if type(pushed) == 'table' and pushed.err then
+    return pushed
+  end
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  for i = 1, #fields do
+    -- never abort after RPUSH: a pushed-but-unsynced entry would duplicate on retry
+    redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], ARGV[1 + i], 1)
+  end
+  return pushed
+]==]
+
+-- OOM probe bails before any destructive op so a popped entry never loses its
+-- facet decrement. ARGV[1]=max_requests.
+local TRIM_SCRIPT = [==[
+  local max = tonumber(ARGV[1])
+  if not max or max < 0 then max = 0 end
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  if max == 0 then
+    redis.call('DEL', KEYS[1])
+    for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+    redis.call('SET', 'requests:facets:initialized', '1')
+    return 0
+  end
+  local nb = redis.call('LLEN', KEYS[1])
+  if nb <= max then return 0 end
+  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  if type(probe) == 'table' and probe.err then
+    return probe
+  end
+  local to_remove = nb - max
+  local items = redis.call('LRANGE', KEYS[1], 0, to_remove - 1)
+  for _, raw in ipairs(items) do
+    local ok, req = pcall(cjson.decode, raw)
+    if ok and type(req) == 'table' then
+      for i = 1, #fields do
+        local v = req[fields[i]]
+        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+        local n = redis.call('HINCRBY', 'requests:facet:' .. fields[i], v, -1)
+        if n <= 0 then redis.call('HDEL', 'requests:facet:' .. fields[i], v) end
+      end
+    end
+  end
+  redis.call('LTRIM', KEYS[1], to_remove, -1)
+  return to_remove
+]==]
+
+-- Marker invalidated up-front so an OOM-aborted rebuild retries next cycle instead
+-- of latching a partial result.
+-- ponytail: one atomic LRANGE + 8xN HINCRBY blocks Redis; fine as it only fires on
+-- rare facet desync, and chunking would break atomicity.
+local REBUILD_SCRIPT = [==[
+  local fields = {'ip','country','method','url','status','reason','server_name','security_mode'}
+  local probe = redis.pcall('SET', 'requests:facets:oomprobe', '1', 'PX', 1)
+  if type(probe) == 'table' and probe.err then return probe end
+  redis.call('DEL', 'requests:facets:initialized')
+  for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
+  local items = redis.call('LRANGE', KEYS[1], 0, -1)
+  for _, raw in ipairs(items) do
+    local ok, req = pcall(cjson.decode, raw)
+    if ok and type(req) == 'table' then
+      for i = 1, #fields do
+        local v = req[fields[i]]
+        if v == nil or v == cjson.null or v == '' then v = 'N/A' else v = tostring(v) end
+        local r = redis.pcall('HINCRBY', 'requests:facet:' .. fields[i], v, 1)
+        if type(r) == 'table' and r.err then return r end
+      end
+    end
+  end
+  redis.call('SET', 'requests:facets:initialized', '1')
+  return #items
+]==]
 
 -- Parse a count value with optional SI shorthand suffix: "100", "1k", "10K", "1m", "5M".
 -- k/K = x1000, m/M = x1_000_000. Returns the integer count, or nil if value is missing
@@ -77,185 +161,188 @@ local function get_request_facet_value(request, field)
 	return tostring(value)
 end
 
-local function clear_request_facets(self, set_initialized)
-	if set_initialized == nil then
-		set_initialized = true
+local function enforce_redis_requests_cap(self)
+	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
+	if not max_requests then
+		-- Unparsable cap must not become 0: cap 0 wipes the list and facets.
+		return
 	end
-
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local _, err = self:redis_call("del", "requests:facet:" .. field)
-		if err then
-			self:log_throttled(ERR, "facet_clear", "Can't clear request facet " .. field .. ": " .. err)
-		end
-	end
-
-	if set_initialized then
-		local ok, err = self:redis_call("set", "requests:facets:initialized", "1")
-		if not ok then
-			self:log_throttled(
-				ERR,
-				"facet_init_set",
-				"Can't mark request facets as initialized: " .. (err or "unknown error")
-			)
-		end
+	local _, err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", tostring(max_requests))
+	if err then
+		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. err)
 	end
 end
 
-local function incr_request_facets(self, request)
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local facet_key = "requests:facet:" .. field
-		local facet_value = get_request_facet_value(request, field)
-		local count_raw, err = self:redis_call("hincrby", facet_key, facet_value, 1)
-		if count_raw == nil or count_raw == false then
-			self:log_throttled(
-				ERR,
-				"facet_incr",
-				"Can't increment request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
-			)
-		end
-	end
-end
-
-local function decr_request_facets(self, request)
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local facet_key = "requests:facet:" .. field
-		local facet_value = get_request_facet_value(request, field)
-		local count_raw, err = self:redis_call("hincrby", facet_key, facet_value, -1)
-		if count_raw == nil or count_raw == false then
-			self:log_throttled(
-				ERR,
-				"facet_decr",
-				"Can't decrement request facet " .. field .. "=" .. facet_value .. ": " .. (err or "unknown error")
-			)
+-- Read-only probe (never denyoom), so it runs even under OOM. Invariant: every
+-- stored request contributes one facet:ip value, so HLEN(facet:ip)==0 with LLEN>0
+-- reliably flags a facet/list desync.
+local function self_heal_request_facets(self)
+	local nb_raw = self:redis_call("llen", "requests")
+	local nb = tonumber(nb_raw) or 0
+	local marker = self:redis_call("get", "requests:facets:initialized")
+	local marked = marker ~= nil and marker ~= false and marker ~= null and tostring(marker) == "1"
+	if nb == 0 then
+		if not marked then
+			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+			if clear_err then
+				self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
+			end
 		else
-			local count = tonumber(count_raw)
-			if count and count <= 0 then
-				local ok, hdel_err = self:redis_call("hdel", facet_key, facet_value)
-				if ok == nil or ok == false then
-					self:log_throttled(
-						ERR,
-						"facet_hdel",
-						"Can't remove empty request facet "
-							.. field
-							.. "="
-							.. facet_value
-							.. ": "
-							.. (hdel_err or "unknown error")
-					)
+			local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
+			local ip_len = tonumber(ip_len_raw) or 0
+			if ip_len > 0 then
+				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 1, "requests", "0")
+				if clear_err then
+					self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 				end
 			end
 		end
+		return
+	end
+	local ip_len_raw = self:redis_call("hlen", "requests:facet:ip")
+	local ip_len = tonumber(ip_len_raw) or 0
+	if ip_len == 0 then
+		local _, err = self:redis_call("eval", REBUILD_SCRIPT, 1, "requests")
+		if err then
+			self:log_throttled(ERR, "facet_rebuild", "Can't rebuild request facets: " .. err)
+		end
+	elseif not marked then
+		local _, err = self:redis_call("set", "requests:facets:initialized", "1")
+		if err then
+			self:log_throttled(ERR, "facet_mark", "Can't mark request facets as initialized: " .. err)
+		end
 	end
 end
 
-local function initialize_request_facets(self)
-	local initialized_raw, _ = self:redis_call("get", "requests:facets:initialized")
-	if
-		initialized_raw ~= nil
-		and initialized_raw ~= false
-		and initialized_raw ~= null
-		and tostring(initialized_raw) == "1"
-	then
-		return
+-- EXPIRE is denyoom-safe, so it must run under OOM to make these pinning keys
+-- and this worker's metrics keys evictable; it bypasses the redis_ok breaker
+-- (dead socket returns an ignored error).
+-- An evicted key keeps its last value in Redis forever, so it goes on being served by
+-- the plugin pages and counts against maxmemory. A TTL only bounds that to its own
+-- expiry, and only for keys that were still in the LRU when one was last applied.
+local function reap_evicted_redis_keys(self, wid, live_keys)
+	for key in pairs(synced_redis_keys) do
+		if not live_keys[key] then
+			local ok, err = self:redis_call("del", "metrics:" .. key .. ":" .. wid)
+			if not ok then
+				self:log_throttled(ERR, "reap_evicted", "Can't delete evicted metric " .. key .. " from Redis: " .. err)
+			end
+		end
 	end
+	synced_redis_keys = live_keys
+end
 
-	clear_request_facets(self, false)
+-- A reload keeps the shared dict the LRU is rebuilt from, a restart does not: the counter
+-- would start again at zero and the next sync would SET that zero over the value Redis had
+-- kept, so the number is destroyed rather than merely missing. Seed the cold LRU from Redis
+-- for whatever the shared dict could not provide.
+-- Numeric counters only: tables are rebuilt from their own sources, and the requests list is
+-- read straight from Redis instead of being held here.
+-- Keys are per worker id, so lowering WORKER_PROCESSES strands the counters of the workers
+-- that no longer exist; METRICS_REDIS_TTL expires them.
+-- budget caps how many entries may be seeded. Redis can hold far more keys than the LRU has
+-- slots (one per client IP for some plugins), and seeding past the cap would evict the counters
+-- the shared dict just restored, which is the very loss this is here to prevent.
+local function seed_counters_from_redis(self, wid, budget)
+	local prefix = "metrics:"
+	local suffix = ":" .. wid
+	local cursor = "0"
+	local seeded = 0
+	local skipped = 0
+	repeat
+		local res, err = self:redis_call("scan", cursor, "MATCH", prefix .. "*" .. suffix, "COUNT", 100)
+		-- The cursor is checked too: a reply without one leaves it nil, which is neither "0" nor
+		-- a usable argument for the next round, so the loop would never end.
+		if type(res) ~= "table" or type(res[1]) ~= "string" then
+			-- A broken cursor cannot be continued, so this one has to return. Trip the breaker on
+			-- the way out: leaving redis_ok true lets the sync later in this same cycle SET the
+			-- cold counters over their Redis totals, which is the loss the seeding exists to
+			-- prevent. Skipping one cycle's sync is cheaper than destroying the history.
+			self.redis_ok = false
+			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unexpected reply"))
+			return
+		end
+		cursor = res[1]
 
-	local nb_requests_raw, len_err = self:redis_call("llen", "requests")
-	if nb_requests_raw == nil or nb_requests_raw == false then
-		self:log_throttled(
-			ERR,
-			"facet_init_llen",
-			"Can't initialize request facets, failed to get requests length: " .. (len_err or "unknown error")
-		)
-		return
-	end
+		-- Only what the shared dict could not provide, in one MGET rather than a GET per key:
+		-- each round trip is a yield, and MGET answers a list-typed key (a table metric, which
+		-- shares this key shape) with nil instead of an error, so non-counters cost nothing.
+		local wanted, keys = {}, {}
+		for _, redis_key in ipairs(res[2] or {}) do
+			local key = redis_key:sub(#prefix + 1, -(#suffix + 1))
+			if key ~= "" and lru:get(key) == nil then
+				if seeded + #wanted >= budget then
+					skipped = skipped + 1
+				else
+					wanted[#wanted + 1] = key
+					keys[#keys + 1] = redis_key
+				end
+			end
+		end
 
-	local nb_requests = tonumber(nb_requests_raw) or 0
-	if nb_requests > 0 then
-		local chunk_size = 1000
-		for start_idx = 0, nb_requests - 1, chunk_size do
-			local stop_idx = start_idx + chunk_size - 1
-			local chunk, range_err = self:redis_call("lrange", "requests", start_idx, stop_idx)
-			if chunk == nil or chunk == false then
+		if #keys > 0 then
+			local values
+			values, err = self:redis_call("mget", unpack(keys))
+			if type(values) ~= "table" then
+				-- Keep going rather than return: seeding only ever runs on a cold start, so
+				-- abandoning it here leaves every remaining counter unseeded, and the sync later
+				-- in this same cycle then writes the cold values over the Redis ones this exists
+				-- to protect. One bad batch should cost that batch, not the rest.
 				self:log_throttled(
 					ERR,
-					"facet_init_lrange",
-					"Can't initialize request facets, failed to read requests chunk: " .. (range_err or "unknown error")
+					"seed_get",
+					"Can't read a batch of metric counters from Redis: " .. (err or "unexpected reply")
 				)
-				break
-			end
-			for _, request_raw in ipairs(chunk) do
-				if request_raw ~= nil and request_raw ~= false and request_raw ~= null then
-					local ok, request = pcall(decode, request_raw)
-					if ok and type(request) == "table" then
-						incr_request_facets(self, request)
+			else
+				for i, key in ipairs(wanted) do
+					local value = values[i]
+					local number = value ~= nil and value ~= null and tonumber(value) or nil
+					if number then
+						lru:set(key, number)
+						seeded = seeded + 1
 					end
 				end
 			end
 		end
-	end
 
-	local ok, set_err = self:redis_call("set", "requests:facets:initialized", "1")
-	if not ok then
-		self:log_throttled(
-			ERR,
-			"facet_init_final",
-			"Can't finalize request facets initialization: " .. (set_err or "unknown error")
+		-- Nothing left to place, so stop walking: the rest of the scan could only keep counting
+		-- skips, and at the cardinalities this guards against that is thousands of round trips.
+		-- It does mean `skipped` stops short of the real shortfall, hence "at least" below.
+		if seeded >= budget then
+			break
+		end
+	until cursor == "0"
+
+	if skipped > 0 then
+		self.logger:log(
+			WARN,
+			-- Not merely "not restored": seeding is a one-shot cold start, so the next time one of
+			-- these metrics fires it enters the cache at its fresh value and the sync writes that
+			-- over the Redis total. Say so, or the operator reads this as harmless.
+			"restored "
+				.. seeded
+				.. " metric counter(s) from Redis but had no room for at least "
+				.. skipped
+				.. " more, whose totals will be overwritten the next time they are incremented, raise MAX_LRU_HISTORY"
 		)
 	end
 end
 
-local function enforce_redis_requests_cap(self)
-	local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"]) or 0
-	if max_requests < 0 then
-		max_requests = 0
-	end
-
-	local nb_requests_raw, err = self:redis_call("llen", "requests")
-	if nb_requests_raw == nil or nb_requests_raw == false then
-		self:log_throttled(ERR, "cap_llen", "Can't get Redis requests length: " .. (err or "unknown error"))
+local function refresh_request_ttls(self, ttl, wid)
+	if not ttl or ttl <= 0 then
 		return
 	end
-
-	local nb_requests = tonumber(nb_requests_raw)
-	if not nb_requests then
-		self:log_throttled(ERR, "cap_parse", "Can't parse Redis requests length: " .. tostring(nb_requests_raw))
-		return
+	self.clusterstore:call("expire", "requests", ttl)
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		self.clusterstore:call("expire", "requests:facet:" .. field, ttl)
 	end
-
-	if nb_requests <= max_requests then
-		return
-	end
-
-	local ok
-	if max_requests == 0 then
-		ok, err = self:redis_call("del", "requests")
-		if ok then
-			clear_request_facets(self)
-		end
-	else
-		local to_remove = nb_requests - max_requests
-		ok = true
-		for _ = 1, to_remove do
-			local removed_raw, pop_err = self:redis_call("lpop", "requests")
-			if removed_raw == nil or removed_raw == false then
-				self:log_throttled(ERR, "cap_lpop", "Can't trim Redis requests list: " .. (pop_err or "unknown error"))
-				ok = false
-				break
-			end
-			if removed_raw == null then
-				break
-			end
-			local decoded_ok, removed_request = pcall(decode, removed_raw)
-			if decoded_ok and type(removed_request) == "table" then
-				decr_request_facets(self, removed_request)
+	self.clusterstore:call("expire", "requests:facets:initialized", ttl)
+	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+		for _, key in ipairs(lru:get_keys()) do
+			if key ~= "setup" and key ~= "requests" then
+				self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
 			end
 		end
-	end
-
-	if not ok then
-		self:log_throttled(ERR, "cap_enforce", "Can't enforce Redis requests cap: " .. (err or "unknown error"))
 	end
 end
 
@@ -271,11 +358,14 @@ function metrics:initialize(ctx)
 	self.metrics_datastore = datastore:new(dict)
 end
 
-function metrics:init_worker()
+-- init_workers(), not init_worker(): the latter is gated behind a shared "misc_ready" flag
+-- and runs once per instance, so it would resize a single worker's LRU and leave every other
+-- one on the default. This is per-worker VM state, so it needs the per-worker phase.
+function metrics:init_workers()
 	-- Resize the per-worker LRU using the configured MAX_LRU_HISTORY (global setting).
 	-- Until this runs, the module-level default LRU sized at DEFAULT_MAX_LRU_HISTORY is
 	-- used. The resize is skipped when the configured value matches the default to avoid
-	-- dropping any entries collected between module load and init_worker.
+	-- dropping any entries collected between module load and here.
 	local max_lru_history = parse_count(self.variables["MAX_LRU_HISTORY"]) or DEFAULT_MAX_LRU_HISTORY
 	if max_lru_history < 1 then
 		max_lru_history = DEFAULT_MAX_LRU_HISTORY
@@ -301,6 +391,10 @@ function metrics:redis_call(method, ...)
 		return false, "Redis unavailable for this cycle"
 	end
 	local res, call_err = self.clusterstore:call(method, ...)
+	if not res and call_err and is_oom_error(call_err) then
+		self.redis_ok = false
+		return false, call_err -- no reconnect: the connection is healthy under OOM
+	end
 	if not res and call_err and is_connection_error(call_err) then
 		self.clusterstore:close()
 		local ok, reconnect_err = self.clusterstore:connect()
@@ -363,7 +457,14 @@ function metrics:log(bypass_checks)
 		-- Remove old requests if needed
 		local max_requests = parse_count(self.variables["METRICS_MAX_BLOCKED_REQUESTS"]) or 1000
 		while #requests > max_requests do
-			table_remove(requests, 1)
+			local dropped = table_remove(requests, 1)
+			if dropped and not dropped.synced then
+				self:log_throttled(
+					WARN,
+					"buffer_drop",
+					"Blocked-request buffer full, dropping unsynced report (Redis down or OOM?)"
+				)
+			end
 		end
 
 		-- Update worker cache
@@ -439,6 +540,7 @@ function metrics:timer()
 	-- In case of a reload, everything in LRU cache is removed
 	-- so we need to copy it from SHM cache if it exists.
 	local setup = lru:get("setup")
+	local cold_start = not setup
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
 			if key:match("_" .. wid .. "$") then
@@ -462,6 +564,9 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
+	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"]) or 0
+	-- Stays true after the OOM breaker trips redis_ok, so the TTL refresh still runs.
+	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()
 		if not self.redis_ok then
@@ -473,99 +578,186 @@ function metrics:timer()
 					.. " - requests will be stored in datastore"
 			)
 		else
-			initialize_request_facets(self)
-		end
-	end
-
-	-- Loop on all keys
-	for _, key in ipairs(lru:get_keys()) do
-		-- Get LRU data
-		local value = lru:get(key)
-		if self.redis_ok then
-			if key == "requests" then
-				for _, request in ipairs(value) do
-					if not request.synced then
-						-- Add only unsynced requests
-						local ok
-						ok, err = self:redis_call("rpush", "requests", encode(request))
-						if not ok then
-							self:log_throttled(ERR, "sync_request", "Can't sync request to Redis: " .. err)
-							break
-						end
-						request.synced = true -- Mark as synced
-						incr_request_facets(self, request)
-					end
-				end
-
-				-- Update LRU cache
-				lru:set("requests", value)
-			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
-				-- Sync other metrics (counters and tables) to Redis with optimized data structures
-				local redis_key = "metrics:" .. key .. ":" .. wid
-				local ok
-				if type(value) == "table" then
-					-- Use Redis list for table values
-					ok, err = self:redis_call("del", redis_key)
-					if ok then
-						for _, item in ipairs(value) do
-							local item_value = type(item) == "table" and encode(item) or tostring(item)
-							ok, err = self:redis_call("rpush", redis_key, item_value)
-							if not ok then
-								self:log_throttled(
-									ERR,
-									"sync_table_item",
-									"Can't push metric table item " .. key .. " to Redis: " .. err
-								)
-								break
-							end
-						end
-					else
-						self:log_throttled(
-							ERR,
-							"sync_table_clear",
-							"Can't clear metric table " .. key .. " in Redis: " .. err
-						)
-					end
-				elseif type(value) == "number" then
-					-- Use Redis string for numeric counters
-					ok, err = self:redis_call("set", redis_key, value)
-					if not ok then
-						self:log_throttled(
-							ERR,
-							"sync_counter",
-							"Can't sync metric counter " .. key .. " to Redis: " .. err
-						)
-					end
-				else
-					-- Use Redis string for other types
-					ok, err = self:redis_call("set", redis_key, tostring(value))
-					if not ok then
-						self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
-					end
+			redis_connected = true
+			self_heal_request_facets(self)
+			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+				-- Seed only into the slots the shared-dict restore left free, so nothing it
+				-- recovered is evicted to make room for a Redis copy.
+				-- capacity(), not count(): num_items is how many entries are held right now,
+				-- which is exactly what get_keys() returns, so subtracting the two gave a budget
+				-- of zero on every cold start and the seeding below never ran at all.
+				local budget = lru:capacity() - #lru:get_keys()
+				if budget > 0 then
+					seed_counters_from_redis(self, wid, budget)
 				end
 			end
 		end
-		if type(value) == "table" then
-			value = encode(value)
+	end
+
+	local lru_keys = lru:get_keys()
+	-- Built from the snapshot rather than from the writes below, so a key skipped because
+	-- the OOM breaker tripped or because it was raced out mid-loop is not taken for evicted.
+	local live_keys = {}
+	for _, key in ipairs(lru_keys) do
+		if key ~= "setup" and key ~= "requests" then
+			live_keys[key] = true
 		end
-		-- Push to dict (with LRU eviction if needed)
-		local ok
-		ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
-		if not ok then
-			-- If there isn't enough memory : we fallback to delete everything
-			if err == "no memory" then
-				self.logger:log(INFO, "not enough memory in the metrics datastore, purging LRU key " .. key)
-				lru:delete(key)
-			else
-				ret = false
-				ret_err = err
-				self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+	end
+
+	-- Loop on all keys, coldest first. get_keys() hands them back hottest first and lru:get()
+	-- promotes what it reads, so walking forward reverses the whole queue on every cycle and
+	-- the next insertion evicts the hottest key instead of the coldest. Walking backwards
+	-- promotes them in the order they already had, leaving it unchanged.
+	for idx = #lru_keys, 1, -1 do
+		local key = lru_keys[idx]
+		-- Get LRU data
+		local value = lru:get(key)
+		-- get_keys() returns a snapshot and every redis_call below yields, so a
+		-- concurrent log() can evict this key from the (full) LRU in between. A miss
+		-- must never be written out: tostring(nil) stores the literal string "nil" in
+		-- Redis, and a nil datastore value deletes the entry. Skip it and let the next
+		-- cycle resync whatever is still live.
+		if value ~= nil then
+			if self.redis_ok then
+				if key == "requests" then
+					for _, request in ipairs(value) do
+						if not request.synced then
+							local v = {}
+							for i, field in ipairs(REQUEST_FACET_FIELDS) do
+								v[i] = get_request_facet_value(request, field)
+							end
+							local ok
+							ok, err = self:redis_call(
+								"eval",
+								PUSH_SCRIPT,
+								1,
+								"requests",
+								encode(request),
+								v[1],
+								v[2],
+								v[3],
+								v[4],
+								v[5],
+								v[6],
+								v[7],
+								v[8]
+							)
+							if not ok then
+								self:log_throttled(
+									ERR,
+									"sync_request",
+									"Can't sync request to Redis: " .. (err or "unknown error")
+								)
+								break
+							end
+							request.synced = true
+						end
+					end
+
+					-- Update LRU cache
+					lru:set("requests", value)
+				elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+					-- Sync other metrics (counters and tables) to Redis with optimized data structures
+					local redis_key = "metrics:" .. key .. ":" .. wid
+					local ok
+					if type(value) == "table" then
+						-- Use Redis list for table values
+						ok, err = self:redis_call("del", redis_key)
+						if ok then
+							for _, item in ipairs(value) do
+								local item_value = type(item) == "table" and encode(item) or tostring(item)
+								ok, err = self:redis_call("rpush", redis_key, item_value)
+								if not ok then
+									self:log_throttled(
+										ERR,
+										"sync_table_item",
+										"Can't push metric table item " .. key .. " to Redis: " .. err
+									)
+									break
+								end
+							end
+						else
+							self:log_throttled(
+								ERR,
+								"sync_table_clear",
+								"Can't clear metric table " .. key .. " in Redis: " .. err
+							)
+						end
+					elseif type(value) == "number" then
+						-- Use Redis string for numeric counters
+						ok, err = self:redis_call("set", redis_key, value)
+						if not ok then
+							self:log_throttled(
+								ERR,
+								"sync_counter",
+								"Can't sync metric counter " .. key .. " to Redis: " .. err
+							)
+						end
+					else
+						-- Use Redis string for other types
+						ok, err = self:redis_call("set", redis_key, tostring(value))
+						if not ok then
+							self:log_throttled(ERR, "sync_other", "Can't sync metric " .. key .. " to Redis: " .. err)
+						end
+					end
+				end
+			end
+			if type(value) == "table" then
+				value = encode(value)
+			end
+			-- Push to dict (with LRU eviction if needed)
+			local ok
+			ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, value)
+			-- Shed the oldest half rather than the whole history: set_with_retries already
+			-- force-evicted, so "no memory" means the dict is undersized, and dropping every
+			-- stored entry to make one write fit loses far more than needed. The halving is
+			-- kept in the LRU, so later cycles start from the reduced size.
+			while not ok and err == "no memory" do
+				local live = lru:get(key)
+				if type(live) ~= "table" or #live < 2 then
+					break
+				end
+				for _ = 1, math.floor(#live / 2) do
+					table_remove(live, 1)
+				end
+				lru:set(key, live)
+				self:log_throttled(
+					WARN,
+					"datastore_shed_" .. key,
+					"not enough memory in the metrics datastore, halved LRU key "
+						.. key
+						.. " to "
+						.. #live
+						.. " entries : raise METRICS_MEMORY_SIZE"
+				)
+				ok, err = self.metrics_datastore:set_with_retries(key .. "_" .. wid, encode(live))
+			end
+			if not ok then
+				-- Nothing left to shed : drop the key so the next cycle starts clean
+				if err == "no memory" then
+					self:log_throttled(
+						WARN,
+						"datastore_purge_" .. key,
+						"not enough memory in the metrics datastore, purging LRU key " .. key
+					)
+					lru:delete(key)
+				else
+					ret = false
+					ret_err = err
+					self:log_throttled(ERR, "datastore_set", "can't set " .. key .. "_" .. wid .. " : " .. err)
+				end
 			end
 		end
 	end
 
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
+		if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+			reap_evicted_redis_keys(self, wid, live_keys)
+		end
+	end
+	if redis_connected and ttl > 0 then
+		refresh_request_ttls(self, ttl, wid)
 	end
 	-- Always attempt cleanup when Redis was used, even if connection dropped mid-cycle.
 	-- clusterstore:close() handles the "client is not instantiated" case gracefully.

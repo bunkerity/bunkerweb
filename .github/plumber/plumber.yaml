@@ -1,0 +1,14 @@
+extends: plumber:default
+version: "2.0"
+
+github:
+  controls:
+    githubActionMustComeFromAuthorizedSources:
+      trustedGithubActions:
+        - scaleway/action-scw
+        - softprops/action-gh-release
+        - stefanzweifel/git-auto-commit-action
+        - rickstaa/action-create-tag
+        - nick-fields/retry
+        - iFaxity/wait-on-action
+        - danielmundi/upload-packagecloud

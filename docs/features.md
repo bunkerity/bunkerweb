@@ -164,7 +164,6 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
     | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
     | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `KEEP_CONFIG_ON_RESTART` | `no`    | global    | No       | **Keep Config on Restart:** Keep the configuration on restart. Set to 'yes' to prevent config reset on restart. |
     | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
 
 === "Nginx Settings"
@@ -1880,7 +1879,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1897,7 +1896,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2933,23 +2932,24 @@ Follow these steps to configure and use the Headers feature:
         - **X-Frame-Options:** Blocks clickjacking attempts by controlling iframe embedding.
         - **Referrer Policy:** Limits sensitive information leakage through referrer headers.
 
-    | Setting                               | Default                                                                                             | Context   | Multiple | Description                                                                                                                  |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
+    | Setting                               | Default                                                                                               | Context   | Multiple | Description                                                                                                                  |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
 
     !!! tip "Best Practices"
         - Regularly review and update your security headers to align with evolving security standards.
         - Use tools like [Mozilla Observatory](https://observatory.mozilla.org/) to validate your header configuration.
         - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
         - In `Report-Only` mode, an upstream `Content-Security-Policy` or `Content-Security-Policy-Report-Only` header is preserved by default (`KEEP_UPSTREAM_HEADERS`); remove the header name from that setting for BunkerWeb's own policy to take precedence.
+        - The default `PERMISSIONS_POLICY` also blocks client hints (`ch-*` directives); if a service relies on `Accept-CH` (for example client-hint responsive images or `Sec-CH-Prefers-Color-Scheme` dark-mode detection), override `PERMISSIONS_POLICY` to re-allow the needed `ch-*` features (for example `ch-dpr=(self)`).
 
 === "Cookie Settings"
 
@@ -3230,7 +3230,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
@@ -3677,26 +3677,30 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default | Context   | Multiple | Description                                                                                                                                      |
-| ------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_METRICS`                        | `yes`   | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                  |
-| `METRICS_MEMORY_SIZE`                | `16m`   | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                          |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`    | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                     |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`   | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                 |
-| `MAX_LRU_HISTORY`                    | `1k`    | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand. |
-| `METRICS_SAVE_TO_REDIS`              | `yes`   | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                             |
+| Setting                              | Default   | Context   | Multiple | Description                                                                                                                                                                                                                                                    |
+| ------------------------------------ | --------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`     | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                                                                                                                                |
+| `METRICS_MEMORY_SIZE`                | `16m`     | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                                                                                                                                        |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                                                                                                                                   |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                                                                                                                               |
+| `METRICS_REDIS_TTL`                  | `2592000` | global    | no       | **Metrics Redis TTL:** Seconds before Redis metrics keys expire (`0` = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under `volatile-lru` so Redis recovers from maxmemory. Accepts `k`/`m` shorthand. |
+| `MAX_LRU_HISTORY`                    | `1k`      | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand.                                                                                                               |
+| `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                                                                                                                                           |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
 
 !!! info "Redis Integration"
-    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances.
+    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis `maxmemory` pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.
 
 !!! note "Worker-Specific Storage"
     Each NGINX worker maintains its own metrics in memory. When accessing metrics through the API, data from all workers is automatically aggregated to provide a complete view.
+
+!!! warning "Report Retention"
+    Blocked-request reports are a rolling buffer, not an audit log. Once the limit is reached, the oldest reports are dropped to make room for new ones, so the total shown in the web UI plateaus: without Redis that ceiling is `METRICS_MAX_BLOCKED_REQUESTS` multiplied by the number of NGINX workers on each instance, and with Redis it is `METRICS_MAX_BLOCKED_REQUESTS_REDIS`. Reports live in shared memory and are cleared whenever BunkerWeb restarts, including package upgrades, unless Redis is enabled and persisted. Ship the NGINX logs to a syslog server or a SIEM if you need long-term retention.
 
 ### Example Configurations
 
@@ -3834,18 +3838,18 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
 
-    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
+    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD|QUERY`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
 
-    For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. `CCM_POST`, `M-SEARCH`).
+    For most websites, the default `GET|POST|HEAD|QUERY` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`. Custom uppercase methods may also contain underscores and dashes for compatibility with non-standard protocols (e.g. `CCM_POST`, `M-SEARCH`).
 
     !!! success "Security Benefits"
         - Prevents exploitation of unused or unnecessary HTTP methods
         - Reduces the attack surface by disabling potentially harmful methods
         - Blocks HTTP method enumeration techniques used by attackers
 
-    | Setting           | Default           | Context   | Multiple | Description                                                                                                                                         |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
+    | Setting           | Default                  | Context   | Multiple | Description                                                                                                                                         |
+    | ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. Custom uppercase methods may contain underscores and dashes. |
 
     !!! abstract "CORS and Pre-flight Requests"
         If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
@@ -4117,8 +4121,8 @@ Follow these steps to configure and use ModSecurity:
 
 Select a CRS version to best match your security needs:
 
-- **`3`**: Stable [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9).
-- **`4`**: Stable [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**default**).
+- **`3`**: Stable [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
+- **`4`**: Stable [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**default**).
 
 !!! warning "Nightly Build Deprecated"
     The `nightly` option for `MODSECURITY_CRS_VERSION` has been deprecated as the OWASP Core Rule Set project has discontinued nightly releases. If your configuration still uses `nightly`, CRS v4 will be used instead. Please update your configuration to use `MODSECURITY_CRS_VERSION=4`.
@@ -4320,32 +4324,47 @@ BunkerWeb evaluates each handshake against the CA bundle and policy you configur
 Follow these steps to deploy mutual TLS with confidence:
 
 1. **Enable the feature:** Set `USE_MTLS` to `yes` on the sites that require certificate authentication.
-2. **Provide the CA bundle:** Store the trusted issuers in a PEM file and point `MTLS_CA_CERTIFICATE` to its absolute path.
+2. **Provide the CA bundle:** Point `MTLS_CA_CERTIFICATE` at a PEM file readable by the Scheduler, or supply the bundle inline as base64/PEM data with `MTLS_CA_CERTIFICATE_DATA`. The Scheduler validates, caches, and distributes the bundle to every instance, so no per-instance mounting is needed.
 3. **Select the verification mode:** Pick `on` for mandatory certificates, `optional` to allow fallbacks, or `optional_no_ca` for temporary diagnostics.
 4. **Tune chain depth:** Adjust `MTLS_VERIFY_DEPTH` if your organization issues intermediate certificates beyond the default depth.
 5. **Forward results (optional):** Keep `MTLS_FORWARD_CLIENT_HEADERS` at `yes` when upstream services should inspect the presented certificate.
-6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` so BunkerWeb can deny revoked certificates.
+6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` (or `MTLS_CRL_DATA`) so BunkerWeb can deny revoked certificates.
 
 ### Configuration Settings
 
-| Setting                       | Default | Context   | Multiple | Description                                                                                                                                                                                                                                       |
-| ----------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                |
-| `MTLS_CA_CERTIFICATE`         |         | multisite | no       | **Client CA bundle:** Absolute path to the trusted client CA bundle (PEM). Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`; must be readable.                                                                                            |
-| `MTLS_VERIFY_CLIENT`          | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                             |
-| `MTLS_URL`                    |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site. |
-| `MTLS_VERIFY_DEPTH`           | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                               |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window).                                                                                              |
-| `MTLS_CRL`                    |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list. Applied only when the CA bundle is successfully loaded.                                                                                                          |
+| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                              |
+| ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                       |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                     |
+| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                              |
+| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                              |
+| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
+| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
+| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window). Client-supplied `X-SSL-*` headers are always stripped on ingress, so these values cannot be spoofed. |
+| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
+| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
+| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
 
-!!! tip "Keep certificates up to date"
-    Store CA bundles and revocation lists in a mounted volume that the Scheduler can read so that restarts pick up the latest trust anchors.
+!!! tip "Configure once, distributed everywhere"
+    CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
 
 !!! warning "Provide the CA bundle for strict modes"
-    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the CA file must exist at runtime. If it is missing, BunkerWeb skips the mTLS directives so the service does not boot with an invalid path. Use `optional_no_ca` only for diagnostics because it weakens client authentication.
+    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.
+
+!!! info "Inbound `X-SSL-*` headers are always stripped"
+    BunkerWeb removes every client-supplied `X-SSL-*` request header before the request reaches your application, on every site, whether or not mTLS is enabled, and on HTTP/1.1, HTTP/2 and HTTP/3 alike. Only the values BunkerWeb derives from the verified TLS handshake are forwarded, and only when `MTLS_FORWARD_CLIENT_HEADERS` is `yes`, so a client cannot spoof `X-SSL-Client-Verify: SUCCESS`.
+
+    If BunkerWeb sits behind another proxy that terminates mTLS and injects these headers itself, capture the value before the strip and re-publish it. Add a custom `server-http` configuration:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    then forward it with `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"`. `REVERSE_PROXY_HEADERS` alone does not work: `$http_x_ssl_client_verify` is already empty by the time `proxy_set_header` evaluates it, whereas `set` runs in the server-rewrite phase, before the strip.
 
 !!! warning "Per-path mTLS requires optional mode"
     NGINX's `ssl_verify_client` directive is server-scope only — it cannot be set per `location`. To require a certificate on some paths only, set `MTLS_VERIFY_CLIENT` to `optional` so the handshake completes for every path, then list the protected paths in `MTLS_URL_n`. BunkerWeb enforces the certificate per-request in Lua on the matching URLs. Use `optional` for real enforcement: `optional_no_ca` skips CA chain validation, so a matching URL would accept any presented certificate and provides no meaningful protection. If you leave `MTLS_VERIFY_CLIENT` at `on` while setting `MTLS_URL_n`, NGINX rejects certificate-less clients during the handshake before BunkerWeb can apply the per-path logic, so enforcement stays site-wide (BunkerWeb logs a warning at startup in this case). If an `MTLS_URL_n` value is not a valid regex, BunkerWeb fails closed — requests are denied (`403`) and the offending pattern is logged — rather than silently letting the path through; fix the pattern to restore service.

@@ -166,7 +166,6 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `AUTOCONF_MODE`          | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                           |
     | `SWARM_MODE`             | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                |
     | `KUBERNETES_MODE`        | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                             |
-    | `KEEP_CONFIG_ON_RESTART` | `no`   | global    | 否   | **重启时保留配置：** 重启时保留配置。设置为 'yes' 以防止重启时重置配置。 |
     | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。              |
 
 === "Nginx 设置"
@@ -1878,7 +1877,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1895,7 +1894,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2929,23 +2928,24 @@ STREAM 支持 :x:
         - **X-Frame-Options：** 通过控制 iframe 嵌入来阻止点击劫持尝试。
         - **Referrer Policy：** 通过 referrer 头限制敏感信息的泄露。
 
-    | 设置                                  | 默认值                                                                                              | 上下文    | 多个 | 描述                                                                              |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
+    | 设置                                  | 默认值                                                                                                | 上下文    | 多个 | 描述                                                                              |
+    | ------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------- | ---- | --------------------------------------------------------------------------------- |
+    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                        | multisite | 否   | **HSTS：** 强制执行安全的 HTTPS 连接，降低中间人攻击的风险。                      |
+    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                      | multisite | 否   | **CSP：** 将资源加载限制在受信任的来源，减轻跨站脚本和数据注入攻击。              |
+    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                  | multisite | 否   | **CSP 报告模式：** 报告违规行为而不阻止内容，有助于在测试安全策略的同时捕获日志。 |
+    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                          | multisite | 否   | **X-Frame-Options：** 通过控制您的网站是否可以被框架化来防止点击劫持。            |
+    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                             | multisite | 否   | **X-Content-Type-Options：** 防止浏览器进行 MIME 嗅探，防止路过式下载攻击。       |
+    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                                 | multisite | 否   | **X-DNS-Prefetch-Control：** 调节 DNS 预取以减少无意的网络请求并增强隐私。        |
+    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                     | multisite | 否   | **Referrer Policy：** 控制发送的引荐来源信息的数量，保护用户隐私。                |
+    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | 否   | **Permissions Policy：** 限制浏览器功能访问，减少潜在的攻击向量。                 |
+    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`      | multisite | 否   | **保留标头：** 保留选定的上游标头，在保持安全性的同时帮助旧版集成。               |
 
     !!! tip "最佳实践"
         -   定期审查和更新您的安全标头，以与不断发展的安全标准保持一致。
         -   使用像 [Mozilla Observatory](https://observatory.mozilla.org/) 这样的工具来验证您的标头配置。
         -   在强制执行 CSP 之前，在 `Report-Only` 模式下进行测试，以避免破坏功能。
         -   在 `Report-Only` 模式下，上游发送的 `Content-Security-Policy` 或 `Content-Security-Policy-Report-Only` 标头默认会被保留（`KEEP_UPSTREAM_HEADERS`）；从该设置中移除相应的标头名称，BunkerWeb 自身的策略才会生效。
+        -   默认的 `PERMISSIONS_POLICY` 也会阻止客户端提示（`ch-*` 指令）；如果某个服务依赖 `Accept-CH`（例如基于客户端提示的响应式图片或通过 `Sec-CH-Prefers-Color-Scheme` 进行的深色模式检测），请覆盖 `PERMISSIONS_POLICY` 以重新允许所需的 `ch-*` 功能（例如 `ch-dpr=(self)`）。
 
 === "Cookie 设置"
 
@@ -3693,6 +3693,9 @@ STREAM 支持 :warning:
 !!! note "工作进程特定存储"
     每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。
 
+!!! warning "报告保留"
+    被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 `METRICS_MAX_BLOCKED_REQUESTS` 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。
+
 ### 配置示例
 
 === "基本配置"
@@ -3829,18 +3832,18 @@ STREAM 支持 :warning:
 
     将 HTTP 方法限制为应用程序所需的那些方法，是遵循最小权限原则的一项基本安全措施。通过明确定义可接受的 HTTP 方法，您可以最大限度地降低通过未使用或危险的方法被利用的风险。
 
-    此功能使用 `ALLOWED_METHODS` 设置进行配置，其中方法用 `|` 分隔（默认值：`GET|POST|HEAD`）。如果客户端尝试使用未列出的方法，服务器将以 **405 - Method Not Allowed** 状态响应。
+    此功能使用 `ALLOWED_METHODS` 设置进行配置，其中方法用 `|` 分隔（默认值：`GET|POST|HEAD|QUERY`）。如果客户端尝试使用未列出的方法，服务器将以 **405 - Method Not Allowed** 状态响应。
 
-    对于大多数网站，默认的 `GET|POST|HEAD` 就足够了。如果您的应用程序使用 RESTful API，您可能需要包含 `PUT` 和 `DELETE` 等方法。自定义的大写方法还可以包含下划线和连字符，以兼容非标准协议（例如 `CCM_POST`、`M-SEARCH`）。
+    对于大多数网站，默认的 `GET|POST|HEAD|QUERY` 就足够了。如果您的应用程序使用 RESTful API，您可能需要包含 `PUT` 和 `DELETE` 等方法。自定义的大写方法还可以包含下划线和连字符，以兼容非标准协议（例如 `CCM_POST`、`M-SEARCH`）。
 
     !!! success "安全优势"
         - 防止利用未使用或不必要的 HTTP 方法
         - 通过禁用可能有害的方法来减少攻击面
         - 阻止攻击者使用的 HTTP 方法枚举技术
 
-    | 设置              | 默认值            | 上下文    | 多选 | 描述                                                                                         |
-    | ----------------- | ----------------- | --------- | ---- | -------------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET\|POST\|HEAD` | multisite | no   | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。自定义大写方法可以包含下划线和连字符。 |
+    | 设置              | 默认值                   | 上下文    | 多选 | 描述                                                                                         |
+    | ----------------- | ------------------------ | --------- | ---- | -------------------------------------------------------------------------------------------- |
+    | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no   | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。自定义大写方法可以包含下划线和连字符。 |
 
     !!! abstract "CORS 和预检请求"
         如果您的应用程序支持[跨源资源共享 (CORS)](#cors)，您应该在 `ALLOWED_METHODS` 设置中包含 `OPTIONS` 方法以处理预检请求。这确保了浏览器发出跨源请求时的正常功能。
@@ -4112,8 +4115,8 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 选择一个 CRS 版本以最符合您的安全需求：
 
-- **`3`**：稳定版 [v3.3.9](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.9)。
-- **`4`**：稳定版 [v4.27.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.27.0) (**默认**)。
+- **`3`**：稳定版 [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10)。
+- **`4`**：稳定版 [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**默认**)。
 
 !!! warning "每日构建版已弃用"
     `MODSECURITY_CRS_VERSION` 的 `nightly` 选项已弃用，因为 OWASP 核心规则集项目已停止每日构建发布。如果您的配置仍使用 `nightly`，将改为使用 CRS v4。请将您的配置更新为 `MODSECURITY_CRS_VERSION=4`。
@@ -4315,32 +4318,47 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 遵循以下步骤安全部署 Mutual TLS：
 
 1. **启用功能：** 在目标站点将 `USE_MTLS` 设置为 `yes`。
-2. **提供 CA 证书包：** 使用 PEM 文件存放可信颁发者，并在 `MTLS_CA_CERTIFICATE` 中配置其绝对路径。
+2. **提供 CA 证书包：** 将 `MTLS_CA_CERTIFICATE` 指向 Scheduler 可读取的 PEM 文件，或通过 `MTLS_CA_CERTIFICATE_DATA` 直接提供 base64/PEM 内联数据。Scheduler 会验证、缓存并将证书包分发到每个实例，无需逐实例挂载。
 3. **选择验证模式：** `on` 强制要求证书，`optional` 允许回退，`optional_no_ca` 仅用于短期诊断。
 4. **调节链路深度：** 若组织存在多级中间证书，可调整 `MTLS_VERIFY_DEPTH`。
 5. **转发验证结果（可选）：** 若后端需要检查证书信息，请保持 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes`。
-6. **维护吊销数据：** 若发布 CRL，请填写 `MTLS_CRL`，使 BunkerWeb 能拒绝已吊销的证书。
+6. **维护吊销数据：** 若发布 CRL，请配置 `MTLS_CRL`（或 `MTLS_CRL_DATA`），使 BunkerWeb 能拒绝已吊销的证书。
 
 ### 配置设置
 
-| 设置                          | 默认值 | 上下文    | 多个 | 说明                                                                                                                                                                                                |
-| ----------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`   | multisite | 否   | **启用 mutual TLS：** 为当前站点启用客户端证书认证。                                                                                                                                                |
-| `MTLS_CA_CERTIFICATE`         |        | multisite | 否   | **客户端 CA 证书包：** 指向受信任客户端 CA 证书包（PEM）的绝对路径。当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时必填；路径必须可读。                                                            |
-| `MTLS_VERIFY_CLIENT`          | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                                                                       |
-| `MTLS_URL`                    |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
-| `MTLS_VERIFY_DEPTH`           | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                                                                           |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。                                                                                           |
-| `MTLS_CRL`                    |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径。仅在成功加载 CA 证书包时生效。                                                                                                           |
+| 设置                           | 默认值 | 上下文    | 多个 | 说明                                                                                                                                                                                                |
+| ------------------------------ | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`   | multisite | 否   | **启用 mutual TLS：** 为当前站点启用客户端证书认证。                                                                                                                                                |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **客户端 CA 证书包优先级：** 客户端 CA 证书包的来源：`file`（路径）或 `data`（base64/PEM）。                                                                                                        |
+| `MTLS_CA_CERTIFICATE`          |        | multisite | 否   | **客户端 CA 证书包路径：** 受信任客户端 CA 证书包（PEM）的路径，需 Scheduler 可读。当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时必填。                                                           |
+| `MTLS_CA_CERTIFICATE_DATA`     |        | multisite | 否   | **客户端 CA 证书包数据：** 直接以 base64 或 PEM 提供的受信任客户端 CA 证书包（例如通过 Web UI）。                                                                                                   |
+| `MTLS_VERIFY_CLIENT`           | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                                                                       |
+| `MTLS_URL`                     |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
+| `MTLS_VERIFY_DEPTH`            | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                                                                           |
+| `MTLS_FORWARD_CLIENT_HEADERS`   | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。 |
+| `MTLS_CRL_PRIORITY`            | `file` | multisite | 否   | **客户端 CRL 优先级：** CRL 的来源：`file`（路径）或 `data`（base64/PEM）。                                                                                                                         |
+| `MTLS_CRL`                     |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。                                     |
+| `MTLS_CRL_DATA`                |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                                                                         |
 
-!!! tip "保持证书最新"
-    将 CA 证书包和吊销列表存放在 Scheduler 可读取的挂载卷中，以便重启时自动加载最新的信任锚。
+!!! tip "配置一次，处处分发"
+    CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。
 
 !!! warning "严格模式需提供 CA 证书包"
-    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，运行时必须存在 CA 文件。如果缺失，BunkerWeb 会跳过生成 mTLS 指令，避免服务因路径无效而启动失败。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。
+    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，Scheduler 必须能够验证并缓存客户端 CA 证书包。如果没有可用的证书包，BunkerWeb 会在每个实例上跳过 mTLS 指令，避免服务在证书引用无效或缺失的情况下运行。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。若 Scheduler 在 `/var/cache/bunkerweb` 非持久化的情况下重启，mTLS 将保持禁用，直到首次任务运行完成并重新分发 CA 证书包；因此在需要严格执行策略的场景下，请使用持久化的缓存卷。
 
 !!! info "受信证书与验证"
     BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。
+
+!!! info "入站 `X-SSL-*` 请求头总是被剥离"
+    在请求到达您的应用之前，BunkerWeb 会移除客户端自行发送的每一个 `X-SSL-*` 请求头：适用于所有站点，无论是否启用 mTLS，HTTP/1.1、HTTP/2 与 HTTP/3 一视同仁。只有 BunkerWeb 从已验证的 TLS 握手中导出的值才会被转发，且仅当 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes` 时才转发，因此客户端无法伪造 `X-SSL-Client-Verify: SUCCESS`。
+
+    如果 BunkerWeb 位于另一个自行终结 mTLS 并注入这些请求头的代理之后，请在剥离之前捕获该值并重新发布。添加一份自定义的 `server-http` 配置：
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    然后通过 `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"` 转发。仅使用 `REVERSE_PROXY_HEADERS` 无效：`proxy_set_header` 求值时 `$http_x_ssl_client_verify` 已经为空，而 `set` 运行在 server-rewrite 阶段，早于剥离。
 
 !!! warning "按路径的 mTLS 需要可选模式"
     NGINX 的 `ssl_verify_client` 指令仅在 `server` 上下文有效，无法置于 `location` 块中。若只想在部分路径上要求证书，请将 `MTLS_VERIFY_CLIENT` 设为 `optional`（或 `optional_no_ca`），使所有路径都能完成握手，然后在 `MTLS_URL_n` 中列出受保护的路径。BunkerWeb 随后会在 Lua 中按请求对匹配的 URL 强制证书。如果在设置 `MTLS_URL_n` 的同时仍将 `MTLS_VERIFY_CLIENT` 保持为 `on`，NGINX 会在握手阶段直接拒绝无证书的客户端，按路径逻辑无从生效，强制仍是全站范围。

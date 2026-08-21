@@ -27,7 +27,7 @@
     "REVERSE_PROXY_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "Location URL that will be proxied.",
+      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
       "regex": "^.+$",

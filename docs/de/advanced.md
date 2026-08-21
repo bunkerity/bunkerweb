@@ -1,8 +1,8 @@
 # Fortgeschrittene Nutzungen
 
-Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples) des GitHub-Repositorys verfügbar.
+Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples) des GitHub-Repositorys verfügbar.
 
-Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/misc/integrations) verfügbar.
+Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/misc/integrations) verfügbar.
 
 Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicherheits-Tuning. Informationen zu allen verfügbaren Einstellungen finden Sie im [Features-Abschnitt](features.md) der Dokumentation.
 
@@ -85,7 +85,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.13
+            bunkerity/bunkerweb-all-in-one:1.6.14
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -96,7 +96,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.13
+            bunkerity/bunkerweb-all-in-one:1.6.14
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -260,7 +260,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.13
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.13
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
         ```bash
         # Skript und Checksumme laden
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.13/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.13/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh.sha256
 
         # Prüfsumme verifizieren
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Ersetzen durch die IPs Ihrer Worker
@@ -607,14 +607,16 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.13
+        image: bunkerity/bunkerweb-ui:1.6.14
         ports:
           - "7000:7000" # UI-Port veröffentlichen
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Bitte stärkeres Passwort setzen
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Stärkeren Schlüssel setzen (siehe Voraussetzungen)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: wird ohne Angabe im Volume bw-ui-data erzeugt; ein Schlüssel hat 43 Zeichen
+        volumes:
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -690,7 +693,7 @@ Worker sind die Knoten, die den eingehenden Verkehr verarbeiten.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -995,7 +998,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
 === "Docker"
@@ -1023,7 +1026,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1034,7 +1037,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1148,7 +1151,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1188,7 +1191,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
 === "Docker"
@@ -1211,7 +1214,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1254,7 +1257,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       volumes:
         - ./bw-data:/data
       ...
@@ -1324,7 +1327,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       volumes:
         - ./bw-data:/data
       ...
@@ -1571,7 +1574,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1594,7 +1597,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1609,7 +1612,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1660,7 +1663,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1890,7 +1893,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - published: 80
@@ -2020,7 +2023,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -2064,7 +2067,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2079,7 +2082,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -2173,7 +2176,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2186,7 +2189,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -2201,7 +2204,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.13
+        image: bunkerity/bunkerweb-autoconf:1.6.14
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2441,7 +2444,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2540,7 +2543,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           USE_IPv6: "yes"
 
@@ -2683,7 +2686,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.13
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2696,7 +2699,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.13
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen
@@ -2713,11 +2716,12 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.13
+        image: bunkerity/bunkerweb-ui:1.6.14
         environment:
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # Wird verwendet, um die Syslog-Protokolle in der Web-UI zu lesen
+          - bw-ui-data:/data # Dient dazu, die Geheimnisse der Weboberfläche zu erhalten (Flask-Secret, TOTP-Verschlüsselungsschlüssel, Biscuit-Schlüssel)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2774,6 +2778,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -2877,7 +2882,7 @@ Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compo
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.13
+    image: bunkerity/bunkerweb:1.6.14
     logging:
       driver: "json-file"
       options:
@@ -2986,7 +2991,7 @@ Die üblichen Variablen sind:
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.13
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     Wenn der Container bereits existiert, erstellen Sie ihn neu, um die neue Umgebung anzuwenden.
@@ -2997,7 +3002,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3016,7 +3021,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3059,7 +3064,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.13
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3261,39 +3266,9 @@ Sie können auch einen benutzerdefinierten S3-Bucket für die Sicherung angeben,
     docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
     ```
 
-!!! note "Spezifikationen für MariaDB/MySQL"
+!!! note "MariaDB/MySQL-Client-Kompatibilität"
 
-    Falls Sie MariaDB/MySQL verwenden, kann beim Versuch, Ihre Datenbank zu sichern, der folgende Fehler auftreten:
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Um dieses Problem zu lösen, können Sie den folgenden Befehl ausführen, um das Authentifizierungs-Plugin auf `mysql_native_password` zu ändern:
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur `docker-compose.yml`-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
+    Die Docker-Images von BunkerWeb enthalten die von MySQLs `caching_sha2_password` benötigten Authentifizierungs-Plugins von MariaDB Connector/C. Wenn der Client unter Linux meldet, dass `caching_sha2_password` nicht geladen werden konnte, installieren Sie die MariaDB Connector/C-Authentifizierungs-Plugins Ihrer Distribution oder einen kompatiblen MySQL-Client. Stellen Sie das Datenbankkonto nicht auf `mysql_native_password` um, da dieses Plugin in MySQL `v9` nicht verfügbar ist.
 
 #### Manuelle Wiederherstellung
 
@@ -3352,18 +3327,18 @@ Der **BunkerWeb MCP-Server** ermöglicht es KI-Assistenten wie **Claude Code** u
 
 ### Funktionen
 
-- **37 Tools** zur Verwaltung von Instanzen, Diensten, Konfigurationen, Sperren, Plugins, Jobs und Cache
+- **43 Tools** zur Verwaltung von Instanzen, Diensten, Konfigurationen, Sperren, Plugins, Jobs und Cache
 - **MCP-Ressourcen** für schreibgeschützten Zugriff (`@config://global`, `@bans://active`, usw.)
 - **Mehrere Transporte**: Stdio, HTTP, WebSocket
 
 ### Docker Compose Beispiel
 
-Ein vollständiges Beispiel ist in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples/mcp-stack) verfügbar:
+Ein vollständiges Beispiel ist in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples/mcp-stack) verfügbar:
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.13
+    image: bunkerity/bunkerweb-api:1.6.14
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -3374,7 +3349,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3402,17 +3377,6 @@ services:
     }
     ```
 
-=== "CLI"
-
-    ```bash
-    # MCP-Server über HTTP hinzufügen
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # Oder über stdio (lokale Installation)
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
 Beispielanfragen:
 
 ```
@@ -3434,7 +3398,7 @@ mcp:
 
   # Container-Image-Konfiguration
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # MCP-Server-Einstellungen
   config:
@@ -3481,7 +3445,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Netzwerkrichtlinien** zur Einschränkung der Pod-zu-Pod-Kommunikation
     - **Port-Forward** anstelle von externem Zugriff (empfohlen für Entwicklung)
 
-Die vollständige Dokumentation finden Sie im [BunkerWeb MCP Repository](https://github.com/bunkerity/mcp-bunkerweb).
+Die vollständige Dokumentation finden Sie im [BunkerWeb MCP Repository](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
@@ -3523,39 +3487,9 @@ Um eine Migrationsdatei manuell zu erstellen, führen Sie den folgenden Befehl a
 
 Dieser Befehl erstellt eine Sicherung Ihrer Datenbank und speichert sie im im Befehl angegebenen Sicherungsverzeichnis.
 
-!!! note "Spezifikationen für MariaDB/MySQL"
+!!! note "MariaDB/MySQL-Client-Kompatibilität"
 
-    Falls Sie MariaDB/MySQL verwenden, kann beim Versuch, Ihre Datenbank zu sichern, der folgende Fehler auftreten:
-
-    ```bash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
-    ```
-
-    Um dieses Problem zu lösen, können Sie den folgenden Befehl ausführen, um das Authentifizierungs-Plugin auf `mysql_native_password` zu ändern:
-
-    ```sql
-    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ```
-
-    Wenn Sie die Docker-Integration verwenden, können Sie den folgenden Befehl zur `docker-compose.yml`-Datei hinzufügen, um das Authentifizierungs-Plugin automatisch zu ändern:
-
-    === "MariaDB"
-
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
-
-    === "MySQL"
-
-        ```yaml
-        bw-db:
-            image: mysql:<version>
-            command: --default-authentication-plugin=mysql_native_password --max-allowed-packet=67108864
-            ...
-        ```
+    Die Docker-Images von BunkerWeb enthalten die von MySQLs `caching_sha2_password` benötigten Authentifizierungs-Plugins von MariaDB Connector/C. Wenn der Client unter Linux meldet, dass `caching_sha2_password` nicht geladen werden konnte, installieren Sie die MariaDB Connector/C-Authentifizierungs-Plugins Ihrer Distribution oder einen kompatiblen MySQL-Client. Stellen Sie das Datenbankkonto nicht auf `mysql_native_password` um, da dieses Plugin in MySQL `v9` nicht verfügbar ist.
 
 ### Eine Migration initialisieren
 
@@ -4225,11 +4159,11 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.13
+            image: bunkerity/bunkerweb:1.6.14
             # ... andere Einstellungen (keine Umgebungsvariablen für Custom Pages hier benötigt)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.13
+            image: bunkerity/bunkerweb-scheduler:1.6.14
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4312,7 +4246,7 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.13
+                  image: bunkerity/bunkerweb-scheduler:1.6.14
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"

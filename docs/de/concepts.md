@@ -105,7 +105,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples)-Verzeichnis des Repositorys.
 
 ## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
@@ -126,7 +126,7 @@ Die Verwaltung benutzerdefinierter Konfigurationen über die Web-Benutzeroberfl�
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.13/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples)-Verzeichnis des Repositorys.
 
 ## Datenbank
 
@@ -163,15 +163,15 @@ Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie B
 
 ### Datenbank-Kompatibilitätsmatrix
 
-| Integration      | PostgreSQL                               | MariaDB              | MySQL                | SQLite        |
-| :--------------- | :--------------------------------------- | :------------------- | :------------------- | :------------ |
-| **Docker**       | ✅ `v18` und früher (all-in-one: ✅ `v17`) | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
-| **Kubernetes**   | ✅ `v18` und früher                       | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
-| **Autoconf**     | ✅ `v18` und früher                       | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
-| **Linux-Pakete** | Siehe Hinweise unten                     | Siehe Hinweise unten | Siehe Hinweise unten | ✅ Unterstützt |
+| Integration      | PostgreSQL         | MariaDB              | MySQL                | SQLite        |
+| :--------------- | :----------------- | :------------------- | :------------------- | :------------ |
+| **Docker**       | ✅ `v18` und früher | ✅ `v12` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Kubernetes**   | ✅ `v18` und früher | ✅ `v12` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Autoconf**     | ✅ `v18` und früher | ✅ `v12` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Linux-Pakete** | Siehe Hinweise unten | Siehe Hinweise unten | Siehe Hinweise unten | ✅ Unterstützt |
 
 !!! info "Hinweise"
-    - **PostgreSQL**: Alpine-basierte Pakete enthalten jetzt den `v18`-Client, daher werden `v18` und frühere Versionen standardmäßig unterstützt; das all-in-one-Image enthält weiterhin den `v17`-Client, daher wird `v18` dort nicht unterstützt.
+    - **PostgreSQL**: Alpine-basierte Images, einschließlich des all-in-one-Images, enthalten jetzt den `v18`-Client; daher werden `v18` und frühere Versionen standardmäßig unterstützt.
     - **Linux**: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich).
     - **SQLite**: Wird mit den Paketen ausgeliefert und ist sofort einsatzbereit.
 
@@ -228,6 +228,10 @@ BunkerWeb nutzt die Leistungsfähigkeit von Vorlagen, um den Konfigurationsproze
     -   **high**: Eine erweiterte Vorlage, die sich auf robuste Sicherheitsmaßnahmen und umfassenden Schutz konzentriert.
 
 -   **Benutzerdefinierte Vorlagen**: Zusätzlich zu den vordefinierten Vorlagen ermöglicht BunkerWeb den Benutzern, benutzerdefinierte Vorlagen zu erstellen, die auf ihre spezifischen Anforderungen zugeschnitten sind. Benutzerdefinierte Vorlagen ermöglichen die Feinabstimmung von Einstellungen und benutzerdefinierten Konfigurationen und stellen sicher, dass BunkerWeb perfekt auf die Bedürfnisse des Benutzers abgestimmt ist.
+
+!!! tip "Sofort einsatzbereite Community-Vorlagen"
+
+    Durchsuchen Sie das [BunkerWeb-Vorlagen-Repository](https://github.com/bunkerity/bunkerweb-templates#installing-templates) und folgen Sie der Installationsanleitung. Die Web-UI-Methode wird für die meisten Benutzer empfohlen; für verwaltete Bereitstellungen ist außerdem eine Plugin-Struktur dokumentiert. Wählen Sie die Vorlage nach der Installation im Einfachmodus oder über die Einstellung `USE_TEMPLATE` aus.
 
 Mit der Web-Benutzeroberfläche sind Vorlagen über den **Einfachmodus** verfügbar, wenn Sie einen Dienst hinzufügen oder bearbeiten:
 

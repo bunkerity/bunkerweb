@@ -21,32 +21,47 @@ BunkerWeb evalúa cada handshake TLS con base en el paquete de CA y en la polít
 Siga estos pasos para desplegar Mutual TLS con confianza:
 
 1. **Active la función:** Establezca `USE_MTLS` en `yes` en los sitios que necesitan autenticación por certificado.
-2. **Aporte el paquete de CA:** Guarde los emisores de confianza en un archivo PEM y apunte `MTLS_CA_CERTIFICATE` a su ruta absoluta.
+2. **Aporte el paquete de CA:** Configure `MTLS_CA_CERTIFICATE` con la ruta a un archivo PEM legible por el Scheduler, o proporcione el paquete directamente como datos base64/PEM con `MTLS_CA_CERTIFICATE_DATA`. El Scheduler valida, almacena en caché y distribuye el paquete a cada instancia, por lo que no es necesario montarlo en cada una.
 3. **Elija el modo de verificación:** Use `on` para exigir certificados, `optional` para permitir una ruta alternativa u `optional_no_ca` de manera temporal para diagnosticar.
 4. **Ajuste la profundidad de la cadena:** Modifique `MTLS_VERIFY_DEPTH` si su PKI incorpora varios intermedios.
 5. **Reenvíe resultados (opcional):** Mantenga `MTLS_FORWARD_CLIENT_HEADERS` en `yes` si los servicios posteriores necesitan inspeccionar el certificado.
-6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` para que BunkerWeb rechace certificados revocados.
+6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` (o `MTLS_CRL_DATA`) para que BunkerWeb rechace los certificados revocados.
 
 ### Parámetros de configuración
 
-| Parámetro                     | Valor predeterminado | Contexto | Múltiple | Descripción                                                                                                                                             |
-| ----------------------------- | -------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                   |
-| `MTLS_CA_CERTIFICATE`         |                      | multisite | no       | **Paquete de CA de clientes:** ruta absoluta al paquete de CA de confianza (PEM). Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`; debe ser legible. |
-| `MTLS_VERIFY_CLIENT`          | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`). |
-| `MTLS_URL`                    |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio. |
-| `MTLS_VERIFY_DEPTH`           | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                            |
-| `MTLS_FORWARD_CLIENT_HEADERS` | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez). |
-| `MTLS_CRL`                    |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM. Solo se aplica cuando el paquete de CA se carga correctamente. |
+| Parámetro                        | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                             |
+| --------------------------------- | --------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                       | `no`                  | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                   |
+| `MTLS_CA_CERTIFICATE_PRIORITY`   | `file`                | multisite | no       | **Prioridad del paquete de CA de clientes:** origen del paquete de CA de clientes: `file` (ruta) o `data` (base64/PEM).                                 |
+| `MTLS_CA_CERTIFICATE`            |                       | multisite | no       | **Ruta del paquete de CA de clientes:** ruta al paquete de CA de confianza (PEM), legible por el Scheduler. Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`. |
+| `MTLS_CA_CERTIFICATE_DATA`       |                       | multisite | no       | **Datos del paquete de CA de clientes:** paquete de CA de confianza aportado directamente como base64 o PEM (p. ej. mediante la interfaz web).           |
+| `MTLS_VERIFY_CLIENT`             | `on`                  | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`). |
+| `MTLS_URL`                       |                       | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio. |
+| `MTLS_VERIFY_DEPTH`              | `2`                   | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                            |
+| `MTLS_FORWARD_CLIENT_HEADERS`    | `yes`                 | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez). Las cabeceras `X-SSL-*` enviadas por el cliente siempre se eliminan en la entrada, de modo que estos valores no se pueden falsificar. |
+| `MTLS_CRL_PRIORITY`              | `file`                | multisite | no       | **Prioridad de la CRL de clientes:** origen de la CRL: `file` (ruta) o `data` (base64/PEM).                                                             |
+| `MTLS_CRL`                       |                       | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM, legible por el Scheduler. Solo se aplica cuando el paquete de CA se carga correctamente. NGINX requiere que el archivo de CRL contenga una CRL para cada CA de la cadena de verificación. |
+| `MTLS_CRL_DATA`                  |                       | multisite | no       | **Datos de la CRL de clientes:** lista de revocación aportada directamente como base64 o PEM.                                                           |
 
-!!! tip "Mantén los certificados actualizados"
-    Guarde los paquetes de CA y las listas de revocación en un volumen montado que el Scheduler pueda leer, de modo que cada reinicio recupere los últimos anclajes de confianza.
+!!! tip "Configúralo una vez, distribuido en todas partes"
+    Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
 !!! warning "Paquete de CA obligatorio en modos estrictos"
-    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el archivo de CA debe existir en tiempo de ejecución. Si falta, BunkerWeb omite las directivas de mTLS para evitar que el servicio arranque con una ruta no válida. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación.
+    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Si no hay ninguno disponible, BunkerWeb omite las directivas de mTLS en cada instancia para que el servicio no se ejecute con una referencia de certificado inválida o inexistente. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, el mTLS permanece deshabilitado hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.
+
+!!! info "Las cabeceras `X-SSL-*` entrantes siempre se eliminan"
+    BunkerWeb elimina toda cabecera de petición `X-SSL-*` enviada por el cliente antes de que la petición llegue a su aplicación: en todos los sitios, esté o no habilitado mTLS, y por igual en HTTP/1.1, HTTP/2 y HTTP/3. Solo se reenvían los valores que BunkerWeb obtiene del handshake TLS verificado, y únicamente cuando `MTLS_FORWARD_CLIENT_HEADERS` es `yes`, así que un cliente no puede falsificar `X-SSL-Client-Verify: SUCCESS`.
+
+    Si BunkerWeb está detrás de otro proxy que termina mTLS e inyecta estas cabeceras por su cuenta, capture el valor antes de la eliminación y vuelva a publicarlo. Añada una configuración personalizada `server-http`:
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    y luego reenvíelo con `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"`. `REVERSE_PROXY_HEADERS` por sí solo no funciona: `$http_x_ssl_client_verify` ya está vacío cuando `proxy_set_header` lo evalúa, mientras que `set` se ejecuta en la fase server-rewrite, antes de la eliminación.
 
 !!! warning "El mTLS por ruta requiere el modo opcional"
     La directiva `ssl_verify_client` de NGINX solo es válida en el contexto `server`: no puede colocarse dentro de un bloque `location`. Para exigir un certificado únicamente en algunas rutas, ponga `MTLS_VERIFY_CLIENT` en `optional` (u `optional_no_ca`) para que el handshake se complete en todas las rutas, y luego liste las rutas protegidas en `MTLS_URL_n`. BunkerWeb aplica entonces el certificado por solicitud, en Lua, sobre las URL coincidentes. Si deja `MTLS_VERIFY_CLIENT` en `on` mientras define `MTLS_URL_n`, NGINX rechaza a los clientes sin certificado durante el handshake, antes de que se aplique la lógica por ruta, por lo que la exigencia sigue siendo para todo el sitio.

@@ -1,0 +1,79 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! NoScript InjectionChecker: Attribute Injection.
+##! Detects javascript: and data: URI schemes, CSS @import, and
+##! -moz-binding injection attempts.
+
+##!+ i
+
+##! 'name' keyword or Unicode/hex escape sequence
+##!> assemble
+  \bname\b
+  \x5c[ux]\d
+  ##!=< js-name-or-escape
+##!<
+
+##! javascript: payload - match followed by name keyword or escape
+##!> assemble
+  .*?
+  ##!=> js-name-or-escape
+  ##!=< js-payload-name-match
+##!<
+
+##! data: URI encoding keywords
+##!> assemble
+  base64
+  charset=
+  ##!=< data-encoding-keyword
+##!<
+
+##! data: payload with encoding keyword
+##!> assemble
+  .*?;.*?\b
+  ##!=> data-encoding-keyword
+  ##!=< data-payload-encoding
+##!<
+
+##! CSS @import target (quote or url function)
+##!> assemble
+  ["']
+  \W*?u\W*?r\W*?l.*?\(
+  ##!=< import-target
+##!<
+
+##! javascript: URI - payload with special chars
+##!> assemble
+  (?:\W|^)javascript:.+[=\x5c\(\[\.<]
+##!<
+
+##! javascript: URI - payload with name keyword or escape
+##!> assemble
+  (?:\W|^)javascript:
+  ##!=> js-payload-name-match
+##!<
+
+##! data: URI - optional MIME type followed by semicolon or comma
+##!> assemble
+  (?:\W|^)data:(?:[a-z]\w+/\w[\w+-]+\w)?[;,]
+##!<
+
+##! data: URI - encoding keyword (base64 or charset)
+##!> assemble
+  (?:\W|^)data:
+  ##!=> data-payload-encoding
+##!<
+
+##! data: URI - HTML-like content
+##!> assemble
+  (?:\W|^)data:.*?,.*?<.*?\w.*?>
+##!<
+
+##! CSS @import
+##!> assemble
+  @\W*?i\W*?m\W*?p\W*?o\W*?r\W*?t\W*?(?:/\*.*?)?
+  ##!=> import-target
+##!<
+
+##! -moz-binding
+-\W*?m\W*?o\W*?z\W*?-\W*?b\W*?i\W*?n\W*?d\W*?i\W*?n\W*?g[^:]*?:\W*?u\W*?r\W*?l.*?\(

@@ -15,23 +15,10 @@ $(document).ready(function () {
   // ordering, and any active SearchPanes selections so the file matches
   // what the user sees in the table (all columns, all matching rows).
   const buildBansExportUrl = (dt, format) => {
-    const params = dt.ajax.params();
     const exportParams = {
+      ...getDataTableStateParams(dt),
       csrf_token: $("#csrf_token").val(),
-      search: params.search ? params.search.value : "",
-      order_column:
-        params.order && params.order.length > 0
-          ? params.columns[params.order[0].column].data
-          : "",
-      order_dir:
-        params.order && params.order.length > 0 ? params.order[0].dir : "",
     };
-
-    Object.keys(params).forEach((key) => {
-      if (key.startsWith("searchPanes[")) {
-        exportParams[key] = params[key];
-      }
-    });
 
     return `${window.location.pathname}/export/${format}?${$.param(
       exportParams,
@@ -204,7 +191,7 @@ $(document).ready(function () {
   };
 
   // Function to set up the unban modal
-  const setupUnbanModal = (bans) => {
+  const setupUnbanModal = (bans, filteredState = null) => {
     const $modalBody = $("#selected-ips-unban");
     $modalBody.empty(); // Clear previous content
 
@@ -265,31 +252,46 @@ $(document).ready(function () {
 
     // Show the modal
     const $unbanModal = $("#modal-unban-ips");
+    const $form = $unbanModal.find("form");
+    $form.find(".filtered-selection-input").remove();
+    if (filteredState) {
+      $modalBody.empty();
+      appendDataTableParamsInputs(
+        $form,
+        filteredState.params,
+        "filtered-selection-input",
+      );
+      appendDataTableParamsInputs(
+        $form,
+        { selection_mode: "filtered", source: "bans" },
+        "filtered-selection-input",
+      );
+    }
     const modalInstance = new bootstrap.Modal($unbanModal[0]);
 
-    // Update the alert text using i18next (assuming keys exist)
-    const alertTextKey =
-      bans.length > 1
+    const alertTextKey = filteredState
+      ? "modal.body.unban_filtered_confirmation"
+      : bans.length > 1
         ? "modal.body.unban_confirmation_alert_plural"
         : "modal.body.unban_confirmation_alert";
+    const alertFallback = filteredState
+      ? "Are you sure you want to unban all {{count}} matching bans?"
+      : "Are you sure you want to unban the selected IP address(es)?";
     $unbanModal
       .find(".alert")
       .attr("data-i18n", alertTextKey)
-      .text(
-        t(
-          alertTextKey,
-          "Are you sure you want to unban the selected IP address(es)?",
-        ),
-      );
+      .text(t(alertTextKey, alertFallback, { count: filteredState?.count }));
 
     modalInstance.show();
 
     // Set the hidden input value
-    $("#selected-ips-input-unban").val(JSON.stringify(bans));
+    $("#selected-ips-input-unban").val(
+      filteredState ? "" : JSON.stringify(bans),
+    );
   };
 
   // Function to set up the update duration modal
-  const setupUpdateDurationModal = (bans) => {
+  const setupUpdateDurationModal = (bans, filteredState = null) => {
     const $modalBody = $("#selected-ips-update-duration");
     $modalBody.empty(); // Clear previous content
 
@@ -350,11 +352,27 @@ $(document).ready(function () {
 
     // Show the modal
     const $updateDurationModal = $("#modal-update-duration");
+    if (filteredState) {
+      $modalBody.empty();
+    }
+    $updateDurationModal.data("filtered-state", filteredState);
+    const alertTextKey = filteredState
+      ? "modal.body.update_filtered_duration_alert"
+      : "modal.body.update_duration_alert";
+    const alertFallback = filteredState
+      ? "Select a new duration for all {{count}} matching bans:"
+      : "Select a new duration for the selected bans:";
+    $updateDurationModal
+      .find(".alert")
+      .attr("data-i18n", alertTextKey)
+      .text(t(alertTextKey, alertFallback, { count: filteredState?.count }));
     const modalInstance = new bootstrap.Modal($updateDurationModal[0]);
     modalInstance.show();
 
     // Set the hidden input value
-    $("#selected-ips-input-update-duration").val(JSON.stringify(bans));
+    $("#selected-ips-input-update-duration").val(
+      filteredState ? "" : JSON.stringify(bans),
+    );
 
     // Initialize flatpickr for custom duration after modal is shown
     const customEndDateInput = $("#custom-end-date");
@@ -391,6 +409,45 @@ $(document).ready(function () {
     e.preventDefault();
 
     const duration = $("#duration-select").val();
+    const filteredState = $("#modal-update-duration").data("filtered-state");
+    const customEndDate = $("#custom-end-date").val();
+    if (duration === "custom" && !customEndDate) {
+      alert(
+        t("alert.custom_end_date_required", "Please select a custom end date."),
+      );
+      return;
+    }
+
+    if (filteredState) {
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname}/update_duration`,
+        class: "visually-hidden",
+      });
+      appendDataTableParamsInputs(form, filteredState.params);
+      appendDataTableParamsInputs(form, {
+        csrf_token: $("#csrf_token").val(),
+        selection_mode: "filtered",
+        source: "bans",
+        duration: duration,
+      });
+      if (duration === "custom") {
+        const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
+        appendDataTableParamsInputs(form, {
+          end_date: customEndDateWithOffset,
+          custom_exp: Math.max(
+            0,
+            Math.floor(
+              new Date(customEndDateWithOffset).getTime() / 1000 -
+                Date.now() / 1000,
+            ),
+          ),
+        });
+      }
+      form.appendTo("body").submit();
+      return;
+    }
+
     const bansData = JSON.parse($("#selected-ips-input-update-duration").val());
 
     // Prepare updates array
@@ -405,16 +462,6 @@ $(document).ready(function () {
 
         // Add custom duration data if applicable
         if (duration === "custom") {
-          const customEndDate = $("#custom-end-date").val();
-          if (!customEndDate) {
-            alert(
-              t(
-                "alert.custom_end_date_required",
-                "Please select a custom end date.",
-              ),
-            );
-            return null;
-          }
           const customEndDateWithOffset = `${customEndDate}${getTimeZoneOffset()}`;
           update.end_date = customEndDateWithOffset;
           update.custom_exp = Math.max(
@@ -635,6 +682,28 @@ $(document).ready(function () {
         },
       ],
     },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-filter-alt bx-18px me-md-2" aria-hidden="true"></span><span class="d-none d-md-inline" data-i18n="button.filtered_actions">${t(
+        "button.filtered_actions",
+        "Filtered actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary filtered-action-button",
+      buttons: [
+        { extend: "unban_filtered_bans", className: "text-danger" },
+        { extend: "update_filtered_bans", className: "text-warning" },
+      ],
+      init: function (dt, node) {
+        const updateState = () => {
+          const hasMatches = dt.page.info().recordsDisplay > 0;
+          $(node)
+            .toggleClass("disabled", isReadOnly || !hasMatches)
+            .prop("disabled", isReadOnly || !hasMatches);
+        };
+        dt.on("draw.filteredBanActions", updateState);
+        updateState();
+      },
+    },
   ];
 
   let autoRefresh = false;
@@ -679,11 +748,13 @@ $(document).ready(function () {
   $("#modal-unban-ips").on("hidden.bs.modal", function () {
     $("#selected-ips-unban").empty();
     $("#selected-ips-input-unban").val("");
+    $(this).find(".filtered-selection-input").remove();
   });
 
   $("#modal-update-duration").on("hidden.bs.modal", function () {
     $("#selected-ips-update-duration").empty();
     $("#selected-ips-input-update-duration").val("");
+    $(this).removeData("filtered-state");
     // Reset form
     $("#duration-select").val("1h");
     $("#custom-duration-fields").hide();
@@ -845,6 +916,53 @@ $(document).ready(function () {
       }
       setupUnbanModal(bans);
       actionLock = false;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.unban_filtered_bans = {
+    text: `<span class="tf-icons bx bxs-buoy bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.unban_all_filtered">${t(
+      "button.unban_all_filtered",
+      "Unban all matching bans",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const count = dt.page.info().recordsDisplay;
+      if (count === 0) return;
+      $(".dt-button-background").click();
+      setupUnbanModal([], { count, params: getDataTableStateParams(dt) });
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.update_filtered_bans = {
+    text: `<span class="tf-icons bx bx-timer bx-18px me-2" aria-hidden="true"></span><span data-i18n="button.update_duration_all_filtered">${t(
+      "button.update_duration_all_filtered",
+      "Update duration for all matching bans",
+    )}</span>`,
+    action: function (e, dt) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const count = dt.page.info().recordsDisplay;
+      if (count === 0) return;
+      $(".dt-button-background").click();
+      setupUpdateDurationModal([], {
+        count,
+        params: getDataTableStateParams(dt),
+      });
     },
   };
 

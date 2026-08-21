@@ -3,7 +3,7 @@
 ## Aperçu
 
 <figure markdown>
-  ![Vue d'ensemble](assets/img/intro-overview.svg){ align=center, width="800 » }
+  ![Vue d'ensemble](assets/img/intro-overview.svg){ align=center, width="800" }
   <figcaption>Sécurisez vos services web par défaut !</figcaption>
 </figure>
 

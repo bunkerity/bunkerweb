@@ -78,7 +78,9 @@ utils.get_variable = function(variable, site_search, ctx)
 		else
 			server_name = var.server_name
 		end
-		if variables[server_name] then
+		-- Keep the global value when the service has no entry of its own, otherwise a
+		-- partially populated per-service table hides settings that do exist globally.
+		if variables[server_name] and variables[server_name][variable] ~= nil then
 			value = variables[server_name][variable]
 		end
 	end
@@ -408,8 +410,10 @@ utils.get_reason = function(ctx)
 		end
 		return banned, {}, security_mode
 	end
-	-- unknown
-	if ngx.status == utils.get_deny_status() then
+	-- unknown BunkerWeb denial
+	local upstream_status = var.upstream_status
+	local upstream_denied = upstream_status and tonumber(upstream_status:match("(%d%d%d)%s*$")) == ngx.status
+	if ngx.status == utils.get_deny_status() and not upstream_denied then
 		return "unknown", {}
 	end
 	return nil
@@ -1221,6 +1225,10 @@ end
 utils.is_connection_error = function(err)
 	return err
 		and (err:find("closed", 1, true) or err:find("broken pipe", 1, true) or err:find("connection reset", 1, true))
+end
+
+utils.is_oom_error = function(err)
+	return err and err:find("OOM", 1, true) ~= nil
 end
 
 utils.kill_all_threads = function(threads)

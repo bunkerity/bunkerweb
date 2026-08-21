@@ -90,7 +90,7 @@ do_config()
     kill $SRV_PID
     wait $SRV_PID
 
-    scripts/massif_max.pl massif.out.*
+    framework/scripts/massif_max.pl massif.out.*
     mv massif.out.* massif-$NAME.$$
 }
 

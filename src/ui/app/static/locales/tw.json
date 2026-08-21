@@ -487,6 +487,7 @@
       "no_data": "無資料"
     },
     "window": {
+      "all_time": "全部時間",
       "last_days": "最近 {{days}} 天",
       "title": "儀表板視窗"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "報告儲存在記憶體中的循環緩衝區內：達到設定的上限後，最舊的紀錄會被捨棄。除非啟用 Redis，否則重新啟動 BunkerWeb 時報告也會被清空。",
     "security_incident": "安全事件",
     "security_report_data": "安全報告資料"
   },

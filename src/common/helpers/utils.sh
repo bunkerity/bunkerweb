@@ -120,39 +120,46 @@ function get_nginx_conf_dir() {
 	echo "/etc/nginx"
 }
 
-# Export key/value pairs from a simple env file (KEY=VALUE lines).
+# Export shell-compatible key/value pairs from a simple env file (KEY=VALUE lines).
 function export_env_file() {
 	local env_file=$1
 	[ -f "$env_file" ] || return 0
 	while IFS='=' read -r key value; do
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
-		[[ -z "$key" ]] && continue
+		[[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
 		export "$key=$value"
 	done < "$env_file"
 }
 
 # Execute a command as the nginx user using the safest available helper
 function run_as_nginx() {
+	# None of the helpers below reset HOME: setpriv and runuser leave the environment
+	# alone, sudo -E and su -m preserve it on purpose. The services run as root, so the
+	# nginx-uid process would inherit HOME=/root and anything resolving a dotfile from it
+	# fails on permissions, libpq looking up $HOME/.postgresql/postgresql.crt being the
+	# one that breaks database connections.
+	local nginx_home="/var/lib/bunkerweb"
+
 	if command -v setpriv >/dev/null 2>&1; then
-		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- "$@"
+		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v runuser >/dev/null 2>&1; then
-		runuser -u nginx -- "$@"
+		runuser -u nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v sudo >/dev/null 2>&1; then
-		sudo -n -E -u nginx -g nginx -- "$@"
+		sudo -n -E -u nginx -g nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v su >/dev/null 2>&1; then
 		local cmd_escaped
 		cmd_escaped=$(printf "%q " "$@")
-		su -m nginx -c "$cmd_escaped"
+		su -m nginx -c "env HOME=$(printf "%q" "$nginx_home") $cmd_escaped"
 		return $?
 	fi
 

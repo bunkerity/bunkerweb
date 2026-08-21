@@ -2899,7 +2899,7 @@ void aead_encrypt_setup(int key_type_arg, data_t *key_data,
 
 exit:
     /* Cleanup */
-    PSA_ASSERT(psa_destroy_key(key));
+    psa_destroy_key(key);
     mbedtls_free(output_data);
     PSA_DONE();
     mbedtls_test_driver_aead_hooks = mbedtls_test_driver_aead_hooks_init();
@@ -3001,7 +3001,7 @@ void aead_decrypt_setup(int key_type_arg, data_t *key_data,
     }
 
 exit:
-    PSA_ASSERT(psa_destroy_key(key));
+    psa_destroy_key(key);
     mbedtls_free(output_data);
     PSA_DONE();
 }
@@ -3311,6 +3311,222 @@ exit:
     psa_destroy_key(shared_key_id);
     psa_pake_abort(&server);
     psa_pake_abort(&client);
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void xof_dispatch(int alg_arg,
+                  data_t *input,
+                  data_t *expected_output,
+                  int forced_status_arg,
+                  int expected_driver_status_arg,
+                  int expected_status_arg)
+{
+    psa_algorithm_t alg = alg_arg;
+    psa_status_t forced_status = forced_status_arg;
+    psa_status_t expected_driver_status = expected_driver_status_arg;
+    psa_status_t expected_status = expected_status_arg;
+    psa_xof_operation_t operation = psa_xof_operation_init();
+    unsigned char *output = NULL;
+
+    PSA_ASSERT(psa_crypto_init());
+    TEST_CALLOC(output, expected_output->len);
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    mbedtls_test_driver_xof_hooks.forced_status = forced_status;
+
+    TEST_EQUAL(psa_xof_setup(&operation, alg), expected_status);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status,
+               expected_driver_status);
+
+    if (expected_status == PSA_SUCCESS) {
+        PSA_ASSERT(psa_xof_update(&operation, input->x, input->len));
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits,
+                   forced_status == PSA_SUCCESS ? 2 : 1);
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status,
+                   expected_driver_status);
+
+        PSA_ASSERT(psa_xof_output(&operation, output, expected_output->len));
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits,
+                   forced_status == PSA_SUCCESS ? 3 : 1);
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status,
+                   expected_driver_status);
+
+        PSA_ASSERT(psa_xof_abort(&operation));
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits,
+                   forced_status == PSA_SUCCESS ? 4 : 1);
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status,
+                   expected_driver_status);
+
+        TEST_MEMORY_COMPARE(output, expected_output->len,
+                            expected_output->x, expected_output->len);
+    }
+
+exit:
+    psa_xof_abort(&operation);
+    mbedtls_free(output);
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void xof_set_context(int alg_arg,
+                     data_t *context)
+{
+    psa_algorithm_t alg = alg_arg;
+    psa_xof_operation_t operation = psa_xof_operation_init();
+
+    PSA_ASSERT(psa_crypto_init());
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+
+    TEST_EQUAL(psa_xof_set_context(&operation, context->x, context->len),
+               PSA_ERROR_BAD_STATE);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+
+    PSA_ASSERT(psa_xof_setup(&operation, alg));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    TEST_EQUAL(psa_xof_set_context(&operation, context->x, context->len),
+               PSA_ERROR_BAD_STATE);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+
+exit:
+    psa_xof_abort(&operation);
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void xof_update_dispatch(int alg_arg,
+                         data_t *input,
+                         data_t *expected_output,
+                         int forced_status_arg)
+{
+    psa_algorithm_t alg = alg_arg;
+    psa_status_t forced_status = forced_status_arg;
+    psa_xof_operation_t operation = psa_xof_operation_init();
+    unsigned char *output = NULL;
+
+    PSA_ASSERT(psa_crypto_init());
+    TEST_CALLOC(output, expected_output->len);
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+
+    TEST_EQUAL(psa_xof_update(&operation, input->x, input->len),
+               PSA_ERROR_BAD_STATE);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+
+    PSA_ASSERT(psa_xof_setup(&operation, alg));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+    mbedtls_test_driver_xof_hooks.forced_status = forced_status;
+    TEST_EQUAL(psa_xof_update(&operation, input->x, input->len),
+               forced_status);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits,
+               forced_status == PSA_SUCCESS ? 2 : 3);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, forced_status);
+
+    if (forced_status == PSA_SUCCESS) {
+        mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+        PSA_ASSERT(psa_xof_output(&operation, output, expected_output->len));
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+        TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+        TEST_MEMORY_COMPARE(output, expected_output->len,
+                            expected_output->x, expected_output->len);
+    }
+
+exit:
+    psa_xof_abort(&operation);
+    mbedtls_free(output);
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void xof_output_dispatch(int alg_arg,
+                         data_t *input,
+                         data_t *expected_output,
+                         int forced_status_arg)
+{
+    psa_algorithm_t alg = alg_arg;
+    psa_status_t forced_status = forced_status_arg;
+    psa_xof_operation_t operation = psa_xof_operation_init();
+    unsigned char *output = NULL;
+
+    PSA_ASSERT(psa_crypto_init());
+    TEST_CALLOC(output, expected_output->len);
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+
+    TEST_EQUAL(psa_xof_output(&operation, output, expected_output->len),
+               PSA_ERROR_BAD_STATE);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+
+    PSA_ASSERT(psa_xof_setup(&operation, alg));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+    PSA_ASSERT(psa_xof_update(&operation, input->x, input->len));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 2);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+    mbedtls_test_driver_xof_hooks.forced_status = forced_status;
+    TEST_EQUAL(psa_xof_output(&operation, output, expected_output->len),
+               forced_status);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits,
+               forced_status == PSA_SUCCESS ? 3 : 4);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, forced_status);
+
+    if (forced_status == PSA_SUCCESS) {
+        TEST_MEMORY_COMPARE(output, expected_output->len,
+                            expected_output->x, expected_output->len);
+    }
+
+exit:
+    psa_xof_abort(&operation);
+    mbedtls_free(output);
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+    PSA_DONE();
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void xof_abort_dispatch(int alg_arg,
+                        int forced_status_arg)
+{
+    psa_algorithm_t alg = alg_arg;
+    psa_status_t forced_status = forced_status_arg;
+    psa_xof_operation_t operation = psa_xof_operation_init();
+
+    PSA_ASSERT(psa_crypto_init());
+
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
+
+    PSA_ASSERT(psa_xof_abort(&operation));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 0);
+
+    PSA_ASSERT(psa_xof_setup(&operation, alg));
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 1);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, PSA_SUCCESS);
+
+    mbedtls_test_driver_xof_hooks.forced_status = forced_status;
+    TEST_EQUAL(psa_xof_abort(&operation), forced_status);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.hits, 2);
+    TEST_EQUAL(mbedtls_test_driver_xof_hooks.driver_status, forced_status);
+
+exit:
+    psa_xof_abort(&operation);
+    mbedtls_test_driver_xof_hooks = mbedtls_test_driver_xof_hooks_init();
     PSA_DONE();
 }
 /* END_CASE */

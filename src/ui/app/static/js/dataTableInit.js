@@ -1,5 +1,81 @@
 // dataTableInit.js
 
+function collectDataTableSearchPaneEntries(requestData) {
+  if (!requestData || typeof requestData !== "object") return [];
+
+  const entries = Object.keys(requestData)
+    .filter((key) => key.startsWith("searchPanes["))
+    .map((key) => [key, String(requestData[key] || "")]);
+
+  const flatten = (value, path) => {
+    if (value === null || typeof value === "undefined") return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => flatten(item, `${path}[${index}]`));
+      return;
+    }
+
+    if (typeof value === "object") {
+      Object.keys(value)
+        .sort((a, b) => a.localeCompare(b))
+        .forEach((key) => flatten(value[key], `${path}[${String(key)}]`));
+      return;
+    }
+
+    entries.push([path, String(value)]);
+  };
+
+  if (requestData.searchPanes && typeof requestData.searchPanes === "object") {
+    flatten(requestData.searchPanes, "searchPanes");
+  }
+
+  const seen = new Set();
+  return entries
+    .filter(([key, value]) => {
+      const signature = `${key}=${value}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    })
+    .sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function getDataTableStateParams(dataTable) {
+  const params = dataTable.ajax.params() || {};
+  const state = {
+    search: params.search ? params.search.value : "",
+    order_column:
+      params.order && params.order.length > 0
+        ? params.columns[params.order[0].column].data
+        : "",
+    order_dir:
+      params.order && params.order.length > 0 ? params.order[0].dir : "",
+  };
+
+  collectDataTableSearchPaneEntries(params).forEach(([key, value]) => {
+    state[key] = value;
+  });
+
+  return state;
+}
+
+function appendDataTableParamsInputs(form, params, inputClass = "") {
+  Object.entries(params).forEach(([name, value]) => {
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: name,
+        value: value,
+        class: inputClass,
+      }),
+    );
+  });
+}
+
+function appendDataTableStateInputs(form, dataTable) {
+  appendDataTableParamsInputs(form, getDataTableStateParams(dataTable));
+}
+
 /**
  * Escape a single cell value against spreadsheet formula injection (CWE-1236).
  *
@@ -54,10 +130,37 @@ function bwCsvSafe(value) {
     btn.action = function (e, dt, button, config) {
       config = config || {};
       config.exportOptions = config.exportOptions || {};
+
+      // Buttons' own default formatters are what call ``stripData``, which is what
+      // removes the markup from a cell. Replacing them outright therefore exported raw
+      // ``innerHTML`` (badges, links, icons) into every CSV / XLSX / clipboard payload,
+      // so compose with it instead of overwriting it.
+      //
+      // ``stripData`` reads its flags from the second argument and treats a *present*
+      // object with a falsy ``stripHtml`` as "do not strip", so the library defaults have
+      // to be restated here; passing ``exportOptions`` alone would silently disable it
+      // again. Anything the page sets explicitly still wins.
+      const stripConfig = $.extend(
+        {
+          stripHtml: true,
+          stripNewlines: true,
+          decodeEntities: true,
+          trim: true,
+        },
+        config.exportOptions,
+      );
+      const stripThenEscape = function (value) {
+        return bwCsvSafe($.fn.dataTable.Buttons.stripData(value, stripConfig));
+      };
+
       config.exportOptions.format = $.extend(
         {},
         config.exportOptions.format || {},
-        { body: bwCsvSafe, header: bwCsvSafe, footer: bwCsvSafe },
+        {
+          body: stripThenEscape,
+          header: stripThenEscape,
+          footer: stripThenEscape,
+        },
       );
       return origAction.call(this, e, dt, button, config);
     };

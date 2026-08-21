@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
@@ -21,7 +21,7 @@ from flask_login import current_user
 from flask import redirect, url_for
 
 from app.routes.logout import logout_page
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, STATIC_PATH_PREFIXES
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, is_static_path
 
 from common_utils import get_version  # type: ignore
 
@@ -53,6 +53,43 @@ READ_ONLY_POST_PATH_SUFFIXES = (
     "/reports/filters",
     "/reports/data",
 )
+
+# biscuit-rust authorizes under a wall-clock budget defaulting to 1 ms, and reports blowing it as
+# the same AuthorizationError a policy denial raises. An honest token authorizes in ~0.01 ms, but a
+# CPU-starved host still overran 1 ms often enough to log valid sessions out. Raise the clock only:
+# max_facts and max_iterations bound the work a token's own Datalog can demand, so they keep their
+# defaults. Duplicated from the API guard rather than shared: src/ui and src/api ship as separate
+# images with no common package.
+AUTHORIZE_MAX_TIME = timedelta(milliseconds=100)
+
+# Whole-message marker for a run-limit abort. Unlike the API, this token is never attacker-supplied
+# (it is minted server-side and kept in the signed session), so a residual abort here means the host
+# is still starved, not that the token is hostile. Match the whole message: a denial quotes back
+# check text that token content can influence, so a substring test would misclassify a real denial.
+RUN_LIMIT_ERROR = "Reached Datalog execution limits"
+
+
+def _raise_time_budget(authorizer: AuthorizerBuilder) -> None:
+    # limits() hands back a copy, so set_limits() is what actually applies the change.
+    limits = authorizer.limits()
+    limits.max_time = AUTHORIZE_MAX_TIME
+    authorizer.set_limits(limits)
+
+
+def _internal_error_response():
+    # A failure to reach a verdict is not a verdict. Returning the logout redirect (or a 403) would
+    # destroy or disown a session that is still perfectly valid, so surface it as the server-side
+    # error it is and leave the session intact for the retry.
+    return (
+        render_template(
+            "unauthorized.html",
+            message="An unexpected error occurred during authorization.",
+            next=url_for("home.home_page"),
+            error_code=500,
+            auto_redirect=False,
+        ),
+        500,
+    )
 
 
 def _normalize_path(path: str) -> str:
@@ -117,7 +154,7 @@ class BiscuitMiddleware:
         # it would let any authenticated non-admin (e.g. a PRO "reader") delete cache,
         # because these routes have no role check of their own. Let them flow through the
         # operation policy below (GET->read, POST->write) like every other route.
-        if request.path.startswith(STATIC_PATH_PREFIXES + ("/logout",)):
+        if is_static_path(request.path, "/logout"):
             return
 
         token_str: Optional[str] = session.get("biscuit_token")  # Retrieve token from session
@@ -152,85 +189,73 @@ class BiscuitMiddleware:
         current_app.logger.debug(str(token))
 
         # First we check if the biscuit is up to date
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                authorizer = AuthorizerBuilder()
+        try:
+            authorizer = AuthorizerBuilder()
 
-                authorizer.add_check(Check(f'check if version("{get_version()}")'))
-                if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
-                    authorizer.add_check(Check("check if client_ip({client_ip})", {"client_ip": request.remote_addr or "0.0.0.0"}))
+            authorizer.add_check(Check(f'check if version("{get_version()}")'))
+            if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
+                authorizer.add_check(Check("check if client_ip({client_ip})", {"client_ip": request.remote_addr or "0.0.0.0"}))
 
-                authorizer.add_policy(Policy("allow if true"))
+            authorizer.add_policy(Policy("allow if true"))
+            _raise_time_budget(authorizer)
 
-                current_app.logger.debug(str(authorizer))
-                authorizer.build(token).authorize()
-                break  # Success, exit retry loop
-            except AuthorizationError as e:
-                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
-                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
-                    continue
+            current_app.logger.debug(str(authorizer))
+            authorizer.build(token).authorize()
+        except AuthorizationError as e:
+            if str(e) == RUN_LIMIT_ERROR:
+                current_app.logger.error(f"Datalog run limits hit during version check on {request.method} {request.path}; session kept")
+                return _internal_error_response()
 
-                current_app.logger.warning(f"Version check error: {e}")
-                return redirect(url_for("logout.logout_page"))
-            except Exception as e:
-                current_app.logger.debug(format_exc())
-                current_app.logger.error(f"Unexpected error during version check: {e}")
-                return redirect(url_for("logout.logout_page"))
+            current_app.logger.warning(f"Version check error: {e}")
+            return redirect(url_for("logout.logout_page"))
+        except Exception as e:
+            current_app.logger.debug(format_exc())
+            current_app.logger.error(f"Unexpected error during version check: {e}")
+            return redirect(url_for("logout.logout_page"))
 
         route_rule = request.url_rule.rule if request.url_rule else None
         resource_path = route_rule or request.path
         operation = resolve_operation(request.method, request.path, request.endpoint, route_rule)
 
-        for attempt in range(max_retries):
-            try:
-                authorizer = AuthorizerBuilder()
+        try:
+            authorizer = AuthorizerBuilder()
 
-                # resource_path can fall back to the attacker-controlled request path, so
-                # bind it (and the operation) as parameters to prevent Datalog injection.
-                authorizer.add_fact(Fact("resource({resource_path})", {"resource_path": resource_path}))
-                authorizer.add_fact(Fact("operation({operation})", {"operation": operation}))
+            # resource_path can fall back to the attacker-controlled request path, so
+            # bind it (and the operation) as parameters to prevent Datalog injection.
+            authorizer.add_fact(Fact("resource({resource_path})", {"resource_path": resource_path}))
+            authorizer.add_fact(Fact("operation({operation})", {"operation": operation}))
 
-                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
-                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
-                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
-                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
-                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
-                authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
+            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
+            authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
+            _raise_time_budget(authorizer)
 
-                current_app.logger.debug(str(authorizer))
-                authorizer.build(token).authorize()
-                break  # Success, exit retry loop
-            except AuthorizationError as e:
-                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
-                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
-                    continue
+            current_app.logger.debug(str(authorizer))
+            authorizer.build(token).authorize()
+        except AuthorizationError as e:
+            if str(e) == RUN_LIMIT_ERROR:
+                current_app.logger.error(f"Datalog run limits hit authorizing {request.method} {request.path}; not a permission denial")
+                return _internal_error_response()
 
-                current_app.logger.warning(
-                    f"Biscuit authorization error on {request.method} {request.path} endpoint={request.endpoint} rule={route_rule} (operation={operation}): {e}"
-                )
-                return (
-                    render_template(
-                        "unauthorized.html",
-                        message="You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action.",
-                        next=url_for("home.home_page"),
-                        error_code=403,
-                        auto_redirect=False,
-                    ),
-                    403,
-                )
-            except Exception as e:
-                current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")
-                return (
-                    render_template(
-                        "unauthorized.html",
-                        message="An unexpected error occurred during authorization.",
-                        next=url_for("home.home_page"),
-                        error_code=500,
-                        auto_redirect=False,
-                    ),
-                    500,
-                )
+            current_app.logger.warning(
+                f"Biscuit authorization error on {request.method} {request.path} endpoint={request.endpoint} rule={route_rule} (operation={operation}): {e}"
+            )
+            return (
+                render_template(
+                    "unauthorized.html",
+                    message="You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action.",
+                    next=url_for("home.home_page"),
+                    error_code=403,
+                    auto_redirect=False,
+                ),
+                403,
+            )
+        except Exception as e:
+            current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")
+            return _internal_error_response()
 
 
 class BiscuitTokenFactory:

@@ -16,6 +16,21 @@ set(TF_PSA_CRYPTO_DRIVERS_INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/pqcp/include
 )
 
+# The core and drivers need to see the driver dispatch functions in
+# psa_crypto_driver_wrappers.h. (Note that drivers can call the dispatch layer
+# to perform sub-operations.) Some dispatch functions in
+# psa_crypto_driver_wrappers.h have inline function definitions. Hence code
+# that calls the dispatch layer also need to see the declarations of the
+# driver entry points. Those are in drivers' private directories.
+# Note that this needs to be done before adding the driver subdirectories.
+foreach(driver ${drivers})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${driver}/src)
+        list(APPEND TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/${driver}/src)
+    endif()
+endforeach()
+set(TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS
+        "${TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS}" PARENT_SCOPE)
+
 if(CMAKE_COMPILER_IS_MSVC)
     if(MSVC_STATIC_RUNTIME)
         foreach(flag_var
@@ -102,15 +117,26 @@ add_subdirectory(p256-m)
 add_subdirectory(builtin)
 add_subdirectory(pqcp)
 
-#
-# Add to the list of directories with internal headers the driver ones that
-# must be visible by core and tests code.
-# Done after adding the driver sub-directories as drivers do not need to see
-# each other internal headers.
-#
-list(APPEND TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS
-        ${CMAKE_CURRENT_SOURCE_DIR}/builtin/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/pqcp/src
-)
-set(TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS
-        "${TF_PSA_CRYPTO_PRIVATE_INCLUDE_DIRS}" PARENT_SCOPE)
+if (GEN_FILES)
+    # Make sure psa_crypto_driver_wrappers.h is available before building
+    # driver code.
+    foreach (target IN LISTS driver_targets driver_static_targets)
+        add_dependencies(${target}
+            ${TF_PSA_CRYPTO_TARGET_PREFIX}libtfpsacrypto_generated_files_target)
+    endforeach()
+endif()
+
+if(TF_PSA_CRYPTO_TEST_DRIVER)
+    foreach (target IN LISTS driver_targets driver_static_targets)
+        # Note: "tests/include/test" exists solely to provide access to
+        #       "mbedtls/build_info.h". That header is an alias of
+        #       "tf-psa-crypto/build_info.h".
+        #
+        #       It is included in framework headers and C modules because those
+        #       components are also used in the Mbed TLS context.
+        target_include_directories(${target} PRIVATE
+            ${TF_PSA_CRYPTO_FRAMEWORK_DIR}/tests/include
+            ${PROJECT_SOURCE_DIR}/tests/include/test
+        )
+    endforeach()
+endif()

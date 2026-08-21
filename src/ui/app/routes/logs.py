@@ -30,6 +30,34 @@ except (ValueError, TypeError):
 _stream_lock = threading.Lock()
 _active_streams = 0
 
+# Cache total line counts keyed by file identity: a repeat load of an unchanged
+# file skips the full-file line scan (the dominant per-load cost on large logs).
+# Identity = (st_dev, st_ino, st_size, st_mtime_ns) so a ROTATED log (same path,
+# new inode, possibly same size + coarse mtime) is never served a stale count.
+# ponytail: an actively-growing log changes size/mtime and still pays one full
+# count per load (plus islice from the start for the latest page); a byte-offset
+# index over appended bytes would make that incremental — add it if profiling
+# shows active-log latency matters.
+_LINECOUNT_CACHE: dict[str, tuple[tuple, int]] = {}
+_LINECOUNT_LOCK = threading.Lock()
+
+
+def _count_lines_cached(file_path: Path, stat_result) -> int:
+    key = str(file_path)
+    identity = (stat_result.st_dev, stat_result.st_ino, stat_result.st_size, stat_result.st_mtime_ns)
+    with _LINECOUNT_LOCK:
+        cached = _LINECOUNT_CACHE.get(key)
+        if cached and cached[0] == identity:
+            return cached[1]
+    # Count without holding the whole file in memory (one line resident at a time).
+    total = 0
+    with file_path.open(encoding="utf-8", errors="replace") as f:
+        for _ in f:
+            total += 1
+    with _LINECOUNT_LOCK:
+        _LINECOUNT_CACHE[key] = (identity, total)
+    return total
+
 
 def _list_log_files():
     """Return {'main': [...], 'letsencrypt': [...]} of the available *.log files."""
@@ -106,12 +134,10 @@ def logs_page():
         if file_path is None or not file_path.is_file():
             return Response("No such file", 404)
 
-        # Count lines without holding the whole file in memory (avoids OOM on
-        # very large logs — only one line is resident at a time).
-        total_lines = 0
-        with file_path.open(encoding="utf-8", errors="replace") as f:
-            for _ in f:
-                total_lines += 1
+        # Stat once, then count lines through an (size, mtime)-keyed cache so a
+        # repeat load of an unchanged log skips the full-file scan.
+        stat = file_path.stat()
+        total_lines = _count_lines_cached(file_path, stat)
         # Ceil division so an exact multiple of PAGE_SIZE doesn't add a spurious
         # trailing empty page (which would be the default "latest" view).
         page_num = max(1, -(-total_lines // PAGE_SIZE))
@@ -128,7 +154,6 @@ def logs_page():
         with file_path.open(encoding="utf-8", errors="replace") as f:
             raw_logs = "".join(islice(f, start, start + PAGE_SIZE)).rstrip("\n")
 
-        stat = file_path.stat()
         file_meta = {"size": stat.st_size, "lines": total_lines, "mtime": stat.st_mtime}
 
     return render_template(

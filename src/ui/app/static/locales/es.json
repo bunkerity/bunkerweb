@@ -487,6 +487,7 @@
       "no_data": "Sin datos"
     },
     "window": {
+      "all_time": "Total histórico",
       "last_days": "Últimos {{days}} días",
       "title": "Ventana del panel"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Los informes son un búfer circular en memoria: las entradas más antiguas se descartan cuando se alcanza el límite configurado. A menos que Redis esté habilitado, también se borran al reiniciar BunkerWeb.",
     "security_incident": "Incidente de Seguridad",
     "security_report_data": "Datos del Informe de Seguridad"
   },

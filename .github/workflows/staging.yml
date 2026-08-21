@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write # Trivy SARIF upload
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
@@ -131,7 +132,14 @@ jobs:
     with:
       TYPE: ${{ matrix.type }}
       RUNS_ON: ${{ matrix.runs_on }}
-    secrets: inherit
+    secrets:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
+      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
 
   # Delete infrastructures
   delete-infras:
@@ -156,12 +164,12 @@ jobs:
       packages: write
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

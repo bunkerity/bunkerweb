@@ -5,6 +5,10 @@
   - Works whether URL structure is /<version>/<lang>/... or /<lang>/<version>/...
 */
 (function () {
+  var ASSET_BASE_URL = document.currentScript
+    ? new URL('.', document.currentScript.src)
+    : new URL('assets/', document.baseURI);
+
   function onReady(fn) {
     if (document.readyState !== 'loading') fn();
     else document.addEventListener('DOMContentLoaded', fn, { once: true });
@@ -90,17 +94,7 @@
       var lists = Array.prototype.slice.call(document.querySelectorAll('.md-select__list'));
       if (!lists.length) return;
 
-      // Detect current language to compute correct relative path
-      var pathSegments = window.location.pathname.split('/').filter(Boolean);
-      if (pathSegments.length && VERSION_RE.test(pathSegments[0])) pathSegments.shift();
-      var currentLang = 'en';
-      if (pathSegments.length && KNOWN_LANGS.indexOf(pathSegments[0]) !== -1) {
-        currentLang = pathSegments[0];
-      }
-      // English is at /<version>/ so needs no "../", others are at /<version>/<lang>/ so need "../"
-      var logoPath = currentLang === 'en'
-        ? 'assets/' + MORPHAIUS_CREDIT.logoFilename
-        : '../assets/' + MORPHAIUS_CREDIT.logoFilename;
+      var logoPath = new URL(MORPHAIUS_CREDIT.logoFilename, ASSET_BASE_URL).href;
 
       lists.forEach(function (list) {
         if (!list.querySelector('a[hreflang]')) return;

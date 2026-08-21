@@ -1,5 +1,9 @@
 name: Perform staging tests (REUSABLE)
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_call:
     inputs:
@@ -9,15 +13,23 @@ on:
       RUNS_ON:
         required: true
         type: string
-    # secrets:
-    #   PRIVATE_REGISTRY:
-    #     required: true
-    #   PRIVATE_REGISTRY_TOKEN:
-    #     required: true
-    #   TEST_DOMAINS:
-    #     required: true
-    #   ROOT_DOMAIN:
-    #     required: true
+    secrets:
+      # Every secret below is consumed behind an `inputs.TYPE` condition, so none
+      # is required on every call.
+      SECRET_KEY:
+        required: false
+      PRIVATE_REGISTRY:
+        required: false
+      ROOT_DOMAIN:
+        required: false
+      TEST_DOMAINS_DOCKER:
+        required: false
+      TEST_DOMAINS_AUTOCONF:
+        required: false
+      TEST_DOMAINS_KUBERNETES:
+        required: false
+      TEST_DOMAINS_LINUX:
+        required: false
 
 jobs:
   tests:
@@ -25,9 +37,9 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Login to ghcr
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

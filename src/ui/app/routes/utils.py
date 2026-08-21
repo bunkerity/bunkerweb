@@ -18,7 +18,6 @@ from common_utils import get_redis_client as get_common_redis_client  # type: ig
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
-PLUGIN_ID_RX = re_compile(r"^[\w_-]{1,64}$")
 CUSTOM_CONF_RX = re_compile(
     r"^CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
@@ -265,6 +264,18 @@ def parse_search_panes(source, *, sort_values: bool = False) -> str:
         return ";".join(f"{field}:{','.join(sorted(values))}" for field, values in items)
 
     return ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items())
+
+
+def get_default_ban_time(config: dict, server_name: str) -> int:
+    """Resolve the Bad Behavior ban duration for a report service."""
+    try:
+        if server_name and server_name not in ("_", ""):
+            service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
+            if service_key in config:
+                return int(config[service_key])
+        return int(config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+    except (AttributeError, TypeError, ValueError):
+        return 86400
 
 
 def parse_search_panes_dict(source) -> Dict[str, list]:

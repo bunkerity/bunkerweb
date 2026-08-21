@@ -21,32 +21,47 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 遵循以下步骤安全部署 Mutual TLS：
 
 1. **启用功能：** 在目标站点将 `USE_MTLS` 设置为 `yes`。
-2. **提供 CA 证书包：** 使用 PEM 文件存放可信颁发者，并在 `MTLS_CA_CERTIFICATE` 中配置其绝对路径。
+2. **提供 CA 证书包：** 将 `MTLS_CA_CERTIFICATE` 指向 Scheduler 可读取的 PEM 文件，或通过 `MTLS_CA_CERTIFICATE_DATA` 直接提供 base64/PEM 内联数据。Scheduler 会验证、缓存并将证书包分发到每个实例，无需逐实例挂载。
 3. **选择验证模式：** `on` 强制要求证书，`optional` 允许回退，`optional_no_ca` 仅用于短期诊断。
 4. **调节链路深度：** 若组织存在多级中间证书，可调整 `MTLS_VERIFY_DEPTH`。
 5. **转发验证结果（可选）：** 若后端需要检查证书信息，请保持 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes`。
-6. **维护吊销数据：** 若发布 CRL，请填写 `MTLS_CRL`，使 BunkerWeb 能拒绝已吊销的证书。
+6. **维护吊销数据：** 若发布 CRL，请配置 `MTLS_CRL`（或 `MTLS_CRL_DATA`），使 BunkerWeb 能拒绝已吊销的证书。
 
 ### 配置设置
 
-| 设置                         | 默认值 | 上下文    | 多个 | 说明                                                                                                                                              |
-| ---------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                   | `no`   | multisite | 否   | **启用 mutual TLS：** 为当前站点启用客户端证书认证。                                                                                                |
-| `MTLS_CA_CERTIFICATE`        |        | multisite | 否   | **客户端 CA 证书包：** 指向受信任客户端 CA 证书包（PEM）的绝对路径。当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时必填；路径必须可读。               |
-| `MTLS_VERIFY_CLIENT`         | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                         |
-| `MTLS_URL`                   |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
-| `MTLS_VERIFY_DEPTH`          | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                          |
-| `MTLS_FORWARD_CLIENT_HEADERS`| `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。                                          |
-| `MTLS_CRL`                   |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径。仅在成功加载 CA 证书包时生效。                                                         |
+| 设置                            | 默认值 | 上下文    | 多个 | 说明                                                                                                                                              |
+| -------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                      | `no`   | multisite | 否   | **启用 mutual TLS：** 为当前站点启用客户端证书认证。                                                                                                |
+| `MTLS_CA_CERTIFICATE_PRIORITY`  | `file` | multisite | 否   | **客户端 CA 证书包优先级：** 客户端 CA 证书包的来源：`file`（路径）或 `data`（base64/PEM）。                                                        |
+| `MTLS_CA_CERTIFICATE`           |        | multisite | 否   | **客户端 CA 证书包路径：** 受信任客户端 CA 证书包（PEM）的路径，需 Scheduler 可读。当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时必填。            |
+| `MTLS_CA_CERTIFICATE_DATA`      |        | multisite | 否   | **客户端 CA 证书包数据：** 直接以 base64 或 PEM 提供的受信任客户端 CA 证书包（例如通过 Web UI）。                                                   |
+| `MTLS_VERIFY_CLIENT`            | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                         |
+| `MTLS_URL`                      |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
+| `MTLS_VERIFY_DEPTH`             | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                          |
+| `MTLS_FORWARD_CLIENT_HEADERS`   | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。 |
+| `MTLS_CRL_PRIORITY`             | `file` | multisite | 否   | **客户端 CRL 优先级：** CRL 的来源：`file`（路径）或 `data`（base64/PEM）。                                                                        |
+| `MTLS_CRL`                      |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。 |
+| `MTLS_CRL_DATA`                 |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                        |
 
-!!! tip "保持证书最新"
-    将 CA 证书包和吊销列表存放在 Scheduler 可读取的挂载卷中，以便重启时自动加载最新的信任锚。
+!!! tip "配置一次，处处分发"
+    CA 证书包和吊销列表无需挂载到 BunkerWeb 容器中。只需将文件路径或内联数据提供给 Scheduler；Scheduler 会验证、缓存并将其分发到每个实例。更新会在下一次任务运行时自动获取并重新分发。
 
 !!! warning "严格模式需提供 CA 证书包"
-    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，运行时必须存在 CA 文件。如果缺失，BunkerWeb 会跳过生成 mTLS 指令，避免服务因路径无效而启动失败。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。
+    当 `MTLS_VERIFY_CLIENT` 为 `on` 或 `optional` 时，Scheduler 必须能够验证并缓存客户端 CA 证书包。如果没有可用的证书包，BunkerWeb 会在每个实例上跳过 mTLS 指令，避免服务在证书引用无效或缺失的情况下运行。`optional_no_ca` 仅建议用于排查问题，因为它会降低认证强度。若 Scheduler 在 `/var/cache/bunkerweb` 非持久化的情况下重启，mTLS 将保持禁用，直到首次任务运行完成并重新分发 CA 证书包；因此在需要严格执行策略的场景下，请使用持久化的缓存卷。
 
 !!! info "受信证书与验证"
     BunkerWeb 使用同一份 CA 证书包完成链路校验与信任构建，确保吊销检查和握手验证保持一致。
+
+!!! info "入站 `X-SSL-*` 请求头总是被剥离"
+    在请求到达您的应用之前，BunkerWeb 会移除客户端自行发送的每一个 `X-SSL-*` 请求头：适用于所有站点，无论是否启用 mTLS，HTTP/1.1、HTTP/2 与 HTTP/3 一视同仁。只有 BunkerWeb 从已验证的 TLS 握手中导出的值才会被转发，且仅当 `MTLS_FORWARD_CLIENT_HEADERS` 为 `yes` 时才转发，因此客户端无法伪造 `X-SSL-Client-Verify: SUCCESS`。
+
+    如果 BunkerWeb 位于另一个自行终结 mTLS 并注入这些请求头的代理之后，请在剥离之前捕获该值并重新发布。添加一份自定义的 `server-http` 配置：
+
+    ```nginx
+    set $trusted_ssl_verify $http_x_ssl_client_verify;
+    ```
+
+    然后通过 `REVERSE_PROXY_HEADERS: "X-SSL-Client-Verify $trusted_ssl_verify"` 转发。仅使用 `REVERSE_PROXY_HEADERS` 无效：`proxy_set_header` 求值时 `$http_x_ssl_client_verify` 已经为空，而 `set` 运行在 server-rewrite 阶段，早于剥离。
 
 !!! warning "按路径的 mTLS 需要可选模式"
     NGINX 的 `ssl_verify_client` 指令仅在 `server` 上下文有效，无法置于 `location` 块中。若只想在部分路径上要求证书，请将 `MTLS_VERIFY_CLIENT` 设为 `optional`（或 `optional_no_ca`），使所有路径都能完成握手，然后在 `MTLS_URL_n` 中列出受保护的路径。BunkerWeb 随后会在 Lua 中按请求对匹配的 URL 强制证书。如果在设置 `MTLS_URL_n` 的同时仍将 `MTLS_VERIFY_CLIENT` 保持为 `on`，NGINX 会在握手阶段直接拒绝无证书的客户端，按路径逻辑无从生效，强制仍是全站范围。

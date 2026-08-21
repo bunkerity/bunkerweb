@@ -17,15 +17,17 @@ from typing import Dict, List, Optional
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from flask import Blueprint, render_template, request, jsonify
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from common_utils import safe_tar_extractall  # type: ignore
 from letsencrypt_consistency import (  # type: ignore
+    detect_broken_lineages as _detect_broken_lineages,
     detect_orphan_renewals as _detect_orphan_renewals,
     is_safe_cert_name as _is_safe_cert_name,
     le_cache_write_lock as _le_cache_write_lock,
     letsencrypt_cache_consistent as _le_cache_consistent,
     path_is_inside as _path_is_inside,
+    purge_lineage as _purge_lineage,
 )
 from app.dependencies import DB  # type: ignore
 from app.utils import LOGGER  # type: ignore
@@ -98,6 +100,15 @@ def _ui_scratch_dir() -> TemporaryDirectory:
     """
     Path(SCRATCH_ROOT).mkdir(parents=True, exist_ok=True)
     return TemporaryDirectory(prefix="le-ui-", dir=SCRATCH_ROOT)
+
+
+def _user_readonly() -> bool:
+    """True when the current user lacks write permission (mirrors src/ui templates.py write-gate).
+
+    Cert lifecycle (delete/heal) is writer-level, not admin-only: a read-only user must never be
+    able to run certbot delete / purge_lineage and re-persist the DB cache blob.
+    """
+    return "write" not in getattr(current_user, "list_permissions", [])
 
 
 def download_certificates(target: Path) -> None:
@@ -260,9 +271,14 @@ def letsencrypt_fetch():
             download_certificates(scratch)
             certs = retrieve_certificates(scratch)
             LOGGER.debug(f"Certificates: {certs}")
-            # Tag each row with whether its renewal conf references a missing ACME account.
-            # The front-end uses this to render a per-row "Heal orphan" quick-action button.
+            # Tag each row with whether its renewal conf references a missing ACME account OR has a
+            # broken lineage (stem/body name mismatch). The front-end uses this to render a per-row
+            # "Heal" quick-action button. Rows are keyed off the live-dir basename, which for a
+            # broken lineage is the BODY name (e.g. domain.se.conf), not the conf stem — so tag
+            # every lineage_names alias (stem AND body names), not just the stem cert_name.
             orphan_names = {o["cert_name"] for o in _detect_orphan_renewals(scratch)}
+            for b in _detect_broken_lineages(scratch):
+                orphan_names.update(b["lineage_names"])
         for i, domain in enumerate(certs.get("domain", [])):
             cert_list.append(
                 {
@@ -415,6 +431,8 @@ def letsencrypt_fetch():
 @login_required
 @cors_required
 def letsencrypt_delete():
+    if _user_readonly():
+        return jsonify({"status": "ko", "message": "User is read-only"}), 403
     cert_name = request.json.get("cert_name") if request.is_json else None
     if not cert_name:
         return jsonify({"status": "ko", "message": "Missing cert_name"}), 400
@@ -434,6 +452,27 @@ def letsencrypt_delete():
     with _le_cache_write_lock(), _ui_scratch_dir() as tmp:
         scratch = Path(tmp)
         download_certificates(scratch)
+
+        # Alias-aware broken-lineage delete (mirrors /letsencrypt/heal). A #3733-shaped lineage
+        # keys its UI row off the live-dir basename (the body name, e.g. domain.se.conf), not the
+        # conf stem, so `certbot delete --cert-name` + the stem-derived renewal_file below would
+        # both miss and 500. Route it through the shared purge_lineage, which resolves the conf
+        # stem AND body names, then persist and skip the certbot subprocess for this case.
+        target_broken = next(
+            (b for b in _detect_broken_lineages(scratch) if cert_name == b["cert_name"] or cert_name in b["lineage_names"]),
+            None,
+        )
+        if target_broken is not None:
+            LOGGER.info(f"Deleting broken certificate lineage {cert_name} ({target_broken['reason']})")
+            removed = _purge_lineage(scratch, Path(target_broken["renewal_conf"]), quarantine_root=None, logger=LOGGER)
+            try:
+                err = _persist_le_cache_dir(scratch, bypass_gate=True)
+                if err:
+                    return jsonify({"status": "ko", "message": f"Successfully deleted certificate {cert_name}, but cache update failed: {err}"}), 500
+            except Exception as e:
+                return jsonify({"status": "ko", "message": f"Successfully deleted certificate {cert_name}, but cache update failed: {e}"}), 500
+            return jsonify({"status": "ok", "message": f"Successfully deleted certificate {cert_name}", "removed": removed})
+
         work_dir = scratch.joinpath("_work")
         work_dir.mkdir(parents=True, exist_ok=True)
 
@@ -517,20 +556,30 @@ def letsencrypt_orphans():
         scratch = Path(tmp)
         download_certificates(scratch)
         orphans = _detect_orphan_renewals(scratch)
-    return jsonify({"status": "ok", "count": len(orphans), "orphans": orphans})
+        broken = _detect_broken_lineages(scratch)
+    return jsonify({"status": "ok", "count": len(orphans), "orphans": orphans, "broken": broken})
 
 
 @letsencrypt.route("/letsencrypt/heal", methods=["POST"])
 @login_required
 @cors_required
 def letsencrypt_heal():
-    """Tier 2 interactive remediation: remove an orphan renewal conf + its cert files.
+    """Tier 2 interactive remediation: remove an orphan or broken renewal conf + its cert files.
 
     Body: { "cert_name": "<service>" }
 
-    Refuses to act unless the cert is actually orphaned. On success, the next
-    scheduler certbot-new tick will re-issue against a fresh account.
+    Refuses to act unless the cert is actually orphaned (missing ACME account) or broken
+    (lineage name mismatch / no cert material). On success, the next scheduler certbot-new
+    tick will re-issue.
+
+    Cross-writer window: the scheduler's sanitize step mutates the live tree outside
+    le_cache_write_lock while this heal works from its own scratch snapshot, so the last DB
+    writer wins — broken lineages self-correct on the next tick, but a healed account-orphan
+    can be resurrected by a concurrent scheduler write (per-host lock caveat, see
+    letsencrypt_consistency.py LE_CACHE_LOCK_PATH).
     """
+    if _user_readonly():
+        return jsonify({"status": "ko", "message": "User is read-only"}), 403
     cert_name = request.json.get("cert_name") if request.is_json else None
     if not cert_name:
         return jsonify({"status": "ko", "message": "Missing cert_name"}), 400
@@ -541,43 +590,41 @@ def letsencrypt_heal():
         scratch = Path(tmp)
         download_certificates(scratch)
         orphans = {o["cert_name"]: o for o in _detect_orphan_renewals(scratch)}
-        if cert_name not in orphans:
-            return jsonify({"status": "ko", "message": f"Certificate {cert_name} is not orphaned — refusing to heal"}), 400
+        # Match a broken entry by conf stem OR by a body-derived lineage name: the UI row is keyed
+        # off the live-dir basename, which for a #3733 lineage is the body name (domain.se.conf),
+        # not the conf stem (domain.se) that detect_broken_lineages reports as cert_name.
+        target_broken = next(
+            (b for b in _detect_broken_lineages(scratch) if cert_name == b["cert_name"] or cert_name in b["lineage_names"]),
+            None,
+        )
+        if cert_name in orphans:
+            target_info = orphans[cert_name]
+            LOGGER.info(f"Healing orphan certificate {cert_name} (missing account {target_info['account']} on {target_info['server']})")
+            renewal_file = scratch.joinpath("renewal", f"{cert_name}.conf")
+        elif target_broken is not None:
+            target_info = target_broken
+            LOGGER.info(f"Healing broken certificate lineage {cert_name} ({target_info['reason']})")
+            # Heal the broken entry via its own renewal_conf path (already under scratch) so a
+            # submitted body-name alias resolves to the real conf stem's lineage.
+            renewal_file = Path(target_info["renewal_conf"])
+        else:
+            return jsonify({"status": "ko", "message": f"Certificate {cert_name} is neither orphaned nor broken — refusing to heal"}), 400
 
-        orphan_info = orphans[cert_name]
-        LOGGER.info(f"Healing orphan certificate {cert_name} (missing account {orphan_info['account']} on {orphan_info['server']})")
-
-        renewal_file = scratch.joinpath("renewal", f"{cert_name}.conf")
-        cert_dir = scratch.joinpath("live", cert_name)
-        archive_dir = scratch.joinpath("archive", cert_name)
         # Defense-in-depth: refuse anything that would resolve outside the scratch.
-        for path in (renewal_file, cert_dir, archive_dir):
-            if not _path_is_inside(path, scratch):
-                LOGGER.error(f"Refusing heal: cert_name {cert_name!r} escapes scratch {scratch}")
-                return jsonify({"status": "ko", "message": "Invalid cert_name"}), 400
+        if not _path_is_inside(renewal_file, scratch):
+            LOGGER.error(f"Refusing heal: cert_name {cert_name!r} escapes scratch {scratch}")
+            return jsonify({"status": "ko", "message": "Invalid cert_name"}), 400
 
-        removed: List[str] = []
-        if renewal_file.exists():
-            try:
-                renewal_file.unlink()
-                removed.append(renewal_file.as_posix())
-            except Exception as e:
-                LOGGER.error(f"Failed to remove {renewal_file}: {e}")
-                return jsonify({"status": "ko", "message": f"Failed to remove {renewal_file.name}: {e}"}), 500
-
-        for path in (cert_dir, archive_dir):
-            if path.exists():
-                try:
-                    rmtree(path, ignore_errors=False)
-                    removed.append(path.as_posix())
-                except Exception as e:
-                    LOGGER.error(f"Failed to remove {path}: {e}")
-                    return jsonify({"status": "ko", "message": f"Failed to remove {path.name}: {e}"}), 500
+        # purge_lineage removes the renewal conf + live/<name> + archive/<name> for the conf stem
+        # AND any body-referenced lineage names — broken confs point live/archive at a name that
+        # differs from the stem, which the old hard-coded triple would have missed. Each path is
+        # containment-checked against scratch inside purge_lineage.
+        removed = _purge_lineage(scratch, renewal_file, quarantine_root=None, logger=LOGGER)
 
         try:
-            # Bypass the consistency gate here — operator explicitly asked to remove this
-            # orphan; the resulting tar is strictly better than the prior state (one fewer
-            # orphan ref). Scheduler-side gate still protects against runtime poisoning.
+            # Bypass the consistency gate here — operator explicitly asked to remove this cert; the
+            # resulting tar is strictly better than the prior state. Scheduler-side gate still
+            # protects against runtime poisoning.
             err = _persist_le_cache_dir(scratch, bypass_gate=True)
             if err:
                 # Persistence failed → return 500 so automation knows to retry.
@@ -589,9 +636,9 @@ def letsencrypt_heal():
     return jsonify(
         {
             "status": "ok",
-            "message": f"Healed orphan {cert_name}; next certbot-new tick will reissue with a fresh ACME account.",
+            "message": f"Healed {cert_name}; next certbot-new tick will reissue.",
             "removed": removed,
-            "orphan": orphan_info,
+            "target": target_info,
         }
     )
 

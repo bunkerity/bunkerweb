@@ -359,6 +359,7 @@ LUA_API void luaJIT_profile_stop(lua_State *L)
   ProfileState *ps = &profile_state;
   global_State *g = ps->g;
   if (G(L) == g) {  /* Only stop profiler if started by this VM. */
+    ps->g = NULL;
     profile_timer_stop(ps);
     g->hookmask &= ~HOOK_PROFILE;
     lj_dispatch_update(g, 0);
@@ -368,7 +369,6 @@ LUA_API void luaJIT_profile_stop(lua_State *L)
 #endif
     lj_buf_free(g, &ps->sb);
     ps->sb.w = ps->sb.e = NULL;
-    ps->g = NULL;
   }
 }
 

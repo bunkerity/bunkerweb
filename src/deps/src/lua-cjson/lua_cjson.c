@@ -735,8 +735,9 @@ static int json_append_data(lua_State *l, json_config_t *cfg,
 
 static void json_append_newline_and_indent(strbuf_t *json, json_config_t *cfg, int depth)
 {
+    int i;
     strbuf_append_char(json, '\n');
-    for (int i = 0; i < depth; i++)
+    for (i = 0; i < depth; i++)
         strbuf_append_string(json, cfg->encode_indent);
 }
 

@@ -108,6 +108,9 @@
 !!! note "工作进程特定存储"
     每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。
 
+!!! warning "报告保留"
+    被拦截请求的报告是一个循环缓冲区，而非审计日志。达到上限后，最旧的报告会被丢弃以便存放新报告，因此 Web UI 中显示的总数会停滞不前：未启用 Redis 时，该上限为 `METRICS_MAX_BLOCKED_REQUESTS` 乘以每个实例的 NGINX 工作进程数；启用 Redis 时则为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`。报告保存在共享内存中，除非启用并持久化 Redis，否则每次重启 BunkerWeb（包括软件包升级）都会被清空。如需长期保留，请将 NGINX 日志发送到 syslog 服务器或 SIEM。
+
 ### 配置示例
 
 === "基本配置"

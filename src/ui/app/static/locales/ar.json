@@ -487,6 +487,7 @@
       "no_data": "لا يوجد بيانات"
     },
     "window": {
+      "all_time": "كل الأوقات",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }
@@ -1042,6 +1043,7 @@
     }
   },
   "reports": {
+    "retention_notice": "التقارير مخزَّنة في ذاكرة مؤقتة دائرية داخل الذاكرة: تُحذف أقدم الإدخالات عند بلوغ الحد المُهيَّأ. وما لم يكن Redis مفعَّلاً، تُمحى التقارير أيضاً عند إعادة تشغيل BunkerWeb.",
     "security_incident": "حادث أمني",
     "security_report_data": "بيانات تقرير الأمان"
   },

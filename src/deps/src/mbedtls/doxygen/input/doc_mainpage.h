@@ -10,7 +10,7 @@
  */
 
 /**
- * @mainpage Mbed TLS v4.1.0 API Documentation
+ * @mainpage Mbed TLS v4.2.0 API Documentation
  *
  * This documentation describes the application programming interface (API)
  * of Mbed TLS.

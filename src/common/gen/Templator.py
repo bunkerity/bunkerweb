@@ -453,9 +453,11 @@ class Templator:
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
         self._render_global()
-        servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
+        server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
+        # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an empty server_name directive
+        servers = [server_name] if server_name else []
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split()
+            servers = server_name.split()
 
         effective_cpus = effective_cpu_count()
         if len(servers) >= effective_cpus * 2:
@@ -624,7 +626,11 @@ class Templator:
         real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
+            # Sorted so two runs over the same settings produce byte-identical output.
+            # Instances skip a push whose archive matches the one already applied, and
+            # dict insertion order here varies between runs, which alone was enough to
+            # make every /confs push look like a change.
+            config_lines = [f"{k}={v}\n" for k, v in sorted(self._full_config.items())]
             real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")

@@ -50,6 +50,15 @@
       "regex": "^\\d+[kKmM]?$",
       "type": "text"
     },
+    "METRICS_REDIS_TTL": {
+      "context": "global",
+      "default": "2592000",
+      "help": "Time-to-live in seconds for metrics keys stored in Redis (default `2592000`, 30 days; `0` keeps keys permanent). Refreshed on every sync so active data never expires; with a `volatile-lru` eviction policy this lets abandoned metrics data become evictable so Redis recovers from maxmemory instead of rejecting writes forever. Accepts a plain integer or `k`/`m` shorthand.",
+      "id": "metrics-redis-ttl",
+      "label": "Metrics Redis TTL",
+      "regex": "^\\d+[kKmM]?$",
+      "type": "text"
+    },
     "MAX_LRU_HISTORY": {
       "context": "global",
       "default": "1k",

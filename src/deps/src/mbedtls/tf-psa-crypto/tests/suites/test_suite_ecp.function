@@ -1467,7 +1467,7 @@ exit:
 }
 /* END_CASE */
 
-/* BEGIN_CASE depends_on:MBEDTLS_TEST_HOOKS:MBEDTLS_ECP_WITH_MPI_UINT */
+/* BEGIN_CASE depends_on:MBEDTLS_TEST_HOOKS */
 void ecp_mod_p_generic_raw(int curve_id,
                            char *input_N,
                            char *input_X,
@@ -1485,8 +1485,10 @@ void ecp_mod_p_generic_raw(int curve_id,
     size_t curve_bits;
     int (*curve_func)(mbedtls_mpi_uint *X, size_t X_limbs);
 
+#if defined(MBEDTLS_ECP_WITH_MPI_UINT)
     mbedtls_mpi_mod_modulus m;
     mbedtls_mpi_mod_modulus_init(&m);
+#endif
 
     TEST_EQUAL(mbedtls_test_read_mpi_core(&X,   &limbs_X,   input_X), 0);
     TEST_EQUAL(mbedtls_test_read_mpi_core(&N,   &limbs_N,   input_N), 0);
@@ -1544,20 +1546,34 @@ void ecp_mod_p_generic_raw(int curve_id,
     TEST_EQUAL(limbs_X, limbs);
     TEST_EQUAL(limbs_res, limbs_N);
 
-    TEST_EQUAL(mbedtls_mpi_mod_modulus_setup(
-                   &m, N, limbs_N), 0);
 
     TEST_EQUAL((*curve_func)(X, limbs_X), 0);
 
+#if defined(MBEDTLS_ECP_WITH_MPI_UINT)
+    /* This is what we'll do in the future, based on bignum_mod_raw */
+    TEST_EQUAL(mbedtls_mpi_mod_modulus_setup(&m, N, limbs_N), 0);
     mbedtls_mpi_mod_raw_fix_quasi_reduction(X, &m);
+#else
+    /* This is what we're doing now, based on bignum_core,
+     * see ecp_modp() in ecp.c */
+    mbedtls_mpi_uint c = mbedtls_mpi_core_sub(X, X, N, limbs_N);
+    (void) mbedtls_mpi_core_add_if(X, N, limbs_N, (unsigned) c);
+#endif
+    /* Checking that the result is equal to the expected value is enough,
+     * but in case of failures, it's useful to know if the incorrect result
+     * had the correct bitlength or not / was in the correct range or not. */
     TEST_LE_U(mbedtls_mpi_core_bitlen(X, limbs_X), curve_bits);
+    /* This only works because we know from above the top limbs of X are 0. */
+    TEST_EQUAL(MBEDTLS_CT_TRUE, mbedtls_mpi_core_lt_ct(X, N, limbs_N));
     TEST_MEMORY_COMPARE(X, bytes, res, bytes);
 
 exit:
     mbedtls_free(X);
     mbedtls_free(res);
 
+#if defined(MBEDTLS_ECP_WITH_MPI_UINT)
     mbedtls_mpi_mod_modulus_free(&m);
+#endif
     mbedtls_free(N);
 }
 /* END_CASE */
@@ -1800,18 +1816,5 @@ exit:
     mbedtls_mpi_mod_modulus_free(&m);
     mbedtls_mpi_mod_residue_release(&rX);
     mbedtls_free(rX_raw);
-}
-/* END_CASE */
-
-/* BEGIN_CASE depends_on:MBEDTLS_TEST_HOOKS:MBEDTLS_ECP_LIGHT */
-void check_variant()
-{
-    mbedtls_ecp_variant variant = mbedtls_ecp_get_variant();
-
-#if defined(MBEDTLS_ECP_WITH_MPI_UINT)
-    TEST_EQUAL(variant, MBEDTLS_ECP_VARIANT_WITH_MPI_UINT);
-#else
-    TEST_EQUAL(variant, MBEDTLS_ECP_VARIANT_WITH_MPI_STRUCT);
-#endif
 }
 /* END_CASE */
