@@ -10,6 +10,20 @@ transition, which a ~15s restart slips past.
 
 ``main`` is loaded under an alias here: its plain module name would collide with
 ``src/api/app/main.py`` in the same test session (see this package's conftest).
+
+Importing it is not free: ``src/scheduler/main.py`` calls ``Path.mkdir`` at module level on
+``/etc/bunkerweb/configs`` (:63, plus one per entry of ``CUSTOM_CONFIGS_DIRS`` at :77),
+``/etc/bunkerweb/plugins`` (:83), ``/etc/bunkerweb/pro/plugins`` (:86) and ``/var/tmp/bunkerweb``
+(:89). That is correct behaviour inside the scheduler's container and is not this file's business
+to change — but it means the import writes to ``/etc``. On a developer box with a permissive
+``/etc/bunkerweb`` the import happens to succeed; on a CI runner it does not, and every test here
+errored with ``PermissionError: [Errno 13] Permission denied: '/etc/bunkerweb'`` (run 32470372717,
+branch 1.7, 2026-08-21). The ambient filesystem was supplying the answer.
+
+So the import runs with ``Path.mkdir`` re-rooted into a per-module sandbox, and the same patch
+**refuses** any target that is still absolute-and-outside it — i.e. it behaves exactly like the
+runner's ``/etc``. Remove the re-rooting and the import raises ``PermissionError`` here too, on
+any host. ``test_the_import_writes_nothing_outside_the_sandbox`` asserts that directly.
 """
 
 import importlib.util
@@ -21,16 +35,77 @@ import pytest
 
 _MAIN_PATH = Path(__file__).resolve().parents[3] / "src" / "scheduler" / "main.py"
 
+_REAL_MKDIR = Path.mkdir
+
+
+def _sandboxed_mkdir(sandbox, created):
+    """A ``Path.mkdir`` that cannot write outside ``sandbox``, and says so the way a runner does.
+
+    An absolute target is re-rooted under ``sandbox`` (``/etc/bunkerweb/configs`` ->
+    ``<sandbox>/etc/bunkerweb/configs``); a relative one is left alone. Anything that ends up
+    absolute and outside the sandbox raises ``PermissionError(13)`` — the exact failure CI gets for
+    ``/etc``. Both halves matter: the re-rooting is the fix, the refusal is what proves the fix is
+    doing the work rather than a writable ``/etc/bunkerweb`` on the host.
+    """
+
+    def _reroot(path):
+        """The fix itself, isolated so a mutant can neuter exactly this and nothing else."""
+        return sandbox.joinpath(*path.parts[1:]) if path.is_absolute() else path
+
+    def _mkdir(self, *args, **kwargs):
+        # `parents=True` makes pathlib recurse via `self.parent.mkdir(...)`, which comes back
+        # through this same patch — so a path already inside the sandbox must be left alone, or
+        # each parent would be re-rooted a second time.
+        target = self if self.is_relative_to(sandbox) else _reroot(self)
+        if target.is_absolute() and not target.is_relative_to(sandbox):
+            raise PermissionError(13, "Permission denied", str(target))
+        created.append(str(target))
+        return _REAL_MKDIR(target, *args, **kwargs)
+
+    return _mkdir
+
 
 @pytest.fixture(scope="module")
-def scheduler_main():
+def scheduler_import(tmp_path_factory):
+    """Import ``src/scheduler/main.py`` with every module-level ``mkdir`` confined to a sandbox.
+
+    Returns ``(module, sandbox, created)``. ``created`` is every directory the import asked for,
+    already re-rooted — the evidence the guard test reads.
+    """
+    sandbox = tmp_path_factory.mktemp("scheduler-import-sandbox")
+    created = []
+
     spec = importlib.util.spec_from_file_location("bw_scheduler_main", _MAIN_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     sys.modules["bw_scheduler_main"] = module
-    spec.loader.exec_module(module)
-    yield module
+    with patch.object(Path, "mkdir", _sandboxed_mkdir(sandbox, created)):
+        spec.loader.exec_module(module)
+    yield module, sandbox, created
     sys.modules.pop("bw_scheduler_main", None)
+
+
+@pytest.fixture(scope="module")
+def scheduler_main(scheduler_import):
+    return scheduler_import[0]
+
+
+def test_the_import_writes_nothing_outside_the_sandbox(scheduler_import):
+    """RULE 17: the host's ``/etc`` must not be what makes this file pass.
+
+    The floor is not decoration — ``all(...)``/``== []`` over an empty list is vacuously true, so a
+    run where the import created nothing at all would otherwise read as a pass.
+    """
+    _module, sandbox, created = scheduler_import
+
+    assert len(created) >= 1, "the import created no directory at all — this guard proves nothing"
+    outside = [path for path in created if not path.startswith(str(sandbox))]
+    assert outside == [], f"the import wrote outside the sandbox: {outside}"
+
+    # The three /etc trees main.py builds at import really were requested, and really landed in the
+    # sandbox: proof the paths were redirected rather than the calls skipped.
+    for expected in ("etc/bunkerweb/configs", "etc/bunkerweb/plugins", "etc/bunkerweb/pro/plugins"):
+        assert (sandbox / expected).is_dir(), f"{expected} was not created under the sandbox"
 
 
 class FakeApiClient:
