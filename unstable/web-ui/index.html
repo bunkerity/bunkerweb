@@ -1335,9 +1335,9 @@
 <ul>
 <li>Run the UI behind BunkerWeb on an internal network; pick a hard-to-guess <code>REVERSE_PROXY_URL</code> and restrict source IPs.</li>
 <li>Set strong <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>; enable <code>OVERRIDE_ADMIN_CREDS=yes</code> only when you intentionally want to reset credentials.</li>
-<li>Provide <code>TOTP_ENCRYPTION_KEYS</code> and enable TOTP on admin accounts; keep recovery codes safe.</li>
+<li>Enable TOTP on admin accounts and keep recovery codes safe. The encryption keys are generated on first start, so <code>TOTP_ENCRYPTION_KEYS</code> only matters when you cannot persist the UI volume.</li>
 <li>Use TLS (terminate at BunkerWeb or set <code>UI_SSL_ENABLED=yes</code> with cert/key paths); set <code>UI_FORWARDED_ALLOW_IPS</code> to trusted proxies.</li>
-<li>Persist secrets: mount <code>/var/lib/bunkerweb</code> so <code>FLASK_SECRET</code>, Biscuit keys, and TOTP material survive restarts.</li>
+<li>Persist secrets: in containers mount a volume on <code>/data</code> (<code>/var/lib/bunkerweb</code> is a symlink to <code>/data/lib</code> in the images) so <code>FLASK_SECRET</code>, Biscuit keys, and TOTP encryption keys survive a container recreation. Without it, recreating the UI container wipes every 2FA enrollment.</li>
 <li>Keep <code>CHECK_PRIVATE_IP=yes</code> (default) to bind sessions to the client IP. <code>ALWAYS_REMEMBER=yes</code> only makes the session cookie survive a browser restart; it never extends <code>SESSION_LIFETIME_HOURS</code> or <code>SESSION_ABSOLUTE_HOURS</code>.</li>
 <li>Ensure <code>/var/log/bunkerweb</code> is writable by UID/GID 101 (or the mapped ID when running rootless) so the UI can read logs.</li>
 </ul>
@@ -1352,22 +1352,22 @@
 <p>Skip the wizard by seeding credentials and network settings up front; example Compose with a syslog sidecar:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-service-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;service-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
-<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
-<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span><span class="w"> </span><span class="c1"># Service logs from supporting components</span>
-<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
+<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">"stderr</span><span class="nv"> </span><span class="s">syslog"</span><span class="w"> </span><span class="c1"># Service logs from supporting components</span>
+<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://bw-syslog:514"</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># QUIC</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/udp"</span><span class="w"> </span><span class="c1"># QUIC</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span>
 <span class="w">      </span><span class="c1"># Optional API token when securing API access</span>
-<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Make sure that it matches the one set in the scheduler</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># Make sure that it matches the one set in the scheduler</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
@@ -1376,22 +1376,22 @@
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
-<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
-<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
-<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"www.example.com"</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span>
 <span class="w">      </span><span class="c1"># Optional API token when securing API access</span>
-<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Make sure that it matches the one set in the bunkerweb service</span>
-<span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb_access&quot;</span>
-<span class="w">      </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ui&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/changeme&quot;</span><span class="w"> </span><span class="c1"># Change it to a hard-to-guess URI</span>
-<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># Make sure that it matches the one set in the bunkerweb service</span>
+<span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"syslog:server=bw-syslog:514,tag=bunkerweb_access"</span>
+<span class="w">      </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"syslog:server=bw-syslog:514,tag=bunkerweb"</span>
+<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">"ui"</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">"/changeme"</span><span class="w"> </span><span class="c1"># Change it to a hard-to-guess URI</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">"http://bw-ui:7000"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># This is used to persist the cache and other data like the backups</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -1400,13 +1400,14 @@
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
-<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
-<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;set-me&quot;</span><span class="w">  </span><span class="c1"># Remember to set a stronger secret key (see below)</span>
-<span class="w">      </span><span class="nt">UI_FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10.20.30.0/24&quot;</span>
+<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">"admin"</span>
+<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"Str0ng&amp;P@ss!"</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
+<span class="w">      </span><span class="c1"># TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters</span>
+<span class="w">      </span><span class="nt">UI_FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">"10.20.30.0/24"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-ui-data:/data</span><span class="w"> </span><span class="c1"># This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -1416,13 +1417,13 @@
 <span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">"db"</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"changeme"</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
@@ -1439,7 +1440,7 @@
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># This is the syslog-ng configuration file</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
@@ -1447,6 +1448,7 @@
 <span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-ui-data</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -1477,7 +1479,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <ul>
 <li>Bind defaults: Docker images listen on <code>0.0.0.0:7000</code>; Linux packages bind to <code>127.0.0.1:7000</code>. Override with <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code>.</li>
 <li>Proxy headers: <code>UI_FORWARDED_ALLOW_IPS</code> defaults to <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>; <code>UI_PROXY_ALLOW_IPS</code> defaults to the value of <code>FORWARDED_ALLOW_IPS</code>. On Linux installations set them to your reverse proxy IPs for tighter defaults.</li>
-<li>Secrets and state: <code>/var/lib/bunkerweb</code> stores <code>FLASK_SECRET</code>, Biscuit keys, and TOTP material. Mount it in Docker; on Linux it is created and managed by the package scripts.</li>
+<li>Secrets and state: <code>/var/lib/bunkerweb</code> stores <code>FLASK_SECRET</code>, Biscuit keys, and TOTP encryption keys. In containers that path is a symlink to <code>/data/lib</code>, so mount a volume on <code>/data</code>; on Linux the directory is created and managed by the package scripts.</li>
 <li>Logs: <code>/var/log/bunkerweb</code> must be readable by UID/GID 101 (or the mapped UID in rootless Docker). Packages create the path; containers need a volume with correct ownership.</li>
 <li>Wizard behavior: easy-install on Linux starts the UI and wizard automatically; Docker users reach the wizard via the reverse-proxied URL unless they preseed env vars.</li>
 </ul>
@@ -1486,20 +1488,27 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>Admin account: create via setup wizard or <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>. Passwords must include lowercase, uppercase, digit, and special chars. <code>OVERRIDE_ADMIN_CREDS=yes</code> forces reseeding even if an account exists.</li>
 <li>Password length limit: bcrypt only uses the first <strong>72 bytes</strong> of a secret, so passwords are capped at 72 bytes everywhere they are set (setup wizard, profile page, <code>ADMIN_PASSWORD</code> / <code>API_PASSWORD</code>). A longer value is rejected with an explanatory error/log rather than being silently truncated. Note that non-ASCII characters (accents, emoji) consume several bytes each, so a "72-character" passphrase made of such characters can exceed the limit. Pre-hashed bcrypt values are exempt (the hash already encodes the limit).</li>
 <li>Roles: <code>admin</code>, <code>writer</code>, and <code>reader</code> are created automatically; accounts live in the database.</li>
+<li>Secrets: <code>FLASK_SECRET</code> is stored at <code>/var/lib/bunkerweb/.flask_secret</code>; Biscuit keys live next to it and can be provided via <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</li>
 <li>
-<p>Secrets: <code>FLASK_SECRET</code> is stored at <code>/var/lib/bunkerweb/.flask_secret</code>; Biscuit keys live next to it and can be provided via <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code>.</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
+<p>2FA: TOTP secrets are stored in the database, encrypted with keys kept in <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>. The UI generates them on first start, so nothing is required as long as that file is persisted. Set <code>TOTP_ENCRYPTION_KEYS</code> (space-separated keys or a JSON map) to supply your own; each key must then be exactly <strong>43 characters</strong>, anything else is discarded with an <code>Invalid TOTP secret for key</code> warning and replaced by a random key. Generate one with:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from passlib import totp; print(totp.generate_secret())"</span>
 </code></pre></div>
 <p>Recovery codes are shown once in the UI; losing the encryption keys wipes stored TOTP secrets.
 - Sessions: default idling lifetime is 12h (<code>SESSION_LIFETIME_HOURS</code>), refreshed on every request. A hard absolute cap is enforced by <code>SESSION_ABSOLUTE_HOURS</code> (default <code>168</code> = 7 days) — past it, users are logged out regardless of activity. Optional session ID rotation (<code>SESSION_ROLLING_HOURS</code>, default <code>0</code> = disabled) regenerates the session ID at that interval. Sessions are pinned to IP and User-Agent; <code>CHECK_PRIVATE_IP=no</code> relaxes the IP check for private ranges only. <code>ALWAYS_REMEMBER=yes</code> (like ticking "Remember me" at login) marks the session cookie permanent so it survives a browser restart — no separate long-lived token is issued, so the session stays bound by the limits above and is revoked immediately by logout, a password change or <em>Wipe other sessions</em>. To stay logged in longer, raise <strong>both</strong> <code>SESSION_LIFETIME_HOURS</code> and <code>SESSION_ABSOLUTE_HOURS</code>: the absolute cap is clamped up to the idle lifetime, so raising only one of them will not do what you expect.
 - Remember to set <code>PROXY_NUMBERS</code> if multiple proxies append <code>X-Forwarded-*</code> headers.</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">2FA is gone after recreating the container</p>
+<p>TOTP secrets are stored encrypted in the database, and the keys that decrypt them live <strong>on disk</strong>, not in the database. At every start the UI takes the first source available: <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>, then <code>TOTP_ENCRYPTION_KEYS</code> (alias <code>TOTP_SECRETS</code>). When neither is usable it generates a new random set, the stored secrets can no longer be decrypted, the admin enrollment is removed from the database, and every user has to enroll again.</p>
+<p>Restarting a container is harmless. What loses the keys is losing the container filesystem: <code>docker compose down</code> then <code>up</code>, a recreation after an image or environment change, <code>docker rm</code>, or a new pod. Mounting a persistent volume on <code>/data</code> in the <code>bw-ui</code> container is enough, and every example on this page does it: the keys are generated on first start and kept in <code>/data/lib</code>, which leaves <code>TOTP_ENCRYPTION_KEYS</code> optional.</p>
+<p>Set the variable yourself only when that volume cannot be persisted, or to control rotation. If you do, mind the length: a placeholder like <code>changeme</code> is <strong>not</strong> a valid key — keys are 43 characters, as produced by <code>passlib</code>'s <code>generate_secret()</code>. An invalid value is discarded and replaced by a random key, and unlike an unset variable it also stops the admin enrollment from being reset, so 2FA stays unusable until it is <a href="../troubleshooting/#web-ui">cleared manually</a>. Rotating is possible with a JSON map: keep the old keys next to the new one and existing enrollments stay valid.</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Pre-hashed admin password</p>
 <p><code>ADMIN_PASSWORD</code> accepts a <strong>bcrypt hash</strong> (<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>) and stores it as-is, keeping the plaintext out of your env files and secrets. The strength policy is skipped (you own the source password), but a cost factor below <code>10</code> is <strong>rejected</strong>; <code>10</code>–<code>11</code> logs a warning (<code>12</code>+ recommended). Env create and <code>OVERRIDE_ADMIN_CREDS</code> only; the wizard and profile page still need plaintext.</p>
 <p>Generate a hash:</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import bcrypt; print(bcrypt.hashpw(b'Str0ng&amp;P@ss!', bcrypt.gensalt(rounds=13)).decode())"</span>
 </code></pre></div>
 </div>
 <div class="admonition warning">
@@ -1794,25 +1803,25 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 # Source configuration to receive logs from Docker containers
 source s_net {
   udp(
-    ip(&quot;0.0.0.0&quot;)
+    ip("0.0.0.0")
   );
 };
 
 # Template to format log messages
 template t_imp {
-  template(&quot;$MSG\n&quot;);
+  template("$MSG\n");
   template_escape(no);
 };
 
 # Destination configuration to write logs to dynamically named files
 destination d_dyna_file {
   file(
-    &quot;/var/log/bunkerweb/${PROGRAM}.log&quot;
+    "/var/log/bunkerweb/${PROGRAM}.log"
     template(t_imp)
-    owner(&quot;101&quot;)
-    group(&quot;101&quot;)
-    dir_owner(&quot;root&quot;)
-    dir_group(&quot;101&quot;)
+    owner("101")
+    group("101")
+    dir_owner("root")
+    dir_group("101")
     perm(0440)
     dir_perm(0770)
     create_dirs(yes)

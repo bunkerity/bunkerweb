@@ -1492,38 +1492,38 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </ul>
 <p>Beispiel für eine benutzerdefinierte Vorlagendatei:
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vorlagenname&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vorlagenname"</span><span class="p">,</span>
 <span class="w">    </span><span class="c1">// optional</span>
-<span class="w">    </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;EINSTELLUNG_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Wert&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;EINSTELLUNG_2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Wert&quot;</span>
+<span class="w">    </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"EINSTELLUNG_1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Wert"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"EINSTELLUNG_2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Wert"</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="c1">// optional</span>
-<span class="w">    </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;modsec/false_positives.conf&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;modsec/non_editable.conf&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;modsec-crs/custom_rules.conf&quot;</span>
+<span class="w">    </span><span class="nt">"configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"modsec/false_positives.conf"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"modsec/non_editable.conf"</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">"modsec-crs/custom_rules.conf"</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="c1">// optional</span>
-<span class="w">    </span><span class="nt">&quot;steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">"steps"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Titel 1&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;subtitle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Untertitel 1&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                </span><span class="s2">&quot;EINSTELLUNG_1&quot;</span>
+<span class="w">            </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Titel 1"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"subtitle"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Untertitel 1"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">"EINSTELLUNG_1"</span>
 <span class="w">            </span><span class="p">],</span>
-<span class="w">            </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                </span><span class="s2">&quot;modsec-crs/custom_rules.conf&quot;</span>
+<span class="w">            </span><span class="nt">"configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">"modsec-crs/custom_rules.conf"</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Titel 2&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;subtitle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Untertitel 2&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                </span><span class="s2">&quot;EINSTELLUNG_2&quot;</span>
+<span class="w">            </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Titel 2"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"subtitle"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Untertitel 2"</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">"EINSTELLUNG_2"</span>
 <span class="w">            </span><span class="p">],</span>
-<span class="w">            </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">                </span><span class="s2">&quot;modsec/false_positives.conf&quot;</span>
+<span class="w">            </span><span class="nt">"configs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">"modsec/false_positives.conf"</span>
 <span class="w">            </span><span class="p">]</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>

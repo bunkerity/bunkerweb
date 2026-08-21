@@ -1335,9 +1335,9 @@
 <ul>
 <li>在内部网络通过 BunkerWeb 暴露 UI；选择难猜的 <code>REVERSE_PROXY_URL</code> 并限制来源 IP。</li>
 <li>设置强 <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code>；仅在需要时开启 <code>OVERRIDE_ADMIN_CREDS=yes</code> 来重置。</li>
-<li>提供 <code>TOTP_ENCRYPTION_KEYS</code> 并为管理员启用 TOTP；妥善保存恢复码。</li>
+<li>为管理员启用 TOTP 并妥善保存恢复码。加密密钥会在首次启动时生成，因此只有在无法持久化 UI 卷时才需要设置 <code>TOTP_ENCRYPTION_KEYS</code>。</li>
 <li>使用 TLS（在 BunkerWeb 终止或 <code>UI_SSL_ENABLED=yes</code> 并提供证书/密钥路径）；将 <code>UI_FORWARDED_ALLOW_IPS</code> 设为可信代理。</li>
-<li>持久化秘密：挂载 <code>/var/lib/bunkerweb</code> 以保留 <code>FLASK_SECRET</code>、Biscuit 密钥与 TOTP 数据。</li>
+<li>持久化秘密：容器中请挂载卷到 <code>/data</code>（镜像里 <code>/var/lib/bunkerweb</code> 是指向 <code>/data/lib</code> 的软链接），以保留 <code>FLASK_SECRET</code>、Biscuit 密钥与 TOTP 加密密钥。没有该卷时，重建 UI 容器会清除所有 2FA 绑定。</li>
 <li>保持 <code>CHECK_PRIVATE_IP=yes</code>（默认）以绑定会话到客户端 IP；若无长期会话需求，将 <code>ALWAYS_REMEMBER</code> 维持为 <code>no</code>。</li>
 <li>确保 <code>/var/log/bunkerweb</code> 对 UID/GID 101（或 rootless 映射 UID）可读，便于 UI 读取日志。</li>
 </ul>
@@ -1354,66 +1354,67 @@
 <div class="tabbed-block">
 <p>预置凭据和网络以跳过向导；下面是带 syslog sidecar 的 Compose 示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-service-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;service-env</span>
-<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span>
-<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stderr</span><span class="nv"> </span><span class="s">syslog&quot;</span>
-<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://bw-syslog:514&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"</span>
+<span class="w">  </span><span class="nt">LOG_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">"stderr</span><span class="nv"> </span><span class="s">syslog"</span>
+<span class="w">  </span><span class="nt">LOG_SYSLOG_ADDRESS</span><span class="p">:</span><span class="w"> </span><span class="s">"udp://bw-syslog:514"</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:8080/tcp"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/tcp"</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"443:8443/udp"</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-services</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
-<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
-<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb_access&quot;</span>
-<span class="w">      </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;syslog:server=bw-syslog:514,tag=bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ui&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/changeme&quot;</span>
-<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-ui:7000&quot;</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"www.example.com"</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span>
+<span class="w">      </span><span class="nt">ACCESS_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"syslog:server=bw-syslog:514,tag=bunkerweb_access"</span>
+<span class="w">      </span><span class="nt">ERROR_LOG_1</span><span class="p">:</span><span class="w"> </span><span class="s">"syslog:server=bw-syslog:514,tag=bunkerweb"</span>
+<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">"ui"</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">"/changeme"</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">"http://bw-ui:7000"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*service-env</span>
-<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
-<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span>
-<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;set-me&quot;</span>
-<span class="w">      </span><span class="nt">UI_FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10.20.30.0/24&quot;</span>
+<span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">"admin"</span>
+<span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"Str0ng&amp;P@ss!"</span>
+<span class="w">      </span><span class="c1"># TOTP_ENCRYPTION_KEYS: "changeme" # 可选：未设置时会在 bw-ui-data 卷中生成；密钥长度为 43 个字符</span>
+<span class="w">      </span><span class="nt">UI_FORWARDED_ALLOW_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">"10.20.30.0/24"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-ui-data:/data</span><span class="w"> </span><span class="c1"># 用于持久化 Web UI 的密钥（Flask secret、TOTP 加密密钥、Biscuit 密钥）</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
 <span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">"db"</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">"bunkerweb"</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">"changeme"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-db</span><span class="p p-Indicator">]</span>
 
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
@@ -1421,7 +1422,7 @@
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">"unless-stopped"</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">bw-universe</span><span class="p p-Indicator">]</span>
 
 <span class="nt">volumes</span><span class="p">:</span>
@@ -1429,6 +1430,7 @@
 <span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-lib</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-ui-data</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
@@ -1454,7 +1456,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <ul>
 <li>监听默认值：Docker 镜像在 <code>0.0.0.0:7000</code>，Linux 包在 <code>127.0.0.1:7000</code>。可用 <code>UI_LISTEN_ADDR</code> / <code>UI_LISTEN_PORT</code> 覆盖。</li>
 <li>代理头：<code>UI_FORWARDED_ALLOW_IPS</code> 默认 <code>127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>；<code>UI_PROXY_ALLOW_IPS</code> 默认取 <code>FORWARDED_ALLOW_IPS</code> 的值。在 Linux 安装中将其设为反代 IP 以更严格。</li>
-<li>秘密与状态：<code>/var/lib/bunkerweb</code> 保存 <code>FLASK_SECRET</code>、Biscuit 密钥和 TOTP 数据。Docker 需挂载；Linux 由包脚本创建管理。</li>
+<li>秘密与状态：<code>/var/lib/bunkerweb</code> 保存 <code>FLASK_SECRET</code>、Biscuit 密钥和 TOTP 加密密钥。容器中该路径是指向 <code>/data/lib</code> 的软链接，因此请挂载卷到 <code>/data</code>；Linux 由包脚本创建管理。</li>
 <li>日志：<code>/var/log/bunkerweb</code> 需对 UID/GID 101（或 rootless 映射 UID）可读。包会创建路径；容器需挂载权限正确的卷。</li>
 <li>向导行为：Linux easy-install 自动启动 UI 和向导；Docker 需通过反代 URL 访问向导，除非预置环境变量。</li>
 </ul>
@@ -1465,19 +1467,25 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>角色：<code>admin</code>、<code>writer</code>、<code>reader</code> 会自动创建；账户存储在数据库。</li>
 <li>秘密：<code>FLASK_SECRET</code> 存于 <code>/var/lib/bunkerweb/.flask_secret</code>；Biscuit 密钥位于同目录，可用 <code>BISCUIT_PUBLIC_KEY</code> / <code>BISCUIT_PRIVATE_KEY</code> 提供。</li>
 <li>
-<p>2FA：用 <code>TOTP_ENCRYPTION_KEYS</code>（空格分隔或 JSON）开启 TOTP。生成密钥：</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
+<p>2FA：TOTP 秘钥加密后存放在数据库，解密用的密钥保存在 <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>。UI 会在首次启动时生成它们，只要该文件被持久化就无需额外配置。若要提供自己的密钥，可设置 <code>TOTP_ENCRYPTION_KEYS</code>（空格分隔或 JSON 映射）；此时每个密钥必须正好 <strong>43 个字符</strong>，其他长度会被丢弃并记录 <code>Invalid TOTP secret for key</code> 警告，然后用随机密钥替代。生成密钥：</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from passlib import totp; print(totp.generate_secret())"</span>
 </code></pre></div>
 <p>恢复码在 UI 中仅显示一次；若丢失加密密钥，将清除已存的 TOTP 秘钥。
 - 会话：默认空闲时长 12 小时（<code>SESSION_LIFETIME_HOURS</code>），每次请求刷新。<code>SESSION_ABSOLUTE_HOURS</code>（默认 <code>168</code> = 7 天）设定绝对上限——无论是否活跃，超过即强制登出。可选的会话 ID 轮换（<code>SESSION_ROLLING_HOURS</code>，默认 <code>0</code> = 关闭）按该间隔重新生成会话 ID。会话绑定 IP 与 User-Agent；<code>CHECK_PRIVATE_IP=no</code> 仅对私网放宽 IP 检查。<code>ALWAYS_REMEMBER=yes</code> 始终启用持久 Cookie。
 - 若多级代理附加 <code>X-Forwarded-*</code>，请设置 <code>PROXY_NUMBERS</code>。</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">重建容器后 2FA 消失</p>
+<p>TOTP 秘钥以加密形式存放在数据库，而解密它们的密钥存放在<strong>磁盘上</strong>，不在数据库里。每次启动时 UI 按顺序取第一个可用来源：<code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>，然后是 <code>TOTP_ENCRYPTION_KEYS</code>（别名 <code>TOTP_SECRETS</code>）。若两者都不可用，它会生成一组全新的随机密钥：已存储的秘钥再也无法解密，管理员的绑定会从数据库中删除，所有用户都必须重新绑定。</p>
+<p>重启容器不会有问题。真正丢失密钥的是丢失容器文件系统：先 <code>docker compose down</code> 再 <code>up</code>、修改镜像或环境变量后重建、<code>docker rm</code>，或新建 Pod。在 <code>bw-ui</code> 容器上挂载持久卷到 <code>/data</code> 即可，本页所有示例都这么做：密钥在首次启动时生成并保存在 <code>/data/lib</code>，因此 <code>TOTP_ENCRYPTION_KEYS</code> 是可选的。</p>
+<p>仅当该卷无法持久化，或你想自行控制轮换时，才需要设置该变量。此时注意长度：像 <code>changeme</code> 这样的占位值<strong>不是</strong>有效密钥——密钥为 43 个字符，与 <code>passlib</code> 的 <code>generate_secret()</code> 生成的一致。无效值会被丢弃并替换为随机密钥；与未设置该变量不同，它还会阻止管理员绑定被重置，2FA 将一直不可用，直到<a href="../troubleshooting/#web-ui">手动清除</a>。可以用 JSON 映射做轮换：把旧密钥与新密钥一起保留，已有绑定仍然有效。</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">预哈希管理员密码</p>
 <p><code>ADMIN_PASSWORD</code> 接受 <strong>bcrypt 哈希</strong>（<code>$2a$</code>/<code>$2b$</code>/<code>$2y$</code>）并按原样存储，明文不再留在环境文件或密钥中。跳过强度策略（源密码由你负责）；成本因子低于 <code>10</code> 会被拒绝，<code>10</code>–<code>11</code> 会记录警告（推荐 <code>12</code>+）。仅限环境创建和 <code>OVERRIDE_ADMIN_CREDS</code>；向导和个人资料页面仍需明文。</p>
 <p>生成哈希：</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import bcrypt; print(bcrypt.hashpw(b&#39;Str0ng&amp;P@ss!&#39;, bcrypt.gensalt(rounds=13)).decode())&quot;</span>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import bcrypt; print(bcrypt.hashpw(b'Str0ng&amp;P@ss!', bcrypt.gensalt(rounds=13)).decode())"</span>
 </code></pre></div>
 </div>
 <div class="admonition warning">
@@ -1769,12 +1777,12 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </ul>
 <p>写入按程序分文件的 <code>syslog-ng.conf</code> 示例：</p>
 <div class="highlight"><pre><span></span><code>@version: 4.10
-source s_net { udp(ip(&quot;0.0.0.0&quot;)); };
-template t_imp { template(&quot;$MSG\n&quot;); template_escape(no); };
+source s_net { udp(ip("0.0.0.0")); };
+template t_imp { template("$MSG\n"); template_escape(no); };
 destination d_dyna_file {
-  file(&quot;/var/log/bunkerweb/${PROGRAM}.log&quot;
-       template(t_imp) owner(&quot;101&quot;) group(&quot;101&quot;)
-       dir_owner(&quot;root&quot;) dir_group(&quot;101&quot;)
+  file("/var/log/bunkerweb/${PROGRAM}.log"
+       template(t_imp) owner("101") group("101")
+       dir_owner("root") dir_group("101")
        perm(0440) dir_perm(0770) create_dirs(yes));
 };
 log { source(s_net); destination(d_dyna_file); };

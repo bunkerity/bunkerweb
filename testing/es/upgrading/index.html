@@ -1351,7 +1351,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <li>
 <p><strong>Inicio rápido</strong>:</p>
 <p>Para empezar, descarga el script de instalación y su suma de verificación, luego verifica la integridad del script antes de ejecutarlo.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-oP<span class="w"> </span><span class="s1">&#39;&quot;tag_name&quot;: &quot;\K(.*)(?=&quot;)&#39;</span><span class="k">)</span>
+<div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-oP<span class="w"> </span><span class="s1">'"tag_name": "\K(.*)(?=")'</span><span class="k">)</span>
 
 <span class="c1"># Download the script and its checksum</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
@@ -1544,7 +1544,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<spa
 <ol>
 <li>
 <p><strong>Instalar el paquete de configuración del repositorio de PostgreSQL</strong></p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm&quot;</span>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">"https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm"</span>
 </code></pre></div>
 </li>
 <li>
@@ -1991,7 +1991,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <ol>
 <li>
 <p><strong>Instalar el paquete de configuración del repositorio de PostgreSQL</strong></p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm&quot;</span>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">"https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm"</span>
 </code></pre></div>
 </li>
 <li>
@@ -2021,11 +2021,11 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>sqlite
 </code></pre></div>
 <p>Luego, haz una copia de seguridad de la base de datos.</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">&quot;.dump&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">".dump"</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">&quot;.dump&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+<div class="highlight"><pre><span></span><code>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">".dump"</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
 </code></pre></div>
 </div>
 </div>

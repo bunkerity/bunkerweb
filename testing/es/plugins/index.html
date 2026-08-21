@@ -1476,19 +1476,19 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DATABASE_URI&quot;</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"DATABASE_URI"</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"</span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">"/data/plugins"</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
 <span class="w">      </span><span class="nt">initContainers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler-init</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpine/git</span>
-<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;git</span><span class="nv"> </span><span class="s">clone</span><span class="nv"> </span><span class="s">https://github.com/bunkerity/bunkerweb-plugins</span><span class="nv"> </span><span class="s">/data/plugins</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">chown</span><span class="nv"> </span><span class="s">-R</span><span class="nv"> </span><span class="s">101:101</span><span class="nv"> </span><span class="s">/data/plugins&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"/bin/sh"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"-c"</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"git</span><span class="nv"> </span><span class="s">clone</span><span class="nv"> </span><span class="s">https://github.com/bunkerity/bunkerweb-plugins</span><span class="nv"> </span><span class="s">/data/plugins</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">chown</span><span class="nv"> </span><span class="s">-R</span><span class="nv"> </span><span class="s">101:101</span><span class="nv"> </span><span class="s">/data/plugins"</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">"/data/plugins"</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
 <span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
@@ -1563,27 +1563,27 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="metadatos">Metadatos</h3>
 <p>Un archivo llamado <strong>plugin.json</strong> y escrito en la raíz de la carpeta del plugin debe contener metadatos sobre el plugin. Aquí hay un ejemplo:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;miplugin&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mi Plugin&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solo un plugin de ejemplo.&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;parcial&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;DUMMY_SETTING&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;multisite&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;help&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aquí está la ayuda de la configuración.&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dummy-id&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Configuración de ejemplo&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^.*$&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"miplugin"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Mi Plugin"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Solo un plugin de ejemplo."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"stream"</span><span class="p">:</span><span class="w"> </span><span class="s2">"parcial"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"settings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"DUMMY_SETTING"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"multisite"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1234"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"help"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aquí está la ayuda de la configuración."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dummy-id"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Configuración de ejemplo"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"regex"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^.*$"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"jobs"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi-trabajo&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi-trabajo.py&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;every&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hour&quot;</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mi-trabajo"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mi-trabajo.py"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"every"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hour"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
@@ -1754,9 +1754,9 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <li>Declare los comandos en la sección opcional 'bwcli' de 'plugin.json', mapeando cada nombre de comando a su nombre de archivo ejecutable.</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;bwcli&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;list.py&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;save&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;save.py&quot;</span>
+<span class="w">  </span><span class="nt">"bwcli"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"list"</span><span class="p">:</span><span class="w"> </span><span class="s2">"list.py"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"save"</span><span class="p">:</span><span class="w"> </span><span class="s2">"save.py"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -1765,9 +1765,9 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p>Puedes añadir configuraciones personalizadas de NGINX añadiendo una carpeta llamada <strong>confs</strong> con contenido similar a las <a href="../advanced/#custom-configurations">configuraciones personalizadas</a>. Cada subcarpeta dentro de <strong>confs</strong> contendrá plantillas de <a href="https://jinja.palletsprojects.com">jinja2</a> que se generarán y cargarán en el contexto correspondiente (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> y <code>crs-plugins-after</code>).</p>
 <p>Aquí hay un ejemplo para un archivo de plantilla de configuración dentro de la carpeta <strong>confs/server-http</strong> llamado <strong>example.conf</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kn">default_type</span><span class="w"> </span><span class="s">&#39;text/plain&#39;</span><span class="p">;</span>
+<span class="w">  </span><span class="kn">default_type</span><span class="w"> </span><span class="s">'text/plain'</span><span class="p">;</span>
 <span class="w">    </span><span class="kn">content_by_lua_block</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kn">ngx.say(&#39;{{</span><span class="w"> </span><span class="s">DUMMY_SETTING</span><span class="w"> </span><span class="err">}}</span><span class="s">&#39;)</span>
+<span class="w">        </span><span class="kn">ngx.say('{{</span><span class="w"> </span><span class="s">DUMMY_SETTING</span><span class="w"> </span><span class="err">}}</span><span class="s">')</span>
 <span class="w">    </span><span class="err">}</span>
 <span class="err">}</span>
 </code></pre></div>
@@ -1777,52 +1777,52 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="lua">LUA</h3>
 <h4 id="script-principal">Script principal</h4>
 <p>Internamente, BunkerWeb utiliza el <a href="https://github.com/openresty/lua-nginx-module">módulo LUA de NGINX</a> para ejecutar código dentro de NGINX. Los plugins que necesiten ejecutar código deben proporcionar un archivo lua en el directorio raíz de la carpeta del plugin utilizando el valor <code>id</code> de <strong>plugin.json</strong> como su nombre. Aquí hay un ejemplo llamado <strong>miplugin.lua</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;middleclass&quot;</span>
-<span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.plugin&quot;</span>
-<span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"middleclass"</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.plugin"</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.utils"</span>
 
 
-<span class="kd">local</span><span class="w"> </span><span class="nv">myplugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">class</span><span class="p">(</span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">plugin</span><span class="p">)</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">myplugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">class</span><span class="p">(</span><span class="s2">"myplugin"</span><span class="p">,</span><span class="w"> </span><span class="nv">plugin</span><span class="p">)</span>
 
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">ctx</span><span class="p">)</span>
-<span class="w">    </span><span class="nv">plugin</span><span class="p">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">self</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">ctx</span><span class="p">)</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="w">    </span><span class="nv">plugin</span><span class="p">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">self</span><span class="p">,</span><span class="w"> </span><span class="s2">"myplugin"</span><span class="p">,</span><span class="w"> </span><span class="nv">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"dummy"</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">init</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;init called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"init called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">set</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;set called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"set called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">access</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;access called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"access called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"log called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_default</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_default called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"log_default called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">preread</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;preread called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"preread called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_stream</span><span class="p">()</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_stream called&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"log_stream called"</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">"success"</span><span class="p">)</span>
 <span class="kr">end</span>
 
 <span class="kr">return</span><span class="w"> </span><span class="nv">myplugin</span>
@@ -1888,13 +1888,13 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
 
 <span class="nv">_M</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="p">()</span>
-<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="s2">"dummy"</span>
 <span class="kr">end</span>
 
 <span class="kr">return</span><span class="w"> </span><span class="nv">_M</span>
 </code></pre></div>
 <p>Y aquí está cómo puedes usarla desde el archivo <strong>miplugin.lua</strong>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">mialibreria</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;miplugin.mialibreria&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">mialibreria</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"miplugin.mialibreria"</span>
 
 <span class="p">...</span>
 
@@ -1912,34 +1912,34 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <li><code>bunkerweb.clusterstore</code>: accede a un almacén de datos Redis compartido entre las instancias de BunkerWeb (almacén de clave/valor)</li>
 </ul>
 <p>Para acceder a las funciones, primero necesitas <strong>requerir</strong> los módulos:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
-<span class="kd">local</span><span class="w"> </span><span class="nv">datastore</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.datastore&quot;</span>
-<span class="kd">local</span><span class="w"> </span><span class="nv">clustestore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.clustertore&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.utils"</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">datastore</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.datastore"</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">clustestore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">"bunkerweb.clustertore"</span>
 </code></pre></div>
 <p>Recuperar el valor de una configuración:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">variables</span><span class="p">[</span><span class="s2">&quot;DUMMY_SETTING&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">variables</span><span class="p">[</span><span class="s2">"DUMMY_SETTING"</span><span class="p">]</span>
 <span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="kr">then</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;no se puede recuperar la configuración DUMMY_SETTING&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">"no se puede recuperar la configuración DUMMY_SETTING"</span><span class="p">)</span>
 <span class="kr">else</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DUMMY_SETTING = &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">value</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"DUMMY_SETTING = "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">value</span><span class="p">)</span>
 <span class="kr">end</span>
 </code></pre></div>
 <p>Almacenar algo en la caché local:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ok</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">datastore</span><span class="p">:</span><span class="nf">set</span><span class="p">(</span><span class="s2">&quot;plugin_myplugin_something&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;somevalue&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ok</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">datastore</span><span class="p">:</span><span class="nf">set</span><span class="p">(</span><span class="s2">"plugin_myplugin_something"</span><span class="p">,</span><span class="w"> </span><span class="s2">"somevalue"</span><span class="p">)</span>
 <span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="kr">then</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;no se puede guardar plugin_myplugin_something en el datastore: &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">"no se puede guardar plugin_myplugin_something en el datastore: "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
 <span class="kr">else</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;se guardó correctamente plugin_myplugin_something en el datastore&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"se guardó correctamente plugin_myplugin_something en el datastore"</span><span class="p">)</span>
 <span class="kr">end</span>
 </code></pre></div>
 <p>Comprobar si una dirección IP es global:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ret</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">utils</span><span class="p">.</span><span class="nf">ip_is_global</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="p">)</span>
 <span class="kr">if</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="kr">then</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;error al comprobar si la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; es global o no: &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">"error al comprobar si la IP "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">" es global o no: "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
 <span class="kr">elseif</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="kr">then</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; no es global&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"la IP "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">" no es global"</span><span class="p">)</span>
 <span class="kr">else</span>
-<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; es global&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">"la IP "</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">" es global"</span><span class="p">)</span>
 <span class="kr">end</span>
 </code></pre></div>
 <div class="admonition tip">
@@ -1973,7 +1973,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="admonition warning">
 <p class="admonition-title">Token CSRF</p>
 <p>Ten en cuenta que cada envío de formulario está protegido mediante un token CSRF, necesitarás incluir el siguiente fragmento en tus formularios:
-<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">"hidden"</span> <span class="na">name</span><span class="o">=</span><span class="s">"csrf_token"</span> <span class="na">value</span><span class="o">=</span><span class="s">"{{ csrf_token() }}"</span> <span class="p">/&gt;</span>
 </code></pre></div></p>
 </div>
 <p>Puedes potenciar tu página de plugin con scripting adicional con el archivo <strong>actions.py</strong> al enviar un <strong>POST /plugins/&lt;<em>id_plugin</em>&gt;</strong>.</p>
@@ -1984,7 +1984,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
   <span class="k">return</span> <span class="o">&lt;</span><span class="n">datos_pre_render</span><span class="o">&gt;</span>
 </code></pre></div>
 <p>BunkerWeb te enviará este tipo de respuesta:</p>
-<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok|ko&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_pre_render</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"ok|ko"</span><span class="p">,</span> <span class="s2">"code"</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_pre_render</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
 </code></pre></div>
 <p><strong>Función &lt;<em>id_plugin</em>&gt;</strong></p>
 <p>Esto te permite recuperar datos cuando haces un <strong>POST</strong> desde el punto final de la plantilla, que debe usarse en AJAX.</p>
@@ -1992,7 +1992,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
   <span class="k">return</span> <span class="o">&lt;</span><span class="n">datos_id_plugin</span><span class="o">&gt;</span>
 </code></pre></div>
 <p>BunkerWeb te enviará este tipo de respuesta:</p>
-<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_id_plugin</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span><span class="err">```</span>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"ok"</span><span class="p">,</span> <span class="s2">"data"</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_id_plugin</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span><span class="err">```</span>
 
 <span class="o">**</span><span class="n">A</span> <span class="n">qué</span> <span class="n">puedes</span> <span class="n">acceder</span> <span class="n">desde</span> <span class="n">action</span><span class="o">.</span><span class="n">py</span><span class="o">**</span>
 
@@ -2041,7 +2041,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">miplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
-    <span class="n">mi_valor_formulario</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;mi_entrada_formulario&quot;</span><span class="p">]</span>
+    <span class="n">mi_valor_formulario</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">"mi_entrada_formulario"</span><span class="p">]</span>
   <span class="k">return</span> <span class="n">mi_valor_formulario</span>
 </code></pre></div>
 <ul>
@@ -2051,7 +2051,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CONFIG&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'app'</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">"CONFIG"</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">config</span><span class="err">```</span>
 
 <span class="o">**</span><span class="n">plantilla</span><span class="o">**</span>
@@ -2063,7 +2063,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 
 <span class="n">Esta</span> <span class="n">documentación</span> <span class="n">describe</span> <span class="n">los</span> <span class="n">ganchos</span> <span class="n">de</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">utilizados</span> <span class="n">para</span> <span class="n">gestionar</span> <span class="n">diferentes</span> <span class="n">etapas</span> <span class="n">de</span> <span class="n">una</span> <span class="n">solicitud</span> <span class="n">dentro</span> <span class="n">de</span> <span class="n">la</span> <span class="n">aplicación</span><span class="o">.</span> <span class="n">Cada</span> <span class="n">gancho</span> <span class="n">está</span> <span class="n">asociado</span> <span class="n">a</span> <span class="n">una</span> <span class="n">fase</span> <span class="n">específica</span><span class="o">.</span>
 
-<span class="o">===</span> <span class="s2">&quot;before_request&quot;</span>
+<span class="o">===</span> <span class="s2">"before_request"</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">antes</span><span class="o">**</span> <span class="n">de</span> <span class="n">procesar</span> <span class="n">una</span> <span class="n">solicitud</span> <span class="n">entrante</span><span class="o">.</span> <span class="n">Se</span> <span class="n">utilizan</span> <span class="n">normalmente</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">preprocesamiento</span> <span class="n">como</span> <span class="n">autenticación</span><span class="p">,</span> <span class="n">validación</span> <span class="n">o</span> <span class="n">registro</span><span class="o">.</span>
 
     <span class="n">Si</span> <span class="n">el</span> <span class="n">gancho</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span><span class="p">,</span> <span class="n">Flask</span> <span class="n">omitirá</span> <span class="n">el</span> <span class="n">manejo</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">y</span> <span class="n">devolverá</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">directamente</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">puede</span> <span class="n">ser</span> <span class="n">útil</span> <span class="n">para</span> <span class="n">cortocircuitar</span> <span class="n">el</span> <span class="n">pipeline</span> <span class="n">de</span> <span class="n">procesamiento</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
@@ -2074,16 +2074,16 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">before_request</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Antes de la solicitud: validando la solicitud...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Antes de la solicitud: validando la solicitud..."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Realizar autenticación, validación o registro aquí</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span> <span class="c1"># Estamos en el contexto de la aplicación</span>
-            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s2">&quot;¡Solicitud inválida!&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s2">"¡Solicitud inválida!"</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
         <span class="c1"># Lógica de validación ficticia</span>
-        <span class="k">return</span> <span class="s2">&quot;user&quot;</span> <span class="ow">in</span> <span class="n">request</span>
+        <span class="k">return</span> <span class="s2">"user"</span> <span class="ow">in</span> <span class="n">request</span>
     <span class="err">```</span>
-<span class="o">===</span> <span class="s2">&quot;after_request&quot;</span>
+<span class="o">===</span> <span class="s2">"after_request"</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">después</span><span class="o">**</span> <span class="n">de</span> <span class="n">que</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">ha</span> <span class="n">sido</span> <span class="n">procesada</span><span class="o">.</span> <span class="n">Son</span> <span class="n">ideales</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">postprocesamiento</span> <span class="n">como</span> <span class="n">limpieza</span><span class="p">,</span> <span class="n">registro</span> <span class="n">adicional</span> <span class="n">o</span> <span class="n">modificación</span> <span class="n">de</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">que</span> <span class="n">se</span> <span class="n">envíe</span> <span class="n">de</span> <span class="n">vuelta</span><span class="o">.</span>
 
     <span class="n">Reciben</span> <span class="n">el</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span> <span class="n">como</span> <span class="n">argumento</span> <span class="n">y</span> <span class="n">pueden</span> <span class="n">modificarlo</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">devolverlo</span><span class="o">.</span> <span class="n">El</span> <span class="n">primer</span> <span class="n">gancho</span> <span class="n">after_request</span> <span class="n">que</span> <span class="n">devuelva</span> <span class="n">una</span> <span class="n">respuesta</span> <span class="n">se</span> <span class="n">utilizará</span> <span class="n">como</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">final</span><span class="o">.</span>
@@ -2094,23 +2094,23 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
     <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Después de la solicitud: registrando la respuesta...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Después de la solicitud: registrando la respuesta..."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Realizar registro, limpieza o modificaciones de la respuesta aquí</span>
         <span class="n">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">response</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
         <span class="c1"># Lógica de registro ficticia</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Respuesta registrada:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Respuesta registrada:"</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="err">```</span>
-<span class="o">===</span> <span class="s2">&quot;teardown_request&quot;</span>
+<span class="o">===</span> <span class="s2">"teardown_request"</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">invocan</span> <span class="n">cuando</span> <span class="n">el</span> <span class="n">contexto</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">se</span> <span class="n">está</span> <span class="n">desmontando</span><span class="o">.</span> <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">utilizan</span> <span class="n">para</span> <span class="n">liberar</span> <span class="n">recursos</span> <span class="n">o</span> <span class="n">manejar</span> <span class="n">errores</span> <span class="n">que</span> <span class="n">ocurrieron</span> <span class="n">durante</span> <span class="n">el</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
 
     <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
 
     <span class="err">```</span><span class="n">python</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">teardown_request</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Desmontaje de la solicitud: limpiando recursos...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Desmontaje de la solicitud: limpiando recursos..."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Realizar limpieza, liberar recursos o manejar errores aquí</span>
         <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
             <span class="n">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
@@ -2118,13 +2118,13 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 
     <span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
         <span class="c1"># Lógica de manejo de errores ficticia</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error encontrado:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error encontrado:"</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">cleanup_resources</span><span class="p">():</span>
         <span class="c1"># Lógica de limpieza de recursos ficticia</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Los recursos han sido limpiados.&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Los recursos han sido limpiados."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="err">```</span>
-<span class="o">===</span> <span class="s2">&quot;context_processor&quot;</span>
+<span class="o">===</span> <span class="s2">"context_processor"</span>
     <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">utilizan</span> <span class="n">para</span> <span class="n">inyectar</span> <span class="n">contexto</span> <span class="n">adicional</span> <span class="n">en</span> <span class="n">las</span> <span class="n">plantillas</span> <span class="n">o</span> <span class="n">vistas</span><span class="o">.</span> <span class="n">Enriquecen</span> <span class="n">el</span> <span class="n">contexto</span> <span class="n">de</span> <span class="n">tiempo</span> <span class="n">de</span> <span class="n">ejecución</span> <span class="n">pasando</span> <span class="n">datos</span> <span class="n">comunes</span> <span class="p">(</span><span class="n">como</span> <span class="n">información</span> <span class="k">del</span> <span class="n">usuario</span> <span class="n">o</span> <span class="n">configuraciones</span><span class="p">)</span> <span class="n">a</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span>
 
     <span class="n">Si</span> <span class="n">un</span> <span class="n">procesador</span> <span class="n">de</span> <span class="n">contexto</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">diccionario</span><span class="p">,</span> <span class="n">las</span> <span class="n">claves</span> <span class="n">y</span> <span class="n">los</span> <span class="n">valores</span> <span class="n">se</span> <span class="n">añadirán</span> <span class="n">al</span> <span class="n">contexto</span> <span class="n">para</span> <span class="n">todas</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">te</span> <span class="n">permite</span> <span class="n">compartir</span> <span class="n">datos</span> <span class="n">entre</span> <span class="n">múltiples</span> <span class="n">vistas</span> <span class="n">o</span> <span class="n">plantillas</span><span class="o">.</span>
@@ -2133,12 +2133,12 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 
     <span class="err">```</span><span class="n">python</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">context_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Procesador de contexto: inyectando datos de contexto...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Procesador de contexto: inyectando datos de contexto..."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Devolver un diccionario que contenga datos de contexto para las plantillas/vistas</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;current_user&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;app_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;feature_flags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;new_ui&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+            <span class="s2">"current_user"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+            <span class="s2">"app_version"</span><span class="p">:</span> <span class="s2">"1.0.0"</span><span class="p">,</span>
+            <span class="s2">"feature_flags"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"new_ui"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
         <span class="p">}</span>
     <span class="err">```</span>
 
@@ -2165,12 +2165,12 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
 
 <span class="c1"># Definir el blueprint</span>
-<span class="n">mi_blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;mi_blueprint&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
+<span class="n">mi_blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">'mi_blueprint'</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'/templates'</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
 
 <span class="c1"># Definir una ruta dentro del blueprint</span>
-<span class="nd">@mi_blueprint</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/mi_blueprint&#39;</span><span class="p">)</span>
+<span class="nd">@mi_blueprint</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">'/mi_blueprint'</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mi_pagina_blueprint</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;mi_blueprint.html&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">'mi_blueprint.html'</span><span class="p">)</span>
 </code></pre></div></p>
 <p>En este ejemplo, se crea un blueprint llamado <code>mi_blueprint</code> y se define una ruta <code>/mi_blueprint</code> dentro de él.</p>
 <h4 id="sobrescribir-un-blueprint-existente">Sobrescribir un Blueprint existente</h4>
@@ -2180,11 +2180,11 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">Blueprint</span>
 
 <span class="c1"># Blueprint original</span>
-<span class="n">instances</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
+<span class="n">instances</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">'instances'</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'/templates'</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
 
-<span class="nd">@instances</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/instances&#39;</span><span class="p">)</span>
+<span class="nd">@instances</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">'/instances'</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">override_instances</span><span class="p">():</span>
-    <span class="k">return</span> <span class="s2">&quot;Mi nueva página de instancias&quot;</span>
+    <span class="k">return</span> <span class="s2">"Mi nueva página de instancias"</span>
 </code></pre></div>
 <p>En este escenario, al acceder a la URL <code>/instances</code> se mostrará "Mi nueva página de instancias" porque el blueprint <code>instances</code>, registrado en último lugar, sobrescribe el blueprint <code>instances</code> original.</p>
 <div class="admonition warning">

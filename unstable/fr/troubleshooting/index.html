@@ -1519,74 +1519,74 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <li>Le seuil par défaut pour le score d'anomalie est de 5 pour les requêtes et de 4 pour les réponses</li>
 </ul>
 <p>Prenons les logs suivants comme exemple de détection ModSecurity à l'aide de la configuration par défaut (formatée pour une meilleure lisibilité) :</p>
-<div class="highlight"><pre><span></span><code>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `lfi-os-files.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf&quot;]
-    [line &quot;78&quot;]
-    [id &quot;930120&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;OS File Access Attempt&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-lfi&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/255/153/126&quot;]
-    [tag &quot;PCI/6.5.4&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched &quot;Operator `PmFromFile&#39; with parameter `unix-shell.data&#39; against variable `ARGS:id&#39; (Value: `/etc/passwd&#39; )
-    [file &quot;/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf&quot;]
-    [line &quot;480&quot;]
-    [id &quot;932160&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Remote Command Execution: Unix Shell Code Found&quot;]
-    [data &quot;Matched Data: etc/passwd found within ARGS:id: /etc/passwd&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-shell&quot;]
-    [tag &quot;platform-unix&quot;]
-    [tag &quot;attack-rce&quot;]
-    [tag &quot;paranoia-level/1&quot;]
-    [tag &quot;OWASP_CRS&quot;]
-    [tag &quot;capec/1000/152/248/88&quot;]
-    [tag &quot;PCI/6.5.2&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
-2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched &quot;Operator `Ge&#39; with parameter `5&#39; against variable `TX:ANOMALY_SCORE&#39; (Value: `10&#39; )
-    [file &quot;/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf&quot;]
-    [line &quot;80&quot;]
-    [id &quot;949110&quot;]
-    [rev &quot;&quot;]
-    [msg &quot;Inbound Anomaly Score Exceeded (Total Score: 10)&quot;]
-    [data &quot;&quot;]
-    [severity &quot;2&quot;]
-    [ver &quot;OWASP_CRS/3.3.2&quot;]
-    [maturity &quot;0&quot;]
-    [accuracy &quot;0&quot;]
-    [tag &quot;application-multi&quot;]
-    [tag &quot;language-multi&quot;]
-    [tag &quot;platform-multi&quot;]
-    [tag &quot;attack-generic&quot;]
-    [hostname &quot;172.17.0.2&quot;]
-    [uri &quot;/&quot;]
-    [unique_id &quot;165097447014.179282&quot;]
-    [ref &quot;&quot;],
-    client: 172.17.0.1, server: localhost, request: &quot;GET /?id=/etc/passwd HTTP/1.1&quot;, host: &quot;localhost&quot;
+<div class="highlight"><pre><span></span><code>2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched "Operator `PmFromFile' with parameter `lfi-os-files.data' against variable `ARGS:id' (Value: `/etc/passwd' )
+    [file "/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-930-APPLICATION-ATTACK-LFI.conf"]
+    [line "78"]
+    [id "930120"]
+    [rev ""]
+    [msg "OS File Access Attempt"]
+    [data "Matched Data: etc/passwd found within ARGS:id: /etc/passwd"]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-multi"]
+    [tag "platform-multi"]
+    [tag "attack-lfi"]
+    [tag "paranoia-level/1"]
+    [tag "OWASP_CRS"]
+    [tag "capec/1000/255/153/126"]
+    [tag "PCI/6.5.4"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref "o1,10v9,11t:utf8toUnicode,t:urlDecodeUni,t:normalizePathWin,t:lowercase"],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
+2022/04/26 12:01:10 [warn] 85#85: *11 ModSecurity: Warning. Matched "Operator `PmFromFile' with parameter `unix-shell.data' against variable `ARGS:id' (Value: `/etc/passwd' )
+    [file "/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-932-APPLICATION-ATTACK-RCE.conf"]
+    [line "480"]
+    [id "932160"]
+    [rev ""]
+    [msg "Remote Command Execution: Unix Shell Code Found"]
+    [data "Matched Data: etc/passwd found within ARGS:id: /etc/passwd"]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-shell"]
+    [tag "platform-unix"]
+    [tag "attack-rce"]
+    [tag "paranoia-level/1"]
+    [tag "OWASP_CRS"]
+    [tag "capec/1000/152/248/88"]
+    [tag "PCI/6.5.2"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref "o1,10v9,11t:urlDecodeUni,t:cmdLine,t:normalizePath,t:lowercase"],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
+2022/04/26 12:01:10 [error] 85#85: *11 [client 172.17.0.1] ModSecurity: Access denied with code 403 (phase 2). Matched "Operator `Ge' with parameter `5' against variable `TX:ANOMALY_SCORE' (Value: `10' )
+    [file "/usr/share/bunkerweb/core/modsecurity/files/coreruleset/rules/REQUEST-949-BLOCKING-EVALUATION.conf"]
+    [line "80"]
+    [id "949110"]
+    [rev ""]
+    [msg "Inbound Anomaly Score Exceeded (Total Score: 10)"]
+    [data ""]
+    [severity "2"]
+    [ver "OWASP_CRS/3.3.2"]
+    [maturity "0"]
+    [accuracy "0"]
+    [tag "application-multi"]
+    [tag "language-multi"]
+    [tag "platform-multi"]
+    [tag "attack-generic"]
+    [hostname "172.17.0.2"]
+    [uri "/"]
+    [unique_id "165097447014.179282"]
+    [ref ""],
+    client: 172.17.0.1, server: localhost, request: "GET /?id=/etc/passwd HTTP/1.1", host: "localhost"
 </code></pre></div>
 <p>Comme nous pouvons le voir, il existe 3 journaux différents :</p>
 <ol>
@@ -1650,7 +1650,7 @@ Si vous redéployez fréquemment, d’anciennes lignes peuvent rester (par exemp
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">)</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">'now'</span><span class="p">,</span><span class="w"> </span><span class="s1">'-90 days'</span><span class="p">)</span>
 <span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
 <span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
 </code></pre></div>
@@ -1666,7 +1666,7 @@ Si vous redéployez fréquemment, d’anciennes lignes peuvent rester (par exemp
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">server_name</span><span class="p">,</span><span class="w"> </span><span class="k">method</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">creation_date</span><span class="p">,</span><span class="w"> </span><span class="n">last_seen</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">'90 days'</span>
 <span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="k">ASC</span>
 <span class="k">LIMIT</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
 </code></pre></div>
@@ -1681,7 +1681,7 @@ Si vous redéployez fréquemment, d’anciennes lignes peuvent rester (par exemp
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
 
 <span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">&#39;now&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-90 days&#39;</span><span class="p">);</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">datetime</span><span class="p">(</span><span class="s1">'now'</span><span class="p">,</span><span class="w"> </span><span class="s1">'-90 days'</span><span class="p">);</span>
 
 <span class="k">COMMIT</span><span class="p">;</span>
 </code></pre></div>
@@ -1699,7 +1699,7 @@ Si vous redéployez fréquemment, d’anciennes lignes peuvent rester (par exemp
 <div class="highlight"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
 
 <span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">&#39;90 days&#39;</span><span class="p">;</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">last_seen</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NOW</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">INTERVAL</span><span class="w"> </span><span class="s1">'90 days'</span><span class="p">;</span>
 
 <span class="k">COMMIT</span><span class="p">;</span>
 </code></pre></div>
@@ -1709,7 +1709,7 @@ Si vous redéployez fréquemment, d’anciennes lignes peuvent rester (par exemp
 <div class="admonition tip">
 <p class="admonition-title">Supprimer par hostname</p>
 <p>Pour supprimer une instance spécifique, utilisez son hostname (la clé primaire).</p>
-<div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&lt;hostname&gt;&#39;</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_instances</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'&lt;hostname&gt;'</span><span class="p">;</span>
 </code></pre></div>
 </div>
 <h3 id="4-marquer-les-instances-comme-modifiees-optionnel">4 - Marquer les instances comme modifiées (optionnel)</h3>
@@ -1754,6 +1754,10 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :</p>
 </div>
 <h2 id="web-ui">Interface utilisateur Web</h2>
 <p>Si vous avez oublié vos informations d'identification de l'interface utilisateur ou si vous rencontrez des problèmes de 2FA, vous pouvez vous connecter à la base de données pour retrouver l'accès.</p>
+<div class="admonition warning">
+<p class="admonition-title">Le 2FA ne fonctionne plus après une recréation du conteneur</p>
+<p>Les clés qui déchiffrent les secrets TOTP sont stockées dans le conteneur de l'UI, dans <code>/var/lib/bunkerweb/.totp_encryption_keys.json</code>, soit <code>/data/lib</code> dans l'image. Recréer le conteneur <code>bw-ui</code> sans volume persistant sur <code>/data</code> génère un nouveau jeu de clés : les secrets conservés en base ne sont plus déchiffrables, l'inscription de l'admin est supprimée et les autres comptes doivent être réinitialisés avec le SQL ci-dessous. Montez un volume sur <code>/data</code> (voir la <a href="../web-ui/">documentation de l'interface web</a>) pour conserver les clés, ou fournissez vos propres <code>TOTP_ENCRYPTION_KEYS</code>.</p>
+</div>
 <h3 id="access-database">Accéder à la base de données</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MariaDB / MySQL</label><label for="__tabbed_7_3">PostgreSQL</label></div>
 <div class="tabbed-content">
@@ -1809,7 +1813,7 @@ Pour Tout-en-un, nous supposons que la base de données est <code>db.sqlite3</co
 </code></pre></div>
 <p>Vous devriez voir quelque chose comme ceci :</p>
 <div class="highlight"><pre><span></span><code>SQLite version &lt;VER&gt; &lt;DATE&gt;
-Enter &quot;.help&quot; for usage hints.
+Enter ".help" for usage hints.
 sqlite&gt;
 </code></pre></div>
 </div>
@@ -2039,10 +2043,10 @@ sqlite&gt;
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>bcrypt
 </code></pre></div>
 <p>Générez votre hachage (remplacez <code>mypassword</code> par votre propre mot de passe) :</p>
-<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;from bcrypt import hashpw, gensalt ; print(hashpw(b&quot;&quot;&quot;mypassword&quot;&quot;&quot;, gensalt(rounds=10)).decode(&quot;utf-8&quot;))&#39;</span>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s1">'from bcrypt import hashpw, gensalt ; print(hashpw(b"""mypassword""", gensalt(rounds=10)).decode("utf-8"))'</span>
 </code></pre></div>
 <p>Vous pouvez mettre à jour votre nom d'utilisateur / mot de passe en exécutant cette commande :</p>
-<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&lt;password_hash&gt;&#39;</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">admin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'&lt;password_hash&gt;'</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">admin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 </code></pre></div>
 <p>Si vous vérifiez à nouveau votre table <code>bw_ui_users</code> en suivant cette commande :</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">bw_ui_users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">admin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>

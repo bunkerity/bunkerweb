@@ -126,6 +126,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
         image: bunkerity/bunkerweb-ui:testing
         environment:
           <<: *bw-env
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -164,6 +166,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -250,7 +253,9 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
         image: bunkerity/bunkerweb-ui:testing
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -289,6 +294,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -422,7 +428,9 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
         image: bunkerity/bunkerweb-ui:testing
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -451,6 +459,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/e
     volumes:
       bw-data:
       bw-storage:
+      bw-ui-data:
 
     networks:
       bw-universe:
