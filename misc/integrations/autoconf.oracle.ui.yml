@@ -83,6 +83,8 @@ services:
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.7.0-beta
+    volumes:
+      - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -157,6 +159,7 @@ volumes:
   bw-worker-storage:
   bw-data:
   bw-storage:
+  bw-ui-data:
 
 networks:
   bw-universe:
