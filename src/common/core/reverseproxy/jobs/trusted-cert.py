@@ -200,14 +200,40 @@ try:
 
         LOGGER.info(f"No change in {first_server}'s trusted certificate")
 
+    # A removal changes the rendered conf exactly as much as an addition does, so it has to be
+    # noticed. del_cache reports success even when there was nothing to delete, so ask the disk
+    # instead: without this the loops below are entirely silent -- status stays 0, so no push, no
+    # reload and no re-render -- and the claim that dropping the pair turns mutual TLS back off is
+    # not true, the directives simply stay in the rendered conf.
+    def drop_cache(server: str, name: str) -> bool:
+        existed = JOB.job_path.joinpath(server, name).is_file()
+        JOB.del_cache(name, service_id=server)
+        return existed
+
+    removed = False
     for first_server in skipped_servers:
-        JOB.del_cache(CACHE_NAME, service_id=first_server)
+        removed = drop_cache(first_server, CACHE_NAME) or removed
 
     # Dropping the pair when it is no longer configured is what turns mutual TLS back off:
     # the templates emit the directives only when both files are present.
     for first_server in skipped_client_servers:
-        JOB.del_cache(CLIENT_CERT_CACHE_NAME, service_id=first_server)
-        JOB.del_cache(CLIENT_KEY_CACHE_NAME, service_id=first_server)
+        removed = drop_cache(first_server, CLIENT_CERT_CACHE_NAME) or removed
+        removed = drop_cache(first_server, CLIENT_KEY_CACHE_NAME) or removed
+
+    if removed and status == 0:
+        status = 1
+
+    # New (or dropped) PEM material needs a RE-RENDER, not just a push. Both templates gate on
+    # is_file() at render time (confs/server-http/reverse-proxy.conf:27 and :43, and the stream
+    # twin at :15 and :32), so material that appears after the last render emits nothing at all:
+    # the conf keeps `proxy_ssl_verify off;` and upstream verification silently never turns on.
+    # Exiting 1 buys this job a cache push and a reload (worker/tasks.py:426), and neither re-runs
+    # the gate -- reloading re-reads the *rendered* conf. Flagging the plugin makes the scheduler
+    # dispatch push-configs (main.py:1131 -> :944), which re-renders first.
+    if status == 1:
+        err = JOB.db.checked_changes(["config"], plugins_changes=["reverseproxy"], value=True)
+        if err:
+            LOGGER.error(f"Couldn't flag reverseproxy for regeneration, the upstream TLS material will not be applied : {err}")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
