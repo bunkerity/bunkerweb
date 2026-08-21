@@ -373,7 +373,7 @@ class Database(
                 else:
                     with self.sql_engine.connect() as conn:
                         table_name = uuid4().hex
-                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+                        conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
                         conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
                 not_connected = False
@@ -583,7 +583,7 @@ class Database(
 
         table_name = uuid4().hex
         with self.sql_engine.connect() as conn:
-            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT)"))
+            conn.execute(text(f"CREATE TABLE IF NOT EXISTS test_{table_name} (id INT PRIMARY KEY)"))
             conn.execute(text(f"DROP TABLE IF EXISTS test_{table_name}"))
 
     @contextmanager
