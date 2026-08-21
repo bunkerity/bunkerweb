@@ -1,5 +1,9 @@
 name: Core test (REUSABLE)
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_call:
     inputs:

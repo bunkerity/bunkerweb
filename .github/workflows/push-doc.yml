@@ -1,5 +1,8 @@
 name: Push documentation (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:
