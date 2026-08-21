@@ -24,6 +24,7 @@ jobs:
       - name: Run Plumber
         uses: getplumber/plumber@031bc86d1e5f661626e2000f4f8779912d608d5f # v0.4.39
         with:
+          sparse-checkout: .github
           verify-attestation: true
           config-file: .github/plumber/plumber.yaml
           min-score: C
