@@ -281,19 +281,39 @@ done
 }
 
 # Function to handle Docker secrets
+#
+# Reads /run/secrets and exports each file as an environment variable named after the file,
+# uppercased. `BW_DOCKER_SECRETS_DIR` overrides the directory; it exists so this can be tested
+# without a container and is not something a deployment should set.
+#
+# A secret whose FILENAME is not a valid shell identifier is skipped, not exported. Certificate
+# material is the case that matters: the natural name for a key secret is `example.com.key`, which
+# uppercases to `EXAMPLE.COM.KEY`, and `export` refuses that -- as it does any name with a dot or a
+# dash, e.g. `db-password`. Two things went wrong before this guard existed, and only the first was
+# visible: `src/worker/entrypoint.sh` runs `set -e`, so the failed `export` killed the worker at
+# boot; and in ALL entrypoints, `export` prints the whole rejected assignment to stderr, so the
+# secret's own contents were written into the container log. The file is still mounted either way
+# -- read such a secret by its path, which is what the customcert settings take.
 function handle_docker_secrets() {
-	local secrets_dir="/run/secrets"
+	local secrets_dir="${BW_DOCKER_SECRETS_DIR:-/run/secrets}"
 	if [ -d "$secrets_dir" ]; then
 		log "ENTRYPOINT" "ℹ️" "Processing Docker secrets from $secrets_dir ..."
 		for secret_file in "$secrets_dir"/*; do
 			if [ -f "$secret_file" ]; then
 				local secret_name
 				secret_name=$(basename "$secret_file")
+				local secret_variable="${secret_name^^}"
+				if [[ ! "$secret_variable" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+					# Names the FILE, never the value: this branch exists because the value used
+					# to end up in the log.
+					log "ENTRYPOINT" "⚠️" "Skipped Docker secret $secret_name: not a valid environment variable name, read it by path instead"
+					continue
+				fi
 				local secret_value
 				secret_value=$(cat "$secret_file")
 				# Export the secret as an environment variable (uppercase)
-				export "${secret_name^^}"="$secret_value"
-				log "ENTRYPOINT" "ℹ️" "Loaded Docker secret: ${secret_name^^}"
+				export "$secret_variable"="$secret_value"
+				log "ENTRYPOINT" "ℹ️" "Loaded Docker secret: $secret_variable"
 			fi
 		done
 	fi
