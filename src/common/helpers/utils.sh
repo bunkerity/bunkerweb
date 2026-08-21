@@ -142,25 +142,33 @@ function export_env_file() {
 
 # Execute a command as the nginx user using the safest available helper
 function run_as_nginx() {
+	# None of the helpers below resets HOME: setpriv and runuser leave the environment
+	# alone, sudo -E and su -m preserve it on purpose. The services run as root, so the
+	# nginx-uid process would inherit HOME=/root and anything resolving a dotfile from it
+	# fails on permissions, libpq looking up $HOME/.postgresql/postgresql.crt being the
+	# one that breaks database connections. /var/lib/bunkerweb is chown'd to nginx by
+	# src/linux/scripts/postinstall.sh, which is what makes it a usable HOME.
+	local nginx_home="/var/lib/bunkerweb"
+
 	if command -v setpriv >/dev/null 2>&1; then
-		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- "$@"
+		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v runuser >/dev/null 2>&1; then
-		runuser -u nginx -- "$@"
+		runuser -u nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v sudo >/dev/null 2>&1; then
-		sudo -n -E -u nginx -g nginx -- "$@"
+		sudo -n -E -u nginx -g nginx -- env "HOME=$nginx_home" "$@"
 		return $?
 	fi
 
 	if command -v su >/dev/null 2>&1; then
 		local cmd_escaped
 		cmd_escaped=$(printf "%q " "$@")
-		su -m nginx -c "$cmd_escaped"
+		su -m nginx -c "env HOME=$(printf "%q" "$nginx_home") $cmd_escaped"
 		return $?
 	fi
 
