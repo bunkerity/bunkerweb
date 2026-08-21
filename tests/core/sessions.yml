@@ -1,12 +1,22 @@
 integrations: "all"
 
 actions:
-  # TODO: see to test the random values
   manual_name:
     type: "cookie"
     url: "http://www.example.com"
     cookie_name: "test"
-    cookie_rx: "^.*$"
+    # lua-resty-session 4.1.5 (src/deps/src/lua-resty-session) encodes the cookie as a fixed 82-byte
+    # header -- type, flags, 32-byte session id, timestamps, tag, MAC -- base64url'd to exactly 110
+    # characters (`base64_size(82) = ceil(4*82/3)`), with the payload concatenated straight after it
+    # and no separator. So the alphabet and that 110-character floor are guaranteed by the format
+    # itself, and are what this asserts. The observed value here is 486 characters, but that length
+    # is payload-dependent: pinning it would red on a harmless change to what the session carries.
+    # The previous `^.*$` matched anything at all, including the empty string, on a SESSION
+    # IDENTIFIER -- a regression emitting a constant, truncated or empty cookie passed silently.
+    # Not asserted, and not assertable through this action: that two sessions get DIFFERENT values.
+    # `type: cookie` opens its own driver and quits it (core_handlers/selenium_cookie_handler.py),
+    # so there is no second session to compare against and no way to carry a value between actions.
+    cookie_rx: "^[A-Za-z0-9_-]{110,}$"
     cookie_http_only_flag: true
     cookie_same_site_flag: "Lax"
     config:
