@@ -6,6 +6,12 @@
 env/
 src/deps/tmp_venv/
 tests/
+# ...except the Rocky repo files: tests/linux/Dockerfile-{rhel-8,rhel-9,rhel-10,alma-10}
+# COPY them and linux-build.yml builds those with `context: .`, so excluding them breaks the
+# "Build test image" step. They are NOT the same files as src/linux/rocky-*.repo (baseurl +
+# %ARCH% here, mirrorlist + $basearch and excludepkgs tuning there), so pointing the COPY at
+# src/linux/ would change what the test images install.
+!tests/linux/utils/*.repo
 **/Dockerfile
 src/common/README*.md
 src/common/core/*/README*.md
