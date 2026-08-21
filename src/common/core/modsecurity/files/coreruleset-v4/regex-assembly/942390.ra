@@ -19,7 +19,7 @@
 ##! xor 'b' <
 ##! xor 'b' >
 ##! xor 'b' =
-##! '   or    chars_less_than_20+
+##! '   or    chars+
 
 ##!> define x_or \bx?or\b
 ##!> define quotes ['"]
@@ -27,9 +27,16 @@
 ##!> define optional_spaces \s*
 ##!> define comparison_operators [><=]
 ##!> define unary_operators [+\-!<>=]
+##! digits is intentionally left bounded: the branch that uses it bare (no
+##! required trailing anchor) already matches on any 1-10-digit prefix
+##! regardless of what follows, so the bound can never cause a false negative
+##! there. not_equal and different_than_unary_operators are unbounded because
+##! their branches DO require a specific character (a closing quote, or a
+##! unary operator) immediately after the run - a length cap on those let an
+##! attacker bypass detection just by padding the literal past the cap.
 ##!> define digits \d{1,10}
-##!> define not_equal [^=]{1,10}
-##!> define different_than_unary_operators [^+\-!<=>]{1,20}
+##!> define not_equal [^=]+
+##!> define different_than_unary_operators [^+\-!<=>]+
 
 ##! The pattern below that matches 'or/xor' followed by digits without requiring a comparison operator is very prone to false positives.
 {{x_or}}{{spaces}}{{digits}}

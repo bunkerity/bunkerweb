@@ -143,7 +143,6 @@ PHPShell by MAX666, Private Exploit, For Server Hacking
 <title>Tiny File Manager</title>
 # Turk Shell web shell
 <head><title>Wardom | Ne Mutlu T
-# Unknown web shell
 <hr>to browse go to http://?d=[directory here]
 # Ustadcage48 Filemanager
 <font color="red">USTADCAGE_48</font> <font color="dodgerblue">FILE MANAGER</font>
@@ -163,5 +162,44 @@ PHPShell by MAX666, Private Exploit, For Server Hacking
 <title>0byt3m1n1-V2</title>
 # Zerostore web shell
 <title>ZEROSHELL | ZEROSTORE</title>
-# Unknown web shell
+# MumaSec Web Shell
+<title>中国木马资源网-WwW.MumaSec.TK</title>
+# Langouster web shell
+<font color="#886688" size="3">&copy;Langouster</font>
+# TryYaG Web Shell
+<title>TrYaG Team - TrYaG.php
+# Sunucu Bilgileri Web Shell
+<p align="center">Sunucu Bilgileri: <select size="1" name="file">
+# SimAttacker Web Shell
+<title>SimAttacker -
+# s72 Web Shell
+<title>s72 Shell
+# Ru24Post Web Shell
+<title>Ru24PostWebShell -
+# r57 Web Shell
+<title>:: The r57 shell
+# MOHAJER22 Web Shell
+<title>MOHAJER22</title>
+# IIS Spy Web Shell
+<title>IIS SPY</title>
+# g00nshell Web Shell
+<title>g00nshell
+# News Remote Web Shell
+<title>|| .::News Remote PHP Shell Injection::. ||   </title>
+# ex0shell Web Shell
+<title>ex0shell Shell
+# ErNe Safe Mode Bypass Web Shell
+<tr><td><center><font size="4" color="#FFFFFF"><span style="background-color: #000000">ErNe Safe Mode Bypass
+# lama's'hell Web Shell
+<title>lama's'hell
+ ~ Shell I</title>
+# Unknown Web Shells
 <input type=submit name=find value='find writeable'>
+<div align="center">code Author:<span class="STYLE1"><font color='red'> 仗剑孤行　QQ:87074139</font></span></div>
+<b><font color=#83000>Âûïîëíåíèå PHP-êîäà<br> Îòêðûòèå è çàêðûòèå PHP êîäà ( &lt;? è ?> ) ïèñàòü íå íóæíî!</font></b>
+<title>中国木马资源网- WwW.7jyewu.Cn </title>
+<select onchange="go('Shell','method='+this.value,this)">
+<SCRIPT SRC=http://7jyewu.cn/a/a.asp></SCRIPT>
+Èìÿ ñêðèïòà: <input type=text size=13 name=bfileneme value="bind.pl"> Ïîðò: <input type=text size=10 name=bport value="65426">
+<td><a href="#" onclick="document.reqs.action.value='shell'; document.reqs.submit();">| Shell </a></td>
+<title>Backdoor PHP codée par rAidEn & LFL</title>

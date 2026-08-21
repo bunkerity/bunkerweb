@@ -445,6 +445,9 @@ kannst du ein „Change Marker“-Update erzwingen:
 
 Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA haben, können Sie sich mit der Datenbank verbinden, um wieder Zugriff zu erhalten.
 
+!!! warning "2FA funktioniert nach dem Neuerstellen des Containers nicht mehr"
+    Die Schlüssel zum Entschlüsseln der TOTP-Secrets liegen im UI-Container unter `/var/lib/bunkerweb/.totp_encryption_keys.json`, im Image also in `/data/lib`. Wird der Container `bw-ui` ohne persistentes Volume auf `/data` neu erstellt, entsteht ein neuer Schlüsselsatz: die in der Datenbank gespeicherten Secrets sind nicht mehr entschlüsselbar, die Admin-Registrierung wird entfernt und die übrigen Konten müssen mit dem SQL unten zurückgesetzt werden. Binden Sie ein Volume auf `/data` ein (siehe [Dokumentation der Weboberfläche](web-ui.md)), damit die Schlüssel erhalten bleiben, oder geben Sie eigene `TOTP_ENCRYPTION_KEYS` vor.
+
 ### Auf die Datenbank zugreifen {#access-database}
 
 === "SQLite"

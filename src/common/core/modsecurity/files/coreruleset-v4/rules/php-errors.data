@@ -1286,7 +1286,6 @@ zlib window size (logarithm) (
 # ($end)
 # (after
 (breaking at opline
-(inclusive)
 (path:
 (tried to allocate
 - dynamic modules are not supported
@@ -1588,7 +1587,7 @@ with an empty name
 ::__toString() must return a string value
 ::getCurrentLine(): Return value must be of type string,
 ::offsetSet() instead
-> in all
+# > in all
 > in attribute
 > in attributeGroup
 > in choice
@@ -2031,7 +2030,6 @@ must be a class name compatible with
 must be a class name derived from
 must be a file name or a stream resource,
 must be a string, an array(class, method), or a callable object,
-must be a valid
 must be a valid callback or null,
 must be a valid callback,
 must be a valid callback, function "

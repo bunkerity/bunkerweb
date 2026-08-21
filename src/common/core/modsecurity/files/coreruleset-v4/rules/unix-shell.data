@@ -437,6 +437,7 @@ bin/php5
 bin/php7
 bin/pic
 bin/pico
+bin/piconv
 bin/pidstat
 bin/pigz
 bin/ping
@@ -548,6 +549,7 @@ bin/ssh-copy-id
 bin/ssh-keygen
 bin/ssh-keyscan
 bin/sshpass
+bin/stat
 bin/start-stop-daemon
 bin/stdbuf
 bin/strace
@@ -601,6 +603,7 @@ bin/traceroute6
 bin/troff
 bin/trap
 bin/tshark
+bin/uconv
 bin/ul
 bin/ulimit
 bin/uname

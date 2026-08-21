@@ -5,6 +5,30 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.29.0 - 2026-08-17
+
+## What's Changed
+
+### 🆕 New features and detections 🎉
+* fix(932): add backslash-prefix evasion to shell command detection by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4599
+* feat(unix): detect basic quote evasion attempts against known unix commands by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4649
+* feat(unix): detect stat command at pl-2+ by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4735
+* feat: Expand web shells (v1) by @HackingRepo in https://github.com/coreruleset/coreruleset/pull/4626
+### 🧰 Other Changes
+* fix: allow optional json. prefix in rule 932171 ARGS_NAMES pattern by @fzipi in https://github.com/coreruleset/coreruleset/pull/4703
+* fix(942190): require operator or quote after '!' to cut natural-language FPs by @fzipi in https://github.com/coreruleset/coreruleset/pull/4704
+* fix(942200): tighten comma branch to cut UA/Referer false positives by @fzipi in https://github.com/coreruleset/coreruleset/pull/4665
+* fix(942390): remove bypassable length bound on quoted/unary literals by @fzipi in https://github.com/coreruleset/coreruleset/pull/4713
+* fix(953100): more FPs related to RESPONSE_BODY ("(inclusive)" and "must be a valid") by @azurit in https://github.com/coreruleset/coreruleset/pull/4697
+* fix(932): remove w from Unix no-arguments command list by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4592
+* fix(932): require arguments for base64, lastlog, lastlogin by @zoutjebot in https://github.com/coreruleset/coreruleset/pull/4593
+* fix(953100): FP with '> in all' in RESPONSE_BODY by @azurit in https://github.com/coreruleset/coreruleset/pull/4736
+* feat(930120): restore node_modules coverage by @Prateeksaini12 in https://github.com/coreruleset/coreruleset/pull/4681
+* fix(942190): Fix the message to reflect that the rule applies to all SQL DBs by @aryehb in https://github.com/coreruleset/coreruleset/pull/4671
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.28.0...v4.29.0
+
 ## Version 4.28.0 - 2026-07-01
 
 ## What's Changed

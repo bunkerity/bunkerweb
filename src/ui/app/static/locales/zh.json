@@ -487,6 +487,7 @@
       "no_data": "无数据"
     },
     "window": {
+      "all_time": "全部时间",
       "last_days": "最近 {{days}} 天",
       "title": "仪表板窗口"
     }

@@ -492,6 +492,7 @@
       "no_data": "No data"
     },
     "window": {
+      "all_time": "All time",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }

@@ -1844,7 +1844,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1861,7 +1861,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -4054,7 +4054,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:
 
 - **`3`**: Stabile [v3.3.10](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.10).
-- **`4`**: Stabile [v4.28.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.28.0) (**Standard**).
+- **`4`**: Stabile [v4.29.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.29.0) (**Standard**).
 
 !!! warning "Nightly-Build veraltet"
     Die Option `nightly` für `MODSECURITY_CRS_VERSION` ist veraltet, da das OWASP Core Rule Set-Projekt die Nightly-Releases eingestellt hat. Wenn Ihre Konfiguration noch `nightly` verwendet, wird stattdessen CRS v4 verwendet. Bitte aktualisieren Sie Ihre Konfiguration auf `MODSECURITY_CRS_VERSION=4`.

@@ -42,7 +42,7 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
-    STATIC_PATH_PREFIXES,
+    is_static_path,
     _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
@@ -1135,7 +1135,7 @@ def _host_allowed(host: str, allowed: list) -> bool:
 def before_request():
     # Skip the per-request lifecycle (UIData lock, CSP nonce, get_metadata) for static assets;
     # returning None lets the static view still serve the file (after_request supplies the nonce).
-    if request.path.startswith(STATIC_PATH_PREFIXES):
+    if is_static_path(request.path):
         return
 
     # Defense-in-depth: reject unexpected Host headers when an allowlist is configured.
@@ -1168,7 +1168,7 @@ def before_request():
                     app.config["SESSION_COOKIE_DOMAIN"] = None
                 _cookie_config_detected = True
 
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         metadata = DB.get_metadata()
 
         # Plugin reload trigger
@@ -1411,8 +1411,23 @@ def set_security_headers(response):
 
     # * Permissions-Policy header to prevent unwanted behavior
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), compute-pressure=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), storage-access=(), usb=(), web-share=(), window-management=(), xr-spatial-tracking=(), interest-cohort=(), language-detector=(), language-model=(), proofreader=(), rewriter=(), translator=(), writer=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version=(), ch-ua-full-version-list=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform=(), ch-ua-platform-version=(), ch-ua-wow64=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), focus-without-user-activation=(), join-ad-interest-group=(), keyboard-map=(), manual-text=(), media-playback-while-not-visible=(), private-aggregation=(), record-ad-auction-events=(), run-ad-auction=(), shared-storage=(), shared-storage-select-url=(), tools=(), unload=(), vertical-scroll=(), web-app-installation=(), webnn=()"
+        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
+
+    # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the
+    # indexing of a URL discovered elsewhere.
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    # * Cross-origin headers to sever the opener relationship and refuse cross-origin embedding.
+    # COEP is left out on purpose: it would break the third-party resources the CSP allows.
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+    # * Cache-Control to keep authenticated pages out of the browser cache, so the back button
+    # cannot render the panel after a logout. Static assets keep theirs, and a route that already
+    # set its own value wins.
+    if not is_static_path(request.path):
+        response.headers.setdefault("Cache-Control", "no-store")
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
@@ -1429,7 +1444,7 @@ def set_security_headers(response):
     # delete_cookie defaults it to False and a __Host- deletion without Secure is rejected by
     # the UA. Skipped on static paths so no Set-Cookie lands on a cacheable response.
     # ponytail: hard-coded name list; drop this block once no issued token can still be live.
-    if not request.path.startswith(STATIC_PATH_PREFIXES):
+    if not is_static_path(request.path):
         for legacy_cookie in ("__Host-bw_ui_remember_token", "bw_ui_remember_token"):
             if legacy_cookie in request.cookies:
                 response.delete_cookie(legacy_cookie, path="/", secure=legacy_cookie.startswith("__Host-"))
@@ -1440,7 +1455,7 @@ def set_security_headers(response):
 @app.teardown_request
 def teardown_request(teardown):
     with suppress(AssertionError, RuntimeError):
-        if not request.path.startswith(STATIC_PATH_PREFIXES) and current_user.is_authenticated and "session_id" in session:
+        if not is_static_path(request.path) and current_user.is_authenticated and "session_id" in session:
             _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
@@ -1480,6 +1495,40 @@ def loading():
 def check():
     # deepcode ignore TooPermissiveCors: We need to allow all origins for the wizard
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/.well-known/security.txt", methods=["GET"])
+def security_txt():
+    # Expires is mandatory and must stay fresh, so it is generated per request instead of
+    # being shipped as a static file like robots.txt.
+    expires = (datetime.now().astimezone() + timedelta(days=365)).replace(microsecond=0).isoformat()
+    fields = [
+        "Contact: mailto:security@bunkerity.com",
+        "Contact: https://github.com/bunkerity/bunkerweb/security/advisories/new",
+        f"Expires: {expires}",
+        "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
+        "Preferred-Languages: en, fr",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/SECURITY.md",
+    ]
+
+    # Canonical is derived from the request, so it is only emitted once the Host header has been
+    # vetted against a real allowlist: this path skips the before_request check, and "*" vets nothing.
+    allowed_hosts = app.config.get("ALLOWED_HOSTS") or []
+    if allowed_hosts and "*" not in allowed_hosts and _host_allowed(request.host, allowed_hosts):
+        fields.append(f"Canonical: {url_for('security_txt', _external=True)}")
+
+    return Response(content_type="text/plain; charset=utf-8", response="\n".join(fields) + "\n")
+
+
+@app.route("/security.txt", methods=["GET"])
+def security_txt_redirect():
+    return redirect(url_for("security_txt"), 301)
+
+
+@app.route("/.well-known/change-password", methods=["GET"])
+def change_password_redirect():
+    # Not permanent on purpose: the page holding the password form may move.
+    return redirect(url_for("profile.profile_page"))
 
 
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":

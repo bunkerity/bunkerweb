@@ -487,6 +487,7 @@
       "no_data": "Veri yok"
     },
     "window": {
+      "all_time": "Tüm zamanlar",
       "last_days": "Son {{days}} gün",
       "title": "Panel penceresi"
     }

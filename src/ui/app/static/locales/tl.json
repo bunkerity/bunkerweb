@@ -487,6 +487,7 @@
       "no_data": "Walang data"
     },
     "window": {
+      "all_time": "Buong panahon",
       "last_days": "Nakaraang {{days}} araw",
       "title": "Window ng Dashboard"
     }

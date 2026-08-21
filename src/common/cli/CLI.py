@@ -141,11 +141,15 @@ class CLI(ApiCaller):
             self.__logger.debug("Unable to determine terminal size. Using default width.")
             self.__terminal_width = 80  # Default width for non-TTY environments
 
+        # API only falls back to the environment, which a shell running bwcli does not have.
+        # The token lives in the database (or in variables.env), so read it from there.
+        api_token = self.__get_variable("API_TOKEN") or None
+
         if self.__db:
             for db_instance in self.__db.get_instances():
                 try:
                     # Centralized builder handles scheme/port/host
-                    self.apis.append(API.from_instance(db_instance))
+                    self.apis.append(API.from_instance(db_instance, token=api_token))
                 except ValueError as e:
                     self.__logger.warning(f"Skipping invalid instance {db_instance.get('hostname', '<missing>')}: {e}")
         else:
@@ -157,7 +161,7 @@ class CLI(ApiCaller):
                 listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                 https_port=int(self.__get_variable("API_HTTPS_PORT", "5443") or "5443"),
             )
-            self.apis.append(API(endpoint, server_name))
+            self.apis.append(API(endpoint, server_name, token=api_token))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))

@@ -487,6 +487,7 @@
       "no_data": "Sem dados"
     },
     "window": {
+      "all_time": "Desde o início",
       "last_days": "Últimos {{days}} dias",
       "title": "Janela do painel"
     }

@@ -487,6 +487,7 @@
       "no_data": "कोई डेटा नहीं"
     },
     "window": {
+      "all_time": "सर्वकालिक",
       "last_days": "Last {{days}} days",
       "title": "Dashboard window"
     }

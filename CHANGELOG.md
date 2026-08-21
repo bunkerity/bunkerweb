@@ -1,6 +1,22 @@
 # Changelog
 
-## v1.6.14~rc3 - 2026/07/??
+## v1.6.14 - 2026/08/??
+
+- [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
+- [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.
+- [BUGFIX] `core`: an instance no longer stays on its loading configuration after a restart, where a surviving `.bw-applied` marker made the Scheduler skip the next push.
+- [BUGFIX] `docker`: `KEEP_CONFIG_ON_RESTART` defaults to `no` as documented, where unset was read as empty and preserved the configuration on every restart. A container that never set it now restarts through the loading configuration, as on Linux; set it to `yes` for the old behaviour.
+- [BUGFIX] `cli`: read `API_TOKEN` from the configuration, not the environment only, where every `bwcli` command on Linux was refused by the API. (Fixes #3810)
+- [BUGFIX] `ui`: treat `/favicon.ico` as a static asset, instead of attaching a cookie deletion to a response cached for a day.
+- [BUGFIX] `letsencrypt`: close certbot's stderr once its reader finishes, which leaked a descriptor per invocation.
+- [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, as in the shared dictionary, instead of expiring at once.
+- [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the stored values. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
+- [BUGFIX] `ui`: Total Requests, Blocked Requests and the Request status chart say which window they show, instead of being read as *Last 7 days* while holding cumulative counters. (Refs #3775)
+- [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
+- [DEPS] Updated Coreruleset version to v4.29.0 (v4)
+- [DEPS] Updated lua-resty-openssl version to v1.9.0
+
+## v1.6.14~rc3 - 2026/08/14
 
 - [SECURITY] `db`: the database password is no longer written to the logs, where a malformed `DATABASE_URI` was logged in full before exiting. Connection failures now name the masked target and the reason. (Refs #3361)
 - [SECURITY] `api`: a configuration or plugin push no longer empties the target directory on a live instance while it copies the new content in, which made every request to every service fail for the duration of the copy. Entries are now swapped one at a time with a rename, and a push whose content is unchanged is skipped instead of rewriting an identical tree on every Scheduler start.
@@ -9,6 +25,7 @@
 - [SECURITY] `ui`: a TOTP code can no longer be used more than once. The replay guard never persisted the last accepted time step, leaving a captured code valid for the rest of its 30 second window.
 - [SECURITY] `ui`: removed the year-long "remember me" token, which survived logout, password changes and *Wipe other sessions* and bypassed IP/User-Agent pinning and the absolute session cap. "Remember me" now marks the session cookie permanent, so it still survives a browser restart but is a normal revocable session; raise both `SESSION_LIFETIME_HOURS` and `SESSION_ABSOLUTE_HOURS` to stay logged in longer. Existing tokens are rejected and deleted on the next request.
 - [SECURITY] `ui`: revoked sessions are recorded in the session store (Redis when enabled) instead of a file outside the persistent volume, where recreating the container forgot every revocation and revocations never reached other replicas. *Wipe other sessions* and the password-change cleanup now keep the session you are using instead of the newest one.
+- [SECURITY] `docker`: update the Alpine `python3` and `pyc` packages to 3.14.7-r0, fixing CVE-2026-7210.
 - [FEATURE] `crowdsec`: every `CROWDSEC_*` setting is now `multisite`, so services on one instance can use different Local API and AppSec endpoints, or only one of the two. Set `CROWDSEC_API` to an empty string for a service to keep AppSec inspection without the decision lookup. Cached decisions are keyed by Local API, so services pointing at different CrowdSec instances no longer read each other's. See the CrowdSec documentation for per-service examples.
 - [FEATURE] `ui`: a *Validate certificate* button on the custom certificate settings checks the pasted or uploaded pair before the service is saved, reporting a mismatched or encrypted key, expiry, and a server name the certificate does not cover. A certificate given as a path is still only checked by the scheduler, which is the only component that can read it. (Refs #3630)
 - [BUGFIX] `letsencrypt`: an ACME account the certificate authority no longer accepts, or that was removed locally, is replaced instead of leaving every renewal failing forever with `AccountNotFound`. A deactivated account was not even recognized as the cause, because only one of the two rejections the authority can send was matched. The account is now retired, a new one registered, and every renewal configuration moved onto it in the same run, on renewal as well as on issuance. The retired account is kept aside for 30 days rather than deleted, so its key stays available. No certificate is re-issued and the repair itself costs no request. (Fixes #3783)
@@ -37,6 +54,8 @@
 - [BUGFIX] `ui`: stopping the temporary setup web UI no longer raises a `TypeError` in the signal handler. (Fixes #3345)
 - [BUGFIX] `autoconf`: write IPv6 load balancer addresses to the Ingress and Gateway status as addresses, not hostnames, which Kubernetes rejected with a 422 on dual-stack clusters. (Fixes #3771)
 - [BUGFIX] `cli`: `bwcli ban` and `bwcli unban` reported success even when every instance refused the request, so a ban that was never lifted looked lifted. (Fixes #3759)
+- [BUGFIX] `db`: a configuration save that loses a race with another writer is recomputed and retried instead of being dropped, which left every setting it carried at its default. The config saver now exits non-zero when a save is dropped.
+- [BUGFIX] `db`: stop writing `Jobs.last_run`, dropped from the model in 1.6.0, during a plugin synchronization: a plugin whose job metadata changed aborted the sync with an `AttributeError` and never updated. (Fixes #3795)
 - [BUGFIX] `linux`: commands dropped to the nginx user get a writable `HOME` instead of root's, which made SSL PostgreSQL connections fail on an unreadable `/root/.postgresql/postgresql.crt`. (Fixes #3354)
 
 ## v1.6.14~rc2 - 2026/07/29
@@ -83,7 +102,7 @@
 - [FEATURE] `headers`: deny Chrome built-in AI APIs in the default `PERMISSIONS_POLICY`.
 - [FEATURE] `misc`: allow the `QUERY` HTTP method by default in `ALLOWED_METHODS` and bundled service templates.
 - [LINUX] Updated the NGINX version to v1.30.4 for Fedora 43 and 44 now that it is available in their repositories.
-- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683, #3685)
+- [UI] Reports and Bans pages: show unknown countries as not applicable, and make exports and bulk actions honor active filters. (Fixes #3683)
 
 ## v1.6.13 - 2026/07/16
 

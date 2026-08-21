@@ -20,9 +20,9 @@ La interfaz web es el plano de control visual de BunkerWeb. Administra servicios
 
 - Ejecuta la UI detrás de BunkerWeb en una red interna; usa un `REVERSE_PROXY_URL` difícil de adivinar y limita IPs de origen.
 - Establece `ADMIN_USERNAME` / `ADMIN_PASSWORD` fuertes; usa `OVERRIDE_ADMIN_CREDS=yes` solo cuando quieras forzar un reseteo.
-- Proporciona `TOTP_ENCRYPTION_KEYS` y habilita TOTP en cuentas admin; guarda los códigos de recuperación.
+- Habilita TOTP en las cuentas admin y guarda los códigos de recuperación. Las claves de cifrado se generan en el primer arranque, así que `TOTP_ENCRYPTION_KEYS` solo importa si no puedes persistir el volumen de la UI.
 - Usa TLS (terminado en BunkerWeb o `UI_SSL_ENABLED=yes` con rutas de cert/clave); fija `UI_FORWARDED_ALLOW_IPS` a proxies de confianza.
-- Persiste secretos: monta `/var/lib/bunkerweb` para conservar `FLASK_SECRET`, llaves Biscuit y material TOTP entre reinicios.
+- Persiste secretos: en contenedores monta un volumen en `/data` (`/var/lib/bunkerweb` es un enlace simbólico a `/data/lib` en las imágenes) para conservar `FLASK_SECRET`, las llaves Biscuit y las claves de cifrado TOTP. Sin ese volumen, recrear el contenedor de la UI borra todas las inscripciones 2FA.
 - Mantén `CHECK_PRIVATE_IP=yes` (por defecto) para ligar sesiones a la IP; deja `ALWAYS_REMEMBER=no` salvo que requieras cookies largas.
 - Asegura que `/var/log/bunkerweb` sea legible por UID/GID 101 (o el UID mapeado en rootless) para que la UI pueda leer logs.
 
@@ -35,7 +35,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.14~rc3-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.14-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,15 +83,16 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14-rc3
+        image: bunkerity/bunkerweb-ui:1.6.14
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
           ADMIN_PASSWORD: "Str0ng&P@ss!"
-          TOTP_ENCRYPTION_KEYS: "set-me"
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
           - bw-logs:/var/log/bunkerweb
+          - bw-ui-data:/data # Se usa para conservar los secretos de la interfaz web (secreto Flask, claves de cifrado TOTP, claves Biscuit)
         restart: "unless-stopped"
         networks: [bw-universe, bw-db]
 
@@ -121,6 +122,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
       bw-storage:
       bw-logs:
       bw-lib:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -149,7 +151,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
 - Enlaces por defecto: imágenes Docker escuchan en `0.0.0.0:7000`; paquetes Linux en `127.0.0.1:7000`. Cambia con `UI_LISTEN_ADDR` / `UI_LISTEN_PORT`.
 - Cabeceras de proxy: `UI_FORWARDED_ALLOW_IPS` por defecto `127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`; `UI_PROXY_ALLOW_IPS` toma por defecto el valor de `FORWARDED_ALLOW_IPS`. En Linux ajústalos a las IP de tu proxy para endurecer.
-- Secretos y estado: `/var/lib/bunkerweb` guarda `FLASK_SECRET`, llaves Biscuit y material TOTP. Móntalo en Docker; en Linux lo gestiona el paquete.
+- Secretos y estado: `/var/lib/bunkerweb` guarda `FLASK_SECRET`, las llaves Biscuit y las claves de cifrado TOTP. En contenedores esa ruta es un enlace simbólico a `/data/lib`, así que monta un volumen en `/data`; en Linux el directorio lo gestiona el paquete.
 - Logs: `/var/log/bunkerweb` debe ser legible por UID/GID 101 (o el UID mapeado en rootless). Los paquetes crean la ruta; los contenedores necesitan un volumen con permisos adecuados.
 - Asistente: easy-install en Linux arranca la UI y el asistente automáticamente; en Docker se accede al asistente vía la URL reverse-proxificada salvo que preselecciones variables de entorno.
 
@@ -159,7 +161,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 - Límite de longitud de contraseña: bcrypt solo usa los primeros **72 bytes** de un secreto, por lo que las contraseñas se limitan a 72 bytes en todos los lugares donde se configuran (asistente de configuración, página de perfil, `ADMIN_PASSWORD` / `API_PASSWORD`). Un valor más largo se rechaza con un error o registro explicativo en lugar de truncarse silenciosamente. Ten en cuenta que los caracteres no ASCII (acentos, emoji) consumen varios bytes cada uno; una frase de contraseña de "72 caracteres" formada por esos caracteres puede superar el límite. Los valores bcrypt pre-hasheados están exentos (el hash ya codifica el límite).
 - Roles: `admin`, `writer` y `reader` se crean automáticamente; las cuentas viven en la base de datos.
 - Secretos: `FLASK_SECRET` se guarda en `/var/lib/bunkerweb/.flask_secret`; las llaves Biscuit al lado, opcionalmente vía `BISCUIT_PUBLIC_KEY` / `BISCUIT_PRIVATE_KEY`.
-- 2FA: habilita TOTP con `TOTP_ENCRYPTION_KEYS` (separadas por espacios o JSON). Genera una llave:
+- 2FA: los secretos TOTP se guardan en la base de datos, cifrados con claves que viven en `/var/lib/bunkerweb/.totp_encryption_keys.json`. La UI las genera en el primer arranque, así que no hace falta nada mientras ese fichero se conserve. Define `TOTP_ENCRYPTION_KEYS` (separadas por espacios o mapa JSON) para aportar las tuyas; entonces cada clave debe tener exactamente **43 caracteres**, cualquier otro valor se descarta con un aviso `Invalid TOTP secret for key` y se sustituye por una clave aleatoria. Genera una llave:
 
     ```bash
     python3 -c "from passlib import totp; print(totp.generate_secret())"
@@ -168,6 +170,13 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
 - Sesiones: duración de inactividad por defecto 12 h (`SESSION_LIFETIME_HOURS`), refrescada en cada petición. Se aplica un límite absoluto vía `SESSION_ABSOLUTE_HOURS` (por defecto `168` = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (`SESSION_ROLLING_HOURS`, por defecto `0` = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
+
+!!! warning "La 2FA desaparece al recrear el contenedor"
+    Los secretos TOTP se guardan cifrados en la base de datos, y las claves que los descifran viven **en disco**, no en la base. En cada arranque la UI toma la primera fuente disponible: `/var/lib/bunkerweb/.totp_encryption_keys.json` y luego `TOTP_ENCRYPTION_KEYS` (alias `TOTP_SECRETS`). Si ninguna es utilizable genera un juego aleatorio nuevo: los secretos almacenados ya no se pueden descifrar, la inscripción del admin se elimina de la base y cada usuario debe volver a inscribirse.
+
+    Reiniciar un contenedor no rompe nada. Lo que pierde las claves es perder el sistema de archivos del contenedor: `docker compose down` seguido de `up`, una recreación tras cambiar la imagen o el entorno, `docker rm`, o un pod nuevo. Basta con montar un volumen persistente en `/data` en el contenedor `bw-ui`, y todos los ejemplos de esta página lo hacen: las claves se generan en el primer arranque y se conservan en `/data/lib`, lo que deja `TOTP_ENCRYPTION_KEYS` como opcional.
+
+    Define la variable tú mismo solo si ese volumen no se puede persistir, o para controlar la rotación. Si lo haces, cuidado con la longitud: un marcador como `changeme` **no** es una clave válida — las claves tienen 43 caracteres, como las que produce `generate_secret()` de `passlib`. Un valor inválido se descarta y se sustituye por una clave aleatoria y, a diferencia de una variable sin definir, también impide que se reinicie la inscripción del admin, por lo que la 2FA queda inutilizable hasta [borrarla manualmente](troubleshooting.md#web-ui). La rotación es posible con un mapa JSON: mantén las claves antiguas junto a la nueva y las inscripciones existentes siguen siendo válidas.
 
 !!! tip "Contraseña de administrador pre-hasheada"
     `ADMIN_PASSWORD` acepta un **hash bcrypt** (`$2a$`/`$2b$`/`$2y$`) y lo almacena tal cual, manteniendo el texto plano fuera de tus archivos de entorno y secretos. Se omite la política de fortaleza (tú eres responsable de la contraseña de origen), pero se **rechaza** un factor de coste inferior a `10`; `10`–`11` registra una advertencia (se recomienda `12`+). Solo en creación por entorno y `OVERRIDE_ADMIN_CREDS`: el asistente y el perfil siguen requiriendo texto plano.

@@ -18,7 +18,9 @@ from app.routes.utils import handle_error, verify_data_in_form, wait_applying
 
 configs = Blueprint("configs", __name__)
 
-CONFIG_NAME_RX = r"^[\w_-]{1,255}$"
+# \Z, not $: Python's $ also matches before a trailing newline, so "name\n" passed and
+# became a filename that breaks the line-based directory listing used when pushing configs.
+CONFIG_NAME_RX = r"^[\w_-]{1,255}\Z"
 EXPORT_FORMAT_VERSION = 1
 
 CONFIG_TYPES = {
@@ -448,7 +450,7 @@ def configs_new():
             next=True,
         )
         config_name = request.form["name"]
-        if not match(r"^[\w_-]{1,255}$", config_name):
+        if not match(CONFIG_NAME_RX, config_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         verify_data_in_form(
@@ -604,7 +606,7 @@ def configs_edit(service: str, config_type: str, name: str):
             next=True,
         )
         new_name = secure_filename(request.form["name"])
-        if not match(r"^[\w_-]{1,255}$", new_name):
+        if not match(CONFIG_NAME_RX, new_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         # Forbid renaming template-based configs (content can still be edited)

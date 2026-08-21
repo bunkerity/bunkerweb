@@ -487,6 +487,7 @@
       "no_data": "Brak danych"
     },
     "window": {
+      "all_time": "Cały okres",
       "last_days": "Ostatnie {{days}} dni",
       "title": "Okno pulpitu"
     }
