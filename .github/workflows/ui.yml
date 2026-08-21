@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write # container-build.yml uploads the Trivy SARIF
     strategy:
       matrix:
         image: [bunkerweb, scheduler, ui]
