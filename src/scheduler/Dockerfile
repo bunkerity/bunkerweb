@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6 AS builder
+FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -40,7 +40,7 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
-FROM python:3.14-slim@sha256:cea0e6040540fb2b965b6e7fb5ffa00871e632eef63719f0ea54bca189ce14a6
+FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -55,6 +55,10 @@ RUN apt-get update && \
 
 # Fix CVEs
 RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
+# util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by python:3.14-slim.
+# Every package maps to a finding of this image's own pre-fix Trivy scan:
+#   CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

@@ -1,4 +1,4 @@
-FROM nginx:1.30.4@sha256:5cf90903deda2c5981b8ad05e7617ac010e389f0dde0ac83487c02c509281de6 AS builder
+FROM nginx:1.30.4@sha256:46ccc48fbb1f5a43167f2ee2c279c122b96eec5d976e7f4e1e0780f59a51b4d6 AS builder
 
 # glibc base (was Alpine): certbot-dns-multi's Go/CGO bridge cannot load on musl, so the image set
 # is standardizing on glibc. nginx:1.30.4 is the official Debian image: nginx + the nginx user are
@@ -78,7 +78,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.30.4@sha256:5cf90903deda2c5981b8ad05e7617ac010e389f0dde0ac83487c02c509281de6
+FROM nginx:1.30.4@sha256:46ccc48fbb1f5a43167f2ee2c279c122b96eec5d976e7f4e1e0780f59a51b4d6
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -90,6 +90,15 @@ RUN apt-get update && \
 
 # Fix CVEs
 RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 && rm -rf /var/lib/apt/lists/* # CVE-2026-55200 CVE-2026-55199 CVE-2026-7598 CVE-2025-15661
+# Every package below maps to a finding of this image's own pre-fix Trivy scan (gate flags:
+# --ignore-unfixed, UNKNOWN..CRITICAL). Nothing is a blanket upgrade.
+#   util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by nginx:1.30.4:
+#     CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
+#   image codecs inherited from the same base: CVE-2026-56208 (libaom3),
+#     CVE-2024-38949 (libde265-0), CVE-2025-68431 (libheif1 + its dav1d/libde265 plugins),
+#     libexpat1 CVE-2026-72522 2.8.2-1~deb13u1 -> 2.8.3-1~deb13u1 (the pre-refresh digest
+#     carried 2.7.1-2 / CVE-2025-59375; refreshing the base moved it to the newer pair)
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
