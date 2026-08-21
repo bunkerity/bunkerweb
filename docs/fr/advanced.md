@@ -615,6 +615,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remplacez par un mot de passe plus fort
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remplacez par une clé plus forte (voir la section Prérequis)
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -660,6 +663,9 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
       bw-redis:
         name: bw-redis
     ```
+
+    !!! info "Le volume `bw-ui-data` n'est pas facultatif"
+        Il contient les clés qui déchiffrent les secrets TOTP stockés. Sans lui, la 2FA est perdue à la prochaine recréation du conteneur — voir [La 2FA disparaît après une recréation du conteneur](web-ui.md).
 
     Démarrez la pile manager :
 
@@ -2717,6 +2723,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # Permet à l'UI de lire les logs syslog
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2773,6 +2780,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -3373,7 +3381,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3401,17 +3409,6 @@ services:
     }
     ```
 
-=== "CLI"
-
-    ```bash
-    # Ajouter le serveur MCP via HTTP
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # Ou via stdio (installation locale)
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
 Exemples de requêtes :
 
 ```
@@ -3433,7 +3430,7 @@ mcp:
 
   # Configuration de l'image
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # Paramètres du serveur MCP
   config:
@@ -3480,7 +3477,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Politiques réseau** pour restreindre la communication entre pods
     - **Port-forward** au lieu d'exposer externellement (recommandé pour le développement)
 
-Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://github.com/bunkerity/mcp-bunkerweb).
+Pour la documentation complète, visitez le [dépôt BunkerWeb MCP](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migration <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 

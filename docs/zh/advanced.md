@@ -615,6 +615,8 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # 请使用更强密码
           TOTP_ENCRYPTION_KEYS: "mysecret" # 请使用更强密钥（见前提条件）
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -653,6 +655,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -660,6 +663,9 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
       bw-redis:
         name: bw-redis
     ```
+
+    !!! info "`bw-ui-data` 卷不是可选项"
+        它保存着解密已存储 TOTP 密钥所需的密钥。缺少它，下一次重建容器时 2FA 就会丢失——参见[重建容器后 2FA 会丢失](web-ui.md)。
 
     启动 Manager 组合：
 
@@ -2715,6 +2721,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # 用于 Web UI 读取 syslog 日志
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2771,6 +2778,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -3371,7 +3379,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3399,17 +3407,6 @@ services:
     }
     ```
 
-=== "CLI"
-
-    ```bash
-    # 通过 HTTP 添加 MCP 服务器
-    claude mcp add --transport http bunkerweb --scope local http://localhost:8080/mcp
-
-    # 或通过 stdio（本地安装）
-    pip install mcp-bunkerweb
-    claude mcp add --transport stdio bunkerweb --scope local -- mcp-bunkerweb
-    ```
-
 查询示例：
 
 ```
@@ -3431,7 +3428,7 @@ mcp:
 
   # 容器镜像配置
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # MCP 服务器设置
   config:
@@ -3478,7 +3475,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - 使用**网络策略**限制 Pod 间通信
     - 使用 **port-forward** 而不是外部暴露（推荐用于开发环境）
 
-完整文档请访问 [BunkerWeb MCP 仓库](https://github.com/bunkerity/mcp-bunkerweb)。
+完整文档请访问 [BunkerWeb MCP 仓库](https://github.com/bunkerity/bunkerweb-mcp)。
 
 ## 迁移 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 

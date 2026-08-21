@@ -617,6 +617,8 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+        volumes:
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-db
@@ -655,6 +657,7 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
       bw-data:
       bw-storage:
       redis-data:
+      bw-ui-data:
 
     networks:
       bw-db:
@@ -662,6 +665,9 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
       bw-redis:
         name: bw-redis
     ```
+
+    !!! info "The `bw-ui-data` volume is not optional"
+        It holds the keys that decrypt stored TOTP secrets. Drop it and 2FA is lost on the next container recreation — see [2FA is gone after recreating the container](web-ui.md).
 
     Start the manager stack:
 
@@ -2725,6 +2731,7 @@ LOG_LEVEL_1=error
           <<: *bw-env
         volumes:
           - bw-logs:/var/log/bunkerweb # This is used to read the syslog logs from the Web UI
+          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -2781,6 +2788,7 @@ LOG_LEVEL_1=error
       bw-storage:
       redis-data:
       bw-logs:
+      bw-ui-data:
 
     networks:
       bw-universe:
@@ -3381,7 +3389,7 @@ services:
       - bw-mcp
 
   bw-mcp:
-    image: bunkerity/bunkerweb-mcp:v0.1.0
+    image: bunkerity/bunkerweb-mcp:0.2.0
     ports:
       - "127.0.0.1:8080:8080"
     environment:
@@ -3430,7 +3438,7 @@ mcp:
 
   # Container image configuration
   repository: docker.io/bunkerity/bunkerweb-mcp
-  tag: v0.1.0
+  tag: 0.2.0
 
   # MCP server settings
   config:
@@ -3477,7 +3485,7 @@ kubectl port-forward svc/mcp-bunkerweb 8080:8080
     - **Network policies** to restrict pod-to-pod communication
     - **Port-forward** instead of exposing externally (recommended for development)
 
-For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/mcp-bunkerweb).
+For full documentation, visit the [BunkerWeb MCP repository](https://github.com/bunkerity/bunkerweb-mcp).
 
 ## Migration <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#migration-pro}
 
