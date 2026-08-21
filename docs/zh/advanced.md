@@ -1,8 +1,8 @@
 # 高级用法
 
-GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/examples) 文件夹中提供了许多真实世界的用例示例。
+GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples) 文件夹中提供了许多真实世界的用例示例。
 
-我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/misc/integrations) 文件夹中找到。
+我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/misc/integrations) 文件夹中找到。
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
@@ -85,7 +85,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.14
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -96,7 +96,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.14
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -260,7 +260,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14-rc3
+          image: bunkerity/bunkerweb:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.14
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
         ```bash
         # 下载脚本及校验文件
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14-rc3/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14-rc3/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh.sha256
 
         # 校验完整性
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # 替换为 Worker IP
@@ -607,7 +607,7 @@ Manager 是集群的大脑，运行 Scheduler、数据库以及可选的 Web 界
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14-rc3
+        image: bunkerity/bunkerweb-ui:1.6.14
         ports:
           - "7000:7000" # 暴露 UI 端口
         environment:
@@ -693,7 +693,7 @@ Worker 负责处理进入的流量。
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -998,7 +998,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
 === "Docker"
@@ -1026,7 +1026,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1037,7 +1037,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1151,7 +1151,7 @@ systemctl status systemd-resolved
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1191,7 +1191,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
 === "Docker"
@@ -1214,7 +1214,7 @@ systemctl status systemd-resolved
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1257,7 +1257,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       volumes:
         - ./bw-data:/data
       ...
@@ -1327,7 +1327,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       volumes:
         - ./bw-data:/data
       ...
@@ -1572,7 +1572,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1595,7 +1595,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1610,7 +1610,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1661,7 +1661,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1891,7 +1891,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - published: 80
@@ -2021,7 +2021,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -2065,7 +2065,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2080,7 +2080,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -2174,7 +2174,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2187,7 +2187,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -2202,7 +2202,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.14-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.14
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2442,7 +2442,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2541,7 +2541,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           USE_IPv6: "yes"
 
@@ -2683,7 +2683,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # 这将是用于在调度程序中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.14
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2696,7 +2696,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.14
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -2713,7 +2713,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14-rc3
+        image: bunkerity/bunkerweb-ui:1.6.14
         environment:
           <<: *bw-env
         volumes:
@@ -2879,7 +2879,7 @@ log {
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.14-rc3
+    image: bunkerity/bunkerweb:1.6.14
     logging:
       driver: "json-file"
       options:
@@ -2988,7 +2988,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.14
     ```
 
     如果容器已存在，请重新创建以应用新的环境变量。
@@ -2999,7 +2999,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3018,7 +3018,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3061,7 +3061,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.14
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3330,12 +3330,12 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
 
 ### Docker Compose 示例
 
-完整示例可在 [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.14-rc3/examples/mcp-stack) 中找到：
+完整示例可在 [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples/mcp-stack) 中找到：
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.14-rc3
+    image: bunkerity/bunkerweb-api:1.6.14
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -4156,11 +4156,11 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.14-rc3
+            image: bunkerity/bunkerweb:1.6.14
             # ... 其他设置（自定义页面无需在此处设置环境变量）
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+            image: bunkerity/bunkerweb-scheduler:1.6.14
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4243,7 +4243,7 @@ BunkerWeb 模板使用 [lua-resty-template](https://github.com/bungle/lua-resty-
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+                  image: bunkerity/bunkerweb-scheduler:1.6.14
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
