@@ -8,6 +8,17 @@ actions:
     type: tool
     tool: "dirb"
     arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
+    # dirb is a provocation, not an assertion: it exists to make CrowdSec ban the runner, and
+    # `blocked_live` below is what actually checks the result. It cannot be left unbounded,
+    # because it deadlocks on its own success -- once the ban lands, its remaining requests
+    # hang and it never returns. Measured: 86112 requests sent, then 0 CPU for 6.5 minutes.
+    # 30s is chosen from what the scenario needs, not from taste: the ban fires after 4
+    # `http-admin-interface-probing` events, and dirb reaches the `admin*` words in roughly the
+    # first 1% of its scan, i.e. a few seconds. 30s is a large multiple of that, and it stays
+    # well under CROWDSEC_UPDATE_FREQUENCY (60) so it cannot push the stream-mode assertions
+    # past the bouncer's next pull. Too short a bound is safe: it reds `blocked_live` with a
+    # 200 rather than passing quietly.
+    timeout: 30
     restart_stack: false
   blocked_live:
     type: status
@@ -19,6 +30,10 @@ actions:
     type: tool
     tool: "dirb"
     arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
+    # Same bound, and here it also protects the next assertion rather than only this action:
+    # `not_yet_blocked_stream` demands a 200, so this scan must finish before the bouncer pulls
+    # the decision at CROWDSEC_UPDATE_FREQUENCY=60. Unbounded, it outlasted that window.
+    timeout: 30
     config:
       CROWDSEC_MODE: "stream"
     restart_stack: false

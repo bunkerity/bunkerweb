@@ -14,6 +14,11 @@ actions:
     config:
       REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
       REDIRECT_TO_STATUS_CODE: "302"
+  # Reaches the public internet: the runner dials www.example.com (loopback) but follows the
+  # redirect out to a third party's page, and asserts text from it. So this action reds when that
+  # page is reworded or retired, with nothing wrong in BunkerWeb -- and it cannot run offline. The
+  # bare-hostname guard does not see any of this: the external URL is in `config`, which is
+  # container-side and deliberately unchecked.
   check_redirection:
     type: string
     url: "http://www.example.com"

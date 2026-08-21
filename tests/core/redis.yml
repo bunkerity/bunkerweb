@@ -15,6 +15,15 @@ actions:
     restart_stack: false
   check_keys:
     type: redis
+    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
+    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
+    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
+    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
+    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    Docker:
+      port: 6390
+    Autoconf:
+      port: 6390
     query: "keys *"
     keys:
       - "plugin_bad_behavior_www.example.com_192.168.0.254"
@@ -30,6 +39,15 @@ actions:
       db: 0
   clear_keys:
     type: redis
+    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
+    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
+    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
+    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
+    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    Docker:
+      port: 6390
+    Autoconf:
+      port: 6390
     query: "FLUSHALL"
     result: "True"
     full_clean: true
@@ -53,6 +71,15 @@ actions:
     restart_stack: false
   check_keys_global_scope:
     type: redis
+    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
+    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
+    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
+    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
+    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    Docker:
+      port: 6390
+    Autoconf:
+      port: 6390
     query: "keys *"
     keys:
       - "plugin_bad_behavior_192.168.0.254"
@@ -68,6 +95,15 @@ actions:
       db: 0
   clear_keys_1:
     type: redis
+    # The plain path dials 127.0.0.1:<port>, and the container this spec inspects is the shared
+    # `redis` from tests/misc/docker/redis.yml -- which publishes 127.0.0.1:${TESTS_REDIS_PORT:-6390},
+    # NOT 6379, since the state store moved off the product's port. The action default 6379 is still
+    # correct on Linux (packaged redis-server, host network) and on All-in-one (6383, below), so the
+    # override is per-integration rather than a new default. Keep in step with TESTS_REDIS_PORT.
+    Docker:
+      port: 6390
+    Autoconf:
+      port: 6390
     query: "FLUSHALL"
     result: "True"
     full_clean: true

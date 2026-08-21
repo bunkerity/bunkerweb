@@ -14,6 +14,17 @@ actions:
       X-Frame-Options: "^SAMEORIGIN$"
       X-Content-Type-Options: "^nosniff$"
       X-DNS-Prefetch-Control: "^off$"
+    # The Content-Security-Policy asserted above is not BunkerWeb's: `tests/misc/index.php` sends
+    # it, and BunkerWeb keeps it verbatim because Content-Security-Policy is in the default
+    # KEEP_UPSTREAM_HEADERS list. Kubernetes has no PHP -- this spec nulls REMOTE_PHP there and the
+    # ingress backend is nginxdemos/nginx-hello, which sends no CSP -- so BunkerWeb emits its own
+    # plugin default instead. Same dependency on index.php that already excludes every cookie
+    # action below (bw_cookie comes from the same file); this header was the one that was missed.
+    # A red here means the CONTENT_SECURITY_POLICY default changed, not that a setting failed to
+    # reach the pods -- check_headers sets nothing.
+    Kubernetes:
+      response_headers:
+        Content-Security-Policy: "^object-src 'none'; form-action 'self'; frame-ancestors 'self';$"
   tweaked_headers_ssl:
     type: header
     url: "https://www.example.com"
