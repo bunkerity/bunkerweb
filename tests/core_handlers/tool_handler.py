@@ -3,7 +3,7 @@
 
 from logging import Logger
 from shlex import split
-from subprocess import run
+from subprocess import TimeoutExpired, run
 from typing import Any
 
 
@@ -11,10 +11,22 @@ def handle(LOGGER: Logger, action: Any) -> None:
     LOGGER.info(f"🔧 Running tool {action.tool!r} with arguments {action.arguments!r} ...")
 
     cmd = f"{action.tool} {action.arguments}"
+    # A tool that asserts on its own output must run to completion (the model refuses an explicit
+    # timeout there); everything else is a provocation and gets bounded so it cannot hang the run.
+    timeout = None if action.result else action.timeout
     try:
-        process = run(split(cmd), capture_output=True, text=True, check=False)
+        process = run(split(cmd), capture_output=True, text=True, check=False, timeout=timeout)
         exit_code = process.returncode
         ret = process.stdout + process.stderr
+    except TimeoutExpired:
+        # The model only allows a timeout on an action with no `result`, i.e. a provocation whose
+        # whole purpose is the state it leaves behind. Cutting it short cannot weaken the test:
+        # the NEXT action is the assertion, and if the provocation had not landed yet it reds
+        # there. crowdsec.yml is the case in point -- `dirb` triggers a ban and `blocked_live`
+        # demands the 403. Too short a bound shows up as a 200, never as a false pass.
+        LOGGER.info(f"🔧 Tool reached its {timeout}s bound and was stopped; treating the provocation as delivered")
+        LOGGER.info("🔧 Tool executed successfully")
+        return
     except BaseException as e:
         LOGGER.error(f"🔧 Failed to execute tool: {e}")
         exit_code = 1
