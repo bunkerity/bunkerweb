@@ -214,6 +214,97 @@ actions:
     headers:
       X-Forwarded-For: "203.0.113.43"
 
+  # --- group 3: the ban EXPIRES, so no unban ever runs -----------------------------------------
+  # This is the assertion the two groups above structurally cannot make. They both go through
+  # `bwcli unban`, so they pass on the `utils.remove_ban` purge alone (commit b47ccf824). Here the
+  # ban simply lapses -- BAD_BEHAVIOR_BAN_TIME expires, nothing calls remove_ban, and the only thing
+  # that can have cleared the counter is the delete `badbehavior.lua` does in the add_ban success
+  # branch at ban time. With BAN_TIME 20 and COUNT_TIME 600 the counter cannot have decayed either:
+  # its decrement is queued 600s out, so before the ban-time delete it sits at the threshold for ten
+  # minutes and the first offence after the ban lapses re-bans on the spot.
+  #
+  # Third address, and no `full_clean`: 203.0.113.44 has no history from the two groups above.
+  # Nothing inside the block restarts the stack -- a restart empties the shared dict, which empties
+  # the counter, and every assertion below would then pass against unfixed code.
+  expiry_reaches_the_threshold:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 5
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+    config:
+      SERVER_NAME: "www.example.com app1.example.com"
+      MULTISITE: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+      # Restated rather than inherited from group 1: an assertion that reads the answer out of an
+      # earlier block's config is one edit away from testing nothing.
+      USE_REAL_IP: "yes"
+      REAL_IP_FROM: "0.0.0.0/0"
+      BAD_BEHAVIOR_THRESHOLD: "5"
+      BAD_BEHAVIOR_BAN_TIME: "60"
+      BAD_BEHAVIOR_COUNT_TIME: "600"
+      BAD_BEHAVIOR_BAN_SCOPE: "service"
+  expiry_is_banned:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+  # BAN_TIME is 60s and ~10s have already passed; 75 more leaves a wide margin at both ends -- the
+  # 403 above still has ~50s of ban left even if the config push is slow, and the 200 here is well
+  # past expiry. COUNT_TIME (600s) is still an order of magnitude larger than BAN_TIME, so the
+  # counter cannot have decayed by itself and the discrimination below is unchanged. The 403s above
+  # were served by the ban itself and did not count -- `log()` returns early on a banned IP.
+  expiry_ban_lapsed:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 75
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+  # Exactly one request: `repeat` is omitted rather than set to 1, which would send two.
+  expiry_one_offence:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+  # The assertion this block exists for. Without the ban-time delete the counter is still at the
+  # threshold here and this returns 403.
+  expiry_one_offence_is_not_enough:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    delay: 10
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+  # ... and the counter restarted from zero rather than stopped counting: five more requests, six
+  # in total against a threshold of five, reach it again and the ban comes back.
+  expiry_five_more_offences:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    repeat: 4
+    restart_stack: false
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+  # Last action of the block: this one restarts the stack, so the next group's config applies.
+  expiry_the_threshold_bans_again:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    delay: 10
+    headers:
+      X-Forwarded-For: "203.0.113.44"
+
   blocked_requests_1:
     type: status
     url: "http://www.example.com/?id=/etc/passwd"
