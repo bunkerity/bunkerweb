@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 from pydantic import field_validator
 
-from .action import ActionBase, ActionData
+from .action import ActionBase, ActionData, check_embedded_runner_urls
 
 
 class ScriptData(ActionData):
@@ -18,6 +18,9 @@ class ScriptData(ActionData):
     def check_script(cls, v: List[str]) -> List[str]:
         if not v or not all(isinstance(part, str) and part for part in v):
             raise ValueError("script must be a non-empty list of non-empty strings")
+        # argv runs on the runner: a URL in any element is dialled from here, not from a container.
+        for part in v:
+            check_embedded_runner_urls(part)
         return v
 
 

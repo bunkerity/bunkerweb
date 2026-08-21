@@ -5,7 +5,7 @@ from typing import Literal, Optional
 
 from pydantic import field_validator, model_validator
 
-from .action import ActionBase, ActionData
+from .action import ActionBase, ActionData, check_embedded_runner_urls
 
 
 class ToolData(ActionData):
@@ -19,6 +19,16 @@ class ToolData(ActionData):
     def check_url(cls, v: str) -> str:
         if v:
             warning("The URL property is only a dummy value, it won't be used in the tests.")
+        return v
+
+    @field_validator("arguments")
+    @classmethod
+    def check_arguments(cls, v: Optional[str]) -> Optional[str]:
+        # `tool` runs on the runner, so a URL embedded in its argv has to resolve there the same
+        # way a `url` field does. crowdsec.yml's dirb call is loopback by the author's choice, not
+        # because anything enforced it.
+        if v:
+            check_embedded_runner_urls(v)
         return v
 
     @model_validator(mode="after")

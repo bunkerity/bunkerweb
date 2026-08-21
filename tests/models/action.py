@@ -1,7 +1,58 @@
 from logging import warning
 from pydantic import BaseModel, field_validator, model_validator
-from re import match
+from ipaddress import ip_address
+from re import compile as re_compile, match
+from urllib.parse import urlsplit
 from typing import Any, Dict, Literal, Optional, Set, Tuple
+
+
+URL_IN_TEXT = re_compile(r"https?://[^\s'\"`]+")
+
+
+def check_runner_host(value: str) -> None:
+    """Raise if `value` is a URL the RUNNER dials whose host cannot resolve deterministically.
+
+    A bare container name does not: the suite expects dnsmasq to answer it, but a workstation asks
+    its own resolver, and a DNS `search` domain turns the bare name into an FQDN in some other zone.
+    On the machine this was written on that zone is a WILDCARD, so *every* bare name resolves to a
+    real host -- `custom-api`, `app1` and `definitely-not-a-real-host-xyz9` all return the same
+    address. Nothing can ever NXDOMAIN, so the mistake never looks like DNS: it looks like a
+    ten-second connect timeout on an unrelated action. That cost `bunkernet` a full run before
+    anyone read the resolver.
+
+    Deterministic hosts only: a dotted name (`www.example.com` comes from /etc/hosts), an IP
+    literal, or `localhost`. Reach a container by its PUBLISHED port on loopback instead -- which is
+    what the Kubernetes overrides in bunkernet.yml already did.
+
+    Container-side settings are NOT checked and must not be: `BUNKERNET_SERVER`,
+    `WHITELIST_IP_URLS`, `CROWDSEC_API` and friends live in `config`, are resolved inside the
+    network where dnsmasq is authoritative, and a bare name there is correct.
+    """
+    if "%" in value:  # ui specs template their base URL in later
+        return
+    host = urlsplit(value).hostname  # strips userinfo, so `user:pass@host` cannot be misread
+    if not host or host == "localhost" or "." in host:
+        return
+    try:
+        ip_address(host)
+    except ValueError:
+        raise ValueError(
+            f"url host {host!r} is a bare name the runner cannot resolve deterministically; "
+            "use a *.example.com name or the published port on 127.0.0.1"
+        )
+
+
+def check_embedded_runner_urls(text: str) -> None:
+    """Same rule, for a runner-side field that *embeds* URLs rather than being one.
+
+    `tool` arguments and `script` argv are executed on the runner, so a bare name there fails
+    exactly like one in `url` -- and with no `url` field involved for that guard to see. This is the
+    blind spot the first version shipped with: `crowdsec.yml` passes
+    `'http://127.0.0.1 -H "Host: www.example.com" -f'`, which was loopback by the author's choice
+    and by nothing enforcing it.
+    """
+    for match_ in URL_IN_TEXT.finditer(text or ""):
+        check_runner_host(match_.group(0))
 
 
 class ActionData(BaseModel):
@@ -72,6 +123,8 @@ class ActionData(BaseModel):
     def check_url(cls, v: str) -> str:
         if not v:
             raise ValueError("url must not be empty")
+
+        check_runner_host(v)
         return v
 
     @field_validator("headers")
