@@ -38,7 +38,9 @@ which matches how the piggyback actually works within a plugin's own cache direc
 
 import ast
 import json
+import re
 from pathlib import Path
+from shutil import copytree
 
 import pytest
 
@@ -449,6 +451,187 @@ def test_every_core_job_is_classified():
     """
     total = sum(len(json.loads(m.read_text(encoding="utf-8")).get("jobs") or []) for m in CORE.glob("*/plugin.json"))
     assert total >= 35, f"only {total} core jobs found -- the plugin walker is not seeing the tree"
+
+
+# --------------------------------------------------------------------------------------
+# Third predicate: material read at RENDER time needs a re-render, and a push is not one
+# --------------------------------------------------------------------------------------
+# Exit 1 buys a job two things: its cache tree is pushed to every instance, and every instance is
+# told to reload. For a plugin whose Lua reads the cache at request time that is enough -- the file
+# is there, the next request picks it up. It is **not** enough when the consumer is a Jinja conf
+# template, because the template runs on the *scheduler*, at generation time, and what lands on the
+# instance is the already-rendered result. `pathlib.Path(...).is_file()` in a template is answered
+# once, when the conf is generated. Reloading nginx re-reads that rendered conf; it does not re-ask
+# the question.
+#
+# So a job that caches material a template gates on, or inlines, has a third requirement on top of
+# the two above: it must ask for a re-generation. The one mechanism that exists is
+# `db.checked_changes(["config"], plugins_changes=[<plugin id>], value=True)`, which sets
+# `Plugins.config_changed`; `get_metadata()` exports it as `plugins_config_changed` and the
+# scheduler acts on it at `src/scheduler/main.py:1131` by dispatching `push-configs`, which
+# re-renders before it pushes.
+#
+# Measured on 2026-08-20, both directions on one stack: with `realip-download` exiting 1 and no
+# flag, a changed `combined.list` reached `/var/cache/bunkerweb` on the instance and `POST /reload`
+# returned 200, and `grep -rn 198.51.100 /etc/nginx/` found nothing -- the rendered
+# `set_real_ip_from` lines still carried the old ranges. With the flag, the same change produced
+# "Plugins config changed, generating ...", a push-configs run, and the ranges in `/etc/nginx/` and
+# in `nginx -T`.
+#
+# **This is a class, not one bug.** Three plugins hold it: `realip` inlines its list with
+# `read_text()`, `modsecurity` walks `crs-plugins.json` to emit one `include` per CRS plugin file,
+# and `reverseproxy` gates `proxy_ssl_verify` / `proxy_ssl_certificate` on `is_file()` -- that last
+# one fails *closed on the security side*, emitting `proxy_ssl_verify off;` and keeping it. The
+# same shape appeared twice more the same day outside this file's reach: a supervisord `command=`
+# truncated at an inline comment, and a digest marker that would let a needed push be skipped.
+# Every one of them leaves the observable surface healthy while the thing itself is absent.
+#
+# Detection is deliberately coarse, and coarse in the accusing direction this time: a template that
+# names a plugin's cache directory *and* probes the filesystem anywhere in the same file is treated
+# as a render-time consumer, without proving the two are on the same line. A false accusation here
+# costs one `checked_changes` call in a job that may not have strictly needed it; a miss costs a
+# silently inert plugin. The ownership is by *path*, not by directory: `grpc.conf` reads
+# `/var/cache/bunkerweb/reverseproxy/...`, and it is `reverseproxy`'s job that has to flag.
+RENDER_TIME_PROBES = (".is_file()", ".is_dir()", ".read_text()", ".read_bytes()", ".exists()", ".iterdir()", ".glob(")
+TEMPLATE_SUFFIXES = (".conf", ".modsec")
+
+
+def _cache_dir_referenced(text: str, plugin_id: str) -> bool:
+    """``/var/cache/bunkerweb/realip`` must not match a hypothetical ``realipv6`` plugin."""
+    return re.search(rf"{re.escape(CACHE_ROOT)}/{re.escape(plugin_id)}(?![0-9A-Za-z_-])", text) is not None
+
+
+def render_time_readers(plugin_id: str, core_dir=CORE) -> list:
+    """Conf templates -- in any plugin -- that read this plugin's cache while rendering."""
+    readers = []
+    for candidate in sorted(core_dir.rglob("*")):
+        if not candidate.is_file() or candidate.suffix not in TEMPLATE_SUFFIXES or "confs" not in candidate.parts:
+            continue
+        text = candidate.read_text(encoding="utf-8", errors="ignore")
+        if _cache_dir_referenced(text, plugin_id) and any(probe in text for probe in RENDER_TIME_PROBES):
+            readers.append(candidate.relative_to(core_dir).as_posix())
+    return readers
+
+
+def asks_for_regeneration(plugin_dir: Path) -> bool:
+    """True if some job of this plugin calls ``checked_changes`` naming its own id.
+
+    Generous on purpose: the id is looked for anywhere in the call rather than only inside the
+    ``plugins_changes`` keyword, so a job that spells the argument differently still counts.
+    """
+    jobs_dir = plugin_dir / "jobs"
+    if not jobs_dir.is_dir():
+        return False
+    for source_file in sorted(jobs_dir.rglob("*.py")):
+        try:
+            tree = ast.parse(source_file.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            return True  # unparseable is not provably missing the call; never accuse on a guess
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "checked_changes"):
+                continue
+            if any(isinstance(n, ast.Constant) and n.value == plugin_dir.name for n in ast.walk(node)):
+                return True
+    return False
+
+
+def plugins_whose_material_never_gets_rendered(core_dir=CORE) -> list:
+    """Plugins with a render-time consumer, a job that feeds it, and no re-render request."""
+    broken = []
+    for manifest in sorted(core_dir.glob("*/plugin.json")):
+        plugin_dir = manifest.parent
+        if not (json.loads(manifest.read_text(encoding="utf-8")).get("jobs") or []):
+            continue  # nothing writes the cache on a schedule, so nothing can go stale behind a render
+        readers = render_time_readers(plugin_dir.name, core_dir)
+        if readers and not asks_for_regeneration(plugin_dir):
+            broken.append((plugin_dir.name, readers))
+    return broken
+
+
+def test_every_render_time_consumer_has_a_job_that_asks_for_a_re_render():
+    """A failure means: a template decides on this plugin's cached files while rendering, a job
+    writes those files, and no job asks for the re-render that would make them count. Fix the job
+    -- ``JOB.db.checked_changes(["config"], plugins_changes=[<id>], value=True)`` on the branch
+    that changed the material -- not this test."""
+    broken = plugins_whose_material_never_gets_rendered()
+    assert broken == [], "plugin(s) whose cached material a push can never apply: " + "; ".join(
+        f"{plugin} (rendered by {', '.join(readers)})" for plugin, readers in broken
+    )
+
+
+class TestRenderTimeDetectorBites:
+    """Anti-vacuity for the third predicate."""
+
+    @staticmethod
+    def _plant(tmp_path: Path, *, job_source: str, template: str, plugin_id: str = "acme") -> Path:
+        core = tmp_path / "core"
+        jobs = core / plugin_id / "jobs"
+        confs = core / plugin_id / "confs" / "server-http"
+        jobs.mkdir(parents=True)
+        confs.mkdir(parents=True)
+        (core / plugin_id / "plugin.json").write_text(
+            json.dumps({"id": plugin_id, "jobs": [{"name": f"{plugin_id}-dl", "file": "job.py", "every": "hour"}]}), encoding="utf-8"
+        )
+        (jobs / "job.py").write_text(job_source, encoding="utf-8")
+        (confs / "thing.conf").write_text(template, encoding="utf-8")
+        return core
+
+    INLINING_TEMPLATE = '{% if pathlib.Path("/var/cache/bunkerweb/acme/list.txt").is_file() %}\nset_thing on;\n{% endif %}\n'
+    UNFLAGGED_JOB = "from sys import exit as sys_exit\nstatus = 0\nif changed:\n    JOB.cache_file('list.txt', data)\n    status = 1\nsys_exit(status)\n"
+    FLAGGED_JOB = UNFLAGGED_JOB.replace("    status = 1", "    status = 1\n    JOB.db.checked_changes(['config'], plugins_changes=['acme'], value=True)")
+
+    def test_a_render_time_reader_with_no_flag_is_caught(self, tmp_path):
+        core = self._plant(tmp_path, job_source=self.UNFLAGGED_JOB, template=self.INLINING_TEMPLATE)
+        assert plugins_whose_material_never_gets_rendered(core) == [("acme", ["acme/confs/server-http/thing.conf"])]
+
+    def test_the_flag_clears_it(self, tmp_path):
+        core = self._plant(tmp_path, job_source=self.FLAGGED_JOB, template=self.INLINING_TEMPLATE)
+        assert plugins_whose_material_never_gets_rendered(core) == []
+
+    def test_a_flag_naming_another_plugin_does_not_count(self, tmp_path):
+        """``plugins_changes=['realip']`` inside acme's job flags realip, not acme."""
+        core = self._plant(tmp_path, job_source=self.FLAGGED_JOB.replace("'acme'", "'realip'"), template=self.INLINING_TEMPLATE)
+        assert [p for p, _ in plugins_whose_material_never_gets_rendered(core)] == ["acme"]
+
+    def test_a_template_that_only_names_the_path_is_not_a_render_time_reader(self, tmp_path):
+        """Emitting a path for nginx to open at runtime is fine -- a push lands the file in time."""
+        core = self._plant(tmp_path, job_source=self.UNFLAGGED_JOB, template="ssl_certificate /var/cache/bunkerweb/acme/cert.pem;\n")
+        assert plugins_whose_material_never_gets_rendered(core) == []
+
+    def test_a_probe_on_a_foreign_path_is_not_this_plugin_s_problem(self, tmp_path):
+        core = self._plant(tmp_path, job_source=self.UNFLAGGED_JOB, template='{% if pathlib.Path("/etc/ssl/ca.pem").is_file() %}x{% endif %}\n')
+        assert plugins_whose_material_never_gets_rendered(core) == []
+
+    def test_a_plugin_with_no_job_is_not_accused(self, tmp_path):
+        """``mtls`` reads operator-supplied paths: no job writes them, so no job can flag them."""
+        core = self._plant(tmp_path, job_source=self.UNFLAGGED_JOB, template=self.INLINING_TEMPLATE)
+        manifest = core / "acme" / "plugin.json"
+        manifest.write_text(json.dumps({"id": "acme", "jobs": []}), encoding="utf-8")
+        assert plugins_whose_material_never_gets_rendered(core) == []
+
+    def test_the_detector_still_sees_the_real_tree(self):
+        """Anti-vacuity against ``src/``: these three are the known render-time consumers, and a
+        change that makes the detector stop seeing them is a broken detector, not a fixed tree."""
+        seen = {plugin for plugin in ("realip", "modsecurity", "reverseproxy") if render_time_readers(plugin)}
+        assert seen == {"realip", "modsecurity", "reverseproxy"}, f"render-time detector went blind: only saw {sorted(seen)}"
+
+    @pytest.mark.parametrize("plugin_id", ("realip", "modsecurity", "reverseproxy"))
+    def test_each_real_fix_goes_red_when_removed(self, tmp_path, plugin_id):
+        """Mutation on a copy -- ``src/`` is never touched. Pins all three fixes at once."""
+        src_plugin = CORE / plugin_id
+        core = tmp_path / plugin_id / "core"
+        dst = core / plugin_id
+        copytree(src_plugin, dst)
+        assert plugins_whose_material_never_gets_rendered(core) == [], f"{plugin_id} is not flagging its own regeneration"
+
+        removed = 0
+        for source_file in sorted((dst / "jobs").rglob("*.py")):
+            lines = source_file.read_text(encoding="utf-8").splitlines(keepends=True)
+            kept = [line for line in lines if "checked_changes" not in line]
+            removed += len(lines) - len(kept)
+            source_file.write_text("".join(kept), encoding="utf-8")
+        assert removed == 1, f"expected exactly one checked_changes call in {plugin_id}'s jobs, found {removed}"
+        assert [p for p, _ in plugins_whose_material_never_gets_rendered(core)] == [plugin_id]
 
 
 if __name__ == "__main__":  # pragma: no cover - convenience for a quick manual look
