@@ -21,7 +21,7 @@ from flask_login import current_user
 from flask import redirect, url_for
 
 from app.routes.logout import logout_page
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, STATIC_PATH_PREFIXES
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, is_static_path
 
 from common_utils import get_version  # type: ignore
 
@@ -154,7 +154,7 @@ class BiscuitMiddleware:
         # it would let any authenticated non-admin (e.g. a PRO "reader") delete cache,
         # because these routes have no role check of their own. Let them flow through the
         # operation policy below (GET->read, POST->write) like every other route.
-        if request.path.startswith(STATIC_PATH_PREFIXES + ("/logout",)):
+        if is_static_path(request.path, "/logout"):
             return
 
         token_str: Optional[str] = session.get("biscuit_token")  # Retrieve token from session
