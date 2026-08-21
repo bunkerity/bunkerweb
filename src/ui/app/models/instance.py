@@ -8,6 +8,7 @@ from os import getenv
 from threading import Lock
 from time import monotonic
 from traceback import format_exc
+from re import fullmatch
 from typing import Any, List, Literal, Optional, Tuple, Union
 
 from urllib.parse import quote
@@ -15,6 +16,7 @@ from urllib.parse import quote
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
+from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES
 
 # Short-lived process-local cache for home page aggregates. /home recomputes a
@@ -242,6 +244,26 @@ class Instance:
         return self.apiCaller.send_to_apis("GET", f"/{plugin_endpoint}", response=True)
 
 
+def _parse_count(value: Any, default: int = 0) -> int:
+    r"""Parse a plain integer or `k`/`m` shorthand (`10k`, `1m`).
+
+    Mirrors the Lua `parse_count` in `core/metrics/metrics.lua:361` -- and, through it, the
+    `^\d+[kKmM]?$` regex the setting declares -- so the UI's scan cap honours the same value the
+    Redis list is actually trimmed to. Without it `int("10k")` raises on the *default*
+    configuration and the caller's bare `except` turned that into a silent 100000, i.e. ten times
+    the configured cap.
+
+    Anything the Lua parser rejects (`1.5k`, negatives, exponents) returns `default` here too:
+    diverging from it would put the UI's idea of the cap out of step with the runtime's.
+    """
+    if isinstance(value, (int, float)):
+        return int(value)
+    match = fullmatch(r"(\d+)([km]?)", str(value).strip().lower())
+    if not match:
+        return default
+    return int(match.group(1)) * {"": 1, "k": 1000, "m": 1000000}[match.group(2)]
+
+
 class InstancesUtils:
     _REPORT_PANE_FIELDS = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
     _REPORT_PANE_MAX_VALUES = 200
@@ -253,10 +275,14 @@ class InstancesUtils:
         default_max = 100000
         try:
             config = self.__api_client.get_global_settings(full=True)
-            value = int(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max))
-            return max(0, value)
-        except Exception:
+        except (ApiClientError, ApiUnavailableError) as e:
+            # Narrow on purpose. The bare `except` this replaces was the actual mechanism of the
+            # 10x defect: it caught `int("10k")`'s ValueError and reported the fallback as if it
+            # were the configured value. An unreachable API is the one thing that legitimately
+            # lands here, and it is worth a log line rather than silence.
+            LOGGER.debug(f"Couldn't read METRICS_MAX_BLOCKED_REQUESTS_REDIS, falling back to {default_max}: {e.message}")
             return default_max
+        return max(0, _parse_count(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max), default_max))
 
     def _get_redis_scan_start_index(self, redis_client, max_requests: int) -> int:
         if max_requests <= 0:
