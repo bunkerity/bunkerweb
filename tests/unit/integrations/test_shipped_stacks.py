@@ -241,13 +241,119 @@ def test_every_service_comes_back_after_it_dies(manifest):
     """Compose does not restart a container unless told to, and the scheduler does exit on
     purpose -- it gives up once its error budget is spent. Without a policy that exit is
     permanent: no config change is applied and no job is dispatched again, silently, until
-    somebody notices. install-bunkerweb.sh has always set one; these did not."""
+    somebody notices. install-bunkerweb.sh has always set one; these did not.
+
+    The Swarm stacks answer the same question in the other vocabulary. `docker stack deploy`
+    IGNORES the top-level `restart:` key outright -- a swarm.*.yml carrying it would read as
+    protected here and have no restart policy at all in production, which is the worst of both.
+    So they are required to carry `deploy.restart_policy` instead, and forbidden the other spelling.
+    """
     text = manifest.read_text(encoding="utf-8")
     services = text.count("\n    image:")
+
+    if manifest.name.startswith("swarm."):
+        assert 'restart: "unless-stopped"' not in text, f"{manifest.name} uses `restart:`, which docker stack deploy ignores"
+        assert (
+            services and text.count("\n      restart_policy:") == services
+        ), f"{manifest.name} leaves some of its {services} services with no deploy.restart_policy"
+        return
 
     assert (
         services and text.count('\n    restart: "unless-stopped"') == services
     ), f"{manifest.name} leaves some of its {services} services with no restart policy"
+
+
+# ------------------------------------------------------------------- the Swarm reference stacks
+
+SWARM = [path for path in MANIFESTS if path.name.startswith("swarm.")]
+
+# Compose keys `docker stack deploy` accepts in the file and then silently does nothing with.
+# A stack ported mechanically from autoconf.*.yml carries all of them and races on every deploy.
+IGNORED_BY_STACK_DEPLOY = ("container_name:", "depends_on:", "links:", "profiles:")
+
+
+def test_there_are_swarm_stacks_to_check():
+    """RULE 13 floor: without this every assertion below is vacuously true the day the glob breaks."""
+    assert len(SWARM) >= 8, f"expected the four backends with and without the UI, found {[path.name for path in SWARM]}"
+
+
+@pytest.mark.parametrize("manifest", SWARM, ids=lambda path: path.name)
+def test_a_swarm_stack_never_relies_on_a_key_stack_deploy_ignores(manifest):
+    """These are accepted by the parser and dropped by the orchestrator -- no warning, no error.
+    1.7's boot order is heavily sequenced (autoconf waits on the API, the scheduler on the API,
+    the worker on the broker), so a stack that leans on `depends_on` races on every single deploy
+    and the failures get filed as "Swarm being unstable"."""
+    text = manifest.read_text(encoding="utf-8")
+    # `depends_on` appears in the prose header explaining why it is absent; only real keys count.
+    present = [key for key in IGNORED_BY_STACK_DEPLOY if f"\n    {key}" in text or f"\n      {key}" in text]
+    assert not present, f"{manifest.name} declares {present}, which docker stack deploy ignores"
+
+
+@pytest.mark.parametrize("manifest", SWARM, ids=lambda path: path.name)
+def test_swarm_bunkerweb_labels_are_service_labels_not_container_labels(manifest):
+    """The single most expensive mistake available here, and it is completely silent.
+
+    `SwarmController` reads `Spec.Labels` off the SERVICE (see `_get_controller_swarm_services`
+    and `_to_services`). In a stack file that is `deploy.labels`. A `labels:` block at service
+    level sets CONTAINER labels instead -- the stack deploys perfectly, every task runs, and the
+    controller never discovers a single instance or service. Nothing anywhere reports an error.
+    """
+    document = _compose_config(manifest.read_text(encoding="utf-8"))
+    for name, service in document["services"].items():
+        container_labels = service.get("labels") or {}
+        entries = container_labels if not isinstance(container_labels, dict) else list(container_labels)
+        offenders = [entry for entry in entries if str(entry).startswith("bunkerweb.")]
+        assert not offenders, f"{manifest.name}: {name} puts {offenders} in container labels; the controller only reads deploy.labels"
+
+    deploy_labels = [
+        label for service in document["services"].values() for label in (service.get("deploy", {}).get("labels") or []) if str(label).startswith("bunkerweb.")
+    ]
+    assert deploy_labels, f"{manifest.name} declares no bunkerweb.* service label at all"
+
+
+@pytest.mark.parametrize("manifest", SWARM, ids=lambda path: path.name)
+def test_the_swarm_bunkerweb_service_is_global(manifest):
+    """The controller registers instances as `<service>.<NodeID>.<TaskID>`, which only resolves
+    for a global service; a replicated one is `<service>.<slot>.<TaskID>` and unreachable. The
+    controller refuses it at runtime -- shipping a stack that trips its own guard is worse."""
+    bunkerweb = _compose_config(manifest.read_text(encoding="utf-8"))["services"]["bunkerweb"]
+    assert bunkerweb["deploy"]["mode"] == "global", f"{manifest.name}: the bunkerweb service must be mode: global"
+
+
+@pytest.mark.parametrize("manifest", SWARM, ids=lambda path: path.name)
+def test_every_swarm_service_owning_a_volume_is_pinned_to_the_state_node(manifest):
+    """A named volume in Swarm is LOCAL TO A NODE. Reschedule the broker and it restarts against
+    an empty AOF: every queued job is gone, silently. Same for bw-storage, bw-worker-storage and
+    bw-data. A single-node CI gate cannot catch this -- on one node nothing is ever rescheduled --
+    so the placement constraint is the only thing standing between a reader and silent job loss."""
+    document = _compose_config(manifest.read_text(encoding="utf-8"))
+    named = set(document.get("volumes") or {})
+
+    unpinned = []
+    for name, service in document["services"].items():
+        # normalized by `docker compose config`:each mount is {"type": ..., "source": ...}
+        mounts = service.get("volumes") or []
+        if not any(mount.get("source") in named for mount in mounts):
+            continue
+        constraints = service.get("deploy", {}).get("placement", {}).get("constraints") or []
+        if not any("node.labels.bw-state" in constraint for constraint in constraints):
+            unpinned.append(name)
+
+    assert not unpinned, f"{manifest.name}: {unpinned} own a named volume with no node.labels.bw-state constraint"
+
+
+@pytest.mark.parametrize("manifest", SWARM, ids=lambda path: path.name)
+def test_swarm_publishes_bunkerweb_in_host_mode(manifest):
+    """The default routing mesh source-NATs every connection, so BunkerWeb sees the ingress
+    network's address rather than the client's -- and every IP-based decision it makes (whitelist,
+    blacklist, country, rate limit, bans) is then taken against the wrong address. That is a WAF
+    silently failing open, with a stack that looks entirely healthy."""
+    ports = _compose_config(manifest.read_text(encoding="utf-8"))["services"]["bunkerweb"]["ports"]
+    assert ports, f"{manifest.name}: the bunkerweb service publishes nothing"
+    for port in ports:
+        assert (
+            isinstance(port, dict) and port.get("mode") == "host"
+        ), f"{manifest.name}: port {port} goes through the routing mesh, which hides the client IP from the WAF"
 
 
 @pytest.mark.parametrize("manifest", COMPOSE, ids=lambda path: path.name)

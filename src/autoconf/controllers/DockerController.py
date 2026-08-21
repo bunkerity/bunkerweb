@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
 from os import getenv
-from contextlib import suppress
-from time import sleep, time
 from typing import Any, Dict, List
 from threading import Lock
 from docker import DockerClient
 from re import compile as re_compile, split as re_split
-from traceback import format_exc
 
 from docker.models.containers import Container
 from docker.errors import DockerException
@@ -21,9 +18,6 @@ class DockerController(Controller):
         self.__internal_lock = Lock()
         # Protected alias so the base-class settings recheck worker shares the same lock object.
         self._internal_lock = self.__internal_lock
-        self.__pending_apply = False
-        self.__last_event_time = 0.0
-        self.__debounce_delay = 2  # seconds
         self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
@@ -266,98 +260,11 @@ class DockerController(Controller):
         self._set_autoconf_loaded()
         self._start_settings_recheck_worker()
         self._logger.info("Listening for Docker events ...")
-        locked = False
-        error = False
-        applied = False
-        listening_logged = True
-        while True:
-            try:
-                for event in self.__client.events(decode=True, filters={"type": "container"}):
-                    applied = False
-                    self.__internal_lock.acquire()
-                    locked = True
-                    if not self.__process_event(event):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    self._first_start = False
-
-                    # Mark event received and update time
-                    self.__pending_apply = True
-                    self.__last_event_time = time()
-                    self.__internal_lock.release()
-                    locked = False
-
-                    # Wait for debounce period
-                    while (time() - self.__last_event_time) < self.__debounce_delay:
-                        sleep(0.1)
-
-                    # Debounce period passed, try to apply
-                    self.__internal_lock.acquire()
-                    locked = True
-
-                    # Check if another event updated the time while we were waiting
-                    if (time() - self.__last_event_time) < self.__debounce_delay:
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-
-                    if not self.__pending_apply:
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-
-                    self.__pending_apply = False
-
-                    try:
-                        to_apply = False
-                        with self._api.expect_errors():
-                            while not applied:
-                                waiting = self.have_to_wait()
-                                self._update_settings()
-                                self._instances = self.get_instances()
-                                self._services = self.get_services()
-                                self._configs = self.get_configs()
-
-                                if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
-                                    if locked:
-                                        self.__internal_lock.release()
-                                        locked = False
-                                    applied = True
-                                    continue
-
-                                to_apply = True
-                                listening_logged = False
-                                if waiting:
-                                    sleep(1)
-                                    continue
-
-                                self._logger.info("Batched Docker event(s), deploying configuration...")
-                                if not self.apply_config():
-                                    self._logger.error("Error while deploying new configuration")
-                                else:
-                                    self._logger.info("Successfully deployed new configuration 🚀")
-                                    self._set_autoconf_loaded()
-                                applied = True
-                    except BaseException:
-                        self._logger.error(f"Exception while processing Docker event :\n{format_exc()}")
-                    finally:
-                        if applied and not listening_logged:
-                            self._logger.info("Listening for Docker events ...")
-                            listening_logged = True
-
-                    if locked:
-                        self.__internal_lock.release()
-                        locked = False
-            except:
-                self._logger.error(f"Exception while reading Docker event :\n{format_exc()}")
-                error = True
-            finally:
-                if locked:
-                    with suppress(BaseException):
-                        self.__internal_lock.release()
-                    locked = False
-                if error is True:
-                    self._logger.warning("Got exception, retrying in 10 seconds ...")
-                    sleep(10)
-                    error = False
+        # The debounce/batch/apply loop lives in Controller._run_event_loop, shared with
+        # SwarmController -- the two carried near-identical copies of it.
+        self._run_event_loop(
+            events=lambda: self.__client.events(decode=True, filters={"type": "container"}),
+            process_event=self.__process_event,
+            label="Docker",
+            lock=self.__internal_lock,
+        )

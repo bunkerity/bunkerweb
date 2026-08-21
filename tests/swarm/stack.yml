@@ -1,0 +1,208 @@
+# The Swarm stack the `swarm` core spec deploys. Not a compose file: `docker stack deploy` reads
+# it, so `container_name`, `depends_on`, `links`, `profiles` and the top-level `restart:` key are
+# all silently ignored and none of them appear here. Ordering comes from each component's own
+# readiness loop plus `deploy.restart_policy`; a service that starts before its dependency retries.
+#
+# Deliberately self-contained and NOT modelled on tests/docker/*.yml: those are compose files the
+# harness drives, and this one has to survive being deployed beside them on the same daemon.
+# Everything that could collide is moved:
+#
+#   networks   stack-scoped (no `name:` override) -- the harness owns bridge networks literally
+#              called bw-universe / bw-services / bw-db, and a `name:` here would fight them
+#   subnet     10.55.60.0/24 -- the harness holds 10.20.30.0/24, 192.168.0.0/24 and 10.10.10.0/24
+#   ports      8080/8443 and 127.0.0.1:8890 -- the harness stack holds 80, 443 and 127.0.0.1:8888
+#
+# SQLite on purpose: one less service to converge, and on a single node the local volume the
+# scheduler, API and worker share is stable. All three mount the SAME /data because with a
+# sqlite:// DSN the database IS a file in there.
+
+x-env: &env
+  DATABASE_URI: "sqlite:////data/db.sqlite3"
+  SWARM_MODE: "yes"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "secret"
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+  LOG_LEVEL: "info"
+  DISABLE_DEFAULT_SERVER: "no"
+  USE_BUNKERNET: "no"
+  SEND_ANONYMOUS_REPORT: "no"
+  USE_BLACKLIST: "no"
+  USE_DNSBL: "no"
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:tests
+    deploy:
+      # REQUIRED. The controller registers each task as `<service>.<NodeID>.<TaskID>`, which only
+      # resolves for a global service. SwarmController refuses a replicated INSTANCE service.
+      mode: global
+      labels:
+        # SERVICE labels (deploy.labels), not container labels: SwarmController reads Spec.Labels.
+        - "bunkerweb.INSTANCE=yes"
+        - "bunkerweb.NAMESPACE=bw-swarm-test"
+      restart_policy:
+        condition: any
+    labels:
+      # A CONTAINER label as well, and on purpose. The BunkerWeb image bakes `bunkerweb.INSTANCE`
+      # (src/bw/Dockerfile), so any *Docker* autoconf controller on this daemon -- the harness's
+      # own, another checkout's -- queries the whole daemon and would adopt these tasks as its
+      # instances. Namespacing them at container level keeps this stack out of its inventory.
+      bunkerweb.NAMESPACE: "bw-swarm-test"
+    ports:
+      # host mode, not the routing mesh: the mesh source-NATs and the WAF would judge every
+      # request against the ingress address instead of the client's.
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+      - target: 8443
+        published: 8443
+        protocol: tcp
+        mode: host
+    environment:
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.55.60.0/24 172.16.0.0/12"
+      MULTISITE: "yes"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:tests
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager" # the Swarm API is only served by a manager
+      restart_policy:
+        condition: any
+    environment:
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
+      # Without this the controller adopts every bunkerweb.INSTANCE service on the daemon.
+      NAMESPACES: "bw-swarm-test"
+      # Exercised by the spec: one full key and one bare suffix.
+      SWARM_IGNORE_LABELS: "bunkerweb.IGNORED_FULL_KEY IGNORED_SUFFIX"
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:tests
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.55.60.0/24 172.16.0.0/12"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:tests
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true" # shares the SQLite file in bw-storage
+      restart_policy:
+        condition: any
+    volumes:
+      - bw-storage:/data
+    ports:
+      - target: 8888
+        published: 8890 # 8888 belongs to the harness's own bw-api
+        protocol: tcp
+        mode: host
+    environment:
+      <<: *env
+      API_USERNAME: "admin"
+      API_PASSWORD: "Ch@ngeme1234"
+      API_WHITELIST_IP: "127.0.0.0/8 10.55.60.0/24 172.16.0.0/12"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:tests
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    volumes:
+      # The SAME volume as the scheduler and the API: the SQLite database is a file in it.
+      - bw-storage:/data
+    environment:
+      <<: *env
+    networks:
+      - bw-universe
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    command:
+      ["valkey-server", "--save", "", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "noeviction"]
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - bw-universe
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+      restart_policy:
+        condition: any
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Wider than the Docker-autoconf proxy: the Swarm controller lists and inspects SERVICES and
+      # CONFIGS, reads their events, and resolves TASKS to build instance hostnames.
+      SERVICES: "1"
+      TASKS: "1"
+      NODES: "1"
+      CONFIGS: "1"
+      EVENTS: "1"
+      SWARM: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
+volumes:
+  bw-storage:
+  bw-jobs-broker-data:
+
+networks:
+  bw-universe:
+    driver: overlay
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.55.60.0/24
+  bw-services:
+    driver: overlay
+    attachable: true
+  bw-docker:
+    driver: overlay
+    attachable: true

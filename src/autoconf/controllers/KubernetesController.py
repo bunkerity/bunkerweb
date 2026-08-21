@@ -26,9 +26,9 @@ HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
 class KubernetesController(Controller):
     def __init__(self, *, api_client):
         self._internal_lock = Lock()
-        self._pending_apply = False
-        self._last_event_time = 0.0
-        self._debounce_delay = 2  # seconds
+        # No debounce state here: `super().__init__()` below sets `_pending_apply`,
+        # `_last_event_time` and `_debounce_delay` to these exact values, so setting them first was
+        # dead code.
         self._event_summary = {}
         self._event_summary_max = 8
         self._event_loggable_kinds = {"Ingress", "Gateway", "HTTPRoute", "GRPCRoute", "TLSRoute", "TCPRoute", "UDPRoute", "ConfigMap", "Secret"}

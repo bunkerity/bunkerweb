@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
 from os import getenv
-from contextlib import suppress
-from time import sleep, time
-from traceback import format_exc
 from threading import Thread, Lock
 from typing import Any, Dict, List
 from docker import DockerClient
-from re import split as re_split
+from re import compile as re_compile, split as re_split
 from base64 import b64decode
 
 from docker.models.services import Service
@@ -25,10 +22,8 @@ class SwarmController(Controller):
         self.__swarm_instances = []
         self.__swarm_services = []
         self.__swarm_configs = []
-        self.__pending_apply = False
-        self.__last_event_time = 0.0
-        self.__debounce_delay = 2  # seconds
-        self._logger.warning("Swarm integration is deprecated and will be removed in a future release")
+        self.__warned_custom_conf_services = set()
+        self.__warned_non_global_instances = set()
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
         ignore_labels = getenv("SWARM_IGNORE_LABELS", "")
@@ -101,19 +96,56 @@ class SwarmController(Controller):
 
         return valid_services
 
+    # Image-level metadata labels that are not BunkerWeb settings. The BunkerWeb image bakes
+    # `bunkerweb.INSTANCE` (src/bw/Dockerfile), so a service carrying both SERVER_NAME and
+    # INSTANCE emitted `INSTANCE=yes` as a setting -- one validation warning per cycle, forever.
+    __METADATA_LABELS = frozenset(("bunkerweb.type", "bunkerweb.INSTANCE"))
+
+    # `bunkerweb.CUSTOM_CONF_*` labels are a Docker-autoconf feature: `Config.py` ignores the
+    # prefix for every controller and only DockerController reads them back off the container.
+    # Under Swarm they are inert, and were inert *silently* -- every Docker-autoconf doc snippet
+    # using them did nothing here with no diagnostic at all. Swarm's route is `docker config create`.
+    __custom_conf_rx = re_compile(r"^bunkerweb\.CUSTOM_CONF_")
+
     def _get_controller_instances(self) -> List[Service]:
         """
         Fetch Swarm services labeled as 'bunkerweb.INSTANCE'.
         """
+        # Reset before the pass, not after: `_to_instances` appends one id per service and the
+        # base class calls it once per service per pass. Without this the list grew without bound
+        # for the lifetime of the process, and a *deleted* service kept satisfying the event
+        # filter in `__process_event` because its id was still in there.
+        self.__swarm_instances = []
         return self._get_controller_swarm_services(label_key="bunkerweb.INSTANCE")
 
     def _get_controller_services(self) -> List[Service]:
         """
         Fetch Swarm services labeled as 'bunkerweb.SERVER_NAME'.
         """
+        self.__swarm_services = []
         return self._get_controller_swarm_services(label_key="bunkerweb.SERVER_NAME")
 
     def _to_instances(self, controller_instance) -> List[dict]:
+        # R6 -- a BunkerWeb instance service MUST be `mode: global`. The hostname registered for
+        # an instance is `<service>.<NodeID>.<TaskID>` (below), which is only the task's real DNS
+        # name under a global service; a replicated service resolves as `<service>.<slot>.<TaskID>`
+        # instead. Accepting one would register instances the control plane can never reach, and
+        # the operator would see a stack that boots and never converges, with no error anywhere.
+        # The documentation prescribed `mode: global` in prose and nothing enforced it.
+        mode = controller_instance.attrs.get("Spec", {}).get("Mode", {}) or {}
+        if "Global" not in mode:
+            # Log once per service, not once per reconcile pass: this runs on every event burst and
+            # the operator cannot fix it from the log anyway -- they have to redeploy the service.
+            # Repeating it every few seconds only buries the rest of the diagnostics.
+            if controller_instance.id not in self.__warned_non_global_instances:
+                self._logger.error(
+                    f"Ignoring service {controller_instance.name!r} labelled bunkerweb.INSTANCE: it is not a global service "
+                    f"(mode: {', '.join(mode) or 'unknown'}). A BunkerWeb instance service must be deployed with `mode: global`, "
+                    "otherwise its tasks are unreachable from the control plane."
+                )
+                self.__warned_non_global_instances.add(controller_instance.id)
+            return []
+
         self.__swarm_instances.append(controller_instance.id)
         instances = []
         instance_env = {}
@@ -141,12 +173,30 @@ class SwarmController(Controller):
     def _to_services(self, controller_service) -> List[dict]:
         self.__swarm_services.append(controller_service.id)
         service = {}
-        for variable, value in controller_service.attrs["Spec"]["Labels"].items():
+        custom_conf_labels = []
+        for variable, value in (controller_service.attrs.get("Spec", {}).get("Labels", {}) or {}).items():
             if self.__should_ignore_label(variable):
                 continue
             if not variable.startswith("bunkerweb."):
                 continue
+            if self.__custom_conf_rx.match(variable):
+                custom_conf_labels.append(variable)
+                continue
+            if variable in self.__METADATA_LABELS:
+                continue
             service[variable.replace("bunkerweb.", "", 1)] = value
+
+        if custom_conf_labels and controller_service.id not in self.__warned_custom_conf_services:
+            # Warn once per service rather than once per reconcile: the reconcile runs on every
+            # event, and a per-pass warning would bury every other line in the controller log.
+            self.__warned_custom_conf_services.add(controller_service.id)
+            self._logger.warning(
+                f"Service {controller_service.name!r} carries {len(custom_conf_labels)} bunkerweb.CUSTOM_CONF_* "
+                f"label(s) ({', '.join(sorted(custom_conf_labels))}) which the Swarm controller CANNOT apply -- they "
+                "are a Docker-autoconf feature and are being ignored. Ship the configuration as a Swarm config object "
+                "labelled bunkerweb.CONFIG_TYPE instead (`docker config create`)."
+            )
+
         return [service]
 
     def get_configs(self) -> Dict[str, Dict[str, Any]]:
@@ -161,6 +211,15 @@ class SwarmController(Controller):
             labels = config.attrs["Spec"].get("Labels", {}) or {}
             if any(self.__should_ignore_label(label) for label in labels):
                 self._logger.info(f"Skipping Swarm config {getattr(config, 'name', config.id)} because of ignored labels")
+                continue
+
+            # NAMESPACES filtered the *event* path of this same file (__process_event) and the
+            # service-discovery path, but not this one -- so a GLOBAL custom config labelled for
+            # another namespace was picked up by every partition on the daemon. A config carrying
+            # CONFIG_SITE was filtered only incidentally, by the _is_service_present check below.
+            # DockerController filters both paths; this brings Swarm to parity.
+            if self._namespaces and not any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces):
+                self._logger.debug(f"Skipping Swarm config {getattr(config, 'name', config.id)}: namespace not in the allowed namespaces")
                 continue
 
             config_type = labels["bunkerweb.CONFIG_TYPE"]
@@ -210,7 +269,10 @@ class SwarmController(Controller):
                 return ("bunkerweb.INSTANCE" in labels or "bunkerweb.SERVER_NAME" in labels) and (
                     not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
                 )
-            except:
+            # Typed: the bare `except:` this replaces also swallowed KeyboardInterrupt and
+            # SystemExit. A service that vanished between the event and this lookup raises
+            # NotFound, which is the case actually worth ignoring.
+            except Exception:
                 return False
         if event["Type"] == "config":
             if event["Actor"]["ID"] in self.__swarm_configs:
@@ -223,107 +285,20 @@ class SwarmController(Controller):
                 return "bunkerweb.CONFIG_TYPE" in labels and (
                     not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
                 )
-            except:
+            except Exception:
                 return False
         return False
 
     def __event(self, event_type):
-        listening_logged = True
-        while True:
-            locked = False
-            error = False
-            applied = False
-            try:
-                for event in self.__client.events(decode=True, filters={"type": event_type}):
-                    applied = False
-                    self.__internal_lock.acquire()
-                    locked = True
-                    if not self.__process_event(event):
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-                    self._first_start = False
-
-                    # Mark event received and update time
-                    self.__pending_apply = True
-                    self.__last_event_time = time()
-                    self.__internal_lock.release()
-                    locked = False
-
-                    # Wait for debounce period
-                    while (time() - self.__last_event_time) < self.__debounce_delay:
-                        sleep(0.1)
-
-                    # Debounce period passed, try to apply
-                    self.__internal_lock.acquire()
-                    locked = True
-
-                    # Check if another event updated the time while we were waiting
-                    if (time() - self.__last_event_time) < self.__debounce_delay:
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-
-                    if not self.__pending_apply:
-                        self.__internal_lock.release()
-                        locked = False
-                        continue
-
-                    self.__pending_apply = False
-
-                    try:
-                        to_apply = False
-                        with self._api.expect_errors():
-                            while not applied:
-                                waiting = self.have_to_wait()
-                                self._update_settings()
-                                self._instances = self.get_instances()
-                                self._services = self.get_services()
-                                self._configs = self.get_configs()
-
-                                if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
-                                    if locked:
-                                        self.__internal_lock.release()
-                                        locked = False
-                                    applied = True
-                                    continue
-
-                                to_apply = True
-                                listening_logged = False
-                                if waiting:
-                                    sleep(1)
-                                    continue
-
-                                self._logger.info("Batched Swarm event(s), deploying configuration...")
-                                if not self.apply_config():
-                                    self._logger.error("Error while deploying new configuration")
-                                else:
-                                    self._logger.info(
-                                        "Successfully deployed new configuration 🚀",
-                                    )
-                                    self._set_autoconf_loaded()
-                                applied = True
-                    except BaseException:
-                        self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
-                    finally:
-                        if applied and not listening_logged:
-                            self._logger.info("Listening for Swarm events ...")
-                            listening_logged = True
-
-                    if locked:
-                        self.__internal_lock.release()
-                        locked = False
-            except:
-                self._logger.error(f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}")
-                error = True
-            finally:
-                if locked:
-                    with suppress(BaseException):
-                        self.__internal_lock.release()
-                    locked = False
-                if error is True:
-                    self._logger.warning("Got exception, retrying in 10 seconds ...")
-                    sleep(10)
+        # The debounce/batch/apply loop lives in Controller._run_event_loop: this used to be a
+        # near-byte-identical copy of DockerController's, so any fix to one bypassed the other.
+        self._run_event_loop(
+            events=lambda: self.__client.events(decode=True, filters={"type": event_type}),
+            process_event=self.__process_event,
+            label="Swarm",
+            lock=self.__internal_lock,
+            error_suffix=f" ({event_type})",
+        )
 
     def process_events(self):
         self._set_autoconf_loaded()

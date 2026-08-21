@@ -1,0 +1,22 @@
+# `examples/swarm-configs/` is one of six example directories that ship with no manifest and have
+# never had a scenario -- neither in `examples/` nor in `tests/examples/`. So the only shipped
+# demonstration of Swarm custom configs has never been executed by anything.
+#
+# It matters more than a typical example: `docker config create` is the ONLY route Swarm has for
+# custom NGINX snippets. The `bunkerweb.CUSTOM_CONF_*` labels every Docker-autoconf snippet uses
+# are inert under Swarm (Config.py ignores the prefix for all controllers and only DockerController
+# reads them back), so a reader following a Docker page under Swarm gets silence. The controller
+# now warns about that instead of ignoring it, and this example is where the right way is shown.
+#
+# A `script` action for the same reason as tests/core/swarm.yml: no Swarm arm exists in the
+# harness, and example mode deploys a compose file rather than a stack.
+integrations:
+  - "Docker"
+
+actions:
+  the_shipped_swarm_configs_example_actually_works:
+    type: script
+    script: ["./tests/core/swarm-example/test.sh", "docker"]
+    result: "swarm-example: all checks passed"
+    restart_stack: false
+    timeout: 900

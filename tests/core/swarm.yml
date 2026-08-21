@@ -1,0 +1,28 @@
+# Docker Swarm integration gate.
+#
+# Swarm is not an integration in this framework's sense: `tests/scripts/start.sh` and its siblings
+# have no Swarm arm, and giving them one means forking ~58 stack-path `docker compose` call sites,
+# 16 `docker compose <file> exec|logs|ps` sites, three large functions in `utils.sh` and the label
+# emission in `generate.py` (which writes CONTAINER labels, while SwarmController reads SERVICE
+# labels). That was sized and deferred; see conception 67ZcQIRdg4.
+#
+# So the gate is a `script` action on the Docker arm, following `tests/core/internalcert.yml`:
+# the script brings up its own single-node Swarm stack on its own ports, asserts, and removes it.
+# The framework's stack is untouched, which is what `restart_stack: false` asserts here.
+#
+# Consequence to be explicit about: `tests/utils/integrations.yml` keeps `TODO` on every Swarm row,
+# so acceptance criterion 1 of the conception is met in substance -- Swarm runs on every PR -- and
+# not in its letter, which asks for a real runner on those rows.
+integrations:
+  - "Docker"
+
+actions:
+  swarm_discovery_configs_secrets_and_jobs_work_end_to_end:
+    type: script
+    script: ["./tests/core/swarm/test.sh", "docker"]
+    result: "swarm: all checks passed"
+    # The script owns its stack completely; the framework's stack is never touched.
+    restart_stack: false
+    # A Swarm stack boot is ~60 s and this exercises ten rows of the conception's test matrix
+    # against it, including a background job that has to reach the worker and come back.
+    timeout: 900

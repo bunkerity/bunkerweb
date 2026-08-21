@@ -41,7 +41,11 @@ staging:
     amd64: '["ubuntu-latest"]'
     arm/v7: "TODO"
     arm64: "TODO"
-  # Swarm: port deferred — no stack-up path in start.sh yet, keep it unselectable.
+  # Swarm: exercised by script specs on the Docker arm (tests/core/swarm.yml and
+  # tests/core/swarm-secrets.yml), which deploy a real single-node Swarm stack and tear it
+  # down again. These rows stay TODO because no per-spec Swarm arm exists in start.sh and
+  # friends: giving them a runner would produce matrix entries nothing can execute. Sizing
+  # the full arm and why it was deferred: conception 67ZcQIRdg4.
   Swarm:
     386: "TODO"
     amd64: "TODO"
@@ -67,7 +71,7 @@ dev:
     amd64: '["ubuntu-latest"]'
   Autoconf:
     amd64: '["ubuntu-latest"]'
-  # Swarm: port deferred, see above.
+  # Swarm: see the note above — covered by script specs on the Docker arm, no arm of its own.
   Swarm:
     amd64: "TODO"
   Kubernetes:

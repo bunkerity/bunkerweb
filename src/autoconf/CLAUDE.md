@@ -16,7 +16,7 @@ Autoconf is BunkerWeb's dynamic configuration component. It watches container/or
 Config (Config.py)
   └── Controller (controllers/Controller.py)           # abstract base
         ├── DockerController (controllers/DockerController.py)     # standalone Docker
-        ├── SwarmController (controllers/SwarmController.py)       # Docker Swarm (deprecated)
+        ├── SwarmController (controllers/SwarmController.py)       # Docker Swarm
         └── KubernetesController (controllers/KubernetesController.py)  # concrete K8s base
               ├── IngressController (controllers/IngressController.py)   # K8s Ingress API
               └── GatewayController (controllers/GatewayController.py)   # K8s Gateway API
@@ -107,6 +107,8 @@ API endpoints used:
 
 - **Docker**: Single-threaded event loop on `client.events()` with internal lock for debounce
 - **Swarm**: Two threads — one watching `service` events, one watching `config` events, sharing a lock
+- Docker and Swarm share one debounce/batch/apply loop, `Controller._run_event_loop`. They used to
+  carry near-identical copies of it, so a fix to one bypassed the other — do not re-inline it.
 - **Kubernetes**: One thread per watcher type (pod, configmap, service, secret, ingress/gateway routes), all sharing `_internal_lock`
 
 ## Build & Run
@@ -133,7 +135,13 @@ docker compose -f misc/dev/docker-compose.autoconf.yml up -d --force-recreate bw
 
 ## Conventions
 
-- Swarm integration is deprecated (logged at startup)
 - Health check: writes `/var/tmp/bunkerweb/autoconf.healthy` when event loop starts, removes on exit
+- Swarm: a service labelled `bunkerweb.INSTANCE` **must** be `mode: global`. The controller refuses a
+  replicated one — the registered hostname is `<service>.<NodeID>.<TaskID>`, which only resolves for a
+  global service; a replicated service's tasks are `<service>.<slot>.<TaskID>` and unreachable.
+- Swarm: `bunkerweb.CUSTOM_CONF_*` labels are a Docker-only feature and are inert here. The controller
+  warns once per service; the Swarm route is a config object labelled `bunkerweb.CONFIG_TYPE`.
+- Swarm: a task's `Status.State == "running"` is already gated on the container HEALTHCHECK by
+  swarmkit, in both directions — do not add a container-inspect tier (it cannot work off-node anyway).
 - All controllers use `_first_start` flag to unconditionally apply config on the first event cycle
 - `_set_autoconf_loaded()` sets `autoconf_loaded` metadata once after first successful apply

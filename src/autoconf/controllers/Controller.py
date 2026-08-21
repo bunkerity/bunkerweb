@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 from abc import abstractmethod
+from contextlib import suppress
 from os import getenv
 from threading import Thread
-from time import sleep
+from time import sleep, time
 from traceback import format_exc
 
 from Config import Config
@@ -23,6 +24,12 @@ class Controller(Config):
         self._logger = getLogger(f"{self._type.upper()}-CONTROLLER")
         self._namespaces = None
         self._first_start = True
+
+        # Debounce state for _run_event_loop. Both event-driven controllers batch a burst of
+        # orchestrator events into one apply instead of applying once per event.
+        self._pending_apply = False
+        self._last_event_time = 0.0
+        self._debounce_delay = 2  # seconds
 
         # Periodic re-check interval (seconds) for the settings recheck worker. <= 0 disables it.
         recheck_interval = getenv("AUTOCONF_SETTINGS_RECHECK_INTERVAL", "300").strip()
@@ -191,6 +198,114 @@ class Controller(Config):
                         self._logger.error("Error while re-applying autoconf configuration after settings change")
             except BaseException:
                 self._logger.error(f"Exception in settings recheck worker:\n{format_exc()}")
+
+    def _run_event_loop(self, *, events, process_event, label: str, lock, error_suffix: str = ""):
+        """Debounce a stream of orchestrator events, then apply the whole batch once it goes quiet.
+
+        `DockerController` and `SwarmController` each carried their own copy of this loop. The two
+        were identical bar the word they log, the stream they read and the filter they apply, so a
+        fix landing in one silently left the other behind -- which is the divergence this method
+        exists to close, not a tidiness exercise.
+
+        `events` is a **factory**, not an iterator: after the stream raises, the loop has to open a
+        new one. Passing an already-built iterator would retry against an exhausted stream forever.
+        """
+        listening_logged = True
+        while True:
+            locked = False
+            error = False
+            applied = False
+            try:
+                for event in events():
+                    applied = False
+                    lock.acquire()
+                    locked = True
+                    if not process_event(event):
+                        lock.release()
+                        locked = False
+                        continue
+                    self._first_start = False
+
+                    # Mark event received and update time
+                    self._pending_apply = True
+                    self._last_event_time = time()
+                    lock.release()
+                    locked = False
+
+                    # Wait for debounce period
+                    while (time() - self._last_event_time) < self._debounce_delay:
+                        sleep(0.1)
+
+                    # Debounce period passed, try to apply
+                    lock.acquire()
+                    locked = True
+
+                    # Check if another event updated the time while we were waiting
+                    if (time() - self._last_event_time) < self._debounce_delay:
+                        lock.release()
+                        locked = False
+                        continue
+
+                    if not self._pending_apply:
+                        lock.release()
+                        locked = False
+                        continue
+
+                    self._pending_apply = False
+
+                    try:
+                        to_apply = False
+                        with self._api.expect_errors():
+                            while not applied:
+                                waiting = self.have_to_wait()
+                                self._update_settings()
+                                self._instances = self.get_instances()
+                                self._services = self.get_services()
+                                self._configs = self.get_configs()
+
+                                if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                                    if locked:
+                                        lock.release()
+                                        locked = False
+                                    applied = True
+                                    continue
+
+                                to_apply = True
+                                listening_logged = False
+                                if waiting:
+                                    sleep(1)
+                                    continue
+
+                                self._logger.info(f"Batched {label} event(s), deploying configuration...")
+                                if not self.apply_config():
+                                    self._logger.error("Error while deploying new configuration")
+                                else:
+                                    self._logger.info("Successfully deployed new configuration 🚀")
+                                    self._set_autoconf_loaded()
+                                applied = True
+                    except BaseException:
+                        self._logger.error(f"Exception while processing {label} event{error_suffix} :\n{format_exc()}")
+                    finally:
+                        if applied and not listening_logged:
+                            self._logger.info(f"Listening for {label} events ...")
+                            listening_logged = True
+
+                    if locked:
+                        lock.release()
+                        locked = False
+            # Typed rather than bare: a bare `except:` here swallowed KeyboardInterrupt and
+            # SystemExit, so the loop kept running through a shutdown signal.
+            except Exception:
+                self._logger.error(f"Exception while reading {label} event{error_suffix} :\n{format_exc()}")
+                error = True
+            finally:
+                if locked:
+                    with suppress(BaseException):
+                        lock.release()
+                    locked = False
+                if error:
+                    self._logger.warning("Got exception, retrying in 10 seconds ...")
+                    sleep(10)
 
     @abstractmethod
     def process_events(self):

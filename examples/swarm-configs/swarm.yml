@@ -4,9 +4,12 @@ services:
     networks:
       - bw-services
     deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+      # No placement constraint on purpose: this example must deploy on a single-node swarm, where
+      # the only node is a manager and `node.role==worker` would leave every task Pending forever.
+      # On a real multi-node cluster, pin application services to your workers by adding:
+      #   placement:
+      #     constraints:
+      #       - "node.role==worker"
       labels:
         - "bunkerweb.SERVER_NAME=app1.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -18,9 +21,12 @@ services:
     networks:
       - bw-services
     deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+      # No placement constraint on purpose: this example must deploy on a single-node swarm, where
+      # the only node is a manager and `node.role==worker` would leave every task Pending forever.
+      # On a real multi-node cluster, pin application services to your workers by adding:
+      #   placement:
+      #     constraints:
+      #       - "node.role==worker"
       labels:
         - "bunkerweb.SERVER_NAME=app2.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
@@ -32,9 +38,12 @@ services:
     networks:
       - bw-services
     deploy:
-      placement:
-        constraints:
-          - "node.role==worker"
+      # No placement constraint on purpose: this example must deploy on a single-node swarm, where
+      # the only node is a manager and `node.role==worker` would leave every task Pending forever.
+      # On a real multi-node cluster, pin application services to your workers by adding:
+      #   placement:
+      #     constraints:
+      #       - "node.role==worker"
       labels:
         - "bunkerweb.SERVER_NAME=app3.example.com"
         - "bunkerweb.USE_REVERSE_PROXY=yes"

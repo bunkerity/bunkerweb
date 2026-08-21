@@ -27,7 +27,7 @@
     "CUSTOM_SSL_CERT": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the certificate or bundle file (must be readable by the scheduler).",
+      "help": "Full path of the certificate or bundle file. It must be readable by the WORKER, which is where the custom-cert job runs since 1.7 moved job execution off the scheduler - not by the scheduler, whatever older documentation says. Under Docker Swarm, mount it on bw-worker and give the path it is mounted at, e.g. /run/secrets/example.com.pem; a Swarm config is fine for a certificate, which is public.",
       "id": "custom-ssl-cert",
       "label": "Certificate path",
       "regex": "^(/[\\w. \\-]+)*/?$",
@@ -36,7 +36,7 @@
     "CUSTOM_SSL_KEY": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the key file (must be readable by the scheduler).",
+      "help": "Full path of the key file. It must be readable by the WORKER, which is where the custom-cert job runs since 1.7 moved job execution off the scheduler - not by the scheduler, whatever older documentation says. Under Docker Swarm, mount the private key on bw-worker as a Swarm SECRET and give the path it is mounted at, e.g. /run/secrets/example.com.key. Never ship a private key as a Swarm config: configs are stored unencrypted in the raft store on every manager node.",
       "id": "custom-ssl-key",
       "label": "Key path",
       "regex": "^(/[\\w. \\-]+)*/?$",

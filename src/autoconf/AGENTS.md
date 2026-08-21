@@ -15,7 +15,10 @@ Local agent guide for BunkerWeb Autoconf in `src/autoconf/`.
 - Preserve the shared debounce and `update_needed()` before `apply()` pattern.
 - `apply()` must signal Scheduler changes through API metadata and checked-changes calls.
 - API degraded mode keeps watching events but skips writes until the API recovers.
-- Swarm mode is deprecated but still present.
+- Swarm is supported, not deprecated. An instance service must be `mode: global` (a replicated
+  task's DNS name is unreachable from the control plane); custom configs travel as `docker config`
+  objects labelled `bunkerweb.CONFIG_TYPE`, not as `bunkerweb.CUSTOM_CONF_*` labels. See
+  [CLAUDE.md](CLAUDE.md).
 
 ## Commands
 
