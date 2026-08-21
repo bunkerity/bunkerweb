@@ -17,10 +17,17 @@ def handle(LOGGER: Logger, integration: str, action: Any) -> None:
         LOGGER.error(f"🖲️ Command output: {ret}")
         exit(1)
 
-    if action.result not in ret:
-        LOGGER.error(f"🖲️ Result {action.result!r} not found in command output, exiting ...")
-        LOGGER.error(f"🖲️ Command output: {ret}")
-        exit(1)
+    if action.result is not None:
+        if action.result not in ret:
+            LOGGER.error(f"🖲️ Result {action.result!r} not found in command output, exiting ...")
+            LOGGER.error(f"🖲️ Command output: {ret}")
+            exit(1)
+        LOGGER.info(f"🖲️ Result {action.result!r} found in command output")
 
-    LOGGER.info(f"🖲️ Result {action.result!r} found in command output")
+    if action.not_result is not None:
+        if action.not_result in ret:
+            LOGGER.error(f"🖲️ Result {action.not_result!r} found in command output but should not be, exiting ...")
+            LOGGER.error(f"🖲️ Command output: {ret}")
+            exit(1)
+        LOGGER.info(f"🖲️ Result {action.not_result!r} not found in command output, as expected")
     LOGGER.info("🖲️ All commands ran successfully")

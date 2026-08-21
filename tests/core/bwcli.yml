@@ -50,3 +50,19 @@ actions:
     command: "unban 10.99.0.2 -service www.example.com"
     result: "has been unbanned"
     restart_stack: false
+
+  # `unban` printing "has been unbanned" proves it printed a message, not that the row is gone: an
+  # unban that reported success and removed nothing passed every assertion above. These two close
+  # that. The needles are the same ones `the_ban_is_listed` and `the_service_ban_is_listed` match
+  # while the bans exist -- confirmed against real output on 2026-08-19 at 12:42:08 and 12:42:12 --
+  # so they provably CAN appear here, which is what makes their absence mean something.
+  the_global_ban_is_gone:
+    type: bwcli
+    command: "bans"
+    not_result: "10.99.0.1"
+    restart_stack: false
+
+  the_service_ban_is_gone:
+    type: bwcli
+    command: "bans"
+    not_result: "10.99.0.2"
