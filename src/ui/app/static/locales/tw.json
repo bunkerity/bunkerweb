@@ -88,6 +88,14 @@
     "support": "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "跨您所有 BunkerWeb 執行個體的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "已封鎖的唯一 IP"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} 執行中 / {{down}} 已停止 / {{loading}} 載入中",
         "title": "執行個體"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "危急：系統記憶體即將耗盡！",
-        "good_high": "適合生產環境的優質記憶體",
-        "info_medium": "建議升級至 16GB 以上以用於生產環境",
         "title": "系統 RAM",
         "usage": "{{percent}}% 已使用",
         "warning_low": "警告：記憶體不足可能影響效能"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} 線上 / {{draft}} 草稿",
         "title": "服務"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "我想要訂閱新聞通訊，並且我已經閱讀並同意：",
     "title": "加入新聞通訊"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "頁"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "深色",
-    "light": "淺色"
+    "light": "淺色",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "退出全螢幕",

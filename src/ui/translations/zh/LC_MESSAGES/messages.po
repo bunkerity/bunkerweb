@@ -214,6 +214,18 @@ msgstr "升级至 PRO 版本，充分利用 BunkerWeb。更多信息和免费试
 msgid "banner.support"
 msgstr "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "按原因统计封禁"
 
@@ -1744,6 +1756,9 @@ msgstr "被阻止的唯一 IP"
 msgid "dashboard.card.certificates.title"
 msgstr "证书"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s 运行中 / %(down)s 已停止 / %(loading)s 加载中"
 
@@ -1765,12 +1780,6 @@ msgstr "插件"
 msgid "dashboard.card.ram.critical_high"
 msgstr "严重：系统内存即将耗尽！"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "内存充足，适合生产环境"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "建议升级到 16GB+ 以用于生产环境"
-
 msgid "dashboard.card.ram.title"
 msgstr "系统内存"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% 已使用"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "警告：内存不足可能影响性能"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s 在线 / %(draft)s 草稿"
@@ -3217,6 +3229,12 @@ msgstr "我想要订阅新闻通讯，并且我已经阅读并同意："
 
 msgid "newsletter.title"
 msgstr "加入新闻通讯"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "忽略"
@@ -5272,6 +5290,9 @@ msgstr "深色"
 
 msgid "theme.light"
 msgstr "浅色"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "今日攻击"

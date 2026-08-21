@@ -12,6 +12,7 @@ from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, flash, gen_password_hash, password_exceeds_bcrypt_limit, revoke_sessions
 
+from app.routes.preferences import SESSION_KEYS as PREFERENCE_SESSION_KEYS, THEME_MODE_KEY
 from app.routes.utils import cors_required, handle_error, verify_data_in_form
 
 profile = Blueprint("profile", __name__)
@@ -360,10 +361,32 @@ def edit_profile():
 
         user_data["password"] = gen_password_hash(request.form["new_password"])
     elif "theme" in request.form:
-        if request.form["theme"] not in ("dark", "light"):
+        # The form posts the MODE (#3820). "system" is stored as a per-user preference and
+        # leaves bw_ui_users.theme alone -- the column keeps the last resolved light|dark so
+        # the server-rendered first paint stays correct and THEMES_ENUM never has to grow a
+        # third value (which would be an Alembic revision on four dialects for a comfort
+        # setting). The browser writes the freshly resolved value through POST /set_theme.
+        if request.form["theme"] not in ("dark", "light", "system"):
             return handle_error("The theme is invalid.", "profile")
 
-        user_data["theme"] = request.form["theme"]
+        theme_mode = request.form["theme"]
+        if theme_mode == "system":
+            try:
+                API_CLIENT.update_user_preferences(current_user.get_id(), THEME_MODE_KEY, {"mode": "system"})
+            except (ApiClientError, ApiUnavailableError) as e:
+                return handle_error(f"Couldn't update the {current_user.get_id()} user: {e.message}", "profile")
+            session.pop(PREFERENCE_SESSION_KEYS[THEME_MODE_KEY], None)
+            # Same confirmation every other branch gives: the column is deliberately left
+            # holding the last resolved value, but from the user's side the profile did change.
+            flash("The profile has been successfully updated.")
+            return redirect(url_for("profile.profile_page"))
+
+        user_data["theme"] = theme_mode
+        try:
+            API_CLIENT.update_user_preferences(current_user.get_id(), THEME_MODE_KEY, {"mode": theme_mode})
+        except (ApiClientError, ApiUnavailableError) as e:
+            return handle_error(f"Couldn't update the {current_user.get_id()} user: {e.message}", "profile")
+        session.pop(PREFERENCE_SESSION_KEYS[THEME_MODE_KEY], None)
     else:
         return handle_error("No fields were updated.", "profile")
 

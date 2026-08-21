@@ -214,6 +214,18 @@ msgstr "升級至 PRO 版本，充分利用 BunkerWeb。更多資訊和免費試
 msgid "banner.support"
 msgstr "需要 BunkerWeb 的進階支援或客製化諮詢服務？查看我們的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">專業服務</a>。"
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "依原因統計封鎖"
 
@@ -1744,6 +1756,9 @@ msgstr "已封鎖的唯一 IP"
 msgid "dashboard.card.certificates.title"
 msgstr "憑證"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s 執行中 / %(down)s 已停止 / %(loading)s 載入中"
 
@@ -1765,12 +1780,6 @@ msgstr "外掛程式"
 msgid "dashboard.card.ram.critical_high"
 msgstr "危急：系統記憶體即將耗盡！"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "適合生產環境的優質記憶體"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "建議升級至 16GB 以上以用於生產環境"
-
 msgid "dashboard.card.ram.title"
 msgstr "系統 RAM"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% 已使用"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "警告：記憶體不足可能影響效能"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s 線上 / %(draft)s 草稿"
@@ -3217,6 +3229,12 @@ msgstr "我想要訂閱新聞通訊，並且我已經閱讀並同意："
 
 msgid "newsletter.title"
 msgstr "加入新聞通訊"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "略過"
@@ -5272,6 +5290,9 @@ msgstr "深色"
 
 msgid "theme.light"
 msgstr "淺色"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "今日攻擊"

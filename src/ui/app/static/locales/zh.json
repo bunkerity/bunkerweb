@@ -88,6 +88,14 @@
     "support": "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "您的 BunkerWeb 实例中被封禁的 IP 地址——添加、移除或调整封禁时长。",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "被阻止的唯一 IP"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} 运行中 / {{down}} 已停止 / {{loading}} 加载中",
         "title": "实例"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "严重：系统内存即将耗尽！",
-        "good_high": "内存充足，适合生产环境",
-        "info_medium": "建议升级到 16GB+ 以用于生产环境",
         "title": "系统内存",
         "usage": "{{percent}}% 已使用",
         "warning_low": "警告：内存不足可能影响性能"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} 在线 / {{draft}} 草稿",
         "title": "服务"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "我想要订阅新闻通讯，并且我已经阅读并同意：",
     "title": "加入新闻通讯"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "页"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "深色",
-    "light": "浅色"
+    "light": "浅色",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "退出全屏",

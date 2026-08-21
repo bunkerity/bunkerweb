@@ -88,6 +88,14 @@
     "support": "Нужна премиум-поддержка или индивидуальная консультация по BunkerWeb? Ознакомьтесь с нашими <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">профессиональными услугами</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Заблокированные IP-адреса для всех ваших экземпляров BunkerWeb — добавляйте, удаляйте или изменяйте длительность блокировки.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "Заблокированные уникальные IP"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} в сети / {{down}} не в сети / {{loading}} загрузка",
         "title": "Экземпляры"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Критический уровень: системе не хватает памяти!",
-        "good_high": "Отличный объём памяти для продуктивной среды",
-        "info_medium": "Рекомендуется обновить до 16 ГБ и более для использования в продуктивной среде",
         "title": "Системная память (RAM)",
         "usage": "{{percent}}% использовано",
         "warning_low": "Предупреждение: недостаток памяти может повлиять на производительность"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} в сети / {{draft}} черновик",
         "title": "Сервисы"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Я подписываюсь на рассылку и соглашаюсь с:",
     "title": "Подписаться на рассылку"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Страница"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Темная",
-    "light": "Светлая"
+    "light": "Светлая",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Выйти из полноэкранного режима",

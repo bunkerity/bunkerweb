@@ -146,6 +146,7 @@ NON_COPY_FILES = {
     "pages/ace-mode-bunkerweb_settings.js": "ACE syntax-highlighting grammar tokens",
 }
 NON_COPY_VALUES = {
+    "(prefers-color-scheme: dark)": "CSS media query",
     "(prefers-reduced-motion: reduce)": "CSS media query",
     "AbortError": "WebAuthn exception name",
     "ArrowDown": "keyboard key value",

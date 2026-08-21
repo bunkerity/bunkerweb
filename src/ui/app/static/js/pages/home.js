@@ -29,6 +29,25 @@ $(async function () {
     if (wrapper) wrapper.classList.add("is-loaded");
   }
 
+  // Read one hidden `#<id>` JSON island. A card the user hid is not rendered at all
+  // (home.html gates it on `hidden_home_cards`), so the island is *absent*, and
+  // `JSON.parse($("#missing").text())` is `JSON.parse("")` -> SyntaxError. Every read below
+  // sits at the top level of this one `async function`, so a single throw takes every chart
+  // after it with it and the surviving cards keep their spinners forever. Never parse an
+  // island directly.
+  function readIsland(id, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return fallback;
+    const raw = (el.textContent || "").trim();
+    if (!raw) return fallback;
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn(`Malformed data island #${id}:`, e);
+      return fallback;
+    }
+  }
+
   const fmtCompact = (value) => {
     const n = Number(value) || 0;
     if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
@@ -119,25 +138,30 @@ $(async function () {
 
   // Requests countries map
 
-  const requestsMapData = JSON.parse($("#requests-map-data").text());
+  const requestsMapData = readIsland("requests-map-data", {});
 
   // Initialize the map — no tile layer, ocean is a flat brand-tinted surface
   // sourced from --bw-map-ocean in overrides.css.
   const baseUrl = window.location.href.split("/home")[0];
-  const map = L.map("requests-map", {
-    minZoom: 2,
-    maxZoom: 4,
-    center: [30, 10],
-    zoom: 2,
-    worldCopyJump: false,
-    zoomControl: true,
-    attributionControl: false,
-    maxBounds: [
-      [-85, -180],
-      [85, 180],
-    ],
-    maxBoundsViscosity: 1.0,
-  });
+  // Absent when the user hid the world-map card. `L.map()` on a missing element throws, so
+  // every leaflet call below is gated on this rather than re-checking the element each time.
+  const mapMount = document.getElementById("requests-map");
+  const map = !mapMount
+    ? null
+    : L.map("requests-map", {
+        minZoom: 2,
+        maxZoom: 4,
+        center: [30, 10],
+        zoom: 2,
+        worldCopyJump: false,
+        zoomControl: true,
+        attributionControl: false,
+        maxBounds: [
+          [-85, -180],
+          [85, 180],
+        ],
+        maxBoundsViscosity: 1.0,
+      });
 
   // Read the brand-driven choropleth palette from CSS so the map flips with
   // data-bs-theme without any JS recompute.
@@ -599,7 +623,7 @@ $(async function () {
   }
 
   // Initialize geo data loading
-  loadGeoData();
+  if (map) loadGeoData();
 
   // Add a legend to the map
   const legend = L.control({ position: "bottomright" });
@@ -646,12 +670,13 @@ $(async function () {
     return div;
   };
 
-  legend.addTo(map);
+  if (map) legend.addTo(map);
 
   // Re-render the legend when i18next initializes later or the user switches
   // language — Leaflet controls don't participate in the global data-i18n walk
   // automatically when built before translations load.
   const rerenderLegend = () => {
+    if (!map) return;
     legend.remove();
     legend.addTo(map);
   };
@@ -676,11 +701,11 @@ $(async function () {
   });
 
   // Blocking timeline raw data.
-  const blockingData = JSON.parse($("#requests-blocking-data").text());
+  const blockingData = readIsland("requests-blocking-data", {});
 
   // Requests stats chart
 
-  const requestsDataRaw = JSON.parse($("#requests-stats-data").text());
+  const requestsDataRaw = readIsland("requests-stats-data", {});
   const requestStatusEntries = Object.entries(requestsDataRaw)
     .map(([status, count]) => [String(status), parseInt(count, 10) || 0])
     .filter(([, count]) => count > 0);
@@ -762,6 +787,8 @@ $(async function () {
   var requestsChart;
 
   function renderStatsChart() {
+    // Absent when the status-code card is hidden: ApexCharts on a null element throws.
+    if (!document.querySelector("#requests-stats")) return;
     const chartSurfaceColor = getChartSurfaceColor();
 
     const requestsOptions = {
@@ -938,7 +965,7 @@ $(async function () {
 
   function renderIpsChart() {
     const chartSurfaceColor = getChartSurfaceColor();
-    const requestsIpsDataRaw = JSON.parse($("#requests-ips-data").text());
+    const requestsIpsDataRaw = readIsland("requests-ips-data", {});
     const getBlockedCount = (entry) => {
       if (entry && typeof entry === "object") {
         return parseInt(entry.blocked || 0, 10) || 0;
@@ -1162,6 +1189,8 @@ $(async function () {
   var blockingChart;
 
   function renderBlockingStatus() {
+    // Absent when the blocking-timeline card is hidden.
+    if (!document.querySelector("#requests-blocking")) return;
     const markerStrokeColor = theme === "dark" ? "#162430" : "#ffffff";
     const chartGridBorderColor = getChartGridBorderColor();
 

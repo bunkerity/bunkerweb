@@ -88,6 +88,14 @@
     "support": "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "BunkerWeb 인스턴스 전반에 걸쳐 차단된 IP 주소 — 차단 기간을 추가, 제거 또는 조정합니다.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "차단된 고유 IP"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} 실행 중 / {{down}} 중지 / {{loading}} 로딩 중",
         "title": "인스턴스"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "위험: 시스템 메모리가 부족합니다!",
-        "good_high": "운영 환경에 적합한 우수한 메모리 상태입니다.",
-        "info_medium": "운영 용도로는 16GB 이상으로 업그레이드하는 것을 권장합니다.",
         "title": "시스템 RAM",
         "usage": "{{percent}}% 사용 중",
         "warning_low": "주의: 메모리 부족으로 성능이 저하될 수 있습니다."
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} 온라인 / {{draft}} 초안",
         "title": "서비스"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "뉴스레터 구독을 원하며, 다음 사항을 읽고 동의합니다:",
     "title": "뉴스레터 가입"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "페이지"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "어둡게",
-    "light": "밝게"
+    "light": "밝게",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "전체 화면 종료",

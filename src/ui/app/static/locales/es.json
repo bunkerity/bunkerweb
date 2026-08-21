@@ -88,6 +88,14 @@
     "support": "¿Necesitas soporte premium o consultoría personalizada para BunkerWeb? Consulta nuestros <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">servicios profesionales</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Direcciones IP bloqueadas en sus instancias de BunkerWeb — agregue, elimine o ajuste las duraciones de bloqueo.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "IP Únicas Bloqueadas"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} activas / {{down}} inactivas / {{loading}} cargando",
         "title": "Instancias"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Crítico: ¡El sistema se está quedando sin memoria!",
-        "good_high": "Memoria excelente para entornos de producción",
-        "info_medium": "Considera actualizar a 16GB+ para uso en producción",
         "title": "RAM del Sistema",
         "usage": "{{percent}}% usado",
         "warning_low": "Advertencia: Poca memoria puede afectar el rendimiento"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} en línea / {{draft}} borrador",
         "title": "Servicios"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Quiero suscribirme al boletín, y he leído y acepto la:",
     "title": "Únete al Boletín"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Página"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Oscuro",
-    "light": "Claro"
+    "light": "Claro",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Salir de pantalla completa",

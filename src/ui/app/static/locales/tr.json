@@ -88,6 +88,14 @@
     "support": "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "BunkerWeb örneklerinizdeki engellenmiş IP adresleri — engelleme sürelerini ekleyin, kaldırın veya ayarlayın.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "Engellenen Benzersiz IP'ler"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} aktif / {{down}} deaktif / {{loading}} yükleniyor",
         "title": "Örnekler"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Kritik: Sistem belleği tükenmek üzere!",
-        "good_high": "Üretim ortamları için mükemmel bellek",
-        "info_medium": "Üretim ortamlarında kullanım için 16 GB veya daha fazlasına yükseltmeyi düşünün",
         "title": "Sistem RAM'i",
         "usage": "{{percent}}% kullanıldı",
         "warning_low": "Uyarı: Düşük bellek performansı etkileyebilir"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} çevrimiçi / {{draft}} taslak",
         "title": "Servisler"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Bültene abone olmak istiyorum ve şunları okudum ve kabul ediyorum:",
     "title": "Bültene Katıl"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Sayfa"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Koyu",
-    "light": "Açık"
+    "light": "Açık",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Tam ekrandan çık",

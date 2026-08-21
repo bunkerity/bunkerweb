@@ -88,6 +88,14 @@
     "support": "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "আপনার BunkerWeb ইনস্ট্যান্স জুড়ে নিষিদ্ধ IP ঠিকানা — যোগ, অপসারণ, অথবা নিষিদ্ধ সময়কাল পরিবর্তন করুন।",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "অবরুদ্ধ অনন্য আইপি"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} চালু / {{down}} বন্ধ / {{loading}} লোড হচ্ছে",
         "title": "ইনস্ট্যান্স"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "গুরুতর: সিস্টেমের মেমোরি প্রায় শেষ!",
-        "good_high": "প্রোডাকশন পরিবেশের জন্য চমৎকার মেমোরি",
-        "info_medium": "প্রোডাকশন ব্যবহারের জন্য ১৬জিবি+ আপগ্রেড বিবেচনা করুন",
         "title": "সিস্টেম RAM",
         "usage": "{{percent}}% ব্যবহৃত",
         "warning_low": "সতর্কতা: কম মেমোরি পারফরম্যান্সে প্রভাব ফেলতে পারে"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} অনলাইন / {{draft}} খসড়া",
         "title": "পরিষেবা"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "আমি নিউজলেটারে সাবস্ক্রাইব করতে চাই, এবং আমি পড়েছি এবং সম্মত হয়েছি:",
     "title": "নিউজলেটারে যোগ দিন"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "পৃষ্ঠা"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "ডার্ক",
-    "light": "লাইট"
+    "light": "লাইট",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "পূর্ণ স্ক্রিন থেকে বেরিয়ে যান",

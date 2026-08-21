@@ -214,6 +214,18 @@ msgstr "Tirez le meilleur parti de BunkerWeb en passant à la version PRO. Plus 
 msgid "banner.support"
 msgstr "Besoin d'un support premium ou de conseils sur mesure pour BunkerWeb ? Consultez nos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">services professionnels</a>."
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Bannissements par motif"
 
@@ -1744,6 +1756,9 @@ msgstr "Adresses IP uniques bloquées"
 msgid "dashboard.card.certificates.title"
 msgstr "Certificats"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s actives / %(down)s inactives / %(loading)s chargement"
 
@@ -1765,12 +1780,6 @@ msgstr "Plugins"
 msgid "dashboard.card.ram.critical_high"
 msgstr "Critique : le système manque de mémoire !"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "Mémoire excellente pour les environnements de production"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "Envisagez de passer à 16 Go ou plus pour un usage en production"
-
 msgid "dashboard.card.ram.title"
 msgstr "RAM du système"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s %% utilisée"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "Attention : une faible mémoire peut affecter les performances"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s en ligne · %(draft)s en brouillon"
@@ -3222,6 +3234,12 @@ msgstr "Je souhaite m’abonner à la newsletter ; j’ai lu et j’accepte la p
 
 msgid "newsletter.title"
 msgstr "S’inscrire à la newsletter"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "Masquer"
@@ -5277,6 +5295,9 @@ msgstr "Sombre"
 
 msgid "theme.light"
 msgstr "Clair"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "Attaques aujourd'hui"

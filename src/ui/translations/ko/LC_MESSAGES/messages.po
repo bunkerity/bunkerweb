@@ -214,6 +214,18 @@ msgstr "PRO 버전으로 업그레이드하여 BunkerWeb의 모든 기능을 활
 msgid "banner.support"
 msgstr "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "사유별 차단"
 
@@ -1744,6 +1756,9 @@ msgstr "차단된 고유 IP"
 msgid "dashboard.card.certificates.title"
 msgstr "인증서"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s 실행 중 / %(down)s 중지 / %(loading)s 로딩 중"
 
@@ -1765,12 +1780,6 @@ msgstr "플러그인"
 msgid "dashboard.card.ram.critical_high"
 msgstr "위험: 시스템 메모리가 부족합니다!"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "운영 환경에 적합한 우수한 메모리 상태입니다."
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "운영 용도로는 16GB 이상으로 업그레이드하는 것을 권장합니다."
-
 msgid "dashboard.card.ram.title"
 msgstr "시스템 RAM"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% 사용 중"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "주의: 메모리 부족으로 성능이 저하될 수 있습니다."
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s 온라인 / %(draft)s 초안"
@@ -3217,6 +3229,12 @@ msgstr "뉴스레터 구독을 원하며, 다음 사항을 읽고 동의합니�
 
 msgid "newsletter.title"
 msgstr "뉴스레터 가입"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "닫기"
@@ -5272,6 +5290,9 @@ msgstr "어둡게"
 
 msgid "theme.light"
 msgstr "밝게"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "오늘의 공격"

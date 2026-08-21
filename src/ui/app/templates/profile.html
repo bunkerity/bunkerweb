@@ -157,7 +157,10 @@
                             <div class="row g-3">
                                 <div class="col-md-12"
                                      {% if is_readonly %} data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_db_readonly") }}"{% endif %}>
-                                    {{ native_select(id="theme-toggle", name="theme", label="Theme", label_i18n="form.label.theme", value=theme, options=[{"value": "light", "text": "Light", "i18n_key": "theme.light"}, {"value": "dark", "text": "Dark", "i18n_key": "theme.dark"}], disabled=is_readonly) }}
+                                    {# The select holds the MODE (#3820): "system" follows the OS, while bw_ui_users.theme
+                                       keeps storing the resolved light|dark so the first paint is server-rendered and
+                                       THEMES_ENUM does not move. #}
+                                    {{ native_select(id="theme-toggle", name="theme", label="Theme", label_i18n="form.label.theme", value=theme_mode | default(theme, true), options=[{"value": "light", "text": "Light", "i18n_key": "theme.light"}, {"value": "dark", "text": "Dark", "i18n_key": "theme.dark"}, {"value": "system", "text": "System", "i18n_key": "theme.system"}], disabled=is_readonly) }}
                                 </div>
                             </div>
                             <div class="mt-4 justify-content-center d-flex">

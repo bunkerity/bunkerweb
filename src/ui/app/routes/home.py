@@ -1,12 +1,12 @@
 from datetime import datetime
 from re import match
 from operator import itemgetter
-from psutil import virtual_memory
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required
 
 from app.dependencies import API_CLIENT, BW_INSTANCES_UTILS
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.system_memory import memory_state, read_memory
 from app.utils import LOGGER, flash
 from app.routes.utils import cors_required
 
@@ -50,31 +50,23 @@ def home_page():
             except Exception:
                 continue
 
-    # Get system memory information
-    memory = virtual_memory()
-    total_gb = memory.total / (1024**3)
-    used_gb = memory.used / (1024**3)
-    available_gb = memory.available / (1024**3)
+    # Get system memory information -- cgroup-aware, so the card describes the container the
+    # UI actually runs in rather than the host that happens to carry it.
+    memory = read_memory()
+    total_gb = memory["total"] / (1024**3)
+    used_gb = memory["used"] / (1024**3)
+    available_gb = memory["available"] / (1024**3)
 
     # Calculate percentage consistently based on used/total
     used_percent = (used_gb / total_gb) * 100 if total_gb > 0 else 0
-
-    # Determine memory state based on total RAM and usage
-    if used_percent >= 90:
-        memory_state = "danger"  # Critical usage regardless of total RAM
-    elif total_gb < 8:
-        memory_state = "low"
-    elif total_gb < 16:
-        memory_state = "medium"
-    else:
-        memory_state = "high"
 
     memory_info = {
         "total_gb": round(total_gb, 1),
         "used_gb": round(used_gb, 1),
         "used_percent": round(used_percent, 1),
         "available_gb": round(available_gb, 1),
-        "memory_state": memory_state,
+        # Bands on usage ONLY (#3820): a 6 GB lab at 50% is not permanently amber.
+        "memory_state": memory_state(used_percent),
     }
 
     try:

@@ -214,6 +214,18 @@ msgstr "Masulit ang BunkerWeb sa pamamagitan ng pag-upgrade sa PRO na bersyon. K
 msgid "banner.support"
 msgstr "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Mga ban ayon sa dahilan"
 
@@ -1744,6 +1756,9 @@ msgstr "Mga Na-block na Natatanging IP"
 msgid "dashboard.card.certificates.title"
 msgstr "Mga Sertipiko"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s aktibo / %(down)s hindi aktibo / %(loading)s naglo-load"
 
@@ -1765,12 +1780,6 @@ msgstr "Mga Plugin"
 msgid "dashboard.card.ram.critical_high"
 msgstr "Kritikal: Malapit nang maubusan ng memorya ang sistema!"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "Mahusay na memorya para sa mga production environment"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "Isaalang-alang ang pag-upgrade sa 16GB+ para sa production"
-
 msgid "dashboard.card.ram.title"
 msgstr "System RAM"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% ginagamit"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "Babala: Ang mababang memorya ay maaaring makaapekto sa pagganap"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s online / %(draft)s draft"
@@ -3222,6 +3234,12 @@ msgstr "Gusto kong mag-subscribe sa newsletter, at nabasa at sinangayunan ko ang
 
 msgid "newsletter.title"
 msgstr "Sumali sa Newsletter"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "Huwag nang ipakita"
@@ -5277,6 +5295,9 @@ msgstr "Madilim"
 
 msgid "theme.light"
 msgstr "Maliwanag"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "Mga pag-atake ngayong araw"

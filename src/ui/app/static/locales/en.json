@@ -88,6 +88,14 @@
     "support": "Need premium support or tailored consulting for BunkerWeb? Check out our <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">professional services</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Banned IP addresses across your BunkerWeb instances — add, remove, or adjust ban durations.",
     "stats": {
       "card": {
@@ -542,6 +550,7 @@
       "certificates": {
         "title": "Certificates"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} up / {{down}} down / {{loading}} loading",
         "title": "Instances"
@@ -558,12 +567,11 @@
       },
       "ram": {
         "critical_high": "Critical: System is running out of memory!",
-        "good_high": "Excellent memory for production environments",
-        "info_medium": "Consider upgrading to 16GB+ for production use",
         "title": "System RAM",
         "usage": "{{percent}}% used",
         "warning_low": "Warning: Low memory may affect performance"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} online / {{draft}} draft",
         "title": "Services"
@@ -1168,6 +1176,10 @@
   "newsletter": {
     "legal_agreement": "I want to subscribe to the newsletter, and I've read and agree to the:",
     "title": "Join the Newsletter"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "onboarding": {
     "dismiss": "Dismiss",
@@ -1920,7 +1932,8 @@
   },
   "theme": {
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Exit fullscreen",

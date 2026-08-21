@@ -667,11 +667,15 @@ $(document).ready(() => {
     clearNotifications($(this).data("root-url"));
   });
 
-  const saveTheme = debounce((rootUrl, theme) => {
+  const saveTheme = debounce((rootUrl, theme, mode) => {
     const csrfToken = $("#csrf_token").val();
 
     const data = new FormData();
+    // `theme` is always a RESOLVED value (light|dark) so bw_ui_users.theme -- and therefore
+    // THEMES_ENUM and the schema -- never has to grow a third value. `mode` is the user's
+    // actual choice and lives in the per-user preference table (#3820).
     data.append("theme", theme);
+    data.append("mode", mode || theme);
     data.append("csrf_token", csrfToken);
 
     fetch(rootUrl, {
@@ -689,20 +693,54 @@ $(document).ready(() => {
       });
   }, 1000);
 
+  // Theme mode: "system" follows the OS and keeps following it, so a machine that flips at
+  // dusk flips the UI with it, without a reload (#3820). The mode is what the user chose;
+  // what gets painted -- and what the server stores -- is always the resolved light|dark.
+  const themeMediaQuery =
+    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+
+  function osTheme() {
+    return themeMediaQuery && themeMediaQuery.matches ? "dark" : "light";
+  }
+
+  function resolveMode(mode) {
+    return mode === "system" ? osTheme() : mode;
+  }
+
+  // One listener for the life of the page; it does nothing unless the mode is "system", so
+  // switching back to an explicit choice cannot leave the OS still driving the theme.
+  if (
+    themeMediaQuery &&
+    typeof themeMediaQuery.addEventListener === "function"
+  ) {
+    themeMediaQuery.addEventListener("change", function () {
+      if (window.__bwThemeMode !== "system") return;
+      applyTheme("system", $("#theme-toggle").data("root-url") || null, true);
+    });
+  }
+
   // Server renders the authoritative theme on <html> and #theme; anon pages get
   // it resolved into window.__bwResolvedTheme by the head script. Repaint only
   // when it differs from what was painted -> logged-in is a no-op (zero flicker).
   const serverTheme = ($("#theme").val() || "light").trim();
+  // base.html stamps the stored MODE here before this file runs; with no stored mode the
+  // column value is the choice, which is the pre-1.7 behaviour.
+  const serverMode = window.__bwThemeMode === "system" ? "system" : serverTheme;
+  window.__bwThemeMode = serverMode;
   const desiredTheme =
-    typeof window.__bwResolvedTheme === "string"
-      ? window.__bwResolvedTheme
-      : serverTheme;
+    serverMode === "system"
+      ? osTheme()
+      : typeof window.__bwResolvedTheme === "string"
+        ? window.__bwResolvedTheme
+        : serverTheme;
 
   const isAuthenticated = $("body").attr("data-authenticated") === "true";
 
   if (isAuthenticated) {
     try {
-      localStorage.setItem("theme", desiredTheme); // sync cache with DB
+      // The MODE, not the painted value: caching a resolved light|dark under "system" is
+      // exactly how the OS stops being followed at the next load.
+      localStorage.setItem("theme", serverMode); // sync cache with DB
     } catch (e) {
       // Storage unavailable (private mode): non-fatal.
     }
@@ -712,7 +750,14 @@ $(document).ready(() => {
 
   if (desiredTheme !== serverTheme) {
     // <html> already fixed pre-paint; reconcile body assets only.
-    applyTheme(desiredTheme);
+    //
+    // Pass the MODE, not the resolved value. `applyTheme` stamps whatever it is given onto
+    // `window.__bwThemeMode`, and this branch is exactly the state a "system" user lands in
+    // when the column disagrees with the current OS resolution -- handing it "dark" here
+    // would kill the media-query listener for the page and write `dark` into the profile
+    // select, which is the "System snapped back to Light" defect all over again.
+    // `resolveMode("system")` paints the same thing `desiredTheme` holds.
+    applyTheme(serverMode === "system" ? "system" : desiredTheme);
   }
 
   // Explicit user choice -> always persist, even on anon pages.
@@ -750,6 +795,12 @@ $(document).ready(() => {
   function applyTheme(theme, rootUrl = null, persist = isAuthenticated) {
     $themeSelector = $("#theme-toggle");
 
+    // "system" is a MODE, never a painted value: resolve it here and remember the choice so
+    // the media-query listener above knows whether it is still allowed to repaint.
+    const mode = theme === "system" ? "system" : theme;
+    window.__bwThemeMode = mode;
+    theme = resolveMode(theme);
+
     if (theme === "dark") {
       $("html")
         .removeClass("light-style")
@@ -770,7 +821,6 @@ $(document).ready(() => {
         .not(".bw-logo-light, .bw-logo-dark")
         .attr("src", $("#bw-logo-white").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url-white").val());
-      $themeSelector.find("option[value='dark']").prop("selected", true);
     } else {
       $("html")
         .removeClass("dark-style dark")
@@ -791,15 +841,20 @@ $(document).ready(() => {
         .not(".bw-logo-light, .bw-logo-dark")
         .attr("src", $("#bw-logo").val());
       $("[alt='User Avatar']").attr("src", $("#avatar-url").val());
-      $themeSelector.find("option[value='light']").prop("selected", true);
     }
 
-    // Update input values
+    // Update input values. The profile select also carries name="theme", but it holds the
+    // MODE -- writing the resolved value into it snaps "System" straight back to "Light" the
+    // moment the theme is applied, which is exactly what a browser pass caught.
     $("#theme").val(theme);
-    $("[name='theme']").val(theme);
+    $("[name='theme']").not("#theme-toggle").val(theme);
+    $themeSelector.val(mode);
     if (persist) {
       try {
-        localStorage.setItem("theme", theme); // Save user preference
+        // In "system" mode the stored value is the mode itself: base.html's pre-paint script
+        // treats anything that is not light|dark as "follow the OS", so a resolved value
+        // written here would silently become an explicit choice at the next load.
+        localStorage.setItem("theme", mode === "system" ? "system" : theme);
       } catch (e) {
         // Storage unavailable (private mode / disabled): non-fatal.
       }
@@ -808,7 +863,7 @@ $(document).ready(() => {
     if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
-    saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
+    saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme, mode);
   }
 
   $("#pluginsCollapse").on("show.bs.collapse", function () {

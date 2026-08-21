@@ -15,8 +15,19 @@
     <!-- Newsletter Signup Section: rendered here (newsletter=false above) instead of via the
          macro's own newsletter slot -- see sidebar-notifications.html for why (i18n.js hardcodes
          the literal "#newsletter-email-check"/"#newsletter-locale" ids). -->
+    {# The form posts to Brevo in a new tab, so the UI never learns that the subscription
+       happened and used to ask forever (#3820). "Already subscribed" writes the per-user
+       `dismissed_notices` key and the block stops rendering -- we do not learn the subscription
+       state, we only record that this user is done being asked. #}
+    {% if not (dismissed_notices | default({}, true)).get("newsletter") %}
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
-        <h5 class="mb-3 text-primary">{{ _("newsletter.title") }}</h5>
+        <div class="d-flex align-items-start justify-content-between mb-3">
+            <h5 class="mb-0 text-primary">{{ _("newsletter.title") }}</h5>
+            <button type="button"
+                    class="btn btn-sm btn-link text-muted p-0 text-decoration-none"
+                    data-dismiss-notice="newsletter"
+                    >{{ _("notice.already_subscribed") }}</button>
+        </div>
         <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
               method="POST"
               target="_blank">
@@ -52,5 +63,6 @@
                     >{{ _("button.subscribe") }}</button>
         </form>
     </div>
+    {% endif %}
     <!-- End Newsletter Signup Section -->
 {% endcall %}

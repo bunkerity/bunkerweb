@@ -88,6 +88,14 @@
     "support": "Hai bisogno di supporto premium o consulenza su misura per BunkerWeb? Dai un'occhiata ai nostri <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">servizi professionali</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Indirizzi IP bloccati in tutte le tue istanze di BunkerWeb: aggiungili, rimuovili o modificane la durata del blocco.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "IP Unici Bloccati"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} attive / {{down}} inattive / {{loading}} in caricamento",
         "title": "Istanze"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Critico: la memoria di sistema sta esaurendosi!",
-        "good_high": "Memoria eccellente per ambienti di produzione",
-        "info_medium": "Considera l'aggiornamento a 16GB o più per l'uso in produzione",
         "title": "RAM di sistema",
         "usage": "{{percent}}% utilizzata",
         "warning_low": "Avviso: memoria insufficiente potrebbe influire sulle prestazioni"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} online / {{draft}} bozza",
         "title": "Servizi"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Voglio iscrivermi alla newsletter, e ho letto e accetto la:",
     "title": "Iscriviti alla Newsletter"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Pagina"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Scuro",
-    "light": "Chiaro"
+    "light": "Chiaro",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Esci da schermo intero",

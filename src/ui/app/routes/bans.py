@@ -279,6 +279,38 @@ def bans_stats():
     )
 
 
+@bans.route("/bans/timeseries", methods=["POST"])
+@login_required
+@cors_required
+def bans_timeseries():
+    """Picker-driven "active bans per interval" series for the panel under the KPI header.
+
+    Same start/end/bucket parsing and the same 400 (bad range) / 503 (API down) mapping as
+    ``home_dashboard`` (routes/home.py) -- the panel renders an empty chart rather than
+    breaking the page when the API is unreachable.
+    """
+    try:
+        end = int(request.form.get("end") or datetime.now().timestamp())
+        start = int(request.form.get("start") or (end - 86400))
+        bucket = request.form.get("bucket", "hour")
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Invalid start/end"}), 400
+
+    try:
+        timeseries = API_CLIENT.get_bans_timeseries(start=start, end=end, bucket=bucket)
+    except ApiClientError as e:
+        if e.status_code == 400:
+            LOGGER.warning(f"Bans API rejected the timeseries request ({e})")
+            return jsonify({"status": "error", "message": str(e) or "Invalid range"}), 400
+        LOGGER.warning(f"Bans API unavailable ({e}); the bans timeline will show an empty state")
+        return jsonify({"status": "error", "message": "Bans service unavailable"}), 503
+    except ApiUnavailableError as e:
+        LOGGER.warning(f"Bans API unavailable ({e}); the bans timeline will show an empty state")
+        return jsonify({"status": "error", "message": "Bans service unavailable"}), 503
+
+    return jsonify({"status": "success", "timeseries": timeseries})
+
+
 @bans.route("/bans/fetch", methods=["POST"])
 @login_required
 @cors_required

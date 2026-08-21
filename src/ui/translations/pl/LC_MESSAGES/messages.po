@@ -214,6 +214,18 @@ msgstr "Wykorzystaj w pełni możliwości BunkerWeb, przechodząc na wersję PRO
 msgid "banner.support"
 msgstr "Potrzebujesz wsparcia premium lub dostosowanego doradztwa dla BunkerWeb? Sprawdź nasze <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">profesjonalne usługi</a>."
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "Blokady według przyczyny"
 
@@ -1744,6 +1756,9 @@ msgstr "Zablokowane unikalne IP"
 msgid "dashboard.card.certificates.title"
 msgstr "Certyfikaty"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "aktywne %(up)s /nieaktywne %(down)s /wczytywanie %(loading)s"
 
@@ -1765,12 +1780,6 @@ msgstr "Wtyczki"
 msgid "dashboard.card.ram.critical_high"
 msgstr "Krytyczne: Systemowi kończy się pamięć!"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "Doskonała pamięć dla środowisk produkcyjnych"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "Rozważ aktualizację powyżej 16 GB do użytku produkcyjnego"
-
 msgid "dashboard.card.ram.title"
 msgstr "Pamięć RAM systemu"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% wykorzystane"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s online / %(draft)s szkice"
@@ -3227,6 +3239,12 @@ msgstr "Chcę zapisać się do newslettera i zapoznałem się z:"
 
 msgid "newsletter.title"
 msgstr "Dołącz do newslettera"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "Odrzuć"
@@ -5282,6 +5300,9 @@ msgstr "Ciemny"
 
 msgid "theme.light"
 msgstr "Jasny"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "Ataki dzisiaj"

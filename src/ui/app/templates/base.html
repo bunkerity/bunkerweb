@@ -34,15 +34,22 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="BunkerWeb user interface" />
         <meta name="author" content="Bunkerity" />
-        <!-- Anti-FOUC: resolve theme before first paint on anonymous pages.
-             Logged-in pages already render the authoritative DB theme inline. -->
-        {% if current_user is defined and not current_user.is_authenticated %}
+        <!-- Anti-FOUC: resolve theme before first paint on anonymous pages, and on logged-in
+             pages whose theme mode is "system" -- there the DB column holds the value resolved
+             at the LAST write, which the OS may have flipped since (#3820). An explicit
+             light/dark choice still renders straight from the column, untouched. -->
+        {% if current_user is defined and (not current_user.is_authenticated or theme_mode == 'system') %}
             <script nonce="{{ script_nonce }}">
           (function () {
             try {
               var serverTheme = {{ theme | tojson }};
+              var serverMode = {{ theme_mode | default(theme, true) | tojson }};
+              window.__bwThemeMode = serverMode;
               var mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
               function readStored() {
+                // In "system" mode there is no explicit choice to honour -- the OS decides,
+                // and a stale light|dark left in storage must not override it.
+                if (serverMode === "system") return null;
                 try {
                   var s = localStorage.getItem("theme");
                   return s === "light" || s === "dark" ? s : null;
@@ -76,6 +83,14 @@
               // Live OS tracking: only while the visitor has no explicit stored choice.
               if (mq && typeof mq.addEventListener === "function") {
                 mq.addEventListener("change", function () {
+                  // On a system-mode page `readStored()` returns null unconditionally, so this
+                  // listener would keep following the OS even after the user picks Light or Dark
+                  // from the navbar toggle -- silently reverting the choice on the next flip,
+                  // until a reload. utils.js's own listener already stands down in that case;
+                  // this one has to as well. Keyed on the closure's `serverMode`, NOT on the
+                  // global alone: on an anonymous page `__bwThemeMode` holds light|dark by
+                  // design, and a blanket check would kill OS tracking there.
+                  if (serverMode === "system" && window.__bwThemeMode !== "system") return;
                   if (readStored()) return; // explicit choice wins
                   apply(osTheme());
                 });
@@ -150,7 +165,13 @@
             {% endif %}
         {% endfor %}
     </head>
+    {# `data-app-root` is the application's mount point (`SCRIPT_NAME`, empty at the domain
+       root). The documented production topology puts the UI on a subpath behind BunkerWeb
+       (docs/web-ui.md, REVERSE_PROXY_URL + X-Forwarded-Prefix -> models/reverse_proxied.py),
+       where a root-absolute fetch("/preferences/...") leaves the app entirely. Scripts that
+       cannot derive their base from the current page read it here. #}
     <body data-page-title="{{ page_title_fallback if page_title_fallback else 'BunkerWeb UI' }}"
+          data-app-root="{{ request.script_root if request else '' }}"
           data-authenticated="{{ 'true' if current_user is defined and current_user.is_authenticated else 'false' }}">
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
         <input type="hidden" id="is-read-only" value="{{ is_readonly }}" />
@@ -201,6 +222,11 @@
         <script src="{{ url_for('static', filename='js/common.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/utils.js') }}"
+                nonce="{{ script_nonce }}"></script>
+        {# Dismissable notices + hideable Home cards (#3820). Loaded here rather than per page:
+           the MFA reminder is a toast the flash machinery injects on whatever page the user
+           lands on, and the newsletter block lives in the sidebar of every page. #}
+        <script src="{{ url_for('static', filename='js/components/ui-preferences.js') }}"
                 nonce="{{ script_nonce }}"></script>
         {# The browser's message catalog, loaded synchronously so `t()` is defined before any page
            script runs. It used to be an XHR by i18next, which is why every table waited on

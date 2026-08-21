@@ -121,6 +121,11 @@ class ApiClient(BaseApiClient):
         each instance is enforcing right now — not what the operator decided."""
         return (self._get("/bans") or {}).get("data", [])
 
+    def get_bans_timeseries(self, *, start: int, end: int, bucket: str = "hour"):
+        """Active bans per interval over ``[start, end)`` — occupancy, not creations (the table
+        keeps one row per ``(ip, scope, service)`` and a re-ban rewrites its ``created_at``)."""
+        return self._get("/bans/timeseries", params={"start": start, "end": end, "bucket": bucket})
+
     def ban(self, bans: list):
         return self._post("/bans/ban", json=bans)
 

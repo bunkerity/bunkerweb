@@ -214,6 +214,18 @@ msgstr "PRO সংস্করণে আপগ্রেড করে BunkerWeb-�
 msgid "banner.support"
 msgstr "BunkerWeb-এর জন্য প্রিমিয়াম সমর্থন বা কাস্টমাইজড পরামর্শ প্রয়োজন? আমাদের <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">পেশাদার পরিষেবাগুলি</a> দেখুন।"
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "কারণ অনুযায়ী ব্লক"
 
@@ -1744,6 +1756,9 @@ msgstr "অবরুদ্ধ অনন্য আইপি"
 msgid "dashboard.card.certificates.title"
 msgstr "সার্টিফিকেট"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s চালু / %(down)s বন্ধ / %(loading)s লোড হচ্ছে"
 
@@ -1765,12 +1780,6 @@ msgstr "প্লাগইন"
 msgid "dashboard.card.ram.critical_high"
 msgstr "গুরুতর: সিস্টেমের মেমোরি প্রায় শেষ!"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "প্রোডাকশন পরিবেশের জন্য চমৎকার মেমোরি"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "প্রোডাকশন ব্যবহারের জন্য ১৬জিবি+ আপগ্রেড বিবেচনা করুন"
-
 msgid "dashboard.card.ram.title"
 msgstr "সিস্টেম RAM"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% ব্যবহৃত"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "সতর্কতা: কম মেমোরি পারফরম্যান্সে প্রভাব ফেলতে পারে"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s অনলাইন / %(draft)s খসড়া"
@@ -3222,6 +3234,12 @@ msgstr "আমি নিউজলেটারে সাবস্ক্রাই�
 
 msgid "newsletter.title"
 msgstr "নিউজলেটারে যোগ দিন"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "বাতিল করুন"
@@ -5277,6 +5295,9 @@ msgstr "ডার্ক"
 
 msgid "theme.light"
 msgstr "লাইট"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "আজকের আক্রমণ"

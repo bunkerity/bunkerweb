@@ -5,6 +5,8 @@
 {% from "components/tile.html" import tile %}
 {% from "components/alert.html" import alert %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/chart-area.html" import chart_area %}
+{% from "components/range-picker.html" import range_picker %}
 {# The page-head band now owns the breadcrumb + title, so suppress the dashboard shell's
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
@@ -15,6 +17,13 @@
           as="style" />
     <link rel="stylesheet"
           href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <!-- ApexCharts (bans timeline) -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
           nonce="{{ style_nonce }}" />
     <!-- Flatpickr -->
     <link rel="preload"
@@ -52,6 +61,12 @@
         <div class="col-6 col-lg-3">{{ tile(id="bans-tile-countries", title="Countries", title_i18n="bans.stats.tile.countries", value="—", color="secondary", icon="bx-globe") }}</div>
         <div class="col-6 col-lg-3">{{ tile(id="bans-tile-permanent", title="Permanent bans", title_i18n="bans.stats.tile.permanent", value="—", color="secondary", icon="bx-lock") }}</div>
     </div>
+    {# "Active bans per interval" (#3820). Occupancy, not creations: bw_bans keeps one row per
+       (ip, scope, service) and a re-ban rewrites its created_at, so a "bans created" series would
+       claim an event history the table cannot back -- the note under the chart says so. #}
+    <div class="d-flex justify-content-end mb-2">{{ range_picker(id="bans-range", active="24h") }}</div>
+    {{ chart_area(id="bans-timeseries-chart", title="Active bans per interval", title_key="bans.chart.timeseries.title", subtitle="Selected range", subtitle_key="bans.chart.timeseries.subtitle", uppercase=true, height=260, card_classes="mb-4") }}
+    <p class="text-muted small mb-4" id="bans-timeseries-note">{{ _("bans.chart.timeseries.note") }}</p>
     <div class="row g-3">
         <div class="col-lg-8">
             {% call card(classes="table-responsive text-nowrap p-4 pb-8 min-vh-70") %}
@@ -353,6 +368,15 @@
             defer
             type="module"></script>
     <script src="{{ url_for('static', filename='js/pages/bans-stats.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/components/range-picker.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/bans-timeseries.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
 {% endblock %}

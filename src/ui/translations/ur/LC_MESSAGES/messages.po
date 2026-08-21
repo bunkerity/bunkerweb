@@ -214,6 +214,18 @@ msgstr "PRO ورژن میں اپ گریڈ کر کے BunkerWeb سے زیادہ س
 msgid "banner.support"
 msgstr "BunkerWeb کے لیے پریمیم سپورٹ یا موزوں مشاورت کی ضرورت ہے؟ ہماری <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">پیشہ ورانہ خدمات</a> دیکھیں۔"
 
+msgid "bans.chart.timeseries.note"
+msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+
+msgid "bans.chart.timeseries.series"
+msgstr "Active bans"
+
+msgid "bans.chart.timeseries.subtitle"
+msgstr "Selected range"
+
+msgid "bans.chart.timeseries.title"
+msgstr "Active bans per interval"
+
 msgid "bans.stats.card.by_reason"
 msgstr "وجہ کے لحاظ سے پابندیاں"
 
@@ -1744,6 +1756,9 @@ msgstr "روکے گئے منفرد IPs"
 msgid "dashboard.card.certificates.title"
 msgstr "سرٹیفکیٹس"
 
+msgid "dashboard.card.hide"
+msgstr "Hide this card"
+
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s فعال / %(down)s غیر فعال / %(loading)s لوڈ ہو رہا ہے"
 
@@ -1765,12 +1780,6 @@ msgstr "پلگ انز"
 msgid "dashboard.card.ram.critical_high"
 msgstr "انتہائی سنگین: سسٹم کی میموری ختم ہو رہی ہے!"
 
-msgid "dashboard.card.ram.good_high"
-msgstr "پیداواری ماحول کے لیے بہترین میموری۔"
-
-msgid "dashboard.card.ram.info_medium"
-msgstr "پیداواری استعمال کے لیے 16GB+ میں اپ گریڈ کرنے پر غور کریں۔"
-
 msgid "dashboard.card.ram.title"
 msgstr "سسٹم RAM"
 
@@ -1779,6 +1788,9 @@ msgstr "%(percent)s%% استعمال شدہ"
 
 msgid "dashboard.card.ram.warning_low"
 msgstr "انتباہ: کم میموری کارکردگی کو متاثر کر سکتی ہے۔"
+
+msgid "dashboard.card.restore"
+msgstr "Restore hidden cards"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s آن لائن / %(draft)s ڈرافٹ"
@@ -3222,6 +3234,12 @@ msgstr "میں نیوز لیٹر کی رکنیت حاصل کرنا چاہتا ہ
 
 msgid "newsletter.title"
 msgstr "نیوز لیٹر میں شامل ہوں"
+
+msgid "notice.already_subscribed"
+msgstr "Already subscribed"
+
+msgid "notice.dismiss_mfa"
+msgstr "Don't remind me again"
 
 msgid "onboarding.dismiss"
 msgstr "نظر انداز کریں"
@@ -5277,6 +5295,9 @@ msgstr "تاریک"
 
 msgid "theme.light"
 msgstr "روشن"
+
+msgid "theme.system"
+msgstr "System"
 
 msgid "threatmap.attacks_today"
 msgstr "آج کے حملے"

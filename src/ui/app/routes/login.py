@@ -7,6 +7,8 @@ from flask_login import current_user, login_user
 
 from app.dependencies import API_CLIENT
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.i18n import translated
+from app.routes.preferences import dismissed_notices
 from app.routes.utils import cors_required
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, LOGIN_NOTICES, flash, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
@@ -149,11 +151,18 @@ def login_page():
 
             LOGGER.info(f"User {ui_user.username} logged in successfully" + (" with remember me" if request.form.get("remember-me") == "on" else ""))
 
+            # The 2FA reminder repeats on EVERY login until it is set up, with no way to say
+            # "I know" -- an interface on an isolated network behind a bastion is a legitimate
+            # reason not to (#3820). Dismissing is per user and does not disable anything: the
+            # MFA state stays visible in the profile and in the guided walkthrough.
             if not user_data.get("totp_secret") and not user_data.get("webauthn_credentials_count"):
-                flash(
-                    f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>',
-                    "warning",
-                )
+                if not dismissed_notices(ui_user.username).get("mfa"):
+                    dismiss_label = translated("notice.dismiss_mfa") or "Don't remind me again"
+                    flash(
+                        f'Please enable two-factor authentication to secure your account <a href="{url_for("profile.profile_page", _anchor="security")}">here</a>'
+                        f' <a href="#" class="alert-link" data-dismiss-notice="mfa">{dismiss_label}</a>',
+                        "warning",
+                    )
 
             return redirect(url_for("loading", next=_safe_next()))
         else:

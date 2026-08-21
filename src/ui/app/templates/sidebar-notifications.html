@@ -45,8 +45,17 @@
          macro's own newsletter slot, because static/js/i18n.js hardcodes the literal ids
          "#newsletter-email-check"/"#newsletter-locale" -- the macro's built-in slot namespaces
          them as "{{ id }}-newsletter-locale" etc, which would silently break that JS hook. -->
+    {# Same per-user dismissal as the news drawer (#3820): the signup block is duplicated in
+       both drawers, so gating only one leaves the other still asking forever. #}
+    {% if not (dismissed_notices | default({}, true)).get("newsletter") %}
     <div class="newsletter-signup position-sticky bottom-0 start-0 w-100 p-4 bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle border-top">
-        <h5 class="mb-3 text-primary">{{ _("newsletter.title") }}</h5>
+        <div class="d-flex align-items-start justify-content-between mb-3">
+            <h5 class="mb-0 text-primary">{{ _("newsletter.title") }}</h5>
+            <button type="button"
+                    class="btn btn-sm btn-link text-muted p-0 text-decoration-none"
+                    data-dismiss-notice="newsletter"
+                    >{{ _("notice.already_subscribed") }}</button>
+        </div>
         <form action="https://sibforms.com/serve/MUIFAHoWe6WZdJ2ergvcJd8d2gn5T_x7bUzVM6jJd1FmAMfS6v-S9cUN3Iqw6DFiq7mRlDMvTXSIM9voEv8sCkZmEhtoDukSdI4BomhnTtgJAMXFkXUIj07KNw5gBWJ-1kPYCoSJlcabngBdufuqPnzGQ87UMecHcke3Hv2-AgAZOMYbCgKg2mx4ki8vhCkQtEpfBQhNZY22UY5y"
               method="POST"
               target="_blank">
@@ -82,5 +91,6 @@
                     >{{ _("button.subscribe") }}</button>
         </form>
     </div>
+    {% endif %}
     <!-- End Newsletter Signup Section -->
 {% endcall %}

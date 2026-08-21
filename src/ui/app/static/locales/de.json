@@ -88,6 +88,14 @@
     "support": "Benötigst du Premium-Support oder maßgeschneiderte Beratung für BunkerWeb? Schau dir unsere <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">professionellen Dienstleistungen</a> an."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Blockierte IP-Adressen für Ihre BunkerWeb-Instanzen — hinzufügen, entfernen oder die Sperrdauer anpassen.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "Blockierte eindeutige IPs"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} aktiv / {{down}} inaktiv / {{loading}} lädt",
         "title": "Instanzen"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Kritisch: Das System hat fast keinen Speicher mehr!",
-        "good_high": "Ausgezeichneter Speicher für Produktionsumgebungen",
-        "info_medium": "Für den Produktionseinsatz wird ein Upgrade auf 16GB+ empfohlen",
         "title": "System-RAM",
         "usage": "{{percent}}% verwendet",
         "warning_low": "Warnung: Wenig Speicher kann die Leistung beeinträchtigen"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} online / {{draft}} Entwurf",
         "title": "Dienste"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Ich möchte den Newsletter abonnieren und habe gelesen und stimme zu:",
     "title": "Newsletter abonnieren"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Seite"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Dunkel",
-    "light": "Hell"
+    "light": "Hell",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Vollbild beenden",

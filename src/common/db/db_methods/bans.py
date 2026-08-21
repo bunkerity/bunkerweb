@@ -3,14 +3,16 @@ from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from json import dumps, loads
+from math import ceil
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import and_, delete, or_, select, update
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 
 from model import Bans  # type: ignore
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
+from .metrics import MAX_TIMESERIES_BUCKETS, _safe_epoch_to_datetime
 
 # reason_data crosses a trust boundary: it is built on the instance (badbehavior ships per-IP
 # counters through it) and scraped back here. Cap it rather than storing unbounded JSON.
@@ -221,6 +223,73 @@ class DatabaseBansMixin(DatabaseMixinBase):
             stmt = stmt.where(_active_clause(now))
         with self._db_session() as session:
             return [_row_to_dict(row, now) for row in session.scalars(stmt.order_by(Bans.created_at.desc())).all()]
+
+    @retry_on_transient_db_errors
+    def get_bans_timeseries(self, *, start: int, end: int, bucket: str = "hour") -> Dict[str, Any]:
+        """How many bans were **in force** during each interval of ``[start, end)`` (epoch seconds).
+
+        Not "bans created per interval". ``bw_bans`` holds one row per ``(ip, ban_scope,
+        service_id)`` and ``upsert_ban`` rewrites ``created_at`` on the existing row, so a
+        re-ban overwrites the original date and a ban/unban/re-ban erases the revocation
+        entirely: a creation series would be an event history the table cannot back. What the
+        table *can* answer honestly is occupancy — a row counts in every bucket its lifetime
+        ``[created_at, revoked_at or expires_at)`` overlaps, and a still-running ban counts to
+        the end of the window.
+
+        Bucketing is done in Python for the same reason ``get_metrics_timeseries`` does it: no
+        portable ``date_trunc`` across the 4 engines. The ``MAX_TIMESERIES_BUCKETS`` guard and
+        ``_safe_epoch_to_datetime`` come from that module verbatim, so a nonsense range is a 400
+        at the boundary rather than a 500 or a multi-gigabyte list.
+
+        ponytail: O(rows overlapping the window). ``ix_bw_bans_active`` covers the
+        revoked/expires side; a six-figure ban table over a wide window still materializes every
+        overlapping row. Move to per-engine SQL if that ever shows up as slow.
+        """
+        bucket_seconds = 3600 if bucket == "hour" else 86400
+        window = end - start
+        bucket_count = max(1, -(-window // bucket_seconds))  # ceil division
+        if bucket_count > MAX_TIMESERIES_BUCKETS:
+            raise ValueError(f"requested range too large: {bucket_count} buckets exceeds {MAX_TIMESERIES_BUCKETS}")
+
+        start_dt = _safe_epoch_to_datetime(start, "start")
+        end_dt = _safe_epoch_to_datetime(end, "end")
+        prev_start_dt = _safe_epoch_to_datetime(start - window, "start")
+
+        def _overlaps(window_start: datetime, window_end: datetime):
+            """Ban lifetime ``[created_at, ended)`` intersects ``[window_start, window_end)``."""
+            ended = func.coalesce(Bans.revoked_at, Bans.expires_at)
+            return and_(Bans.created_at < window_end, or_(ended.is_(None), ended > window_start))
+
+        with self._db_session() as session:
+            rows = session.execute(select(Bans.created_at, Bans.revoked_at, Bans.expires_at).where(_overlaps(start_dt, end_dt))).all()
+            prev_total = session.scalar(select(func.count()).select_from(select(Bans.id).where(_overlaps(prev_start_dt, start_dt)).subquery())) or 0
+
+        counts = [0] * bucket_count
+        for created_at, revoked_at, expires_at in rows:
+            # SQLite/MySQL/MariaDB hand these back without tzinfo; .timestamp() on a naive
+            # datetime resolves against the *local* zone, which would shift every bucket index
+            # off UTC. _utc() is the same "naive means UTC" fix the write path already carries.
+            began = _utc(created_at).timestamp()
+            ended = _utc(revoked_at) or _utc(expires_at)
+            first = max(0, int((began - start) // bucket_seconds))
+            if ended is None:  # still in force -- occupies every remaining bucket
+                last = bucket_count - 1
+            else:
+                # A ban ending exactly on a bucket boundary does NOT occupy that bucket:
+                # the interval is half-open on both sides.
+                last = min(bucket_count - 1, ceil((ended.timestamp() - start) / bucket_seconds) - 1)
+            for index in range(first, last + 1):
+                counts[index] += 1
+
+        total = len(rows)
+        trend_pct = round(((total - prev_total) / prev_total) * 100, 1) if prev_total else None
+        return {
+            "buckets": [start + i * bucket_seconds for i in range(bucket_count)],
+            "counts": counts,
+            "total": total,
+            "prev_total": prev_total,
+            "trend_pct": trend_pct,
+        }
 
     @retry_on_transient_db_errors
     def learn_bans(self, records: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:

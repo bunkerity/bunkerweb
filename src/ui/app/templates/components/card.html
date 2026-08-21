@@ -38,8 +38,14 @@
                   muted ".sub" line under it (app.css:336-339). Backward-compatible:
                   omit it and the header keeps the default h5 card-title look.
 
-   No companion JS -- this is a static wrapper, there is no interaction to wire up. #}
-{% macro card(id=none, classes="", title=none, title_key=none, subtitle=none, subtitle_key=none, icon=none, header_right=none, separator=true, uppercase=false) -%}
+     hideable     when true (and `id` is set), renders a "hide this card" control at the end
+                  of the header. static/js/components/ui-preferences.js posts the id to
+                  /preferences/home-cards and reloads; the page then simply does not render
+                  the card. Requires a header -- a headerless card has nowhere to put it.
+
+   Companion JS: only for `hideable` (ui-preferences.js, loaded from base.html). Otherwise this
+   is a static wrapper with no interaction to wire up. #}
+{% macro card(id=none, classes="", title=none, title_key=none, subtitle=none, subtitle_key=none, icon=none, header_right=none, separator=true, uppercase=false, hideable=false) -%}
     {%- set has_header = title or icon or header_right -%}
     <div{% if id %} id="{{ id }}"{% endif %}
          class="card{% if classes %} {{ classes }}{% endif %}"
@@ -55,7 +61,18 @@
                         </div>
                     {%- endif %}
                 </div>
-                {%- if header_right %}{{ header_right | safe }}{% endif %}
+                <div class="d-flex align-items-center gap-2">
+                    {%- if header_right %}{{ header_right | safe }}{% endif %}
+                    {%- if hideable and id %}
+                        <button type="button"
+                                class="btn btn-sm btn-link text-muted p-0 lh-1 bw-card-hide"
+                                data-hide-card="{{ id }}"
+                                title="{{ _('dashboard.card.hide') }}"
+                                aria-label="{{ _('dashboard.card.hide') }}">
+                            <i class="bx bx-x bx-sm" aria-hidden="true"></i>
+                        </button>
+                    {%- endif %}
+                </div>
             </div>
             <div class="card-body">
                 {{ caller() }}

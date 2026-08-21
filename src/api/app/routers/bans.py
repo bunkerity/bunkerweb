@@ -43,6 +43,25 @@ def list_bans() -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success", "data": get_db().get_bans()})
 
 
+@router.get("/timeseries", dependencies=[Depends(guard)])
+def query_bans_timeseries(start: int, end: int, bucket: str = "hour") -> JSONResponse:
+    """Active bans per interval over ``[start, end)``.
+
+    Occupancy, not creations: ``bw_bans`` keeps one row per ``(ip, ban_scope, service_id)`` and a
+    re-ban rewrites ``created_at`` on it, so the table cannot back an event history. See
+    ``DatabaseBansMixin.get_bans_timeseries``.
+
+    No ACL wiring: ``_resolve_bans`` falls back to a per-verb mapping for any unlisted path under
+    ``/bans``, so this ``GET`` resolves ``ban_read`` on its own (pinned by
+    ``tests/unit/api/test_bans_timeseries.py``).
+    """
+    try:
+        result = get_db().get_bans_timeseries(start=start, end=end, bucket=bucket)
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+    return JSONResponse(status_code=200, content={"status": "success", **result})
+
+
 @router.get("/instances", dependencies=[Depends(guard)])
 def list_instance_bans(api_caller=Depends(get_instances_api_caller)) -> JSONResponse:
     """List the bans each BunkerWeb instance is currently enforcing (runtime view, not durable

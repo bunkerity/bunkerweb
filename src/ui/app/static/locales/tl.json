@@ -88,6 +88,14 @@
     "support": "Kailangan ng premium na suporta o pasadyang konsultasyon para sa BunkerWeb? Tingnan ang aming <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">mga propesyonal na serbisyo</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Mga IP address na binuwag sa iyong mga instance ng BunkerWeb — idagdag, alisin, o ayusin ang tagal ng pagbabawal.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "Mga Na-block na Natatanging IP"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} aktibo / {{down}} hindi aktibo / {{loading}} naglo-load",
         "title": "Mga Instance"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Kritikal: Malapit nang maubusan ng memorya ang sistema!",
-        "good_high": "Mahusay na memorya para sa mga production environment",
-        "info_medium": "Isaalang-alang ang pag-upgrade sa 16GB+ para sa production",
         "title": "System RAM",
         "usage": "{{percent}}% ginagamit",
         "warning_low": "Babala: Ang mababang memorya ay maaaring makaapekto sa pagganap"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} online / {{draft}} draft",
         "title": "Mga Serbisyo"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Gusto kong mag-subscribe sa newsletter, at nabasa at sinangayunan ko ang:",
     "title": "Sumali sa Newsletter"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Pahina"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Madilim",
-    "light": "Maliwanag"
+    "light": "Maliwanag",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Lumabas sa buong screen",

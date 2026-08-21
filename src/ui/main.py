@@ -87,6 +87,16 @@ from app.routes.whats_new import pending_releases, whats_new
 from app import perf
 from base_api_client import REQUEST_ID  # type: ignore
 from app.models.onboarding import PREFERENCE_KEY as ONBOARDING_PREFERENCE_KEY
+from app.routes.preferences import (
+    DISMISSED_NOTICES_KEY,
+    HIDDEN_CARDS_KEY,
+    SESSION_KEYS as PREFERENCE_SESSION_KEYS,
+    THEME_MODE_KEY,
+    dismissed_notices as load_dismissed_notices,
+    hidden_home_cards as load_hidden_home_cards,
+    preferences,
+    theme_mode as load_theme_mode,
+)
 from app.routes.plugins import plugins
 from app.routes.pro import pro
 from app.routes.profile import profile
@@ -132,6 +142,7 @@ BLUEPRINTS = (
     setup,
     support,
     onboarding,
+    preferences,
 )
 
 signal(SIGINT, handle_stop)
@@ -1331,6 +1342,12 @@ def before_request():
         supported_languages=SUPPORTED_LANGUAGES,
         theme=theme_value,
         language=language_value,
+        # The comfort preferences are per user, so the anonymous/login pages get the neutral
+        # defaults rather than nothing: base.html renders `theme_mode | tojson`, and an
+        # Undefined there is a 500, not a missing feature.
+        theme_mode=theme_value,
+        dismissed_notices={},
+        hidden_home_cards=[],
     )
 
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
@@ -1448,6 +1465,27 @@ def before_request():
             onboarding_autoopen = False
             session["onboarding_active"] = onboarding_active
 
+        # Per-user comfort preferences (#3820): dismissed notices, the theme mode, and the
+        # hidden Home cards. Resolved once per session for the same reason the walkthrough flag
+        # is -- these change only through /preferences/* and /set_theme, which clear their own
+        # session key -- so a page render costs no extra API call.
+        notices_session_key = PREFERENCE_SESSION_KEYS[DISMISSED_NOTICES_KEY]
+        if notices_session_key not in session:
+            session[notices_session_key] = load_dismissed_notices(current_user.get_id())
+        dismissed = session[notices_session_key]
+
+        cards_session_key = PREFERENCE_SESSION_KEYS[HIDDEN_CARDS_KEY]
+        if cards_session_key not in session:
+            session[cards_session_key] = load_hidden_home_cards(current_user.get_id())
+        hidden_cards = session[cards_session_key]
+
+        mode_session_key = PREFERENCE_SESSION_KEYS[THEME_MODE_KEY]
+        if mode_session_key not in session:
+            session[mode_session_key] = load_theme_mode(current_user.get_id())
+        # No stored mode means the pre-1.7 behaviour: whatever `bw_ui_users.theme` holds is an
+        # explicit choice.
+        mode = session[mode_session_key] or theme_value
+
         # The post-upgrade recap. Resolved once per session like the walkthrough flag; the
         # releases themselves come from a parsed-and-cached CHANGELOG.md, so the extra cost
         # of a pending recap is a dict lookup, and of a caught-up user nothing at all.
@@ -1483,6 +1521,9 @@ def before_request():
             extra_pages=app.config["EXTRA_PAGES"],
             extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
             extra_styles=DATA.get("EXTRA_STYLES", []),
+            dismissed_notices=dismissed,
+            hidden_home_cards=hidden_cards,
+            theme_mode=mode,
             onboarding_active=onboarding_active,
             onboarding_autoopen=onboarding_autoopen,
             whatsnew_releases=whatsnew_releases,
@@ -1780,11 +1821,22 @@ def set_theme():
     elif request.form["theme"] not in ("dark", "light"):
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
+    # The MODE (light/dark/system) is a per-user preference; the column keeps storing the
+    # RESOLVED value so the server-rendered first paint stays correct and THEMES_ENUM -- and
+    # therefore the schema -- does not move. An absent `mode` means an explicit choice, which
+    # is exactly what the resolved value already says.
+    mode = request.form.get("mode", request.form["theme"])
+    if mode not in ("dark", "light", "system"):
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
     try:
         API_CLIENT.update_user(current_user.get_id(), theme=request.form["theme"])
+        API_CLIENT.update_user_preferences(current_user.get_id(), THEME_MODE_KEY, {"mode": mode})
     except Exception as e:
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {e}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
+
+    session.pop(PREFERENCE_SESSION_KEYS[THEME_MODE_KEY], None)
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 

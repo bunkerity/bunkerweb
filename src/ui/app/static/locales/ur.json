@@ -88,6 +88,14 @@
     "support": "BunkerWeb کے لیے پریمیم سپورٹ یا موزوں مشاورت کی ضرورت ہے؟ ہماری <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">پیشہ ورانہ خدمات</a> دیکھیں۔"
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "آپ کے BunkerWeb انسٹینسز میں ممنوعہ IP ایڈریسز - شامل کریں، ہٹائیں، یا پابندی کی مدت کو ایڈجسٹ کریں۔",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "روکے گئے منفرد IPs"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} فعال / {{down}} غیر فعال / {{loading}} لوڈ ہو رہا ہے",
         "title": "انسٹینسز"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "انتہائی سنگین: سسٹم کی میموری ختم ہو رہی ہے!",
-        "good_high": "پیداواری ماحول کے لیے بہترین میموری۔",
-        "info_medium": "پیداواری استعمال کے لیے 16GB+ میں اپ گریڈ کرنے پر غور کریں۔",
         "title": "سسٹم RAM",
         "usage": "{{percent}}% استعمال شدہ",
         "warning_low": "انتباہ: کم میموری کارکردگی کو متاثر کر سکتی ہے۔"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} آن لائن / {{draft}} ڈرافٹ",
         "title": "خدمات"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "میں نیوز لیٹر کی رکنیت حاصل کرنا چاہتا ہوں، اور میں نے پڑھا ہے اور اس سے اتفاق کرتا ہوں:",
     "title": "نیوز لیٹر میں شامل ہوں"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "صفحہ"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "تاریک",
-    "light": "روشن"
+    "light": "روشن",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "پوری اسکرین سے باہر نکلیں",

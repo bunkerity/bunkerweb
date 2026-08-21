@@ -88,6 +88,14 @@
     "support": "هل تحتاج إلى دعم متميز أو استشارات مخصصة لـ BunkerWeb؟ تحقق من <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">خدماتنا الاحترافية</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "عناوين IP المحظورة عبر مثيلات BunkerWeb الخاصة بك — أضف، أو احذف، أو اضبط مدة الحظر.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "IP فريدة محظورة"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} قيد التشغيل / {{down}} متوقف / {{loading}} قيد التحميل",
         "title": "المثيلات"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "حرج: النظام على وشك نفاد الذاكرة!",
-        "good_high": "ذاكرة ممتازة لبيئات الإنتاج",
-        "info_medium": "يفضل الترقية إلى 16 جيجابايت أو أكثر للاستخدام في الإنتاج",
         "title": "ذاكرة النظام (RAM)",
         "usage": "{{percent}}٪ مستخدمة",
         "warning_low": "تحذير: انخفاض الذاكرة قد يؤثر على الأداء"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} متصل / {{draft}} مسودة",
         "title": "الخدمات"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "أرغب في الاشتراك في النشرة الإخبارية، وقد قرأت ووافقت على:",
     "title": "انضم إلى النشرة الإخبارية"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "صفحة"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "داكن",
-    "light": "فاتح"
+    "light": "فاتح",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "إنهاء ملء الشاشة",

@@ -51,6 +51,15 @@
             <i class="bx bx-refresh" aria-hidden="true"></i>&nbsp;<span>{{ _("button.reload") }}</span>
         </a>
         {{ range_picker(id="home-range", active="7d") }}
+        {# Only when something is actually hidden (#3820): a permanent "restore" button on a
+           complete dashboard is one more control that never does anything. #}
+        {% if hidden_home_cards | default([], true) %}
+            <button type="button"
+                    class="btn btn-outline-secondary d-flex align-items-center"
+                    data-restore-cards="true">
+                <i class="bx bx-reset" aria-hidden="true"></i>&nbsp;<span>{{ _("dashboard.card.restore") }}</span>
+            </button>
+        {% endif %}
         <a href="{{ url_for('support') }}" class="btn btn-primary don-jose d-flex align-items-center">
             <i class="bx bx-support" aria-hidden="true"></i>&nbsp;<span>{{ _("link.get_support") }}</span>
         </a>
@@ -95,9 +104,9 @@
             <span class="sb-eyebrow">{{ _("dashboard.card.ram.title") }}</span>
             <div class="sb-primary">
                 <span class="sb-ram-val don-jose">{{ memory_info.used_gb }}<span class="sb-ram-unit"> / {{ memory_info.total_gb }} GB</span></span>
-                <span class="sb-chip sb-chip-{{ 'danger' if memory_info.memory_state == 'danger' else 'warn' if memory_info.memory_state == 'low' else 'muted' if memory_info.memory_state == 'medium' else 'green' }}">{{ memory_info.used_percent | round(1) }}%</span>
+                <span class="sb-chip sb-chip-{{ 'danger' if memory_info.memory_state == 'danger' else 'warn' if memory_info.memory_state == 'warning' else 'muted' if memory_info.memory_state == 'neutral' else 'green' }}">{{ memory_info.used_percent | round(1) }}%</span>
             </div>
-            <div class="sb-ram-bar {{ 'is-danger' if memory_info.memory_state == 'danger' else 'is-warn' if memory_info.memory_state in ('low', 'medium') else '' }}"><i style="width: {{ memory_info.used_percent | round(1) }}%"></i></div>
+            <div class="sb-ram-bar {{ 'is-danger' if memory_info.memory_state == 'danger' else 'is-warn' if memory_info.memory_state == 'warning' else '' }}"><i style="width: {{ memory_info.used_percent | round(1) }}%"></i></div>
         </div>
         <div class="sb-divider"></div>
         <div class="sb-col sb-blocked">
@@ -112,7 +121,9 @@
         </div>
     </div>
     {# Picker-driven blocked-requests timeline (home-dashboard.js). #}
-    {{ chart_area(id="home-timeseries-chart", title="Blocked requests over time (selected range)", title_key="dashboard.chart.timeseries.title", subtitle="Selected range", subtitle_key="dashboard.panel.timeseries_sub", uppercase=true, height=280, card_classes="mb-4") }}
+    {% if "home-card-timeseries" not in hidden_home_cards | default([], true) %}
+        {{ chart_area(card_id="home-card-timeseries", hideable=true, id="home-timeseries-chart", title="Blocked requests over time (selected range)", title_key="dashboard.chart.timeseries.title", subtitle="Selected range", subtitle_key="dashboard.panel.timeseries_sub", uppercase=true, height=280, card_classes="mb-4") }}
+    {% endif %}
     {# Primary KPI cluster -- design-kit 4-tile row (Instances / Services / Upstreams /
        Certificates), category-tinted titles/icons with rich colored captions. #}
     <div class="row g-3 mb-4">
@@ -205,12 +216,15 @@
                 <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
             </div>
         </div>
-        <div class="col-12 col-lg-4">
-            {{ chart_donut(id="requests-stats", title="Request Status Distribution", title_key="dashboard.chart.request_status.title", subtitle="HTTP response codes", subtitle_key="dashboard.panel.status_sub", uppercase=true, series=request_errors, card_classes="h-100") }}
-        </div>
+        {% if "home-card-status-codes" not in hidden_home_cards | default([], true) %}
+            <div class="col-12 col-lg-4">
+                {{ chart_donut(card_id="home-card-status-codes", hideable=true, id="requests-stats", title="Request Status Distribution", title_key="dashboard.chart.request_status.title", subtitle="HTTP response codes", subtitle_key="dashboard.panel.status_sub", uppercase=true, series=request_errors, card_classes="h-100") }}
+            </div>
+        {% endif %}
+        {% if "home-card-top-reasons" not in hidden_home_cards | default([], true) %}
         <div class="col-12 col-lg-4">
             <div class="home-async-chart h-100" id="requests-reasons-async">
-                {% call card(classes="h-100", title="Top reasons for blocks", title_key="dashboard.card.top_reasons.title", subtitle="By trigger rule", subtitle_key="dashboard.panel.reasons_sub", uppercase=true, separator=false) %}
+                {% call card(id="home-card-top-reasons", hideable=true, classes="h-100", title="Top reasons for blocks", title_key="dashboard.card.top_reasons.title", subtitle="By trigger rule", subtitle_key="dashboard.panel.reasons_sub", uppercase=true, separator=false) %}
                     <table class="table table-sm mb-0">
                         <tbody id="home-top-reasons-body"></tbody>
                     </table>
@@ -218,10 +232,12 @@
                 <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
             </div>
         </div>
+        {% endif %}
     </div>
     {# Blocked requests world map (async -- data from /home/metrics). #}
+    {% if "home-card-world-map" not in hidden_home_cards | default([], true) %}
     <div class="home-async-chart position-relative mb-4" id="requests-map-async">
-        {{ geo_map(id="requests-map", title="Blocked Requests by Country", title_key="dashboard.chart.blocked_request_countries.title", subtitle="Hover for details", subtitle_key="dashboard.panel.map_sub", uppercase=true, data=request_countries, card_classes="") }}
+        {{ geo_map(card_id="home-card-world-map", hideable=true, id="requests-map", title="Blocked Requests by Country", title_key="dashboard.chart.blocked_request_countries.title", subtitle="Hover for details", subtitle_key="dashboard.panel.map_sub", uppercase=true, data=request_countries, card_classes="") }}
         {# This map is the history view; /threatmap is the same data replayed as it arrives. #}
         <a href="{{ url_for('threatmap') }}"
            role="button"
@@ -230,17 +246,21 @@
         </a>
         <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
     </div>
+    {% endif %}
     {# Blocking status over time (async -- data from /home/metrics). #}
+    {% if "home-card-blocking" not in hidden_home_cards | default([], true) %}
     <div class="home-async-chart mb-4" id="requests-blocking-async">
-        {{ chart_area(id="requests-blocking", title="Blocking Status Over Time", title_key="dashboard.chart.blocking_status.title", subtitle="Blocked vs allowed", subtitle_key="dashboard.panel.blocking_sub", uppercase=true, series=time_buckets, height=400, card_classes="") }}
+        {{ chart_area(card_id="home-card-blocking", hideable=true, id="requests-blocking", title="Blocking Status Over Time", title_key="dashboard.chart.blocking_status.title", subtitle="Blocked vs allowed", subtitle_key="dashboard.panel.blocking_sub", uppercase=true, series=time_buckets, height=400, card_classes="") }}
         <div class="home-chart-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ _("status.loading") }}</span></div></div>
     </div>
+    {% endif %}
     {# News. The "Getting started" card that used to share this row is gone: it was four
        hardcoded entries with no persistence, no links, and the same list for every role --
        it told a `reader` to activate PRO, which a reader cannot do. The walkthrough that
        replaced it follows the user across pages instead of living on one page (drawer +
        pill in the app chrome, models/onboarding_drawer.html). The freed half-row collapses
        rather than being backfilled. #}
+    {% if "home-card-news" not in hidden_home_cards | default([], true) %}
     <div class="row g-4">
         <div class="col-12">
             {% set news_header_right %}<a class="news-see-more"
@@ -252,7 +272,7 @@
                     <button type="button" class="icon-btn" id="home-news-prev" aria-label="{{ _("step.previous") }}"><i class="bx bx-chevron-left" aria-hidden="true"></i></button>
                     <button type="button" class="icon-btn" id="home-news-next" aria-label="{{ _("step.next") }}"><i class="bx bx-chevron-right" aria-hidden="true"></i></button>
                 </div>{% endset %}
-            {% call card(classes="h-100 news-carousel", title="News", title_key="dashboard.card.news.title", icon="bx-news", header_right=news_header_right) %}
+            {% call card(id="home-card-news", hideable=true, classes="h-100 news-carousel", title="News", title_key="dashboard.card.news.title", icon="bx-news", header_right=news_header_right) %}
                 <div class="bg-bw-green position-relative w-100 p-2 text-white rounded fw-bold overflow-hidden">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="flex-grow-1 overflow-hidden me-2">
@@ -284,6 +304,7 @@
             {% endcall %}
         </div>
     </div>
+    {% endif %}
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}

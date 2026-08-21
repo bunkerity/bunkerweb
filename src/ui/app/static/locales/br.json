@@ -88,6 +88,14 @@
     "support": "Precisa de suporte premium ou consultoria personalizada para o BunkerWeb? Confira nossos <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">serviços profissionais</a>."
   },
   "bans": {
+    "chart": {
+      "timeseries": {
+        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
+        "series": "Active bans",
+        "subtitle": "Selected range",
+        "title": "Active bans per interval"
+      }
+    },
     "subtitle": "Endereços IP bloqueados em suas instâncias do BunkerWeb — adicione, remova ou ajuste a duração do bloqueio.",
     "stats": {
       "card": {
@@ -515,6 +523,7 @@
       "blocked_unique_ips": {
         "title": "IPs Únicos Bloqueados"
       },
+      "hide": "Hide this card",
       "instances": {
         "status": "{{up}} ativas / {{down}} inativas / {{loading}} carregando",
         "title": "Instâncias"
@@ -531,12 +540,11 @@
       },
       "ram": {
         "critical_high": "Crítico: O sistema está ficando sem memória!",
-        "good_high": "Memória excelente para ambientes de produção",
-        "info_medium": "Considere atualizar para 16GB+ para uso em produção",
         "title": "Memória RAM do Sistema",
         "usage": "{{percent}}% em uso",
         "warning_low": "Aviso: Pouca memória pode afetar o desempenho"
       },
+      "restore": "Restore hidden cards",
       "services": {
         "status": "{{online}} online / {{draft}} rascunho",
         "title": "Serviços"
@@ -1144,6 +1152,10 @@
   "newsletter": {
     "legal_agreement": "Quero me inscrever na newsletter e li e concordo com a:",
     "title": "Junte-se à Newsletter"
+  },
+  "notice": {
+    "already_subscribed": "Already subscribed",
+    "dismiss_mfa": "Don't remind me again"
   },
   "pagination": {
     "page": "Página"
@@ -1866,7 +1878,8 @@
   },
   "theme": {
     "dark": "Escuro",
-    "light": "Claro"
+    "light": "Claro",
+    "system": "System"
   },
   "threatmap": {
     "exit_fullscreen": "Sair da tela cheia",
