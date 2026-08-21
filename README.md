@@ -465,6 +465,9 @@ If you would like to contribute to the plugins, you can read the [contributing g
 
 We take security bugs as serious issues and encourage responsible disclosure; see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.7.0-beta/SECURITY.md) for more information.
 
+<!-- Star History chart hidden: GitHub restricted the stargazers API, so the chart renders an error
+     notice instead of data. Uncomment once upstream serves real charts again.
+
 # Star History
 
 <a href="https://star-history.com/#bunkerity/bunkerweb&Date">
@@ -474,3 +477,4 @@ We take security bugs as serious issues and encourage responsible disclosure; se
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bunkerity/bunkerweb&type=Date" />
  </picture>
 </a>
+-->
