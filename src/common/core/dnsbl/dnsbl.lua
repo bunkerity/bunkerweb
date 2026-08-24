@@ -108,8 +108,17 @@ function dnsbl:init()
 	local i = 0
 	for key in server_name:gmatch("%S+") do
 		for kind, _ in pairs(lists) do
-			local file_path = "/var/cache/bunkerweb/dnsbl/" .. key .. "/" .. kind .. ".list"
-			local f = io.open(file_path, "r")
+			-- IGNORE_IP.list is written by dnsbl-download.py out of DNSBL_IGNORE_IP_URLS and by
+			-- nothing else, so the setting is what makes the file meaningful -- not its presence on
+			-- disk. Reading it unconditionally kept a *withdrawn* ignore list live, and here that
+			-- fails open: an address the operator has removed from the exemption list keeps
+			-- skipping the DNSBL check. Same shared-cache race as whitelist/greylist (push-configs
+			-- tars /var/cache/bunkerweb while the download job is still retiring the file).
+			local urls = get_variable("DNSBL_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f = nil
+			if urls and urls:match("%S") then
+				f = io.open("/var/cache/bunkerweb/dnsbl/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then

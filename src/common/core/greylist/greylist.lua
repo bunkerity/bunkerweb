@@ -102,8 +102,18 @@ function greylist:init()
 	local i = 0
 	for key in server_name:gmatch("%S+") do
 		for kind, _ in pairs(greylists) do
-			local file_path = "/var/cache/bunkerweb/greylist/" .. key .. "/" .. kind .. ".list"
-			local f = open(file_path, "r")
+			-- <KIND>.list is written by greylist-download.py out of GREYLIST_<KIND>_URLS and by
+			-- nothing else, so the setting is what makes the file meaningful -- not its presence on
+			-- disk. Loading it unconditionally kept a *withdrawn* list enforced: the job cache
+			-- directory is shared between push-configs and the download jobs, both dispatched in
+			-- the same batch, so a push that tars the directory while the download job is still
+			-- retiring the file ships the retired list to every instance and the next reload reads
+			-- it back. Bind the file to the setting that produced it and the debris is inert.
+			local urls = get_variable("GREYLIST_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f = nil
+			if urls and urls:match("%S") then
+				f = open("/var/cache/bunkerweb/greylist/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then

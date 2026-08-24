@@ -20,6 +20,59 @@ local ipmatcher_new = ipmatcher.new
 local tostring = tostring
 local open = io.open
 
+-- A community list id is "<prefix>:<name>" and blacklist-download.py maps that prefix onto the
+-- kind whose <KIND>.list the download lands in. The guard in init() needs the same mapping,
+-- because the community lists are a SECOND producer of those files: BLACKLIST_COMMUNITY_LISTS
+-- defaults to a non-empty value, so on a stock configuration IP.list and USER_AGENT.list exist
+-- with no BLACKLIST_*_URLS set at all. Gating on the URLs alone would silently disable the
+-- default community blocklists.
+-- KEEP IN SYNC with blacklist-download.py: the COMMUNITY_LISTS table at :61 and the prefix chains
+-- at :102 (multisite) / :135 (singlesite). If an entry with a NEW prefix is ever added to that
+-- table, it has to be added here too -- the job would route it to a kind this map does not know,
+-- and that kind's file would stop being read.
+local COMMUNITY_PREFIX_KIND = {
+	ip = "IP",
+	ua = "USER_AGENT",
+	rdns = "RDNS",
+	asn = "ASN",
+	uri = "URI",
+}
+
+-- The same literal blacklist-download.py passes to getenv(). It matters when the setting is
+-- missing from variables.env entirely: "absent" has to mean "the job used its default", never
+-- "nothing produces these files".
+local COMMUNITY_LISTS_DEFAULT = "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
+
+-- Set of kinds the community lists configured for `server` produce a file for.
+local function community_kinds(server)
+	local setting = get_variable("BLACKLIST_COMMUNITY_LISTS", true, { bw = { server_name = server } })
+	if setting == nil then
+		setting = COMMUNITY_LISTS_DEFAULT
+	end
+	local kinds = {}
+	for id in setting:gmatch("%S+") do
+		-- No fallback kind, on purpose. The job's `else: kind = "IP"` reads like one but is not:
+		-- it sits INSIDE `if community_id in COMMUNITY_LISTS` (blacklist-download.py:100), so an
+		-- id the job does not recognise -- a typo, a list since removed -- only earns a warning
+		-- (:118 multisite, :151 singlesite) and produces no file at all. Mapping such an id to IP
+		-- here would mark IP.list live while the job wrote nothing, and a retired IP.list would go
+		-- on being enforced -- reopening the very hole this guard closes, for the price of one
+		-- typo in BLACKLIST_COMMUNITY_LISTS. An unrecognised prefix means no producer, as in the job.
+		-- Known limit: the match is on the PREFIX, not on the whole id, so a typo that keeps a
+		-- valid prefix ("ip:danmuek-tor-exit") still marks IP as produced and would keep a retired
+		-- IP.list live. Closing that needs the four ids of blacklist-download.py's COMMUNITY_LISTS
+		-- duplicated here, which trades this narrow case for a worse one -- a list added on the
+		-- Python side only would stop being read, i.e. a live blocklist silently dropped. Upgrade
+		-- path if it ever matters: duplicate the ids AND add a test asserting the two tables match.
+		local prefix = id:match("^([^:]+):")
+		local kind = prefix and COMMUNITY_PREFIX_KIND[prefix:lower()]
+		if kind then
+			kinds[kind] = true
+		end
+	end
+	return kinds
+end
+
 function blacklist:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "blacklist", ctx)
@@ -111,9 +164,20 @@ function blacklist:init()
 	-- Iterate over each kind and server
 	local i = 0
 	for key in server_name:gmatch("%S+") do
+		local from_community = community_kinds(key)
 		for kind, _ in pairs(blacklists) do
-			local file_path = "/var/cache/bunkerweb/blacklist/" .. key .. "/" .. kind .. ".list"
-			local f = open(file_path, "r")
+			-- <KIND>.list only exists because something asked for it: BLACKLIST_<KIND>_URLS, or a
+			-- BLACKLIST_COMMUNITY_LISTS entry that maps to this kind. Bind the file to the union of
+			-- its producers rather than to its presence on disk -- a list withdrawn from the
+			-- configuration used to stay enforced, because push-configs tars /var/cache/bunkerweb
+			-- while the download job is still retiring the file and ships it to every instance.
+			-- The IGNORE_* kinds have no community producer (the prefix mapping never yields one),
+			-- so for them this is a URLs-only guard.
+			local urls = get_variable("BLACKLIST_" .. kind .. "_URLS", true, { bw = { server_name = key } })
+			local f = nil
+			if (urls and urls:match("%S")) or from_community[kind] then
+				f = open("/var/cache/bunkerweb/blacklist/" .. key .. "/" .. kind .. ".list", "r")
+			end
 			if f then
 				for line in f:lines() do
 					if line ~= "" then
