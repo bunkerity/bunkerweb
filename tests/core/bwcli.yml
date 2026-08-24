@@ -12,6 +12,12 @@
 integrations:
   - "Docker"
 
+# The database/instance-view actions authenticate as `admin:P@ssw0rd` — without this block the
+# generated stack creates no API user at all and every view answers 401 Unauthorized.
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
 actions:
   ban_an_ip_globally:
     type: bwcli

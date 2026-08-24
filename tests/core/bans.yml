@@ -23,6 +23,12 @@ integrations:
 config:
   USE_REDIS: "no"
 
+# The script reads the two API views over HTTP Basic (`admin:P@ssw0rd`, its default) — without
+# these the generated stack creates no API user at all and every view answers 401 Unauthorized.
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
 actions:
   a_ban_survives_a_restart_and_its_revoke_reaches_an_instance_that_missed_it:
     type: script
