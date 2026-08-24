@@ -238,6 +238,13 @@
                                            value="{{ csrf_token() }}" />
                                     {{ button(label="Force update", i18n_key="button.force_update", variant="outline-primary", type="submit", classes="text-uppercase don-jose mt-3", tooltip_text="Skip checks and force download of PRO plugins. Keeps current state on failure.", tooltip_i18n_key="tooltip.button.force_update") }}
                                 </form>
+                                <form method="POST" action="{{ url_for("pro") }}/refresh-ui">
+                                    <input type="hidden"
+                                           id="csrf_token"
+                                           name="csrf_token"
+                                           value="{{ csrf_token() }}" />
+                                    {{ button(label="Refresh UI plugins", i18n_key="button.refresh_ui_plugins", variant="outline-secondary", type="submit", classes="text-uppercase don-jose mt-3", tooltip_text="Reloads the PRO plugins the web UI already has, without downloading anything.", tooltip_i18n_key="tooltip.button.refresh_ui_plugins") }}
+                                </form>
                             </div>
                         </div>
                     </div>

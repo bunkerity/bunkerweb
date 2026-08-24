@@ -541,6 +541,9 @@ msgstr "Actualizar"
 msgid "button.refresh_recovery_codes"
 msgstr "Actualizar Códigos de Recuperación"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Recargar plugins de la UI"
+
 msgid "button.reload"
 msgstr "Recargar"
 
@@ -5538,6 +5541,9 @@ msgstr "Omite verificaciones y fuerza la descarga de plugins PRO; mantiene el es
 
 msgid "tooltip.button.ping_instance"
 msgstr "Hacer Ping a Instancia %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Recarga los plugins PRO que ya tiene la interfaz web, sin descargar nada."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Recargar Instancia %(hostname)s"

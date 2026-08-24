@@ -153,3 +153,24 @@ def force_update():
     flash("A forced update of PRO plugins has been scheduled.", "success")
     DATA["PRO_LOADING"] = True
     return redirect(url_for("pro.pro_page"))
+
+
+@pro.route("/pro/refresh-ui", methods=["POST"])
+@login_required
+def refresh_ui():
+    if API_CLIENT.readonly:
+        return handle_error("Database is in read-only mode", "pro")
+
+    # safe_reload_plugins() latches on IS_RELOADING_PLUGINS and only ever clears it on
+    # worker import, so a UI that already reloaded once since boot would consume the flag
+    # without re-extracting anything. Clear the latch so this stays an explicit escape hatch.
+    DATA.load_from_file()
+    DATA["IS_RELOADING_PLUGINS"] = False
+
+    try:
+        API_CLIENT.checked_changes(["ui_plugins"], value=True)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return handle_error(e.message, "pro")
+
+    flash("The web UI will reload its PRO plugins shortly.", "success")
+    return redirect(url_for("pro.pro_page"))

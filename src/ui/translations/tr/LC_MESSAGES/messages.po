@@ -541,6 +541,9 @@ msgstr "Yenile"
 msgid "button.refresh_recovery_codes"
 msgstr "Kurtarma Kodlarını Yenile"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Arayüz eklentilerini yenile"
+
 msgid "button.reload"
 msgstr "Yeniden Yükle"
 
@@ -5533,6 +5536,9 @@ msgstr "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcu
 
 msgid "tooltip.button.ping_instance"
 msgstr "Örneğe Ping At: %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Web arayüzünde zaten bulunan PRO eklentilerini hiçbir şey indirmeden yeniden yükler."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Örneği Yeniden Yükle: %(hostname)s"

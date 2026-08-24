@@ -541,6 +541,9 @@ msgstr "重新整理"
 msgid "button.refresh_recovery_codes"
 msgstr "重新整理復原碼"
 
+msgid "button.refresh_ui_plugins"
+msgstr "重新載入 UI 外掛"
+
 msgid "button.reload"
 msgstr "重新載入"
 
@@ -5533,6 +5536,9 @@ msgstr "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
 
 msgid "tooltip.button.ping_instance"
 msgstr "Ping 執行個體 %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "重新載入網頁介面已有的 PRO 外掛，不會下載任何內容。"
 
 msgid "tooltip.button.reload_instance"
 msgstr "重新載入執行個體 %(hostname)s"

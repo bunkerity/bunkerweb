@@ -541,6 +541,9 @@ msgstr "Обновить"
 msgid "button.refresh_recovery_codes"
 msgstr "Обновить коды восстановления"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Обновить плагины интерфейса"
+
 msgid "button.reload"
 msgstr "Перезагрузить"
 
@@ -5543,6 +5546,9 @@ msgstr "Пропускает проверки и принудительно ск
 
 msgid "tooltip.button.ping_instance"
 msgstr "Пинговать экземпляр %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Перезагружает PRO-плагины, уже имеющиеся в веб-интерфейсе, ничего не скачивая."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Перезагрузить экземпляр %(hostname)s"

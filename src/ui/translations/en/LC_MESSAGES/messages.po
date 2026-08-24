@@ -541,6 +541,9 @@ msgstr "Refresh"
 msgid "button.refresh_recovery_codes"
 msgstr "Refresh Recovery Codes"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Refresh UI plugins"
+
 msgid "button.reload"
 msgstr "Reload"
 
@@ -5538,6 +5541,9 @@ msgstr "Skips checks and forces PRO plugin download; keeps current state on fail
 
 msgid "tooltip.button.ping_instance"
 msgstr "Ping Instance %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Reloads the PRO plugins the web UI already has, without downloading anything."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Reload Instance %(hostname)s"

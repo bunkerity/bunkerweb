@@ -541,6 +541,9 @@ msgstr "刷新"
 msgid "button.refresh_recovery_codes"
 msgstr "刷新恢复代码"
 
+msgid "button.refresh_ui_plugins"
+msgstr "刷新 UI 插件"
+
 msgid "button.reload"
 msgstr "重新加载"
 
@@ -5533,6 +5536,9 @@ msgstr "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
 
 msgid "tooltip.button.ping_instance"
 msgstr "Ping 实例 %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "重新加载 Web UI 已有的 PRO 插件，不下载任何内容。"
 
 msgid "tooltip.button.reload_instance"
 msgstr "重新加载实例 %(hostname)s"

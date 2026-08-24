@@ -541,6 +541,9 @@ msgstr "রিফ্রেশ"
 msgid "button.refresh_recovery_codes"
 msgstr "পুনরুদ্ধার কোড রিফ্রেশ করুন"
 
+msgid "button.refresh_ui_plugins"
+msgstr "UI প্লাগইন রিফ্রেশ করুন"
+
 msgid "button.reload"
 msgstr "পুনরায় লোড করুন"
 
@@ -5538,6 +5541,9 @@ msgstr "চেকগুলি স্কিপ করে PRO প্লাগই�
 
 msgid "tooltip.button.ping_instance"
 msgstr "পিং ইনস্ট্যান্স %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "ওয়েব UI-তে ইতিমধ্যে থাকা PRO প্লাগইনগুলি কিছু ডাউনলোড না করেই পুনরায় লোড করে।"
 
 msgid "tooltip.button.reload_instance"
 msgstr "ইনস্ট্যান্স %(hostname)s পুনরায় লোড করুন"

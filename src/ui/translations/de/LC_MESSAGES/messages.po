@@ -541,6 +541,9 @@ msgstr "Aktualisieren"
 msgid "button.refresh_recovery_codes"
 msgstr "Wiederherstellungscodes aktualisieren"
 
+msgid "button.refresh_ui_plugins"
+msgstr "UI-Plugins neu laden"
+
 msgid "button.reload"
 msgstr "Neu laden"
 
@@ -5538,6 +5541,9 @@ msgstr "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behä
 
 msgid "tooltip.button.ping_instance"
 msgstr "Instanz %(hostname)s pingen"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Lädt die im Web-UI bereits vorhandenen PRO-Plugins neu, ohne etwas herunterzuladen."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Instanz %(hostname)s neu laden"

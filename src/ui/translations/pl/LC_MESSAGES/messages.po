@@ -541,6 +541,9 @@ msgstr "Odśwież"
 msgid "button.refresh_recovery_codes"
 msgstr "Odśwież kody odzyskiwania"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Odśwież wtyczki UI"
+
 msgid "button.reload"
 msgstr "Odśwież"
 
@@ -5543,6 +5546,9 @@ msgstr "Pomija sprawdzanie i wymusza pobranie wtyczki PRO; zachowuje aktualny st
 
 msgid "tooltip.button.ping_instance"
 msgstr "Pinguj instancję %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Przeładowuje wtyczki PRO, które interfejs już posiada, bez pobierania czegokolwiek."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Przeładuj instancję %(hostname)s"

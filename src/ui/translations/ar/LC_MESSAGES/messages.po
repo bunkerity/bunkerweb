@@ -541,6 +541,9 @@ msgstr "تحديث"
 msgid "button.refresh_recovery_codes"
 msgstr "تحديث رموز الاسترداد"
 
+msgid "button.refresh_ui_plugins"
+msgstr "تحديث إضافات الواجهة"
+
 msgid "button.reload"
 msgstr "إعادة تحميل"
 
@@ -5558,6 +5561,9 @@ msgstr "يتجاوز عمليات التحقق ويفرض تنزيل إضافا�
 
 msgid "tooltip.button.ping_instance"
 msgstr "اختبار اتصال المثيل %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "يعيد تحميل إضافات PRO الموجودة بالفعل في واجهة الويب دون تنزيل أي شيء."
 
 msgid "tooltip.button.reload_instance"
 msgstr "إعادة تحميل المثيل %(hostname)s"

@@ -541,6 +541,9 @@ msgstr "I-refresh"
 msgid "button.refresh_recovery_codes"
 msgstr "I-refresh ang Mga Recovery Code"
 
+msgid "button.refresh_ui_plugins"
+msgstr "I-refresh ang mga plugin ng UI"
+
 msgid "button.reload"
 msgstr "I-reload"
 
@@ -5538,6 +5541,9 @@ msgstr "Nilalaktawan ang mga pagsusuri at pinipilit ang pag-download ng PRO plug
 
 msgid "tooltip.button.ping_instance"
 msgstr "I-ping ang Instance na %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Muling niloload ang mga PRO plugin na mayroon na ang web UI, nang walang dina-download."
 
 msgid "tooltip.button.reload_instance"
 msgstr "I-reload ang Instance na %(hostname)s"

@@ -541,6 +541,9 @@ msgstr "تازہ کریں"
 msgid "button.refresh_recovery_codes"
 msgstr "ریکوری کوڈز ریفریش کریں"
 
+msgid "button.refresh_ui_plugins"
+msgstr "UI پلگ ان تازہ کریں"
+
 msgid "button.reload"
 msgstr "دوبارہ لوڈ کریں"
 
@@ -5538,6 +5541,9 @@ msgstr "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن ل�
 
 msgid "tooltip.button.ping_instance"
 msgstr "انسٹینس %(hostname)s پنگ کریں"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "ویب UI میں پہلے سے موجود PRO پلگ ان کو کچھ ڈاؤن لوڈ کیے بغیر دوبارہ لوڈ کرتا ہے۔"
 
 msgid "tooltip.button.reload_instance"
 msgstr "انسٹینس %(hostname)s دوبارہ لوڈ کریں"

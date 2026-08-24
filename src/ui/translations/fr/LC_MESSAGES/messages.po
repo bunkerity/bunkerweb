@@ -541,6 +541,9 @@ msgstr "Actualiser"
 msgid "button.refresh_recovery_codes"
 msgstr "Rafraîchir les codes de récupération"
 
+msgid "button.refresh_ui_plugins"
+msgstr "Rafraîchir les plugins de l'UI"
+
 msgid "button.reload"
 msgstr "Recharger"
 
@@ -5538,6 +5541,9 @@ msgstr "Ignore les vérifications et force le téléchargement des plugins PRO ;
 
 msgid "tooltip.button.ping_instance"
 msgstr "Tester la connexion à l'instance %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "Recharge les plugins PRO déjà présents dans l'interface web, sans rien télécharger."
 
 msgid "tooltip.button.reload_instance"
 msgstr "Recharger l'instance %(hostname)s"

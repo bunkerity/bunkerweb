@@ -541,6 +541,9 @@ msgstr "새로 고침"
 msgid "button.refresh_recovery_codes"
 msgstr "복구 코드 갱신"
 
+msgid "button.refresh_ui_plugins"
+msgstr "UI 플러그인 새로 고침"
+
 msgid "button.reload"
 msgstr "새로고침"
 
@@ -5533,6 +5536,9 @@ msgstr "확인을 건너뛰고 PRO 플러그인을 강제로 다운로드합니�
 
 msgid "tooltip.button.ping_instance"
 msgstr "인스턴스 %(hostname)s에 핑 보내기"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "웹 UI에 이미 있는 PRO 플러그인을 아무것도 내려받지 않고 다시 불러옵니다."
 
 msgid "tooltip.button.reload_instance"
 msgstr "인스턴스 %(hostname)s 새로고침"

@@ -113,3 +113,80 @@ def test_both_success_paths_mark_the_request_consumed_after_their_write_not_befo
     consumed_at = branch.index("force_consumed = True")
     write_at = branch.index("db.set_metadata")
     assert consumed_at > write_at, "the up-to-date branch marks the request consumed before the write that can fail"
+
+
+def test_a_forced_update_reinstalls_an_identical_scheduler_plugin(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    installed = tmp_path / "installed"
+    source.mkdir()
+    installed.joinpath("demo").mkdir(parents=True)
+    source.joinpath("plugin.json").write_text('{"id": "demo", "version": "1.0"}', encoding="utf-8")
+    source.joinpath("payload.txt").write_text("fresh", encoding="utf-8")
+    installed.joinpath("demo", "payload.txt").write_text("stale", encoding="utf-8")
+
+    db = Mock()
+    db.get_plugins.return_value = [{"id": "demo", "version": "1.0", "checksum": "same", "method": "scheduler"}]
+    monkeypatch.setattr(PRO, "PRO_PLUGINS_DIR", installed)
+    monkeypatch.setattr(PRO, "cleaned_up_plugins", False)
+    monkeypatch.setattr(PRO, "_plugin_checksum_matches_database", lambda *_args: True)
+
+    assert PRO.install_plugin(source, db, preview=False, force=True) is True
+    assert installed.joinpath("demo", "payload.txt").read_text(encoding="utf-8") == "fresh"
+
+
+@pytest.mark.parametrize("forced", (False, True), ids=("plain", "forced"))
+def test_a_missing_preview_archive_is_a_no_change_not_a_job_error(tmp_path, monkeypatch, forced):
+    logger = Mock()
+    db = Mock()
+    db.get_metadata.return_value = {
+        "force_pro_update": forced,
+        "last_pro_check": None,
+        "is_pro": False,
+        "pro_license": "",
+        "pro_overlapped": False,
+        "pro_services": 0,
+        "pro_status": "invalid",
+        "non_draft_services": 0,
+    }
+    db.set_metadata.return_value = ""
+    response = Mock(status_code=404, headers={})
+
+    real_path = Path
+
+    def redirected_path(*parts):
+        path = real_path(*parts)
+        if path == real_path("/var/tmp/bunkerweb/pro/plugins"):
+            return tmp_path / "tmp"
+        if path == real_path("/etc/bunkerweb/pro/plugins"):
+            return tmp_path / "plugins"
+        return path
+
+    stubs = {name: ModuleType(name) for name in ("requests", "requests.exceptions", "Database", "logger", "common_utils", "pathlib")}
+    stubs["requests"].get = Mock(return_value=response)
+    stubs["requests"].exceptions = stubs["requests.exceptions"]
+    stubs["requests.exceptions"].ConnectionError = ConnectionError
+    stubs["Database"].Database = Mock(return_value=db)
+    stubs["logger"].getLogger = Mock(return_value=logger)
+    stubs["pathlib"].Path = redirected_path
+    stubs["common_utils"].bytes_hash = Mock()
+    stubs["common_utils"].get_os_info = Mock(return_value="linux")
+    stubs["common_utils"].get_integration = Mock(return_value="docker")
+    stubs["common_utils"].get_version = Mock(return_value="1.7-dev")
+    stubs["common_utils"].create_plugin_tar_gz = Mock()
+    stubs["common_utils"].safe_zip_extractall = Mock()
+    monkeypatch.delenv("PRO_LICENSE_KEY", raising=False)
+
+    namespace = {"__file__": str(JOB_PATH)}
+    with patch.dict(sys.modules, stubs), pytest.raises(SystemExit) as stopped:
+        exec(compile(JOB_PATH.read_text(encoding="utf-8"), str(JOB_PATH), "exec"), namespace)  # noqa: S102
+
+    assert stopped.value.code == 0
+    logger.error.assert_not_called()
+    if forced:
+        # The 404 is a definitive "nothing to install": the operator's forced-update request
+        # must be released, or the flag stays set forever on preview-less versions.
+        db.set_metadata.assert_any_call({"force_pro_update": False})
+    else:
+        for call in db.set_metadata.call_args_list:
+            assert call != (({"force_pro_update": False},),), "an unforced run must not touch the flag"
+    assert any("Couldn't find Pro plugins for BunkerWeb version 1.7-dev" in call.args[0] for call in logger.warning.call_args_list)

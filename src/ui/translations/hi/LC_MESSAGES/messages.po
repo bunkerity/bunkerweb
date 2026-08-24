@@ -541,6 +541,9 @@ msgstr "रीफ़्रेश"
 msgid "button.refresh_recovery_codes"
 msgstr "पुनर्प्राप्ति कोड ताज़ा करें"
 
+msgid "button.refresh_ui_plugins"
+msgstr "UI प्लगइन रीफ़्रेश करें"
+
 msgid "button.reload"
 msgstr "पुनः लोड करें"
 
@@ -5538,6 +5541,9 @@ msgstr "जांचों को छोड़कर PRO प्लगइन्�
 
 msgid "tooltip.button.ping_instance"
 msgstr "पिंग इंस्टेंस %(hostname)s"
+
+msgid "tooltip.button.refresh_ui_plugins"
+msgstr "वेब UI में पहले से मौजूद PRO प्लगइन को बिना कुछ डाउनलोड किए फिर से लोड करता है।"
 
 msgid "tooltip.button.reload_instance"
 msgstr "इंस्टेंस %(hostname)s पुनः लोड करें"

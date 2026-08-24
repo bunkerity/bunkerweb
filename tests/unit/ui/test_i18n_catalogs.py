@@ -138,7 +138,7 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
         ("modal.body.delete_confirmation_alert", "modal.body.delete_confirmation_alert_plural"),
         ("modal.body.unban_confirmation_alert", "modal.body.unban_confirmation_alert_plural"),
     }
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2409
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2411
 
 
 @pytest.mark.parametrize("code", CODES)

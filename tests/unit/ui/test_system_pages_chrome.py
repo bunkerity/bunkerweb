@@ -65,6 +65,14 @@ def test_pro_page_head_band_has_system_breadcrumb_and_keeps_green_upsell_cta():
     assert english("pro.button.upgrade_to_pro") in html
 
 
+def test_pro_page_offers_a_local_ui_plugin_refresh_without_a_download():
+    html = _render_dashboard_page("pro.html", **_pro_context())
+
+    assert 'action="/pro/refresh-ui"' in html
+    assert english("button.refresh_ui_plugins") in html
+    assert english("tooltip.button.refresh_ui_plugins") in html
+
+
 def test_support_page_head_moves_cta_to_navy_primary_and_drops_link_card():
     html = _render_dashboard_page(
         "support.html",
