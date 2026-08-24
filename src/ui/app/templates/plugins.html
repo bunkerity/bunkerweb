@@ -38,6 +38,9 @@
                 ("community", "Community", "plugins.marketplace.tab_community"),
                 ("pro", "PRO", "plugin.type.pro"),
             ] %}
+            {% if catalog_enabled and catalog_available %}
+                {% set filters = filters + [("catalog", "Available", "plugins.catalog.tab")] %}
+            {% endif %}
             {% for value, label, key in filters %}
                 <li class="nav-item" role="presentation">
                     <button type="button"
@@ -206,6 +209,70 @@
             </div>
         {% endfor %}
     </div>
+    {% if catalog_enabled and catalog_available %}
+        {# Catalogue cards live in the SAME grid as installed ones so the existing search and
+           filter JS keeps working unchanged; `data-tier="catalog"` is what the new pill matches.
+           Nothing below is rendered with |safe -- every string here comes from the manifest and
+           goes through Jinja's autoescaping like any other value. #}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3 mt-0"
+             id="plugin-catalog-grid">
+            {% for item in catalog_items %}
+                <div class="col plugin-card-wrapper"
+                     data-tier="catalog"
+                     data-plugin-id="{{ item.id }}"
+                     data-value="catalog">
+                    {% call card(id="catalog-card-" ~ item.id, classes="h-100") %}
+                        <div class="d-flex flex-column h-100">
+                            <div class="d-flex align-items-start justify-content-between gap-2">
+                                <h6 class="mb-1">{{ item.name }}</h6>
+                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary") }}
+                            </div>
+                            <p class="text-muted small mb-2">{{ item.description }}</p>
+                            <div class="small text-muted mb-2">
+                                <span>{{ _("plugins.catalog.version", version=item.version) }}</span>
+                            </div>
+                            {% if item.requires %}
+                                <ul class="small text-muted ps-3 mb-2">
+                                    {% for line in item.requires %}<li>{{ line }}</li>{% endfor %}
+                                </ul>
+                            {% endif %}
+                            {% if not item.compatible %}
+                                <div class="alert alert-warning py-1 px-2 small mb-2" role="alert">
+                                    {{ _("plugins.catalog.incompatible", min=item.bw_min, current=item.bw_version) }}
+                                </div>
+                            {% endif %}
+                            <div class="mt-auto d-flex align-items-center gap-2">
+                                {% if item.homepage %}
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       href="{{ item.homepage }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">{{ _("plugins.catalog.learn_more") }}</a>
+                                {% endif %}
+                                {% if not is_readonly and user_admin and item.compatible and not catalog_stale %}
+                                    <form action="{{ url_for('plugins.install_catalog_plugin') }}"
+                                          method="POST"
+                                          class="ms-auto">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                        <input type="hidden" name="id" value="{{ item.id }}" />
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endcall %}
+                </div>
+            {% endfor %}
+        </div>
+        {# The operator-facing half of the trust model. Deliberately a sentence and not a green
+           "Verified" badge: SHA-256 proves the bytes match the manifest, it does not prove who
+           wrote the manifest, and an installed plugin runs code in the UI, the worker and nginx. #}
+        <p class="text-muted small mt-3 mb-0" id="plugin-catalog-notice">
+            {{ _("plugins.catalog.trust_notice") }}
+            {% if catalog_stale %}<span class="text-warning d-block">{{ _("plugins.catalog.stale") }}</span>{% endif %}
+        </p>
+    {% endif %}
     {{ empty_state(id="plugin-grid-empty", title="No plugins match your filters", title_key="plugins.marketplace.no_match", icon="bx-extension", classes="d-none py-5") }}
     <!-- Modals -->
     {% if not is_readonly and user_admin %}

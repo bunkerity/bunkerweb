@@ -3356,6 +3356,30 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.incompatible"
+msgstr "Requires BunkerWeb %(min)s or newer; this is %(current)s"
+
+msgid "plugins.catalog.install"
+msgstr "Install"
+
+msgid "plugins.catalog.install_failed"
+msgstr "Install failed"
+
+msgid "plugins.catalog.learn_more"
+msgstr "Learn more"
+
+msgid "plugins.catalog.stale"
+msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+
+msgid "plugins.catalog.tab"
+msgstr "Available"
+
+msgid "plugins.catalog.trust_notice"
+msgstr "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+
+msgid "plugins.catalog.version"
+msgstr "Version %(version)s"
+
 msgid "plugins.marketplace.active"
 msgstr "Etkin"
 
@@ -3451,6 +3475,9 @@ msgstr "Pro Özelliği"
 
 msgid "pro.overlay.upgrade_required"
 msgstr "Bu özelliğe erişmek için Pro'ya yükseltin"
+
+msgid "pro.status.billable_services_count"
+msgstr "%(billable_services)s Faturalandırılabilir servis"
 
 msgid "pro.status.draft_services_count"
 msgstr "%(draft_services)s Taslak servis"
@@ -4214,14 +4241,44 @@ msgstr "Bağlanabilecek kaynak yok."
 msgid "service.resources.primary"
 msgstr "Ana sertifika"
 
+msgid "service.resources.template.add"
+msgstr "Add"
+
+msgid "service.resources.template.add_label"
+msgstr "Template to add as a layer"
+
+msgid "service.resources.template.adding"
+msgstr "Saving applies %(names)s. Many settings can move at once."
+
+msgid "service.resources.template.move_down"
+msgstr "Move this template later"
+
+msgid "service.resources.template.move_up"
+msgstr "Move this template earlier"
+
 msgid "service.resources.template.none"
 msgstr "Şablon yok"
 
 msgid "service.resources.template.note"
-msgstr "Kaynak değil: bir şablon bir ayardır. Kaydetmede uygulanır ve değiştirildiğinde birçok ayar aynı anda değiştirilir."
+msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+
+msgid "service.resources.template.overridden_badge"
+msgstr "overridden"
+
+msgid "service.resources.template.overridden_by"
+msgstr "%(name)s overrides %(count)s of this template’s settings."
 
 msgid "service.resources.template.pending"
 msgstr "Kaydetmede uygulanır"
+
+msgid "service.resources.template.remove"
+msgstr "Remove this template"
+
+msgid "service.resources.template.removing"
+msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+
+msgid "service.resources.template.reordered"
+msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
 
 msgid "service.resources.template.switching"
 msgstr "Kaydetmek, bu servisi \"%(from)s\"'den \"%(to)s\"'e geçirir. Mevcut şablon tarafından sağlanan değerler silinir ve \"%(to)s\"'in değerleri uygulanır — birçok ayar aynı anda değiştirilir."
@@ -5242,6 +5299,15 @@ msgstr "Her ayar anahtarı benzersiz olmalıdır."
 
 msgid "template.none"
 msgstr "Şablon Yok"
+
+msgid "templates.catalog.heading"
+msgstr "Available templates"
+
+msgid "templates.catalog.layer_warning"
+msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+
+msgid "templates.catalog.subheading"
+msgstr "Curated service templates published by the BunkerWeb organisation."
 
 msgid "templates.gallery.delete_selected"
 msgstr "Seçilenleri sil"

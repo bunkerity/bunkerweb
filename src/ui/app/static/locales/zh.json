@@ -1203,6 +1203,16 @@
       "tab_community": "社区版",
       "tab_disabled": "已禁用",
       "tab_enabled": "已启用"
+    },
+    "catalog": {
+      "tab": "Available",
+      "install": "Install",
+      "install_failed": "Install failed",
+      "learn_more": "Learn more",
+      "version": "Version {{version}}",
+      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
+      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
     }
   },
   "pro": {
@@ -1241,6 +1251,7 @@
       "upgrade_required": "升级到 Pro 以访问此功能"
     },
     "status": {
+      "billable_services_count": "{{billable_services}} 个计费服务",
       "draft_services_count": "{{draft_services}} 个草稿服务",
       "expired": "已过期",
       "free_version": "免费版本",
@@ -1875,7 +1886,12 @@
       "feature": "内置功能：{{name}}",
       "plugin": "插件：{{name}}"
     },
-    "title": "服务模板"
+    "title": "服务模板",
+    "catalog": {
+      "heading": "Available templates",
+      "subheading": "Curated service templates published by the BunkerWeb organisation.",
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+    }
   },
   "theme": {
     "dark": "深色",
@@ -2842,9 +2858,19 @@
       "none": "未附加",
       "primary": "首选证书",
       "template": {
+        "add": "Add",
+        "add_label": "Template to add as a layer",
+        "adding": "Saving applies {{names}}. Many settings can move at once.",
+        "move_down": "Move this template later",
+        "move_up": "Move this template earlier",
         "none": "未有模板",
-        "note": "不是资源：模板是一个设置。它在保存时生效，并且切换模板会同时更改许多设置。",
+        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
+        "overridden_badge": "overridden",
+        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
         "pending": "在保存时生效",
+        "remove": "Remove this template",
+        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
+        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
         "switching": "保存时，此服务从“{{from}}”切换到“{{to}}”。当前模板提供的所有值将被删除，并应用 {{to}} 的值——许多设置同时更改。",
         "unwired": "此页面无法更改 USE_TEMPLATE，因此模板无法在此处更改。"
       },

@@ -1203,6 +1203,16 @@
       "tab_community": "Comunidade",
       "tab_disabled": "Desativado",
       "tab_enabled": "Ativado"
+    },
+    "catalog": {
+      "tab": "Available",
+      "install": "Install",
+      "install_failed": "Install failed",
+      "learn_more": "Learn more",
+      "version": "Version {{version}}",
+      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
+      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
     }
   },
   "pro": {
@@ -1241,6 +1251,7 @@
       "upgrade_required": "Atualize para Pro para acessar este recurso"
     },
     "status": {
+      "billable_services_count": "Serviços faturáveis: {{billable_services}}",
       "draft_services_count": "Serviços em rascunho: {{draft_services}}",
       "expired": "EXPIRADO",
       "free_version": "Versão GRATUITA",
@@ -1875,7 +1886,12 @@
       "feature": "Recurso integrado: {{name}}",
       "plugin": "Plugin: {{name}}"
     },
-    "title": "Modelos de serviço"
+    "title": "Modelos de serviço",
+    "catalog": {
+      "heading": "Available templates",
+      "subheading": "Curated service templates published by the BunkerWeb organisation.",
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+    }
   },
   "theme": {
     "dark": "Escuro",
@@ -2842,9 +2858,19 @@
       "none": "Nenhum anexado",
       "primary": "Certificado primário",
       "template": {
+        "add": "Add",
+        "add_label": "Template to add as a layer",
+        "adding": "Saving applies {{names}}. Many settings can move at once.",
+        "move_down": "Move this template later",
+        "move_up": "Move this template earlier",
         "none": "Sem modelo",
-        "note": "Não é um recurso: um modelo é uma configuração. Ele é aplicado ao Salvar, e alterá-lo move várias configurações de uma vez.",
+        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
+        "overridden_badge": "overridden",
+        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
         "pending": "Aplicado ao salvar",
+        "remove": "Remove this template",
+        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
+        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
         "switching": "Salvar altera este serviço de “{{from}}” para “{{to}}”. Os valores fornecidos pelo modelo atual são removidos e os do {{to}} são aplicados — muitas configurações são alteradas de uma vez.",
         "unwired": "Esta página não publica o USE_TEMPLATE, portanto, o modelo não pode ser alterado a partir daqui."
       },

@@ -11,6 +11,9 @@
    legacy breadcrumb/mode row for this page (kills the duplicated breadcrumb). #}
 {% block page_head %}{% endblock %}
 {% block content %}
+    {# Page-level CSRF token. The delete form carries its own inside the modal; the catalogue
+       install posts JSON from templates.js and reads the token from here. #}
+    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}" />
     <!-- Page head band (components/page-head.html; kit .page-head, admin.css:138-142) -->
     {% call page_head(title="Service templates", title_i18n="templates.title",
                       breadcrumb=[("Configure", "navigation.configure", none),
@@ -143,6 +146,55 @@
                 </div>
             {% endfor %}
         </div>
+    {% endif %}
+    {% if catalog_enabled and catalog_available %}
+        <h5 class="mt-5 mb-1" id="templates-catalog-heading">{{ _("templates.catalog.heading") }}</h5>
+        <p class="text-muted small mb-3">{{ _("templates.catalog.subheading") }}</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="templates-catalog-grid">
+            {% for item in catalog_items %}
+                <div class="col" data-catalog-template-id="{{ item.id }}">
+                    {% call card(id="catalog-template-" ~ item.id, classes="h-100 bw-tpl-card") %}
+                        <div class="d-flex flex-column h-100">
+                            <div class="d-flex align-items-start justify-content-between gap-2">
+                                <h6 class="mb-1">{{ item.name }}</h6>
+                                {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary") }}
+                            </div>
+                            <p class="text-muted small mb-2">{{ item.description }}</p>
+                            <div class="small text-muted mb-2">{{ _("plugins.catalog.version", version=item.version) }}</div>
+                            {% if not item.compatible %}
+                                <div class="alert alert-warning py-1 px-2 small mb-2" role="alert">
+                                    {{ _("plugins.catalog.incompatible", min=item.bw_min, current=item.bw_version) }}
+                                </div>
+                            {% endif %}
+                            {# A template is a LAYER, not a selection: USE_TEMPLATE is an ordered
+                               last-wins list, so adding one to an already-templated service
+                               changes that service's effective configuration. Installing here
+                               only makes it available -- it attaches nothing by itself. #}
+                            <p class="text-muted small mb-2">{{ _("templates.catalog.layer_warning") }}</p>
+                            <div class="mt-auto d-flex align-items-center gap-2">
+                                {% if item.homepage %}
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       href="{{ item.homepage }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">{{ _("plugins.catalog.learn_more") }}</a>
+                                {% endif %}
+                                {% if not is_readonly and user_admin and item.compatible and not catalog_stale %}
+                                    <button type="button"
+                                            class="btn btn-sm btn-primary ms-auto templates-catalog-install"
+                                            data-template-id="{{ item.id }}">
+                                        <i class="bx bx-download bx-xs me-1" aria-hidden="true"></i>{{ _("plugins.catalog.install") }}
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endcall %}
+                </div>
+            {% endfor %}
+        </div>
+        <p class="text-muted small mt-3 mb-0" id="templates-catalog-notice">
+            {{ _("plugins.catalog.trust_notice") }}
+            {% if catalog_stale %}<span class="text-warning d-block">{{ _("plugins.catalog.stale") }}</span>{% endif %}
+        </p>
     {% endif %}
     <div id="feedback-toast"
          class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"

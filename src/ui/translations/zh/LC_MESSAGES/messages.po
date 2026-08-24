@@ -3356,6 +3356,30 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.incompatible"
+msgstr "Requires BunkerWeb %(min)s or newer; this is %(current)s"
+
+msgid "plugins.catalog.install"
+msgstr "Install"
+
+msgid "plugins.catalog.install_failed"
+msgstr "Install failed"
+
+msgid "plugins.catalog.learn_more"
+msgstr "Learn more"
+
+msgid "plugins.catalog.stale"
+msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+
+msgid "plugins.catalog.tab"
+msgstr "Available"
+
+msgid "plugins.catalog.trust_notice"
+msgstr "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+
+msgid "plugins.catalog.version"
+msgstr "Version %(version)s"
+
 msgid "plugins.marketplace.active"
 msgstr "已启用"
 
@@ -3451,6 +3475,9 @@ msgstr "Pro 功能"
 
 msgid "pro.overlay.upgrade_required"
 msgstr "升级到 Pro 以访问此功能"
+
+msgid "pro.status.billable_services_count"
+msgstr "%(billable_services)s 个计费服务"
 
 msgid "pro.status.draft_services_count"
 msgstr "%(draft_services)s 个草稿服务"
@@ -4214,14 +4241,44 @@ msgstr "没有可关联的项目。"
 msgid "service.resources.primary"
 msgstr "首选证书"
 
+msgid "service.resources.template.add"
+msgstr "Add"
+
+msgid "service.resources.template.add_label"
+msgstr "Template to add as a layer"
+
+msgid "service.resources.template.adding"
+msgstr "Saving applies %(names)s. Many settings can move at once."
+
+msgid "service.resources.template.move_down"
+msgstr "Move this template later"
+
+msgid "service.resources.template.move_up"
+msgstr "Move this template earlier"
+
 msgid "service.resources.template.none"
 msgstr "未有模板"
 
 msgid "service.resources.template.note"
-msgstr "不是资源：模板是一个设置。它在保存时生效，并且切换模板会同时更改许多设置。"
+msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+
+msgid "service.resources.template.overridden_badge"
+msgstr "overridden"
+
+msgid "service.resources.template.overridden_by"
+msgstr "%(name)s overrides %(count)s of this template’s settings."
 
 msgid "service.resources.template.pending"
 msgstr "在保存时生效"
+
+msgid "service.resources.template.remove"
+msgstr "Remove this template"
+
+msgid "service.resources.template.removing"
+msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+
+msgid "service.resources.template.reordered"
+msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
 
 msgid "service.resources.template.switching"
 msgstr "保存时，此服务从“%(from)s”切换到“%(to)s”。当前模板提供的所有值将被删除，并应用 %(to)s 的值——许多设置同时更改。"
@@ -5242,6 +5299,15 @@ msgstr "每个设置键必须唯一。"
 
 msgid "template.none"
 msgstr "无模板"
+
+msgid "templates.catalog.heading"
+msgstr "Available templates"
+
+msgid "templates.catalog.layer_warning"
+msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+
+msgid "templates.catalog.subheading"
+msgstr "Curated service templates published by the BunkerWeb organisation."
 
 msgid "templates.gallery.delete_selected"
 msgstr "删除所选项"

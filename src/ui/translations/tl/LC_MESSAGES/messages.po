@@ -3361,6 +3361,30 @@ msgstr "Pro"
 msgid "plugin.type.ui"
 msgstr "UI"
 
+msgid "plugins.catalog.incompatible"
+msgstr "Requires BunkerWeb %(min)s or newer; this is %(current)s"
+
+msgid "plugins.catalog.install"
+msgstr "Install"
+
+msgid "plugins.catalog.install_failed"
+msgstr "Install failed"
+
+msgid "plugins.catalog.learn_more"
+msgstr "Learn more"
+
+msgid "plugins.catalog.stale"
+msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+
+msgid "plugins.catalog.tab"
+msgstr "Available"
+
+msgid "plugins.catalog.trust_notice"
+msgstr "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+
+msgid "plugins.catalog.version"
+msgstr "Version %(version)s"
+
 msgid "plugins.marketplace.active"
 msgstr "Aktibo"
 
@@ -3456,6 +3480,9 @@ msgstr "Feature ng Pro"
 
 msgid "pro.overlay.upgrade_required"
 msgstr "Mag-upgrade sa Pro upang ma-access ang feature na ito"
+
+msgid "pro.status.billable_services_count"
+msgstr "Mga sinisingil na serbisyo: %(billable_services)s"
 
 msgid "pro.status.draft_services_count"
 msgstr "Mga draft na serbisyo: %(draft_services)s"
@@ -4219,14 +4246,44 @@ msgstr "Walang available na maikakabit."
 msgid "service.resources.primary"
 msgstr "Pangunahing sertipiko"
 
+msgid "service.resources.template.add"
+msgstr "Add"
+
+msgid "service.resources.template.add_label"
+msgstr "Template to add as a layer"
+
+msgid "service.resources.template.adding"
+msgstr "Saving applies %(names)s. Many settings can move at once."
+
+msgid "service.resources.template.move_down"
+msgstr "Move this template later"
+
+msgid "service.resources.template.move_up"
+msgstr "Move this template earlier"
+
 msgid "service.resources.template.none"
 msgstr "Walang template"
 
 msgid "service.resources.template.note"
-msgstr "Hindi ito isang mapagkukunan: ang template ay isang setting. Ito ay ina-apply sa pag-save, at ang pagbabago nito ay nagpapalit ng maraming setting nang sabay."
+msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+
+msgid "service.resources.template.overridden_badge"
+msgstr "overridden"
+
+msgid "service.resources.template.overridden_by"
+msgstr "%(name)s overrides %(count)s of this template’s settings."
 
 msgid "service.resources.template.pending"
 msgstr "Ina-apply sa pag-save"
+
+msgid "service.resources.template.remove"
+msgstr "Remove this template"
+
+msgid "service.resources.template.removing"
+msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+
+msgid "service.resources.template.reordered"
+msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
 
 msgid "service.resources.template.switching"
 msgstr "Ang pag-save ay nagpapalit sa serbisyong ito mula sa “%(from)s” patungo sa “%(to)s”. Ang mga halaga na ibinibigay ng kasalukuyang template ay tinatanggal at ang mga halaga ng “%(to)s” ay inilalapat — maraming setting ang nagbabago nang sabay."
@@ -5247,6 +5304,15 @@ msgstr "Ang bawat key ng setting ay dapat natatangi."
 
 msgid "template.none"
 msgstr "Walang Template"
+
+msgid "templates.catalog.heading"
+msgstr "Available templates"
+
+msgid "templates.catalog.layer_warning"
+msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+
+msgid "templates.catalog.subheading"
+msgstr "Curated service templates published by the BunkerWeb organisation."
 
 msgid "templates.gallery.delete_selected"
 msgstr "Burahin ang napili"

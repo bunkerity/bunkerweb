@@ -20,6 +20,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.routing import BuildError
 from werkzeug.utils import secure_filename
 
+from requests.exceptions import RequestException
+
 from common_utils import bytes_hash, create_plugin_tar_gz, safe_tar_extractall, safe_zip_extractall  # type: ignore
 
 from app.dependencies import (
@@ -33,6 +35,20 @@ from app.dependencies import (
     PRO_PLUGINS_PATH,
 )
 from app.api_client import ApiClientError, ApiUnavailableError
+from app.models.plugin_catalog import (
+    ARTIFACT_MAX_PLUGIN,
+    artifact_cap,
+    build_catalog_view,
+    catalog_enabled,
+    check_archive_identity,
+    collides_with_installed,
+    fetch_artifact,
+    find_item,
+    is_compatible,
+    is_stale,
+    read_cached,
+    verify_digest,
+)
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR, get_activation_map, is_plugin_active
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
@@ -76,7 +92,25 @@ def plugins_page():
         plugin_activations=get_activation_map(),
         custom_icons=CUSTOM_PLUGIN_ICONS,
         static_icons=STATIC_PLUGIN_ICONS,
+        **catalog_context("plugins"),
     )
+
+
+def catalog_context(kind: str) -> dict:
+    """Gather what `build_catalog_view` needs and hand it over.
+
+    The two I/O calls are best-effort: a catalogue section is never worth failing a page over, so
+    an unreachable API degrades to "nothing installed / unknown version", which marks every item
+    incompatible rather than installable. The install route makes both calls again and refuses
+    outright when they fail -- fail-soft to render, fail-closed to act.
+    """
+    installed = ()
+    bw_version = "unknown"
+    with suppress(Exception):
+        installed = BW_CONFIG.get_plugins(with_settings=False) if kind == "plugins" else API_CLIENT.get_templates()
+    with suppress(Exception):
+        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
+    return build_catalog_view(kind, DATA.get("PLUGIN_CATALOG"), installed, bw_version)
 
 
 # Same three neutralizing headers the API sets on an icon response: the bytes are
@@ -641,6 +675,146 @@ def upload_plugin():
     rmtree(tmp_ui_path.joinpath(folder_name), ignore_errors=True)
 
     return {"status": "ok"}, 201
+
+
+@plugins.route("/plugins/catalog/install", methods=["POST"])
+@login_required
+def install_catalog_plugin():
+    """Install one community-catalogue plugin.
+
+    The request contributes exactly ONE value: `id`. The URL, the checksum, the size cap and the
+    version bounds all come from the server-side cached, validated manifest -- honouring a
+    client-supplied URL or hash would hand the browser precisely the power the pinned manifest
+    exists to remove.
+
+    The order of the checks below is the security design, not a style choice. In particular the
+    archive is only parsed AFTER its bytes are proven to be the ones the manifest named, so a
+    tampered archive never reaches a parser.
+    """
+    # Gates first, before any lookup and long before any network call, so a direct POST that
+    # never rendered the page is refused with no side effect at all.
+    if not catalog_enabled():
+        return handle_error("The community catalogue is disabled", "plugins", True)
+    if API_CLIENT.readonly:
+        return handle_error("Database is in read-only mode", "plugins", True)
+    if not current_user.admin:
+        return handle_error("Plugin management is restricted to administrators", "plugins", True)
+
+    verify_data_in_form(
+        data={"csrf_token": None, "id": None},
+        err_message="Missing id parameter on /plugins/catalog/install.",
+        redirect_url="plugins",
+        next=True,
+    )
+    DATA.load_from_file()
+
+    plugin_id = request.form["id"].strip()
+    cached = DATA.get("PLUGIN_CATALOG")
+    item = find_item(cached, "plugins", plugin_id)
+    if not item:
+        return handle_error(f"No catalogue entry named {plugin_id}", "plugins", True)
+
+    # C5: the hourly refresh gates whether a FETCH happens and keeps the old value on failure --
+    # right for a star count, wrong for a supply-chain manifest. Without this, a yanked
+    # vulnerable item stays installable forever whenever fetches keep failing. Checked here, at
+    # install time, against the value right now: a page left open overnight must not carry a
+    # stale install token.
+    _, fetched_at = read_cached(cached)
+    if is_stale(fetched_at):
+        return handle_error("The catalogue is out of date and cannot be installed from; wait for the next refresh", "plugins", True)
+
+    # C6: `bw_version` in main.py is a local of the request-context builder, unreachable from
+    # here, so the route makes its own call -- and it FAILS CLOSED. An unreachable API is not
+    # permission to skip a version check.
+    try:
+        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
+    except (ApiClientError, ApiUnavailableError) as e:
+        return handle_error(f"Couldn't determine the BunkerWeb version, refusing to install: {e.message}", "plugins", True)
+
+    if not is_compatible(bw_version, item.get("bw_min"), item.get("bw_max")):
+        bounds = f">= {item.get('bw_min')}" + (f", < {item['bw_max']}" if item.get("bw_max") else "")
+        return handle_error(f"Plugin {plugin_id} requires BunkerWeb {bounds}; this is {bw_version}", "plugins", True)
+
+    # Up-front collision check against EVERY plugin type, not just `ui` -- the API's own check
+    # is `_type="ui"` only, so a core or scheduler id is invisible to it. This is a courtesy
+    # check that produces a good message; the authoritative one is the `created` assertion after
+    # the upload, which also covers the race this cannot.
+    try:
+        installed = BW_CONFIG.get_plugins(with_settings=False)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return handle_error(f"Couldn't list installed plugins: {e.message}", "plugins", True)
+    if collides_with_installed(plugin_id, installed):
+        return handle_error(f"A plugin with id {plugin_id} is already installed", "plugins", True)
+
+    def install():
+        wait_applying()
+        try:
+            try:
+                payload = fetch_artifact(item["url"], artifact_cap(item.get("size"), ARTIFACT_MAX_PLUGIN))
+            except ValueError as e:
+                DATA["TO_FLASH"].append({"content": f"Refused to download {plugin_id}: {e}", "type": "error"})
+                return
+            except RequestException as e:
+                DATA["TO_FLASH"].append({"content": f"Couldn't download {plugin_id}: {e}", "type": "error"})
+                return
+
+            # THE gate. On the exact bytes received, in memory, before anything writes to disk,
+            # constructs an archive object, or parses a member. On mismatch: abort this item,
+            # no retry, and the cached manifest is NOT invalidated -- a silent re-fetch-and-retry
+            # turns tampering into a loop that eventually wins. A human decides.
+            if not verify_digest(payload, item["sha256"]):
+                got = bytes_hash(payload, algorithm="sha256")
+                LOGGER.error(f"Integrity check failed for catalogue plugin {plugin_id}: expected {item['sha256']}, got {got}")
+                DATA["TO_FLASH"].append(
+                    {"content": f"Integrity check failed for {plugin_id}: expected {item['sha256']}, got {got}. Nothing was installed.", "type": "error"}
+                )
+                return
+
+            # C1 + C2, and only now that the bytes are trusted. The id the installer writes to
+            # the filesystem is the one inside the archive's plugin.json, not ours; and both
+            # install branches loop over every plugin.json they find. Without these two checks
+            # every gate above guards a name the install does not use, and one click could
+            # install N plugins.
+            problem = check_archive_identity(payload, plugin_id)
+            if problem:
+                LOGGER.error(f"Rejected catalogue artifact for {plugin_id}: {problem}")
+                DATA["TO_FLASH"].append({"content": f"Refused to install {plugin_id}: {problem}", "type": "error"})
+                return
+
+            result = API_CLIENT.upload_plugins([("files", (f"{plugin_id}.tar.gz", BytesIO(payload), "application/gzip"))], method="ui")
+
+            # C4: the router appends the id to `created` even when the DB layer skipped the
+            # write (`_uep_sync_plugin_row` returns (True, False), the loop continues, and
+            # update_external_plugins still returns ""). So the response is checked, not
+            # trusted. Equality, not membership: that single assertion catches a silent skip,
+            # an archive that installed something extra, and an id that was not ours.
+            created = sorted(result.get("created") or [])
+            errors = result.get("errors") or []
+            if created != [plugin_id] or errors:
+                detail = (
+                    "; ".join(f"{e.get('file', '?')}: {e.get('error', 'unknown')}" for e in errors) or f"the API reported {created or 'nothing'} as installed"
+                )
+                DATA["TO_FLASH"].append({"content": f"Install of {plugin_id} did not complete: {detail}", "type": "error"})
+                return
+
+            DATA["TO_FLASH"].append({"content": f"Plugin {plugin_id} installed successfully", "type": "success"})
+            with suppress(ApiClientError, ApiUnavailableError):
+                API_CLIENT.checked_changes(["config"], plugins_changes=[plugin_id], value=True)
+        except (ApiClientError, ApiUnavailableError) as e:
+            DATA["TO_FLASH"].append({"content": f"Couldn't install {plugin_id}: {e.message}", "type": "error"})
+        except Exception as e:
+            # Deliberately broad, and it must stay: this runs on a bare ThreadPoolExecutor whose
+            # futures are never retrieved, so anything uncaught here vanishes with no log and no
+            # flash while the user waits on /loading for the 60s watchdog in main.py.
+            LOGGER.exception(f"Failed to install catalogue plugin {plugin_id!r}")
+            DATA["TO_FLASH"].append({"content": f"Couldn't install {plugin_id}: {e}", "type": "error"})
+        finally:
+            DATA["RELOADING"] = False
+
+    DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
+    CONFIG_TASKS_EXECUTOR.submit(install)
+
+    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Installing plugin: {plugin_id}"))
 
 
 @plugins.route("/plugins/<string:plugin>", methods=["GET", "POST"])

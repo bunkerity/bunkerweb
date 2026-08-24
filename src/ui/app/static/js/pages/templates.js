@@ -115,6 +115,41 @@ $(document).ready(function () {
 
   $(document).on("change", ".template-checkbox", refreshSelectionState);
 
+  // Catalogue install. The endpoint is @cors_required and answers JSON, like /templates/create,
+  // so this posts with the XHR header rather than submitting a form. The button is only
+  // rendered when the server already decided the item is installable; the route re-checks
+  // everything anyway, so a disabled or missing button is a hint and never the control.
+  $(document).on("click", ".templates-catalog-install", async function () {
+    const button = this;
+    const templateId = button.dataset.templateId;
+    if (!templateId || button.disabled) return;
+    button.disabled = true;
+
+    const body = new FormData();
+    body.append("id", templateId);
+    const token = document.querySelector("#csrf_token");
+    if (token) body.append("csrf_token", token.value);
+
+    try {
+      const response = await fetch("/templates/catalog/install", {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        body,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok)
+        throw new Error(
+          payload.message ||
+            t("plugins.catalog.install_failed", "Install failed"),
+        );
+      window.location.reload();
+    } catch (err) {
+      button.disabled = false;
+      // eslint-disable-next-line no-alert
+      alert(err.message);
+    }
+  });
+
   $deleteSelected.on("click", function () {
     if (actionLock) return;
     actionLock = true;

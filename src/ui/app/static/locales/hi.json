@@ -1203,6 +1203,16 @@
       "tab_community": "समुदाय",
       "tab_disabled": "अक्षम",
       "tab_enabled": "सक्षम"
+    },
+    "catalog": {
+      "tab": "Available",
+      "install": "Install",
+      "install_failed": "Install failed",
+      "learn_more": "Learn more",
+      "version": "Version {{version}}",
+      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
+      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
     }
   },
   "pro": {
@@ -1241,6 +1251,7 @@
       "upgrade_required": "इस सुविधा तक पहुँचने के लिए प्रो में अपग्रेड करें"
     },
     "status": {
+      "billable_services_count": "बिल योग्य सेवाएँ: {{billable_services}}",
       "draft_services_count": "ड्राफ्ट सेवाएँ: {{draft_services}}",
       "expired": "समय सीमा समाप्त",
       "free_version": "मुफ़्त संस्करण",
@@ -1875,7 +1886,12 @@
       "feature": "अंतर्निहित सुविधा: {{name}}",
       "plugin": "प्लगइन: {{name}}"
     },
-    "title": "सेवा टेम्पलेट"
+    "title": "सेवा टेम्पलेट",
+    "catalog": {
+      "heading": "Available templates",
+      "subheading": "Curated service templates published by the BunkerWeb organisation.",
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+    }
   },
   "theme": {
     "dark": "डार्क",
@@ -2842,9 +2858,19 @@
       "none": "कोई संलग्न नहीं",
       "primary": "प्राथमिक प्रमाणपत्र",
       "template": {
+        "add": "Add",
+        "add_label": "Template to add as a layer",
+        "adding": "Saving applies {{names}}. Many settings can move at once.",
+        "move_down": "Move this template later",
+        "move_up": "Move this template earlier",
         "none": "कोई टेम्पलेट नहीं",
-        "note": "यह एक संसाधन नहीं है: एक टेम्पलेट एक सेटिंग है। यह सहेजने पर लागू होता है, और इसे बदलने से एक साथ कई सेटिंग्स बदल जाती हैं।",
+        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
+        "overridden_badge": "overridden",
+        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
         "pending": "सहेजने पर लागू होता है",
+        "remove": "Remove this template",
+        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
+        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
         "switching": "सहेजने से यह सेवा \"{{from}}\" से \"{{to}}\" में बदल जाती है। वर्तमान टेम्पलेट द्वारा प्रदान किए गए मान हटा दिए जाते हैं और {{to}} के मान लागू किए जाते हैं — कई सेटिंग्स एक साथ बदल जाती हैं।",
         "unwired": "यह पृष्ठ USE_TEMPLATE को पोस्ट नहीं करता है, इसलिए इसे यहां से नहीं बदला जा सकता है।"
       },

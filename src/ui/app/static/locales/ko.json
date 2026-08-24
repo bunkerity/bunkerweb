@@ -1203,6 +1203,16 @@
       "tab_community": "커뮤니티",
       "tab_disabled": "비활성화됨",
       "tab_enabled": "활성화됨"
+    },
+    "catalog": {
+      "tab": "Available",
+      "install": "Install",
+      "install_failed": "Install failed",
+      "learn_more": "Learn more",
+      "version": "Version {{version}}",
+      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
+      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
     }
   },
   "pro": {
@@ -1241,6 +1251,7 @@
       "upgrade_required": "이 기능을 사용하려면 Pro로 업그레이드하세요"
     },
     "status": {
+      "billable_services_count": "{{billable_services}}개의 청구 대상 서비스",
       "draft_services_count": "{{draft_services}}개의 초안 서비스",
       "expired": "만료됨",
       "free_version": "무료 버전",
@@ -1875,7 +1886,12 @@
       "feature": "기본 제공 기능: {{name}}",
       "plugin": "플러그인: {{name}}"
     },
-    "title": "서비스 템플릿"
+    "title": "서비스 템플릿",
+    "catalog": {
+      "heading": "Available templates",
+      "subheading": "Curated service templates published by the BunkerWeb organisation.",
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+    }
   },
   "theme": {
     "dark": "어둡게",
@@ -2842,9 +2858,19 @@
       "none": "연결 없음",
       "primary": "주요 인증서",
       "template": {
+        "add": "Add",
+        "add_label": "Template to add as a layer",
+        "adding": "Saving applies {{names}}. Many settings can move at once.",
+        "move_down": "Move this template later",
+        "move_up": "Move this template earlier",
         "none": "템플릿 없음",
-        "note": "자원이 아님: 템플릿은 설정입니다. 저장 시 적용되며, 전환하면 여러 설정을 한 번에 변경할 수 있습니다.",
+        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
+        "overridden_badge": "overridden",
+        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
         "pending": "저장 시 적용",
+        "remove": "Remove this template",
+        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
+        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
         "switching": "저장하면 이 서비스가 “{{from}}”에서 “{{to}}”로 전환됩니다. 현재 템플릿에서 제공된 값은 삭제되고, {{to}}의 값이 적용됩니다. 여러 설정이 한 번에 변경됩니다.",
         "unwired": "이 페이지는 USE_TEMPLATE을 게시하지 않으므로, 여기서 템플릿을 변경할 수 없습니다."
       },

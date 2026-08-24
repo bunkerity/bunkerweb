@@ -19,7 +19,7 @@ import pytest
 from flask import Flask
 
 from app.models.config import Config  # type: ignore  (src/ui on path via the ui conftest)
-from app.models.save_scope import control_keys, restore_unowned_settings
+from app.models.save_scope import control_keys, restore_unowned_settings, templates_unchanged
 from app.utils import get_blacklisted_settings, is_readonly_request
 
 RESTORE_SKIP = {"SERVER_NAME", "OLD_SERVER_NAME", "USE_TEMPLATE", "USE_UI", "IS_DRAFT"}
@@ -950,3 +950,104 @@ def test_a_compose_save_does_not_preserve_suffixed_rows_by_accident():
         mode="compose",
     )
     assert "REVERSE_PROXY_HOST_1" not in payload
+
+
+# ------------------------------------------------- USE_TEMPLATE as an ORDERED LIST
+# `templates_unchanged` is deliberately an EXACT ORDERED comparison. Every "smarter"
+# variant (set/subset, "layers were only added", per-key membership) restores an
+# outgoing layer's value as a real ui-method row and permanently defeats the layer the
+# user just added. These tests exist to make that regression impossible to land quietly.
+
+
+@pytest.mark.parametrize(
+    "old,new",
+    [
+        ("low", "low"),
+        ("", ""),
+        ("low high", "low high"),
+        # whitespace only: same layer list, so NOT a change
+        ("low  high", "low high"),
+        (" low high ", "low high"),
+    ],
+)
+def test_templates_unchanged_true_for_the_same_layer_list(old, new):
+    assert templates_unchanged(old, new) is True
+
+
+def test_only_the_literal_separator_splits_a_layer_list():
+    """A tab is NOT a separator -- the storage contract (common_utils.normalize_list_value) only
+    ever splits on " ", so "low\thigh" is one (bogus) template id, not two layers. Pinned
+    because Jinja's bare `.split()` and a naive JS whitespace regex both disagree with that, and both
+    render the picker's chips: the three halves must not disagree about what a layer is."""
+    assert templates_unchanged("low\thigh", "low high") is False
+    assert templates_unchanged("low\thigh", "low\thigh") is True
+
+
+@pytest.mark.parametrize(
+    "old,new,why",
+    [
+        ("low", "low high", "a layer was ADDED -- the case the feature exists for"),
+        ("low high", "low", "a layer was removed"),
+        ("low high", "high low", "same layers, REORDERED -- different effective values"),
+        ("", "low", "first layer attached"),
+        ("low", "", "last layer detached"),
+        ("low high", "low medium high", "a layer was inserted in the middle"),
+        ("low", "low low", "a repeat changes the stored list even though the merge is idempotent"),
+    ],
+)
+def test_templates_unchanged_false_for_any_list_change(old, new, why):
+    assert templates_unchanged(old, new) is False, why
+
+
+def test_adding_a_layer_drops_the_outgoing_overlay_rather_than_freezing_it():
+    """THE regression this whole comparison exists to prevent.
+
+    A service on "low" gains a second layer. `low`'s overlay-provided SSL_PROTOCOLS must NOT be
+    restored into the payload: restoring it writes a real ui-method row carrying `low`'s value,
+    which then beats the layer the user just added -- forever, and silently. Dropping it costs
+    nothing, because the overlay re-derives the merged value on the next read.
+    """
+    db_config = _db(SSL_PROTOCOLS=("TLSv1.2 TLSv1.3", "default", "low"))
+    unchanged = templates_unchanged("low", "low high")
+    assert unchanged is False
+    result = restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=unchanged)
+    assert result == {}
+
+
+def test_reordering_layers_also_drops_the_overlay():
+    """Reordering changes which layer wins, so the stored defaults are just as stale as after
+    an add -- a set-based comparison would call this "unchanged" and freeze them."""
+    db_config = _db(SSL_PROTOCOLS=("TLSv1.2 TLSv1.3", "default", "low"))
+    result = restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=templates_unchanged("low high", "high low"))
+    assert result == {}
+
+
+def test_a_still_attached_layers_overlay_is_also_dropped_and_that_is_correct():
+    """Pins the deliberate bluntness: `low` is STILL attached, yet its overlay key is dropped.
+
+    That is safe and intended -- the value is re-derived from the merged overlay on the next
+    read. A "keep the layers that are still attached" refinement is exactly the change that
+    reintroduces the freeze, because the merged default for that key may now come from `high`.
+    """
+    db_config = _db(SSL_PROTOCOLS=("TLSv1.2 TLSv1.3", "default", "low"))
+    result = restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=templates_unchanged("low", "low high"))
+    assert result == {}
+
+
+def test_whitespace_only_edit_still_restores_the_overlay():
+    """The one thing canonicalisation buys: a save that only reformats the value is not a
+    template change, so nothing is needlessly dropped."""
+    db_config = _db(SSL_PROTOCOLS=("TLSv1.2 TLSv1.3", "default", "low"))
+    result = restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=templates_unchanged("low  high", "low high"))
+    assert result == {"SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"}
+
+
+def test_single_template_behaviour_is_unchanged():
+    """THE ACCEPTANCE BAR: the pre-list behaviour of every one-template install."""
+    db_config = _db(SSL_PROTOCOLS=("TLSv1.2 TLSv1.3", "default", "low"))
+    # same template -> restored, exactly as before
+    assert restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=templates_unchanged("low", "low")) == {
+        "SSL_PROTOCOLS": "TLSv1.2 TLSv1.3"
+    }
+    # switched template -> dropped, exactly as before
+    assert restore_unowned_settings({}, db_config, restore_skip=RESTORE_SKIP, template_unchanged=templates_unchanged("low", "high")) == {}

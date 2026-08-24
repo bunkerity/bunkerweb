@@ -35,6 +35,7 @@ from common_utils import get_redis_client as get_common_redis_client, is_newer_v
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
+from app.models.plugin_catalog import catalog_enabled, fetch_catalog
 from app.models.reverse_proxied import ReverseProxied
 
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
@@ -1064,7 +1065,13 @@ def update_github_metadata():
     installs never reach GitHub at all, which is why the failure path logs at debug — an hourly
     warning there would be noise about a deployment choice, not a fault.
     """
-    for key, fetch in (("LATEST_VERSION", get_latest_stable_release), ("GITHUB_STARS", get_github_stars)):
+    # `PLUGIN_CATALOG` rides along here rather than growing its own timer: the gate, the
+    # off-thread submission, the fail-soft semantics and the cross-worker sharing through
+    # ui_data.json are exactly what a manifest cache needs, and re-implementing them would be
+    # a second copy of all four. `fetch_catalog` returns None when the kill switch is off (it
+    # issues no request at all) or when the manifest fails validation, and None means "keep
+    # what we have" -- the same contract the other two entries already follow.
+    for key, fetch in (("LATEST_VERSION", get_latest_stable_release), ("GITHUB_STARS", get_github_stars), ("PLUGIN_CATALOG", fetch_catalog)):
         try:
             value = fetch()
         except BaseException as e:  # noqa: B036 - a background refresh must never take a worker down
@@ -1519,6 +1526,10 @@ def before_request():
             db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
             user_admin=current_user.admin,
+            # One flag for every page: the catalogue sections read it, and so does the
+            # navigation, so the kill switch cannot be honoured on one page and forgotten on
+            # another. The routes re-check it server-side -- this only decides what is drawn.
+            catalog_enabled=catalog_enabled(),
             theme=theme_value,
             language=language_value,
             supported_languages=SUPPORTED_LANGUAGES,

@@ -1203,6 +1203,16 @@
       "tab_community": "Topluluk",
       "tab_disabled": "Devre dışı",
       "tab_enabled": "Etkin"
+    },
+    "catalog": {
+      "tab": "Available",
+      "install": "Install",
+      "install_failed": "Install failed",
+      "learn_more": "Learn more",
+      "version": "Version {{version}}",
+      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
+      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
     }
   },
   "pro": {
@@ -1241,6 +1251,7 @@
       "upgrade_required": "Bu özelliğe erişmek için Pro'ya yükseltin"
     },
     "status": {
+      "billable_services_count": "{{billable_services}} Faturalandırılabilir servis",
       "draft_services_count": "{{draft_services}} Taslak servis",
       "expired": "SÜRESİ DOLDU",
       "free_version": "ÜCRETSİZ Sürüm",
@@ -1875,7 +1886,12 @@
       "feature": "Yerleşik özellik: {{name}}",
       "plugin": "Eklenti: {{name}}"
     },
-    "title": "Hizmet şablonları"
+    "title": "Hizmet şablonları",
+    "catalog": {
+      "heading": "Available templates",
+      "subheading": "Curated service templates published by the BunkerWeb organisation.",
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+    }
   },
   "theme": {
     "dark": "Koyu",
@@ -2842,9 +2858,19 @@
       "none": "Hiçbir şey bağlanmadı",
       "primary": "Ana sertifika",
       "template": {
+        "add": "Add",
+        "add_label": "Template to add as a layer",
+        "adding": "Saving applies {{names}}. Many settings can move at once.",
+        "move_down": "Move this template later",
+        "move_up": "Move this template earlier",
         "none": "Şablon yok",
-        "note": "Kaynak değil: bir şablon bir ayardır. Kaydetmede uygulanır ve değiştirildiğinde birçok ayar aynı anda değiştirilir.",
+        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
+        "overridden_badge": "overridden",
+        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
         "pending": "Kaydetmede uygulanır",
+        "remove": "Remove this template",
+        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
+        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
         "switching": "Kaydetmek, bu servisi \"{{from}}\"'den \"{{to}}\"'e geçirir. Mevcut şablon tarafından sağlanan değerler silinir ve \"{{to}}\"'in değerleri uygulanır — birçok ayar aynı anda değiştirilir.",
         "unwired": "Bu sayfa USE_TEMPLATE'i yayınlamaz, bu nedenle şablon burada değiştirilemez."
       },
