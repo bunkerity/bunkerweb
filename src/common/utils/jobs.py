@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
+from gzip import GzipFile
 from json import dumps as json_dumps
 from inspect import currentframe, getframeinfo
 from io import BytesIO
@@ -458,8 +459,13 @@ class Job:
 
         file_name = f"folder:{dir_path.as_posix()}.tgz"
         content = BytesIO()
-        with tar_open(file_name, mode="w:gz", fileobj=content, compresslevel=9) as tgz:
-            tgz.add(dir_path, arcname=".")
+        # Pin the gzip header (mtime=0, no stored name) so an unchanged directory always produces
+        # the same bytes. The header otherwise carries the current time, every rebuild got a fresh
+        # checksum, and upsert_job_cache rewrote the whole blob each call -- ~48 MiB per reload for
+        # failover-backup. tarfile.add() already walks the tree in sorted order.
+        with GzipFile(filename="", fileobj=content, mode="wb", compresslevel=9, mtime=0) as gz:
+            with tar_open(fileobj=gz, mode="w") as tgz:
+                tgz.add(dir_path, arcname=".")
         content.seek(0, 0)
 
         return self.cache_file(file_name, content.getvalue(), job_name=job_name, service_id=service_id)
