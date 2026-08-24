@@ -44,6 +44,9 @@ APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
 
 RUN = True
+# Set by the SIGHUP handler, consumed by the main loop: rescan /etc/bunkerweb/configs
+# before it gets regenerated from the database.
+RELOAD_SCAN_CONFIGS = False
 SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
 
@@ -186,12 +189,15 @@ signal(SIGTERM, handle_stop)
 
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
+    global RELOAD_SCAN_CONFIGS
+
     try:
         if SCHEDULER is not None and RUN:
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
+            RELOAD_SCAN_CONFIGS = True
             cmd_env = build_cmd_env()
 
             proc = subprocess_run(
@@ -901,7 +907,7 @@ if __name__ == "__main__":
                 return False
             return True
 
-        def check_configs_changes():
+        def check_configs_changes(*, generate: bool = True) -> bool:
             # Checking if any custom config has been created by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
@@ -911,6 +917,7 @@ if __name__ == "__main__":
             for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+                    continue
 
                 content = file.read_text(encoding="utf-8")
                 service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
@@ -942,7 +949,10 @@ if __name__ == "__main__":
                 except BaseException as e:
                     LOGGER.error(f"Error while saving custom configs to database: {e}")
 
-            generate_custom_configs(SCHEDULER.db.get_custom_configs())
+            if generate:
+                generate_custom_configs(SCHEDULER.db.get_custom_configs())
+
+            return changes
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
@@ -1325,6 +1335,16 @@ if __name__ == "__main__":
             _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
+                    # SIGHUP: re-read /etc/bunkerweb/configs before the folder gets regenerated
+                    # from the database, otherwise a manual edit is reverted on every reload.
+                    if RELOAD_SCAN_CONFIGS:
+                        RELOAD_SCAN_CONFIGS = False
+                        if not SCHEDULER.db.readonly and check_configs_changes(generate=False):
+                            CONFIGS_NEED_GENERATION = True
+                            CONFIG_NEED_GENERATION = True
+                            NEED_RELOAD = True
+                            continue
+
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()

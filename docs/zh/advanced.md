@@ -1122,6 +1122,9 @@ systemctl status systemd-resolved
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "重新加载会重新读取该文件夹"
+        重新加载会重新读取 `/etc/bunkerweb/configs`：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。
+
 === "All-in-one"
 
     当使用 [All-in-one 镜像](integrations.md#all-in-one-aio-image)时，您有两种选择来添加自定义配置：

@@ -2724,21 +2724,23 @@ class Database:
 
             if not disable_cleanup:
                 # Data-loss guard (mirror of the save_config guards above): refuse the
-                # cleanup when a ui/api save_custom_configs call would wipe every
+                # cleanup when a ui/api/manual save_custom_configs call would wipe every
                 # method-owned custom config row while supplying nothing to replace
                 # them. An empty incoming list with existing rows almost always means
                 # the caller built an incomplete payload (route exception, form rebuild
-                # race, missing in-memory state). Genuine "remove all custom configs"
-                # actions delete rows individually through the UI/API, so by the time
-                # an empty payload reaches save_custom_configs there is nothing left
-                # to wipe and this guard is a no-op.
-                if method in ("ui", "api") and not custom_configs:
+                # race, missing in-memory state) or, for the manual method, a configs
+                # folder that is missing or unreadable at scan time. Genuine "remove all
+                # custom configs" actions delete rows individually through the UI/API, so
+                # by the time an empty payload reaches save_custom_configs there is
+                # nothing left to wipe and this guard is a no-op.
+                if method in ("ui", "api", "manual") and not custom_configs:
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(
                             f"Refusing save_custom_configs: incoming method={method!r} payload is empty while {existing_count} "
                             f"{method}-method custom config row(s) exist in the database. This indicates the caller submitted "
-                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map). Aborting "
+                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map, or an "
+                            f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
                         return message

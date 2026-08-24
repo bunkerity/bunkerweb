@@ -1122,6 +1122,9 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Das Neuladen liest den Ordner erneut ein"
+        Ein Neuladen liest `/etc/bunkerweb/configs` erneut ein: dort erstellte, geänderte oder gelöschte Dateien werden angewendet und in der Datenbank gespeichert. Eine Konfiguration, die der Weboberfläche oder der API gehört, behält ihren Besitzer, nur ihr Inhalt wird aus der Datei aktualisiert.
+
 === "All-in-one"
 
     Bei Verwendung des [All-in-one-Images](integrations.md#all-in-one-aio-image) haben Sie zwei Möglichkeiten, benutzerdefinierte Konfigurationen hinzuzufügen:

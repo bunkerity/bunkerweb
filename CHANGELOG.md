@@ -4,6 +4,8 @@
 
 - [BUGFIX] `database`: initializing the database only inspects BunkerWeb's own tables instead of every table in the schema, where a single unreadable one aborted the config saver and left every service running on its default settings. A leftover `test_<uuid>` probe table whose tablespace was lost is the usual cause, reported by MariaDB as error 1932; drop any that remain in the schema.
 - [BUGFIX] `scheduler`: the config saver and the config generator now log wherever the Scheduler logs. On Linux their output went to the journal while `/var/log/bunkerweb/scheduler.log` kept only "Config saver failed, configuration will not work as expected", so the failure appeared to have no cause even at debug level.
+- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database and only a restart picked it up. A missing or unreadable folder no longer removes the file-managed configurations.
+- [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
 
 ## v1.6.14 - 2026/08/21
 

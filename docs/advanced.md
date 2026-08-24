@@ -1124,6 +1124,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Reload re-reads the folder"
+        A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
+
 === "All-in-one"
 
     When using the [All-in-one image](integrations.md#all-in-one-aio-image), you have two choices for adding custom configurations:

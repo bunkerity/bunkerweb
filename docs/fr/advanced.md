@@ -1122,6 +1122,9 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Le rechargement relit le dossier"
+        Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :

@@ -1122,6 +1122,9 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "La recarga vuelve a leer la carpeta"
+        Una recarga vuelve a leer `/etc/bunkerweb/configs`: los archivos creados, modificados o eliminados allí se aplican y se guardan en la base de datos. Una configuración que pertenece a la interfaz web o a la API conserva su propietario, solo su contenido se actualiza desde el archivo.
+
 === "Todo en uno"
 
     Cuando se utiliza la [imagen Todo en uno](integrations.md#all-in-one-aio-image), tienes dos opciones para añadir configuraciones personalizadas:
