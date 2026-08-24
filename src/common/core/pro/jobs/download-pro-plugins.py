@@ -23,6 +23,7 @@ from requests import get
 from requests.exceptions import ConnectionError
 
 from common_utils import bytes_hash, get_os_info, get_integration, get_version, create_plugin_tar_gz, safe_zip_extractall  # type: ignore
+from service_classification import count_snapshot  # type: ignore
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 
@@ -226,6 +227,39 @@ def install_plugin(plugin_path: Path, db, preview: bool = True, force: bool = Fa
     return True
 
 
+def _billable_service_number(db=None) -> int:
+    """Number of services that consume a PRO quota slot.
+
+    Counting `SERVER_NAME` was every non-draft service, whatever it does. The
+    shared classifier (src/common/utils/service_classification.py) is the ONE
+    place that decides, so the license path, the UI and any audit answer the
+    same number: standard services plus redirect-only declarations that do not
+    hold up, exempting the valid ones.
+
+    The wire shape is deliberately unchanged -- `service_number` stays a plain
+    string, and the algorithm/allowlist version is NOT sent yet (open PO
+    decision on the license contract). Any failure falls back to the historical
+    env-based count rather than taking the PRO check down with it.
+    """
+    fallback = len(getenv("SERVER_NAME", "www.example.com").split())
+    try:
+        snapshot = (db or Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))).get_non_default_settings(
+            global_only=False, methods=False, with_drafts=False
+        )
+        counts = count_snapshot(snapshot)
+        LOGGER.debug(
+            f"Quota count (algorithm v{counts.algorithm_version}/allowlist v{counts.allowlist_version}): "
+            f"{counts.billable} billable, {counts.exempt_redirect} exempt redirect, {counts.invalid} invalid, "
+            f"{counts.draft} draft"
+        )
+        return counts.billable
+    except Exception as e:
+        # Narrower than the module's other handlers on purpose: nothing in here
+        # raises SystemExit, and swallowing one would hide a deliberate exit.
+        LOGGER.warning(f"Failed to compute the billable service count ({e}), falling back to the raw service count")
+        return fallback
+
+
 try:
     db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
     _cleanup_stale_plugin_dirs()
@@ -240,7 +274,7 @@ try:
         "integration": get_integration(),
         "version": get_version(),
         "os": get_os_info(),
-        "service_number": str(len(getenv("SERVER_NAME", "www.example.com").split())),
+        "service_number": str(_billable_service_number(db)),
     }
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     default_metadata = {
@@ -253,6 +287,12 @@ try:
         "non_draft_services": 0,
     }
     metadata = {
+        # `non_draft_services` is a bw_metadata COLUMN (added in 1.5.11), so the
+        # name is frozen without a migration -- it now holds the BILLABLE count,
+        # which is what `service_number` carries. The two agree today because the
+        # exemption is gated off; once Lot C opens it they will not, and the
+        # column will be the billable figure, not "services that are not drafts".
+        # Renaming it belongs to the same change that opens the gate.
         "non_draft_services": int(data["service_number"]),
     }
     error = False

@@ -6,7 +6,7 @@ from flask_login import login_required
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
-from app.utils import flash
+from app.utils import billable_service_count, flash
 
 pro = Blueprint("pro", __name__)
 
@@ -14,6 +14,13 @@ pro = Blueprint("pro", __name__)
 @pro.route("/pro", methods=["GET"])
 @login_required
 def pro_page():
+    # TWO numbers, because they answer two questions and will stop being equal.
+    # `online_services` is what the operator sees in the services table (non-draft
+    # rows). `billable_services` is what the PRO license is actually billed for,
+    # from the shared classifier -- a valid redirect-only service is online and
+    # consumes nothing. Labelling the billable figure "Online services" would be a
+    # lie the moment the two diverge, and the conception asks the operator to see
+    # total / billable / exemptions / reasons, not one conflated count.
     online_services = 0
     draft_services = 0
     for service in API_CLIENT.get_services(with_drafts=True):
@@ -21,6 +28,7 @@ def pro_page():
             draft_services += 1
             continue
         online_services += 1
+    billable_services = billable_service_count()
 
     metadata = API_CLIENT.get_metadata()
     # Convert current date to UTC and normalize to midnight for daily comparison
@@ -43,6 +51,7 @@ def pro_page():
     return render_template(
         "pro.html",
         online_services=online_services,
+        billable_services=billable_services,
         draft_services=draft_services,
         pro_expires_in=pro_expires_in,
         pro_license_key=BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("PRO_LICENSE_KEY",)).get(

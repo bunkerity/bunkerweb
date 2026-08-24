@@ -19,6 +19,7 @@ from regex import compile as re_compile, match
 from requests import get
 
 from logger import getLogger  # type: ignore
+from service_classification import count_snapshot  # type: ignore
 from password_utils import (  # type: ignore  # noqa: F401
     BCRYPT_HASH_RX as BCRYPT_HASH_RX,
     MAX_PASSWORD_BYTES as MAX_PASSWORD_BYTES,
@@ -337,6 +338,15 @@ def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
         "SWARM_MODE",
         "KUBERNETES_MODE",
         "IS_DRAFT",
+        # A commercial classification, not a knob: `redirect_only` is what makes a
+        # service free, so it must not be reachable from the generic per-plugin
+        # form the way `misc`'s other settings are. Lot C gives it a dedicated
+        # form that validates the whole profile before applying it. Same reason
+        # IS_DRAFT is here. NOTE: this only closes the UI's generic form -- the
+        # environment (`<service>_SERVICE_MODE=`) and the API's generic write path
+        # still reach it, which is why the exemption itself is gated off in
+        # src/common/utils/service_classification.py rather than guarded here.
+        "SERVICE_MODE",
         "BUNKERWEB_INSTANCES",
         "DATABASE_URI",
         "DATABASE_URI_READONLY",
@@ -460,6 +470,25 @@ def get_activation_map() -> dict:
     except Exception:  # a broken plugin tree must not take the plugins page down
         LOGGER.exception("Could not read plugin activation manifests, falling back to conventions")
         return {}
+
+
+def billable_service_count() -> int:
+    """Services consuming a PRO quota slot, per the shared classifier.
+
+    The UI used to recount its own way (``len(get_services())``) while the license
+    job counted ``SERVER_NAME`` -- two numbers that can disagree the moment a
+    service stops being billable. Both now go through
+    ``src/common/utils/service_classification.py``.
+
+    ``full=False`` is the classifier's input contract: the non-default persisted
+    config, not the fully-defaulted one. Drafts are excluded at the source.
+    """
+    # Local import: app.dependencies builds the real API client at import time,
+    # and this module is imported long before that is wanted.
+    from app.dependencies import BW_CONFIG
+
+    snapshot = BW_CONFIG.get_config(global_only=False, methods=False, with_drafts=False)
+    return count_snapshot(snapshot).billable
 
 
 def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:

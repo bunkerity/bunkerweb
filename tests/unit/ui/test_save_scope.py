@@ -480,14 +480,25 @@ def test_the_global_page_gets_a_different_list():
 
 
 def test_the_service_restore_skip_is_unchanged_by_being_derived():
-    """`get_blacklisted_settings() | control_keys()` must still be the historical 12 names, or
-    deriving it moved the goalposts instead of removing a duplicate."""
+    """`get_blacklisted_settings() | control_keys()` must still be the historical names, or
+    deriving it moved the goalposts instead of removing a duplicate.
+
+    SERVICE_MODE is the one deliberate addition (2026-08-24, PRO quota chantier). It decides
+    whether a service is billable, so it must not be a knob on the generic per-plugin form --
+    same reason IS_DRAFT is here. It is NOT yet in `control_keys()`, which means an ordinary
+    service save drops a SERVICE_MODE row that env or the API had set. That hazard is known,
+    accepted and pinned in `tests/unit/ui/test_quota_count.py`: it is money-inert while the
+    exemption is gated off (a dropped row reverts the service to standard, i.e. billable, i.e.
+    fail closed). **Lot C must add SERVICE_MODE to `_SERVICE_CONTROL_KEYS` and render its hidden
+    input in the same change that opens the gate.**
+    """
     assert get_blacklisted_settings() | set(control_keys()) == {
         "IS_LOADING",
         "AUTOCONF_MODE",
         "SWARM_MODE",
         "KUBERNETES_MODE",
         "IS_DRAFT",
+        "SERVICE_MODE",
         "BUNKERWEB_INSTANCES",
         "DATABASE_URI",
         "DATABASE_URI_READONLY",

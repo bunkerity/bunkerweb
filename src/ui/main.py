@@ -46,6 +46,7 @@ from app.utils import (
     LIB_DIR,
     LOGGER,
     SETTINGS_HUNGRY_PATH_PREFIXES,
+    billable_service_count,
     is_static_path,
     _sanitize_internal_next,
     flash,
@@ -1406,8 +1407,12 @@ def before_request():
 
             # Live, every-request overlap check — the metadata flag is only refreshed daily by the scheduler.
             # UI is API-only (DB is a None shim), so count services through BW_CONFIG (API-backed).
+            # The count MUST be the shared classifier's billable figure, not len(services): the
+            # license path bills the same number, and a UI that recounts its own way is exactly the
+            # divergence the shared module exists to kill. `full=False` is the input contract —
+            # the non-default persisted config, never the fully-defaulted one.
             if metadata.get("is_pro") and metadata.get("pro_services"):
-                pro_overlapped = len(BW_CONFIG.get_services()) > metadata["pro_services"]
+                pro_overlapped = billable_service_count() > metadata["pro_services"]
                 if pro_overlapped and current_endpoint != "pro":
                     flash(
                         "You have more services than allowed by your pro license. "

@@ -69,6 +69,9 @@
                                 >
                                 {{ _("pro.status.services_count", online_services=online_services, pro_services=pro_services) }}
                             </h5>
+                            <div class="mb-2 small text-muted">
+                                {{ _("pro.status.billable_services_count", billable_services=billable_services) }}
+                            </div>
                             {% if is_overlapped %}
                                 {% call alert(variant="danger", classes="mt-2 mb-2 text-center") %}
                                     <span>{{ _("pro.alert.overlapped_1") }}</span>

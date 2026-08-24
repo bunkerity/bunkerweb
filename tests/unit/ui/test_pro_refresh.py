@@ -27,6 +27,7 @@ def pro_route():
     route_utils.wait_applying = Mock()
     app_utils = ModuleType("app.utils")
     app_utils.flash = Mock()
+    app_utils.billable_service_count = Mock(return_value=0)
     module_name = "app.routes._pro_refresh_test"
     route_path = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "routes" / "pro.py"
     spec = importlib.util.spec_from_file_location(module_name, route_path)
