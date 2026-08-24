@@ -252,9 +252,15 @@ def test_detect_mode_marks_the_ban_but_does_not_deny(tmp_path, conf, expected_ex
 # fixed. These run the loop.
 WHITELIST_MERGE_HARNESS = """local CACHED = %s
 local CONFIGURED = %s
+local URLS = %s
 local whitelists = { IP = {} }
 local get_variable = function(name)
   if name == "WHITELIST_IP" then return CONFIGURED end
+  -- The loop reads <KIND>.list only while WHITELIST_<KIND>_URLS is configured, because that
+  -- setting is the file's only producer and a list withdrawn from the configuration must stop
+  -- being enforced. CACHED stands for a list the download job just wrote, so the default here
+  -- configures the URLs; run_merge(urls="nil") exercises the retired case.
+  if name == "WHITELIST_IP_URLS" then return URLS end
   return nil
 end
 local open = function()
@@ -282,9 +288,9 @@ def whitelist_merge_loop() -> str:
     return body[start:end] + "whitelists[kind] = deduplicate_list(whitelists[kind])\n\t\tend"
 
 
-def run_merge(tmp_path: Path, cached: str, configured: str) -> list:
+def run_merge(tmp_path: Path, cached: str, configured: str, urls: str = '"http://custom-api:8000/list/ip"') -> list:
     script = tmp_path / "merge.lua"
-    script.write_text(WHITELIST_MERGE_HARNESS % (cached, configured, whitelist_merge_loop()))
+    script.write_text(WHITELIST_MERGE_HARNESS % (cached, configured, urls, whitelist_merge_loop()))
     result = subprocess.run([LUA, str(script)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     return [entry for entry in result.stdout.strip().split(",") if entry]
@@ -315,3 +321,15 @@ def test_no_configured_entries_leaves_the_downloaded_list_intact(tmp_path):
     stored = run_merge(tmp_path, '{"10.0.0.1"}', "nil")
 
     assert stored == ["10.0.0.1"]
+
+
+@needs_lua
+def test_the_downloaded_list_is_ignored_once_its_url_setting_is_gone(tmp_path):
+    """Keeps the three tests above honest. They all feed CACHED through the file read, so a harness
+    whose WHITELIST_IP_URLS answers nil stops loading it and they pass on an empty list instead --
+    which is exactly how this file went red-then-vacuous when the retired-list guard landed. The
+    guard itself is covered in test_whitelist_retired_lists_lua.py; this only pins that CACHED is
+    still reaching the loop."""
+    stored = run_merge(tmp_path, '{"10.0.0.1"}', '"1.1.1.1"', urls="nil")
+
+    assert stored == ["1.1.1.1"], "a retired IP.list must not be read, but the configured entry must survive"
