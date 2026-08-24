@@ -46,6 +46,15 @@ SecRule MULTIPART_STRICT_ERROR "!@eq 0" \
 SecRule MULTIPART_UNMATCHED_BOUNDARY "@eq 1" \
   "id:'200004',phase:2,t:none,log,deny,msg:'Multipart parser detected a possible unmatched boundary.'"
 
+# Reject the RFC 2231 filename* parameter in multipart parts. ModSecurity reads
+# filename= only, while RFC 7578 parsers (Werkzeug, Starlette, busboy, Go, Spring)
+# prefer filename*, so a part can show the WAF a benign name and the application a
+# malicious one. RFC 7578 section 4.2 forbids RFC 2231 encoding here, so refusing it
+# costs nothing for a compliant client.
+SecRule MULTIPART_PART_HEADERS "@rx ^content-disposition\s*:.*;\s*filename\s*\*\s*=" \
+  "id:'200006',phase:2,t:none,t:lowercase,log,deny,status:400, \
+  msg:'Multipart Content-Disposition uses the RFC 2231 filename* parameter',logdata:'%{MATCHED_VAR}'"
+
 # Enable response body checks
 SecResponseBodyAccess On
 SecResponseBodyMimeType text/plain text/html text/xml application/json
