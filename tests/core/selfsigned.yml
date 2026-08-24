@@ -11,6 +11,54 @@ actions:
     verify_ssl: false
     ssl_algorithm: "ec-prime256v1"
     restart_stack: false
+  # 1.7 mirrors the two providers that never had a page of their own into the central certificate
+  # inventory, so the material an operator can see and manage is the material actually in use.
+  # `check_ssl` above proves the certificate is served; these prove the inventory learned about the
+  # same act of issuance -- a provider that stopped mirroring would leave `check_ssl` green and the
+  # certificates page empty. Docker only: the assertions dial the API on loopback:8888, which is
+  # where the Docker arm publishes it.
+  the_certificate_is_mirrored_into_the_inventory:
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/certificates?source=selfsigned"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"source":"selfsigned"'
+    restart_stack: false
+  the_inventory_entry_is_attached_to_the_service:
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/certificates?source=selfsigned"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"service_id":"www.example.com"'
+    restart_stack: false
+  the_inventory_entry_is_the_services_primary_certificate:
+    # The `certificates` plugin materializes a service's PRIMARY attachment and hands it to NGINX
+    # ahead of the settings-driven providers, so an entry attached without that flag would be
+    # inventoried and never served.
+    #
+    # Three actions rather than one needle spanning the whole attachment object: `attachments` is a
+    # nested JSON object whose key order is not part of any contract, so
+    # `"service_id":...,"is_primary":true` as one string would be a wire-format bet. Split, they are
+    # a weaker conjunction -- an entry attached to some OTHER service while this one is primary
+    # would satisfy both -- but the `?source=` filter already scopes the response to one provider on
+    # a single-service stack, and the alternative fails for a reason that has nothing to do with the
+    # feature.
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/certificates?source=selfsigned"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"is_primary":true'
+    restart_stack: false
+
   auto_redirect_https:
     type: status
     url: "http://www.example.com"

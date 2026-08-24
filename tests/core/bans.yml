@@ -1,0 +1,39 @@
+# Bans survive the instance that enforces them (1.7): every decision is written to `bw_bans`
+# before it is fanned out, and `sync-bans` reconciles each instance with that table once a minute.
+# `tests/core/bwcli.yml` covers the decision path -- CLI, database view, runtime view -- on a
+# running stack; what it cannot cover is the lifecycle half, because the framework restarts the
+# scheduler between actions and never the instance.
+#
+# So this is a script, for the same reason `internalcert.yml` is one: the property belongs to a
+# container's lifecycle. It takes each decision while the instance cannot receive it, which is what
+# makes the outcome attributable to `sync-bans` and to nothing else -- and it uses a DIFFERENT kind
+# of unreachable for each half, because they exercise different branches: the ban half stops the
+# container (empty shared dict on the way back, so the restore path runs), the revoke half leaves it
+# running and cuts only its link to the scheduler (so it comes back still enforcing, which is the
+# only state in which the re-unban branch runs at all). Docker only: the Linux packaging restarts a
+# service rather than a container and needs its own probe.
+integrations:
+  - "Docker"
+
+# `sync-bans` projects the database onto the instances only when Redis is OFF: under Redis
+# `project_bans` writes the keys and returns before any instance is pushed to
+# (src/common/core/jobs/jobs/sync-bans.py:113-121), because instances materialize a Redis ban
+# lazily on the first request from that IP. Both halves below assert what an instance is
+# enforcing right now, so with Redis on they would simply time out with no hint why.
+config:
+  USE_REDIS: "no"
+
+actions:
+  a_ban_survives_a_restart_and_its_revoke_reaches_an_instance_that_missed_it:
+    type: script
+    script: ["./tests/core/bans/test.sh", "docker"]
+    result: "bans: all checks passed"
+    # The script stops and starts the framework's own instance and its worker, cuts and restores
+    # the instance's link to the scheduler, and puts all three back as it found them; letting the
+    # framework redeploy on top of that would race with it.
+    restart_stack: false
+    # No `timeout:` on purpose, and it would not do what it looks like anyway: `timeout` is the
+    # stack-READINESS budget (tests/generate.py -> redis `timeout` -> tests/scripts/wait.sh), and
+    # `script` actions are run with `subprocess.run` and no timeout at all
+    # (tests/core_handlers/script_handler.py). The script's own bound is its two 180s converge
+    # loops plus two 180s health waits -- ~12 min worst case, ~3 min measured on a local stack.

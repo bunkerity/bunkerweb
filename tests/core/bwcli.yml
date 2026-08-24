@@ -25,6 +25,29 @@ actions:
     result: "10.99.0.1"
     restart_stack: false
 
+  # What the CLI printed is not where the ban went. Since 1.7 `ban` writes `bw_bans` first and then
+  # fans out to the instances, and the two can disagree: a database write that failed still sends,
+  # while an instance that was unreachable keeps enforcing an unban it never received. `GET /bans`
+  # answers from the database and `GET /bans/instances` asks the instances what they are actually
+  # enforcing right now, so asserting both is what tells the durable path from the runtime one --
+  # neither is visible in `bwcli bans` output, which reads the database and stops there.
+  the_database_has_the_global_ban:
+    type: string
+    url: "http://127.0.0.1:8888/bans"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"ip":"10.99.0.1"'
+    restart_stack: false
+  the_instances_enforce_the_global_ban:
+    type: string
+    url: "http://127.0.0.1:8888/bans/instances"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"ip":"10.99.0.1"'
+    restart_stack: false
+
   ban_an_ip_for_one_service:
     # -service scopes the ban instead of applying it globally; an unknown name falls back to a
     # global ban with a warning, so the service has to be one the stack actually serves.
@@ -37,6 +60,23 @@ actions:
     type: bwcli
     command: "bans"
     result: "10.99.0.2"
+    restart_stack: false
+
+  the_database_has_the_service_ban:
+    type: string
+    url: "http://127.0.0.1:8888/bans"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"ip":"10.99.0.2"'
+    restart_stack: false
+  the_instances_enforce_the_service_ban:
+    type: string
+    url: "http://127.0.0.1:8888/bans/instances"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"ip":"10.99.0.2"'
     restart_stack: false
 
   unban_the_global_ip:
@@ -66,3 +106,25 @@ actions:
     type: bwcli
     command: "bans"
     not_result: "10.99.0.2"
+    restart_stack: false
+
+  # The same two views after the unbans. A revoke that cannot be persisted is refused, so an empty
+  # database view is the durable half; an instance that still enforces a revoked ban is the failure
+  # `sync-bans` exists to repair, and only the runtime view can see it. The needles are the ones the
+  # four actions above matched while the bans existed, which is what makes their absence mean
+  # something.
+  the_database_has_no_ban_left:
+    type: string
+    url: "http://127.0.0.1:8888/bans"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    not_string: '"ip":"10.99.0.'
+    restart_stack: false
+  the_instances_enforce_no_ban_left:
+    type: string
+    url: "http://127.0.0.1:8888/bans/instances"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    not_string: '"ip":"10.99.0.'
