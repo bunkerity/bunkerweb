@@ -15,5 +15,5 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm -y && \
-    dnf install curl php-fpm yum-utils -y && \
+    dnf install --allowerasing curl php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
