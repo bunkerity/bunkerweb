@@ -15,7 +15,7 @@ It complements the existing CodeQL (source code) and OSSF Scorecard
 |---|---|
 | `.github/plumber/plumber.yaml` | Policy overlay on top of `plumber:default` |
 | `.github/plumber/README.md` | This file |
-| `.github/workflows/plumber.yml` | The workflow — must live in `.github/workflows/`, GitHub ignores subdirectories |
+| `.github/workflows/plumber.yml` | Reusable workflow invoked by the `dev` and `master` workflows |
 
 ## Running it locally
 
@@ -39,16 +39,17 @@ pinned by commit SHA in the workflows.
 
 ## Gating
 
-The workflow runs on pushes to `master` and `dev`, on pull requests and
-weekly. It is currently gated at `min-score: C` with `soft-fail: true`, so it
-reports without breaking builds. Results land in the Code Scanning tab.
+The `master` and `dev` workflows invoke Plumber directly, and the reusable
+workflow also runs weekly. It is gated at `min-score: B` with
+`soft-fail: false`, so scores of C, D or E fail the run. Results land in the
+Code Scanning tab.
 
 Every input is set explicitly in `plumber.yml`, including those that match the
 action's own defaults, so that an auditor reads the effective configuration
 from the workflow alone and never has to diff it against `action.yml` at some
 past tag. `verify-attestation: true` keeps the sigstore/SLSA provenance check
-on the downloaded binary; `score-push: false` states that nothing is published
-to the hosted badge service.
+on the downloaded binary; `score-push: true` publishes the score used by the
+hosted badge service.
 
 Each run also uploads a `plumber-report` artifact holding the JSON report, the
 PBOM, the CycloneDX SBOM and the raw SARIF (`upload-artifacts: true`). The

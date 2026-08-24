@@ -1,13 +1,9 @@
 name: Plumber CI/CD security scan
 
 on:
-  push:
-    branches: [master, dev]
-  pull_request:
   schedule:
     - cron: "30 9 * * 1"
-
-permissions: read-all
+  workflow_call:
 
 jobs:
   plumber:
@@ -28,8 +24,8 @@ jobs:
         with:
           verify-attestation: true
           config-file: .github/plumber/plumber.yaml
-          min-score: C
-          soft-fail: true
+          min-score: B
+          soft-fail: false
           upload-sarif: true
           score-push: true
           upload-artifacts: true
