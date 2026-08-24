@@ -23,6 +23,9 @@ PyMySQL==1.2.0
 pytest==8.4.2
 pytest-cov==6.0.0
 pytest-randomly==3.16.0
+# tests/unit/integrations/test_spec_default_expectations.py reads tests/core/*.yml at test
+# time (the anti-drift guard) — module-level `import yaml`, so the CI venv needs it too.
+pyyaml==6.0.3
 regex==2026.5.9
 requests==2.34.2
 schedule==1.2.2
