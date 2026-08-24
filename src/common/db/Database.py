@@ -871,7 +871,11 @@ class Database:
         while error:
             try:
                 meta_cls = sql_metadata()
-                meta_cls.reflect(self.sql_engine)
+                # Reflect only our own tables. An unfiltered reflect() walks every table in the
+                # schema, so a single unreadable one -- an orphaned test_<uuid> probe whose InnoDB
+                # tablespace was lost, for instance -- makes SHOW CREATE TABLE raise and takes the
+                # whole init down. Nothing below reads a table outside Base.metadata anyway.
+                meta_cls.reflect(self.sql_engine, only=lambda table_name, _: table_name in Base.metadata.tables)
                 error = False
             except Exception as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:

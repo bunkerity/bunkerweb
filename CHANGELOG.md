@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.14 - 2026/08/??
+## v1.6.15~rc1 - 2026/08/??
+
+- [BUGFIX] `database`: initializing the database only inspects BunkerWeb's own tables instead of every table in the schema, where a single unreadable one aborted the config saver and left every service running on its default settings. A leftover `test_<uuid>` probe table whose tablespace was lost is the usual cause, reported by MariaDB as error 1932; drop any that remain in the schema.
+
+## v1.6.14 - 2026/08/21
 
 - [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
 - [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.
