@@ -1,0 +1,25 @@
+# Local one-shot usage:
+# docker compose -f docker-compose.bwcli.yml --profile tools run --rm bwcli capabilities
+# docker compose -f docker-compose.bwcli.yml --profile tools run --rm bwcli plugin backup list
+services:
+  bwcli:
+    build:
+      context: ../..
+      dockerfile: src/scheduler/Dockerfile
+      target: bwcli
+    profiles: [tools]
+    env_file:
+      - path: ./bwcli.env
+        required: false
+    read_only: true
+    command: ["capabilities"]
+    volumes:
+      - bwcli-state:/var/lib/bunkerweb
+      # uid/gid 101 must be able to write this host directory.
+      - ./backups:/var/lib/bunkerweb/backups
+    tmpfs:
+      - /tmp
+      - /var/tmp/bunkerweb
+
+volumes:
+  bwcli-state:

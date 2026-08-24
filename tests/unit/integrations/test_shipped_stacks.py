@@ -258,9 +258,8 @@ def test_every_service_comes_back_after_it_dies(manifest):
         ), f"{manifest.name} leaves some of its {services} services with no deploy.restart_policy"
         return
 
-    assert (
-        services and text.count('\n    restart: "unless-stopped"') == services
-    ), f"{manifest.name} leaves some of its {services} services with no restart policy"
+    assert services, f"{manifest.name} declares no services"
+    assert text.count('\n    restart: "unless-stopped"') == services, f"{manifest.name} leaves some of its {services} services with no restart policy"
 
 
 # ------------------------------------------------------------------- the Swarm reference stacks

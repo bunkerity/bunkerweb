@@ -54,10 +54,13 @@ def _fake_path_factory(files: dict, dirs: set):
     return FakePath
 
 
-def _build_cli(monkeypatch, *, variables: str, instances=None):
+def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None):
     """Drive the real CLI.__init__ with the filesystem, Redis and terminal stubbed out."""
     monkeypatch.delenv("API_TOKEN", raising=False)
     monkeypatch.delenv("API_SERVER_NAME", raising=False)
+    monkeypatch.delenv("BWCLI_API_URL", raising=False)
+    if api_url:
+        monkeypatch.setenv("BWCLI_API_URL", api_url)
 
     files = {VARIABLES_ENV: variables}
     dirs = {DB_DIR} if instances is not None else set()
@@ -135,6 +138,34 @@ class TestTheDatabasePath:
             ],
         )
         assert _tokens(cli) == ["the-global-one"]
+
+    def test_an_explicit_bwcli_api_url_overrides_database_discovery(self, monkeypatch):
+        cli = _build_cli(
+            monkeypatch,
+            variables="API_TOKEN=the-global-one\nAPI_SERVER_NAME=control.example\n",
+            instances=[{"hostname": "10.0.0.1", "port": 5000, "server_name": "bwapi"}],
+            api_url="https://bw-api.example:5443",
+        )
+        assert [api.endpoint for api in cli.apis] == ["https://bw-api.example:5443/"]
+        assert [api.host for api in cli.apis] == ["control.example"]
+        assert _tokens(cli) == ["the-global-one"]
+
+    def test_a_database_value_cannot_silently_disable_instance_discovery(self, monkeypatch):
+        cli = _build_cli(
+            monkeypatch,
+            variables="API_TOKEN=the-global-one\nBWCLI_API_URL=https://stale.example:5443\n",
+            instances=[{"hostname": "10.0.0.1", "port": 5000, "server_name": "bwapi"}],
+        )
+        assert [api.endpoint for api in cli.apis] == ["http://10.0.0.1:5000/"]
+
+    def test_a_whitespace_environment_value_does_not_override_instance_discovery(self, monkeypatch):
+        cli = _build_cli(
+            monkeypatch,
+            variables="API_TOKEN=the-global-one\n",
+            instances=[{"hostname": "10.0.0.1", "port": 5000, "server_name": "bwapi"}],
+            api_url="   ",
+        )
+        assert [api.endpoint for api in cli.apis] == ["http://10.0.0.1:5000/"]
 
 
 def test_the_environment_is_still_honoured_when_it_does_exist():

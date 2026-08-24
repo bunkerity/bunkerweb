@@ -2,11 +2,14 @@
 
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
-from json import JSONDecodeError, loads
+from importlib.util import find_spec
+from json import JSONDecodeError, dumps, loads
 from operator import itemgetter
-from os import environ, get_terminal_size, getenv, sep
+from os import W_OK, access, environ, get_terminal_size, getenv, sep
 from os.path import join
 from pathlib import Path
+from shutil import which
+from socket import create_connection
 from subprocess import DEVNULL, STDOUT, run
 from sys import argv as sys_argv, path as sys_path
 from traceback import format_exc
@@ -20,7 +23,86 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from logger import getLogger  # type: ignore
 
-from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
+from common_utils import get_redis_client, handle_docker_secrets, parse_host  # type: ignore
+
+
+def is_mounted(path, mountinfo=Path("/proc/self/mountinfo")) -> bool:
+    """Detect ordinary and bind mounts; pathlib alone misses same-device binds."""
+    target = Path(path).resolve()
+    with suppress(IndexError, OSError):
+        for line in mountinfo.read_text(encoding="utf-8").splitlines():
+            mount_point = line.split(" - ", 1)[0].split()[4]
+            for escaped, value in (("\\040", " "), ("\\011", "\t"), ("\\012", "\n"), ("\\134", "\\")):
+                mount_point = mount_point.replace(escaped, value)
+            if Path(mount_point) == target:
+                return True
+    return target.is_mount()
+
+
+def backup_preflight(backup_directory=None) -> Tuple[bool, str]:
+    """Require an explicit writable backup mount in the dedicated image."""
+    if getenv("BWCLI_REQUIRE_BACKUP_MOUNT", "no").lower() != "yes":
+        return True, ""
+
+    backup_path = Path(backup_directory or getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+    if not backup_path.is_dir():
+        return False, f"Backup directory {backup_path} does not exist"
+    if not is_mounted(backup_path):
+        return False, f"Backup directory {backup_path} is not mounted"
+    if not access(backup_path, W_OK):
+        return False, f"Backup directory {backup_path} is not writable"
+    return True, ""
+
+
+def detect_capabilities() -> dict:
+    """Return the non-secret runtime capabilities needed by bwcli commands."""
+    api_url = getenv("BWCLI_API_URL", "").strip()
+    api_reachable = False
+    if api_url:
+        with suppress(OSError, TypeError, ValueError):
+            _, api_host, api_port = parse_host(API.build_endpoint(api_url))
+            timeout = max(0.1, float(getenv("BWCLI_TIMEOUT", "2")))
+            with create_connection((api_host, api_port), timeout=timeout):
+                api_reachable = True
+
+    has_pymysql = find_spec("pymysql") is not None
+    mysql_dump = which("mariadb-dump") or which("mysqldump")
+    mysql_restore = which("mariadb") or which("mysql")
+    backup_path = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+    return {
+        "api": {"configured": bool(api_url), "reachable": api_reachable},
+        "database": {
+            "sqlite": {"driver": find_spec("sqlite3") is not None, "dump": bool(which("sqlite3")), "restore": bool(which("sqlite3"))},
+            "mysql": {"driver": has_pymysql, "dump": bool(mysql_dump), "restore": bool(mysql_restore)},
+            "mariadb": {"driver": has_pymysql, "dump": bool(mysql_dump), "restore": bool(mysql_restore)},
+            "postgresql": {"driver": find_spec("psycopg") is not None, "dump": bool(which("pg_dump")), "restore": bool(which("psql"))},
+        },
+        "backup": {"path": str(backup_path), "mounted": is_mounted(backup_path), "writable": backup_path.is_dir() and access(backup_path, W_OK)},
+    }
+
+
+def render_capabilities(capabilities: Optional[dict] = None) -> str:
+    capabilities = capabilities or detect_capabilities()
+    if getenv("BWCLI_OUTPUT", "table").lower() == "json":
+        return dumps(capabilities, sort_keys=True)
+
+    lines = [
+        f"API configured: {'yes' if capabilities['api']['configured'] else 'no'}",
+        f"API reachable: {'yes' if capabilities['api']['reachable'] else 'no'}",
+    ]
+    for engine, status in capabilities["database"].items():
+        lines.append(
+            f"{engine}: driver={'yes' if status['driver'] else 'no'}, dump={'yes' if status['dump'] else 'no'}, restore={'yes' if status['restore'] else 'no'}"
+        )
+    backup = capabilities["backup"]
+    lines.extend(
+        (
+            f"Backup path: {backup['path']}",
+            f"Backup mounted: {'yes' if backup['mounted'] else 'no'}",
+            f"Backup writable: {'yes' if backup['writable'] else 'no'}",
+        )
+    )
+    return "\n".join(lines)
 
 
 def format_remaining_time(seconds):
@@ -147,8 +229,11 @@ class CLI(ApiCaller):
         # credential (`instance.get("credential") or token`), so an instance that carries its
         # own keeps using it.
         api_token = self.__get_variable("API_TOKEN") or None
+        api_url = (getenv("BWCLI_API_URL") or "").strip() or None
 
-        if self.__db:
+        if api_url:
+            self.apis.append(API.from_url_or_parts(api_url, server_name=self.__get_variable("API_SERVER_NAME", "bwapi") or "bwapi", token=api_token))
+        elif self.__db:
             for db_instance in self.__db.get_instances(with_credential=True):
                 try:
                     # Centralized builder handles scheme/port/host

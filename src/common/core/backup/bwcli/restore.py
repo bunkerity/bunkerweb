@@ -2,7 +2,8 @@
 
 from argparse import ArgumentParser
 from datetime import datetime
-from os.path import join, sep
+from os import getenv, sep
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 
@@ -49,9 +50,9 @@ try:
 
     LOGGER.info("Backing up the current database before restoring the backup ...")
     current_time = datetime.now().astimezone()
-    tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
-    tmp_backup_dir.mkdir(parents=True, exist_ok=True)
-    db, _ = backup_database(current_time, backup_dir=tmp_backup_dir)
+    safety_backup_dir = Path(getenv("BWCLI_RESTORE_SAFETY_DIRECTORY", join(sep, "tmp", "bunkerweb", "backups")))
+    safety_backup_dir.mkdir(parents=True, exist_ok=True)
+    db, _ = backup_database(current_time, backup_dir=safety_backup_dir)
 
     LOGGER.info(f"Restoring backup {backup_file} ...")
     restore_database(backup_file, db)

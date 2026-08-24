@@ -1800,6 +1800,33 @@ volumes:
     sudo chmod -R 770 bw-data
     ```
 
+### Local bwcli image
+
+The source tree includes a dedicated `bwcli` target for development and operational testing. It
+is not published yet; build it locally and use the profile-gated example in `misc/dev`:
+
+```shell
+cd misc/dev
+docker compose -f docker-compose.bwcli.yml --profile tools build bwcli
+docker compose -f docker-compose.bwcli.yml --profile tools run --rm bwcli capabilities
+```
+
+`bwcli capabilities` checks whether the configured API endpoint is reachable, whether the Python
+drivers and dump/restore clients for SQLite, MySQL, MariaDB and PostgreSQL are present, and whether
+the backup path is an explicit writable mount. The dedicated image also persists the safety dump
+created before a restore inside the required backup mount.
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `BWCLI_API_URL` | Explicit API hostname or HTTP(S) endpoint; environment-only so a stale DB value cannot override instance discovery | unset |
+| `BWCLI_TIMEOUT` | TCP capability-probe timeout in seconds | `2` |
+| `BWCLI_OUTPUT` | Capability output format | `table` (`json` is also accepted) |
+| `BWCLI_RESTORE_SAFETY_DIRECTORY` | Directory for the pre-restore safety dump | `/var/lib/bunkerweb/backups/restore-safety` in the dedicated image |
+
+The image internally requires `/var/lib/bunkerweb/backups` to be mounted and writable before any
+backup command opens the database. `bwcli plugin backup save` accepts the long
+`--directory PATH` form; `-d` remains the plugin command's debug flag.
+
 ### Scheduler container settings
 
 The scheduler is the control-plane worker that reads settings, renders configs, and pushes them to BunkerWeb instances. Settings are centralized here with defaults and accepted values.

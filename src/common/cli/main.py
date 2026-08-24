@@ -11,7 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from logger import getLogger  # type: ignore
-from CLI import CLI
+from CLI import CLI, backup_preflight, render_capabilities
 
 if __name__ == "__main__":
     logger = getLogger("CLI")
@@ -60,6 +60,9 @@ if __name__ == "__main__":
         # Plugin list subparser
         parser_plugin_list = subparsers.add_parser("plugin_list", help="list all available plugins and their commands")
 
+        # Capabilities subparser
+        subparsers.add_parser("capabilities", help="show detected API, database client and backup volume capabilities")
+
         # Plugin subparser
         parser_plugin = subparsers.add_parser("plugin", help="execute a custom command from a plugin")
         parser_plugin.add_argument("plugin_id", type=str, help="the plugin id that you want to execute the command on")
@@ -71,6 +74,21 @@ if __name__ == "__main__":
 
         logger.debug(f"args : {args}")
         logger.debug(f"unknown_args : {unknown_args}")
+
+        if args.command == "capabilities":
+            print(render_capabilities())
+            sys_exit(0)
+
+        if args.command == "plugin" and args.plugin_id == "backup" and args.plugin_command in ("list", "save", "restore"):
+            backup_directory = None
+            if args.plugin_command == "save":
+                backup_parser = ArgumentParser(add_help=False)
+                backup_parser.add_argument("--directory", default=None)
+                backup_directory = backup_parser.parse_known_args(unknown_args)[0].directory
+            ok, error = backup_preflight(backup_directory)
+            if not ok:
+                logger.error(error)
+                sys_exit(1)
 
         # Instantiate CLI
         cli = CLI()

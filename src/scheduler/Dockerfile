@@ -40,6 +40,41 @@ COPY src/common/cli cli
 COPY src/common/db db
 COPY src/common/gen gen
 
+FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4 AS bwcli
+
+# Reuse the Scheduler dependency build; only the direct CLI runtime is added here.
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends bash ca-certificates libpq5 libmariadb3 sqlite3 mariadb-client postgresql-client tzdata && \
+  rm -rf /var/lib/apt/lists/* && \
+  groupadd -g 101 bwcli && \
+  useradd -u 101 -g bwcli -d /usr/share/bunkerweb/cli -s /usr/sbin/nologin -M bwcli
+
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
+
+RUN cp helpers/bwcli /usr/bin/ && \
+  echo "Docker" > INTEGRATION && \
+  mkdir -p /etc/bunkerweb/plugins /etc/bunkerweb/pro/plugins /var/lib/bunkerweb/backups /var/tmp/bunkerweb && \
+  chown -R root:bwcli INTEGRATION /etc/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
+  chmod 550 /usr/bin/bwcli && \
+  chmod 770 /var/lib/bunkerweb /var/lib/bunkerweb/backups /var/tmp/bunkerweb
+
+LABEL maintainer="Bunkerity <contact@bunkerity.com>"
+LABEL version="1.7.0~beta"
+LABEL url="https://www.bunkerweb.io"
+LABEL bunkerweb.type="bwcli"
+
+VOLUME ["/var/lib/bunkerweb", "/var/tmp/bunkerweb", "/tmp"]
+
+USER bwcli:bwcli
+
+ENV PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/utils:/usr/share/bunkerweb/api:/usr/share/bunkerweb/db
+ENV BWCLI_REQUIRE_BACKUP_MOUNT=yes
+ENV BWCLI_RESTORE_SAFETY_DIRECTORY=/var/lib/bunkerweb/backups/restore-safety
+
+ENTRYPOINT ["bwcli"]
+
 FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
