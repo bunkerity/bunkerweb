@@ -8,7 +8,7 @@ from pathlib import Path
 from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
-from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
+from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, split_templates, trim_scalar_value  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -212,6 +212,39 @@ class Config:
             else:
                 variables.pop(key, None)
 
+        # Lazily fetched, and only when a USE_TEMPLATE edit is actually being checked, so an
+        # ordinary save costs no extra API call. `False` = probed and unavailable, which is
+        # distinct from `None` = not probed yet.
+        known_templates: Union[Set[str], bool, None] = None
+
+        def unknown_template_layers(raw: str) -> List[str]:
+            """``['"typo" at position 2']`` for every layer of a USE_TEMPLATE value that does not exist.
+
+            USE_TEMPLATE is an ORDERED LIST and its regex is ``^.*$`` (the ids are user-created),
+            so a typo clears the lexical gate below and is only noticed at generation time, where
+            it silently drops ONE LAYER OF N. Mirrors Database.unknown_template_layers, which the
+            API routers use -- the UI reaches the same fact through the API instead, having no DB
+            access of its own.
+
+            Positions enumerate the DECLARED list rather than using ``.index()``, so a repeated
+            unknown id is not blamed on its first occurrence twice.
+            """
+            nonlocal known_templates
+            layers = split_templates(raw)
+            if not layers:
+                return []
+            if known_templates is None:
+                try:
+                    known_templates = set(self.__api_client.get_templates() or {})
+                except (ApiClientError, ApiUnavailableError):
+                    # Cannot prove a layer is unknown, so do not reject: a false rejection
+                    # reverts a legitimate edit, while a missed one is still reported per
+                    # position at generation time.
+                    known_templates = False
+            if known_templates is False:
+                return []
+            return [f'"{layer}" at position {position}' for position, layer in enumerate(layers, start=1) if layer not in known_templates]
+
         # Iterate over a copy of the items to safely modify the dictionary.
         for key, value in to_check.items():
             # Remove blacklisted variables.
@@ -276,6 +309,18 @@ class Config:
                     value = normalize_select_value(
                         value, options, multi=True, separator=separator, case_insensitive=plugins_settings[setting].get("case_insensitive", False)
                     )
+            # Referential check, after canonicalization so the layers are already split cleanly.
+            # `reject_value`, never `pop`: dropping USE_TEMPLATE deletes the row and DETACHES
+            # every template from the service (save_scope.py documents why it is in restore_skip)
+            # -- far worse than the typo being rejected. Reverting to the stored value is what a
+            # refused edit should do, and report_error has already said why.
+            if key == "USE_TEMPLATE":
+                unknown = unknown_template_layers(value)
+                if unknown:
+                    report_error(f"Variable {key} names unknown template(s): {', '.join(unknown)}, ignoring the change.")
+                    reject_value(key)
+                    continue
+
             if key in variables:
                 variables[key] = value
 

@@ -39,6 +39,16 @@
     {% set service_templates = templates | default({}) %}
     {% set template_entry = (config | default({})).get("USE_TEMPLATE") or {} %}
     {% set service_template = template_entry.get("value", "") %}
+    {# USE_TEMPLATE is an ORDERED LIST (multivalue, separator " "): layers apply left to right
+       and a later one overrides an earlier one.
+
+       `.split(" ") | reject("equalto", "")` and NOT Jinja's bare `.split()`: the storage
+       contract (common_utils.normalize_list_value / split_templates) only ever treats the
+       literal separator as a break, so a tab is part of a (bogus) template id rather than a
+       separator between two. Spelled inline rather than pulled from a Jinja global because this
+       partial is rendered by more than one environment (tests/unit/ui/test_ui_service_resources.py
+       builds its own), and a missing global is an UndefinedError, not a fallback. #}
+    {% set service_template_ids = service_template.split(" ") | reject("equalto", "") | list %}
     {# Same gate the rest of the page applies to a non-UI-authored setting: offering a picker
        whose value the save layer will not honour is worse than offering none.
        `allow_default=True` is load-bearing -- a service with no template still has a
@@ -60,34 +70,93 @@
                              >{{ _("service.resources.template.pending") }}</span>
                     </div>
                     {% if template_locked %}
-                        <div class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
-                             data-family="template">
-                            <span class="text-truncate">{{ (service_templates.get(service_template) or {}).get("name") or service_template or "" }}</span>
-                        </div>
-                        {% if not service_template %}
+                        {% for tpl in service_template_ids %}
+                            <div class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+                                 data-family="template">
+                                <span class="text-truncate">{{ (service_templates.get(tpl) or {}).get("name") or tpl }}</span>
+                                {% if service_template_ids | length > 1 %}
+                                    <span class="badge bg-secondary ms-2">{{ loop.index }}</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        {% if not service_template_ids %}
                             <div class="text-muted small">{{ _("service.resources.none") }}</div>
                         {% endif %}
                     {% else %}
-                        {# No `name` on purpose -- see the header. `data-current` is the stored value,
-                           so the JS can tell a real switch from a pick that lands back on it. #}
-                        <select class="form-select form-select-sm"
-                                id="service-template-picker"
-                                data-current="{{ service_template }}"
-                                aria-describedby="service-template-note">
-                            <option value="" {% if not service_template %}selected{% endif %}
-                                   >{{ _("service.resources.template.none") }}</option>
-                            {# `ui` is the internal template the UI writes its own configs under, the
-                               same one the deleted easy pane filtered out of its own picker. #}
-                            {% for tpl, tpl_data in service_templates.items() if tpl != "ui" %}
-                                <option value="{{ tpl }}" {% if tpl == service_template %}selected{% endif %}>{{ tpl_data.get("name") or tpl }}</option>
-                            {% endfor %}
-                            {% if service_template and (service_template not in service_templates or service_template == "ui") %}
-                                {# A stored template that is not in the list would otherwise leave the
-                                   FIRST option selected, so the picker would misreport the service as
-                                   templateless. Carry it, exactly as the compose shelf's picker does. #}
-                                <option value="{{ service_template }}" selected>{{ service_template }}</option>
-                            {% endif %}
-                        </select>
+                        {# ORDERED LAYER PICKER. Nothing here carries a `name` -- see the header:
+                           the ONE input[name="USE_TEMPLATE"] the page emits is the compose
+                           shelf's, and service-resources.js writes the space-joined list into it.
+                           The server still renders the stored order below, so with JS broken the
+                           hidden input keeps the stored value verbatim and NO layer is dropped.
+
+                           `data-current` is the stored value, so the JS can tell a real change
+                           from an edit that lands back on it. `data-overlaps` is the symmetric
+                           pair-overlap matrix (routes/services.py:template_overlaps) the JS uses
+                           to warn that a layer will be partly overridden by a later one -- before
+                           the save, not after it. #}
+                        <div id="service-template-layers"
+                             data-current="{{ service_template }}"
+                             {# SINGLE-quoted, and it must stay that way: Jinja's `tojson` escapes
+                                `<>&'` but NOT `"`, because it is designed for exactly this
+                                single-quoted-attribute placement. In a double-quoted attribute the
+                                first `"` of the JSON closes it, the browser parses `data-overlaps`
+                                as `{`, JSON.parse throws, service-resources.js swallows it, and the
+                                whole overlap preview silently never renders. #}
+                             data-overlaps='{{ (template_overlaps | default({})) | tojson }}'>
+                            {# Rendered SERVER-SIDE in stored order, then taken over by the JS.
+                               With JS broken the chips still show the real layers and the hidden
+                               input still holds the stored value verbatim, so nothing is lost and
+                               nothing is silently dropped -- the buttons simply do nothing. #}
+                            <ul class="list-unstyled mb-2" id="service-template-layer-list">
+                                {% for tpl in service_template_ids %}
+                                    <li class="resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1"
+                                        data-id="{{ tpl }}">
+                                        <span class="text-truncate">{{ (service_templates.get(tpl) or {}).get("name") or tpl }}</span>
+                                        <span class="d-flex align-items-center gap-1 ms-2">
+                                            <span class="badge bg-secondary layer-position">{{ loop.index }}</span>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link p-0 layer-up"
+                                                    aria-label="{{ _("service.resources.template.move_up") }}"
+                                                    {% if loop.first %}disabled{% endif %}>
+                                                <i class="bx bx-up-arrow-alt" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link p-0 layer-down"
+                                                    aria-label="{{ _("service.resources.template.move_down") }}"
+                                                    {% if loop.last %}disabled{% endif %}>
+                                                <i class="bx bx-down-arrow-alt" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-link p-0 text-danger layer-remove"
+                                                    aria-label="{{ _("service.resources.template.remove") }}">
+                                                <i class="bx bx-x" aria-hidden="true"></i>
+                                            </button>
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="text-muted small mb-2 {% if service_template_ids %}d-none{% endif %}"
+                                 id="service-template-empty"
+                                >{{ _("service.resources.none") }}</div>
+                            <div class="input-group input-group-sm">
+                                {# `ui` is the internal template the UI writes its own configs
+                                   under, the same one the deleted easy pane filtered out of its
+                                   own picker. A STORED `ui` layer still renders as a chip above
+                                   (the list comes from the stored value, not from this catalog),
+                                   it just cannot be ADDED from here. #}
+                                <select class="form-select"
+                                        id="service-template-picker"
+                                        aria-label="{{ _("service.resources.template.add_label") }}">
+                                    {% for tpl, tpl_data in service_templates.items() if tpl != "ui" %}
+                                        <option value="{{ tpl }}">{{ tpl_data.get("name") or tpl }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="service-template-add"
+                                       >{{ _("service.resources.template.add") }}</button>
+                            </div>
+                        </div>
                     {% endif %}
                     <div class="form-text small"
                          id="service-template-note"

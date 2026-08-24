@@ -20,6 +20,8 @@ from model import (  # type: ignore
     Template_settings,
 )
 
+from common_utils import merge_template_settings, split_templates  # type: ignore
+
 from location_claims import LOCATION_FAMILIES, inline_location_conflict  # type: ignore
 from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
@@ -194,7 +196,7 @@ def _canonicalize_stored_value(
     return value if canonical is None else canonical
 
 
-def _compute_anchored_slots(ctx: "_SaveConfigContext", cfg: Dict[str, str], cfg_template: str, suffix_rx) -> set:
+def _compute_anchored_slots(ctx: "_SaveConfigContext", cfg: Dict[str, str], template_settings: Dict[Tuple[str, int], Any], suffix_rx) -> set:
     """Multiple-group slots kept alive by a member the user actually set.
 
     A slot ``(group, suffix>=1)`` is *anchored* when at least one of its members in the incoming
@@ -217,7 +219,10 @@ def _compute_anchored_slots(ctx: "_SaveConfigContext", cfg: Dict[str, str], cfg_
         anchor_setting = ctx.settings_dict.get(anchor_base)
         if not anchor_setting or not anchor_setting.get("multiple"):
             continue
-        anchor_default = ctx.templates.get(cfg_template, {}).get((anchor_base, anchor_suffix)) if cfg_template else None
+        # ``template_settings`` is the service's layers already folded last-wins, so the
+        # anchor is compared against the value that will actually be in effect. Resolving one
+        # layer here would call a member "non-default" against a default a later layer overrides.
+        anchor_default = template_settings.get((anchor_base, anchor_suffix))
         if anchor_default is None:
             anchor_default = anchor_setting["default"]
         if anchor_value != anchor_default:
@@ -225,19 +230,25 @@ def _compute_anchored_slots(ctx: "_SaveConfigContext", cfg: Dict[str, str], cfg_
     return anchored
 
 
-def _compute_template_slots(ctx: "_SaveConfigContext", cfg_template: str) -> set:
+def _compute_template_slots(ctx: "_SaveConfigContext", template_ids: List[str]) -> set:
     """Slots kept alive by a template that defines any member at that suffix.
 
     ``get_config`` rebuilds such a slot from ``Template_settings`` with no row of its own, so its
     default members must not be persisted either. Keyed per ``(group, suffix)`` so the partial case
     works too: a template's ``HOST_1`` keeps its sibling ``TIMEOUT_1``'s slot alive.
+
+    UNION across the service's layers, not a last-wins fold: liveness is "does ANY layer define
+    any member at this suffix". A fold would answer with the last layer only, so a slot supplied
+    by an earlier layer would be treated as dead and its default members persisted as real rows
+    -- which disables the field in the Web UI even though nobody ever typed in it.
     """
     slots = set()
-    for member_id, member_suffix in ctx.templates.get(cfg_template, {}):
-        if member_suffix and member_suffix > 0:
-            member_setting = ctx.settings_dict.get(member_id)
-            if member_setting and member_setting.get("multiple"):
-                slots.add((member_setting["multiple"], member_suffix))
+    for template_id in template_ids:
+        for member_id, member_suffix in ctx.templates.get(template_id) or {}:
+            if member_suffix and member_suffix > 0:
+                member_setting = ctx.settings_dict.get(member_id)
+                if member_setting and member_setting.get("multiple"):
+                    slots.add((member_setting["multiple"], member_suffix))
     return slots
 
 
@@ -1177,8 +1188,13 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         local_changed_services = False
         local_service_template_change = False
 
+        # USE_TEMPLATE is an ORDERED LIST; fold it once per service instead of per key.
         service_template = service_config.get("USE_TEMPLATE", ctx.template)
-        alive_slots = _compute_anchored_slots(ctx, service_config, service_template, self.SUFFIX_RX) | _compute_template_slots(ctx, service_template)
+        service_template_ids = split_templates(service_template)
+        service_template_settings = merge_template_settings(ctx.templates, service_template_ids)
+        alive_slots = _compute_anchored_slots(ctx, service_config, service_template_settings, self.SUFFIX_RX) | _compute_template_slots(
+            ctx, service_template_ids
+        )
 
         for original_key, value in service_config.items():
             suffix = 0
@@ -1238,7 +1254,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             template_setting_default = None
             if service_template:
-                template_setting_default = ctx.templates.get(service_template, {}).get((key, suffix))
+                # The merged (last-wins) default, so "value equals its default -> no row" is
+                # decided against the value the overlay will actually serve back.
+                template_setting_default = service_template_settings.get((key, suffix))
                 local_service_template_change = True
 
             is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)
@@ -1362,7 +1380,9 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         local_changed_plugins = set()
         local_service_template_change = False
 
-        alive_slots = _compute_anchored_slots(ctx, global_config, ctx.template, self.SUFFIX_RX) | _compute_template_slots(ctx, ctx.template)
+        global_template_ids = split_templates(ctx.template)
+        global_template_settings = merge_template_settings(ctx.templates, global_template_ids)
+        alive_slots = _compute_anchored_slots(ctx, global_config, global_template_settings, self.SUFFIX_RX) | _compute_template_slots(ctx, global_template_ids)
 
         for original_key, value in global_config.items():
             suffix = 0
@@ -1405,7 +1425,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
             template_setting_default = None
             if ctx.template:
-                template_setting_default = ctx.templates.get(ctx.template, {}).get((key, suffix))
+                template_setting_default = global_template_settings.get((key, suffix))
                 local_service_template_change = True
 
             is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)

@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from model import Custom_configs, Metadata, Services, Template_custom_configs  # type: ignore
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, split_templates  # type: ignore
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -232,32 +232,43 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                 if not template:
                     continue
 
-                if template not in template_configs:
-                    template_configs[template] = session.execute(
-                        select(*template_entities).filter_by(template_id=template).order_by(Template_custom_configs.order)
-                    ).all()
+                # REVERSED, and this is the one place last-wins is not free. Shadowing here runs
+                # through `provided`: the FIRST layer to claim a (service, type, name) keeps it
+                # and every later one is skipped — first-wins, the opposite of the settings
+                # overlay (config_read.py:318-400), which lets a later layer overwrite because
+                # the earlier value carries method "default". Walking the layers backwards makes
+                # the LAST declared layer claim the key first, so both artefacts agree on
+                # last-wins. Real `bw_custom_configs` rows are unaffected: `provided` is
+                # pre-seeded from them above, so they still shadow every layer.
+                for template_id in reversed(split_templates(template)):
+                    if template_id not in template_configs:
+                        template_configs[template_id] = session.execute(
+                            select(*template_entities).filter_by(template_id=template_id).order_by(Template_custom_configs.order)
+                        ).all()
 
-                for template_config in template_configs[template]:
-                    config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
-                    # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
-                    # normalize both sides so an overriding row correctly suppresses the template-provided config.
-                    key = (service_id, config_type.replace("-", "_"), template_config.name)
-                    if key in provided:
-                        continue
+                    for template_config in template_configs[template_id]:
+                        config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
+                        # Real custom_configs rows use the underscore enum form while config_type is hyphenated here;
+                        # normalize both sides so an overriding row correctly suppresses the template-provided config.
+                        key = (service_id, config_type.replace("-", "_"), template_config.name)
+                        if key in provided:
+                            continue
 
-                    custom_config = {
-                        "service_id": service_id,
-                        "type": config_type,
-                        "name": template_config.name,
-                        "checksum": template_config.checksum,
-                        "method": "default",
-                        "template": template,
-                        "is_draft": False,
-                    }
-                    if with_data:
-                        custom_config["data"] = template_config.data
-                    custom_configs.append(custom_config)
-                    provided.add(key)
+                        custom_config = {
+                            "service_id": service_id,
+                            "type": config_type,
+                            "name": template_config.name,
+                            "checksum": template_config.checksum,
+                            "method": "default",
+                            # The owning LAYER, never the whole list — the UI's editability
+                            # check (routes/services.py) membership-tests this against the list.
+                            "template": template_id,
+                            "is_draft": False,
+                        }
+                        if with_data:
+                            custom_config["data"] = template_config.data
+                        custom_configs.append(custom_config)
+                        provided.add(key)
 
             if as_dict:
                 dict_custom_configs = {}
@@ -288,12 +299,12 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
         if not db_config:
             if service_id:
                 service_config = self.get_non_default_settings(with_drafts=True, filtered_settings=("USE_TEMPLATE",))
-                if service_config.get(f"{service_id}_USE_TEMPLATE"):
+                # Reversed for the same reason as get_custom_configs: the LAST declared layer
+                # that provides this config is the one in effect. First match wins the scan.
+                for template_id in reversed(split_templates(service_config.get(f"{service_id}_USE_TEMPLATE"))):
                     with self._db_session() as session:
                         template_config = session.scalars(
-                            select(Template_custom_configs)
-                            .filter_by(template_id=service_config.get(f"{service_id}_USE_TEMPLATE"), type=config_type, name=name)
-                            .limit(1)
+                            select(Template_custom_configs).filter_by(template_id=template_id, type=config_type, name=name).limit(1)
                         ).first()
                         if template_config:
                             custom_config = {
@@ -302,7 +313,7 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                                 "name": name,
                                 "checksum": template_config.checksum,
                                 "method": "default",
-                                "template": service_config.get(f"{service_id}_USE_TEMPLATE"),
+                                "template": template_id,
                                 "is_draft": False,
                             }
                             if with_data:

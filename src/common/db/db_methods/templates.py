@@ -17,7 +17,7 @@ from model import (
     Templates,
 )  # type: ignore
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, merge_template_settings, split_templates  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
 
 from sqlalchemy import case, delete, select, update
@@ -203,20 +203,72 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             }
 
     def get_template_settings(self, template_id: str) -> Dict[str, Any]:
-        """Get templates settings."""
+        """Merged settings of one or several templates.
+
+        ``template_id`` is a raw ``USE_TEMPLATE`` value, so it may name several templates
+        separated with spaces. They are applied in order and a later one overrides an earlier
+        one (last-wins); a single id behaves exactly as it always did. Unknown ids contribute
+        nothing -- use ``resolve_template_settings`` when you need to know about them.
+        """
+        return self.resolve_template_settings(template_id)[0]
+
+    def resolve_template_settings(self, template_id: str) -> Tuple[Dict[str, Any], List[str]]:
+        """``(merged_settings, unknown_ids)`` for a raw ``USE_TEMPLATE`` value.
+
+        The unknown half exists because ``{}`` is ambiguous: a template that defines no
+        settings and a template that does not exist return the same thing. With a single id a
+        typo just meant "no template"; with a list it silently drops one layer out of N, so the
+        callers that can report it (generation, the UI save, the API) need to be able to tell
+        the two apart. Order in ``unknown_ids`` follows the declared order, so a caller can
+        report the offending position.
+        """
+        template_ids = split_templates(template_id)
+        if not template_ids:
+            return {}, []
+
         with self._db_session() as session:
-            settings = {}
+            # One query for every layer, then folded in DECLARED order below -- the query's own
+            # row order groups by nothing in particular and must not be relied on for precedence.
+            per_template: Dict[str, Dict[str, Any]] = {}
             for setting in session.execute(
                 select(
+                    Template_settings.template_id,
                     Template_settings.setting_id,
                     Template_settings.default,
                     Template_settings.suffix,
                 )
-                .filter_by(template_id=template_id)
+                .filter(Template_settings.template_id.in_(set(template_ids)))
                 .order_by(Template_settings.order)
             ):
-                settings[f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id] = self._empty_if_none(setting.default)
-            return settings
+                key = f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
+                per_template.setdefault(setting.template_id, {})[key] = self._empty_if_none(setting.default)
+
+            # A template row with no settings is still a KNOWN template: probe the table itself
+            # rather than inferring existence from `per_template`, or an empty template would be
+            # reported as a typo.
+            known = {row.id for row in session.execute(select(Templates.id).filter(Templates.id.in_(set(template_ids))))}
+
+        unknown = [template_id_ for template_id_ in template_ids if template_id_ not in known]
+        return merge_template_settings(per_template, template_ids), unknown
+
+    def unknown_template_layers(self, template_id: str) -> List[Tuple[int, str]]:
+        """``[(1-based position, id)]`` for every layer of a ``USE_TEMPLATE`` value that does not exist.
+
+        The save-path counterpart of the generator's warning. ``USE_TEMPLATE``'s regex is
+        ``^.*$`` -- it has to be, the ids are user-created -- so a typo clears every lexical gate
+        and is only noticed at generation time, where it silently drops ONE LAYER OF N. Callers
+        that validate a submitted payload (the API routers) refuse it instead, naming the id and
+        its position; generation still warns and continues, because refusing to generate over a
+        typo would take a fleet down.
+
+        Positions come from enumerating the DECLARED list, never ``list.index()``: a repeated
+        unknown id would otherwise be blamed on its first occurrence twice.
+        """
+        template_ids = split_templates(template_id)
+        if not template_ids:
+            return []
+        unknown = set(self.resolve_template_settings(template_id)[1])
+        return [(position, layer) for position, layer in enumerate(template_ids, start=1) if layer in unknown]
 
     def _prepare_template_entities(
         self,
@@ -675,12 +727,17 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
             if template is None:
                 return "Template not found"
 
-            global_reference = session.execute(select(Global_values.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).limit(1)).first()
-            if global_reference:
+            # Membership, not equality: USE_TEMPLATE holds an ORDERED LIST, so a service on
+            # "low high" does not match the literal "low" and the guard would wave the delete
+            # through, leaving a dangling layer that then resolves as an unknown id at every
+            # generation. Filtered in Python rather than SQL on purpose -- a token match in SQL
+            # means LIKE '% x %' with separator padding, which is a portability footgun across
+            # the four supported engines and matches substrings of longer ids. The row set is
+            # bounded by the service count and each value is a short string.
+            if any(template_id in split_templates(row.value) for row in session.execute(select(Global_values.value).filter_by(setting_id="USE_TEMPLATE"))):
                 return "Template is currently used by the global settings"
 
-            service_reference = session.execute(select(Services_settings.id).filter_by(setting_id="USE_TEMPLATE", value=template_id).limit(1)).first()
-            if service_reference:
+            if any(template_id in split_templates(row.value) for row in session.execute(select(Services_settings.value).filter_by(setting_id="USE_TEMPLATE"))):
                 return "Template is currently used by a service"
 
             session.delete(template)

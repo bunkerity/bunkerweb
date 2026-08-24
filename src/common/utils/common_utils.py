@@ -145,6 +145,43 @@ def normalize_list_value(value: Any, separator: str = " ") -> Any:
     return separator.join(item for item in items if item)
 
 
+def split_templates(value: Any, separator: str = " ") -> List[str]:
+    """Ordered template ids behind a ``USE_TEMPLATE`` value.
+
+    ``USE_TEMPLATE`` is a ``multivalue`` setting whose ORDER IS THE PRECEDENCE: layers apply
+    left to right and a later one overrides an earlier one (see ``merge_template_settings``).
+    Empty/``None``/non-string give ``[]``; repeats are kept (the merge is idempotent under
+    repetition, so de-duplicating would only hide what the user actually stored).
+
+    Deliberately agrees with ``normalize_list_value`` on the same input -- the stored form and
+    the split must never disagree, or a value could round-trip into a different layer list than
+    the one that was validated.
+    """
+    if not isinstance(value, str) or not separator:
+        return []
+    return [item for item in (raw.strip() for raw in value.split(separator)) if item]
+
+
+def merge_template_settings(templates: Dict[str, Dict[Any, Any]], template_ids: List[str]) -> Dict[Any, Any]:
+    """Fold several templates' settings into one overlay, LAST-WINS.
+
+    ``templates`` maps a template id to its settings; the key shape is the caller's (the DB
+    layer uses ``(setting_id, suffix)``, ``get_template_settings`` uses the suffixed string
+    form) and is never inspected here. Unknown ids are skipped, not fatal: a typo must cost
+    one layer, never a boot (``gen/Configurator.py`` reports them separately).
+
+    A left fold, hence associative -- which is what lets ``config_read``, ``config_save`` and
+    ``Configurator`` each resolve the same list their own way without disagreeing. Returns a
+    new dict and never mutates ``templates``: the per-service merge runs inside a
+    ThreadPoolExecutor (``config_save._sc_process_service``), where mutating the shared map
+    would corrupt every other service in the same save.
+    """
+    merged: Dict[Any, Any] = {}
+    for template_id in template_ids:
+        merged.update(templates.get(template_id) or {})
+    return merged
+
+
 # Setting types where leading/trailing whitespace can be semantically meaningful and
 # therefore MUST NOT be trimmed at ingestion: free-form/regex text, file bodies, and
 # secrets. Every other scalar type (number, select, check, size, duration, lists) is

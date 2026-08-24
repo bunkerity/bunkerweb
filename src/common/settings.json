@@ -23,7 +23,7 @@
     "help": "HTTP port number which bunkerweb binds to. Leave empty to disable HTTP listening.",
     "id": "http-port",
     "label": "HTTP port",
-    "regex": "^\\d*$",
+    "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
     "type": "number",
     "multiple": "listen-http-ports"
   },
@@ -33,7 +33,7 @@
     "help": "HTTPS port number which bunkerweb binds to. Leave empty to disable HTTPS listening.",
     "id": "https-port",
     "label": "HTTPS port",
-    "regex": "^\\d*$",
+    "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
     "type": "number",
     "multiple": "listen-https-ports"
   },
@@ -341,7 +341,7 @@
     "help": "Listening port for non-ssl (passthrough). Leave empty to disable non-SSL stream listening.",
     "id": "listen-stream-port",
     "label": "Listen stream port",
-    "regex": "^[0-9]*$",
+    "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
     "type": "text",
     "multiple": "listen-stream-ports"
   },
@@ -351,7 +351,7 @@
     "help": "Listening port for ssl (passthrough). Leave empty to disable SSL stream listening.",
     "id": "listen-stream-port-ssl",
     "label": "Listen stream port ssl",
-    "regex": "^[0-9]*$",
+    "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
     "type": "text",
     "multiple": "listen-stream-ports-ssl"
   },
@@ -431,11 +431,12 @@
   "USE_TEMPLATE": {
     "context": "multisite",
     "default": "",
-    "help": "Config template to use that will override the default values of specific settings.",
+    "help": "Config templates to apply, separated with spaces, that will override the default values of specific settings. Templates apply in order and a later one overrides an earlier one.",
     "id": "use-template",
     "label": "Use template",
     "regex": "^.*$",
-    "type": "text"
+    "separator": " ",
+    "type": "multivalue"
   },
   "SECURITY_MODE": {
     "context": "multisite",

@@ -23,6 +23,8 @@ own, so callers can adopt this function before they can compute a scope.
 from re import search as re_search
 from typing import Any, Dict, Optional, Set, Tuple
 
+from common_utils import split_templates  # type: ignore
+
 from app.utils import is_editable_method
 
 # The keys a surface must post itself because this module deliberately never restores them
@@ -60,6 +62,38 @@ _SERVICE_CONTROL_KEYS: Tuple[str, ...] = ("SERVER_NAME", "OLD_SERVER_NAME", "IS_
 def control_keys(global_page: bool = False) -> Tuple[str, ...]:
     """The keys this page must post itself, in render order. Empty at global scope -- see above."""
     return () if global_page else _SERVICE_CONTROL_KEYS
+
+
+def templates_unchanged(old_value: Any, new_value: Any) -> bool:
+    """Does this save leave the service's ``USE_TEMPLATE`` LAYER LIST exactly as it was?
+
+    ``USE_TEMPLATE`` is an ordered list, and this is an EXACT ORDERED comparison on purpose --
+    only whitespace is canonicalised, so "low  high" and "low high" (the same overlay) stop
+    reading as a change while "low high" and "high low" (genuinely different overlays) keep
+    reading as one.
+
+    DO NOT relax this into a set/subset test, a "layers were only added, so nothing changed"
+    shortcut, or a per-key ``entry["template"] in new_list`` membership test. The return value
+    drives ``restore_unowned_settings``' guard below, which fires ONLY for keys the overlay
+    synthesised (method "default" + a template id). The load-bearing property of those keys is
+    that **an overlay-synthesised key is always re-derivable from the merged overlay** -- state
+    it that way, not as "the value is always the template's own default": that stronger claim is
+    the one the ``multiple``-group re-materialisation in ``db_methods/config_read.py`` broke by
+    emitting a PLUGIN default under a truthy owning layer. It records ``None`` there now, so both
+    readings hold today, but only re-derivability is what the guard actually needs. Therefore:
+
+    * returning False (drop) loses nothing -- the value is re-derived from the merged overlay on
+      the very next read;
+    * returning True (restore) is a no-op only while the merged default is unchanged. As soon as
+      a newly added layer overrides that key, ``config_save`` resolves ``template_setting_default``
+      against the NEW list, ``_check_value`` returns False, and a real ``method="ui"`` row is
+      written FREEZING the outgoing layer's value -- permanently defeating the layer the user
+      just added, on exactly the add-a-layer gesture multi-template exists for.
+
+    So any change to the list -- add, remove or reorder -- must return False. Blunt is correct
+    here; the clever version is the data-loss path.
+    """
+    return split_templates(old_value) == split_templates(new_value)
 
 
 def _in_scope(setting: str, scope: Set[str]) -> bool:

@@ -97,6 +97,16 @@ def _invalid_variables(variables: Optional[Dict[str, Any]], *, skip: tuple = ())
         ok, err = db.is_valid_setting(key, value="" if value is None else value, multisite=True)
         if not ok:
             invalid.append(f"{key}: {err}")
+            continue
+
+        # USE_TEMPLATE holds an ORDERED LIST of template ids, and its regex is `^.*$` because
+        # the ids are user-created -- so a typo passes every lexical gate above and is only
+        # noticed at generation time, which drops ONE LAYER OF N with a log line nobody reads.
+        # Referential check, same principle as the SERVER_NAME gate below: refuse at the save.
+        if key == "USE_TEMPLATE" and value is not None:
+            unknown = db.unknown_template_layers(str(value))
+            if unknown:
+                invalid.append(f"{key}: " + ", ".join(f'unknown template "{layer}" at position {position}' for position, layer in unknown))
     return invalid
 
 

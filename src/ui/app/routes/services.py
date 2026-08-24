@@ -13,10 +13,18 @@ from flask import Blueprint, Response, jsonify, redirect, render_template, reque
 from flask_login import login_required
 from regex import search, sub
 
+from common_utils import split_templates  # type: ignore
+
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
-from app.models.save_scope import control_keys, restore_unowned_settings
-from app.models.service_attachments import attached_ids, failed_families, get_service_attachments, resource_conflict_context
+from app.models.save_scope import control_keys, restore_unowned_settings, templates_unchanged
+from app.models.service_attachments import (
+    attached_ids,
+    failed_families,
+    get_service_attachments,
+    resource_conflict_context,
+    template_overlap_context,
+)
 
 from app.routes.configs import EXPORT_FORMAT_VERSION, apply_imported_configs, flash_import_results, parse_configs_export
 from app.routes.utils import (
@@ -1149,7 +1157,16 @@ def update_service(
                 new_configs.add(key)
                 db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method, "is_draft": False})
 
-                if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
+                # Membership, not equality: USE_TEMPLATE is an ORDERED LIST while
+                # `db_custom_config["template"]` is the SINGLE layer the config came from
+                # (db_methods/custom_configs.py). Comparing the two whole-value made every
+                # template-provided custom config on a multi-template service unequal, so each
+                # one raised the "created via the default method" error and was skipped.
+                # `None not in []` matches the old `None != ""` for a real row, so one template
+                # and no template both behave exactly as before.
+                if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] not in split_templates(
+                    variables.get("USE_TEMPLATE", "")
+                ):
                     DATA["TO_FLASH"].append(
                         {
                             "content": (
@@ -1229,6 +1246,9 @@ def update_service(
     # vice versa) and quietly start being restored instead of posted.
     restore_skip = get_blacklisted_settings() | set(control_keys())
     if service != "new" and mode != "easy":
+        # USE_TEMPLATE is an ORDERED LIST. The comparison lives in save_scope.templates_unchanged
+        # next to the flag it feeds -- read its docstring before touching it: it is deliberately
+        # an exact ORDERED compare, and every "smarter" variant is the data-loss path.
         old_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
         new_template = variables.get("USE_TEMPLATE", "")
         variables = restore_unowned_settings(
@@ -1236,7 +1256,7 @@ def update_service(
             db_config,
             scope=scope,
             restore_skip=restore_skip,
-            template_unchanged=old_template == new_template,
+            template_unchanged=templates_unchanged(old_template, new_template),
             # The stepper has no multiples cloner -- one input per step-named key
             # (models/template_steps_body.html:115 vs models/plugin_settings_body.html:122) -- so
             # a stored REVERSE_PROXY_HOST_1 is never posted, while save_scope.py:39-40
@@ -1651,6 +1671,10 @@ def services_service_page(service: str):
         # What the attach dialog needs to refuse a conflict before the API does; `db_config` adds
         # the inline half of the location namespace (app/models/service_attachments.py).
         resource_conflicts=resource_conflict_context(attachments, service_id, db_config),
+        # What the LAYER picker needs to preview an override before the save: how many settings
+        # each pair of templates shares. Symmetric, so it covers every order the user can build
+        # client-side (app/models/service_attachments.py explains why counts and not key sets).
+        template_overlaps=template_overlap_context(db_templates),
         plugin_order=core_plugin_order(),
     )
 
@@ -1780,7 +1804,11 @@ def services_template_page(service: str, template: str):
     selected_template = db_config.get("USE_TEMPLATE", {}).get("value", "")
     # models/template_steps_body.html:48 -- a service locked to another template renders the
     # "template in use" notice instead of any field, so the form posts nothing at all.
-    template_editable = is_editable_method(template_method) or not selected_template or template == selected_template
+    # Membership: `selected_template` is an ORDERED LIST. Whole-value equality made every
+    # attached layer's page render the "template in use" notice instead of its fields on any
+    # service whose USE_TEMPLATE row carries a non-editable method (scheduler/autoconf -- i.e.
+    # every env-var- or label-driven install), so the form posted nothing at all.
+    template_editable = is_editable_method(template_method) or not selected_template or template in split_templates(selected_template)
 
     if request.method == "POST":
         if API_CLIENT.readonly:

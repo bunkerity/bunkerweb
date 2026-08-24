@@ -139,6 +139,13 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
         ok, err = db.is_valid_setting(key, value=value)
         if not ok:
             invalid.append(f"{key}: {err}")
+            continue
+        # See routers/services.py:_invalid_variables -- USE_TEMPLATE's regex cannot express
+        # "these ids exist", so an unknown layer is caught referentially or not at all.
+        if key == "USE_TEMPLATE":
+            unknown = db.unknown_template_layers(value)
+            if unknown:
+                invalid.append(f"{key}: " + ", ".join(f'unknown template "{layer}" at position {position}' for position, layer in unknown))
     if invalid:
         return JSONResponse(
             status_code=400,

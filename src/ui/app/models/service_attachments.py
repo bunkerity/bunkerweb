@@ -167,3 +167,31 @@ def resource_conflict_context(
         "stream_upstream": stream_upstream,
         "primary_certificate": primary_certificate,
     }
+
+
+def template_overlap_context(templates: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, int]]:
+    """How many settings each pair of templates has in common, for the layer picker's preview.
+
+    ``USE_TEMPLATE`` is an ordered list and later layers override earlier ones, so the picker
+    has to be able to say "attaching this on top will override N of that one's settings" BEFORE
+    the save. Which side wins depends on the order the user picks, but the SIZE of the overlap
+    does not -- it is symmetric -- so one small symmetric matrix answers every ordering the user
+    can produce client-side. That is why this ships counts per pair instead of the key sets:
+    ~25 integers for the shipped templates rather than several hundred setting names on every
+    service page (see the /services payload work -- this page is already the heaviest one).
+
+    Pairs with no overlap are omitted, so a typical map is small and mostly empty. Built from
+    the templates dict the page already fetched -- no extra query.
+    """
+    keys = {template_id: set((data or {}).get("settings") or {}) for template_id, data in (templates or {}).items()}
+    overlaps: Dict[str, Dict[str, int]] = {}
+    for template_id, own in keys.items():
+        if not own:
+            continue
+        for other_id, other in keys.items():
+            if other_id == template_id or not other:
+                continue
+            shared = len(own & other)
+            if shared:
+                overlaps.setdefault(template_id, {})[other_id] = shared
+    return overlaps

@@ -16,7 +16,19 @@ from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash, create_plugin_tar_gz, normalize_check_value, normalize_list_value, normalize_select_value, trim_scalar_value  # type: ignore
+from common_utils import (  # type: ignore
+    bytes_hash,
+    create_plugin_tar_gz,
+    normalize_check_value,
+    normalize_list_value,
+    normalize_select_value,
+    split_templates,
+    trim_scalar_value,
+)
+# Imported on its own line rather than merged into the block above: this module's port report
+# is the only consumer, and keeping it separate keeps the two concerns reviewable apart.
+from common_utils import get_integration  # type: ignore
+from ports import check_ports, reserved_ports, services_from_config  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -288,11 +300,11 @@ class Configurator:
             self.__logger.error("No core plugins found, exiting")
             exit(1)
 
-        # Extract template overridden settings
+        # Extract template overridden settings. USE_TEMPLATE is an ORDERED LIST: layers apply
+        # left to right, a later one overrides an earlier one.
         template_settings = {}
         if template and db:
-            self.__logger.info(f"Using template {template}")
-            template_settings = db.get_template_settings(template)
+            template_settings = self.__resolve_template_settings(db, template, "the global settings")
 
         for settings in default_settings:
             for setting, data in settings.items():
@@ -332,8 +344,11 @@ class Configurator:
 
                 service_template = config.get(f"{server_name}_USE_TEMPLATE", template)
                 service_template_settings = {}
-                if service_template != template and db:
-                    service_template_settings = db.get_template_settings(service_template)
+                # Compare the canonical LISTS, not the raw strings: "low high" and "low  high"
+                # are the same overlay and must not cost a second resolution, while "low high"
+                # and "high low" are genuinely different and must.
+                if split_templates(service_template) != split_templates(template) and db:
+                    service_template_settings = self.__resolve_template_settings(db, service_template, f"service {server_name}")
 
                 for settings in default_settings:
                     for setting, data in settings.items():
@@ -347,7 +362,37 @@ class Configurator:
                             elif setting in config:
                                 config[key] = service_template_settings.get(setting, config[setting])
 
+        self.__report_port_issues(config)
+
         return config
+
+    def __report_port_issues(self, config: Dict[str, Any]) -> None:
+        """Log the listen-port conflicts a configuration carries, once, at generation time.
+
+        Warn, never ``exit(1)``: this runs on the boot path and refusing to generate over a port
+        the operator may well have meant would take a whole fleet down -- same rule as every other
+        problem reported here. Refusal belongs to the write paths (API/UI), where an operator is
+        in front of the error and a single service is at stake.
+
+        The checks themselves are pure and live in ``utils/ports.py`` so the write paths give the
+        same verdict; only the two environment facts they need are answered here.
+        """
+        integration = get_integration()
+        containerized = integration != "Linux"
+        # /etc/supervisor.d only exists in the all-in-one image (src/all-in-one/Dockerfile:252),
+        # which is the only layout where the UI (7000) and the API service (8888) share this
+        # network namespace and are therefore unavailable to a service.
+        all_in_one = containerized and Path(sep, "etc", "supervisor.d").is_dir()
+        with suppress(Exception):
+            for issue in check_ports(
+                services_from_config(config),
+                reserved=reserved_ports(config, all_in_one=all_in_one),
+                containerized=containerized,
+            ):
+                if issue.level == "fatal":
+                    self.__logger.error(f"Listen port conflict : {issue.message}")
+                else:
+                    self.__logger.warning(f"Listen port warning : {issue.message}")
 
     def __check_var(self, variable: str) -> Tuple[bool, str, str]:
         value = self.__variables[variable]
@@ -421,6 +466,30 @@ class Configurator:
                 value = normalize_select_value(value, options, multi=True, separator=separator, case_insensitive=case_insensitive)
             return True, value
         return True, value
+
+    def __resolve_template_settings(self, db, raw_value: str, scope: str) -> Dict[str, Any]:
+        """Merged overlay of a raw ``USE_TEMPLATE`` value, reporting layers that do not exist.
+
+        An unknown id used to be silent: ``get_template_settings`` returns ``{}`` for a typo and
+        for a settings-less template alike, and this method logged "Using template X" BEFORE
+        resolving, so the log asserted the opposite of what happened. With one template a typo
+        merely meant "no template"; with a list it drops one layer out of N, which is far harder
+        to notice -- hence the explicit per-position report.
+
+        Warn and continue, never ``exit(1)``: this runs on the boot path, and refusing to
+        generate over a cosmetic typo would take a whole fleet down. That matches how every
+        other unrecognised variable is handled here.
+        """
+        settings, unknown = db.resolve_template_settings(raw_value)
+        template_ids = split_templates(raw_value)
+        self.__logger.info(f"Using template{'s' if len(template_ids) > 1 else ''} {' '.join(template_ids)} for {scope}")
+        # Enumerate the declared list rather than walking `unknown`: `.index()` would report the
+        # FIRST occurrence for every repeat, so "hgh low hgh" would blame position 1 twice.
+        unknown_ids = set(unknown)
+        for position, template_id in enumerate(template_ids, start=1):
+            if template_id in unknown_ids:
+                self.__logger.warning(f'Unknown template "{template_id}" at position {position} of USE_TEMPLATE for {scope} - layer skipped')
+        return settings
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, str]], str]:
         targets = [

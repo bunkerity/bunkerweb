@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import datetime
 from json import JSONDecodeError, loads
 from typing import Any, Dict, List, Optional, Set
@@ -5,9 +6,25 @@ from typing import Any, Dict, List, Optional, Set
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from app.dependencies import API_CLIENT, BW_CONFIG
+from requests.exceptions import RequestException
+
+from common_utils import split_templates  # type: ignore
+
+from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.configs import CONFIG_TYPES
+from app.models.plugin_catalog import (
+    ARTIFACT_MAX_TEMPLATE,
+    artifact_cap,
+    build_catalog_view,
+    catalog_enabled,
+    fetch_artifact,
+    find_item,
+    is_compatible,
+    is_stale,
+    read_cached,
+    verify_digest,
+)
 from app.routes.utils import cors_required
 from app.utils import LOGGER, flash
 
@@ -232,9 +249,12 @@ def _compute_template_usage(templates_index: Dict[str, Dict[str, Any]]) -> Dict[
         return usage
 
     for service in services or []:
-        template_id = (service or {}).get("template") or ""
-        if template_id in usage:
-            usage[template_id] += 1
+        # USE_TEMPLATE is an ORDERED LIST, so `template` may name several layers. Counting the
+        # raw value would match no template at all and report 0 uses for every multi-template
+        # service -- a wrong number, which is worse than no chip.
+        for template_id in split_templates((service or {}).get("template")):
+            if template_id in usage:
+                usage[template_id] += 1
     return usage
 
 
@@ -435,6 +455,21 @@ def _build_editor_context(
     }
 
 
+def _catalog_context() -> Dict[str, Any]:
+    """Same shape as the plugins page's, with the templates page's own notion of "installed".
+
+    Best-effort I/O: a catalogue section never fails the page. The install route re-reads both
+    and refuses when either is unavailable.
+    """
+    installed = ()
+    bw_version = "unknown"
+    with suppress(Exception):
+        installed = API_CLIENT.get_templates()
+    with suppress(Exception):
+        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
+    return build_catalog_view("templates", DATA.get("PLUGIN_CATALOG"), installed, bw_version)
+
+
 @templates.route("/templates", methods=["GET"])
 @login_required
 def templates_page():
@@ -442,7 +477,13 @@ def templates_page():
     template_usage = _compute_template_usage(db_templates)
     catalog = _build_multisite_settings_catalog()
     template_badges = {template_id: _split_badges(_template_tag_badges(template_data, catalog)) for template_id, template_data in db_templates.items()}
-    return render_template("templates.html", templates=db_templates, template_usage=template_usage, template_badges=template_badges)
+    return render_template(
+        "templates.html",
+        templates=db_templates,
+        template_usage=template_usage,
+        template_badges=template_badges,
+        **_catalog_context(),
+    )
 
 
 @templates.route("/templates/new", methods=["GET"])
@@ -544,6 +585,108 @@ def templates_create():
         return jsonify({"status": "error", "message": e.message}), getattr(e, "status_code", None) or 400
 
     flash(f"Template {template_id} created successfully.", "success")
+    return jsonify({"status": "success"})
+
+
+@templates.route("/templates/catalog/install", methods=["POST"])
+@login_required
+@cors_required
+def templates_catalog_install():
+    """Install one curated service template from the community catalogue.
+
+    Same chain as the plugin half (`/plugins/catalog/install`): the request contributes only an
+    `id`, everything else comes from the server-side cached manifest, and the SHA-256 gate runs
+    on the downloaded bytes before anything parses them.
+
+    Two things differ, and both are deliberate.
+
+    **Admin, not `write`.** `/templates/create` needs only `write`, but a catalogue template
+    carries `configs[].data` blobs fetched from the internet, and `_prepare_template_entities`
+    validates settings hard while storing config data with *no* content validation at all -- it
+    is stringified, encoded, hashed and written. That text becomes NGINX configuration on the
+    instances. This gate lives in the route by necessity: the API authenticates the UI's single
+    service credential and has no per-user role to check, so anything reaching the API directly
+    with that credential bypasses it.
+
+    **The payload is re-validated by the DB layer.** It is handed to `create_template`, so every
+    setting id is checked against the live Settings table. That gives the template half a second,
+    structural compatibility gate for free: a template naming a setting this BunkerWeb does not
+    have is refused with `Unknown settings: ...`, whatever `bw_min` claimed.
+    """
+    if not catalog_enabled():
+        return jsonify({"status": "error", "message": "The community catalogue is disabled"}), 403
+    permission = _check_permissions()
+    if permission:
+        return jsonify({"status": "error", "message": permission["message"]}), permission["code"]
+    if not current_user.admin:
+        return jsonify({"status": "error", "message": "Installing catalogue templates is restricted to administrators"}), 403
+
+    template_id = (request.form.get("id") or "").strip()
+    if not template_id:
+        return jsonify({"status": "error", "message": "Template id is required"}), 400
+
+    cached = DATA.get("PLUGIN_CATALOG")
+    item = find_item(cached, "templates", template_id)
+    if not item:
+        return jsonify({"status": "error", "message": f"No catalogue entry named {template_id}"}), 404
+
+    _, fetched_at = read_cached(cached)
+    if is_stale(fetched_at):
+        return jsonify({"status": "error", "message": "The catalogue is out of date and cannot be installed from"}), 409
+
+    try:
+        bw_version = API_CLIENT.get_metadata().get("version", "unknown")
+    except (ApiClientError, ApiUnavailableError) as e:
+        # Fails closed: an unreachable API is not permission to skip the version check.
+        return jsonify({"status": "error", "message": f"Couldn't determine the BunkerWeb version: {e.message}"}), 503
+
+    if not is_compatible(bw_version, item.get("bw_min"), item.get("bw_max")):
+        bounds = f">= {item.get('bw_min')}" + (f", < {item['bw_max']}" if item.get("bw_max") else "")
+        return jsonify({"status": "error", "message": f"Template {template_id} requires BunkerWeb {bounds}; this is {bw_version}"}), 422
+
+    try:
+        if template_id in API_CLIENT.get_templates():
+            return jsonify({"status": "error", "message": f"Template {template_id} already exists"}), 409
+    except (ApiClientError, ApiUnavailableError) as e:
+        return jsonify({"status": "error", "message": f"Couldn't list templates: {e.message}"}), 503
+
+    try:
+        payload = fetch_artifact(item["url"], artifact_cap(item.get("size"), ARTIFACT_MAX_TEMPLATE))
+    except ValueError as e:
+        return jsonify({"status": "error", "message": f"Refused to download {template_id}: {e}"}), 502
+    except RequestException as e:
+        return jsonify({"status": "error", "message": f"Couldn't download {template_id}: {e}"}), 502
+
+    # Before anything parses the bytes.
+    if not verify_digest(payload, item["sha256"]):
+        LOGGER.error(f"Integrity check failed for catalogue template {template_id}: expected {item['sha256']}")
+        return jsonify({"status": "error", "message": f"Integrity check failed for {template_id}. Nothing was installed."}), 502
+
+    try:
+        data = loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, JSONDecodeError, ValueError) as e:
+        return jsonify({"status": "error", "message": f"Template payload is not valid JSON: {e}"}), 502
+    if not isinstance(data, dict):
+        return jsonify({"status": "error", "message": "Template payload must be a JSON object"}), 502
+
+    # The template half's equivalent of the plugin archive-identity check: the id inside the
+    # payload is what `create_template` writes, so it must be the one the manifest named.
+    declared = str(data.get("id", "")).strip()
+    if declared != template_id:
+        return jsonify({"status": "error", "message": f"The payload declares id {declared!r} but the catalogue entry is {template_id!r}"}), 502
+
+    try:
+        API_CLIENT.create_template(
+            template_id,
+            name=data.get("name", template_id),
+            settings=data.get("settings", {}),
+            steps=data.get("steps", []),
+            configs=data.get("configs", []),
+        )
+    except (ApiClientError, ApiUnavailableError) as e:
+        return jsonify({"status": "error", "message": e.message}), getattr(e, "status_code", None) or 400
+
+    flash(f"Template {template_id} installed from the catalogue.", "success")
     return jsonify({"status": "success"})
 
 

@@ -49,74 +49,322 @@ $(function () {
   });
 
   // -------------------------------------------------------------------------------------
-  // Template -- a setting, not a resource, so it applies on Save instead of immediately.
+  // Template LAYERS -- a setting, not a resource, so it applies on Save instead of immediately.
   //
-  // The picker has no `name`; it drives the ONE input[name="USE_TEMPLATE"] the page already
-  // posts (models/compose_shelf.html:299-312). USE_TEMPLATE sits in the service `restore_skip`
-  // (models/save_scope.py:57) and is therefore never restored, so posting it twice and not
-  // posting it at all are both destructive -- the row is deleted, the service loses its
-  // template, and `template_unchanged` goes False, which DROPS the outgoing template's values
-  // instead of materialising the new one's (routes/services.py:878-893). Hence: resolve the
-  // input lazily, and write only when there is exactly one. A greyed picker is a visible
-  // no-op; a silent one is a lost template.
+  // USE_TEMPLATE is an ORDERED LIST (multivalue, separator " "): layers apply left to right and
+  // a later one overrides an earlier one. Nothing in this block has a `name`; it drives the ONE
+  // input[name="USE_TEMPLATE"] the page already posts (models/compose_shelf.html). USE_TEMPLATE
+  // sits in the service `restore_skip` (models/save_scope.py) and is therefore never restored,
+  // so posting it twice and not posting it at all are both destructive. Hence: resolve the input
+  // lazily, and write only when there is exactly one. A disabled control is a visible no-op; a
+  // silent one is a lost layer.
+  //
+  // NO INTERACTION MAY SILENTLY DROP A LAYER. Three things enforce that:
+  //   1. the chips are rendered SERVER-SIDE in stored order, so with this file broken the list
+  //      is still correct on screen and the hidden input still carries the stored value;
+  //   2. the only removal gesture is an explicit click on a chip's x;
+  //   3. every write goes through renderLayers(), which rebuilds the hidden input from the
+  //      SAME array the chips are rendered from -- the two can never disagree.
   // -------------------------------------------------------------------------------------
+  const layersRoot = $("#service-template-layers");
+  const layerList = $("#service-template-layer-list");
+  const layerEmpty = $("#service-template-empty");
   const picker = $("#service-template-picker");
+  const addButton = $("#service-template-add");
   const templateWarning = $("#service-template-warning");
   const templatePending = $("#service-template-pending");
   const templateInputs = () => $('[name="USE_TEMPLATE"]');
 
-  const templateLabel = (value) => {
+  // Same contract as common_utils.split_templates: split on the literal separator, drop
+  // empties. NOT /\s+/ -- the storage contract (normalize_list_value) only ever treats " " as
+  // a separator, so a tab is part of a (bogus) template id, not a break between two.
+  const splitTemplates = (value) =>
+    String(value || "")
+      .split(" ")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  // .filter() and not an interpolated attribute selector: a template id is user-created, so
+  // building a selector from it would need CSS.escape (and the scanner in
+  // tests/unit/ui/test_untranslated_js_literals.py walks the file lexically -- a template
+  // literal carrying nested quotes desynchronises it and silently hides every later literal).
+  const templateLabel = (id) => {
+    const stored = layerList
+      .children("li")
+      .filter(function () {
+        return $(this).attr("data-id") === id;
+      })
+      .find(".text-truncate")
+      .first();
+    if (stored.length) return stored.text().trim() || id;
     const option = picker.find("option").filter(function () {
-      return this.value === value;
+      return this.value === id;
     });
-    return (option.length ? option.first().text().trim() : "") || value;
+    return (option.length ? option.first().text().trim() : "") || id;
   };
 
-  const disablePicker = () => {
+  const disableLayerControls = (message) => {
     picker.prop("disabled", true);
-    templateWarning
-      .text(
+    addButton.prop("disabled", true);
+    layerList.find("button").prop("disabled", true);
+    templateWarning.text(message).removeClass("d-none");
+  };
+
+  if (layersRoot.length) {
+    // How many settings each PAIR of templates shares (routes/services.py:template_overlaps).
+    // Symmetric, so it answers every order the user can build here.
+    let overlaps = {};
+    try {
+      overlaps = JSON.parse(layersRoot.attr("data-overlaps") || "{}");
+    } catch (e) {
+      overlaps = {};
+    }
+
+    const stored = splitTemplates(layersRoot.attr("data-current"));
+    // Seeded from the SERVER-RENDERED chips, not from the stored string, so the array and the
+    // DOM start out identical by construction.
+    let layers = layerList
+      .children("li")
+      .map(function () {
+        return $(this).attr("data-id");
+      })
+      .get();
+
+    const sharedWith = (id, otherId) => {
+      // hasOwnProperty, not a bare lookup: template ids are user-created, and one named
+      // "constructor" would otherwise resolve off Object.prototype.
+      if (!Object.prototype.hasOwnProperty.call(overlaps, id)) return 0;
+      const row = overlaps[id];
+      return Object.prototype.hasOwnProperty.call(row, otherId)
+        ? row[otherId]
+        : 0;
+    };
+
+    // Which LATER layers override some of this one's settings. Names, not a summed count:
+    // two later layers can override the same key, so adding the pairwise counts would
+    // over-report. The pair counts go in the title attribute, where each one is honest.
+    const overriddenBy = (index) =>
+      layers
+        .slice(index + 1)
+        .filter((later) => sharedWith(layers[index], later) > 0)
+        .map((later) => ({
+          id: later,
+          shared: sharedWith(layers[index], later),
+        }));
+
+    function renderLayers() {
+      layerList.empty();
+      layers.forEach((id, index) => {
+        const shadowing = overriddenBy(index);
+        const row = $("<li>", {
+          class:
+            "resource-chip d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1",
+          "data-id": id,
+        });
+        row.append(
+          $("<span>", { class: "text-truncate", text: templateLabel(id) }),
+        );
+
+        const controls = $("<span>", {
+          class: "d-flex align-items-center gap-1 ms-2",
+        });
+        if (shadowing.length) {
+          controls.append(
+            $("<span>", {
+              class: "badge bg-warning text-dark layer-overridden",
+              text: t("service.resources.template.overridden_badge", {
+                defaultValue: "overridden",
+              }),
+              // Two things about the string below, both load-bearing:
+              //  * the typographic apostrophe, not a straight one -- and NO apostrophe may
+              //    appear in a comment INSIDE a t(...) call either: _translation_ranges in
+              //    tests/unit/ui/test_untranslated_js_literals.py scans for the closing paren
+              //    WITHOUT stripping comments, so one stray quote there swallows every later
+              //    literal in the file into this call range. That is why these lines sit here,
+              //    outside the call, rather than next to the property they describe.
+              //  * escapeValue false, because jQuery .text()/attr already escape; leaving t()
+              //    to escape as well would render a template named A&B as A&amp;B.
+              title: shadowing
+                .map((entry) =>
+                  t("service.resources.template.overridden_by", {
+                    count: entry.shared,
+                    name: templateLabel(entry.id),
+                    defaultValue:
+                      "{{name}} overrides {{count}} of this template\u2019s settings.",
+                    interpolation: { escapeValue: false },
+                  }),
+                )
+                .join(" "),
+            }),
+          );
+        }
+        controls.append(
+          $("<span>", {
+            class: "badge bg-secondary layer-position",
+            text: index + 1,
+          }),
+        );
+        controls.append(
+          $("<button>", {
+            type: "button",
+            class: "btn btn-sm btn-link p-0 layer-up",
+            "aria-label": t("service.resources.template.move_up", {
+              defaultValue: "Move this template earlier",
+            }),
+            disabled: index === 0,
+          }).append(
+            $("<i>", { class: "bx bx-up-arrow-alt", "aria-hidden": "true" }),
+          ),
+        );
+        controls.append(
+          $("<button>", {
+            type: "button",
+            class: "btn btn-sm btn-link p-0 layer-down",
+            "aria-label": t("service.resources.template.move_down", {
+              defaultValue: "Move this template later",
+            }),
+            disabled: index === layers.length - 1,
+          }).append(
+            $("<i>", { class: "bx bx-down-arrow-alt", "aria-hidden": "true" }),
+          ),
+        );
+        controls.append(
+          $("<button>", {
+            type: "button",
+            class: "btn btn-sm btn-link p-0 text-danger layer-remove",
+            "aria-label": t("service.resources.template.remove", {
+              defaultValue: "Remove this template",
+            }),
+          }).append($("<i>", { class: "bx bx-x", "aria-hidden": "true" })),
+        );
+
+        row.append(controls);
+        layerList.append(row);
+      });
+
+      layerEmpty.toggleClass("d-none", layers.length > 0);
+      // A template already attached is not an add candidate; keep it selectable nowhere rather
+      // than letting a duplicate in (harmless to the merge, confusing on screen).
+      picker.find("option").each(function () {
+        $(this).prop("disabled", layers.indexOf(this.value) !== -1);
+      });
+      const firstFree = picker.find("option:not(:disabled)").first();
+      addButton.prop("disabled", firstFree.length === 0);
+      if (picker.find("option:selected").prop("disabled") && firstFree.length) {
+        picker.val(firstFree.val());
+      }
+
+      commit();
+    }
+
+    // The ONLY writer of the hidden input, and it always writes the whole list.
+    function commit() {
+      const target = templateInputs();
+      if (target.length !== 1) {
+        // The page does not post USE_TEMPLATE (or posts it twice): editing here would be a
+        // silent no-op at best and a lost layer at worst. Freeze the controls and say so.
+        disableLayerControls(
+          t("service.resources.template.unwired", {
+            defaultValue:
+              "This page does not post USE_TEMPLATE, so the template cannot be changed from here.",
+          }),
+        );
+        return;
+      }
+
+      const value = layers.join(" ");
+      target.val(value);
+
+      const changed = value !== stored.join(" ");
+      templatePending.toggleClass("d-none", !changed);
+      if (!changed) {
+        templateWarning.addClass("d-none").text("");
+        return;
+      }
+
+      const removed = stored.filter((id) => layers.indexOf(id) === -1);
+      const added = layers.filter((id) => stored.indexOf(id) === -1);
+      const messages = [];
+      if (removed.length) {
+        messages.push(
+          t("service.resources.template.removing", {
+            names: removed.map(templateLabel).join(", "),
+            defaultValue:
+              "Saving detaches {{names}}. The values those templates supplied are dropped.",
+            interpolation: { escapeValue: false },
+          }),
+        );
+      }
+      if (added.length) {
+        messages.push(
+          t("service.resources.template.adding", {
+            names: added.map(templateLabel).join(", "),
+            defaultValue:
+              "Saving applies {{names}}. Many settings can move at once.",
+            interpolation: { escapeValue: false },
+          }),
+        );
+      }
+      if (!messages.length) {
+        messages.push(
+          t("service.resources.template.reordered", {
+            defaultValue:
+              "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
+          }),
+        );
+      }
+      templateWarning.text(messages.join(" ")).removeClass("d-none");
+    }
+
+    if (templateInputs().length !== 1) {
+      disableLayerControls(
         t("service.resources.template.unwired", {
           defaultValue:
             "This page does not post USE_TEMPLATE, so the template cannot be changed from here.",
         }),
-      )
-      .removeClass("d-none");
-  };
-
-  if (picker.length) {
-    if (templateInputs().length !== 1) {
-      disablePicker();
+      );
     } else {
-      picker.on("change", function () {
-        const target = templateInputs();
-        if (target.length !== 1) {
-          disablePicker();
-          return;
-        }
+      addButton.on("click", function () {
         const chosen = picker.val();
-        // attr, never .data() -- .data() coerces a numeric-looking id to a Number, the same
-        // defect the cloner fix chased through settings-widgets.js.
-        const current = picker.attr("data-current") || "";
-        target.val(chosen);
-
-        const changed = chosen !== current;
-        templatePending.toggleClass("d-none", !changed);
-        if (!changed) {
-          templateWarning.addClass("d-none").text("");
-          return;
-        }
-        templateWarning
-          .text(
-            t("service.resources.template.switching", {
-              from: templateLabel(current),
-              to: templateLabel(chosen),
-              defaultValue:
-                "Saving switches this service from “{{from}}” to “{{to}}”. The values the current template supplied are dropped and {{to}}’s are applied — many settings move at once.",
-            }),
-          )
-          .removeClass("d-none");
+        if (!chosen || layers.indexOf(chosen) !== -1) return;
+        layers.push(chosen);
+        renderLayers();
       });
+
+      // Delegated: renderLayers() replaces every row, so per-row handlers would go stale.
+      //
+      // Both handlers key on the row's POSITION, never on its template id. Repeats are legal --
+      // "low low high" is a valid stored value (spec: last-wins is idempotent under repetition,
+      // so nothing rejects it from env vars, autoconf labels, the API or the raw pane) and
+      // renderLayers() draws one row per layer including repeats. Keyed on the id instead,
+      // `filter(layer !== id)` deleted EVERY copy on one click and `indexOf(id)` moved the FIRST
+      // chip when you clicked the second -- both silent drops of a layer, which is exactly what
+      // the header invariant above forbids. `.index()` is the row's position among its siblings,
+      // and renderLayers() builds the rows from `layers` in order, so the two cannot disagree.
+      layerList.on("click", ".layer-remove", function () {
+        const index = $(this).closest("li").index();
+        if (index < 0 || index >= layers.length) return;
+        layers.splice(index, 1);
+        renderLayers();
+      });
+
+      layerList.on("click", ".layer-up, .layer-down", function () {
+        const index = $(this).closest("li").index();
+        const target = $(this).hasClass("layer-up") ? index - 1 : index + 1;
+        if (
+          index < 0 ||
+          index >= layers.length ||
+          target < 0 ||
+          target >= layers.length
+        )
+          return;
+        const moved = layers[index];
+        layers[index] = layers[target];
+        layers[target] = moved;
+        renderLayers();
+      });
+
+      renderLayers();
     }
   }
 

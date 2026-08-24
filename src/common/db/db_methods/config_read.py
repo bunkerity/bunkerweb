@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from model import Global_values, Services, Services_settings, Settings, Template_settings  # type: ignore
 
+from common_utils import split_templates  # type: ignore
+
 from resource_group_resolver import value_for_validation  # type: ignore
 
 from sqlalchemy import join, select
@@ -316,48 +318,69 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
         )
 
         template_used = config.get("USE_TEMPLATE", {"value": ""})["value"]
+        # USE_TEMPLATE is an ORDERED LIST (multivalue, separator " "): layers apply left to
+        # right and a later one overrides an earlier one. The skip-guards below are what make
+        # last-wins free -- a key written by an earlier layer carries method "default", so the
+        # guard does not trip and the next layer overwrites it. Only a non-default method (a
+        # real row the user or a component owns) stops a layer.
+        global_template_ids = split_templates(template_used)
         templates = {"global": template_used} if template_used else {}
         with self._db_session() as session:
-            if template_used:
+            if global_template_ids:
                 query = (
-                    select(Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                    .filter_by(template_id=template_used)
+                    select(Template_settings.template_id, Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
+                    .filter(Template_settings.template_id.in_(set(global_template_ids)))
                     .order_by(Template_settings.order)
                 )
 
                 if filtered_settings:
                     query = query.filter(Template_settings.setting_id.in_(filtered_settings))
 
+                # Grouped first, then replayed in DECLARED order: the query returns the layers
+                # interleaved by Template_settings.order, which carries no precedence at all.
+                global_template_settings = {}
                 for template_setting in session.execute(query):
-                    key = template_setting.setting_id + (f"_{template_setting.suffix}" if template_setting.suffix > 0 else "")
-                    if key in config and config[key]["method"] != "default":
-                        continue
+                    global_template_settings.setdefault(template_setting.template_id, []).append(template_setting)
 
-                    config[key] = {
-                        "value": self._empty_if_none(template_setting.default),
-                        "global": True,
-                        "method": "default",
-                        "default": self._empty_if_none(template_setting.default),
-                        "template": template_used,
-                    }
+                for template_id in global_template_ids:
+                    for template_setting in global_template_settings.get(template_id, []):
+                        key = template_setting.setting_id + (f"_{template_setting.suffix}" if template_setting.suffix > 0 else "")
+                        if key in config and config[key]["method"] != "default":
+                            continue
+
+                        config[key] = {
+                            "value": self._empty_if_none(template_setting.default),
+                            "global": True,
+                            "method": "default",
+                            "default": self._empty_if_none(template_setting.default),
+                            # The LAYER this value came from, never the whole list: the UI's
+                            # provenance checks and the save layer's "drop the outgoing
+                            # template's defaults" rule both need the single owning template.
+                            "template": template_id,
+                        }
 
             if not global_only and config["MULTISITE"]["value"] == "yes":
                 server_names = config["SERVER_NAME"]["value"].split()
 
-                # Collect all unique templates used by services
-                service_templates = {}
+                # Collect the ORDERED layer list of every service, and the flat set of ids to
+                # fetch. Two services may share the same layers in a DIFFERENT order, so the
+                # per-service order is kept per service and never collapsed into the id set.
+                service_template_ids = {}
+                used_template_ids = set()
                 for service_id in server_names:
                     service_template_used = config.get(f"{service_id}_USE_TEMPLATE", {"value": self._empty_if_none(template_used)})["value"]
                     if service_template_used:
                         templates[service_id] = service_template_used
-                        service_templates.setdefault(service_template_used, []).append(service_id)
+                        layer_ids = split_templates(service_template_used)
+                        if layer_ids:
+                            service_template_ids[service_id] = layer_ids
+                            used_template_ids.update(layer_ids)
 
                 # Batch query: fetch all template settings for all used templates at once
-                if service_templates:
-                    template_ids = list(service_templates.keys())
+                if used_template_ids:
                     query = (
                         select(Template_settings.template_id, Template_settings.setting_id, Template_settings.default, Template_settings.suffix)
-                        .filter(Template_settings.template_id.in_(template_ids))
+                        .filter(Template_settings.template_id.in_(used_template_ids))
                         .order_by(Template_settings.order)
                     )
 
@@ -369,11 +392,13 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     for setting in session.execute(query):
                         template_settings_map.setdefault(setting.template_id, []).append(setting)
 
-                    # Apply template settings to each service that uses them
-                    for tmpl_id, service_ids in service_templates.items():
-                        tmpl_settings = template_settings_map.get(tmpl_id, [])
-                        for service_id in service_ids:
-                            for setting in tmpl_settings:
+                    # Apply each service's OWN layers in its OWN order. Iterating per template
+                    # (as this did while one service meant one template) cannot express that:
+                    # two services sharing "low high" and "high low" would both get whichever
+                    # order the outer loop happened to visit.
+                    for service_id, layer_ids in service_template_ids.items():
+                        for tmpl_id in layer_ids:
+                            for setting in template_settings_map.get(tmpl_id, []):
                                 key = f"{service_id}_{setting.setting_id}" + (f"_{setting.suffix}" if setting.suffix > 0 else "")
                                 if key in config and config[key]["method"] != "default" and not config[key]["global"]:
                                     continue
@@ -383,6 +408,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                                     "global": False,
                                     "method": "default",
                                     "default": self._empty_if_none(setting.default),
+                                    # The owning LAYER, not the list -- see the global branch.
                                     "template": tmpl_id,
                                 }
 
@@ -430,15 +456,49 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
         if multiple:
             with self._db_session() as session:
-                query = select(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))
+                group_settings = session.execute(select(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))).all()
 
-                for setting in session.execute(query):
+                # USE_TEMPLATE is an ORDERED LIST here too. This block used to pass the window's
+                # RAW value straight to `filter_by(template_id=...)`, which matches no row at all
+                # once it names more than one layer -- so every re-materialised group member fell
+                # back to its plugin default -- and then wrote that whole list into the per-key
+                # `template` provenance (`HOST_1` carrying `'template': 'base hard'`), which the
+                # UI's provenance checks and the save layer's outgoing-template rule both read as
+                # a single template id.
+                window_layers = {}
+                for windows in multiple.values():
+                    for window in windows:
+                        if window not in window_layers:
+                            window_layers[window] = split_templates(templates.get(window, "") or templates.get("global", ""))
+
+                # ONE query for every (layer, setting, suffix) in play, instead of the per-suffix
+                # `scalars()` the old block issued from inside a triple loop. Deliberately NOT
+                # reusing the overlay's `template_settings_map` above: that one is narrowed by
+                # `filtered_settings`, while this block legitimately re-materialises SIBLING
+                # members of a group that the filter never asked for.
+                referenced_layers = {layer for layers in window_layers.values() for layer in layers}
+                layer_defaults = {}
+                if referenced_layers:
+                    for row in session.execute(
+                        select(
+                            Template_settings.template_id,
+                            Template_settings.setting_id,
+                            Template_settings.suffix,
+                            Template_settings.default,
+                        ).filter(
+                            Template_settings.template_id.in_(referenced_layers),
+                            Template_settings.setting_id.in_({group_setting.id for group_setting in group_settings}),
+                        )
+                    ):
+                        layer_defaults[(row.template_id, row.setting_id, row.suffix or 0)] = self._empty_if_none(row.default)
+
+                for setting in group_settings:
                     group_key = multiple_groups.get(setting.id)
                     if group_key is None or group_key not in multiple:
                         continue
 
                     for window, suffixes in multiple[group_key].items():
-                        template = templates.get(window, "") or templates.get("global", "")
+                        layers = window_layers.get(window, [])
                         for suffix in map(int, suffixes):
                             if window == "global" or service:
                                 key = f"{setting.id}_{suffix}"
@@ -447,12 +507,34 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
                             default = self._empty_if_none(setting.default)
                             value = deepcopy(default)
-                            if template:
-                                template_setting = session.scalars(
-                                    select(Template_settings).filter_by(template_id=template, setting_id=setting.id, suffix=suffix).limit(1)
-                                ).first()
-                                if template_setting is not None:
-                                    value = self._empty_if_none(template_setting.default)
+                            # LAST-WINS, resolved per layer: walk the list backwards and stop at
+                            # the first layer that actually supplies this member. `owning_template`
+                            # stays None when no layer does -- a plugin default is NOT
+                            # template-provided, and claiming otherwise makes save_scope treat it
+                            # as an outgoing template value and drop it on a template change.
+                            #
+                            # This resolution is LIVE, not defensive. The overlay above usually
+                            # pre-empts it (it has already written every member a layer declares,
+                            # and `filtered_settings` -- the one thing that makes it skip one --
+                            # narrows the base query at `:294` too, so the setting would not reach
+                            # `multiple_groups` either). But the `service=` route reaches it: the
+                            # loop above POPS every key and re-adds only the `{service}_`-prefixed
+                            # ones, so a member the GLOBAL overlay wrote is gone from `config` by
+                            # the time this block runs, and this block re-materialises it.
+                            # Pinned by test_config_read.py.
+                            #
+                            # For the record, a pre-existing shape this does not change: under
+                            # `service=` the key reaching the window scan has ALREADY had its
+                            # service prefix stripped, so `multiple_groups` hits on the first try
+                            # and `window` stays "global". This block therefore resolves against
+                            # the GLOBAL layer list even for a service that carries its own.
+                            owning_template = None
+                            for template_id in reversed(layers):
+                                layer_value = layer_defaults.get((template_id, setting.id, suffix))
+                                if layer_value is not None:
+                                    value = layer_value
+                                    owning_template = template_id
+                                    break
 
                             if key not in config:
                                 config[key] = (
@@ -461,7 +543,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                                         "global": True,
                                         "method": "default",
                                         "default": default,
-                                        "template": template,
+                                        "template": owning_template,
                                     }
                                     if methods
                                     else value

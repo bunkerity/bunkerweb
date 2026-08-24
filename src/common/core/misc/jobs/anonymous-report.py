@@ -12,7 +12,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from common_utils import get_os_info  # type: ignore
+from common_utils import get_os_info, split_templates  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -111,8 +111,9 @@ try:
 
     template_keys = (f"{server}_USE_TEMPLATE" for server in services) if multisite else ("USE_TEMPLATE",)
     for template_key in template_keys:
-        template = db_config.get(template_key, {}).get("value")
-        if template:
+        # USE_TEMPLATE is an ordered LIST, so count each layer. Counting the raw value would
+        # report "low high" as a template of its own and undercount both real ones.
+        for template in split_templates(db_config.get(template_key, {}).get("value")):
             used_templates[template] = used_templates.get(template, 0) + 1
 
     # Convert counts to strings for consistency.

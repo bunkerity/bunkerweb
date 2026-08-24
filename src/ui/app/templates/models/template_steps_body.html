@@ -43,7 +43,19 @@
     </div>
 </div>
 <div class="card-body">
-    {% if is_editable_method(template_method) or not selected_template or template == selected_template %}
+    {# `selected_template` is an ORDERED LIST (USE_TEMPLATE is multivalue): membership, not
+       whole-value equality. Equality made every attached layer's page render the "in use"
+       notice instead of its fields on any service whose USE_TEMPLATE row carries a
+       non-editable method (scheduler/autoconf, i.e. every env- or label-driven install), so
+       the form posted nothing at all.
+
+       `.split(" ") | reject("equalto", "")` matches the storage contract exactly (see
+       models/service_resources_band.html for why a bare `.split()` does not). This gate is
+       deliberately still spelled out here rather than reading the route's `template_editable`:
+       the partial is rendered by environments that do not pass it, and an undefined name here
+       would hide the stepper on every one of them. Kept in sync with
+       routes/services.py:template_editable. #}
+    {% if is_editable_method(template_method) or not selected_template or template in selected_template.split(" ") | reject("equalto", "") | list %}
         {% if template_data["steps"] %}
             <div class="row">
                 <div class="col-12 col-lg-3 mb-3 mb-lg-0 ps-0 pe-1">
