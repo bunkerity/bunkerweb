@@ -381,3 +381,118 @@ class DefaultMultipleSiblingLockTest(TestCase):
         err = self.db.save_config(bare, "scheduler", changed=False)
         self.assertNotIsInstance(err, str, err)
         self.assertEqual(len(self._grows("TEST_GLOG_FMT", 1)), 1)
+
+
+class MultiTemplateLayerSlotTest(TestCase):
+    """`USE_TEMPLATE` as an ORDERED LIST, through the same save_config machinery.
+
+    Two properties that only differ once a service carries more than one layer:
+
+    * slot liveness is a UNION across layers, never a fold -- a slot supplied by an EARLIER
+      layer stays alive, otherwise its default members are persisted as real rows and the Web
+      UI disables fields nobody ever typed in;
+    * ``template_setting_default`` is the MERGED (last-wins) default, so "this value equals its
+      default, do not store a row" is decided against the value the overlay will actually serve.
+    """
+
+    def setUp(self):
+        self.tmpdir = TemporaryDirectory()
+        db_path = Path(self.tmpdir.name) / "test.sqlite3"
+        self.logger = SimpleNamespace(info=lambda *_a: None, warning=lambda *_a: None, error=lambda *_a: None, debug=lambda *_a: None)
+        self.db = Database(self.logger, sqlalchemy_string=f"sqlite:///{db_path}")
+        general = loads((REPO_ROOT / "src" / "common" / "settings.json").read_text())
+        ret, err = self.db.init_tables([general, deepcopy(_test_plugin())])
+        self.assertFalse(err, err)
+
+    def tearDown(self):
+        self.db.close()
+        self.tmpdir.cleanup()
+
+    def _rows(self, setting_id: str, suffix: int):
+        with self.db._db_session() as session:
+            return session.query(Services_settings).filter_by(service_id=SERVICE, setting_id=setting_id, suffix=suffix).all()
+
+    def _mk_layer(self, template_id: str, *settings):
+        """One template carrying `(setting_id, default, suffix)` members."""
+        from datetime import datetime
+
+        now = datetime.now().astimezone()
+        with self.db._db_session() as session:
+            session.add(Templates(id=template_id, name=template_id.capitalize(), plugin_id=None, method="manual", creation_date=now, last_update=now))
+            session.flush()
+            session.add(Template_steps(id=1, template_id=template_id, title="Step", subtitle=None))
+            for order, (sid, default, suffix) in enumerate(settings, 1):
+                session.add(Template_settings(template_id=template_id, setting_id=sid, step_id=1, default=default, suffix=suffix, order=order))
+            session.commit()
+
+    def _use_layers(self, use_template: str, extra=None):
+        init = {"SERVER_NAME": SERVICE, "MULTISITE": "yes", f"{SERVICE}_SERVER_NAME": SERVICE, f"{SERVICE}_USE_TEMPLATE": use_template}
+        if extra:
+            init.update(extra)
+        self.assertNotIsInstance(self.db.save_config(init, "scheduler", changed=False), str)
+        # The scheduler round-trip: get_config re-materialises every slot member, save_config
+        # must decide which of them are real user intent.
+        self.assertNotIsInstance(self.db.save_config(self.db.get_config(methods=False), "scheduler", changed=False), str)
+
+    def test_slot_liveness_is_a_union_across_layers(self):
+        """Spec T9. Layer 1 supplies slot 1, layer 2 supplies slot 2; BOTH must stay alive.
+
+        A fold (last layer only) would leave slot 1 dead, so its members become "anchorless" and
+        every one of them is persisted as a scheduler row -- the exact defect the sibling lock in
+        this file exists to prevent, reintroduced by the multi-layer path.
+        """
+        self._mk_layer("base", ("TEST_RP_HOST", "http://base:1", 1))
+        self._mk_layer("hard", ("TEST_RP_TIMEOUT", "90s", 2))
+        self._use_layers("base hard")
+
+        # Slot 1, kept alive by the EARLIER layer.
+        self.assertEqual(self._rows("TEST_RP_HOST", 1), [], "the earlier layer's own member was persisted")
+        self.assertEqual(self._rows("TEST_RP_TIMEOUT", 1), [], "slot 1 was treated as dead, so its default sibling was persisted")
+        # Slot 2, kept alive by the later layer.
+        self.assertEqual(self._rows("TEST_RP_TIMEOUT", 2), [])
+        self.assertEqual(self._rows("TEST_RP_HOST", 2), [])
+
+    def test_slot_liveness_union_holds_in_the_other_order(self):
+        """Order must not decide liveness -- a union is symmetric even though the merge is not."""
+        self._mk_layer("base", ("TEST_RP_HOST", "http://base:1", 1))
+        self._mk_layer("hard", ("TEST_RP_TIMEOUT", "90s", 2))
+        self._use_layers("hard base")
+
+        self.assertEqual(self._rows("TEST_RP_HOST", 1), [])
+        self.assertEqual(self._rows("TEST_RP_TIMEOUT", 1), [])
+        self.assertEqual(self._rows("TEST_RP_TIMEOUT", 2), [])
+        self.assertEqual(self._rows("TEST_RP_HOST", 2), [])
+
+    def test_merged_default_decides_whether_a_row_is_written(self):
+        """`template_setting_default` is the LAST-WINS merge, not the first layer's value.
+
+        Both layers define HOST_1; `hard` wins. Saving the merged value is "unchanged" and must
+        leave no row -- resolving against `base` instead would store a row for a value the user
+        never typed, and freeze it against the layer that actually wins.
+        """
+        self._mk_layer("base", ("TEST_RP_HOST", "http://base:1", 1))
+        self._mk_layer("hard", ("TEST_RP_HOST", "http://hard:1", 1))
+        self._use_layers("base hard")
+
+        self.assertEqual(self._rows("TEST_RP_HOST", 1), [], "the merged (last-wins) default was stored as a row")
+
+    def test_a_value_diverging_from_the_merged_default_is_persisted(self):
+        """The other direction, so the test above cannot pass by never writing anything."""
+        self._mk_layer("base", ("TEST_RP_HOST", "http://base:1", 1))
+        self._mk_layer("hard", ("TEST_RP_HOST", "http://hard:1", 1))
+        self._use_layers("base hard", {f"{SERVICE}_TEST_RP_HOST_1": "http://custom:9"})
+
+        rows = self._rows("TEST_RP_HOST", 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].value, "http://custom:9")
+
+    def test_the_earlier_layers_value_is_not_the_merged_default(self):
+        """Pins the direction: `base`'s value is NOT what a save is compared against, so posting
+        it is a real change and gets a row."""
+        self._mk_layer("base", ("TEST_RP_HOST", "http://base:1", 1))
+        self._mk_layer("hard", ("TEST_RP_HOST", "http://hard:1", 1))
+        self._use_layers("base hard", {f"{SERVICE}_TEST_RP_HOST_1": "http://base:1"})
+
+        rows = self._rows("TEST_RP_HOST", 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].value, "http://base:1")

@@ -227,3 +227,89 @@ class TestGetCustomConfigTemplateFallback:
         add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low")
         # USE_TEMPLATE set, but no such template/config row -> {}
         assert db.get_custom_config("server_http", "missing", service_id="app1.example.com") == {}
+
+
+class TestGetCustomConfigsMultiTemplateMerge:
+    """Custom configs must agree with the settings overlay on LAST-WINS.
+
+    This is the one artefact where last-wins is not free. Shadowing runs through a ``provided``
+    set — the FIRST layer to claim a (service, type, name) keeps it — which is *first*-wins in
+    iteration order, the opposite of the settings overlay (where a later layer overwrites
+    because the earlier value carries method "default"). The layers are therefore walked
+    BACKWARDS so the last declared one claims the key first."""
+
+    def test_last_layer_wins(self, db):
+        seed_multisite(db)
+        assert _template_with_server_http_config(db, "base", name="Base", data="# from-base") == ""
+        assert _template_with_server_http_config(db, "hardening", name="Hardening", data="# from-hardening") == ""
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1  # one config, not one per layer
+        assert matching[0]["data"] == b"# from-hardening"
+        assert matching[0]["template"] == "hardening"  # the owning LAYER, not the list
+
+    def test_order_is_significant(self, db):
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        _template_with_server_http_config(db, "hardening", name="Hardening", data="# from-hardening")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="hardening base")
+
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert matching[0]["data"] == b"# from-base"
+        assert matching[0]["template"] == "base"
+
+    def test_single_element_list_unchanged(self, db):
+        """THE ACCEPTANCE BAR for this artefact."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base")
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1
+        assert matching[0]["data"] == b"# from-base"
+        assert matching[0]["template"] == "base"
+
+    def test_a_real_row_still_shadows_every_layer(self, db):
+        """`provided` is pre-seeded from the real rows before any layer is considered, so the
+        reverse walk must not have disturbed that."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        _template_with_server_http_config(db, "hardening", name="Hardening", data="# from-hardening")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+        db.save_custom_configs(
+            [{"service_id": "app1.example.com", "type": "server_http", "name": "tmplcfg", "data": "# real", "method": "manual"}],
+            "manual",
+        )
+        matching = [c for c in db.get_custom_configs() if c["name"] == "tmplcfg" and c["service_id"] == "app1.example.com"]
+        assert len(matching) == 1
+        assert matching[0]["template"] is None
+        assert matching[0]["data"] == b"# real"
+
+    def test_layers_contribute_disjoint_configs(self, db):
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", cfg_name="frombase", data="# base-only")
+        _template_with_server_http_config(db, "hardening", name="Hardening", cfg_name="fromhard", data="# hard-only")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+        names = {c["name"]: c for c in db.get_custom_configs() if c["service_id"] == "app1.example.com"}
+        assert names["frombase"]["template"] == "base"
+        assert names["fromhard"]["template"] == "hardening"
+
+    def test_get_custom_config_single_lookup_is_last_wins(self, db):
+        """`get_custom_config` resolves one config on its own path and must not disagree."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", data="# from-base")
+        _template_with_server_http_config(db, "hardening", name="Hardening", data="# from-hardening")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+        cfg = db.get_custom_config("server_http", "tmplcfg", service_id="app1.example.com")
+        assert cfg["data"] == b"# from-hardening"
+        assert cfg["template"] == "hardening"
+
+    def test_get_custom_config_falls_through_to_an_earlier_layer(self, db):
+        """Only the last layer that actually PROVIDES the config wins — not the last layer."""
+        seed_multisite(db)
+        _template_with_server_http_config(db, "base", name="Base", cfg_name="onlybase", data="# base-only")
+        _template_with_server_http_config(db, "hardening", name="Hardening", cfg_name="other", data="# other")
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="base hardening")
+        cfg = db.get_custom_config("server_http", "onlybase", service_id="app1.example.com")
+        assert cfg["data"] == b"# base-only"
+        assert cfg["template"] == "base"

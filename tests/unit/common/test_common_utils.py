@@ -22,12 +22,14 @@ from common_utils import (  # type: ignore
     is_newer_version_available,
     normalize_bunkerweb_version,
     normalize_check_value,
+    merge_template_settings,
     normalize_list_value,
     normalize_select_value,
     plugin_tar_exclude,
     plugin_tar_filter,
     resolve_plugin_icon,
     safe_zip_extractall,
+    split_templates,
     trim_scalar_value,
 )
 
@@ -102,6 +104,133 @@ class TestNormalizeListValue:
     def test_idempotent(self):
         once = normalize_list_value(" a  b ", " ")
         assert normalize_list_value(once, " ") == once
+
+
+class TestSplitTemplates:
+    """Spec §2 / §4: the ordered id list behind a USE_TEMPLATE value."""
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("", []),
+            (None, []),
+            ("   ", []),
+            ("low", ["low"]),
+            ("low high", ["low", "high"]),
+            # Irregular whitespace is the same list -- normalize_list_value semantics.
+            ("  low   high ", ["low", "high"]),
+            ("\tlow high\n", ["low", "high"]),
+        ],
+    )
+    def test_split(self, raw, expected):
+        assert split_templates(raw) == expected
+
+    def test_order_is_preserved(self):
+        # Order IS the precedence (spec §1), so this is a behavioural assertion, not cosmetics.
+        assert split_templates("api high low") == ["api", "high", "low"]
+        assert split_templates("low high api") == ["low", "high", "api"]
+
+    def test_repeats_are_preserved(self):
+        # Spec §1: no de-duplication. Last-wins is idempotent under repetition, so a repeat is
+        # a cosmetic wart, never a merge difference (see TestMergeTemplateSettings).
+        assert split_templates("low low high") == ["low", "low", "high"]
+
+    def test_non_string_is_empty(self):
+        assert split_templates(123) == []
+        assert split_templates(["low"]) == []
+
+    def test_custom_separator(self):
+        assert split_templates("low,high", ",") == ["low", "high"]
+
+    def test_agrees_with_normalize_list_value(self):
+        # The stored form and the split must not disagree, or a value could round-trip into a
+        # different layer list than the one that was validated.
+        raw = "  low   high "
+        assert " ".join(split_templates(raw)) == normalize_list_value(raw, " ")
+
+
+class TestMergeTemplateSettings:
+    """Spec §1: last-wins, associative, and byte-identical to today for one template."""
+
+    @staticmethod
+    def _templates():
+        # Keyed (setting_id, suffix) exactly like ctx.templates (config_save.py:1150-1159).
+        return {
+            "low": {("USE_ANTIBOT", 0): "no", ("SECURITY_MODE", 0): "detect"},
+            "high": {("SECURITY_MODE", 0): "block", ("USE_MODSECURITY", 0): "yes"},
+            "api": {("USE_ANTIBOT", 0): "captcha", ("USE_LIMIT_REQ", 0): "no"},
+        }
+
+    def test_empty_list_is_empty_merge(self):
+        assert merge_template_settings(self._templates(), []) == {}
+
+    def test_single_template_is_byte_identical(self):
+        # THE ACCEPTANCE BAR (spec §8 T2): a one-element list must behave exactly like today.
+        tmpls = self._templates()
+        for template_id, settings in tmpls.items():
+            assert merge_template_settings(tmpls, [template_id]) == settings
+
+    def test_last_wins_on_shared_keys(self):
+        merged = merge_template_settings(self._templates(), ["low", "high"])
+        # Shared key: the LAST layer wins.
+        assert merged[("SECURITY_MODE", 0)] == "block"
+        # Unshared keys from both layers survive.
+        assert merged[("USE_ANTIBOT", 0)] == "no"
+        assert merged[("USE_MODSECURITY", 0)] == "yes"
+
+    def test_order_changes_the_result(self):
+        tmpls = self._templates()
+        assert merge_template_settings(tmpls, ["low", "high"])[("SECURITY_MODE", 0)] == "block"
+        assert merge_template_settings(tmpls, ["high", "low"])[("SECURITY_MODE", 0)] == "detect"
+
+    def test_repeat_is_a_no_op(self):
+        # Spec §1: last-wins is idempotent under repetition, which is why no de-dup is needed.
+        tmpls = self._templates()
+        assert merge_template_settings(tmpls, ["low", "low", "high"]) == merge_template_settings(tmpls, ["low", "high"])
+        assert merge_template_settings(tmpls, ["low", "high", "high"]) == merge_template_settings(tmpls, ["low", "high"])
+
+    def test_associativity(self):
+        """Spec §8 T5: the precedence is a genuine left fold.
+
+        merge([a,b,c]) == merge(merge([a,b]), c) == merge(a, merge([b,c]))
+
+        This is what lets every call site resolve layers independently -- config_read's
+        per-service overlay, config_save's template_setting_default lookup and Configurator's
+        generation pass each fold the same list in their own way and must not disagree.
+        """
+        tmpls = self._templates()
+        ids = ["low", "high", "api"]
+
+        flat = merge_template_settings(tmpls, ids)
+
+        left = merge_template_settings({"_ab": merge_template_settings(tmpls, ids[:2]), "c": tmpls[ids[2]]}, ["_ab", "c"])
+        right = merge_template_settings({"a": tmpls[ids[0]], "_bc": merge_template_settings(tmpls, ids[1:])}, ["a", "_bc"])
+
+        assert flat == left == right
+
+    def test_unknown_ids_are_skipped_not_fatal(self):
+        # Spec §4: generation must not die on a typo; the layers that DO resolve still apply.
+        merged = merge_template_settings(self._templates(), ["low", "hgh", "high"])
+        assert merged[("SECURITY_MODE", 0)] == "block"
+        assert merged[("USE_MODSECURITY", 0)] == "yes"
+
+    def test_suffixed_members_merge_per_slot(self):
+        # (setting_id, suffix) is the merge key, so HOST_1 and HOST_2 are independent.
+        tmpls = {
+            "a": {("REVERSE_PROXY_HOST", 1): "http://a", ("REVERSE_PROXY_HOST", 2): "http://a2"},
+            "b": {("REVERSE_PROXY_HOST", 1): "http://b"},
+        }
+        merged = merge_template_settings(tmpls, ["a", "b"])
+        assert merged[("REVERSE_PROXY_HOST", 1)] == "http://b"
+        assert merged[("REVERSE_PROXY_HOST", 2)] == "http://a2"
+
+    def test_source_templates_are_not_mutated(self):
+        # The merge runs per service inside a ThreadPoolExecutor (config_save.py:_sc_process_service);
+        # mutating ctx.templates in place would corrupt every other service in the same save.
+        tmpls = self._templates()
+        before = {tid: dict(settings) for tid, settings in tmpls.items()}
+        merge_template_settings(tmpls, ["low", "high", "api"])
+        assert tmpls == before
 
 
 class TestTrimScalarValue:

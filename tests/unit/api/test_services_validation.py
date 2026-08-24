@@ -82,6 +82,9 @@ def db(monkeypatch):
     # _full_config_snapshot(); the existing roster is what update_service resolves against.
     fake_db.get_non_default_settings.return_value = {"SERVER_NAME": SERVICE}
     fake_db.save_config.return_value = set()
+    # A bare Mock() returns a truthy Mock, which the USE_TEMPLATE gate would read as
+    # "every layer is unknown" and reject every save. Default it to "all known".
+    fake_db.unknown_template_layers.return_value = []
     monkeypatch.setattr(ROUTER, "get_db", lambda: fake_db)
     return fake_db
 
@@ -256,3 +259,62 @@ def test_patch_rejects_an_illegal_rename(db):
     assert response.status_code == 400
     assert "Invalid server_name" in response.content["message"]
     db.save_config.assert_not_called()
+
+
+# --- the USE_TEMPLATE referential gate --------------------------------------------
+# USE_TEMPLATE holds an ORDERED LIST of template ids and its regex is `^.*$` -- it has to be,
+# the ids are user-created -- so a typo clears the regex gate above and is only noticed at
+# generation time, where it silently drops ONE LAYER OF N.
+
+
+def test_create_rejects_an_unknown_template_layer(db):
+    db.is_valid_setting.return_value = (True, "")
+    db.unknown_template_layers.return_value = [(2, "typo")]
+
+    response = ROUTER.create_service(schemas.ServiceCreateRequest(server_name="new.example.com", variables={"USE_TEMPLATE": "low typo"}))
+
+    assert response.status_code == 400
+    assert "USE_TEMPLATE" in response.content["message"]
+    assert "typo" in response.content["message"]
+    assert "position 2" in response.content["message"], "the operator needs the position, not just the id"
+    db.save_config.assert_not_called()
+
+
+def test_patch_rejects_an_unknown_template_layer(db):
+    db.is_valid_setting.return_value = (True, "")
+    db.unknown_template_layers.return_value = [(1, "gone")]
+
+    response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_TEMPLATE": "gone low"}))
+
+    assert response.status_code == 400
+    assert "position 1" in response.content["message"]
+    db.save_config.assert_not_called()
+
+
+def test_a_fully_known_template_list_is_accepted(db):
+    db.is_valid_setting.return_value = (True, "")
+    db.unknown_template_layers.return_value = []
+
+    response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_TEMPLATE": "low high"}))
+
+    assert response.status_code == 200
+    db.save_config.assert_called_once()
+
+
+def test_the_referential_check_runs_only_for_use_template(db):
+    """One extra resolution per submitted USE_TEMPLATE, never per key."""
+    db.is_valid_setting.return_value = (True, "")
+
+    ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_ANTIBOT": "captcha", "USE_GZIP": "yes"}))
+
+    db.unknown_template_layers.assert_not_called()
+
+
+def test_a_key_failing_the_regex_gate_is_not_also_layer_checked(db):
+    """The `continue` after the regex failure: reporting both reasons for one key is noise."""
+    db.is_valid_setting.side_effect = _rejecting("USE_TEMPLATE")
+
+    response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_TEMPLATE": "low"}))
+
+    assert response.status_code == 400
+    db.unknown_template_layers.assert_not_called()

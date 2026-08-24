@@ -96,6 +96,7 @@ def _render_band(
     templates=None,
     config=None,
     resource_conflicts=None,
+    template_overlaps=None,
 ):
     env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
     env.globals["csrf_token"] = lambda: "test-csrf-token"
@@ -115,6 +116,7 @@ def _render_band(
         templates=templates if templates is not None else {},
         config=config if config is not None else {},
         resource_conflicts=resource_conflicts if resource_conflicts is not None else {},
+        template_overlaps=template_overlaps if template_overlaps is not None else {},
     )
 
 
@@ -567,16 +569,26 @@ def test_the_template_picker_posts_nothing_itself():
     assert 'name="USE_TEMPLATE"' not in html
     picker = re.search(r"<select[^>]*service-template-picker[^>]*>", html).group(0)
     assert "name=" not in picker
-    # the stored value drives the selection and is exposed for the "did it change?" test.
-    assert 'data-current="low"' in picker
-    assert re.search(r'<option value="low" selected>', html)
+    # The add-button must not carry one either -- it is the second control in this column now.
+    add_button = re.search(r"<button[^>]*service-template-add[^>]*>", html).group(0)
+    assert "name=" not in add_button
+    # The stored value is exposed for the "did it change?" test -- on the LAYER LIST now, not
+    # on the picker: the picker chooses what to ADD, the list holds what is attached.
+    assert 'data-current="low"' in re.search(r'<div[^>]*id="service-template-layers"[^>]*>', html).group(0)
+    # ...and the stored layer is rendered SERVER-SIDE, so a broken JS bundle still shows the
+    # real list instead of an empty one.
+    assert re.search(r'<li[^>]*data-id="low"', html)
 
 
-def test_the_template_picker_carries_a_stored_template_missing_from_the_list():
-    """`ui` is filtered out of the list (as plugins_settings_easy.html:27 does) and an
-    externally-set template may not be installed at all. Either way a select with no
-    matching option shows its FIRST option, which would misreport the service as
-    templateless."""
+def test_the_layer_list_carries_a_stored_template_missing_from_the_add_list():
+    """`ui` is filtered out of the ADD list (as plugins_settings_easy.html:27 does) and an
+    externally-set template may not be installed at all.
+
+    The old single `<select>` had to carry such a value as a synthetic option or it would show
+    its FIRST option and misreport the service as templateless. The layer list has no such
+    failure mode by construction -- the chips come from the STORED value, never from the
+    catalog -- but the guarantee is the same and still has to hold: a stored layer is always
+    visible, whether or not it can be added from here."""
     html = _render_band(
         "app.example.com",
         _empty_attachments(),
@@ -584,8 +596,9 @@ def test_the_template_picker_carries_a_stored_template_missing_from_the_list():
         config={"USE_TEMPLATE": {"value": "ui", "method": "ui"}},
     )
 
-    assert '<option value="ui" selected>ui</option>' in html
-    assert html.count('value="ui"') == 1, "the filtered-out entry must not also appear in the list"
+    assert re.search(r'<li[^>]*data-id="ui"', html), "a stored `ui` layer must still be shown"
+    assert '<option value="ui"' not in html, "...but must not be offered in the add list"
+
     # a template that is not installed at all gets the same treatment.
     gone = _render_band(
         "app.example.com",
@@ -593,7 +606,41 @@ def test_the_template_picker_carries_a_stored_template_missing_from_the_list():
         templates=_TEMPLATES,
         config={"USE_TEMPLATE": {"value": "vanished", "method": "ui"}},
     )
-    assert '<option value="vanished" selected>vanished</option>' in gone
+    assert re.search(r'<li[^>]*data-id="vanished"', gone)
+    assert "vanished" in gone
+
+
+def test_every_stored_layer_is_rendered_in_order_and_none_is_dropped():
+    """The acceptance criterion for the whole picker: no surface may silently lose a layer.
+
+    Rendered server-side, in stored order, one chip per layer -- so the list is correct even
+    with the JS bundle broken, and the position badges say which layer wins (last)."""
+    html = _render_band(
+        "app.example.com",
+        _empty_attachments(),
+        templates=_TEMPLATES,
+        config={"USE_TEMPLATE": {"value": "low high", "method": "ui"}},
+    )
+
+    chips = re.findall(r'<li[^>]*data-id="([^"]+)"', html)
+    assert chips == ["low", "high"], "stored order is the precedence order and must be preserved"
+    assert 'data-current="low high"' in html
+    # An already-attached template is not offered again by the add list (the JS disables it,
+    # but the stored order must not depend on that).
+    assert re.search(r'<li[^>]*data-id="low"[^>]*>.*?class="badge bg-secondary layer-position">1<', html, re.S)
+
+
+def test_an_irregularly_spaced_stored_value_is_still_one_chip_per_layer():
+    """`.split(" ") | reject("equalto", "")` and not a bare `.split()`: runs of separators
+    collapse (no empty chip), while a tab stays PART of a (bogus) id rather than splitting it
+    -- the storage contract common_utils.split_templates enforces on the Python side."""
+    html = _render_band(
+        "app.example.com",
+        _empty_attachments(),
+        templates=_TEMPLATES,
+        config={"USE_TEMPLATE": {"value": " low  high ", "method": "ui"}},
+    )
+    assert re.findall(r'<li[^>]*data-id="([^"]+)"', html) == ["low", "high"]
 
 
 @pytest.mark.parametrize(
@@ -622,7 +669,11 @@ def test_a_service_with_no_template_row_still_gets_a_picker():
     )
 
     assert 'id="service-template-picker"' in html
-    assert re.search(r'<option value="" selected\s*>' + re.escape(english("service.resources.template.none")), html)
+    assert 'id="service-template-add"' in html
+    # No chips, and the empty state is visible rather than an empty box.
+    assert not re.findall(r'<li[^>]*data-id="', html)
+    empty = re.search(r'<div[^>]*id="service-template-empty"[^>]*>', html).group(0)
+    assert "d-none" not in empty
 
 
 def test_the_band_hands_the_conflict_context_to_the_dialog():
@@ -684,15 +735,27 @@ def test_the_template_picker_js_cannot_write_use_template_unguarded():
     # The wire itself: the picker drives the compose shelf's own control-key input.
     assert "$('[name=\"USE_TEMPLATE\"]')" in source
 
-    # Twice: once at load (grey the picker) and once at change time (refuse to write). One
-    # value must reach request.form -- USE_TEMPLATE is in restore_skip and is never restored,
-    # so writing into two inputs, or into none while the user thinks it took, loses the row.
+    # Twice: once at load (freeze the controls) and once inside commit() (refuse to write).
+    # One value must reach request.form -- USE_TEMPLATE is in restore_skip and is never
+    # restored, so writing into two inputs, or into none while the user thinks it took, loses
+    # the whole layer list.
     assert source.count("length !== 1") == 2
 
     # attr, not .data(): jQuery coerces a numeric-looking data-* value to a Number, which is
     # the cloned-<select> defect the chantier already chased through settings-widgets.js.
-    assert 'picker.attr("data-current")' in source
-    assert 'picker.data("current")' not in source
+    assert 'layersRoot.attr("data-current")' in source
+    assert 'layersRoot.data("current")' not in source
+
+    # ONE writer of the hidden input, and it always writes the WHOLE list. Any second writer
+    # could persist a list the chips do not show -- which is the silent-layer-drop this
+    # picker exists to make impossible.
+    assert source.count("target.val(") == 1
+
+    # Splitting must match the storage contract (common_utils.split_templates): the literal
+    # separator only. A whitespace regex would turn a tab inside a (bogus) id into a split and
+    # invent a layer that was never stored.
+    assert '.split(" ")' in source
+    assert "split(/\\s+/)" not in source
 
     # The primary-certificate demotion succeeds -- it is a warning, never a refusal, so it
     # must not gate the submit button the way a real conflict does.
@@ -712,7 +775,111 @@ def test_the_template_picker_js_cannot_write_use_template_unguarded():
     # A path typed by hand must not resolve off Object.prototype.
     assert "Object.prototype.hasOwnProperty.call(claimedPaths, path)" in source
 
-    # The one line the whole column exists for. Without it the picker still shows the pending
-    # badge and the "switches this service from X to Y" warning while the posted USE_TEMPLATE
-    # stays at the stored value -- the silent no-op the greying exists to avoid.
-    assert "target.val(chosen);" in source
+    # The one line the whole column exists for. Without it the chips and the pending badge move
+    # while the posted USE_TEMPLATE stays at the stored value -- the silent no-op the frozen
+    # controls exist to avoid. It writes the joined LIST, never a single chosen id.
+    assert 'const value = layers.join(" ");' in source
+    assert "target.val(value);" in source
+
+
+def _attr(html, element_id, attribute):
+    """The value of one attribute, as an HTML PARSER sees it -- not as a regex does.
+
+    The distinction is the whole point of the test below: a regex over the source text reads
+    the intended JSON, while the browser stops the attribute at the first `"` and hands the JS
+    a truncated string. Only a real parse can tell the two apart."""
+    from html.parser import HTMLParser
+
+    found = {}
+
+    class _Parser(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if attrs.get("id") == element_id:
+                found["value"] = attrs.get(attribute)
+
+    _Parser().feed(html)
+    return found.get("value")
+
+
+def test_the_overlap_matrix_survives_html_parsing_as_json():
+    """`data-overlaps` must round-trip through the PARSER, not just appear in the source.
+
+    Jinja's `tojson` escapes `<>&'` but deliberately NOT `"` -- it is built for a
+    single-quoted attribute. Placed in a double-quoted one the first `"` of the JSON closes
+    the attribute: the browser reads `data-overlaps` as `{`, `JSON.parse` throws,
+    service-resources.js swallows it into `overlaps = {}`, and the whole overlap preview --
+    the `overridden` badge and its tooltip -- silently never renders on any service. Green
+    regex-based tests cannot see that, because the source text looks right.
+    """
+    overlaps = {"low": {"high": 12}, "high": {"low": 12, "api": 3}}
+
+    html = _render_band(
+        "app.example.com",
+        _empty_attachments(),
+        templates=_TEMPLATES,
+        config={"USE_TEMPLATE": {"value": "low high", "method": "ui"}},
+        template_overlaps=overlaps,
+    )
+
+    raw = _attr(html, "service-template-layers", "data-overlaps")
+    assert raw is not None, "the attribute is missing entirely"
+    assert json.loads(raw) == overlaps, f"the parser saw a truncated attribute: {raw!r}"
+
+
+def test_the_overlap_matrix_is_not_html_injectable():
+    """Single-quoting is safe: `tojson` \\u-escapes `<`, `>`, `&` and `'`, so a template id
+    cannot break out of the attribute or open a tag."""
+    html = _render_band(
+        "app.example.com",
+        _empty_attachments(),
+        templates=_TEMPLATES,
+        config={"USE_TEMPLATE": {"value": "low", "method": "ui"}},
+        template_overlaps={"a'><script>alert(1)</script>": {"low": 1}},
+    )
+
+    assert "<script>alert(1)</script>" not in html
+    assert json.loads(_attr(html, "service-template-layers", "data-overlaps")) == {"a'><script>alert(1)</script>": {"low": 1}}
+
+
+def test_repeated_layers_render_one_row_each_in_order():
+    """The invariant the remove/reorder handlers depend on: rows correspond 1:1 AND in order to
+    the stored layers, repeats included.
+
+    Repeats are legal -- last-wins is idempotent under repetition, so nothing rejects
+    "low low high" from an env var, an autoconf label, the API or the raw pane. The handlers key
+    on the row's `.index()`, which is only correct because of this."""
+    html = _render_band(
+        "app.example.com",
+        _empty_attachments(),
+        templates=_TEMPLATES,
+        config={"USE_TEMPLATE": {"value": "low low high", "method": "ui"}},
+    )
+
+    assert re.findall(r'<li[^>]*data-id="([^"]+)"', html) == ["low", "low", "high"]
+    assert re.findall(r'class="badge bg-secondary layer-position">(\d+)<', html) == ["1", "2", "3"]
+
+
+def test_the_layer_handlers_key_on_row_position_not_on_the_template_id():
+    """Duplicate layers broke both handlers while they keyed on the id.
+
+    `layers.filter((layer) => layer !== id)` removed EVERY copy, so clicking x on the second
+    `low` dropped two layers at once; `layers.indexOf(id)` always resolved to the FIRST copy, so
+    up/down on the second `low` moved the first chip. Both are silent layer drops -- exactly
+    what this file's header invariant forbids. There is no jsdom or jQuery in this toolchain, so
+    the wiring is pinned here and the 1:1 row/layer correspondence it relies on is pinned by
+    test_repeated_layers_render_one_row_each_in_order above."""
+    source = (Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "static" / "js" / "pages" / "service-resources.js").read_text(encoding="utf-8")
+
+    remove_start = source.index('layerList.on("click", ".layer-remove"')
+    reorder_start = source.index('layerList.on("click", ".layer-up, .layer-down"')
+    remove = source[remove_start:reorder_start]
+    reorder = source[reorder_start:]
+    reorder = reorder[: reorder.index("renderLayers();") + len("renderLayers();")]
+
+    for name, block in (("remove", remove), ("reorder", reorder)):
+        assert 'closest("li").index()' in block, f"the {name} handler does not key on the row position"
+        assert "indexOf(" not in block, f"the {name} handler still resolves a template id to an index"
+        assert 'attr("data-id")' not in block, f"the {name} handler still keys on the template id"
+
+    assert "layers.splice(index, 1)" in remove

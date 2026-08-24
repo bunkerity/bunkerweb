@@ -76,6 +76,9 @@ def db(monkeypatch):
     # The ownership gate must be exercised against the real compatibility rule, not a Mock
     # (a Mock return value is truthy, i.e. "always compatible", which would hide the gate).
     fake_db._methods_are_compatible = Database._methods_are_compatible
+    # Same reason as above: a bare Mock is truthy, which the USE_TEMPLATE gate would read as
+    # "every layer is unknown" and reject every save.
+    fake_db.unknown_template_layers.return_value = []
     monkeypatch.setattr(ROUTER, "get_db", lambda: fake_db)
     return fake_db
 
@@ -243,3 +246,40 @@ def test_patch_does_not_let_the_synthetic_server_name_method_trigger_a_conflict(
 
     assert response.status_code == 200
     writable_db.save_config.assert_called_once()
+
+
+# --- the USE_TEMPLATE referential gate --------------------------------------------
+
+
+def test_patch_rejects_an_unknown_global_template_layer(db):
+    """A global USE_TEMPLATE is the fallback for every service without its own, so a typo here
+    drops a layer fleet-wide. Its regex is `^.*$`, so only a referential check can catch it."""
+    db.is_valid_setting.return_value = (True, "")
+    db.unknown_template_layers.return_value = [(2, "typo")]
+
+    response = ROUTER.update_global_settings(schemas.GlobalSettingsUpdate({"USE_TEMPLATE": "low typo"}))
+
+    assert response.status_code == 400
+    assert "USE_TEMPLATE" in response.content["message"]
+    assert "position 2" in response.content["message"]
+    db.save_config.assert_not_called()
+
+
+def test_patch_accepts_a_fully_known_global_template_list(db):
+    db.is_valid_setting.return_value = (True, "")
+    db.unknown_template_layers.return_value = []
+    db.save_config.return_value = set()
+
+    response = ROUTER.update_global_settings(schemas.GlobalSettingsUpdate({"USE_TEMPLATE": "low high"}))
+
+    assert response.status_code == 200
+    db.save_config.assert_called_once()
+
+
+def test_the_layer_check_runs_only_for_use_template(db):
+    db.is_valid_setting.return_value = (True, "")
+    db.save_config.return_value = set()
+
+    ROUTER.update_global_settings(schemas.GlobalSettingsUpdate({"USE_ANTIBOT": "captcha"}))
+
+    db.unknown_template_layers.assert_not_called()

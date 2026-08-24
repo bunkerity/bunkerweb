@@ -3,6 +3,7 @@
 from fixtures.seed import (
     add_global_value,
     add_select_setting,
+    add_service_setting,
     add_setting,
     seed_minimal,
 )
@@ -435,3 +436,153 @@ class TestUpdateTemplateBranches:
         db.create_template("low", **_minimal_template_args())
         assert db.update_template("low", plugin_id="general") == ""
         assert db.get_templates()["low"]["plugin_id"] == "general"
+
+
+class TestResolveTemplateSettings:
+    """``USE_TEMPLATE`` holds an ORDERED LIST; ``resolve_template_settings`` folds it last-wins
+    and reports the layers that do not exist."""
+
+    @staticmethod
+    def _layers(db):
+        seed_minimal(db)
+        add_setting(db, "SECURITY_MODE_X", context="multisite")
+        assert (
+            db.create_template(
+                "base",
+                name="Base",
+                settings={"USE_REVERSE_PROXY": "yes", "SECURITY_MODE_X": "detect"},
+                steps=[{"title": "S", "settings": ["USE_REVERSE_PROXY", "SECURITY_MODE_X"]}],
+            )
+            == ""
+        )
+        assert (
+            db.create_template(
+                "hardening",
+                name="Hardening",
+                settings={"SECURITY_MODE_X": "block"},
+                steps=[{"title": "S", "settings": ["SECURITY_MODE_X"]}],
+            )
+            == ""
+        )
+
+    def test_single_id_is_byte_identical(self, db):
+        """THE ACCEPTANCE BAR: a one-element list resolves exactly as a bare id always did."""
+        self._layers(db)
+        merged, unknown = db.resolve_template_settings("base")
+        assert merged == {"USE_REVERSE_PROXY": "yes", "SECURITY_MODE_X": "detect"}
+        assert unknown == []
+        assert db.get_template_settings("base") == merged
+
+    def test_last_wins(self, db):
+        self._layers(db)
+        merged, unknown = db.resolve_template_settings("base hardening")
+        assert merged == {"USE_REVERSE_PROXY": "yes", "SECURITY_MODE_X": "block"}
+        assert unknown == []
+
+    def test_order_is_significant(self, db):
+        self._layers(db)
+        assert db.resolve_template_settings("hardening base")[0]["SECURITY_MODE_X"] == "detect"
+        assert db.resolve_template_settings("base hardening")[0]["SECURITY_MODE_X"] == "block"
+
+    def test_repeat_is_a_no_op(self, db):
+        self._layers(db)
+        assert db.resolve_template_settings("base base hardening")[0] == db.resolve_template_settings("base hardening")[0]
+
+    def test_irregular_whitespace_is_the_same_list(self, db):
+        self._layers(db)
+        assert db.resolve_template_settings("  base   hardening ")[0] == db.resolve_template_settings("base hardening")[0]
+
+    def test_unknown_layer_reported_and_skipped(self, db):
+        """``{}`` is ambiguous -- a settings-less template and a typo look identical -- so the
+        unknown ids come back separately for the caller to report by position."""
+        self._layers(db)
+        merged, unknown = db.resolve_template_settings("base hgh hardening")
+        assert unknown == ["hgh"]
+        assert merged["SECURITY_MODE_X"] == "block"  # the layers that DO exist still apply
+
+    def test_settings_less_template_is_known_not_unknown(self, db):
+        """Probes bw_templates, not the settings rows: an empty template must not read as a typo."""
+        self._layers(db)
+        assert db.create_template("empty", name="Empty", settings={}, steps=[{"title": "S", "settings": []}]) == ""
+        merged, unknown = db.resolve_template_settings("empty")
+        assert unknown == []
+        assert merged == {}
+
+    def test_empty_value(self, db):
+        self._layers(db)
+        assert db.resolve_template_settings("") == ({}, [])
+
+
+class TestDeleteTemplateWithLayers:
+    """The delete guard is a MEMBERSHIP test: exact-value equality let a layer of a
+    multi-template service be deleted, leaving a dangling id that then resolves as unknown at
+    every generation."""
+
+    def test_delete_blocked_when_one_layer_of_a_service_list(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="low high")
+        assert db.delete_template("low") == "Template is currently used by a service"
+
+    def test_delete_blocked_when_one_layer_of_the_global_list(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        add_global_value(db, setting_id="USE_TEMPLATE", value="high low")
+        assert db.delete_template("low") == "Template is currently used by the global settings"
+
+    def test_unreferenced_template_still_deletable(self, db):
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="high medium")
+        assert db.delete_template("low") == ""
+
+    def test_substring_of_a_longer_id_does_not_block(self, db):
+        """A token match, not a substring match -- 'low' must not be pinned by 'lowest'."""
+        seed_minimal(db)
+        db.create_template("low", **_minimal_template_args())
+        add_service_setting(db, service_id="app1.example.com", setting_id="USE_TEMPLATE", value="lowest")
+        assert db.delete_template("low") == ""
+
+
+class TestUnknownTemplateLayers:
+    """The save-path counterpart of the generator's per-position warning.
+
+    ``USE_TEMPLATE``'s regex is ``^.*$`` -- it has to be, the ids are user-created -- so a typo
+    clears every lexical gate and is only noticed at generation, which drops one layer of N."""
+
+    @staticmethod
+    def _layers(db):
+        seed_minimal(db)
+        assert db.create_template("base", **_minimal_template_args()) == ""
+
+    def test_all_known_is_empty(self, db):
+        self._layers(db)
+        assert db.unknown_template_layers("base") == []
+
+    def test_empty_value_is_empty(self, db):
+        self._layers(db)
+        assert db.unknown_template_layers("") == []
+
+    def test_reports_the_1_based_position(self, db):
+        self._layers(db)
+        assert db.unknown_template_layers("base typo") == [(2, "typo")]
+        assert db.unknown_template_layers("typo base") == [(1, "typo")]
+
+    def test_several_unknown_layers(self, db):
+        self._layers(db)
+        assert db.unknown_template_layers("a base b") == [(1, "a"), (3, "b")]
+
+    def test_a_repeated_unknown_id_is_blamed_at_each_position(self, db):
+        """``list.index()`` would report position 1 twice."""
+        self._layers(db)
+        assert db.unknown_template_layers("typo base typo") == [(1, "typo"), (3, "typo")]
+
+    def test_a_settings_less_template_is_known(self, db):
+        """Probes bw_templates, so an empty template is not mistaken for a typo."""
+        seed_minimal(db)
+        assert db.create_template("empty", name="Empty", settings={}, steps=[{"title": "S", "settings": []}]) == ""
+        assert db.unknown_template_layers("empty") == []
+
+    def test_irregular_whitespace_does_not_invent_a_layer(self, db):
+        self._layers(db)
+        assert db.unknown_template_layers("  base   ") == []
