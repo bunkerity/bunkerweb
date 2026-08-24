@@ -135,7 +135,6 @@ for test in $tests ; do
         exit 1
     fi
 
-    first_try=true
     retries=$(redis_cli get retries)
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] || [ -z "$retries" ] ; then
@@ -143,7 +142,14 @@ for test in $tests ; do
         exit 1
     fi
 
-    while $first_try || [ "$retries" -gt 0 ] ; do
+    # `retries: N` in a spec means N retries AFTER the first attempt, so N+1 attempts in all.
+    # Counting attempts rather than juggling a "first try" flag against a counter that was also
+    # decremented before it was tested is what fixes the off-by-one: `retries: 1` used to spend
+    # its only retry on the decrement and exit immediately, so every action carrying it -- all
+    # four whitelist rdns* ones, among others -- never retried at all.
+    attempts=$((retries + 1))
+
+    while [ "$attempts" -gt 0 ] ; do
         if [ "$restart_stack" -eq 1 ] ; then
             # Baseline for wait.sh: how many configuration pushes had happened before this
             # restart. Counting them afterwards alone would accept one the previous action
@@ -206,14 +212,14 @@ for test in $tests ; do
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "RUN" "❌" "Test \"$test\" failed"
-            retries=$((retries - 1))
-            if [ "$retries" -gt 0 ] ; then
-                log "RUN" "⚠️" "Retrying test \"$test\" ($retries retries left)"
+            attempts=$((attempts - 1))
+            if [ "$attempts" -gt 0 ] ; then
+                log "RUN" "⚠️" "Retrying test \"$test\" ($attempts attempt(s) left)"
             else
                 exit 1
             fi
         else
-            retries=0
+            attempts=0
         fi
 
         if [[ -n ${DEBUG:-} ]] ; then
@@ -234,7 +240,6 @@ for test in $tests ; do
             exit 1
         fi
 
-        first_try=false
         first_run=false
 
         if [ "$restart_stack" -eq 1 ] ; then
