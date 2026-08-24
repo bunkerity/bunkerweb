@@ -264,8 +264,12 @@ jobs:
       - name: Pull UI docker image
         if: inputs.TYPE == 'ui' && (needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes')
         run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-ui:tests
+      # Docker too, for the `swarm*` specs only: they deploy tests/swarm/stack*.yml with
+      # `--resolve-image never`, and that stack runs bw-autoconf. Without the image the task is
+      # rejected with "No such image: bunkerity/bunkerweb-autoconf:tests", the stack never
+      # converges and all three swarm specs fail on the Docker arm.
       - name: Pull Autoconf docker image
-        if: needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        if: needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes' || (needs.setup.outputs.integration == 'Docker' && startsWith(needs.setup.outputs.test, 'swarm'))
         run: docker pull ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-autoconf:tests
       - name: Pull All-in-one docker image
         if: needs.setup.outputs.integration == 'All-in-one'
