@@ -88,9 +88,14 @@ jobs:
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: /tmp/${{ inputs.LINUX }}
-      # Yank existing package (generic)
+      # Yank existing package (generic). Packagecloud stores the file under its
+      # metadata-derived name, which on the dev/beta channels carries a -dev/-beta
+      # version the inputs don't — try every variant so a re-push never collides.
       - name: Yank existing package
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ env.DIST }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        run: |
+          for V in "${{ inputs.BW_VERSION }}" "${{ inputs.BW_VERSION }}-dev" "${{ inputs.BW_VERSION }}-beta"; do
+            package_cloud yank bunkerity/${{ inputs.REPO }}/${{ env.DIST }} "bunkerweb${{ inputs.SEPARATOR }}${V}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}" || true
+          done
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

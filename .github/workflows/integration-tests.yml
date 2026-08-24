@@ -97,7 +97,14 @@ jobs:
           echo "suffix=$SUFFIX" >> $GITHUB_OUTPUT
           echo "package=$PACKAGE" >> $GITHUB_OUTPUT
 
-          echo "linux_release=$INPUT_RELEASE" >> $GITHUB_OUTPUT
+          # The package inside the *-tests image carries the version linux-build.yml stamped with
+          # update-version.sh — "<release>-dev" for the 1.5/1.7 dev channels — so the filename the
+          # Linux arm extracts must use that version, not the bare release.
+          LINUX_RELEASE="$INPUT_RELEASE"
+          case "$INPUT_RELEASE" in
+            1.5|1.7) LINUX_RELEASE="${INPUT_RELEASE}-dev" ;;
+          esac
+          echo "linux_release=$LINUX_RELEASE" >> $GITHUB_OUTPUT
 
   test:
     permissions:
