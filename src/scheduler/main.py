@@ -136,6 +136,34 @@ def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
     return f"{scheme}://{host}:{port}"
 
 
+def build_cmd_env() -> Dict[str, str]:
+    """Environment handed to the gen/ and save_config subprocesses.
+
+    The logging variables have to travel with it. Without them the child falls back to
+    LOG_TYPES=stderr, so on Linux -- where the scheduler runs with LOG_TYPES=file -- every
+    error the config saver reports lands in journald while the scheduler log file only keeps
+    the one-line "failed" summary, which reads as "no logs at all".
+    """
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+        value = getenv(key)
+        if value:
+            cmd_env[key] = value
+
+    for key, value in environ.items():
+        if "CUSTOM_CONF" in key:
+            cmd_env[key] = value
+
+    return cmd_env
+
+
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
     while APPLYING_CHANGES.is_set() and (datetime.now().astimezone() - current_time).seconds < 30:
@@ -164,20 +192,7 @@ def handle_reload(signum, frame):
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
@@ -555,16 +570,7 @@ def generate_caches() -> Set[str]:
 
 
 def generate_configs(logger: Logger = LOGGER) -> bool:
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-        "DATABASE_URI": getenv("DATABASE_URI", ""),
-    }
-
-    if getenv("TZ"):
-        cmd_env["TZ"] = getenv("TZ")
+    cmd_env = build_cmd_env()
 
     # run the generator
     proc = subprocess_run(
@@ -810,20 +816,7 @@ if __name__ == "__main__":
                 env_content = "\n".join(f"{key}={value}" for key, value in environ.items() if "CUSTOM_CONF" not in key)
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             # run the config saver
             proc = subprocess_run(
@@ -888,20 +881,7 @@ if __name__ == "__main__":
                 )
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
