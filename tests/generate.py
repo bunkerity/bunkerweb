@@ -143,6 +143,12 @@ if ARGS.integration == "All-in-one":
     config["variables"]["DNS_RESOLVERS"] = "10.20.30.20 127.0.0.11"
     config["variables"]["SERVICE_UI"] = "yes" if ARGS.type == "ui" else "no"
     config["variables"]["SERVICE_API"] = "yes" if ARGS.type == "api" else "no"
+    # Without this the AIO entrypoint mints a random API_TOKEN of its own (src/all-in-one/
+    # entrypoint.sh). The stack still works — every caller is inside the container and reads the
+    # same generated value — but a spec that authenticates from the host cannot know it, so
+    # `core/api.yml` sends `Bearer tests-secret-token` and the instance answers anything but 200.
+    # Linux pins the same token for the same reason; the branch below does it for the others.
+    config["variables"]["API_TOKEN"] = API_TEST_TOKEN
 elif ARGS.integration == "Linux":
     # The package provisions one shared API_TOKEN into variables.env (postinstall.sh) and both
     # the scheduler and the API read it from there — there is no second env file for it. This

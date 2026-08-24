@@ -69,6 +69,22 @@ if [ "${SERVICE_WORKER:-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
     exit 1
   fi
 
+  # The entrypoint derives CELERY_BROKER_URL from REDIS_* and exports it, but only supervisord's
+  # children inherit that -- a HEALTHCHECK process is started fresh from the container env, where
+  # the variable is unset (it is in neither the image ENV nor variables.env). `celery inspect ping`
+  # then falls back to redis://127.0.0.1:6379/0, which is the right broker only when the AIO runs
+  # the embedded Redis with no password: point REDIS_HOST at an external server, or set
+  # REDIS_PASSWORD, and the probe dialled a broker nobody listens on, so a healthy worker kept the
+  # container unhealthy for ever. Same derivation as entrypoint.sh -- keep the two in sync. An
+  # explicit CELERY_BROKER_URL still wins, there as here.
+  if [ -z "${CELERY_BROKER_URL:-}" ]; then
+    broker_credentials=""
+    if [ -n "${REDIS_PASSWORD:-}" ]; then
+      broker_credentials=":${REDIS_PASSWORD}@"
+    fi
+    export CELERY_BROKER_URL="redis://${broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0"
+  fi
+
   # Not executable in the image (COPY src/worker keeps 0644), so run it through bash.
   if ! bash /usr/share/bunkerweb/worker/healthcheck-worker.sh; then
     echo "Worker health check failed"
