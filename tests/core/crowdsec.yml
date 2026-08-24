@@ -24,30 +24,61 @@ actions:
     type: status
     url: "http://www.example.com"
     status: 403
+    # full_clean is load-bearing for not_yet_blocked_stream: live_query cached this ban in
+    # lua_shared_dict crowdsec_cache, which SURVIVES reloads -- only the `down -v` behind
+    # full_clean clears it. Drop this line and the not-yet assertion turns deterministically
+    # 403 for a reason no log will point at.
     full_clean: true
 
   dirb_1:
     type: tool
     tool: "dirb"
     arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
-    # Same bound, and here it also protects the next assertion rather than only this action:
-    # `not_yet_blocked_stream` demands a 200, so this scan must finish before the bouncer pulls
-    # the decision at CROWDSEC_UPDATE_FREQUENCY=60. Unbounded, it outlasted that window.
+    # A bound on a provocation, nothing more -- it no longer protects the next assertion. In
+    # stream mode at the frequency below, the ban cannot reach the bouncer while dirb runs, so
+    # the scan is never blocked and cannot deadlock on its own success the way `dirb` above
+    # does. Measured on an isolated stack: the whole 4612-word scan finished in 6s and CrowdSec
+    # had already created the decision ~1s in, so the bound does not even fire. It stays because
+    # `-f` recurses into what it finds and a runner with more to find sends far more requests
+    # (86112 in the CI run this replaced), and the action's cost should stay predictable.
     timeout: 30
     config:
       CROWDSEC_MODE: "stream"
-    restart_stack: false
+      # An hour away: nothing the bouncer does can interfere with the scan, and the decision
+      # cannot reach it before the next action asserts that it has not. The next action lowers
+      # this, and the stack restart between the two is what applies it -- which is why this
+      # action no longer carries `restart_stack: false`.
+      CROWDSEC_UPDATE_FREQUENCY: "3600"
   not_yet_blocked_stream:
     type: status
     url: "http://www.example.com"
     status: 200
+    config:
+      # Re-stated because the stack restarts here and the spec-level default is `live`.
+      CROWDSEC_MODE: "stream"
+      CROWDSEC_UPDATE_FREQUENCY: "10"
+    # This assertion used to be a race against a wall clock: a 60s window opened by the end of
+    # dirb_1 and closed by the bouncer's next pull, which the harness lost outright when it
+    # spent 4min11s between the two actions. It is a property now. The bouncer arms its stream
+    # timer on the FIRST request that reaches crowdsec:access() after a reload (bouncer.lua:505
+    # SetupStream -> :488 `ngx.timer.at(UPDATE_FREQUENCY, stream_query)`), and measurement says
+    # nothing else reaches it -- the instance API and the healthcheck never do. The restart the
+    # previous action now triggers reloads the bouncer, so THIS request is what starts the
+    # clock and the pull it schedules is 10s behind it. A 200 cannot lose a race it starts
+    # itself, however slow the harness is.
     restart_stack: false
   blocked_stream:
     type: status
     url: "http://www.example.com"
     status: 403
-    # Longer than CROWDSEC_UPDATE_FREQUENCY so the bouncer has pulled the decision by now.
-    delay: 70
+    # ...and the decision does arrive. No config and no restart here, both on purpose: a restart
+    # would re-arm the timer and make THIS request the one that starts the clock, i.e. a
+    # guaranteed 200 -- measured, that is what the first request after a restart returns, with
+    # the 403 only 11s behind it. The timer the previous action armed keeps firing every 10s
+    # instead, so one bounded delay covers it three times over. The retries are free because
+    # nothing restarts between them.
+    delay: 30
+    retries: 2
 
 config:
   USE_MODSECURITY: "no"
@@ -62,10 +93,8 @@ config:
   CROWDSEC_REQUEST_TIMEOUT: "1000"
   CROWDSEC_EXCLUDE_LOCATION: ""
   CROWDSEC_CACHE_EXPIRATION: "1"
-  # not_yet_blocked_stream asserts the bouncer has NOT pulled the ban yet, so this window has to
-  # outlast the dirb run that triggers it -- at 10s the assertion raced dirb's own duration and
-  # failed on any host where the scan takes longer than the interval.
-  CROWDSEC_UPDATE_FREQUENCY: "60"
+  # CROWDSEC_UPDATE_FREQUENCY is deliberately absent here: it only means something in stream
+  # mode, and the two stream actions each set the value their own assertion depends on.
   CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
   CROWDSEC_APPSEC_FAILURE_ACTION: "passthrough"
   CROWDSEC_APPSEC_CONNECT_TIMEOUT: "100"
