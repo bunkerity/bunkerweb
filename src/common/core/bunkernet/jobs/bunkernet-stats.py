@@ -57,20 +57,27 @@ try:
     rows.append({"metric": "blocklist_size", "value": _count_lines(JOB.db.get_job_cache_file("bunkernet-data", "ip.list"))})
     rows.append({"metric": "reports_pending", "value": _count_reports(JOB.db.get_job_cache_file("bunkernet-send", "reports.json"))})
     instance_id = JOB.db.get_job_cache_file("bunkernet-register", "instance.id")
-    rows.append({"metric": "registered", "value": 1 if instance_id and instance_id.strip() else 0})
+    registered = bool(instance_id and instance_id.strip())
+    rows.append({"metric": "registered", "value": 1 if registered else 0})
 
-    # Best-effort per-instance connectivity (never fails the job).
-    try:
-        instances = JOB.db.get_instances(with_credential=True)
-        if instances:
-            caller = ApiCaller([API.from_instance(instance) for instance in instances])
-            _, responses = caller.send_to_apis("POST", "/bunkernet/ping", response=True)
-            if isinstance(responses, dict):
-                for hostname, resp in responses.items():
-                    connected = isinstance(resp, dict) and resp.get("status") == "success"
-                    rows.append({"metric": "connected", "value": 1 if connected else 0, "instance_hostname": hostname})
-    except Exception:
-        LOGGER.debug(format_exc())
+    # Best-effort per-instance connectivity (never fails the job). Only worth asking when the
+    # deployment is registered: without an ID the instance answers /bunkernet/ping with HTTP 500
+    # "missing instance ID" and ApiCaller logs that as an ❌ line — which fails every spec that
+    # asserts a clean log (db, modsecurity, upgrade) on the integrations where the worker and the
+    # scheduler share a single log stream. USE_BUNKERNET=no lands here too: bunkernet-register
+    # skips, so no ID is ever cached.
+    if registered:
+        try:
+            instances = JOB.db.get_instances(with_credential=True)
+            if instances:
+                caller = ApiCaller([API.from_instance(instance) for instance in instances])
+                _, responses = caller.send_to_apis("POST", "/bunkernet/ping", response=True)
+                if isinstance(responses, dict):
+                    for hostname, resp in responses.items():
+                        connected = isinstance(resp, dict) and resp.get("status") == "success"
+                        rows.append({"metric": "connected", "value": 1 if connected else 0, "instance_hostname": hostname})
+        except Exception:
+            LOGGER.debug(format_exc())
 
     err = JOB.db.ext("bunkernet").upsert_stats(rows)
     if err:
