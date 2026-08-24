@@ -5,6 +5,16 @@
   "version": "1.0",
   "stream": "partial",
   "settings": {
+    "SERVICE_MODE": {
+      "context": "multisite",
+      "default": "standard",
+      "help": "Declared purpose of the service: \"standard\" for an ordinary service, \"redirect_only\" for a listener that does nothing but redirect. The declaration is what the PRO quota classification reads; it is never inferred from the redirect settings.",
+      "id": "service-mode",
+      "label": "Service mode",
+      "regex": "^(standard|redirect_only)$",
+      "type": "select",
+      "select": ["standard", "redirect_only"]
+    },
     "DISABLE_DEFAULT_SERVER": {
       "context": "global",
       "default": "no",
