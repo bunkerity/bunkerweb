@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, sorted_backups, DB_LOCK_FILE
+from backup import backup_database, update_cache_file, acquire_db_lock, rotate_backups, sorted_backups, DB_LOCK_FILE
 
 LOGGER = getLogger("BACKUP")
 status = 0
@@ -58,6 +58,7 @@ try:
 
         already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
         backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
+        backup_strategy = getenv("BACKUP_ROTATION_STRATEGY", "fifo")
 
         sorted_files = []
         if already_done:
@@ -89,15 +90,9 @@ try:
             sorted_files = sorted_backups(backup_dir)
 
     if not force_backup:
-        # Check if the number of backup files exceeds the rotation limit
-        if len(sorted_files) > backup_rotation:
-            # Calculate the number of files to remove
-            num_files_to_remove = len(sorted_files) - backup_rotation
-
-            # Remove the oldest backup files
-            for file in sorted_files[:num_files_to_remove]:
-                LOGGER.warning(f"Removing old backup file: {file}, as the rotation limit has been reached ...")
-                file.unlink()
+        # Both strategies drop the same number of files (len - rotation); `hanoi` only chooses
+        # differently among them, so it can never delete more than `fifo` would.
+        rotate_backups(sorted_files, backup_rotation, backup_strategy, timedelta(seconds=PERIOD_STAMPS[backup_period]))
 
         if backed_up:
             update_cache_file(db, backup_dir)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 from json import dumps, loads
 from os import getenv, replace
@@ -27,6 +27,8 @@ from model import Base  # type: ignore
 LOGGER = getLogger("BACKUP")
 
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
+STAMP_RE = re.compile(r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")
+STAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
 
@@ -94,12 +96,178 @@ def sorted_backups(backup_dir: Path = BACKUP_DIR) -> list:
     """
 
     def _key(path: Path):
-        stamp = re.search(r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})", path.name)
+        stamp = STAMP_RE.search(path.name)
         # A name without a timestamp is not ours; mtime keeps it in a sane place instead of
         # sorting every one of them together at one end.
-        return stamp.group(1) if stamp else datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d_%H-%M-%S")
+        return stamp.group(1) if stamp else datetime.fromtimestamp(path.stat().st_mtime).strftime(STAMP_FORMAT)
 
     return sorted(backup_dir.glob("backup-*.zip"), key=_key)
+
+
+def backup_time(backup: Path) -> datetime:
+    """When a backup was taken.
+
+    Same source of truth as `sorted_backups` -- the timestamp in the name, `mtime` for a name
+    that has none -- read as a date instead of as a sort key. The stamp is written without an
+    offset (`backup_database` formats a local time), so it is read back as local time, exactly
+    like `bwcli plugin backup list` does.
+
+    A stamp that MATCHES the pattern but is not a real date (`2026-02-30_00-00-00`) counts as a
+    name with no timestamp, not as an error. Rotation is the only caller, and letting `strptime`
+    raise here took the whole job down -- on the default FIFO path too -- which skipped
+    `update_cache_file`, froze the manifest date, and left `already_done` false forever: a full
+    dump on every run and rotation never running again, from one malformed file name.
+    """
+    stamp = STAMP_RE.search(backup.name)
+    if stamp:
+        try:
+            return datetime.strptime(stamp.group(1), STAMP_FORMAT).astimezone()
+        except ValueError:
+            LOGGER.warning(f"Backup {backup.name} carries an impossible date, falling back to its modification time")
+    return datetime.fromtimestamp(backup.stat().st_mtime).astimezone()
+
+
+def period_index(taken: datetime, period: timedelta) -> int:
+    """Which backup period a timestamp falls in -- the Hanoi session counter, derived not stored."""
+    return int(taken.timestamp() // period.total_seconds())
+
+
+def newest_per_period(dated_backups: list, period: timedelta) -> dict:
+    """The last backup of each period, by period index.
+
+    Two backups in one period -- a manual `bwcli plugin backup save` beside the scheduled one --
+    are a single restore point as far as rotation is concerned, and the freshest of them is it.
+    """
+    by_period = {}
+    for taken, backup in sorted(dated_backups, key=lambda dated: dated[0]):
+        by_period[period_index(taken, period)] = backup
+    return by_period
+
+
+def hanoi_keep(dated_backups: list, rotation: int, period: timedelta) -> set:
+    """The backups the Tower of Hanoi ladder protects -- never more than `rotation` of them.
+
+    Classic Hanoi rotation is the medium reused every `2^k` sessions. The session counter is
+    derived from the timestamp (`floor(taken / period)`) instead of stored, so nothing has to
+    survive a restore for the ladder to keep working. Level `k` cuts the timeline into fixed
+    blocks of `2^k` periods and keeps the OLDEST backup of each of its two most recent non-empty
+    blocks; level 0's blocks are single periods, so it keeps the last two. The newest backup is
+    pinned on top of that, which is what covers `rotation = 1`, where there are no levels at all.
+
+    Three decisions carry this design, and each of them is the difference between an exponential
+    ladder and something that only looks like one:
+
+    * The blocks are anchored on an ABSOLUTE grid, not on windows measured back from `now`. Block
+      membership is then a property of the file itself, so a backup that falls out of the ladder
+      can never be wanted again and deleting it is safe forever. Windows measured from `now`
+      cannot promise that -- whichever backup such a window protects, the ones that would have
+      refilled it are the ones being deleted, so the deep tiers empty out and stay empty. Only
+      walking a long sequence shows it (`tests/unit/backup/test_hanoi_rotation.py`).
+    * A level takes a backup from each of its two most recent non-empty BLOCKS, not the backups
+      whose index divides `2^k` exactly. Divisibility works only while backups are perfectly
+      regular; after a scheduler outage, or in a directory of manual backups, nothing lands on a
+      grid point at all and a ladder built on divisibility protects none of it.
+    * It takes the OLDEST backup of the block, not the newest. The oldest of the previous block
+      is at least `2^k` periods back, so level `k` is guaranteed to reach that far and the levels
+      spread out exponentially. The newest of that block can be one single period back, and then
+      the levels pile up on each other: measured over 2100 periods, `rotation = 12` collapses from
+      a depth of 1049 periods to 26, and `rotation = 24` keeps one point at 2074 and NOTHING
+      between 26 and it.
+
+    Each level costs at most one file more than the level below it -- its newer keeper is the
+    oldest backup of the current block, which is also the oldest backup of a block the level
+    below already keeps -- so `2 + (levels - 1)` bounds the whole ladder. That is why `levels` is
+    `rotation - 1`: it is exactly what the operator's file budget pays for.
+    """
+    by_period = newest_per_period(dated_backups, period)
+    if not by_period:
+        return set()
+
+    indices = sorted(by_period)
+    kept = {by_period[indices[-1]]}
+    for level in range(max(0, rotation - 1)):
+        block_size = 1 << level
+        oldest_of_block = {}
+        for index in indices:
+            oldest_of_block.setdefault(index // block_size, index)
+        kept.update(by_period[oldest_of_block[block]] for block in sorted(oldest_of_block)[-2:])
+    return kept
+
+
+def hanoi_rank(index: int, indices: list, levels: int) -> tuple:
+    """How close a period came to the ladder: `(level, blocks behind the newest)`, its best.
+
+    A block 0 or 1 behind the newest is a block the ladder keeps, so a victim's best rank is 2 or
+    more -- and which level it came closest on is the one thing that tells an operator whether a
+    file was one backup away from being kept or nowhere near it.
+    """
+    best = (0, len(indices))
+    for level in range(max(1, levels)):
+        block_size = 1 << level
+        blocks = sorted({other // block_size for other in indices}, reverse=True)
+        rank = blocks.index(index // block_size)
+        if rank < best[1]:
+            best = (level, rank)
+    return best
+
+
+def rotation_victims(dated_backups: list, rotation: int, strategy: str = "fifo", period: timedelta = timedelta(days=1)) -> list:
+    """The backups rotation gives up, each with the reason to log.
+
+    Pure: it reads `(taken_at, path)` pairs and nothing else -- not the current time, so a run
+    delayed by hours makes exactly the same decision as one on schedule, and not the filesystem.
+    Resolving a backup's date is the caller's job and `backup_time` is where a `stat()` can
+    happen, for the archives whose name carries no usable timestamp.
+
+    Both strategies give up exactly `count - rotation` files, so `hanoi` can never delete MORE
+    than the FIFO rotation that shipped before it would have for the same inputs -- they differ
+    only in WHICH files they pick. FIFO gives up the oldest ones. Hanoi gives up whatever its
+    ladder does not need, oldest first.
+    """
+    ordered = sorted(dated_backups, key=lambda dated: dated[0])
+    excess = len(ordered) - rotation
+    if excess <= 0:
+        return []
+
+    if strategy != "hanoi":
+        return [(backup, f"oldest of {len(ordered)} backups, over the rotation limit of {rotation}") for _, backup in ordered[:excess]]
+
+    kept = hanoi_keep(ordered, rotation, period)
+    by_period = newest_per_period(ordered, period)
+
+    # The ladder asks for fewer files than the operator allows until the deep levels fill up --
+    # reaching level k takes 2^k periods. The rest of the quota is not spent explicitly: taking
+    # only `excess` victims, oldest first, leaves exactly the most recent unladdered backups
+    # standing, which is the granularity near the present #3271 asks for.
+    indices = sorted(by_period)
+    victims = []
+    for taken, backup in ordered:
+        if backup in kept:
+            continue
+        index = period_index(taken, period)
+        # A backup that is not the last of its period costs nothing to give up -- a newer copy of
+        # the same period is still there -- so those go before anything that is a period's last.
+        last_of_period = backup is by_period[index]
+        if not last_of_period:
+            reason = f"period {index} already has a newer backup"
+        else:
+            level, rank = hanoi_rank(index, indices, rotation - 1)
+            reason = f"period {index} is off the Hanoi ladder: closest at level {level} (blocks of {1 << level} period(s)), {rank} blocks behind the newest, and only the last 2 are kept"
+        victims.append((last_of_period, taken, backup, reason))
+    victims.sort(key=lambda victim: victim[:2])
+    return [(backup, reason) for _, _, backup, reason in victims[:excess]]
+
+
+def rotate_backups(backups: list, rotation: int, strategy: str = "fifo", period: timedelta = timedelta(days=1)) -> list:
+    """Delete the backups the rotation policy gives up. Returns what was deleted."""
+    victims = rotation_victims([(backup_time(backup), backup) for backup in backups], rotation, strategy, period)
+    LOGGER.info(
+        f"Backup rotation ({strategy}): {len(backups)} backup(s) present, limit {rotation}, removing {len(victims)}, keeping {len(backups) - len(victims)}"
+    )
+    for backup, reason in victims:
+        LOGGER.warning(f"Removing old backup file: {backup}, {reason} ...")
+        backup.unlink()
+    return [backup for backup, _ in victims]
 
 
 def update_cache_file(db: Database, backup_dir: Path) -> str:

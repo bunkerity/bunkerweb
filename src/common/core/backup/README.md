@@ -14,7 +14,7 @@ Follow these steps to configure and use the Backup feature:
 
 1. **Enable the feature:** The backup feature is enabled by default. If needed, you can control this with the `USE_BACKUP` setting.
 2. **Configure backup schedule:** Choose how often backups should occur by setting the `BACKUP_SCHEDULE` parameter.
-3. **Set retention policy:** Specify how many backups to keep using the `BACKUP_ROTATION` setting.
+3. **Set retention policy:** Specify how many backups to keep using the `BACKUP_ROTATION` setting, and how they are picked with `BACKUP_ROTATION_STRATEGY`.
 4. **Define storage location:** Choose where backups will be stored using the `BACKUP_DIRECTORY` setting.
 5. **Use CLI commands:** Manage backups manually with the `bwcli plugin backup` commands when needed.
 
@@ -25,6 +25,7 @@ Follow these steps to configure and use the Backup feature:
 | `USE_BACKUP`       | `yes`                        | global  | no       | **Enable Backup:** Set to `yes` to enable automatic backups.                                                              |
 | `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | **Backup Frequency:** How often to perform backups. Options: `daily`, `weekly`, or `monthly`.                             |
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | **Backup Retention:** The number of backup files to keep. Older backups beyond this number will be automatically deleted. |
+| `BACKUP_ROTATION_STRATEGY` | `fifo`               | global  | no       | **Rotation Strategy:** How backups are picked for deletion once the limit is reached. `fifo` keeps the most recent ones; `hanoi` keeps a Tower of Hanoi ladder — fine near the present, exponentially coarser further back — for the same number of files. |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | **Backup Location:** The directory where backup files will be stored.                                                     |
 
 ### Command Line Interface
@@ -77,6 +78,29 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_ROTATION: "12"
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
+
+=== "Daily Backups with Tower of Hanoi Rotation"
+
+    The same 24 files, spread out instead of covering only the last 24 days. The most recent
+    backups are kept at full granularity and older ones are thinned exponentially, so the oldest
+    restore point moves further back every time the install doubles in age — a problem noticed
+    late is still recoverable:
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "24"
+    BACKUP_ROTATION_STRATEGY: "hanoi"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
+    Both strategies delete the same number of files, so switching to `hanoi` never removes more
+    backups than `fifo` would — only different ones. Every deletion is logged with the reason.
+
+!!! info "How backups are dated"
+    Rotation reads the timestamp in each archive's name. An archive whose name does not carry a
+    usable one — a file copied in by hand, or renamed — is dated by its modification time instead,
+    under both strategies.
 
 === "Monthly Backups to Custom Location"
 

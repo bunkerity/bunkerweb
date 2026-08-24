@@ -33,6 +33,16 @@
       "regex": "^[1-9][0-9]*$",
       "type": "text"
     },
+    "BACKUP_ROTATION_STRATEGY": {
+      "context": "global",
+      "default": "fifo",
+      "help": "How old backups are picked for deletion: fifo keeps the most recent ones, hanoi keeps a Tower of Hanoi ladder (fine near the present, coarse further back) for the same file count",
+      "id": "backup-rotation-strategy",
+      "label": "Backup rotation strategy",
+      "regex": "^(fifo|hanoi)$",
+      "type": "select",
+      "select": ["fifo", "hanoi"]
+    },
     "BACKUP_DIRECTORY": {
       "context": "global",
       "default": "/var/lib/bunkerweb/backups",
