@@ -1380,6 +1380,35 @@ function restart_stack () {
         # container then fails to start with "could not find a network matching network mode
         # bw-db". One retry through a full `down -v` clears it.
         compose_up "tests/docker/docker-compose.all-in-one.yml" "BunkerWeb All-in-one" "🍱" || return 1
+
+        # Same block as the Docker/Autoconf branch above and the Linux one below: an action that
+        # declares `services:` has generate.py write them into /tmp/services.yml and raise
+        # restart_services, and only a redeploy brings them up. Without it the All-in-one arm ran
+        # every such action against services that do not exist -- `antibot;capjs` reached the
+        # antibot page, could not have its token validated by a Cap backend nothing had started,
+        # and failed on the xpath with "Verification failed", nowhere near the cause.
+        if [ -f /tmp/services.yml ] && [ "$restart_services" -eq 1 ] ; then
+            robust_docker_pull "/tmp/services.yml" "dockerized services"
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🐳 Pull failed for dockerized services after multiple attempts"
+                return 1
+            fi
+
+            docker compose -f /tmp/services.yml down -v
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🐳 Failed to stop dockerized services"
+                return 1
+            fi
+
+            docker compose -f /tmp/services.yml up -d
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "UTILS" "❌" "🐳 Failed to start dockerized services"
+                return 1
+            fi
+        fi
     elif [ "$integration" == "Kubernetes" ] ; then
         secrets=$(kubectl get secrets -n bunkerweb -o jsonpath='{.items[*].metadata.name}')
         if echo "$secrets" | grep -q "bw-secret" ; then
