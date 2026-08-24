@@ -146,16 +146,29 @@ class Config:
         configs = configs or {}
         extra_config = extra_config or {}
 
-        # Use sets for comparing lists of dictionaries
-        if set(map(str, self.__instances)) != set(map(str, instances)):
+        # Every comparison here is the SAME one apply() makes on the same value a few lines down,
+        # and that is the whole requirement: a difference update_needed can see but apply() cannot
+        # act on never converges. apply() is what stores the new value, so when it declines to
+        # store, self.__instances / __services / __configs keep the OLD content and the next poll
+        # reports the identical difference again, forever.
+        #
+        # `set(map(str, ...))` was that kind of difference. It stringifies each dict, and str() of
+        # a dict follows its INSERTION order -- so the same services, rebuilt from a container's
+        # labels dict that the daemon happened to serialise in another order (see
+        # DockerController._to_services, which iterates `controller_service.labels.items()`), read
+        # as a change while apply()'s `!=` compared them by value and found them equal.
+        if self.__instances != instances:
             self.__logger.debug(f"Instances changed: {self.__instances} -> {instances}")
             return True
 
-        if set(map(str, self.__services)) != set(map(str, services)):
+        if self.__services != services:
             self.__logger.debug(f"Services changed: {self.__services} -> {services}")
             return True
 
-        if set(map(str, self.__configs.items())) != set(map(str, configs.items())):
+        # Same story for the custom configs, and this is the one the Autoconf CI arm actually
+        # tripped over: the identical set of configs, enumerated in another order, read as a change
+        # on every poll and the controller re-applied on every poll.
+        if self.__configs != configs:
             self.__logger.debug(f"Configs changed: {self.__configs} -> {configs}")
             return True
 
@@ -313,12 +326,19 @@ class Config:
                 success = False
                 self.__logger.error(f"Can't save autoconf custom configs via API: {err}, custom configs may not work as expected")
 
-        # signal changes via API
-        ret = self._api.checked_changes(changes, plugins_changes=changed_plugins, value=True)
-        if ret:
-            self.__logger.error(f"An error occurred when setting the changes to checked via API : {ret}")
+        # signal changes via API -- only when there is something to signal. An EMPTY list is not
+        # "no changes" by the time it reaches the database: Database.checked_changes() starts with
+        # `changes = changes or [<all seven>]` so that callers passing None mean "everything", and
+        # an empty list is falsy too. Signalling [] therefore set all seven bw_metadata *_changed
+        # flags, which makes the scheduler re-dispatch its whole job batch -- turning "nothing
+        # happened" into the most expensive possible outcome. The `or [...]` default is right for
+        # its other callers, so the guard belongs here, at the one call site that can produce [].
+        if changes:
+            ret = self._api.checked_changes(changes, plugins_changes=changed_plugins, value=True)
+            if ret:
+                self.__logger.error(f"An error occurred when setting the changes to checked via API : {ret}")
 
-        self.__logger.info("Successfully saved new configuration 🚀")
+            self.__logger.info("Successfully saved new configuration 🚀")
 
         if success:
             # Record the settings baseline so the recheck worker only re-fires when the valid
