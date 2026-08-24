@@ -49,15 +49,34 @@ actions:
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
     Kubernetes:
       status: 405
+  # The only assertion that global CRS actually BLOCKS. crs_plugins_global below is a 404 by
+  # design, and a global-crs include that rendered nothing would 404 exactly the same way -- so
+  # without this action the whole global-CRS mode could stop loading rules and the spec would
+  # stay green. Verified locally against bunkerity/bunkerweb:tests: emptying
+  # /etc/nginx/http/modsecurity-rules-global-crs.conf.modsec and reloading turns this 403 into a
+  # 200, and restoring it turns it back.
+  global_crs_activated:
+    type: status
+    url: "http://www.example.com/?id=/etc/passwd"
+    status: 403
+    log: '[ver "OWASP_CRS/4'
+    config:
+      USE_MODSECURITY_GLOBAL_CRS: "yes"
   crs_plugins_global:
     type: status
     url: "http://www.example.com/post/wp-login.php?pass1=<script>"
     method: POST
     not_log: "❌"
-    status: 403
+    # Same outcome as crs_plugins since 2e0ae130d: global CRS is one shared ruleset in the http
+    # context, so it loads the union of every service's downloaded plugins instead of loading
+    # none of them. wordpress-rule-exclusions therefore applies here too, the request is no
+    # longer blocked and nginx answers for a path that does not exist.
+    status: 404
     config:
       USE_MODSECURITY_GLOBAL_CRS: "yes"
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
+    Kubernetes:
+      status: 405
 
 config:
   USE_MODSECURITY: "yes"
