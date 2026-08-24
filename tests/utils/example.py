@@ -11,11 +11,9 @@ is rewritten. The example itself is never modified.
 from logging import Logger
 from os import sep
 from pathlib import Path
-from re import MULTILINE, sub
+from re import MULTILINE, sub, subn
 from shutil import copytree, rmtree
 from subprocess import run
-
-from yaml import safe_dump, safe_load
 
 # Where the materialised stack lands, and the file start.sh reads to find it.
 STACK_DIR = Path(sep, "tmp", "example-stack")
@@ -58,6 +56,41 @@ STACK_FILES = {
 # tests/docker/docker-compose.bunkerweb.yml. generate.py imports it from here.
 AUTOCONF_NAMESPACE = "bw-tests"
 
+# Networks the framework owns. build.sh brings dnsmasq (and redis, and php-fpm) up on both of
+# them before start.sh deploys anything, and their definitions there are the authoritative ones.
+SHARED_NETWORKS = ("bw-universe", "bw-services")
+
+
+def _externalise_shared_networks(content: str, logger: Logger) -> str:
+    """Point a Docker example at the bw-* networks the framework already created.
+
+    A Docker example ships the whole stack, so it declares `bw-universe` and `bw-services`
+    itself -- correct for someone copying it, wrong here: compose compares its declaration
+    against the live network and *recreates* the ones that differ. `bw-services` always
+    differs (dnsmasq.yml pins 192.168.0.0/24, every example leaves the subnet out), so the
+    removal ran, hit dnsmasq's endpoint on it and took every `example-*` job down with
+    "error while removing network: network bw-services has active endpoints".
+
+    The examples' own autoconf.yml already marks these `external: true` for the same reason,
+    which is exactly what compose suggests in the warning it prints just before failing.
+    """
+    for network in SHARED_NETWORKS:
+        content, count = subn(
+            rf"^  {network}:\n(?:^(?:    .*)?\n)*",
+            f"  {network}:\n    name: {network}\n    external: true\n",
+            content,
+            count=1,
+            flags=MULTILINE,
+        )
+        if count:
+            logger.debug(f"Externalised network {network}")
+        elif network in content:
+            # Used but not matched: the example declares it in a shape this rewrite does not
+            # recognise, so compose will manage it and the stack-up failure comes back. Silent
+            # here would look exactly like "this example does not use that network".
+            logger.warning(f"{network} is referenced but was not externalised -- check its top-level networks block")
+    return content
+
 
 def _join_test_namespace(content: str, logger: Logger) -> str:
     """Put the example's services in the namespace the test controller watches.
@@ -68,6 +101,8 @@ def _join_test_namespace(content: str, logger: Logger) -> str:
     The stack still came up and BunkerWeb still answered — with `SERVER_NAME` empty, from the
     default server — so the failure looked like the application serving the wrong page.
     """
+    from yaml import safe_dump, safe_load  # only this path needs a YAML round-trip
+
     stack = safe_load(content)
     for name, service in (stack.get("services") or {}).items():
         labels = service.get("labels")
@@ -148,6 +183,8 @@ def materialise(logger: Logger, name: str, integration: str, bw_version: str) ->
 
     if integration == "Autoconf":
         content = _join_test_namespace(content, logger)
+    elif integration == "Docker":
+        content = _externalise_shared_networks(content, logger)
 
     compose.write_text(content)
     STACK_MARKER.write_text(str(compose))
