@@ -153,9 +153,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.5",
+      "name": "lua-resty-session v4.2.0",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "505ff720957f61f2ecd2e6e9fe11c66530a42807",
+      "commit": "9c7e43735b62819b69927b3104c9e1f47696c30a",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -194,9 +194,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20260724",
+      "name": "LuaJIT v2.1-20260824",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "982cd8323eafd8604a9e5f2a916aa50b9f67d9ed",
+      "commit": "fbfc558aacd57a54623df0ced4c31a28f81f8ff2",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

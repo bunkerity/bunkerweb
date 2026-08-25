@@ -7,6 +7,8 @@
 - [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database and only a restart picked it up. A missing or unreadable folder no longer removes the file-managed configurations.
 - [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
 - [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
+- [DEPS] Updated lua-resty-session version to v4.2.0
+- [DEPS] Updated LuaJIT version to v2.1-20260824
 - [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
 - [DEPS] Updated build tooling: cssnano to 8.0.8 and postcss to 8.5.26
 

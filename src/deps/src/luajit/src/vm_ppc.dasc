@@ -1392,6 +1392,25 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vmeta_binop			// Binop call for compatibility.
 #endif
   |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  mr CARG3, RD
+  |  mr CARG4, RD
+  |  b >1
+  |
+  |->vmeta_bitop:
+  |  mr CARG3, RB
+  |  mr CARG4, RC
+  |1:
+  |  add CARG2, BASE, RA
+  |   stp BASE, L->base
+  |  mr CARG1, L
+  |   stw PC, SAVE_PC
+  |  decode_OP1 CARG5, INS		// Caveat: CARG5 overlaps INS.
+  |  bl extern lj_meta_bitop  // (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  b ->cont_nop
+  |
   |//-- Call metamethod ----------------------------------------------------
   |
   |->vmeta_call:			// Resolve and call __call metamethod.
@@ -4759,6 +4778,87 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  stw TMP1, 4(RA)
     |.endif
     |  ins_next2
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  lwzux CARG1, RD, BASE
+    |.if DUALNUM
+    |  lwz CARG2, 4(RD)
+    |  checknum cr0, CARG1
+    |  bne ->vmeta_bnot
+    |.else
+    |  lfd FARG1, 0(RD)
+    |  checknum cr0, CARG1
+    |  bge ->vmeta_bnot
+    |  fadd FARG1, FARG1, TOBIT
+    |  stfd FARG1, TMPD
+    |  lwz CARG2, TMPD_LO
+    |.endif
+    |  not CARG2, CARG2
+    |7:
+    |.if DUALNUM
+    |  ins_next1
+    |  stwux TISNUM, RA, BASE
+    |  stw CARG2, 4(RA)
+    |.else
+    |  tonum_u FARG1, CARG2
+    |  ins_next1
+    |  stfdx FARG1, BASE, RA
+    |.endif
+    |  ins_next2
+    break;
+
+    |.macro ins_bitop, ins, shmod
+    |  // RA = dst*8, RB = src1*8, RC = src2*8
+    |  lwzux CARG1, RB, BASE
+    |   lwzux CARG3, RC, BASE
+    |.if DUALNUM
+    |  lwz CARG2, 4(RB)
+    |   lwz CARG4, 4(RC)
+    |  checknum cr0, CARG1
+    |   checknum cr1, CARG3
+    |  bne ->vmeta_bitop
+    |   bne cr1, ->vmeta_bitop
+    |.else
+    |  lfd FARG1, 0(RB)
+    |   lfd FARG2, 0(RC)
+    |  checknum cr0, CARG1
+    |   checknum cr1, CARG3
+    |  bge ->vmeta_bitop
+    |   bge cr1, ->vmeta_bitop
+    |  fadd FARG1, FARG1, TOBIT
+    |   fadd FARG2, FARG2, TOBIT
+    |  stfd FARG1, TMPD
+    |  lwz CARG2, TMPD_LO
+    |   stfd FARG2, TMPD
+    |   lwz CARG4, TMPD_LO
+    |.endif
+    |.if shmod == 1
+    |  rlwinm CARG4, CARG4, 0, 27, 31
+    |.endif
+    |  ins CARG2, CARG2, CARG4
+    |  b <7
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop and, 0
+    break;
+  case BC_BOR:
+    |  ins_bitop or, 0
+    break;
+  case BC_BXOR:
+    |  ins_bitop xor, 0
+    break;
+  case BC_BSHL:
+    |  ins_bitop slw, 1
+    break;
+  case BC_BSHR:
+    |  ins_bitop srw, 1
+    break;
+  case BC_BSAR:
+    |  ins_bitop sraw, 1
     break;
 
   /* -- Constant ops ------------------------------------------------------ */
