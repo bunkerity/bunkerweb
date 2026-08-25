@@ -6,6 +6,7 @@
 - [BUGFIX] `scheduler`: the config saver and the config generator now log wherever the Scheduler logs. On Linux their output went to the journal while `/var/log/bunkerweb/scheduler.log` kept only "Config saver failed, configuration will not work as expected", so the failure appeared to have no cause even at debug level.
 - [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database and only a restart picked it up. A missing or unreadable folder no longer removes the file-managed configurations.
 - [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
+- [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
 
 ## v1.6.14 - 2026/08/21
 
