@@ -46,6 +46,14 @@ local cached_options = {}
 local cached_connectors = {}
 local cached_timer_log_level
 
+-- lua-resty-redis reports a desynced reply stream as `unknown prefix: "..."` : the byte it
+-- read where a RESP type marker belongs came from someone else's reply. is_connection_error
+-- does not match it by name, so without this the socket kept `healthy` and went back to the
+-- keepalive pool -- handing the desync to the next borrower.
+local function is_protocol_error(err)
+	return err ~= nil and err:find("unknown prefix", 1, true) ~= nil
+end
+
 -- Helper function to get timer log level with validation
 local function get_timer_log_level()
 	if cached_timer_log_level then
@@ -252,14 +260,22 @@ function clusterstore:close()
 	return ok ~= nil, err
 end
 
+-- The client can also *raise* : reading a reply off a desynced stream reached string.byte
+-- with a non-string and killed the whole access phase (reversescan, run 32834226362), leaving
+-- `healthy` true and the poisoned socket eligible for the keepalive pool. A redis call is I/O,
+-- not control flow -- it reports failures, it does not abort its caller's phase.
 function clusterstore:call(method, ...)
 	-- Check if client is created
 	if not self.redis_client then
 		return false, "client is not instantiated"
 	end
 	-- Call method (res is nil for socket errors, false for Redis RESP errors)
-	local res, err = self.redis_client[method](self.redis_client, ...)
-	if res == nil and is_connection_error(err) then
+	local ok, res, err = pcall(self.redis_client[method], self.redis_client, ...)
+	if not ok then
+		self.healthy = false
+		return nil, "redis client raised : " .. tostring(res)
+	end
+	if res == nil and (is_connection_error(err) or is_protocol_error(err)) then
 		self.healthy = false
 	end
 	return res, err
