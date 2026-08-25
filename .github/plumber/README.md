@@ -13,25 +13,26 @@ It complements the existing CodeQL (source code) and OSSF Scorecard
 
 | Path | Purpose |
 |---|---|
-| `.github/plumber/plumber.yaml` | Policy overlay on top of `plumber:default` |
+| `.plumber.yaml` | Root-discovered policy overlay on top of `plumber:default` |
 | `.github/plumber/README.md` | This file |
 | `.github/workflows/plumber.yml` | Reusable workflow invoked by the `dev` and `master` workflows |
 
 ## Running it locally
 
 ```bash
-brew install getplumber/tap/plumber        # or: docker run ghcr.io/getplumber/plumber
-plumber analyze --config .github/plumber/plumber.yaml --score
+plumber config validate
+plumber analyze --score
 plumber explain ISSUE-801                  # details for a given issue code
 ```
 
+Install Plumber using the [upstream instructions](https://github.com/getplumber/plumber#installation).
 `plumber analyze` scans the local workflows and queries the GitHub API for
 branch protection. That last control needs a token with `Administration: read`;
 without it, protection findings are incomplete rather than wrong.
 
 ## Policy
 
-`plumber.yaml` extends `plumber:default` and only adds an allowlist of the
+`.plumber.yaml` extends `plumber:default` and only adds an allowlist of the
 third-party actions this repository already relies on. Each entry names an
 exact `owner/repo` rather than an owner wildcard, so trust cannot spread to
 other or future repositories under those accounts. Every one of them is

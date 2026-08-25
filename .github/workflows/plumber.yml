@@ -17,13 +17,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          sparse-checkout: .github
+          sparse-checkout: |
+            .github
+            .plumber.yaml
           persist-credentials: false
       - name: Run Plumber
         uses: getplumber/plumber@031bc86d1e5f661626e2000f4f8779912d608d5f # v0.4.39
         with:
           verify-attestation: true
-          config-file: .github/plumber/plumber.yaml
+          config-file: .plumber.yaml
           min-score: B
           soft-fail: false
           upload-sarif: true
