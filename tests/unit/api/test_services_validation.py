@@ -85,6 +85,9 @@ def db(monkeypatch):
     # A bare Mock() returns a truthy Mock, which the USE_TEMPLATE gate would read as
     # "every layer is unknown" and reject every save. Default it to "all known".
     fake_db.unknown_template_layers.return_value = []
+    # The declared-default fallback `_http01_refusal` reaches for when the snapshot carries no
+    # global port row (`get_config` default-fills from `bw_settings.default`).
+    fake_db.get_config.return_value = {"HTTP_PORT": "8080"}
     monkeypatch.setattr(ROUTER, "get_db", lambda: fake_db)
     return fake_db
 
@@ -318,3 +321,166 @@ def test_a_key_failing_the_regex_gate_is_not_also_layer_checked(db):
 
     assert response.status_code == 400
     db.unknown_template_layers.assert_not_called()
+
+
+# --- the HTTP-01 gate -------------------------------------------------------------
+
+
+class TestHttp01IsRefusedForAServiceOnItsOwnPort:
+    """``HTTP_PORT`` is multisite since Lot B, so a service can be moved off the port that public
+    port 80 is published to. An ACME server only ever contacts port 80 and follows no redirect to
+    get there, so ``LETS_ENCRYPT_CHALLENGE=http`` can never succeed for such a service.
+
+    Refusing at save is the point: accepted, the certificate order fails later, in a job, against a
+    rate-limited ACME account, with nobody watching. The message has to say WHY and WHAT to do --
+    an operator who moved a port on purpose needs to know which of the two ways out they want.
+    """
+
+    def _config(self):
+        return {
+            "SERVER_NAME": SERVICE,
+            "MULTISITE": "yes",
+            "HTTP_PORT": "8080",
+            "AUTO_LETS_ENCRYPT": "yes",
+            "LETS_ENCRYPT_CHALLENGE": "http",
+        }
+
+    def test_patch_moving_the_port_is_refused(self, db):
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._config()
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 400
+        message = response.content["message"]
+        assert "9080" in message and "8080" in message, message
+        assert "LETS_ENCRYPT_CHALLENGE=dns" in message and "HTTP_PORT" in message, message
+        db.save_config.assert_not_called()
+
+    def test_patch_that_keeps_the_global_port_is_accepted(self, db):
+        """Anti-vacuity, and the contract for every existing deployment: same list, same behaviour
+        as before the flip."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._config()
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_ANTIBOT": "captcha"}))
+
+        assert response.status_code == 200
+        db.save_config.assert_called_once()
+
+    def test_switching_to_the_dns_challenge_in_the_same_payload_is_accepted(self):
+        """One of the two ways out the message names, taken in a single request."""
+        fake_db = Mock()
+        fake_db.is_valid_setting.return_value = (True, "")
+        fake_db.save_config.return_value = set()
+        fake_db.unknown_template_layers.return_value = []
+        fake_db.get_non_default_settings.return_value = self._config()
+        with patch.object(ROUTER, "get_db", lambda: fake_db):
+            response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080", "LETS_ENCRYPT_CHALLENGE": "dns"}))
+
+        assert response.status_code == 200
+        fake_db.save_config.assert_called_once()
+
+    def test_creating_a_service_on_its_own_port_is_refused_too(self, db):
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._config()
+
+        response = ROUTER.create_service(schemas.ServiceCreateRequest(server_name="new.example.com", variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 400
+        assert "new.example.com" in response.content["message"]
+        db.save_config.assert_not_called()
+
+    def test_a_service_with_lets_encrypt_off_may_move_freely(self, db):
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = dict(self._config(), AUTO_LETS_ENCRYPT="no")
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 200
+        db.save_config.assert_called_once()
+
+    def _config_without_a_global_row(self):
+        """What a real snapshot looks like when the fleet never moved off 8080: a write path hands
+        over the NON-default settings, and a global left at its declared default has no row."""
+        config = self._config()
+        del config["HTTP_PORT"]
+        return config
+
+    def test_a_service_restating_the_declared_default_is_not_refused(self, db):
+        """The operator sets ``HTTP_PORT=8080`` on a service -- the value the fleet already uses --
+        and used to get a 400 telling them to remove the value they had just set, because the
+        snapshot has no global row to compare against. The declared default is the comparison."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._config_without_a_global_row()
+        db.get_config.return_value = {"HTTP_PORT": "8080"}
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "8080"}))
+
+        assert response.status_code == 200, response.content
+        db.save_config.assert_called_once()
+
+    def test_a_service_that_really_moves_is_still_refused_without_a_global_row(self, db):
+        """Anti-vacuity: the fallback must not turn the gate off, only make it read the right
+        fleet value."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._config_without_a_global_row()
+        db.get_config.return_value = {"HTTP_PORT": "8080"}
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 400
+        message = response.content["message"]
+        # The fleet clause is no longer dropped either: the default IS the fleet's port.
+        assert "9080" in message and "8080" in message, message
+        db.save_config.assert_not_called()
+
+    def _partial_default_fleet(self):
+        """The fleet added a second port without moving the first: `HTTP_PORT_1` has a row,
+        `HTTP_PORT` does not, because it still sits on its declared default."""
+        config = self._config()
+        del config["HTTP_PORT"]
+        config["HTTP_PORT_1"] = "8081"
+        return config
+
+    def test_a_service_restating_a_partial_default_fleet_list_is_not_refused(self, db):
+        """The fallback used to be gated on the WHOLE list being absent, so a fleet with a row for
+        the repetition alone never triggered it — and the operator restating `8080 8081` got the
+        400. Gating on the base key fires here; putting the recovered base back in LIST POSITION is
+        what makes the comparison agree, since `list_moved` compares ordered sequences and an
+        appended base answers ['8081', '8080']."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._partial_default_fleet()
+        db.get_config.return_value = {"HTTP_PORT": "8080"}
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "8080", "HTTP_PORT_1": "8081"}))
+
+        assert response.status_code == 200, response.content
+        db.save_config.assert_called_once()
+
+    def test_a_service_that_really_moves_off_a_partial_default_fleet_is_still_refused(self, db):
+        """Anti-vacuity for the same shape: the fallback must only make the comparison read the
+        right fleet list, never switch the gate off."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = self._partial_default_fleet()
+        db.get_config.return_value = {"HTTP_PORT": "8080"}
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080", "HTTP_PORT_1": "9081"}))
+
+        assert response.status_code == 400
+        message = response.content["message"]
+        assert "9080" in message and "8080" in message and "8081" in message, message
+        db.save_config.assert_not_called()
+
+    def test_an_explicitly_emptied_global_is_not_overwritten_by_the_default(self, db):
+        """``HTTP_PORT=""`` globally is a real row with a real (empty) value -- the documented way
+        to disable HTTP listening. The fallback keys on the KEY being absent, so it must not fire
+        here and must not resurrect 8080 as "the fleet's port"."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = dict(self._config(), HTTP_PORT="")
+        db.get_config.return_value = {"HTTP_PORT": "8080"}
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 400
+        db.get_config.assert_not_called()

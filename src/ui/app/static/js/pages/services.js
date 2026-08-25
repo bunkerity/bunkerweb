@@ -113,6 +113,10 @@ $(document).ready(function () {
     }
 
     const convertTo = isDraft ? "online" : "draft";
+    // A service that listens where the fleet does keeps a bare https://<name> link: the rendered
+    // port is not the published one there (the images publish 443:8443), so adding it would break
+    // a link that works. `link_port` is only set when the service declared HTTPS ports of its own.
+    const linkPort = row.link_port ? `:${escapeAttr(String(row.link_port))}` : "";
 
     return `
       <div class="row-actions">
@@ -124,7 +128,7 @@ $(document).ready(function () {
               )}" data-i18n="tooltip.disabled_draft"`
             : ""
         }>
-          <a role="button" class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}"
+          <a role="button" class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}${linkPort}"
              data-bs-toggle="tooltip" data-bs-placement="bottom"
              data-bs-original-title="${t("tooltip.link.access_service", "Access service {{name}}", { name: id })}"
              data-i18n="tooltip.link.access_service" data-i18n-options='{"name": "${safeId}"}'

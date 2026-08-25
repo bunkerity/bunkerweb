@@ -182,6 +182,9 @@ def _service_rows(services_list) -> List[Dict[str, Any]]:
                 "creation_date": _local_iso(service.get("creation_date")),
                 "last_update": _local_iso(service.get("last_update")),
                 "deletable": can_delete_service(service),
+                # Only when this service moved off the fleet's HTTPS listener; empty otherwise, so
+                # a deployment that does not use per-service ports adds nothing to the row.
+                "link_port": service.get("link_port") or "",
             }
         )
     return rows

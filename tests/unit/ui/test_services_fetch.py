@@ -96,10 +96,20 @@ def test_a_row_carries_facts_rather_than_markup(services_route):
             "creation_date": rows[0]["creation_date"],
             "last_update": rows[0]["last_update"],
             "deletable": rows[0]["deletable"],
+            "link_port": "",
         }
     ]
     for value in rows[0].values():
         assert "<" not in str(value), "a row must not carry markup"
+
+
+def test_a_service_on_its_own_port_ships_it_so_the_link_can_carry_it(services_route):
+    """``HTTPS_PORT`` is multisite since Lot B: a service can listen somewhere other than the port
+    the fleet publishes, and the name alone is then not a reachable URL. The API answers
+    ``link_port`` (empty for every service that did not move, because the RENDERED port is not the
+    published one -- the images publish ``443:8443``), and `services.js` appends it."""
+    assert services_route._service_rows([_service("a.example.com", link_port="9443")])[0]["link_port"] == "9443"
+    assert services_route._service_rows([_service("a.example.com")])[0]["link_port"] == ""
 
 
 def test_a_timestamp_leaves_with_an_offset_on_it(services_route):

@@ -136,7 +136,17 @@ def test_services_draft_disables_access_action():
     # `id|draft|method|deletable` string the template used to put in the cell. Same fact, one less
     # encoding to keep in step between Python and JavaScript.
     assert 'const isDraft = row.type === "draft";' in actions
-    assert 'class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}"' in actions
+    assert 'class="icon-btn${isDraft ? " disabled" : ""}" href="https://${safeId}${linkPort}"' in actions
+
+
+def test_the_access_link_carries_a_moved_services_own_port():
+    """``HTTPS_PORT`` is multisite since Lot B, so the name alone is not always a reachable URL.
+    ``link_port`` is empty for every service that listens where the fleet does -- the rendered port
+    is not the published one there (the images publish ``443:8443``) -- so this link is unchanged
+    for every deployment that uses no per-service port."""
+    actions = _renderer_source(SERVICES_JS.read_text(encoding="utf-8"))
+
+    assert 'const linkPort = row.link_port ? `:${escapeAttr(String(row.link_port))}` : "";' in actions
 
 
 def test_the_page_ships_no_rows_at_all():

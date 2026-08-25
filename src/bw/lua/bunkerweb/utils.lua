@@ -255,6 +255,109 @@ utils.get_variable = function(variable, site_search, ctx)
 	return value, "success"
 end
 
+-- Ordered port list a `multiple` port setting resolves to inside one variables table:
+-- BASE, BASE_1, BASE_2 ... with empty values dropped. An empty value is a port the operator
+-- deliberately disabled -- `HTTP_PORT=""` is the documented way to stop listening
+-- (settings.json:23) -- and it is also how a service shortens an inherited list, since a merge can
+-- overwrite a key but never remove one. A key a service did NOT declare is not empty here, it is
+-- absent: `Templator._inherited_port_keys` leaves it out of variables.env entirely, so this table
+-- carries the list the service's server block actually listens on.
+-- pairs() has no order, so the suffixes are sorted rather than walked: they need not be
+-- contiguous, and stopping at the first gap would silently truncate the list.
+local function port_list(variables_table, base_setting)
+	local ports = {}
+	if not variables_table then
+		return ports
+	end
+	local escaped = base_setting:gsub("([^%w])", "%%%1")
+	local indexed = {}
+	for key, value in pairs(variables_table) do
+		if key == base_setting then
+			indexed[#indexed + 1] = { 0, value }
+		else
+			local suffix = key:match("^" .. escaped .. "_(%d+)$")
+			if suffix then
+				indexed[#indexed + 1] = { tonumber(suffix), value }
+			end
+		end
+	end
+	table.sort(indexed, function(a, b)
+		return a[1] < b[1]
+	end)
+	for _, entry in ipairs(indexed) do
+		if entry[2] ~= "" then
+			ports[#ports + 1] = entry[2]
+		end
+	end
+	return ports
+end
+
+-- The port an absolute URL built for `server_name` must carry, or nil to carry none.
+--
+-- nil means "this service still listens where the fleet does", and every caller then behaves
+-- exactly as it did before per-service ports existed. That is the whole point: the rendered port
+-- is NOT the published port -- the product's own compose publishes 80:8080 and 443:8443
+-- (misc/integrations/docker.yml:16-18) -- so emitting a service's own 8443 into a redirect would
+-- break every default install. A list that DIFFERS from the global one is the only reliable sign
+-- that an operator moved this service on purpose, and with no NAT modelling in scope the rendered
+-- port is then the reachable one.
+--
+-- Costs one worker-LRU lookup (internalstore:get(..., true) is an in-process table read), whatever
+-- the length of the list.
+utils.listen_port_override = function(base_setting, server_name)
+	local variables, err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't access variables from internalstore : " .. err
+	end
+	-- `variables.global and`, same guard as internal_api.lua:20: init_by_lua can leave a partial
+	-- table behind (a truncated variables.env keeps the previous LRU data, api.lua:225), and
+	-- indexing a nil `global` here would raise inside the access phase rather than degrade.
+	if not variables.global or variables.global["MULTISITE"] ~= "yes" then
+		return nil, "not multisite"
+	end
+	if not server_name or not variables[server_name] then
+		return nil, "unknown service " .. tostring(server_name)
+	end
+	local service_ports = port_list(variables[server_name], base_setting)
+	local global_ports = port_list(variables["global"], base_setting)
+	if #service_ports == #global_ports then
+		local identical = true
+		for index = 1, #service_ports do
+			if service_ports[index] ~= global_ports[index] then
+				identical = false
+				break
+			end
+		end
+		if identical then
+			return nil, "same list as the global one"
+		end
+	end
+	if #service_ports == 0 then
+		return nil, "no listener of its own"
+	end
+	return service_ports[1], "success"
+end
+
+-- `host` without its port, so a port of our own can replace it. An IPv6 literal keeps its
+-- brackets and its inner colons: only a trailing ":<digits>" outside them is a port.
+utils.host_without_port = function(host)
+	local bracketed = host:match("^(%[.-%])")
+	if bracketed then
+		return bracketed
+	end
+	return (host:gsub(":%d+$", ""))
+end
+
+-- Absolute-URL authority for `server_name`, given the host the client used and which port
+-- setting applies. Returns `host` untouched whenever the service did not move.
+utils.public_authority = function(host, base_setting, server_name)
+	local port = utils.listen_port_override(base_setting, server_name)
+	if not port then
+		return host
+	end
+	return utils.host_without_port(host) .. ":" .. port
+end
+
 utils.has_variable = function(variable, value)
 	-- Get global variable
 	local variables, err = internalstore:get("variables", true)

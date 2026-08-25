@@ -8,6 +8,7 @@ local ngx = ngx
 local HTTP_NO_CONTENT = ngx.HTTP_NO_CONTENT
 local regex_match = utils.regex_match
 local get_deny_status = utils.get_deny_status
+local public_authority = utils.public_authority
 
 function cors:initialize(ctx)
 	-- Call parent initialize
@@ -24,6 +25,18 @@ function cors:initialize(ctx)
 		["CORS_ALLOW_METHODS"] = "Access-Control-Allow-Methods",
 		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers",
 	}
+end
+
+-- The `self` origin has to be the authority a browser will actually send in `Origin`, port
+-- included. It carried none, which is right on a default install (8443 is published as 443) and
+-- wrong the moment a service declares ports of its own: the emitted origin then never matches the
+-- browser's and CORS silently denies every cross-origin request. public_authority() returns the
+-- bare name for every service that did not move, so nothing changes for an existing deployment.
+function cors:self_origin()
+	local https = self.ctx.bw.https_configured == "yes"
+	local authority =
+		public_authority(self.ctx.bw.server_name, https and "HTTPS_PORT" or "HTTP_PORT", self.ctx.bw.server_name)
+	return (https and "https://" or "http://") .. authority
 end
 
 function cors:header()
@@ -53,11 +66,7 @@ function cors:header()
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
 		ngx_header["Access-Control-Allow-Origin"] = "*"
 	elseif self.variables["CORS_ALLOW_ORIGIN"] == "self" then
-		if self.ctx.bw.https_configured == "yes" then
-			ngx_header["Access-Control-Allow-Origin"] = "https://" .. self.ctx.bw.server_name
-		else
-			ngx_header["Access-Control-Allow-Origin"] = "http://" .. self.ctx.bw.server_name
-		end
+		ngx_header["Access-Control-Allow-Origin"] = self:self_origin()
 	else
 		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
 	end
@@ -92,11 +101,7 @@ function cors:access()
 	-- Set the allow origin
 	local allow_origin = self.variables["CORS_ALLOW_ORIGIN"]
 	if allow_origin == "self" then
-		if self.ctx.bw.https_configured == "yes" then
-			allow_origin = "https://" .. self.ctx.bw.server_name
-		else
-			allow_origin = "http://" .. self.ctx.bw.server_name
-		end
+		allow_origin = self:self_origin()
 	end
 
 	-- Deny as soon as possible if needed

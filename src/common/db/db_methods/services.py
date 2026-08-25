@@ -3,11 +3,13 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any, Dict, List
 
-from model import Metadata, Services, Services_settings  # type: ignore
+from model import Global_values, Metadata, Services, Services_settings, Settings  # type: ignore
 
 from sqlalchemy import select
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import aliased
+
+from ports import HTTPS_PORT_SETTING  # type: ignore
 
 from .common import DatabaseMixinBase, delete_service_rows, retry_on_transient_db_errors
 
@@ -50,7 +52,36 @@ class DatabaseServicesMixin(DatabaseMixinBase):
 
             db_services = session.execute(stmt).all()
 
+            # Two indexed lookups, once for the whole call rather than once per service, so a
+            # caller that ignores `link_port` pays two extra key reads and no N+1.
+            service_ports: Dict[str, List[str]] = {}
+            for row in session.execute(
+                select(Services_settings.service_id, Services_settings.value)
+                .where(Services_settings.setting_id == HTTPS_PORT_SETTING)
+                .order_by(Services_settings.service_id, Services_settings.suffix)
+            ).all():
+                if row.value:
+                    service_ports.setdefault(row.service_id, []).append(row.value)
+
+            global_ports = [
+                row.value
+                for row in session.execute(
+                    select(Global_values.value).where(Global_values.setting_id == HTTPS_PORT_SETTING).order_by(Global_values.suffix)
+                ).all()
+                if row.value
+            ]
+            if not global_ports:
+                # No global row means the setting sits at its declared default.
+                declared = session.execute(select(Settings.default).where(Settings.id == HTTPS_PORT_SETTING)).scalar()
+                global_ports = [declared] if declared else []
+
         for service in db_services:
+            # The port an absolute link to this service must carry, or "" to carry none. Empty for
+            # every service that listens where the fleet does -- which is every service on a
+            # deployment that does not use per-service ports -- because the rendered port is not
+            # the published one there (the images publish 80:8080 / 443:8443).
+            own_ports = service_ports.get(service.id, [])
+            link_port = own_ports[0] if own_ports and own_ports != global_ports else ""
             services.append(
                 {
                     "id": service.id,
@@ -61,6 +92,7 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                     "template": service.template or "",
                     "security_mode": service.security_mode or "block",
                     "server_type": service.server_type or "http",
+                    "link_port": link_port,
                 }
             )
 

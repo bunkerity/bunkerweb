@@ -49,12 +49,15 @@ __all__ = (
     "PRIVILEGED_PORT_CEILING",
     "STREAM_PORT_SETTING",
     "STREAM_SSL_PORT_SETTING",
+    "ACME_HTTP01_PORT",
     "PORT_LIST_SETTINGS",
     "check_ports",
     "collect_ports",
     "drop_inherited_ports",
     "inherited_port_keys",
+    "http01_refusals",
     "inventory",
+    "list_moved",
     "parse_port",
     "port_list_keys",
     "port_list_setting",
@@ -86,6 +89,10 @@ ALL_IN_ONE_API_PORT = 8888  # src/all-in-one/entrypoint.sh:223
 
 FATAL = "fatal"
 WARNING = "warning"
+
+# The only port an ACME server ever contacts for an http-01 challenge, and it follows no
+# redirect to reach it (documented at src/common/core/ssl/ssl.lua:18-24).
+ACME_HTTP01_PORT = 80
 
 
 class Listener(NamedTuple):
@@ -454,7 +461,58 @@ def check_ports(
 # ---------------------------------------------------------------------------------------------
 
 
-def services_from_config(config: Mapping[str, Any], server_names: Optional[Sequence[str]] = None) -> Dict[str, Dict[str, Any]]:
+def list_moved(service_config: Mapping[str, Any], global_config: Mapping[str, Any], setting: str) -> bool:
+    """Whether ``service_config``'s port list for ``setting`` differs from the global one.
+
+    Compared as ORDERED sequences: ``8080 8081`` and ``8081 8080`` are different listeners in a
+    different order, and nothing here is entitled to decide that the operator meant the same thing.
+    """
+    return collect_ports(service_config, setting) != collect_ports(global_config, setting)
+
+
+def http01_refusals(services: Mapping[str, Mapping[str, Any]], global_config: Mapping[str, Any]) -> Dict[str, str]:
+    """``{service: why}`` for each service whose ``http-01`` challenge can no longer be validated.
+
+    An ACME server only ever contacts **public port 80** and follows no redirect to get there. A
+    service that kept the fleet's HTTP listener is reachable there exactly as before -- whatever
+    the rendered port is, because the host publishes it. A service that declared a list of its own
+    is not, and the failure is otherwise a job error sixty seconds after a save that answered 200.
+
+    The message names the two ways out, because this is a hard refusal at save time and an
+    operator staring at a 400 needs to know what to do rather than what went wrong.
+    """
+    refusals: Dict[str, str] = {}
+    for service, config in services.items():
+        if str(config.get("AUTO_LETS_ENCRYPT", "no")).strip() != "yes":
+            continue
+        if str(config.get("LETS_ENCRYPT_CHALLENGE", "http")).strip() != "http":
+            continue
+        # Passthrough means BunkerWeb is not the one answering the challenge.
+        if str(config.get("LETS_ENCRYPT_PASSTHROUGH", "no")).strip() == "yes":
+            continue
+        if not list_moved(config, global_config, HTTP_PORT_SETTING):
+            continue
+        own = ", ".join(collect_ports(config, HTTP_PORT_SETTING)) or "none"
+        # A configuration snapshot only carries the settings that are NOT at their default (that is
+        # what the write paths hand over), so "no global list" here means "left at the default", not
+        # "no global port". Naming a port that is not in the snapshot would be inventing one, and
+        # printing "(none)" would be a plain lie -- so the clause is dropped instead.
+        fleet = ", ".join(collect_ports(global_config, HTTP_PORT_SETTING))
+        refusals[service] = (
+            f"LETS_ENCRYPT_CHALLENGE=http cannot work for {service}: it listens on its own HTTP port(s) ({own}) instead of the "
+            f"global one{'s' if ',' in fleet else ''}{f' ({fleet})' if fleet else ''}, and Let's Encrypt only ever contacts public "
+            f"port {ACME_HTTP01_PORT} and follows no redirect. Either set LETS_ENCRYPT_CHALLENGE=dns and configure a DNS provider, "
+            "or remove this service's HTTP_PORT override so it keeps listening on the global port that port 80 is published to."
+        )
+    return refusals
+
+
+def services_from_config(
+    config: Mapping[str, Any],
+    server_names: Optional[Sequence[str]] = None,
+    *,
+    multisite: Optional[bool] = None,
+) -> Dict[str, Dict[str, Any]]:
     """Slice a full (prefixed) config into ``{service: effective config}``.
 
     Global values stay as the per-service default, exactly like
@@ -462,12 +520,19 @@ def services_from_config(config: Mapping[str, Any], server_names: Optional[Seque
     keys, then overwrite with the service's own. Non-multisite yields the single
     service under its ``SERVER_NAME``.
 
+    ``multisite`` overrides what the configuration says about itself. The write
+    paths need it: a snapshot they are about to persist already carries prefixed
+    per-service keys, and reading ``MULTISITE`` out of it would make the answer
+    depend on a setting the very same request may be changing.
+
     Names are matched longest-first so a service whose id is a prefix of another
     cannot claim its sibling's keys.
     """
     if server_names is None:
         server_names = str(config.get("SERVER_NAME", "")).strip().split()
-    if str(config.get("MULTISITE", "no")).strip() != "yes":
+    if multisite is None:
+        multisite = str(config.get("MULTISITE", "no")).strip() == "yes"
+    if not multisite:
         return {name: dict(config) for name in server_names[:1]}
 
     prefixes = sorted(server_names, key=len, reverse=True)

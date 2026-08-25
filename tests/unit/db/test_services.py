@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 from fixtures.seed import (
     add_custom_config_row,
+    add_global_value,
+    add_setting,
     add_jobs_cache_row,
     add_service,
     add_service_setting,
@@ -66,3 +68,62 @@ class TestDeleteServices:
         assert db.get_metadata()["custom_configs_changed"] is True
         with session(db) as db_session:
             assert db_session.query(ResourceAttachments).count() == 0
+
+
+class TestLinkPort:
+    """``link_port`` is what an absolute link to a service must carry, and "" means "carry none".
+
+    Empty is the answer for every service that listens where the fleet does, which is every service
+    on a deployment that uses no per-service ports: the images publish ``443:8443``
+    (``misc/integrations/docker.yml:16-18``), so the RENDERED port is not the reachable one and
+    putting it in a link would send the operator to a socket nothing listens on from outside.
+    A service moved off that list is the opposite case -- its rendered port is the only one that
+    reaches it, so the link has to carry it.
+    """
+
+    def _settings(self, db):
+        add_setting(db, "HTTPS_PORT", context="multisite", multiple="listen-https-ports", default="8443")
+
+    def test_a_service_that_declares_nothing_gets_no_port(self, db):
+        seed_minimal(db)
+        self._settings(db)
+        assert db.get_services()[0]["link_port"] == ""
+
+    def test_a_service_on_its_own_port_gets_that_port(self, db):
+        seed_minimal(db)
+        self._settings(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="HTTPS_PORT", value="9443")
+        assert db.get_services()[0]["link_port"] == "9443"
+
+    def test_a_service_declaring_the_global_value_gets_no_port(self, db):
+        """Same list as the global one is not a move, whether it is inherited or restated."""
+        seed_minimal(db)
+        self._settings(db)
+        add_global_value(db, setting_id="HTTPS_PORT", value="9443")
+        add_service_setting(db, service_id="app1.example.com", setting_id="HTTPS_PORT", value="9443")
+        assert db.get_services()[0]["link_port"] == ""
+
+    def test_the_declared_default_is_used_when_no_global_row_exists(self, db):
+        """A setting left at its default has no ``Global_values`` row at all, so without the
+        fallback every service that restated the default would look moved."""
+        seed_minimal(db)
+        self._settings(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="HTTPS_PORT", value="8443")
+        assert db.get_services()[0]["link_port"] == ""
+
+    def test_the_first_port_is_the_one_linked(self, db):
+        seed_minimal(db)
+        self._settings(db)
+        add_service_setting(db, service_id="app1.example.com", setting_id="HTTPS_PORT", value="9443", suffix=0)
+        add_service_setting(db, service_id="app1.example.com", setting_id="HTTPS_PORT", value="9444", suffix=1)
+        assert db.get_services()[0]["link_port"] == "9443"
+
+    def test_one_service_moving_does_not_move_its_neighbour(self, db):
+        seed_minimal(db)
+        self._settings(db)
+        add_service(db, "app2.example.com")
+        add_service_setting(db, service_id="app2.example.com", setting_id="HTTPS_PORT", value="9443")
+        assert {service["id"]: service["link_port"] for service in db.get_services()} == {
+            "app1.example.com": "",
+            "app2.example.com": "9443",
+        }

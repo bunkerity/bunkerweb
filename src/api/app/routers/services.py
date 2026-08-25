@@ -4,6 +4,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
+from ports import HTTP_PORT_SETTING, http01_refusals, services_from_config  # type: ignore
+
 from ..auth.guard import guard
 from ..utils import get_db
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
@@ -110,6 +112,43 @@ def _invalid_variables(variables: Optional[Dict[str, Any]], *, skip: tuple = ())
     return invalid
 
 
+def _http01_refusal(config: Dict[str, Any], service: str) -> Optional[str]:
+    """Why ``service`` cannot keep ``LETS_ENCRYPT_CHALLENGE=http``, or None.
+
+    Checked on the config the handler is ABOUT TO PERSIST, not on the payload: the challenge and
+    the port can arrive in different requests, or one of the two can already be stored, and only
+    the merged result says whether the combination is reachable.
+
+    A hard refusal rather than a warning, on the PO's ruling: an ACME server contacts public port
+    80 and follows no redirect, so the alternative is a job failing sixty seconds after a save that
+    answered 200 — a support ticket instead of an error message. Only the service being written is
+    judged; a pre-existing violation on a sibling must not block an unrelated save.
+    """
+    services = services_from_config(config, [service], multisite=True)
+    globals_only = {key: value for key, value in config.items() if not key.startswith(f"{service}_")}
+    # A snapshot carries the NON-default settings, so a global port left at its declared default
+    # has no row at all -- and a service that merely restates that default would then look moved
+    # and be told to "remove this service's HTTP_PORT override", i.e. to remove the value it just
+    # set. Same fallback the services listing already applies for `link_port`
+    # (`db_methods/services.py:73-76`).
+    #
+    # Gated on the BASE key, not on the whole list being empty: a fleet that added a second port
+    # without moving the first one has a row for `HTTP_PORT_1` and none for `HTTP_PORT`, so a
+    # list-wide gate never fires on exactly the shape that needs it. And keyed on the key being
+    # ABSENT, never on its value being empty: `HTTP_PORT=""` is a deliberate global with a row.
+    if HTTP_PORT_SETTING not in globals_only:
+        declared = get_db().get_config(global_only=True, methods=False, filtered_settings=(HTTP_PORT_SETTING,))
+        if HTTP_PORT_SETTING in declared:
+            # Appending the recovered base is safe because `collect_ports` orders by SUFFIX, not by
+            # dict order. It was not: `list_moved` compares ordered sequences, so the recovered
+            # base landed last and answered ['8081', '8080'] against the service's ['8080', '8081'],
+            # refusing the very save this fallback exists to accept. Re-inserting it in position
+            # here would have fixed only half of it -- `services_from_config` appends the service's
+            # own base after the global repetition on the other side of the same comparison.
+            globals_only[HTTP_PORT_SETTING] = declared[HTTP_PORT_SETTING]
+    return http01_refusals(services, globals_only).get(service)
+
+
 def _invalid_server_name(name: str) -> Optional[str]:
     """Return the reason `name` is unusable as a server name, or None.
 
@@ -171,6 +210,10 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
 
     conf["SERVER_NAME"] = " ".join(sorted(existing | {name}))
 
+    refusal = _http01_refusal(conf, name)
+    if refusal:
+        return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
+
     return _persist_config(conf)
 
 
@@ -230,6 +273,10 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         if isinstance(v, (dict, list)):
             return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid value for {k}: must be scalar"})
         conf[f"{target}_{k}"] = "" if v is None else v
+
+    refusal = _http01_refusal(conf, target)
+    if refusal:
+        return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
 
     return _persist_config(conf)
 

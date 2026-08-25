@@ -26,7 +26,9 @@ from ports import (  # type: ignore
     check_ports,
     collect_ports,
     drop_inherited_ports,
+    http01_refusals,
     inventory,
+    list_moved,
     parse_port,
     port_list_keys,
     port_list_setting,
@@ -276,6 +278,15 @@ class TestServicesFromConfig:
         assert collect_ports(services["a"], "HTTP_PORT") == ["9000"]
         assert collect_ports(services["b"], "HTTP_PORT") == ["8080", "8081"]
 
+    def test_the_multisite_override_wins_over_the_configuration(self):
+        """The write paths need it: a snapshot they are about to persist already carries prefixed
+        keys, and reading MULTISITE out of it would make the answer depend on a setting the very
+        same request may be changing."""
+        config = {"MULTISITE": "no", "SERVER_NAME": "a b", "a_HTTP_PORT": "9000"}
+        services = services_from_config(config, ["a", "b"], multisite=True)
+        assert list(services) == ["a", "b"]
+        assert services["a"]["HTTP_PORT"] == "9000"
+
     def test_non_multisite_yields_the_single_service(self):
         services = services_from_config({"MULTISITE": "no", "SERVER_NAME": "a.example.com", "HTTP_PORT": "8080"})
         assert list(services) == ["a.example.com"]
@@ -342,6 +353,92 @@ class TestDropInheritedPorts:
         merged = dict(self.GLOBAL, HTTP_PORT="")
         drop_inherited_ports(merged, {"HTTP_PORT": ""})
         assert collect_ports(merged, "HTTP_PORT") == []
+
+
+class TestListMoved:
+    """Lot C's discriminator. Equal list means the published-port contract still holds --
+    ``misc/integrations/docker.yml:16-18`` publishes ``80:8080``, so the RENDERED port is not the
+    reachable one and no absolute URL may carry it. A different list means the operator moved this
+    service off the published port, and the rendered port is then the only one that reaches it.
+
+    The Python side answers this question for ``http01_refusals``; the port an absolute URL
+    actually carries is decided in Lua (``utils.listen_port_override``), which reads
+    ``variables.env`` at request time.
+    """
+
+    GLOBAL = {"HTTP_PORT": "8080", "HTTP_PORT_1": "8081"}
+
+    def test_the_same_list_is_not_a_move(self):
+        assert list_moved(dict(self.GLOBAL), self.GLOBAL, "HTTP_PORT") is False
+
+    def test_a_different_value_is_a_move(self):
+        assert list_moved({"HTTP_PORT": "9000"}, self.GLOBAL, "HTTP_PORT") is True
+
+    def test_the_same_ports_in_a_different_order_are_a_move(self):
+        """Order decides which port an absolute URL gets, so it is part of the identity. Sorting is
+        by SUFFIX, never by value, which is what keeps this a move: the two ports are assigned to
+        different repetitions."""
+        service = {"HTTP_PORT": "8081", "HTTP_PORT_1": "8080"}
+        assert list_moved(service, self.GLOBAL, "HTTP_PORT") is True
+
+    def test_a_restated_list_is_not_a_move_whatever_order_the_keys_arrive_in(self):
+        """The shape that reached the HTTP-01 gate: a fleet carrying a row for ``HTTP_PORT_1``
+        alone, and a service restating ``8080 8081``. Both sides of this comparison are built by
+        merging dicts, so both had their base appended last — the refusal it caused was a
+        dict-ordering artefact, not a moved service."""
+        merged_backwards = {"HTTP_PORT_1": "8081", "HTTP_PORT": "8080"}
+        assert list_moved(merged_backwards, self.GLOBAL, "HTTP_PORT") is False
+        assert list_moved(dict(self.GLOBAL), merged_backwards, "HTTP_PORT") is False
+
+    def test_a_service_that_disabled_its_listener_moved_the_list(self):
+        """``HTTP_PORT=""`` is an empty list, which is not the fleet's list."""
+        assert list_moved({"HTTP_PORT": ""}, self.GLOBAL, "HTTP_PORT") is True
+
+
+class TestHttp01Refusals:
+    """An ACME server only ever contacts public port 80 and follows no redirect to get there. A
+    service that listens somewhere else can never pass an http-01 challenge, so the save is refused
+    with the two ways out rather than issuing a certificate request that will fail later."""
+
+    GLOBAL = {"HTTP_PORT": "8080", "AUTO_LETS_ENCRYPT": "yes", "LETS_ENCRYPT_CHALLENGE": "http"}
+
+    def refusal(self, **service):
+        services = {"b": dict(self.GLOBAL, **service)}
+        return http01_refusals(services, self.GLOBAL).get("b")
+
+    def test_a_moved_service_is_refused(self):
+        message = self.refusal(HTTP_PORT="9080")
+        assert message and "9080" in message and "8080" in message
+
+    def test_the_message_names_both_ways_out(self):
+        message = self.refusal(HTTP_PORT="9080")
+        assert "LETS_ENCRYPT_CHALLENGE=dns" in message
+        assert "HTTP_PORT" in message
+
+    def test_the_global_clause_is_dropped_when_the_snapshot_has_no_global_row(self):
+        """A write path hands over the NON-default settings, so a global port left at its default
+        is simply absent. Printing "(none)" there says the fleet has no HTTP port, which is false
+        and points the operator at the wrong thing."""
+        message = http01_refusals({"b": {"AUTO_LETS_ENCRYPT": "yes", "LETS_ENCRYPT_CHALLENGE": "http", "HTTP_PORT": "9080"}}, {})["b"]
+        assert "(none)" not in message
+        assert "instead of the global one, and" in message
+
+    def test_a_plural_global_list_is_named_in_full(self):
+        message = http01_refusals({"b": dict(self.GLOBAL, HTTP_PORT="9080")}, dict(self.GLOBAL, HTTP_PORT_1="8081"))["b"]
+        assert "global ones (8080, 8081)" in message
+
+    def test_a_service_on_the_global_ports_is_not_refused(self):
+        assert self.refusal() is None
+
+    def test_the_dns_challenge_is_never_refused(self):
+        assert self.refusal(HTTP_PORT="9080", LETS_ENCRYPT_CHALLENGE="dns") is None
+
+    def test_lets_encrypt_off_is_never_refused(self):
+        assert self.refusal(HTTP_PORT="9080", AUTO_LETS_ENCRYPT="no") is None
+
+    def test_passthrough_is_never_refused(self):
+        """The challenge is answered upstream, so this instance's ports do not decide it."""
+        assert self.refusal(HTTP_PORT="9080", LETS_ENCRYPT_PASSTHROUGH="yes") is None
 
 
 class TestSettingsDeclaration:

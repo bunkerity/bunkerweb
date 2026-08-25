@@ -1,10 +1,12 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
 local ssl = class("ssl", plugin)
 
 local ngx = ngx
 local sub = string.sub
+local public_authority = utils.public_authority
 local HTTP_MOVED_PERMANENTLY = ngx.HTTP_MOVED_PERMANENTLY
 
 local ACME_CHALLENGE_PREFIX = "/.well-known/acme-challenge/"
@@ -35,11 +37,19 @@ function ssl:access()
 			and self.ctx.bw.http_host ~= nil
 		)
 	then
+		-- `http_host` is the authority the client used, port included, which is why this redirect
+		-- works on a default install: 8443 is published as 443, so dropping the client's :80 and
+		-- adding nothing lands on the right place. That contract only holds while this service
+		-- listens where the fleet does. When it declared HTTPS ports of its own, the rendered port
+		-- IS the reachable one and the redirect has to carry it -- otherwise it points at 443,
+		-- where this service has no listener at all. public_authority() returns `http_host`
+		-- unchanged for every service that did not move.
+		local authority = public_authority(self.ctx.bw.http_host, "HTTPS_PORT", self.ctx.bw.server_name)
 		return self:ret(
 			true,
 			"redirect to HTTPS",
 			HTTP_MOVED_PERMANENTLY,
-			"https://" .. self.ctx.bw.http_host .. self.ctx.bw.request_uri
+			"https://" .. authority .. self.ctx.bw.request_uri
 		)
 	end
 	return self:ret(true, "no redirect to HTTPS needed")
