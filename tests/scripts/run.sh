@@ -150,6 +150,39 @@ for test in $tests ; do
     attempts=$((retries + 1))
 
     while [ "$attempts" -gt 0 ] ; do
+        # Regenerate before every retry. `generate.py` runs once per action, above, and writes
+        # /tmp/services.yml -- but a full_clean attempt ends in `cleanup_stack`, which deletes
+        # that file (utils.sh), and `start.sh` only deploys the application when it exists
+        # (`elif [ -f /tmp/services.yml ]`). Without this, every retry of a full_clean action
+        # brings up a stack with no application at all: the assertion then fails on something
+        # else entirely ("cookie not found in page", "String ... not found in response") and
+        # overwrites the real error, so those retries can never pass and never measured anything.
+        # Seen in Autoconf;headers, where check_cookie_flags_ssl's three retries all reported an
+        # absent cookie while the controller was saving {'SERVER_NAME': '', 'MULTISITE': 'yes'}.
+        if [ "$attempts" -le "$retries" ] ; then
+            # Same reason as before the first generation: the package's services own
+            # variables.env once they have run, and generate.py rewrites it from scratch.
+            if [ "$integration" == "Linux" ] ; then
+                if $IS_FREEBSD ; then
+                    chmod 777 /etc/bunkerweb/variables.env
+                else
+                    docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb/variables.env
+                fi
+            fi
+
+            if [ "$release" == "dev" ] ; then
+                python3 tests/generate.py "$integration" "$type" "$test" --dev
+            else
+                python3 tests/generate.py "$integration" "$type" "$test"
+            fi
+
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "RUN" "❌" "🧑‍🔧 Failed to regenerate test \"$test\" for the retry"
+                exit 1
+            fi
+        fi
+
         if [ "$restart_stack" -eq 1 ] ; then
             # Baseline for wait.sh: how many configuration pushes had happened before this
             # restart. Counting them afterwards alone would accept one the previous action

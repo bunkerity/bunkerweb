@@ -55,6 +55,8 @@ type=core
 test=whitelist:rdns
 integration=Docker
 category=whitelist
+release=dev
+IS_FREEBSD=false
 
 log() { :; }
 log_stack() { :; }
@@ -68,7 +70,18 @@ redis_cli() {
     fi
 }
 
+# Two different python3 calls reach this stub: the action itself, and the regeneration the
+# loop runs before every retry (without it a full_clean retry starts a stack with no
+# application -- see run.sh). Only the first is an attempt; the second must succeed, or the
+# loop's error branch aborts the category.
 python3() {
+    case "${1:-}" in
+        tests/generate.py)
+            echo "generate" >> "$GENERATIONS_FILE"
+            return 0
+            ;;
+    esac
+
     echo "attempt" >> "$ATTEMPTS_FILE"
     local seen
     seen=$(wc -l < "$ATTEMPTS_FILE")
@@ -86,6 +99,8 @@ def _run(retries: int, pass_on: int, tmp_path: Path):
     """Run the extracted loop; PASS_ON=0 means the spec never passes."""
     attempts_file = tmp_path / f"attempts-{retries}-{pass_on}"
     attempts_file.write_text("")
+    generations_file = tmp_path / f"generations-{retries}-{pass_on}"
+    generations_file.write_text("")
     script = HARNESS % _extract_loop()
     proc = subprocess.run(
         ["bash", "-c", script],
@@ -96,10 +111,12 @@ def _run(retries: int, pass_on: int, tmp_path: Path):
             "RETRIES": str(retries),
             "PASS_ON": str(pass_on),
             "ATTEMPTS_FILE": attempts_file.as_posix(),
+            "GENERATIONS_FILE": generations_file.as_posix(),
         },
     )
     attempts = len(attempts_file.read_text().splitlines())
-    return attempts, proc.returncode, proc.stderr
+    generations = len(generations_file.read_text().splitlines())
+    return attempts, generations, proc.returncode, proc.stderr
 
 
 @pytest.mark.parametrize(
@@ -112,13 +129,27 @@ def _run(retries: int, pass_on: int, tmp_path: Path):
     ],
 )
 def test_a_failing_test_is_attempted_retries_plus_one_times(retries, expected_attempts, tmp_path):
-    attempts, returncode, stderr = _run(retries, pass_on=0, tmp_path=tmp_path)
+    attempts, _, returncode, stderr = _run(retries, pass_on=0, tmp_path=tmp_path)
     assert attempts == expected_attempts, f"retries={retries} ran {attempts} attempt(s): {stderr}"
     assert returncode == 1, "a spec that never passes must still fail the job"
 
 
 def test_the_loop_stops_at_the_first_pass(tmp_path):
     # retries: 2 but the second attempt succeeds -> three attempts must NOT be made.
-    attempts, returncode, stderr = _run(2, pass_on=2, tmp_path=tmp_path)
+    attempts, _, returncode, stderr = _run(2, pass_on=2, tmp_path=tmp_path)
     assert attempts == 2, f"the loop kept going after a pass: {stderr}"
     assert returncode == 0, "a passing retry must not fail the job"
+
+
+@pytest.mark.parametrize(("retries", "expected_generations"), [(0, 0), (1, 1), (3, 3)])
+def test_every_retry_regenerates_the_action(retries, expected_generations, tmp_path):
+    """A retry must re-run generate.py -- once per retry, never before the first attempt.
+
+    `generate.py` runs once per action, outside this loop, and writes /tmp/services.yml. A
+    `full_clean` attempt ends in `cleanup_stack`, which deletes that file, and `start.sh` only
+    deploys the application when it is there. Without a regeneration the retry therefore tests a
+    stack with no application: `Autoconf;headers` spent all three of `check_cookie_flags_ssl`'s
+    retries reporting an absent cookie, which is not what failed, and the real error was lost.
+    """
+    _, generations, _, stderr = _run(retries, pass_on=0, tmp_path=tmp_path)
+    assert generations == expected_generations, f"retries={retries} regenerated {generations} time(s): {stderr}"
