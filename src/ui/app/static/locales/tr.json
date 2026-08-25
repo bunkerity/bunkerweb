@@ -1210,9 +1210,11 @@
       "install_failed": "Install failed",
       "learn_more": "Learn more",
       "version": "Version {{version}}",
-      "incompatible": "Requires BunkerWeb {{min}} or newer; this is {{current}}",
+      "incompatible": "This release declares no BunkerWeb compatibility; this is {{current}}",
       "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
-      "trust_notice": "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+      "trust_notice": "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges.",
+      "incompatible_declared": "This release supports BunkerWeb {{supported}}; this is {{current}}",
+      "release": "Read from release {{tag}}"
     }
   },
   "pro": {
@@ -1483,6 +1485,68 @@
     "multiple": {
       "description": "Bu eklenti için ayarların birden fazla örneğini burada yapılandırabilirsiniz.",
       "title": "Çoklu Ayarlar"
+    },
+    "antibot": {
+      "capjs": {
+        "hint": "Needs a Cap.js server; the frontend and backend URLs may differ.",
+        "title": "Cap.js"
+      },
+      "captcha": {
+        "hint": "Rendered by BunkerWeb itself — no third-party account, no outbound request.",
+        "title": "Built-in captcha"
+      },
+      "challenge": {
+        "description": "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid.",
+        "title": "Challenge behaviour"
+      },
+      "countries": {
+        "both_set": "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous.",
+        "description": "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded.",
+        "mode": {
+          "all": "Challenge every country",
+          "ignore": "Skip the challenge for these countries",
+          "only": "Challenge only these countries"
+        },
+        "picker_label": "Country filter",
+        "title": "Countries"
+      },
+      "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
+      "exemptions": {
+        "description": "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing.",
+        "title": "Exemptions"
+      },
+      "hcaptcha": {
+        "hint": "Needs a site registered at hcaptcha.com.",
+        "title": "hCaptcha"
+      },
+      "mcaptcha": {
+        "hint": "Needs an mCaptcha instance — the hosted demo or your own.",
+        "title": "mCaptcha"
+      },
+      "mode": {
+        "description": "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back.",
+        "title": "Challenge mode"
+      },
+      "recaptcha": {
+        "classic": {
+          "hint": "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition.",
+          "title": "reCAPTCHA classic"
+        },
+        "enterprise": {
+          "hint": "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition.",
+          "title": "reCAPTCHA Enterprise"
+        },
+        "hint": "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions.",
+        "title": "Google reCAPTCHA"
+      },
+      "turnstile": {
+        "hint": "Needs a site registered in the Cloudflare dashboard.",
+        "title": "Cloudflare Turnstile"
+      },
+      "unplaced": {
+        "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
+        "title": "Other settings"
+      }
     }
   },
   "setup": {
@@ -1890,7 +1954,8 @@
     "catalog": {
       "heading": "Available templates",
       "subheading": "Curated service templates published by the BunkerWeb organisation.",
-      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration.",
+      "no_compat_notice": "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
     }
   },
   "theme": {

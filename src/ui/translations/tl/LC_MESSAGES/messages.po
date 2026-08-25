@@ -3362,7 +3362,10 @@ msgid "plugin.type.ui"
 msgstr "UI"
 
 msgid "plugins.catalog.incompatible"
-msgstr "Requires BunkerWeb %(min)s or newer; this is %(current)s"
+msgstr "This release declares no BunkerWeb compatibility; this is %(current)s"
+
+msgid "plugins.catalog.incompatible_declared"
+msgstr "This release supports BunkerWeb %(supported)s; this is %(current)s"
 
 msgid "plugins.catalog.install"
 msgstr "Install"
@@ -3373,6 +3376,9 @@ msgstr "Install failed"
 msgid "plugins.catalog.learn_more"
 msgstr "Learn more"
 
+msgid "plugins.catalog.release"
+msgstr "Read from release %(tag)s"
+
 msgid "plugins.catalog.stale"
 msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
 
@@ -3380,7 +3386,7 @@ msgid "plugins.catalog.tab"
 msgstr "Available"
 
 msgid "plugins.catalog.trust_notice"
-msgstr "Community items are published by the BunkerWeb organisation on GitHub. Downloads are integrity-checked (SHA-256) but not cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+msgstr "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
 
 msgid "plugins.catalog.version"
 msgstr "Version %(version)s"
@@ -4311,6 +4317,102 @@ msgstr "Kabuuang bilang ng mga serbisyo"
 
 msgid "services.with_configs"
 msgstr "Na may custom na configuration"
+
+msgid "settings.antibot.capjs.hint"
+msgstr "Needs a Cap.js server; the frontend and backend URLs may differ."
+
+msgid "settings.antibot.capjs.title"
+msgstr "Cap.js"
+
+msgid "settings.antibot.captcha.hint"
+msgstr "Rendered by BunkerWeb itself — no third-party account, no outbound request."
+
+msgid "settings.antibot.captcha.title"
+msgstr "Built-in captcha"
+
+msgid "settings.antibot.challenge.description"
+msgstr "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid."
+
+msgid "settings.antibot.challenge.title"
+msgstr "Challenge behaviour"
+
+msgid "settings.antibot.countries.both_set"
+msgstr "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous."
+
+msgid "settings.antibot.countries.description"
+msgstr "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded."
+
+msgid "settings.antibot.countries.mode.all"
+msgstr "Challenge every country"
+
+msgid "settings.antibot.countries.mode.ignore"
+msgstr "Skip the challenge for these countries"
+
+msgid "settings.antibot.countries.mode.only"
+msgstr "Challenge only these countries"
+
+msgid "settings.antibot.countries.picker_label"
+msgstr "Country filter"
+
+msgid "settings.antibot.countries.title"
+msgstr "Countries"
+
+msgid "settings.antibot.disabled_notice"
+msgstr "Antibot is off for this scope. Pick a challenge mode to configure it."
+
+msgid "settings.antibot.exemptions.description"
+msgstr "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing."
+
+msgid "settings.antibot.exemptions.title"
+msgstr "Exemptions"
+
+msgid "settings.antibot.hcaptcha.hint"
+msgstr "Needs a site registered at hcaptcha.com."
+
+msgid "settings.antibot.hcaptcha.title"
+msgstr "hCaptcha"
+
+msgid "settings.antibot.mcaptcha.hint"
+msgstr "Needs an mCaptcha instance — the hosted demo or your own."
+
+msgid "settings.antibot.mcaptcha.title"
+msgstr "mCaptcha"
+
+msgid "settings.antibot.mode.description"
+msgstr "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back."
+
+msgid "settings.antibot.mode.title"
+msgstr "Challenge mode"
+
+msgid "settings.antibot.recaptcha.classic.hint"
+msgstr "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition."
+
+msgid "settings.antibot.recaptcha.classic.title"
+msgstr "reCAPTCHA classic"
+
+msgid "settings.antibot.recaptcha.enterprise.hint"
+msgstr "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition."
+
+msgid "settings.antibot.recaptcha.enterprise.title"
+msgstr "reCAPTCHA Enterprise"
+
+msgid "settings.antibot.recaptcha.hint"
+msgstr "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions."
+
+msgid "settings.antibot.recaptcha.title"
+msgstr "Google reCAPTCHA"
+
+msgid "settings.antibot.turnstile.hint"
+msgstr "Needs a site registered in the Cloudflare dashboard."
+
+msgid "settings.antibot.turnstile.title"
+msgstr "Cloudflare Turnstile"
+
+msgid "settings.antibot.unplaced.description"
+msgstr "Declared by the plugin but not yet placed in a section above. They still save normally."
+
+msgid "settings.antibot.unplaced.title"
+msgstr "Other settings"
 
 msgid "settings.custom_config.title"
 msgstr "Custom na Configuration"
@@ -5310,6 +5412,9 @@ msgstr "Available templates"
 
 msgid "templates.catalog.layer_warning"
 msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+
+msgid "templates.catalog.no_compat_notice"
+msgstr "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
 
 msgid "templates.catalog.subheading"
 msgstr "Curated service templates published by the BunkerWeb organisation."
