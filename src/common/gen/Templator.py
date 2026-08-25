@@ -26,6 +26,7 @@ if deps_path not in sys_path:
 
 from common_utils import effective_cpu_count  # type: ignore
 from logger import getLogger  # type: ignore
+from ports import stream_reuseport_owners  # type: ignore
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
@@ -432,6 +433,13 @@ class Templator:
 
         self._categorized_templates = self._categorize_templates()
 
+        # `reuseport` is a listen OPTION and NGINX binds listen options to the addr:port, not to the
+        # server block: a second block setting one on the same addr:port is fatal
+        # (src/deps/src/nginx/src/stream/ngx_stream.c:489-497). A template only ever sees its own
+        # block, so the owner of each stream addr:port is elected HERE, where every service is
+        # visible, and handed to the template as STREAM_REUSEPORT_PORTS.
+        self._stream_reuseport_ports = stream_reuseport_owners(self._service_configs())
+
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
             "has_variable": Templator.has_variable,
@@ -654,6 +662,21 @@ class Templator:
 
         return filtered_config
 
+    def _service_configs(self) -> Dict[str, Dict[str, Any]]:
+        """``{service: effective config}`` in SERVER_NAME order, the view each block renders with.
+
+        Same merge as :meth:`_get_server_config` because it is the same question: what a server
+        block actually sees. Non-multisite has a single block, which then owns all of its ports and
+        renders exactly as it did before the ownership rule existed.
+        """
+        server_name = str(self._config.get("SERVER_NAME", "")).strip()
+        if self._config.get("MULTISITE", "no") != "yes":
+            return {server_name: self._full_config} if server_name else {}
+        return {
+            server: self._get_server_config(server, self._global_only_full_config, self._server_specific_full_config.get(server, {}))
+            for server in server_name.split()
+        }
+
     def _render_global(self) -> None:
         """Render global templates."""
         global_start = perf_counter()
@@ -717,6 +740,9 @@ class Templator:
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = full_config
         template_vars.update(config)
+        # Set AFTER update(config) on purpose: this is a derived variable, never a setting, and a
+        # configuration key must not be able to shadow it.
+        template_vars["STREAM_REUSEPORT_PORTS"] = self._stream_reuseport_ports.get(server, frozenset())
 
         for template in templates:
             name = basename(template) if any(template.endswith(root_conf) for root_conf in self._global_templates) else None
