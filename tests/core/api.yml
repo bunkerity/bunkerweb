@@ -75,6 +75,18 @@ actions:
     url: "http://127.0.0.1:5001/ping"
     headers:
       Host: "bwapi"
+    # Not on Linux. The other arms gate readiness on the container healthcheck, which only asks
+    # whether nginx answers `/healthz` -- indifferent to whether the instance was ever
+    # configured. The Linux gate greps `BunkerWeb is ready` out of error.log
+    # (`tests/scripts/wait.sh`), and that line is only written once `IS_LOADING` flips, which
+    # takes a scheduler -> instance configuration push through the very listener this action
+    # turns off. The stack therefore cannot become healthy here however long it waits, and the
+    # action spent the full 300s timeout before asserting anything.
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "Kubernetes"
+      - "All-in-one"
     config:
       API_LISTEN_HTTP: "no"
 
