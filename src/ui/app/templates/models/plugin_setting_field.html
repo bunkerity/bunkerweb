@@ -1,0 +1,146 @@
+{# ONE settings field, end to end: the `disabled`/value/method prelude, the column wrapper,
+   the disabled tooltip, the `.bw-setting-frame` box, the label + provenance badges, and the
+   widget dispatch.
+
+   Extracted VERBATIM out of models/plugin_settings_body.html (its non-multiple grid cell) so a
+   purpose-built plugin body -- templates/plugin_bodies/*.html -- renders a field with exactly
+   the chrome the generic form renders. The PRELUDE is the load-bearing half: its `disabled`
+   expression has to stay identical to routes/services.py:postable_scope, because a page that
+   claims authority over a key its form cannot send deletes that row
+   (db_methods/config_save.py:579-585). One copy is the only way that stays true across five
+   custom pages.
+
+   The generic body's `multiple` loop deliberately does NOT use this partial: its markup differs
+   (setting_id_suffix, its own column sizing, no frame), so folding the two would not have been
+   a pure move.
+
+   Caller must set: `setting`, `setting_data`, `setting_id_prefix`. Everything else comes from
+   the page context (`config`, `plugin`, `plugin_data`, `clone`, `current_endpoint`,
+   `is_readonly`, `is_pro_version`) plus the Jinja globals. `setting_id_suffix` stays Undefined
+   here (it renders as "") exactly as it did inline -- only the multiples loop ever sets it.
+
+   `field_col_class` is the ONLY new name. It defaults to the exact class string the generic grid
+   used, so the generic render stays byte-identical -- proven by re-rendering all 45 core
+   manifests x {service, global} x {normal, new, clone} x {readonly on, off} = 540 pages to the
+   same sha256 before and after the move; a plugin body overrides it to lay its own groups out.
+
+   WHITESPACE CONTRACT: this partial emits exactly the bytes the inline block emitted, so moving
+   it changed no rendered page. Two trims do it, and both are load-bearing:
+     * the whitespace-control markers below eat this whole preamble;
+     * the trimming comment on the LAST line eats the newline after the final closing div,
+       because the caller's own include line already supplies one.
+   That trailing trim is a comment rather than "just leave the file without a final newline": the
+   `end-of-file-fixer` pre-commit hook runs on every commit and would silently put one back,
+   turning a proven pure move into a quiet whitespace change on 44 pages. Do not add a blank line
+   at either end of this file, and do not delete that last comment. #}
+{#- The multisite badge below calls `docs_url`. Imported HERE rather than left to the
+   caller: plugin_settings_body.html happened to import it at its own top, but every
+   plugin_bodies/*.html would have to remember, and forgetting it is a 500 on the page
+   rather than a missing badge. The `-` markers keep this preamble whitespace-free. -#}
+{%- from 'macros/docs_link.html' import docs_url -%}
+{%- set field_col_class = field_col_class | default("col-12 col-sm-6 col-lg-4 pb-3", true) -%}
+{% set setting_config = config.get(setting, {}) %}
+        {% set setting_default = setting_data.get("default", "") %}
+        {% set setting_value = setting_config.get("value", setting_default) %}
+        {% set setting_method = setting_config.get("method", "default") %}
+        {% set setting_template = setting_config.get("template", "") %}
+        {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+        {% if current_endpoint == "new" or clone %}
+            {% set setting_method = "default" %}
+            {% set disabled = false %}
+            {% if setting == "SERVER_NAME" %}
+                {% set setting_value = "" %}
+            {% endif %}
+        {% endif %}
+        {% if is_readonly %}
+            {% set disabled = true %}
+            {% set setting_method = "readonly" %}
+        {% endif %}
+        {% if plugin_data["type"] == "pro" and not is_pro_version %}
+            {% set disabled = true %}
+            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+        {% endif %}
+        <div class="{{ field_col_class }}"
+             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+            {# bw-setting-frame: kit .bw-input-wrap.is-setting bordered box (settings.css, settings page only). Additive wrapper -- .closest(".col-12") / .setting-highlight still anchor on the col. #}
+            <div class="bw-setting-frame">
+            <div class="d-flex justify-content-between align-items-center">
+                <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
+                       for="setting-{{ plugin }}-{{ setting_data['id'] }}"
+                       class="form-label fw-semibold text-truncate">
+                    {{ setting_data["label"] }}
+                </label>
+                <div class="d-flex align-items-center">
+                    {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
+                        <a role="badge"
+                           href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                           data-endpoint="/concepts"
+                           data-fragment="#multisite-mode"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="top"
+                           data-bs-original-title="Multisite setting"
+                           target="_blank"
+                           rel="noopener">
+                            <span class="bx bx-server bx-xs"></span>
+                        </a>
+                    {% endif %}
+                    {% if setting_template %}
+                        <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              data-bs-original-title="From template: {{ setting_template }}">
+                            <span class="bx bx-spreadsheet bx-xs"></span>
+                        </span>
+                    {% endif %}
+                    {% if setting_method == "api" %}
+                        <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              data-bs-original-title="{{ _("badge.managed_via_api") }}">
+                            <span class="bx bx-code-curly bx-xs"></span>
+                        </span>
+                    {% endif %}
+                    {% if setting_config.get("clone") %}
+                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              data-bs-original-title="Cloned from service {{ clone }}">
+                            <span class="bx bx-copy-alt bx-xs"></span>
+                        </span>
+                    {% elif current_endpoint != "global-config" and current_endpoint != "global-settings" and setting_config.get("global") and setting_value != setting_default %}
+                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              data-bs-original-title="From global settings">
+                            <span class="bx bx-globe bx-xs"></span>
+                        </span>
+                    {% endif %}
+                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-original-title="{{ setting_data['help'] }}">
+                        <span class="bx bx-question-mark bx-xs"></span>
+                    </span>
+                </div>
+            </div>
+            {% if setting_data["type"] == "select" %}
+                {% include "models/select_setting.html" %}
+            {% elif setting_data["type"] == "multiselect" %}
+                {% include "models/multiselect_setting.html" %}
+            {% elif setting_data["type"] == "multivalue" %}
+                {% include "models/multivalue_setting.html" %}
+            {% elif setting_data["type"] == "check" %}
+                {% include "models/checkbox_setting.html" %}
+            {% else %}
+                {% if setting == "SERVER_NAME" and current_endpoint != "global-config" and current_endpoint != "global-settings" %}
+                    <input type="hidden"
+                           id="old-server-name"
+                           name="OLD_SERVER_NAME"
+                           value="{{ setting_value }}">
+                {% endif %}
+                {% include "models/input_setting.html" %}
+            {% endif %}
+            </div>
+        </div>
+{#- -#}

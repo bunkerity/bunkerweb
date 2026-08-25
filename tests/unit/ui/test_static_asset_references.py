@@ -74,6 +74,17 @@ def test_the_two_map_pages_load_topojson_before_they_use_it():
         assert source.index("topojson-client.min.js") < source.index(script), f"{page} loads topojson after the page script"
 
 
+# A `url_for('static', filename=<variable>)` the literal regex cannot read is allowed ONLY when
+# its value set is finite and something else pins it. One entry today:
+#
+#   filename=settings_body_script   plugin_settings_page.html -- a plugin body's behaviour script.
+#                                   The routes only ever pass what `app.utils
+#                                   .plugin_settings_body_script` resolved by globbing the shipped
+#                                   directory, so the reference cannot name a file that is not
+#                                   there. What CAN drift is the pairing between the two
+#                                   directories, which is what the test below pins.
+VARIABLE_REFERENCES = {"filename=settings_body_script"}
+
 _ANY_STATIC = re.compile(r"""url_for\(\s*['"]static['"]""")
 
 
@@ -90,8 +101,12 @@ def _unreadable_references():
         source = template.read_text(encoding="utf-8")
         literal_starts = {m.start() for m in _URL_FOR_STATIC.finditer(source)}
         for match in _ANY_STATIC.finditer(source):
-            if match.start() not in literal_starts:
-                unreadable.append((template.name, source[match.start() : match.start() + 120].replace("\n", " ")))
+            if match.start() in literal_starts:
+                continue
+            excerpt = source[match.start() : match.start() + 120].replace("\n", " ")
+            if any(allowed in excerpt for allowed in VARIABLE_REFERENCES):
+                continue
+            unreadable.append((template.name, excerpt))
     return unreadable
 
 
@@ -120,3 +135,26 @@ def test_the_invisibility_detector_actually_detects(tmp_path, monkeypatch):
 
     assert len(unreadable) == 1, f"an expression-valued filename was not reported: {unreadable}"
     assert unreadable[0][0] == "invented.html"
+
+
+def test_every_plugin_body_script_the_page_can_ask_for_is_on_disk():
+    """The real assertion behind `filename=settings_body_script` (VARIABLE_REFERENCES above).
+
+    `plugin_settings_body_script` resolves a name only when the file exists, so the <script> tag
+    cannot 404. The pairing between templates/plugin_bodies/ and static/js/plugin_bodies/ is the
+    part that can drift -- a body renamed on one side and not the other loses its behaviour with
+    no error anywhere, so name the pairs rather than only counting them.
+    """
+    from app.utils import plugin_settings_body, plugin_settings_body_script
+
+    bodies = sorted(path.stem for path in (TEMPLATES / "plugin_bodies").glob("*.html"))
+    assert bodies, "no plugin body ships -- the scan below would pass vacuously"
+
+    for plugin in bodies:
+        assert plugin_settings_body(plugin) == f"plugin_bodies/{plugin}.html"
+        script = plugin_settings_body_script(plugin)
+        if script is not None:
+            assert (STATIC / script).is_file(), f"{plugin}: {script} is claimed but missing"
+
+    for path in (STATIC / "js" / "plugin_bodies").glob("*.js"):
+        assert path.stem in bodies, f"{path.name} has no templates/plugin_bodies/{path.stem}.html, so nothing ever loads it"

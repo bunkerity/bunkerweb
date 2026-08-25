@@ -9,7 +9,7 @@ from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.save_scope import control_keys, restore_unowned_settings
 from app.routes.services import postable_scope, postable_shelf_scope, resolve_plugin, resolve_save_mode, shelf_plugin_scope
-from app.utils import LOGGER, flash, get_activation_map, get_blacklisted_settings, is_readonly_request
+from app.utils import LOGGER, flash, get_activation_map, get_blacklisted_settings, is_readonly_request, plugin_settings_body, plugin_settings_body_script
 
 from app.routes.utils import extract_file_setting_names, handle_error, wait_applying
 
@@ -293,4 +293,8 @@ def global_settings_plugin_page(plugin: str):
         config=global_config,
         service_id="",
         clone=None,
+        # Same override body as the per-service page, same reasoning -- see services.py. Both
+        # scopes get a plugin's custom form from one template; nothing here changes the writer.
+        settings_body=plugin_settings_body(plugin),
+        settings_body_script=plugin_settings_body_script(plugin),
     )

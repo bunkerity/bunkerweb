@@ -1653,6 +1653,42 @@ $(document).ready(() => {
   if (form) {
     let resubmitQueued = false;
 
+    // A HIDDEN control that fails its own `pattern=` kills Save silently. Constraint
+    // validation runs over every named control, visible or not; the browser refuses to
+    // submit, tries to focus the offender to show its bubble, cannot (it is not rendered),
+    // and reports "An invalid form control ... is not focusable" to the console only. The
+    // user clicks Save, nothing happens, no request is made and no message appears.
+    //
+    // Not reachable on the generic grid, which renders every field. It becomes reachable the
+    // moment a page hides part of its scope -- which is exactly what a plugin body does
+    // (templates/plugin_bodies/*.html hide the modes that do not apply, and
+    // models/input_setting.html puts `pattern=` on every text input). A stored value that no
+    // longer matches its regex -- written with IGNORE_REGEX_CHECK=yes, or through the API, or
+    // by an older release with a looser regex -- is enough.
+    //
+    // So: reveal the offender instead of leaving the user with a dead button. `invalid` does
+    // not bubble, hence the capture phase. Unhiding is the whole fix -- the browser retries
+    // focus after this handler and shows the real message on the real field.
+    //
+    // This lives HERE rather than in each body's own script on purpose: every settings page
+    // loads this bundle, so every future body inherits it instead of copying four lines and
+    // eventually forgetting. Pinned by tests/unit/ui/test_plugin_settings_bodies.py.
+    form.addEventListener(
+      "invalid",
+      (event) => {
+        for (
+          let node = event.target;
+          node && node !== form;
+          node = node.parentElement
+        ) {
+          if (node.hasAttribute && node.hasAttribute("hidden")) {
+            node.removeAttribute("hidden");
+          }
+        }
+      },
+      true,
+    );
+
     form.addEventListener("submit", (event) => {
       // A file chosen a moment ago may still be mid-FileReader; its content has not
       // landed in the hidden text input yet, so submitting now would save the OLD

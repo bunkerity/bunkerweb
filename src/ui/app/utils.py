@@ -322,6 +322,44 @@ def is_readonly_request(api_readonly: bool) -> bool:
     return api_readonly or "write" not in getattr(current_user, "list_permissions", [])
 
 
+# The plugins that ship a purpose-built body for the per-plugin settings form, resolved once at
+# import: the directory is baked into the image and cannot change at runtime.
+#
+# Placement is `src/ui/app/templates/plugin_bodies/<plugin_id>.html`, deliberately NOT
+# `<plugin>/ui/templates/` -- see .cache/results-2026-08-24/plugin-pages-mechanism.md. Rendering
+# plugin-supplied Jinja is code execution, which is why routes/plugins.py gates its plugin-page
+# route on admin; both settings routes are `@login_required` only, so registering plugin template
+# folders app-wide would render third-party Jinja for any logged-in user. Shipping the bodies here
+# delivers the identical capability (every candidate is a core plugin, released with the UI) with
+# no loader entry to keep scoped forever.
+_PLUGIN_BODIES: FrozenSet[str] = frozenset(path.stem for path in (Path(__file__).parent / "templates" / "plugin_bodies").glob("*.html"))
+
+
+def plugin_settings_body(plugin_id: str) -> Optional[str]:
+    """The override body template for this plugin, or None to render the generic grid.
+
+    THE CONTRACT EVERY OVERRIDE BODY OWES: it may HIDE a field, never OMIT it. `postable_scope`
+    (routes/services.py) claims authority over every key the form can send, and an in-scope key
+    the POST does not carry has its row DELETED (db_methods/config_save.py:579-585) -- so a body
+    that renders only the current mode's fields would destroy the operator's stored credentials
+    for every other mode the first time they save. Render the whole scope and hide the irrelevant
+    groups: a `hidden` section still serialises. Pinned per body by
+    tests/unit/ui/test_plugin_settings_bodies.py::test_body_posts_exactly_the_declared_scope.
+    """
+    return f"plugin_bodies/{plugin_id}.html" if plugin_id in _PLUGIN_BODIES else None
+
+
+# Same convention one directory over, resolved the same way: a body's behaviour script is
+# `static/js/plugin_bodies/<plugin_id>.js`. Checked rather than assumed so a body that needs no
+# script does not put a 404 <script> on the page.
+_PLUGIN_BODY_SCRIPTS: FrozenSet[str] = frozenset(path.stem for path in (Path(__file__).parent / "static" / "js" / "plugin_bodies").glob("*.js"))
+
+
+def plugin_settings_body_script(plugin_id: str) -> Optional[str]:
+    """The static path of this body's behaviour script, or None when it ships without one."""
+    return f"js/plugin_bodies/{plugin_id}.js" if plugin_id in _PLUGIN_BODY_SCRIPTS else None
+
+
 def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[str, dict]:
     multisites = {}
     for setting, data in settings.items():

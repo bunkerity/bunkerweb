@@ -1,0 +1,202 @@
+{# Antibot's purpose-built settings body, in place of the flat 33-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/antibot
+   and /global-settings/plugins/antibot -- so the form, the control keys, `postable_scope` and
+   the writer are all the generic ones. This file owns the LAYOUT and nothing else.
+   Design + the options weighed: .cache/results-2026-08-24/plugin-pages-mechanism.md.
+
+   ======================= HIDE, NEVER OMIT =======================
+   Every declared setting is rendered on every load; a group that does not apply to the current
+   mode carries the `hidden` attribute. `hidden` suppresses rendering only -- the inputs inside
+   still serialise, which is the entire point: `postable_scope` claims authority over all 33 keys
+   and an in-scope key the POST does not carry has its row DELETED
+   (db_methods/config_save.py:579-585). A body that rendered only the chosen provider's fields
+   would therefore wipe the operator's stored hCaptcha / Turnstile / mCaptcha / Cap.js
+   credentials the first time they saved in another mode, and switching back would show empty
+   fields with the secrets gone from the provider's side too. Rendering-and-hiding costs nothing
+   and makes that impossible. Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope
+   (every body, every select option and checkbox value) and ::test_antibot_body_posts_exactly_the_declared_scope
+   (this body's 9 modes x 2 reCAPTCHA editions).
+
+   THE DAY ANTIBOT DECLARES A `multiple` SETTING, THIS FILE OWES A `get_multiples` LOOP. It has
+   none today because antibot declares none. `_in_scope` matches a stored `FOO_2` by its BASE
+   name (models/save_scope.py:99-110), so one `multiple` in the manifest puts every suffixed row
+   inside the declared scope at once -- and a body that renders no cloner posts none of them,
+   which deletes them all on the next save. Copy the loop from
+   models/plugin_settings_body.html:122-269; it is deliberately NOT in
+   models/plugin_setting_field.html because its markup differs. Guarded by
+   ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render.
+
+   The per-mode visibility contract, read by static/js/plugin_bodies/antibot.js:
+     * `data-antibot-modes="a b c"` -- visible when USE_ANTIBOT is one of those values.
+       Absent means "always visible".
+     * `data-antibot-classic="yes|no"` -- additionally requires ANTIBOT_RECAPTCHA_CLASSIC to be
+       that value. reCAPTCHA classic verifies with ANTIBOT_RECAPTCHA_SECRET against
+       google.com/recaptcha/api/siteverify; Enterprise ignores SECRET entirely and uses
+       PROJECT_ID + API_KEY (+ optional JA3/JA4) against recaptchaenterprise.googleapis.com
+       (core/antibot/antibot.lua:769-819). SITEKEY and SCORE are live in both (:664, :840).
+   Server-side visibility below and the JS agree by construction: both read the same two values.
+   With JS off the page still renders the right groups for the STORED mode -- the picker just
+   stops being live, which is the correct degradation.
+
+   The mode picker is USE_ANTIBOT's own `select` widget, not a card row of provider logos: the
+   sketch's logos would need six new bundled assets and buy nothing the select does not. #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set antibot_settings = plugin_data["settings"] -%}
+{%- set mode = config.get("USE_ANTIBOT", {}).get("value", antibot_settings["USE_ANTIBOT"].get("default", "no")) -%}
+{%- set recaptcha_classic = config.get("ANTIBOT_RECAPTCHA_CLASSIC", {}).get("value", antibot_settings["ANTIBOT_RECAPTCHA_CLASSIC"].get("default", "yes")) -%}
+{# Every mode that actually serves a challenge, derived from the manifest rather than hardcoded:
+   a provider added to USE_ANTIBOT's `select` must not silently lose the shared blocks. #}
+{%- set challenge_modes = antibot_settings["USE_ANTIBOT"]["select"] | reject("equalto", "no") | list -%}
+{%- set ignore_countries = config.get("ANTIBOT_IGNORE_COUNTRY", {}).get("value", "") -%}
+{%- set only_countries = config.get("ANTIBOT_ONLY_COUNTRY", {}).get("value", "") -%}
+{# The two country lists are NOT mutually exclusive in the runtime -- antibot.lua:1198-1203 ORs
+   them (an ignore-list hit, OR being outside the only-list, exempts the request). The picker
+   below can only show one, so when both are stored it shows `only` and says so rather than
+   pretending the ignore list is empty. #}
+{%- set country_mode = "only" if only_countries else ("ignore" if ignore_countries else "all") -%}
+{%- set groups = [
+    {"id": "mode", "title": "settings.antibot.mode.title", "hint": "settings.antibot.mode.description",
+     "settings": ["USE_ANTIBOT"], "col": "col-12 col-sm-8 col-lg-5 pb-3"},
+    {"id": "captcha", "title": "settings.antibot.captcha.title", "hint": "settings.antibot.captcha.hint",
+     "modes": ["captcha"], "settings": ["ANTIBOT_CAPTCHA_ALPHABET"], "col": "col-12 col-lg-8 pb-3"},
+    {"id": "recaptcha", "title": "settings.antibot.recaptcha.title", "hint": "settings.antibot.recaptcha.hint",
+     "modes": ["recaptcha"],
+     "settings": ["ANTIBOT_RECAPTCHA_CLASSIC", "ANTIBOT_RECAPTCHA_SITEKEY", "ANTIBOT_RECAPTCHA_SCORE"]},
+    {"id": "recaptcha-classic", "title": "settings.antibot.recaptcha.classic.title",
+     "hint": "settings.antibot.recaptcha.classic.hint",
+     "modes": ["recaptcha"], "classic": "yes", "settings": ["ANTIBOT_RECAPTCHA_SECRET"]},
+    {"id": "recaptcha-enterprise", "title": "settings.antibot.recaptcha.enterprise.title",
+     "hint": "settings.antibot.recaptcha.enterprise.hint",
+     "modes": ["recaptcha"], "classic": "no",
+     "settings": ["ANTIBOT_RECAPTCHA_PROJECT_ID", "ANTIBOT_RECAPTCHA_API_KEY", "ANTIBOT_RECAPTCHA_JA3", "ANTIBOT_RECAPTCHA_JA4"]},
+    {"id": "hcaptcha", "title": "settings.antibot.hcaptcha.title", "hint": "settings.antibot.hcaptcha.hint",
+     "modes": ["hcaptcha"], "settings": ["ANTIBOT_HCAPTCHA_SITEKEY", "ANTIBOT_HCAPTCHA_SECRET"]},
+    {"id": "turnstile", "title": "settings.antibot.turnstile.title", "hint": "settings.antibot.turnstile.hint",
+     "modes": ["turnstile"], "settings": ["ANTIBOT_TURNSTILE_SITEKEY", "ANTIBOT_TURNSTILE_SECRET"]},
+    {"id": "mcaptcha", "title": "settings.antibot.mcaptcha.title", "hint": "settings.antibot.mcaptcha.hint",
+     "modes": ["mcaptcha"], "settings": ["ANTIBOT_MCAPTCHA_SITEKEY", "ANTIBOT_MCAPTCHA_SECRET", "ANTIBOT_MCAPTCHA_URL"]},
+    {"id": "capjs", "title": "settings.antibot.capjs.title", "hint": "settings.antibot.capjs.hint",
+     "modes": ["capjs"],
+     "settings": ["ANTIBOT_CAPJS_FRONTEND_URL", "ANTIBOT_CAPJS_BACKEND_URL", "ANTIBOT_CAPJS_SITEKEY", "ANTIBOT_CAPJS_SECRET"]},
+    {"id": "challenge", "title": "settings.antibot.challenge.title", "hint": "settings.antibot.challenge.description",
+     "modes": challenge_modes,
+     "settings": ["ANTIBOT_URI", "ANTIBOT_TIME_RESOLVE", "ANTIBOT_TIME_VALID", "ANTIBOT_SUCCESS_URI"]},
+    {"id": "exemptions", "title": "settings.antibot.exemptions.title", "hint": "settings.antibot.exemptions.description",
+     "modes": challenge_modes,
+     "settings": ["ANTIBOT_IGNORE_URI", "ANTIBOT_IGNORE_IP", "ANTIBOT_IGNORE_RDNS", "ANTIBOT_RDNS_GLOBAL", "ANTIBOT_IGNORE_ASN", "ANTIBOT_IGNORE_USER_AGENT"]},
+] -%}
+{# Keys this body lays out by hand rather than through the `groups` loop, so the coverage check
+   at the bottom knows they are not missing. #}
+{%- set hand_placed = ["ANTIBOT_IGNORE_COUNTRY", "ANTIBOT_ONLY_COUNTRY"] -%}
+<div class="card-body pb-0">
+    {% if mode == "no" %}
+        <div class="alert alert-secondary d-flex align-items-center mb-4" role="status">
+            <i class="bx bx-info-circle bx-sm me-2" aria-hidden="true"></i>
+            <span>{{ _("settings.antibot.disabled_notice") }}</span>
+        </div>
+    {% endif %}
+    {% for group in groups %}
+        {% set visible = (not group.get("modes") or mode in group["modes"]) and (not group.get("classic") or recaptcha_classic == group["classic"]) %}
+        <section class="antibot-group mb-4"
+                 data-antibot-group="{{ group['id'] }}"
+                 {% if group.get("modes") %}data-antibot-modes="{{ group['modes'] | join(' ') }}"{% endif %}
+                 {% if group.get("classic") %}data-antibot-classic="{{ group['classic'] }}"{% endif %}
+                 {% if not visible %}hidden{% endif %}
+                 aria-labelledby="antibot-group-{{ group['id'] }}-title">
+            <h6 id="antibot-group-{{ group['id'] }}-title" class="mb-1 don-jose">{{ _(group["title"]) }}</h6>
+            {% if group.get("hint") %}<p class="text-muted small courier-prime mb-2">{{ _(group["hint"]) }}</p>{% endif %}
+            <div class="row g-2 gx-6">
+                {# `filtered_settings` and `blacklisted_settings` are applied here for the same
+                   reason the generic body applies them (models/plugin_settings_body.html:14):
+                   a global-context or blacklisted key must not render, and none of antibot's 33
+                   are today -- the filter is what keeps that true if one becomes so. #}
+                {% for setting in group["settings"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                    {% set setting_data = filtered_settings[setting] %}
+                    {% set field_col_class = group.get("col", "col-12 col-sm-6 col-lg-4 pb-3") %}
+                    {% include "models/plugin_setting_field.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endfor %}
+    {# Countries: one picker over two settings that the flat form showed as two unrelated
+       250-option multiselects with nothing saying how they interact. Both are always rendered
+       (hide-never-omit); the picker decides which one is on screen and, via the JS, clears the
+       other so the OR in antibot.lua:1198-1203 cannot be reached by accident.
+       The picker itself carries NO `name`: it is a client-side control, and an unnamed select is
+       not serialised -- so the POST body stays exactly the plugin's own keys and no route has to
+       learn to pop a form-only key. #}
+    <section class="antibot-group mb-4"
+             data-antibot-group="countries"
+             data-antibot-modes="{{ challenge_modes | join(' ') }}"
+             {% if mode == "no" %}hidden{% endif %}
+             aria-labelledby="antibot-group-countries-title">
+        <h6 id="antibot-group-countries-title" class="mb-1 don-jose">{{ _("settings.antibot.countries.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.antibot.countries.description") }}</p>
+        {% if ignore_countries and only_countries %}
+            <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                <i class="bx bx-error bx-sm me-2" aria-hidden="true"></i>
+                <span>{{ _("settings.antibot.countries.both_set") }}</span>
+            </div>
+        {% endif %}
+        <div class="row g-2 gx-6">
+            <div class="col-12 col-sm-8 col-lg-5 pb-3">
+                <div class="bw-setting-frame">
+                    <label for="antibot-country-mode" class="form-label fw-semibold text-truncate"
+                          >{{ _("settings.antibot.countries.picker_label") }}</label>
+                    {# A plain wrapper, not `.form-floating`: that pattern puts a second <label
+                       for="..."> inside the control, which is fine for the generic grid (its top
+                       label is the human name and the floating one is the raw setting key) but
+                       here both would carry the SAME text and screen readers announce it twice.
+                       The bold label above keeps this control lined up with its neighbours. #}
+                    <div class="mt-1 overflow-hidden position-relative">
+                        <select id="antibot-country-mode"
+                                class="form-select"
+                                data-antibot-country-mode
+                                {% if is_readonly %}disabled{% endif %}>
+                            {% for value, label_key in [("all", "settings.antibot.countries.mode.all"), ("ignore", "settings.antibot.countries.mode.ignore"), ("only", "settings.antibot.countries.mode.only")] %}
+                                <option value="{{ value }}" {% if country_mode == value %}selected{% endif %}>{{ _(label_key) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% for setting, for_mode in [("ANTIBOT_IGNORE_COUNTRY", "ignore"), ("ANTIBOT_ONLY_COUNTRY", "only")] %}
+                {% if setting in filtered_settings and setting not in blacklisted_settings %}
+                    <div class="col-12 col-lg-7"
+                         data-antibot-country-list="{{ for_mode }}"
+                         {% if country_mode != for_mode %}hidden{% endif %}>
+                        <div class="row g-2 gx-6">
+                            {% set setting_data = filtered_settings[setting] %}
+                            {% set field_col_class = "col-12 pb-3" %}
+                            {% include "models/plugin_setting_field.html" %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {# Coverage backstop, not decoration. If antibot's manifest grows a setting and nobody adds it
+       to `groups`, the key would silently stop posting and `postable_scope` would delete its row
+       on the next save. Rendering the stragglers keeps the save correct on day one; the test
+       suite fails loudly so the group placement gets done properly.
+       Kept LAST and visible: an unplaced key is a bug the operator can still see and edit. #}
+    {% set placed = groups | map(attribute="settings") | sum(start=[]) | list + hand_placed %}
+    {% set stragglers = filtered_settings | reject("in", placed) | reject("in", blacklisted_settings) | list %}
+    {% if stragglers %}
+        {# `data-plugin-body-unplaced` is the CONVENTION, not an antibot detail: every body ships a
+           backstop like this one and the shared test keys off that attribute, so a future body
+           inherits the "nothing is unplaced" check without naming anything antibot. #}
+        <section class="antibot-group mb-4" data-antibot-group="unplaced" data-plugin-body-unplaced>
+            <h6 class="mb-1 don-jose">{{ _("settings.antibot.unplaced.title") }}</h6>
+            <p class="text-muted small courier-prime mb-2">{{ _("settings.antibot.unplaced.description") }}</p>
+            <div class="row g-2 gx-6">
+                {% for setting in stragglers %}
+                    {% set setting_data = filtered_settings[setting] %}
+                    {% include "models/plugin_setting_field.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>

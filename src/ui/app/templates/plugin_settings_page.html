@@ -71,7 +71,30 @@
             </div>
         </div>
         <div class="card p-2">
-            {% if filtered_settings %}
+            {# A plugin may ship a purpose-built body (app/utils.py:plugin_settings_body,
+               templates/plugin_bodies/<id>.html). It replaces the LAYOUT only: the form, the
+               control keys below, `postable_scope` and the writer are all unchanged, so there is
+               still exactly one save path.
+
+               THE RULE AN OVERRIDE BODY OWES: hide a field, never omit it. `postable_scope`
+               claims every key this form can send and an in-scope key the POST does not carry is
+               DELETED (db_methods/config_save.py:579-585) -- a body that rendered only the
+               current mode's fields would wipe the operator's stored credentials for every other
+               mode. A `hidden` section still serialises, so hiding costs nothing. Pinned per body
+               by tests/unit/ui/test_plugin_settings_bodies.py.
+
+               `settings_body` is Undefined on any surface that renders this page without passing
+               it, which is falsy, so the generic branch below still renders. Be precise about how
+               identical that is: the field partial's move IS byte-identical (540 renders, same
+               sha256), but THIS page is not -- the branch split here and the script block at the
+               bottom add 3 whitespace-only lines, 23 bytes per render, measured over all 45 core
+               plugins x both scopes x readonly on/off: 180/180 differ, 180/180 are
+               whitespace-only. Same DOM, same attributes, same text; not the same bytes. Pinned
+               by tests/unit/ui/test_plugin_settings_bodies.py, which asserts the three falsy
+               forms (Undefined / None / "") render identically to each other. #}
+            {% if settings_body and filtered_settings %}
+                {% include settings_body %}
+            {% elif filtered_settings %}
                 {% include "models/plugin_settings_body.html" %}
             {% else %}
                 <div class="card-body text-center text-muted">
@@ -97,4 +120,13 @@
     <script src="{{ url_for('static', filename='js/components/settings-widgets.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    {# An override body's own behaviour script, by the same convention as its template:
+       static/js/plugin_bodies/<id>.js beside templates/plugin_bodies/<id>.html. Loaded AFTER
+       settings-widgets.js so the shared widgets are already wired when it runs, and only when a
+       body is in use -- the generic page loads exactly what it always loaded. #}
+    {% if settings_body_script %}
+        <script src="{{ url_for('static', filename=settings_body_script) }}"
+                nonce="{{ script_nonce }}"
+                defer></script>
+    {% endif %}
 {% endblock %}
