@@ -48,6 +48,8 @@ from app.utils import (
     is_editable_method,
     is_readonly_request,
     is_ui_api_method,
+    plugin_settings_body,
+    plugin_settings_body_script,
 )
 
 services = Blueprint("services", __name__)
@@ -1767,6 +1769,11 @@ def services_plugin_page(service: str, plugin: str):
         config=db_config,
         service_id=service,
         clone=None,
+        # A purpose-built body for this plugin, or None for the generic grid. GET only -- the
+        # POST arm above is untouched on purpose: an override body changes the LAYOUT, never the
+        # save path, so `postable_scope` stays the single authority for what this form owns.
+        settings_body=plugin_settings_body(plugin),
+        settings_body_script=plugin_settings_body_script(plugin),
     )
 
 
