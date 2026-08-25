@@ -404,6 +404,9 @@ if ARGS.type == "ui":
 api_config = data.get("api", {}) | data.get(ARGS.integration, {}).get("api", {})
 
 if database != "sqlite":
+    # Hardcodes /db: fine for mariadb/mysql/postgresql, WRONG for oracle (which uses
+    # ?service_name=FREEPDB1 above). Dormant while tests/core/db.yml keeps the oracle action
+    # commented out -- fix this before un-commenting it, api.env sources AFTER variables.env.
     config["api"][
         "DATABASE_URI"
     ] = f"{database}+{DATABASE_SPECS[database]['extension']}://bunkerweb:secret@{DATABASE_HOST}:{DATABASE_SPECS[database]['port']}/db"
@@ -488,15 +491,45 @@ if ARGS.integration != "Kubernetes":
     def write_env(name: str, values: dict) -> None:
         path = BW_ETC.joinpath(name)
         LOGGER.info(f"📝 Writing {path}")
-        path.write_text("\n".join([f"{key}={value}" for key, value in values.items()]))
+        try:
+            # Unlink first: on Linux these files live in the package's own /etc/bunkerweb and its
+            # services chown them to root:nginx 0660 once they have run, which a rewrite in place
+            # cannot touch as the unprivileged runner. Replacing the entry only needs the
+            # directory, so this is what `run.sh`'s `chmod 777 variables.env` was working around,
+            # one file at a time.
+            path.unlink(missing_ok=True)
+            path.write_text("\n".join([f"{key}={value}" for key, value in values.items()]))
+            # The API and the scheduler read these as `nginx`, not as the runner; a restrictive
+            # umask on the runner would otherwise hand them a file they cannot open. 0644 is
+            # wider than the package's own root:nginx 0660 for api.env -- deliberate, CI-only.
+            path.chmod(0o644)
+        except OSError as e:
+            # Never silent. An env file that did not land does not fail the action being
+            # generated -- it changes what the stack is configured with, and the spec then fails
+            # somewhere else entirely: a missing `api.env` is a 401 on an authenticated call,
+            # with nothing anywhere naming a write. Only `FileNotFoundError` was ever swallowed
+            # here (by `missing_ok`), so any other errno means the directory or the file is not
+            # ours to replace -- see the post-install chmod in `integration-tests.yml`.
+            LOGGER.error(f"Could not write {path}: [errno {e.errno}] {e.strerror or e}")
+            exit(1)
 
     write_env("variables.env", config["variables"])
 
     if ARGS.type == "ui":
         write_env("ui.env", config["ui"])
 
-    if ARGS.integration not in ("Linux", "All-in-one"):
+    if ARGS.integration != "All-in-one":
+        # Linux included: the packaged API sources this file right after variables.env
+        # (`src/linux/scripts/bunkerweb-api.sh`, export_env_file), but nothing ever wrote it
+        # on that arm, so a spec's `api:` block never reached the Linux API -- bunkernet.yml
+        # sets API_USERNAME/API_PASSWORD there and every authenticated call the spec makes came
+        # back `401 Unauthorized` with nothing in any log naming the missing credentials. The
+        # keys the script would otherwise have written into its own default file are the same
+        # values its shell fallbacks already use, so replacing that file costs nothing.
+        # All-in-one keeps taking the API's environment from the container instead.
         write_env("api.env", config["api"])
+
+    if ARGS.integration not in ("Linux", "All-in-one"):
         write_env("worker.env", config["worker"])
 
     if test_crowdsec_config != crowdsec_config:

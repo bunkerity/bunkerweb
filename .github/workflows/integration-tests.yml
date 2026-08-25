@@ -327,6 +327,24 @@ jobs:
           else
             docker exec -u 0 bunkerweb-linux dnf install -y /opt/bunkerweb.rpm
           fi
+      # `generate.py` runs as the unprivileged runner and writes the stack's env files straight
+      # into this directory, which is the same inode as the container's /etc/bunkerweb (bind
+      # mount, tests/linux/docker-compose.yml). The `chmod -R 777` in "Setup configuration files"
+      # happens BEFORE the package is installed, and the two package formats disagree about what
+      # an install does to a directory that already exists — measured on 2026-08-25 against a
+      # throwaway package shipping the directory at 0755, pre-created at 0777:
+      #
+      #   dpkg 1.22.6 / 1.21.1 / 1.21.23  ->  0777 kept   (only the postinst's chown lands)
+      #   rpm 6.0.2                       ->  0755 root-owned, and the runner is then refused
+      #                                        both `unlink()` and creating a new file
+      #
+      # So the deb arm this workflow runs today is fine and the rpm arms are not: `api.env` does
+      # not exist until the API service first starts, so writing it needs the DIRECTORY, not just
+      # the file — which is what `run.sh`'s per-action `chmod 777 variables.env` cannot give.
+      # Restoring the mode here keeps the harness independent of that difference.
+      - name: Make /etc/bunkerweb writable again after the package install
+        if: needs.setup.outputs.integration == 'Linux'
+        run: docker exec -u 0 bunkerweb-linux chmod 777 /etc/bunkerweb
       - name: Install Python dependencies
         run: |
           export MAKEFLAGS="-j $(nproc)"
