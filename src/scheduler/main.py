@@ -658,9 +658,18 @@ if __name__ == "__main__":
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
 
         ready = False
+        # Two different failures used to print the same line. `get_metadata()` returns the API
+        # error as a STRING (scheduler/api_client.py), so an authentication or transport failure
+        # was reported as "Database is not initialized" -- a claim about the database made by a
+        # call that never reached it. On the Linux arm that is exactly what a missing API token
+        # looks like: the readonly probe fails first, the configuration saver is skipped as if
+        # the database were read-only, and this loop then spins for the whole stack-wait window
+        # with 60 identical warnings and no mention of the API. Print what actually happened.
         while not ready:
             db_metadata = API_CLIENT.get_metadata()
-            if isinstance(db_metadata, str) or not db_metadata["is_initialized"]:
+            if isinstance(db_metadata, str):
+                LOGGER.warning(f"Could not read the database metadata from the API, retrying in 5s ... : {db_metadata}")
+            elif not db_metadata["is_initialized"]:
                 LOGGER.warning("Database is not initialized, retrying in 5s ...")
             else:
                 ready = True
