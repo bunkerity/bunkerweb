@@ -165,14 +165,14 @@ Al especificar el URI de la base de datos apropiado en la configuración, puedes
 
 | Integración        | PostgreSQL                                 | MariaDB                  | MySQL                    | SQLite       |
 | :----------------- | :----------------------------------------- | :----------------------- | :----------------------- | :----------- |
-| **Docker**         | ✅ `v18` y anteriores (all-in-one: ✅ `v17`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Kubernetes**     | ✅ `v18` y anteriores                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
-| **Autoconf**       | ✅ `v18` y anteriores                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Docker**         | ✅ `v18` y anteriores (imágenes de 64 bits; 32 bits: `v17`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Kubernetes**     | ✅ `v18` y anteriores (imágenes de 64 bits; 32 bits: `v17`)                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Autoconf**       | ✅ `v18` y anteriores (imágenes de 64 bits; 32 bits: `v17`)                       | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
 | **Paquetes Linux** | Ver notas a continuación                   | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
 
 !!! info "Notas"
-    - **PostgreSQL**: Los paquetes basados en Alpine ahora incluyen el cliente `v18`, por lo que `v18` y versiones anteriores son compatibles de forma predeterminada; la imagen all-in-one sigue usando el cliente `v17`, por lo que `v18` no es compatible allí.
-    - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).
+    - **PostgreSQL**: Las imágenes de contenedor incluyen el cliente `v18`, tomado del [repositorio apt propio del proyecto PostgreSQL](https://www.postgresql.org/download/linux/) en lugar de Debian (que se queda en `v17`). `pg_dump` rechaza un servidor más nuevo que él mismo pero sí admite los más antiguos, así que el mismo cliente respalda servidores de `v13` a `v18`; no hay que hacer nada en una instalación `v16` o `v17` existente. **Esto solo aplica a las imágenes de 64 bits** (`linux/amd64`, `linux/arm64`): el proyecto PostgreSQL no publica paquetes de 32 bits, por lo que las imágenes `linux/386` y `linux/arm/v7` conservan el cliente `v17` de Debian y no pueden respaldar un servidor `v18`. Usa un despliegue de 64 bits si ejecutas PostgreSQL 18.
+    - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Los paquetes `.deb` piden `postgresql-client-18` y recurren al `postgresql-client` de tu distribución cuando el repositorio de PostgreSQL no está configurado — Debian y Ubuntu incluyen de `v14` a `v17` según la versión, y respaldar un servidor `v18` requiere añadir el [repositorio apt de PostgreSQL](https://www.postgresql.org/download/linux/) e instalar `postgresql-client-18` en el host. Fedora ya incluye un cliente `v18`; en RHEL el paquete no instala el cliente en absoluto y debe añadirse a mano (consulta el [repositorio yum de PostgreSQL](https://www.postgresql.org/download/linux/redhat/)). Lo mismo aplica a los clientes de MariaDB/MySQL.
     - **SQLite**: Se entrega con los paquetes y está listo para usar.
 
 Recursos externos útiles para instalar clientes de bases de datos:

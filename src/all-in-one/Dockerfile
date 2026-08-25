@@ -172,11 +172,25 @@ FROM nginx:1.30.4@sha256:46ccc48fbb1f5a43167f2ee2c279c122b96eec5d976e7f4e1e0780f
 RUN umask 027
 
 # Runtime dependencies incl. supervisord & redis (nginx + the nginx user are already in the base)
-RUN apt-get update && \
+# PostgreSQL client 18 (PGDG). Debian trixie only ships 17 and pg_dump refuses any server newer
+# than itself, so the bundled client must be >= the newest PostgreSQL the product supports.
+# The signing key is checked in (fingerprint B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8,
+# "PostgreSQL Debian Repository") so no key is fetched over the network at build time.
+# PGDG publishes amd64 and arm64 only -- binary-i386 and binary-armhf 404 -- while the release
+# workflow builds linux/386 and linux/arm/v7 as well, so those two keep the distribution's client
+# and its 17-server ceiling. Adding the repository unconditionally fails their build outright.
+COPY --chmod=644 src/deps/pgdg-archive-keyring.asc /etc/apt/keyrings/pgdg.asc
+
+RUN . /etc/os-release && \
+    case "$(dpkg --print-architecture)" in \
+    amd64|arm64) echo "deb [signed-by=/etc/apt/keyrings/pgdg.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list; PGCLIENT=postgresql-client-18 ;; \
+    *) PGCLIENT=postgresql-client ;; \
+    esac && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     bash curl ca-certificates grep sed tzdata unzip openssl supervisor gettext-base procps \
     python3 python3-pip libpcre2-8-0 libmagic1 libpq5 libxml2 libgd3 libbrotli1 liblmdb0 libfuzzy2 libyajl2 libgeoip1 \
-    libmariadb3 mariadb-client postgresql-client sqlite3 redis-server && \
+    libmariadb3 mariadb-client "$PGCLIENT" sqlite3 redis-server && \
     rm -rf /var/lib/apt/lists/*
 
 # Fix CVEs

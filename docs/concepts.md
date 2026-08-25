@@ -165,14 +165,14 @@ By specifying the appropriate database URI in the configuration, you can seamles
 
 | Integration        | PostgreSQL          | MariaDB             | MySQL              | SQLite      |
 | :----------------- | :------------------ | :------------------ | :----------------- | :---------- |
-| **Docker**         | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Kubernetes**     | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
-| **Autoconf**       | ✅ `v17` and earlier | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Docker**         | ✅ `v18` and earlier (64-bit images; 32-bit: `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v18` and earlier (64-bit images; 32-bit: `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v18` and earlier (64-bit images; 32-bit: `v17`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
 | **Linux packages** | See notes below     | See notes below     | See notes below    | ✅ Supported |
 
 !!! info "Notes"
-    - **PostgreSQL**: the images ship the `v17` client (Debian 13), and `pg_dump` refuses a server newer than itself. BunkerWeb itself connects to a `v18` server without trouble — it is the backup plugin that cannot dump or restore it, so keep the server at `v17` or earlier if you rely on backups.
-    - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
+    - **PostgreSQL**: the container images ship the `v18` client, taken from the [PostgreSQL project's own apt repository](https://www.postgresql.org/download/linux/) rather than from Debian (which stops at `v17`). `pg_dump` refuses a server newer than itself but handles older ones, so the same client backs up `v13` through `v18` servers — no action is needed for an existing `v16` or `v17` deployment. **This applies to the 64-bit images only** (`linux/amd64`, `linux/arm64`): the PostgreSQL project publishes no 32-bit packages, so the `linux/386` and `linux/arm/v7` images keep Debian's `v17` client and cannot back up a `v18` server. Use a 64-bit deployment if you run PostgreSQL 18.
+    - **Linux**: Support depends on your distribution's packages. The `.deb` packages ask for `postgresql-client-18` and fall back to your distribution's `postgresql-client` when the PostgreSQL repository is not configured — Debian and Ubuntu ship `v14` to `v17` depending on the release, and backing up a `v18` server requires adding the [PostgreSQL apt repository](https://www.postgresql.org/download/linux/) and installing `postgresql-client-18` on the host. Fedora already ships a `v18` client; on RHEL the client is not installed by the package at all and must be added by hand (see the [PostgreSQL yum repository](https://www.postgresql.org/download/linux/redhat/)). The same applies to the MariaDB/MySQL clients.
     - **SQLite**: Ships with the packages and is ready to use.
 
 Helpful external resources for installing database clients:

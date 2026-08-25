@@ -36,7 +36,11 @@ def test_default_build_stays_the_unnamed_scheduler_target():
 
 def test_bwcli_target_contains_every_supported_database_client():
     target = _target("bwcli")
-    for package in ("sqlite3", "mariadb-client", "postgresql-client"):
+    # postgresql-client-18, not the meta-package: the image reaches PGDG for it, and a bare
+    # "postgresql-client" would pass by substring even after a revert. On 32-bit the install line
+    # resolves to the distribution's client through the architecture gate -- see
+    # tests/unit/integrations/test_postgres_client_version.py for both arms.
+    for package in ("sqlite3", "mariadb-client", "postgresql-client-18"):
         assert package in target
     assert "COPY src/common/core core" in DOCKERFILE.read_text(encoding="utf-8")
     for path in ("/etc/bunkerweb/plugins", "/etc/bunkerweb/pro/plugins"):

@@ -58,8 +58,22 @@ FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9
 
 RUN umask 027
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 sqlite3 mariadb-client postgresql-client tzdata && \
+# PostgreSQL client 18 (PGDG). Debian trixie only ships 17 and pg_dump refuses any server newer
+# than itself, so the bundled client must be >= the newest PostgreSQL the product supports.
+# The signing key is checked in (fingerprint B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8,
+# "PostgreSQL Debian Repository") so no key is fetched over the network at build time.
+# PGDG publishes amd64 and arm64 only -- binary-i386 and binary-armhf 404 -- while the release
+# workflow builds linux/386 and linux/arm/v7 as well, so those two keep the distribution's client
+# and its 17-server ceiling. Adding the repository unconditionally fails their build outright.
+COPY --chmod=644 src/deps/pgdg-archive-keyring.asc /etc/apt/keyrings/pgdg.asc
+
+RUN . /etc/os-release && \
+  case "$(dpkg --print-architecture)" in \
+  amd64|arm64) echo "deb [signed-by=/etc/apt/keyrings/pgdg.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list; PGCLIENT=postgresql-client-18 ;; \
+  *) PGCLIENT=postgresql-client ;; \
+  esac && \
+  apt-get update && \
+  apt-get install -y --no-install-recommends bash curl ca-certificates libpq5 openssl libmagic1 libmariadb3 sqlite3 mariadb-client "$PGCLIENT" tzdata && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 101 worker && \
   useradd -u 101 -g worker -d /usr/share/bunkerweb/worker -s /usr/sbin/nologin -M worker

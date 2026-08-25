@@ -165,14 +165,14 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 | 集成             | PostgreSQL                                | MariaDB            | MySQL             | SQLite |
 | :--------------- | :---------------------------------------- | :----------------- | :---------------- | :----- |
-| **Docker**       | ✅ `v18` 及更早版本（all-in-one：✅ `v17`） | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
-| **Kubernetes**   | ✅ `v18` 及更早版本                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
-| **Autoconf**     | ✅ `v18` 及更早版本                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Docker**       | ✅ `v18` 及更早版本（64 位镜像；32 位：`v17`） | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Kubernetes**   | ✅ `v18` 及更早版本（64 位镜像；32 位：`v17`）                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Autoconf**     | ✅ `v18` 及更早版本（64 位镜像；32 位：`v17`）                        | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
 | **Linux 软件包** | 见下方说明                                | 见下方说明         | 见下方说明        | ✅ 支持 |
 
 !!! info "说明"
-    - **PostgreSQL**: 基于 Alpine 的软件包现在包含 `v18` 客户端，因此默认支持 `v18` 及更早版本；all-in-one 镜像仍然使用 `v17` 客户端，因此 `v18` 在该镜像中尚不受支持。
-    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。
+    - **PostgreSQL**: 容器镜像内置 `v18` 客户端，来自 [PostgreSQL 项目自己的 apt 仓库](https://www.postgresql.org/download/linux/)，而非 Debian（Debian 仅到 `v17`）。`pg_dump` 拒绝比自身更新的服务端，但可以处理更旧的版本，因此同一个客户端可以备份 `v13` 到 `v18` 的服务端——已有的 `v16` 或 `v17` 部署无需任何改动。**这仅适用于 64 位镜像**（`linux/amd64`、`linux/arm64`）：PostgreSQL 项目不发布 32 位软件包，因此 `linux/386` 与 `linux/arm/v7` 镜像仍使用 Debian 的 `v17` 客户端，无法备份 `v18` 服务端。如果运行 PostgreSQL 18，请使用 64 位部署。
+    - **Linux**: 支持情况取决于您的发行版软件包。`.deb` 软件包请求 `postgresql-client-18`，在未配置 PostgreSQL 仓库时回退到发行版自带的 `postgresql-client`——Debian 与 Ubuntu 依版本提供 `v14` 到 `v17`，备份 `v18` 服务端需要在主机上添加 [PostgreSQL apt 仓库](https://www.postgresql.org/download/linux/)并安装 `postgresql-client-18`。Fedora 已经提供 `v18` 客户端；在 RHEL 上软件包根本不安装该客户端，必须手动添加（参见 [PostgreSQL yum 仓库](https://www.postgresql.org/download/linux/redhat/)）。MariaDB/MySQL 客户端同理。
     - **SQLite**: 随软件包一起提供，可立即使用。
 
 有助于安装数据库客户端的外部资源：
