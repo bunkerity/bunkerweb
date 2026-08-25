@@ -90,10 +90,12 @@ jobs:
           path: /tmp/${{ inputs.LINUX }}
       # Yank existing package (generic). Packagecloud stores the file under its
       # metadata-derived name, which on the dev/beta channels carries a -dev/-beta
-      # version the inputs don't — try every variant so a re-push never collides.
+      # version the inputs don't — and RPM versions cannot hold a hyphen, so the
+      # rpm channels store it as _dev/_beta. Try every variant so a re-push never
+      # collides.
       - name: Yank existing package
         run: |
-          for V in "${{ inputs.BW_VERSION }}" "${{ inputs.BW_VERSION }}-dev" "${{ inputs.BW_VERSION }}-beta"; do
+          for V in "${{ inputs.BW_VERSION }}" "${{ inputs.BW_VERSION }}-dev" "${{ inputs.BW_VERSION }}-beta" "${{ inputs.BW_VERSION }}_dev" "${{ inputs.BW_VERSION }}_beta"; do
             package_cloud yank bunkerity/${{ inputs.REPO }}/${{ env.DIST }} "bunkerweb${{ inputs.SEPARATOR }}${V}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}" || true
           done
         continue-on-error: true
