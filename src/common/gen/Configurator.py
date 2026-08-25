@@ -61,6 +61,7 @@ class Configurator:
                 "HEALTHCHECK_INTERVAL",
                 "DATABASE_RETRY_TIMEOUT",
                 "RELOAD_MIN_TIMEOUT",
+                "SEND_FILES_MIN_TIMEOUT",
                 "DISABLE_CONFIGURATION_TESTING",
                 "IGNORE_FAIL_SENDING_CONFIG",
                 "GPG_KEY",

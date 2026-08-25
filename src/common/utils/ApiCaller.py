@@ -106,7 +106,7 @@ class ApiCaller:
         result.seek(0)
         return result
 
-    def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+    def send_files(self, path: str, url: str, timeout=(5, 30), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         with self._build_archive(path) as tgz:
             files = {"archive.tar.gz": tgz}
             ret = self.send_to_apis("POST", url, files=files, timeout=timeout, response=response)

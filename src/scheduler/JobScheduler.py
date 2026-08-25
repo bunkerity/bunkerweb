@@ -416,8 +416,18 @@ class JobScheduler(ApiCaller):
                 try:
                     if self.apis:
                         cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
+                        send_files_min_timeout = self.env.get("SEND_FILES_MIN_TIMEOUT", "30")
+
+                        if not send_files_min_timeout.isdigit():
+                            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
+                            send_files_min_timeout = 30
+
                         self.__logger.info(f"Sending '{cache_path}' folder...")
-                        if not self.send_files(cache_path, "/cache"):
+                        if not self.send_files(
+                            cache_path,
+                            "/cache",
+                            timeout=(5, min(120, max(1, int(send_files_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())))),
+                        ):
                             success = False
                             self.__logger.error(f"Error while sending '{cache_path}' folder")
                         else:

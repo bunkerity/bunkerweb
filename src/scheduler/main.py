@@ -113,6 +113,14 @@ if not RELOAD_MIN_TIMEOUT.isdigit():
 
 RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
 
+SEND_FILES_MIN_TIMEOUT = getenv("SEND_FILES_MIN_TIMEOUT", "30")
+
+if not SEND_FILES_MIN_TIMEOUT.isdigit():
+    LOGGER.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
+    SEND_FILES_MIN_TIMEOUT = 30
+
+SEND_FILES_MIN_TIMEOUT = int(SEND_FILES_MIN_TIMEOUT)
+
 DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes"
 
 if DISABLE_CONFIGURATION_TESTING:
@@ -278,7 +286,14 @@ def wait_for_reachable_instance(timeout: int = 60) -> bool:
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     logger.info(f"Sending {file_path} to {'specific' if api_caller else 'all reachable'} BunkerWeb instances ...")
-    success, responses = (api_caller or SCHEDULER).send_files(file_path.as_posix(), endpoint, response=True)
+    success, responses = (api_caller or SCHEDULER).send_files(
+        file_path.as_posix(),
+        endpoint,
+        # Bounded both ways: healthcheck_job submits five of these into a four-worker pool and
+        # blocks the scheduler loop on the results, so an unbounded value stalls it for two waves.
+        timeout=(5, min(120, max(1, SEND_FILES_MIN_TIMEOUT, 3 * len(SCHEDULER.env.get("SERVER_NAME", "www.example.com").split())))),
+        response=True,
+    )
     fails = []
 
     if not IGNORE_FAIL_SENDING_CONFIG:
@@ -859,7 +874,7 @@ if __name__ == "__main__":
             env["TZ"] = tz
 
         # Instantiate scheduler environment
-        SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
+        SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT), "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT)}
 
         task_futures: List[Future] = []
 
@@ -1124,7 +1139,12 @@ if __name__ == "__main__":
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
-                    env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
+                    env
+                    | {
+                        "TZ": getenv("TZ", "UTC"),
+                        "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
+                        "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT),
+                    },
                     changed_plugins=changed_plugins,
                     ignore_plugins=["misc", "pro"] if FIRST_START else None,
                 ):
