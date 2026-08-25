@@ -207,12 +207,14 @@ try:
             # Mirror the material into the central inventory so the certificate is visible and
             # manageable from the certificates page, which this provider has no UI of its own for.
             managed_servers.append(first_server)
+            # In the file-priority branch these are still Paths — check_cert() reads them into
+            # bytes only inside its own scope — and the inventory API takes PEM bytes.
             import_err, _ = JOB.db.import_certificate(
                 name=first_server,
                 description="Managed by the custom certificate provider",
                 source="customcert",
-                certificate_pem=cert_file,
-                private_key_pem=key_file,
+                certificate_pem=cert_file.read_bytes() if isinstance(cert_file, Path) else cert_file,
+                private_key_pem=key_file.read_bytes() if isinstance(key_file, Path) else key_file,
                 service_ids=[first_server],
                 primary=True,
                 renewal_metadata={"managed_by": "customcert"},
