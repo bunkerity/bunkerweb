@@ -51,4 +51,27 @@ config:
 
 Kubernetes:
   config:
-    BLACKLIST_IP_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000"
+    # Same key the base config sets, not a neighbouring one: `custom-api` is the Docker compose
+    # name and resolves, inside a pod, to the dnsmasq address 10.20.30.30, which nothing there
+    # can reach -- the request hangs until the client gives up (499, "while connecting to
+    # upstream"). This line used to override BLACKLIST_IP_URLS, a setting this spec never sets,
+    # so the k8s arm kept proxying to the Docker name and `activated_allowed` timed out.
+    # `svc-custom-api.misc.svc.cluster.local` must stay literal here: tests/scripts/build.sh
+    # greps the spec for it to decide whether to deploy tests/misc/k8s/custom-api.yml.
+    REVERSE_PROXY_HOST: "http://svc-custom-api.misc.svc.cluster.local:8000"
+
+# Kubernetes only (generate.py reads `annotations:` inside the Kubernetes branch alone). The
+# ingress always declares www.example.com -> svc-app1 and its path becomes that service's
+# REVERSE_PROXY_URL_1, while the unsuffixed REVERSE_PROXY_HOST above renders at
+# REVERSE_PROXY_URL's default "/". Both on "/" is `duplicate location "/"` and NGINX refuses the
+# configuration -- silently, since tests/utils/config.yml:15 sets DISABLE_CONFIGURATION_TESTING
+# for the whole suite, so the API still reports "reload successful" and only the scheduler's own
+# push (which lands before the controller's) ever takes effect. This spec asserts against
+# app1.example.com/app2.example.com, never www.example.com, so moving the ingress off "/" costs
+# it nothing.
+# Do NOT "simplify" this to the `bunkerweb.io/REVERSE_PROXY_URL: ""` other specs use (brotli,
+# clientcache, gzip, redirect, securitytxt): an empty value makes generate.py skip the ingress
+# rule entirely -- no rule, no /tmp/services.yml, no app1 -- and it drops the readiness gate in
+# tests/core.py:135 from two "BunkerWeb is ready" lines to one. A real path keeps both.
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: "/app1"

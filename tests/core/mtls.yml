@@ -174,3 +174,21 @@ config:
 Kubernetes:
   config:
     REVERSE_PROXY_HOST: "http://svc-custom-api.misc.svc.cluster.local:8000"
+
+# Kubernetes only (generate.py reads `annotations:` inside the Kubernetes branch alone). The
+# ingress always declares www.example.com -> svc-app1, and its path becomes the service's
+# REVERSE_PROXY_URL_1. This spec's upstream is the unsuffixed pair above, which renders at
+# REVERSE_PROXY_URL's default "/", so leaving the ingress on "/" gives the same server two
+# `location /` blocks and NGINX refuses the whole configuration:
+#   [emerg] duplicate location "/" in /etc/nginx/www.example.com/server-http/reverse-proxy.conf
+# tests/utils/config.yml:15 sets DISABLE_CONFIGURATION_TESTING for the whole suite, so the API
+# still answers "reload successful" and the pod silently keeps its boot configuration -- every
+# assertion here then meets the default server (200) instead of mTLS (400). app1
+# (nginxdemos/nginx-hello) is not what this spec asserts against; custom-api is, so moving the
+# ingress off "/" costs nothing.
+# Do NOT "simplify" this to the `bunkerweb.io/REVERSE_PROXY_URL: ""` other specs use (brotli,
+# clientcache, gzip, redirect, securitytxt): an empty value makes generate.py skip the ingress
+# rule entirely -- no rule, no /tmp/services.yml, no app1 -- and it drops the readiness gate in
+# tests/core.py:135 from two "BunkerWeb is ready" lines to one. A real path keeps both.
+annotations:
+  bunkerweb.io/REVERSE_PROXY_URL: "/app1"
