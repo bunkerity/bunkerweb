@@ -50,8 +50,12 @@ class Controller(Config):
     def wait(self, wait_time: int) -> list:
         all_ready = False
         while not all_ready:
-            if self.have_to_wait():
-                self._logger.info(f"Waiting for the API to be ready, retrying in {wait_time}s ...")
+            reason = self.have_to_wait()
+            if reason:
+                # The reason, not "the API": this loop blocks on the scheduler's change flags far
+                # more often than on an unreachable API, and printing the API either way is what
+                # made a stuck first apply look like an API outage in every Kubernetes dump.
+                self._logger.info(f"Waiting for {reason}, retrying in {wait_time}s ...")
                 sleep(wait_time)
                 continue
 

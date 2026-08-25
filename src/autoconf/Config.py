@@ -178,17 +178,42 @@ class Config:
 
         return False
 
-    def have_to_wait(self) -> bool:
+    # The change flags the scheduler raises and the job that applies them clears. Autoconf must
+    # not write while any of them is set. Named once because the same tuple lives in
+    # `wait_applying` below, and the last time the two drifted `plugins_config_changed` was
+    # missing from one of them and every settings change cost autoconf its full 240s wait.
+    PENDING_CHANGE_FLAGS = (
+        "custom_configs_changed",
+        "external_plugins_changed",
+        "pro_plugins_changed",
+        "plugins_config_changed",
+        "instances_changed",
+    )
+
+    def have_to_wait(self) -> str:
+        """What autoconf is still waiting for, or an empty string when it may proceed.
+
+        A reason rather than a bare bool: every caller only tests truthiness, and the one that
+        logs (`Controller.wait`) printed "Waiting for the API to be ready" for all three causes.
+        Two of them say nothing about the API being reachable -- an uninitialised database, and a
+        configuration change the scheduler dispatched whose job has not acknowledged it yet -- and
+        that message is what sent two separate CI investigations after an API that was answering
+        one second earlier in the same log. The Kubernetes failure dump shows twenty identical
+        lines of it and no way to tell which of the three is live.
+        """
         metadata = self._api.get_metadata()
-        return (
-            isinstance(metadata, str)
-            or not metadata.get("is_initialized")
-            or any(
-                v
-                for k, v in metadata.items()
-                if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-            )
-        )
+        if isinstance(metadata, str):
+            return f"the API to answer ({metadata})"
+        if not metadata.get("is_initialized"):
+            return "the database to be initialized"
+        pending = self._pending_changes(metadata)
+        if pending:
+            return f"the scheduler to finish applying ({', '.join(pending)})"
+        return ""
+
+    def _pending_changes(self, metadata: dict) -> List[str]:
+        """The raised change flags, in declaration order. Empty when the scheduler is idle."""
+        return [flag for flag in self.PENDING_CHANGE_FLAGS if metadata.get(flag)]
 
     def wait_applying(self):
         # Ready when DB is initialized and no scheduler apply is in flight.
@@ -208,15 +233,7 @@ class Config:
                         self.__logger.error(f"API has been failing for {elapsed}s ({metadata})")
                     else:
                         self.__logger.warning(f"Could not check metadata via API ({metadata}), will retry ...")
-                elif (
-                    metadata.get("is_initialized")
-                    and metadata.get("first_config_saved")
-                    and not any(
-                        v
-                        for k, v in metadata.items()
-                        if k in ("custom_configs_changed", "external_plugins_changed", "pro_plugins_changed", "plugins_config_changed", "instances_changed")
-                    )
-                ):
+                elif metadata.get("is_initialized") and metadata.get("first_config_saved") and not self._pending_changes(metadata):
                     ready = True
                     continue
                 else:
