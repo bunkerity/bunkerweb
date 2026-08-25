@@ -2,12 +2,17 @@
 
 ## v1.6.15~rc1 - 2026/08/??
 
-- [BUGFIX] `database`: initializing the database only inspects BunkerWeb's own tables instead of every table in the schema, where a single unreadable one aborted the config saver and left every service running on its default settings. A leftover `test_<uuid>` probe table whose tablespace was lost is the usual cause, reported by MariaDB as error 1932; drop any that remain in the schema.
-- [BUGFIX] `scheduler`: the config saver and the config generator now log wherever the Scheduler logs. On Linux their output went to the journal while `/var/log/bunkerweb/scheduler.log` kept only "Config saver failed, configuration will not work as expected", so the failure appeared to have no cause even at debug level.
-- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database and only a restart picked it up. A missing or unreadable folder no longer removes the file-managed configurations.
-- [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
-- [FEATURE] `sessions`: a destroyed session is now rejected on its next use when session data is stored in the cookie. Cookie sessions are stateless, so destroying one only cleared it from the browser and the signed cookie stayed valid until it timed out, including after an IP or User-Agent check failed. Revoked identifiers are held in a shared store sized by `SESSIONS_REVOCATION_MEMORY_SIZE`; it is local to each instance, so use Redis to revoke across a cluster. See the Sessions documentation.
+- [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts. ModSecurity reads `filename=` only while common frameworks prefer `filename*`, so a part could show the WAF a benign name and the application a malicious one. RFC 7578 forbids the encoding here, so compliant clients are unaffected.
+- [SECURITY] `api`: `instances_create` and `instances_update` are treated as admin-equivalent. Calls to a registered instance carry the `API_TOKEN` admin override, and the Scheduler pushes the generated configuration and cache, TLS private keys included, to every registered instance, so registering one endpoint collects all of it. See the API documentation.
 - [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
+- [FEATURE] `sessions`: a destroyed cookie session is now rejected on its next use. Cookie sessions are stateless, so destroying one only cleared the browser copy while the signed cookie stayed valid until it timed out, including after an IP or User-Agent check failed. Revoked identifiers live in a store sized by `SESSIONS_REVOCATION_MEMORY_SIZE`, local to each instance; use Redis to revoke across a cluster. See the Sessions documentation.
+- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables, where a single unreadable table in the schema aborted the config saver and left every service on its default settings. The usual cause is a leftover `test_<uuid>` probe table whose tablespace was lost, reported by MariaDB as error 1932; drop any that remain.
+- [BUGFIX] `scheduler`: the config saver and the config generator log wherever the Scheduler logs. On Linux their output went to the journal, so `/var/log/bunkerweb/scheduler.log` recorded the failure with no cause, even at debug level.
+- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database until a restart. A missing or unreadable folder no longer removes the file-managed configurations.
+- [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
+- [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, where the gzip header carried the current time so every reload rewrote the whole blob, about 48 MiB per reload for failover-backup.
+- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins into the database instead of stopping at "All Pro plugins are up to date", which left the plugin pages and hooks missing until a manual database edit.
+- [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
 - [DEPS] Updated lua-resty-session version to v4.2.0
 - [DEPS] Updated LuaJIT version to v2.1-20260824
 - [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
@@ -25,8 +30,6 @@
 - [BUGFIX] `core`: an expiry of `0` in the datastore worker cache means no expiry, as in the shared dictionary, instead of expiring at once.
 - [BUGFIX] `metrics`: restore the per-worker counters from Redis on a cold start, where a restart zeroed them and the next sync overwrote the stored values. Needs `METRICS_SAVE_TO_REDIS`. (Fixes #3775)
 - [BUGFIX] `ui`: Total Requests, Blocked Requests and the Request status chart say which window they show, instead of being read as *Last 7 days* while holding cumulative counters. (Refs #3775)
-- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins into the database instead of stopping at "All Pro plugins are up to date", which left the plugin pages and hooks missing until a manual database edit.
-- [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
 - [MISC] Remove the four ad auction features Chromium dropped (`join-ad-interest-group`, `private-aggregation`, `record-ad-auction-events` and `run-ad-auction`) from the default value for the Permissions-Policy header, now sorted alphabetically.
 - [DEPS] Updated Coreruleset version to v4.29.0 (v4)
 - [DEPS] Updated lua-resty-openssl version to v1.9.0
