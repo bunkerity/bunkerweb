@@ -133,6 +133,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).          |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global  | Nein     | **Sitzungswiderruf-Speichergröße:** Größe des Speichers für widerrufene Cookie-Sitzungskennungen. |
 
 === "Protokollierungseinstellungen"
 

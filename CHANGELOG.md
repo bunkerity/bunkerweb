@@ -6,6 +6,7 @@
 - [BUGFIX] `scheduler`: the config saver and the config generator now log wherever the Scheduler logs. On Linux their output went to the journal while `/var/log/bunkerweb/scheduler.log` kept only "Config saver failed, configuration will not work as expected", so the failure appeared to have no cause even at debug level.
 - [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database and only a restart picked it up. A missing or unreadable folder no longer removes the file-managed configurations.
 - [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
+- [FEATURE] `sessions`: a destroyed session is now rejected on its next use when session data is stored in the cookie. Cookie sessions are stateless, so destroying one only cleared it from the browser and the signed cookie stayed valid until it timed out, including after an IP or User-Agent check failed. Revoked identifiers are held in a shared store sized by `SESSIONS_REVOCATION_MEMORY_SIZE`; it is local to each instance, so use Redis to revoke across a cluster. See the Sessions documentation.
 - [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
 - [DEPS] Updated lua-resty-session version to v4.2.0
 - [DEPS] Updated LuaJIT version to v2.1-20260824

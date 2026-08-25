@@ -133,6 +133,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | Non      | **Mémoire cachestore IPC :** Taille du cache interne (IPC).                           |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | Non      | **Mémoire cachestore miss :** Taille du cache interne (miss).                         |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | Non      | **Mémoire cachestore locks :** Taille du cache interne (locks).                       |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`          | global   | Non      | **Mémoire de révocation des sessions :** Taille du stockage des identifiants de session cookie révoqués. |
 
 === "Paramètres de journalisation"
 

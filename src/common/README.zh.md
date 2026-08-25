@@ -135,6 +135,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。          |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。      |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。   |
 
 === "日志设置"
 

@@ -9,6 +9,7 @@ local sessions = class("sessions", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
+local shared = ngx.shared
 local get_variable = utils.get_variable
 local session_init = session.init
 local tonumber = tonumber
@@ -154,6 +155,18 @@ function sessions:init()
 			config.redis.port = tonumber(redis_vars["REDIS_PORT"])
 		end
 	end
+	-- Cookie storage is stateless: destroy() only clears the client cookie, so a session stays
+	-- valid until it times out. A shm denylist makes destroy authoritative. lua-resty-session
+	-- drops the revocation config whenever storage is server-side, so this stays inert while
+	-- redis is up and takes over during the redis-down fallback to cookie storage.
+	if shared["sessions_revocation"] then
+		config.revocation = "shm"
+		config.revocation_fail_mode = "open"
+		config.shm = { zone = "sessions_revocation", prefix = "revoked_" }
+	else
+		self.logger:log(ERR, "lua_shared_dict sessions_revocation is missing, cookie session revocation is disabled")
+	end
+
 	local ok_set, err_set = self.internalstore:set("storage_sessions_STORAGE", config.storage)
 	if not ok_set then
 		self.logger:log(ERR, "error from internalstore:set : " .. err_set)
