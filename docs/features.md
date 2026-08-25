@@ -133,15 +133,16 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Memory Settings"
 
-    | Setting                        | Default | Context | Multiple | Description                                                                                                                                               |
-    | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
-    | `DATASTORE_LRU_SIZE`           | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | Setting                           | Default | Context | Multiple | Description                                                                                                                                               |
+    | --------------------------------- | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
+    | `DATASTORE_LRU_SIZE`              | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`   | global  | No       | **Sessions Revocation Memory Size:** Size of the store holding revoked cookie session identifiers (for example `8192`, `16k`, `16m`).                     |
 
 === "Logging Settings"
 
@@ -159,12 +160,12 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Integration Settings"
 
-    | Setting                  | Default | Context   | Multiple | Description                                                                                                     |
-    | ------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
-    | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
-    | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
+    | Setting           | Default | Context   | Multiple | Description                                                                                          |
+    | ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
+    | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
+    | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
 
 === "Nginx Settings"
 
@@ -268,7 +269,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_DNS_PROVIDER`                 |             | multisite | no       | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
 | `ACME_DNS_ALIAS`                    |             | multisite | no       | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
 | `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | no       | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_KEY_SIZE`                     | `256`       | multisite | no       | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -2069,33 +2070,50 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
 Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
+Every setting is `multisite`, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.
+
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                      |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Enable CrowdSec:** Set to `yes` to enable the CrowdSec bouncer.                                                |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service.                                             |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service. Leave empty to disable decision lookups.    |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
 
 #### Application Security Component Settings
 
-| Setting                           | Default       | Context | Multiple | Description                                                                                            |
-| --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
+| Setting                           | Default       | Context   | Multiple | Description                                                                                            |
+| --------------------------------- | ------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
     - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
+
+#### Per-service endpoints
+
+Because the endpoints are `multisite`, services on the same instance can use different CrowdSec components, or only some of them. The two features are independent:
+
+- **Decision lookups** are active when `CROWDSEC_API` is set. Set it to an empty string for a service to skip the Local API entirely.
+- **AppSec inspection** is active when `CROWDSEC_APPSEC_URL` is set. Set it to an empty string for a service to skip deep request inspection.
+
+A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, and the instance logs that neither endpoint is defined.
+
+!!! warning "One decision cache per instance"
+    Cached decisions live in a single shared memory zone for the whole instance, keyed by the Local API they came from. Services pointing at the same `CROWDSEC_API` reuse each other's cached decisions, which is what keeps the lookup cheap. Services pointing at different Local APIs never see each other's decisions. Sizing that zone is instance-wide, so a fleet with many distinct Local APIs and large decision lists shares one budget.
+
+!!! info "Bouncer key per Local API"
+    `CROWDSEC_API_KEY` is resolved per service like every other setting. When services target different Local APIs, give each one the key registered with `cscli bouncers add` on its own CrowdSec host, otherwise the lookups are rejected as unauthenticated.
 
 ### Example Configurations
 
@@ -2129,9 +2147,42 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Per-service Configuration"
+
+    AppSec on every public service, decision lookups on a subset, and one service left out entirely. The unprefixed values are the fleet-wide baseline and each service overrides only what differs:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline for every service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # No decision lookup unless a service asks for it
+    CROWDSEC_API_KEY: ""
+
+    # app1 adds the Local API decision lookup on top of AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 keeps AppSec only, inheriting the empty CROWDSEC_API baseline
+
+    # intranet is not checked at all
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    A service can also point at a different CrowdSec host altogether, with its own bouncer key:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Step&nbsp;3 – Validate the integration
 
 - In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- In the BunkerWeb instance logs, the init phase reports how many bouncers were built and how many services they cover. Services sharing an identical configuration share one bouncer, so the two counts differ when a fleet uses several distinct endpoints.
 - On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
 - In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
@@ -3230,7 +3281,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
@@ -4332,19 +4383,19 @@ Follow these steps to deploy mutual TLS with confidence:
 
 ### Configuration Settings
 
-| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                              |
-| ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                       |
-| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                     |
-| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                              |
-| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                              |
-| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
-| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
-| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
+| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                               |
+| ------------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                        |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                      |
+| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                               |
+| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                               |
+| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                     |
+| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.         |
+| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                       |
 | `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window). Client-supplied `X-SSL-*` headers are always stripped on ingress, so these values cannot be spoofed. |
-| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
-| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
-| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
+| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                         |
+| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain.  |
+| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                            |
 
 !!! tip "Configure once, distributed everywhere"
     CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
@@ -5141,7 +5192,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
     | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                                                                                                                          |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location.                                             |
     | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
@@ -5863,6 +5914,13 @@ Follow these steps to configure and use the Sessions feature:
     1. Set `USE_REDIS` to `yes` and configure your Redis connection
     2. Ensure all instances use the exact same `SESSIONS_SECRET` and `SESSIONS_NAME`
     3. This ensures users maintain their session regardless of which BunkerWeb instance handles their requests
+
+!!! info "Session Revocation"
+    Without Redis, session data lives in the cookie itself, so destroying a session only cleared it from the browser and the signed cookie stayed valid until it timed out. BunkerWeb keeps a denylist of destroyed session identifiers in shared memory, so a destroyed cookie is rejected the next time it is presented.
+
+    - It applies only when session data is stored in the cookie. With `USE_REDIS` set to `yes`, session data is server-side and destroying a session already removes it.
+    - The denylist is local to each BunkerWeb instance. Use Redis to revoke sessions across a cluster.
+    - Size it with `SESSIONS_REVOCATION_MEMORY_SIZE`. If the store fills up or becomes unavailable, the session is treated as valid and a warning is logged.
 
 ### Example Configurations
 
