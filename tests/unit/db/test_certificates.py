@@ -4,6 +4,8 @@ from io import BytesIO
 from json import loads
 from tarfile import REGTYPE, SYMTYPE, TarInfo, open as tar_open
 
+import pytest
+
 from certificate_utils import generate_self_signed  # type: ignore
 from fixtures.seed import add_service, seed_minimal, session
 from model import Certificates, Jobs, Metadata, ResourceAttachments  # type: ignore
@@ -600,3 +602,177 @@ def test_sync_leaves_manually_assigned_certificates_alone(db, monkeypatch):
 
     assert db.get_certificate_details(managed)["attachments"] == []
     assert db.get_certificate_details(manual)["attachments"] == [{"service_id": "app1.example.com", "is_primary": True}]
+
+
+# --- provider swap must not wedge the inventory ---------------------------------------------
+# Both provider jobs name their inventory entry after the service (`name=first_server`), so every
+# selfsigned <-> customcert swap lands on the same `bw_resources.name`. `create_certificate`'s name
+# check was source-BLIND while `import_certificate`'s lookup was source-SCOPED, and
+# `sync_managed_attachments` only ever deletes ResourceAttachments rows -- so the withdrawn
+# provider's Resources row survived forever and the new provider's job errored on every single run.
+
+
+def _import(db, monkeypatch, *, source, name, service_ids=None, sans=None, managed=True):
+    _configure_keyring(monkeypatch)
+    certificate, private_key = generate_self_signed(f"{name}", sans or [])
+    return (
+        db.import_certificate(
+            name=name,
+            description=f"Managed by the {source} provider",
+            source=source,
+            certificate_pem=certificate,
+            private_key_pem=private_key,
+            service_ids=service_ids or [],
+            primary=True,
+            renewal_metadata={"managed_by": source} if managed else {},
+        ),
+        certificate,
+    )
+
+
+@pytest.mark.parametrize("first,second", [("selfsigned", "customcert"), ("customcert", "selfsigned")])
+def test_a_provider_swap_takes_the_managed_inventory_row_over(db, monkeypatch, first, second):
+    seed_minimal(db)
+    service = "app1.example.com"
+
+    (first_error, first_id), _ = _import(db, monkeypatch, source=first, name=service, service_ids=[service])
+    assert first_error == ""
+    # The withdrawn provider's job stops covering the service and detaches it. It does NOT (and
+    # must not) delete the inventory row -- that is exactly the row the swap used to trip over.
+    assert db.sync_managed_attachments(first, []) == ""
+
+    (second_error, second_id), second_certificate = _import(db, monkeypatch, source=second, name=service, service_ids=[service], sans=[f"extra.{service}"])
+
+    assert second_error == "", "the swap must not wedge the inventory"
+    assert second_id == first_id, "the row is taken over, not duplicated"
+    details = db.get_certificate_details(second_id)
+    assert details["source"] == second, "ownership must move to the new provider"
+    assert details["renewal_metadata"]["managed_by"] == second
+    assert f"extra.{service}" in details["sans"], "the new provider's material must win"
+    assert details["attachments"] == [{"service_id": service, "is_primary": True}]
+    assert db.get_certificates()["total"] == 1, "no orphan left behind"
+
+
+def test_repeated_swaps_keep_working(db, monkeypatch):
+    """The wedge was permanent, so one successful swap is not enough evidence.
+
+    A *swap* means the outgoing provider is DISABLED -- its job keeps running and detaches the
+    service (`sync_managed_attachments` sits outside the per-service gate in both jobs), which is
+    the release signal the takeover waits for. Two providers running at once is a different
+    situation entirely: see test_two_active_providers_do_not_flap_the_inventory_row.
+    """
+    seed_minimal(db)
+    service = "app1.example.com"
+    previous = None
+
+    for index, source in enumerate(("selfsigned", "customcert", "selfsigned", "customcert")):
+        if previous:
+            # The outgoing provider no longer covers this service.
+            assert db.sync_managed_attachments(previous, []) == ""
+        (error, resource_id), _ = _import(db, monkeypatch, source=source, name=service, service_ids=[service], sans=[f"r{index}.{service}"])
+        assert error == "", f"swap {index} to {source} failed: {error}"
+        assert db.get_certificate_details(resource_id)["source"] == source
+        previous = source
+    assert db.get_certificates()["total"] == 1
+
+
+def test_two_active_providers_do_not_flap_the_inventory_row(db, monkeypatch):
+    """Nothing forbids GENERATE_SELF_SIGNED_SSL=yes AND USE_CUSTOM_SSL=yes on one service: each job
+    gates only on its own setting, both run daily, and self-signed still calls import_certificate
+    when generate_cert short-circuits on a still-valid cached certificate (it returns True, 0).
+
+    An unbounded takeover turns that into a DAILY FLAP -- each run adopts the other's row, replaces
+    the material and flags certificates_changed, and `certificates` is ahead of both providers in
+    order.json's ssl_certificate phase, so the alternating leaf reaches the wire. Requiring a
+    released row keeps this (already misconfigured) service stable: one provider owns the name, the
+    other gets the ordinary "already exists" refusal every run, which is what it did before
+    takeover existed.
+    """
+    seed_minimal(db)
+    service = "app1.example.com"
+    owners = []
+
+    for day in range(3):
+        for source in ("selfsigned", "customcert"):
+            (error, resource_id), _ = _import(db, monkeypatch, source=source, name=service, service_ids=[service], sans=[f"{source}{day}.example.com"])
+            if not error:
+                owners.append(db.get_certificate_details(resource_id)["source"])
+
+    assert set(owners) == {"selfsigned"}, f"the inventory row flaps between providers: {owners}"
+    assert db.get_certificates()["total"] == 1
+    details = db.get_certificates()["items"][0]
+    assert details["source"] == "selfsigned"
+    assert details["attachments"] == [{"service_id": service, "is_primary": True}]
+
+
+def test_a_row_attached_to_other_services_is_never_consumed(db, monkeypatch):
+    """A legacy letsencrypt row covering several services must not be swallowed by a
+    single-service provider -- that would silently drop TLS for the services it does not name."""
+    seed_minimal(db)
+    add_service(db, "app2.example.com")
+    (error, legacy_id), _ = _import(db, monkeypatch, source="letsencrypt", name="app1.example.com", service_ids=["app1.example.com", "app2.example.com"])
+    assert error == ""
+
+    (swap_error, swap_id), _ = _import(db, monkeypatch, source="selfsigned", name="app1.example.com", service_ids=["app1.example.com"], sans=["v2.example.com"])
+
+    assert swap_error == "Certificate name app1.example.com already exists"
+    assert swap_id is None
+    unchanged = db.get_certificate_details(legacy_id)
+    assert unchanged["source"] == "letsencrypt"
+    assert {attachment["service_id"] for attachment in unchanged["attachments"]} == {"app1.example.com", "app2.example.com"}
+
+
+def test_a_takeover_relabels_the_row_but_a_refresh_never_does(db, monkeypatch):
+    """description is a provider-written label, so a takeover must rewrite it -- otherwise the row
+    reads "Managed by the self-signed certificate provider" under source customcert. A same-source
+    refresh must NOT: update_certificate lets an operator edit that field, and a daily job run
+    would silently revert the edit."""
+    seed_minimal(db)
+    service = "app1.example.com"
+    (error, resource_id), _ = _import(db, monkeypatch, source="selfsigned", name=service, service_ids=[service])
+    assert error == ""
+    assert db.sync_managed_attachments("selfsigned", []) == ""
+
+    (error, taken_over_id), _ = _import(db, monkeypatch, source="customcert", name=service, service_ids=[service], sans=["v2.example.com"])
+
+    assert error == ""
+    assert taken_over_id == resource_id
+    assert db.get_certificate_details(taken_over_id)["description"] == "Managed by the customcert provider"
+
+    # Now an operator renames it, and the owning provider runs again.
+    assert db.update_certificate(resource_id, description="Wildcard for the shop") == ""
+    (error, refreshed_id), _ = _import(db, monkeypatch, source="customcert", name=service, service_ids=[service], sans=["v3.example.com"])
+
+    assert error == ""
+    assert refreshed_id == resource_id
+    assert db.get_certificate_details(refreshed_id)["description"] == "Wildcard for the shop", "a same-source refresh must not revert an operator's edit"
+
+
+def test_a_hand_uploaded_certificate_is_never_taken_over(db, monkeypatch):
+    """An operator upload through /certificates carries `source="customcert"` with NO `managed_by`
+    (same discriminator sync_managed_attachments uses). Overwriting it would be data loss, so the
+    provider job must still get the explicit refusal."""
+    seed_minimal(db)
+    uploaded_id, _, _ = _create(db, monkeypatch, name="app1.example.com", source="customcert", renewal_metadata={})
+
+    (error, imported_id), _ = _import(db, monkeypatch, source="selfsigned", name="app1.example.com", sans=["other.example.com"])
+
+    assert error == "Certificate name app1.example.com already exists"
+    assert imported_id is None
+    unchanged = db.get_certificate_details(uploaded_id)
+    assert unchanged["source"] == "customcert"
+    assert unchanged["renewal_metadata"] == {}
+
+
+def test_a_same_source_reimport_still_refreshes_in_place(db, monkeypatch):
+    """The takeover widens the lookup; it must not change the ordinary same-provider path."""
+    seed_minimal(db)
+    (first_error, first_id), _ = _import(db, monkeypatch, source="selfsigned", name="app1.example.com", service_ids=["app1.example.com"])
+    (second_error, second_id), _ = _import(
+        db, monkeypatch, source="selfsigned", name="app1.example.com", service_ids=["app1.example.com"], sans=["v2.example.com"]
+    )
+
+    assert first_error == second_error == ""
+    assert second_id == first_id
+    assert db.get_certificate_details(second_id)["source"] == "selfsigned"
+    assert db.get_certificates()["total"] == 1

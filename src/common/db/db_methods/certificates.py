@@ -394,6 +394,70 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 .where(Resources.type == "certificate", Resources.name == name, Certificates.source == source)
                 .limit(1)
             ).first()
+            taken_over = False
+            if not existing:
+                # Provider swap: the same inventory name is already held by a DIFFERENT provider.
+                # `bw_resources` carries UniqueConstraint(type, name), so `create_certificate`
+                # below can never insert a second row under this name -- and both provider jobs
+                # name their entry after the service (`name=first_server`), so every
+                # selfsigned <-> customcert <-> letsencrypt swap lands on the same name. Without a
+                # takeover the swap wedged the inventory permanently: the new provider's job errored
+                # on every run while the withdrawn provider's row stayed behind forever
+                # (`sync_managed_attachments` only ever deletes ResourceAttachments rows, never the
+                # Resources row). Taking the row over is what the refresh path below was already
+                # written for -- it reassigns `certificate.source` unconditionally.
+                #
+                # Two conditions, and BOTH are load-bearing.
+                #
+                # 1. `managed_by` must be set -- the row was created by a provider job, not by an
+                #    operator. Same discriminator `sync_managed_attachments` uses, and for the same
+                #    reason: a certificate uploaded by hand through /certificates carries
+                #    `source="customcert"` with no `managed_by`, and silently overwriting an
+                #    operator's own upload would be data loss.
+                #
+                # 2. The row must be RELEASED -- no attachment left at all. A withdrawn provider
+                #    announces its release by detaching: its job keeps running even once its
+                #    setting is off (the `sync_managed_attachments` call sits outside the
+                #    per-service gate in both custom-cert.py and self-signed.py, so it runs with an
+                #    empty `keep`), and that detach is the signal this branch waits for. Without
+                #    this condition the takeover is UNBOUNDED, and nothing stops
+                #    GENERATE_SELF_SIGNED_SSL=yes and USE_CUSTOM_SSL=yes on the SAME service: both
+                #    jobs import every day under the same `name=<service>`, each would adopt the
+                #    other's row, and since a takeover replaces the material and flags
+                #    `certificates_changed`, the deployed leaf would ALTERNATE on every cycle --
+                #    and `certificates` sits ahead of both providers in order.json's
+                #    ssl_certificate phase, so that flap reaches the wire, it is not just inventory
+                #    noise. Requiring a released row keeps that (already broken) configuration
+                #    stable-but-noisy, exactly as it was before takeover existed: the first
+                #    provider owns the row, the second gets the "already exists" refusal below on
+                #    every run. It also stops a multi-service row (a legacy letsencrypt entry
+                #    covering several services) being consumed by a single-service provider.
+                #
+                # A genuine customcert<->selfsigned swap is unaffected: those two providers call
+                # sync_managed_attachments outside their per-service gates, so the withdrawn one
+                # detaches and the new one adopts the released row on its next run (one cycle later
+                # at worst). letsencrypt does NOT release: certbot-new exits before the legacy
+                # import when no service uses LE, sync derives its services from the certbot cache
+                # rather than AUTO_LETS_ENCRYPT, and the lineage survives unless
+                # LETS_ENCRYPT_CLEAR_OLD_CERTS=yes -- an LE-held name therefore stays wedged (the
+                # pre-takeover behaviour, unchanged here).
+                candidate = session.execute(
+                    select(Resources, Certificates)
+                    .join(Certificates, Certificates.resource_id == Resources.id)
+                    .where(Resources.type == "certificate", Resources.name == name)
+                    .limit(1)
+                ).first()
+                if candidate and _load_json(candidate[1].renewal_metadata, {}).get("managed_by"):
+                    holders = session.scalars(select(ResourceAttachments.service_id).where(ResourceAttachments.resource_id == candidate[0].id)).all()
+                    if holders:
+                        # The job below only logs "already exists", which says nothing about WHO
+                        # holds the name. Name the holder so a daily error is actionable.
+                        holder_list = ", ".join(sorted(holders))
+                        self.logger.warning(f"Certificate {name} cannot be imported by {source}: still held by {candidate[1].source} for {holder_list}")
+                    else:
+                        self.logger.warning(f"Certificate {name} taken over by {source} (was {candidate[1].source})")
+                        existing = candidate
+                        taken_over = True
 
         if fingerprint_match:
             fingerprint_source = fingerprint_match[1].source
@@ -404,6 +468,9 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                     None,
                 )
             existing = fingerprint_match
+            # The fingerprint-matched row is same-source: what follows is a refresh, not the
+            # takeover the name-candidate branch may have flagged just above.
+            taken_over = False
 
         if fingerprint_match and source != "letsencrypt":
             fingerprint_id = fingerprint_match[0].id
@@ -436,6 +503,13 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 metadata["service_ids"] = service_ids
 
             certificate.source = source
+            if taken_over:
+                # Takeover ONLY. The description is a provider-written label ("Managed by the
+                # self-signed certificate provider"), so leaving the old provider's copy under the
+                # new source is simply wrong. On a same-source refresh it must NOT be rewritten:
+                # `update_certificate` lets an operator edit this field, and a daily job run would
+                # silently revert their edit.
+                resource.description = self._empty_if_none(kwargs.get("description"))
             metadata_json = _json_object(metadata)
             metadata_changed = certificate.renewal_metadata != metadata_json
             certificate.renewal_metadata = metadata_json
@@ -457,7 +531,7 @@ class DatabaseCertificatesMixin(DatabaseMixinBase):
                 certificate.last_error = ""
                 certificate.revoked = False
                 certificate.revoked_at = None
-            if material_changed or metadata_changed:
+            if material_changed or metadata_changed or taken_over:
                 resource.last_update = now
             try:
                 self._flag_certificates_changed(session)
