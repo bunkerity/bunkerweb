@@ -144,6 +144,18 @@ actions:
     config:
       REDIS_SSL: "yes"
       REDIS_PORT: "6380"
+    # 6380 is the port valkey serves TLS on INSIDE its container, which is what BunkerWeb dials
+    # on the arms that share `bw-universe` with it. The Linux container runs `network_mode: host`
+    # (tests/linux/docker-compose.yml) and reaches valkey through the PUBLISHED ports instead --
+    # which is why the spec-level Linux override is 6479 and not 6379. Same shift for TLS:
+    # tests/misc/docker/valkey.yml publishes `127.0.0.1:6480:6380`. Without this the instance
+    # dialled a port nothing listens on, wrote no key, and `tls` below read back an empty
+    # database. `tests/core/redis.yml` follows the same pattern for its TLS actions but with
+    # 6380 -- its arm talks to a HOST-PACKAGED redis, not these published container ports, so
+    # do not "harmonise" the two values.
+    Linux:
+      config:
+        REDIS_PORT: "6480"
     restart_stack: false
   bad_request_tls:
     type: status
@@ -162,6 +174,9 @@ actions:
     valkey: true
     config:
       REDIS_PORT: "6380"
+    Linux:
+      config:
+        REDIS_PORT: "6480"
     delay: 6
     restart_stack: false
   clear_keys_4:
@@ -174,6 +189,9 @@ actions:
     full_clean: true
     config:
       REDIS_PORT: "6380"
+    Linux:
+      config:
+        REDIS_PORT: "6480"
 
   # sentinel_check: # TODO
   #   type: redis
