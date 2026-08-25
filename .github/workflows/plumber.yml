@@ -22,7 +22,7 @@ jobs:
             .plumber.yaml
           persist-credentials: false
       - name: Run Plumber
-        uses: getplumber/plumber@031bc86d1e5f661626e2000f4f8779912d608d5f # v0.4.39
+        uses: getplumber/plumber@56369e7d43c4878049ee8ec6c2d600c21af45c4e # v0.4.40
         with:
           verify-attestation: true
           config-file: .plumber.yaml
