@@ -14,7 +14,7 @@ Follow these steps to configure and use the Backup feature:
 
 1. **Enable the feature:** The backup feature is enabled by default. If needed, you can control this with the `USE_BACKUP` setting.
 2. **Configure backup schedule:** Choose how often backups should occur by setting the `BACKUP_SCHEDULE` parameter.
-3. **Set retention policy:** Specify how many backups to keep using the `BACKUP_ROTATION` setting, and how they are picked with `BACKUP_ROTATION_STRATEGY`.
+3. **Set retention policy:** Specify how many backups to keep using the `BACKUP_ROTATION` setting. Which ones are kept is decided by `BACKUP_ROTATION_STRATEGY`, `hanoi` by default.
 4. **Define storage location:** Choose where backups will be stored using the `BACKUP_DIRECTORY` setting.
 5. **Use CLI commands:** Manage backups manually with the `bwcli plugin backup` commands when needed.
 
@@ -25,7 +25,7 @@ Follow these steps to configure and use the Backup feature:
 | `USE_BACKUP`       | `yes`                        | global  | no       | **Enable Backup:** Set to `yes` to enable automatic backups.                                                              |
 | `BACKUP_SCHEDULE`  | `daily`                      | global  | no       | **Backup Frequency:** How often to perform backups. Options: `daily`, `weekly`, or `monthly`.                             |
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | **Backup Retention:** The number of backup files to keep. Older backups beyond this number will be automatically deleted. |
-| `BACKUP_ROTATION_STRATEGY` | `fifo`               | global  | no       | **Rotation Strategy:** How backups are picked for deletion once the limit is reached. `fifo` keeps the most recent ones; `hanoi` keeps a Tower of Hanoi ladder — fine near the present, exponentially coarser further back — for the same number of files. |
+| `BACKUP_ROTATION_STRATEGY` | `hanoi`              | global  | no       | **Rotation Strategy:** How backups are picked for deletion once the limit is reached. `hanoi` keeps a Tower of Hanoi ladder — fine near the present, exponentially coarser further back; `fifo` keeps the most recent ones. Both keep the same number of files. |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | **Backup Location:** The directory where backup files will be stored.                                                     |
 
 ### Command Line Interface
@@ -57,14 +57,26 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
 ### Example Configurations
 
-=== "Daily Backups with 7-Day Retention"
+=== "Daily Backups with 7-File Retention"
 
-    Default configuration that creates daily backups and keeps the most recent 7 files:
+    Default configuration: daily backups, 7 files kept, spread by the Tower of Hanoi ladder.
 
     ```yaml
     USE_BACKUP: "yes"
     BACKUP_SCHEDULE: "daily"
     BACKUP_ROTATION: "7"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
+=== "Daily Backups, Last 7 Days (FIFO)"
+
+    The previous default: the 7 most recent files and nothing older.
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "7"
+    BACKUP_ROTATION_STRATEGY: "fifo"
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
@@ -79,28 +91,19 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
-=== "Daily Backups with Tower of Hanoi Rotation"
+=== "Daily Backups with Deeper Retention"
 
-    The same 24 files, spread out instead of covering only the last 24 days. The most recent
-    backups are kept at full granularity and older ones are thinned exponentially, so the oldest
-    restore point moves further back every time the install doubles in age — a problem noticed
-    late is still recoverable:
+    24 files spread out by the default ladder instead of covering only the last 24 days. The most
+    recent backups are kept at full granularity and older ones are thinned exponentially, so the
+    oldest restore point moves further back every time the install doubles in age — a problem
+    noticed late is still recoverable:
 
     ```yaml
     USE_BACKUP: "yes"
     BACKUP_SCHEDULE: "daily"
     BACKUP_ROTATION: "24"
-    BACKUP_ROTATION_STRATEGY: "hanoi"
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
-
-    Both strategies delete the same number of files, so switching to `hanoi` never removes more
-    backups than `fifo` would — only different ones. Every deletion is logged with the reason.
-
-!!! info "How backups are dated"
-    Rotation reads the timestamp in each archive's name. An archive whose name does not carry a
-    usable one — a file copied in by hand, or renamed — is dated by its modification time instead,
-    under both strategies.
 
 === "Monthly Backups to Custom Location"
 
@@ -112,3 +115,32 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_ROTATION: "24"
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
+
+!!! info "Which backups are kept"
+    `hanoi` is the default. Both strategies delete the same **number** of files — `hanoi` never
+    removes more backups than `fifo` would — but they do not delete the same ones, and the
+    difference is not only at the old end. The ladder buys its depth by thinning the recent window
+    too: with a daily schedule at the default `BACKUP_ROTATION: "7"`, an established archive keeps
+    one backup from each of roughly the last 1, 2, 4, 8, 16 and 32-day windows — ages of about
+    0, 1, 2–3, 4–7, 8–15, 16–31 and 32–63 days, the exact ages depending on where the current day
+    falls on the ladder's fixed grid — where `fifo` keeps the last 7 days. **Three or four of the
+    last seven days are given up** in exchange for those older restore points.
+    The most recent backup is always kept; with one backup per day and `BACKUP_ROTATION` of at
+    least 2, so are the two most recent days. The trade is milder the larger `BACKUP_ROTATION` is —
+    at `"24"` roughly the last three weeks stay contiguous, a span that shrinks slowly as the
+    archive ages.
+
+    **Several backups in the same day count as one restore point, and the extras are the first
+    files a rotation gives up** — ahead of anything older. Only the newest backup of each day
+    survives once the file budget is spent. So a manual save taken before a risky change is safe
+    only until the next backup of that same day, and by becoming that day's newest it displaces the
+    day's scheduled backup, which is then the one deleted. Under `fifo` you would have kept both.
+
+    Nothing already on disk is deleted by the upgrade itself — the change takes effect at the next
+    rotation. Set `BACKUP_ROTATION_STRATEGY: "fifo"` for the previous behaviour. Every deletion is
+    logged with the reason it was picked.
+
+!!! info "How backups are dated"
+    Rotation reads the timestamp in each archive's name. An archive whose name does not carry a
+    usable one — a file copied in by hand, or renamed — is dated by its modification time instead,
+    under both strategies.

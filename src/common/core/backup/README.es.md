@@ -56,9 +56,11 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 
 ### Configuraciones de ejemplo
 
-=== "Copias de seguridad diarias con retención de 7 días"
+=== "Copias de seguridad diarias con retención de 7 archivos"
 
-    Configuración por defecto que crea copias de seguridad diarias y conserva los 7 archivos más recientes:
+    Configuración por defecto: copias diarias, 7 archivos conservados, repartidos por la escalera de las Torres de Hanói.
+    Así cubre más que los últimos 7 días, pero no conserva cada uno de los últimos 7 días.
+    Con `BACKUP_ROTATION_STRATEGY: "fifo"` se conservan en su lugar los 7 archivos más recientes.
 
     ```yaml
     USE_BACKUP: "yes"

@@ -58,7 +58,7 @@ try:
 
         already_done = last_backup_date and last_backup_date.timestamp() + PERIOD_STAMPS[backup_period] > current_time.timestamp()
         backup_rotation = int(getenv("BACKUP_ROTATION", "7"))
-        backup_strategy = getenv("BACKUP_ROTATION_STRATEGY", "fifo")
+        backup_strategy = getenv("BACKUP_ROTATION_STRATEGY", "hanoi")
 
         sorted_files = []
         if already_done:

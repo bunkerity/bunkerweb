@@ -211,7 +211,7 @@ def hanoi_rank(index: int, indices: list, levels: int) -> tuple:
     return best
 
 
-def rotation_victims(dated_backups: list, rotation: int, strategy: str = "fifo", period: timedelta = timedelta(days=1)) -> list:
+def rotation_victims(dated_backups: list, rotation: int, strategy: str = "hanoi", period: timedelta = timedelta(days=1)) -> list:
     """The backups rotation gives up, each with the reason to log.
 
     Pure: it reads `(taken_at, path)` pairs and nothing else -- not the current time, so a run
@@ -223,6 +223,11 @@ def rotation_victims(dated_backups: list, rotation: int, strategy: str = "fifo",
     than the FIFO rotation that shipped before it would have for the same inputs -- they differ
     only in WHICH files they pick. FIFO gives up the oldest ones. Hanoi gives up whatever its
     ladder does not need, oldest first.
+
+    `hanoi` is the default, here and in `plugin.json`: the two defaults are deliberately the same
+    value so that a caller who omits `strategy` gets the policy the product actually ships. Any
+    other value -- including a typo the setting's `select` regex would have rejected -- is FIFO,
+    which is the conservative half of a choice that deletes the same number of files either way.
     """
     ordered = sorted(dated_backups, key=lambda dated: dated[0])
     excess = len(ordered) - rotation
@@ -258,7 +263,7 @@ def rotation_victims(dated_backups: list, rotation: int, strategy: str = "fifo",
     return [(backup, reason) for _, _, backup, reason in victims[:excess]]
 
 
-def rotate_backups(backups: list, rotation: int, strategy: str = "fifo", period: timedelta = timedelta(days=1)) -> list:
+def rotate_backups(backups: list, rotation: int, strategy: str = "hanoi", period: timedelta = timedelta(days=1)) -> list:
     """Delete the backups the rotation policy gives up. Returns what was deleted."""
     victims = rotation_victims([(backup_time(backup), backup) for backup in backups], rotation, strategy, period)
     LOGGER.info(

@@ -873,9 +873,11 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
 
 ### Beispielkonfigurationen
 
-=== "Tägliche Backups mit 7-tägiger Aufbewahrung"
+=== "Tägliche Backups mit Aufbewahrung von 7 Dateien"
 
-    Standardkonfiguration, die tägliche Backups erstellt und die letzten 7 Dateien aufbewahrt:
+    Standardkonfiguration: tägliche Backups, 7 aufbewahrte Dateien, verteilt durch die Türme-von-Hanoi-Leiter.
+    Sie deckt damit mehr als die letzten 7 Tage ab, behält dafür aber nicht jeden der letzten 7 Tage.
+    Mit `BACKUP_ROTATION_STRATEGY: "fifo"` werden stattdessen die 7 neuesten Dateien aufbewahrt.
 
     ```yaml
     USE_BACKUP: "yes"

@@ -888,9 +888,11 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
 ### 示例配置
 
-=== "每日备份，保留 7 天"
+=== "每日备份，保留 7 个文件"
 
-    默认配置，创建每日备份并保留最近的 7 个文件：
+    默认配置：每日备份，保留 7 个文件，由汉诺塔阶梯分布。
+    因此它覆盖的范围超过最近 7 天，但不会保留最近 7 天中的每一天。
+    设置 `BACKUP_ROTATION_STRATEGY: "fifo"` 则改为保留最近的 7 个文件。
 
     ```yaml
     USE_BACKUP: "yes"

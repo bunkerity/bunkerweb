@@ -2,9 +2,10 @@
 
 Rotation deletes files, so the invariant that matters more than the ladder itself is that the new
 strategy can never remove MORE than the FIFO rotation that shipped before it: both give up exactly
-`count - BACKUP_ROTATION` files and differ only in which ones. `fifo` stays the default, and its
-decisions match the slice `backup-data.py` used to compute inline for every archive whose name
-carries a valid timestamp -- which is every archive the plugin itself writes. An archive whose name
+`count - BACKUP_ROTATION` files and differ only in which ones. `hanoi` is the default (PO ruling,
+2026-08-24); `fifo` remains available as `BACKUP_ROTATION_STRATEGY=fifo`, and its decisions still
+match the slice `backup-data.py` used to compute inline for every archive whose name carries a
+valid timestamp -- which is every archive the plugin itself writes. An archive whose name
 does not (or whose stamp is not a real date) is now ordered by its true modification time instead of
 by that time rendered as a local wall-clock string, which differs only where wall-clock time is not
 monotonic: the hour a DST fall-back repeats.
@@ -120,7 +121,9 @@ class TestFifoIsUnchanged:
         assert [backup for backup, _ in rotation_victims(dated, rotation, "fifo", DAY)] == expected
 
     def test_an_unknown_strategy_falls_back_to_fifo(self):
-        """A typo in BACKUP_ROTATION_STRATEGY must not silently enable the new deletion policy."""
+        """Only the exact literal `hanoi` selects the ladder. A value the setting's own regex would
+        have rejected therefore degrades to FIFO rather than to the shipped default -- the same
+        number of files either way, and the conservative half of the choice."""
         dated = _dated(*range(10))
         assert [backup for backup, _ in rotation_victims(dated, 7, "hanOi", DAY)] == [backup for backup, _ in rotation_victims(dated, 7, "fifo", DAY)]
 
@@ -343,14 +346,21 @@ class TestEdges:
 
 
 class TestDefaults:
-    """The signature defaults, which nothing else pins: every other test passes `strategy`."""
+    """The signature defaults, which nothing else pins: every other test passes `strategy`.
 
-    def test_omitting_the_strategy_rotates_fifo(self):
+    They are `hanoi`, the same value `plugin.json` and the job's `getenv` fall back to. One default
+    for the whole plugin is the point: were the signatures left on `fifo` while the product shipped
+    `hanoi`, a caller that omits `strategy` -- a future job, a test, `bwcli` -- would silently get a
+    policy the product no longer ships, which is this pin's own failure mode with the sign flipped.
+    """
+
+    def test_omitting_the_strategy_rotates_hanoi(self):
         dated = _dated(*range(10))
 
-        assert rotation_victims(dated, 7) == rotation_victims(dated, 7, "fifo", DAY)
+        assert rotation_victims(dated, 7) == rotation_victims(dated, 7, "hanoi", DAY)
+        assert rotation_victims(dated, 7) != rotation_victims(dated, 7, "fifo", DAY)
 
-    def test_omitting_the_strategy_in_the_destructive_helper_rotates_fifo(self, tmp_path):
+    def test_omitting_the_strategy_in_the_destructive_helper_rotates_hanoi(self, tmp_path):
         """On an input where the two strategies genuinely disagree, or the assertion is vacuous
         and a flipped default sails through."""
         directories = {}
@@ -366,8 +376,15 @@ class TestDefaults:
             "hanoi": rotate_backups(sorted_backups(directories["hanoi"]), 7, "hanoi", DAY),
         }
 
-        assert [backup.name for backup in removed["default"]] == [backup.name for backup in removed["fifo"]]
-        assert [backup.name for backup in removed["default"]] != [backup.name for backup in removed["hanoi"]]
+        assert [backup.name for backup in removed["default"]] == [backup.name for backup in removed["hanoi"]]
+        assert [backup.name for backup in removed["default"]] != [backup.name for backup in removed["fifo"]]
+
+    def test_the_default_period_is_one_day(self):
+        """The other signature default, and the one the ladder is measured in: a caller that omits
+        `period` must land on the same blocks as the daily schedule the job passes."""
+        dated = _dated(*range(20))
+
+        assert rotation_victims(dated, 7, "hanoi") == rotation_victims(dated, 7, "hanoi", DAY)
 
 
 class TestMalformedNames:
@@ -478,13 +495,30 @@ class TestRotateBackups:
         strategy setting and the logging, and every test above would still pass."""
         job = (_BACKUP / "jobs" / "backup-data.py").read_text(encoding="utf-8")
         assert "rotate_backups(sorted_files, backup_rotation, backup_strategy" in job
-        assert 'getenv("BACKUP_ROTATION_STRATEGY", "fifo")' in job
+        assert 'getenv("BACKUP_ROTATION_STRATEGY", "hanoi")' in job
         assert "num_files_to_remove" not in job
 
-    def test_the_setting_is_declared_with_the_fail_safe_default(self):
+    def test_the_setting_is_declared_with_the_shipped_default(self):
+        """`hanoi` by PO ruling (2026-08-24). An install that never set the setting keeps the same
+        NUMBER of backups it always did and a different selection of them; `fifo` stays offered,
+        which is what an operator who wants the old selection back sets."""
         from json import loads
 
         setting = loads((_BACKUP / "plugin.json").read_text(encoding="utf-8"))["settings"]["BACKUP_ROTATION_STRATEGY"]
-        assert setting["default"] == "fifo"
+        assert setting["default"] == "hanoi"
         assert setting["context"] == "global"
         assert setting["select"] == ["fifo", "hanoi"]
+
+    def test_the_four_defaults_are_one_value(self):
+        """plugin.json, the job's getenv fallback and both signatures. A flip that misses one of
+        them leaves the plugin with two different notions of `unset`, and every test above still
+        passes: the ones that exercise a strategy all name it explicitly."""
+        from inspect import signature
+        from json import loads
+
+        declared = loads((_BACKUP / "plugin.json").read_text(encoding="utf-8"))["settings"]["BACKUP_ROTATION_STRATEGY"]["default"]
+        job = (_BACKUP / "jobs" / "backup-data.py").read_text(encoding="utf-8")
+
+        assert f'getenv("BACKUP_ROTATION_STRATEGY", "{declared}")' in job
+        assert signature(rotation_victims).parameters["strategy"].default == declared
+        assert signature(rotate_backups).parameters["strategy"].default == declared
