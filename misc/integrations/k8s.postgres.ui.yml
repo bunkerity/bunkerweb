@@ -123,7 +123,26 @@ spec:
               value: "postgresql://bunkerweb:changeme@svc-bunkerweb-db:5432/db"
             - name: API_TOKEN
               value: "changeme"
+          # failureThreshold x periodSeconds must clear the scheduler's APPLY_RETRY_INTERVAL
+          # (300s, src/scheduler/main.py): this probe reads autoconf.healthy, which main.py only
+          # writes AFTER the first apply, so a controller correctly waiting for a slow or retried
+          # apply used to be killed at ~2min -- and a restart resets both that wait and this
+          # probe's initialDelaySeconds, so it never caught up. It also destroyed the evidence:
+          # `kubectl logs` without --previous shows only the container that came after the kill.
           livenessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 60
+          # Readiness, not liveness, is where "autoconf has not applied yet" belongs: it is the
+          # loud-but-harmless signal. Kept at the old 110s budget on purpose -- no Service in this
+          # file selects app: bunkerweb-controller, so this steers no traffic; it exists so
+          # `kubectl get pods` shows 0/1 while the controller waits, instead of a Ready pod that
+          # has applied nothing for eleven minutes.
+          readinessProbe:
             exec:
               command:
                 - /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh

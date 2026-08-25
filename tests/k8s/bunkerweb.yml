@@ -149,6 +149,17 @@ spec:
           envFrom:
             - secretRef:
                 name: bw-secret
+          # failureThreshold x periodSeconds must clear the scheduler's APPLY_RETRY_INTERVAL
+          # (300s, src/scheduler/main.py). Both probes run the same script, and it only turns
+          # green after autoconf's FIRST apply -- which cannot happen until the scheduler's
+          # change flags are cleared by the job that applies them. At 350s nominal (355s
+          # observed) the liveness budget expired ~55s after the scheduler's 300s re-dispatch,
+          # so the controller was SIGTERMed
+          # exactly while its retry was in flight, restarted, and then owed another 60s of
+          # initialDelaySeconds before it could report ready at all -- inside a 420s stack wait
+          # that is unrecoverable. The kill also destroyed the evidence: `kubectl logs` without
+          # --previous shows only the container that came after it, so the first six minutes of
+          # every such failure were missing from the dump.
           livenessProbe:
             exec:
               command:
@@ -156,7 +167,7 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 1
-            failureThreshold: 30
+            failureThreshold: 60
           readinessProbe:
             exec:
               command:
