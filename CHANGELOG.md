@@ -2,6 +2,7 @@
 
 ## v1.6.15~rc1 - 2026/08/??
 
+- [SECURITY] `core`: an instance restarted with `KEEP_CONFIG_ON_RESTART=yes` no longer stays in its loading state. The entrypoint flags the state inside the kept configuration without invalidating the push marker, so the Scheduler's configuration was answered "already applied" and never written, and the instance kept serving traffic with every Lua plugin skipped, mTLS and authbasic included, until the next configuration change. Only `1.6.14` is affected, and the loading window itself still lasts until the Scheduler's next healthcheck.
 - [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts. ModSecurity reads `filename=` only while common frameworks prefer `filename*`, so a part could show the WAF a benign name and the application a malicious one. RFC 7578 forbids the encoding here, so compliant clients are unaffected.
 - [SECURITY] `api`: `instances_create` and `instances_update` are treated as admin-equivalent. Calls to a registered instance carry the `API_TOKEN` admin override, and the Scheduler pushes the generated configuration and cache, TLS private keys included, to every registered instance, so registering one endpoint collects all of it. See the API documentation.
 - [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
