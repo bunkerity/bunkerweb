@@ -206,10 +206,10 @@ actions:
       REMOTE_PHP_PATH: "/var/www/html"
     Linux:
       config:
-      REMOTE_PHP: null
-      REMOTE_PHP_PATH: null
-      LOCAL_PHP: "/run/php/php-fpm.sock"
-      LOCAL_PHP_PATH: "/var/www/html"
+        REMOTE_PHP: null
+        REMOTE_PHP_PATH: null
+        LOCAL_PHP: "/run/php/php-fpm.sock"
+        LOCAL_PHP_PATH: "/var/www/html"
 
   # The relaxed CSP belongs to the isolated widget document (`?capjs_frame=1`), not to the
   # challenge page: the parent stays eval-free and only embeds this same-origin iframe. Asked
