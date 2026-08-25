@@ -155,6 +155,9 @@ jobs:
           name: package-${{ inputs.LINUX }}-${{ env.LARCH }}
           retention-days: 7
           path: package-${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          # An empty glob otherwise uploads nothing and only fails two jobs later, as an opaque
+          # "Artifact not found" in the integration run's download step.
+          if-no-files-found: error
       # Build test image
       - name: Extract metadata
         if: inputs.TEST == true

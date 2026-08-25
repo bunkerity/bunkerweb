@@ -37,10 +37,7 @@ jobs:
       specs: ${{ steps.setup.outputs.specs }}
       test: ${{ steps.setup.outputs.test }}
       linux_name: ${{ steps.setup.outputs.linux_name }}
-      separator: ${{ steps.setup.outputs.separator }}
-      suffix: ${{ steps.setup.outputs.suffix }}
       package: ${{ steps.setup.outputs.package }}
-      linux_release: ${{ steps.setup.outputs.linux_release }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -52,7 +49,6 @@ jobs:
         id: setup
         env:
           INPUT_TEST: ${{ inputs.TEST }}
-          INPUT_RELEASE: ${{ inputs.RELEASE }}
         run: |
           export INTEGRATION=$(echo "$INPUT_TEST" | cut -d ";" -f 1)
           echo "integration=${INTEGRATION//_/-}" >> $GITHUB_OUTPUT
@@ -73,8 +69,6 @@ jobs:
           echo "test=$TEST" >> $GITHUB_OUTPUT
 
           export LINUX_NAME=""
-          export SEPARATOR=""
-          export SUFFIX=""
           export PACKAGE=""
 
           if [[ "$INTEGRATION" == "Linux" ]]; then
@@ -87,24 +81,14 @@ jobs:
 
             packages_info=$(cat /tmp/packages/packages_info.json)
             export LINUX_NAME="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].name')"
-            export SEPARATOR="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].separator')"
-            export SUFFIX="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].suffix')"
             export PACKAGE="$(echo "$packages_info" | jq -r --arg specs "$SPECS" '.[$specs].package')"
           fi
 
+          # `linux_name` doubles as the distro leg of linux-build.yml's matrix, and `architecture`
+          # already carries the package-flavoured arch (x86_64/aarch64 for rpm, amd64/arm64 for
+          # deb) — together they are the artefact name that job uploaded.
           echo "linux_name=$LINUX_NAME" >> $GITHUB_OUTPUT
-          echo "separator=$SEPARATOR" >> $GITHUB_OUTPUT
-          echo "suffix=$SUFFIX" >> $GITHUB_OUTPUT
           echo "package=$PACKAGE" >> $GITHUB_OUTPUT
-
-          # The package inside the *-tests image carries the version linux-build.yml stamped with
-          # update-version.sh — "<release>-dev" for the 1.5/1.7 dev channels — so the filename the
-          # Linux arm extracts must use that version, not the bare release.
-          LINUX_RELEASE="$INPUT_RELEASE"
-          case "$INPUT_RELEASE" in
-            1.5|1.7) LINUX_RELEASE="${INPUT_RELEASE}-dev" ;;
-          esac
-          echo "linux_release=$LINUX_RELEASE" >> $GITHUB_OUTPUT
 
   test:
     permissions:
@@ -233,22 +217,34 @@ jobs:
           echo "::group::Host resources"; free -h; nproc; echo "::endgroup::"
           echo "::group::Minikube logs"; minikube logs --file=- 2>&1 | tail -300 || true; echo "::endgroup::"
           echo "::group::Docker state"; docker ps -a; echo "::endgroup::"
-      - name: Copy package file to host
+      # The package to install is the one `linux-build.yml` built earlier in this same run and
+      # uploaded as `package-<distro>-<arch>` — the artefact push-packagecloud.yml already ships
+      # from. It used to be extracted from the `<distro>-tests` image instead, but that image is
+      # `tests/linux/Dockerfile-<distro>`, a bare systemd runtime: `71247ab38` dropped the
+      # `COPY ./package-<distro>/*.deb /opt` line the copy depended on, so /opt has been empty
+      # ever since and every Linux job died here. Restoring that COPY is not an option — the
+      # "Build Linux image" step below builds the same Dockerfile on a runner that has no
+      # `package-<distro>/` directory, and a COPY of a missing path fails the build.
+      - name: Download the Linux package
+        if: needs.setup.outputs.integration == 'Linux'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: package-${{ needs.setup.outputs.linux_name }}-${{ needs.setup.outputs.architecture }}
+          path: linux-package
+      - name: Stage the Linux package
         if: needs.setup.outputs.integration == 'Linux'
         env:
-          LINUX_NAME: ${{ needs.setup.outputs.linux_name }}
-          RELEASE: ${{ inputs.RELEASE }}
-          SEPARATOR: ${{ needs.setup.outputs.separator }}
-          LINUX_RELEASE: ${{ needs.setup.outputs.linux_release }}
-          SUFFIX: ${{ needs.setup.outputs.suffix }}
-          ARCHITECTURE: ${{ needs.setup.outputs.architecture }}
           PACKAGE: ${{ needs.setup.outputs.package }}
         run: |
-          docker pull "ghcr.io/bunkerity/${LINUX_NAME}-tests:${RELEASE}"
-          container_id=$(docker create "ghcr.io/bunkerity/${LINUX_NAME}-tests:${RELEASE}")
-          docker cp "${container_id}:/opt/bunkerweb${SEPARATOR}${LINUX_RELEASE}${SUFFIX}${ARCHITECTURE}.${PACKAGE}" "bunkerweb.${PACKAGE}"
-          docker rm "$container_id"
-          sudo chmod 777 "bunkerweb.${PACKAGE}"
+          # package.sh names the file after the version it stamped, and every step below installs
+          # `bunkerweb.${PACKAGE}` — so glob the artefact instead of rebuilding that name here.
+          mapfile -t packages < <(find linux-package -maxdepth 1 -type f -name "*.${PACKAGE}")
+          if [ "${#packages[@]}" -ne 1 ]; then
+            echo "::error::expected exactly one .${PACKAGE} in the package artefact, found ${#packages[@]}"
+            find linux-package -maxdepth 1 -type f
+            exit 1
+          fi
+          mv "${packages[0]}" "bunkerweb.${PACKAGE}"
       - name: Build Linux image
         if: needs.setup.outputs.integration == 'Linux'
         env:
