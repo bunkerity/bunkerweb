@@ -105,16 +105,16 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "网络和端口设置"
 
-    | 设置                    | 默认值       | 上下文 | 多个 | 描述                                                       |
-    | ----------------------- | ------------ | ------ | ---- | ---------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
-    | `HTTPS_PORT`            | `8443`       | global | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
-    | `USE_IPV6`              | `no`         | global | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
-    | `SEND_TIMEOUT`          | `10s`        | global | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
+    | 设置                    | 默认值       | 上下文       | 多个 | 描述                                                       |
+    | ----------------------- | ------------ | --------- | ---- | ---------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | multisite | 是   | **HTTP 端口：** HTTP 流量的端口号。留空以禁用HTTP监听。    |
+    | `HTTPS_PORT`            | `8443`       | multisite | 是   | **HTTPS 端口：** HTTPS 流量的端口号。留空以禁用HTTPS监听。 |
+    | `USE_IPV6`              | `no`         | global    | 否   | **IPv6 支持：** 启用 IPv6 连接。                           |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | 否   | **DNS 解析器：** 要使用的解析器的 DNS 地址。               |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global    | 否   | **客户端请求体超时：** 读取客户端请求体的超时时间。        |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global    | 否   | **客户端请求头超时：** 读取客户端请求头的超时时间。        |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | 否   | **Keepalive 超时：** 客户端 Keepalive 连接的超时时间。     |
+    | `SEND_TIMEOUT`          | `10s`        | global    | 否   | **发送超时：** 向客户端传输响应的超时时间。                |
 
 === "流服务器设置"
 

@@ -178,9 +178,24 @@ class TestEmptyPortRendersNoListen:
         kept = "8443" if disabled == "HTTP_PORT" else "8080"
         assert f"listen 0.0.0.0:{kept}" in default_server, "disabling one protocol must not disable the other"
 
-    def test_disabling_both_ports_leaves_the_default_server_with_no_listen(self, render):
+    def test_disabling_both_ports_drops_the_default_server_instead_of_leaving_it_portless(self, render):
+        """A ``server{}`` with no ``listen`` is not inert: NGINX gives it an implicit ``*:80``. So
+        the configuration that asks for no HTTP listener at all was the one that silently took
+        port 80 -- on the host, in a Linux install. The block is not included at all now."""
         tree = render(MULTISITE="yes", SERVER_NAME="a.example.com", HTTP_PORT="", HTTPS_PORT="")
         assert [line for line in tree["default-server-http.conf"].splitlines() if line.strip().startswith("listen ")] == []
+        assert "default-server-http.conf" not in included_blocks(tree)
+
+    def test_a_stream_only_deployment_does_not_include_the_default_server_either(self, render):
+        """Same silent ``*:80``, reached the other way: a stream service renders no http block, so
+        the union is empty even though nobody wrote ``HTTP_PORT=""``."""
+        tree = render(**STREAM, HTTP_PORT="", HTTPS_PORT="")
+        assert "default-server-http.conf" not in included_blocks(tree)
+
+    def test_an_ordinary_deployment_still_includes_it(self, render):
+        """Anti-vacuity for the two above."""
+        tree = render(MULTISITE="yes", SERVER_NAME="a.example.com")
+        assert "default-server-http.conf" in included_blocks(tree)
 
     def test_the_quic_loop_is_guarded_too(self, render):
         """The third unguarded loop (``:80``) only renders with HTTP3 on, which is the default."""

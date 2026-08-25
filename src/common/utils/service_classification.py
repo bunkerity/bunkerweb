@@ -112,6 +112,12 @@ ALLOWED_SETTINGS: Dict[str, Optional[frozenset]] = {
     "REDIRECT_TO_STATUS_CODE": _ANY,
     # -- listener ----------------------------------------------------------
     "LISTEN_HTTP": _ANY,
+    # Multisite since the per-service listen ports landed: without these two a
+    # redirect service that just moves to another port would be classified
+    # `invalid` and start counting against the quota, which a port number has no
+    # business doing. A port cannot add a serving capability.
+    "HTTP_PORT": _ANY,
+    "HTTPS_PORT": _ANY,
     "HTTP2": _ANY,
     "HTTP3": _ANY,
     "HTTP3_ALT_SVC_PORT": _ANY,

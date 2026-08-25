@@ -26,7 +26,17 @@ if deps_path not in sys_path:
 
 from common_utils import effective_cpu_count  # type: ignore
 from logger import getLogger  # type: ignore
-from ports import stream_reuseport_owners  # type: ignore
+from common_utils import get_integration  # type: ignore
+from ports import (  # type: ignore
+    HTTPS_PORT_SETTING,
+    HTTP_PORT_SETTING,
+    check_ports,
+    drop_inherited_ports,
+    inherited_port_keys,
+    reserved_ports,
+    stream_reuseport_owners,
+    union_ports,
+)
 
 from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
@@ -438,7 +448,19 @@ class Templator:
         # (src/deps/src/nginx/src/stream/ngx_stream.c:489-497). A template only ever sees its own
         # block, so the owner of each stream addr:port is elected HERE, where every service is
         # visible, and handed to the template as STREAM_REUSEPORT_PORTS.
-        self._stream_reuseport_ports = stream_reuseport_owners(self._service_configs())
+        service_configs = self._service_configs()
+        self._stream_reuseport_ports = stream_reuseport_owners(service_configs)
+
+        # The default server is rendered globally, with the global configuration, so it used to
+        # listen on the global ports only. Now that a service can declare a port of its own, a port
+        # nobody else covers has NO default_server -- and the first block declared on it silently
+        # becomes the implicit default, which takes DISABLE_DEFAULT_SERVER and the strict-SNI
+        # rejection off that port. Measured, not assumed: spike S2 in the ports report shows an
+        # unknown SNI completing the handshake with that service's certificate. The union closes it.
+        self._all_http_ports = union_ports(self._full_config, service_configs, HTTP_PORT_SETTING)
+        self._all_https_ports = union_ports(self._full_config, service_configs, HTTPS_PORT_SETTING)
+
+        self._report_port_issues(service_configs)
 
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
@@ -630,12 +652,66 @@ class Templator:
         self._template_path_cache[cache_key] = result
         return result
 
+    def _report_port_issues(self, service_configs: Dict[str, Dict[str, Any]]) -> None:
+        """Log the listen-port conflicts this configuration carries, once, at generation time.
+
+        Here rather than in ``Configurator`` because Configurator is only on the ENVIRONMENT path:
+        ``scheduler/main.py`` runs ``gen/main.py`` with no ``--variables``, so the database render
+        never constructs one — and the database is where per-service ports are declared, so the
+        deployments that can actually collide were the ones getting no report. Templator is the
+        single object both paths build.
+
+        ``service_configs`` is the post-merge, post-``drop_inherited_ports`` view, i.e. the ports
+        each block will really bind. Feeding the raw config instead would credit every service with
+        the fleet's whole list and miss both directions: a collision on a port only one service
+        declares, and a service that VACATED a global port.
+
+        Warn, never ``exit(1)``: this runs on the boot path and refusing to generate over a port the
+        operator may well have meant would take a whole fleet down. Refusal belongs to the write
+        paths (API/UI), where an operator is in front of the error and one service is at stake.
+        """
+        containerized = get_integration() != "Linux"
+        # /etc/supervisor.d only exists in the all-in-one image (src/all-in-one/Dockerfile:252),
+        # which is the only layout where the UI (7000) and the API service (8888) share this
+        # network namespace and are therefore unavailable to a service.
+        all_in_one = containerized and Path(sep, "etc", "supervisor.d").is_dir()
+        with suppress(Exception):
+            for issue in check_ports(
+                service_configs,
+                reserved=reserved_ports(self._full_config, all_in_one=all_in_one),
+                containerized=containerized,
+            ):
+                if issue.level == "fatal":
+                    logger.error(f"Listen port conflict : {issue.message}")
+                else:
+                    logger.warning(f"Listen port warning : {issue.message}")
+
+    def _inherited_port_keys(self) -> List[str]:
+        """The ``<service>_HTTP_PORT*`` / ``<service>_HTTPS_PORT*`` keys of ``_full_config`` that
+        the service did NOT declare, and that its rendered ``listen`` lines therefore do not carry.
+
+        `variables.env` is the Lua side's only view of the configuration, and
+        `utils.listen_port_override` reads a service's port list straight out of it to decide which
+        port an absolute URL must carry. The full config is the INHERITED view on purpose (the
+        per-service editor needs it, `config_read.py:186-210`), so without this the Lua answer is
+        the global port for a service that declared only a repetition of its own -- a port its
+        block does not even listen on.
+
+        Same discriminator as :meth:`_get_server_config`: `_server_specific_config` is built from
+        the non-default settings, so a key is there only if the service really declared it.
+        """
+        dropped: List[str] = []
+        for server, inherited in self._server_specific_full_config.items():
+            dropped.extend(f"{server}_{key}" for key in inherited_port_keys(inherited, self._server_specific_config.get(server, {})))
+        return dropped
+
     def _write_config(self) -> None:
         """Write the configuration to a variables.env file."""
         real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
+            inherited_ports = frozenset(self._inherited_port_keys())
+            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items() if k not in inherited_ports]
             real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
@@ -655,6 +731,22 @@ class Templator:
 
         filtered_config.update(server_specific_config)
 
+        # A service that declares a listen port REPLACES the global list rather than adding to it
+        # (conception §2.2). This is the only place BOTH generation paths converge, and they need
+        # different work: the environment path arrives pre-blanked from Configurator (every service
+        # key is materialised there, so nothing is "inherited" and this is a no-op), while the
+        # scheduler path renders straight from the database -- gen/main.py:128 takes
+        # `db.get_non_default_settings()` and never calls Configurator at all. Every port declared
+        # through the UI, the API or autoconf comes in that way, and without this the service
+        # listened on its own port AND on every global repetition.
+        #
+        # `_server_specific_config` is the discriminator on purpose: it is built from the
+        # non-default settings, so a key is present there only if the service really declared it.
+        # `_server_specific_full_config` cannot answer the question -- `get_config` fills the
+        # inherited copies in (config_read.py:205-210, which the per-service editor needs), so every
+        # service looks there like it declared everything.
+        drop_inherited_ports(filtered_config, self._server_specific_config.get(server, {}))
+
         filtered_config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
         if "SERVER_NAME" not in filtered_config:
@@ -669,7 +761,11 @@ class Templator:
         block actually sees. Non-multisite has a single block, which then owns all of its ports and
         renders exactly as it did before the ownership rule existed.
         """
-        server_name = str(self._config.get("SERVER_NAME", "")).strip()
+        # Same fallback as :meth:`render` (:474) and the prefix build (:369). A different default
+        # here would hand the reuseport election and the port unions a service list the renderer
+        # never renders -- not reachable today, since every caller sets SERVER_NAME, and left
+        # aligned so it stays that way.
+        server_name = str(self._config.get("SERVER_NAME", "www.example.com")).strip()
         if self._config.get("MULTISITE", "no") != "yes":
             return {server_name: self._full_config} if server_name else {}
         return {
@@ -694,6 +790,9 @@ class Templator:
         template_vars = self._base_template_vars.copy()
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
+        # Derived, never settings: set after update() so no configuration key can shadow them.
+        template_vars["ALL_HTTP_PORTS"] = self._all_http_ports
+        template_vars["ALL_HTTPS_PORTS"] = self._all_https_ports
 
         for template in templates:
             self._render_template(template, template_vars)

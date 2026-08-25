@@ -29,6 +29,7 @@ if _HERE not in sys.path:
 # between Configurator and Templator: a template only ever sees one server block, while the rules
 # are about the set of blocks. Rendering the real tree is the only way to assert them.
 
+import json  # noqa: E402
 import logging  # noqa: E402
 import tempfile  # noqa: E402
 
@@ -71,6 +72,89 @@ def render_tree():
                 T.Templator(str(_CONFS), str(_CORE), str(plugins), str(pro_plugins), str(output), "/etc/nginx", config, config.copy(), config.copy()).render()
                 cache[key] = {str(path.relative_to(output)): path.read_text() for path in sorted(output.rglob("*.conf"))}
             return cache[key]
+
+        try:
+            yield _render
+        finally:
+            T.sep = original_sep
+
+
+@pytest.fixture
+def render_db_tree(db):
+    """``render_db_tree(globals_, services)`` -> the tree the SCHEDULER renders, not the entrypoint.
+
+    There are two generation paths and they hand Templator different shapes:
+
+    * ``bw`` renders from the environment -- ``gen/main.py:117`` builds the config with
+      ``Configurator.get_config``, which materialises an inherited copy of every multisite setting
+      under every service name (ports excepted, ``Configurator.py:363-376``).
+    * the scheduler renders from the database -- ``scheduler/main.py:427-441`` calls ``gen/main.py``
+      with no ``--variables``, so line 128 takes ``db.get_non_default_settings()`` as ``config`` and
+      ``db.get_config(methods=True)`` as ``full_config`` / ``default_config``.
+
+    Every port declared through the UI, the API or autoconf reaches the render this second way, so a
+    rule that only holds on the first one holds for almost nobody.
+
+    **The two dicts come from a REAL ``Database``**, not from a hand-written imitation of one. The
+    previous version of this fixture built them from the caller's variables and materialised nothing
+    at all, so it rendered a shape the scheduler never produces: it was green against a
+    ``config_read.py`` that leaked an inherited ``<service>_HTTP_PORT_1`` into the NON-default view
+    and therefore made every service look like it had declared the whole global list. Seeding
+    ``settings.json`` plus every core ``plugin.json`` and going through ``save_config`` costs about
+    a second per test and removes the only thing that made this harness able to agree with a broken
+    database layer.
+
+    Consequence worth knowing: this fixture consumes ``db``, so the tests using it are parametrised
+    over ``--db-engines`` like the DB suite. On the default (``sqlite``) that is one run; a
+    ``--db-engines=sqlite,postgresql,mariadb`` invocation renders the tree once per engine.
+    """
+    import Templator as T  # type: ignore
+    from fixtures.seed import make_core_plugin  # type: ignore
+
+    plugin_manifests = [make_core_plugin("general", settings=json.loads(_SETTINGS.read_text()))]
+    for manifest in sorted(_CORE.glob("*/plugin.json")):
+        data = json.loads(manifest.read_text())
+        data.setdefault("settings", {})
+        data.setdefault("jobs", [])
+        # `bwcli` is a plugin.json key init_tables does not consume; passing it through would be
+        # the only difference between this seed and what the scheduler's own init does.
+        data.pop("bwcli", None)
+        plugin_manifests.append(data)
+    ok, err = db.init_tables(plugin_manifests)
+    assert ok, f"init_tables failed: {err}"
+
+    with tempfile.TemporaryDirectory() as root:
+        sandbox = Path(root)
+        original_sep = T.sep
+        T.sep = str(sandbox)
+        plugins = sandbox / "plugins"
+        plugins.mkdir()
+        pro_plugins = sandbox / "pro-plugins"
+        pro_plugins.mkdir()
+        rendered = []
+
+        def _render(globals_: dict, services: dict):
+            declared = {f"{service}_{key}": value for service, settings in services.items() for key, value in settings.items()}
+            # `<service>_SERVER_NAME` is what makes save_config create the bw_services row, exactly
+            # as the API and the UI send it.
+            declared.update({f"{service}_SERVER_NAME": service for service in services})
+            saved = db.save_config(
+                {"MULTISITE": "yes", "SERVER_NAME": " ".join(services)} | globals_ | declared,
+                "scheduler",
+                changed=True,
+            )
+            assert not isinstance(saved, str), f"save_config refused the seed: {saved}"
+
+            config = db.get_non_default_settings()
+            full = db.get_config(methods=True)
+            default_config = {setting: data["default"] for setting, data in full.items()}
+            full_config = {setting: data["value"] for setting, data in full.items()}
+
+            output = sandbox / f"out{len(rendered)}"
+            output.mkdir()
+            rendered.append(output)
+            T.Templator(str(_CONFS), str(_CORE), str(plugins), str(pro_plugins), str(output), "/etc/nginx", config, default_config, full_config).render()
+            return {str(path.relative_to(output)): path.read_text() for path in sorted(output.rglob("*")) if path.is_file()}
 
         try:
             yield _render

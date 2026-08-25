@@ -1560,6 +1560,15 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ...
     ```
 
+!!! tip "the same works for HTTP/HTTPS, and per service"
+
+    `HTTP_PORT` and `HTTPS_PORT` take numbered suffixes too (`HTTP_PORT_1`, ...), and since `1.7`
+    they can be set **per service** by prefixing them with the service name
+    (`app2.example.com_HTTPS_PORT=9443`). Note one difference from the stream ports above: a
+    service's HTTP/HTTPS list **replaces** the global one instead of merging with it. See the
+    "Multiple and Per-Service Ports" tab in [features](features.md) for the details, the reserved
+    ports, and what each integration has to publish.
+
 === "All-in-one"
 
     You will need to add the settings to the environment variables when running the All-in-one container. You will also need to expose the stream ports.

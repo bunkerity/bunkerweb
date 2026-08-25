@@ -92,16 +92,87 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Network & Port Settings"
 
-    | Setting                 | Default      | Context | Multiple | Description                                                                            |
-    | ----------------------- | ------------ | ------- | -------- | -------------------------------------------------------------------------------------- |
-    | `HTTP_PORT`             | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
-    | `HTTPS_PORT`            | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
-    | `USE_IPV6`              | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
-    | `DNS_RESOLVERS`         | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
-    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global  | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
-    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global  | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
-    | `KEEPALIVE_TIMEOUT`     | `15s`        | global  | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
-    | `SEND_TIMEOUT`          | `10s`        | global  | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
+    | Setting                 | Default      | Context   | Multiple | Description                                                                            |
+    | ----------------------- | ------------ | --------- | -------- | -------------------------------------------------------------------------------------- |
+    | `HTTP_PORT`             | `8080`       | multisite | Yes      | **HTTP Port:** Port number for HTTP traffic. Leave empty to disable HTTP listening.    |
+    | `HTTPS_PORT`            | `8443`       | multisite | Yes      | **HTTPS Port:** Port number for HTTPS traffic. Leave empty to disable HTTPS listening. |
+    | `USE_IPV6`              | `no`         | global    | No       | **IPv6 Support:** Enable IPv6 connectivity.                                            |
+    | `DNS_RESOLVERS`         | `127.0.0.11` | global    | No       | **DNS Resolvers:** DNS addresses of resolvers to use.                                  |
+    | `CLIENT_BODY_TIMEOUT`   | `10s`        | global    | No       | **Client Body Timeout:** Timeout for reading the client request body.                  |
+    | `CLIENT_HEADER_TIMEOUT` | `10s`        | global    | No       | **Client Header Timeout:** Timeout for reading the client request header.              |
+    | `KEEPALIVE_TIMEOUT`     | `15s`        | global    | No       | **Keepalive Timeout:** Timeout for keep-alive client connections.                      |
+    | `SEND_TIMEOUT`          | `10s`        | global    | No       | **Send Timeout:** Timeout for transmitting a response to the client.                   |
+
+=== "Multiple and Per-Service Ports"
+
+    `HTTP_PORT` and `HTTPS_PORT` accept **several ports** and can be set **per service**.
+
+    **Several ports at once** (available since `1.6.0`) — add numbered suffixes:
+
+    ```yaml
+    HTTP_PORT: "8080"
+    HTTP_PORT_1: "8081"
+    HTTPS_PORT: "8443"
+    HTTPS_PORT_1: "8444"
+    ```
+
+    **A port for one service** (multisite) — prefix the setting with the service name:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com"
+    HTTPS_PORT: "8443"
+    # app1 answers on 8443 like everybody else, app2 answers on 9443 only
+    app2.example.com_HTTPS_PORT: "9443"
+    ```
+
+    !!! warning "A service's list replaces the global one, it does not add to it"
+
+        As soon as a service declares any `HTTP_PORT*` (or any `HTTPS_PORT*`), that list becomes
+        **the whole list** for that service: the global ports are not inherited on top. In the
+        example above `app2.example.com` listens on **9443 only**, not on 8443 and 9443.
+
+        The two settings are independent — declaring an HTTP port for a service leaves its HTTPS
+        ports inherited, and the other way round.
+
+        "Declares" means a value that **differs** from the fleet's list. Setting a service's port to
+        the value the fleet already uses changes nothing and keeps it tracking the fleet, which is
+        what lets the web UI and the API render the current list in a per-service form and post it
+        back untouched. To make a service listen on **fewer** ports than the fleet, set the ones it
+        should drop to an empty value (`app2.example.com_HTTP_PORT_1: ""`) rather than omitting
+        them — an absent key is an inherited one, not a removed one.
+
+        Stream ports behave differently: `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` have
+        merged with the global list since `1.6.0` and still do.
+
+    !!! info "The default server follows automatically"
+
+        BunkerWeb's default server — the one that answers a request whose `Host`/SNI matches no
+        service, and that `DISABLE_DEFAULT_SERVER` and `DISABLE_DEFAULT_SERVER_STRICT_SNI` act on —
+        listens on **every** port in use, including ports declared by a single service. Nothing to
+        configure: an unknown name gets the same treatment on a per-service port as anywhere else.
+
+    **Ports you cannot use.** A few are already taken by BunkerWeb itself and are refused:
+    `API_HTTP_PORT` (`5000` by default), `API_HTTPS_PORT` (`5443`), and `6000` for the internal
+    healthcheck. In the all-in-one image, `7000` (web UI) and `8888` (API service) are taken too.
+
+    !!! warning "Ports below 1024 need a container that can bind them"
+
+        The Docker, Swarm, Kubernetes and all-in-one images run NGINX as the unprivileged `nginx`
+        user, which **cannot bind a port below 1024**. That is why the defaults are `8080`/`8443`
+        rather than `80`/`443`: you publish `80:8080` from the host and BunkerWeb never binds a
+        privileged port. On a Linux (deb/rpm) install NGINX starts as root and drops privileges, so
+        `HTTP_PORT=80` works there.
+
+    **Publishing the port is still your job** — BunkerWeb declares what it listens on, it does not
+    open anything on the host:
+
+    | Integration | What to add |
+    | ----------- | ----------- |
+    | Docker / Autoconf | a `ports:` entry, e.g. `- 9443:9443`. `EXPOSE` in the image is documentation only and publishes nothing |
+    | Swarm | the same, on the Swarm service |
+    | Kubernetes | a `containerPort`/`hostPort` pair per port on the DaemonSet. A `hostPort` is exclusive to the node and must be free on **every** node, or the pods stay `Pending` |
+    | Linux | nothing to publish, but `firewalld`/`ufw` will not open the port for you |
 
 === "Stream Server Settings"
 

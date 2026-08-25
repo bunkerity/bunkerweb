@@ -18,7 +18,7 @@
     "type": "text"
   },
   "HTTP_PORT": {
-    "context": "global",
+    "context": "multisite",
     "default": "8080",
     "help": "HTTP port number which bunkerweb binds to. Leave empty to disable HTTP listening.",
     "id": "http-port",
@@ -28,7 +28,7 @@
     "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
-    "context": "global",
+    "context": "multisite",
     "default": "8443",
     "help": "HTTPS port number which bunkerweb binds to. Leave empty to disable HTTPS listening.",
     "id": "https-port",

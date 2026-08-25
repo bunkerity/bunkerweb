@@ -25,6 +25,7 @@ from common_utils import merge_template_settings, split_templates  # type: ignor
 from location_claims import LOCATION_FAMILIES, inline_location_conflict  # type: ignore
 from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
+from ports import list_moved, port_list_setting  # type: ignore
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
@@ -250,6 +251,72 @@ def _compute_template_slots(ctx: "_SaveConfigContext", template_ids: List[str]) 
                 if member_setting and member_setting.get("multiple"):
                     slots.add((member_setting["multiple"], member_suffix))
     return slots
+
+
+def _moved_port_groups(ctx: _SaveConfigContext, service_config: Dict[str, Any]) -> Set[str]:
+    """The port lists this service is actually MOVING, out of what it posted.
+
+    A port list is atomic: a service listens on the list it declares, and
+    ``ports.drop_inherited_ports`` reads the presence of any member as "this whole list is mine".
+    Deciding member by member — which is what ``_is_default_value`` does for every other setting —
+    breaks that in both directions:
+
+    * a form that posts the fleet's list back unchanged had its base dropped (it equals the
+      declared default) while a repetition survived (it does not), leaving a one-member row that
+      says "this service listens on 8081 only". The fleet's main port then disappeared from a
+      service that asked for nothing. The base is only recognisable as "the fleet's value" through
+      the DECLARED DEFAULT when no global row exists, which is exactly what a snapshot of the
+      non-default settings (``routers/services.py:62``) does not carry.
+    * a form that changes one repetition had the unchanged base dropped, so the service declared
+      the repetition alone and lost the base it had just been shown.
+    * undoing a move left the member that sits on the fleet's own value behind, because that value
+      never CHANGES and the update branch can only delete a row that changed. One stale row is a
+      whole declaration, so the service that had just been put back on the fleet's ports kept only
+      the first of them.
+
+    So the unit of decision is the group: if any posted member differs from the fleet's effective
+    value for that member, the service is moving that list and every posted member is persisted,
+    default-valued ones included. If none differs, the service is restating what it already
+    inherits and the group is REMOVED — no row is written and any row still standing is deleted, so
+    the service goes back to tracking the fleet like every other multisite setting a form posts back
+    unchanged. The caller routes the "none differs" verdict through the spurious-sibling branch for
+    exactly that reason: it deletes on method compatibility alone, without needing a changed value.
+
+    The comparison is between LISTS, through ``ports.list_moved`` — the same function the http-01
+    gate and the request-time authority use, so the lot carries ONE definition of "moved". Deciding
+    member by member instead read "not moved" whenever the posted keys were a SUBSET of the fleet's
+    and each posted member happened to match, which is a different question entirely:
+
+    * a service really moved to ``HTTP_PORT=9000`` keeps its row until the fleet later converges
+      onto 9000 and adds ``HTTP_PORT_1=9001``. The next unrelated ``PATCH /services`` re-posts the
+      full snapshot, the per-member check finds 9000 == 9000 and deletes the row, and the service
+      silently gains 9001 — a listener nobody asked for.
+    * the documented way to shorten a list is an empty ``_N``. Re-post the service without it and
+      the per-member check sees only ``HTTP_PORT=8080``, matching the fleet's base, and undoes the
+      shortening.
+
+    Both are "fewer members than the fleet, all of them equal", which as a LIST is a move and as a
+    bag of members is not. ``collect_ports`` sorts by suffix on both sides, so the ordered compare
+    is safe whatever order the keys arrive in.
+
+    The fleet's list is the union of the port keys present in ``db_config`` and in the incoming
+    config (incoming wins per key), plus the DECLARED default for the base member — the part that
+    has no row when the fleet never moved off it. ``db_config`` is populated for
+    ``method='autoconf'`` only, and is the only source of the fleet's list there, because
+    ``Config.__get_full_env`` emits no globals.
+    """
+    moved: Set[str] = set()
+    for group in {port_list_setting(key) for key in service_config} - {None}:
+        setting = ctx.settings_dict.get(group)
+        if setting is None:
+            continue
+        fleet = {key: value for source in (ctx.db_config, ctx.config) for key, value in source.items() if port_list_setting(key) == group}
+        # The base is the one member that can be absent from both sources and still be the fleet's:
+        # `save_config` writes no row for a value equal to the declared default.
+        fleet.setdefault(group, setting["default"])
+        if list_moved(service_config, fleet, group):
+            moved.add(group)
+    return moved
 
 
 def _slot_flags(setting: dict, suffix: int, value: str, template_setting_default: Optional[str], alive_slots: set) -> Tuple[bool, bool]:
@@ -1195,6 +1262,8 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         alive_slots = _compute_anchored_slots(ctx, service_config, service_template_settings, self.SUFFIX_RX) | _compute_template_slots(
             ctx, service_template_ids
         )
+        # Port lists are decided per GROUP, not per member -- see _moved_port_groups.
+        moved_ports = _moved_port_groups(ctx, service_config)
 
         for original_key, value in service_config.items():
             suffix = 0
@@ -1260,6 +1329,30 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 local_service_template_change = True
 
             is_spurious_default_sibling, is_anchorless_multiple_member = _slot_flags(setting, suffix, value, template_setting_default, alive_slots)
+
+            # A port list is decided as a GROUP (see _moved_port_groups), never member by member:
+            # the list a service declares is the whole list it listens on, so persisting some of
+            # what was posted and dropping the rest changes which sockets it ends up bound to.
+            # Moving -> every posted member is persisted, default-valued ones included.
+            # Restating the fleet's list -> every member is REMOVED, existing rows included, so the
+            # service goes back to tracking the fleet like every other multisite setting a form
+            # posts back unchanged.
+            #
+            # The removal half routes through the spurious-sibling branch below rather than through
+            # `drop_as_default`, and it has to: `drop_as_default` can only delete a row that also
+            # passes `should_update_value`, which needs `value_changed`. A member sitting on the
+            # fleet's own value never changes, so undoing a move left exactly that row behind --
+            # and its bare presence is what `drop_inherited_ports` reads as "this whole list is
+            # mine", taking the rest of the fleet's ports away from the service that had just been
+            # put back on them. The spurious branch deletes on method compatibility alone.
+            port_group = port_list_setting(original_key)
+            if port_group is not None:
+                is_spurious_default_sibling = port_group not in moved_ports
+                drop_as_default = is_spurious_default_sibling
+            else:
+                # A member of an ANCHORLESS slot is persisted even at its default value: dropping
+                # it would make the whole user-declared all-default slot vanish.
+                drop_as_default = _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member
             # A default-valued sibling of a slot that stays alive on its own (an anchor member, or a
             # template defining the slot) is round-trip material, not user intent: drop it, and clear
             # any stale row, so the field stays editable in the UI. The slot itself survives.
@@ -1271,15 +1364,23 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 ):
                     self.logger.debug(f"Removing spurious default multiple-group setting {key}_{suffix} for service {server_name}")
                     local_to_delete.append({"model": Services_settings, "filter": {"service_id": server_name, "setting_id": key, "suffix": suffix}})
+                    # Known nit, left as is: a row deleted while its VALUE did not change marks
+                    # neither the plugin nor `Services.last_update` -- the branch `continue`s below
+                    # before both. For a PORT row that IS a rendering difference and not a no-op:
+                    # presence is the declaration, so removing the row hands the service back the
+                    # fleet's whole list, which is exactly the state change nothing here signals.
+                    # It is not silent in practice, because every path that reaches this deletion
+                    # also changes something else in the same save (a port row is only dropped when
+                    # the service stopped moving that list, which is a value change on some other
+                    # member) -- but the guard is wrong on its own terms and would be the first
+                    # thing to fix if a save ever managed to reach it alone.
                     if value_changed:
                         local_changed_plugins.add(setting["plugin_id"])
                 continue
 
             # Determine if we need to add, update, or delete
             if not service_setting:
-                # A member of an ANCHORLESS slot is persisted even at its default value: dropping it
-                # would make the whole user-declared all-default slot vanish.
-                if _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
+                if drop_as_default:
                     continue
 
                 self.logger.debug(f"Adding setting {key} for service {server_name}")
@@ -1311,7 +1412,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 # Editing a value back down to its default removes the row, defaults being implicit
                 # -- except for a member of an anchorless slot, where removing the last rows would
                 # vanish the whole user-declared slot; persist the default instead.
-                if should_update_value and _check_value(ctx, key, value, setting, template_setting_default, suffix) and not is_anchorless_multiple_member:
+                if should_update_value and drop_as_default:
                     self.logger.debug(f"Removing setting {key} for service {server_name}")
                     local_to_delete.append(
                         {

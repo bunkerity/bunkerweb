@@ -49,10 +49,15 @@ __all__ = (
     "PRIVILEGED_PORT_CEILING",
     "STREAM_PORT_SETTING",
     "STREAM_SSL_PORT_SETTING",
+    "PORT_LIST_SETTINGS",
     "check_ports",
     "collect_ports",
+    "drop_inherited_ports",
+    "inherited_port_keys",
     "inventory",
     "parse_port",
+    "port_list_keys",
+    "port_list_setting",
     "reserved_ports",
     "stream_reuseport_owners",
     "union_ports",
@@ -62,6 +67,11 @@ HTTP_PORT_SETTING = "HTTP_PORT"
 HTTPS_PORT_SETTING = "HTTPS_PORT"
 STREAM_PORT_SETTING = "LISTEN_STREAM_PORT"
 STREAM_SSL_PORT_SETTING = "LISTEN_STREAM_PORT_SSL"
+
+# The lists a service REPLACES rather than extends when it declares one of its own
+# (conception §2.2). Stream ports are deliberately absent: they have been multisite and
+# unioned since 1.6.0 and changing that would silently drop ports from working deployments.
+PORT_LIST_SETTINGS = (HTTP_PORT_SETTING, HTTPS_PORT_SETTING)
 
 MIN_PORT = 0
 MAX_PORT = 65535
@@ -110,7 +120,7 @@ def parse_port(value: Any) -> Optional[int]:
 
 
 def collect_ports(config: Mapping[str, Any], setting: str) -> List[str]:
-    """Raw values of ``SETTING`` and its ``SETTING_<N>`` repetitions, in dict order.
+    """Raw values of ``SETTING`` and its ``SETTING_<N>`` repetitions, in SUFFIX order.
 
     Empty values are dropped — that is the ``and port`` guard the per-service
     templates already carry (``server-http/server.conf:24``), expressed once.
@@ -118,16 +128,81 @@ def collect_ports(config: Mapping[str, Any], setting: str) -> List[str]:
     The suffix must be all digits, which is how ``LISTEN_STREAM_PORT_SSL`` stops
     being read as a repetition of ``LISTEN_STREAM_PORT``. The templates achieve
     the same with a second ``startswith`` (``server-stream.conf:24``).
+
+    **Ordered by suffix, not by dict order**, exactly like Lua's ``port_list``
+    (``utils.lua``) — because :func:`list_moved` compares ORDERED sequences, and dict order is not a property of the configuration. Two
+    ways it diverges from the list an operator wrote: a database read whose
+    ``order_by`` had no suffix tiebreak (engine-dependent), and a merged view like
+    ``services_from_config``, where a service key absent from the globals is
+    APPENDED after the repetition that was there — so a service restating
+    ``8080 8081`` over a fleet with a row for ``HTTP_PORT_1`` alone read back as
+    ``['8081', '8080']`` and counted as moved. Sorting here is the one place that
+    closes both, and it is a no-op wherever the keys were already in order, which
+    is what keeps the default server's union byte-identical.
     """
     prefix = f"{setting}_"
-    ports = []
+    indexed = []
     for key, value in config.items():
-        if key != setting and not (key.startswith(prefix) and key[len(prefix) :].isdigit()):  # noqa: E203
+        if key == setting:
+            suffix = 0
+        elif key.startswith(prefix) and key[len(prefix) :].isdigit():  # noqa: E203
+            suffix = int(key[len(prefix) :])  # noqa: E203
+        else:
             continue
         port = str(value).strip()
         if port:
-            ports.append(port)
-    return ports
+            indexed.append((suffix, port))
+    return [port for _, port in sorted(indexed, key=lambda entry: entry[0])]
+
+
+def port_list_setting(key: str) -> Optional[str]:
+    """The port list ``key`` is a member of (``HTTP_PORT_1`` -> ``HTTP_PORT``), or ``None``.
+
+    The suffix must be all digits for the same reason as in :func:`collect_ports`:
+    ``LISTEN_STREAM_PORT_SSL`` is not a repetition of ``LISTEN_STREAM_PORT``.
+    """
+    for setting in PORT_LIST_SETTINGS:
+        if key == setting:
+            return setting
+        prefix = f"{setting}_"
+        if key.startswith(prefix) and key[len(prefix) :].isdigit():  # noqa: E203
+            return setting
+    return None
+
+
+def port_list_keys(config: Mapping[str, Any], setting: str) -> List[str]:
+    """The ``SETTING`` / ``SETTING_<N>`` keys present in ``config``, in insertion order."""
+    return [key for key in config if port_list_setting(key) == setting]
+
+
+def inherited_port_keys(merged: Mapping[str, Any], declared: Mapping[str, Any]) -> List[str]:
+    """The port-list keys of ``merged`` this service did NOT declare, i.e. the ones the
+    list-REPLACEMENT rule (§2.2) takes away from it.
+
+    A service that declares any member of a port list replaces the inherited list instead of
+    adding to it: ``multiple`` settings merge as a union, and a service told to listen on 9000
+    that also keeps the global ``HTTP_PORT_1=8081`` is listening somewhere nobody asked for.
+
+    ``merged`` is global-then-service (``Templator._get_server_config``) and ``declared`` is the
+    service's OWN keys, so "inherited" is exactly "in merged, not in declared". A service that
+    declares nothing loses nothing, which is what keeps the render byte-identical.
+
+    Two callers need the same answer for different reasons -- the render drops these keys from the
+    server's view, and ``Templator._write_config`` keeps them out of ``variables.env`` so the Lua
+    side reads the list the block really binds -- so the rule lives here once.
+    """
+    keys = []
+    for setting in PORT_LIST_SETTINGS:
+        if not any(port_list_setting(key) == setting for key in declared):
+            continue
+        keys.extend(key for key in port_list_keys(merged, setting) if key not in declared)
+    return keys
+
+
+def drop_inherited_ports(merged: Dict[str, Any], declared: Mapping[str, Any]) -> None:
+    """Apply the list-REPLACEMENT rule to one service's merged configuration, in place."""
+    for key in inherited_port_keys(merged, declared):
+        del merged[key]
 
 
 def _protocols(config: Mapping[str, Any]) -> Tuple[str, ...]:
@@ -202,11 +277,29 @@ def union_ports(global_config: Mapping[str, Any], services: Mapping[str, Mapping
             seen.add(port)
             ports.append(port)
     for config in services.values():
+        if not _renders_http_listener(config, setting):
+            continue
         for port in collect_ports(config, setting):
             if port not in seen:
                 seen.add(port)
                 ports.append(port)
     return ports
+
+
+def _renders_http_listener(config: Mapping[str, Any], setting: str) -> bool:
+    """Whether an http{} server block will actually bind ``setting`` for this service.
+
+    The same gates :func:`inventory` reads, and they have to agree: a stream service inherits
+    ``HTTP_PORT`` like any other but renders no http block, so counting its port in the default
+    server's union makes http{} bind a port ``server-stream.conf`` also binds -- plain
+    ``EADDRINUSE``, and NGINX refuses to start. :func:`check_ports` cannot catch it because it
+    reports on the same inventory the union would be contradicting.
+    """
+    if str(config.get("SERVER_TYPE", "http")).strip() == "stream":
+        return False
+    if setting == HTTP_PORT_SETTING:
+        return str(config.get("LISTEN_HTTP", "yes")).strip() == "yes"
+    return True
 
 
 def inventory(services: Mapping[str, Mapping[str, Any]]) -> List[Listener]:
@@ -344,6 +437,23 @@ def check_ports(
     return sorted(issues, key=lambda issue: 0 if issue.level == FATAL else 1)
 
 
+# ---------------------------------------------------------------------------------------------
+# "Has this service been moved off the fleet's listener?"
+#
+# One question, four answers downstream: the HTTP->HTTPS redirect, the CORS `self` origin, the web
+# UI's service link, and whether an http-01 challenge can still be validated. It is the whole of
+# the PO ruling, and it is what keeps every existing deployment untouched.
+#
+# Why the comparison is against the GLOBAL list rather than against the scheme's default port:
+# the rendered port is NOT the published port, and the product's own default compose relies on
+# that -- misc/integrations/docker.yml:16-18 publishes 80:8080 and 443:8443. "Use the service's
+# own port" applied blindly would emit https://example.com:8443/ for a service that overrode
+# nothing, breaking a redirect that works today. Equal lists mean the published-port contract
+# still holds and nothing may change; a different list means the operator moved this service
+# deliberately, and with no NAT modelling in scope the rendered port IS the reachable one.
+# ---------------------------------------------------------------------------------------------
+
+
 def services_from_config(config: Mapping[str, Any], server_names: Optional[Sequence[str]] = None) -> Dict[str, Dict[str, Any]]:
     """Slice a full (prefixed) config into ``{service: effective config}``.
 
@@ -375,5 +485,9 @@ def services_from_config(config: Mapping[str, Any], server_names: Optional[Seque
     for name in server_names:
         merged = dict(globals_only)
         merged.update(per_service[name])
+        # Same rule the renderer applies (Templator._get_server_config): a service that declares a
+        # port list replaces the inherited one. Reporting and the write-path refusals have to see
+        # the ports the service will really listen on, not the union nobody renders.
+        drop_inherited_ports(merged, per_service[name])
         services[name] = merged
     return services

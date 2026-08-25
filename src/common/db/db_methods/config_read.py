@@ -9,6 +9,8 @@ from common_utils import split_templates  # type: ignore
 
 from resource_group_resolver import value_for_validation  # type: ignore
 
+from ports import port_list_setting  # type: ignore
+
 from sqlalchemy import join, select
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import scoped_session
@@ -116,7 +118,16 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
             # Define the join operation
             j = join(Settings, Global_values, Settings.id == Global_values.setting_id)
 
-            # Define the select statement
+            # Define the select statement.
+            #
+            # `suffix` is a tiebreak, not decoration: `Settings.order` carries the same value for
+            # every repetition of one `multiple` setting, so without it the relative position of
+            # `HTTP_PORT` and `HTTP_PORT_1` in the returned dict is whatever the engine happens to
+            # give back. `collect_ports` and `list_moved` both read that dict order and
+            # compare ORDERED sequences, and the per-service templates render their `listen` lines
+            # straight from it -- so the same database answered differently on PostgreSQL than on
+            # SQLite. `db_methods/services.py:60-70` and Lua's `port_list` already order by suffix;
+            # this is the same rule applied at the source.
             stmt = (
                 select(
                     Settings.id.label("setting_id"),
@@ -130,7 +141,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                     Global_values.method,
                 )
                 .select_from(j)
-                .order_by(Settings.order)
+                .order_by(Settings.order, Global_values.suffix)
             )
 
             if filtered_settings:
@@ -182,10 +193,28 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 # Share the same dictionary objects instead of creating copies
                 multisite_defaults = {key: config[key] for key in multisite if key in config}
 
+                # The port lists are the one family this materialisation must NOT copy when the
+                # caller asked for the non-default settings alone. A service REPLACES the global
+                # port list rather than extending it (`ports.drop_inherited_ports`), and the only
+                # thing that can say "this service declared a port" is the presence of its row.
+                # An inherited copy makes every service look like it declared the whole global
+                # list, so a service that declares `HTTP_PORT=9000` beside a global
+                # `HTTP_PORT_1=8081` keeps listening on 8081, and one that declares only
+                # `HTTP_PORT_1=9081` keeps listening on the global `HTTP_PORT` too.
+                #
+                # `get_config` (original_config is not None) DOES need the copies: it strips the
+                # `<service>_` prefix on the way out (:443-447), so dropping them would remove the
+                # port settings from the per-service editor entirely. Its consumers merge the
+                # globals themselves (`Templator._get_server_config`, `ports.services_from_config`),
+                # so the full view stays the inherited one and the non-default view stays factual.
+                skip_port_lists = original_config is None
+
                 # Populate service-specific entries using shared references
                 # This is still O(services * multisite_settings) but avoids deepcopy overhead
                 for service_id, _ in service_list:
                     for key, value in multisite_defaults.items():
+                        if skip_port_lists and port_list_setting(key) is not None:
+                            continue
                         # Keep already-materialized service values (notably *_IS_DRAFT from bw_services).
                         config.setdefault(f"{service_id}_{key}", value)
 
@@ -193,7 +222,8 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 j = join(Services, Services_settings, Services.id == Services_settings.service_id)
                 j = j.join(Settings, Settings.id == Services_settings.setting_id)
 
-                # Define the select statement
+                # Define the select statement. Same `suffix` tiebreak as the global query above,
+                # for the same reason.
                 stmt = (
                     select(
                         Services.id.label("service_id"),
@@ -207,7 +237,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                         Services_settings.method,
                     )
                     .select_from(j)
-                    .order_by(Services.id, Settings.order)
+                    .order_by(Services.id, Settings.order, Services_settings.suffix)
                 )
 
                 if not with_drafts:

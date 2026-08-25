@@ -25,10 +25,8 @@ from common_utils import (  # type: ignore
     split_templates,
     trim_scalar_value,
 )
-# Imported on its own line rather than merged into the block above: this module's port report
-# is the only consumer, and keeping it separate keeps the two concerns reviewable apart.
-from common_utils import get_integration  # type: ignore
-from ports import check_ports, reserved_ports, services_from_config  # type: ignore
+
+from ports import port_list_setting  # type: ignore
 from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
@@ -359,40 +357,31 @@ class Configurator:
                         if key not in config:
                             if setting == "SERVER_NAME":
                                 config[key] = server_name
+                            elif port_list_setting(setting):
+                                # NOT inherited, on purpose. A listen port is the one setting whose
+                                # per-service presence MEANS something: a service that declares any
+                                # member of the list replaces the whole inherited list rather than
+                                # adding to it (conception §2.2), and the renderer decides that by
+                                # asking whether the key is there at all
+                                # (Templator._get_server_config -> ports.drop_inherited_ports).
+                                # Materialising an inherited copy here would make every service look
+                                # like it had declared one -- and it would be PERSISTED as such,
+                                # since the scheduler saves this config back, so the database path
+                                # would then read a declaration the operator never made.
+                                # A template supplying the port IS a declaration, and lands here.
+                                if setting in service_template_settings:
+                                    config[key] = service_template_settings[setting]
                             elif setting in config:
                                 config[key] = service_template_settings.get(setting, config[setting])
 
-        self.__report_port_issues(config)
+        # The listen-port report used to run here. It moved to `Templator.__init__`
+        # (`_report_port_issues`): this method is only reached on the environment path, and the
+        # scheduler renders straight from the database without ever constructing a Configurator --
+        # so the fleet that can actually declare per-service ports got no report at all. Templator
+        # is the one object both paths build, and it holds the merged per-service views the check
+        # needs (`_service_configs`, after `drop_inherited_ports`).
 
         return config
-
-    def __report_port_issues(self, config: Dict[str, Any]) -> None:
-        """Log the listen-port conflicts a configuration carries, once, at generation time.
-
-        Warn, never ``exit(1)``: this runs on the boot path and refusing to generate over a port
-        the operator may well have meant would take a whole fleet down -- same rule as every other
-        problem reported here. Refusal belongs to the write paths (API/UI), where an operator is
-        in front of the error and a single service is at stake.
-
-        The checks themselves are pure and live in ``utils/ports.py`` so the write paths give the
-        same verdict; only the two environment facts they need are answered here.
-        """
-        integration = get_integration()
-        containerized = integration != "Linux"
-        # /etc/supervisor.d only exists in the all-in-one image (src/all-in-one/Dockerfile:252),
-        # which is the only layout where the UI (7000) and the API service (8888) share this
-        # network namespace and are therefore unavailable to a service.
-        all_in_one = containerized and Path(sep, "etc", "supervisor.d").is_dir()
-        with suppress(Exception):
-            for issue in check_ports(
-                services_from_config(config),
-                reserved=reserved_ports(config, all_in_one=all_in_one),
-                containerized=containerized,
-            ):
-                if issue.level == "fatal":
-                    self.__logger.error(f"Listen port conflict : {issue.message}")
-                else:
-                    self.__logger.warning(f"Listen port warning : {issue.message}")
 
     def __check_var(self, variable: str) -> Tuple[bool, str, str]:
         value = self.__variables[variable]

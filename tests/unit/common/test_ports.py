@@ -25,8 +25,11 @@ from ports import (  # type: ignore
     WARNING,
     check_ports,
     collect_ports,
+    drop_inherited_ports,
     inventory,
     parse_port,
+    port_list_keys,
+    port_list_setting,
     reserved_ports,
     services_from_config,
     stream_reuseport_owners,
@@ -59,6 +62,19 @@ class TestCollectPorts:
     def test_base_and_numeric_suffixes_in_declaration_order(self):
         config = {"HTTP_PORT": "8080", "HTTP_PORT_1": "8081", "HTTP_PORT_2": "8082"}
         assert collect_ports(config, "HTTP_PORT") == ["8080", "8081", "8082"]
+
+    def test_the_order_is_the_suffix_order_not_the_dict_order(self):
+        """``list_moved`` and the Lua side both compare ORDERED sequences, and dict order is not a
+        property of the configuration: a database read whose ``order_by`` has no suffix tiebreak
+        returns whatever the engine gives back, and ``services_from_config`` APPENDS a service key
+        that the globals did not carry. Lua's ``port_list`` has always sorted numerically; this is
+        the same rule on the Python side."""
+        assert collect_ports({"HTTP_PORT_1": "8081", "HTTP_PORT": "8080"}, "HTTP_PORT") == ["8080", "8081"]
+        assert collect_ports({"HTTP_PORT_2": "8082", "HTTP_PORT": "8080", "HTTP_PORT_1": "8081"}, "HTTP_PORT") == ["8080", "8081", "8082"]
+
+    def test_suffixes_are_ordered_numerically_not_lexically(self):
+        """``"10" < "2"`` as strings. Suffixes need not be contiguous either."""
+        assert collect_ports({"HTTP_PORT": "8080", "HTTP_PORT_10": "8090", "HTTP_PORT_2": "8082"}, "HTTP_PORT") == ["8080", "8082", "8090"]
 
     def test_empty_values_are_dropped(self):
         """The ``and port`` guard of the per-service templates (server.conf:24), expressed once.
@@ -252,10 +268,80 @@ class TestServicesFromConfig:
         assert services["app_2"]["HTTP_PORT"] == "9002"
         assert services["app"]["HTTP_PORT"] == "9001"
 
+    def test_a_declaring_service_does_not_keep_the_inherited_repetitions(self):
+        """Same replacement the renderer applies, so the write-path refusals and the conflict
+        report see the ports the service will really listen on."""
+        config = {"MULTISITE": "yes", "SERVER_NAME": "a b", "HTTP_PORT": "8080", "HTTP_PORT_1": "8081", "a_HTTP_PORT": "9000"}
+        services = services_from_config(config)
+        assert collect_ports(services["a"], "HTTP_PORT") == ["9000"]
+        assert collect_ports(services["b"], "HTTP_PORT") == ["8080", "8081"]
+
     def test_non_multisite_yields_the_single_service(self):
         services = services_from_config({"MULTISITE": "no", "SERVER_NAME": "a.example.com", "HTTP_PORT": "8080"})
         assert list(services) == ["a.example.com"]
         assert services["a.example.com"]["HTTP_PORT"] == "8080"
+
+
+class TestPortListKeys:
+    @pytest.mark.parametrize(
+        "key,expected",
+        [
+            ("HTTP_PORT", "HTTP_PORT"),
+            ("HTTP_PORT_1", "HTTP_PORT"),
+            ("HTTP_PORT_12", "HTTP_PORT"),
+            ("HTTPS_PORT", "HTTPS_PORT"),
+            ("HTTPS_PORT_3", "HTTPS_PORT"),
+            # Not members: a stream port (deliberately still unioned), a lookalike, and the
+            # control plane's own ports -- which carry the setting name as a SUFFIX.
+            ("LISTEN_STREAM_PORT", None),
+            ("HTTP_PORTX", None),
+            ("HTTP_PORT_X", None),
+            ("API_HTTP_PORT", None),
+        ],
+    )
+    def test_membership(self, key, expected):
+        assert port_list_setting(key) == expected
+
+    def test_keys_come_back_in_insertion_order(self):
+        config = {"HTTP_PORT_1": "8081", "HTTP_PORT": "8080", "HTTPS_PORT": "8443"}
+        assert port_list_keys(config, "HTTP_PORT") == ["HTTP_PORT_1", "HTTP_PORT"]
+
+
+class TestDropInheritedPorts:
+    """§2.2. ``multiple`` settings merge as a union and ``dict.update`` cannot remove a key, so
+    "this service listens on 9000" would otherwise still mean "and on the inherited 8081"."""
+
+    GLOBAL = {"HTTP_PORT": "8080", "HTTP_PORT_1": "8081", "HTTPS_PORT": "8443", "OTHER": "keep"}
+
+    def test_a_declared_base_port_removes_the_inherited_repetitions(self):
+        merged = dict(self.GLOBAL, HTTP_PORT="9000")
+        drop_inherited_ports(merged, {"HTTP_PORT": "9000"})
+        assert collect_ports(merged, "HTTP_PORT") == ["9000"]
+
+    def test_a_declared_repetition_alone_removes_the_inherited_base(self):
+        """Replacement is about the LIST, not about the base key."""
+        merged = dict(self.GLOBAL, HTTP_PORT_1="9001")
+        drop_inherited_ports(merged, {"HTTP_PORT_1": "9001"})
+        assert collect_ports(merged, "HTTP_PORT") == ["9001"]
+
+    def test_declaring_nothing_leaves_the_configuration_untouched(self):
+        """The half that makes the flip invisible to every existing deployment."""
+        merged = dict(self.GLOBAL)
+        drop_inherited_ports(merged, {"SERVER_TYPE": "http"})
+        assert merged == self.GLOBAL
+
+    def test_the_two_settings_do_not_leak_into_each_other(self):
+        merged = dict(self.GLOBAL, HTTP_PORT="9000")
+        drop_inherited_ports(merged, {"HTTP_PORT": "9000"})
+        assert merged["HTTPS_PORT"] == "8443"
+        assert merged["OTHER"] == "keep"
+
+    def test_an_explicitly_empty_declaration_still_replaces(self):
+        """``HTTP_PORT=""`` is the documented "no listener" value (settings.json:23). It has to
+        beat the inherited list, or disabling a service's HTTP listener would be impossible."""
+        merged = dict(self.GLOBAL, HTTP_PORT="")
+        drop_inherited_ports(merged, {"HTTP_PORT": ""})
+        assert collect_ports(merged, "HTTP_PORT") == []
 
 
 class TestSettingsDeclaration:
