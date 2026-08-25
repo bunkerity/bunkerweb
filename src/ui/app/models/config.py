@@ -9,6 +9,7 @@ from re import DOTALL, error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
 from common_utils import normalize_check_value, normalize_list_value, normalize_select_value, split_templates, trim_scalar_value  # type: ignore
+from resource_group_resolver import value_for_validation  # type: ignore
 from unit_parser import normalize_unit  # type: ignore
 
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -325,14 +326,44 @@ class Config:
                 variables[key] = value
 
             # Validate the variable's value against the regex pattern.
+            # `value_for_validation` strips the `@group` tokens of a resource-list setting first,
+            # exactly like Configurator.__check_var and db config_read.check_setting do: a list
+            # setting's regex only describes literal items, so leaving the tokens in rejects the
+            # very value this UI's own resource-group picker inserts. The tokens themselves are
+            # validated separately (validate_resource_group_refs), and the stored value keeps them.
             try:
                 regex_flags = DOTALL if plugins_settings[setting].get("type") == "file" else 0
-                if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value, regex_flags) is None:
+                if not self.__ignore_regex_check and re_search(plugins_settings[setting]["regex"], value_for_validation(setting, value), regex_flags) is None:
                     report_error(f"Variable {key} is not valid.")
                     reject_value(key)
             except RegexError as e:
                 report_error(f"Invalid regex for setting {setting}: {plugins_settings[setting]['regex']}. Ignoring regex check: {e}")
                 reject_value(key)
+
+        # Cross-key rule, so it runs once after the per-key loop, on the save's complete desired
+        # state. An ENABLED greylist with no entries denies EVERY request: nothing matches, so
+        # greylist.lua:209 falls through to `self:ret(true, "not in greylist", get_deny_status())`,
+        # and `preread` (:212) routes stream traffic through the same access(), so L4 goes dark too.
+        # Turning USE_GREYLIST on is one click on the compose shelf and nothing warns, which is why
+        # this is refused server-side rather than explained in a tooltip. Only the *flip* is
+        # refused: an already-enabled scope is never re-checked here (both save paths strip
+        # unchanged keys from `to_check`), so this can never block an unrelated edit. `reject_value`
+        # reverts just this key -- every other greylist edit in the same save is kept, which is what
+        # lets the user add entries and enable in two saves.
+        if "USE_GREYLIST" in to_check and variables.get("USE_GREYLIST") == "yes":
+            # Derived, not hardcoded: `multivalue` is exactly the ten entry lists (the five direct
+            # ones plus their `_URLS` downloader variants) and excludes GREYLIST_RDNS_GLOBAL, which
+            # is a `check` and feeds no entry. A greylist setting added later is covered for free.
+            entry_keys = [k for k, data in plugins_settings.items() if k.startswith("GREYLIST_") and data.get("type") == "multivalue"]
+            # An entry stored on the scope counts even when this save does not post it.
+            if entry_keys and not any(str(variables.get(k, config.get(k, {}).get("value", "")) or "").strip() for k in entry_keys):
+                report_error(
+                    "USE_GREYLIST was not enabled: a greylist with no entries denies every request, "
+                    "including yours. Add at least one GREYLIST_IP, GREYLIST_RDNS, GREYLIST_ASN, "
+                    "GREYLIST_USER_AGENT or GREYLIST_URI value (or a *_URLS source to download one) "
+                    "and save, then enable the greylist."
+                )
+                reject_value("USE_GREYLIST")
 
         return variables
 

@@ -41,7 +41,9 @@
      setting_data         required -- the plugin.json setting dict. `id`
                           builds element ids, `separator` (default " ")
                           joins/splits the stored value, `regex` (if present)
-                          becomes the hidden input's `pattern`.
+                          becomes the hidden input's `pattern` -- except on a
+                          resource-group setting, where the regex knows nothing
+                          about `@group` tokens (see the hidden input below).
      setting_value        required -- current stored value (already a
                           separator-joined string).
      setting_default      required -- default value, written to
@@ -76,6 +78,7 @@
    not user-reorderable. #}
 {% from "components/resource-group-picker.html" import resource_group_picker %}
 {% set setting_separator = setting_data.get("separator", " ") %}
+{% set resource_kind = resource_kind_for_setting(setting) %}
 {% set setting_values = setting_value.split(setting_separator) if setting_value else [""] %}
 {% set setting_values = setting_values if setting_values != [""] else [""] %}
 {% if not disabled and (setting_values | last) != "" %}
@@ -94,7 +97,15 @@
            data-method="{{ setting_method }}"
            {% if disabled %}disabled{% endif %}
            {% if required %}required{% endif %}
-           {% if setting_data.get('regex') %}pattern="{{ setting_data['regex'] }}"{% endif %}>
+           {# No `pattern` when the setting accepts `@group` tokens: its regex only describes
+              literal items, so it rejects the very value the picker below inserts. The attribute
+              is inert on the plain settings pages (a hidden input is barred from constraint
+              validation, and settings-widgets.js listens for `input`, which the hidden input
+              never fires -- updateMultivalueHiddenInput triggers `change`), but the template
+              steps page validates it explicitly via $input.attr("pattern") in its own
+              .plugin-setting loop, where the narrow regex would permanently block Save.
+              check_variables strips the tokens the same way before its server-side check. #}
+           {% if setting_data.get('regex') and not resource_kind %}pattern="{{ setting_data['regex'] }}"{% endif %}>
     <div class="multivalue-inputs d-flex flex-wrap align-items-center gap-2">
         {% for value in setting_values %}
             <div class="multivalue-input-group{% if value %} has-value{% endif %}">
@@ -130,7 +141,6 @@
             </small>
         </div>
     {% endif %}
-    {% set resource_kind = resource_kind_for_setting(setting) %}
     {% if resource_kind %}
         {{ resource_group_picker(
             target_id=setting_id_prefix ~ setting_data['id'] ~ (setting_id_suffix if setting_id_suffix is defined else ''),

@@ -628,3 +628,36 @@ def test_use_ui_checkbox_precedes_the_shells_hidden_fallback(render_plugin_page)
     assert html[:last].rstrip().endswith('<input type="hidden"')
     first_tag_end = html.index(">", first)
     assert "plugin-setting" in html[first:first_tag_end]
+
+
+# --- the multivalue hidden input's `pattern` on a resource-group setting ---------------------
+# The template steps page validates .plugin-setting fields explicitly through
+# `$input.attr("pattern")` (static/js/pages/template-settings-page.js), hidden inputs included.
+# A resource-list setting's regex describes literal items only, so emitting it there made the
+# picker's own `@alias` token permanently un-saveable on that page.
+
+
+def _render_multivalue(setting, regex, kind):
+    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
+    env.globals.update(resource_kind_for_setting=lambda key: kind, _=lambda text, **kwargs: text)
+    return env.get_template("models/multivalue_setting.html").render(
+        setting=setting,
+        setting_data={"id": setting.lower(), "regex": regex, "separator": " "},
+        setting_value="",
+        setting_default="",
+        setting_config=None,
+        setting_method="ui",
+        setting_id_prefix="setting-x-",
+        resource_groups={"g1": {"name": "office-eu", "entries": [{"kind": kind, "value": "1.2.3.4"}]}} if kind else {},
+    )
+
+
+def test_a_resource_group_setting_emits_no_narrow_pattern():
+    html = _render_multivalue("BLACKLIST_IP", r"^( *([0-9.]+) *)*$", "ip")
+    assert "pattern=" not in html
+    assert 'value="@office-eu"' in html, "the picker that inserts @tokens must still be rendered"
+
+
+def test_a_plain_multivalue_setting_keeps_its_pattern():
+    html = _render_multivalue("DNS_RESOLVERS", r"^( *([0-9.]+) *)*$", None)
+    assert 'pattern="^( *([0-9.]+) *)*$"' in html
