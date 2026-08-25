@@ -21,7 +21,7 @@ fi
 
 STACK="${BW_SWARM_STACK:-bw-swarm-test}"
 API="http://127.0.0.1:${BW_SWARM_API_PORT:-8890}"
-HTTP="http://127.0.0.1:${BW_SWARM_HTTP_PORT:-8080}"
+HTTP="http://127.0.0.1:${BW_SWARM_HTTP_PORT:-8083}"
 TOKEN="secret"
 STACK_FILE="tests/swarm/stack.yml"
 

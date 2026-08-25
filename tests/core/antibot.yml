@@ -509,8 +509,13 @@ actions:
         REMOTE_PHP_PATH: null
         LOCAL_PHP: "/run/php/php-fpm.sock"
         LOCAL_PHP_PATH: "/var/www/html"
+    # No `string` override here, unlike `ignore_us` below: this action asks for the challenge, and
+    # Kubernetes serves it from the same BunkerWeb page as every other integration. The override
+    # that used to sit here expected the application page instead -- `ignore_us`' expectation, for
+    # the opposite setting -- so the arm only passed while the country lookup was returning nothing
+    # on Kubernetes. In run 32733647372 it resolved 8.8.8.8 to US, antibot logged "displaying
+    # challenge to client", and this was the one assertion in the category that called that a bug.
     Kubernetes:
-      string: 'alt="NGINX Logo"'
       config:
         REMOTE_PHP: null
         REMOTE_PHP_PATH: null
@@ -524,6 +529,10 @@ actions:
       ANTIBOT_ONLY_COUNTRY: "US"
       USE_REAL_IP: "yes"
       REAL_IP_FROM: "0.0.0.0/0"
+    # The k8s upstream is nginxdemos/nginx-hello, whose body never contains "Hello World!" —
+    # same override its six app-page siblings carry.
+    Kubernetes:
+      string: 'alt="NGINX Logo"'
 
   ignore_us:
     type: string

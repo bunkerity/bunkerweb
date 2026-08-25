@@ -24,7 +24,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tests" / "utils"))
 
-from example import SHARED_NETWORKS, _externalise_shared_networks  # noqa: E402
+from example import SHARED_NETWORKS, SHARED_SERVICES_SUBNET, _externalise_shared_networks, _widen_api_whitelist  # noqa: E402
 
 LOGGER = logging.getLogger("test-example-materialisation")
 
@@ -189,3 +189,58 @@ def test_the_framework_owns_the_networks_it_hands_over():
     """`external: true` is a promise that something else created them -- keep that true."""
     dnsmasq = _compose_config((ROOT / "tests" / "misc" / "docker" / "dnsmasq.yml").read_text(encoding="utf-8"))
     assert set(SHARED_NETWORKS) <= set(dnsmasq.get("networks") or {})
+
+
+# --- the whitelist that comes with those networks ------------------------------------------
+# Externalising `bw-services` moves the copy onto the framework's 192.168.0.0/24, and the
+# gateway of that bridge -- 192.168.0.1 -- is what BunkerWeb sees when the host calls a
+# published instance API port. No example whitelists it (they cover Docker's default pool,
+# 172.16.0.0/12), and an unwhitelisted caller gets its connection closed with no response, so
+# `example-stream-multisite` timed out for 90s on a bare RemoteDisconnected in run 32733647372.
+
+API_EXAMPLE = "stream-multisite"  # the one example that probes the instance API from the host
+
+
+def _whitelists(content):
+    return [line.split(":", 1)[1].strip() for line in content.splitlines() if line.strip().startswith("API_WHITELIST_IP:")]
+
+
+def test_the_materialised_docker_copy_trusts_the_framework_gateway(tmp_path):
+    written = _materialise(tmp_path, "Docker", API_EXAMPLE)
+    values = _whitelists(written)
+
+    assert values, f"{API_EXAMPLE} no longer sets API_WHITELIST_IP -- this guard would pass vacuously"
+    for value in values:
+        assert SHARED_SERVICES_SUBNET in value, f"the host cannot reach the instance API through {SHARED_SERVICES_SUBNET}.1"
+
+    # The example itself is documentation, and its reader is not on the framework's network.
+    source = (ROOT / "examples" / API_EXAMPLE / "docker-compose.yml").read_text(encoding="utf-8")
+    assert SHARED_SERVICES_SUBNET not in source
+
+
+def test_widening_twice_adds_it_once():
+    """materialise() copies the example fresh every action, but a second pass must not accumulate."""
+    once = _widen_api_whitelist('    API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"\n', LOGGER)
+    twice = _widen_api_whitelist(once, LOGGER)
+
+    assert once.count(SHARED_SERVICES_SUBNET) == 1
+    assert twice == once
+
+
+def test_widening_leaves_everything_else_alone():
+    """A greedy pattern here would rewrite API_WHITELIST_IPS (the API's own, plural) too."""
+    content = 'x-bw-env: &bw-env\n  API_WHITELIST_IP: "127.0.0.0/8"\n  API_TOKEN: "secret"\nservices:\n  bw-api:\n    environment:\n      API_WHITELIST_IPS: "127.0.0.0/8"\n'
+
+    out = _widen_api_whitelist(content, LOGGER)
+
+    assert f'API_WHITELIST_IP: "127.0.0.0/8 {SHARED_SERVICES_SUBNET}"' in out
+    assert 'API_WHITELIST_IPS: "127.0.0.0/8"' in out
+    assert 'API_TOKEN: "secret"' in out
+
+
+def test_the_framework_still_pins_that_subnet():
+    """The constant is a copy of dnsmasq.yml's ipam block; a silent drift there re-breaks the API."""
+    dnsmasq = _compose_config((ROOT / "tests" / "misc" / "docker" / "dnsmasq.yml").read_text(encoding="utf-8"))
+    subnets = [c.get("subnet") for c in ((dnsmasq["networks"]["bw-services"].get("ipam") or {}).get("config") or [])]
+
+    assert SHARED_SERVICES_SUBNET in subnets

@@ -10,7 +10,10 @@
 #   networks   stack-scoped (no `name:` override) -- the harness owns bridge networks literally
 #              called bw-universe / bw-services / bw-db, and a `name:` here would fight them
 #   subnet     10.55.60.0/24 -- the harness holds 10.20.30.0/24, 192.168.0.0/24 and 10.10.10.0/24
-#   ports      8080/8443 and 127.0.0.1:8890 -- the harness stack holds 80, 443 and 127.0.0.1:8888
+#   ports      8083/8443 and 127.0.0.1:8890 -- the harness stack holds 80, 443, 127.0.0.1:8888 and
+#              8080 (app1, from tests/misc/docker/services.yml). Publishing 8080 here made every
+#              bunkerweb task die on "Bind for 0.0.0.0:8080 failed: port is already allocated"
+#              while the stack.secrets.yml (8081) and swarm-example (8082) siblings stayed green.
 #
 # SQLite on purpose: one less service to converge, and on a single node the local volume the
 # scheduler, API and worker share is stable. All three mount the SAME /data because with a
@@ -52,7 +55,7 @@ services:
       # host mode, not the routing mesh: the mesh source-NATs and the WAF would judge every
       # request against the ingress address instead of the client's.
       - target: 8080
-        published: 8080
+        published: 8083
         protocol: tcp
         mode: host
       - target: 8443

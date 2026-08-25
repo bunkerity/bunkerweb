@@ -11,7 +11,7 @@ is rewritten. The example itself is never modified.
 from logging import Logger
 from os import sep
 from pathlib import Path
-from re import MULTILINE, sub, subn
+from re import MULTILINE, escape, sub, subn
 from shutil import copytree, rmtree
 from subprocess import run
 
@@ -60,6 +60,12 @@ AUTOCONF_NAMESPACE = "bw-tests"
 # them before start.sh deploys anything, and their definitions there are the authoritative ones.
 SHARED_NETWORKS = ("bw-universe", "bw-services")
 
+# The subnet dnsmasq.yml and services.yml pin for the framework's `bw-services`. Examples leave
+# that network's subnet out, so on their own they get one from Docker's default pool (172.16/12,
+# which every example already whitelists) -- but _externalise_shared_networks() below points them
+# at the framework's network instead, and its gateway is 192.168.0.1. See _widen_api_whitelist().
+SHARED_SERVICES_SUBNET = "192.168.0.0/24"
+
 
 def _externalise_shared_networks(content: str, logger: Logger) -> str:
     """Point a Docker example at the bw-* networks the framework already created.
@@ -89,6 +95,34 @@ def _externalise_shared_networks(content: str, logger: Logger) -> str:
             # recognise, so compose will manage it and the stack-up failure comes back. Silent
             # here would look exactly like "this example does not use that network".
             logger.warning(f"{network} is referenced but was not externalised -- check its top-level networks block")
+    return content
+
+
+def _widen_api_whitelist(content: str, logger: Logger) -> str:
+    """Let the host reach the instance API of a Docker example running on the framework's networks.
+
+    An example that publishes the instance API (stream-multisite publishes 5000/5443) is probed
+    from the host, and BunkerWeb sees those calls arriving from the gateway of the bridge the
+    published port is proxied through. On its own the example gets that network from Docker's
+    default pool, which is why every example whitelists 172.16.0.0/12 -- but
+    _externalise_shared_networks() puts the copy on the framework's `bw-services`, pinned to
+    192.168.0.0/24 by dnsmasq.yml, and its gateway 192.168.0.1 is in no example's whitelist.
+
+    The API answers a request from an address it does not trust by closing the connection with no
+    response (`ngx.HTTP_CLOSE`, api.conf), so the symptom is a bare RemoteDisconnected on the host
+    with a single `can't validate access from IP 192.168.0.1 : IP is not in API_WHITELIST_IP` line
+    in the instance log -- nothing that names the network rewrite that caused it.
+
+    Only the copy is touched, and only where the key already exists: an example that does not
+    publish its API has no reason to widen anything.
+    """
+    content, count = subn(
+        rf'^(\s*API_WHITELIST_IP:\s*")(?![^"]*{escape(SHARED_SERVICES_SUBNET)})([^"]*)(")',
+        rf"\1\2 {SHARED_SERVICES_SUBNET}\3",
+        content,
+        flags=MULTILINE,
+    )
+    logger.debug(f"Widened API_WHITELIST_IP with {SHARED_SERVICES_SUBNET} on {count} line(s)")
     return content
 
 
@@ -185,6 +219,7 @@ def materialise(logger: Logger, name: str, integration: str, bw_version: str) ->
         content = _join_test_namespace(content, logger)
     elif integration == "Docker":
         content = _externalise_shared_networks(content, logger)
+        content = _widen_api_whitelist(content, logger)
 
     compose.write_text(content)
     STACK_MARKER.write_text(str(compose))

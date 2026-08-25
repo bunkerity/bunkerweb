@@ -129,7 +129,7 @@ log "deploying the BunkerWeb stack ..."
 # belonging to another lane is invisible to it. The instance-count assertion is what catches it if
 # that ever stops being true.
 sed -e "s/bw-swarm-test/${STACK}/g" \
-	-e "s/published: 8080/published: ${HTTP##*:}/" \
+	-e "s/published: 8083/published: ${HTTP##*:}/" \
 	-e "s/published: 8443/published: 8445/" \
 	-e "s/published: 8890/published: ${API##*:}/" \
 	-e "s|10.55.60.0/24|10.55.62.0/24|g" \
