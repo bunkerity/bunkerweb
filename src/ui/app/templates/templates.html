@@ -160,10 +160,18 @@
                                 {{ badge(text="Community", i18n_key="plugins.marketplace.tab_community", variant="secondary") }}
                             </div>
                             <p class="text-muted small mb-2">{{ item.description }}</p>
-                            <div class="small text-muted mb-2">{{ _("plugins.catalog.version", version=item.version) }}</div>
+                            {# A template.json carries no version of its own, and the repository
+                               publishes no compatibility data -- the only version in play is the
+                               release tag the whole listing came from, shown once in the notice
+                               below rather than repeated on every card. `compatible` is therefore
+                               always true here (see `item_compatible`); the alert stays wired so
+                               that flipping `version_gate` needs no template change.
+                               That flip now also refuses at `/templates/catalog/install`, which
+                               is the half that matters: this button vanishing would otherwise
+                               hide a JSON endpoint anyone can still POST to. #}
                             {% if not item.compatible %}
                                 <div class="alert alert-warning py-1 px-2 small mb-2" role="alert">
-                                    {{ _("plugins.catalog.incompatible", min=item.bw_min, current=item.bw_version) }}
+                                    {{ _("plugins.catalog.incompatible", current=item.bw_version) }}
                                 </div>
                             {% endif %}
                             {# A template is a LAYER, not a selection: USE_TEMPLATE is an ordered
@@ -193,6 +201,8 @@
         </div>
         <p class="text-muted small mt-3 mb-0" id="templates-catalog-notice">
             {{ _("plugins.catalog.trust_notice") }}
+            <span class="d-block">{{ _("templates.catalog.no_compat_notice") }}</span>
+            {% if catalog_tag %}<span class="d-block">{{ _("plugins.catalog.release", tag=catalog_tag) }}</span>{% endif %}
             {% if catalog_stale %}<span class="text-warning d-block">{{ _("plugins.catalog.stale") }}</span>{% endif %}
         </p>
     {% endif %}

@@ -14,15 +14,15 @@ from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.configs import CONFIG_TYPES
 from app.models.plugin_catalog import (
-    ARTIFACT_MAX_TEMPLATE,
-    artifact_cap,
+    SOURCES,
     build_catalog_view,
     catalog_enabled,
-    fetch_artifact,
+    fetch_archive,
     find_item,
-    is_compatible,
     is_stale,
+    item_compatible,
     read_cached,
+    template_payload,
     verify_digest,
 )
 from app.routes.utils import cors_required
@@ -595,23 +595,34 @@ def templates_catalog_install():
     """Install one curated service template from the community catalogue.
 
     Same chain as the plugin half (`/plugins/catalog/install`): the request contributes only an
-    `id`, everything else comes from the server-side cached manifest, and the SHA-256 gate runs
-    on the downloaded bytes before anything parses them.
+    `id`, everything else comes from the server-side cached listing, and the recorded-digest gate
+    runs on the downloaded archive before anything is read out of it.
 
-    Two things differ, and both are deliberate.
+    Three things differ, and all three are deliberate.
 
     **Admin, not `write`.** `/templates/create` needs only `write`, but a catalogue template
-    carries `configs[].data` blobs fetched from the internet, and `_prepare_template_entities`
-    validates settings hard while storing config data with *no* content validation at all -- it
-    is stringified, encoded, hashed and written. That text becomes NGINX configuration on the
+    carries config blobs fetched from the internet, and `_prepare_template_entities` validates
+    settings hard while storing config data with *no* content validation at all -- it is
+    stringified, encoded, hashed and written. That text becomes NGINX configuration on the
     instances. This gate lives in the route by necessity: the API authenticates the UI's single
     service credential and has no per-user role to check, so anything reaching the API directly
     with that credential bypasses it.
 
-    **The payload is re-validated by the DB layer.** It is handed to `create_template`, so every
-    setting id is checked against the live Settings table. That gives the template half a second,
-    structural compatibility gate for free: a template naming a setting this BunkerWeb does not
-    have is refused with `Unknown settings: ...`, whatever `bw_min` claimed.
+    **The version gate is CALLED here even though it currently passes everything.** The templates
+    repository has no version field and no compatibility file, so `item_compatible` returns True
+    for this half (`SOURCES["templates"]["version_gate"]` is False) and a bound invented here
+    would assert a compatibility its publisher never stated. The call is made anyway, and that is
+    the point: an earlier revision documented "flip the flag and nothing else changes" while this
+    route never consulted the gate at all, so flipping it would have hidden the button
+    (`templates.html` renders on `item.compatible`) and left this endpoint -- reachable directly,
+    it is `@cors_required` JSON, not a form post -- installing regardless. A gate the server does
+    not call is not a gate; the promise is now true because the code makes it true.
+
+    **The payload is re-validated by the DB layer, and that is the real compatibility check.** It
+    is handed to `create_template`, so every setting id is checked against the live Settings
+    table: a template naming a setting this BunkerWeb does not have is refused with
+    `Unknown settings: ...`. That is a structural check against this exact build, and it is
+    strictly more informative than a declared version range.
     """
     if not catalog_enabled():
         return jsonify({"status": "error", "message": "The community catalogue is disabled"}), 403
@@ -626,23 +637,31 @@ def templates_catalog_install():
         return jsonify({"status": "error", "message": "Template id is required"}), 400
 
     cached = DATA.get("PLUGIN_CATALOG")
-    item = find_item(cached, "templates", template_id)
-    if not item:
+    item, section = find_item(cached, "templates", template_id)
+    if not item or not section:
         return jsonify({"status": "error", "message": f"No catalogue entry named {template_id}"}), 404
 
     _, fetched_at = read_cached(cached)
     if is_stale(fetched_at):
         return jsonify({"status": "error", "message": "The catalogue is out of date and cannot be installed from"}), 409
 
+    tag = section.get("tag")
+    digest = section.get("sha256")
+    if not tag or not digest:
+        return jsonify({"status": "error", "message": f"The cached catalogue entry for {template_id} is incomplete"}), 409
+
+    # Fails CLOSED, and symmetric with the plugin half by design rather than by coincidence. The
+    # API is already required a few lines below (`get_templates`), so asking it for the version
+    # adds no failure mode that was not already there -- what it buys is that the flag in
+    # `SOURCES` really is the only thing to change, on the server as well as in the template.
     try:
         bw_version = API_CLIENT.get_metadata().get("version", "unknown")
     except (ApiClientError, ApiUnavailableError) as e:
-        # Fails closed: an unreachable API is not permission to skip the version check.
         return jsonify({"status": "error", "message": f"Couldn't determine the BunkerWeb version: {e.message}"}), 503
 
-    if not is_compatible(bw_version, item.get("bw_min"), item.get("bw_max")):
-        bounds = f">= {item.get('bw_min')}" + (f", < {item['bw_max']}" if item.get("bw_max") else "")
-        return jsonify({"status": "error", "message": f"Template {template_id} requires BunkerWeb {bounds}; this is {bw_version}"}), 422
+    if not item_compatible("templates", bw_version, item):
+        supported = ", ".join(item.get("supported") or []) or "no BunkerWeb version"
+        return jsonify({"status": "error", "message": f"Template {template_id} declares support for {supported}; this is {bw_version}"}), 422
 
     try:
         if template_id in API_CLIENT.get_templates():
@@ -650,38 +669,33 @@ def templates_catalog_install():
     except (ApiClientError, ApiUnavailableError) as e:
         return jsonify({"status": "error", "message": f"Couldn't list templates: {e.message}"}), 503
 
+    # At the pinned tag, never at "latest".
     try:
-        payload = fetch_artifact(item["url"], artifact_cap(item.get("size"), ARTIFACT_MAX_TEMPLATE))
+        archive = fetch_archive(SOURCES["templates"]["repo"], tag)
     except ValueError as e:
         return jsonify({"status": "error", "message": f"Refused to download {template_id}: {e}"}), 502
     except RequestException as e:
         return jsonify({"status": "error", "message": f"Couldn't download {template_id}: {e}"}), 502
 
-    # Before anything parses the bytes.
-    if not verify_digest(payload, item["sha256"]):
-        LOGGER.error(f"Integrity check failed for catalogue template {template_id}: expected {item['sha256']}")
-        return jsonify({"status": "error", "message": f"Integrity check failed for {template_id}. Nothing was installed."}), 502
+    # Before anything is read out of the archive. A git tag can be force-moved; this is what makes
+    # "the bytes listed" and "the bytes installed" the same claim.
+    if not verify_digest(archive, digest):
+        LOGGER.error(f"Archive digest mismatch installing template {template_id} from {tag}: expected {digest}")
+        return jsonify({"status": "error", "message": f"The {tag} archive no longer matches what the catalogue listed. Nothing was installed."}), 502
 
-    try:
-        data = loads(payload.decode("utf-8"))
-    except (UnicodeDecodeError, JSONDecodeError, ValueError) as e:
-        return jsonify({"status": "error", "message": f"Template payload is not valid JSON: {e}"}), 502
-    if not isinstance(data, dict):
-        return jsonify({"status": "error", "message": "Template payload must be a JSON object"}), 502
-
-    # The template half's equivalent of the plugin archive-identity check: the id inside the
-    # payload is what `create_template` writes, so it must be the one the manifest named.
-    declared = str(data.get("id", "")).strip()
-    if declared != template_id:
-        return jsonify({"status": "error", "message": f"The payload declares id {declared!r} but the catalogue entry is {template_id!r}"}), 502
+    # Assembles the template from its folder: `template.json` plus the config blobs its `configs`
+    # references name, materialised from these same verified bytes. Re-checks the declared id.
+    data, problem = template_payload(archive, template_id)
+    if problem or data is None:
+        return jsonify({"status": "error", "message": f"Refused to install {template_id}: {problem}"}), 502
 
     try:
         API_CLIENT.create_template(
             template_id,
-            name=data.get("name", template_id),
-            settings=data.get("settings", {}),
-            steps=data.get("steps", []),
-            configs=data.get("configs", []),
+            name=data["name"],
+            settings=data["settings"],
+            steps=data["steps"],
+            configs=data["configs"],
         )
     except (ApiClientError, ApiUnavailableError) as e:
         return jsonify({"status": "error", "message": e.message}), getattr(e, "status_code", None) or 400

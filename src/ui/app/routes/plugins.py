@@ -36,17 +36,16 @@ from app.dependencies import (
 )
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.models.plugin_catalog import (
-    ARTIFACT_MAX_PLUGIN,
-    artifact_cap,
+    SOURCES,
     build_catalog_view,
     catalog_enabled,
-    check_archive_identity,
     collides_with_installed,
-    fetch_artifact,
+    fetch_archive,
     find_item,
-    is_compatible,
     is_stale,
+    item_compatible,
     read_cached,
+    repack_plugin,
     verify_digest,
 )
 from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR, get_activation_map, is_plugin_active
@@ -100,9 +99,10 @@ def catalog_context(kind: str) -> dict:
     """Gather what `build_catalog_view` needs and hand it over.
 
     The two I/O calls are best-effort: a catalogue section is never worth failing a page over, so
-    an unreachable API degrades to "nothing installed / unknown version", which marks every item
-    incompatible rather than installable. The install route makes both calls again and refuses
-    outright when they fail -- fail-soft to render, fail-closed to act.
+    an unreachable API degrades to "nothing installed / unknown version". For plugins that marks
+    every item incompatible rather than installable, because the version gate fails closed on an
+    unparseable version. The install routes make both calls again and refuse outright when they
+    fail -- fail-soft to render, fail-closed to act.
     """
     installed = ()
     bw_version = "unknown"
@@ -682,17 +682,18 @@ def upload_plugin():
 def install_catalog_plugin():
     """Install one community-catalogue plugin.
 
-    The request contributes exactly ONE value: `id`. The URL, the checksum, the size cap and the
-    version bounds all come from the server-side cached, validated manifest -- honouring a
-    client-supplied URL or hash would hand the browser precisely the power the pinned manifest
-    exists to remove.
+    The request contributes exactly ONE value: `id`. The repository, the pinned release tag, the
+    recorded archive digest and the compatibility list all come from the server-side cached
+    listing -- honouring a client-supplied URL, tag or hash would hand the browser precisely the
+    power a pinned source exists to remove.
 
     The order of the checks below is the security design, not a style choice. In particular the
-    archive is only parsed AFTER its bytes are proven to be the ones the manifest named, so a
-    tampered archive never reaches a parser.
+    archive is only unpacked AFTER its bytes are shown to be the ones that were listed, and what
+    reaches the installer is a tarball we build containing that one plugin -- never the release
+    archive, which holds nine.
     """
-    # Gates first, before any lookup and long before any network call, so a direct POST that
-    # never rendered the page is refused with no side effect at all.
+    # Gates first, before any lookup and long before any network call, so a direct POST that never
+    # rendered the page is refused with no side effect at all.
     if not catalog_enabled():
         return handle_error("The community catalogue is disabled", "plugins", True)
     if API_CLIENT.readonly:
@@ -710,35 +711,44 @@ def install_catalog_plugin():
 
     plugin_id = request.form["id"].strip()
     cached = DATA.get("PLUGIN_CATALOG")
-    item = find_item(cached, "plugins", plugin_id)
-    if not item:
+    item, section = find_item(cached, "plugins", plugin_id)
+    if not item or not section:
         return handle_error(f"No catalogue entry named {plugin_id}", "plugins", True)
 
     # C5: the hourly refresh gates whether a FETCH happens and keeps the old value on failure --
-    # right for a star count, wrong for a supply-chain manifest. Without this, a yanked
-    # vulnerable item stays installable forever whenever fetches keep failing. Checked here, at
-    # install time, against the value right now: a page left open overnight must not carry a
-    # stale install token.
+    # right for a star count, wrong for a supply-chain listing. Without this, a yanked vulnerable
+    # item stays installable forever whenever fetches keep failing. Checked here, at install time,
+    # against the value right now: a page left open overnight must not carry a stale install
+    # token. It is also what bounds the recorded-digest promise below.
     _, fetched_at = read_cached(cached)
     if is_stale(fetched_at):
         return handle_error("The catalogue is out of date and cannot be installed from; wait for the next refresh", "plugins", True)
 
-    # C6: `bw_version` in main.py is a local of the request-context builder, unreachable from
-    # here, so the route makes its own call -- and it FAILS CLOSED. An unreachable API is not
-    # permission to skip a version check.
+    tag = section.get("tag")
+    digest = section.get("sha256")
+    if not tag or not digest:
+        return handle_error(f"The cached catalogue entry for {plugin_id} is incomplete; wait for the next refresh", "plugins", True)
+
+    # C6: `bw_version` in main.py is a local of the request-context builder, unreachable from here,
+    # so the route makes its own call -- and it FAILS CLOSED. An unreachable API is not permission
+    # to skip a version check.
     try:
         bw_version = API_CLIENT.get_metadata().get("version", "unknown")
     except (ApiClientError, ApiUnavailableError) as e:
         return handle_error(f"Couldn't determine the BunkerWeb version, refusing to install: {e.message}", "plugins", True)
 
-    if not is_compatible(bw_version, item.get("bw_min"), item.get("bw_max")):
-        bounds = f">= {item.get('bw_min')}" + (f", < {item['bw_max']}" if item.get("bw_max") else "")
-        return handle_error(f"Plugin {plugin_id} requires BunkerWeb {bounds}; this is {bw_version}", "plugins", True)
+    if not item_compatible("plugins", bw_version, item):
+        supported = ", ".join(item.get("supported") or []) or "no BunkerWeb version"
+        return handle_error(
+            f"Release {item.get('version') or '?'} of {plugin_id} declares support for {supported}; this is {bw_version}",
+            "plugins",
+            True,
+        )
 
-    # Up-front collision check against EVERY plugin type, not just `ui` -- the API's own check
-    # is `_type="ui"` only, so a core or scheduler id is invisible to it. This is a courtesy
-    # check that produces a good message; the authoritative one is the `created` assertion after
-    # the upload, which also covers the race this cannot.
+    # Up-front collision check against EVERY plugin type, not just `ui` -- the API's own check is
+    # `_type="ui"` only, so a core or scheduler id is invisible to it. This is a courtesy check
+    # that produces a good message; the authoritative one is the `created` assertion after the
+    # upload, which also covers the race this cannot.
     try:
         installed = BW_CONFIG.get_plugins(with_settings=False)
     except (ApiClientError, ApiUnavailableError) as e:
@@ -749,8 +759,10 @@ def install_catalog_plugin():
     def install():
         wait_applying()
         try:
+            # AT THE PINNED TAG, never at "latest": re-resolving here would let a release
+            # published between listing and clicking install something nobody saw.
             try:
-                payload = fetch_artifact(item["url"], artifact_cap(item.get("size"), ARTIFACT_MAX_PLUGIN))
+                archive = fetch_archive(SOURCES["plugins"]["repo"], tag)
             except ValueError as e:
                 DATA["TO_FLASH"].append({"content": f"Refused to download {plugin_id}: {e}", "type": "error"})
                 return
@@ -758,36 +770,39 @@ def install_catalog_plugin():
                 DATA["TO_FLASH"].append({"content": f"Couldn't download {plugin_id}: {e}", "type": "error"})
                 return
 
-            # THE gate. On the exact bytes received, in memory, before anything writes to disk,
-            # constructs an archive object, or parses a member. On mismatch: abort this item,
-            # no retry, and the cached manifest is NOT invalidated -- a silent re-fetch-and-retry
-            # turns tampering into a loop that eventually wins. A human decides.
-            if not verify_digest(payload, item["sha256"]):
-                got = bytes_hash(payload, algorithm="sha256")
-                LOGGER.error(f"Integrity check failed for catalogue plugin {plugin_id}: expected {item['sha256']}, got {got}")
+            # THE gate. On the exact bytes received, in memory, before anything is unpacked. A git
+            # tag is not immutable -- it can be force-moved, and codeload will then serve different
+            # bytes for the same URL -- so this is what makes "the bytes listed" and "the bytes
+            # installed" the same claim. On mismatch: abort, no retry, and the cached listing is
+            # NOT invalidated. A silent re-fetch-and-retry turns tampering into a loop that
+            # eventually wins. A human decides.
+            if not verify_digest(archive, digest):
+                LOGGER.error(f"Archive digest mismatch installing {plugin_id} from {tag}: expected {digest}")
                 DATA["TO_FLASH"].append(
-                    {"content": f"Integrity check failed for {plugin_id}: expected {item['sha256']}, got {got}. Nothing was installed.", "type": "error"}
+                    {
+                        "content": f"The {tag} archive no longer matches what the catalogue listed. Nothing was installed for {plugin_id}.",
+                        "type": "error",
+                    }
                 )
                 return
 
-            # C1 + C2, and only now that the bytes are trusted. The id the installer writes to
-            # the filesystem is the one inside the archive's plugin.json, not ours; and both
-            # install branches loop over every plugin.json they find. Without these two checks
-            # every gate above guards a name the install does not use, and one click could
-            # install N plugins.
-            problem = check_archive_identity(payload, plugin_id)
-            if problem:
-                LOGGER.error(f"Rejected catalogue artifact for {plugin_id}: {problem}")
+            # Only now that the bytes are trusted. Both install branches in this router loop over
+            # every plugin.json they find, so the nine-plugin release archive is never handed over
+            # -- what goes up is a tarball holding exactly this one folder, its member names
+            # rewritten under the id.
+            payload, problem = repack_plugin(archive, plugin_id)
+            if problem or payload is None:
+                LOGGER.error(f"Rejected catalogue archive for {plugin_id}: {problem}")
                 DATA["TO_FLASH"].append({"content": f"Refused to install {plugin_id}: {problem}", "type": "error"})
                 return
 
             result = API_CLIENT.upload_plugins([("files", (f"{plugin_id}.tar.gz", BytesIO(payload), "application/gzip"))], method="ui")
 
-            # C4: the router appends the id to `created` even when the DB layer skipped the
-            # write (`_uep_sync_plugin_row` returns (True, False), the loop continues, and
-            # update_external_plugins still returns ""). So the response is checked, not
-            # trusted. Equality, not membership: that single assertion catches a silent skip,
-            # an archive that installed something extra, and an id that was not ours.
+            # C4: the router appends the id to `created` even when the DB layer skipped the write
+            # (`_uep_sync_plugin_row` returns (True, False), the loop continues, and
+            # update_external_plugins still returns ""). So the response is checked, not trusted.
+            # Equality, not membership: that single assertion catches a silent skip, an archive
+            # that installed something extra, and an id that was not ours.
             created = sorted(result.get("created") or [])
             errors = result.get("errors") or []
             if created != [plugin_id] or errors:

@@ -231,14 +231,18 @@
                             <div class="small text-muted mb-2">
                                 <span>{{ _("plugins.catalog.version", version=item.version) }}</span>
                             </div>
-                            {% if item.requires %}
-                                <ul class="small text-muted ps-3 mb-2">
-                                    {% for line in item.requires %}<li>{{ line }}</li>{% endfor %}
-                                </ul>
-                            {% endif %}
+                            {# `supported` is what the plugins repository's own COMPATIBILITY.json
+                               declares for this release line. It is empty for every current
+                               release, so this alert is what the operator actually sees -- which
+                               is the point: an unexplained empty page generates a support ticket,
+                               a card that says upstream has not declared 1.7 support does not. #}
                             {% if not item.compatible %}
                                 <div class="alert alert-warning py-1 px-2 small mb-2" role="alert">
-                                    {{ _("plugins.catalog.incompatible", min=item.bw_min, current=item.bw_version) }}
+                                    {% if item.supported %}
+                                        {{ _("plugins.catalog.incompatible_declared", supported=item.supported | join(", "), current=item.bw_version) }}
+                                    {% else %}
+                                        {{ _("plugins.catalog.incompatible", current=item.bw_version) }}
+                                    {% endif %}
                                 </div>
                             {% endif %}
                             <div class="mt-auto d-flex align-items-center gap-2">
@@ -266,10 +270,12 @@
             {% endfor %}
         </div>
         {# The operator-facing half of the trust model. Deliberately a sentence and not a green
-           "Verified" badge: SHA-256 proves the bytes match the manifest, it does not prove who
-           wrote the manifest, and an installed plugin runs code in the UI, the worker and nginx. #}
+           "Verified" badge: nothing here is signed. The transport is TLS to GitHub and the bytes
+           installed are checked against the bytes that were listed -- neither proves who wrote
+           them, and an installed plugin runs code in the UI, the worker and nginx. #}
         <p class="text-muted small mt-3 mb-0" id="plugin-catalog-notice">
             {{ _("plugins.catalog.trust_notice") }}
+            {% if catalog_tag %}<span class="d-block">{{ _("plugins.catalog.release", tag=catalog_tag) }}</span>{% endif %}
             {% if catalog_stale %}<span class="text-warning d-block">{{ _("plugins.catalog.stale") }}</span>{% endif %}
         </p>
     {% endif %}

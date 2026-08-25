@@ -13,8 +13,10 @@ adds on top of them, and each one exists because of a specific finding:
   silently skipping the write (``_uep_sync_plugin_row`` returns ``(True, False)``, the router
   still appends the id, and ``update_external_plugins`` still returns ``""`` — so the operator
   would be told an install succeeded when nothing happened);
-* and the **ordering**: nothing is uploaded when the digest does not match, when the archive
-  declares a different id, or when it carries more than one plugin.
+* and the **ordering**: nothing is uploaded when the archive digest does not match what was
+  recorded at listing time, and what IS uploaded is a tarball holding exactly the one plugin
+  that was asked for — never the release archive, which holds nine and which both install
+  branches would loop over.
 
 The route module is loaded with ``app.dependencies`` stubbed, following the pattern in
 ``test_onboarding_routes.py`` — it reads container-only paths at import time.
@@ -38,40 +40,45 @@ from app.models.plugin_catalog import CATALOG_MAX_AGE  # type: ignore
 
 ROUTE_PATH = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "routes" / "plugins.py"
 
-GOOD_URL = "https://github.com/bunkerity/bunkerweb-plugins/releases/download/v1.11/clamav-1.11.tar.gz"
+TAG = "v1.11"
+ROOT = "bunkerity-bunkerweb-plugins-fb55b84"
 
 
-def _tar(*plugins):
+def _tar(*plugins, root=ROOT):
+    """A release source archive: one generated wrapper directory, then one folder per plugin."""
     buf = BytesIO()
     with tar_open(fileobj=buf, mode="w:gz") as tar:
-        for root, declared in plugins:
-            body = dumps({"id": declared, "name": declared, "version": "1.0"}).encode()
-            info = TarInfo(f"{root}/plugin.json")
+        for folder, declared in plugins:
+            body = dumps({"id": declared, "name": declared, "version": "1.11"}).encode()
+            info = TarInfo(f"{root}/{folder}/plugin.json")
             info.size = len(body)
             tar.addfile(info, BytesIO(body))
     return buf.getvalue()
 
 
-ARCHIVE = _tar(("clamav", "clamav"))
-DIGEST = __import__("hashlib").sha256(ARCHIVE).hexdigest()
+def _sha(blob):
+    return __import__("hashlib").sha256(blob).hexdigest()
+
+
+# The real thing holds nine plugins; two is enough to prove only one is uploaded.
+ARCHIVE = _tar(("clamav", "clamav"), ("coraza", "coraza"))
+DIGEST = _sha(ARCHIVE)
 
 
 def _entry(**over):
-    item = {
-        "id": "clamav",
-        "name": "ClamAV",
-        "description": "",
-        "version": "1.11",
-        "url": GOOD_URL,
-        "sha256": DIGEST,
-        "size": len(ARCHIVE),
-        "bw_min": "1.7.0",
-        "bw_max": None,
-        "requires": [],
-        "homepage": None,
-    }
+    item = {"id": "clamav", "name": "ClamAV", "description": "", "version": "1.11", "supported": ["1.7.0"], "homepage": None}
     item.update(over)
     return item
+
+
+def _cache(items=None, tag=TAG, sha=DIGEST, fetched_at=None):
+    return {
+        "fetched_at": fetched_at or datetime.now().astimezone().isoformat(),
+        "catalog": {
+            "plugins": {"tag": tag, "sha256": sha, "items": [_entry()] if items is None else items},
+            "templates": {"tag": "0.6", "sha256": "b" * 64, "items": []},
+        },
+    }
 
 
 @pytest.fixture(scope="module")
@@ -111,7 +118,7 @@ def ctx(route_module, monkeypatch):
 
     monkeypatch.setenv("USE_PLUGIN_CATALOG", "yes")
     data["TO_FLASH"] = []
-    data["PLUGIN_CATALOG"] = {"fetched_at": datetime.now().astimezone().isoformat(), "catalog": {"plugins": [_entry()], "templates": []}}
+    data["PLUGIN_CATALOG"] = _cache()
     # `DATA` here is a plain dict; the product's UIData persists on write. The route only uses
     # dict semantics plus `load_from_file`, so a no-op stub is faithful enough.
     data_obj = data
@@ -144,7 +151,7 @@ def ctx(route_module, monkeypatch):
     client.upload_plugins.side_effect = lambda files, method="ui": uploads.append((files, method)) or {"created": ["clamav"]}
 
     monkeypatch.setattr(module, "wait_applying", lambda *a, **k: None)
-    monkeypatch.setattr(module, "fetch_artifact", lambda url, cap: ARCHIVE)
+    monkeypatch.setattr(module, "fetch_archive", lambda repo, tag: ARCHIVE)
 
     admin = SimpleNamespace(admin=True, is_authenticated=True, is_active=True, is_anonymous=False, get_id=lambda: "1", list_permissions=["write"])
     monkeypatch.setattr(module, "current_user", admin)
@@ -211,12 +218,32 @@ def test_an_unknown_id_installs_nothing(ctx):
 
 
 def test_a_stale_cache_refuses_the_install(ctx):
-    ctx.data["PLUGIN_CATALOG"] = {
-        "fetched_at": (datetime.now().astimezone() - CATALOG_MAX_AGE - timedelta(minutes=1)).isoformat(),
-        "catalog": {"plugins": [_entry()], "templates": []},
-    }
+    ctx.data["PLUGIN_CATALOG"] = _cache(fetched_at=(datetime.now().astimezone() - CATALOG_MAX_AGE - timedelta(minutes=1)).isoformat())
     _post(ctx)
     assert ctx.uploads == []
+
+
+def test_a_cache_with_no_pinned_tag_refuses_the_install(ctx):
+    # A scrubbed tag (read_cached refuses anything RELEASE_TAG_RX rejects) leaves nothing to pin
+    # the re-fetch to, and "fall back to latest" is exactly the drift the pin exists to stop.
+    ctx.data["PLUGIN_CATALOG"] = _cache(tag="")
+    _post(ctx)
+    assert ctx.uploads == []
+    assert "incomplete" in _flashes(ctx)
+
+
+def test_a_cache_with_no_recorded_digest_refuses_the_install(ctx):
+    ctx.data["PLUGIN_CATALOG"] = _cache(sha="")
+    _post(ctx)
+    assert ctx.uploads == []
+    assert "incomplete" in _flashes(ctx)
+
+
+def test_the_re_fetch_is_pinned_to_the_listed_tag_not_to_latest(ctx, monkeypatch):
+    seen = []
+    monkeypatch.setattr(ctx.module, "fetch_archive", lambda repo, tag: seen.append((repo, tag)) or ARCHIVE)
+    _post(ctx)
+    assert seen == [("bunkerity/bunkerweb-plugins", TAG)]
 
 
 # ── C6: the version source fails CLOSED ─────────────────────────────────────
@@ -245,6 +272,15 @@ def test_an_incompatible_version_refuses(ctx):
     assert ctx.uploads == []
 
 
+def test_an_item_declaring_no_compatibility_refuses(ctx):
+    # The state every real plugin is in today: the plugins repository has shipped v1.9/v1.10/v1.11
+    # without a COMPATIBILITY.json line, so `supported` is empty and the gate fails closed.
+    ctx.data["PLUGIN_CATALOG"] = _cache(items=[_entry(supported=[])])
+    _post(ctx)
+    assert ctx.uploads == []
+    assert "declares support for no BunkerWeb version" in _flashes(ctx)
+
+
 def test_a_compatible_version_installs(ctx):
     _post(ctx)
     assert len(ctx.uploads) == 1
@@ -264,38 +300,49 @@ def test_an_id_colliding_with_a_core_plugin_refuses(ctx):
 # ── C1/C2: ordering. Nothing is uploaded when the bytes are wrong ───────────
 
 
-def test_a_digest_mismatch_uploads_nothing(ctx, monkeypatch):
-    monkeypatch.setattr(ctx.module, "fetch_artifact", lambda url, cap: ARCHIVE + b"tampered")
+def test_a_re_cut_tag_uploads_nothing(ctx, monkeypatch):
+    """The gate that replaces the manifest's published hash.
+
+    A git tag can be force-moved, and codeload then serves different bytes for the same URL. The
+    digest recorded when the catalogue was listed is what makes "listed" and "installed" the same
+    bytes, and nothing is uploaded when they differ.
+    """
+    monkeypatch.setattr(ctx.module, "fetch_archive", lambda repo, tag: _tar(("clamav", "clamav"), ("evil", "evil")))
     _post(ctx)
     assert ctx.uploads == []
-    assert "Integrity check failed" in _flashes(ctx)
+    assert "no longer matches" in _flashes(ctx)
 
 
-def test_an_archive_declaring_another_id_uploads_nothing(ctx, monkeypatch):
-    other = _tar(("clamav", "blacklist"))
-    entry = _entry(sha256=__import__("hashlib").sha256(other).hexdigest())
-    ctx.data["PLUGIN_CATALOG"] = {"fetched_at": datetime.now().astimezone().isoformat(), "catalog": {"plugins": [entry], "templates": []}}
-    monkeypatch.setattr(ctx.module, "fetch_artifact", lambda url, cap: other)
+def test_a_folder_missing_from_the_archive_uploads_nothing(ctx, monkeypatch):
+    other = _tar(("coraza", "coraza"))
+    ctx.data["PLUGIN_CATALOG"] = _cache(sha=_sha(other))
+    monkeypatch.setattr(ctx.module, "fetch_archive", lambda repo, tag: other)
     _post(ctx)
     assert ctx.uploads == []
-    assert "declares id" in _flashes(ctx)
+    assert "no folder named clamav" in _flashes(ctx)
 
 
-def test_a_multi_plugin_archive_uploads_nothing(ctx, monkeypatch):
-    multi = _tar(("clamav", "clamav"), ("extra", "extra"))
-    entry = _entry(sha256=__import__("hashlib").sha256(multi).hexdigest())
-    ctx.data["PLUGIN_CATALOG"] = {"fetched_at": datetime.now().astimezone().isoformat(), "catalog": {"plugins": [entry], "templates": []}}
-    monkeypatch.setattr(ctx.module, "fetch_artifact", lambda url, cap: multi)
+def test_only_the_requested_plugin_is_uploaded_never_the_whole_archive(ctx):
+    """The structural half of the identity guarantee.
+
+    Both install branches in this router loop over every plugin.json they find, so handing over
+    the release archive would install all nine on one click, none of them the one clicked. What
+    goes up is a tarball built here holding exactly one folder.
+    """
     _post(ctx)
-    assert ctx.uploads == []
-    assert "exactly one" in _flashes(ctx)
+    assert len(ctx.uploads) == 1
+    _, (_, handle, _) = ctx.uploads[0][0][0]
+    with tar_open(fileobj=BytesIO(handle.read())) as tar:
+        names = tar.getnames()
+    assert names and all(n == "clamav" or n.startswith("clamav/") for n in names)
+    assert not any("coraza" in n for n in names)
 
 
 def test_a_download_failure_uploads_nothing(ctx, monkeypatch):
-    def _boom(url, cap):
+    def _boom(repo, tag):
         raise ValueError("URL is not allowlisted")
 
-    monkeypatch.setattr(ctx.module, "fetch_artifact", _boom)
+    monkeypatch.setattr(ctx.module, "fetch_archive", _boom)
     _post(ctx)
     assert ctx.uploads == []
     assert "Refused to download" in _flashes(ctx)
@@ -337,13 +384,14 @@ def test_errors_in_the_response_are_a_failure_even_alongside_a_created_id(ctx):
     assert "did not complete" in _flashes(ctx)
 
 
-def test_the_upload_carries_the_manifest_id_as_the_filename(ctx):
+def test_the_upload_carries_the_catalogue_id_as_the_filename(ctx):
     _post(ctx)
     files, method = ctx.uploads[0]
     assert method == "ui"
     field, (filename, handle, content_type) = files[0]
     assert field == "files" and filename == "clamav.tar.gz" and content_type == "application/gzip"
-    assert handle.read() == ARCHIVE
+    # NOT the archive that was downloaded: what goes up is the repacked single-plugin tarball.
+    assert handle.read() != ARCHIVE
 
 
 def test_the_route_is_login_protected(ctx):

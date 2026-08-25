@@ -1067,10 +1067,14 @@ def update_github_metadata():
     """
     # `PLUGIN_CATALOG` rides along here rather than growing its own timer: the gate, the
     # off-thread submission, the fail-soft semantics and the cross-worker sharing through
-    # ui_data.json are exactly what a manifest cache needs, and re-implementing them would be
+    # ui_data.json are exactly what a listing cache needs, and re-implementing them would be
     # a second copy of all four. `fetch_catalog` returns None when the kill switch is off (it
-    # issues no request at all) or when the manifest fails validation, and None means "keep
-    # what we have" -- the same contract the other two entries already follow.
+    # issues no request at all) or when neither repository could be resolved and enumerated,
+    # and None means "keep what we have" -- the same contract the other two entries follow.
+    #
+    # Fail-soft is right for the *refresh*; it is not right for installing. That is what the
+    # `fetched_at` stamp and the staleness gate in the install routes are for: a listing that
+    # has not been confirmed for 24h stops being installable even though it stays on screen.
     for key, fetch in (("LATEST_VERSION", get_latest_stable_release), ("GITHUB_STARS", get_github_stars), ("PLUGIN_CATALOG", fetch_catalog)):
         try:
             value = fetch()
