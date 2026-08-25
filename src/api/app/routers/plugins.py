@@ -289,9 +289,14 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
     created: List[str] = []
     errors: List[Dict[str, str]] = []
 
-    # Build set of existing UI plugin ids to avoid collisions
+    # Build the set of existing plugin ids to avoid collisions. EVERY type, not just `ui`:
+    # `Plugins.id` is the primary key, so a core, external, pro or scheduler-installed plugin
+    # occupies the id just as much as a UI one does. Scoped to `ui`, this check let a colliding
+    # archive through to `update_external_plugins`, which SKIPS it in `_uep_sync_plugin_row`
+    # (method mismatch, or `db_plugin.type` not in external/ui/pro) and still returns "" -- so
+    # the id landed in `created` and the API answered success for a plugin it never installed.
     try:
-        existing_ids = {p.get("id") for p in db.get_plugins(_type="ui", with_data=False)}
+        existing_ids = {p.get("id") for p in db.get_plugins(_type="all", with_data=False, with_settings=False)}
     except Exception:
         existing_ids = set()
 
@@ -420,6 +425,27 @@ def upload_plugins(files: List[UploadFile] = File(...), method: str = Form("ui")
                 continue
         except Exception as e:
             errors.append({"file": up.filename or "(unknown)", "error": str(e)})
+
+    # `update_external_plugins` returns "" both when it installed the plugin and when it silently
+    # skipped it, so `created` is confirmed against the database rather than assumed. The check
+    # above already refused every id that existed BEFORE this request, so a `ui` row carrying one
+    # of these ids now can only be one this request wrote -- which also closes the window between
+    # that check and the write. Same-request-only: an id we did not append is never inspected.
+    # That premise holds only while the pre-check actually ran: it is fail-open (`except Exception`
+    # -> `existing_ids = set()`), so if listing the plugins failed there, a pre-existing `ui` id can
+    # reach this point and be confirmed as "installed" when it was really skipped. Acceptable: both
+    # lookups fail together in practice (the same `db.get_plugins`), and the fallback is the old
+    # behaviour, not something worse.
+    if created:
+        try:
+            installed_ids = {p.get("id") for p in db.get_plugins(_type="ui", with_data=False, with_settings=False)}
+        except Exception:
+            installed_ids = None
+        if installed_ids is not None:
+            skipped = [pid for pid in created if pid not in installed_ids]
+            if skipped:
+                created = [pid for pid in created if pid in installed_ids]
+                errors.extend({"file": pid, "error": f"Plugin {pid} was not installed: the id is already taken by another plugin"} for pid in skipped)
 
     status = 207 if errors and created else (400 if errors and not created else 201)
     body: Dict[str, Any] = {"status": "success" if created and not errors else ("partial" if created else "error")}

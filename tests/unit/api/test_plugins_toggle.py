@@ -10,7 +10,7 @@ the ``..schemas``/``..auth.guard``/``..utils`` package modules — all stubbed h
 import importlib.util
 import sys
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock, patch
 
 import pytest
@@ -165,3 +165,98 @@ def test_list_keeps_the_schema_unless_asked_otherwise(db):
     db.get_plugins.return_value = []
     ROUTER.list_plugins()
     assert db.get_plugins.call_args.kwargs["with_settings"] is True
+
+
+# --- POST /plugins/upload: `created` must mean installed --------------------------------------
+# `update_external_plugins` returns "" both when it wrote the plugin and when `_uep_sync_plugin_row`
+# SKIPPED it (method mismatch, or the id already belongs to a core/non-external plugin). The router
+# appended the id to `created` either way, so the API answered 201 success — and the UI flashed
+# "uploaded successfully" — for a plugin that was never installed.
+
+
+def _tar_gz(plugin_id, filename=None):
+    """A minimal .tar.gz carrying one plugin.json, the shape the tar branch parses."""
+    from io import BytesIO as _BytesIO
+    from json import dumps
+    from tarfile import TarInfo, open as tar_open
+
+    payload = dumps({"id": plugin_id, "name": plugin_id, "description": "d", "version": "1.0", "stream": "no", "settings": {}}).encode()
+    buffer = _BytesIO()
+    with tar_open(fileobj=buffer, mode="w:gz") as archive:
+        member = TarInfo(f"{plugin_id}/plugin.json")
+        member.size = len(payload)
+        archive.addfile(member, _BytesIO(payload))
+    return SimpleNamespace(filename=filename or f"{plugin_id}.tar.gz", file=_BytesIO(buffer.getvalue()))
+
+
+@pytest.fixture
+def upload_db(db, monkeypatch, tmp_path):
+    monkeypatch.setattr(ROUTER, "TMP_UI_ROOT", tmp_path / "ui")
+    monkeypatch.setattr(ROUTER, "create_plugin_tar_gz", lambda *a, **k: __import__("io").BytesIO(b"blob"))
+    monkeypatch.setattr(ROUTER, "bytes_hash", lambda *a, **k: "sha")
+    db.update_external_plugins.return_value = ""
+    return db
+
+
+def test_a_core_id_collision_is_refused_before_the_write(upload_db):
+    """A core plugin owns the id. The pre-check listed only `_type="ui"`, so this archive reached
+    the DB layer, was skipped there, and came back as a success."""
+    upload_db.get_plugins.return_value = [{"id": "antibot", "type": "core"}]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("antibot")], method="ui")
+
+    assert resp.status_code == 400
+    assert resp.content["status"] == "error"
+    assert "created" not in resp.content
+    assert resp.content["errors"] == [{"file": "antibot.tar.gz", "error": "Plugin antibot already exists"}]
+    upload_db.update_external_plugins.assert_not_called()
+
+
+def test_the_collision_check_covers_every_plugin_type(upload_db):
+    upload_db.get_plugins.return_value = []
+    ROUTER.upload_plugins(files=[_tar_gz("brandnew")], method="ui")
+    assert upload_db.get_plugins.call_args_list[0].kwargs["_type"] == "all"
+
+
+def test_a_silent_db_skip_is_reported_instead_of_claimed_as_created(upload_db):
+    """The race the pre-check cannot cover: the id is free when listed, taken by the time the DB
+    writes. `update_external_plugins` still returns "", so the row itself is the only evidence."""
+    upload_db.get_plugins.side_effect = [[], []]  # free before; still absent after -> skipped
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("ghost")], method="ui")
+
+    assert resp.status_code == 400
+    assert resp.content["status"] == "error"
+    assert "created" not in resp.content
+    assert resp.content["errors"] == [{"file": "ghost", "error": "Plugin ghost was not installed: the id is already taken by another plugin"}]
+
+
+def test_a_real_install_still_reports_created(upload_db):
+    upload_db.get_plugins.side_effect = [[], [{"id": "brandnew", "type": "ui"}]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("brandnew")], method="ui")
+
+    assert resp.status_code == 201
+    assert resp.content == {"status": "success", "created": ["brandnew"]}
+
+
+def test_a_mixed_upload_separates_the_installed_from_the_skipped(upload_db):
+    """The catalogue route asserts `created == [plugin_id]`; a partial must not hide a skip."""
+    upload_db.get_plugins.side_effect = [[], [{"id": "goodone", "type": "ui"}]]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("goodone"), _tar_gz("badone")], method="ui")
+
+    assert resp.status_code == 207
+    assert resp.content["status"] == "partial"
+    assert resp.content["created"] == ["goodone"]
+    assert resp.content["errors"] == [{"file": "badone", "error": "Plugin badone was not installed: the id is already taken by another plugin"}]
+
+
+def test_an_unreadable_plugin_list_never_erases_created(upload_db):
+    """`get_plugins` failing must not turn a successful install into a reported skip."""
+    upload_db.get_plugins.side_effect = [[], Exception("db down")]
+
+    resp = ROUTER.upload_plugins(files=[_tar_gz("brandnew")], method="ui")
+
+    assert resp.status_code == 201
+    assert resp.content == {"status": "success", "created": ["brandnew"]}
