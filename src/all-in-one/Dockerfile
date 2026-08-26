@@ -168,7 +168,7 @@ FROM nginx:1.30.4-alpine-slim@sha256:ddde39c6e51f02fde7410c2e9c234cf2d0a4c7bdbbe
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
+RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
