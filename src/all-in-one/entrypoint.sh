@@ -259,8 +259,37 @@ if [ "${SERVICE_WORKER}" = "yes" ]; then
 	if [ -n "${REDIS_PASSWORD:-}" ]; then
 		_broker_credentials=":${REDIS_PASSWORD}@"
 	fi
-	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-redis://${_broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0}"
-	unset _broker_credentials
+	# REDIS_SSL reached every other Redis consumer (clusterstore.lua, the API's rate_limit
+	# storage, sync-bans) but not this URL: it always said `redis://`, so pointing REDIS_HOST
+	# at a TLS Redis gave the worker -- and the API's dispatch client, which reads the same
+	# variable -- a plaintext handshake against a TLS listener. Every connection came back
+	# "reset by peer", the worker never consumed and POST /jobs/dispatch answered 502.
+	#
+	# ssl_cert_reqs is always spelled out, never left to a default. Three clients read this one
+	# URL: kombu (the Celery transport) harvests every `ssl_*` query key into conninfo.ssl in
+	# `kombu/utils/url.py` parse_url, and `redis.Redis.from_url` reads them too --
+	# worker/tasks.py `_broker_client` (delivery counter) and jobs/push-configs.py
+	# `_redis_client` (the push lease). Both halves of the branch are load-bearing:
+	#   - `=required`: without it a bare `rediss://` makes kombu log "defaulting to insecure SSL
+	#     behaviour" and fall back to CERT_NONE, silently dropping the verification
+	#     REDIS_SSL_VERIFY asked for (it defaults to yes in core/redis/plugin.json).
+	#   - `=none`: redundant for kombu, which would fall back to CERT_NONE anyway, but required
+	#     for the two redis-py consumers, which otherwise verify and fail
+	#     CERTIFICATE_VERIFY_FAILED against a private CA while the worker itself is connected.
+	# Verification uses the system/certifi trust store: no REDIS_SSL_CA setting exists, so a
+	# private-CA Redis needs REDIS_SSL_VERIFY=no.
+	_broker_scheme="redis"
+	_broker_query=""
+	if [ "${REDIS_SSL:-no}" = "yes" ]; then
+		_broker_scheme="rediss"
+		if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
+			_broker_query="?ssl_cert_reqs=required"
+		else
+			_broker_query="?ssl_cert_reqs=none"
+		fi
+	fi
+	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-${_broker_scheme}://${_broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0${_broker_query}}"
+	unset _broker_credentials _broker_scheme _broker_query
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/worker.ini
 	# Redact the credentials before logging : the URL can now carry the broker password,
 	# and an operator-supplied CELERY_BROKER_URL could always have carried one.

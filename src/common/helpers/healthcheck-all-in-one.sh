@@ -82,7 +82,23 @@ if [ "${SERVICE_WORKER:-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
     if [ -n "${REDIS_PASSWORD:-}" ]; then
       broker_credentials=":${REDIS_PASSWORD}@"
     fi
-    export CELERY_BROKER_URL="redis://${broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0"
+    # REDIS_SSL picks the scheme, exactly as entrypoint.sh does: probing a TLS broker over
+    # plaintext resets the connection, so `celery inspect ping` failed and the container stayed
+    # unhealthy for ever even though the worker was fine. The query is not decoration here
+    # either -- kombu harvests `ssl_*` query keys in `kombu/utils/url.py` parse_url, so
+    # `=required` is what makes this probe actually verify instead of falling back to
+    # CERT_NONE. Keep identical to entrypoint.sh; see the longer note there.
+    broker_scheme="redis"
+    broker_query=""
+    if [ "${REDIS_SSL:-no}" = "yes" ]; then
+      broker_scheme="rediss"
+      if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
+        broker_query="?ssl_cert_reqs=required"
+      else
+        broker_query="?ssl_cert_reqs=none"
+      fi
+    fi
+    export CELERY_BROKER_URL="${broker_scheme}://${broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0${broker_query}"
   fi
 
   # Not executable in the image (COPY src/worker keeps 0644), so run it through bash.
