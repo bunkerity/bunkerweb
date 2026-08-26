@@ -18,6 +18,16 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 4.  **Statuscode auswählen:** Legen Sie den entsprechenden HTTP-Statuscode mit der Einstellung `REDIRECT_TO_STATUS_CODE` fest, um eine permanente oder temporäre Umleitung anzuzeigen.
 5.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden alle Anfragen an die Website automatisch basierend auf Ihren Einstellungen umgeleitet.
 
+### Wiederverwendbare Weiterleitungen
+
+Über die dienstbezogenen Einstellungen unten hinaus kann eine Weiterleitung einmalig als **benannte, wiederverwendbare Regel** gespeichert und an beliebig viele Dienste angehängt werden — über die Seite **Weiterleitungen** in der Weboberfläche oder über die `/redirects`-API-Endpunkte.
+
+- Eine Regel trägt dieselben vier Werte wie die Inline-Einstellungen: Quellpfad, Ziel-URL, Statuscode und ob die Request-URI angehängt wird.
+- Inline-`REDIRECT_*`-Einstellungen funktionieren genau wie bisher. Angehängte Regeln werden **danach** gerendert und belegen die nächsten freien Suffixe, so dass bestehende Konfigurationen unverändert bleiben und keine Migration nötig ist.
+- Eine Regel, die an nichts angehängt ist, rendert nichts.
+- **Ein Pfad, ein Eigentümer.** Eine Weiterleitung rendert ein `location` in denselben Server wie die Reverse-Proxy- und gRPC-Plugins, und NGINX lehnt zwei `location`-Blöcke mit derselben URI ab. Ein Quellpfad ist daher über alle drei hinweg belegt — ob von einer angehängten Regel, einem angehängten Upstream-Pool oder einer Inline-Einstellung — und die kollidierende Änderung wird mit einer Meldung abgelehnt, die nennt, was ihn bereits hält.
+- Das Löschen einer Regel wird abgelehnt, solange sie noch an einen Dienst angehängt ist; hängen Sie sie zuerst ab.
+
 ### Konfigurationseinstellungen
 
 | Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                |

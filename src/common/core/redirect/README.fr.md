@@ -16,6 +16,16 @@ Comment ça marche :
 4. Code : `REDIRECT_TO_STATUS_CODE` (`301` ou `302`).
 5. Laisser BunkerWeb faire le reste : une fois configurées, les redirections sont appliquées automatiquement à vos visiteurs.
 
+### Redirections réutilisables
+
+Au-delà des paramètres par service ci-dessous, une redirection peut être enregistrée une fois comme **règle nommée et réutilisable**, puis attachée à autant de services que vous le souhaitez, depuis la page **Redirections** de l'interface web ou via les endpoints d'API `/redirects`.
+
+- Une règle porte les mêmes quatre valeurs que les paramètres en ligne : chemin source, URL de destination, code de statut et conservation ou non de l'URI de la requête.
+- Les paramètres `REDIRECT_*` en ligne continuent de fonctionner exactement comme avant. Les règles attachées sont rendues **après** eux, en prenant les suffixes libres suivants, de sorte que les configurations existantes ne changent pas et qu'aucune migration n'est nécessaire.
+- Une règle attachée à rien ne rend rien.
+- **Un chemin, un propriétaire.** Une redirection rend un `location` dans le même serveur que les plugins reverse proxy et gRPC, et NGINX refuse deux blocs `location` portant la même URI. Un chemin source est donc pris pour les trois à la fois — qu'il soit revendiqué par une règle attachée, un pool d'upstreams attaché ou un paramètre en ligne — et la modification en conflit est refusée avec un message nommant ce qui le détient déjà.
+- La suppression d'une règle est refusée tant qu'elle est encore attachée à un service ; détachez-la d'abord.
+
 ### Paramètres
 
 | Paramètre                 | Défaut | Contexte  | Multiple | Description                                                         |

@@ -17,6 +17,12 @@ Le plugin gRPC permet à BunkerWeb de proxyfier des services gRPC via HTTP/2 ave
 3. **Associer les chemins :** Définissez `GRPC_URL` pour chaque upstream (avec les suffixes correspondants en cas d'entrées multiples).
 4. **Ajuster le comportement :** Configurez si besoin les timeouts, les retries, les en-têtes et les options TLS SNI.
 
+!!! tip "Pools réutilisables de backends gRPC"
+    Un `GRPC_HOST` pointe vers un seul backend. Pour répartir la charge entre plusieurs backends, ou partager les mêmes backends entre plusieurs services, déclarez un **pool d'upstreams gRPC** sur la page **Upstreams** (ou via l'API `/upstreams`) et attachez-le à un service sur un chemin — BunkerWeb écrit alors `grpc://<pool>` dans le `GRPC_HOST` correspondant à votre place. Notez que les `location` gRPC et reverse proxy partagent un seul espace de noms de chemins sur un service : un même chemin ne peut pas être revendiqué deux fois, quel que soit le plugin qui le sert. Voir la section *Upstreams réutilisables* de la documentation du Reverse Proxy.
+
+!!! tip "TLS mutuel avec le backend gRPC"
+    Pour présenter un certificat client au backend, configurez `REVERSE_PROXY_SSL_CLIENT_CERT` et `REVERSE_PROXY_SSL_CLIENT_KEY` (ou leurs variantes `_DATA`) sur le service. L'identité est volontairement partagée avec le reverse proxy : un service s'authentifie auprès de ses backends avec un seul certificat, quel que soit le plugin qui relaie le trafic, et BunkerWeb en émet `grpc_ssl_certificate`/`grpc_ssl_certificate_key`. Voir *TLS mutuel avec l'upstream* dans la documentation du Reverse Proxy.
+
 ### Paramètres de configuration
 
 | Paramètre                    | Défaut | Contexte  | Multiple | Description                                                                                          |

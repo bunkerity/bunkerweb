@@ -93,8 +93,18 @@
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
+| `METRICS_REDIS_TTL` | `2592000` | global | 否 | **指标 Redis TTL：** Redis 中指标键过期前的秒数（`0` 表示永不过期）；每次同步都会刷新，因此活跃数据永不过期，而被弃用的数据则可在 `volatile-lru` 策略下被淘汰，使 Redis 能从 `maxmemory` 中恢复。支持 `k`/`m` 简写。 |
 | `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
+| `METRICS_COLLECT_TIMINGS` | `yes` | global | 否 | **采集插件耗时：** 按 (插件, 阶段) 以 count/sum/max 聚合的形式，测量每个插件在每个请求阶段所花的时间。它需要在每次插件调用前后强制刷新 NGINX 的时间，在完整插件链上约合每请求一微秒；设为 `no` 可完全去掉这项开销。整个请求的耗时始终会被采集。 |
+| `METRICS_MEMORY_MAX_RETRIES` | `5` | global | 否 | **内存操作最大重试次数：** 内存操作的最大重试次数。 |
+| `METRICS_PERSIST_TO_DB` | `yes` | global | 否 | **持久化报告：** 通过定期抓取各实例，把被拦截请求的报告持久化到数据库中——可长期保存且可查询。禁用后，报告只存在于内存和 Redis 存储中。 |
+| `METRICS_RETENTION_DAYS` | `90` | global | 否 | **报告保留（天）：** 已持久化的被拦截请求报告在被保留任务删除之前的最大保存天数。 |
+| `METRICS_RETENTION_MAX_ROWS` | `1000000` | global | 否 | **报告保留（行数）：** 要保留的已持久化报告的最大条数；超出部分由保留任务从最旧的行开始删除。 |
+| `METRICS_BASELINE_SAMPLE_RATE` | `1` | global | 否 | **基线采样率：** 记录为流量基线的*未被拦截*请求所占的百分比，供异常检测学习"正常"是什么样子（`0` 表示关闭，`1` 表示每一百个请求采样一个）。采样依据请求 id 是确定性的，且从不存储客户端 IP。 |
+| `METRICS_MAX_BASELINE_REQUESTS` | `1k` | global | 否 | **基线记录上限：** 每个 worker 在丢弃最旧记录之前所保留的采样基线记录的最大条数。该缓冲区与报告共享 `METRICS_MEMORY_SIZE`，但在空间不足时会被丢弃，而不会挤占报告。请降低采样率，而不是调高此值。 |
+| `METRICS_BASELINE_RETENTION_DAYS` | `14` | global | 否 | **基线保留（天）：** 采样基线记录在被保留任务删除之前的最大保存天数。有意比报告的保留期更短：基线增长快得多，而模型是基于近期的正常行为训练的。 |
+| `METRICS_BASELINE_RETENTION_MAX_ROWS` | `2000000` | global | 否 | **基线保留（行数）：** 要保留的采样基线记录的最大条数。与报告的上限分开设置，因为这两张表的增长速度差别很大。 |
 
 !!! tip "调整内存分配大小"
     应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。

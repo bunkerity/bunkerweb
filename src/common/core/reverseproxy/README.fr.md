@@ -18,6 +18,38 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
 4.  **Configurer les options spécifiques au protocole :** Pour les WebSockets ou des exigences HTTP spéciales, ajustez les paramètres correspondants.
 5.  **Mettre en place la mise en cache (optionnel) :** Activez et configurez la mise en cache du proxy pour améliorer les performances pour le contenu fréquemment accédé.
 
+### Upstreams réutilisables
+
+Les paramètres ci-dessous font pointer un `location` vers un seul backend. Lorsque plusieurs backends servent la même application, ou que plusieurs services partagent les mêmes backends, vous pouvez à la place déclarer un **pool nommé et réutilisable** — un upstream — depuis la page **Upstreams** de l'interface web ou via les endpoints d'API `/upstreams`, et l'attacher à autant de services que vous le souhaitez. Modifier le pool met à jour tous les services auxquels il est attaché.
+
+- Un pool porte un nom, un **protocole**, une méthode de répartition de charge (`round_robin`, `least_conn` ou `ip_hash`), un nombre de connexions `keepalive` facultatif, et un ou plusieurs serveurs.
+- Chaque serveur porte son adresse (`hôte` ou `hôte:port`, sans schéma), un `weight`, et les paramètres de contrôle de santé passif `max_fails` et `fail_timeout` ; il peut aussi être marqué `backup` (utilisé uniquement lorsque les autres échouent) ou `down` (temporairement retiré).
+- Le **protocole** décide quel consommateur utilise le pool et comment il est attaché :
+    - `http` — le reverse proxy (`proxy_pass`). Attaché à un **service et un chemin**, de sorte qu'un même service peut relayer `/` vers un pool et `/api` vers un autre.
+    - `grpc` — le plugin gRPC (`grpc_pass`), attaché de la même façon. Les pools HTTP et gRPC partagent un seul espace de noms de chemins, puisque tous deux rendent un `location` dans le même serveur.
+    - `stream` — un service TCP/UDP. Il n'y a pas de chemin : le pool prend en charge tout le service et remplace le backend unique implicite que la configuration stream construit à partir de `REVERSE_PROXY_HOST`. Un service ne peut en porter qu'un seul, et `keepalive` ne s'applique pas.
+- Le commutateur `backend_ssl` sélectionne TLS vers les serveurs : `https://` au lieu de `http://`, `grpcs://` au lieu de `grpc://`.
+- Le protocole doit correspondre au service : un pool HTTP ou gRPC va sur un service dont le `SERVER_TYPE` est `http`, un pool stream sur un service dont le `SERVER_TYPE` est `stream`. L'interface web ne propose que les services compatibles ; l'API refuse les autres avec une explication.
+- Les paramètres `REVERSE_PROXY_HOST` et `GRPC_HOST` en ligne continuent de fonctionner exactement comme avant. Les pools attachés sont rendus **après** eux, en prenant les suffixes libres suivants, de sorte que les configurations existantes ne changent pas et qu'aucune migration n'est nécessaire. Un service auquel un pool est attaché voit `USE_REVERSE_PROXY` (ou `USE_GRPC`) activé automatiquement.
+- **Un chemin, un propriétaire.** Le reverse proxy, gRPC et les **redirections** rendent tous un `location` dans le même serveur, et NGINX refuse deux blocs `location` portant la même URI. Un chemin est donc pris pour les trois à la fois — qu'il soit revendiqué par un pool attaché, une redirection attachée ou un paramètre en ligne — et la modification en conflit est refusée avec un message nommant ce qui le détient déjà.
+- Un pool attaché à rien ne rend rien, et la suppression d'un pool est refusée tant qu'il est encore attaché à un service ; détachez-le d'abord. Changer le protocole d'un pool attaché est refusé pour la même raison.
+- Les noms de pool n'acceptent que des lettres, des chiffres, des tirets et des tirets bas. Les points sont refusés volontairement : NGINX résout un nom contre les upstreams déclarés avant le résolveur DNS, donc un pool nommé comme un hôte réel capterait le trafic qui lui est destiné.
+
+### TLS mutuel avec l'upstream
+
+Les paramètres `REVERSE_PROXY_SSL_VERIFY` ci-dessous vérifient le certificat *du backend*. Pour présenter aussi un certificat **au** backend — TLS mutuel — configurez la paire client :
+
+- `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` pour des chemins de fichiers lisibles par le scheduler, ou `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` pour du PEM en base64 ou en clair, sélectionnés par `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` ou `data`).
+- La paire est validée avec OpenSSL, mise en cache et distribuée à chaque instance par le même job que celui qui gère l'autorité de certification de confiance, et y est écrite avec des permissions restreintes au propriétaire et au groupe.
+- **Les deux moitiés sont obligatoires.** Un certificat sans sa clé (ou l'inverse) est refusé plutôt qu'appliqué à moitié, car NGINX a besoin des deux directives ou d'aucune.
+- L'identité est **par service, et partagée avec gRPC et stream** : un service s'authentifie auprès de ses backends avec un seul certificat, quel que soit le plugin qui relaie le trafic. Dans le contexte stream, c'est aussi ce qui active TLS vers le backend (`proxy_ssl on`), de sorte qu'un service sans paire client conserve son comportement en clair actuel.
+- Effacer les paramètres supprime les fichiers à l'exécution suivante, ce qui désactive le TLS mutuel.
+
+C'est indépendant du plugin `mtls`, qui authentifie *les clients qui se connectent à BunkerWeb* — la direction opposée.
+
+!!! warning "Un backend non résoluble fait échouer le rechargement"
+    NGINX résout les adresses des serveurs upstream au chargement de sa configuration. Si un serveur d'un pool attaché ne peut pas être résolu, toute la configuration est refusée et BunkerWeb conserve la dernière valide. Utilisez une adresse qui se résout au moment du rechargement, ou marquez le serveur comme `down` tant qu'il est indisponible.
+
 ### Guide de configuration
 
 === "Configuration de base"
@@ -66,6 +98,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | Paramètre                       | Défaut | Contexte  | Multiple | Description                                                                                                        |
     | ------------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`  | multisite | yes      | **Délai de connexion :** Temps maximum pour établir une connexion avec le serveur backend.                         |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | oui | **Fermeture à moitié (stream) :** à `yes`, garde la connexion vers le backend ouverte après que le client a fermé son sens d'écriture. Nécessaire pour les protocoles TCP où le client ferme à moitié puis attend la réponse ; nginx ferme les deux sens par défaut. Services stream (TCP/UDP) uniquement. |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`  | multisite | yes      | **Délai de lecture :** Temps maximum entre les transmissions de deux paquets successifs depuis le serveur backend. |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`  | multisite | yes      | **Délai d'envoi :** Temps maximum entre les transmissions de deux paquets successifs vers le serveur backend.      |
     | `PROXY_BUFFERS`                 |        | multisite | no       | **Tampons :** Nombre et taille des tampons pour lire la réponse du serveur backend.                                |
@@ -97,6 +130,11 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **Chemin du certificat de confiance SSL :** Chemin vers un bundle d'AC au format PEM (lisible par le planificateur) utilisé pour vérifier l'amont. |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **Données du certificat de confiance SSL :** AC de confiance fournie directement en base64 ou PEM (p. ex. via l'interface web). |
     | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **Profondeur de vérification SSL :** Profondeur de vérification dans la chaîne de certificats de l'amont. |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | non | **Priorité du certificat client :** Source du certificat et de la clé présentés à l'upstream : `file` (chemin) ou `data` (base64/PEM). |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | non | **Chemin du certificat client :** Chemin vers le certificat client PEM que BunkerWeb présente à l'upstream, lisible par le scheduler. Nécessite la clé correspondante. |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | non | **Données du certificat client :** Certificat client fourni directement en base64 ou en PEM (par ex. via l'interface web). |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | non | **Chemin de la clé client :** Chemin vers la clé privée PEM correspondant au certificat client, lisible par le scheduler. |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | non | **Données de la clé client :** Clé privée client fournie directement en base64 ou en PEM. Préférez un chemin de fichier quand c'est possible : une clé définie ici est stockée comme valeur de paramètre. |
 
     !!! info "Vérification du certificat"
         Lorsque `REVERSE_PROXY_SSL_VERIFY` est défini sur `yes`, NGINX valide à la fois la chaîne de certificats de l'amont et son nom :
@@ -205,6 +243,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | yes      | **Configurations supplémentaires :** Incluez des configurations additionnelles dans le bloc location.                                                                                                                      |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | yes      | **Passer le corps de la requête :** Active ou désactive la transmission du corps de la requête.                                                                                                                            |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | yes      | **ModSecurity (par location) :** Mettez à `no` pour émettre `modsecurity off;` dans cette location ; contourne le WAF sur les points de terminaison de gros téléversements afin d'éviter un OOM (voir la note ci-dessous). |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | non | **Envoyer le protocole PROXY :** Envoie l'en-tête du protocole PROXY à l'upstream stream. `auto` suit le paramètre global `USE_PROXY_PROTOCOL`, ce que BunkerWeb faisait avant l'existence de ce paramètre ; `yes` et `no` décident indépendamment du listener entrant. Services stream (TCP/UDP) uniquement. |
 
     !!! warning "Considérations de sécurité"
         Soyez prudent lorsque vous incluez des extraits de configuration personnalisés car ils peuvent outrepasser les paramètres de sécurité de BunkerWeb ou introduire des vulnérabilités s'ils ne sont pas correctement configurés.

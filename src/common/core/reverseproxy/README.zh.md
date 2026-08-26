@@ -18,6 +18,38 @@
 4.  **配置特定于协议的选项：** 对于 WebSockets 或特殊的 HTTP 要求，请调整相应的设置。
 5.  **设置缓存（可选）：** 启用和配置代理缓存，以提高频繁访问内容的性能。
 
+### 可复用的上游池
+
+下面这些设置把一个 `location` 指向单个后端。当多个后端服务于同一个应用，或多个服务共用同一批后端时，您可以改为声明一个**具名、可复用的池**——即上游（upstream）——可在 Web 界面的 **Upstreams** 页面或通过 `/upstreams` API 端点创建，并附加到任意多个服务上。修改池会同时更新所有附加了它的服务。
+
+- 一个池带有名称、**协议**、负载均衡方法（`round_robin`、`least_conn` 或 `ip_hash`）、可选的 `keepalive` 连接数，以及一个或多个服务器。
+- 每个服务器带有地址（`主机` 或 `主机:端口`，不含协议前缀）、`weight`，以及被动健康检查参数 `max_fails` 和 `fail_timeout`；还可以标记为 `backup`（仅在其他服务器失败时使用）或 `down`（临时摘除）。
+- **协议**决定由哪个消费方使用该池以及如何附加：
+    - `http` —— 反向代理（`proxy_pass`）。附加到一个**服务加一个路径**，因此同一个服务可以把 `/` 代理到一个池、把 `/api` 代理到另一个池。
+    - `grpc` —— gRPC 插件（`grpc_pass`），附加方式相同。HTTP 与 gRPC 池共享同一个路径命名空间，因为二者都会向同一个 server 渲染 `location`。
+    - `stream` —— TCP/UDP 服务。没有路径：池接管整个服务，取代 stream 配置根据 `REVERSE_PROXY_HOST` 构建的那个隐式单后端。一个服务只能带一个，且 `keepalive` 不适用。
+- `backend_ssl` 开关决定是否对后端服务器使用 TLS：用 `https://` 代替 `http://`，用 `grpcs://` 代替 `grpc://`。
+- 协议必须与服务匹配：HTTP 或 gRPC 池只能用于 `SERVER_TYPE` 为 `http` 的服务，stream 池只能用于 `SERVER_TYPE` 为 `stream` 的服务。Web 界面只列出匹配的服务；API 会拒绝其余的并给出说明。
+- 内联的 `REVERSE_PROXY_HOST` 和 `GRPC_HOST` 设置的行为与以往完全一致。附加的池在它们**之后**渲染，占用接下来空闲的后缀，因此现有配置不受影响，也不需要任何迁移。附加了池的服务会自动启用 `USE_REVERSE_PROXY`（或 `USE_GRPC`）。
+- **一个路径，只有一个归属。** 反向代理、gRPC 和**重定向**都会向同一个 server 渲染 `location`，而 NGINX 拒绝两个 URI 相同的 `location` 块。因此一个路径会被这三者共同占用——无论占用它的是附加的池、附加的重定向，还是内联设置——冲突的改动会被拒绝，并给出说明是谁已经占用了该路径的消息。
+- 没有附加到任何服务的池不会渲染出任何内容；只要池仍附加在某个服务上，删除它就会被拒绝，请先解除附加。出于同样的原因，修改已附加池的协议也会被拒绝。
+- 池名只接受字母、数字、连字符和下划线。点号是有意拒绝的：NGINX 会先在已声明的上游中解析名称，然后才走 DNS 解析器，因此一个与真实主机同名的池会截走本该发往该主机的流量。
+
+### 与上游之间的双向 TLS
+
+下面的 `REVERSE_PROXY_SSL_VERIFY` 系列设置校验的是*后端的*证书。若还要向后端出示证书——即双向 TLS——请配置客户端证书对：
+
+- 使用 `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` 指定调度器可读的文件路径，或使用 `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` 直接给出 base64 或明文 PEM，由 `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY`（`file` 或 `data`）决定取哪一种。
+- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。
+- **两半都必须提供。** 只有证书而没有对应的私钥（或反之）会被拒绝，而不会只应用一半，因为 NGINX 要么需要这两条指令，要么一条都不要。
+- 该身份是**按服务生效的，并与 gRPC 和 stream 共享**：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证。在 stream 上下文中，它同时也是启用到后端的 TLS（`proxy_ssl on`）的开关，因此未配置客户端证书对的服务会保持其现有的明文行为。
+- 清空这些设置后，下一次运行会删除这些文件，双向 TLS 随之关闭。
+
+这与 `mtls` 插件无关，后者认证的是*连接到 BunkerWeb 的客户端*——方向正好相反。
+
+!!! warning "无法解析的后端会导致重载失败"
+    NGINX 在加载配置时会解析上游服务器的地址。如果已附加池中的某个服务器无法解析，整份配置都会被拒绝，BunkerWeb 会继续使用上一份有效配置。请使用在重载时可解析的地址，或在服务器不可用期间将其标记为 `down`。
+
 ### 配置指南
 
 === "基本配置"
@@ -66,6 +98,7 @@
     | 设置                            | 默认值 | 上下文    | 多选 | 描述                                                            |
     | ------------------------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`  | multisite | 是   | **连接超时：** 建立到后端服务器连接的最长时间。                 |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | 是 | **Stream 半关闭：** 设为 `yes` 时，在客户端关闭其写方向后仍保持与后端的连接。某些 TCP 协议要求客户端先半关闭再等待响应，而 nginx 默认会同时关闭两个方向。仅适用于 stream（TCP/UDP）服务。 |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`  | multisite | 是   | **读取超时：** 从后端服务器传输两个连续数据包之间的最长时间。   |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`  | multisite | 是   | **发送超时：** 向后端服务器传输两个连续数据包之间的最长时间。   |
     | `PROXY_BUFFERS`                 |        | multisite | 否   | **缓冲区：** 用于从后端服务器读取响应的缓冲区的数量和大小。     |
@@ -97,6 +130,11 @@
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。 |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。 |
     | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                       |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | 否 | **客户端证书优先级：** 向上游出示的证书与私钥的来源：`file`（路径）或 `data`（base64/PEM）。 |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | 否 | **客户端证书路径：** BunkerWeb 向上游出示的 PEM 客户端证书路径，需可被调度器读取。必须同时提供配对的私钥。 |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | 否 | **客户端证书数据：** 直接以 base64 或 PEM 形式提供的客户端证书（例如通过 Web 界面）。 |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | 否 | **客户端私钥路径：** 与客户端证书配对的 PEM 私钥路径，需可被调度器读取。 |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | 否 | **客户端私钥数据：** 直接以 base64 或 PEM 形式提供的客户端私钥。条件允许时请优先使用文件路径：在此填入的私钥会作为设置值存储。 |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -205,6 +243,7 @@
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | 否 | **发送 PROXY 协议：** 向 stream 上游发送 PROXY 协议头。`auto` 跟随全局的 `USE_PROXY_PROTOCOL`，也就是该设置出现之前 BunkerWeb 的行为；`yes` 和 `no` 则与入站监听器无关地独立决定。仅适用于 stream（TCP/UDP）服务。 |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。

@@ -17,6 +17,12 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
 3. **映射路径：** 为每个上游设置 `GRPC_URL`（多个条目时使用对应后缀）。
 4. **调优行为：** 按需配置超时、重试、请求头以及 TLS SNI 选项。
 
+!!! tip "可复用的 gRPC 后端池"
+    一个 `GRPC_HOST` 只指向单个后端。若要在多个后端之间做负载均衡，或在多个服务之间共用同一批后端，请在 **Upstreams** 页面（或通过 `/upstreams` API）声明一个 **gRPC 上游池**，并按路径附加到某个服务上——BunkerWeb 会替您把 `grpc://<池名>` 写入对应的 `GRPC_HOST`。请注意，在同一个服务上 gRPC 与反向代理的 `location` 共享同一个路径命名空间：同一路径不能被占用两次，无论由哪个插件提供服务。参见反向代理文档中的*可复用的上游池*一节。
+
+!!! tip "与 gRPC 后端之间的双向 TLS"
+    要向后端出示客户端证书，请在该服务上设置 `REVERSE_PROXY_SSL_CLIENT_CERT` 和 `REVERSE_PROXY_SSL_CLIENT_KEY`（或它们的 `_DATA` 变体）。该身份是有意与反向代理共享的：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证，BunkerWeb 会据此输出 `grpc_ssl_certificate`/`grpc_ssl_certificate_key`。参见反向代理文档中的*与上游之间的双向 TLS*。
+
 ### 配置项
 
 | 配置项                       | 默认值 | 上下文    | 可多值 | 说明                                                                                   |

@@ -98,6 +98,7 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
     | Setting                         | Default | Context   | Multiple | Description                                                                                             |
     | ------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`   | multisite | yes      | **Connect Timeout:** Maximum time to establish a connection to the backend server.                      |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | yes | **Stream Half Close:** when set to `yes`, keep the connection to the backend open after the client closes its write side. Required by TCP protocols where the client half-closes and then waits for the response; nginx closes both directions by default. Stream (TCP/UDP) services only. |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`   | multisite | yes      | **Read Timeout:** Maximum time between transmissions of two successive packets from the backend server. |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`   | multisite | yes      | **Send Timeout:** Maximum time between transmissions of two successive packets to the backend server.   |
     | `PROXY_BUFFERS`                 |         | multisite | no       | **Buffers:** Number and size of buffers for reading the response from the backend server.               |
@@ -129,6 +130,11 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI). |
     | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                  |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | no | **Client Certificate Priority:** Source of the client certificate and key presented to the upstream: `file` (path) or `data` (base64/PEM). |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | no | **Client Certificate Path:** Path to the PEM client certificate BunkerWeb presents to the upstream, readable by the scheduler. Requires the matching key. |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | no | **Client Certificate Data:** Client certificate supplied directly as base64 or PEM (e.g. via the web UI). |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | no | **Client Key Path:** Path to the PEM private key matching the client certificate, readable by the scheduler. |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | no | **Client Key Data:** Client private key supplied directly as base64 or PEM. Prefer a file path when possible: a key set here is stored as a setting value. |
 
     !!! info "Certificate Verification"
         When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
@@ -237,6 +243,7 @@ This is independent of the `mtls` plugin, which authenticates *clients connectin
     | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | no | **Send PROXY Protocol:** Send the PROXY protocol header to the stream upstream. `auto` follows the global `USE_PROXY_PROTOCOL`, which is what BunkerWeb did before this setting existed; `yes` and `no` decide independently of the inbound listener. Stream (TCP/UDP) services only. |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.

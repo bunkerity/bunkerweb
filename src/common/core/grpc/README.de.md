@@ -17,6 +17,12 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
 3. **Pfad(e) zuordnen:** Setzen Sie `GRPC_URL` pro Upstream (bei mehreren Einträgen mit passenden Suffixen).
 4. **Verhalten abstimmen:** Konfigurieren Sie bei Bedarf Timeouts, Retries, Header und TLS-SNI-Optionen.
 
+!!! tip "Wiederverwendbare Pools von gRPC-Backends"
+    Ein `GRPC_HOST` zeigt auf ein einzelnes Backend. Um über mehrere Backends zu verteilen oder dieselben Backends zwischen Diensten zu teilen, deklarieren Sie einen **gRPC-Upstream-Pool** auf der Seite **Upstreams** (oder über die `/upstreams`-API) und hängen ihn an einen Dienst mit einem Pfad an — BunkerWeb schreibt dann `grpc://<pool>` in den passenden `GRPC_HOST` für Sie. Beachten Sie, dass gRPC- und Reverse-Proxy-`location` sich auf einem Dienst einen Pfad-Namensraum teilen: derselbe Pfad kann nicht zweimal belegt werden, gleich welches Plugin ihn bedient. Siehe den Abschnitt *Wiederverwendbare Upstreams* in der Reverse-Proxy-Dokumentation.
+
+!!! tip "Gegenseitiges TLS zum gRPC-Backend"
+    Um dem Backend ein Client-Zertifikat vorzulegen, setzen Sie `REVERSE_PROXY_SSL_CLIENT_CERT` und `REVERSE_PROXY_SSL_CLIENT_KEY` (oder ihre `_DATA`-Varianten) am Dienst. Die Identität wird bewusst mit dem Reverse Proxy geteilt: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt, und BunkerWeb gibt daraus `grpc_ssl_certificate`/`grpc_ssl_certificate_key` aus. Siehe *Gegenseitiges TLS zum Upstream* in der Reverse-Proxy-Dokumentation.
+
 ### Konfigurationseinstellungen
 
 | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |

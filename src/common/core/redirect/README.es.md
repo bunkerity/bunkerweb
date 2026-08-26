@@ -18,6 +18,16 @@ Siga estos pasos para configurar y utilizar la función de Redirección:
 4.  **Seleccione el código de estado:** Establezca el código de estado HTTP apropiado con el ajuste `REDIRECT_TO_STATUS_CODE` para indicar una redirección permanente o temporal.
 5.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, todas las solicitudes al sitio se redirigirán automáticamente según su configuración.
 
+### Redirecciones reutilizables
+
+Más allá de los ajustes por servicio de más abajo, una redirección puede guardarse una sola vez como **regla con nombre y reutilizable** y adjuntarse a tantos servicios como quiera, desde la página **Redirecciones** de la interfaz web o a través de los endpoints de API `/redirects`.
+
+- Una regla lleva los mismos cuatro valores que los ajustes en línea: ruta de origen, URL de destino, código de estado y si se añade la URI de la petición.
+- Los ajustes `REDIRECT_*` en línea siguen funcionando exactamente igual que antes. Las reglas adjuntas se renderizan **después** de ellos, tomando los siguientes sufijos libres, de modo que las configuraciones existentes no se tocan y no hace falta ninguna migración.
+- Una regla que no está adjunta a nada no renderiza nada.
+- **Una ruta, un propietario.** Una redirección renderiza un `location` en el mismo servidor que los complementos de proxy inverso y gRPC, y NGINX rechaza dos bloques `location` con la misma URI. Por tanto, una ruta de origen queda ocupada para los tres a la vez — la reclame una regla adjunta, un grupo de upstreams adjunto o un ajuste en línea — y el cambio en conflicto se rechaza con un mensaje que indica qué la ocupa ya.
+- Eliminar una regla se rechaza mientras siga adjunta a un servicio; despréndala primero.
+
 ### Ajustes de Configuración
 
 | Ajuste                    | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
