@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4 AS builder
+FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -70,7 +70,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.14-slim@sha256:ce40764625a4ff50df3548277632e7f96c4e77fe75fa848aae9885476e7df5a4
+FROM python:3.14-slim@sha256:83ff1d245a3d57d04152252d3ef9cb361494d0b3395abd65a5ebe91c401c8e83
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -103,7 +103,7 @@ RUN . /etc/os-release && \
   useradd -u 101 -g ui -d /usr/share/bunkerweb/ui -s /usr/sbin/nologin -M ui
 
 # Fix CVEs
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount openssl util-linux && rm -rf /var/lib/apt/lists/* # util-linux 2.41-5 -> 2.41.5-0+deb13u1 and openssl 3.5.6-1~deb13u2 -> 3.5.7-1~deb13u2 (openssl drags libssl3t64 + openssl-provider-legacy with it), both still shipped vulnerable by the base image: CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615 CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
