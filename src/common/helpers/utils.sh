@@ -124,7 +124,13 @@ function get_nginx_conf_dir() {
 function export_env_file() {
 	local env_file=$1
 	[ -f "$env_file" ] || return 0
-	while IFS='=' read -r key value; do
+	# `|| [ -n "$key" ]`: `read` returns non-zero on a final line with no trailing newline,
+	# which ends the loop BEFORE the body runs -- so the last variable of such a file was
+	# silently never exported. Every consumer of this helper was affected: an
+	# /etc/bunkerweb/variables.env whose last line is `API_TOKEN=...` left the API with no
+	# token at all, so the scheduler's Bearer never matched and every one of its calls came
+	# back 401 Unauthorized, reported as a read-only database.
+	while IFS='=' read -r key value || [ -n "$key" ]; do
 		[[ -z "$key" || "$key" =~ ^# ]] && continue
 		key=$(echo "$key" | xargs)
 		[[ -z "$key" ]] && continue
