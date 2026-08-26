@@ -28,6 +28,13 @@ spec:
         - name: valkey
           image: valkey/valkey:8-alpine@sha256:77643d152547b446fc15cbafaff22004545663fcd40c6b28038ad283837baa75
           imagePullPolicy: Always
+          # Same entrypoint the Docker fixture uses (tests/misc/docker/valkey.yml). Without it the
+          # stock image ignored every VALKEY_* key in valkey-secret -- including VALKEY_ACL_FILE --
+          # so the `admin` user generate.py writes into /acl/valkey.acl never existed and the
+          # harness's own client died on AUTH with "invalid username-password pair or user is
+          # disabled". redis-master.yml has run its entrypoint this way all along; this deployment
+          # was the odd one out.
+          command: ["/scripts/valkey-entrypoint.sh"]
           envFrom:
             - secretRef:
                 name: valkey-secret
@@ -36,6 +43,13 @@ spec:
               name: vol-acl
             - mountPath: /tls/
               name: vol-tls
+            # /mnt/redis-scripts, not a valkey-specific directory: it is already created and synced
+            # into the node for any spec with `type: redis` actions, which every valkey spec is by
+            # construction (`valkey: true` is an attribute of a redis action). A dedicated
+            # /mnt/valkey-scripts would need a new entry in sync_minikube_fixtures.
+            - mountPath: /scripts/
+              name: vol-scripts
+              readOnly: true
             - mountPath: "/data"
               name: vol-data
       volumes:
@@ -45,6 +59,9 @@ spec:
         - name: vol-tls
           hostPath:
             path: /mnt/valkey-tls/
+        - name: vol-scripts
+          hostPath:
+            path: /mnt/redis-scripts/
         - name: vol-data
           persistentVolumeClaim:
             claimName: pvc-redis
@@ -63,6 +80,10 @@ spec:
       protocol: TCP
       port: 6379
       targetPort: 6379
+    - name: redis-tls
+      protocol: TCP
+      port: 6380
+      targetPort: 6380
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -91,3 +112,11 @@ spec:
       port: 6379
       targetPort: 6379
       nodePort: 30479
+    # 30482, not 30480/30481: those two are already claimed by the valkey-slave nodeports in
+    # valkey-sentinel.yml, and a nodePort is cluster-global -- the second apply would be rejected
+    # with "provided port is already allocated".
+    - name: redis-tls
+      protocol: TCP
+      port: 6380
+      targetPort: 6380
+      nodePort: 30482

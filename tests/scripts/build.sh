@@ -279,7 +279,7 @@ else
       "80:80" "443:443" "5000:5000" "5001:5001" "5443:5443"
       "${UI_HOST_PORT:-7000}:30070" "8000:30080" "8888:30088"
       "3306:30306" "5432:30432"
-      "6380:30379" "6381:30380" "6382:30381" "6479:30479"
+      "6380:30379" "6381:30380" "6382:30381" "6479:30479" "6480:30482"
       "26379:32379" "26380:32380" "26381:32381"
       "26479:32479" "26480:32480" "26481:32481"
     )
@@ -382,6 +382,13 @@ else
 
     if grep -q "valkey: true" tests/core/"$category".yml ; then
       mkdir -p /tmp/valkey-acl /tmp/valkey-tls /tmp/valkey-sentinel
+      # Into redis-scripts on purpose: that directory is already created just above (a valkey spec
+      # is a redis spec -- `valkey: true` is an attribute of a `type: redis` action) and is already
+      # in the sync_minikube_fixtures list, so tests/misc/k8s/valkey.yml can mount it as /scripts
+      # without a new fixture directory. The stock image ignores VALKEY_* env, so without this
+      # entrypoint the ACL file is never loaded and every authenticated action fails on AUTH.
+      cp tests/misc/scripts/valkey-entrypoint.sh /tmp/redis-scripts/
+      chmod 0755 /tmp/redis-scripts/valkey-entrypoint.sh
     fi
   fi
 
