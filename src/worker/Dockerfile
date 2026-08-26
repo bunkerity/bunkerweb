@@ -109,6 +109,17 @@ COPY --chown=root:worker --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn
 COPY --chown=root:worker --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 COPY --chown=root:worker --chmod=550 src/worker/healthcheck-worker.sh /usr/share/bunkerweb/helpers/healthcheck-worker.sh
 
+# The public root bundle `lua_ssl_trusted_certificate` points at, needed HERE because the worker is
+# where the generator runs: push-configs shells out to gen/main.py, and when REDIS_SSL_CA is set
+# gen appends the operator CA onto this bundle so the Lua request path trusts it too. Until now
+# only the bw and all-in-one images carried it (src/bw/Dockerfile:40 `COPY src/bw/misc misc`), so a
+# worker generating for a split-container fleet had no roots to append to -- and appending to
+# nothing would have silently dropped the CAs antibot, BunkerNet and CrowdSec verify against.
+# 550, not 440: BuildKit applies --chmod to the parent directories it creates as well, and
+# /usr/share/bunkerweb/misc does not exist in this image -- at 440 the directory came out
+# `dr--r-----` and the worker (uid 101) could not traverse into it to read the file at all.
+COPY --chown=root:worker --chmod=550 src/bw/misc/root-ca.pem /usr/share/bunkerweb/misc/root-ca.pem
+
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.7.0~beta"
 LABEL url="https://www.bunkerweb.io"

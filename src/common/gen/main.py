@@ -5,6 +5,7 @@ from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
 from shutil import rmtree
+from ssl import PROTOCOL_TLS_CLIENT, SSLContext, SSLError
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Any, Dict
@@ -24,6 +25,105 @@ from plugin_extensions import run_config_extensions  # type: ignore
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
 LOGGER = getLogger("GENERATOR")
+
+# The public root bundle every Lua cosocket verifies against, shipped in the image and named by
+# `lua_ssl_trusted_certificate` in confs/http.conf and confs/stream.conf.
+LUA_TRUSTED_CA_SOURCE = Path(sep, "usr", "share", "bunkerweb", "misc", "root-ca.pem")
+# Written into the rendered tree, so those same two templates can name it and push-configs ships
+# it to every instance in the same tar as the configuration that points at it.
+LUA_TRUSTED_CA_BUNDLE = "lua-trusted-ca.pem"
+
+
+def write_lua_trusted_ca_bundle(redis_ssl_ca: str, output_path: Path) -> None:
+    """Append the operator's Redis/Valkey CA onto the trust store the Lua request path uses.
+
+    `clusterstore.lua` reaches Redis through an OpenResty cosocket, and a cosocket has no
+    per-connection trust store: it verifies against the single `lua_ssl_trusted_certificate`
+    file of the surrounding NGINX configuration. That is why REDIS_SSL_CA could not reach the
+    request path at all, and why it can only reach it by joining that one file.
+
+    Appended, never substituted. The same store is what antibot, BunkerNet and CrowdSec verify
+    their outbound HTTPS against, so replacing it with the operator's CA would break all three
+    on the whole fleet; adding to it only grants trust the operator asked for.
+
+    Unset REDIS_SSL_CA writes nothing, and the two templates keep naming the baked-in bundle --
+    the rendered tree is then byte-for-byte what it was before this existed.
+
+    Every failure below is fatal on purpose. `lua_ssl_trusted_certificate` pointing at a missing
+    or malformed file makes NGINX refuse to start, so a bad value has to stop generation here:
+    push-configs treats a non-zero generator as "render failed", pushes nothing, and every
+    instance keeps serving the configuration it already has.
+    """
+    redis_ssl_ca = (redis_ssl_ca or "").strip()
+    if not redis_ssl_ca:
+        return
+
+    ca_file = Path(redis_ssl_ca)
+    if not ca_file.is_file():
+        LOGGER.error(f"REDIS_SSL_CA is set but is not a file : {ca_file}")
+        sys_exit(1)
+    elif not access(ca_file, R_OK):
+        LOGGER.error(f"REDIS_SSL_CA is set but can't be read : {ca_file}")
+        sys_exit(1)
+
+    if not LUA_TRUSTED_CA_SOURCE.is_file() or not access(LUA_TRUSTED_CA_SOURCE, R_OK):
+        LOGGER.error(
+            f"REDIS_SSL_CA is set but the root bundle is missing : {LUA_TRUSTED_CA_SOURCE}"
+            " (refusing to ship a trust store without it, which would break every other Lua HTTPS client)"
+        )
+        sys_exit(1)
+
+    # Bytes, not text. `read_text()` normalises line endings, and the shipped root bundle uses CRLF
+    # (1794 of them) -- reading it as text and writing it back silently rewrote 1794 bytes of a
+    # bundle this is only supposed to APPEND to. OpenSSL accepts either ending, so nothing would
+    # have failed; the roots would just no longer have been the bytes that shipped.
+    try:
+        roots = LUA_TRUSTED_CA_SOURCE.read_bytes()
+        operator_ca = ca_file.read_bytes()
+    except OSError as e:
+        LOGGER.error(f"REDIS_SSL_CA : can't read the CA material ({e})")
+        sys_exit(1)
+
+    # `load_verify_locations(cadata=...)` reads PEM only from a str -- bytes there mean DER.
+    try:
+        roots_pem = roots.decode()
+        operator_pem = operator_ca.decode()
+    except UnicodeDecodeError as e:
+        LOGGER.error(f"REDIS_SSL_CA : the CA material is not text, so it is not PEM ({e})")
+        sys_exit(1)
+
+    # The operator's file is validated ON ITS OWN, and that separation is load-bearing: OpenSSL
+    # silently ignores non-PEM text trailing a valid bundle, so validating only the concatenation
+    # would happily accept a REDIS_SSL_CA containing nothing but garbage and ship a trust store
+    # that does not actually trust the Redis/Valkey CA.
+    try:
+        SSLContext(PROTOCOL_TLS_CLIENT).load_verify_locations(cadata=operator_pem)
+    except (SSLError, ValueError) as e:
+        LOGGER.error(f"REDIS_SSL_CA is not a valid PEM CA bundle : {ca_file} ({e})")
+        sys_exit(1)
+
+    combined = (roots if roots.endswith(b"\n") else roots + b"\n") + operator_ca
+
+    try:
+        combined_ctx = SSLContext(PROTOCOL_TLS_CLIENT)
+        combined_ctx.load_verify_locations(cadata=combined.decode())
+        root_ctx = SSLContext(PROTOCOL_TLS_CLIENT)
+        root_ctx.load_verify_locations(cadata=roots_pem)
+    except (SSLError, ValueError, UnicodeDecodeError) as e:
+        LOGGER.error(f"REDIS_SSL_CA : the combined trust bundle is not loadable ({e})")
+        sys_exit(1)
+
+    # "Append, never replace", asserted instead of assumed. Fewer certificates than the root
+    # bundle alone means the concatenation lost some, and the loss would surface as every Lua
+    # HTTPS client failing verification across the fleet rather than as an error here.
+    if len(combined_ctx.get_ca_certs()) < len(root_ctx.get_ca_certs()):
+        LOGGER.error(f"REDIS_SSL_CA : the combined trust bundle dropped certificates from {LUA_TRUSTED_CA_SOURCE}")
+        sys_exit(1)
+
+    bundle_path = output_path.joinpath(LUA_TRUSTED_CA_BUNDLE)
+    bundle_path.write_bytes(combined)
+    LOGGER.info(f"Appended REDIS_SSL_CA ({ca_file}) onto the Lua trust bundle : {bundle_path}")
+
 
 if __name__ == "__main__":
     try:
@@ -164,6 +264,11 @@ if __name__ == "__main__":
                 file.unlink()
             elif file.is_dir():
                 rmtree(file.as_posix(), ignore_errors=True)
+
+        # After the wipe (which would delete it) and before the render (which needs it to exist
+        # by the time http.conf/stream.conf name it). A failure here exits non-zero, so nothing
+        # is rendered and nothing is pushed.
+        write_lua_trusted_ca_bundle(config.get("REDIS_SSL_CA", ""), output_path)
 
         # Render the templates
         LOGGER.info("Rendering templates ...")
