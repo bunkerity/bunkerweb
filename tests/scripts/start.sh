@@ -542,7 +542,32 @@ elif [ "$integration" == "Kubernetes" ] ; then
             echo "  newName: ${NEW_PREFIX}/bunkerweb-ui";
             echo "  newTag: ${NEW_TAG}";
         fi
+        # The worker was born in 1.7 and `bunkerity/bunkerweb-worker` does not exist on the
+        # registry for any earlier tag -- the "from" half of the upgrade spec therefore pinned
+        # bunkerity/bunkerweb-worker:1.6.14, sat in ImagePullBackOff, and the readiness wait
+        # (every pod in the bunkerweb namespace) timed out after 420s before a single action ran.
+        # Drop the deployment for a pre-1.7 stack; the upgrade re-applies with it. The Docker
+        # branch gates on the same helper.
+        if ! stack_has_worker ; then
+            echo "patches:";
+            echo "- target:";
+            echo "    group: apps";
+            echo "    version: v1";
+            echo "    kind: Deployment";
+            echo "    name: bunkerweb-worker";
+            echo "  patch: |";
+            echo "    \$patch: delete";
+            echo "    apiVersion: apps/v1";
+            echo "    kind: Deployment";
+            echo "    metadata:";
+            echo "      name: bunkerweb-worker";
+            echo "      namespace: bunkerweb";
+        fi
     } > "$KZ_DIR/kustomization.yaml"
+
+    if ! stack_has_worker ; then
+        log "START" "ℹ️ " "☸️ BunkerWeb $BW_VERSION predates the worker, deploying without it"
+    fi
 
     kubectl apply -k "$KZ_DIR"
     # shellcheck disable=SC2181
