@@ -1447,19 +1447,22 @@ function restart_stack () {
 
             # Copy resources locally because kustomize forbids absolute paths from outside the root
             cp tests/k8s/bunkerweb.yml "$KZ_DIR/bunkerweb.yml"
+            # The API is applied for every type, exactly as start.sh does: the 1.7 scheduler
+            # dispatches its jobs through it, so a cluster without it runs none. This block used to
+            # gate it on ui|api, which meant a `type: core` version change re-versioned everything
+            # BUT the API -- the whole to_latest_* half of the upgrade spec then ran a 1.6.14 API
+            # against a 1.7 scheduler and database.
+            cp tests/k8s/bunkerweb-api.yml "$KZ_DIR/bunkerweb-api.yml"
             if [ "$type" == "ui" ] ; then
                 cp tests/k8s/bunkerweb-ui.yml "$KZ_DIR/bunkerweb-ui.yml"
-            elif [ "$type" == "api" ] ; then
-                cp tests/k8s/bunkerweb-api.yml "$KZ_DIR/bunkerweb-api.yml"
             fi
 
             {
                 echo "resources:";
                 echo "- bunkerweb.yml";
+                echo "- bunkerweb-api.yml";
                 if [ "$type" == "ui" ] ; then
                     echo "- bunkerweb-ui.yml";
-                elif [ "$type" == "api" ] ; then
-                    echo "- bunkerweb-api.yml";
                 fi
                 echo "images:";
                 echo "- name: localhost:5000/bunkerity/bunkerweb";
@@ -1471,16 +1474,44 @@ function restart_stack () {
                 echo "- name: localhost:5000/bunkerity/bunkerweb-scheduler";
                 echo "  newName: ${NEW_PREFIX}/bunkerweb-scheduler";
                 echo "  newTag: ${NEW_TAG}";
+                echo "- name: localhost:5000/bunkerity/bunkerweb-api";
+                echo "  newName: ${NEW_PREFIX}/bunkerweb-api";
+                echo "  newTag: ${NEW_TAG}";
+                # bunkerweb.yml carries the worker Deployment, so this block always re-applied it --
+                # but with no transform entry it landed back on the untransformed
+                # localhost:5000/...:tests, right for a "tests" target only by accident.
+                echo "- name: localhost:5000/bunkerity/bunkerweb-worker";
+                echo "  newName: ${NEW_PREFIX}/bunkerweb-worker";
+                echo "  newTag: ${NEW_TAG}";
                 if [ "$type" == "ui" ] ; then
                     echo "- name: localhost:5000/bunkerity/bunkerweb-ui";
                     echo "  newName: ${NEW_PREFIX}/bunkerweb-ui";
                     echo "  newTag: ${NEW_TAG}";
-                elif [ "$type" == "api" ] ; then
-                    echo "- name: localhost:5000/bunkerity/bunkerweb-api";
-                    echo "  newName: ${NEW_PREFIX}/bunkerweb-api";
-                    echo "  newTag: ${NEW_TAG}";
+                fi
+                # The worker was born in 1.7 and `bunkerity/bunkerweb-worker` does not exist on the
+                # registry for any earlier tag, so a transition whose target predates it must drop
+                # the Deployment rather than pin an image that cannot be pulled. Same gate and same
+                # patch as the start.sh block.
+                if ! stack_has_worker ; then
+                    echo "patches:";
+                    echo "- target:";
+                    echo "    group: apps";
+                    echo "    version: v1";
+                    echo "    kind: Deployment";
+                    echo "    name: bunkerweb-worker";
+                    echo "  patch: |";
+                    echo "    \$patch: delete";
+                    echo "    apiVersion: apps/v1";
+                    echo "    kind: Deployment";
+                    echo "    metadata:";
+                    echo "      name: bunkerweb-worker";
+                    echo "      namespace: bunkerweb";
                 fi
             } > "$KZ_DIR/kustomization.yaml"
+
+            if ! stack_has_worker ; then
+                log "UTILS" "ℹ️ " "☸️ BunkerWeb $BW_VERSION predates the worker, restarting without it"
+            fi
 
             kubectl apply -k "$KZ_DIR"
             # shellcheck disable=SC2181
