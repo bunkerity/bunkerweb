@@ -232,12 +232,18 @@ ngx_http_cookie_flag_filter_init(ngx_conf_t *cf)
     return NGX_OK;
 }
 
+// bunkerweb-patch: every flag guard below used ngx_strcasestrn(), which scans until a NUL byte,
+// but header->value.data is never NUL-terminated: ngx_sprintf() fills the buffers allocated here
+// exactly full, and lua-nginx-module's ngx.header["Set-Cookie"] does the same. The scan then ran
+// past the end of the allocation, and a spurious hit in adjacent pool memory made the module treat
+// the flag as already present and silently drop it (layout-dependent flag loss). Switched to
+// ngx_strlcasestrn(), which is bounded by an explicit "last" pointer instead of a NUL scan.
 static ngx_int_t
 ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *cookie, ngx_table_elt_t *header)
 {
     ngx_str_t tmp;
 
-    if (cookie->httponly == 1 && ngx_strcasestrn(header->value.data, "; HttpOnly", 10 - 1) == NULL) {
+    if (cookie->httponly == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; HttpOnly", 10 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; HttpOnly") - 1);
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -247,7 +253,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->secure == 1 && ngx_strcasestrn(header->value.data, "; secure", 8 - 1) == NULL) {
+    if (cookie->secure == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; secure", 8 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; secure") - 1);
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -257,7 +263,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite == 1 && ngx_strcasestrn(header->value.data, "; SameSite", 10 - 1) == NULL) {
+    if (cookie->samesite == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite", 10 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite") - 1);
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -267,7 +273,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite_lax == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Lax", 14 - 1) == NULL) {
+    if (cookie->samesite_lax == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite=Lax", 14 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Lax") - 1);
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -277,7 +283,7 @@ ngx_http_cookie_flag_filter_append(ngx_http_request_t *r, ngx_http_cookie_t *coo
         header->value.len = tmp.len;
     }
 
-    if (cookie->samesite_strict == 1 && ngx_strcasestrn(header->value.data, "; SameSite=Strict", 17 - 1) == NULL) {
+    if (cookie->samesite_strict == 1 && ngx_strlcasestrn(header->value.data, header->value.data + header->value.len, (u_char *) "; SameSite=Strict", 17 - 1) == NULL) {
         tmp.data = ngx_pnalloc(r->pool, header->value.len + sizeof("; SameSite=Strict") - 1);
         if (tmp.data == NULL) {
             return NGX_ERROR;
@@ -334,7 +340,10 @@ ngx_http_cookie_flag_filter_handler(ngx_http_request_t *r)
 
                 if (ngx_strncasecmp(cookie[j].cookie_name.data, (u_char *) "*", 1) != 0) {
                     // append "=" to the security cookie name. The result will be something like "cookie_name="
-                    char *cookie_name = ngx_pnalloc(r->pool,  sizeof("=") - 1 + cookie[j].cookie_name.len);
+                    // bunkerweb-patch: was sizeof("=") - 1 + len, i.e. len + 1 bytes, but strcpy() writes
+                    // len + 1 (name + NUL) and strcat("=") then writes 2 more at [len] and [len + 1] --
+                    // a 1-byte heap overflow. len + 2 is the exact size of "name=" plus its NUL.
+                    char *cookie_name = ngx_pnalloc(r->pool,  sizeof("=") + cookie[j].cookie_name.len);
                     if (cookie_name == NULL) {
                         return NGX_ERROR;
                     }
@@ -342,7 +351,9 @@ ngx_http_cookie_flag_filter_handler(ngx_http_request_t *r)
                     strcat(cookie_name, "=");
 
                     // if Set-Cookie contains a cookie from settings
-                    if (ngx_strcasestrn(header[i].value.data, cookie_name, strlen(cookie_name) - 1) != NULL) {
+                    // bunkerweb-patch: bounded search -- header[i].value.data is not NUL-terminated (see the
+                    // note on ngx_http_cookie_flag_filter_append above); ngx_strcasestrn() over-read past it.
+                    if (ngx_strlcasestrn(header[i].value.data, header[i].value.data + header[i].value.len, (u_char *) cookie_name, strlen(cookie_name) - 1) != NULL) {
                         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "filter http_cookie_flag - add flags for cookie \"%V\"", &cookie[j].cookie_name);
                         ngx_int_t res = ngx_http_cookie_flag_filter_append(r, &cookie[j], &header[i]);
                         if (res != NGX_OK) {
