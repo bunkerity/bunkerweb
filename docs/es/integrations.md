@@ -1432,6 +1432,17 @@ La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [pe
 - **Autenticación:** cuando se define `REDIS_PASSWORD` y la configuración no contiene ya `requirepass`, el Redis integrado se lanza con `requirepass` para mantener la coherencia entre el cliente y el servidor de BunkerWeb. El servidor integrado solo admite el usuario predeterminado: define `REDIS_USERNAME` únicamente cuando apuntes a un Redis externo con ACLs.
 - Los registros de Redis aparecen con el prefijo `[REDIS]` en los registros de Docker y en `/var/log/bunkerweb/redis.log`.
 
+### Retención de registros {#aio-log-retention}
+
+A diferencia de las demás imágenes Docker, el Todo en Uno mantiene `access.log`, `error.log` y `modsec_audit.log` como archivos reales bajo `/var/log/bunkerweb/`. El flujo de registro los lee para anteponer un prefijo a cada línea y aplicar `HIDE_SERVICE_LOGS`, y tanto el analizador de CrowdSec incluido como el visor de registros de la interfaz web los leen desde el disco.
+
+- La imagen incluye `logrotate` y lo ejecuta cada hora bajo supervisor. Un fallo de rotación se reporta con el prefijo `[LOGROTATE]` en los registros del contenedor.
+- La política es la misma que instalan los paquetes de Linux, en `/etc/logrotate.d/bunkerweb`: cada archivo que coincide con `/var/log/bunkerweb/*.log` se rota en cuanto supera los 100 MB, se conservan siete generaciones comprimidas, y la rotación usa `copytruncate`.
+- `copytruncate` vacía el archivo en el mismo sitio en lugar de renombrarlo, por lo que conserva su inodo. El flujo de registro, el analizador de CrowdSec y el visor de registros lo siguen a través de una rotación sin necesidad de reiniciar, y ModSecurity sigue escribiendo en el archivo correcto aunque nunca reabre su registro de auditoría.
+- Para cambiar el umbral o el número de generaciones, monta tu propio archivo sobre `/etc/logrotate.d/bunkerweb`. Para desactivar la rotación por completo y gestionar tú mismo la retención, monta un archivo vacío sobre esa misma ruta; un volumen montado en `/var/log/bunkerweb` solo cambia dónde viven los datos, no impide que el `logrotate` del contenedor los siga rotando ahí.
+
+Consulta [Retención de los archivos de registro](advanced.md#log-file-retention) para ver cómo lo gestionan las demás integraciones.
+
 ### Integración con CrowdSec {#crowdsec-integration}
 
 La imagen Docker **Todo en Uno** de BunkerWeb viene con CrowdSec totalmente integrado, sin necesidad de contenedores adicionales ni configuración manual. Sigue los pasos a continuación para habilitar, configurar y ampliar CrowdSec en tu despliegue.

@@ -1432,6 +1432,17 @@ BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化�
 - **认证：** 当 `REDIS_PASSWORD` 被设置且配置文件尚未定义 `requirepass` 时，内置 Redis 将以 `requirepass` 启动，使 BunkerWeb 客户端和服务端保持一致。内置服务端仅支持默认用户——仅当连接启用 ACL 的外部 Redis 时才设置 `REDIS_USERNAME`。
 - Redis 日志在 Docker 日志和 `/var/log/bunkerweb/redis.log` 中以 `[REDIS]` 前缀出现。
 
+### 日志保留 {#aio-log-retention}
+
+与其他 Docker 镜像不同，一体化镜像会将 `access.log`、`error.log` 和 `modsec_audit.log` 保留为 `/var/log/bunkerweb/` 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 `HIDE_SERVICE_LOGS`，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。
+
+- 该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 `[LOGROTATE]` 前缀报告。
+- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件在超过 100 MB 时都会被轮转，保留七个压缩后的历史版本，并使用 `copytruncate` 进行轮转。
+- `copytruncate` 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。
+- 如需更改阈值或历史版本数量，请将您自己的文件挂载到 `/etc/logrotate.d/bunkerweb`。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 `/var/log/bunkerweb` 只会改变数据的存放位置，并不会阻止容器内运行的 `logrotate` 继续对其进行轮转。
+
+参见[日志文件保留策略](advanced.md#log-file-retention)，了解其他集成方式如何处理这一点。
+
 ### CrowdSec 集成 {#crowdsec-integration}
 
 BunkerWeb **一体化** Docker 镜像完全集成了 CrowdSec——无需额外的容器或手动设置。请按照以下步骤在您的部署中启用、配置和扩展 CrowdSec。

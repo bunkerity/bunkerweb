@@ -1444,6 +1444,17 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 - **Authentication:** when `REDIS_PASSWORD` is set and the conf does not already define `requirepass`, the embedded Redis is launched with `requirepass` so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set `REDIS_USERNAME` only when pointing at an external Redis with ACLs.
 - Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
 
+### Log Retention {#aio-log-retention}
+
+Unlike the other Docker images, the All-In-One keeps `access.log`, `error.log` and `modsec_audit.log` as real files under `/var/log/bunkerweb/`. The log stream reads them to prefix each line and to apply `HIDE_SERVICE_LOGS`, and both the bundled CrowdSec parser and the Web UI log viewer read them from disk.
+
+- The image bundles `logrotate` and runs it hourly under supervisor. A rotation failure is reported with the `[LOGROTATE]` prefix in the container logs.
+- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated once it passes 100 MB, seven compressed generations are kept, and rotation uses `copytruncate`.
+- `copytruncate` empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.
+- To change the threshold or the number of generations, mount your own file over `/etc/logrotate.d/bunkerweb`. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at `/var/log/bunkerweb` only changes where the bytes live, it does not stop the container's own `logrotate` from still rotating them there.
+
+See [Log File Retention](advanced.md#log-file-retention) for how the other integrations handle this.
+
 ### CrowdSec Integration {#crowdsec-integration}
 
 The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.

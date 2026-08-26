@@ -168,7 +168,7 @@ FROM nginx:1.30.4-alpine-slim@sha256:ddde39c6e51f02fde7410c2e9c234cf2d0a4c7bdbbe
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
+RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
@@ -235,6 +235,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
     chmod 770 -R /etc/supervisor.d
 
+COPY --chown=root:nginx --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 

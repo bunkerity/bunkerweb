@@ -27,18 +27,19 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 ### 配置设置
 
-| 设置                                  | 默认值         | 上下文    | 多选 | 描述                                                                                                                                        |
-| ------------------------------------- | -------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                            |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                 |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                      |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
+| 设置                                  | 默认值                                | 上下文    | 多选 | 描述                                                                                                                                        |
+| ------------------------------------- | ------------------------------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                            |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                 |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。                |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
 
 !!! warning "ModSecurity 和 OWASP 核心规则集"
     **我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)**，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。

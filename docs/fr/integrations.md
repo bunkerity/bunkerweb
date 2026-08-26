@@ -1439,6 +1439,17 @@ L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persist
 - **Authentification :** lorsque `REDIS_PASSWORD` est défini et que la conf ne contient pas déjà `requirepass`, le Redis embarqué est lancé avec `requirepass`, ce qui maintient la cohérence entre client et serveur BunkerWeb. Le serveur embarqué ne prend en charge que l'utilisateur par défaut — ne définissez `REDIS_USERNAME` que pour cibler un Redis externe avec des ACLs.
 - Les journaux Redis apparaissent avec le préfixe `[REDIS]` dans les journaux Docker et dans `/var/log/bunkerweb/redis.log`.
 
+### Rétention des journaux {#aio-log-retention}
+
+Contrairement aux autres images Docker, l'All-in-one conserve `access.log`, `error.log` et `modsec_audit.log` comme de vrais fichiers sous `/var/log/bunkerweb/`. Le flux de journalisation les lit pour ajouter un préfixe à chaque ligne et appliquer `HIDE_SERVICE_LOGS`, et l'analyseur CrowdSec embarqué ainsi que le visualiseur de journaux de l'interface Web les lisent depuis le disque.
+
+- L'image embarque `logrotate` et l'exécute toutes les heures sous supervisor. Un échec de rotation est signalé par le préfixe `[LOGROTATE]` dans les logs du conteneur.
+- La politique est celle installée par les paquets Linux, dans `/etc/logrotate.d/bunkerweb` : tout fichier correspondant à `/var/log/bunkerweb/*.log` est tourné dès qu'il dépasse 100 Mo, sept générations compressées sont conservées, et la rotation utilise `copytruncate`.
+- `copytruncate` vide le fichier sur place au lieu de le renommer, si bien qu'il conserve son inode. Le flux de journalisation, l'analyseur CrowdSec et le visualiseur de journaux le suivent donc à travers une rotation sans avoir besoin de redémarrer, et ModSecurity continue d'écrire dans le bon fichier même s'il ne rouvre jamais son journal d'audit.
+- Pour modifier le seuil ou le nombre de générations, montez votre propre fichier par-dessus `/etc/logrotate.d/bunkerweb`. Pour désactiver entièrement la rotation et gérer la rétention vous-même, montez un fichier vide par-dessus ce même chemin ; un volume monté sur `/var/log/bunkerweb` ne fait que déplacer les données, il n'empêche pas le `logrotate` du conteneur de continuer à les faire tourner à cet endroit.
+
+Voir [Rétention des fichiers journaux](advanced.md#log-file-retention) pour savoir comment les autres intégrations gèrent cela.
+
 ### Intégration CrowdSec {#crowdsec-integration}
 
 L'image Docker **tout-en-un** de BunkerWeb est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.

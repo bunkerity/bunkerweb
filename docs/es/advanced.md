@@ -2605,11 +2605,11 @@ Hay dos categorías principales de registros para configurar:
 
 Los registros de servicio se controlan con la configuración `LOG_TYPES`, que puede aceptar múltiples valores separados por espacios (por ejemplo, `LOG_TYPES="stderr syslog"`).
 
-| Valor    | Descripción                                                                                                                                                                                                            |
-| :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Escribe los registros en un archivo plano. La rotación externa la gestiona `logrotate` en instalaciones Linux o tu driver de logging del contenedor en Docker. Requerido para el visor de registros de la interfaz UI. |
-| `stderr` | Escribe los registros en la salida de error estándar. Estándar en entornos con contenedores (`docker logs`).                                                                                                           |
-| `syslog` | Envía los registros a un servidor syslog. Requiere definir `LOG_SYSLOG_ADDRESS`.                                                                                                                                       |
+| Valor    | Descripción                                                                                                                                                                                                                                                                                                                                                                                    |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Escribe los registros en un archivo plano. En instalaciones Linux, la rotación externa la gestiona `logrotate`. En un contenedor, nada rota un archivo que un servicio escribe por sí mismo: la retención es responsabilidad del operador, así que monta el archivo en un volumen y rótalo tú mismo, o prefiere `stderr`/`syslog` ahí. Requerido para el visor de registros de la interfaz UI. |
+| `stderr` | Escribe los registros en la salida de error estándar. Estándar en entornos con contenedores (`docker logs`).                                                                                                                                                                                                                                                                                   |
+| `syslog` | Envía los registros a un servidor syslog. Requiere definir `LOG_SYSLOG_ADDRESS`.                                                                                                                                                                                                                                                                                                               |
 
 Al usar `file`, también debes configurar:
 
@@ -2643,6 +2643,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Retención de los archivos de registro {#log-file-retention}
+
+Solo las integraciones que mantienen archivos de registro reales necesitan retención, y ambas usan el mismo mecanismo: `logrotate`, con la política que BunkerWeb instala en `/etc/logrotate.d/bunkerweb`. Rota cada archivo que coincida con `/var/log/bunkerweb/*.log` en cuanto supera los 100 MB, conserva siete generaciones comprimidas y usa `copytruncate`.
+
+- **Linux**: los paquetes dependen de `logrotate` y el sistema lo ejecuta con su propio temporizador. No hay nada más que hacer.
+- **All-in-one**: la imagen incluye `logrotate` y lo ejecuta cada hora bajo supervisor, usando ese mismo archivo de política.
+- **Docker, Autoconf, Swarm y Kubernetes**: no hay nada que rotar. `src/bw/Dockerfile` sustituye `access.log`, `error.log` y `modsec_audit.log` por enlaces simbólicos a la salida estándar y al error estándar del propio contenedor al construir la imagen, de modo que la retención corresponde al driver de logging de tu entorno de ejecución de contenedores (consulta [las buenas prácticas de logging de Docker](#docker-logging-best-practices) más abajo).
+
+`copytruncate` es lo que hace que una sola política funcione para todas ellas. Copia el archivo aparte y vacía el original en el mismo sitio en lugar de renombrarlo, de modo que un proceso que nunca reabre su registro sigue escribiendo en el archivo correcto. ModSecurity es exactamente ese proceso: abre el registro de auditoría una vez, cuando se carga la configuración, y mantiene el descriptor abierto. Rotar mediante renombrado lo dejaría escribiendo en el archivo archivado para siempre, con el archivo activo vacío.
+
+Edita `/etc/logrotate.d/bunkerweb` para cambiar el umbral, el número de generaciones, o para añadir un `maxage`. En el All-in-one, monta tu propio archivo sobre esa ruta.
+
+La ubicación del registro de auditoría se establece mediante `MODSECURITY_SEC_AUDIT_LOG` (multisite, por defecto `/var/log/bunkerweb/modsec_audit.log`); consulta los [ajustes de ModSecurity](features.md#modsecurity). Si lo apuntas fuera de `/var/log/bunkerweb`, queda fuera de la política anterior, y en una integración de contenedores sustituye el enlace simbólico por un archivo real que nada rota. Si lo mueves, móntalo en un volumen y rótalo tú mismo.
+
 ### Valores por defecto e integración — Ejemplos
 
 === "Linux"
@@ -2668,6 +2682,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf"
 
     **Comportamiento predeterminado**: `LOG_TYPES="stderr"`. Los registros son visibles mediante `docker logs`.
+
+    Estas imágenes no tienen, de entrada, ningún archivo de registro gestionado por BunkerWeb que limitar: `src/bw/Dockerfile` elimina `access.log`, `error.log` y `modsec_audit.log` al construir la imagen y sustituye los tres por enlaces simbólicos a la salida estándar y al error estándar del propio contenedor, de modo que `ACCESS_LOG`, `ERROR_LOG` y `MODSECURITY_SEC_AUDIT_LOG` van directamente al flujo de registro del contenedor por defecto. La retención ahí es responsabilidad de tu entorno de ejecución, a través del driver de logging (consulta [las buenas prácticas de logging de Docker](#docker-logging-best-practices) más abajo) o de un colector externo; BunkerWeb no incluye `logrotate` en sus imágenes.
 
     **Ejemplo (adaptado de la guía de inicio rápido)**: Mantener `docker logs` (stderr) Y enviar también a un contenedor syslog central (necesario para la interfaz web y CrowdSec).
 
@@ -2796,6 +2812,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **Comportamiento predeterminado**: igual que Docker (`LOG_TYPES="stderr"`), pero la imagen All-in-one conserva `ACCESS_LOG`, `ERROR_LOG` y `MODSECURITY_SEC_AUDIT_LOG` como archivos reales bajo `/var/log/bunkerweb/` (los mismos valores por defecto que en Linux), porque tanto el CrowdSec incluido como el visor de registros de la interfaz web los leen desde disco.
+
+    BunkerWeb los limita por ti ahí: la imagen incluye `logrotate` y lo ejecuta cada hora bajo supervisor, con la misma política que instalan los paquetes de Linux (consulta [Retención de los archivos de registro](#log-file-retention) más arriba). Como la rotación se hace con `copytruncate`, los archivos conservan su inodo, de modo que el analizador de CrowdSec y el visor de registros los siguen a través de una rotación sin necesidad de reiniciar.
+
 === "Kubernetes"
 
     **Comportamiento predeterminado**: Los registros se escriben en `stderr` y son visibles mediante `kubectl logs`.
@@ -2872,7 +2894,7 @@ log {
 };
 ```
 
-## Buenas prácticas de registro de Docker
+## Buenas prácticas de registro de Docker {#docker-logging-best-practices}
 
 Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro `json-file`, lo que puede dar lugar a archivos de registro muy grandes si no se configura.
 
