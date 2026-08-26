@@ -52,6 +52,11 @@ EXEMPT_DOCKERFILES = {
     # Alpine base, and alembic-only: `grep -rn "pg_dump\|psql" misc/migration/` is empty, so its
     # client is never on a dump path. Alpine has no PGDG equivalent to gate on either.
     "misc/migration/Dockerfile": "alpine, alembic-only, never on a dump path",
+    # Installs no client of its own -- it only CONFIGURES the repository so that the .deb, which
+    # the Linux arm installs at container runtime, can resolve its first alternative. The mention
+    # the sweep catches is in a comment. Guarded separately by
+    # `test_the_linux_test_image_can_resolve_the_pinned_client` below.
+    "tests/linux/Dockerfile-ubuntu-noble": "configures the PGDG repository, installs no client itself",
 }
 
 # The .deb recipes. RPM targets are deliberately absent: Fedora already ships an 18 client under the
@@ -126,6 +131,31 @@ def test_every_dockerfile_installing_a_postgresql_client_is_accounted_for():
     # Non-vacuity: a glob that silently stopped matching would make the assertion above trivially
     # true, so require that every guarded file was actually discovered by the sweep.
     assert set(DOCKERFILES) <= found, f"the sweep no longer finds the guarded Dockerfiles: {sorted(set(DOCKERFILES) - found)}"
+
+
+# The Linux integration arm installs the .deb inside this image, so its apt has to be able to
+# satisfy the FIRST alternative or the arm silently tests the fallback instead. Only ubuntu-noble
+# is dispatched today (tests/utils/integrations.yml `dev:`); the four sibling deb images
+# (ubuntu, ubuntu-jammy, debian-bookworm, debian-trixie) still need the same block before a
+# matrix row can enable them.
+LINUX_TEST_IMAGE = "tests/linux/Dockerfile-ubuntu-noble"
+
+
+def test_the_linux_test_image_can_resolve_the_pinned_client():
+    """Without the PGDG repository here, `apt install bunkerweb.deb` takes the fallback client.
+
+    noble's archive stops at 16 and the suite's own manifest runs a 17 server, so the arm reported
+    `pg_dump: error: aborting because of server version mismatch` on backup;generate_postgresql --
+    a test-environment gap, not the product limit it looked like.
+    """
+    text = (ROOT / LINUX_TEST_IMAGE).read_text(encoding="utf-8")
+    assert PGDG_ARM.split(";")[0] in text, f"{LINUX_TEST_IMAGE} lost the PGDG repository line"
+    assert "COPY --chmod=644 src/deps/pgdg-archive-keyring.asc /etc/apt/keyrings/pgdg.asc" in text
+    assert "[signed-by=/etc/apt/keyrings/pgdg.asc]" in text
+    assert "${VERSION_CODENAME}-pgdg main" in text
+    # Same discipline as the images: no key fetched at build time, no apt-key.
+    assert "apt-key" not in text
+    assert "postgresql.org/media/keys" not in text
 
 
 @pytest.mark.parametrize("relpath", DEB_FPM_RECIPES)

@@ -34,6 +34,23 @@ RUN apt update && \
     apt-get update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
 
+# The package depends on `postgresql-client-18 | postgresql-client`: PGDG when the repository is
+# configured, the distribution's client otherwise so the .deb still installs on a host that never
+# touches PostgreSQL. Ubuntu noble's archive has no postgresql-client-18, so without this the
+# alternative resolved to 16 while tests/misc/docker/postgresql.yml runs a 17 server and
+# `bwcli plugin backup save` aborted with "server version mismatch" -- the TEST environment failing
+# to reproduce the documented deployment, not a product limit. Same checked-in key, same
+# signed-by scope and same architecture gate as the five images (src/*/Dockerfile); the gate is
+# kept verbatim so this file cannot drift away from them.
+COPY --chmod=644 src/deps/pgdg-archive-keyring.asc /etc/apt/keyrings/pgdg.asc
+
+RUN . /etc/os-release && \
+    case "$(dpkg --print-architecture)" in \
+    amd64|arm64) echo "deb [signed-by=/etc/apt/keyrings/pgdg.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" > /etc/apt/sources.list.d/pgdg.list ;; \
+    *) : ;; \
+    esac && \
+    apt-get update
+
 RUN echo "force-bad-version" | tee -a /etc/dpkg/dpkg.cfg
 
 VOLUME ["/sys/fs/cgroup"]
