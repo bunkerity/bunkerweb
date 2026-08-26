@@ -34,6 +34,15 @@ local sort = table.sort
 local lower = string.lower
 local gsub = string.gsub
 
+-- The one spelling of the challenge prefix and of the directory it is served from. `api()` used
+-- to carry its own copy of the folder path; `ssl.lua` still carries its own copy of the prefix
+-- (tests/unit/common/test_ssl_acme_challenge_not_redirected.py asserts the two agree).
+local ACME_CHALLENGE_PREFIX = "/.well-known/acme-challenge/"
+local ACME_CHALLENGE_DIR = "/var/tmp/bunkerweb/lets-encrypt" .. ACME_CHALLENGE_PREFIX
+-- ACME HTTP-01 tokens are base64url ([A-Za-z0-9_-]+, RFC 8555 §8.3). Rejecting anything else is
+-- what stops an attacker-controlled token from escaping ACME_CHALLENGE_DIR via "/", "\" or "..".
+local ACME_TOKEN_PATTERN = "^[A-Za-z0-9_%-]+$"
+
 -- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
 local function sanitize_domain_labels(domain)
 	if not domain or domain == "" then
@@ -513,14 +522,38 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
+	-- ARMED only for a service that is really going to be validated over http-01. It used to be
+	-- armed for every service whose LETS_ENCRYPT_PASSTHROUGH was "no" -- the default -- so on a
+	-- fleet that never asked for a certificate, and on every service using the dns challenge, any
+	-- URI under the challenge prefix ended the access chain right here: a returned status breaks
+	-- the loop in access-lua.conf, so blacklist, greylist, country, dnsbl, crowdsec, bunkernet,
+	-- reversescan, limit, authbasic, misc, cors, workflows and antibot were all skipped. Nothing
+	-- released that bypass after issuance because nothing armed it in the first place.
 	if
-		self.variables["LETS_ENCRYPT_PASSTHROUGH"] == "no"
-		and sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/"
+		self.variables["LETS_ENCRYPT_PASSTHROUGH"] ~= "no"
+		or self.variables["AUTO_LETS_ENCRYPT"] ~= "yes"
+		or self.variables["LETS_ENCRYPT_CHALLENGE"] ~= "http"
+		or sub(self.ctx.bw.uri, 1, #ACME_CHALLENGE_PREFIX) ~= ACME_CHALLENGE_PREFIX
 	then
-		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
-		return self:ret(true, "visit from LE", OK)
+		return self:ret(true, "success")
 	end
-	return self:ret(true, "success")
+	-- RELEASED as soon as certbot-cleanup.py removes the token. The file has to be there for the
+	-- validation to succeed at all -- certbot-auth.py writes it to every instance before telling
+	-- the ACME server to come and get it -- so requiring it costs the legitimate flow nothing and
+	-- keeps the prefix behind the full access chain for the ~89 days between renewals. A miss is
+	-- not a refusal either: the request simply carries on through the chain, and the location
+	-- still serves the file if it is there. Same charset gate as api(), for the same reason.
+	local token = sub(self.ctx.bw.uri, #ACME_CHALLENGE_PREFIX + 1)
+	if not match(token, ACME_TOKEN_PATTERN) then
+		return self:ret(true, "not an ACME token")
+	end
+	local file = open(ACME_CHALLENGE_DIR .. token, "r")
+	if not file then
+		return self:ret(true, "no challenge pending for this token")
+	end
+	file:close()
+	self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
+	return self:ret(true, "visit from LE", OK)
 end
 
 -- luacheck: ignore 212
@@ -531,25 +564,21 @@ function letsencrypt:api()
 	then
 		return self:ret(false, "success")
 	end
-	local acme_folder = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
 	local ngx_req = ngx.req
 	ngx_req.read_body()
 	local ret, data = pcall(decode, ngx_req.get_body_data())
 	if not ret then
 		return self:ret(true, "json body decoding failed", HTTP_BAD_REQUEST)
 	end
-	-- ACME HTTP-01 tokens are base64url ([A-Za-z0-9_-]+, RFC 8555 §8.3); reject
-	-- anything else so an attacker-controlled token cannot escape acme_folder
-	-- via "/", "\" or "..".
-	if type(data) ~= "table" or type(data.token) ~= "string" or not match(data.token, "^[A-Za-z0-9_%-]+$") then
+	if type(data) ~= "table" or type(data.token) ~= "string" or not match(data.token, ACME_TOKEN_PATTERN) then
 		return self:ret(true, "invalid challenge token", HTTP_BAD_REQUEST)
 	end
-	execute("mkdir -p " .. acme_folder)
+	execute("mkdir -p " .. ACME_CHALLENGE_DIR)
 	if self.ctx.bw.request_method == "POST" then
 		if type(data.validation) ~= "string" then
 			return self:ret(true, "invalid challenge validation", HTTP_BAD_REQUEST)
 		end
-		local file, err = open(acme_folder .. data.token, "w+")
+		local file, err = open(ACME_CHALLENGE_DIR .. data.token, "w+")
 		if not file then
 			return self:ret(true, "can't write validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		end
@@ -557,7 +586,7 @@ function letsencrypt:api()
 		file:close()
 		return self:ret(true, "validation token written", HTTP_OK)
 	elseif self.ctx.bw.request_method == "DELETE" then
-		local ok, err = remove(acme_folder .. data.token)
+		local ok, err = remove(ACME_CHALLENGE_DIR .. data.token)
 		if not ok then
 			return self:ret(true, "can't remove validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		end
