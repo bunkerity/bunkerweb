@@ -498,7 +498,14 @@ if ARGS.integration != "Kubernetes":
             # directory, so this is what `run.sh`'s `chmod 777 variables.env` was working around,
             # one file at a time.
             path.unlink(missing_ok=True)
-            path.write_text("\n".join([f"{key}={value}" for key, value in values.items()]))
+            # Trailing newline, deliberately: on Linux and All-in-one these files are read by
+            # `export_env_file` (src/common/helpers/utils.sh), a `while read` loop that used to
+            # drop a final line carrying no newline. API_TOKEN is the LAST key this writes into
+            # variables.env and API_PASSWORD the last one in api.env, so the API started with
+            # neither -- every scheduler call answered 401 (`db;sqlite` never turned healthy) and
+            # `bunkernet;plugin_stats_api` got 401 on Basic auth against a user that was never
+            # created. The helper is fixed too; a POSIX text file ends in a newline regardless.
+            path.write_text("\n".join([f"{key}={value}" for key, value in values.items()]) + "\n")
             # The API and the scheduler read these as `nginx`, not as the runner; a restrictive
             # umask on the runner would otherwise hand them a file they cannot open. 0644 is
             # wider than the package's own root:nginx 0660 for api.env -- deliberate, CI-only.
