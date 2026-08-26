@@ -87,13 +87,17 @@ if [ "${SERVICE_WORKER:-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
     # unhealthy for ever even though the worker was fine. The query is not decoration here
     # either -- kombu harvests `ssl_*` query keys in `kombu/utils/url.py` parse_url, so
     # `=required` is what makes this probe actually verify instead of falling back to
-    # CERT_NONE. Keep identical to entrypoint.sh; see the longer note there.
+    # CERT_NONE, and REDIS_SSL_CA is what lets it verify a private CA at all. Keep identical
+    # to entrypoint.sh; see the longer note there.
     broker_scheme="redis"
     broker_query=""
     if [ "${REDIS_SSL:-no}" = "yes" ]; then
       broker_scheme="rediss"
       if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
         broker_query="?ssl_cert_reqs=required"
+        if [ -n "${REDIS_SSL_CA:-}" ]; then
+          broker_query="${broker_query}&ssl_ca_certs=${REDIS_SSL_CA}"
+        fi
       else
         broker_query="?ssl_cert_reqs=none"
       fi

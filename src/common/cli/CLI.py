@@ -202,6 +202,7 @@ class CLI(ApiCaller):
             redis_timeout=self.__get_variable("REDIS_TIMEOUT", "1000.0"),
             redis_keepalive_pool=self.__get_variable("REDIS_KEEPALIVE_POOL", "10"),
             redis_ssl=self.__get_variable("REDIS_SSL", "no") == "yes",
+            redis_ssl_ca=self.__get_variable("REDIS_SSL_CA", None) or None,
             redis_username=self.__get_variable("REDIS_USERNAME", None) or None,
             redis_password=self.__get_variable("REDIS_PASSWORD", None) or None,
             redis_sentinel_hosts=self.__get_variable("REDIS_SENTINEL_HOSTS", []),

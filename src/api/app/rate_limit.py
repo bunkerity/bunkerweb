@@ -442,8 +442,19 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         # always verified: an operator who turned verification off still could not reach a
         # Redis serving its own certificate, and every request paid a failed TLS handshake.
         # `clusterstore.lua` honours the same setting on the request path.
+        redis_ssl_ca = ""
         if redis_ssl and str(_env_or_cfg("REDIS_SSL_VERIFY", "yes") or "yes").lower() != "yes":
             storage_options.setdefault("ssl_cert_reqs", None)
+        elif redis_ssl:
+            # Verification is on. A private CA is in neither the system store nor certifi, so a
+            # perfectly good certificate still fails CERTIFICATE_VERIFY_FAILED and every request
+            # pays a doomed handshake -- the only escape used to be turning verification off
+            # wholesale. REDIS_SSL_CA names the bundle to trust instead. It is read only on this
+            # side of the branch: with ssl_cert_reqs=None nothing is verified, so a CA there
+            # would just be dead configuration.
+            redis_ssl_ca = str(_env_or_cfg("REDIS_SSL_CA", "") or "").strip()
+            if redis_ssl_ca:
+                storage_options.setdefault("ssl_ca_certs", redis_ssl_ca)
 
         if sentinels and sentinel_master:
             # redis sentinel URI must not embed master auth, otherwise limits applies
@@ -473,6 +484,8 @@ def _build_storage(cfg: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
             sentinel_kwargs.setdefault("socket_connect_timeout", storage_options.get("socket_connect_timeout"))
             sentinel_kwargs.setdefault("socket_keepalive", storage_options.get("socket_keepalive"))
             sentinel_kwargs.setdefault("ssl", redis_ssl)
+            if redis_ssl_ca:
+                sentinel_kwargs.setdefault("ssl_ca_certs", redis_ssl_ca)
 
             # Explicit None values prevent limits from reusing master auth
             # when Sentinel auth is intentionally unset.
@@ -591,6 +604,7 @@ def setup_rate_limiter(app) -> None:
                 "REDIS_KEEPALIVE_POOL",
                 "REDIS_SSL",
                 "REDIS_SSL_VERIFY",
+                "REDIS_SSL_CA",
                 "REDIS_USERNAME",
                 "REDIS_PASSWORD",
                 "REDIS_SENTINEL_HOSTS",

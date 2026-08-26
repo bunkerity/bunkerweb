@@ -276,14 +276,24 @@ if [ "${SERVICE_WORKER}" = "yes" ]; then
 	#   - `=none`: redundant for kombu, which would fall back to CERT_NONE anyway, but required
 	#     for the two redis-py consumers, which otherwise verify and fail
 	#     CERTIFICATE_VERIFY_FAILED against a private CA while the worker itself is connected.
-	# Verification uses the system/certifi trust store: no REDIS_SSL_CA setting exists, so a
-	# private-CA Redis needs REDIS_SSL_VERIFY=no.
+	# Verification uses the system/certifi trust store unless REDIS_SSL_CA names a bundle: both
+	# readers of this URL take `ssl_ca_certs` from the query (redis-py `parse_url`, kombu
+	# `parse_url` -> conninfo.ssl -> connparams), so the path needs no per-client plumbing.
+	# Before it existed a private-CA Redis had no option but REDIS_SSL_VERIFY=no.
+	#
+	# The value goes in verbatim and is NOT validated here. plugin.json's regex gates the
+	# database/Configurator path only; this reads the raw environment, so a path containing & # or
+	# ? would corrupt the query. Deliberately left alone -- an operator who can set REDIS_SSL_CA in
+	# the environment can set CELERY_BROKER_URL outright, so there is nothing to defend against.
 	_broker_scheme="redis"
 	_broker_query=""
 	if [ "${REDIS_SSL:-no}" = "yes" ]; then
 		_broker_scheme="rediss"
 		if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
 			_broker_query="?ssl_cert_reqs=required"
+			if [ -n "${REDIS_SSL_CA:-}" ]; then
+				_broker_query="${_broker_query}&ssl_ca_certs=${REDIS_SSL_CA}"
+			fi
 		else
 			_broker_query="?ssl_cert_reqs=none"
 		fi

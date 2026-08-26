@@ -171,6 +171,7 @@ try:
             redis_timeout=getenv("REDIS_TIMEOUT", "1000.0"),
             redis_keepalive_pool=getenv("REDIS_KEEPALIVE_POOL", "10"),
             redis_ssl=getenv("REDIS_SSL", "no") == "yes",
+            redis_ssl_ca=getenv("REDIS_SSL_CA") or None,
             redis_username=getenv("REDIS_USERNAME") or None,
             redis_password=getenv("REDIS_PASSWORD") or None,
             redis_sentinel_hosts=getenv("REDIS_SENTINEL_HOSTS", []),

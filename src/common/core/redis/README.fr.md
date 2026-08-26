@@ -26,6 +26,7 @@ Comment ça marche :
 | `REDIS_DATABASE`          | `0`        | global   | non      | Numéro de base (0–15).                                         |
 | `REDIS_SSL`               | `no`       | global   | non      | Activer SSL/TLS.                                               |
 | `REDIS_SSL_VERIFY`        | `yes`      | global   | non      | Vérifier le certificat SSL du serveur.                         |
+| `REDIS_SSL_CA`            |            | global   | non      | Bundle d’AC (PEM) pour vérifier le certificat du serveur (AC privée). Utilisé par les clients Python et, via le bundle de confiance généré, par le chemin de requête. Un fichier absent ou invalide fait échouer la génération de configuration. |
 | `REDIS_TIMEOUT`           | `1000`     | global   | non      | Timeout (ms) pour connexion/lecture/écriture.                  |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                               |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                  |

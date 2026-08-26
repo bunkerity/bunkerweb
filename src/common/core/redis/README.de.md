@@ -26,6 +26,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                       |
 | `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                            |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
+| `REDIS_SSL_CA`            |            | global  | nein     | PEM-CA-Bundle zur Überprüfung des Serverzertifikats (private CA). Wird von den Python-Clients und, über das generierte Trust-Bundle, vom Request-Pfad genutzt. Eine fehlende oder ungültige Datei lässt die Konfigurationsgenerierung fehlschlagen. |
 | `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                 |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |

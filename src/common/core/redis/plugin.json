@@ -59,6 +59,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "REDIS_SSL_CA": {
+      "context": "global",
+      "default": "",
+      "help": "Path to a PEM CA bundle used to verify the Redis/Valkey server certificate (private CA); unset means the system trust store. When set it is trusted by the Python clients (Celery broker, jobs, API rate limiter, bwcli, web UI) and appended to the NGINX Lua trust bundle, so the request path trusts it too. Read where configuration is generated and by each client, so the file must exist at that path there; a missing or invalid bundle fails configuration generation.",
+      "id": "redis-ssl-ca",
+      "label": "Redis SSL/TLS CA bundle",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
     "REDIS_TIMEOUT": {
       "context": "global",
       "default": "1000",

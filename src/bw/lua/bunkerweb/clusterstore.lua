@@ -86,6 +86,14 @@ local function build_options(variables, pool)
 		send_timeout = tonumber(variables["REDIS_TIMEOUT"]),
 		keepalive_timeout = tonumber(variables["REDIS_KEEPALIVE_IDLE"]),
 		keepalive_poolsize = tonumber(variables["REDIS_KEEPALIVE_POOL"]),
+		-- REDIS_SSL_CA is absent here because it cannot be passed per connection: the handshake
+		-- ends in `sock:sslhandshake(false, server_name, ssl_verify)` (lua-resty-redis) and an
+		-- OpenResty cosocket has no per-connection trust store -- it verifies against the one
+		-- `lua_ssl_trusted_certificate` file of the surrounding NGINX config. It does reach this
+		-- path all the same: when REDIS_SSL_CA is set, gen/main.py appends it onto that bundle
+		-- (write_lua_trusted_ca_bundle) and src/common/confs/{http,stream}.conf point the
+		-- directive at the result. Appended, never substituted -- antibot, bunkernet and crowdsec
+		-- verify against the same store, so replacing it would break all three.
 		connection_options = {
 			ssl = variables["REDIS_SSL"] == "yes",
 			ssl_verify = variables["REDIS_SSL_VERIFY"] == "yes",

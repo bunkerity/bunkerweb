@@ -101,6 +101,34 @@ CASES = [
         {"REDIS_HOST": "valkey", "REDIS_PORT": "6380", "REDIS_SSL": "yes", "REDIS_SSL_VERIFY": "no", "REDIS_PASSWORD": "secret"},
         "rediss://:secret@valkey:6380/0?ssl_cert_reqs=none",
     ),
+    # REDIS_SSL_CA: the private-CA case the `=required` branch could not serve. Verification was
+    # against the system/certifi store, which never holds a private CA, so a correct certificate
+    # failed CERTIFICATE_VERIFY_FAILED and the only escape was REDIS_SSL_VERIFY=no -- which turns
+    # verification off for every Redis consumer at once.
+    (
+        {"REDIS_HOST": "valkey", "REDIS_SSL": "yes", "REDIS_SSL_CA": "/etc/bunkerweb/redis-ca.pem"},
+        "rediss://valkey:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/bunkerweb/redis-ca.pem",
+    ),
+    # Verification off means nothing is verified, so a CA would be dead configuration. Emitting it
+    # anyway would read as "this CA is in use" in the logs while CERT_NONE ignores it.
+    (
+        {"REDIS_HOST": "valkey", "REDIS_SSL": "yes", "REDIS_SSL_VERIFY": "no", "REDIS_SSL_CA": "/etc/bunkerweb/redis-ca.pem"},
+        "rediss://valkey:6379/0?ssl_cert_reqs=none",
+    ),
+    # A CA without TLS is not a reason to start a query string on a plaintext URL.
+    ({"REDIS_HOST": "valkey", "REDIS_SSL_CA": "/etc/bunkerweb/redis-ca.pem"}, "redis://valkey:6379/0"),
+    # Spaces are allowed in the path (plugin.json's regex, ^$|^(/[\w. \-]+)+/?$, permits them on
+    # the database path; the environment path here is not validated at all) and both parsers accept
+    # a raw space in a query value, so it goes in verbatim rather than percent-encoded.
+    (
+        {"REDIS_HOST": "valkey", "REDIS_SSL": "yes", "REDIS_SSL_CA": "/etc/my ca/ca.pem"},
+        "rediss://valkey:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/etc/my ca/ca.pem",
+    ),
+    # Password and CA together: the credentials stay in the authority, the CA in the query.
+    (
+        {"REDIS_HOST": "valkey", "REDIS_SSL": "yes", "REDIS_PASSWORD": "secret", "REDIS_SSL_CA": "/ca.pem"},
+        "rediss://:secret@valkey:6379/0?ssl_cert_reqs=required&ssl_ca_certs=/ca.pem",
+    ),
 ]
 
 
@@ -121,3 +149,28 @@ def test_both_scripts_agree_on_every_case():
     """The two derivations are duplicated by necessity; nothing but this test keeps them equal."""
     for env, _ in CASES:
         assert derive("entrypoint", env) == derive("healthcheck", env), env
+
+
+def test_the_ca_reaches_every_client_that_reads_this_url():
+    """The URL is only a carrier: assert the three consumers actually pick the CA out of it.
+
+    A string assertion cannot tell ``ssl_ca_certs`` from a typo'd key -- both look like a query
+    parameter and both leave the URL "correct". kombu (the Celery transport, so the worker's
+    consumer and the API's producer) and ``redis.Redis.from_url`` (``worker/tasks.py``
+    ``_broker_client`` and ``jobs/push-configs.py`` ``_redis_client``) are what has to end up
+    holding the path, which is why no client-side plumbing was needed for the broker at all.
+
+    Skipped where redis-py/kombu are not installed -- the unit venv does not carry them.
+    """
+    redis_parse = pytest.importorskip("redis.connection").parse_url
+    kombu_parse = pytest.importorskip("kombu.utils.url").parse_url
+
+    url = derive("entrypoint", {"REDIS_HOST": "valkey", "REDIS_SSL": "yes", "REDIS_SSL_CA": "/etc/bunkerweb/redis-ca.pem"})
+
+    assert redis_parse(url)["ssl_ca_certs"] == "/etc/bunkerweb/redis-ca.pem"
+    assert kombu_parse(url)["ssl"]["ssl_ca_certs"] == "/etc/bunkerweb/redis-ca.pem"
+
+    # And unset stays unset: no client may end up with a CA nobody configured.
+    plain = derive("entrypoint", {"REDIS_HOST": "valkey", "REDIS_SSL": "yes"})
+    assert "ssl_ca_certs" not in redis_parse(plain)
+    assert "ssl_ca_certs" not in kombu_parse(plain)["ssl"]

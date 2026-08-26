@@ -722,6 +722,7 @@ def get_redis_client(
     redis_timeout: Union[str, float] = "1000.0",
     redis_keepalive_pool: Union[str, int] = "10",
     redis_ssl: bool = False,
+    redis_ssl_ca: Optional[str] = None,
     redis_username: Optional[str] = None,
     redis_password: Optional[str] = None,
     redis_sentinel_hosts: Union[List[List[str]], List[tuple], str] = [],
@@ -741,6 +742,7 @@ def get_redis_client(
         redis_timeout: Connection timeout in milliseconds
         redis_keepalive_pool: Maximum connections in pool
         redis_ssl: Whether to use SSL for connection
+        redis_ssl_ca: Path to a PEM CA bundle used to verify the server certificate
         redis_username: Redis username for authentication
         redis_password: Redis password for authentication
         redis_sentinel_hosts: List of Redis Sentinel hosts
@@ -793,6 +795,14 @@ def get_redis_client(
     if isinstance(redis_sentinel_hosts, str):
         redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
 
+    # redis-py defaults SSLConnection to ssl_cert_reqs="required", so `ssl=True` already
+    # verifies against the system/certifi store -- which never contains a private CA, so a
+    # correct certificate still failed CERTIFICATE_VERIFY_FAILED with no setting to fix it.
+    # REDIS_SSL_CA names the bundle to trust instead. Empty means "unchanged": the kwarg is
+    # only ever added when a path was given, so callers that pass nothing behave exactly as
+    # before.
+    ssl_kwargs = {"ssl_ca_certs": redis_ssl_ca} if (redis_ssl and redis_ssl_ca) else {}
+
     redis_client = None
 
     try:
@@ -810,6 +820,7 @@ def get_redis_client(
                 socket_connect_timeout=redis_timeout / 1000,
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
+                **ssl_kwargs,
             )
 
             try:
@@ -848,6 +859,7 @@ def get_redis_client(
                 socket_keepalive=True,
                 max_connections=redis_keepalive_pool,
                 ssl=redis_ssl,
+                **ssl_kwargs,
             )
 
         # Test the connection

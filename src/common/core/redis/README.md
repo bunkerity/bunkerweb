@@ -28,6 +28,7 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).             |
 | `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
+| `REDIS_SSL_CA`            |            | global  | no       | **Redis/Valkey SSL CA bundle:** Path to a PEM CA bundle used to verify the server certificate (private CA). Trusted by the Python clients and, via the generated trust bundle, by the request path — see the note below. |
 | `REDIS_TIMEOUT`           | `1000`     | global  | no       | **Redis/Valkey Timeout:** Connect/read/write timeout in milliseconds for Redis/Valkey operations. |
 | `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
 | `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
@@ -37,6 +38,16 @@ Follow these steps to configure and use the Redis plugin:
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | no       | **Keepalive Idle:** Maximum idle time (in milliseconds) before closing a pooled Redis/Valkey connection. |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
+
+!!! info "Private CA: how `REDIS_SSL_CA` is trusted"
+    With `REDIS_SSL_VERIFY: "yes"` (the default), verification uses the system/certifi trust store, which never contains a private CA — a perfectly valid certificate still fails `CERTIFICATE_VERIFY_FAILED`, and the only escape used to be turning verification off for every consumer at once. `REDIS_SSL_CA` names a PEM CA bundle to trust instead. It reaches both halves of the product, by two different routes:
+
+    - **Python clients — the path is passed to the client.** The Celery broker URL (worker and API), the jobs (`push-configs`, `sync-bans`), the API rate limiter, `bwcli` and the web UI. The broker URL and the API rate limiter carry the CA only while verification is on: with `REDIS_SSL_VERIFY: "no"` nothing is verified, so no CA is sent.
+    - **The NGINX Lua request path (`clusterstore.lua`, used when `USE_REDIS: "yes"`) — the CA is appended to the trust bundle.** An OpenResty cosocket has no per-connection trust store; it verifies against the single global `lua_ssl_trusted_certificate` file. So the config generator appends your CA onto the shipped root bundle and points that directive at the result, which travels to every instance with the configuration. Appended, never replaced: antibot, BunkerNet and CrowdSec verify their own HTTPS against the same store and keep trusting everything they trusted before.
+
+    **Where the file must exist.** It is read where the configuration is generated (the worker) and by each Python client in its own filesystem, so mount it at the same path in the scheduler, worker, API and UI. BunkerWeb instances need nothing mounted — they receive the combined bundle. A `REDIS_SSL_CA` that is missing, unreadable or not a valid PEM bundle **fails configuration generation** on purpose: `lua_ssl_trusted_certificate` pointing at a bad file makes NGINX refuse to start, so nothing is pushed and the fleet keeps serving the configuration it already has.
+
+    An explicit `CELERY_BROKER_URL` still wins over the derived one: put `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem` in it yourself if you set it by hand.
 
 !!! tip "High Availability with Redis Sentinel"
     For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
@@ -79,6 +90,8 @@ Follow these steps to configure and use the Redis plugin:
     REDIS_PASSWORD: "your-strong-password"
     REDIS_SSL: "yes"
     REDIS_SSL_VERIFY: "yes"
+    # Only for a certificate signed by a private CA; omit it for a publicly trusted one
+    REDIS_SSL_CA: "/etc/bunkerweb/redis-ca.pem"
     ```
 
 === "Redis Sentinel Configuration"
