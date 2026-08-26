@@ -1371,6 +1371,134 @@ def test_a_missing_non_ip_redis_facet_rebuilds_every_index():
     assert result.stdout.strip() == "rebuild|2|requests|requests:ids"
 
 
+@needs_lua
+def test_an_errored_probe_never_drives_the_cap_0_wipe():
+    """`redis_call` returns `false, "<reason>"`, and `tonumber(false) or 0` read that as "empty".
+
+    The probes used to discard the second return value, so a failed `llen` on a populated list
+    took the `nb == 0` arm and ran `TRIM_SCRIPT` with cap 0 -- a wipe, not a trim. Nothing is
+    healable from reads that did not happen: skip the tick.
+    """
+    preamble = """
+        local null = {}
+        local ERR = "error"
+        local REQUEST_FACET_FIELDS = {
+            "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode",
+        }
+        local TRIM_SCRIPT = "trim"
+        local REBUILD_SCRIPT = "rebuild"
+        local FAIL, EVAL = ..., nil
+        local SELF = {
+            redis_call = function(_, method, ...)
+                if method == FAIL then return false, "Redis unavailable for this cycle" end
+                if method == "llen" then return 5 end
+                if method == "get" then return "1" end
+                if method == "hlen" or method == "scard" then return 5 end
+                if method == "eval" then EVAL = true; return true end
+                error("unexpected method " .. method)
+            end,
+            log_throttled = function() end,
+        }
+    """
+    for failing in ("llen", "get", "hlen", "scard"):
+        script = preamble + _extract("self_heal_request_facets")
+        script += '\nself_heal_request_facets(SELF)\nprint(tostring(EVAL))'
+        result = subprocess.run([LUA, "-", failing], input=script, capture_output=True, text=True)
+        assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
+        assert result.stdout.strip() == "nil", f"a failed {failing} still drove a write to Redis"
+
+
+@needs_lua
+def test_the_cap_0_wipe_is_asked_to_re_check_the_list_itself():
+    """The probes are eight round-trips and every one of them yields, on four workers.
+
+    Worker A can read `llen == 0`, worker B replay a buffered report, and A's facet probes then
+    see B's write -- so the stale-index arm fires against a list that is no longer empty. The
+    probes cannot detect that; only the script can, because EVAL is the atomic unit. Both cap-0
+    call sites must therefore pass the guard flag.
+    """
+    preamble = """
+        local null = {}
+        local ERR = "error"
+        local REQUEST_FACET_FIELDS = {
+            "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode",
+        }
+        local TRIM_SCRIPT = "trim"
+        local REBUILD_SCRIPT = "rebuild"
+        local MARKER, EVAL = ..., nil
+        local SELF = {
+            redis_call = function(_, method, ...)
+                local args = { ... }
+                if method == "llen" then return 0 end
+                if method == "get" then return MARKER ~= "" and MARKER or nil end
+                if method == "hlen" or method == "scard" then return 1 end
+                if method == "eval" then EVAL = args; return true end
+                error("unexpected method " .. method)
+            end,
+            log_throttled = function() end,
+        }
+    """
+    # marked: the torn-read arm (stale indexes over an empty list). unmarked: the init arm.
+    for marker in ("1", ""):
+        script = preamble + _extract("self_heal_request_facets")
+        script += '\nself_heal_request_facets(SELF)\nprint(EVAL[1] .. "|" .. EVAL[5] .. "|" .. tostring(EVAL[6]))'
+        result = subprocess.run([LUA, "-", marker], input=script, capture_output=True, text=True)
+        assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
+        assert result.stdout.strip().split("|") == ["trim", "0", "1"], f"unguarded cap-0 wipe with marker={marker!r}"
+
+
+@needs_lua
+def test_the_guarded_cap_0_wipe_spares_a_list_that_filled_up_mid_probe():
+    """Run the real TRIM_SCRIPT: guarded and non-empty is a no-op, guarded and empty still clears.
+
+    Unguarded stays a wipe -- `enforce_redis_requests_cap` passes no flag, because a configured
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS of 0 means store nothing and must clear whatever is there.
+    """
+    preamble = """
+        local rows, guard = ...
+        LIST, MARKER, IDS, FACETS = {}, "1", true, true
+        for i = 1, tonumber(rows) do LIST[i] = "json-" .. i end
+        redis = {}
+        function redis.call(command, ...)
+            local args = { ... }
+            if command == "LLEN" then return #LIST end
+            if command == "SET" then MARKER = args[2]; return "OK" end
+            if command == "DEL" then
+                for _, key in ipairs(args) do
+                    if key == "requests" then LIST = {} end
+                    if key == "requests:ids" then IDS = false end
+                    if key == "requests:facet:ip" then FACETS = false end
+                    if key == "requests:facets:initialized" then MARKER = nil end
+                end
+                return 1
+            end
+            error("unexpected command " .. command)
+        end
+        function redis.pcall(...)
+            local ok, result = pcall(redis.call, ...)
+            if ok then return result end
+            return { err = result }
+        end
+        KEYS = { "requests", "requests:ids" }
+        ARGV = { "0", guard ~= "" and guard or nil }
+    """
+    source = preamble + "\nlocal run = assert((loadstring or load)([====[\n"
+    source += _extract_script("TRIM_SCRIPT") + "\n]====]))\n"
+    source += """
+        local rc = run()
+        print(tostring(rc) .. "|" .. #LIST .. "|" .. tostring(IDS) .. "|" .. tostring(FACETS) .. "|" .. tostring(MARKER))
+    """
+
+    def run(rows: str, guard: str) -> list:
+        result = subprocess.run([LUA, "-", rows, guard], input=source, capture_output=True, text=True)
+        assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
+        return result.stdout.strip().split("|")
+
+    assert run("1", "1") == ["0", "1", "true", "true", "1"], "the guarded wipe destroyed a row pushed mid-probe"
+    assert run("0", "1") == ["0", "0", "false", "false", "1"], "the guard must not stop a genuine clear of stale indexes"
+    assert run("7", "") == ["0", "0", "false", "false", "1"], "an operator cap of 0 must still wipe unconditionally"
+
+
 # --- structural: the report path ----------------------------------------------------------
 
 

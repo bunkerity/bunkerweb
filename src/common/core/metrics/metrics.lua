@@ -248,6 +248,18 @@ local TRIM_SCRIPT = [==[
     for i = 1, #fields do redis.call('DEL', 'requests:facet:' .. fields[i]) end
   end
   if max == 0 then
+    -- ARGV[2]='1' asks for the wipe only while the list is still empty. self_heal's probes are
+    -- separate round-trips and every one of them yields, so another worker can push a report
+    -- between its `LLEN requests == 0` and this call; wiping on that stale read deletes a row
+    -- nobody ever counted, silently -- it returns 0 like a clean no-op and re-sets the marker,
+    -- so the next push is accepted and nothing is ever logged. Re-reading inside the script is
+    -- the only place the race can be closed: EVAL is the atomic unit. Leaving the row alone is
+    -- safe, the next tick sees nb > 0 and rebuilds the indexes if they are short.
+    -- enforce_redis_requests_cap omits the flag on purpose: a configured cap of 0 means store
+    -- nothing, and must wipe whatever is there.
+    if ARGV[2] == '1' and redis.call('LLEN', KEYS[1]) > 0 then
+      return 0
+    end
     redis.call('DEL', KEYS[1])
     clear_indexes()
     local marked = redis.pcall('SET', 'requests:facets:initialized', '1')
@@ -402,14 +414,30 @@ end
 -- Read-only probes (never denyoom), so they run even under OOM. Every stored request contributes
 -- all eight facets (using N/A when absent) and one ID; any missing index triggers a full rebuild.
 local function self_heal_request_facets(self)
-	local nb_raw = self:redis_call("llen", "requests")
+	-- A probe that errors reads back as 0, and 0 is exactly what fires the wipe below, so a
+	-- failed `llen` used to clear a populated list. Skip the tick instead: there is nothing to
+	-- heal from reads that did not happen. On a connection/protocol/OOM error redis_call has
+	-- already condemned the socket for the rest of the cycle so the later probes would no-op
+	-- anyway; a generic error (e.g. WRONGTYPE) does not, which is the other reason to bail here.
+	local nb_raw, probe_err = self:redis_call("llen", "requests")
+	if probe_err then
+		return
+	end
 	local nb = tonumber(nb_raw) or 0
-	local marker = self:redis_call("get", "requests:facets:initialized")
+	local marker
+	marker, probe_err = self:redis_call("get", "requests:facets:initialized")
+	if probe_err then
+		return
+	end
 	local marked = marker ~= nil and marker ~= false and marker ~= null and tostring(marker) == "1"
 	local facets_present = false
 	local facets_complete = true
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		local facet_len_raw = self:redis_call("hlen", "requests:facet:" .. field)
+		local facet_len_raw
+		facet_len_raw, probe_err = self:redis_call("hlen", "requests:facet:" .. field)
+		if probe_err then
+			return
+		end
 		local facet_len = tonumber(facet_len_raw) or 0
 		if facet_len > 0 then
 			facets_present = true
@@ -417,17 +445,23 @@ local function self_heal_request_facets(self)
 			facets_complete = false
 		end
 	end
-	local ids_len_raw = self:redis_call("scard", "requests:ids")
+	local ids_len_raw
+	ids_len_raw, probe_err = self:redis_call("scard", "requests:ids")
+	if probe_err then
+		return
+	end
 	local ids_len = tonumber(ids_len_raw) or 0
 	if nb == 0 then
+		-- "1" is the guard: wipe only if the list is still empty when the script runs. The
+		-- probes above yield, so nb == 0 is a snapshot, not a promise.
 		if not marked then
-			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0")
+			local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0", "1")
 			if clear_err then
 				self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 			end
 		else
 			if facets_present or ids_len > 0 then
-				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0")
+				local _, clear_err = self:redis_call("eval", TRIM_SCRIPT, 2, "requests", "requests:ids", "0", "1")
 				if clear_err then
 					self:log_throttled(ERR, "facet_clear", "Can't clear request facets: " .. clear_err)
 				end
