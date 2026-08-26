@@ -846,7 +846,7 @@ STREAM 支持 :white_check_mark:
 
 1.  **启用该功能：** 备份功能默认启用。如果需要，您可以使用 `USE_BACKUP` 设置来控制此功能。
 2.  **配置备份计划：** 通过设置 `BACKUP_SCHEDULE` 参数选择备份的频率。
-3.  **设置保留策略：** 使用 `BACKUP_ROTATION` 设置指定要保留的备份数量。
+3.  **设置保留策略：** 使用 `BACKUP_ROTATION` 设置指定要保留的备份数量。保留哪些备份由 `BACKUP_ROTATION_STRATEGY` 决定，默认为 `hanoi`。
 4.  **定义存储位置：** 使用 `BACKUP_DIRECTORY` 设置选择备份的存储位置。
 5.  **使用 CLI 命令：** 需要时，使用 `bwcli plugin backup` 命令手动管理备份。
 
@@ -856,7 +856,8 @@ STREAM 支持 :white_check_mark:
 | ------------------ | ---------------------------- | ------ | ---- | --------------------------------------------------------------------- |
 | `USE_BACKUP`       | `yes`                        | 全局   | 否   | **启用备份：** 设置为 `yes` 以启用自动备份。                          |
 | `BACKUP_SCHEDULE`  | `daily`                      | 全局   | 否   | **备份频率：** 执行备份的频率。选项：`daily`、`weekly` 或 `monthly`。 |
-| `BACKUP_ROTATION`  | `7`                          | 全局   | 否   | **备份保留：** 要保留的备份文件数量。超过此数量的旧备份将被自动删除。 |
+| `BACKUP_ROTATION`  | `7`                          | 全局   | 否   | **备份保留：** 要保留的备份文件数量。超出该数量的备份将被自动删除。 |
+| `BACKUP_ROTATION_STRATEGY` | `hanoi`              | 全局   | 否   | **轮换策略：** 达到上限后如何挑选要删除的备份。`hanoi` 维持一条汉诺塔阶梯——越靠近当前越细密，越往前指数级变粗；`fifo` 保留最近的若干个。两者保留的文件数量相同。 |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | 全局   | 否   | **备份位置：** 备份文件将存储的目录。                                 |
 
 ### 命令行界面
@@ -886,18 +887,30 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 !!! warning "数据库兼容性"
     备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。
 
+    备份只能恢复到它所来自的同一种数据库引擎——引擎名是文件名的一部分（`backup-mariadb-…`），恢复到其他引擎会在改动任何内容之前被拒绝。如果您在引擎之间做过迁移，两套备份都会留在该目录中：不带参数的 `restore` 会取任意引擎中最新的那个文件，因此请显式给出路径，才能恢复当前引擎的某个较旧备份。
+
 ### 示例配置
 
 === "每日备份，保留 7 个文件"
 
     默认配置：每日备份，保留 7 个文件，由汉诺塔阶梯分布。
-    因此它覆盖的范围超过最近 7 天，但不会保留最近 7 天中的每一天。
-    设置 `BACKUP_ROTATION_STRATEGY: "fifo"` 则改为保留最近的 7 个文件。
 
     ```yaml
     USE_BACKUP: "yes"
     BACKUP_SCHEDULE: "daily"
     BACKUP_ROTATION: "7"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
+=== "每日备份，最近 7 天（FIFO）"
+
+    此前的默认行为：保留最近的 7 个文件，更早的一概不留。
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "7"
+    BACKUP_ROTATION_STRATEGY: "fifo"
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
@@ -912,6 +925,17 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
+=== "每日备份，保留更深的历史"
+
+    24 个文件按默认阶梯铺开，而不是只覆盖最近 24 天。最近的备份以完整粒度保留，较旧的按指数稀释，因此每当安装的运行时长翻一倍，最早的恢复点就会再往前移一段——很晚才发现的问题依然可以恢复：
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "24"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
 === "每月备份到自定义位置"
 
     用于每月备份并存储在自定义位置的配置：
@@ -922,6 +946,24 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_ROTATION: "24"
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
+
+!!! info "保留哪些备份"
+    `hanoi` 是默认值。两种策略删除的文件**数量**相同——`hanoi` 删除的备份绝不会比 `fifo` 更多——但删除的并不是同一批，而且差异不只出现在最旧的一端。阶梯是靠同时稀释近期窗口来换取深度的：在每日计划和默认 `BACKUP_ROTATION: "7"` 下，一个已经运行一段时间的归档会在大约最近 1、2、4、8、16 和 32 天的各个窗口中各保留一个备份——即年龄约为 0、1、2–3、4–7、8–15、16–31 和 32–63 天，确切年龄取决于当前这一天落在阶梯固定网格的什么位置——而 `fifo` 保留的是最近 7 天。**最近七天中会放弃三到四天**，换来那些更久远的恢复点。
+    最新的备份总会保留；在每天一个备份且 `BACKUP_ROTATION` 至少为 2 时，最近两天也会保留。`BACKUP_ROTATION` 越大，这种取舍越温和——在 `"24"` 时大约最近三周仍然是连续的，这个跨度会随着归档变老而缓慢缩短。
+
+    **同一天内的多个备份只算作一个恢复点，多出来的那些是轮换最先放弃的文件**——排在任何更旧的文件之前。文件预算用尽后，每天只有最新的那个备份能留下。因此，在有风险的变更之前手工做的备份，只安全到当天的下一个备份为止；而且它一旦成为当天最新的备份，就会挤掉当天计划内的备份，被删除的反而是后者。若使用 `fifo`，两个都会保留。
+
+    升级本身不会删除磁盘上已有的任何文件——变化在下一次轮换时才生效。设置 `BACKUP_ROTATION_STRATEGY: "fifo"` 可恢复此前的行为。每一次删除都会连同被选中的原因一起记入日志。
+
+!!! info "阶梯是如何构建的"
+    阶梯以**周期**计数，一个周期就是一个 `BACKUP_SCHEDULE`：`daily` 为一天，`weekly` 为七天，`monthly` 为二十八天（四周，而非自然月）。同一个周期内的所有备份都算作同一个恢复点，由其中最新的那个代表。
+
+    `BACKUP_ROTATION` 既是文件预算，也是阶梯的深度：它会构建 `BACKUP_ROTATION - 1` 个层级，第 `k` 层把时间轴切成宽度为 `2^k` 个周期的固定区块，并在其最近的两个非空区块中各保留最旧的那个备份，同时最新的备份始终被钉在最上面。每一层最多只比下面一层多花一个文件，因此整条阶梯都能装进预算——而它的跨度每上一层就翻一倍。它最深的区块宽 `2^(BACKUP_ROTATION - 2)` 个周期，所以在每日计划下，默认 `BACKUP_ROTATION: "7"` 时最早的恢复点位于**约 32 到 63 天**之前，`"12"` 时位于**约 1024 到 2047 天**之前——文件数量线性增长，深度指数增长。在相同预算下，`fifo` 向前绝不会超过 `BACKUP_ROTATION` 个周期。
+
+    这些区块坐落在一张绝对网格上，而不是从今天往回度量的窗口上，正是这一点让删除变得安全：阶梯放弃的备份将来绝不会再被需要，因此深层不会随时间被掏空。这也意味着阶梯会**随着归档变老而逐步填满**——到达第 `k` 层需要 `2^k` 个周期，所以一个刚部署不久的安装会保留它拥有的全部备份，深层恢复点则随时间推移才出现。在此之前，没有花掉的预算都会用在最近的备份上，保持完整粒度。
+
+!!! info "备份的日期是如何确定的"
+    轮换读取每个归档文件名中的时间戳。文件名中没有可用时间戳的归档——手工拷进来的或被改过名的文件——则改用其修改时间来确定日期，两种策略下都是如此。
 
 ## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2862,6 +2904,12 @@ gRPC 插件允许 BunkerWeb 通过 HTTP/2 使用 `grpc_pass` 代理 gRPC 服务�
 3. **映射路径：** 为每个上游设置 `GRPC_URL`（多个条目时使用对应后缀）。
 4. **调优行为：** 按需配置超时、重试、请求头以及 TLS SNI 选项。
 
+!!! tip "可复用的 gRPC 后端池"
+    一个 `GRPC_HOST` 只指向单个后端。若要在多个后端之间做负载均衡，或在多个服务之间共用同一批后端，请在 **Upstreams** 页面（或通过 `/upstreams` API）声明一个 **gRPC 上游池**，并按路径附加到某个服务上——BunkerWeb 会替您把 `grpc://<池名>` 写入对应的 `GRPC_HOST`。请注意，在同一个服务上 gRPC 与反向代理的 `location` 共享同一个路径命名空间：同一路径不能被占用两次，无论由哪个插件提供服务。参见反向代理文档中的*可复用的上游池*一节。
+
+!!! tip "与 gRPC 后端之间的双向 TLS"
+    要向后端出示客户端证书，请在该服务上设置 `REVERSE_PROXY_SSL_CLIENT_CERT` 和 `REVERSE_PROXY_SSL_CLIENT_KEY`（或它们的 `_DATA` 变体）。该身份是有意与反向代理共享的：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证，BunkerWeb 会据此输出 `grpc_ssl_certificate`/`grpc_ssl_certificate_key`。参见反向代理文档中的*与上游之间的双向 TLS*。
+
 ### 配置项
 
 | 配置项                       | 默认值 | 上下文    | 可多值 | 说明                                                                                   |
@@ -3827,14 +3875,24 @@ STREAM 支持 :warning:
 
 ### 配置设置
 
-| 设置                                 | 默认值 | 上下文    | 多选 | 描述                                                                                                                           |
-| ------------------------------------ | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_METRICS`                        | `yes`  | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                                                           |
-| `METRICS_MEMORY_SIZE`                | `16m`  | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                                              |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`   | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                               |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`  | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。                                          |
-| `MAX_LRU_HISTORY`                    | `1k`   | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
-| `METRICS_SAVE_TO_REDIS`              | `yes`  | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。                               |
+| 设置                                 | 默认值   | 上下文    | 多选 | 描述                                                                                             |
+| ------------------------------------ | -------- | --------- | ---- | ------------------------------------------------------------------------------------------------ |
+| `USE_METRICS`                        | `yes`    | multisite | 否   | **启用指标：** 设置为 `yes` 以启用指标的收集和检索。                                             |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
+| `METRICS_REDIS_TTL` | `2592000` | global | 否 | **指标 Redis TTL：** Redis 中指标键过期前的秒数（`0` 表示永不过期）；每次同步都会刷新，因此活跃数据永不过期，而被弃用的数据则可在 `volatile-lru` 策略下被淘汰，使 Redis 能从 `maxmemory` 中恢复。支持 `k`/`m` 简写。 |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
+| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
+| `METRICS_COLLECT_TIMINGS` | `yes` | global | 否 | **采集插件耗时：** 按 (插件, 阶段) 以 count/sum/max 聚合的形式，测量每个插件在每个请求阶段所花的时间。它需要在每次插件调用前后强制刷新 NGINX 的时间，在完整插件链上约合每请求一微秒；设为 `no` 可完全去掉这项开销。整个请求的耗时始终会被采集。 |
+| `METRICS_MEMORY_MAX_RETRIES` | `5` | global | 否 | **内存操作最大重试次数：** 内存操作的最大重试次数。 |
+| `METRICS_PERSIST_TO_DB` | `yes` | global | 否 | **持久化报告：** 通过定期抓取各实例，把被拦截请求的报告持久化到数据库中——可长期保存且可查询。禁用后，报告只存在于内存和 Redis 存储中。 |
+| `METRICS_RETENTION_DAYS` | `90` | global | 否 | **报告保留（天）：** 已持久化的被拦截请求报告在被保留任务删除之前的最大保存天数。 |
+| `METRICS_RETENTION_MAX_ROWS` | `1000000` | global | 否 | **报告保留（行数）：** 要保留的已持久化报告的最大条数；超出部分由保留任务从最旧的行开始删除。 |
+| `METRICS_BASELINE_SAMPLE_RATE` | `1` | global | 否 | **基线采样率：** 记录为流量基线的*未被拦截*请求所占的百分比，供异常检测学习"正常"是什么样子（`0` 表示关闭，`1` 表示每一百个请求采样一个）。采样依据请求 id 是确定性的，且从不存储客户端 IP。 |
+| `METRICS_MAX_BASELINE_REQUESTS` | `1k` | global | 否 | **基线记录上限：** 每个 worker 在丢弃最旧记录之前所保留的采样基线记录的最大条数。该缓冲区与报告共享 `METRICS_MEMORY_SIZE`，但在空间不足时会被丢弃，而不会挤占报告。请降低采样率，而不是调高此值。 |
+| `METRICS_BASELINE_RETENTION_DAYS` | `14` | global | 否 | **基线保留（天）：** 采样基线记录在被保留任务删除之前的最大保存天数。有意比报告的保留期更短：基线增长快得多，而模型是基于近期的正常行为训练的。 |
+| `METRICS_BASELINE_RETENTION_MAX_ROWS` | `2000000` | global | 否 | **基线保留（行数）：** 要保留的采样基线记录的最大条数。与报告的上限分开设置，因为这两张表的增长速度差别很大。 |
 
 !!! tip "调整内存分配大小"
     应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
@@ -4961,6 +5019,16 @@ STREAM 支持 :x:
 4.  **选择状态码：** 使用 `REDIRECT_TO_STATUS_CODE` 设置设置适当的 HTTP 状态码，以指示是永久重定向还是临时重定向。
 5.  **让 BunkerWeb 处理其余部分：** 配置完成后，所有对该站点的请求都将根据您的设置自动重定向。
 
+### 可复用的重定向
+
+除了下面这些按服务配置的设置之外，一条重定向还可以作为**具名、可复用的规则**只保存一次，然后从 Web 界面的**重定向**页面或通过 `/redirects` API 端点，附加到任意多个服务上。
+
+- 一条规则携带与内联设置相同的四个值：源路径、目标 URL、状态码，以及是否附加请求 URI。
+- 内联的 `REDIRECT_*` 设置的行为与以往完全一致。附加的规则在它们**之后**渲染，占用接下来空闲的后缀，因此现有配置不受影响，也不需要任何迁移。
+- 没有附加到任何服务的规则不会渲染出任何内容。
+- **一个路径，只有一个归属。** 重定向会向与反向代理和 gRPC 插件相同的 server 中渲染一个 `location`，而 NGINX 拒绝两个 URI 相同的 `location` 块。因此一个源路径会被这三者共同占用——无论占用它的是附加的规则、附加的上游池，还是内联设置——冲突的改动会被拒绝，并给出说明是谁已经占用了该路径的消息。
+- 只要规则仍附加在某个服务上，删除该规则就会被拒绝；请先解除附加。
+
 ### 配置设置
 
 | 设置                      | 默认值 | 上下文    | 多选 | 描述                                                                                    |
@@ -5266,6 +5334,38 @@ STREAM 支持 :warning:
 4.  **配置特定于协议的选项：** 对于 WebSockets 或特殊的 HTTP 要求，请调整相应的设置。
 5.  **设置缓存（可选）：** 启用和配置代理缓存，以提高频繁访问内容的性能。
 
+### 可复用的上游池
+
+下面这些设置把一个 `location` 指向单个后端。当多个后端服务于同一个应用，或多个服务共用同一批后端时，您可以改为声明一个**具名、可复用的池**——即上游（upstream）——可在 Web 界面的 **Upstreams** 页面或通过 `/upstreams` API 端点创建，并附加到任意多个服务上。修改池会同时更新所有附加了它的服务。
+
+- 一个池带有名称、**协议**、负载均衡方法（`round_robin`、`least_conn` 或 `ip_hash`）、可选的 `keepalive` 连接数，以及一个或多个服务器。
+- 每个服务器带有地址（`主机` 或 `主机:端口`，不含协议前缀）、`weight`，以及被动健康检查参数 `max_fails` 和 `fail_timeout`；还可以标记为 `backup`（仅在其他服务器失败时使用）或 `down`（临时摘除）。
+- **协议**决定由哪个消费方使用该池以及如何附加：
+    - `http` —— 反向代理（`proxy_pass`）。附加到一个**服务加一个路径**，因此同一个服务可以把 `/` 代理到一个池、把 `/api` 代理到另一个池。
+    - `grpc` —— gRPC 插件（`grpc_pass`），附加方式相同。HTTP 与 gRPC 池共享同一个路径命名空间，因为二者都会向同一个 server 渲染 `location`。
+    - `stream` —— TCP/UDP 服务。没有路径：池接管整个服务，取代 stream 配置根据 `REVERSE_PROXY_HOST` 构建的那个隐式单后端。一个服务只能带一个，且 `keepalive` 不适用。
+- `backend_ssl` 开关决定是否对后端服务器使用 TLS：用 `https://` 代替 `http://`，用 `grpcs://` 代替 `grpc://`。
+- 协议必须与服务匹配：HTTP 或 gRPC 池只能用于 `SERVER_TYPE` 为 `http` 的服务，stream 池只能用于 `SERVER_TYPE` 为 `stream` 的服务。Web 界面只列出匹配的服务；API 会拒绝其余的并给出说明。
+- 内联的 `REVERSE_PROXY_HOST` 和 `GRPC_HOST` 设置的行为与以往完全一致。附加的池在它们**之后**渲染，占用接下来空闲的后缀，因此现有配置不受影响，也不需要任何迁移。附加了池的服务会自动启用 `USE_REVERSE_PROXY`（或 `USE_GRPC`）。
+- **一个路径，只有一个归属。** 反向代理、gRPC 和**重定向**都会向同一个 server 渲染 `location`，而 NGINX 拒绝两个 URI 相同的 `location` 块。因此一个路径会被这三者共同占用——无论占用它的是附加的池、附加的重定向，还是内联设置——冲突的改动会被拒绝，并给出说明是谁已经占用了该路径的消息。
+- 没有附加到任何服务的池不会渲染出任何内容；只要池仍附加在某个服务上，删除它就会被拒绝，请先解除附加。出于同样的原因，修改已附加池的协议也会被拒绝。
+- 池名只接受字母、数字、连字符和下划线。点号是有意拒绝的：NGINX 会先在已声明的上游中解析名称，然后才走 DNS 解析器，因此一个与真实主机同名的池会截走本该发往该主机的流量。
+
+### 与上游之间的双向 TLS
+
+下面的 `REVERSE_PROXY_SSL_VERIFY` 系列设置校验的是*后端的*证书。若还要向后端出示证书——即双向 TLS——请配置客户端证书对：
+
+- 使用 `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` 指定调度器可读的文件路径，或使用 `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` 直接给出 base64 或明文 PEM，由 `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY`（`file` 或 `data`）决定取哪一种。
+- 该证书对会用 OpenSSL 校验，并由处理受信任 CA 的同一个任务缓存并分发到每个实例，写入时权限仅限属主与属组。
+- **两半都必须提供。** 只有证书而没有对应的私钥（或反之）会被拒绝，而不会只应用一半，因为 NGINX 要么需要这两条指令，要么一条都不要。
+- 该身份是**按服务生效的，并与 gRPC 和 stream 共享**：无论由哪个插件转发流量，一个服务都以同一份证书向其后端认证。在 stream 上下文中，它同时也是启用到后端的 TLS（`proxy_ssl on`）的开关，因此未配置客户端证书对的服务会保持其现有的明文行为。
+- 清空这些设置后，下一次运行会删除这些文件，双向 TLS 随之关闭。
+
+这与 `mtls` 插件无关，后者认证的是*连接到 BunkerWeb 的客户端*——方向正好相反。
+
+!!! warning "无法解析的后端会导致重载失败"
+    NGINX 在加载配置时会解析上游服务器的地址。如果已附加池中的某个服务器无法解析，整份配置都会被拒绝，BunkerWeb 会继续使用上一份有效配置。请使用在重载时可解析的地址，或在服务器不可用期间将其标记为 `down`。
+
 ### 配置指南
 
 === "基本配置"
@@ -5314,6 +5414,7 @@ STREAM 支持 :warning:
     | 设置                            | 默认值 | 上下文    | 多选 | 描述                                                            |
     | ------------------------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`  | multisite | 是   | **连接超时：** 建立到后端服务器连接的最长时间。                 |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | 是 | **Stream 半关闭：** 设为 `yes` 时，在客户端关闭其写方向后仍保持与后端的连接。某些 TCP 协议要求客户端先半关闭再等待响应，而 nginx 默认会同时关闭两个方向。仅适用于 stream（TCP/UDP）服务。 |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`  | multisite | 是   | **读取超时：** 从后端服务器传输两个连续数据包之间的最长时间。   |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`  | multisite | 是   | **发送超时：** 向后端服务器传输两个连续数据包之间的最长时间。   |
     | `PROXY_BUFFERS`                 |        | multisite | 否   | **缓冲区：** 用于从后端服务器读取响应的缓冲区的数量和大小。     |
@@ -5336,15 +5437,20 @@ STREAM 支持 :warning:
         - **证书验证：** 控制如何验证后端服务器证书
         - **SNI 支持：** 为托管多个站点的后端指定服务器名称指示
 
-    | 设置                                             | 默认值 | 上下文    | 多选 | 描述                                                                               |
-    | ------------------------------------------------ | ------ | --------- | ---- | ---------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`                          | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。                         |
-    | `REVERSE_PROXY_SSL_SNI_NAME`                     |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。              |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                             |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。   |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。            |
+    | 设置                         | 默认值 | 上下文    | 多选 | 描述                                                                  |
+    | ---------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`      | `no`   | multisite | 否   | **SSL SNI：** 启用或禁用向上游发送 SNI（服务器名称指示）。            |
+    | `REVERSE_PROXY_SSL_SNI_NAME` |        | multisite | 否   | **SSL SNI 名称：** 当启用 SSL SNI 时，设置要发送到上游的 SNI 主机名。 |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | 否   | **SSL 验证：** 启用或禁用对上游服务器 SSL 证书的验证。                  |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | 否   | **受信任证书优先级：** 受信任 CA 的来源：`file`（路径）或 `data`（base64/PEM）。 |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | 否   | **SSL 受信任证书路径：** 用于验证上游的 PEM CA 包路径（需调度器可读）。 |
     | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | 否   | **SSL 受信任证书数据：** 以 base64 或 PEM 直接提供的受信任 CA（例如通过 Web UI）。 |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                                  |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | 否   | **SSL 验证深度：** 上游服务器证书链中的验证深度。                       |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | 否 | **客户端证书优先级：** 向上游出示的证书与私钥的来源：`file`（路径）或 `data`（base64/PEM）。 |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | 否 | **客户端证书路径：** BunkerWeb 向上游出示的 PEM 客户端证书路径，需可被调度器读取。必须同时提供配对的私钥。 |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | 否 | **客户端证书数据：** 直接以 base64 或 PEM 形式提供的客户端证书（例如通过 Web 界面）。 |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | 否 | **客户端私钥路径：** 与客户端证书配对的 PEM 私钥路径，需可被调度器读取。 |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | 否 | **客户端私钥数据：** 直接以 base64 或 PEM 形式提供的客户端私钥。条件允许时请优先使用文件路径：在此填入的私钥会作为设置值存储。 |
 
     !!! info "证书验证"
         当 `REVERSE_PROXY_SSL_VERIFY` 设置为 `yes` 时，NGINX 会同时验证上游证书链及其名称：
@@ -5453,6 +5559,7 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | 否 | **发送 PROXY 协议：** 向 stream 上游发送 PROXY 协议头。`auto` 跟随全局的 `USE_PROXY_PROTOCOL`，也就是该设置出现之前 BunkerWeb 的行为；`yes` 和 `no` 则与入站监听器无关地独立决定。仅适用于 stream（TCP/UDP）服务。 |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。

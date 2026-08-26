@@ -831,7 +831,7 @@ Führen Sie die folgenden Schritte aus, um die Backup-Funktion zu konfigurieren 
 
 1.  **Aktivieren Sie die Funktion:** Die Backup-Funktion ist standardmäßig aktiviert. Bei Bedarf können Sie dies mit der Einstellung `USE_BACKUP` steuern.
 2.  **Backup-Zeitplan konfigurieren:** Wählen Sie mit dem Parameter `BACKUP_SCHEDULE`, wie oft Backups durchgeführt werden sollen.
-3.  **Aufbewahrungsrichtlinie festlegen:** Geben Sie mit der Einstellung `BACKUP_ROTATION` an, wie viele Backups aufbewahrt werden sollen.
+3.  **Aufbewahrungsrichtlinie festlegen:** Geben Sie mit der Einstellung `BACKUP_ROTATION` an, wie viele Backups aufbewahrt werden sollen. Welche davon aufbewahrt werden, entscheidet `BACKUP_ROTATION_STRATEGY`, standardmäßig `hanoi`.
 4.  **Speicherort festlegen:** Wählen Sie mit der Einstellung `BACKUP_DIRECTORY`, wo die Backups gespeichert werden sollen.
 5.  **CLI-Befehle verwenden:** Verwalten Sie Backups bei Bedarf manuell mit den `bwcli plugin backup`-Befehlen.
 
@@ -841,7 +841,8 @@ Führen Sie die folgenden Schritte aus, um die Backup-Funktion zu konfigurieren 
 | ------------------ | ---------------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
 | `USE_BACKUP`       | `yes`                        | global  | nein     | **Backup aktivieren:** Auf `yes` setzen, um automatische Backups zu aktivieren.                                      |
 | `BACKUP_SCHEDULE`  | `daily`                      | global  | nein     | **Backup-Frequenz:** Wie oft Backups durchgeführt werden sollen. Optionen: `daily`, `weekly` oder `monthly`.         |
-| `BACKUP_ROTATION`  | `7`                          | global  | nein     | **Backup-Aufbewahrung:** Die Anzahl der aufzubewahrenden Backup-Dateien. Ältere Backups werden automatisch gelöscht. |
+| `BACKUP_ROTATION`  | `7`                          | global  | nein     | **Backup-Aufbewahrung:** Die Anzahl der aufzubewahrenden Backup-Dateien. Backups über diese Anzahl hinaus werden automatisch gelöscht. |
+| `BACKUP_ROTATION_STRATEGY` | `hanoi`              | global  | nein     | **Rotationsstrategie:** Wie Backups zum Löschen ausgewählt werden, sobald das Limit erreicht ist. `hanoi` behält eine Türme-von-Hanoi-Leiter — fein nahe der Gegenwart, exponentiell gröber weiter zurück; `fifo` behält die neuesten. Beide behalten dieselbe Anzahl an Dateien. |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | nein     | **Backup-Speicherort:** Das Verzeichnis, in dem die Backup-Dateien gespeichert werden.                               |
 
 ### Befehlszeilenschnittstelle
@@ -871,18 +872,30 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
 !!! warning "Datenbankkompatibilität"
     Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.
 
+    Ein Backup kann nur in die Datenbank-Engine zurückgespielt werden, aus der es stammt — die Engine ist Teil des Dateinamens (`backup-mariadb-…`), und eine Wiederherstellung in eine andere wird abgelehnt, bevor irgendetwas angefasst wird. Wenn Sie zwischen Engines migriert sind, bleiben beide Backup-Sätze im Verzeichnis: `restore` ohne Argument nimmt die neueste Datei jeder beliebigen Engine, geben Sie den Pfad also ausdrücklich an, um ein älteres Backup Ihrer aktuellen Engine wiederherzustellen.
+
 ### Beispielkonfigurationen
 
 === "Tägliche Backups mit Aufbewahrung von 7 Dateien"
 
     Standardkonfiguration: tägliche Backups, 7 aufbewahrte Dateien, verteilt durch die Türme-von-Hanoi-Leiter.
-    Sie deckt damit mehr als die letzten 7 Tage ab, behält dafür aber nicht jeden der letzten 7 Tage.
-    Mit `BACKUP_ROTATION_STRATEGY: "fifo"` werden stattdessen die 7 neuesten Dateien aufbewahrt.
 
     ```yaml
     USE_BACKUP: "yes"
     BACKUP_SCHEDULE: "daily"
     BACKUP_ROTATION: "7"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
+=== "Tägliche Backups, letzte 7 Tage (FIFO)"
+
+    Der bisherige Standard: die 7 neuesten Dateien und nichts Älteres.
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "7"
+    BACKUP_ROTATION_STRATEGY: "fifo"
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
@@ -897,6 +910,20 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
     BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
     ```
 
+=== "Tägliche Backups mit größerer Tiefe"
+
+    24 Dateien, durch die Standard-Leiter verteilt, statt nur die letzten 24 Tage abzudecken. Die
+    neuesten Backups werden in voller Granularität aufbewahrt, ältere exponentiell ausgedünnt, so
+    dass der älteste Wiederherstellungspunkt bei jeder Verdopplung des Alters der Installation
+    weiter zurückrückt — ein spät bemerktes Problem bleibt wiederherstellbar:
+
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "24"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
+
 === "Monatliche Backups an einem benutzerdefinierten Speicherort"
 
     Konfiguration für monatliche Backups, die an einem benutzerdefinierten Ort gespeichert werden:
@@ -907,6 +934,63 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
     BACKUP_ROTATION: "24"
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
+
+!!! info "Welche Backups aufbewahrt werden"
+    `hanoi` ist der Standard. Beide Strategien löschen dieselbe **Anzahl** an Dateien — `hanoi`
+    entfernt nie mehr Backups als `fifo` es täte — aber sie löschen nicht dieselben, und der
+    Unterschied liegt nicht nur am alten Ende. Die Leiter erkauft ihre Tiefe damit, dass sie auch
+    das jüngste Fenster ausdünnt: bei täglichem Zeitplan und dem Standard `BACKUP_ROTATION: "7"`
+    behält ein eingelaufenes Archiv je ein Backup aus den Fenstern der letzten etwa 1, 2, 4, 8, 16
+    und 32 Tage — Alter von rund 0, 1, 2–3, 4–7, 8–15, 16–31 und 32–63 Tagen, wobei das genaue
+    Alter davon abhängt, wo der aktuelle Tag auf dem festen Raster der Leiter liegt — während
+    `fifo` die letzten 7 Tage behält. **Drei oder vier der letzten sieben Tage werden aufgegeben**,
+    im Tausch gegen diese älteren Wiederherstellungspunkte.
+    Das neueste Backup wird immer behalten; bei einem Backup pro Tag und einem `BACKUP_ROTATION`
+    von mindestens 2 auch die beiden neuesten Tage. Der Tausch fällt milder aus, je größer
+    `BACKUP_ROTATION` ist — bei `"24"` bleiben etwa die letzten drei Wochen zusammenhängend, eine
+    Spanne, die mit dem Alter des Archivs langsam schrumpft.
+
+    **Mehrere Backups desselben Tages zählen als ein Wiederherstellungspunkt, und die
+    überzähligen sind die ersten Dateien, die eine Rotation aufgibt** — noch vor allem Älteren. Nur
+    das neueste Backup jedes Tages überlebt, sobald das Dateibudget aufgebraucht ist. Ein manuelles
+    Backup vor einer riskanten Änderung ist also nur bis zum nächsten Backup desselben Tages
+    sicher, und indem es zum neuesten dieses Tages wird, verdrängt es das geplante Backup des
+    Tages, das dann gelöscht wird. Mit `fifo` hätten Sie beide behalten.
+
+    Nichts, was bereits auf der Platte liegt, wird durch das Upgrade selbst gelöscht — die
+    Änderung greift bei der nächsten Rotation. Setzen Sie `BACKUP_ROTATION_STRATEGY: "fifo"` für
+    das bisherige Verhalten. Jede Löschung wird mit dem Grund protokolliert, aus dem die Datei
+    ausgewählt wurde.
+
+!!! info "Wie die Leiter aufgebaut ist"
+    Die Leiter zählt in **Perioden**, und eine Periode ist ein `BACKUP_SCHEDULE`: ein Tag bei
+    `daily`, sieben bei `weekly`, achtundzwanzig (vier Wochen, kein Kalendermonat) bei `monthly`.
+    Alle Backups innerhalb einer Periode sind derselbe Wiederherstellungspunkt, und das neueste
+    davon vertritt ihn.
+
+    `BACKUP_ROTATION` ist zugleich das Dateibudget und die Tiefe der Leiter: sie baut
+    `BACKUP_ROTATION - 1` Ebenen, wobei Ebene `k` die Zeitachse in feste Blöcke von `2^k` Perioden
+    schneidet und das älteste Backup ihrer beiden jüngsten nicht leeren Blöcke behält, mit dem
+    neuesten Backup stets obenauf angeheftet. Jede Ebene kostet höchstens eine Datei mehr als die
+    darunter, so dass die ganze Leiter ins Budget passt — während ihre Reichweite sich mit jeder
+    Ebene verdoppelt. Ihre tiefsten Blöcke sind `2^(BACKUP_ROTATION - 2)` Perioden breit, so dass
+    der älteste Wiederherstellungspunkt bei täglichem Zeitplan zwischen **32 und 63 Tagen** zurück
+    liegt (Standard `BACKUP_ROTATION: "7"`) und zwischen **1024 und 2047 Tagen** bei `"12"` — die
+    Zahl der Dateien wächst linear, die Tiefe exponentiell. `fifo` reicht bei gleichem Budget nie
+    weiter zurück als `BACKUP_ROTATION` Perioden.
+
+    Die Blöcke liegen auf einem absoluten Raster statt auf Fenstern, die von heute zurück gemessen
+    werden, und genau das macht eine Löschung sicher: ein Backup, das die Leiter fahren lässt, kann
+    nie wieder gebraucht werden, weshalb die tiefen Ebenen sich mit der Zeit nicht leeren. Es heißt
+    aber auch, dass die Leiter sich **mit dem Alter des Archivs füllt** — Ebene `k` zu erreichen
+    dauert `2^k` Perioden, eine junge Installation behält also alles, was sie hat, und die tiefen
+    Wiederherstellungspunkte entstehen erst mit der Zeit. Bis dahin geht das nicht ausgeschöpfte
+    Budget an die neuesten Backups, in voller Granularität.
+
+!!! info "Wie Backups datiert werden"
+    Die Rotation liest den Zeitstempel im Namen jedes Archivs. Ein Archiv, dessen Name keinen
+    brauchbaren trägt — eine von Hand hineinkopierte oder umbenannte Datei — wird stattdessen über
+    seine Änderungszeit datiert, unter beiden Strategien.
 
 ## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2809,6 +2893,12 @@ Das gRPC-Plugin ermöglicht BunkerWeb, gRPC-Dienste über HTTP/2 mit `grpc_pass`
 3. **Pfad(e) zuordnen:** Setzen Sie `GRPC_URL` pro Upstream (bei mehreren Einträgen mit passenden Suffixen).
 4. **Verhalten abstimmen:** Konfigurieren Sie bei Bedarf Timeouts, Retries, Header und TLS-SNI-Optionen.
 
+!!! tip "Wiederverwendbare Pools von gRPC-Backends"
+    Ein `GRPC_HOST` zeigt auf ein einzelnes Backend. Um über mehrere Backends zu verteilen oder dieselben Backends zwischen Diensten zu teilen, deklarieren Sie einen **gRPC-Upstream-Pool** auf der Seite **Upstreams** (oder über die `/upstreams`-API) und hängen ihn an einen Dienst mit einem Pfad an — BunkerWeb schreibt dann `grpc://<pool>` in den passenden `GRPC_HOST` für Sie. Beachten Sie, dass gRPC- und Reverse-Proxy-`location` sich auf einem Dienst einen Pfad-Namensraum teilen: derselbe Pfad kann nicht zweimal belegt werden, gleich welches Plugin ihn bedient. Siehe den Abschnitt *Wiederverwendbare Upstreams* in der Reverse-Proxy-Dokumentation.
+
+!!! tip "Gegenseitiges TLS zum gRPC-Backend"
+    Um dem Backend ein Client-Zertifikat vorzulegen, setzen Sie `REVERSE_PROXY_SSL_CLIENT_CERT` und `REVERSE_PROXY_SSL_CLIENT_KEY` (oder ihre `_DATA`-Varianten) am Dienst. Die Identität wird bewusst mit dem Reverse Proxy geteilt: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt, und BunkerWeb gibt daraus `grpc_ssl_certificate`/`grpc_ssl_certificate_key` aus. Siehe *Gegenseitiges TLS zum Upstream* in der Reverse-Proxy-Dokumentation.
+
 ### Konfigurationseinstellungen
 
 | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                          |
@@ -3765,14 +3855,24 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
 
 ### Konfigurationseinstellungen
 
-| Einstellung                          | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                               |
-| ------------------------------------ | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`    | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                                                                                      |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `8192`, `16m`, `32m`).                                                                                                                 |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`.                                                     |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`.                                                 |
+| Einstellung                          | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
+| ------------------------------------ | -------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`    | multisite | nein     | **Metriken aktivieren:** Auf `yes` setzen, um die Erfassung und den Abruf von Metriken zu aktivieren.                                     |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | nein     | **Speichergröße:** Größe des internen Speichers für Metriken (z. B. `8192`, `16m`, `32m`).                                                 |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | nein     | **Max. blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die pro Worker gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | nein     | **Max. Redis-blockierte Anfragen:** Maximale Anzahl blockierter Anfragen, die in Redis gespeichert werden sollen. Akzeptiert die Kurzschreibweise `k`/`m`. |
+| `METRICS_REDIS_TTL` | `2592000` | global | nein | **Metrik-Redis-TTL:** Sekunden, bis Redis-Metrikschlüssel ablaufen (`0` = dauerhaft); bei jeder Synchronisation aufgefrischt, so dass aktive Daten nie ablaufen und aufgegebene Daten unter `volatile-lru` verdrängbar werden, damit Redis sich von `maxmemory` erholt. Akzeptiert die Kurzformen `k`/`m`. |
 | `MAX_LRU_HISTORY`                    | `1k`     | global    | nein     | **Max. LRU-Verlauf:** Anzahl der LRU-Slots pro Worker und Limit des Ereignisverlaufsarrays pro Schlüssel (Blockierungsverläufe, Authentifizierungsverläufe usw.). Akzeptiert die Kurzschreibweise `k`/`m`. |
-| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern.                                                                  |
+| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern. |
+| `METRICS_COLLECT_TIMINGS` | `yes` | global | nein | **Plugin-Zeiten erfassen:** Misst, wie lange jedes Plugin in jeder Anfragephase braucht, als count/sum/max-Aggregat je (Plugin, Phase). Es erzwingt eine NGINX-Zeitaktualisierung um jeden Plugin-Aufruf — etwa eine Mikrosekunde pro Anfrage über eine volle Kette; auf `no` setzen, um diese Kosten zu entfernen. Die Gesamtdauer der Anfrage wird immer erfasst. |
+| `METRICS_MEMORY_MAX_RETRIES` | `5` | global | nein | **Max. Speicher-Wiederholungen:** Maximale Anzahl von Wiederholungen für Speicheroperationen. |
+| `METRICS_PERSIST_TO_DB` | `yes` | global | nein | **Berichte persistieren:** Speichert Berichte über blockierte Anfragen dauerhaft und abfragbar in der Datenbank, indem die Instanzen regelmäßig abgefragt werden. Deaktiviert leben die Berichte nur im Arbeitsspeicher und in Redis. |
+| `METRICS_RETENTION_DAYS` | `90` | global | nein | **Berichtsaufbewahrung (Tage):** Maximales Alter persistierter Berichte über blockierte Anfragen, bevor der Aufbewahrungsjob sie löscht. |
+| `METRICS_RETENTION_MAX_ROWS` | `1000000` | global | nein | **Berichtsaufbewahrung (Zeilen):** Maximale Anzahl persistierter Berichte; der Aufbewahrungsjob löscht die ältesten Zeilen darüber hinaus. |
+| `METRICS_BASELINE_SAMPLE_RATE` | `1` | global | nein | **Baseline-Abtastrate:** Prozentsatz der *nicht blockierten* Anfragen, die als Verkehrs-Baseline aufgezeichnet werden, damit die Anomalieerkennung lernt, wie normal aussieht (`0` schaltet sie ab, `1` erfasst eine von hundert Anfragen). Die Abtastung ist deterministisch anhand der Request-ID, und die Client-IP wird nie gespeichert. |
+| `METRICS_MAX_BASELINE_REQUESTS` | `1k` | global | nein | **Max. Baseline-Datensätze:** Maximale Anzahl abgetasteter Baseline-Datensätze je Worker, bevor die ältesten verworfen werden. Dieser Puffer teilt sich `METRICS_MEMORY_SIZE` mit den Berichten, wird aber verworfen, statt sie zu verdrängen, wenn der Platz ausgeht. Senken Sie lieber die Abtastrate. |
+| `METRICS_BASELINE_RETENTION_DAYS` | `14` | global | nein | **Baseline-Aufbewahrung (Tage):** Maximales Alter abgetasteter Baseline-Datensätze, bevor der Aufbewahrungsjob sie löscht. Bewusst kürzer als die Berichtsaufbewahrung: eine Baseline wächst weit schneller, und ein Modell wird auf dem jüngsten Normalverhalten trainiert. |
+| `METRICS_BASELINE_RETENTION_MAX_ROWS` | `2000000` | global | nein | **Baseline-Aufbewahrung (Zeilen):** Maximale Anzahl aufzubewahrender Baseline-Datensätze. Getrennt von der Berichtsobergrenze, weil beide Tabellen sehr unterschiedlich schnell wachsen. |
 
 !!! tip "Dimensionierung der Speicherzuweisung"
     Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
@@ -4897,6 +4997,16 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 4.  **Statuscode auswählen:** Legen Sie den entsprechenden HTTP-Statuscode mit der Einstellung `REDIRECT_TO_STATUS_CODE` fest, um eine permanente oder temporäre Umleitung anzuzeigen.
 5.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden alle Anfragen an die Website automatisch basierend auf Ihren Einstellungen umgeleitet.
 
+### Wiederverwendbare Weiterleitungen
+
+Über die dienstbezogenen Einstellungen unten hinaus kann eine Weiterleitung einmalig als **benannte, wiederverwendbare Regel** gespeichert und an beliebig viele Dienste angehängt werden — über die Seite **Weiterleitungen** in der Weboberfläche oder über die `/redirects`-API-Endpunkte.
+
+- Eine Regel trägt dieselben vier Werte wie die Inline-Einstellungen: Quellpfad, Ziel-URL, Statuscode und ob die Request-URI angehängt wird.
+- Inline-`REDIRECT_*`-Einstellungen funktionieren genau wie bisher. Angehängte Regeln werden **danach** gerendert und belegen die nächsten freien Suffixe, so dass bestehende Konfigurationen unverändert bleiben und keine Migration nötig ist.
+- Eine Regel, die an nichts angehängt ist, rendert nichts.
+- **Ein Pfad, ein Eigentümer.** Eine Weiterleitung rendert ein `location` in denselben Server wie die Reverse-Proxy- und gRPC-Plugins, und NGINX lehnt zwei `location`-Blöcke mit derselben URI ab. Ein Quellpfad ist daher über alle drei hinweg belegt — ob von einer angehängten Regel, einem angehängten Upstream-Pool oder einer Inline-Einstellung — und die kollidierende Änderung wird mit einer Meldung abgelehnt, die nennt, was ihn bereits hält.
+- Das Löschen einer Regel wird abgelehnt, solange sie noch an einen Dienst angehängt ist; hängen Sie sie zuerst ab.
+
 ### Konfigurationseinstellungen
 
 | Einstellung               | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                |
@@ -5199,6 +5309,38 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
 4.  **Protokollspezifische Optionen konfigurieren:** Passen Sie für WebSockets oder spezielle HTTP-Anforderungen die entsprechenden Einstellungen an.
 5.  **Caching einrichten (optional):** Aktivieren und konfigurieren Sie das Proxy-Caching, um die Leistung für häufig aufgerufene Inhalte zu verbessern.
 
+### Wiederverwendbare Upstreams
+
+Die Einstellungen unten richten ein `location` auf einen einzelnen Backend-Server. Wenn mehrere Backends dieselbe Anwendung bedienen oder mehrere Dienste sich dieselben Backends teilen, können Sie stattdessen einen **benannten, wiederverwendbaren Pool** — einen Upstream — auf der Seite **Upstreams** in der Weboberfläche oder über die `/upstreams`-API-Endpunkte deklarieren und ihn an beliebig viele Dienste anhängen. Eine Änderung am Pool aktualisiert jeden Dienst, an dem er hängt.
+
+- Ein Pool trägt einen Namen, ein **Protokoll**, eine Lastverteilungsmethode (`round_robin`, `least_conn` oder `ip_hash`), eine optionale Anzahl von `keepalive`-Verbindungen und einen oder mehrere Server.
+- Jeder Server trägt seine Adresse (`host` oder `host:port`, ohne Schema), ein `weight` sowie die passiven Health-Check-Parameter `max_fails` und `fail_timeout`; er kann außerdem als `backup` (nur genutzt, wenn die anderen ausfallen) oder `down` (vorübergehend herausgenommen) markiert werden.
+- Das **Protokoll** entscheidet, welcher Konsument den Pool nutzt und wie er angehängt wird:
+    - `http` — der Reverse Proxy (`proxy_pass`). An einen **Dienst und einen Pfad** angehängt, so dass ein Dienst `/` an den einen und `/api` an einen anderen Pool weitergeben kann.
+    - `grpc` — das gRPC-Plugin (`grpc_pass`), auf dieselbe Weise angehängt. HTTP- und gRPC-Pools teilen sich einen Pfad-Namensraum, da beide ein `location` in denselben Server rendern.
+    - `stream` — ein TCP/UDP-Dienst. Es gibt keinen Pfad: der Pool übernimmt den ganzen Dienst und ersetzt das einzelne implizite Backend, das die Stream-Konfiguration aus `REVERSE_PROXY_HOST` baut. Ein Dienst kann nur einen tragen, und `keepalive` gilt nicht.
+- Der Schalter `backend_ssl` wählt TLS zu den Servern: `https://` statt `http://`, `grpcs://` statt `grpc://`.
+- Das Protokoll muss zum Dienst passen: ein HTTP- oder gRPC-Pool gehört an einen Dienst mit `SERVER_TYPE` `http`, ein Stream-Pool an einen mit `SERVER_TYPE` `stream`. Die Weboberfläche bietet nur die passenden Dienste an; die API lehnt die übrigen mit einer Erklärung ab.
+- Inline-Einstellungen `REVERSE_PROXY_HOST` und `GRPC_HOST` funktionieren genau wie bisher. Angehängte Pools werden **danach** gerendert und belegen die nächsten freien Suffixe, so dass bestehende Konfigurationen unverändert bleiben und keine Migration nötig ist. Bei einem Dienst mit angehängtem Pool wird `USE_REVERSE_PROXY` (bzw. `USE_GRPC`) automatisch aktiviert.
+- **Ein Pfad, ein Eigentümer.** Reverse Proxy, gRPC und **Weiterleitungen** rendern alle ein `location` in denselben Server, und NGINX lehnt zwei `location`-Blöcke mit derselben URI ab. Ein Pfad ist daher über alle drei hinweg belegt — ob von einem angehängten Pool, einer angehängten Weiterleitung oder einer Inline-Einstellung — und die kollidierende Änderung wird mit einer Meldung abgelehnt, die nennt, was ihn bereits hält.
+- Ein an nichts angehängter Pool rendert nichts, und das Löschen eines Pools wird abgelehnt, solange er noch an einem Dienst hängt; hängen Sie ihn zuerst ab. Das Ändern des Protokolls eines angehängten Pools wird aus demselben Grund abgelehnt.
+- Pool-Namen akzeptieren nur Buchstaben, Ziffern, Bindestriche und Unterstriche. Punkte werden bewusst abgelehnt: NGINX löst einen Namen vor dem DNS-Resolver gegen die deklarierten Upstreams auf, so dass ein Pool mit dem Namen eines echten Hosts den für ihn bestimmten Verkehr abfangen würde.
+
+### Gegenseitiges TLS zum Upstream
+
+Die `REVERSE_PROXY_SSL_VERIFY`-Einstellungen unten prüfen das Zertifikat *des Backends*. Um dem Backend auch selbst ein Zertifikat vorzulegen — gegenseitiges TLS — setzen Sie das Client-Paar:
+
+- `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` für Dateipfade, die der Scheduler lesen kann, oder `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` für Base64- oder Klartext-PEM, ausgewählt über `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` oder `data`).
+- Das Paar wird mit OpenSSL validiert, zwischengespeichert und von demselben Job an jede Instanz verteilt, der auch die vertrauenswürdige CA behandelt, und dort mit Rechten nur für Eigentümer und Gruppe geschrieben.
+- **Beide Hälften sind erforderlich.** Ein Zertifikat ohne seinen Schlüssel (oder umgekehrt) wird abgelehnt statt halb angewendet, weil NGINX beide Direktiven braucht oder keine.
+- Die Identität gilt **pro Dienst und wird mit gRPC und Stream geteilt**: ein Dienst authentifiziert sich bei seinen Backends mit einem Zertifikat, gleich welches Plugin den Verkehr weitergibt. Im Stream-Kontext ist dies zugleich das, was TLS zum Backend überhaupt erst aktiviert (`proxy_ssl on`), so dass ein Dienst ohne Client-Paar sein bisheriges Klartextverhalten behält.
+- Werden die Einstellungen geleert, entfernt der nächste Lauf die Dateien, womit gegenseitiges TLS wieder aus ist.
+
+Dies ist unabhängig vom `mtls`-Plugin, das *Clients authentifiziert, die sich mit BunkerWeb verbinden* — die entgegengesetzte Richtung.
+
+!!! warning "Nicht auflösbare Backends lassen das Neuladen scheitern"
+    NGINX löst die Adressen von Upstream-Servern beim Laden seiner Konfiguration auf. Kann ein Server eines angehängten Pools nicht aufgelöst werden, wird die gesamte Konfiguration abgelehnt und BunkerWeb behält die letzte gültige. Verwenden Sie eine Adresse, die zum Zeitpunkt des Neuladens auflösbar ist, oder markieren Sie den Server als `down`, solange er nicht verfügbar ist.
+
 ### Konfigurationsanleitung
 
 === "Grundlegende Konfiguration"
@@ -5247,6 +5389,7 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
     | Einstellung                     | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                             |
     | ------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
     | `REVERSE_PROXY_CONNECT_TIMEOUT` | `60s`    | multisite | ja       | **Verbindungs-Timeout:** Maximale Zeit zum Herstellen einer Verbindung zum Backend-Server.                               |
+    | `REVERSE_PROXY_STREAM_HALF_CLOSE` | `no` | multisite | ja | **Stream Half Close:** Auf `yes` gesetzt, bleibt die Verbindung zum Backend offen, nachdem der Client seine Schreibseite geschlossen hat. Erforderlich für TCP-Protokolle, bei denen der Client halb schließt und dann auf die Antwort wartet; nginx schließt standardmäßig beide Richtungen. Nur für Stream-Dienste (TCP/UDP). |
     | `REVERSE_PROXY_READ_TIMEOUT`    | `60s`    | multisite | ja       | **Lese-Timeout:** Maximale Zeit zwischen der Übertragung von zwei aufeinanderfolgenden Paketen vom Backend-Server.       |
     | `REVERSE_PROXY_SEND_TIMEOUT`    | `60s`    | multisite | ja       | **Sende-Timeout:** Maximale Zeit zwischen der Übertragung von zwei aufeinanderfolgenden Paketen zum Backend-Server.      |
     | `PROXY_BUFFERS`                 |          | multisite | nein     | **Puffer:** Anzahl und Größe der Puffer zum Lesen der Antwort vom Backend-Server.                                        |
@@ -5269,15 +5412,20 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Zertifikatsvalidierung:** Kontrollieren Sie, wie Backend-Serverzertifikate validiert werden
         - **SNI-Unterstützung:** Geben Sie die Server Name Indication für Backends an, die mehrere Websites hosten
 
-    | Einstellung                                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                               |
-    | ------------------------------------------------ | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_SSL_SNI`                          | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.                                                       |
-    | `REVERSE_PROXY_SSL_SNI_NAME`                     |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist.                                              |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`     | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.                                                       |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`   | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM).                                |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |          | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |          | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI).                                 |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`      | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                                                                      |
+    | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                  |
+    | ---------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_SSL_SNI`      | `no`     | multisite | nein     | **SSL SNI:** Aktiviert oder deaktiviert das Senden von SNI (Server Name Indication) an den Upstream.          |
+    | `REVERSE_PROXY_SSL_SNI_NAME` |          | multisite | nein     | **SSL SNI-Name:** Legt den SNI-Hostnamen fest, der an den Upstream gesendet wird, wenn SSL SNI aktiviert ist. |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | nein     | **SSL Verify:** Aktiviert oder deaktiviert die Überprüfung des SSL-Zertifikats des Upstream-Servers.        |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | nein     | **Priorität des vertrauenswürdigen Zertifikats:** Quelle der vertrauenswürdigen CA: `file` (Pfad) oder `data` (base64/PEM). |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | nein     | **Pfad des vertrauenswürdigen SSL-Zertifikats:** Pfad zu einem PEM-CA-Bundle (für den Scheduler lesbar), das zur Überprüfung des Upstreams verwendet wird. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | nein     | **Daten des vertrauenswürdigen SSL-Zertifikats:** Vertrauenswürdige CA direkt als base64 oder PEM (z. B. über die Web-UI). |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | nein     | **SSL Verify Depth:** Überprüfungstiefe in der Zertifikatskette des Upstream-Servers.                       |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | nein | **Priorität des Client-Zertifikats:** Quelle des Zertifikats und Schlüssels, die dem Upstream vorgelegt werden: `file` (Pfad) oder `data` (Base64/PEM). |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | nein | **Pfad des Client-Zertifikats:** Pfad zum PEM-Client-Zertifikat, das BunkerWeb dem Upstream vorlegt, lesbar für den Scheduler. Erfordert den passenden Schlüssel. |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | nein | **Daten des Client-Zertifikats:** Client-Zertifikat direkt als Base64 oder PEM angegeben (z. B. über die Weboberfläche). |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | nein | **Pfad des Client-Schlüssels:** Pfad zum privaten PEM-Schlüssel, der zum Client-Zertifikat passt, lesbar für den Scheduler. |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | nein | **Daten des Client-Schlüssels:** Privater Client-Schlüssel direkt als Base64 oder PEM. Bevorzugen Sie nach Möglichkeit einen Dateipfad: ein hier gesetzter Schlüssel wird als Einstellungswert gespeichert. |
 
     !!! info "Zertifikatsüberprüfung"
         Wenn `REVERSE_PROXY_SSL_VERIFY` auf `yes` gesetzt ist, überprüft NGINX sowohl die Zertifikatskette des Upstreams als auch dessen Namen:
@@ -5381,11 +5529,12 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - **Leistungsoptimierung:** Optimieren Sie die Anforderungsbehandlung für bestimmte Anwendungsfälle
         - **Flexibilität:** Passen Sie sich mit speziellen Konfigurationen an einzigartige Anwendungsanforderungen an
 
-    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                      |
-    | --------------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                  |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                         |
+    | Einstellung                       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                       |
+    | --------------------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |          | multisite | ja       | **Zusätzliche Konfigurationen:** Fügen Sie zusätzliche Konfigurationen in den Standortblock ein.                                                                                                   |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`    | multisite | ja       | **Anforderungskörper weiterleiten:** Aktiviert oder deaktiviert das Weiterleiten des Anforderungskörpers.                                                                                          |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`    | multisite | ja       | **ModSecurity (pro Location):** Auf `no` setzen, um `modsecurity off;` in dieser Location auszugeben; umgeht die WAF auf Endpunkten für große Uploads, um OOM zu vermeiden (siehe Hinweis unten). |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | nein | **PROXY-Protokoll senden:** Sendet den PROXY-Protokoll-Header an den Stream-Upstream. `auto` folgt der globalen Einstellung `USE_PROXY_PROTOCOL`, also dem Verhalten vor Einführung dieser Einstellung; `yes` und `no` entscheiden unabhängig vom eingehenden Listener. Nur für Stream-Dienste (TCP/UDP). |
 
     !!! warning "Sicherheitsüberlegungen"
         Seien Sie vorsichtig, wenn Sie benutzerdefinierte Konfigurationsausschnitte einfügen, da diese die Sicherheitseinstellungen von BunkerWeb überschreiben oder bei unsachgemäßer Konfiguration Schwachstellen einführen können.

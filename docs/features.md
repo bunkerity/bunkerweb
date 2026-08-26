@@ -1043,6 +1043,29 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     rotation. Set `BACKUP_ROTATION_STRATEGY: "fifo"` for the previous behaviour. Every deletion is
     logged with the reason it was picked.
 
+!!! info "How the ladder is built"
+    The ladder counts in **periods**, and a period is one `BACKUP_SCHEDULE`: one day for `daily`,
+    seven for `weekly`, twenty-eight (four weeks, not a calendar month) for `monthly`. Every backup
+    taken inside one period is the same restore point, and the newest of them is the one that
+    represents it.
+
+    `BACKUP_ROTATION` is both the file budget and the depth of the ladder: it builds
+    `BACKUP_ROTATION - 1` levels, level `k` cutting the timeline into fixed blocks of `2^k` periods
+    and keeping the oldest backup of its two most recent non-empty blocks, with the newest backup
+    always pinned on top. Each level costs at most one file more than the one below it, so the
+    whole ladder fits in the budget — while its reach doubles at every level. Its deepest blocks are
+    `2^(BACKUP_ROTATION - 2)` periods wide, so on a daily schedule the oldest restore point sits
+    between **32 and 63 days** back at the default `BACKUP_ROTATION: "7"`, and between **1024 and
+    2047 days** at `"12"` — the number of files grows linearly, the depth exponentially. `fifo` at
+    the same budget never reaches further back than `BACKUP_ROTATION` periods.
+
+    The blocks sit on an absolute grid rather than on windows measured back from today, which is
+    what makes a deletion safe: a backup the ladder lets go can never be wanted again, so the deep
+    levels do not empty out over time. It also means the ladder **fills in as the archive ages** —
+    reaching level `k` takes `2^k` periods, so a young install keeps everything it has and the deep
+    restore points appear as it gets older. Until then the unspent budget goes to the most recent
+    backups, at full granularity.
+
 !!! info "How backups are dated"
     Rotation reads the timestamp in each archive's name. An archive whose name does not carry a
     usable one — a file copied in by hand, or renamed — is dated by its modification time instead,
@@ -2993,6 +3016,12 @@ The gRPC plugin lets BunkerWeb proxy gRPC services through HTTP/2 using `grpc_pa
 3. **Map path(s):** Set `GRPC_URL` for each upstream (and matching suffixed values for multiple entries).
 4. **Tune behavior:** Configure timeouts, retries, headers, and TLS SNI options if needed.
 
+!!! tip "Reusable pools of gRPC backends"
+    A `GRPC_HOST` points at a single backend. To balance across several backends, or to share the same backends between services, declare a **gRPC upstream pool** on the **Upstreams** page (or through the `/upstreams` API) and attach it to a service at a path — BunkerWeb then writes `grpc://<pool>` into the matching `GRPC_HOST` for you. Note that gRPC and reverse-proxy locations share one path namespace on a service: the same path cannot be claimed twice, whichever plugin serves it. See the *Reusable Upstreams* section of the Reverse Proxy documentation.
+
+!!! tip "Mutual TLS with the gRPC backend"
+    To present a client certificate to the backend, set `REVERSE_PROXY_SSL_CLIENT_CERT` and `REVERSE_PROXY_SSL_CLIENT_KEY` (or their `_DATA` variants) on the service. The identity is deliberately shared with the reverse proxy: one service authenticates to its backends with one certificate, whichever plugin proxies the traffic, and BunkerWeb emits `grpc_ssl_certificate`/`grpc_ssl_certificate_key` from it. See *Mutual TLS with the upstream* in the Reverse Proxy documentation.
+
 ### Configuration Settings
 
 | Setting                      | Default | Context   | Multiple | Description                                                                                         |
@@ -3959,15 +3988,24 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default   | Context   | Multiple | Description                                                                                                                                                                                                                                                    |
-| ------------------------------------ | --------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`     | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                                                                                                                                                                |
-| `METRICS_MEMORY_SIZE`                | `16m`     | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                                                                                                                                                                        |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`      | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.                                                                                                                                                   |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`     | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.                                                                                                                                               |
-| `METRICS_REDIS_TTL`                  | `2592000` | global    | no       | **Metrics Redis TTL:** Seconds before Redis metrics keys expire (`0` = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under `volatile-lru` so Redis recovers from maxmemory. Accepts `k`/`m` shorthand. |
-| `MAX_LRU_HISTORY`                    | `1k`      | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand.                                                                                                               |
-| `METRICS_SAVE_TO_REDIS`              | `yes`     | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation.                                                                                                                                           |
+| Setting                              | Default  | Context   | Multiple | Description                                                                                                          |
+| ------------------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                      |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `8192`, `16m`, `32m`).                              |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker. Accepts `k`/`m` shorthand.         |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. Accepts `k`/`m` shorthand.     |
+| `METRICS_REDIS_TTL`                  | `2592000`| global    | no       | **Metrics Redis TTL:** Seconds before Redis metrics keys expire (`0` = permanent); refreshed each sync so active data never expires, letting abandoned data become evictable under `volatile-lru` so Redis recovers from maxmemory. Accepts `k`/`m` shorthand. |
+| `MAX_LRU_HISTORY`                    | `1k`     | global    | no       | **Max LRU History:** Per-worker LRU slot count and per-key event-history array cap (block trails, auth trails, etc.). Accepts `k`/`m` shorthand.                |
+| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation. |
+| `METRICS_COLLECT_TIMINGS` | `yes` | global | no | **Collect Plugin Timings:** Measure how long each plugin takes in each request phase, as a count/sum/max aggregate per (plugin, phase). It forces an NGINX time refresh around every plugin call — roughly a microsecond per request across a full chain; set to `no` to remove that cost. Whole-request duration is always collected. |
+| `METRICS_MEMORY_MAX_RETRIES` | `5` | global | no | **Memory Max Retries:** Maximum number of retries for memory operations. |
+| `METRICS_PERSIST_TO_DB` | `yes` | global | no | **Persist Reports:** Persist blocked-request reports to the database — durable and queryable — by periodically scraping the instances. When disabled, reports live only in the in-memory and Redis stores. |
+| `METRICS_RETENTION_DAYS` | `90` | global | no | **Report Retention (days):** Maximum age of persisted blocked-request reports before the retention job deletes them. |
+| `METRICS_RETENTION_MAX_ROWS` | `1000000` | global | no | **Report Retention (rows):** Maximum number of persisted blocked-request reports to keep; the retention job deletes the oldest rows beyond this count. |
+| `METRICS_BASELINE_SAMPLE_RATE` | `1` | global | no | **Baseline Sample Rate:** Percentage of *non-blocked* requests recorded as a traffic baseline, so anomaly detection can learn what normal looks like (`0` disables it, `1` samples one request in a hundred). Sampling is deterministic on the request id, and the client IP is never stored. |
+| `METRICS_MAX_BASELINE_REQUESTS` | `1k` | global | no | **Max Baseline Records:** Maximum number of sampled baseline records held per worker before the oldest are dropped. This buffer shares `METRICS_MEMORY_SIZE` with the reports, but is dropped rather than evicting them when space runs out. Lower the sample rate instead of raising this. |
+| `METRICS_BASELINE_RETENTION_DAYS` | `14` | global | no | **Baseline Retention (days):** Maximum age of sampled baseline records before the retention job deletes them. Deliberately shorter than the report retention: a baseline grows far faster, and a model is trained on recent normal behaviour. |
+| `METRICS_BASELINE_RETENTION_MAX_ROWS` | `2000000` | global | no | **Baseline Retention (rows):** Maximum number of sampled baseline records to keep. Separate from the report cap because the two tables grow at very different rates. |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
@@ -5094,6 +5132,16 @@ Follow these steps to configure and use the Redirect feature:
 4. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
 5. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
 
+### Reusable Redirects
+
+Beyond the per-service settings below, a redirect can be stored once as a **named, reusable rule** and attached to as many services as you like, from the **Redirects** page in the web UI or through the `/redirects` API endpoints. Editing the rule updates every service it is attached to.
+
+- A rule carries the same four values as the inline settings: source path, destination URL, status code and whether to append the request URI.
+- Inline `REDIRECT_*` settings keep working exactly as before. Attached rules are rendered **after** them, taking the next free suffixes, so existing configurations are untouched and no migration is needed.
+- A rule attached to nothing renders nothing.
+- **One path, one owner.** A redirect renders a `location` into the same server as the reverse proxy and gRPC plugins, and NGINX rejects two `location` blocks with the same URI. A source path is therefore taken across all three at once — another redirect, an attached upstream pool, or an inline `REVERSE_PROXY_*`/`GRPC_*` setting — and the conflicting change is refused with a message naming what already holds it.
+- Deleting a rule is refused while it is still attached to a service; detach it first.
+
 ### Configuration Settings
 
 | Setting                   | Default | Context   | Multiple | Description                                                                                                       |
@@ -5398,6 +5446,38 @@ Follow these steps to configure and use the Reverse Proxy feature:
 4. **Configure protocol-specific options:** For WebSockets or special HTTP requirements, adjust the corresponding settings.
 5. **Set up caching (optional):** Enable and configure proxy caching to improve performance for frequently accessed content.
 
+### Reusable Upstreams
+
+The settings below point a location at a single backend. When several backends serve the same application, or several services share the same backends, you can instead declare a **named, reusable pool** — an upstream — from the **Upstreams** page in the web UI or through the `/upstreams` API endpoints, and attach it to as many services as you like. Editing the pool updates every service it is attached to.
+
+- A pool carries a name, a **protocol**, a load-balancing method (`round_robin`, `least_conn` or `ip_hash`), an optional `keepalive` connection count, and one or more servers.
+- Each server carries its address (`host` or `host:port`, no scheme), a `weight`, and the passive health-check parameters `max_fails` and `fail_timeout`; it can also be marked as a `backup` (only used when the others fail) or `down` (temporarily taken out).
+- The **protocol** decides which consumer uses the pool and how it is attached:
+    - `http` — the reverse proxy (`proxy_pass`). Attached to a **service and a path**, so one service can proxy `/` to one pool and `/api` to another.
+    - `grpc` — the gRPC plugin (`grpc_pass`), attached the same way. HTTP and gRPC pools share one path namespace, since both render a `location` into the same server.
+    - `stream` — a TCP/UDP service. There is no path: the pool takes over the whole service and replaces the single implicit backend the stream configuration builds from `REVERSE_PROXY_HOST`. A service can carry only one, and `keepalive` does not apply.
+- The `backend_ssl` switch selects TLS towards the servers: `https://` instead of `http://`, `grpcs://` instead of `grpc://`.
+- The protocol has to match the service: an HTTP or gRPC pool goes on a service whose `SERVER_TYPE` is `http`, a stream pool on one whose `SERVER_TYPE` is `stream`. The web UI only offers the services that fit; the API refuses the rest with an explanation.
+- Inline `REVERSE_PROXY_HOST` and `GRPC_HOST` settings keep working exactly as before. Attached pools are rendered **after** them, taking the next free suffixes, so existing configurations are untouched and no migration is needed. A service with an attached pool has `USE_REVERSE_PROXY` (or `USE_GRPC`) enabled automatically.
+- **One path, one owner.** Reverse proxy, gRPC and **redirects** all render a `location` into the same server, and NGINX rejects two `location` blocks with the same URI. A path is therefore taken across all three at once — whether it is claimed by an attached pool, an attached redirect, or an inline setting — and the conflicting change is refused with a message naming what already holds it.
+- A pool attached to nothing renders nothing, and deleting a pool is refused while it is still attached to a service; detach it first. Changing the protocol of an attached pool is refused for the same reason.
+- Pool names accept letters, digits, hyphens and underscores only. Dots are refused on purpose: NGINX resolves a name against the declared upstreams before the DNS resolver, so a pool named like a real host would capture traffic meant for it.
+
+### Mutual TLS with the upstream
+
+The `REVERSE_PROXY_SSL_VERIFY` settings below check *the backend's* certificate. To also present a certificate **to** the backend — mutual TLS — set the client pair:
+
+- `REVERSE_PROXY_SSL_CLIENT_CERT` / `REVERSE_PROXY_SSL_CLIENT_KEY` for file paths readable by the scheduler, or `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` / `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` for base64 or plaintext PEM, selected by `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` (`file` or `data`).
+- The pair is validated with OpenSSL, cached and distributed to every instance by the same job that handles the trusted CA, and written there with owner/group-only permissions.
+- **Both halves are required.** A certificate without its key (or the reverse) is refused rather than half-applied, because NGINX needs both directives or neither.
+- The identity is **per service, and shared with gRPC and stream**: one service authenticates to its backends with one certificate, whichever plugin proxies the traffic. In the stream context this is also what enables TLS to the backend at all (`proxy_ssl on`), so a service without a client pair keeps its current plaintext behaviour.
+- Clearing the settings removes the files on the next run, which turns mutual TLS back off.
+
+This is independent of the `mtls` plugin, which authenticates *clients connecting to BunkerWeb* — the opposite direction.
+
+!!! warning "Unresolvable backends fail the reload"
+    NGINX resolves the addresses of upstream servers when it loads its configuration. If a server of an attached pool cannot be resolved, the whole configuration is refused and BunkerWeb keeps the last valid one. Use an address that resolves at reload time, or mark the server as `down` while it is unavailable.
+
 ### Configuration Guide
 
 === "Basic Configuration"
@@ -5469,15 +5549,20 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Certificate Validation:** Control how backend server certificates are validated
         - **SNI Support:** Specify Server Name Indication for backends that host multiple sites
 
-    | Setting                                          | Default | Context   | Multiple | Description                                                                                                        |
-    | ------------------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_SSL_SNI`                          | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                   |
-    | `REVERSE_PROXY_SSL_SNI_NAME`                     |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                               |
-    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`    | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.                           |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).                  |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |         | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
-    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |         | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI).             |
-    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`     | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                                 |
+    | Setting                      | Default | Context   | Multiple | Description                                                                          |
+    | ---------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------ |
+    | `REVERSE_PROXY_SSL_SNI`                 | `no`    | multisite | no       | **SSL SNI:** Enable or disable sending SNI (Server Name Indication) to upstream.                                       |
+    | `REVERSE_PROXY_SSL_SNI_NAME`            |         | multisite | no       | **SSL SNI Name:** Sets the SNI hostname to send to upstream when SSL SNI is enabled.                                   |
+    | `REVERSE_PROXY_SSL_VERIFY`                       | `no`   | multisite | no       | **SSL Verify:** Enable or disable verification of the upstream server's SSL certificate.            |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_PRIORITY` | `file` | multisite | no       | **Trusted Certificate Priority:** Source of the trusted CA: `file` (path) or `data` (base64/PEM).   |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE`          |        | multisite | no       | **SSL Trusted Certificate Path:** Path to a PEM CA bundle (readable by the scheduler) used to verify the upstream. |
+    | `REVERSE_PROXY_SSL_TRUSTED_CERTIFICATE_DATA`     |        | multisite | no       | **SSL Trusted Certificate Data:** Trusted CA supplied directly as base64 or PEM (e.g. via the web UI). |
+    | `REVERSE_PROXY_SSL_VERIFY_DEPTH`                 | `1`    | multisite | no       | **SSL Verify Depth:** Verification depth in the upstream server certificate chain.                  |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_PRIORITY` | `file` | multisite | no | **Client Certificate Priority:** Source of the client certificate and key presented to the upstream: `file` (path) or `data` (base64/PEM). |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT` | | multisite | no | **Client Certificate Path:** Path to the PEM client certificate BunkerWeb presents to the upstream, readable by the scheduler. Requires the matching key. |
+    | `REVERSE_PROXY_SSL_CLIENT_CERT_DATA` | | multisite | no | **Client Certificate Data:** Client certificate supplied directly as base64 or PEM (e.g. via the web UI). |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY` | | multisite | no | **Client Key Path:** Path to the PEM private key matching the client certificate, readable by the scheduler. |
+    | `REVERSE_PROXY_SSL_CLIENT_KEY_DATA` | | multisite | no | **Client Key Data:** Client private key supplied directly as base64 or PEM. Prefer a file path when possible: a key set here is stored as a setting value. |
 
     !!! info "Certificate Verification"
         When `REVERSE_PROXY_SSL_VERIFY` is set to `yes`, NGINX validates both the upstream certificate chain and its name:
@@ -5581,11 +5666,12 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Performance Optimization:** Fine-tune request handling for specific use cases
         - **Flexibility:** Adapt to unique application requirements with specialized configurations
 
-    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                        |
-    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                       |
-    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                 |
+    | Setting                           | Default | Context   | Multiple | Description                                                                                                                                                         |
+    | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_INCLUDES`          |         | multisite | yes      | **Additional Configurations:** Include additional configs in location block.                                                                                        |
+    | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`   | multisite | yes      | **Pass Request Body:** Enable or disable passing the request body.                                                                                                  |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`   | multisite | yes      | **ModSecurity (per location):** Set to `no` to emit `modsecurity off;` in this location; bypasses the WAF on large-upload endpoints to avoid OOM (see note below). |
+    | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | no | **Send PROXY Protocol:** Send the PROXY protocol header to the stream upstream. `auto` follows the global `USE_PROXY_PROTOCOL`, which is what BunkerWeb did before this setting existed; `yes` and `no` decide independently of the inbound listener. Stream (TCP/UDP) services only. |
 
     !!! warning "Security Considerations"
         Be careful when including custom configuration snippets as they may override BunkerWeb's security settings or introduce vulnerabilities if not properly configured.
