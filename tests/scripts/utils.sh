@@ -1963,6 +1963,30 @@ function log_stack () {
                     log "UTILS" "ℹ️ " "📜 Showing BunkerWeb access logs ..."
                     docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/access.log
 
+                    # Since 1.7 the scheduler only dispatches: it hands the job to the API, the
+                    # API queues it on the broker and a Celery worker executes it. Dumping only
+                    # bunkerweb + bunkerweb-scheduler therefore describes none of the three
+                    # services that actually run a job, which is why the db;sqlite and backup
+                    # reds of run 32859117306 could not be diagnosed from their CI logs at all.
+                    # These are packaged units on every Linux arm (src/linux/*.service), so they
+                    # are dumped unconditionally -- not gated on $type like the UI is.
+                    log "UTILS" "ℹ️ " "📜 Showing BunkerWeb API logs ..."
+                    docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-api --no-pager
+                    docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/api.log
+
+                    log "UTILS" "ℹ️ " "📜 Showing BunkerWeb API access logs ..."
+                    docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/api-access.log
+
+                    # The worker logs to the journal only (StandardOutput=journal+console, no
+                    # /var/log/bunkerweb/worker.log), so this journal is its ONLY record.
+                    log "UTILS" "ℹ️ " "📜 Showing BunkerWeb Worker logs ..."
+                    docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-worker --no-pager
+
+                    # The broker unit name differs per distro -- same probe order as
+                    # detect_broker_unit() in src/linux/scripts/postinstall.sh.
+                    log "UTILS" "ℹ️ " "📜 Showing BunkerWeb jobs broker logs ..."
+                    docker exec -u 0 bunkerweb-linux bash -c 'for unit in bunkerweb-broker redis-server valkey redis ; do if systemctl list-unit-files "${unit}.service" 2>/dev/null | grep -q "^${unit}.service" ; then echo "--- ${unit}.service ---" ; journalctl -u "$unit" --no-pager ; exit 0 ; fi ; done ; echo "No Redis/Valkey broker unit installed."'
+
                     if [ "$type" == "ui" ] ; then
                         log "UTILS" "ℹ️ " "📜 Showing BunkerWeb UI logs ..."
                         docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-ui --no-pager
@@ -1970,13 +1994,6 @@ function log_stack () {
 
                         log "UTILS" "ℹ️ " "📜 Showing BunkerWeb UI access logs ..."
                         docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/ui-access.log
-                    elif [ "$type" == "api" ] ; then
-                        log "UTILS" "ℹ️ " "📜 Showing BunkerWeb API logs ..."
-                        docker exec -u 0 bunkerweb-linux journalctl -u bunkerweb-api --no-pager
-                        docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/api.log
-
-                        log "UTILS" "ℹ️ " "📜 Showing BunkerWeb API access logs ..."
-                        docker exec -u 0 bunkerweb-linux cat /var/log/bunkerweb/api-access.log
                     fi
                 fi
             fi
