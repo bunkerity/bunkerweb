@@ -118,5 +118,17 @@ All-in-one:
     REDIS_HOST: "127.0.0.1"
     REDIS_DATABASE: "0"
 
+# Same defect tests/core/redis.yml carried: `redis` is a docker-compose service name that resolves
+# nowhere in the cluster, and this spec-level `config` is merged AFTER the in-cluster default
+# generate.py sets for Kubernetes, so it wins. Only a scheduling accident hides it -- the workflow
+# runs `run-Docker-tests-api` and has no Kubernetes api job, so this arm never executes in CI. A
+# local `run.sh Kubernetes api redis`, or the day an api-on-k8s job is added, reds the same way.
+# The three sentinel actions above are unaffected either way: each pins `REDIS_HOST: ""` on purpose
+# so the instance discovers the master through the sentinels, and a per-action config wins over
+# this block. It is `api_sentinel_password`, which declares no config of its own, that needs it.
+Kubernetes:
+  config:
+    REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
+
 api:
   API_TOKEN: "secret"

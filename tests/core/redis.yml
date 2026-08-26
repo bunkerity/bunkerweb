@@ -48,6 +48,11 @@ actions:
       port: 6390
     Autoconf:
       port: 6390
+    # Kubernetes publishes no host port for 6379: build.sh maps 6380 -> nodePort 30379 ->
+    # svc-redis-master, which is the datastore the Kubernetes block at the bottom of this file
+    # points the product at. Without this the action dialled 127.0.0.1:6379 and got ECONNREFUSED.
+    Kubernetes:
+      port: 6380
     query: "FLUSHALL"
     result: "True"
     full_clean: true
@@ -104,6 +109,11 @@ actions:
       port: 6390
     Autoconf:
       port: 6390
+    # Kubernetes publishes no host port for 6379: build.sh maps 6380 -> nodePort 30379 ->
+    # svc-redis-master, which is the datastore the Kubernetes block at the bottom of this file
+    # points the product at. Without this the action dialled 127.0.0.1:6379 and got ECONNREFUSED.
+    Kubernetes:
+      port: 6380
     query: "FLUSHALL"
     result: "True"
     full_clean: true
@@ -426,3 +436,13 @@ All-in-one:
   config:
     REDIS_HOST: "127.0.0.1"
     REDIS_DATABASE: "0"
+
+# `redis` is a docker-compose service name and resolves nowhere in the cluster. generate.py sets an
+# in-cluster default for Kubernetes, but the spec-level `config` above is merged AFTER it and wins,
+# so the whole stack -- scheduler, API rate limiter, and the Celery worker that runs sync-bans --
+# dialled `redis:6379` and timed out. Point it at the redis-master this spec deploys in the `redis`
+# namespace, the same host the per-action Kubernetes overrides already use, so one datastore serves
+# both the product (in-cluster) and the harness (host 6380 -> nodePort 30379).
+Kubernetes:
+  config:
+    REDIS_HOST: "svc-redis-master.redis.svc.cluster.local"
