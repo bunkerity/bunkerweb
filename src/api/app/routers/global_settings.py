@@ -1,13 +1,57 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
+from ports import HTTP_PORT_SETTING  # type: ignore
+
 from ..auth.guard import guard
-from ..utils import get_db
+from ..http01 import http01_refusals_for
+from ..utils import LOGGER, get_db
 from ..schemas import GlobalSettingsUpdate, ValidateSettingRequest, SaveConfigRequest
 
 config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
+
+# The settings whose value decides whether a service can still answer an ACME http-01 challenge.
+# ``HTTP_PORT`` counts in both directions: moving the FLEET's list makes a service that spelled out
+# the old one look moved, exactly as moving the service's own list does.
+HTTP01_SETTINGS = ("AUTO_LETS_ENCRYPT", "LETS_ENCRYPT_CHALLENGE", "LETS_ENCRYPT_PASSTHROUGH", HTTP_PORT_SETTING)
+_HTTP01_SUFFIXES = tuple(f"_{name}" for name in HTTP01_SETTINGS)
+
+
+def _touches_http01(keys) -> bool:
+    """Whether a payload can change the answer to "can this service still be validated?".
+
+    Matched on the SUFFIX, so a service-prefixed key counts too. That is not defensive breadth: an
+    autoconf payload carries every label as ``<server_name>_AUTO_LETS_ENCRYPT`` and can contain no
+    global row at all (``autoconf/Config.py:__get_full_env`` builds ``SERVER_NAME``, ``MULTISITE``
+    and prefixed keys), so a global-only test would skip exactly the path this gate exists for.
+
+    A trailing ``_<digits>`` is dropped first, because a port list is spelled ``HTTP_PORT_1``.
+    Over-matching costs nothing -- this only decides whether the real check below runs at all.
+    """
+    for key in keys:
+        head, _, tail = key.rpartition("_")
+        if head and tail.isdigit():
+            key = head
+        if key in HTTP01_SETTINGS or key.endswith(_HTTP01_SUFFIXES):
+            return True
+    return False
+
+
+def _http01_refusal_message(db, config: Mapping[str, Any], server_names) -> Optional[str]:
+    """The 400 body for a fleet-wide write that would strand one or more services, or None.
+
+    Every offending service is named with its own reason: unlike a single-service write, one
+    global change can reach many at once, and an operator who is told about the first of five
+    fixes it and gets refused again four times.
+    """
+    refusals = http01_refusals_for(db, config, server_names)
+    if not refusals:
+        return None
+    return " ".join(refusals[name] for name in sorted(refusals))
+
+
 router = APIRouter(prefix="/global_settings", tags=["global_settings"])
 
 
@@ -105,8 +149,49 @@ def save_config(req: SaveConfigRequest) -> JSONResponse:
 
     Used by Autoconf to persist its merged configuration.
     Returns the list of changed plugin IDs on success.
+
+    A configuration that would strand a service's http-01 challenge is refused with a 400 for an
+    interactive caller and logged-then-saved for ``method="autoconf"`` -- see the branch below.
     """
-    ret = get_db().save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
+    db = get_db()
+
+    # Semantic gate, deliberately beyond this endpoint's payload-shape contract. The payload IS
+    # the complete desired state here (`Database.save_config` deletes any in-scope key it omits),
+    # so unlike PATCH below there is nothing to merge and nothing to skip: judge it as written.
+    #
+    # This is the autoconf settings-apply path -- `src/autoconf/Config.py:apply()` reaches it
+    # through `AutoconfApiClient.save_config` -- and the UI's config editor
+    # (`ui/app/models/config.py`) reaches it too. Both used to persist a service that had been
+    # moved off the fleet's HTTP listener while asking for an http-01 challenge, and the failure
+    # surfaced sixty seconds later inside the certificate job.
+    server_names = str(req.config.get("SERVER_NAME", "") or "").split()
+    if server_names and _touches_http01(req.config):
+        refusal = _http01_refusal_message(db, req.config, server_names)
+        if refusal:
+            # Split by CALLER, and only here. `autoconf` is a declarative reconciler with no
+            # operator in the loop, and its payload is the WHOLE fleet: refusing it would leave
+            # every other service unconfigured too -- on a first boot, nothing at all -- because
+            # one container carries a bad label. That trades one service's certificate failure for
+            # a fleet-wide outage, which is strictly worse than the defect being fixed. So the same
+            # message is logged and the configuration is saved UNCHANGED: the offending service's
+            # http-01 order then fails exactly as it does today, no worse, but the diagnostic
+            # arrives at apply time instead of sixty seconds later inside a job.
+            #
+            # Nothing is rewritten to make it valid. Silently moving a port or switching a
+            # challenge would be a reconciler deciding what the operator meant.
+            #
+            # Every other method reaching here is a human editing one thing -- the UI config editor
+            # (`ui`), `manual`, `wizard` -- where the 400 is the whole point: they see it and fix
+            # their input. `scheduler` is allowed by the schema but never arrives: the scheduler
+            # shells out to `gen/save_config.py` (main.py:196, :645, :726) and has no client method
+            # for this endpoint. If that is ever wired up, it belongs on the autoconf side of this
+            # branch for exactly the same reason.
+            if req.method == "autoconf":
+                LOGGER.error(f"Saving an autoconf configuration that strands an http-01 challenge: {refusal}")
+            else:
+                return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
+
+    ret = db.save_config(req.config, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup)
     if isinstance(ret, str):
         code = 400 if "read-only" in ret.lower() or "resource group" in ret.lower() else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
@@ -200,6 +285,25 @@ def update_global_settings(payload: GlobalSettingsUpdate) -> JSONResponse:
             status_code=409,
             content={"status": "error", "message": "Settings managed elsewhere: " + "; ".join(conflicts)},
         )
+
+    # Semantic gate, and the ONE check here that is not payload-only. Everything above judges the
+    # incoming keys alone, on purpose (see both comments), because a pre-existing invalid or
+    # foreign-owned row must not block an unrelated save. This one cannot be payload-only:
+    # "can this service still answer an http-01 challenge?" is a property of the MERGED config --
+    # the challenge is global while the port that breaks it is per-service -- and a fleet-wide
+    # write reaches every service at once. It keeps the spirit of the rule by firing only when the
+    # payload actually carries a setting that decides the answer: a PATCH touching none of them
+    # cannot strand anything and pays no snapshot read.
+    if _touches_http01(to_set):
+        snapshot = db.get_non_default_settings(methods=False, with_drafts=True)
+        # The roster is taken BEFORE the overlay and from the database, not from the payload: this
+        # save passes skip_service_management=True, so a SERVER_NAME in the payload creates and
+        # deletes nothing, and the services that can be stranded are the ones that already exist.
+        server_names = str(snapshot.get("SERVER_NAME", "") or "").split()
+        snapshot.update(to_set)
+        refusal = _http01_refusal_message(db, snapshot, server_names) if server_names else None
+        if refusal:
+            return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
 
     base.update(to_set)
     ret = db.save_config(base, "api", changed=True, skip_service_management=True)

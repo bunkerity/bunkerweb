@@ -65,6 +65,12 @@ def _load_router():
     names["bw_services.auth"].__path__ = []
     names["bw_services.auth.guard"].guard = object()
     names["bw_services.utils"].get_db = Mock()
+    # `http01.py` is loaded for real, not stubbed: it holds the shared refusal core both routers
+    # now import, and a stub of it would make every assertion below assert the stub.
+    http01_spec = importlib.util.spec_from_file_location("bw_services.http01", ROOT / "src" / "api" / "app" / "http01.py")
+    http01 = importlib.util.module_from_spec(http01_spec)
+    http01_spec.loader.exec_module(http01)
+    names["bw_services.http01"] = http01
     with patch.dict(sys.modules, names):
         path = ROOT / "src" / "api" / "app" / "routers" / "services.py"
         spec = importlib.util.spec_from_file_location("bw_services.routers.services", path)
@@ -399,6 +405,44 @@ class TestHttp01IsRefusedForAServiceOnItsOwnPort:
 
         assert response.status_code == 200
         db.save_config.assert_called_once()
+
+    def test_a_service_that_overrides_nothing_is_not_refused_on_a_stock_fleet(self, db):
+        """The commonest fleet there is: nobody ever moved `HTTP_PORT`, so the snapshot has no
+        global row, and this service declares no port of its own either.
+
+        The declared-default recovery used to be added to the GLOBAL side only, so the service's
+        empty list was compared against the recovered ``['8080']`` and read as moved -- the message
+        even said "it listens on its own HTTP port(s) (none)" and told the operator to remove an
+        override they never set. On a stock fleet that refused turning Let's Encrypt on at all.
+        The default now reaches both sides of the comparison."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = {
+            "SERVER_NAME": SERVICE,
+            "MULTISITE": "yes",
+            "AUTO_LETS_ENCRYPT": "yes",
+            "LETS_ENCRYPT_CHALLENGE": "http",
+        }
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"USE_ANTIBOT": "captcha"}))
+
+        assert response.status_code == 200, response.content
+        db.save_config.assert_called_once()
+
+    def test_a_stock_fleet_still_refuses_a_service_that_does_move(self, db):
+        """Anti-vacuity for the case above: recovering the default must not disarm the gate."""
+        db.is_valid_setting.return_value = (True, "")
+        db.get_non_default_settings.return_value = {
+            "SERVER_NAME": SERVICE,
+            "MULTISITE": "yes",
+            "AUTO_LETS_ENCRYPT": "yes",
+            "LETS_ENCRYPT_CHALLENGE": "http",
+        }
+
+        response = ROUTER.update_service(SERVICE, schemas.ServiceUpdateRequest(variables={"HTTP_PORT": "9080"}))
+
+        assert response.status_code == 400
+        assert "9080" in response.content["message"] and "8080" in response.content["message"]
+        db.save_config.assert_not_called()
 
     def _config_without_a_global_row(self):
         """What a real snapshot looks like when the fleet never moved off 8080: a write path hands
