@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 import re
 from json import dumps, loads
-from os import getenv, replace
+from os import O_DIRECTORY, O_NOFOLLOW, O_RDONLY, close as os_close, fchown, fstat, geteuid, getenv, open as os_open, replace, stat as os_stat
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
@@ -30,6 +30,53 @@ BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 STAMP_RE = re.compile(r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")
 STAMP_FORMAT = "%Y-%m-%d_%H-%M-%S"
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
+
+
+def ensure_backup_dir(directory: Path = BACKUP_DIR) -> Path:
+    """Create the backup directory and keep it owned by the user the product runs as.
+
+    `bwcli plugin backup save` runs as root on a package install, the worker that rotates runs
+    as nginx, and whoever creates this directory first owns it. A root-created one is readable
+    but not writable by the worker, and unlinking a file needs write+execute on the DIRECTORY --
+    so rotation died on `PermissionError: [Errno 13] ... backup-*.zip`, the backup count grew
+    past BACKUP_ROTATION forever, and the only record of why sat in the worker journal.
+
+    The reference owner is the product's state directory (`DB_LOCK_FILE.parent`,
+    /var/lib/bunkerweb, which `src/linux/scripts/postinstall.sh` chowns to nginx), NOT the
+    backup directory's own parent: a custom BACKUP_DIRECTORY under a root-owned parent would
+    otherwise be aligned to root, which is the very bug this function exists to prevent.
+
+    Everything after the mkdir is fd-bound, and that is a security requirement rather than a
+    style choice. This runs as ROOT and nginx owns the parent, so nginx -- the uid the API, the
+    UI, the worker and the Lua runtime all run as -- can replace `backups` with a symlink.
+    `Path.mkdir(exist_ok=True)` does not raise on a symlink-to-directory, and `Path.stat()` and
+    `os.chown()` both follow it, so a path-based chown here hands a compromised nginx the
+    ownership of any directory it can name -- `/etc`, and from there `/etc/ld.so.preload`. An
+    `is_symlink()` pre-check does not close it either; the swap can happen between the check and
+    the chown. `O_NOFOLLOW` refuses a symlinked final component outright and `fchown` acts on
+    the object the descriptor already holds, so there is no window and no second lookup.
+    `lchown` is NOT the fix: it would chown the link and leave rotation broken.
+
+    A refused or impossible chown is a warning, not a failure -- the caller needs the directory,
+    and a backup that cannot rotate still beats no backup. The archives themselves may stay
+    root-owned; nothing needs to open them for writing.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    if geteuid() != 0:
+        return directory
+    reference = DB_LOCK_FILE.parent
+    try:
+        owner = os_stat(reference)
+        fd = os_open(directory, O_RDONLY | O_NOFOLLOW | O_DIRECTORY)
+        try:
+            current = fstat(fd)
+            if (current.st_uid, current.st_gid) != (owner.st_uid, owner.st_gid):
+                fchown(fd, owner.st_uid, owner.st_gid)
+        finally:
+            os_close(fd)
+    except OSError as e:
+        LOGGER.warning(f"Could not align the ownership of {directory} with {reference}: {e}")
+    return directory
 
 
 def mysql_client_command(operation: Literal["dump", "restore"]) -> tuple[str, bool]:

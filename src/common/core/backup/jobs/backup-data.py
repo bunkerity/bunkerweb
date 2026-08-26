@@ -15,7 +15,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file, acquire_db_lock, rotate_backups, sorted_backups, DB_LOCK_FILE
+from backup import backup_database, update_cache_file, acquire_db_lock, ensure_backup_dir, rotate_backups, sorted_backups, DB_LOCK_FILE
 
 LOGGER = getLogger("BACKUP")
 status = 0
@@ -23,8 +23,7 @@ status = 0
 try:
     # Prevent concurrent DB access with other backup plugins
     acquire_db_lock()
-    backup_dir = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
-    backup_dir.mkdir(parents=True, exist_ok=True)
+    backup_dir = ensure_backup_dir(Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups")))
 
     # A run killed mid-archive leaves the partial file `backup_database` was building. It is
     # inert -- no `backup-*.zip` glob matches it -- but nothing else ever removes it, so sweep

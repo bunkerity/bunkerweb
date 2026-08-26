@@ -10,7 +10,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "core", "backup")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, LOGGER, update_cache_file
+from backup import acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, ensure_backup_dir, LOGGER, update_cache_file
 
 status = 0
 
@@ -44,7 +44,11 @@ try:
         # the operator that waiting for the daily job would fix it. The job itself creates the
         # directory unconditionally, so this only aligns the CLI with it.
         LOGGER.info(f"Creating directory {directory} as it does not exist")
-        directory.mkdir(parents=True, exist_ok=True)
+
+    # Always, not only when it is missing: this command runs as root on a package install and
+    # the worker that rotates runs as nginx, so the directory has to end up owned by the latter
+    # whichever of the two got here first.
+    ensure_backup_dir(directory)
 
     db, _ = backup_database(datetime.now().astimezone(), backup_dir=directory)
 
