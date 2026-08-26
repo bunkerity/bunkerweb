@@ -55,6 +55,8 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 !!! warning "Database Compatibility"
     The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
 
+    A backup can only be restored into the same database engine it was taken from — the engine is part of the file name (`backup-mariadb-…`), and a restore into a different one is refused before anything is touched. If you migrated between engines, both sets of backups stay in the directory: `restore` without an argument takes the most recent file of any engine, so pass the path explicitly to restore an older backup of your current one.
+
 ### Example Configurations
 
 === "Daily Backups with 7-File Retention"
@@ -139,6 +141,29 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     Nothing already on disk is deleted by the upgrade itself — the change takes effect at the next
     rotation. Set `BACKUP_ROTATION_STRATEGY: "fifo"` for the previous behaviour. Every deletion is
     logged with the reason it was picked.
+
+!!! info "How the ladder is built"
+    The ladder counts in **periods**, and a period is one `BACKUP_SCHEDULE`: one day for `daily`,
+    seven for `weekly`, twenty-eight (four weeks, not a calendar month) for `monthly`. Every backup
+    taken inside one period is the same restore point, and the newest of them is the one that
+    represents it.
+
+    `BACKUP_ROTATION` is both the file budget and the depth of the ladder: it builds
+    `BACKUP_ROTATION - 1` levels, level `k` cutting the timeline into fixed blocks of `2^k` periods
+    and keeping the oldest backup of its two most recent non-empty blocks, with the newest backup
+    always pinned on top. Each level costs at most one file more than the one below it, so the
+    whole ladder fits in the budget — while its reach doubles at every level. Its deepest blocks are
+    `2^(BACKUP_ROTATION - 2)` periods wide, so on a daily schedule the oldest restore point sits
+    between **32 and 63 days** back at the default `BACKUP_ROTATION: "7"`, and between **1024 and
+    2047 days** at `"12"` — the number of files grows linearly, the depth exponentially. `fifo` at
+    the same budget never reaches further back than `BACKUP_ROTATION` periods.
+
+    The blocks sit on an absolute grid rather than on windows measured back from today, which is
+    what makes a deletion safe: a backup the ladder lets go can never be wanted again, so the deep
+    levels do not empty out over time. It also means the ladder **fills in as the archive ages** —
+    reaching level `k` takes `2^k` periods, so a young install keeps everything it has and the deep
+    restore points appear as it gets older. Until then the unspent budget goes to the most recent
+    backups, at full granularity.
 
 !!! info "How backups are dated"
     Rotation reads the timestamp in each archive's name. An archive whose name does not carry a
