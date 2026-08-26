@@ -165,6 +165,7 @@ local crc32_short = ngx.crc32_short
 local get_reason = utils.get_reason
 local has_variable = utils.has_variable
 local is_connection_error = utils.is_connection_error
+local is_protocol_error = utils.is_protocol_error
 local is_oom_error = utils.is_oom_error
 local encode = cjson.encode
 local decode = cjson.decode
@@ -516,6 +517,12 @@ end
 -- Must be called after self.clusterstore:connect() has succeeded.
 -- Acts as a circuit-breaker: once self.redis_ok is false, all calls
 -- are short-circuited for the rest of the timer cycle.
+-- A desynced reply stream gets the same one reconnect. It is not a socket condition by name,
+-- but the socket is just as unusable: clusterstore:call has already condemned it, and every
+-- later call in the cycle would read off the same poisoned stream. Without this a buffered
+-- report replay that hit a desync failed the whole replay and left the batch unsynced until
+-- the next tick reconnected. One retry, then fail loud -- a desync that survives a fresh
+-- connection is not a stale socket.
 function metrics:redis_call(method, ...)
 	if self.redis_ok == false then
 		return false, "Redis unavailable for this cycle"
@@ -525,7 +532,7 @@ function metrics:redis_call(method, ...)
 		self.redis_ok = false
 		return false, call_err -- no reconnect: the connection is healthy under OOM
 	end
-	if not res and call_err and is_connection_error(call_err) then
+	if not res and call_err and (is_connection_error(call_err) or is_protocol_error(call_err)) then
 		self.clusterstore:close()
 		local ok, reconnect_err = self.clusterstore:connect()
 		if not ok then
@@ -1027,6 +1034,12 @@ function metrics:timer()
 							-- socket one and the chunk result still reports that.
 							-- ponytail: 512 items per call -- LuaJIT's unpack() argument
 							-- ceiling is ~8000 and MAX_LRU_HISTORY accepts values like "1m".
+							-- ponytail: at-least-once. redis_call retries a chunk on a desync or a
+							-- dropped socket, so a reply lost after Redis applied the RPUSH duplicates
+							-- up to 512 items. Self-heals on the next cycle -- the del above rewrites
+							-- the whole key -- and the same hazard already existed for a connection
+							-- error. Make the chunk idempotent (eval with a DEL-then-RPUSH head) if a
+							-- consumer ever reads this key mid-cycle.
 							local items = {}
 							for _, item in ipairs(value) do
 								items[#items + 1] = type(item) == "table" and encode(item) or tostring(item)

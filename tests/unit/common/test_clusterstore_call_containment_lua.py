@@ -19,6 +19,7 @@ A redis call is I/O: it reports failures, it does not abort its caller's phase.
 Runs through the ``lua`` binary with OpenResty stubbed.
 """
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -28,8 +29,21 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 MODULE = ROOT / "src" / "bw" / "lua" / "bunkerweb" / "clusterstore.lua"
 LUA_DIR = ROOT / "src" / "bw" / "lua"
+UTILS = ROOT / "src" / "bw" / "lua" / "bunkerweb" / "utils.lua"
 
 pytestmark = pytest.mark.skipif(shutil.which("lua") is None, reason="the lua interpreter is not installed")
+
+
+def real_predicate(name: str) -> str:
+    """Return the shipped `utils.<name>` function expression, source-exact.
+
+    Splicing the real body in is what keeps this file honest: delete or narrow the classifier
+    in utils.lua and the extraction fails here rather than the assertions passing on a copy.
+    """
+    body = re.search(rf"^utils\.{name} = (function\(err\).*?^end)$", UTILS.read_text(encoding="utf-8"), re.M | re.S)
+    assert body, f"utils.{name} is gone from {UTILS}"
+    return body.group(1)
+
 
 HARNESS = """
 package.path = "%s/?.lua;" .. package.path
@@ -40,19 +54,13 @@ package.loaded["bunkerweb.logger"] = {
     new = function(_, _) return { log = function() end } end,
 }
 package.loaded["resty.redis.connector"] = { new = function() return {}, nil end }
--- The real predicate, verbatim, so the test cannot pass by weakening it.
+-- The real predicates, spliced out of utils.lua rather than restated here: a copy would let
+-- this file keep passing while the shipped classifier was weakened or deleted outright.
 package.loaded["bunkerweb.utils"] = {
     get_variable = function() return "", nil end,
     is_cosocket_available = function() return false end,
-    is_connection_error = function(err)
-        return err
-            and (
-                err:find("closed", 1, true)
-                or err:find("broken pipe", 1, true)
-                or err:find("connection reset", 1, true)
-                or err:find("timeout", 1, true)
-            )
-    end,
+    is_connection_error = %s,
+    is_protocol_error = %s,
 }
 
 local clusterstore = dofile("%s")
@@ -108,7 +116,7 @@ print("OK")
 
 def test_a_raise_or_desync_is_contained_and_condemns_the_socket():
     result = subprocess.run(
-        ["lua", "-e", HARNESS % (LUA_DIR.as_posix(), MODULE.as_posix())],
+        ["lua", "-e", HARNESS % (LUA_DIR.as_posix(), real_predicate("is_connection_error"), real_predicate("is_protocol_error"), MODULE.as_posix())],
         capture_output=True,
         text=True,
     )

@@ -11,6 +11,7 @@ local logger = clogger:new("CLUSTERSTORE")
 local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
 local is_connection_error = utils.is_connection_error
+local is_protocol_error = utils.is_protocol_error
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local INFO = ngx.INFO
@@ -45,14 +46,6 @@ local cached_variables
 local cached_options = {}
 local cached_connectors = {}
 local cached_timer_log_level
-
--- lua-resty-redis reports a desynced reply stream as `unknown prefix: "..."` : the byte it
--- read where a RESP type marker belongs came from someone else's reply. is_connection_error
--- does not match it by name, so without this the socket kept `healthy` and went back to the
--- keepalive pool -- handing the desync to the next borrower.
-local function is_protocol_error(err)
-	return err ~= nil and err:find("unknown prefix", 1, true) ~= nil
-end
 
 -- Helper function to get timer log level with validation
 local function get_timer_log_level()

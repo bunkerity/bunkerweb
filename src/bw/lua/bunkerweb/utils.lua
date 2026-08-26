@@ -1664,6 +1664,19 @@ utils.is_connection_error = function(err)
 		)
 end
 
+-- A desynced reply stream: the bytes coming back no longer line up with the commands sent,
+-- so nothing read off this socket can be trusted and it must not be reused as-is. Two shapes
+-- reach callers. lua-resty-redis reports the wire form as `unknown prefix: "..."` -- the byte
+-- it read where a RESP type marker belongs came from someone else's reply. clusterstore:call
+-- reports the raising form as `redis client raised : ...` -- reading that same stream reached
+-- string.byte with a non-string. is_connection_error matches neither by name, so callers that
+-- only consult it recycle a poisoned socket (keepalive) or keep calling through it for the
+-- rest of the cycle. Callers use this to condemn the socket and reconnect before retrying.
+utils.is_protocol_error = function(err)
+	return err ~= nil
+		and (err:find("unknown prefix", 1, true) ~= nil or err:find("redis client raised", 1, true) ~= nil)
+end
+
 utils.is_oom_error = function(err)
 	return err and err:find("OOM", 1, true) ~= nil
 end
