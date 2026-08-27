@@ -31,5 +31,5 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_column("bw_metadata", "failover_message")
 
-    # Revert the version in bw_metadata
-    op.execute("UPDATE bw_metadata SET version = '1.6.1-rc3' WHERE id = 1")
+    # Revert the version in bw_metadata (previous version was 1.6.0)
+    op.execute("UPDATE bw_metadata SET version = '1.6.0' WHERE id = 1")
