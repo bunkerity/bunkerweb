@@ -30,6 +30,12 @@ def get_celery_app() -> Optional[Any]:
     celery_app = Celery("bunkerweb")
     celery_app.conf.update(
         broker_url=broker_url,
+        broker_transport_options={
+            # Keep an API request worker out of the kernel's long SYN retry path when a
+            # stale broker endpoint black-holes connections rather than refusing them.
+            "socket_timeout": 5,
+            "socket_connect_timeout": 5,
+        },
         result_backend=None,
         task_serializer="json",
         result_serializer="json",

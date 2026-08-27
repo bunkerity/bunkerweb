@@ -19,6 +19,10 @@ app.conf.update(
     broker_transport_options={
         "visibility_timeout": 7200,
         "max_connections": 8,
+        # Bound kernel SYN retries to a black-holed broker pod. The read timeout is
+        # belt-and-braces and stays above Kombu's one-second BRPOP polling interval.
+        "socket_timeout": 5,
+        "socket_connect_timeout": 5,
     },
     broker_connection_retry_on_startup=True,
     result_backend=None,

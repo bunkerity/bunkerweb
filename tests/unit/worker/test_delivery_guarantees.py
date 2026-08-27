@@ -179,6 +179,16 @@ class TestAckSettings:
         reserved_depth = 2 * conf["worker_prefetch_multiplier"]
         assert conf["broker_transport_options"]["visibility_timeout"] >= conf["task_time_limit"] * (reserved_depth + 1)
 
+    def test_broker_transport_cannot_block_startup_forever(self):
+        """Keep socket reads above Kombu's one-second BRPOP polling interval.
+
+        ``kombu/transport/redis.py:1331`` subtracts one second for ``brpop_timeout``;
+        a lower socket timeout turns normal polling into a reconnect storm.
+        """
+        options = APP.app.conf["broker_transport_options"]
+        assert options["socket_timeout"] > options.get("polling_interval", 1)
+        assert options["socket_connect_timeout"] > 0
+
 
 class TestBrokerClient:
     """The counter runs on the job's critical path, so it must never be able to block one."""
