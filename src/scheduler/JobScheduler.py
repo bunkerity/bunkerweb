@@ -179,6 +179,26 @@ class JobScheduler:
         """Dispatch a single job to workers via the API."""
         return self.api_client.dispatch_jobs([self._build_dispatch_item(job, plugin_id)])
 
+    def confirm_worker_liveness(self) -> bool:
+        """Return whether the API's bounded Celery inspection found a live worker."""
+        probe_error = None
+        try:
+            # expect_errors: a failed probe is diagnosed below, the client must not shout ERROR about it
+            with self.api_client.expect_errors():
+                if self.api_client._get("/jobs/queue", timeout=10).get("stats"):
+                    return True
+        except Exception as e:
+            probe_error = e
+
+        # [^/]* runs to the LAST @ before the path so a password containing @ is fully redacted
+        broker_url = re_compile(r"://[^/]*@").sub("://***@", os.getenv("CELERY_BROKER_URL", "").strip() or "<not configured>")
+        cause = f" (probe failed: {probe_error})" if probe_error is not None else ""
+        self.__logger.warning(
+            f"No Celery worker responded to the first-start dispatch through broker {broker_url}{cause}; jobs will remain queued until a worker connects. "
+            "Start or repair the BunkerWeb worker."
+        )
+        return False
+
     def request_reload(self, test: bool = True) -> bool:
         """Request a reload of all BunkerWeb instances via the API."""
         self.__logger.info("Requesting nginx reload via API ...")

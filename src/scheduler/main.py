@@ -900,7 +900,8 @@ if __name__ == "__main__":
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
-                    LOGGER.info("All jobs in run_once() were successful")
+                    if not FIRST_START or SCHEDULER.confirm_worker_liveness():
+                        LOGGER.info("All jobs in run_once() were successful")
                     if API_CLIENT.readonly:
                         generate_caches()
                 healthcheck_job_run = False
