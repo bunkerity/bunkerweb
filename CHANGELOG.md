@@ -20,7 +20,7 @@
 - [BUGFIX] `scheduler`: a multi-line setting value survives `variables.env`, where readers split it on physical lines and the config saver stored the truncated first line back over a working certificate. Affects every setting holding a PEM or base64 block. (Fixes #3835)
 - [BUGFIX] `cli`: `bwcli` falls back to `/etc/bunkerweb/variables.env` for `DATABASE_URI` and refuses a database with no schema, instead of creating an empty SQLite file and failing on `no such table: bw_settings`. (Refs #3836)
 - [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails, instead of upgrading with nothing to restore from. Pass `--no-auto-backup` to skip it. (Refs #3836)
-- [BUGFIX] `letsencrypt`: the UI reads certificate validity dates from the timezone-aware properties. The naive ones were labelled with the local offset while still holding UTC, so *Valid from* and *Valid to* were shown shifted on any instance not running in UTC, and every certificate listing logged a `CryptographyDeprecationWarning`. (Fixes #3839)
+- [BUGFIX] `letsencrypt`: the UI reads certificate validity dates from the timezone-aware properties, where *Valid from* and *Valid to* were stamped with the local offset over a UTC value and shown shifted on any instance not running in UTC. (Fixes #3839)
 - [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
 - [DEPS] Updated lua-resty-session version to v4.2.0
 - [DEPS] Updated LuaJIT version to v2.1-20260824
