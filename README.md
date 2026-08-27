@@ -258,7 +258,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 
 BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it like a BunkerWeb-as-a-Service!
 
-You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=docs).
+You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/saas-offer-cloud/?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=docs).
 -->
 ## Linux
 
@@ -277,7 +277,7 @@ List of supported Linux distros:
 - Fedora 44
 - RHEL, CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
-You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
+You will find more information in the [Linux section](https://docs.bunkerweb.io/latest/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
 ## Docker
 
