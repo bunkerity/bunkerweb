@@ -62,7 +62,8 @@ class SchedulerApiClient(BaseApiClient):
     def reload_instances(self, test: bool = True) -> bool:
         """Reload all instances. Returns True on success."""
         try:
-            self._post("/instances/reload", params={"test": str(test).lower()})
+            # The API fan-out allows 30s for the instance verdict; leave room to return it.
+            self._post("/instances/reload", params={"test": str(test).lower()}, timeout=(5, 35))
             return True
         except (ApiClientError, ApiUnavailableError):
             return False

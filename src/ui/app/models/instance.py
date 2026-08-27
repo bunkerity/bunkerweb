@@ -33,6 +33,8 @@ _HOME_AGG_CACHE_TTL = 30.0
 # Serializes cache misses so concurrent /home loads compute the aggregation once
 # (single-flight) instead of each running the full Redis scan in parallel.
 _HOME_AGG_LOCK = Lock()
+# Keep aligned with common/core/jobs/jobs/push-configs.py.
+RELOAD_TIMEOUT = (5, 30)
 
 
 def _copy_home_aggregates(agg: dict) -> dict:
@@ -112,7 +114,9 @@ class Instance:
 
     def reload(self) -> str:
         try:
-            result = self.apiCaller.send_to_apis("POST", f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}")[0]
+            result = self.apiCaller.send_to_apis(
+                "POST", f"/reload?test={'no' if getenv('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}", timeout=RELOAD_TIMEOUT
+            )[0]
         except BaseException as e:
             return f"Can't reload instance {self.hostname}: {e}"
 

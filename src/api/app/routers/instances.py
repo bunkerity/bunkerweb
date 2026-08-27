@@ -14,6 +14,8 @@ from ..utils import get_db, LOGGER
 
 router = APIRouter(prefix="/instances", tags=["instances"])
 UI_API_METHODS = {"ui", "api"}
+# Keep aligned with common/core/jobs/jobs/push-configs.py.
+RELOAD_TIMEOUT = (5, 30)
 
 
 # ---------- Instance actions broadcasted to all instances ----------
@@ -29,10 +31,10 @@ def reload_config(test: bool = True, api_caller=Depends(get_instances_api_caller
     """Reload configuration on all registered BunkerWeb instances.
 
     Args:
-        test: If True, validate configuration without applying it (default: True)
+        test: If True, validate the configuration before applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    ok, _ = api_caller.send_to_apis("POST", f"/reload?test={test_arg}")
+    ok, _ = api_caller.send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 
@@ -95,10 +97,10 @@ def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostnam
 
     Args:
         hostname: The hostname of the instance to reload
-        test: If True, validate configuration without applying it (default: True)
+        test: If True, validate the configuration before applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    sent, _err, status, _resp = api.request("POST", f"/reload?test={test_arg}")
+    sent, _err, status, _resp = api.request("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
     ok = bool(sent and status == 200)
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 

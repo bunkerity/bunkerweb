@@ -109,7 +109,7 @@ def test_the_holder_pushes_the_cache_then_reloads():
         TASKS._request_reload_debounced(apis, BROKER, LOGGER)
 
     apis.send_files.assert_called_once_with("/var/cache/bunkerweb", "/cache")
-    assert apis.send_to_apis.call_count == 1
+    apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
     # Held for the next job to take, not left behind to block it for a minute.
     assert TASKS.RELOAD_LOCK_KEY not in client.keys
 

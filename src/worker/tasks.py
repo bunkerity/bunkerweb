@@ -188,6 +188,8 @@ from jobs import (  # type: ignore # noqa: E402
 
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
+# Keep aligned with common/core/jobs/jobs/push-configs.py.
+RELOAD_TIMEOUT = (5, 30)
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
 # holder deletes the key when it is done, so this only matters when a worker dies mid-reload.
 RELOAD_LOCK_TTL = 60
@@ -337,7 +339,7 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             if not apis.send_files("/var/cache/bunkerweb", "/cache"):
                 raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
 
-            if not apis.send_to_apis("POST", f"/reload?test={test}")[0]:
+            if not apis.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]:
                 raise RuntimeError("Failed to request BunkerWeb reload")
 
             # The material is on the instances and they have reloaded: now, and only now, is a
