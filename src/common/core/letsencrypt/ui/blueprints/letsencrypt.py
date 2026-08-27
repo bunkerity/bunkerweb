@@ -205,8 +205,8 @@ def retrieve_certificates(source: Path):
             issuer = cert.issuer.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
             if issuer:
                 cert_info["issuer"] = issuer[0].value
-            cert_info["valid_from"] = cert.not_valid_before.astimezone().isoformat()
-            cert_info["valid_to"] = cert.not_valid_after.astimezone().isoformat()
+            cert_info["valid_from"] = cert.not_valid_before_utc.astimezone().isoformat()
+            cert_info["valid_to"] = cert.not_valid_after_utc.astimezone().isoformat()
             cert_info["serial_number"] = str(cert.serial_number)
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
             cert_info["version"] = cert.version.name
