@@ -81,7 +81,14 @@ try:
 
         return latest
 
-    latest_release = get_latest_stable_release()
+    try:
+        latest_release = get_latest_stable_release()
+    except RequestException:
+        # A transient GitHub failure (rate limit, outage, no route) is expected and
+        # non-actionable: a missed check is not a job failure, and the next run retries.
+        LOGGER.debug(format_exc())
+        LOGGER.warning("Could not reach the GitHub API to check for a newer release, skipping this run")
+        sys_exit(0)
 
     if not latest_release:
         # 2, not 1: in the job contract 1 means "changed, ship the cache and reload the fleet"
@@ -135,6 +142,9 @@ try:
         )
     else:
         LOGGER.info(f"No newer stable version available (current: {current_version}, latest stable: {latest_version})")
+except SystemExit:
+    # sys_exit inside the try block must exit with its own code, not be relabeled a crash.
+    raise
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())
