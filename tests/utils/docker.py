@@ -16,6 +16,22 @@ CONTAINER_TYPES = {
     "api": {"name": "bw-api"},
 }
 
+AIO_LOG_TAGS = {
+    # NGINX and ModSecurity files are streamed separately, but belong to the
+    # bunkerweb log stream exposed by a dedicated container.
+    "bunkerweb": ("[BUNKERWEB]", "[NGINX.ACCESS]", "[NGINX.ERROR]", "[MODSEC]"),
+    "controller": ("[AUTOCONF]",),
+    "scheduler": ("[SCHEDULER]",),
+    "api": ("[API]",),
+}
+AIO_RECOGNIZED_LOG_TAGS = {tag for tags in AIO_LOG_TAGS.values() for tag in tags} | {
+    "[WORKER]",
+    "[UI]",
+    "[REDIS]",
+    "[CROWDSEC]",
+    "[LOGSTREAM]",
+}
+
 
 @cache
 def get_docker_client() -> DockerClient:
@@ -42,9 +58,9 @@ def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "sch
 
 
 def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], since: Optional[float]) -> List[str]:
-    return (
-        get_container(logger, _type)
-        .logs(
+    container = get_container(logger, _type)
+    logs = (
+        container.logs(
             since=since,
             stdout=True,
             stderr=True,
@@ -54,6 +70,11 @@ def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "schedule
         .strip()
         .split("\n")
     )
+
+    if (container.labels or {}).get("bunkerweb.type") == "all-in-one" and (tags := AIO_LOG_TAGS.get(_type)):
+        return [line for line in logs if (tag := line.partition(" ")[2].partition(" ")[0]) not in AIO_RECOGNIZED_LOG_TAGS or tag in tags]
+
+    return logs
 
 
 def run_command(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], command: List[str]) -> Tuple[int, str]:
