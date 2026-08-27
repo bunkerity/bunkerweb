@@ -9,7 +9,6 @@ from datetime import datetime
 from gc import collect
 from io import BytesIO
 from json import load as json_load
-from logging import Logger
 from os import _exit, environ, getenv, getpid, sep
 from os.path import join
 from pathlib import Path
@@ -409,42 +408,6 @@ def generate_caches():
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
             if resource_path.stat().st_mode & 0o777 != desired_perms:
                 resource_path.chmod(desired_perms)
-
-
-def generate_configs(logger: Logger = LOGGER) -> bool:
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-        "DATABASE_URI": getenv("DATABASE_URI", ""),
-    }
-
-    if getenv("TZ"):
-        cmd_env["TZ"] = getenv("TZ")
-
-    # run the generator
-    proc = subprocess_run(
-        [
-            BUNKERWEB_PATH.joinpath("gen", "main.py").as_posix(),
-            "--settings",
-            BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
-            "--templates",
-            BUNKERWEB_PATH.joinpath("confs").as_posix(),
-            "--output",
-            CONFIG_PATH.as_posix(),
-        ],
-        stdin=DEVNULL,
-        stderr=STDOUT,
-        check=False,
-        env=cmd_env,
-    )
-
-    if proc.returncode != 0:
-        logger.error("Config generator failed, configuration will not work as expected...")
-        return False
-
-    return True
 
 
 def healthcheck_job():

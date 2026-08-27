@@ -656,10 +656,10 @@ class Templator:
         """Log the listen-port conflicts this configuration carries, once, at generation time.
 
         Here rather than in ``Configurator`` because Configurator is only on the ENVIRONMENT path:
-        ``scheduler/main.py`` runs ``gen/main.py`` with no ``--variables``, so the database render
-        never constructs one — and the database is where per-service ports are declared, so the
-        deployments that can actually collide were the ones getting no report. Templator is the
-        single object both paths build.
+        ``src/common/core/jobs/jobs/push-configs.py:362-379`` runs ``gen/main.py`` with no
+        ``--variables``, so the database render never constructs one — and the database is where
+        per-service ports are declared, so the deployments that can actually collide were the ones
+        getting no report. Templator is the single object both paths build.
 
         ``service_configs`` is the post-merge, post-``drop_inherited_ports`` view, i.e. the ports
         each block will really bind. Feeding the raw config instead would credit every service with
@@ -735,10 +735,11 @@ class Templator:
         # (conception §2.2). This is the only place BOTH generation paths converge, and they need
         # different work: the environment path arrives pre-blanked from Configurator (every service
         # key is materialised there, so nothing is "inherited" and this is a no-op), while the
-        # scheduler path renders straight from the database -- gen/main.py:128 takes
+        # scheduler path runs through `src/common/core/jobs/jobs/push-configs.py:362-379`, which calls
+        # gen/main.py with no `--variables` -- gen/main.py:128 therefore takes
         # `db.get_non_default_settings()` and never calls Configurator at all. Every port declared
-        # through the UI, the API or autoconf comes in that way, and without this the service
-        # listened on its own port AND on every global repetition.
+        # through the UI, the API or autoconf comes in that way, and without this the service listened
+        # on its own port AND on every global repetition.
         #
         # `_server_specific_config` is the discriminator on purpose: it is built from the
         # non-default settings, so a key is present there only if the service really declared it.

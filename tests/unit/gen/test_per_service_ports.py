@@ -295,10 +295,10 @@ class TestOverridePositionIsPreserved:
 class TestTheSchedulerRenderPath:
     """The path almost every real port declaration takes, and the one the rule first missed.
 
-    ``scheduler/main.py:427-441`` runs ``gen/main.py`` with no ``--variables``, so
-    ``Configurator.get_config`` is never called: ``gen/main.py:128`` renders straight from
-    ``db.get_non_default_settings()``. Anything declared through the UI, the API or autoconf
-    arrives that way. A replacement rule that lived in Configurator therefore applied to
+    ``src/common/core/jobs/jobs/push-configs.py:362-379`` runs ``gen/main.py`` with no
+    ``--variables``, so ``Configurator.get_config`` is never called: ``gen/main.py:128`` renders
+    straight from ``db.get_non_default_settings()``. Anything declared through the UI, the API or
+    autoconf arrives that way. A replacement rule that lived in Configurator therefore applied to
     environment-declared ports only -- the service listened on its own port AND on every inherited
     repetition, which is the union the rule exists to prevent.
     """
@@ -443,10 +443,11 @@ class TestTheSchedulerRenderPath:
 
 class TestThePortReportRunsOnBothGenerationPaths:
     """``check_ports`` / ``reserved_ports`` used to be called from ``Configurator``, which only the
-    ENVIRONMENT path constructs: ``scheduler/main.py`` runs ``gen/main.py`` with no ``--variables``,
-    so the database render — the one path where per-service ports can be declared at all — got no
-    FATAL collision report and no reserved/privileged warning. The report now runs in
-    ``Templator.__init__``, the one object both paths build, over the merged per-service views.
+    ENVIRONMENT path constructs: ``src/common/core/jobs/jobs/push-configs.py:362-379`` runs
+    ``gen/main.py`` with no ``--variables``, so the database render — the one path where per-service
+    ports can be declared at all — got no FATAL collision report and no reserved/privileged warning.
+    The report now runs in ``Templator.__init__``, the one object both paths build, over the merged
+    per-service views.
     """
 
     def test_an_http_stream_collision_is_reported_on_the_database_path(self, render_db_tree, caplog):

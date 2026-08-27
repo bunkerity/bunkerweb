@@ -88,9 +88,10 @@ def render_db_tree(db):
     * ``bw`` renders from the environment -- ``gen/main.py:117`` builds the config with
       ``Configurator.get_config``, which materialises an inherited copy of every multisite setting
       under every service name (ports excepted, ``Configurator.py:363-376``).
-    * the scheduler renders from the database -- ``scheduler/main.py:427-441`` calls ``gen/main.py``
-      with no ``--variables``, so line 128 takes ``db.get_non_default_settings()`` as ``config`` and
-      ``db.get_config(methods=True)`` as ``full_config`` / ``default_config``.
+    * the scheduler renders from the database -- ``src/common/core/jobs/jobs/push-configs.py:362-379``
+      calls ``gen/main.py`` with no ``--variables``, so line 128 takes
+      ``db.get_non_default_settings()`` as ``config`` and ``db.get_config(methods=True)`` as
+      ``full_config`` / ``default_config``.
 
     Every port declared through the UI, the API or autoconf reaches the render this second way, so a
     rule that only holds on the first one holds for almost nobody.
