@@ -280,6 +280,14 @@ spec:
               mountPath: /tmp/output/
             - name: pvc-data
               mountPath: "/data"
+          readinessProbe:
+            exec:
+              command:
+                - /usr/share/bunkerweb/helpers/healthcheck-worker.sh
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 30
       volumes:
         - name: pvc-www
           hostPath:
@@ -324,6 +332,15 @@ spec:
             - ""
             - "--appendonly"
             - "yes"
+          readinessProbe:
+            exec:
+              command:
+                - valkey-cli
+                - ping
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 30
 ---
 apiVersion: v1
 kind: Service
