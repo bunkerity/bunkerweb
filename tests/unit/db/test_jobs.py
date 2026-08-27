@@ -4,7 +4,7 @@ Jobs_runs/Jobs_cache carry FKs to Jobs.name (and Jobs -> Plugins), so ``seed_min
 (which creates plugin ``general`` + job ``testjob``) is required for PG/MariaDB.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -37,6 +37,19 @@ class TestJobRuns:
     def test_cleanup_under_limit_noop(self, jdb):
         jdb.add_job_run("testjob", True, DT)
         assert jdb.cleanup_jobs_runs_excess(10) == "Removed 0 excess jobs runs"
+
+    def test_get_last_job_run_returns_the_newest_run(self, jdb):
+        newest = DT.astimezone() + timedelta(minutes=1)
+        jdb.add_job_run("testjob", True, DT, DT)
+        jdb.add_job_run("testjob", False, newest, newest)
+
+        last_run = jdb.get_last_job_run("testjob")
+
+        assert last_run["success"] is False
+        assert datetime.fromisoformat(last_run["end_date"]) == newest
+
+    def test_get_last_job_run_returns_none_for_an_absent_job(self, jdb):
+        assert jdb.get_last_job_run("missing-job") is None
 
 
 class TestJobCache:

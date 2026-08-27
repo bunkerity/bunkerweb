@@ -90,6 +90,7 @@ def home_page():
         jobs = API_CLIENT.get_jobs()
     except (ApiClientError, ApiUnavailableError):
         jobs = {}
+    jobs_failed = any(job.get("history") and job["history"][0].get("success") is False for job in jobs.values())
 
     # "Bans active" mini-tile -- the durable count from the database, so it does not drop to zero
     # after an instance restart the way the old per-instance tally did.
@@ -127,6 +128,7 @@ def home_page():
         is_initialized=bool(metadata.get("is_initialized", False)),
         first_config_saved=bool(metadata.get("first_config_saved", False)),
         jobs_count=len(jobs),
+        jobs_failed=jobs_failed,
         bans_active=bans_active,
         certificates_total=certificates_total,
         certs_expired=certs_expired,

@@ -126,6 +126,15 @@ def test_api_client_get_jobs(api_client, monkeypatch):
     get.assert_called_once_with("/jobs")
 
 
+def test_api_client_get_last_job_run(api_client, monkeypatch):
+    last_run = {"success": False}
+    get = Mock(return_value={"last_run": last_run})
+    monkeypatch.setattr(api_client, "_get", get)
+
+    assert api_client.get_last_job_run("push-configs") == last_run
+    get.assert_called_once_with("/jobs/push-configs/last-run")
+
+
 # ── home_page() context ─────────────────────────────────────────────────────────────
 
 
@@ -135,7 +144,10 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     client.get_bans.return_value = [{"ip": "1.2.3.4"}, {"ip": "5.6.7.8"}]
     client.get_services.return_value = []
     client.get_metadata.return_value = {"is_initialized": True, "first_config_saved": True}
-    client.get_jobs.return_value = {"job1": {}, "job2": {}}
+    client.get_jobs.return_value = {
+        "job1": {"history": [{"success": True}]},
+        "job2": {"history": [{"success": False}]},
+    }
     client.get_upstreams.return_value = {"total": 3, "upstreams": [{"id": "pool-a"}]}
     client.get_metrics_requests.return_value = {
         "pane_counts": {
@@ -155,6 +167,7 @@ def test_home_page_context_happy_path(route_app, monkeypatch):
     assert captured["is_initialized"] is True
     assert captured["first_config_saved"] is True
     assert captured["jobs_count"] == 2
+    assert captured["jobs_failed"] is True
     assert captured["bans_active"] == 2
     assert captured["upstreams_total"] == 3
     # The heavy aggregation is NOT part of this context any more: home.py:140-148 ships the
@@ -193,7 +206,22 @@ def test_home_page_context_defaults_to_empty_state_on_api_failure(route_app, mon
     assert captured["is_initialized"] is False
     assert captured["first_config_saved"] is False
     assert captured["jobs_count"] == 0
+    assert captured["jobs_failed"] is False
     assert captured["bans_active"] == 0
+
+
+def test_home_page_ignores_older_failures_when_the_newest_run_succeeded(route_app, monkeypatch):
+    module, client, instances_utils, app = route_app
+    _stub_home_aggregates(instances_utils)
+    client.get_services.return_value = []
+    client.get_metadata.return_value = {}
+    client.get_jobs.return_value = {"push-configs": {"history": [{"success": True}, {"success": False}]}}
+    captured = _render_and_capture(module, monkeypatch)
+
+    with app.test_request_context("/home"):
+        module.home_page.__wrapped__()
+
+    assert captured["jobs_failed"] is False
 
 
 def test_upstreams_tile_links_to_the_live_page():

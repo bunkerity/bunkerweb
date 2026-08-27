@@ -517,6 +517,9 @@
     "not_applicable": "Hindi Naaangkop"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "Mga Na-block na Kahilingan"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "Nabigo ang request sa security key. Subukan muli."
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "Kung nabasa mo ito, ibig sabihin ay mausisa ka",
     "error": "Error",
     "message": "Impormasyon",

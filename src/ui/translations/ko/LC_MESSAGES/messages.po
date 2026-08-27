@@ -1750,6 +1750,9 @@ msgstr "짐바브웨"
 msgid "country.not_applicable"
 msgstr "해당 없음"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "차단된 요청"
 
@@ -2311,11 +2314,17 @@ msgstr "IP 주소 차단 해제 실패. 다시 시도해 주세요."
 msgid "error.webauthn_request_failed"
 msgstr "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
 
 msgid "flash.error"
 msgstr "오류"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "정보"

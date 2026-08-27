@@ -158,6 +158,21 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                 for job in session.execute(select(Jobs.name, Jobs.plugin_id, Jobs.every, Jobs.reload, Jobs.run_async)).all()
             }
 
+    def get_last_job_run(self, job_name: str) -> Optional[Dict[str, Any]]:
+        """Get the newest run for a job."""
+        with self._db_session() as session:
+            job_run = session.execute(
+                select(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date).filter_by(job_name=job_name).order_by(Jobs_runs.end_date.desc()).limit(1)
+            ).first()
+
+        if job_run is None:
+            return None
+        return {
+            "success": job_run.success,
+            "start_date": job_run.start_date.astimezone().isoformat(),
+            "end_date": job_run.end_date.astimezone().isoformat(),
+        }
+
     def get_job_cache_file(
         self, job_name: str, file_name: str, *, service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
     ) -> Optional[Union[Dict[str, Any], bytes]]:

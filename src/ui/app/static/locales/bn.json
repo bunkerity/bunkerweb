@@ -517,6 +517,9 @@
     "not_applicable": "প্রযোজ্য নয়"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "অবরুদ্ধ অনুরোধ"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "সিকিউরিটি-কী অনুরোধ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "যদি আপনি এটি পড়েন, তার মানে আপনি কৌতূহলী",
     "error": "ত্রুটি",
     "message": "তথ্য",

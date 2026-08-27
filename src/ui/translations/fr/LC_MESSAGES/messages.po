@@ -1750,6 +1750,9 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Requêtes bloquées"
 
@@ -2311,11 +2314,17 @@ msgstr "Échec du débannissement de l'adresse IP. Veuillez réessayer."
 msgid "error.webauthn_request_failed"
 msgstr "La requête de clé de sécurité a échoué. Veuillez réessayer."
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "Si vous lisez ceci, c'est que vous êtes curieux"
 
 msgid "flash.error"
 msgstr "Erreur"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "Info"

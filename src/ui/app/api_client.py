@@ -179,6 +179,9 @@ class ApiClient(BaseApiClient):
     def get_jobs(self):
         return self._get("/jobs").get("jobs", [])
 
+    def get_last_job_run(self, name):
+        return self._get(f"/jobs/{name}/last-run").get("last_run")
+
     def run_jobs(self, jobs: list):
         return self._post("/jobs/run", json={"jobs": jobs})
 

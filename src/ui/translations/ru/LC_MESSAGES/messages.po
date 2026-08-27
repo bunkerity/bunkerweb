@@ -1750,6 +1750,9 @@ msgstr "Зимбабве"
 msgid "country.not_applicable"
 msgstr "Н/Д"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Заблокированные запросы"
 
@@ -2311,11 +2314,17 @@ msgstr "Не удалось разбанить IP-адрес. Пожалуйст
 msgid "error.webauthn_request_failed"
 msgstr "Запрос ключа безопасности завершился ошибкой. Повторите попытку."
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "Если вы это читаете, значит, вы любопытны"
 
 msgid "flash.error"
 msgstr "Ошибка"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "Информация"

@@ -22,6 +22,12 @@ def list_jobs() -> JSONResponse:
     return JSONResponse(status_code=200, content={"status": "success", "jobs": jobs})
 
 
+@router.get("/{name}/last-run", dependencies=[Depends(guard)])
+def get_last_job_run(name: str) -> JSONResponse:
+    """Return the newest persisted run for one job."""
+    return JSONResponse(status_code=200, content={"status": "success", "last_run": get_db().get_last_job_run(name)})
+
+
 @router.post("/run", dependencies=[Depends(guard)])
 def run_jobs(payload: RunJobsRequest) -> JSONResponse:
     """Trigger execution of specified jobs' plugins.

@@ -517,6 +517,9 @@
     "not_applicable": "لاگو نہیں"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "روکی گئی درخواستیں"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "سیکیورٹی کلید کی درخواست ناکام ہوئی۔ دوبارہ کوشش کریں۔"
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں",
     "error": "خرابی",
     "message": "معلومات",

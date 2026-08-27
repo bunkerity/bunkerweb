@@ -517,6 +517,9 @@
     "not_applicable": "N/A"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "Solicitudes Bloqueadas"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "Falló la solicitud de la llave de seguridad. Inténtalo de nuevo."
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "Si lees esto, significa que eres curioso",
     "error": "Error",
     "message": "Información",

@@ -1750,6 +1750,9 @@ msgstr "ज़िम्बाब्वे"
 msgid "country.not_applicable"
 msgstr "लागू नहीं"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "अवरुद्ध अनुरोध"
 
@@ -2311,11 +2314,17 @@ msgstr "आईपी पते का प्रतिबंध हटाने �
 msgid "error.webauthn_request_failed"
 msgstr "सुरक्षा-कुंजी अनुरोध विफल रहा। कृपया फिर से प्रयास करें।"
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं"
 
 msgid "flash.error"
 msgstr "त्रुटि"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "सूचना"

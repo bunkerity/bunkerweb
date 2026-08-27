@@ -138,7 +138,7 @@ def test_rejected_global_edit_is_not_propagated_to_services():
 def test_valid_global_change_still_propagates_with_the_override_flag():
     payload, flashed = _run_update({"SSL_PROTOCOLS": "TLSv1.2"}, override=True)
 
-    assert flashed == ["Global settings successfully saved.", "The Scheduler will be in charge of applying the changes."]
+    assert flashed == ["Global settings successfully saved.", "The Scheduler will attempt to apply the changes."]
     assert payload["SSL_PROTOCOLS"] == "TLSv1.2"
     assert payload["svc2_SSL_PROTOCOLS"] == "TLSv1.2", "a service following the global must follow the change"
     assert payload["svc1_SSL_PROTOCOLS"] == "TLSv1.2", "OVERRIDE_NON_GLOBAL_SERVICES must still override an own value"

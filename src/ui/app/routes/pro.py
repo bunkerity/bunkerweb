@@ -105,7 +105,7 @@ def pro_key():
             else:
                 DATA["TO_FLASH"].append({"content": operation, "type": "success"})
                 DATA["TO_FLASH"].append(
-                    {"content": "The Scheduler will be in charge of applying the changes and downloading the PRO plugins.", "type": "success", "save": False}
+                    {"content": "The Scheduler will attempt to apply the changes and download the PRO plugins.", "type": "success", "save": False}
                 )
 
         DATA["RELOADING"] = False

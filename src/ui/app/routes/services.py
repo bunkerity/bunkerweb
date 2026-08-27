@@ -1415,7 +1415,7 @@ def update_service(
             DATA["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             DATA["TO_FLASH"].append({"content": operation, "type": "success"})
-            DATA["TO_FLASH"].append({"content": "The Scheduler will be in charge of applying the changes.", "type": "success", "save": False})
+            DATA["TO_FLASH"].append({"content": "The Scheduler will attempt to apply the changes.", "type": "success", "save": False})
 
     DATA["RELOADING"] = False
 

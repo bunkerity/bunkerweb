@@ -1750,6 +1750,9 @@ msgstr "Zimbábue"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Solicitações Bloqueadas"
 
@@ -2311,11 +2314,17 @@ msgstr "Falha ao desbloquear o endereço IP. Por favor, tente novamente."
 msgid "error.webauthn_request_failed"
 msgstr "A solicitação da chave de segurança falhou. Tente novamente."
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "Se você está lendo isto, significa que você é curioso"
 
 msgid "flash.error"
 msgstr "Erro"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "Informação"

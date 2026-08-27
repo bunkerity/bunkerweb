@@ -6,6 +6,7 @@
 {% from "components/geo-map.html" import geo_map %}
 {% from "components/range-picker.html" import range_picker %}
 {% from "components/page-head.html" import page_head %}
+{% from "components/alert.html" import alert %}
 {# The page-head band now owns the title + head actions, so suppress the dashboard
    shell's legacy breadcrumb/mode row (kills the duplicated header). #}
 {% block page_head %}{% endblock %}
@@ -43,6 +44,9 @@
 {% endblock %}
 {% block content %}
     <!-- Content -->
+    {% if jobs_failed %}
+        {{ alert(message_key="dashboard.alert.jobs_failed", variant="danger", icon="bx-error-circle", dismissible=true) }}
+    {% endif %}
     {# Page-head band: welcome title (name in its own Don Jose accent span, a sibling of the
        greeting) + head actions (Reload / range-picker / Get support). #}
     {% set welcome_title %}<span>{{ _("dashboard.welcome.greeting") }}</span> <span class="don-jose">{{ current_user.get_id() }}</span>{% endset %}

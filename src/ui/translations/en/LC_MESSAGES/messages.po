@@ -1750,6 +1750,9 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Blocked Requests"
 
@@ -2311,11 +2314,17 @@ msgstr "Failed to unban IP address. Please try again."
 msgid "error.webauthn_request_failed"
 msgstr "The security-key request failed. Please try again."
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "If you read this, it means that you're curious"
 
 msgid "flash.error"
 msgstr "Error"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "Info"

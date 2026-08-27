@@ -1750,6 +1750,9 @@ msgstr "জিম্বাবুয়ে"
 msgid "country.not_applicable"
 msgstr "প্রযোজ্য নয়"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "অবরুদ্ধ অনুরোধ"
 
@@ -2311,11 +2314,17 @@ msgstr "আইপি ঠিকানা থেকে নিষেধাজ্ঞ
 msgid "error.webauthn_request_failed"
 msgstr "সিকিউরিটি-কী অনুরোধ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।"
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "যদি আপনি এটি পড়েন, তার মানে আপনি কৌতূহলী"
 
 msgid "flash.error"
 msgstr "ত্রুটি"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "তথ্য"

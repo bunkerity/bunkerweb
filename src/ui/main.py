@@ -66,7 +66,7 @@ from app.utils import (
     stop,
     restart_workers,
 )
-from app.i18n import browser_catalog, init_i18n
+from app.i18n import browser_catalog, init_i18n, translated
 from app.lang_config import SUPPORTED_LANGUAGES
 
 from app.routes.about import about
@@ -1386,7 +1386,19 @@ def before_request():
             DATA["PRO_LOADING"] = False
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
-            if not changes_ongoing and metadata.get("failover", False):
+            last_push_configs_failed = False
+            if changes_ongoing:
+                try:
+                    last_push_configs_run = API_CLIENT.get_last_job_run("push-configs")
+                    last_push_configs_failed = last_push_configs_run is not None and last_push_configs_run.get("success") is False
+                except (ApiClientError, ApiUnavailableError):
+                    LOGGER.warning("Failed to fetch the last push-configs run from API in before_request.")
+
+            if changes_ongoing and last_push_configs_failed:
+                message = translated("flash.last_configuration_change_failed") or "Your last configuration change could not be applied."
+                details = translated("flash.check_jobs_for_details") or "Check the Jobs page for details."
+                flash(f"{message} <a class='alert-link' href='{url_for('jobs.jobs_page')}'>{details}</a>", "error", save=False)
+            elif not changes_ongoing and metadata.get("failover", False):
                 flask_flash(
                     "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",
                     "error",

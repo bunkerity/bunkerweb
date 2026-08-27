@@ -54,6 +54,7 @@ def _base_context(**overrides):
         is_initialized=False,
         first_config_saved=False,
         jobs_count=0,
+        jobs_failed=False,
         bans_active=0,
         top_reasons=[],
     )
@@ -149,6 +150,16 @@ def test_home_page_mini_tiles_render_honest_values():
 
     assert human_readable_number(42) in html
     assert ">5<" in html or "5</span>" in html
+
+
+def test_home_page_renders_a_danger_alert_when_a_job_failed():
+    html = _render_home(jobs_failed=True)
+
+    assert 'class="alert alert-danger' in html
+    assert 'role="alert"' in html
+    assert "One or more jobs failed on their last run." in html
+    assert "alert-dismissible fade show" in html
+    assert 'data-bs-dismiss="alert"' in html
 
 
 # ── "Top reasons for blocks" card ───────────────────────────────────────────────────

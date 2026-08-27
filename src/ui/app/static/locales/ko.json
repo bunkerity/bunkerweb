@@ -517,6 +517,9 @@
     "not_applicable": "해당 없음"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "차단된 요청"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "이 글을 보고 계신다면 호기심이 많으시군요!",
     "error": "오류",
     "message": "정보",

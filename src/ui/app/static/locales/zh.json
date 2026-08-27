@@ -517,6 +517,9 @@
     "not_applicable": "不适用"
   },
   "dashboard": {
+    "alert": {
+      "jobs_failed": "One or more jobs failed on their last run."
+    },
     "card": {
       "blocked_requests": {
         "title": "被阻止的请求"
@@ -776,6 +779,8 @@
     "webauthn_request_failed": "安全密钥请求失败。请重试。"
   },
   "flash": {
+    "check_jobs_for_details": "Check the Jobs page for details.",
+    "last_configuration_change_failed": "Your last configuration change could not be applied.",
     "easter_egg": "如果你读到了这条信息，说明你很好奇",
     "error": "错误",
     "message": "信息",

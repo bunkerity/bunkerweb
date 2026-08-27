@@ -1750,6 +1750,9 @@ msgstr "津巴布韦"
 msgid "country.not_applicable"
 msgstr "不适用"
 
+msgid "dashboard.alert.jobs_failed"
+msgstr "One or more jobs failed on their last run."
+
 msgid "dashboard.card.blocked_requests.title"
 msgstr "被阻止的请求"
 
@@ -2311,11 +2314,17 @@ msgstr "解禁 IP 地址失败。请重试。"
 msgid "error.webauthn_request_failed"
 msgstr "安全密钥请求失败。请重试。"
 
+msgid "flash.check_jobs_for_details"
+msgstr "Check the Jobs page for details."
+
 msgid "flash.easter_egg"
 msgstr "如果你读到了这条信息，说明你很好奇"
 
 msgid "flash.error"
 msgstr "错误"
+
+msgid "flash.last_configuration_change_failed"
+msgstr "Your last configuration change could not be applied."
 
 msgid "flash.message"
 msgstr "信息"
