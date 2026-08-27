@@ -208,7 +208,7 @@ jobs:
           addons: "registry,storage-provisioner,default-storageclass"
           listen-address: "127.0.0.1"
           insecure-registry: "10.0.0.0/24"
-          start-args: "--embed-certs --disable-metrics --disable-optimizations --ports 127.0.0.1:80:80 --ports 127.0.0.1:443:443 --ports 127.0.0.1:5000:5000 --ports 127.0.0.1:5001:5001 --ports 127.0.0.1:5443:5443 --ports 127.0.0.1:7000:30070 --ports 127.0.0.1:8000:30080 --ports 127.0.0.1:8888:30088 --ports 127.0.0.1:3306:30306 --ports 127.0.0.1:5432:30432 --ports 127.0.0.1:6380:30379 --ports 127.0.0.1:6381:30380 --ports 127.0.0.1:6382:30381 --ports 127.0.0.1:6479:30479 --ports 127.0.0.1:26379:32379 --ports 127.0.0.1:26380:32380 --ports 127.0.0.1:26381:32381"
+          start-args: "--embed-certs --disable-metrics --disable-optimizations --ports 127.0.0.1:80:80 --ports 127.0.0.1:443:443 --ports 127.0.0.1:5000:5000 --ports 127.0.0.1:5001:5001 --ports 127.0.0.1:5443:5443 --ports 127.0.0.1:7000:30070 --ports 127.0.0.1:8000:30080 --ports 127.0.0.1:8888:30088 --ports 127.0.0.1:3306:30306 --ports 127.0.0.1:5432:30432 --ports 127.0.0.1:6380:30379 --ports 127.0.0.1:6381:30380 --ports 127.0.0.1:6382:30381 --ports 127.0.0.1:6479:30479 --ports 127.0.0.1:6480:30482 --ports 127.0.0.1:26379:32379 --ports 127.0.0.1:26380:32380 --ports 127.0.0.1:26381:32381 --ports 127.0.0.1:26479:32479 --ports 127.0.0.1:26480:32480 --ports 127.0.0.1:26481:32481"
       - name: Minikube diagnostics on failure
         # Logs for failed runs are purged quickly; capture minikube/host state inline
         # so an exit-80 (or later) failure is diagnosable without re-running.
