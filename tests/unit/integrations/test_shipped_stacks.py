@@ -17,6 +17,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 from password_utils import USER_PASSWORD_RX
 
@@ -68,6 +69,10 @@ def _compose_config(compose):
     )
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
+
+
+def _workflow(name):
+    return yaml.safe_load((ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8"))
 
 
 def _kubernetes_workload(manifest, image):
@@ -170,11 +175,15 @@ def test_kubernetes_internal_api_clients_receive_api_token(manifest, image):
 
 
 def test_staging_builds_and_loads_every_job_component():
-    staging = (ROOT / ".github" / "workflows" / "staging.yml").read_text(encoding="utf-8")
+    staging = _workflow("staging.yml")
     runner = (ROOT / ".github" / "workflows" / "staging-tests.yml").read_text(encoding="utf-8")
-    assert "image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]" in staging
-    assert "dockerfile: src/worker/Dockerfile" in staging
-    assert "bunkerity/bunkerweb-worker:testing" in staging
+    images = staging["jobs"]["build-containers"]["strategy"]["matrix"]["image"]
+    assert {"api", "worker"} <= set(images)
+    assert any(
+        row.get("image") == "worker" and row.get("dockerfile") == "src/worker/Dockerfile"
+        for row in staging["jobs"]["build-containers"]["strategy"]["matrix"]["include"]
+    )
+    assert any("bunkerity/bunkerweb-worker:testing" in step.get("run", "") for step in staging["jobs"]["push-images"]["steps"])
     for image in ("api", "worker"):
         assert f"ghcr.io/bunkerity/{image}-tests:testing" in runner
         assert f"local/{image}-tests:latest" in runner
@@ -186,9 +195,10 @@ def test_integration_workflow_retags_every_job_component():
     # whose api or worker image is missing still boots, and then no job ever runs -- which reads
     # as a spec failure somewhere far from the cause.
     workflow = (ROOT / ".github" / "workflows" / "integration-tests.yml").read_text(encoding="utf-8")
-    branch_workflow = (ROOT / ".github" / "workflows" / "1.7-dev.yml").read_text(encoding="utf-8")
-    assert "image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]" in branch_workflow
+    branch_workflow = _workflow("1.7-dev.yml")
+    images = branch_workflow["jobs"]["build-containers"]["strategy"]["matrix"]["image"]
     for component, image in (("api", "bunkerweb-api"), ("worker", "bunkerweb-worker")):
+        assert component in images
         assert f"docker pull ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}}" in workflow
         assert f"docker tag ghcr.io/bunkerity/{component}-tests:${{{{ inputs.RELEASE }}}} bunkerity/{image}:tests" in workflow
 

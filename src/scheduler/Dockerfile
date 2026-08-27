@@ -58,7 +58,7 @@ RUN . /etc/os-release && \
   *) PGCLIENT=postgresql-client ;; \
   esac && \
   apt-get update && \
-  apt-get install -y --no-install-recommends bash ca-certificates libpq5 libmariadb3 sqlite3 mariadb-client "$PGCLIENT" tzdata && \
+  apt-get install -y --no-install-recommends bash ca-certificates libpq5 openssl libmariadb3 sqlite3 mariadb-client "$PGCLIENT" tzdata && \
   rm -rf /var/lib/apt/lists/* && \
   groupadd -g 101 bwcli && \
   useradd -u 101 -g bwcli -d /usr/share/bunkerweb/cli -s /usr/sbin/nologin -M bwcli

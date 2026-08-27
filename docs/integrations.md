@@ -1800,10 +1800,17 @@ volumes:
     sudo chmod -R 770 bw-data
     ```
 
-### Local bwcli image
+### bwcli image
 
-The source tree includes a dedicated `bwcli` target for development and operational testing. It
-is not published yet; build it locally and use the profile-gated example in `misc/dev`:
+The dedicated image is published as `bunkerity/bunkerweb-bwcli`:
+
+```shell
+docker pull bunkerity/bunkerweb-bwcli:1.7
+docker pull bunkerity/bunkerweb-bwcli:latest
+docker run --rm bunkerity/bunkerweb-bwcli:1.7 capabilities
+```
+
+To build it from source, use the profile-gated example in `misc/dev`:
 
 ```shell
 cd misc/dev

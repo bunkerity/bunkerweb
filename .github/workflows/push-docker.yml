@@ -19,6 +19,10 @@ on:
       DOCKERFILE:
         required: true
         type: string
+      TARGET:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -95,6 +99,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
+          target: ${{ inputs.TARGET }}
           platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ steps.sanitize.outputs.tags }}

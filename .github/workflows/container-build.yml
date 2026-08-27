@@ -20,6 +20,10 @@ on:
       DOCKERFILE:
         required: true
         type: string
+      TARGET:
+        required: false
+        type: string
+        default: ""
       CACHE:
         required: false
         type: boolean
@@ -117,6 +121,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
+          target: ${{ inputs.TARGET }}
           platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
@@ -132,6 +137,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
+          target: ${{ inputs.TARGET }}
           platforms: ${{ inputs.ARCH }}
           load: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
           tags: local/${{ inputs.IMAGE }}

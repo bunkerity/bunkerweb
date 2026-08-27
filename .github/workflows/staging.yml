@@ -16,12 +16,16 @@ jobs:
       security-events: write # container-build.yml uploads the Trivy SARIF
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
+        image:
+          [bunkerweb, scheduler, bwcli, autoconf, ui, api, worker, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
           - image: scheduler
             dockerfile: src/scheduler/Dockerfile
+          - image: bwcli
+            dockerfile: src/scheduler/Dockerfile
+            target: bwcli
           - image: autoconf
             dockerfile: src/autoconf/Dockerfile
           - image: ui
@@ -40,6 +44,7 @@ jobs:
       PUSH: true
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+      TARGET: ${{ matrix.target }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -180,6 +185,8 @@ jobs:
         run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
       - name: Push scheduler image
         run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
+      - name: Push bwcli image
+        run: docker pull ghcr.io/bunkerity/bwcli-tests:testing && docker tag ghcr.io/bunkerity/bwcli-tests:testing bunkerity/bunkerweb-bwcli:testing && docker push bunkerity/bunkerweb-bwcli:testing && docker tag bunkerity/bunkerweb-bwcli:testing ghcr.io/bunkerity/bunkerweb-bwcli:testing && docker push ghcr.io/bunkerity/bunkerweb-bwcli:testing
       - name: Push autoconf image
         run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
       - name: Push UI image

@@ -17,12 +17,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
+        image: [bunkerweb, scheduler, bwcli, autoconf, ui, api, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
           - image: scheduler
             dockerfile: src/scheduler/Dockerfile
+          - image: bwcli
+            dockerfile: src/scheduler/Dockerfile
+            target: bwcli
           - image: autoconf
             dockerfile: src/autoconf/Dockerfile
           - image: ui
@@ -38,6 +41,7 @@ jobs:
       CACHE: true
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+      TARGET: ${{ matrix.target }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}

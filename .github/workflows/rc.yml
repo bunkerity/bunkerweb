@@ -16,7 +16,8 @@ jobs:
     strategy:
       fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
+        image:
+          [bunkerweb, scheduler, bwcli, autoconf, ui, api, worker, all-in-one]
         arch: [linux/amd64, linux/386]
         include:
           - release: rc
@@ -26,6 +27,9 @@ jobs:
             dockerfile: src/bw/Dockerfile
           - image: scheduler
             dockerfile: src/scheduler/Dockerfile
+          - image: bwcli
+            dockerfile: src/scheduler/Dockerfile
+            target: bwcli
           - image: autoconf
             dockerfile: src/autoconf/Dockerfile
           - image: ui
@@ -46,6 +50,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+      TARGET: ${{ matrix.target }}
       CACHE: ${{ matrix.cache }}
       PUSH: ${{ matrix.push }}
       CACHE_SUFFIX: ${{ matrix.cache_suffix }}
@@ -73,7 +78,8 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, api, worker, all-in-one]
+        image:
+          [bunkerweb, scheduler, bwcli, autoconf, ui, api, worker, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
         include:
           - release: rc
@@ -83,6 +89,9 @@ jobs:
             dockerfile: src/bw/Dockerfile
           - image: scheduler
             dockerfile: src/scheduler/Dockerfile
+          - image: bwcli
+            dockerfile: src/scheduler/Dockerfile
+            target: bwcli
           - image: autoconf
             dockerfile: src/autoconf/Dockerfile
           - image: ui
@@ -103,6 +112,7 @@ jobs:
       ARCH: ${{ matrix.arch }}
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+      TARGET: ${{ matrix.target }}
       CACHE: ${{ matrix.cache }}
       PUSH: ${{ matrix.push }}
       CACHE_SUFFIX: ${{ matrix.cache_suffix }}
@@ -204,6 +214,7 @@ jobs:
           [
             bunkerweb,
             bunkerweb-scheduler,
+            bunkerweb-bwcli,
             bunkerweb-autoconf,
             bunkerweb-ui,
             bunkerweb-api,
@@ -218,6 +229,10 @@ jobs:
           - image: bunkerweb-scheduler
             cache_from: scheduler
             dockerfile: src/scheduler/Dockerfile
+          - image: bunkerweb-bwcli
+            cache_from: bwcli
+            dockerfile: src/scheduler/Dockerfile
+            target: bwcli
           - image: bunkerweb-autoconf
             cache_from: autoconf
             dockerfile: src/autoconf/Dockerfile
@@ -239,6 +254,7 @@ jobs:
       TAGS: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ matrix.release }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
       CACHE_FROM: ${{ matrix.cache_from }}-${{ matrix.release }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+      TARGET: ${{ matrix.target }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
