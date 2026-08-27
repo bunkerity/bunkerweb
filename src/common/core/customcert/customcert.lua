@@ -212,8 +212,17 @@ function customcert:init()
 	-- remaining exclusions from the global SERVER_NAME list: every configured service that
 	-- has no exact custom certificate of its own must not be served a wildcard one.
 	if next(wildcard_certificates) then
-		local all_servers = get_variable("SERVER_NAME", false)
-		if all_servers then
+		local all_servers, servers_err = get_variable("SERVER_NAME", false)
+		if not all_servers then
+			-- Fail closed : without the global server list the exclusions would be incomplete,
+			-- so drop the wildcard fallback entirely rather than risk serving a custom
+			-- certificate to a service that opted out of custom SSL.
+			self.logger:log(
+				WARN,
+				"can't get SERVER_NAME variable, disabling custom certificate wildcard fallback : " .. servers_err
+			)
+			wildcard_certificates = {}
+		else
 			for key in all_servers:gmatch("%S+") do
 				local host = normalize_hostname(key)
 				local exact = self.internalstore:get("plugin_customcert_" .. host, true)
