@@ -22,6 +22,7 @@
 - [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails, instead of upgrading with nothing to restore from. Pass `--no-auto-backup` to skip it. (Refs #3836)
 - [BUGFIX] `letsencrypt`: the UI reads certificate validity dates from the timezone-aware properties, where *Valid from* and *Valid to* were stamped with the local offset over a UTC value and shown shifted on any instance not running in UTC. (Fixes #3839)
 - [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
+- [MISC] Add the `haptics` feature to the default value for the Permissions-Policy header. It gates the Web Haptics API, which Chromium still keeps behind an experimental flag; services that want haptic feedback must override `PERMISSIONS_POLICY`.
 - [DEPS] Updated lua-resty-session version to v4.2.0
 - [DEPS] Updated LuaJIT version to v2.1-20260824
 - [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
