@@ -26,14 +26,17 @@ an ``ssl_*`` key it did not carry before.
 import ast
 import sys
 from json import loads
+from os import environ
 from pathlib import Path
+from runpy import run_path
 from types import ModuleType
 from typing import Any, Dict, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
+SYNC_BANS = ROOT.joinpath("src", "common", "core", "jobs", "jobs", "sync-bans.py")
 sys.path.append(ROOT.joinpath("src", "common", "utils").as_posix())
 
 from common_utils import get_redis_client  # noqa: E402
@@ -98,6 +101,55 @@ def test_the_ca_reaches_a_sentinel_connection(fake_redis):
     assert _FakeSentinel.last.kwargs["ssl_ca_certs"] == "/etc/bunkerweb/redis-ca.pem"
 
 
+def test_tls_verification_can_be_disabled_without_emitting_the_ca(fake_redis):
+    client = get_redis_client(
+        use_redis=True,
+        redis_host="valkey",
+        redis_ssl=True,
+        redis_ssl_ca="/etc/bunkerweb/redis-ca.pem",
+        redis_ssl_verify=False,
+    )
+    assert client is not None
+    assert client.kwargs["ssl_cert_reqs"] == "none"
+    assert "ssl_ca_certs" not in client.kwargs
+
+
+def test_tls_verification_stays_required_by_default(fake_redis):
+    client = get_redis_client(use_redis=True, redis_host="valkey", redis_ssl=True)
+    assert client is not None
+    assert "ssl_cert_reqs" not in client.kwargs, "redis-py's required default must remain in effect"
+
+
+def test_sync_bans_forwards_disabled_tls_verification():
+    captured = {}
+
+    def capture_redis_client(**kwargs):
+        captured.update(kwargs)
+        raise RuntimeError("stop after Redis configuration")
+
+    job_instance = Mock()
+    job_instance.db.get_metadata.return_value = {"scheduler_first_start": False}
+    job = ModuleType("jobs")
+    job.Job = Mock(return_value=job_instance)
+    logger = ModuleType("logger")
+    logger.getLogger = Mock(return_value=Mock())
+    api = ModuleType("API")
+    api.API = Mock()
+    api_caller = ModuleType("ApiCaller")
+    api_caller.ApiCaller = Mock()
+    common_utils = ModuleType("common_utils")
+    common_utils.get_redis_client = capture_redis_client
+
+    with (
+        patch.dict(sys.modules, {"jobs": job, "logger": logger, "API": api, "ApiCaller": api_caller, "common_utils": common_utils}),
+        patch.dict(environ, {"USE_REDIS": "yes", "REDIS_SSL": "yes", "REDIS_SSL_VERIFY": "no"}),
+        pytest.raises(SystemExit),
+    ):
+        run_path(str(SYNC_BANS), run_name="__main__")
+
+    assert captured["redis_ssl_verify"] is False
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -111,6 +163,7 @@ def test_nothing_new_travels_when_the_ca_is_not_in_play(fake_redis, kwargs):
     client = get_redis_client(use_redis=True, redis_host="valkey", **kwargs)
     assert client is not None
     assert "ssl_ca_certs" not in client.kwargs
+    assert "ssl_cert_reqs" not in client.kwargs
 
 
 # --------------------------------------------------------------------------------------
