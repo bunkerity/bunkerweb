@@ -48,6 +48,10 @@ local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 local SWAP_LOCK_KEY = "api_swap_in_progress"
 local SWAP_LOCK_TTL = 120
 local SWAP_WAIT_TIMEOUT = 30
+-- How long POST /reload waits for proof that NGINX adopted the new cycle before it stops
+-- believing the signal and asks `nginx -t` instead. A refusal is immediate (the [emerg] is
+-- logged in the same second as the SIGHUP), so this only ever expires on a slow success.
+local RELOAD_CONFIRM_TIMEOUT = 2
 local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
 local execute = os.execute
@@ -93,6 +97,57 @@ local function get_nginx_conf()
 		end
 	end
 	return "/etc/nginx/nginx.conf"
+end
+
+-- Run `nginx -t` and report whether the configuration on disk is loadable, plus its raw output.
+local function test_nginx_conf()
+	local command = get_nginx_bin() .. " -t -e /var/log/bunkerweb/error.log -c " .. get_nginx_conf() .. " 2>&1"
+	local handle = io.popen(command)
+	local result = handle:read("*a")
+	handle:close()
+
+	-- Check for success message in output regardless of exit code
+	if string.match(result, "configuration file .+ test is successful") then
+		return true, result
+	end
+	if
+		string.match(result, "syntax is ok")
+		and string.match(result, "Permission denied")
+		and (string.match(result, "nginx.pid") or string.match(result, "/var/log/nginx/error.log"))
+	then
+		logger:log(NOTICE, "Nginx configuration syntax is valid (non-root permission warnings ignored)")
+		return true, result
+	end
+	return false, result
+end
+
+-- Decide whether the reload we just signalled actually happened.
+--
+-- A SIGHUP that lands is not a reload that took : NGINX parses the new configuration in the
+-- master AFTER the signal, and when it refuses it logs [emerg] and keeps serving the old cycle.
+-- The signal still succeeded, which is why a refused reload used to answer 200 "reload
+-- successful" -- and why DISABLE_CONFIGURATION_TESTING masked it outright: the pre-test was the
+-- only thing on this path that ever produced a verdict, so skipping it left nothing to fail.
+--
+-- Cheap signal first : a master that accepted the new cycle forks fresh workers and immediately
+-- tells the old ones -- us, this request is served by one -- to shut down, so
+-- ngx.worker.exiting() flips within milliseconds. The wait expiring is NOT proof of failure: a
+-- refusal is immediate while a success can be slow, because init_by_lua rebuilds the whole
+-- BunkerWeb runtime in the master on a large configuration. So an unconfirmed reload falls back
+-- to `nginx -t`, which answers for real, and which only runs on the path that needed it.
+local function confirm_reload()
+	local deadline = ngx.now() + RELOAD_CONFIRM_TIMEOUT
+	while not ngx.worker.exiting() do
+		if ngx.now() >= deadline then
+			local ok, output = test_nginx_conf()
+			if not ok then
+				return false, output
+			end
+			return true, "unconfirmed after " .. RELOAD_CONFIRM_TIMEOUT .. "s but the configuration tests clean"
+		end
+		ngx.sleep(0.05)
+	end
+	return true, "workers rotated"
 end
 
 api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
@@ -245,25 +300,11 @@ api.global.POST["^/reload"] = function(self)
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
-		local nginx_bin = get_nginx_bin()
-		local nginx_conf = get_nginx_conf()
-		local command = nginx_bin .. " -t -e /var/log/bunkerweb/error.log -c " .. nginx_conf .. " 2>&1"
-		local handle = io.popen(command)
-		local result = handle:read("*a")
-		handle:close()
-
-		-- Check for success message in output regardless of exit code
-		if string.match(result, "configuration file .+ test is successful") then
-			logger:log(NOTICE, "Nginx configuration is valid")
-		elseif
-			string.match(result, "syntax is ok")
-			and string.match(result, "Permission denied")
-			and (string.match(result, "nginx.pid") or string.match(result, "/var/log/nginx/error.log"))
-		then
-			logger:log(NOTICE, "Nginx configuration syntax is valid (non-root permission warnings ignored)")
-		else
+		local ok, result = test_nginx_conf()
+		if not ok then
 			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
 		end
+		logger:log(NOTICE, "Nginx configuration is valid")
 	end
 
 	-- Reload Nginx
@@ -272,14 +313,22 @@ api.global.POST["^/reload"] = function(self)
 	local ok, err = kill(get_master_pid(), "HUP")
 	if not ok then
 		-- FreeBSD package mode runs nginx master as root; fallback to sudo-managed rc reload.
+		local rc
 		if err == "Operation not permitted" then
-			local rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
-			if rc == 0 or rc == true then
-				return self:response(HTTP_OK, "success", "reload successful")
-			end
+			rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
 		end
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+		if rc ~= 0 and rc ~= true then
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+		end
 	end
+
+	-- The signal landing says nothing about the reload succeeding : see confirm_reload().
+	local reloaded, detail = confirm_reload()
+	if not reloaded then
+		logger:log(ERR, "Nginx refused the reload and is still serving the previous configuration : " .. detail)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload refused by nginx: " .. detail)
+	end
+	logger:log(NOTICE, "Nginx reloaded (" .. detail .. ")")
 
 	-- Create temporary file to indicate reconfiguration
 	local file, err = open("/var/tmp/bunkerweb_reloading", "w")
