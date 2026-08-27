@@ -1,3 +1,8 @@
+# Test-runner contract: Docker-driver minikube is single-node, so every status.hostIP
+# below is the same address. A multi-node cluster would make Sentinels monitor different
+# master addresses and lose quorum. These node-IP/NodePort addresses also bypass build.sh's
+# 127.0.0.1 minikube_ports mapping: the current host-run harness can reach them, but a
+# containerized harness would re-red and should use redis_handler address substitution.
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -26,6 +31,13 @@ spec:
           envFrom:
             - secretRef:
                 name: redis-slave-secret
+          env:
+            - name: REDIS_REPLICA_ANNOUNCE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: REDIS_REPLICA_ANNOUNCE_PORT_BASE
+              value: "30380"
           volumeMounts:
             - mountPath: /acl/
               name: vol-acl
@@ -121,6 +133,13 @@ spec:
           envFrom:
             - secretRef:
                 name: redis-sentinel-secret
+          env:
+            - name: REDIS_MASTER_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: REDIS_MASTER_PORT_NUMBER
+              value: "30379"
           volumeMounts:
             - mountPath: /acl/
               name: vol-acl

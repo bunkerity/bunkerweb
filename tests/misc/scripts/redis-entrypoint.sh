@@ -27,6 +27,14 @@ if [ "$REPLICATION_MODE" = "slave" ]; then
   if [ -n "${REDIS_MASTER_PASSWORD:-}" ]; then
     set -- "$@" "--masterauth" "$REDIS_MASTER_PASSWORD"
   fi
+  if [ -n "${REDIS_REPLICA_ANNOUNCE_IP:-}" ]; then
+    : "${REDIS_REPLICA_ANNOUNCE_PORT_BASE:?Missing REDIS_REPLICA_ANNOUNCE_PORT_BASE}"
+    replica_name="$(hostname)"
+    replica_index="${replica_name##*-}"
+    set -- "$@" \
+      "--replica-announce-ip" "$REDIS_REPLICA_ANNOUNCE_IP" \
+      "--replica-announce-port" "$((REDIS_REPLICA_ANNOUNCE_PORT_BASE + replica_index))"
+  fi
 fi
 
 tls_flag=$(printf '%s' "$TLS_ENABLED" | tr '[:upper:]' '[:lower:]')
