@@ -26,6 +26,16 @@ actions:
       - "Docker"
       - "All-in-one"
     database: "sqlite"
+  to_latest_sqlite_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    restart_stack: false
+    integrations:
+      - "All-in-one"
+    database: "sqlite"
   verify_1_7_sqlite:
     type: database
     query: "SELECT version FROM bw_metadata WHERE id = 1"
@@ -57,6 +67,17 @@ actions:
       - "Docker"
       - "All-in-one"
     database: "sqlite"
+    All-in-one:
+      restart_stack: false
+  to_latest_1_sqlite_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations:
+      - "All-in-one"
+    database: "sqlite"
 
   # Upgrade matrix for MariaDB
   from_latest_stable_mariadb:
@@ -71,6 +92,16 @@ actions:
     status: 200
     not_log: "❌"
     restart_stack: false
+    database: "mariadb"
+  to_latest_mariadb_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    restart_stack: false
+    integrations:
+      - "All-in-one"
     database: "mariadb"
   verify_1_7_mariadb:
     type: database
@@ -91,6 +122,17 @@ actions:
     status: 200
     not_log: "❌"
     database: "mariadb"
+    All-in-one:
+      restart_stack: false
+  to_latest_1_mariadb_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations:
+      - "All-in-one"
+    database: "mariadb"
 
   # Upgrade matrix for MySQL
   from_latest_stable_mysql:
@@ -105,6 +147,16 @@ actions:
     status: 200
     not_log: "❌"
     restart_stack: false
+    database: "mysql"
+  to_latest_mysql_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    restart_stack: false
+    integrations:
+      - "All-in-one"
     database: "mysql"
   verify_1_7_mysql:
     type: database
@@ -125,6 +177,17 @@ actions:
     status: 200
     not_log: "❌"
     database: "mysql"
+    All-in-one:
+      restart_stack: false
+  to_latest_1_mysql_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations:
+      - "All-in-one"
+    database: "mysql"
 
   # Upgrade matrix for PostgreSQL
   from_latest_stable_postgresql:
@@ -139,6 +202,16 @@ actions:
     status: 200
     not_log: "❌"
     restart_stack: false
+    database: "postgresql"
+  to_latest_postgresql_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    restart_stack: false
+    integrations:
+      - "All-in-one"
     database: "postgresql"
   verify_1_7_postgresql:
     type: database
@@ -158,4 +231,15 @@ actions:
     url: "http://www.example.com"
     status: 200
     not_log: "❌"
+    database: "postgresql"
+    All-in-one:
+      restart_stack: false
+  to_latest_1_postgresql_scheduler_logs:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    not_log: "❌"
+    log_from: "scheduler"
+    integrations:
+      - "All-in-one"
     database: "postgresql"

@@ -49,6 +49,17 @@ actions:
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
     Kubernetes:
       status: 405
+    All-in-one:
+      restart_stack: false
+  crs_plugins_scheduler_logs:
+    type: status
+    url: "http://www.example.com/post/wp-login.php?pass1=<script>"
+    method: POST
+    not_log: "❌"
+    log_from: "scheduler"
+    status: 404
+    integrations:
+      - "All-in-one"
   # The only assertion that global CRS actually BLOCKS. crs_plugins_global below is a 404 by
   # design, and a global-crs include that rendered nothing would 404 exactly the same way -- so
   # without this action the whole global-CRS mode could stop loading rules and the spec would
@@ -77,6 +88,17 @@ actions:
       MODSECURITY_CRS_PLUGINS: "wordpress-rule-exclusions"
     Kubernetes:
       status: 405
+    All-in-one:
+      restart_stack: false
+  crs_plugins_global_scheduler_logs:
+    type: status
+    url: "http://www.example.com/post/wp-login.php?pass1=<script>"
+    method: POST
+    not_log: "❌"
+    log_from: "scheduler"
+    status: 404
+    integrations:
+      - "All-in-one"
 
 config:
   USE_MODSECURITY: "yes"
