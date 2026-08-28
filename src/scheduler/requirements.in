@@ -26,7 +26,7 @@ certbot-dns-dynu==0.0.6.post2502111739272536
 certbot-dns-gandi==1.6.2
 certbot-dns-godaddy==2.8.0
 certbot-dns-hetzner==4.0.0
-certbot-dns-infomaniak==0.3.2
+certbot-dns-infomaniak==0.3.3
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
 certbot-dns-pdns==0.1.1
