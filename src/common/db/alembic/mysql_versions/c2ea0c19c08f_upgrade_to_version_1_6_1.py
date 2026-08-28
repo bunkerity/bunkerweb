@@ -25,11 +25,11 @@ def upgrade() -> None:
     op.execute("UPDATE bw_plugins SET type = 'core', data = NULL, checksum = NULL WHERE id = 'crowdsec' AND type = 'external'")
 
     # Update the version in bw_metadata
-    op.execute("UPDATE bw_metadata SET version = '1.6.1' WHERE id = 1")
+    op.execute("UPDATE bw_metadata SET version = '1.6.14' WHERE id = 1")
 
 
 def downgrade() -> None:
     op.drop_column("bw_metadata", "failover_message")
 
     # Revert the version in bw_metadata
-    op.execute("UPDATE bw_metadata SET version = '1.6.1-rc3' WHERE id = 1")
+    op.execute("UPDATE bw_metadata SET version = '1.6.13' WHERE id = 1")
