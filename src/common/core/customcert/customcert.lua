@@ -138,6 +138,10 @@ end
 function customcert:init()
 	local ret_ok, ret_err = true, "success"
 	local wildcard_certificates = {}
+	-- Hosts of services that did not opt into custom SSL. The wildcard SNI fallback must never
+	-- serve a custom certificate for those, or it shadows the certificate another plugin
+	-- provides.
+	local wildcard_excluded = {}
 	if has_variable("USE_CUSTOM_SSL", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
@@ -150,6 +154,13 @@ function customcert:init()
 				return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
 			end
 			for server_name, multisite_vars in pairs(vars) do
+				-- Remember every hostname of services that opted out of custom SSL
+				if multisite_vars["USE_CUSTOM_SSL"] ~= "yes" and server_name ~= "global" then
+					local opted_out = multisite_vars["SERVER_NAME"] or server_name
+					for key in opted_out:gmatch("%S+") do
+						wildcard_excluded[normalize_hostname(key)] = true
+					end
+				end
 				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = read_files({
 						"/var/cache/bunkerweb/customcert/" .. server_name .. "/cert.pem",
@@ -196,6 +207,11 @@ function customcert:init()
 		ret_err = "custom cert is not used"
 	end
 
+	local ok, err = self.internalstore:set("plugin_customcert_wildcard_excluded", wildcard_excluded, nil, true)
+	if not ok then
+		return self:ret(false, "error while caching custom certificate wildcard exclusions : " .. err)
+	end
+
 	local wildcard_bases = {}
 	for base in pairs(wildcard_certificates) do
 		table.insert(wildcard_bases, base)
@@ -207,7 +223,7 @@ function customcert:init()
 		return #a > #b
 	end)
 
-	local ok, err = self.internalstore:set("plugin_customcert_wildcard_bases", wildcard_bases, nil, true)
+	ok, err = self.internalstore:set("plugin_customcert_wildcard_bases", wildcard_bases, nil, true)
 	if not ok then
 		return self:ret(false, "error while caching custom certificate wildcard bases : " .. err)
 	end
@@ -237,6 +253,16 @@ function customcert:ssl_certificate()
 		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
+	end
+
+	-- Never fall back to a wildcard custom certificate for a service that did not enable custom
+	-- SSL : let the next ssl_certificate plugin handle it.
+	local excluded, excluded_err = self.internalstore:get("plugin_customcert_wildcard_excluded", true)
+	if not excluded and excluded_err ~= "not found" then
+		return self:ret(false, "can't get custom certificate wildcard exclusions : " .. excluded_err)
+	end
+	if excluded and excluded[normalized_server_name] then
+		return self:ret(true, "custom certificate is not used (service did not enable USE_CUSTOM_SSL)")
 	end
 
 	local wildcard_bases, bases_err = self.internalstore:get("plugin_customcert_wildcard_bases", true)
