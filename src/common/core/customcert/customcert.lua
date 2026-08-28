@@ -138,9 +138,9 @@ end
 function customcert:init()
 	local ret_ok, ret_err = true, "success"
 	local wildcard_certificates = {}
-	-- PATCH: hosts belonging to services that did not opt into custom SSL. The wildcard
-	-- SNI fallback must never serve a custom certificate for those, otherwise it shadows
-	-- the certificate another plugin (e.g. letsencrypt) would provide. See upstream bug.
+	-- Hosts of services that did not opt into custom SSL. The wildcard SNI fallback must never
+	-- serve a custom certificate for those, or it shadows the certificate another plugin
+	-- provides.
 	local wildcard_excluded = {}
 	if has_variable("USE_CUSTOM_SSL", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
@@ -154,7 +154,7 @@ function customcert:init()
 				return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
 			end
 			for server_name, multisite_vars in pairs(vars) do
-				-- PATCH: remember every hostname of services that opted out of custom SSL
+				-- Remember every hostname of services that opted out of custom SSL
 				if multisite_vars["USE_CUSTOM_SSL"] ~= "yes" and server_name ~= "global" then
 					local opted_out = multisite_vars["SERVER_NAME"] or server_name
 					for key in opted_out:gmatch("%S+") do
@@ -207,32 +207,6 @@ function customcert:init()
 		ret_err = "custom cert is not used"
 	end
 
-	-- PATCH: the scoped variable store only holds settings that differ from the defaults,
-	-- so a service left at USE_CUSTOM_SSL=no may be absent from `vars` entirely. Derive the
-	-- remaining exclusions from the global SERVER_NAME list: every configured service that
-	-- has no exact custom certificate of its own must not be served a wildcard one.
-	if next(wildcard_certificates) then
-		local all_servers, servers_err = get_variable("SERVER_NAME", false)
-		if not all_servers then
-			-- Fail closed : without the global server list the exclusions would be incomplete,
-			-- so drop the wildcard fallback entirely rather than risk serving a custom
-			-- certificate to a service that opted out of custom SSL.
-			self.logger:log(
-				WARN,
-				"can't get SERVER_NAME variable, disabling custom certificate wildcard fallback : " .. servers_err
-			)
-			wildcard_certificates = {}
-		else
-			for key in all_servers:gmatch("%S+") do
-				local host = normalize_hostname(key)
-				local exact = self.internalstore:get("plugin_customcert_" .. host, true)
-				if not exact then
-					wildcard_excluded[host] = true
-				end
-			end
-		end
-	end
-
 	local ok, err = self.internalstore:set("plugin_customcert_wildcard_excluded", wildcard_excluded, nil, true)
 	if not ok then
 		return self:ret(false, "error while caching custom certificate wildcard exclusions : " .. err)
@@ -281,8 +255,8 @@ function customcert:ssl_certificate()
 		return self:ret(true, "certificate/key data found", data)
 	end
 
-	-- PATCH: never fall back to a wildcard custom certificate for a service that did not
-	-- enable custom SSL; let the next ssl_certificate plugin (letsencrypt) handle it.
+	-- Never fall back to a wildcard custom certificate for a service that did not enable custom
+	-- SSL : let the next ssl_certificate plugin handle it.
 	local excluded, excluded_err = self.internalstore:get("plugin_customcert_wildcard_excluded", true)
 	if not excluded and excluded_err ~= "not found" then
 		return self:ret(false, "can't get custom certificate wildcard exclusions : " .. excluded_err)
