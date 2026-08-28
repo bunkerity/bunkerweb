@@ -139,3 +139,19 @@ def test_the_shipped_handler_actually_acts_on_the_verdict():
     body = handler.group(0)
     assert "confirm_reload()" in body, "POST /reload no longer confirms the reload it signalled"
     assert re.search(r"if not reloaded then.*?HTTP_INTERNAL_SERVER_ERROR", body, re.S), "an unconfirmed reload no longer answers an error"
+
+
+def test_the_reloading_marker_is_created_before_the_signal():
+    """The marker is removed by the NEW cycle's worker init (init-worker-lua.conf), and
+    confirm_reload() only returns once those workers are up. Created after the wait, the marker
+    outlives its remover and /health answers "reloading" forever -- the api;health red of run
+    33106855238. Order in the handler source is the contract: marker, then HUP, then confirm."""
+    src = API_LUA.read_text(encoding="utf-8")
+    handler = re.search(r'^api\.global\.POST\["\^/reload"\] = function\(self\).*?^end$', src, re.M | re.S)
+    assert handler, "the POST /reload handler is gone from api.lua"
+    body = handler.group(0)
+    marker = body.find('open("/var/tmp/bunkerweb_reloading", "w")')
+    hup = body.find('"HUP"')
+    confirm = body.find("= confirm_reload()")
+    assert marker != -1 and hup != -1 and confirm != -1, "marker write, HUP signal or confirm_reload missing from the handler"
+    assert marker < hup < confirm, "the reloading marker must be written before the HUP signal (its remover is the new cycle's worker init)"

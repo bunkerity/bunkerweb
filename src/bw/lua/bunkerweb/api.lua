@@ -307,6 +307,19 @@ api.global.POST["^/reload"] = function(self)
 		logger:log(NOTICE, "Nginx configuration is valid")
 	end
 
+	-- Create the reconfiguration marker BEFORE signalling: the entity that removes it is the NEW
+	-- cycle's worker init (init-worker-lua.conf), and confirm_reload() below only returns once
+	-- those workers are already up -- a marker created after it would never be cleared and /health
+	-- would answer "reloading" forever. On a refused reload the marker stays until the next
+	-- successful reload clears it, which is what /health should say about a wedged instance.
+	local file, ferr = open("/var/tmp/bunkerweb_reloading", "w")
+	if file then
+		file:write(tostring(os.time()))
+		file:close()
+	else
+		logger:log(ERR, "Failed to create reload indicator file: " .. ferr)
+	end
+
 	-- Reload Nginx
 	logger:log(NOTICE, "Reloading Nginx")
 	-- Send HUP signal to master process
@@ -329,15 +342,6 @@ api.global.POST["^/reload"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload refused by nginx: " .. detail)
 	end
 	logger:log(NOTICE, "Nginx reloaded (" .. detail .. ")")
-
-	-- Create temporary file to indicate reconfiguration
-	local file, err = open("/var/tmp/bunkerweb_reloading", "w")
-	if file then
-		file:write(tostring(os.time()))
-		file:close()
-	else
-		logger:log(ERR, "Failed to create reload indicator file: " .. err)
-	end
 
 	return self:response(HTTP_OK, "success", "reload successful")
 end
@@ -422,12 +426,18 @@ api.global.POST["^/confs$"] = function(self)
 	-- only recovery there is, so a push that cannot establish its recovery point must not proceed
 	-- to the destructive part. Refusing to start beats failing halfway through a config swap.
 	-- (dev suppresses both the reason and the failure here with `2>/dev/null; true`.)
-	if execute("rm -rf " .. backup .. " && mkdir -p " .. backup .. " && cp -R " .. destination .. "/. " .. backup .. "/") ~= 0 then
+	if
+		execute(
+			"rm -rf " .. backup .. " && mkdir -p " .. backup .. " && cp -R " .. destination .. "/. " .. backup .. "/"
+		) ~= 0
+	then
 		return fail("cannot create the pre-swap backup, refusing to push")
 	end
 
 	-- Extract next : it validates the archive before any consumer-visible entry is touched.
-	if execute("rm -rf " .. staging .. " && mkdir -p " .. staging .. " && tar xzf " .. tmp .. " -C " .. staging) ~= 0 then
+	if
+		execute("rm -rf " .. staging .. " && mkdir -p " .. staging .. " && tar xzf " .. tmp .. " -C " .. staging) ~= 0
+	then
 		return fail("cannot extract archive")
 	end
 
@@ -462,7 +472,10 @@ api.global.POST["^/confs$"] = function(self)
 			)
 			return fail("swap failed and the restore failed too : " .. tostring(swap_err))
 		end
-		logger:log(ERR, "swap rolled back incompletely at " .. destination .. ", restored from backup : " .. tostring(swap_err))
+		logger:log(
+			ERR,
+			"swap rolled back incompletely at " .. destination .. ", restored from backup : " .. tostring(swap_err)
+		)
 		return fail("cannot swap configuration, restored from backup : " .. tostring(swap_err))
 	end
 
