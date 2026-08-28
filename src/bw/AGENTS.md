@@ -72,7 +72,7 @@ Modules read `ngx.config.subsystem` and pick the matching shared dicts (`datasto
 
 ### Cosockets
 
-Async work (Redis, DNS) needs cosockets, available only in some phases. Check `utils.is_cosocket_available()` and fall back to the LRU or shared dict in init, init_worker and log phases.
+Async work (Redis, DNS) needs cosockets, available only in some phases. `utils.is_cosocket_available()` is authoritative: check it and fall back to the LRU or shared dict whenever it returns false.
 
 ### Shared dictionaries
 
@@ -113,8 +113,8 @@ value = self.variables["SETTING_NAME"]
 docker build -f src/bw/Dockerfile -t bunkerweb:dev .
 docker build -f src/bw/Dockerfile -t bunkerweb:dev --build-arg SKIP_MINIFY=yes .   # skip HTML minification
 
-stylua src/bw/lua/bunkerweb/
-luacheck src/bw/lua --std min --codes --ranges --no-cache
+pre-commit run stylua-github --files src/bw/lua/bunkerweb/*.lua
+pre-commit run luacheck --files src/bw/lua/bunkerweb/*.lua
 shellcheck src/bw/entrypoint.sh
 pre-commit run --all-files
 ```
@@ -123,7 +123,7 @@ Lua style is configured at the repo root: `.luacheckrc` (declared globals and ig
 
 ## Runtime Gotchas
 
-- Cosockets are unavailable in the init, init_worker and log phases; code that forgets this fails at runtime only under load.
+- `utils.is_cosocket_available()` is the authoritative cosocket check; do not infer availability from a phase list.
 - `KEEP_CONFIG_ON_RESTART=yes` skips temporary-config regeneration and preserves the existing NGINX config across restarts.
 - Logs are redirected to `/proc/1/fd/{1,2}` (container stdout/stderr).
 - The entrypoint traps SIGTERM (stop) and SIGHUP (reload) and waits on the NGINX process.

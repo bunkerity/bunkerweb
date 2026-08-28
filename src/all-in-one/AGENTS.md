@@ -36,17 +36,17 @@ Dev ports: 80→8080, 443→8443 (TCP/UDP), 7000 for the UI. Credentials match t
 
 Supervisord (`supervisord.conf`, per-service `supervisor.d/*.ini`) starts services by priority:
 
-| Priority | Service   | Toggle              | Default                                                              |
-| -------- | --------- | ------------------- | -------------------------------------------------------------------- |
-| 10       | bunkerweb | (always on)         | yes                                                                  |
-| 12       | redis     | `USE_REDIS`         | yes                                                                  |
-| 12       | crowdsec  | `USE_CROWDSEC`      | no                                                                   |
-| 15       | logstream | (always on)         | yes                                                                  |
-| 20       | ui        | `SERVICE_UI`        | yes                                                                  |
-| 25       | api       | `SERVICE_API`       | no                                                                   |
-| 28       | worker    | `SERVICE_WORKER`    | yes, only when `SERVICE_SCHEDULER=yes` (auto-set by `entrypoint.sh`) |
-| 30       | scheduler | `SERVICE_SCHEDULER` | yes                                                                  |
-| 30       | autoconf  | `AUTOCONF_MODE`     | no                                                                   |
+| Priority | Service   | Toggle              | Default                                                                             |
+| -------- | --------- | ------------------- | ----------------------------------------------------------------------------------- |
+| 10       | bunkerweb | (always on)         | yes                                                                                 |
+| 12       | redis     | `USE_REDIS`         | yes                                                                                 |
+| 12       | crowdsec  | `USE_CROWDSEC`      | no                                                                                  |
+| 15       | logstream | (always on)         | yes                                                                                 |
+| 20       | ui        | `SERVICE_UI`        | yes                                                                                 |
+| 25       | api       | `SERVICE_API`       | image-level `no`; effectively enabled because the default Scheduler auto-enables it |
+| 28       | worker    | `SERVICE_WORKER`    | yes, only when `SERVICE_SCHEDULER=yes` (auto-set by `entrypoint.sh`)                |
+| 30       | scheduler | `SERVICE_SCHEDULER` | yes                                                                                 |
+| 30       | autoconf  | `AUTOCONF_MODE`     | no                                                                                  |
 
 ### Entrypoint flow
 
@@ -66,7 +66,7 @@ Supervisord (`supervisord.conf`, per-service `supervisor.d/*.ini`) starts servic
 
 ## Bundled Dependencies
 
-Compiled in the builder stage, pinned in `deps/*.json` (`go.json`, `crowdsec.json`, `re2.json` — version, URL, commit, per-arch checksums). Build scripts live in `scripts/` (`install-go.sh`, `install-crowdsec.sh`, `install-re2.sh`, and `utils.sh` providing `git_clone_commit`). To bump a version, edit the JSON — the Dockerfile reads it with `jq`.
+Compiled in the builder stage, pinned in `deps/*.json`: Go uses per-architecture checksums, while re2 and CrowdSec use commits. Build scripts live in `scripts/` (`install-go.sh`, `install-crowdsec.sh`, `install-re2.sh`, and `utils.sh` providing `git_clone_commit`). To bump a version, edit the JSON — the Dockerfile reads it with `jq`.
 
 ## CrowdSec Configuration (`conf/`)
 
@@ -90,7 +90,7 @@ Exposed ports: `8080` HTTP, `8443` HTTPS (TCP + UDP/QUIC), `7000` UI, `8888` API
 
 ## Environment (AIO-specific)
 
-- `SERVICE_UI`, `SERVICE_SCHEDULER`, `SERVICE_API` — per-service toggles.
+- `SERVICE_UI`, `SERVICE_SCHEDULER`, `SERVICE_API` — per-service toggles. `SERVICE_API=no` is the image-level default, but the default Scheduler auto-enables it.
 - `SERVICE_WORKER` — the Celery worker. `entrypoint.sh` defaults it to `yes` only when `SERVICE_SCHEDULER=yes`; set it explicitly to override.
 - `WORKER_CONCURRENCY` / `WORKER_MAX_MEMORY_KB` / `WORKER_QUEUES` — worker tuning. **The AIO worker hostname is hardcoded to `worker@%%h` in `supervisor.d/worker.ini`; there is no `WORKER_HOSTNAME` override here.**
 - `AUTOCONF_MODE` — enables the autoconf service.
@@ -101,4 +101,4 @@ Exposed ports: `8080` HTTP, `8443` HTTPS (TCP + UDP/QUIC), `7000` UI, `8888` API
 
 ## Shell Conventions
 
-Scripts use `#!/bin/bash` with `set -euo pipefail`, except `entrypoint.sh`, which omits `set -e` for controlled error handling. ShellCheck is the linter; `entrypoint.sh` carries several `SC2317` disables because of functions used in traps. Log output goes through the `log` helper: `log "COMPONENT" "emoji" "message"`.
+Executable scripts use `#!/bin/bash` with `set -euo pipefail`, except `entrypoint.sh`, which omits `set -e` for controlled error handling; sourced helper libraries do not set shell options. ShellCheck is the linter; `entrypoint.sh` carries several `SC2317` disables because of functions used in traps. Log output goes through the `log` helper: `log "COMPONENT" "emoji" "message"`.

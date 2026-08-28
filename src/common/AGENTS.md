@@ -16,7 +16,7 @@ The shared library used by the Scheduler, API, UI, Autoconf, CLI and Worker. It 
 ## Critical Rules
 
 - Settings flow through `settings.json` and the plugin `plugin.json` schemas → `Configurator` → database → `Templator`. Do not bypass a stage.
-- Every DB change must work on SQLite, MariaDB, MySQL and PostgreSQL, and migrations need a revision in each engine directory. See [db/AGENTS.md](db/AGENTS.md).
+- Every schema change must work on SQLite, MariaDB, MySQL and PostgreSQL, and migrations need a revision in each engine directory. See [db/AGENTS.md](db/AGENTS.md).
 - Lua and Python are decoupled: Lua reads NGINX shared-dict state that the Scheduler synchronizes, and never calls Python.
 - **Job names are global across all plugins.** There is no namespace isolation; a collision silently changes queue routing and cache paths.
 - Preserve the plugin metadata shape and the `order.json` execution ordering.
@@ -29,7 +29,7 @@ The shared library used by the Scheduler, API, UI, Autoconf, CLI and Worker. It 
 - `confs/` — the Jinja2 templates rendered into NGINX configuration.
 - `utils/` — shared helpers.
 - `api/` — the HTTP client for inter-component calls.
-- `cli/` and `helpers/` — `bwcli` and its entry point.
+- `cli/` and `helpers/` — data setup, healthchecks, and the `bwcli` wrapper.
 - `settings.json` — the global settings schema.
 
 ## Data Flow
@@ -85,7 +85,7 @@ Global settings live here; per-plugin settings live in each `plugin.json`. Entry
 
 ## API Client (`api/`)
 
-`API.py` is a thin HTTP client for inter-component communication: `API(endpoint, host=None, token=None)`, bearer-token auth, automatic HTTPS→HTTP fallback, and `from_instance(dict)` to build one from a database instance record.
+`API.py` is a thin HTTP client for inter-component communication: `API(endpoint, host=None, token=None)`, bearer-token auth, HTTPS→HTTP fallback only for unpinned legacy connections (pinned TLS never downgrades), and `from_instance(dict)` to build one from a database instance record.
 
 ## CLI (`cli/`)
 

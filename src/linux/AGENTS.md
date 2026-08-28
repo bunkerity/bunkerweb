@@ -74,19 +74,19 @@ Five units, all `Type=simple` with `Restart=always`:
 
 ## Runtime Script Patterns
 
-Every service script sources `/usr/share/bunkerweb/helpers/utils.sh` for `get_python_bin`, `get_bunkerweb_pythonpath`, `run_as_nginx`, `export_env_file` and `log`; accepts `start|stop|reload|restart` as its first argument; runs BunkerWeb processes as the `nginx` user through `run_as_nginx`; and reads `/etc/bunkerweb/variables.env` plus its own component env file (`scheduler.env`, `ui.env`, `api.env`). `do_and_check_cmd` is the checked-execution pattern used throughout.
+Every service script sources `/usr/share/bunkerweb/helpers/utils.sh` for `get_python_bin`, `get_bunkerweb_pythonpath`, `run_as_nginx`, `export_env_file` and `log`; runs BunkerWeb processes as the `nginx` user through `run_as_nginx`; and reads `/etc/bunkerweb/variables.env` plus its own component env file (`scheduler.env`, `worker.env`, `ui.env`, `api.env`). The API service script supports `start|stop|reload`; the other service scripts also expose `restart`. `do_and_check_cmd` is the checked-execution pattern used throughout.
 
 ## Installed Layout
 
-| Path                    | Purpose                                                                                       |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| `/usr/share/bunkerweb/` | Application code, plugins, deps                                                               |
-| `/etc/bunkerweb/`       | Configuration (`variables.env`, `ui.env`, `scheduler.env`, `api.env`, `plugins/`, `configs/`) |
-| `/var/lib/bunkerweb/`   | Persistent data (`db.sqlite3`)                                                                |
-| `/var/tmp/bunkerweb/`   | Temporary files (setgid 2770)                                                                 |
-| `/var/log/bunkerweb/`   | Logs (rotated by `bunkerweb.logrotate`)                                                       |
-| `/var/run/bunkerweb/`   | PID files                                                                                     |
-| `/var/cache/bunkerweb/` | Cache                                                                                         |
+| Path                    | Purpose                                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `/usr/share/bunkerweb/` | Application code, plugins, deps                                                                             |
+| `/etc/bunkerweb/`       | Configuration (`variables.env`, `scheduler.env`, `worker.env`, `ui.env`, `api.env`, `plugins/`, `configs/`) |
+| `/var/lib/bunkerweb/`   | Persistent data (`db.sqlite3`)                                                                              |
+| `/var/tmp/bunkerweb/`   | Temporary files (setgid 2770)                                                                               |
+| `/var/log/bunkerweb/`   | Logs (rotated by `bunkerweb.logrotate`)                                                                     |
+| `/var/run/bunkerweb/`   | PID files                                                                                                   |
+| `/var/cache/bunkerweb/` | Cache                                                                                                       |
 
 Ownership is `root:nginx` for application files and `nginx:nginx` for runtime and data directories. Dependencies ship compressed as `deps.tar.gz` (with `pigz` when available) and are decompressed by the postinstall.
 

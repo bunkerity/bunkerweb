@@ -21,7 +21,7 @@ Primary instruction file for AI coding agents in this repository.
 - `src/autoconf/`: Docker/Swarm/Kubernetes event-driven config sync.
 - `src/linux/` and `src/all-in-one/`: packaging and distribution targets.
 - `src/deps/`: vendored third-party code — treat as external unless the task targets it.
-- `examples/`: user-facing deployment recipes, also used as e2e fixtures. Their test descriptors live in `tests/examples/<name>.json`, not in the example folder.
+- `examples/`: user-facing deployment recipes; only selected examples are e2e fixtures, with tested scenario descriptors in `tests/examples/`.
 - `tests/`: the YAML-spec integration framework (`tests/scripts/test.sh`) and the pytest unit suite (`tests/unit/`).
 - `docs/`: user-facing documentation, partly generated from plugin metadata.
 
@@ -68,6 +68,10 @@ For packaging commands and distro-specific build details, use [BUILD.md](BUILD.m
 - Security policy: [SECURITY.md](SECURITY.md)
 - Plugin reference (user-facing): [docs/plugins.md](docs/plugins.md)
 - Component guides (each directory's `CLAUDE.md` is a pointer to its `AGENTS.md`):
+  - [.github/AGENTS.md](.github/AGENTS.md)
+  - [misc/AGENTS.md](misc/AGENTS.md)
+  - [examples/AGENTS.md](examples/AGENTS.md)
+    - [examples/mcp-stack/AGENTS.md](examples/mcp-stack/AGENTS.md)
   - [src/api/AGENTS.md](src/api/AGENTS.md)
   - [src/ui/AGENTS.md](src/ui/AGENTS.md)
   - [src/scheduler/AGENTS.md](src/scheduler/AGENTS.md)
@@ -79,6 +83,6 @@ For packaging commands and distro-specific build details, use [BUILD.md](BUILD.m
     - [src/common/core/AGENTS.md](src/common/core/AGENTS.md)
   - [src/linux/AGENTS.md](src/linux/AGENTS.md)
   - [src/all-in-one/AGENTS.md](src/all-in-one/AGENTS.md)
+  - [src/deps/AGENTS.md](src/deps/AGENTS.md)
   - [tests/AGENTS.md](tests/AGENTS.md)
   - [docs/AGENTS.md](docs/AGENTS.md)
-  - [examples/mcp-stack/AGENTS.md](examples/mcp-stack/AGENTS.md)

@@ -21,7 +21,7 @@ Then point the assistant at the MCP server — for Claude Code, copy `.mcp.json`
 
 ## Critical Rules
 
-- Treat read-only MCP tools and resources differently from mutating and destructive ones.
+- Treat read-only, mutating, and confirm-first MCP operations differently.
 - Keep API tokens, session secrets and keys out of commits.
 - The example listens on plain HTTP and disables DNS rebinding protection — production deployments must harden both.
 
@@ -45,16 +45,18 @@ Example: *"Review @config://global and suggest security hardening improvements"*
 
 ## Tool Safety
 
-- **Safe (read-only)**: `ping`, `health`, `list_*`, `get_*`, and the `@` resources.
-- **Modifying (auto-applied)**: `create_*`, `update_*`, `global_config_update`, `ban_ip`, `jobs_run`. BunkerWeb applies changes automatically — no manual reload.
-- **Destructive (confirm first)**: `delete_*`, `unban_ip`, `stop_*`. These remove data or interrupt services.
+- **Read-only**: `@` resources and names containing `health`, `ping`, `list`, `get`, `read`, or `fetch`.
+- **Mutating (auto-applied)**: names containing `create`, `update`, `upload`, `convert`, `reload`, `ban`, or job-run operations. BunkerWeb applies changes automatically — no manual reload.
+- **Confirm first**: every `stop`, `delete`, `unban`, or cache-purge operation, wherever that verb appears in its v0.2.0 tool name.
+
+Read-only and confirm-first classifications take precedence over a mutating substring match.
 
 ## Common Workflows
 
 - **Deploy a service**: `create_service` with `is_draft: true` and a `server_name`, add custom configs with `config_create` if needed, then `convert_service` with `convert_to: "online"`.
 - **Investigate an incident**: read `@bans://active` for patterns (country, ASN, timing), `ban_ip` with a meaningful `reason` and an appropriate expiry, add ModSecurity rules via `config_create` (type `modsec-crs`) if needed.
 - **Refresh threat intelligence**: check `@logs://jobs` for the last successful runs, `jobs_run` the target jobs (e.g. `[{"plugin": "blacklist", "name": "download-blacklist"}]`), verify with `cache_list`.
-- **Fix a corrupt cache**: `cache_delete_file`, `jobs_run` to regenerate, `cache_list` to verify.
+- **Fix a corrupt cache**: confirm before `cache_delete_file`, then `jobs_run` to regenerate and `cache_list` to verify.
 
 ## Troubleshooting
 

@@ -6,7 +6,7 @@ This guide explains how to build **community** BunkerWeb artifacts from source.
 
 This document covers:
 
-- Community container images (`bunkerweb`, `scheduler`, `autoconf`, `ui`, `api`, `all-in-one`)
+- Community container images (`bunkerweb`, `scheduler`, `worker`, `autoconf`, `ui`, `api`, `all-in-one`)
 - Linux packages (`.deb`, `.rpm`)
 
 All commands are expected to be run from the repository root.
@@ -40,6 +40,7 @@ FreeBSD users: BunkerWeb is available as an official port, see <https://www.fres
 | ------------ | --------------------------- |
 | `bunkerweb`  | `src/bw/Dockerfile`         |
 | `scheduler`  | `src/scheduler/Dockerfile`  |
+| `worker`     | `src/worker/Dockerfile`     |
 | `autoconf`   | `src/autoconf/Dockerfile`   |
 | `ui`         | `src/ui/Dockerfile`         |
 | `api`        | `src/api/Dockerfile`        |
@@ -54,10 +55,11 @@ docker build -f src/bw/Dockerfile -t local/bunkerweb:dev .
 ### Build all community images
 
 ```sh
-for image in bunkerweb scheduler autoconf ui api all-in-one; do
+for image in bunkerweb scheduler worker autoconf ui api all-in-one; do
   case "$image" in
     bunkerweb) dockerfile="src/bw/Dockerfile" ;;
     scheduler) dockerfile="src/scheduler/Dockerfile" ;;
+    worker) dockerfile="src/worker/Dockerfile" ;;
     autoconf) dockerfile="src/autoconf/Dockerfile" ;;
     ui) dockerfile="src/ui/Dockerfile" ;;
     api) dockerfile="src/api/Dockerfile" ;;

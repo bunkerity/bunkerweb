@@ -16,7 +16,7 @@ The API is the control plane: configuration, instances, plugins, bans, users, an
 - `app/main.py` creates the FastAPI app; `app/routers/core.py` only assembles routers.
 - One router file per resource under `app/routers/`, mounted at its own prefix. run `ls` for the current set; two exceptions are worth knowing: `/auth` is mounted **unconditionally** (the endpoint itself 401s when no API users exist), and `global_settings.py` serves both `/global_settings` and `/global_config`.
 - Auth is a per-endpoint dependency (`dependencies=[Depends(guard)]`), not global middleware, so it runs **after** route matching. `/health`, `/ping`, `/auth/*` and the docs endpoints never reach it because they simply do not declare it.
-- Adding a protected endpoint means adding its case to the Biscuit ACL path mapping in `app/auth/biscuit.py` (`_resolve_resource_and_perm()`). Forgetting it is a silent authorization hole.
+- Add a Biscuit ACL special case in `app/auth/biscuit.py` (`_resolve_resource_and_perm()`) only when a protected endpoint's intended permission differs from the generic `<resource>_<verb>` fallback; otherwise keep the fallback.
 - Request/response models live in `app/schemas.py`; keep validators aligned with the DB enums and the accepted method names.
 - Keep service/config mutations on the API path that marks changes for the Scheduler — bypassing it produces a DB write no instance ever sees.
 - Instance broadcasts go through `ApiCaller`; a single-instance failure aggregates into a 502 for the caller.
@@ -75,8 +75,8 @@ The API imports the monorepo's shared modules via `sys.path` manipulation using 
 ```bash
 pip install --require-hashes -r src/api/requirements.txt   # compiled from requirements.in
 
-docker compose -f misc/dev/docker-compose.api.yml up -d        # API + MariaDB
-docker compose -f misc/dev/docker-compose.api.misc.yml up -d   # + Redis, scheduler, test upstream
+docker compose -f misc/dev/docker-compose.api.yml up -d        # BunkerWeb, API, Scheduler, Worker, broker, MariaDB, test upstream
+docker compose -f misc/dev/docker-compose.api.misc.yml up -d   # + Redis
 docker compose -f misc/dev/docker-compose.ui.api.yml up -d     # full stack
 
 pre-commit run --all-files

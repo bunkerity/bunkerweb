@@ -49,7 +49,7 @@ Route -> DATA["RELOADING"] = True -> CONFIG_TASKS_EXECUTOR.submit(task)
 
 ### Authentication
 
-Flask-Login with `session_protection = "strong"` (IP + User-Agent validated per request). Sessions live in Redis when available, otherwise `SafeFileSystemCache`. Cookie: `__Host-bw_ui_session` (Secure, HttpOnly, SameSite=Lax). Biscuit tokens carry RBAC; TOTP 2FA with recovery codes; CSRF via Flask-WTF on every POST.
+Flask-Login with `session_protection = "strong"` (IP + User-Agent validated per request). Sessions live in Redis when available, otherwise `SafeFileSystemCache`. Proxied mode uses `__Host-bw_ui_session` (Secure, HttpOnly, SameSite=Lax); direct HTTP falls back to the non-Secure `bw_ui_session`, while retaining HttpOnly and SameSite=Lax. Biscuit tokens carry RBAC; TOTP 2FA with recovery codes; CSRF via Flask-WTF on every POST.
 
 ### Plugin hooks
 

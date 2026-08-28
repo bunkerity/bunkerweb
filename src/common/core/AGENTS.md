@@ -28,7 +28,7 @@ One directory per plugin, `ls` for the current set. External and PRO plugins use
 
 ## `plugin.json`
 
-Top level: `id`, `name`, `description`, `version`, `stream`, `settings`, optional `jobs`, optional `extensions`.
+Top level: `id`, `name`, `description`, `version`, `stream`, `settings`, optional `jobs`, optional `extensions`, optional `bwcli` metadata.
 
 `stream` is `yes`, `no` or `partial` and decides whether the plugin runs in TCP/UDP stream mode.
 
@@ -68,6 +68,6 @@ A plugin can extend the control plane by declaring `extensions` in `plugin.json`
 
 ## Lua Side
 
-Plugin Lua code runs inside the pipeline documented in [../../../src/bw/AGENTS.md](../../../src/bw/AGENTS.md). The rules that bite most often: read request metadata from `self.ctx.bw` rather than re-resolving it, keep `self.variables` for configuration settings, prefix any per-request state you stash in `ctx.bw` with your plugin id, and remember that cosockets (Redis, DNS) do not exist in the init, init_worker and log phases.
+Plugin Lua code runs inside the pipeline documented in [../../../src/bw/AGENTS.md](../../../src/bw/AGENTS.md). The rules that bite most often: read request metadata from `self.ctx.bw` rather than re-resolving it, keep `self.variables` for configuration settings, prefix any per-request state you stash in `ctx.bw` with your plugin id, and check `utils.is_cosocket_available()` before Redis or DNS work.
 
 Lua never calls Python. It reads NGINX shared-dict state that the Scheduler synchronizes.
