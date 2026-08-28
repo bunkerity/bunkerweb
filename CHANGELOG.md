@@ -2,33 +2,37 @@
 
 ## v1.6.15~rc1 - 2026/08/??
 
-- [SECURITY] `core`: an instance restarted with `KEEP_CONFIG_ON_RESTART=yes` no longer stays in its loading state. The entrypoint flags the state inside the kept configuration without invalidating the push marker, so the Scheduler's configuration was answered "already applied" and never written, and the instance kept serving traffic with every Lua plugin skipped, mTLS and authbasic included, until the next configuration change. Only `1.6.14` is affected, and the loading window itself still lasts until the Scheduler's next healthcheck.
-- [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts. ModSecurity reads `filename=` only while common frameworks prefer `filename*`, so a part could show the WAF a benign name and the application a malicious one. RFC 7578 forbids the encoding here, so compliant clients are unaffected.
-- [SECURITY] `api`: `instances_create` and `instances_update` are treated as admin-equivalent. Calls to a registered instance carry the `API_TOKEN` admin override, and the Scheduler pushes the generated configuration and cache, TLS private keys included, to every registered instance, so registering one endpoint collects all of it. See the API documentation.
-- [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering through `ownerDocument` during in-place sanitization, a hook bypass of the clone guard, and bypasses when risky tags are allow-listed.
-- [FEATURE] `sessions`: a destroyed cookie session is now rejected on its next use. Cookie sessions are stateless, so destroying one only cleared the browser copy while the signed cookie stayed valid until it timed out, including after an IP or User-Agent check failed. Revoked identifiers live in a store sized by `SESSIONS_REVOCATION_MEMORY_SIZE`, local to each instance; use Redis to revoke across a cluster. See the Sessions documentation.
-- [BUGFIX] `letsencrypt`: quarantine a renewal lineage when its configuration is missing any of the four file references Certbot requires, or when any of the four live certificate files is not a symlink resolving to existing material. The preflight accepted partial configurations and only checked whether `fullchain.pem` was a symlink, so Certbot refused the lineage and every renewal for that service failed forever with no repair path.
+- [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
+- [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.
+- [SECURITY] `api`: `instances_create` and `instances_update` are now admin-equivalent, since a registered instance receives the configuration and TLS keys. See the API documentation.
+- [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering and sanitizer bypasses.
+- [FEATURE] `sessions`: a destroyed cookie session is rejected on its next use, per instance or cluster-wide with Redis. See the Sessions documentation.
+- [FEATURE] `all-in-one`: log files are rotated with logrotate; mount your own `/etc/logrotate.d/bunkerweb` to change the policy. See the All-In-One documentation.
+- [FEATURE] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` sets the audit log path, which must be a regular file under `/var/log/bunkerweb`.
+- [BUGFIX] `letsencrypt`: quarantine an incomplete renewal lineage, where every renewal for that service failed forever with no repair path.
 - [BUGFIX] `letsencrypt`: a wildcard certificate no longer shadows the certificate of every other service under the same base. (Refs #3841)
+- [BUGFIX] `customcert`: the wildcard SNI fallback is skipped for services with `USE_CUSTOM_SSL=no`, which were served another service's certificate. (Fixes #3841)
 - [BUGFIX] `letsencrypt`: certificate lookups ignore the case and a trailing dot in the requested name.
-- [BUGFIX] `ui`: keep reading up to four raw Redis pages after malformed or duplicate entries are discarded. The fast path stopped after one raw page, so valid rows immediately beyond it were missed; the default Reports view now fills nearby gaps without allowing a duplicate-heavy window to trigger a full scan.
-- [BUGFIX] `scheduler`: configuration and cache folder pushes wait at least 30 seconds and scale with the number of services, capped at 120, instead of timing out after 10 seconds and leaving instances on a stale configuration over a slow link. Raise the floor with `SEND_FILES_MIN_TIMEOUT`.
-- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication variable lists accept repeated whitespace between entries and values, where their validators required a single literal space and silently rejected otherwise valid settings.
-- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables, where a single unreadable table in the schema aborted the config saver and left every service on its default settings. The usual cause is a leftover `test_<uuid>` probe table whose tablespace was lost, reported by MariaDB as error 1932; drop any that remain.
-- [BUGFIX] `scheduler`: the config saver and the config generator log wherever the Scheduler logs. On Linux their output went to the journal, so `/var/log/bunkerweb/scheduler.log` recorded the failure with no cause, even at debug level.
-- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where a manual edit was overwritten from the database until a restart. A missing or unreadable folder no longer removes the file-managed configurations.
+- [BUGFIX] `ui`: the Reports view keeps reading raw Redis pages past discarded entries, instead of dropping the valid rows behind them. (Refs #3685)
+- [BUGFIX] `scheduler`: configuration and cache pushes scale their timeout with the number of services. Raise the floor with `SEND_FILES_MIN_TIMEOUT`.
+- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication lists accept repeated whitespace, which was silently rejected. (Refs #2577)
+- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables; drop leftover `test_<uuid>` tables (MariaDB 1932).
+- [BUGFIX] `scheduler`: the config saver and the config generator log wherever the Scheduler logs, where on Linux their output went to the journal.
+- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where manual edits were overwritten until a restart.
 - [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
-- [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, where the gzip header carried the current time so every reload rewrote the whole blob, about 48 MiB per reload for failover-backup.
-- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins into the database instead of stopping at "All Pro plugins are up to date", which left the plugin pages and hooks missing until a manual database edit.
-- [BUGFIX] `scheduler`: a multi-line setting value survives `variables.env`, where readers split it on physical lines and the config saver stored the truncated first line back over a working certificate. Affects every setting holding a PEM or base64 block. (Fixes #3835)
-- [BUGFIX] `cli`: `bwcli` falls back to `/etc/bunkerweb/variables.env` for `DATABASE_URI` and refuses a database with no schema, instead of creating an empty SQLite file and failing on `no such table: bw_settings`. (Refs #3836)
-- [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails, instead of upgrading with nothing to restore from. Pass `--no-auto-backup` to skip it. (Refs #3836)
+- [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, instead of rewriting the whole blob on every reload.
+- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins, where their pages and hooks stayed missing.
+- [BUGFIX] `scheduler`: a multi-line setting value survives `variables.env`, where the truncated first line was saved back over a working certificate. (Fixes #3835)
+- [BUGFIX] `cli`: `bwcli` falls back to `/etc/bunkerweb/variables.env` for `DATABASE_URI` and refuses a schemaless database. (Refs #3836)
+- [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails. Pass `--no-auto-backup` to skip it. (Refs #3836)
 - [BUGFIX] `letsencrypt`: the UI reads certificate dates from the timezone-aware properties, where they were shown shifted outside UTC. (Fixes #3839)
-- [UI] PRO page: add a **Refresh UI plugins** button that makes the web UI re-extract its PRO plugins from the database and reload its workers, without downloading anything.
-- [MISC] Add the `haptics` feature to the default value for the Permissions-Policy header. It gates the Web Haptics API, which Chromium still keeps behind an experimental flag; services that want haptic feedback must override `PERMISSIONS_POLICY`.
+- [UI] PRO page: add a **Refresh UI plugins** button that re-extracts the PRO plugins from the database and reloads the workers.
+- [MISC] Add `haptics` to the default Permissions-Policy header; override `PERMISSIONS_POLICY` to allow it.
 - [DEPS] Updated lua-resty-session version to v4.2.0
 - [DEPS] Updated LuaJIT version to v2.1-20260824
 - [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
 - [DEPS] Updated build tooling: cssnano to 8.0.8 and postcss to 8.5.26
+- [CONTRIBUTION] Thank you [robotter112](https://github.com/robotter112) for your contribution regarding the wildcard SNI fallback ignoring `USE_CUSTOM_SSL=no`. (#3842)
 
 ## v1.6.14 - 2026/08/21
 
