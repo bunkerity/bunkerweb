@@ -4,7 +4,7 @@
 
 - [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
 - [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.
-- [SECURITY] `api`: `instances_create` and `instances_update` are now admin-equivalent, since a registered instance receives the configuration and TLS keys. See the API documentation.
+- [SECURITY] `api`: `instances_create` and `instances_update` are now admin-equivalent: a registered instance receives the configuration and TLS keys. See the API documentation.
 - [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering and sanitizer bypasses.
 - [FEATURE] `sessions`: a destroyed cookie session is rejected on its next use, per instance or cluster-wide with Redis. See the Sessions documentation.
 - [FEATURE] `all-in-one`: log files are rotated with logrotate; mount your own `/etc/logrotate.d/bunkerweb` to change the policy. See the All-In-One documentation.
@@ -13,11 +13,11 @@
 - [BUGFIX] `letsencrypt`: a wildcard certificate no longer shadows the certificate of every other service under the same base. (Refs #3841)
 - [BUGFIX] `customcert`: the wildcard SNI fallback is skipped for services with `USE_CUSTOM_SSL=no`, which were served another service's certificate. (Fixes #3841)
 - [BUGFIX] `letsencrypt`: certificate lookups ignore the case and a trailing dot in the requested name.
-- [BUGFIX] `ui`: the Reports view keeps reading raw Redis pages past discarded entries, instead of dropping the valid rows behind them. (Refs #3685)
+- [BUGFIX] `ui`: the Reports view reads past discarded Redis entries instead of dropping the valid rows behind them. (Refs #3685)
 - [BUGFIX] `scheduler`: configuration and cache pushes scale their timeout with the number of services. Raise the floor with `SEND_FILES_MIN_TIMEOUT`.
-- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication lists accept repeated whitespace, which was silently rejected. (Refs #2577)
-- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables; drop leftover `test_<uuid>` tables (MariaDB 1932).
-- [BUGFIX] `scheduler`: the config saver and the config generator log wherever the Scheduler logs, where on Linux their output went to the journal.
+- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication lists accept repeated whitespace, silently rejected before. (Refs #2577)
+- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables, where one unreadable leftover table aborted it (MariaDB error 1932).
+- [BUGFIX] `scheduler`: the config saver and generator log wherever the Scheduler logs; on Linux their output went to the journal.
 - [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where manual edits were overwritten until a restart.
 - [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
 - [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, instead of rewriting the whole blob on every reload.
