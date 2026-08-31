@@ -15,17 +15,20 @@ triggered, or by the push a restart does on boot before it has read the new envi
 
 from os import getenv
 from argparse import ArgumentParser
+from json import loads
 from logging import CRITICAL, getLogger
 from re import search
 from sys import exit as sys_exit, path
 from time import sleep
+from urllib.request import Request, urlopen
 
 path.append("tests")
 
+from dotenv import dotenv_values  # noqa: E402
 from redis import Redis  # noqa: E402
 
 import utils.logger  # noqa: E402,F401
-from utils import execute_query  # noqa: E402
+from utils import BW_TESTS_ETC, execute_query  # noqa: E402
 
 LOGGER = getLogger("WAIT_CONFIG")
 
@@ -62,6 +65,7 @@ PENDING_QUERY = (
     "(SELECT COUNT(*) FROM bw_metadata WHERE custom_configs_changed OR external_plugins_changed "
     "OR pro_plugins_changed OR instances_changed OR certificates_changed)"
 )
+QUEUE_URL = "http://127.0.0.1:8888/jobs/queue"
 
 
 def query_count(integration: str, database: str, query: str) -> int:
@@ -80,6 +84,23 @@ def query_count(integration: str, database: str, query: str) -> int:
     # Every client formats its output differently; the count is the only number in it.
     match = search(r"\d+", output)
     return int(match.group()) if match else -1
+
+
+def jobs_queue_quiet(opener=urlopen) -> bool:
+    try:
+        token = dotenv_values(BW_TESTS_ETC / "variables.env").get("API_TOKEN", "tests-secret-token")
+        request = Request(QUEUE_URL, headers={"Authorization": f"Bearer {token}"})
+        with opener(request, timeout=15) as response:
+            queue = loads(response.read())
+        # Known residual: delayed requeues from src/worker/tasks.py:259 appear in `scheduled`, outside this in-flight gate.
+        return not any(tasks for state in ("active", "reserved") for tasks in queue.get(state, {}).values())
+    except Exception as exc:
+        LOGGER.debug(f"Queue inspection unavailable, preserving the existing settle behavior: {exc}")
+        return True
+
+
+def settle_ready(runs: int, previous: int, pending: int, live_instances: int, settled: int, required_settle: int, queue_quiet=jobs_queue_quiet) -> bool:
+    return runs > previous and pending == 0 and live_instances > 0 and settled >= required_settle and queue_quiet()
 
 
 if __name__ == "__main__":
@@ -130,10 +151,13 @@ if __name__ == "__main__":
             else:
                 settled += 1
 
-            if settled >= ARGS.settle:
+            if settle_ready(runs, previous, pending, live_instances, settled, ARGS.settle):
                 redis_client.set(REDIS_KEY, runs)
                 LOGGER.info(f"📤 Configuration pushed and jobs quiet ✅ ({runs} push-configs runs, {all_runs} job runs, {live_instances} live instance(s))")
                 sys_exit(0)
+
+            if settled >= ARGS.settle:
+                settled = 0
 
         sleep(1)
 
