@@ -42,14 +42,22 @@ print(tostring(resolve_wildcard_base(arg[1], bases)))
 # The real `ssl_certificate` phase, lifted verbatim. `sni` is the client's SNI; the internalstore
 # holds one certificate per published base, so the printed value names the certificate the phase
 # would actually serve -- "nil" means it falls through to the default one.
-PHASE_HARNESS = """%s
+PHASE_HARNESS = """local lower, gsub = string.lower, string.gsub
+%s
 local sni = arg[1]
 local function ssl_server_name() return sni, nil end
 local letsencrypt = {}
 %s
 local bases = {}
 for base in arg[2]:gmatch("[^,]+") do bases[#bases + 1] = base end
-local store = { plugin_letsencrypt_wildcard_servers = {}, plugin_letsencrypt_wildcard_bases = bases }
+-- arg[3] is the published `wildcard_servers` map: "host=alias" entries, "host=false" for a host
+-- whose service does not use Let's Encrypt at all. Empty means no service claimed any name.
+local servers = {}
+for entry in (arg[3] or ""):gmatch("[^,]+") do
+    local host, value = entry:match("^([^=]+)=(.*)$")
+    servers[host] = value ~= "false" and value or false
+end
+local store = { plugin_letsencrypt_wildcard_servers = servers, plugin_letsencrypt_wildcard_bases = bases }
 for _, base in ipairs(bases) do
     store["plugin_letsencrypt_" .. base] = "cert-for-" .. base
 end
@@ -82,6 +90,12 @@ def le_helper() -> str:
     return lua_source(LETSENCRYPT_LUA, r"^local function resolve_wildcard_base\(.*?^end$")
 
 
+def le_normalize() -> str:
+    """`ssl_certificate` folds the client SNI before it looks anything up, so the phase does not
+    run without it."""
+    return lua_source(LETSENCRYPT_LUA, r"^local function normalize_hostname\(.*?^end$")
+
+
 def run(tmp_path, name: str, script: str, *args: str) -> str:
     # A script FILE, not `lua -e`: after `-e`, lua treats the first positional as a script name,
     # so the arguments never reach `arg[1]` and the harness dies indexing nil.
@@ -96,9 +110,10 @@ def resolve(tmp_path, hostname: str, bases: str) -> str:
     return run(tmp_path, "resolve.lua", HELPER_HARNESS % le_helper(), hostname, bases)
 
 
-def served_certificate(tmp_path, sni: str, bases: str) -> str:
+def served_certificate(tmp_path, sni: str, bases: str, servers: str = "") -> str:
     phase = lua_source(LETSENCRYPT_LUA, r"^function letsencrypt:ssl_certificate\(.*?^end$")
-    return run(tmp_path, "phase.lua", PHASE_HARNESS % (le_helper(), phase), sni, bases)
+    helpers = le_normalize() + "\n" + le_helper()
+    return run(tmp_path, "phase.lua", PHASE_HARNESS % (helpers, phase), sni, bases, servers)
 
 
 WILDCARD_CASES = [
@@ -184,3 +199,34 @@ print(tostring(resolve_wildcard_base(arg[1], bases)))
         lua_source(CUSTOMCERT_LUA, r"^local function resolve_wildcard_base\(.*?^end$"),
     )
     assert run(tmp_path, "customcert.lua", harness, hostname, bases) == expected
+
+
+@needs_lua
+@pytest.mark.parametrize(
+    ("sni", "servers", "expected"),
+    [
+        # The defect: `bw2.example.com` belongs to a service that does not use Let's Encrypt, so
+        # `init()` claims the name with `false`. Without that claim the host is unknown to the map
+        # and falls through to the base scan, which hands it the neighbouring service's wildcard
+        # certificate -- a certificate issued for someone else.
+        ("bw2.example.com", "bw2.example.com=false", "nil"),
+        # SNI is client-supplied: the claim has to survive case and a trailing dot, or the opt-out
+        # is trivially bypassed by asking for the same host in capitals.
+        ("BW2.Example.COM", "bw2.example.com=false", "nil"),
+        ("bw2.example.com.", "bw2.example.com=false", "nil"),
+        # A service that DOES use Let's Encrypt but has no wildcard maps to itself, not to false,
+        # so it keeps its own certificate instead of borrowing the base's.
+        ("bw2.example.com", "bw2.example.com=bw2.example.com", "nil"),
+        ("example.com", "example.com=example.com", "cert-for-example.com"),
+        # A host no service claims still falls back to the wildcard base, which is what the
+        # fallback exists for.
+        ("unclaimed.example.com", "", "cert-for-example.com"),
+    ],
+)
+def test_a_service_that_opted_out_is_never_served_a_neighbours_wildcard(tmp_path, sni, servers, expected):
+    """`wildcard_servers` is an authority list, not a hint.
+
+    `false` means "this name belongs to a service that does not use Let's Encrypt"; the phase must
+    stop there rather than continue into the wildcard base scan.
+    """
+    assert served_certificate(tmp_path, sni, "example.com", servers) == expected
