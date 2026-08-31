@@ -1,0 +1,152 @@
+# The geoip core plugin resolves country/ASN/city from pluggable databases: a custom
+# GEOIP_*_MMDB path or URL wins over MaxMind, which wins over the bundled DB-IP databases
+# (src/common/core/geoip/jobs/geoip_utils.py:resolve_source). Testing that against the
+# bundled database alone proves nothing -- 8.8.8.8 already resolves correctly there, so a
+# spec that never swaps the source would stay green whatever resolve_source() did. The two
+# fixtures under geoip/fixtures/ are real MaxMind-format databases (built with mmdb_writer,
+# validated against the product's own geoip_utils.validate()) that deliberately disagree with
+# the bundled data for 8.8.8.8: FR/Bunkerville/AS64512 instead of the real US/(no city)/AS15169
+# Google. A blocked request after pointing GEOIP_*_MMDB at one of them is therefore only
+# explainable by the custom source actually being read.
+#
+# Delivery: bw-worker (which runs the geoip jobs) bind-mounts /tmp/output -- the same mount
+# customcert.yml uses for its certificate/key -- so the fixtures are copied there once and
+# referenced by an absolute path the worker can read directly (geoip_utils._fetch_payload
+# reads a `path` source with Path.read_bytes(), no download involved). Docker only: that bind
+# mount is wired in tests/docker/docker-compose.worker.yml, which the Autoconf/Kubernetes
+# worker composes do not share.
+#
+# Country and ASN are proven through BLACKLIST_COUNTRY/BLACKLIST_ASN (country.yml and
+# blacklist.yml's own pattern) rather than a header echo: nginx-hello, the default backend,
+# echoes none of the request headers a REVERSE_PROXY_HEADERS could carry, and the default
+# service serves /var/www/html directly rather than proxying at all, so a status-code flip is
+# the only externally observable signal that does not require new stack wiring. City has no
+# such feature to piggyback on ($bw_city feeds only logs and the UI reports), so it is
+# asserted through LOG_FORMAT + the container's stdout, which is where /var/log/bunkerweb/
+# access.log is symlinked (src/bw/Dockerfile:128) -- `docker logs bunkerweb` therefore already
+# carries every access line. The two probes below use a bracketed, closed format
+# (`CITYPROBE=[$$bw_city]@[$$server_name]END`) specifically so "city resolved" and "city
+# empty" are two non-overlapping literal strings: a substring match for the empty-city line
+# can never be satisfied by an earlier resolved-city line the way an unanchored prefix could.
+# The `$$server_name` half is what makes the EMPTY assertion mean anything at all. `access_log
+# ... logf;` is declared at http level (confs/http.conf), while `set $$bw_city '';` only exists
+# in the service server block (confs/server-http/server.conf) -- so BunkerWeb's own API server
+# block (confs/api.conf, `server_name bwapi`) and the default server both render the operator's
+# LOG_FORMAT with every `$$bw_*` empty. The scheduler and the worker poll that API constantly,
+# so an unanchored `CITYPROBE=[]END` is written several times a minute whatever the city
+# database is doing: measured on a live stack replaying this whole file, 73 such lines in five
+# minutes, 68 of them from `server: bwapi` (only 4 came from the service block, which is the
+# handful this file is actually entitled to assert on), each preceded by nginx's own `[warn]
+# using uninitialized "bw_city" variable while logging request`. The consequence is not
+# theoretical: with the old probe, `city_off_reclaims_the_space` was already satisfied during
+# `city_custom_source_reaches_lua`, one action BEFORE the purge it is supposed to prove.
+# Anchoring on the matched server block -- `$$server_name`, not
+# `$$host`, which a client can spoof -- is what keeps `city_off_reclaims_the_space` falsifiable.
+# The doubled
+# `$$` is not an nginx thing -- LOG_FORMAT is written into variables.env, which reaches the
+# scheduler container through Compose's `env_file:`, and Compose interpolates `$VAR` in an
+# env file exactly like it does in the compose YAML itself. A single `$bw_city` is silently
+# swallowed there (no such Compose-level variable exists, so it becomes an empty string
+# before BunkerWeb -- let alone nginx -- ever sees the setting); `$$` is Compose's own escape
+# for a literal `$`, which is what leaves a single `$bw_city` for nginx's log_format to parse.
+integrations:
+  - "Docker"
+
+config:
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+  USE_BLACKLIST: "yes"
+
+actions:
+  seed_custom_databases:
+    type: script
+    script:
+      [
+        "bash",
+        "-c",
+        "mkdir -p /tmp/output && cp tests/core/geoip/fixtures/geoip-test-city.mmdb tests/core/geoip/fixtures/geoip-test-asn.mmdb /tmp/output/",
+      ]
+
+  country_without_custom_source_is_not_blocked:
+    # Baseline: 8.8.8.8 is really US, so blacklisting FR must NOT block it while the geoip
+    # plugin is still reading the bundled DB-IP country database.
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "FR"
+
+  custom_country_source_wins:
+    # Same IP, same blacklist -- only the source changed. A 403 here is only explainable by
+    # GEOIP_COUNTRY_MMDB's custom path being read instead of the bundled database, since the
+    # fixture maps 8.8.8.8 to FR and the bundled DB-IP database never would.
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "FR"
+      GEOIP_COUNTRY_MMDB: "/tmp/output/geoip-test-city.mmdb"
+
+  asn_without_custom_source_is_not_blocked:
+    # Baseline: 8.8.8.8 is really AS15169 (Google), so blacklisting the fixture's made-up
+    # AS64512 must NOT block it while geoip is still reading the bundled ASN database.
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_ASN: "64512"
+
+  custom_asn_source_wins:
+    # Same IP, same blacklist -- only the source changed. A 403 here is only explainable by
+    # GEOIP_ASN_MMDB's custom path being read: the fixture maps 8.8.8.8 to AS64512, which the
+    # bundled ASN database never would (it says AS15169).
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_ASN: "64512"
+      GEOIP_ASN_MMDB: "/tmp/output/geoip-test-asn.mmdb"
+
+  city_custom_source_reaches_lua:
+    # GEOIP_CITY is opt-in and nothing city-shaped is bundled in the images (README.md), so
+    # there is no "bundled" city answer to distinguish from -- the custom source is the only
+    # way $bw_city is ever populated at all. This asserts utils.get_city / ctx.bw.city reach
+    # the $bw_city NGINX variable (helpers.export_ctx_vars), the observable surface a log line
+    # is built from.
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      GEOIP_CITY: "yes"
+      GEOIP_CITY_MMDB: "/tmp/output/geoip-test-city.mmdb"
+      LOG_FORMAT: "CITYPROBE=[$$bw_city]@[$$server_name]END"
+    log: "CITYPROBE=[Bunkerville]@[www.example.com]END"
+
+  city_off_reclaims_the_space:
+    # geoip-city.py purges city.mmdb the moment GEOIP_CITY flips back to "no" (opt-out reclaims
+    # the ~125 MB a real City database costs), and mmdb.lua's city_db is nil on the next reload
+    # since load_database returns nil for a missing file -- so $bw_city goes back to empty
+    # rather than keeping the last resolved value.
+    #
+    # `@[www.example.com]` is load-bearing, not decoration: without it this assertion is
+    # satisfied by BunkerWeb's own API server block on every healthcheck and never says
+    # anything about the city database. See the file header.
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      GEOIP_CITY: "no"
+      LOG_FORMAT: "CITYPROBE=[$$bw_city]@[$$server_name]END"
+    log: "CITYPROBE=[]@[www.example.com]END"
