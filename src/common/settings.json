@@ -208,6 +208,15 @@
     "regex": "^\\d+([kKmMgG])?$",
     "type": "size"
   },
+  "SESSIONS_REVOCATION_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal store holding revoked cookie session identifiers.",
+    "id": "sessions-revocation-memory-size",
+    "label": "Sessions revocation memory size",
+    "regex": "^\\d+([kKmMgG])?$",
+    "type": "size"
+  },
   "USE_API": {
     "context": "global",
     "default": "yes",
