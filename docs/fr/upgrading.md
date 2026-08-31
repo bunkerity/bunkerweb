@@ -99,16 +99,16 @@
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.14
+                            image: bunkerity/bunkerweb:1.6.15-rc1
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.14
+                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.14
+                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.14
+                            image: bunkerity/bunkerweb-ui:1.6.15-rc1
                             ...
                     ```
 
@@ -164,7 +164,7 @@
 
             4. **Téléchargez la nouvelle image** :
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.14
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc1
                 ```
 
             5. **Recréez le conteneur** avec les mêmes options, en réutilisant le même volume `/data`, les mêmes ports et les mêmes variables d'environnement qu'avant :
@@ -175,7 +175,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.14
+                bunkerity/bunkerweb-all-in-one:1.6.15-rc1
                 ```
 
         === "Docker Compose"
@@ -184,7 +184,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.14
+                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc1
                         ...
                 ```
 
@@ -307,20 +307,20 @@
             Exemples:
 
             ```bash
-            # Upgrade to 1.6.14 interactively (will prompt for backup)
-            sudo ./install-bunkerweb.sh --version 1.6.14
+            # Upgrade to 1.6.15~rc1 interactively (will prompt for backup)
+            sudo ./install-bunkerweb.sh --version 1.6.15~rc1
 
             # Non-interactive upgrade with automatic backup to custom directory
-            sudo ./install-bunkerweb.sh -v 1.6.14 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --backup-dir /var/backups/bw-2025-01 -y
 
             # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-            sudo ./install-bunkerweb.sh -v 1.6.14 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 -y -q
 
             # Perform a dry run (plan) without applying changes
-            sudo ./install-bunkerweb.sh -v 1.6.14 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --dry-run
 
             # Upgrade skipping automatic backup (NOT recommended)
-            sudo ./install-bunkerweb.sh -v 1.6.14 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --no-auto-backup -y
             ```
 
             !!! warning "Sauter les sauvegardes"
@@ -400,7 +400,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.14
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -426,7 +426,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.14
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
                         ```
 
                         Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -898,16 +898,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.14
+                        image: bunkerity/bunkerweb:1.6.15-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.14
+                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.14
+                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.14
+                        image: bunkerity/bunkerweb-ui:1.6.15-rc1
                         ...
                 ```
 
@@ -942,7 +942,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.14
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -968,7 +968,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.14
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
