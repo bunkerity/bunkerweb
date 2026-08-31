@@ -195,7 +195,14 @@ fi
 
 if [ "$integration" == "Linux" ] ; then
   log "BUILD" "ℹ️ " "🐧 Prepping Linux integration ..."
-  sed_in_place '/^server=127.0.0.11/d' tests/misc/conf/dnsmasq.conf
+  # Commented out, not deleted, and `cleanup_stack` strips the prefix back off -- the same shape
+  # the Swarm arm uses on dnsmasq.hosts above, for the same reason. Deleting the line loses WHERE
+  # it was, and dnsmasq.conf sets `strict-order`: its own comment says Docker's resolver has to be
+  # FIRST or a public one answers NXDOMAIN for a container name and ends the query. The teardown
+  # used to put it back with `18i`, a hard-coded line number that lands it fourth, below Cloudflare
+  # and Google -- so a Linux run left the file semantically changed and the next Autoconf or Docker
+  # example could not resolve its own upstream (502, and nothing naming DNS).
+  sed_in_place 's/^server=127\.0\.0\.11$/#linux-arm server=127.0.0.11/' tests/misc/conf/dnsmasq.conf
   if ! $IS_FREEBSD ; then
     docker exec -u 0 bunkerweb-linux systemctl disable --now systemd-resolved
     docker exec -u 0 bunkerweb-linux sh -c 'echo "nameserver 127.0.0.1" | tee /etc/resolv.conf'

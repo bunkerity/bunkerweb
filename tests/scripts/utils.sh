@@ -959,9 +959,10 @@ function cleanup_stack () {
         fi
 
         if [ "$integration" == "Linux" ] ; then
-            if ! grep -q "server=127.0.0.11" tests/misc/conf/dnsmasq.conf ; then
-                sed_in_place '18i\server=127.0.0.11' tests/misc/conf/dnsmasq.conf
-            fi
+            # Uncomment in place. build.sh commented the line rather than deleting it precisely so
+            # this can restore its POSITION, which matters: dnsmasq.conf sets `strict-order` and
+            # documents that Docker's resolver must come first.
+            sed_in_place 's/^#linux-arm server=127\.0\.0\.11$/server=127.0.0.11/' tests/misc/conf/dnsmasq.conf
             sed_in_place 's/127\.0\.0\.1 dnsmasq/10.20.30.20 dnsmasq/g' tests/misc/conf/dnsmasq.hosts
             sed_in_place 's/127\.0\.0\.1 custom-api/10.20.30.30 custom-api/g' tests/misc/conf/dnsmasq.hosts
             sed_in_place 's/127\.0\.0\.1 php-fpm/10.20.30.40 php-fpm/g' tests/misc/conf/dnsmasq.hosts
@@ -1399,8 +1400,13 @@ function cleanup_stack () {
         # Swarm owns all four of its networks in swarm_host_restore below, which also tolerates
         # one that is already gone. Doing it here as well turned a clean teardown into a failure:
         # "network bw-db not found" -> return 1.
+        # `grep -qx`, not `grep -q`: the name has to match the WHOLE line. A workstation that
+        # carries any other project's network with `bw-db` in its name -- a compose project
+        # prefixes them, so `pr3850-bw-db` is enough -- otherwise satisfies this guard, and the
+        # `docker network rm bw-db` under it then fails with "network bw-db not found" and takes
+        # the whole run down at its first cleanup, before a single spec has started.
         networks=$(docker network ls --format "{{.Name}}")
-        if [ "$integration" != "Swarm" ] && echo "$networks" | grep -q "bw-db" ; then
+        if [ "$integration" != "Swarm" ] && echo "$networks" | grep -qx "bw-db" ; then
             docker network rm bw-db
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
