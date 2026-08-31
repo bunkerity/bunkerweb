@@ -69,3 +69,36 @@ class TestEngineGuard:
             restore_database(backup_file, self._ExplodingDatabase())
 
         assert refused.value.code == 1
+
+
+class TestOracleIsRefusedBeforeTheDatabaseIsCleared:
+    """Oracle has no restore path, so a restore must not begin one.
+
+    The refusal existed, but it sat *after* the clearing step: `restore_database` dropped the
+    schema, reached `elif database == "oracle"`, logged "not supported" and returned — destroying
+    the database and restoring nothing, which is the worst outcome of the three. Oracle is a
+    documented URI (`docs/features.md`, `Database.py`), so this is reachable rather than theoretical,
+    and the clear step is now schema-wide rather than model-wide, which would have widened the hole
+    from the model's tables to every table present.
+
+    Same shape and same reasoning as `TestEngineGuard` above: the stand-in raises on any use beyond
+    reading the URI, so "refused before anything was dropped" is enforced rather than asserted.
+    """
+
+    class _ExplodingDatabase:
+        database_uri = "oracle+oracledb://user:pass@db:1521/db"
+
+        @property
+        def sql_engine(self):
+            raise AssertionError("the database was cleared before the unsupported engine was refused")
+
+    def test_an_oracle_restore_is_refused_without_touching_the_database(self, tmp_path):
+        # Named for Oracle, so the engine-tag guard above lets it through and this guard is what
+        # stops it. A mismatched name would pass the test for the wrong reason.
+        backup_file = tmp_path / "backup-oracle-2026-08-31_10-00-00.zip"
+        backup_file.write_bytes(b"")
+
+        with pytest.raises(SystemExit) as refused:
+            restore_database(backup_file, self._ExplodingDatabase())
+
+        assert refused.value.code == 1

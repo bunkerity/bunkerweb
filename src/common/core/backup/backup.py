@@ -17,6 +17,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from sqlalchemy import MetaData
 from sqlalchemy.engine.url import make_url
 
 from common_utils import bytes_hash, safe_zip_extractall  # type: ignore
@@ -516,6 +517,57 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         LOGGER.error(f"Backup {backup_file.name} was taken from a {archived[1]} database, but this instance runs {database}, aborting restore")
         sys_exit(1)
 
+    # Oracle has no restore path -- the branch that used to say so sat *after* the clearing step,
+    # so asking for one wiped the database and then returned "not supported", destroying everything
+    # and restoring nothing. Refusing here, before anything is dropped, is the same shape as the
+    # engine-tag guard above: a restore that cannot finish must not start. The clearing below is
+    # deliberately more thorough than it used to be, which would have widened that hole from the
+    # model's tables to every table in the schema.
+    if database == "oracle":
+        LOGGER.error("Restoring a database backup for Oracle is not supported, aborting before the database is cleared")
+        sys_exit(1)
+
+    # Clear the database before replaying the dump, and clear ALL of it. `Base.metadata` names only
+    # the tables the CURRENT model declares, which is not what the database holds: a table an older
+    # release created and this one dropped (`bw_ui_user_columns_preferences` -- no 1.7 migration
+    # removes it, so every database upgraded from 1.6 still carries it), a table a plugin extension
+    # created, or `alembic_version`, which is not in the model at all.
+    #
+    # Dropping only the model's tables does not merely leave those behind. On an engine that
+    # enforces foreign keys it FAILS, because a leftover table's FK into a model table blocks that
+    # table's DROP -- and the two engines fail differently, neither of them harmlessly:
+    #
+    #   * PostgreSQL has transactional DDL, so the whole drop rolls back and the restore raises
+    #     ("cannot drop table bw_ui_users because other objects depend on it") without restoring
+    #     anything. A rollback to a pre-upgrade backup was simply impossible.
+    #   * MariaDB/MySQL do not, so the drop dies partway through -- measured: 23 of 29 tables gone --
+    #     and leaves a database that is neither the old shape nor the new one, with the restore not
+    #     yet started. Only the safety backup `bwcli plugin backup restore` takes first stood
+    #     between that and total loss.
+    #
+    # Reflecting first is what makes the drop match reality: it is the database's own dependency
+    # graph, so the order is right and nothing is left standing -- including, on PostgreSQL, the
+    # ENUM *types*, which reflection carries along with the columns that use them.
+    # `Base.metadata.drop_all` still runs after it, so this can only ever drop more than before,
+    # never less.
+    #
+    # KNOWN GAP, stated plainly rather than implied: this drops TABLES. `MetaData.reflect` defaults
+    # to `views=False`, so a leftover VIEW -- and likewise a function, procedure or trigger -- is
+    # still invisible on PostgreSQL and MySQL, and a view over a model table reproduces the exact
+    # failure this block exists to fix ("view leftover_v depends on table bw_ui_users"). Only the
+    # SQLite branch below sweeps views, and it is inside `if database == "sqlite"`, so it does
+    # nothing for the others. No BunkerWeb code creates a view today, so this is plugin and
+    # DBA-artefact risk rather than a live bug; closing it needs a per-dialect catalog sweep (or
+    # `DROP SCHEMA public CASCADE` on PostgreSQL), which is a bigger change than this fix.
+    #
+    # A FK CYCLE needs no special handling here, which was measured rather than assumed: with two
+    # mutually-referencing InnoDB tables on MariaDB, `drop_all` emits `ALTER TABLE ... DROP FOREIGN
+    # KEY` for the cyclic constraints before the DROPs and succeeds with the checks left ON. Wrapping
+    # this in `SET FOREIGN_KEY_CHECKS = 0` -- which `test_upgrade_schema_parity._wipe` does -- was
+    # tried and removed: it made no difference to the outcome and only added a dialect branch.
+    leftovers = MetaData()
+    leftovers.reflect(bind=db.sql_engine)
+    leftovers.drop_all(bind=db.sql_engine)
     Base.metadata.drop_all(db.sql_engine)
 
     if database == "sqlite":
@@ -660,10 +712,6 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                     input=input_bytes,
                     env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env,
                 )
-        elif database == "oracle":
-            LOGGER.warning("Restoring a database backup for Oracle is not supported")
-            return db
-
     if proc.returncode != 0:
         LOGGER.error(f"Failed to restore the database: {proc.stderr.decode()}")
         sys_exit(1)
