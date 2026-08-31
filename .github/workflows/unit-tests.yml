@@ -52,6 +52,11 @@ jobs:
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      # `backup_database`/`restore_database` shell out to `sqlite3`, and the backup/restore round
+      # trip now FAILS rather than skips when an engine is present but its client is not -- so this
+      # job's one engine needs its client installed rather than assumed from the runner image.
+      - name: Install the SQLite client
+        run: sudo apt-get install -y --no-install-recommends sqlite3
       - name: Run unit tests (SQLite, full suite incl. slow tier)
         if: github.ref_name != '1.7' && github.base_ref != '1.7'
         run: pytest tests/unit
@@ -114,6 +119,22 @@ jobs:
       # rather than let them silently pass by not running.
       - name: Install the Lua interpreter
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lua5.4 && sudo ln -sf "$(command -v lua5.4)" /usr/local/bin/lua
+      # Same reasoning as the Lua step, for the same reason it is spelled out there: the backup /
+      # restore round trip (tests/unit/db/test_downgrade_round_trip.py) shells out to the real
+      # dump and restore clients, exactly as `backup.py` does in production. Relying on whatever
+      # the runner image happens to ship is not good enough -- it is the only test in tests/unit/
+      # that needs a database client, so nothing else would go red first, and the day the image
+      # drops one the downgrade guarantee silently reverts to unproven while the matrix stays
+      # green. (The test itself now FAILS rather than skips when an engine is reachable but its
+      # client is missing, so this step and that check back each other up.)
+      #
+      # mariadb-client, NOT mysql-client: `mysql_client_command` prefers `mariadb-dump`/`mariadb`,
+      # and the service above is mariadb:11. Measured -- MySQL 8's mysqldump against a populated
+      # MariaDB 11 server exits 2 with "Unknown table 'COLUMN_STATISTICS' in information_schema
+      # (1109)", so mysql-client here would install a client that cannot dump this job's own
+      # database.
+      - name: Install the database clients
+        run: sudo apt-get install -y --no-install-recommends sqlite3 postgresql-client mariadb-client
       - name: Run unit tests (all engines)
         env:
           BW_TEST_PG_URI: postgresql://bw:bw@127.0.0.1:5433/bw_test
