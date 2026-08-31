@@ -13,8 +13,17 @@ from db_methods.common import DatabaseMixinBase  # type: ignore
 # that runs on the BunkerWeb workers/scheduler. Holding any of these is therefore
 # equivalent to full administrative (code-execution) access, so they must never be
 # granted to a party that is not trusted as an admin.
+#
+# The instance write scopes belong here too: outbound calls to a registered instance
+# carry the process-wide API_TOKEN admin override whenever the instance has no
+# per-instance credential, and the scheduler pushes the generated configuration and
+# cache (TLS private keys included) to every instance in the database. Registering or
+# repointing an instance therefore hands the endpoint both the admin token and the
+# cluster's secrets.
 ADMIN_EQUIVALENT_PERMISSIONS = frozenset(
     {
+        "instances_create",
+        "instances_update",
         "config_create",
         "config_update",
         "config_delete",
@@ -73,8 +82,9 @@ class APIPermissionsMethodsMixin(DatabaseMixinBase):
             if granted and permission in ADMIN_EQUIVALENT_PERMISSIONS and not user.admin:
                 self.logger.warning(
                     f"Granting admin-equivalent permission {permission!r} to non-admin API user {username!r} "
-                    f"(resource {resource_type}/{resource_id or '*'}): this permission is code-execution-capable "
-                    "— it can write configuration that is rendered into raw nginx/OpenResty Lua. "
+                    f"(resource {resource_type}/{resource_id or '*'}): this permission is admin-equivalent "
+                    "— it either writes configuration that is rendered into raw nginx/OpenResty Lua, or registers an "
+                    "instance endpoint that receives the API_TOKEN admin override and the pushed configuration and cache. "
                     "Only grant it to a party you trust as an administrator."
                 )
 
