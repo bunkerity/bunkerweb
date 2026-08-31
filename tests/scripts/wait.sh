@@ -178,6 +178,35 @@ else
                 log "WAIT" "❌" "🐚 FreeBSD stack is not healthy after $timeout seconds"
             else
                 log "WAIT" "❌" "🐧 Linux stack is not healthy after $timeout seconds"
+
+                # A stack can go unhealthy from bunkerweb-api/bunkerweb-scheduler being cleanly
+                # stopped and restarted by systemd mid-wait, in lockstep, every ~30s -- not a
+                # Restart=always crash-loop (that only respawns after a process has already
+                # exited) but an externally requested stop the units' own journals never name.
+                # log_stack()'s per-unit `journalctl -u ...` dump (run next, via the EXIT trap)
+                # shows the child's side only. systemd's PID-1 journal does NOT name a stop's
+                # requester at default log level (only debug level logs the enqueuing job), but
+                # it DOES print "Scheduled restart job, restart counter is at N" on every
+                # automatic Restart= respawn — so together with NRestarts below it discriminates
+                # an auto-respawn loop from an externally requested stop, the exact fork left
+                # open in .cache/results-2026-08-28/postround2-triage.md §4. `|| true` on every
+                # command: this is a diagnostic-only dump on a path that is about to exit 1 for
+                # its own reason, so a missing systemd/docker container here must never change
+                # that exit code or abort the rest of the dump.
+                log "WAIT" "ℹ️ " "📜 Showing systemd PID 1 journal (auto-respawn vs externally requested stop) ..."
+                docker exec -u 0 bunkerweb-linux journalctl _PID=1 --no-pager || true
+
+                log "WAIT" "ℹ️ " "📜 Showing bunkerweb-api/bunkerweb-scheduler unit status ..."
+                docker exec -u 0 bunkerweb-linux systemctl status bunkerweb-api bunkerweb-scheduler --no-pager -l -n 30 || true
+
+                log "WAIT" "ℹ️ " "📜 Showing systemd job queue ..."
+                docker exec -u 0 bunkerweb-linux systemctl list-jobs --no-pager || true
+
+                log "WAIT" "ℹ️ " "📜 Showing bunkerweb-api/bunkerweb-scheduler unit relationships ..."
+                docker exec -u 0 bunkerweb-linux systemctl show bunkerweb-api bunkerweb-scheduler -p NRestarts,Result,TriggeredBy,PartOf,BoundBy,ConflictedBy,InvocationID || true
+
+                log "WAIT" "ℹ️ " "📜 Showing process snapshot (newest-started last) ..."
+                docker exec -u 0 bunkerweb-linux ps -eo pid,ppid,etime,cmd --sort=start_time 2>&1 | tail -40 || true
             fi
             exit 1
         fi
