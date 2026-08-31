@@ -116,7 +116,11 @@ config:
   # BAD_BEHAVIOR_STATUS_CODES), so the runner earns a ban a few actions in -- and since 1.7
   # stores bans in the database and restores them with sync-bans, that ban outlives the stack
   # restart between actions. The later actions then get 403 from the ban instead of 429 from the
-  # limit, and a spec about rate limiting fails on the ban subsystem doing its job.
+  # limit, and a spec about rate limiting fails on the ban subsystem doing its job. That
+  # persistence is asserted, not just worked around: tests/core/bwcli.yml checks the DB-backed
+  # and runtime ban views agree after a ban/unban, and tests/core/bans.yml (a script, for the
+  # container-lifecycle half no ordinary action can express) restarts the instance across a ban
+  # and proves sync-bans both restores it and replays a revoke the instance missed.
   USE_BAD_BEHAVIOR: "no"
   USE_LIMIT_REQ: "yes"
   LIMIT_REQ_URL: "/"

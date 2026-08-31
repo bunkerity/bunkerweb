@@ -37,6 +37,23 @@ actions:
       Host: "bwapi"
     restart_stack: false
 
+  health_reflects_the_reload_marker_window:
+    # The two actions above prove `/health` distinguishes startup from ready; this proves it also
+    # distinguishes ready from mid-reload on an instance that was already settled -- the OTHER
+    # window the 1.7 fix cares about, and the one a plain YAML action cannot express because
+    # nothing here runs two HTTP calls against the same instance concurrently. `POST /reload`
+    # applies no config -- it HUPs nginx -- so what this actually observes is the marker file's
+    # lifetime, not a config apply. See tests/core/api/health_during_reload.sh for exactly what
+    # it races and why. Docker only: the script hardcodes the loopback API port this arm
+    # publishes.
+    type: script
+    integrations:
+      - "Docker"
+    script: ["./tests/core/api/health_during_reload.sh"]
+    result: "health_during_reload: reloading was observed"
+    restart_stack: false
+    retries: 1
+
   no_token:
     type: status
     url: "http://127.0.0.1:5001/ping"

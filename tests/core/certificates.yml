@@ -1,0 +1,88 @@
+# The `certificates` plugin (src/common/core/certificates/) is the central inventory NGINX serves
+# from in the `ssl_certificate` phase, AHEAD of every settings-driven provider
+# (`PLUGINS_ORDER_SSL_CERTIFICATE`: certificates -> customcert -> letsencrypt -> selfsigned). It
+# owns no setting of its own (`plugin.json` "settings": {}) -- the only switch is an attachment in
+# the inventory, and `certificates:set()` (certificates.lua) is what turns a service's
+# `https_configured` on from that attachment alone, with no provider setting in play at all.
+#
+# `tests/core/customcert.yml` and `tests/core/selfsigned.yml` already prove those two providers
+# MIRROR their own issuance into the inventory; this file proves the inventory the other direction
+# -- attached and served on its own, through the plugin's own API router
+# (`src/common/core/selfsigned/api/router.py`, mounted at `/selfsigned` by the generic plugin-
+# extension mechanism, `src/api/app/routers/plugin_loader.py`) -- and that the async
+# `deploy-certificates` job (`every: hour`, `reload: true`, `async: true`,
+# `defer_change_acknowledgement`) actually delivers the material rather than merely queuing it.
+#
+# Docker only: every assertion below dials the API on loopback:8888, where the Docker arm
+# publishes it.
+integrations:
+  - "Docker"
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+actions:
+  a_certificate_is_created_and_attached_through_the_api:
+    # No `config:` anywhere in this file: USE_CUSTOM_SSL, GENERATE_SELF_SIGNED_SSL and
+    # AUTO_LETS_ENCRYPT all stay at their "no" default, so the only thing that can put this
+    # service on HTTPS at all is the inventory attachment this call creates.
+    type: string
+    url: "http://127.0.0.1:8888/selfsigned/certificates"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    body: '{"source":"selfsigned","name":"api-attach-www","common_name":"www.example.com","service_ids":["www.example.com"],"primary":true,"valid_days":365,"key_type":"ec"}'
+    string: '"status":"success"'
+
+  the_certificate_is_served_by_the_live_listener:
+    # Default `restart_stack` (true, not overridden): the framework's own restart+wait cycle
+    # gates on `bw_metadata.certificates_changed` clearing before this action's assertion
+    # runs (`tests/wait_config.py`'s PENDING_QUERY; tests/AGENTS.md's gotcha list explains
+    # why that flag is in it). A green `ssl` check here is therefore proof the async
+    # `deploy-certificates` job already ran, cached the material and the worker pushed it --
+    # not a race against a job that has not finished yet.
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+    ssl_algorithm: "ec-prime256v1"
+
+  the_inventory_entry_is_attached_and_primary:
+    type: string
+    url: "http://127.0.0.1:8888/certificates?source=selfsigned&service_id=www.example.com"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"is_primary":true'
+    restart_stack: false
+
+  a_second_certificate_can_attach_without_taking_over_primary:
+    # `attach_certificate(..., primary=False)` has to coexist with the primary attachment
+    # above, not replace it -- proving the inventory holds more than one certificate per
+    # service is what makes the previous action's "is_primary":true mean "the right one",
+    # not "the only one it could have been".
+    type: string
+    url: "http://127.0.0.1:8888/selfsigned/certificates"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    body: '{"source":"selfsigned","name":"api-attach-www-secondary","common_name":"www.example.com","service_ids":["www.example.com"],"primary":false,"valid_days":365,"key_type":"ec"}'
+    string: '"status":"success"'
+    restart_stack: false
+
+  the_second_certificate_is_attached_but_not_primary:
+    type: string
+    url: "http://127.0.0.1:8888/certificates?search=api-attach-www-secondary"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"is_primary":false'
+    restart_stack: false
