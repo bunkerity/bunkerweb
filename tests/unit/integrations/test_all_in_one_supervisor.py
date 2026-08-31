@@ -20,7 +20,7 @@ found the defect, over every unit, on every test run.
 time `worker.ini`'s `--hostname=worker@%%h` stays `%%h`. With stdlib interpolation left on, the
 stand-in collapses it to `%h`, and the resulting one-character shortfall reads as a truncation that
 is not there. Measured against the real `UnhosedConfigParser` on 2026-08-20: with
-`interpolation=None` the two agree on all nine units, with it on they disagree on `worker`.
+`interpolation=None` the two agree on all ten units, with it on they disagree on `worker`.
 """
 
 from configparser import ConfigParser
@@ -71,9 +71,9 @@ def test_every_all_in_one_unit_parses_to_its_full_declared_command():
     assert losses == [], "supervisord will truncate: " + "; ".join(f"{unit} {declared} -> {parsed} chars" for unit, declared, parsed in losses)
 
 
-def test_all_nine_units_are_actually_being_checked():
+def test_all_ten_units_are_actually_being_checked():
     """Anti-vacuity on the walker: a guard that finds no files passes forever."""
-    assert len(list(UNITS_DIR.glob("*.ini"))) == 9, "the all-in-one unit count changed -- read the new unit, then update this number"
+    assert len(list(UNITS_DIR.glob("*.ini"))) == 10, "the all-in-one unit count changed -- read the new unit, then update this number"
 
 
 def test_the_detector_still_catches_the_shape_that_broke_crowdsec(tmp_path):

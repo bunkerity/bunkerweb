@@ -188,7 +188,7 @@ RUN . /etc/os-release && \
     esac && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    bash curl ca-certificates grep sed tzdata unzip openssl supervisor gettext-base procps \
+    bash curl ca-certificates grep sed tzdata unzip openssl supervisor gettext-base procps logrotate \
     python3 python3-pip libpcre2-8-0 libmagic1 libpq5 libxml2 libgd3 libbrotli1 liblmdb0 libfuzzy2 libyajl2 libgeoip1 \
     libmariadb3 mariadb-client "$PGCLIENT" sqlite3 redis-server && \
     rm -rf /var/lib/apt/lists/*
@@ -266,6 +266,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
     chmod 770 -R /etc/supervisor.d
 
+COPY --chown=root:nginx --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 

@@ -30,6 +30,7 @@ AIO_RECOGNIZED_LOG_TAGS = {tag for tags in AIO_LOG_TAGS.values() for tag in tags
     "[REDIS]",
     "[CROWDSEC]",
     "[LOGSTREAM]",
+    "[LOGROTATE]",
 }
 
 

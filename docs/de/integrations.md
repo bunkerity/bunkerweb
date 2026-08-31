@@ -1432,6 +1432,17 @@ Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Pers
 - **Authentifizierung:** Wird `REDIS_PASSWORD` gesetzt und die Konfigurationsdatei deklariert noch kein `requirepass`, startet das eingebettete Redis mit `requirepass`, sodass BunkerWeb-Client und -Server konsistent bleiben. Der eingebettete Server unterstützt nur den Default-Benutzer – setzen Sie `REDIS_USERNAME` ausschließlich beim Anbinden eines externen Redis mit ACLs.
 - Redis-Protokolle erscheinen mit dem Präfix `[REDIS]` in den Docker-Protokollen sowie in `/var/log/bunkerweb/redis.log`.
 
+### Protokollaufbewahrung {#aio-log-retention}
+
+Anders als die übrigen Docker-Images bewahrt das All-In-One `access.log`, `error.log` und `modsec_audit.log` als reale Dateien unter `/var/log/bunkerweb/` auf. Der Log-Stream liest sie, um jeder Zeile ein Präfix voranzustellen und `HIDE_SERVICE_LOGS` anzuwenden, und sowohl der mitgelieferte CrowdSec-Parser als auch der Protokollanzeiger der Web-UI lesen sie von der Festplatte.
+
+- Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus. Ein Rotationsfehler wird mit dem Präfix `[LOGROTATE]` in den Container-Logs gemeldet.
+- Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter `/etc/logrotate.d/bunkerweb`: Jede Datei, die auf `/var/log/bunkerweb/*.log` passt, wird rotiert, sobald sie 100 MB überschreitet, sieben komprimierte Generationen werden aufbewahrt, und die Rotation verwendet `copytruncate`.
+- `copytruncate` leert die Datei an Ort und Stelle, statt sie umzubenennen, sodass sie ihren Inode behält. Der Log-Stream, der CrowdSec-Parser und der Protokollanzeiger folgen ihr daher über eine Rotation hinweg, ohne neu starten zu müssen, und ModSecurity schreibt weiterhin in die richtige Datei, obwohl es sein Audit-Log nie erneut öffnet.
+- Um den Schwellenwert oder die Anzahl der Generationen zu ändern, mounten Sie Ihre eigene Datei über `/etc/logrotate.d/bunkerweb`. Um die Rotation vollständig zu deaktivieren und die Aufbewahrung selbst zu verwalten, mounten Sie eine leere Datei über denselben Pfad. Ein unter `/var/log/bunkerweb` gemountetes Volume ändert nur, wo die Daten liegen — es hindert das im Container laufende `logrotate` nicht daran, sie dort weiterhin zu rotieren.
+
+Siehe [Aufbewahrung der Protokolldateien](advanced.md#log-file-retention) dazu, wie die anderen Integrationen damit umgehen.
+
 ### CrowdSec-Integration {#crowdsec-integration}
 
 Das BunkerWeb **All-In-One**-Docker-Image wird mit vollständig integriertem CrowdSec geliefert – keine zusätzlichen Container oder manuelle Einrichtung erforderlich. Befolgen Sie die nachstehenden Schritte, um CrowdSec in Ihrer Bereitstellung zu aktivieren, zu konfigurieren und zu erweitern.
