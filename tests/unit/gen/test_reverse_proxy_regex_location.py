@@ -10,8 +10,8 @@ today; prefixing ``~`` onto them yields ``location ~ ~* \\.php$`` and ``location
 which NGINX refuses outright — the service does not come up. That is why the two upstream
 commits (``bdb3a34ad`` then ``b236eda5d``) only make sense together.
 
-``reverseproxy``, ``grpc`` and ``redirect`` all render a ``location`` into the same server
-block and share one path namespace (``src/common/utils/location_claims.py`` at render time,
+``reverseproxy``, ``grpc``, ``redirect`` and ``php`` all render a ``location`` into the same
+server block and share one path namespace (``src/common/utils/location_claims.py`` at render time,
 ``db_methods/locations.py`` at mutation time). Making the ``~`` *implicit* means two different
 stored values can render the same ``location``, so both guards claim what NGINX receives rather
 than what was typed — and all three templates have to follow the same rule, or a guard refuses a
@@ -67,7 +67,7 @@ def test_every_template_that_renders_a_location_is_covered():
 
     ⚠️ `antibot.conf` renders `location {{ ANTIBOT_URI }}` and is deliberately NOT here: it is also
     absent from `location_claims.LOCATION_FAMILIES`, so an anti-bot URI is not claimed against the
-    other three and an anchored value there is still a dead prefix location. That is a live gap,
+    others and an anchored value there is still a dead prefix location. That is a live gap,
     reported separately -- not something this test should paper over by growing to four.
     """
     # Match the emitted directive, not one spelling of it. Searching for the literal `location {{`
@@ -88,12 +88,15 @@ def test_every_template_that_renders_a_location_is_covered():
     #   errors.conf      `location = {{ page }}`           user-settable, NOT claimed
     #   securitytxt.conf `location = {{ SECURITYTXT_URI }}` user-settable, NOT claimed -- but it
     #                    self-guards its own second literal at :36, which is the shape the others lack
-    #   lets-encrypt.conf, php.conf                        fixed literals, NOT claimed
+    #   lets-encrypt.conf                                  fixed literal, NOT claimed
+    #   php.conf                                           fixed literal, CLAIMED since the
+    #                    registry learned to carry a family with no path setting
     #
-    # ⚠️ php.conf renders an unconditional `location / {` whenever REMOTE_PHP or LOCAL_PHP is set,
-    # which collides with the DEFAULT `REVERSE_PROXY_URL=/`. Measured: both templates rendered for
-    # one service emit `location / {` twice and NGINX refuses the configuration. Reported, not
-    # fixed here -- whether php becomes a claim family is a design call, not a merge one.
+    # php.conf renders an unconditional `location / {` whenever REMOTE_PHP or LOCAL_PHP is set,
+    # which collides with the DEFAULT `REVERSE_PROXY_URL=/`. It IS a claim family now
+    # (`location_claims.LOCATION_FAMILIES["PHP"]`), so it is absent from FAMILIES below only
+    # because that list parametrizes path VALUES and php has no path setting to vary --
+    # `tests/unit/common/test_location_claims.py` is where its claim and its render are pinned.
     assert emitting == {
         "reverse-proxy.conf",
         "grpc.conf",

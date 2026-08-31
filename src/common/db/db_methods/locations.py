@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Mutation-time guard for the per-service HTTP location namespace.
 
-``reverseproxy``, ``grpc`` and ``redirect`` all render a ``location`` into the same server
-block, and NGINX refuses two ``location`` blocks with the same URI. A path is therefore claimed
-across all three families at once — by an inline setting or by an attached resource alike — so
+``reverseproxy``, ``grpc``, ``redirect`` and ``php`` all render a ``location`` into the same
+server block, and NGINX refuses two ``location`` blocks with the same URI. A path is therefore
+claimed across all four families at once — by an inline setting or by an attached resource alike — so
 every vertical that mounts something on a path checks here rather than only against its own
 kind. The render-time mirror of this lives in ``utils/location_claims.py``.
 
@@ -17,38 +17,54 @@ not. ``tests/unit/db/test_redirects.py`` pins both directions.
 from typing import Any, Dict, List, Optional, Tuple
 
 from model import Global_values, Redirects, ResourceAttachments, Resources, Services_settings, Upstreams  # type: ignore
-from location_claims import rendered_location  # type: ignore
+from location_claims import FIXED_LOCATION, rendered_location  # type: ignore
 from sqlalchemy import select
 
-# label -> (setting whose non-empty value makes the location render, setting holding its path)
+# label -> (trigger, setting holding its path). Kept in step with
+# ``utils/location_claims.LOCATION_FAMILIES`` — same two special shapes, same reason: a family may
+# carry several triggers (``php.conf`` renders for ``REMOTE_PHP`` *or* ``LOCAL_PHP``) and its path
+# setting is ``None`` when the template hardcodes the location (``php.conf:2`` is ``location /``).
 LOCATION_SETTINGS = {
     "reverse proxy": ("REVERSE_PROXY_HOST", "REVERSE_PROXY_URL"),
     "gRPC": ("GRPC_HOST", "GRPC_URL"),
     "redirect": ("REDIRECT_TO", "REDIRECT_FROM"),
+    "PHP": (("REMOTE_PHP", "LOCAL_PHP"), None),
 }
 
 
-def inline_family_paths(session, service_id: str, trigger: str, path_setting: str) -> set:
+def inline_family_paths(session, service_id: str, trigger: Any, path_setting: Optional[str]) -> set:
     """Paths served by one plugin's inline settings on a service.
 
-    A suffix counts only when its trigger setting is non-empty — the exact condition each
-    template loops on — so a blanked-out rule never blocks a resource. Service values shadow
-    global ones, matching multisite inheritance.
+    A suffix counts only when a trigger setting is non-empty — the exact condition each template
+    loops on — so a blanked-out rule never blocks a resource. A family with several triggers is
+    served by *any* of them, matching the template's ``or``. Service values shadow global ones,
+    matching multisite inheritance.
     """
+    triggers = (trigger,) if isinstance(trigger, str) else tuple(trigger)
+    wanted = triggers + ((path_setting,) if path_setting else ())
     by_suffix: Dict[int, Dict[str, str]] = {}
     for scope in (
-        select(Global_values.setting_id, Global_values.value, Global_values.suffix).where(Global_values.setting_id.in_((trigger, path_setting))),
+        select(Global_values.setting_id, Global_values.value, Global_values.suffix).where(Global_values.setting_id.in_(wanted)),
         select(Services_settings.setting_id, Services_settings.value, Services_settings.suffix).where(
-            Services_settings.service_id == service_id, Services_settings.setting_id.in_((trigger, path_setting))
+            Services_settings.service_id == service_id, Services_settings.setting_id.in_(wanted)
         ),
     ):
         for row in session.execute(scope):
             by_suffix.setdefault(row.suffix or 0, {})[row.setting_id] = row.value or ""
 
-    return {rendered_location(path_setting, values.get(path_setting) or "/") for values in by_suffix.values() if values.get(trigger)}
+    paths = set()
+    for values in by_suffix.values():
+        if not any(values.get(one) for one in triggers):
+            continue
+        # A family with no path setting has nothing to read: its template hardcodes the location.
+        path = FIXED_LOCATION if path_setting is None else (values.get(path_setting) or "/")
+        # ``path_setting`` is not read by the helper — deliberately, so it can never grow a
+        # per-family branch — and every other mirror passes "". Keep the four call sites identical.
+        paths.add(rendered_location("", path))
+    return paths
 
 
-def inline_location_paths(session, service_id: str, *, families: Optional[Dict[str, Tuple[str, str]]] = None) -> Dict[str, str]:
+def inline_location_paths(session, service_id: str, *, families: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
     """``{path: family label}`` for every inline location configured on a service."""
     claims: Dict[str, str] = {}
     for label, (trigger, path_setting) in (families or LOCATION_SETTINGS).items():

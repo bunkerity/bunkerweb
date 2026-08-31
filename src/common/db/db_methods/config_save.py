@@ -22,9 +22,9 @@ from model import (  # type: ignore
 
 from common_utils import merge_template_settings, split_templates  # type: ignore
 
-from location_claims import LOCATION_FAMILIES, inline_location_conflict  # type: ignore
+from location_claims import LOCATION_TRIGGERS, inline_family_conflict, inline_location_conflict  # type: ignore
 from redirect_resolver import config_servers, scan_prefixes  # type: ignore
-from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
+from resource_group_resolver import is_rule_key, kind_for_key, validate_resource_group_refs  # type: ignore
 from ports import list_moved, port_list_setting  # type: ignore
 
 from sqlalchemy import delete, select, update
@@ -454,7 +454,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             if error := server_type_attachment_conflict(session, config):
                 return error
 
-            if any(isinstance(value, str) and "@" in value and kind_for_key(key) for key, value in config.items()):
+            if any(isinstance(value, str) and "@" in value and (kind_for_key(key) or is_rule_key(key)) for key, value in config.items()):
                 try:
                     group_index = self._get_resource_group_index(session)
                 except (ProgrammingError, OperationalError) as exc:
@@ -466,11 +466,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     self.logger.warning(error)
                     return error
 
-            # reverseproxy, grpc and redirect all render a `location` into the same server, and
-            # NGINX refuses two locations with the same URI. An incoming inline rule of any of
+            # reverseproxy, grpc, redirect and php all render a `location` into the same server,
+            # and NGINX refuses two locations with the same URI. An incoming inline rule of any of
             # them must therefore not land on a path an attached resource already serves — the
-            # mirror of the check the redirects and upstreams mixins run on the resource side.
-            if any(isinstance(key, str) and any(trigger in key for trigger, _ in LOCATION_FAMILIES.values()) for key in config):
+            # mirror of the check the redirects and upstreams mixins run on the resource side —
+            # and must not land on a path the SAME config claims a second time either, which is
+            # the case no check saw: two families defaulting to `/`, or two suffixes of one
+            # family, went in clean and came out of the templates as `duplicate location "/"`,
+            # an [emerg] that refuses the whole reload.
+            #
+            # The self-collision half is dict-local: it catches a collision only when ONE save
+            # carries both claims — the scheduler's env, one service's Docker labels or Ingress
+            # annotations (Autoconf funnels those through here too), and the full-snapshot saves
+            # `routers/services.py` and `routers/global_settings.py` send. It does NOT catch two
+            # claims arriving in two different saves: `autoconf/Config.py` seeds its dict with
+            # SERVER_NAME/MULTISITE and the annotations alone, so the k8s shape documented in
+            # `tests/core/cors.yml` and `tests/core/mtls.yml` — an unsuffixed REVERSE_PROXY_HOST
+            # from the scheduler env colliding with the ingress path the controller saves later —
+            # is invisible to it. Catching that needs the stored config, not this dict.
+            if any(isinstance(key, str) and any(trigger in key for trigger in LOCATION_TRIGGERS) for key in config):
                 try:
                     service_redirects = self._service_redirects(session)
                     service_upstreams = self._service_upstreams(session)
@@ -481,10 +495,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                 multisite = str(config.get("MULTISITE", "no")) == "yes"
                 for server in config_servers(config):
+                    prefixes = scan_prefixes(server, multisite)
                     paths = [rule["from_path"] for rule in service_redirects.get(server, [])]
                     # A stream pool has no location, so it cannot collide with one.
                     paths += [pool["match_path"] or "/" for pool in service_upstreams.get(server, []) if pool.get("protocol") != "stream"]
-                    if error := inline_location_conflict(config, server, scan_prefixes(server, multisite), paths):
+                    if error := inline_location_conflict(config, server, prefixes, paths):
+                        self.logger.warning(error)
+                        return error
+                    if error := inline_family_conflict(config, server, prefixes):
                         self.logger.warning(error)
                         return error
 

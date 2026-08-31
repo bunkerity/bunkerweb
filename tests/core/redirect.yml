@@ -52,6 +52,23 @@ actions:
       REDIRECT_FROM: "/test"
       REDIRECT_TO: "https://view-transitions.chrome.dev/profiles/mpa/"
 
+# Kubernetes only (generate.py reads `annotations:` inside the Kubernetes branch alone). The
+# blank REVERSE_PROXY_URL is LOAD-BEARING and is not the duplicate-location shield it looks like:
+# an empty value sends generate.py:275 down its `else` branch, which skips the ingress rule
+# entirely -- no rule, no /tmp/services.yml, no app1, and therefore no www.example.com *service*
+# server. That is the topology `check_custom_from` above depends on. With REDIRECT_FROM moved to
+# /test it asserts 200 on "/", and that 200 comes from the DEFAULT server: misc's
+# default-server-http/page.conf renders `location / { root .../core/misc/files; }` and serves the
+# BunkerWeb default page. Restore the ingress (the `/app1` pattern cors.yml/mtls.yml use) and
+# www.example.com becomes a real service server where the redirect sits at /test, the reverse
+# proxy at /app1 and "/" matches nothing -- server.conf ships an `index` but no `root` -- so the
+# action gets a 404 instead. Moving the ingress back therefore needs check_custom_from rewritten
+# first; it is not a drop-in.
+#
+# REDIRECT_FROM rides along as a plain config variable here for the same reason. In the ingress
+# branch it would become a bunkerweb.io annotation, i.e. a SERVICE-level setting, and
+# generate.py:380 applies action-level `config:` as GLOBALS -- so the annotation would shadow
+# every per-action REDIRECT_FROM override instead of being overridden by it.
 annotations:
   REDIRECT_FROM: "/"
   bunkerweb.io/REVERSE_PROXY_URL: ""

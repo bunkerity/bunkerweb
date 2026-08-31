@@ -363,3 +363,90 @@ def test_save_config_accepts_an_inline_rule_on_a_free_path(db):
         "ui",
     )
     assert not isinstance(result, str) or result == ""
+
+
+def _seed_php_and_reverse_proxy_settings(db) -> None:
+    """The trigger settings the location registry watches, as real Settings rows.
+
+    ``seed_minimal`` ships ``REVERSE_PROXY_URL`` but not the host that makes the location render,
+    and nothing at all for php — without these the save path rejects the keys as unknown settings
+    and the conflict guard below never runs.
+    """
+    add_setting(db, "REVERSE_PROXY_HOST", context="multisite", multiple="reverse-proxy")
+    add_setting(db, "REMOTE_PHP", context="multisite")
+
+
+def test_save_config_refuses_two_inline_families_landing_on_the_same_path(db):
+    """No attached resource involved: the incoming config collides with itself.
+
+    This is the shape Autoconf and the Kubernetes controller push — one merged dict for one
+    service — and it used to pass the save untouched and reach NGINX as `duplicate location "/"`,
+    an [emerg] that refuses the whole reload.
+    """
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    _seed_php_and_reverse_proxy_settings(db)
+
+    error = db.save_config(
+        {
+            "MULTISITE": "yes",
+            "SERVER_NAME": "app1.example.com",
+            "app1.example.com_REVERSE_PROXY_HOST": "http://backend:8080",
+            "app1.example.com_REDIRECT_TO": "https://elsewhere.example.com",
+        },
+        "ui",
+    )
+    assert isinstance(error, str) and "would serve / through both its reverse proxy and its redirect settings" in error
+
+
+def test_save_config_refuses_php_next_to_an_inline_reverse_proxy(db):
+    """php.conf hardcodes `location /`, so enabling PHP claims the default path outright."""
+    seed_minimal(db)
+    _seed_php_and_reverse_proxy_settings(db)
+
+    error = db.save_config(
+        {
+            "MULTISITE": "yes",
+            "SERVER_NAME": "app1.example.com",
+            "app1.example.com_REVERSE_PROXY_HOST": "http://backend:8080",
+            "app1.example.com_REMOTE_PHP": "php-fpm",
+        },
+        "ui",
+    )
+    assert isinstance(error, str) and "PHP" in error and "reverse proxy" in error
+
+
+def test_save_config_accepts_two_inline_families_on_different_paths(db):
+    """The false-refusal direction: NGINX accepts these two locations, so the guard must too."""
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    _seed_php_and_reverse_proxy_settings(db)
+
+    result = db.save_config(
+        {
+            "MULTISITE": "yes",
+            "SERVER_NAME": "app1.example.com",
+            "app1.example.com_REVERSE_PROXY_HOST": "http://backend:8080",
+            "app1.example.com_REVERSE_PROXY_URL": "/app",
+            "app1.example.com_REDIRECT_TO": "https://elsewhere.example.com",
+            "app1.example.com_REDIRECT_FROM": "/legacy",
+        },
+        "ui",
+    )
+    assert not isinstance(result, str) or result == ""
+
+
+def test_attaching_a_resource_onto_the_path_php_serves_is_refused(db):
+    """The mutation-time mirror: ``db_methods/locations.py`` has to know about php as well.
+
+    Both mirrors read the same registry now, so a redirect on ``/`` is refused whether php was
+    enabled before the attach (here) or arrives in the same save (above).
+    """
+    seed_minimal(db)
+    _seed_redirect_plugin(db)
+    _seed_php_and_reverse_proxy_settings(db)
+    add_service_setting(db, service_id="app1.example.com", setting_id="REMOTE_PHP", value="php-fpm")
+
+    resource_id = _create(db, name="root", from_path="/", to_url="https://elsewhere.example.com")
+    error = db.attach_redirect(resource_id, "app1.example.com")
+    assert "already serves / through its own PHP settings" in error

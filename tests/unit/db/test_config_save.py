@@ -266,6 +266,16 @@ class TestSaveConfigResourceGroups:
         settings = {
             "BLACKLIST_IP": _list("blacklist-ip", "global"),
             "BLACKLIST_COUNTRY": _list("blacklist-country", "global"),
+            "BLACKLIST_RULE": {
+                "id": "blacklist-rule",
+                "context": "global",
+                "default": "",
+                "help": "h",
+                "label": "L",
+                "regex": r"^$|^(?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+(?: AND (?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+)*$",
+                "type": "text",
+                "multiple": "blacklist-rules",
+            },
         }
         db.init_tables([make_general_settings(), make_core_plugin("blacklist", settings=settings)])
         db.initialize_db("1.7.0", "Docker")
@@ -277,6 +287,13 @@ class TestSaveConfigResourceGroups:
         result = resource_groups_db.save_config({"BLACKLIST_IP": "@typo"}, "ui", skip_service_management=True)
         assert result == "Unknown resource group @typo referenced by BLACKLIST_IP"
         assert resource_groups_db.get_config()["BLACKLIST_IP"] == ""
+
+    def test_unknown_group_inside_a_rule_term_is_rejected_before_save(self, resource_groups_db):
+        # The only @group reference sits inside a *_RULE value: without the is_rule_key gate
+        # the whole validation block is skipped and the typo saves silently.
+        result = resource_groups_db.save_config({"BLACKLIST_RULE_1": "ip:@typo AND ua:^curl"}, "ui", skip_service_management=True)
+        assert isinstance(result, str) and "@typo" in result and "BLACKLIST_RULE_1" in result
+        assert resource_groups_db.get_config().get("BLACKLIST_RULE_1", "") == ""
 
     def test_wrong_kind_group_is_rejected_before_save(self, resource_groups_db):
         result = resource_groups_db.save_config({"BLACKLIST_IP": "@countries"}, "ui", skip_service_management=True)
