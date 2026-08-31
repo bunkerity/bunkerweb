@@ -123,6 +123,41 @@ actions:
       config:
         WHITELIST_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
 
+  # Composite (AND) rules. The flat lists run first; a rule can only ever add a match.
+  # The base config blacklists every IP, so a 200 here means the whitelist rule fired.
+  rule:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      WHITELIST_RULE_1: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+  rule_second_term_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      WHITELIST_RULE_1: "ip:0.0.0.0/0 AND ua:^SomethingElse"
+  rule_not_term:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      WHITELIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+  rule_not_term_matches_so_rule_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "curl/8.0.0"
+    config:
+      WHITELIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+
 config:
   USE_WHITELIST: "yes"
   USE_BLACKLIST: "yes"

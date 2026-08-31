@@ -148,6 +148,86 @@ actions:
       config:
         GREYLIST_URI_URLS: "http://svc-custom-api.misc.svc.cluster.local:8000/list/uri"
 
+  # Composite (AND) rules. A rule matches only when EVERY term matches; rules are OR'd with
+  # each other and with the flat lists above.
+  rule:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+  rule_second_term_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^SomethingElse"
+  rule_not_term:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+  rule_not_term_matches_so_rule_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "curl/8.0.0"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+  # Two rules over the SAME ip term with opposite verdicts. The term's truth is cached once
+  # and negation is applied by the fold, so the negated rule must not be able to allow the
+  # request the positive one denies -- nor the reverse.
+  # The NEGATED rule is RULE_1 on purpose. With the positive one first it matches on its very
+  # first term and the negated rule is never evaluated, so a write-side bug that folds negation
+  # into the cached term truth would ship green. Negated first, the shared ip slot is *written*
+  # by the NOT rule and *read* by the positive one -- the direction that actually poisons.
+  rule_shared_ip_positive:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_RULE_1: "NOT ip:0.0.0.0/0 AND ua:^BunkerBot"
+      GREYLIST_RULE_2: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+  rule_shared_ip_negated_rule_never_matches:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "SomethingElse"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+      GREYLIST_RULE_2: "NOT ip:0.0.0.0/0 AND ua:^SomethingElse"
+  # Rules are OR'd with each other: RULE_1 misses on its ua term, RULE_2 matches, and the request
+  # is greylisted. Both rules share the ip term, so this also pins that a miss on one rule does
+  # not consume or invalidate the term truth the next one needs.
+  rule_or_across_rules:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^SomethingElse"
+      GREYLIST_RULE_2: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+  rule_uri_term:
+    type: status
+    url: "http://www.example.com/admin"
+    status: 404
+    config:
+      GREYLIST_RULE_1: "ip:0.0.0.0/0 AND uri:^/admin"
+    Kubernetes:
+      status: 200
+
 config:
   USE_GREYLIST: "yes"
   USE_REAL_IP: "yes"

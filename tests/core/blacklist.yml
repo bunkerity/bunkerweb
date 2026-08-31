@@ -225,6 +225,52 @@ actions:
     config:
       BLACKLIST_COMMUNITY_LISTS: "ip:laurent-minne-data-shield-aggressive"
 
+  # Composite (AND) rules. A rule matches only when EVERY term matches; rules are OR'd with
+  # each other and with the flat lists above.
+  rule:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+  rule_second_term_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^SomethingElse"
+  rule_not_term:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    headers:
+      User-Agent: "BunkerBot"
+    config:
+      BLACKLIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+  rule_not_term_matches_so_rule_misses:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "curl/8.0.0"
+    config:
+      BLACKLIST_RULE_1: "ip:0.0.0.0/0 AND NOT ua:^curl"
+  # An ignore entry waives a rule verdict exactly as it waives a flat-list one.
+  rule_ignored:
+    type: status
+    url: "http://www.example.com"
+    status: 200
+    headers:
+      User-Agent: "BunkerBot"
+      X-Forwarded-For: "192.168.0.254"
+    config:
+      BLACKLIST_RULE_1: "ip:0.0.0.0/0 AND ua:^BunkerBot"
+      BLACKLIST_IGNORE_IP: "192.168.0.254"
+
 config:
   USE_BLACKLIST: "yes"
   BLACKLIST_COMMUNITY_LISTS: ""
