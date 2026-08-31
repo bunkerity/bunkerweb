@@ -40,7 +40,7 @@ PARSE = ROOT / "tests" / "parse.py"
 # The specs the Swarm arm runs in CI. Deliberately explicit and deliberately short: it is the set
 # that has been executed on a real single-node swarm, not the set that is theoretically eligible.
 # Adding a name here without running it is the failure mode this constant exists to make loud.
-EXPECTED_SWARM_SPECS: set = set()
+EXPECTED_SWARM_SPECS: set = {"core/gzip", "core/redirect"}
 
 
 def _convert_module():

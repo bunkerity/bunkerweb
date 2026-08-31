@@ -1,4 +1,4 @@
-integrations: "all"
+integrations: ["all", "Swarm"]
 
 actions:
   check_status:

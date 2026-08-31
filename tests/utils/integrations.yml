@@ -41,14 +41,14 @@ staging:
     amd64: '["ubuntu-latest"]'
     arm/v7: "TODO"
     arm64: "TODO"
-  # Swarm: exercised by script specs on the Docker arm (tests/core/swarm.yml and
-  # tests/core/swarm-secrets.yml), which deploy a real single-node Swarm stack and tear it
-  # down again. These rows stay TODO because no per-spec Swarm arm exists in start.sh and
-  # friends: giving them a runner would produce matrix entries nothing can execute. Sizing
-  # the full arm and why it was deferred: conception 67ZcQIRdg4.
+  # Swarm: a real per-spec arm now exists (tests/swarm/harness-stack.yml and
+  # tests/scripts/swarm-services.py) and deploys a single-node Swarm stack per spec. It is
+  # opt-in: tests/parse.py only routes a spec here when that spec names "Swarm" explicitly,
+  # so integrations: "all" cannot reach it. Only the specs proven green on a real swarm are
+  # enrolled. 386, arm/v7 and arm64 stay TODO for the same reason every other integration's do.
   Swarm:
     386: "TODO"
-    amd64: "TODO"
+    amd64: '["ubuntu-latest"]'
     arm/v7: "TODO"
     arm64: "TODO"
   Kubernetes:
@@ -71,9 +71,9 @@ dev:
     amd64: '["ubuntu-latest"]'
   Autoconf:
     amd64: '["ubuntu-latest"]'
-  # Swarm: see the note above — covered by script specs on the Docker arm, no arm of its own.
+  # Swarm: see the note above — a real opt-in per-spec arm.
   Swarm:
-    amd64: "TODO"
+    amd64: '["ubuntu-latest"]'
   Kubernetes:
     amd64: '["ubuntu-latest"]'
   All_in_one:
