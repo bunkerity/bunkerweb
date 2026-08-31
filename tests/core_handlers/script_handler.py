@@ -10,11 +10,17 @@ from typing import Any
 # Where an example-backed run materialises the stack. A script ships next to the example
 # it exercises, so that is where it runs from and how a bare filename resolves.
 EXAMPLE_STACK_DIR = Path(sep, "tmp", "example-stack")
+# The marker every OTHER consumer keys on: start.sh in five places and utils.sh's
+# restart_stack. It is what the example cleanup removes (test-example-hook.sh) -- the
+# directory is left behind. Keying the cwd on the directory alone therefore made every
+# core spec's script action run from a leftover example stack instead of the repo root,
+# for the whole rest of the session, so any repo-relative path in it failed.
+EXAMPLE_STACK_MARKER = Path(sep, "tmp", "example_stack.txt")
 
 
 def handle(LOGGER: Logger, action: Any) -> None:
     argv = list(action.script)
-    cwd = EXAMPLE_STACK_DIR if EXAMPLE_STACK_DIR.is_dir() else None
+    cwd = EXAMPLE_STACK_DIR if EXAMPLE_STACK_MARKER.is_file() and EXAMPLE_STACK_DIR.is_dir() else None
 
     LOGGER.info(f"📜 Running script {' '.join(argv)!r}{f' from {cwd}' if cwd else ''} ...")
 
