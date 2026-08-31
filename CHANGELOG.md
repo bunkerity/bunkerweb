@@ -9,6 +9,8 @@
 - [FEATURE] `sessions`: a destroyed cookie session is rejected on its next use, per instance or cluster-wide with Redis. See the Sessions documentation.
 - [FEATURE] `all-in-one`: log files are rotated with logrotate; mount your own `/etc/logrotate.d/bunkerweb` to change the policy. See the All-In-One documentation.
 - [FEATURE] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` sets the audit log path, which must be a regular file under `/var/log/bunkerweb`.
+- [FEATURE] `installer`: `install-bunkerweb.sh --docker` now upgrades a stack it previously generated in place: it backs the database up first, keeps your secrets, ports and `docker-compose.yml` edits, and refuses downgrades. See the Upgrading documentation.
+- [BUGFIX] `installer`: a Docker re-run keeps the stack's Compose project name and published ports, which were recomputed from the directory name and reset to the defaults, orphaning the stack's volumes.
 - [BUGFIX] `letsencrypt`: quarantine an incomplete renewal lineage, where every renewal for that service failed forever with no repair path.
 - [BUGFIX] `letsencrypt`: a wildcard certificate no longer shadows the certificate of every other service under the same base. (Refs #3841)
 - [BUGFIX] `customcert`: the wildcard SNI fallback is skipped for services with `USE_CUSTOM_SSL=no`, which were served another service's certificate. (Fixes #3841)
