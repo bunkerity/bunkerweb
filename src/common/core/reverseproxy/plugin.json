@@ -100,7 +100,7 @@
       "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s][^;]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -121,7 +121,7 @@
       "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s][^;]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"
@@ -332,7 +332,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*(\\$[a-z_\\-]+)\\s+[^;\\s][^;]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "reverse-proxy"

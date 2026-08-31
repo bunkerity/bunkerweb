@@ -49,7 +49,7 @@
       "help": "List of headers to send to gRPC upstream separated with semicolons (values for grpc_set_header directive).",
       "id": "grpc-headers",
       "label": "gRPC headers",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "regex": "^(?![;\\s])(;?\\s*([\\w\\-]+)\\s+[^;\\s][^;]*)*$",
       "type": "multivalue",
       "separator": ";",
       "multiple": "grpc"
