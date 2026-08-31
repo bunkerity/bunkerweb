@@ -4671,6 +4671,20 @@ Prometheus exporter for BunkerWeb internal metrics.
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global | 否     | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global | 否     | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
+### Grafana 仪表板
+
+插件将 Grafana 仪表板安装在 `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/dashboards/bunkerweb.json`。将其导入 Grafana，并选择一个抓取该导出器的 Prometheus 数据源。设置 `USE_MONITORING=yes` 和 `USE_PROMETHEUS_EXPORTER=yes`，并将 Prometheus 服务器地址加入 `PROMETHEUS_EXPORTER_ALLOW_IP`。如果允许列表不包含该地址，端点会拒绝抓取请求。
+
+该仪表板显示请求速率和状态类别、攻击者 IP 和 URI 排名表、根据直方图桶计算的延迟百分位数、上游状态和延迟、TLS 协议分布、缓存结果以及 NGINX 共享字典利用率。预测行显示共享字典预计何时耗尽。模板变量 `job`、`instance` 和 `server_name` 用于筛选面板。
+
+### Zabbix 模板
+
+插件将采用 Zabbix 7.0 LTS 导出格式的模板安装在 `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/templates/zabbix/bunkerweb.yaml`。在 Zabbix 中打开 _Data collection → Templates → Import_ 并导入模板，然后为每个 BunkerWeb 实例创建一个主机。为每个主机添加一个地址指向对应实例的接口，并关联 _BunkerWeb by HTTP_ 模板。抓取 URL 使用 `{HOST.CONN}`，因此接口地址决定抓取哪个实例。每个主机必须对应一个实例，因为导出器提供每个实例各自的内存计数器，不会聚合整个集群的数据。
+
+一个 HTTP agent 主监控项每个间隔抓取一次 `/metrics`，其他监控项都从该响应中获取值。BunkerWeb 端无需安装其他组件。低级别发现会为每个服务和 NGINX 共享字典创建监控项。Zabbix 会针对导出器不可达、Monitoring 插件未初始化、指标收集错误、持续的服务器错误、攻击率升高、后端故障、使用已弃用的 TLS 版本以及预计共享字典耗尽触发随附的触发器。
+
+设置 `USE_MONITORING=yes` 和 `USE_PROMETHEUS_EXPORTER=yes`，并将 Zabbix 服务器或代理地址加入 `PROMETHEUS_EXPORTER_ALLOW_IP`。如果允许列表不包含该地址，端点会拒绝抓取请求。所有阈值都使用宏，包括 `{$BUNKERWEB.5XX.WARN}`、`{$BUNKERWEB.ATTACKS.MAX}` 和 `{$BUNKERWEB.SHM.TIMELEFT}`，因此无需编辑模板即可按主机覆盖阈值。如果更改了 `PROMETHEUS_EXPORTER_PORT` 或 `PROMETHEUS_EXPORTER_URL`，请相应设置 `{$BUNKERWEB.EXPORTER.PORT}` 和 `{$BUNKERWEB.EXPORTER.PATH}`。
+
 ## Real IP
 
 STREAM 支持 :warning:
