@@ -399,6 +399,17 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
 
+        # A value that opens a PEM block and never closes it is a multi-line setting that lost
+        # everything past its first line on the way through a variables file, never something an
+        # operator declared. Saving it replaces a working certificate with its own header and
+        # hands the setting to whichever method is writing, so drop those keys entirely and keep
+        # what is already stored.
+        truncated_pem_keys = {k for k, v in config.items() if isinstance(v, str) and "-----BEGIN" in v and "-----END" not in v}
+        if truncated_pem_keys:
+            self.logger.error(f"Ignoring truncated PEM value for {', '.join(sorted(truncated_pem_keys))}, keeping the stored one")
+            config = {k: v for k, v in config.items() if k not in truncated_pem_keys}
+            explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
+
         ctx = _SaveConfigContext(
             config=config,
             db_config=db_config,

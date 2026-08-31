@@ -16,6 +16,8 @@ from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
+from env_file import make_key_predicate, parse_env_file  # type: ignore
+
 from common_utils import (  # type: ignore
     bytes_hash,
     create_plugin_tar_gz,
@@ -256,13 +258,24 @@ class Configurator:
             self.__logger.debug(f"Exception details: {e}", exc_info=True)
             self.__logger.error(f"Exception while loading JSON from {file} : {e}")
 
+    def __setting_names(self) -> Tuple[Set[str], Set[str]]:
+        """Every known setting name, and the subset whose value can span several lines."""
+        known: Set[str] = set()
+        multiline: Set[str] = set()
+        for settings in (self.__settings, self.get_plugins_settings("core"), self.get_plugins_settings("external"), self.get_plugins_settings("pro")):
+            for name, data in settings.items():
+                known.add(name)
+                if isinstance(data, dict) and data.get("type") == "file":
+                    multiline.add(name)
+        return known, multiline
+
     def __load_variables(self, path: Path) -> Dict[str, str]:
         try:
-            return dict(
-                line.strip().split("=", 1)
-                for line in path.read_text(encoding="utf-8").splitlines()
-                if line.strip() and not line.strip().startswith("#") and "=" in line
-            )
+            # Split on physical lines and a PEM certificate arrives truncated to its
+            # "-----BEGIN CERTIFICATE-----" line, which get_config() then hands to
+            # save_config() as the operator's declared value.
+            known, multiline = self.__setting_names()
+            return parse_env_file(path, make_key_predicate(multiline), make_key_predicate(known))
         except Exception as e:
             self.__logger.error(f"Failed to load variables from {path}: {e}")
             return {}
