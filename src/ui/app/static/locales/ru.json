@@ -1623,6 +1623,24 @@
           "title": "Exceptions",
           "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
         }
+      },
+      "rules": {
+        "title": "Composite rules",
+        "description": "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name.",
+        "rule": "Rule",
+        "add_term": "Add a term",
+        "remove_term": "Remove this term",
+        "negate": "NOT",
+        "negate_help": "Invert this term: the rule matches when the term does NOT match.",
+        "kind": "What this term matches on",
+        "value": "Value, or @group",
+        "expression": "Saved as:",
+        "kind_ip": "IP",
+        "kind_country": "Country",
+        "kind_asn": "ASN",
+        "kind_rdns": "Reverse DNS",
+        "kind_ua": "User agent",
+        "kind_uri": "URI"
       }
     },
     "modsecurity": {

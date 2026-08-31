@@ -4411,6 +4411,54 @@ msgstr "On"
 msgid "settings.access_control.order.title"
 msgstr "Decision order"
 
+msgid "settings.access_control.rules.add_term"
+msgstr "Add a term"
+
+msgid "settings.access_control.rules.description"
+msgstr "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name."
+
+msgid "settings.access_control.rules.expression"
+msgstr "Saved as:"
+
+msgid "settings.access_control.rules.kind"
+msgstr "What this term matches on"
+
+msgid "settings.access_control.rules.kind_asn"
+msgstr "ASN"
+
+msgid "settings.access_control.rules.kind_country"
+msgstr "Country"
+
+msgid "settings.access_control.rules.kind_ip"
+msgstr "IP"
+
+msgid "settings.access_control.rules.kind_rdns"
+msgstr "Reverse DNS"
+
+msgid "settings.access_control.rules.kind_ua"
+msgstr "User agent"
+
+msgid "settings.access_control.rules.kind_uri"
+msgstr "URI"
+
+msgid "settings.access_control.rules.negate"
+msgstr "NOT"
+
+msgid "settings.access_control.rules.negate_help"
+msgstr "Invert this term: the rule matches when the term does NOT match."
+
+msgid "settings.access_control.rules.remove_term"
+msgstr "Remove this term"
+
+msgid "settings.access_control.rules.rule"
+msgstr "Rule"
+
+msgid "settings.access_control.rules.title"
+msgstr "Composite rules"
+
+msgid "settings.access_control.rules.value"
+msgstr "Value, or @group"
+
 msgid "settings.access_control.stage.blacklist"
 msgstr "Blacklist"
 

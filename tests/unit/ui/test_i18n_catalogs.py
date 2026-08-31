@@ -142,9 +142,10 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # removes keys, and it forces them to look at what they added. Was 2433, then 2471 (the 32
     # `settings.antibot.*` keys of the antibot settings body, 3 catalogue keys and 3 apply-failure
     # keys); 2549 adds the 36 `settings.access_control.*` keys and the 42
-    # `settings.modsecurity.*` / `settings.headers.*` keys of the wave 8 configuration pages.
+    # `settings.modsecurity.*` / `settings.headers.*` keys of the wave 8 configuration pages;
+    # 2565 adds the 16 `settings.access_control.rules.*` keys of the composite-rule editor.
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2549
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2565
 
 
 @pytest.mark.parametrize("code", CODES)

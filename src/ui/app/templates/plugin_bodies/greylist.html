@@ -21,18 +21,49 @@
    HIDE, NEVER OMIT: every declared key renders on every load, and a future revision that wants a
    section off screen must use the `hidden` attribute rather than dropping it from the loop --
    `postable_scope` claims all 12 keys and an in-scope key the POST does not carry has its row
-   DELETED (db_methods/config_save.py:579-585). #}
+   DELETED (db_methods/config_save.py:579-585).
+
+   ==================== THE `multiple` HALF ====================
+   The composite-rule family (`GREYLIST_RULE`, `GREYLIST_RULE_1`, ...) is a `multiple` setting, and
+   `_in_scope` matches a stored `GREYLIST_RULE_2` by its BASE name (models/save_scope.py:99-110) --
+   so every suffixed rule an operator has ever added is inside this page's declared scope, and a
+   body that renders the base field but not the suffixed rows posts none of them, DELETING every
+   rule past the first on the next save. `get_multiples` is called HERE (rather than inside the
+   partial) so the static half of
+   ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render reads it in this file;
+   plugin_bodies/access_control/rules.html renders the families it hands over, and any OTHER
+   `multiple` family this plugin ever declares falls through to the matrix's straggler backstop,
+   which fails loudly instead of losing rows quietly. #}
 {%- set setting_id_prefix = "setting-" + plugin + "-" -%}
 {%- set ac_prefix = "GREYLIST" -%}
-{%- set ac_hand_placed = ["USE_GREYLIST"] -%}
+{%- set ac_hand_placed = ["USE_GREYLIST", ac_prefix ~ "_RULE"] -%}
 {%- set ac_col = "col-12 col-sm-6 col-lg-4 pb-3" -%}
-{# Derived, not hardcoded, and deliberately the same derivation the server-side guard uses:
-   `multivalue` is exactly the ten entry lists (the five direct ones plus their `_URLS` downloader
-   variants) and excludes GREYLIST_RDNS_GLOBAL, which is a `check` and feeds no entry. A greylist
-   entry list added later is covered for free, here and there. #}
+{%- set ac_rule_multiples = get_multiples(filtered_settings, config) -%}
+{# Derived, not hardcoded: `multivalue` is exactly the ten entry lists (the five direct ones plus
+   their `_URLS` downloader variants) and excludes GREYLIST_RDNS_GLOBAL, which is a `check` and
+   feeds no entry. A greylist entry list added later is covered for free.
+
+   A COMPOSITE RULE COUNTS TOO, and it has to. `greylist.lua:262-264` evaluates the
+   GREYLIST_RULE_<n> family after the flat pass and a rule match RETURNS ALLOWED, so a greylist
+   configured with rules and no flat entry does not deny everything -- the alert below would be
+   stating something the runtime does not do. The family is read straight out of `config` rather
+   than out of `filtered_settings`, because a suffixed rule (GREYLIST_RULE_2) exists only as a
+   stored row; the manifest names the base alone.
+
+   This is now WIDER than the server-side guard, which still counts only the `multivalue` lists
+   (app/models/config.py, the cross-key rule after the per-key loop) and so refuses a flip to
+   USE_GREYLIST=yes backed by rules alone. Not a fork: that guard is about the FLIP, this alert is
+   about an already-enabled scope, and they answer different questions. Widening the guard is an
+   open question for the PO -- see .cache/results-2026-08-31-wave9/L2-rules-ui-report.md. #}
+{%- set gl_rule_base = ac_prefix ~ "_RULE" -%}
 {%- set gl = namespace(has_entry=false) -%}
 {%- for key, data in filtered_settings.items() -%}
     {%- if data.get("type") == "multivalue" and key.startswith("GREYLIST_") and config.get(key, {}).get("value", data.get("default", "")) | trim -%}
+        {%- set gl.has_entry = true -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- for key, entry in config.items() -%}
+    {%- if (key == gl_rule_base or (key.startswith(gl_rule_base ~ "_") and key[gl_rule_base | length + 1:].isdigit())) and (entry.get("value", "") | trim) -%}
         {%- set gl.has_entry = true -%}
     {%- endif -%}
 {%- endfor -%}
@@ -59,4 +90,7 @@
         </div>
     </section>
     {% include "plugin_bodies/access_control/list_matrix.html" %}
+    {# Composite AND rules, after the flat lists they are OR'd with. `ac_rule_multiples` is
+       computed above so the `multiple`-rendering check can see `get_multiples` in this file. #}
+    {% include "plugin_bodies/access_control/rules.html" %}
 </div>

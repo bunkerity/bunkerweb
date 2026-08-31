@@ -1,0 +1,302 @@
+{# Composite-rule editing, shared by the three list bodies (blacklist, whitelist, greylist).
+
+   A rule is ONE stored string in a multisite numeric-suffix family -- `<PREFIX>_RULE`,
+   `<PREFIX>_RULE_1`, `<PREFIX>_RULE_2`, ... -- holding a conjunction of terms:
+
+       <rule> := <term> ( " AND " <term> )*
+       <term> := [ "NOT " ] <kind> ":" <value>
+       <kind> := ip | country | asn | rdns | ua | uri
+
+   Rules are OR'd with each other and with the flat lists of the same plugin, and a value may be
+   a resource-group token `@name`. The grammar is the engine's, frozen; this file only edits it.
+
+   ======================= WHY THE STRING IS THE FIELD =======================
+   The `<input>` that carries the whole rule expression is the ONLY named control here. Every
+   chip below it is nameless chrome that rewrites that one input, exactly the way
+   models/multivalue_setting.html drives its own hidden input. That is not a stylistic choice:
+   one stored key is one form field, so a term row cannot be a field of its own without
+   inventing a second save path. It also makes the JS optional -- see below.
+
+   ======================= HIDE, NEVER OMIT =======================
+   `postable_scope` walks the STORED config and base-matches (models/save_scope.py:99-110), so a
+   stored `<PREFIX>_RULE_2` is inside this page's declared scope by its own name, and an in-scope
+   key the POST does not carry has its row DELETED (db_methods/config_save.py:579-585). Every
+   suffix therefore renders on every load, collapsed or not -- `.multiple-collapse` hides with
+   Bootstrap's `collapse`, which suppresses rendering only, so the input still serialises.
+   Deleting a rule means the operator removes its group and the family posts WITHOUT that suffix;
+   that is the same gesture (and the same shared handler) every other numeric-suffix family uses.
+   Pinned by tests/unit/ui/test_plugin_settings_bodies.py
+   ::test_every_shipped_body_renders_the_suffixed_rows_it_declares.
+
+   ======================= THE CLONER OWNS ADD/REMOVE RULE =======================
+   The markup contract components/settings-widgets.js was written against is reproduced exactly:
+   `#multiple-<plugin>-<group>` wrapping one `.multiple-container` per suffix, each holding a
+   `.multiple-collapse` with id `#multiple-<plugin>-<group>-<suffix>`, an `.add-multiple` button
+   on suffix 0 only, a `.remove-multiple` on the others, a `.show-multiple` toggle, and the
+   container's FIRST `<h6>` as the title the cloner re-numbers. Reproduced rather than delegated
+   to models/plugin_settings_body.html because that block renders the generic field dispatch and
+   its own "Multiple settings" card header, neither of which fits a stage section -- but the
+   contract above is the part that must not drift, so it is spelled out here rather than left to
+   be re-derived. A rule cloned from a filled one keeps that rule's chip rows with their values
+   blanked by `resetInputField`; static/js/components/access-control-rules.js rebuilds every
+   rule's chips from its own (already reset) input right after, the same fix
+   `rebuildMultivalueRows` is for the multivalue widget.
+
+   ======================= NO JS, NO DATA LOSS =======================
+   The chips are server-rendered, so the stored rule is legible with the script absent, and the
+   named input still posts its stored value -- a save is then a no-op rather than a deletion.
+   What is lost without JS is only the ability to EDIT a term, which is exactly what
+   models/multivalue_setting.html already trades away.
+
+   A term whose kind is not in the grammar is dropped from the chips but NOT from the input, so
+   an expression this page cannot draw still round-trips untouched through a save that does not
+   edit it.
+
+   Caller must set:
+     * `ac_prefix`     -- "BLACKLIST" / "WHITELIST" / "GREYLIST"
+     * `ac_rule_multiples` -- `get_multiples(...)` for this plugin, called in the BODY so the
+                        static half of ::test_every_shipped_body_declares_no_multiple_setting_it_
+                        cannot_render sees it there. Only families whose base setting is named
+                        `<PREFIX>_RULE` are claimed; anything else falls through to the caller's
+                        straggler backstop, which is loud rather than silently lossy. #}
+{%- from "components/button.html" import button -%}
+{%- set ac_rule_kinds = ["ip", "country", "asn", "rdns", "ua", "uri"] -%}
+{# Grammar kind -> resource-group kind (RESOURCE_KINDS_ENUM in src/common/db/model.py). Only `ua`
+   differs, and resolving it HERE rather than in JS is what lets the picker below carry the
+   grammar's own kind on every option: the script compares two strings and needs no table. #}
+{%- set ac_rule_group_kinds = {"ip": "ip", "country": "country", "asn": "asn", "rdns": "rdns", "ua": "user_agent", "uri": "uri"} -%}
+{# The engine accepts the resource-group spelling of a kind as an alias for the grammar's own
+   (`user_agent` for `ua`), so the inverse of the map above IS the alias table. Derived rather than
+   written twice, and published to the script below: the grammar lives in this file, and
+   static/js/components/access-control-rules.js mirrors none of it. #}
+{%- set ac_rule_aliases = {} -%}
+{%- for kind, group_kind in ac_rule_group_kinds.items() if group_kind != kind -%}
+    {%- set _ = ac_rule_aliases.update({group_kind: kind}) -%}
+{%- endfor -%}
+{# The families this section claims. `get_multiples` keys on the manifest's `multiple` name, so
+   the base setting is recovered from the group's suffix-0 entry rather than assumed. #}
+{%- set ac_rule_groups = [] -%}
+{%- for group_name, group in (ac_rule_multiples | default({}, true)).items() -%}
+    {%- for base in (group.get("0") or {}) if base == ac_prefix ~ "_RULE" -%}
+        {%- set _ = ac_rule_groups.append({"name": group_name, "base": base, "data": group["0"][base], "suffixes": group}) -%}
+    {%- endfor -%}
+{%- endfor -%}
+{# One <option> per (group, kind) pair the operator could insert. Rendered for every kind at once
+   and narrowed to the term's kind by the script -- the term's kind is a live control, so a
+   server-side filter would be stale the moment it changes. #}
+{%- set ac_rule_group_options = [] -%}
+{%- for group_id, group in (resource_groups | default({}, true)).items() -%}
+    {%- set group_name = group.get("name", group_id) -%}
+    {%- for kind in ac_rule_kinds -%}
+        {%- set matching = group.get("entries", []) | selectattr("kind", "equalto", ac_rule_group_kinds[kind]) | list -%}
+        {%- if matching -%}
+            {%- set _ = ac_rule_group_options.append({"kind": kind, "name": group_name, "count": matching | length}) -%}
+        {%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
+{# One term row. Used for the server-rendered chips AND for the <template> the script clones, so
+   an added term is the same markup as a stored one -- there is no second shape to keep in step. #}
+{%- macro ac_rule_term(term, disabled) -%}
+    <div class="ac-rule-term input-group input-group-sm mb-1" data-ac-rule-term>
+        <button type="button"
+                class="btn btn-outline-secondary{% if term['not'] %} active{% endif %}"
+                data-ac-rule-not
+                aria-pressed="{{ 'true' if term['not'] else 'false' }}"
+                title="{{ _('settings.access_control.rules.negate_help') }}"
+                {% if disabled %}disabled{% endif %}>{{ _("settings.access_control.rules.negate") }}</button>
+        <select class="form-select flex-grow-0 w-auto"
+                data-ac-rule-kind
+                aria-label="{{ _('settings.access_control.rules.kind') }}"
+                {% if disabled %}disabled{% endif %}>
+            {% for kind in ac_rule_kinds %}
+                <option value="{{ kind }}" {% if term["kind"] == kind %}selected{% endif %}>{{ _("settings.access_control.rules.kind_" + kind) }}</option>
+            {% endfor %}
+        </select>
+        <input type="text"
+               class="form-control"
+               data-ac-rule-term-value
+               value="{{ term['value'] }}"
+               placeholder="{{ _('settings.access_control.rules.value') }}"
+               aria-label="{{ _('settings.access_control.rules.value') }}"
+               {% if disabled %}disabled{% endif %}>
+        {% if ac_rule_group_options %}
+            <select class="form-select flex-grow-0 w-auto"
+                    data-ac-rule-group
+                    aria-label="{{ _('resource_groups.add_to_setting') }}"
+                    {% if disabled %}disabled{% endif %}>
+                <option value="" selected>{{ _("resource_groups.add_to_setting") }}</option>
+                {% for option in ac_rule_group_options | sort(attribute="name") %}
+                    <option value="@{{ option['name'] }}" data-ac-rule-group-kind="{{ option['kind'] }}">@{{ option["name"] }} ({{ option["count"] }})</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        {% if not disabled %}
+            <button type="button"
+                    class="btn btn-outline-danger"
+                    data-ac-rule-term-remove
+                    aria-label="{{ _('settings.access_control.rules.remove_term') }}">
+                <i class="bx bx-x" aria-hidden="true"></i>
+            </button>
+        {% endif %}
+    </div>
+{%- endmacro -%}
+{% if ac_rule_groups %}
+    {# The grammar, published for the script: the separator, the negation prefix and the alias
+       table. The kind list needs no attribute -- the term template's own <select> already carries
+       it, option for option. #}
+    <section class="access-control-group mb-4"
+             data-access-control-group="rules"
+             data-ac-rules
+             data-ac-rule-separator=" AND "
+             data-ac-rule-negation="NOT "
+             data-ac-rule-aliases='{{ ac_rule_aliases | tojson }}'
+             aria-labelledby="access-control-rules-title">
+        <h6 id="access-control-rules-title" class="mb-1 don-jose">{{ _("settings.access_control.rules.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.rules.description") }}</p>
+        {% for family in ac_rule_groups %}
+            <div id="multiple-{{ plugin }}-{{ family['name'] }}">
+                {% for suffix, settings in family["suffixes"].items() %}
+                    {# The one stored key this group edits. Suffix 0 is the base name; every other
+                       suffix is `<base>_<n>`, which is also what the cloner writes when it clones
+                       suffix 0 (it appends `_<suffix>` to the source `name`). #}
+                    {% set setting = family["base"] if suffix == "0" else family["base"] ~ "_" ~ suffix %}
+                    {% set setting_data = family["data"] %}
+                    {# The prelude is a copy of models/plugin_setting_field.html:42-62, which is a
+                       copy of routes/services.py:postable_scope. It has to stay identical to both:
+                       a page that claims a key its form cannot send deletes that row. Evaluated on
+                       THIS suffix's own stored entry, never the base's, because that is what
+                       postable_scope does for a `multiple` setting. #}
+                    {% set setting_config = config.get(setting, {}) %}
+                    {% set setting_default = setting_data.get("default", "") %}
+                    {% set setting_value = setting_config.get("value", setting_default) %}
+                    {% set setting_method = setting_config.get("method", "default") %}
+                    {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                    {% if current_endpoint == "new" or clone %}
+                        {% set setting_method = "default" %}
+                        {% set disabled = false %}
+                    {% endif %}
+                    {% if is_readonly %}
+                        {% set disabled = true %}
+                        {% set setting_method = "readonly" %}
+                    {% endif %}
+                    {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                        {% set disabled = true %}
+                    {% endif %}
+                    {# The stored expression, split back into chips. Jinja has no destructuring, so
+                       the terms are accumulated into a list and the malformed ones dropped -- the
+                       input above still carries the original string either way. #}
+                    {% set ac_terms = [] %}
+                    {% for raw in setting_value.split(" AND ") %}
+                        {% set piece = raw | trim %}
+                        {% set negated = piece.startswith("NOT ") %}
+                        {% set rest = (piece[4:] | trim) if negated else piece %}
+                        {# `user_agent` is the engine's accepted alias for `ua`; normalised here so
+                           a stored expression written either way draws the same chip. The value is
+                           split on the FIRST colon only -- an IPv6 term is `ip:2001:db8::/32`. #}
+                        {% set raw_kind = rest.split(":")[0] | lower %}
+                        {% set kind = "ua" if raw_kind == "user_agent" else raw_kind %}
+                        {% if kind in ac_rule_kinds and ":" in rest %}
+                            {% set _ = ac_terms.append({"not": negated, "kind": kind, "value": rest.split(":", 1)[1]}) %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="row multiple-container pt-2 pb-2">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                {# FIRST h6 of the container: the cloner re-numbers exactly this
+                                   node with `.text()`, so nothing else may live inside it. #}
+                                <h6 class="mb-0 me-2">
+                                    {{ _("settings.access_control.rules.rule") }}
+                                    {% if suffix != "0" %}#{{ suffix }}{% endif %}
+                                </h6>
+                                {# The manifest's own help, the badge every other field gets. It is
+                                   where the grammar is spelled out in full, and this section
+                                   renders no generic field to carry it. `.badge` is what keeps the
+                                   cloner from stripping the tooltip off a cloned rule. #}
+                                <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top"
+                                      data-bs-original-title="{{ setting_data['help'] }}">
+                                    <span class="bx bx-question-mark bx-xs"></span>
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                {% if suffix == "0" %}
+                                    <div class="me-1"
+                                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
+                                         {% endif %}>
+                                        {{ button(id="add-multiple-" + plugin + "-" + family["name"], label="ADD", i18n_key="button.multiple_add", variant="text-bw-green", icon="bx-plus-circle bx-sm", disabled=is_readonly, classes="btn-xs rounded-pill add-multiple p-0 pe-2") }}
+                                    </div>
+                                {% else %}
+                                    {{ button(id="remove-multiple-" + plugin + "-" + family["name"] + "-" + suffix, label="REMOVE", i18n_key="button.multiple_remove", variant="text-danger", icon="bx-trash bx-sm", classes="btn-xs rounded-pill remove-multiple p-0 pe-2") }}
+                                {% endif %}
+                                <button id="show-multiple-{{ plugin }}-{{ family['name'] }}-{{ suffix }}"
+                                        type="button"
+                                        class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#multiple-{{ plugin }}-{{ family['name'] }}-{{ suffix }}"
+                                        aria-expanded="true"
+                                        aria-controls="multiple-{{ plugin }}-{{ family['name'] }}-{{ suffix }}">
+                                    <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span>{{ _("button.multiple_hide") }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="multiple-{{ plugin }}-{{ family['name'] }}-{{ suffix }}"
+                             class="collapse show multiple-collapse pt-0">
+                            <div class="ac-rule mt-2"
+                                 data-ac-rule
+                                 {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                {# THE field. Hidden like the multivalue widget's, for the same
+                                   reason: the chips are the editor, this is the value. #}
+                                <input type="hidden"
+                                       id="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ suffix }}"
+                                       name="{{ setting }}"
+                                       class="plugin-setting ac-rule-value"
+                                       value="{{ setting_value }}"
+                                       data-original="{{ setting_config.get('value', setting_default) if setting_config else setting_default }}"
+                                       data-default="{{ setting_default }}"
+                                       data-method="{{ setting_method }}"
+                                       {% if disabled %}disabled{% endif %}>
+                                <div class="ac-rule-terms" data-ac-rule-terms>
+                                    {% for term in ac_terms %}{{ ac_rule_term(term, disabled) }}{% endfor %}
+                                </div>
+                                {% if not disabled %}
+                                    <button type="button"
+                                            class="btn btn-xs btn-text-secondary rounded-pill p-0 pe-2"
+                                            data-ac-rule-add-term>
+                                        <i class="bx bx-plus-circle bx-sm"></i>&nbsp;<span>{{ _("settings.access_control.rules.add_term") }}</span>
+                                    </button>
+                                {% endif %}
+                                <p class="text-muted small courier-prime mb-0 mt-2">
+                                    <span>{{ _("settings.access_control.rules.expression") }}</span>
+                                    <code data-ac-rule-preview>{{ setting_value }}</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        {# The blank row the script clones for "add term". Inert markup -- a <template>'s content
+           is inactive, so its nameless controls post nothing and its presence cannot widen the
+           scope this page claims. #}
+        <template data-ac-rule-term-template>{{ ac_rule_term({"not": false, "kind": "ip", "value": ""}, false) }}</template>
+    </section>
+    {# The editor is one behaviour shared by three bodies, so it is one file rather than three
+       copies of ~200 lines -- the promotion headers.js' own note calls for when a THIRD body wants
+       the same code. It lives in static/js/components/ with every other shared widget script and
+       NOT in static/js/plugin_bodies/, where a script is paired one-to-one with a body of the same
+       name (tests/unit/ui/test_static_asset_references.py
+       ::test_every_plugin_body_script_the_page_can_ask_for_is_on_disk); a section shared by three
+       bodies has no such twin. `plugin_settings_body_script` therefore cannot reach it, so the
+       SECTION pulls it in -- emitted only where this partial is included, i.e. only on the three
+       pages that have rules to edit, and only once per page.
+
+       `defer` is required, not cosmetic: this tag sits in the content block, ABOVE base.html's own
+       script tags, and only a deferred script runs after jQuery and the message catalog are in
+       place. Deferred scripts execute in document order, so this one runs BEFORE
+       components/settings-widgets.js -- which is why it hooks the multiples cloner through a
+       delegated listener and a `setTimeout`, never by reading anything that file defines. #}
+    <script src="{{ url_for('static', filename='js/components/access-control-rules.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+{% endif %}

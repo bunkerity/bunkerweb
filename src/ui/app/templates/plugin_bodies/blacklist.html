@@ -13,15 +13,28 @@
    section off screen must use the `hidden` attribute rather than dropping it from the loop --
    `postable_scope` claims all 23 keys and an in-scope key the POST does not carry has its row
    DELETED (db_methods/config_save.py:579-585). Pinned by
-   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope. #}
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope.
+
+   ==================== THE `multiple` HALF ====================
+   The composite-rule family (`BLACKLIST_RULE`, `BLACKLIST_RULE_1`, ...) is a `multiple` setting, and
+   `_in_scope` matches a stored `BLACKLIST_RULE_2` by its BASE name (models/save_scope.py:99-110) --
+   so every suffixed rule an operator has ever added is inside this page's declared scope, and a
+   body that renders the base field but not the suffixed rows posts none of them, DELETING every
+   rule past the first on the next save. `get_multiples` is called HERE (rather than inside the
+   partial) so the static half of
+   ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render reads it in this file;
+   plugin_bodies/access_control/rules.html renders the families it hands over, and any OTHER
+   `multiple` family this plugin ever declares falls through to the matrix's straggler backstop,
+   which fails loudly instead of losing rows quietly. #}
 {%- set setting_id_prefix = "setting-" + plugin + "-" -%}
 {%- set ac_prefix = "BLACKLIST" -%}
 {# The two keys this file lays out by hand rather than through the matrix, so the matrix's
    coverage backstop knows they are not missing. #}
-{%- set ac_hand_placed = ["USE_BLACKLIST", "BLACKLIST_COMMUNITY_LISTS"] -%}
+{%- set ac_hand_placed = ["USE_BLACKLIST", "BLACKLIST_COMMUNITY_LISTS", ac_prefix ~ "_RULE"] -%}
 {# Four cells per row (entries, downloaded, exception, exception downloaded) -- blacklist is the
    only one of the three that carries the exception half of the matrix. #}
 {%- set ac_col = "col-12 col-md-6 col-xxl-3 pb-3" -%}
+{%- set ac_rule_multiples = get_multiples(filtered_settings, config) -%}
 <div class="card-body pb-0">
     {% include "plugin_bodies/access_control/decision_order.html" %}
     <section class="access-control-group mb-4"
@@ -54,4 +67,7 @@
         </div>
     </section>
     {% include "plugin_bodies/access_control/list_matrix.html" %}
+    {# Composite AND rules, after the flat lists they are OR'd with. `ac_rule_multiples` is
+       computed above so the `multiple`-rendering check can see `get_multiples` in this file. #}
+    {% include "plugin_bodies/access_control/rules.html" %}
 </div>
