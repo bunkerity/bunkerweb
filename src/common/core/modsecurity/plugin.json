@@ -106,6 +106,15 @@
         { "id": "K", "label": "K - List of matched rules", "value": "K" }
       ]
     },
+    "MODSECURITY_SEC_AUDIT_LOG": {
+      "context": "multisite",
+      "default": "/var/log/bunkerweb/modsec_audit.log",
+      "help": "Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which is not possible on a pipe or a stream.",
+      "id": "modsecurity-sec-audit-log",
+      "label": "SecAuditLog",
+      "regex": "^/var/log/bunkerweb/[\\w-][\\w.-]*$",
+      "type": "text"
+    },
     "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
       "context": "multisite",
       "default": "131072",
