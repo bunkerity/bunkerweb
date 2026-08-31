@@ -65,6 +65,8 @@
   "bwcli": {
     "list": "list.py",
     "save": "save.py",
-    "restore": "restore.py"
+    "restore": "restore.py",
+    "preflight": "preflight.py",
+    "quiesce": "quiesce.py"
   }
 }
