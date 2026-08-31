@@ -98,8 +98,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                     cert_info["issuer"] = issuer[0].value
 
                 # ? Getting the validity period
-                cert_info["valid_from"] = cert.not_valid_before.strftime("%d-%m-%Y %H:%M:%S UTC")
-                cert_info["valid_to"] = cert.not_valid_after.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_from"] = cert.not_valid_before_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
+                cert_info["valid_to"] = cert.not_valid_after_utc.strftime("%d-%m-%Y %H:%M:%S UTC")
 
                 # ? Getting the serial number
                 cert_info["serial_number"] = str(cert.serial_number)
