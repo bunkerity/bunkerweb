@@ -17,7 +17,7 @@ they cannot poison a runtime list consumer.
 """
 
 from re import compile as re_compile
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from resource_validation import RESOURCE_GROUP_RESERVED_ALIASES  # type: ignore
 
@@ -66,6 +66,74 @@ RESOURCE_LIST_SETTINGS: Dict[str, str] = {
 
 _GROUP_TOKEN_RX = re_compile(r"(?<!\S)@[A-Za-z0-9_-]+(?!\S)")
 
+# Composite (AND) rule families. Unlike every other entry above, a rule setting has no single
+# kind: the kind lives in each term's prefix, so these are resolved term by term.
+RULE_SETTINGS = frozenset(("GREYLIST_RULE", "WHITELIST_RULE", "BLACKLIST_RULE"))
+
+# Term kind -> resource kind. "ua" is the grammar's spelling, "user_agent" the resource kind's.
+RULE_TERM_KINDS: Dict[str, str] = {
+    "ip": "ip",
+    "country": "country",
+    "asn": "asn",
+    "rdns": "rdns",
+    "ua": "user_agent",
+    "user_agent": "user_agent",
+    "uri": "uri",
+}
+
+# Kinds whose value is a PCRE regex. A group expands to an alternation for these and to a
+# comma-separated list for the others -- a comma is legal inside a quantifier like {1,3}, so
+# splitting a regex on it would corrupt the pattern.
+_RULE_REGEX_KINDS = frozenset(("ua", "user_agent", "uri"))
+
+_RULE_SEPARATOR = " AND "
+_RULE_TERM_RX = re_compile(r"^(NOT )?([A-Za-z_]+):(.+)$")
+
+
+def is_rule_key(key: str) -> bool:
+    """True for a ``<LIST>_RULE`` / ``<LIST>_RULE_<n>`` key, multisite prefix included."""
+    for base in RULE_SETTINGS:
+        if key == base or key.endswith("_" + base):
+            return True
+        head, _, suffix = key.rpartition("_")
+        if suffix.isdigit() and (head == base or head.endswith("_" + base)):
+            return True
+    return False
+
+
+def _split_rule_terms(value: str):
+    """Yield ``(negation, kind, term_value)`` per term, or None if the rule does not parse.
+
+    Deliberately the same split as ``src/bw/lua/bunkerweb/rules.lua``: on the literal
+    separator, no escaping. A rule that does not parse here is left untouched -- the setting's
+    own regex is what refuses it at save time, and silently rewriting a malformed rule would
+    hide the refusal.
+    """
+    terms = []
+    for segment in value.split(_RULE_SEPARATOR):
+        match = _RULE_TERM_RX.match(segment)
+        if not match:
+            return None
+        negation, kind, term_value = match.groups()
+        if kind.lower() not in RULE_TERM_KINDS:
+            return None
+        terms.append((negation or "", kind, term_value))
+    return terms
+
+
+def group_tokens(setting_id: str, value: str) -> Set[str]:
+    """``@token`` references held by a setting value.
+
+    A flat list holds them as bare space-separated tokens; a composite rule holds them as a
+    term value (``ip:@office``), which ``value.split()`` would never find. Callers that scan
+    stored settings for references to a group must go through this, not through ``split()``.
+    """
+    if not isinstance(value, str) or "@" not in value:
+        return set()
+    if is_rule_key(setting_id):
+        return {term_value for _negation, _kind, term_value in (_split_rule_terms(value) or ()) if term_value.startswith("@")}
+    return {token for token in value.split() if token.startswith("@")}
+
 
 def kind_for_key(key: str) -> Optional[str]:
     """Return the resource kind for a config key, accounting for the optional
@@ -100,10 +168,32 @@ def build_group_index(db: Any) -> Dict[str, Dict[str, List[str]]]:
     return index
 
 
+def _validate_group_token(token: str, kind: str, key: str, group_index: Dict[str, Dict[str, List[str]]]) -> Optional[str]:
+    alias = token[1:]
+    group = group_index.get(alias)
+    if group is None:
+        if kind == "country" and alias.upper() in RESOURCE_GROUP_RESERVED_ALIASES:
+            return None
+        return f"Unknown resource group @{alias} referenced by {key}"
+    if not group.get(kind):
+        return f"Resource group @{alias} has no {kind} entries required by {key}"
+    return None
+
+
 def validate_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Dict[str, List[str]]]) -> Optional[str]:
     """Return an error when a resource-list setting references an unusable group."""
     for key, value in config.items():
         if not isinstance(value, str) or "@" not in value:
+            continue
+        if is_rule_key(key):
+            # A rule term carries its own kind, so each @token is validated against the kind
+            # of the term it sits in. A rule that does not parse is left to the setting regex.
+            for _negation, term_kind, term_value in _split_rule_terms(value) or ():
+                if not term_value.startswith("@"):
+                    continue
+                error = _validate_group_token(term_value, RULE_TERM_KINDS[term_kind.lower()], key, group_index)
+                if error:
+                    return error
             continue
         kind = kind_for_key(key)
         if kind is None:
@@ -112,18 +202,69 @@ def validate_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, 
         for token in value.split():
             if not token.startswith("@"):
                 continue
-            alias = token[1:]
-            group = group_index.get(alias)
-            if group is None:
-                if kind == "country" and alias.upper() in RESOURCE_GROUP_RESERVED_ALIASES:
-                    continue
-                return f"Unknown resource group @{alias} referenced by {key}"
-            if not group.get(kind):
-                return f"Resource group @{alias} has no {kind} entries required by {key}"
+            error = _validate_group_token(token, kind, key, group_index)
+            if error:
+                return error
     return None
 
 
-def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Dict[str, List[str]]]) -> Dict[str, Any]:
+def _expand_rule(value: str, group_index: Dict[str, Dict[str, List[str]]]) -> Optional[str]:
+    """Expand the ``@name`` tokens of one composite rule, or None to kill the rule.
+
+    A term value that is a group token becomes the group's entries of that term's kind: a
+    comma-separated list, or a ``(?:a|b)`` alternation for the regex kinds. Both mean OR
+    *inside* one term, which is what a group is.
+
+    An unresolvable reference kills the WHOLE rule rather than dropping the term. Dropping a
+    term from an AND rule loosens it -- ``ip:@office AND ua:^Bot`` would become ``ua:^Bot``
+    and whitelist every client running that agent. A flat list can afford to shrink; a
+    conjunction cannot.
+
+    So does an expansion that would not parse. Expansion is a third transform on top of the two
+    validation gates, and neither of them sees its output: the setting regex ran on the rule
+    *before* expansion, and a group entry is validated against its own kind's regex, which knows
+    nothing about the rule separator. A group entry holding " and " in any casing would therefore
+    produce a stored rule ``rules.parse`` refuses at load time, i.e. a rule that is silently gone
+    with one error-log line behind it.
+    """
+    terms = _split_rule_terms(value)
+    if terms is None:
+        return value
+    out = []
+    for negation, kind, term_value in terms:
+        if term_value.startswith("@"):
+            resource_kind = RULE_TERM_KINDS[kind.lower()]
+            alias = term_value[1:]
+            group = group_index.get(alias)
+            if group is None and resource_kind == "country" and alias.upper() in RESOURCE_GROUP_RESERVED_ALIASES:
+                # Legacy built-in country alias whose seeded group is absent: keep it, the
+                # country plugin expands @EU and friends itself.
+                out.append(f"{negation}{kind}:{term_value}")
+                continue
+            entries = [] if group is None else group.get(resource_kind, [])
+            if not entries:
+                return None
+            if kind.lower() in _RULE_REGEX_KINDS:
+                term_value = "(?:" + "|".join(entries) + ")"
+            else:
+                term_value = ",".join(entries)
+            # An expanded rule must still parse. ``rules.parse`` refuses any term whose value
+            # holds " and " in any casing -- that is the separator, and there is no escaping
+            # syntax -- so a group entry carrying one would produce a rule the runtime drops with
+            # only an error-log line to show for it. Neither gate sees this: the setting regex
+            # validated the rule *before* expansion, and the group entry's own kind regex never
+            # looks for the rule separator. Kill the rule instead, the same fail-closed answer an
+            # unresolvable reference gets -- dropping just the term would widen the conjunction.
+            # Lowercased and padded on the right only, so a trailing " and" is caught while a
+            # value merely *starting* with "and" is not -- byte for byte what ``rules.parse``
+            # does with `value:lower() .. " "`.
+            if _RULE_SEPARATOR.lower() in (term_value + " ").lower():
+                return None
+        out.append(f"{negation}{kind}:{term_value}")
+    return _RULE_SEPARATOR.join(out)
+
+
+def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Dict[str, List[str]]], logger: Any = None) -> Dict[str, Any]:
     """Return a copy of ``config`` with ``@name`` tokens in list settings expanded.
 
     Tokens are replaced by the referenced group's entries of the setting's kind;
@@ -134,6 +275,14 @@ def expand_resource_group_refs(config: Dict[str, Any], group_index: Dict[str, Di
     out = config.copy()
     for key, value in config.items():
         if not isinstance(value, str) or "@" not in value:
+            continue
+        if is_rule_key(key):
+            expanded = _expand_rule(value, group_index)
+            if expanded is None:
+                if logger is not None:
+                    logger.warning(f"{key} references a resource group that does not expand into a usable rule, rule dropped: {value}")
+                expanded = ""
+            out[key] = expanded
             continue
         kind = kind_for_key(key)
         if kind is None:
@@ -175,11 +324,11 @@ def expand_config_groups(config: Dict[str, Any], db: Any, logger: Any = None) ->
     legacy built-in country aliases are preserved.
     """
     if db is None:
-        return expand_resource_group_refs(config, {})
+        return expand_resource_group_refs(config, {}, logger)
     try:
         group_index = build_group_index(db)
     except Exception as exc:  # noqa: BLE001 - never break config generation over groups
         if logger is not None:
             logger.warning(f"Could not expand resource group references: {exc}")
-        return expand_resource_group_refs(config, {})
-    return expand_resource_group_refs(config, group_index)
+        return expand_resource_group_refs(config, {}, logger)
+    return expand_resource_group_refs(config, group_index, logger)

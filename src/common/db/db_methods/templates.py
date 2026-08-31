@@ -18,7 +18,7 @@ from model import (
 )  # type: ignore
 
 from common_utils import bytes_hash, merge_template_settings, split_templates  # type: ignore
-from resource_group_resolver import kind_for_key, validate_resource_group_refs  # type: ignore
+from resource_group_resolver import is_rule_key, kind_for_key, validate_resource_group_refs  # type: ignore
 
 from sqlalchemy import case, delete, select, update
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -452,7 +452,7 @@ class DatabaseTemplatesMixin(DatabaseMixinBase):
         semantic_config = {
             f"{entity['setting_id']}_{entity['suffix']}" if entity["suffix"] else entity["setting_id"]: entity["default"] for entity in setting_entities
         }
-        if any(isinstance(value, str) and "@" in value and kind_for_key(key) for key, value in semantic_config.items()):
+        if any(isinstance(value, str) and "@" in value and (kind_for_key(key) or is_rule_key(key)) for key, value in semantic_config.items()):
             try:
                 group_index = self._get_resource_group_index(session)
             except (ProgrammingError, OperationalError) as exc:

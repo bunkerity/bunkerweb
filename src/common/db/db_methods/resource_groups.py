@@ -25,7 +25,7 @@ from model import (
     Templates,
 )  # type: ignore
 
-from resource_group_resolver import RESOURCE_LIST_SETTINGS  # type: ignore
+from resource_group_resolver import RESOURCE_LIST_SETTINGS, RULE_SETTINGS, group_tokens  # type: ignore
 from resource_validation import (  # type: ignore
     RESOURCE_GROUP_MAX_COMMENT_LENGTH,
     RESOURCE_GROUP_MAX_DESCRIPTION_LENGTH,
@@ -164,7 +164,11 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
         if not groups:
             return references
         tokens = {group_id: f"@{name}" for group_id, name in groups.items()}
-        compatible_settings = tuple(RESOURCE_LIST_SETTINGS)
+        # The composite rule families carry their @tokens inside a term (``ip:@office``), so
+        # they are scanned here too -- and through group_tokens(), because splitting a rule on
+        # whitespace finds no bare token and a group referenced only by a rule would look
+        # unreferenced (and be deletable out from under it).
+        compatible_settings = tuple(RESOURCE_LIST_SETTINGS) + tuple(RULE_SETTINGS)
 
         global_rows = session.execute(
             select(
@@ -211,7 +215,7 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
         )
 
         for row in global_rows:
-            row_tokens = row.value.split() if row.value else ()
+            row_tokens = group_tokens(row.setting_id, row.value)
             for group_id, token in tokens.items():
                 if token in row_tokens:
                     references[group_id].append(
@@ -225,7 +229,7 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
                         }
                     )
         for row in service_rows:
-            row_tokens = row.value.split() if row.value else ()
+            row_tokens = group_tokens(row.setting_id, row.value)
             for group_id, token in tokens.items():
                 if token in row_tokens:
                     references[group_id].append(
@@ -239,7 +243,7 @@ class DatabaseResourceGroupsMixin(DatabaseMixinBase):
                         }
                     )
         for row in template_rows:
-            row_tokens = row.default.split() if row.default else ()
+            row_tokens = group_tokens(row.setting_id, row.default)
             for group_id, token in tokens.items():
                 if token in row_tokens:
                     references[group_id].append(
