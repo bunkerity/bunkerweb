@@ -34,6 +34,7 @@ import CLI as CLI_MODULE  # noqa: E402
 from API import API  # noqa: E402
 
 VARIABLES_ENV = ("/", "etc", "nginx", "variables.env")
+BW_VARIABLES_ENV = ("/", "etc", "bunkerweb", "variables.env")
 DB_DIR = ("/", "usr", "share", "bunkerweb", "db")
 
 
@@ -51,10 +52,18 @@ def _fake_path_factory(files: dict, dirs: set):
         def open(self):
             return StringIO(files[self._parts])
 
+        # `parse_env_file` reads the whole file at once; `CLI` still builds paths through
+        # `Path(...)`, so both accessors have to exist on the stub.
+        def read_text(self, encoding=None):
+            return files[self._parts]
+
+        def as_posix(self):
+            return "/".join(self._parts).replace("//", "/")
+
     return FakePath
 
 
-def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None):
+def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None, bw_variables=None, metadata=None):
     """Drive the real CLI.__init__ with the filesystem, Redis and terminal stubbed out."""
     monkeypatch.delenv("API_TOKEN", raising=False)
     monkeypatch.delenv("API_SERVER_NAME", raising=False)
@@ -62,9 +71,15 @@ def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None):
     if api_url:
         monkeypatch.setenv("BWCLI_API_URL", api_url)
 
-    files = {VARIABLES_ENV: variables}
+    files = {VARIABLES_ENV: variables} if variables is not None else {}
+    if bw_variables is not None:
+        files[BW_VARIABLES_ENV] = bw_variables
     dirs = {DB_DIR} if instances is not None else set()
-    monkeypatch.setattr(CLI_MODULE, "Path", _fake_path_factory(files, dirs))
+    fake_path = _fake_path_factory(files, dirs)
+    monkeypatch.setattr(CLI_MODULE, "Path", fake_path)
+    # `VARIABLES_PATHS` is built at import time with the real `Path`, so patching the name alone
+    # leaves `CLI.__init__` reading the host's own files.
+    monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", (fake_path(*VARIABLES_ENV), fake_path(*BW_VARIABLES_ENV)))
     monkeypatch.setattr(CLI_MODULE, "handle_docker_secrets", lambda: {})
     monkeypatch.setattr(CLI_MODULE, "get_redis_client", lambda **kwargs: None)
     monkeypatch.setattr(CLI_MODULE, "get_terminal_size", lambda: Mock(columns=80))
@@ -72,6 +87,9 @@ def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None):
     if instances is not None:
         config = dict(line.split("=", 1) for line in variables.splitlines() if "=" in line)
         db = Mock()
+        # An uninitialized schema makes `CLI.__init__` exit, so the healthy metadata is part of
+        # the stub rather than of any single test.
+        db.get_metadata.return_value = metadata if metadata is not None else {"default": False, "is_initialized": True}
         db.get_config.return_value = config
         db.get_instances.return_value = instances
         module = ModuleType("Database")
@@ -179,6 +197,52 @@ def test_the_environment_is_still_honoured_when_it_does_exist():
         assert API("http://10.0.0.1:5000", "bwapi", token="explicit")._API__token == "explicit"
     finally:
         del os.environ["API_TOKEN"]
+
+
+class TestWhereDatabaseUriComesFrom:
+    """`8f38c4b77`: /etc/nginx/variables.env only exists once an instance has rendered its
+    configuration. On a Linux install that has not happened yet, DATABASE_URI lives in
+    /etc/bunkerweb/variables.env, and reading the generated file alone left it empty -- so the
+    CLI silently opened the default SQLite file instead of the stack's database."""
+
+    def test_the_linux_variables_file_is_read_when_the_generated_one_is_absent(self, monkeypatch):
+        cli = _build_cli(
+            monkeypatch,
+            variables=None,
+            bw_variables="DATABASE_URI=postgresql://bunkerweb@db/bunkerweb\nAPI_TOKEN=from-etc-bunkerweb\n",
+        )
+        assert _tokens(cli) == ["from-etc-bunkerweb"]
+
+    def test_the_generated_file_wins_where_both_declare_the_key(self, monkeypatch):
+        """First path listed wins: the rendered configuration is the more specific one."""
+        cli = _build_cli(
+            monkeypatch,
+            variables="API_TOKEN=from-etc-nginx\n",
+            bw_variables="API_TOKEN=from-etc-bunkerweb\n",
+        )
+        assert _tokens(cli) == ["from-etc-nginx"]
+
+    def test_an_empty_value_does_not_shadow_the_other_file(self, monkeypatch):
+        """`variables.env` is written for every key, so the generated file carries `KEY=` for a
+        setting it has no value for. Taking that as "declared" is what left DATABASE_URI empty."""
+        cli = _build_cli(
+            monkeypatch,
+            variables="API_TOKEN=\n",
+            bw_variables="API_TOKEN=from-etc-bunkerweb\n",
+        )
+        assert _tokens(cli) == ["from-etc-bunkerweb"]
+
+    def test_an_uninitialized_database_exits_instead_of_tracebacking(self, monkeypatch):
+        """SQLAlchemy creates the SQLite file on connect, so an unresolved URI connects fine and
+        raises on the first query. Exiting names the actual problem."""
+        with pytest.raises(SystemExit) as excinfo:
+            _build_cli(
+                monkeypatch,
+                variables="API_TOKEN=whatever\n",
+                instances=[{"hostname": "10.0.0.1", "port": 5000, "server_name": "bwapi"}],
+                metadata={"default": True, "is_initialized": False},
+            )
+        assert excinfo.value.code == 1
 
 
 if __name__ == "__main__":

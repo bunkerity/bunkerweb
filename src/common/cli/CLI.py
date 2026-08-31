@@ -11,7 +11,7 @@ from pathlib import Path
 from shutil import which
 from socket import create_connection
 from subprocess import DEVNULL, STDOUT, run
-from sys import argv as sys_argv, path as sys_path
+from sys import argv as sys_argv, exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Any, Optional, Tuple
 
@@ -24,6 +24,9 @@ from ApiCaller import ApiCaller  # type: ignore
 from logger import getLogger  # type: ignore
 
 from common_utils import get_redis_client, handle_docker_secrets, parse_host  # type: ignore
+from env_file import parse_env_file  # type: ignore
+
+VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"), Path(sep, "etc", "bunkerweb", "variables.env"))
 
 
 def is_mounted(path, mountinfo=Path("/proc/self/mountinfo")) -> bool:
@@ -171,12 +174,19 @@ class CLI(ApiCaller):
             # Update environment with secrets
             environ.update(docker_secrets)
 
-        variables_path = Path(sep, "etc", "nginx", "variables.env")
+        # /etc/nginx/variables.env only exists once an instance has rendered its configuration,
+        # while a Linux install keeps DATABASE_URI in /etc/bunkerweb/variables.env. Reading the
+        # generated file alone leaves DATABASE_URI empty whenever the instance has not written
+        # it yet, and the CLI then talks to the default SQLite path instead of the database the
+        # rest of the stack uses.
         self.__variables = {}
         self.__db = None
-        if variables_path.is_file():
-            with variables_path.open() as f:
-                self.__variables = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+        for variables_path in VARIABLES_PATHS:
+            if not variables_path.is_file():
+                continue
+            for key, value in parse_env_file(variables_path).items():
+                if not self.__variables.get(key):
+                    self.__variables[key] = value
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
@@ -184,6 +194,19 @@ class CLI(ApiCaller):
             self.__logger.info("Getting variables from database")
 
             self.__db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
+
+            # SQLAlchemy creates a SQLite file on connect, so an unresolved DATABASE_URI gives a
+            # connection that succeeds against an empty database and a traceback on the first
+            # query. Say which database is missing its schema instead.
+            metadata = self.__db.get_metadata()
+            if metadata.get("default") or not metadata.get("is_initialized"):
+                self.__logger.error(
+                    "The database has no BunkerWeb schema. Check that DATABASE_URI is set in "
+                    f"{' or '.join(path.as_posix() for path in VARIABLES_PATHS)} or in the environment, "
+                    "and that the scheduler has already initialized it."
+                )
+                sys_exit(1)
+
             self.__variables = self.__db.get_config()
 
         assert isinstance(self.__variables, dict), "Failed to get variables from database"
