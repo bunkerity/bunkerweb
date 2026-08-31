@@ -443,7 +443,7 @@ class InstancesUtils:
     ) -> tuple[int, list[dict[str, Any]]]:
         """Fast pagination path for default date-ordered Redis requests queries.
 
-        This path avoids scanning the whole Redis list and only reads the requested page.
+        This path avoids scanning the whole Redis list and only reads until the requested page is full or its scan budget is exhausted.
         """
         if length <= 0:
             return 0, []
@@ -461,39 +461,48 @@ class InstancesUtils:
         if capped_total <= 0 or start >= capped_total:
             return capped_total, []
 
-        fetch_count = min(length, capped_total - start)
-        if fetch_count <= 0:
-            return capped_total, []
-
-        raw_chunk = []
-        if order_dir == "asc":
-            start_idx = scan_start_idx + start
-            end_idx = start_idx + fetch_count - 1
-            raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
-        else:
-            # Descending order: newest first from the capped window.
-            end_idx = total_requests - 1 - start
-            start_idx = max(scan_start_idx, end_idx - fetch_count + 1)
-            raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
-            raw_chunk.reverse()
-
         reports: list[dict[str, Any]] = []
         seen_ids: set = set()
-        for report_raw in raw_chunk:
-            try:
-                report = loads(report_raw)
-            except Exception:
-                continue
-            if not isinstance(report, dict):
-                continue
+        next_idx = scan_start_idx + start if order_dir == "asc" else total_requests - 1 - start
+        # ponytail: scan at most four raw pages; raise only if legitimate reports are commonly sparser.
+        remaining_scan = min(capped_total - start, length * 4)
 
-            report_id = report.get("id")
-            if report_id is not None:
-                if report_id in seen_ids:
+        while len(reports) < length and remaining_scan > 0 and scan_start_idx <= next_idx < total_requests:
+            fetch_count = min(length, remaining_scan)
+            remaining_scan -= fetch_count
+            if order_dir == "asc":
+                start_idx = next_idx
+                end_idx = start_idx + fetch_count - 1
+                next_idx = end_idx + 1
+            else:
+                # Descending order: newest first from the capped window.
+                end_idx = next_idx
+                start_idx = end_idx - fetch_count + 1
+                next_idx = start_idx - 1
+
+            raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
+            if not raw_chunk:
+                break
+            if order_dir == "desc":
+                raw_chunk.reverse()
+
+            for report_raw in raw_chunk:
+                try:
+                    report = loads(report_raw)
+                except Exception:
                     continue
-                seen_ids.add(report_id)
+                if not isinstance(report, dict):
+                    continue
 
-            reports.append(report)
+                report_id = report.get("id")
+                if report_id is not None:
+                    if report_id in seen_ids:
+                        continue
+                    seen_ids.add(report_id)
+
+                reports.append(report)
+                if len(reports) == length:
+                    break
 
         return capped_total, reports
 
