@@ -216,13 +216,6 @@ scripts by hand rather than through `test.sh`, remove it yourself between specs
 settings: a run that set `REDIS_HOST=valkey` leaves the following API answering 500 to every
 `/ping` while it waits on a container that is gone.
 
-A spec that brute-forces the product has no useful upper bound on wall-clock. `crowdsec`
-runs `dirb` through BunkerWeb at a wordlist, and CrowdSec rate-limits it as designed — the
-better the product works, the longer the action takes. One local run spent 24 minutes of
-elapsed time on 17 seconds of CPU there, and `dirb` buffers its output, so a silent log is
-not evidence of a stall: check `TIME` in `ps` before assuming a hang. CI bounds this with a
-job timeout that a workstation run does not have, so budget for it or run that spec last.
-
 Once a stack is up, you can drive narrower loops:
 
 ```bash
@@ -243,6 +236,26 @@ looks for the driver at `./geckodriver` or `/usr/local/bin/geckodriver` — nowh
 Firefox and geckodriver explicitly; a workstation whose only Firefox is the snap fails with
 `NoSuchDriverException`, so symlink your driver into the repo root (it is gitignored, as is the
 `geckodriver.log` the framework writes there on every browser action).
+
+**`restart_stack: false` on an action does not exempt that action from a fresh config** — the
+field controls whether the *next* action's config gets applied before its own assertion runs,
+not the current one (see `action.py`'s docstring). Copy it onto every action in a spec (as
+`customcert.yml`/`bans.yml` do, where it is safe because those specs never change a setting
+mid-file) and only the very first action's config ever takes effect: a later assertion expecting
+a changed setting gets the *previous* value, because the new setting was written to
+`variables.env` but the scheduler was never told to reload before the request fired. Leave it at
+the default `true` unless an action's own config specifically must wait for a later one.
+
+**An nginx variable inside a `config:` value needs its `$` doubled.** A setting like
+`LOG_FORMAT: "CITYPROBE=[$bw_city]END"` lands in `variables.env`, which reaches the scheduler
+container through Compose's `env_file:` — and Compose interpolates `$VAR` in an env file exactly
+like it does in the compose YAML itself. A single `$bw_city` is silently swallowed (no such
+Compose-level variable exists), so nginx's own `log_format` directive never sees the variable
+reference at all. `docker compose` does warn (`The "bw_city" variable is not set. Defaulting to
+a blank string.`) during the push, but nothing surfaces that warning into the test's own
+pass/fail output, so the symptom just looks like the plugin never populated the variable.
+Compose's own escape (`$$` → literal `$`) is what survives the trip: write
+`"CITYPROBE=[$$bw_city]END"` for any setting value that must reach nginx carrying a literal `$`.
 
 ## Stack shape since 1.7
 
@@ -418,4 +431,3 @@ command, not derived from the ban store, so it would pass against a `bwcli` that
 success and removed nothing. The `bwcli` action now takes `not_result` beside `result` —
 either one, enforced by the model — and the spec lists the bans back after lifting them and
 requires each address to be absent. That is the check that fails if the unban is a no-op.
-
