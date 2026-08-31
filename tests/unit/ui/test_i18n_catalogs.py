@@ -139,11 +139,12 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
         ("modal.body.unban_confirmation_alert", "modal.body.unban_confirmation_alert_plural"),
     }
     # A deliberate tripwire, not a fact about gettext: the number only moves when someone adds or
-    # removes keys, and it forces them to look at what they added. Was 2433; 2471 counts the 32
-    # `settings.antibot.*` keys of the antibot settings body (wave 4, lane plugin-pages-1) and the
-    # 3 catalogue keys added alongside it, plus the 3 apply-failure keys. STAGING A SUBSET OF
-    # THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2471
+    # removes keys, and it forces them to look at what they added. Was 2433, then 2471 (the 32
+    # `settings.antibot.*` keys of the antibot settings body, 3 catalogue keys and 3 apply-failure
+    # keys); 2549 adds the 36 `settings.access_control.*` keys and the 42
+    # `settings.modsecurity.*` / `settings.headers.*` keys of the wave 8 configuration pages.
+    # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2549
 
 
 @pytest.mark.parametrize("code", CODES)

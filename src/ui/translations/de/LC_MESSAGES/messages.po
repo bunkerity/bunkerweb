@@ -4327,6 +4327,111 @@ msgstr "Gesamtdienste"
 msgid "services.with_configs"
 msgstr "Mit benutzerdefinierten Konfigurationen"
 
+msgid "settings.access_control.blacklist.community.description"
+msgstr "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+
+msgid "settings.access_control.blacklist.community.title"
+msgstr "Community lists"
+
+msgid "settings.access_control.blacklist.enforcement.description"
+msgstr "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+
+msgid "settings.access_control.country.conflict.clear"
+msgstr "Clear the block list"
+
+msgid "settings.access_control.country.conflict.description"
+msgstr "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set."
+
+msgid "settings.access_control.country.description"
+msgstr "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list."
+
+msgid "settings.access_control.country.exceptions.description"
+msgstr "Requests whose URI matches one of these patterns skip the country rule entirely."
+
+msgid "settings.access_control.country.exceptions.title"
+msgstr "Exceptions"
+
+msgid "settings.access_control.country.mode.all"
+msgstr "No country rule"
+
+msgid "settings.access_control.country.mode.block"
+msgstr "Block these countries"
+
+msgid "settings.access_control.country.mode.only"
+msgstr "Allow only these countries"
+
+msgid "settings.access_control.country.picker_label"
+msgstr "Country rule"
+
+msgid "settings.access_control.country.title"
+msgstr "Country rule"
+
+msgid "settings.access_control.enforcement.title"
+msgstr "Enforcement"
+
+msgid "settings.access_control.greylist.enforcement.description"
+msgstr "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+
+msgid "settings.access_control.greylist.locked_out"
+msgstr "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+
+msgid "settings.access_control.kind.asn"
+msgstr "Autonomous systems (ASN)"
+
+msgid "settings.access_control.kind.ip"
+msgstr "IP addresses and networks"
+
+msgid "settings.access_control.kind.rdns"
+msgstr "Reverse DNS"
+
+msgid "settings.access_control.kind.uri"
+msgstr "URIs"
+
+msgid "settings.access_control.kind.user_agent"
+msgstr "User agents"
+
+msgid "settings.access_control.kinds.description"
+msgstr "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+
+msgid "settings.access_control.kinds.title"
+msgstr "What is matched"
+
+msgid "settings.access_control.order.current"
+msgstr "current page"
+
+msgid "settings.access_control.order.description"
+msgstr "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD."
+
+msgid "settings.access_control.order.off"
+msgstr "Off"
+
+msgid "settings.access_control.order.on"
+msgstr "On"
+
+msgid "settings.access_control.order.title"
+msgstr "Decision order"
+
+msgid "settings.access_control.stage.blacklist"
+msgstr "Blacklist"
+
+msgid "settings.access_control.stage.country"
+msgstr "Country"
+
+msgid "settings.access_control.stage.greylist"
+msgstr "Greylist"
+
+msgid "settings.access_control.stage.whitelist"
+msgstr "Whitelist"
+
+msgid "settings.access_control.unplaced.description"
+msgstr "Declared by the plugin but not yet given a place on this page. They still save normally."
+
+msgid "settings.access_control.unplaced.title"
+msgstr "Other settings"
+
+msgid "settings.access_control.whitelist.enforcement.description"
+msgstr "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+
 msgid "settings.antibot.capjs.hint"
 msgstr "Needs a Cap.js server; the frontend and backend URLs may differ."
 
@@ -4347,6 +4452,9 @@ msgstr "Challenge behaviour"
 
 msgid "settings.antibot.countries.both_set"
 msgstr "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous."
+
+msgid "settings.antibot.countries.both_set_clear"
+msgstr "Clear the skip list"
 
 msgid "settings.antibot.countries.description"
 msgstr "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded."
@@ -4425,6 +4533,132 @@ msgstr "Other settings"
 
 msgid "settings.custom_config.title"
 msgstr "Benutzerdefinierte Konfiguration"
+
+msgid "settings.headers.browser.description"
+msgstr "Small fixed-value headers. An empty value removes the header instead of sending it."
+
+msgid "settings.headers.browser.title"
+msgstr "Browser protections"
+
+msgid "settings.headers.cookies.description"
+msgstr "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+
+msgid "settings.headers.cookies.title"
+msgstr "Cookies"
+
+msgid "settings.headers.csp.description"
+msgstr "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+
+msgid "settings.headers.csp.title"
+msgstr "Content Security Policy"
+
+msgid "settings.headers.notice.csp_report_only"
+msgstr "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce."
+
+msgid "settings.headers.notice.hsts_preload"
+msgstr "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then."
+
+msgid "settings.headers.notice.keep_all"
+msgstr "The keep list is *, so every header the upstream sends wins over the values configured here."
+
+msgid "settings.headers.notice.keep_shadows"
+msgstr "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:"
+
+msgid "settings.headers.permissions.description"
+msgstr "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+
+msgid "settings.headers.permissions.title"
+msgstr "Permissions Policy"
+
+msgid "settings.headers.transport.description"
+msgstr "The Strict-Transport-Security header. Only sent over HTTPS."
+
+msgid "settings.headers.transport.title"
+msgstr "HTTPS enforcement"
+
+msgid "settings.headers.unplaced.description"
+msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+
+msgid "settings.headers.unplaced.title"
+msgstr "Other settings"
+
+msgid "settings.headers.upstream.description"
+msgstr "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+
+msgid "settings.headers.upstream.title"
+msgstr "Upstream and removed headers"
+
+msgid "settings.modsecurity.audit.description"
+msgstr "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+
+msgid "settings.modsecurity.audit.title"
+msgstr "Audit log"
+
+msgid "settings.modsecurity.crs.description"
+msgstr "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+
+msgid "settings.modsecurity.crs.title"
+msgstr "OWASP Core Rule Set"
+
+msgid "settings.modsecurity.crs_plugins.description"
+msgstr "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+
+msgid "settings.modsecurity.crs_plugins.title"
+msgstr "Core Rule Set plugins"
+
+msgid "settings.modsecurity.engine.description"
+msgstr "Whether ModSecurity is loaded at all, and what it does with a rule match."
+
+msgid "settings.modsecurity.engine.title"
+msgstr "Engine"
+
+msgid "settings.modsecurity.global_crs.description"
+msgstr "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+
+msgid "settings.modsecurity.global_crs.title"
+msgstr "Global CRS mode"
+
+msgid "settings.modsecurity.limits.description"
+msgstr "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+
+msgid "settings.modsecurity.limits.title"
+msgstr "Request body limits"
+
+msgid "settings.modsecurity.notice.crs_v3_no_plugins"
+msgstr "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+
+msgid "settings.modsecurity.notice.engine_detect"
+msgstr "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked."
+
+msgid "settings.modsecurity.notice.engine_off"
+msgstr "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree."
+
+msgid "settings.modsecurity.notice.off"
+msgstr "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again."
+
+msgid "settings.modsecurity.tuning.crs_plugins_after"
+msgstr "After CRS plugins"
+
+msgid "settings.modsecurity.tuning.crs_plugins_before"
+msgstr "Before CRS plugins"
+
+msgid "settings.modsecurity.tuning.description"
+msgstr "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded."
+
+msgid "settings.modsecurity.tuning.modsec"
+msgstr "After the Core Rule Set"
+
+msgid "settings.modsecurity.tuning.modsec_crs"
+msgstr "Before the Core Rule Set"
+
+msgid "settings.modsecurity.tuning.title"
+msgstr "Rule tuning"
+
+msgid "settings.modsecurity.unplaced.description"
+msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+
+msgid "settings.modsecurity.unplaced.title"
+msgstr "Other settings"
 
 msgid "settings.multiple.description"
 msgstr "Konfigurieren Sie hier mehrere Instanzen von Einstellungen für dieses Plugin."

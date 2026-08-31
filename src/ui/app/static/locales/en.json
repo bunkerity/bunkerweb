@@ -1567,7 +1567,8 @@
           "only": "Challenge only these countries"
         },
         "picker_label": "Country filter",
-        "title": "Countries"
+        "title": "Countries",
+        "both_set_clear": "Clear the skip list"
       },
       "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
       "exemptions": {
@@ -1605,6 +1606,157 @@
       "unplaced": {
         "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
         "title": "Other settings"
+      }
+    },
+    "access_control": {
+      "order": {
+        "title": "Decision order",
+        "description": "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD.",
+        "current": "current page",
+        "on": "On",
+        "off": "Off"
+      },
+      "stage": {
+        "whitelist": "Whitelist",
+        "blacklist": "Blacklist",
+        "greylist": "Greylist",
+        "country": "Country"
+      },
+      "enforcement": {
+        "title": "Enforcement"
+      },
+      "kinds": {
+        "title": "What is matched",
+        "description": "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+      },
+      "kind": {
+        "ip": "IP addresses and networks",
+        "rdns": "Reverse DNS",
+        "asn": "Autonomous systems (ASN)",
+        "user_agent": "User agents",
+        "uri": "URIs"
+      },
+      "unplaced": {
+        "title": "Other settings",
+        "description": "Declared by the plugin but not yet given a place on this page. They still save normally."
+      },
+      "whitelist": {
+        "enforcement": {
+          "description": "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+        }
+      },
+      "blacklist": {
+        "enforcement": {
+          "description": "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+        },
+        "community": {
+          "title": "Community lists",
+          "description": "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+        }
+      },
+      "greylist": {
+        "enforcement": {
+          "description": "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+        },
+        "locked_out": "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+      },
+      "country": {
+        "title": "Country rule",
+        "description": "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list.",
+        "picker_label": "Country rule",
+        "mode": {
+          "all": "No country rule",
+          "only": "Allow only these countries",
+          "block": "Block these countries"
+        },
+        "conflict": {
+          "description": "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set.",
+          "clear": "Clear the block list"
+        },
+        "exceptions": {
+          "title": "Exceptions",
+          "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
+        }
+      }
+    },
+    "modsecurity": {
+      "engine": {
+        "title": "Engine",
+        "description": "Whether ModSecurity is loaded at all, and what it does with a rule match."
+      },
+      "crs": {
+        "title": "OWASP Core Rule Set",
+        "description": "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+      },
+      "crs_plugins": {
+        "title": "Core Rule Set plugins",
+        "description": "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+      },
+      "global_crs": {
+        "title": "Global CRS mode",
+        "description": "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+      },
+      "audit": {
+        "title": "Audit log",
+        "description": "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+      },
+      "limits": {
+        "title": "Request body limits",
+        "description": "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+      },
+      "tuning": {
+        "title": "Rule tuning",
+        "description": "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded.",
+        "modsec_crs": "Before the Core Rule Set",
+        "modsec": "After the Core Rule Set",
+        "crs_plugins_before": "Before CRS plugins",
+        "crs_plugins_after": "After CRS plugins"
+      },
+      "notice": {
+        "off": "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again.",
+        "engine_off": "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree.",
+        "engine_detect": "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked.",
+        "crs_v3_no_plugins": "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+      },
+      "unplaced": {
+        "title": "Other settings",
+        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+      }
+    },
+    "headers": {
+      "csp": {
+        "title": "Content Security Policy",
+        "description": "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+      },
+      "permissions": {
+        "title": "Permissions Policy",
+        "description": "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+      },
+      "transport": {
+        "title": "HTTPS enforcement",
+        "description": "The Strict-Transport-Security header. Only sent over HTTPS."
+      },
+      "browser": {
+        "title": "Browser protections",
+        "description": "Small fixed-value headers. An empty value removes the header instead of sending it."
+      },
+      "upstream": {
+        "title": "Upstream and removed headers",
+        "description": "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+      },
+      "cookies": {
+        "title": "Cookies",
+        "description": "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+      },
+      "notice": {
+        "csp_report_only": "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce.",
+        "hsts_preload": "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then.",
+        "keep_shadows": "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:",
+        "keep_all": "The keep list is *, so every header the upstream sends wins over the values configured here."
+      },
+      "unplaced": {
+        "title": "Other settings",
+        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
       }
     }
   },
