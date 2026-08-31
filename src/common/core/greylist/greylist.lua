@@ -1,6 +1,7 @@
 local class = require "middleclass"
 local ipmatcher = require "resty.ipmatcher"
 local plugin = require "bunkerweb.plugin"
+local rules = require "bunkerweb.rules"
 local utils = require "bunkerweb.utils"
 
 local greylist = class("greylist", plugin)
@@ -8,6 +9,7 @@ local greylist = class("greylist", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
@@ -15,6 +17,7 @@ local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local regex_match = utils.regex_match
 local get_variable = utils.get_variable
+local get_multiple_variables = utils.get_multiple_variables
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
 local tostring = tostring
@@ -57,6 +60,17 @@ function greylist:initialize(ctx)
 				end
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
+		end
+		-- Composite rules, parsed once in init(). for_server() merges the scopes the way
+		-- utils.get_variable does: a global rule holds unless the service declared that key.
+		self.rules = {}
+		local all_rules, rules_err = self.internalstore:get("plugin_greylist_rules", true)
+		if not all_rules then
+			-- Throttled: the key is missing only when init() did not run for this subsystem,
+			-- which is a per-request condition, not a per-request event.
+			self:log_throttled(ERR, "missing_rules", "can't get greylist rules : " .. rules_err)
+		else
+			self.rules = rules.for_server(all_rules, self.ctx.bw.server_name)
 		end
 	end
 end
@@ -147,7 +161,48 @@ function greylist:init()
 			["URI"] = {},
 		}
 	end
+
+	-- Composite rules : parsed here, once per configuration load, never per request.
+	local ok, rules_err = self:init_rules()
+	if not ok then
+		return self:ret(false, rules_err)
+	end
+
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
+end
+
+-- Parse the GREYLIST_RULE_<n> family for every scope and store it in the internalstore.
+-- A rule that does not parse is dropped with an error : the others still apply, and refusing
+-- to load the whole configuration over one bad row would take the service down.
+function greylist:init_rules()
+	local variables, err = get_multiple_variables({ "GREYLIST_RULE" })
+	if variables == nil then
+		return false, err
+	end
+	local data = {}
+	local count = 0
+	for scope, scoped_vars in pairs(variables) do
+		local parsed, errors = rules.parse_family(scoped_vars, "GREYLIST_RULE")
+		for _, parse_err in ipairs(errors) do
+			self.logger:log(ERR, "invalid greylist rule for " .. scope .. " : " .. parse_err)
+		end
+		for _, warning in ipairs(rules.warnings(parsed)) do
+			self.logger:log(WARN, "greylist rule for " .. scope .. " : " .. warning)
+		end
+		if #parsed > 0 then
+			data[scope] = parsed
+			count = count + #parsed
+		end
+	end
+	local ok
+	ok, err = self.internalstore:set("plugin_greylist_rules", data, nil, true)
+	if not ok then
+		return false, "can't store greylist rules into internalstore : " .. err
+	end
+	if count > 0 then
+		self.logger:log(INFO, "successfully loaded " .. tostring(count) .. " greylist rule(s)")
+	end
+	return true
 end
 
 function greylist:access()
@@ -204,9 +259,49 @@ function greylist:access()
 		end
 	end
 
+	-- Composite rules, after the flat pass : the flat lists are cheaper and already cached,
+	-- and a rule can only ever add a match (rules are OR'd with the lists and with each other).
+	local matched = self:match_rules()
+	if matched then
+		return self:ret(true, "rule " .. matched.id .. " matched (" .. matched.text .. ")")
+	end
+
 	-- Return
 	self:set_metric("counters", "failed_greylist", 1)
 	return self:ret(true, "not in greylist", get_deny_status())
+end
+
+-- Fold the composite rules over this request. Term truths go through the same cachestore the
+-- flat pass uses, under their own `rule_term:` namespace : a term's truth is cached, a rule's
+-- verdict never is, so two rules disagreeing over one term cannot poison each other.
+function greylist:match_rules()
+	if not self.rules or #self.rules == 0 then
+		return nil
+	end
+	return rules.evaluate(self.rules, {
+		ctx = self.ctx,
+		logger = self.logger,
+		rdns_global = self.variables["GREYLIST_RDNS_GLOBAL"] == "yes",
+		rdns_forward_confirm = true,
+		cache_get = function(key)
+			local ok, cached = self:is_in_cache(key)
+			if not ok then
+				self.logger:log(ERR, "error while checking rule term cache : " .. cached)
+				return nil
+			elseif cached == "1" then
+				return true
+			elseif cached == "0" then
+				return false
+			end
+			return nil
+		end,
+		cache_set = function(key, truth)
+			local ok, err = self:add_to_cache(key, truth and "1" or "0")
+			if not ok then
+				self.logger:log(ERR, "error while caching rule term : " .. err)
+			end
+		end,
+	})
 end
 
 function greylist:preread()

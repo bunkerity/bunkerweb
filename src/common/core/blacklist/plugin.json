@@ -144,6 +144,16 @@
       "regex": "^.*$",
       "type": "multivalue"
     },
+    "BLACKLIST_RULE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Composite rule: every term must match for the rule to match. Terms are separated with \" AND \" (uppercase) and each one is [NOT ]<kind>:<value>, where <kind> is ip, country, asn, rdns, ua (alias user_agent) or uri. Example: ip:10.0.0.0/8 AND NOT ua:^curl. Rules are OR'd with each other and with the flat lists above. A value may be a resource-group token like @office. Stream services evaluate ip, country, asn and rdns only.",
+      "id": "blacklist-rule",
+      "label": "Blacklist rule",
+      "regex": "^$|^(?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+(?: AND (?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+)*$",
+      "type": "text",
+      "multiple": "blacklist-rules"
+    },
     "BLACKLIST_IP_URLS": {
       "context": "multisite",
       "default": "",

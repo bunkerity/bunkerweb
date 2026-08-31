@@ -1,6 +1,7 @@
 local class = require "middleclass"
 local ipmatcher = require "resty.ipmatcher"
 local plugin = require "bunkerweb.plugin"
+local rules = require "bunkerweb.rules"
 local utils = require "bunkerweb.utils"
 
 local blacklist = class("blacklist", plugin)
@@ -8,6 +9,7 @@ local blacklist = class("blacklist", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
@@ -15,6 +17,7 @@ local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local regex_match = utils.regex_match
 local get_variable = utils.get_variable
+local get_multiple_variables = utils.get_multiple_variables
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
 local tostring = tostring
@@ -116,6 +119,17 @@ function blacklist:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		-- Composite rules, parsed once in init(). for_server() merges the scopes the way
+		-- utils.get_variable does: a global rule holds unless the service declared that key.
+		self.rules = {}
+		local all_rules, rules_err = self.internalstore:get("plugin_blacklist_rules", true)
+		if not all_rules then
+			-- Throttled: the key is missing only when init() did not run for this subsystem,
+			-- which is a per-request condition, not a per-request event.
+			self:log_throttled(ERR, "missing_rules", "can't get blacklist rules : " .. rules_err)
+		else
+			self.rules = rules.for_server(all_rules, self.ctx.bw.server_name)
+		end
 	end
 end
 
@@ -216,7 +230,48 @@ function blacklist:init()
 			["IGNORE_URI"] = {},
 		}
 	end
+
+	-- Composite rules : parsed here, once per configuration load, never per request.
+	local ok, rules_err = self:init_rules()
+	if not ok then
+		return self:ret(false, rules_err)
+	end
+
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
+end
+
+-- Parse the BLACKLIST_RULE_<n> family for every scope and store it in the internalstore.
+-- A rule that does not parse is dropped with an error : the others still apply, and refusing
+-- to load the whole configuration over one bad row would take the service down.
+function blacklist:init_rules()
+	local variables, err = get_multiple_variables({ "BLACKLIST_RULE" })
+	if variables == nil then
+		return false, err
+	end
+	local data = {}
+	local count = 0
+	for scope, scoped_vars in pairs(variables) do
+		local parsed, errors = rules.parse_family(scoped_vars, "BLACKLIST_RULE")
+		for _, parse_err in ipairs(errors) do
+			self.logger:log(ERR, "invalid blacklist rule for " .. scope .. " : " .. parse_err)
+		end
+		for _, warning in ipairs(rules.warnings(parsed)) do
+			self.logger:log(WARN, "blacklist rule for " .. scope .. " : " .. warning)
+		end
+		if #parsed > 0 then
+			data[scope] = parsed
+			count = count + #parsed
+		end
+	end
+	local ok
+	ok, err = self.internalstore:set("plugin_blacklist_rules", data, nil, true)
+	if not ok then
+		return false, "can't store blacklist rules into internalstore : " .. err
+	end
+	if count > 0 then
+		self.logger:log(INFO, "successfully loaded " .. tostring(count) .. " blacklist rule(s)")
+	end
+	return true
 end
 
 function blacklist:access()
@@ -289,8 +344,168 @@ function blacklist:access()
 		end
 	end
 
+	-- Composite rules, after the flat pass : the flat lists are cheaper and already cached,
+	-- and a rule can only ever add a match (rules are OR'd with the lists and with each other).
+	local matched = self:match_rules()
+	if matched then
+		-- Ignore lists apply to a rule verdict exactly as they apply to a flat-list one: per
+		-- kind. The flat pass suppresses per kind (IGNORE_IP shields the IP check only), so a
+		-- rule is waived only by an ignore whose kind it actually tests -- see is_ignored().
+		local ignored, ignore_reason = self:is_ignored(matched)
+		if ignored then
+			self.logger:log(INFO, "rule " .. matched.id .. " matched but request is ignored (" .. ignore_reason .. ")")
+		else
+			local data = { id = "rule", rule = matched.text }
+			self:set_metric("counters", "failed_rule", 1)
+			return self:ret(
+				true,
+				"rule " .. matched.id .. " matched (" .. matched.text .. ")",
+				get_deny_status(),
+				nil,
+				data
+			)
+		end
+	end
+
 	-- Return
 	return self:ret(true, "not blacklisted")
+end
+
+-- Fold the composite rules over this request. Term truths go through the same cachestore the
+-- flat pass uses, under their own `rule_term:` namespace : a term's truth is cached, a rule's
+-- verdict never is, so two rules disagreeing over one term cannot poison each other.
+function blacklist:match_rules()
+	if not self.rules or #self.rules == 0 then
+		return nil
+	end
+	return rules.evaluate(self.rules, {
+		ctx = self.ctx,
+		logger = self.logger,
+		rdns_global = self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes",
+		-- No forward confirmation, mirroring the flat BLACKLIST_RDNS pass : spoofing a PTR
+		-- into a deny list is not an attack, and requiring the forward lookup would let an
+		-- IP with no A record out of the rule. Safe to differ from greylist/whitelist because
+		-- is_in_cache/add_to_cache prefix every key with "plugin_blacklist_<server>", so this
+		-- looser rDNS answer can never land in a slot they read.
+		rdns_forward_confirm = false,
+		cache_get = function(key)
+			local ok, cached = self:is_in_cache(key)
+			if not ok then
+				self.logger:log(ERR, "error while checking rule term cache : " .. cached)
+				return nil
+			elseif cached == "1" then
+				return true
+			elseif cached == "0" then
+				return false
+			end
+			return nil
+		end,
+		cache_set = function(key, truth)
+			local ok, err = self:add_to_cache(key, truth and "1" or "0")
+			if not ok then
+				self.logger:log(ERR, "error while caching rule term : " .. err)
+			end
+		end,
+	})
+end
+
+-- True when a BLACKLIST_IGNORE_* entry **of a kind the matched rule actually tests** matches
+-- this request. Only ever called after a rule matched, so the rDNS lookup it may trigger is
+-- paid on the deny path alone.
+--
+-- Scope is a security property, not a nicety. The flat pass suppresses per kind : IGNORE_URI
+-- shields the URI check and nothing else (is_blacklisted_uri), IGNORE_IP shields the IP/rDNS/ASN
+-- checks (is_blacklisted_ip), IGNORE_USER_AGENT shields the UA check (is_blacklisted_ua). Waiving
+-- a rule on ANY ignore entry would be strictly weaker than the flat lists it mirrors : with
+-- BLACKLIST_RULE_1 = "ip:203.0.113.0/24 AND country:CN" and BLACKLIST_IGNORE_URI = "^/static",
+-- every request to /static bypasses the rule -- and the URI is attacker-chosen, so the deny is
+-- one path away from off. Only an ignore whose kind appears among the rule's terms may waive it.
+--
+-- `country:` has no ignore counterpart (there is no BLACKLIST_IGNORE_COUNTRY), so a rule made
+-- only of country terms is never waived. That is the fail-closed side and it matches the flat
+-- lists, which have no country list either.
+--
+-- Each block below mirrors the flat pass's own ignore block; they are copies on purpose (the
+-- flat ones are entangled with their list checks and cannot be called for the ignore half
+-- alone). Originals, keep in sync : IGNORE_IP + IGNORE_RDNS + IGNORE_ASN in
+-- is_blacklisted_ip(), IGNORE_URI in is_blacklisted_uri(), IGNORE_USER_AGENT in
+-- is_blacklisted_ua().
+--
+-- @param rule the matched rule ({id, text, terms}) whose term kinds bound the scope
+function blacklist:is_ignored(rule)
+	local kinds = {}
+	for _, term in ipairs(rule.terms) do
+		kinds[term.kind] = true
+	end
+
+	if kinds.ip then
+		local ipm, err = ipmatcher_new(self.lists["IGNORE_IP"])
+		if not ipm then
+			self.logger:log(ERR, "error while instantiating ignore ipmatcher : " .. err)
+		else
+			local match, match_err = ipm:match(self.ctx.bw.remote_addr)
+			if match_err then
+				self.logger:log(ERR, "error while matching ignore ip : " .. match_err)
+			elseif match then
+				return true, "ignore ip"
+			end
+		end
+	end
+
+	if kinds.asn and self.ctx.bw.ip_is_global then
+		local asn = self.ctx.bw.asn_number
+		if asn then
+			for _, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+				if ignore_asn == tostring(asn) then
+					return true, "ignore ASN " .. ignore_asn
+				end
+			end
+		end
+	end
+
+	if kinds.ua and self.ctx.bw.http_user_agent then
+		for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
+			if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+				return true, "ignore UA " .. ignore_ua
+			end
+		end
+	end
+
+	if kinds.uri and self.ctx.bw.uri then
+		for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
+			if regex_match(self.ctx.bw.uri, ignore_uri) then
+				return true, "ignore URI " .. ignore_uri
+			end
+		end
+	end
+
+	if kinds.rdns and #self.lists["IGNORE_RDNS"] > 0 then
+		local check_rdns = true
+		if self.variables["BLACKLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
+			check_rdns = false
+		end
+		if check_rdns then
+			local rdns_list, rdns_err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
+			if not rdns_list then
+				self.logger:log(ERR, "error while getting rdns : " .. rdns_err)
+			else
+				-- Forward-confirmed, fail-closed : same guard the flat pass puts on its own
+				-- ignore bypass, since an unconfirmed PTR here would waive a deny verdict.
+				local suffix = rdns_forward_confirmed(
+					rdns_list,
+					self.lists["IGNORE_RDNS"],
+					self.ctx,
+					self.ctx.bw.remote_addr,
+					self.logger
+				)
+				if suffix then
+					return true, "ignore rDNS " .. suffix
+				end
+			end
+		end
+	end
+
+	return false
 end
 
 function blacklist:preread()

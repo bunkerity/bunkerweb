@@ -75,12 +75,21 @@ package.loaded["middleclass"] = function(_, parent)
     return klass
 end
 package.loaded["resty.ipmatcher"] = { new = function() return { match = function() return false end } end }
+-- The plugin requires bunkerweb.rules at load time; this harness exercises init()'s
+-- list reading only, so the composite-rule family is stubbed empty. A plugin-level
+-- require with no stub here kills the harness at LOAD, not at an assertion.
+package.loaded["bunkerweb.rules"] = {
+    parse_family = function() return {}, {} end,
+    warnings = function() return {} end,
+    for_server = function() return {} end,
+}
 package.loaded["bunkerweb.plugin"] = {
     initialize = function() end,
     ret = function(_, ok, msg) return { ret = ok, msg = msg } end,
 }
 package.loaded["bunkerweb.utils"] = {
     has_variable = function() return true end,
+    get_multiple_variables = function() return {} end,
     get_deny_status = function() return 403 end,
     get_rdns = function() return {} end,
     rdns_forward_confirmed = function() return false end,
