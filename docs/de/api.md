@@ -18,6 +18,7 @@ Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten,
 
 - Netzwerk: Traffic intern halten; an Loopback oder internes Interface binden und Quell-IPs per `API_WHITELIST_IPS` (standardmäßig aktiv) begrenzen.
 - Auth vorhanden: `API_USERNAME`/`API_PASSWORD` (Admin) setzen und bei Bedarf `API_ACL_BOOTSTRAP_FILE` für weitere Nutzer/ACLs; ein Override `API_TOKEN` nur als Notfall behalten.
+- ACL-Scopes: Schreibrechte auf Config, Service, Plugin und Global Settings sind admin-äquivalent (ihr Inhalt landet unverändert als NGINX/Lua-Code in der Konfiguration): nur an vollständig vertrauenswürdige Nutzer vergeben. `instances_create` und `instances_update` ebenso, auf anderem Weg: Aufrufe an eine registrierte Instanz tragen den `API_TOKEN`-Admin-Override, und der Scheduler schiebt die generierte Konfiguration und den Cache (inklusive privater TLS-Schlüssel) an jede registrierte Instanz. Siehe [Berechtigungen und ACL](#berechtigungen-und-acl).
 - Pfad verbergen: beim Reverse Proxy einen nicht offensichtlichen `API_ROOT_PATH` wählen und auf dem Proxy spiegeln.
 - Ratenbegrenzung: aktiviert lassen, außer eine andere Schicht erzwingt gleichwertige Limits; `/auth` ist immer begrenzt.
 - TLS: am Proxy terminieren oder `API_SSL_ENABLED=yes` mit Zertifikat/Key setzen.
@@ -191,8 +192,9 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
 - Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Jeder Nutzer akzeptiert ein Klartext-`password` oder ein vorab gehashtes `password_hash`/`password_bcrypt` (siehe Tipp unten).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`

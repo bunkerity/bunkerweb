@@ -1,5 +1,9 @@
 name: Push on GitHub (REUSABLE)
 
+permissions:
+  contents: write
+  discussions: write
+
 on:
   workflow_call:
     inputs:

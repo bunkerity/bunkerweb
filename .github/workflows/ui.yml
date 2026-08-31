@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write # Trivy SARIF upload
     strategy:
       matrix:
         image: [bunkerweb, scheduler, ui]

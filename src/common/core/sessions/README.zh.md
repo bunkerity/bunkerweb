@@ -48,6 +48,13 @@
     2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`
     3. 这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话
 
+!!! info "会话吊销"
+    未启用 Redis 时，会话数据保存在 Cookie 本身中，因此销毁会话只会清除浏览器中的 Cookie，已签名的 Cookie 在超时前仍然有效。BunkerWeb 会在共享内存中维护一份已销毁会话标识符的拒绝列表，被销毁的 Cookie 在下次使用时会被拒绝。
+
+    - 仅在会话数据存储于 Cookie 时生效。将 `USE_REDIS` 设为 `yes` 后，会话数据保存在服务端，销毁会话本身就会将其删除。
+    - 拒绝列表仅在单个 BunkerWeb 实例内有效。如需在集群范围内吊销会话，请使用 Redis。
+    - 通过 `SESSIONS_REVOCATION_MEMORY_SIZE` 调整其大小。若存储写满或不可用，会话将被视为有效，并记录一条警告。
+
 ### 配置示例
 
 === "基本配置"

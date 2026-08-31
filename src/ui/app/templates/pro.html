@@ -261,6 +261,20 @@
                                         <span data-i18n="button.force_update">Force update</span>
                                     </button>
                                 </form>
+                                <form method="POST" action="{{ url_for("pro") }}/refresh-ui">
+                                    <input type="hidden"
+                                           id="csrf_token"
+                                           name="csrf_token"
+                                           value="{{ csrf_token() }}" />
+                                    <button type="submit"
+                                            class="btn btn-outline-secondary text-uppercase don-jose mt-3"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Reloads the PRO plugins the web UI already has, without downloading anything."
+                                            data-i18n="tooltip.button.refresh_ui_plugins">
+                                        <span data-i18n="button.refresh_ui_plugins">Refresh UI plugins</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

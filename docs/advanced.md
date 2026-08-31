@@ -1124,6 +1124,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Reload re-reads the folder"
+        A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
+
 === "All-in-one"
 
     When using the [All-in-one image](integrations.md#all-in-one-aio-image), you have two choices for adding custom configurations:
@@ -2603,11 +2606,11 @@ There are two main categories of logs to configure:
 
 Service logs are controlled by the `LOG_TYPES` setting, which can accept multiple values separated by spaces (e.g., `LOG_TYPES="stderr syslog"`).
 
-| Value    | Description                                                                                                                                                                   |
-| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Writes logs to a plain file. External rotation is handled by `logrotate` on Linux installs or by your container logging driver on Docker. Required for the Web UI log viewer. |
-| `stderr` | Writes logs to standard error. Standard for containerized environments (`docker logs`).                                                                                       |
-| `syslog` | Sends logs to a syslog server. Requires `LOG_SYSLOG_ADDRESS` to be set.                                                                                                       |
+| Value    | Description                                                                                                                                                                                                                                                                                                                |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Writes logs to a plain file. On Linux installs, external rotation is handled by `logrotate`. In a container, nothing rotates a file a service writes itself: retention is the operator's job, so mount the file to a volume and rotate it yourself, or prefer `stderr`/`syslog` there. Required for the Web UI log viewer. |
+| `stderr` | Writes logs to standard error. Standard for containerized environments (`docker logs`).                                                                                                                                                                                                                                    |
+| `syslog` | Sends logs to a syslog server. Requires `LOG_SYSLOG_ADDRESS` to be set.                                                                                                                                                                                                                                                    |
 
 When using `file`, you should also configure:
 
@@ -2641,6 +2644,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Log File Retention {#log-file-retention}
+
+Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` once it passes 100 MB, keeps seven compressed generations, and uses `copytruncate`.
+
+- **Linux**: the packages depend on `logrotate` and the system runs it on its own timer. Nothing else to do.
+- **All-in-one**: the image ships `logrotate` and runs it hourly under supervisor, using that same policy file.
+- **Docker, Autoconf, Swarm and Kubernetes**: nothing to rotate. `src/bw/Dockerfile` replaces `access.log`, `error.log` and `modsec_audit.log` with symlinks to the container's own stdout and stderr at build time, so retention belongs to your container runtime's logging driver (see [Docker logging best practices](#docker-logging-best-practices) below).
+
+`copytruncate` is what makes one policy fit all of them. It copies the file aside and empties the original in place instead of renaming it, so a writer that never reopens its log keeps writing to the right file. ModSecurity is exactly that writer: it opens the audit log once when the configuration loads and holds the descriptor. Rotating by rename would leave it writing to the archive forever, and the live file empty.
+
+Edit `/etc/logrotate.d/bunkerweb` to change the threshold, the number of generations, or to add a `maxage`. On the All-in-one, mount your own file over that path.
+
+The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](features.md#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself.
+
 ### Integration Defaults & Examples
 
 === "Linux"
@@ -2666,6 +2683,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf / Swarm"
 
     **Default behavior**: `LOG_TYPES="stderr"`. Logs are visible via `docker logs`.
+
+    These images have no BunkerWeb-managed log files to bound: `src/bw/Dockerfile` deletes `access.log`, `error.log` and `modsec_audit.log` at build time and replaces all three with symlinks to the container's own stdout and stderr, so `ACCESS_LOG`, `ERROR_LOG` and `MODSECURITY_SEC_AUDIT_LOG` go straight to the container's log stream by default. Retention there is your container runtime's job, through the logging driver (see [Docker logging best practices](#docker-logging-best-practices) below) or an external collector; BunkerWeb ships no `logrotate` inside its images.
 
     **Example (Adapted from the quickstart guide)**: Keep `docker logs` (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).
 
@@ -2794,6 +2813,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **Default behavior**: same as Docker (`LOG_TYPES="stderr"`), but the All-in-one image keeps `ACCESS_LOG`, `ERROR_LOG` and `MODSECURITY_SEC_AUDIT_LOG` as real files under `/var/log/bunkerweb/` (same defaults as Linux), because the bundled CrowdSec and the Web UI log viewer both read them from disk.
+
+    BunkerWeb bounds them for you there: the image ships `logrotate` and runs it hourly under supervisor, with the same policy the Linux packages install (see [Log File Retention](#log-file-retention) above). Because it rotates with `copytruncate`, the files keep their inode, so the CrowdSec parser and the log viewer follow them across a rotation without restarting.
+
 === "Kubernetes"
 
     **Default behavior**: Logs are written to `stderr` and visible via `kubectl logs`.
@@ -2870,7 +2895,7 @@ log {
 };
 ```
 
-## Docker logging best practices
+## Docker logging best practices {#docker-logging-best-practices}
 
 When using Docker, it's important to manage container logs to prevent them from consuming excessive disk space. By default, Docker uses the `json-file` logging driver, which can lead to very large log files if left unconfigured.
 

@@ -1508,7 +1508,7 @@ def security_txt():
         f"Expires: {expires}",
         "Acknowledgments: https://github.com/bunkerity/bunkerweb/security/advisories",
         "Preferred-Languages: en, fr",
-        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/SECURITY.md",
+        "Policy: https://github.com/bunkerity/bunkerweb/blob/master/.github/SECURITY.md",
     ]
 
     # Canonical is derived from the request, so it is only emitted once the Host header has been

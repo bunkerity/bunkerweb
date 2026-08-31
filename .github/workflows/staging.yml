@@ -132,7 +132,14 @@ jobs:
     with:
       TYPE: ${{ matrix.type }}
       RUNS_ON: ${{ matrix.runs_on }}
-    secrets: inherit
+    secrets:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
+      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
 
   # Delete infrastructures
   delete-infras:

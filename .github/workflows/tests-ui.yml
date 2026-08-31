@@ -1,5 +1,9 @@
 name: Perform tests for UI (REUSABLE)
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_call:
     inputs:

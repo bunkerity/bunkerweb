@@ -135,15 +135,16 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "内存设置"
 
-    | 设置                           | 默认值 | 上下文 | 多个 | 描述                                                                                                             |
-    | ------------------------------ | ------ | ------ | ---- | ---------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。                                                 |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                                                                      |
-    | `DATASTORE_LRU_SIZE`           | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                                                                      |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
+    | 设置                              | 默认值 | 上下文 | 多个 | 描述                                                                                                             |
+    | --------------------------------- | ------ | ------ | ---- | ---------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`  | global | 否   | **工作锁内存大小：** 用于初始化工作进程的 lua_shared_dict 大小。                                                 |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`  | global | 否   | **数据存储内存大小：** 内部数据存储的大小。                                                                      |
+    | `DATASTORE_LRU_SIZE`              | `1k`   | global | 否   | **数据存储 LRU 大小：** 每个工作进程共享数据存储 LRU 的槽数。接受整数或 `k`/`m` 简写（例如 `1k`、`10k`、`1m`）。 |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`  | global | 否   | **缓存存储内存大小：** 内部缓存存储的大小。                                                                      |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`  | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。                                                  |
 
 === "日志设置"
 
@@ -161,12 +162,12 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 === "集成设置"
 
-    | 设置                     | 默认值 | 上下文    | 多个 | 描述                                                                     |
-    | ------------------------ | ------ | --------- | ---- | ------------------------------------------------------------------------ |
-    | `AUTOCONF_MODE`          | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                           |
-    | `SWARM_MODE`             | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                |
-    | `KUBERNETES_MODE`        | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                             |
-    | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。              |
+    | 设置              | 默认值 | 上下文    | 多个 | 描述                                                        |
+    | ----------------- | ------ | --------- | ---- | ----------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。              |
+    | `SWARM_MODE`      | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                   |
+    | `KUBERNETES_MODE` | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                |
+    | `USE_TEMPLATE`    |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。 |
 
 === "Nginx 设置"
 
@@ -270,7 +271,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_DNS_PROVIDER`                 |             | multisite | 否     | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | 是     | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | 是     | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | 否     | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | 否     | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
 | `ACME_DNS_ALIAS`                    |             | multisite | 否     | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
 | `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | 否     | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_KEY_SIZE`                     | `256`       | multisite | 否     | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -2070,26 +2071,26 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                             |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
-| `CROWDSEC_API_KEY`          |                        | global    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
-| `CROWDSEC_MODE`             | `live`                 | global    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
+| `CROWDSEC_API_KEY`          |                        | multisite | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
+| `CROWDSEC_MODE`             | `live`                 | multisite | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
 
 #### 应用程序安全组件设置
 
-| 设置                              | 默认值        | 上下文 | 多个 | 描述                                                                              |
-| --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |               | global | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
+| 设置                              | 默认值        | 上下文    | 多个 | 描述                                                                              |
+| --------------------------------- | ------------- | --------- | ---- | --------------------------------------------------------------------------------- |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
 !!! info "关于操作模式"
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
@@ -3226,7 +3227,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | 否   | **验证类型：** 用于验证域名所有权的方法。选项：`http` 或 `dns`。                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | 否   | **DNS 提供商：** 使用 DNS 验证时，要使用的 DNS 提供商（例如 cloudflare、route53、digitalocean）。                                                                                    |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | 否   | **DNS 传播：** 等待 DNS 传播的时间（秒）。如果未提供值，则使用提供商的默认传播时间。                                                                                                 |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。值可以是原始文本、base64 编码或 JSON 对象。                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | 是   | **凭证项：** 用于 DNS 提供商身份验证的配置项（例如 `cloudflare_api_token 123456`）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。      |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | 否   | **自动解码 Base64 DNS 凭据：** 启用后自动解码 base64 编码的 DNS 提供商凭据（`rfc2136` 提供商除外）。如果凭据故意为 base64，请设置为 `no`。                                           |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | 否   | **通配符证书：** 设置为 `yes` 时，为所有域名创建通配符证书。仅适用于 DNS 验证。                                                                                                      |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | 否   | **使用测试环境：** 设置为 `yes` 时，使用 Let's Encrypt 的测试环境进行测试。测试环境的速率限制较高，但生成的证书不受浏览器信任。                                                      |
@@ -4096,6 +4097,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。                |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
 | `MODSECURITY_CRS_PLUGINS`             |                | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
@@ -4335,7 +4337,7 @@ BunkerWeb 会基于您配置的 CA 证书包和策略评估每一次 TLS 握手�
 | `MTLS_VERIFY_CLIENT`           | `on`   | multisite | 否   | **验证模式：** 选择是否强制要求证书（`on`）、允许可选证书（`optional`），或在不验证 CA 的情况下接受证书（`optional_no_ca`）。                                                                       |
 | `MTLS_URL`                     |        | multisite | 是   | **mTLS URL：** 用于与请求 URI 匹配的正则表达式，仅在匹配的路径上强制要求有效的客户端证书（仅 HTTP）。需要将 `MTLS_VERIFY_CLIENT` 设置为 `optional` 或 `optional_no_ca`。留空则对整个站点强制 mTLS。 |
 | `MTLS_VERIFY_DEPTH`            | `2`    | multisite | 否   | **验证深度：** 接受的客户端证书最大链深。                                                                                                                                                           |
-| `MTLS_FORWARD_CLIENT_HEADERS`   | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。 |
+| `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`  | multisite | 否   | **转发客户端请求头：** 传播验证结果（状态、DN、签发者、序列号、指纹和有效期等 `X-SSL-Client-*` 请求头）。客户端自行发送的 `X-SSL-*` 请求头总是在入口处被剥离，因此这些值无法被伪造。                |
 | `MTLS_CRL_PRIORITY`            | `file` | multisite | 否   | **客户端 CRL 优先级：** CRL 的来源：`file`（路径）或 `data`（base64/PEM）。                                                                                                                         |
 | `MTLS_CRL`                     |        | multisite | 否   | **客户端 CRL 路径：** 指向 PEM 编码证书吊销列表的可选路径，需 Scheduler 可读。仅在成功加载 CA 证书包时生效。NGINX 要求 CRL 文件包含验证链中每个 CA 的吊销列表。                                     |
 | `MTLS_CRL_DATA`                |        | multisite | 否   | **客户端 CRL 数据：** 直接以 base64 或 PEM 提供的吊销列表。                                                                                                                                         |
@@ -5136,7 +5138,7 @@ STREAM 支持 :warning:
     | --------------------------------- | ------ | --------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`   | multisite | 否   | **启用反向代理：** 设置为 `yes` 以启用反向代理功能。                                                                                               |
     | `REVERSE_PROXY_HOST`              |        | multisite | 是   | **后端主机：** 代理资源的完整 URL (proxy_pass)。                                                                                                   |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。                                                                                                        |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | 是   | **位置 URL：** 将被代理到后端服务器的路径。以 `^` 开头或以 `$` 结尾的值将被视为正则表达式 location。                                               |
     | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | 是   | **响应缓冲：** 启用或禁用来自代理资源的响应缓冲。                                                                                                  |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | 是   | **请求缓冲：** 启用或禁用向代理资源发送请求时的缓冲。                                                                                              |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | 是   | **保持连接：** 启用或禁用与代理资源的保持连接。                                                                                                    |
@@ -5858,6 +5860,13 @@ STREAM 支持 :white_check_mark:
     1. 将 `USE_REDIS` 设置为 `yes` 并配置您的 Redis 连接
     2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`
     3. 这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话
+
+!!! info "会话吊销"
+    未启用 Redis 时，会话数据保存在 Cookie 本身中，因此销毁会话只会清除浏览器中的 Cookie，已签名的 Cookie 在超时前仍然有效。BunkerWeb 会在共享内存中维护一份已销毁会话标识符的拒绝列表，被销毁的 Cookie 在下次使用时会被拒绝。
+
+    - 仅在会话数据存储于 Cookie 时生效。将 `USE_REDIS` 设为 `yes` 后，会话数据保存在服务端，销毁会话本身就会将其删除。
+    - 拒绝列表仅在单个 BunkerWeb 实例内有效。如需在集群范围内吊销会话，请使用 Redis。
+    - 通过 `SESSIONS_REVOCATION_MEMORY_SIZE` 调整其大小。若存储写满或不可用，会话将被视为有效，并记录一条警告。
 
 ### 配置示例
 

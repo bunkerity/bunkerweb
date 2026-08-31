@@ -48,7 +48,7 @@
 
 ## Contributing
 
-- Follow the [CONTRIBUTING.md](../CONTRIBUTING.md) and [SECURITY.md](../SECURITY.md) guidelines.
+- Follow the [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) guidelines.
 - Use the [web UI](https://docs.bunkerweb.io/web-ui/) for most configuration and debugging tasks.
 
 ---

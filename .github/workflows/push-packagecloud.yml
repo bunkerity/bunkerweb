@@ -1,5 +1,8 @@
 name: Push packagecloud (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:

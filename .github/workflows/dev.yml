@@ -8,6 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  plumber:
+    uses: ./.github/workflows/plumber.yml
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
   # Containers
   build-containers:
     permissions:
@@ -171,7 +178,7 @@ jobs:
   # Push with dev tag
   push-dev:
     # needs: [tests-ui, tests-core] # TODO: Uncomment when tests are back
-    needs: [build-containers]
+    needs: [plumber, build-containers]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -209,7 +216,7 @@ jobs:
   # Push Linux packages
   push-packages:
     # needs: [tests-ui-linux, tests-core-linux] # TODO: Uncomment when tests are back
-    needs: [build-packages]
+    needs: [plumber, build-packages]
     strategy:
       matrix:
         linux:

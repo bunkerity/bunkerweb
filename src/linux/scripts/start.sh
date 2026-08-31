@@ -69,6 +69,12 @@ function set_loading_state() {
         echo "IS_LOADING=yes" >> "$nginx_variables_path"
     fi
 
+    # The scheduler skips a push whose archive digest matches the ".bw-applied" marker left by
+    # the previous one. Editing variables.env here makes the tree differ from what that marker
+    # describes, so the push carrying IS_LOADING=no would be answered "already applied" and the
+    # instance would stay in the loading state, serving traffic with every Lua plugin disabled.
+    rm -f "$(dirname "$nginx_variables_path")/.bw-applied"
+
     return 0
 }
 

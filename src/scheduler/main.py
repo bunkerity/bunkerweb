@@ -32,6 +32,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 from schedule import every as schedule_every, run_pending
 
 from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude, safe_tar_extractall  # type: ignore
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -44,6 +45,9 @@ APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
 
 RUN = True
+# Set by the SIGHUP handler, consumed by the main loop: rescan /etc/bunkerweb/configs
+# before it gets regenerated from the database.
+RELOAD_SCAN_CONFIGS = False
 SCHEDULER: Optional[JobScheduler] = None
 SCHEDULER_LOCK = Lock()
 
@@ -109,6 +113,14 @@ if not RELOAD_MIN_TIMEOUT.isdigit():
 
 RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
 
+SEND_FILES_MIN_TIMEOUT = getenv("SEND_FILES_MIN_TIMEOUT", "30")
+
+if not SEND_FILES_MIN_TIMEOUT.isdigit():
+    LOGGER.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
+    SEND_FILES_MIN_TIMEOUT = 30
+
+SEND_FILES_MIN_TIMEOUT = int(SEND_FILES_MIN_TIMEOUT)
+
 DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes"
 
 if DISABLE_CONFIGURATION_TESTING:
@@ -136,6 +148,34 @@ def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
     return f"{scheme}://{host}:{port}"
 
 
+def build_cmd_env() -> Dict[str, str]:
+    """Environment handed to the gen/ and save_config subprocesses.
+
+    The logging variables have to travel with it. Without them the child falls back to
+    LOG_TYPES=stderr, so on Linux -- where the scheduler runs with LOG_TYPES=file -- every
+    error the config saver reports lands in journald while the scheduler log file only keeps
+    the one-line "failed" summary, which reads as "no logs at all".
+    """
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+        value = getenv(key)
+        if value:
+            cmd_env[key] = value
+
+    for key, value in environ.items():
+        if "CUSTOM_CONF" in key:
+            cmd_env[key] = value
+
+    return cmd_env
+
+
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
     while APPLYING_CHANGES.is_set() and (datetime.now().astimezone() - current_time).seconds < 30:
@@ -158,26 +198,16 @@ signal(SIGTERM, handle_stop)
 
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
+    global RELOAD_SCAN_CONFIGS
+
     try:
         if SCHEDULER is not None and RUN:
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            RELOAD_SCAN_CONFIGS = True
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
@@ -256,7 +286,14 @@ def wait_for_reachable_instance(timeout: int = 60) -> bool:
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     logger.info(f"Sending {file_path} to {'specific' if api_caller else 'all reachable'} BunkerWeb instances ...")
-    success, responses = (api_caller or SCHEDULER).send_files(file_path.as_posix(), endpoint, response=True)
+    success, responses = (api_caller or SCHEDULER).send_files(
+        file_path.as_posix(),
+        endpoint,
+        # Bounded both ways: healthcheck_job submits five of these into a four-worker pool and
+        # blocks the scheduler loop on the results, so an unbounded value stalls it for two waves.
+        timeout=(5, min(120, max(1, SEND_FILES_MIN_TIMEOUT, 3 * len(SCHEDULER.env.get("SERVER_NAME", "www.example.com").split())))),
+        response=True,
+    )
     fails = []
 
     if not IGNORE_FAIL_SENDING_CONFIG:
@@ -555,16 +592,7 @@ def generate_caches() -> Set[str]:
 
 
 def generate_configs(logger: Logger = LOGGER) -> bool:
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-        "DATABASE_URI": getenv("DATABASE_URI", ""),
-    }
-
-    if getenv("TZ"):
-        cmd_env["TZ"] = getenv("TZ")
+    cmd_env = build_cmd_env()
 
     # run the generator
     proc = subprocess_run(
@@ -791,8 +819,7 @@ if __name__ == "__main__":
 
         dotenv_env = {}
         if tmp_variables_path.is_file():
-            with tmp_variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(tmp_variables_path)
 
         SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
@@ -810,20 +837,7 @@ if __name__ == "__main__":
                 env_content = "\n".join(f"{key}={value}" for key, value in environ.items() if "CUSTOM_CONF" not in key)
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             # run the config saver
             proc = subprocess_run(
@@ -860,7 +874,7 @@ if __name__ == "__main__":
             env["TZ"] = tz
 
         # Instantiate scheduler environment
-        SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
+        SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT), "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT)}
 
         task_futures: List[Future] = []
 
@@ -888,20 +902,7 @@ if __name__ == "__main__":
                 )
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
@@ -921,7 +922,7 @@ if __name__ == "__main__":
                 return False
             return True
 
-        def check_configs_changes():
+        def check_configs_changes(*, generate: bool = True) -> bool:
             # Checking if any custom config has been created by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
@@ -931,6 +932,7 @@ if __name__ == "__main__":
             for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+                    continue
 
                 content = file.read_text(encoding="utf-8")
                 service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
@@ -962,7 +964,10 @@ if __name__ == "__main__":
                 except BaseException as e:
                     LOGGER.error(f"Error while saving custom configs to database: {e}")
 
-            generate_custom_configs(SCHEDULER.db.get_custom_configs())
+            if generate:
+                generate_custom_configs(SCHEDULER.db.get_custom_configs())
+
+            return changes
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
@@ -1134,7 +1139,12 @@ if __name__ == "__main__":
             if RUN_JOBS_ONCE:
                 # Only run jobs once
                 if not SCHEDULER.reload(
-                    env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
+                    env
+                    | {
+                        "TZ": getenv("TZ", "UTC"),
+                        "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT),
+                        "SEND_FILES_MIN_TIMEOUT": str(SEND_FILES_MIN_TIMEOUT),
+                    },
                     changed_plugins=changed_plugins,
                     ignore_plugins=["misc", "pro"] if FIRST_START else None,
                 ):
@@ -1345,6 +1355,16 @@ if __name__ == "__main__":
             _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
+                    # SIGHUP: re-read /etc/bunkerweb/configs before the folder gets regenerated
+                    # from the database, otherwise a manual edit is reverted on every reload.
+                    if RELOAD_SCAN_CONFIGS:
+                        RELOAD_SCAN_CONFIGS = False
+                        if not SCHEDULER.db.readonly and check_configs_changes(generate=False):
+                            CONFIGS_NEED_GENERATION = True
+                            CONFIG_NEED_GENERATION = True
+                            NEED_RELOAD = True
+                            continue
+
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()

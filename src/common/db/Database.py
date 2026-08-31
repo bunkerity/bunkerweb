@@ -871,7 +871,11 @@ class Database:
         while error:
             try:
                 meta_cls = sql_metadata()
-                meta_cls.reflect(self.sql_engine)
+                # Reflect only our own tables. An unfiltered reflect() walks every table in the
+                # schema, so a single unreadable one -- an orphaned test_<uuid> probe whose InnoDB
+                # tablespace was lost, for instance -- makes SHOW CREATE TABLE raise and takes the
+                # whole init down. Nothing below reads a table outside Base.metadata anyway.
+                meta_cls.reflect(self.sql_engine, only=lambda table_name, _: table_name in Base.metadata.tables)
                 error = False
             except Exception as e:
                 if (datetime.now().astimezone() - current_time).total_seconds() > timeout_seconds:
@@ -1718,6 +1722,17 @@ class Database:
             db_config = self.get_non_default_settings(with_drafts=True)
 
         normalized_file_names = {k: ("" if v is None else v.strip()) for k, v in (file_names or {}).items()}
+
+        # A value that opens a PEM block and never closes it is a multi-line setting that lost
+        # everything past its first line on the way through a variables file, never something an
+        # operator declared. Saving it replaces a working certificate with its own header and
+        # hands the setting to whichever method is writing, so drop those keys entirely and keep
+        # what is already stored.
+        truncated_pem_keys = {k for k, v in config.items() if isinstance(v, str) and "-----BEGIN" in v and "-----END" not in v}
+        if truncated_pem_keys:
+            self.logger.error(f"Ignoring truncated PEM value for {', '.join(sorted(truncated_pem_keys))}, keeping the stored one")
+            config = {k: v for k, v in config.items() if k not in truncated_pem_keys}
+            explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
 
         explicit_env_keys = frozenset(explicit_keys or ())
 
@@ -2720,21 +2735,23 @@ class Database:
 
             if not disable_cleanup:
                 # Data-loss guard (mirror of the save_config guards above): refuse the
-                # cleanup when a ui/api save_custom_configs call would wipe every
+                # cleanup when a ui/api/manual save_custom_configs call would wipe every
                 # method-owned custom config row while supplying nothing to replace
                 # them. An empty incoming list with existing rows almost always means
                 # the caller built an incomplete payload (route exception, form rebuild
-                # race, missing in-memory state). Genuine "remove all custom configs"
-                # actions delete rows individually through the UI/API, so by the time
-                # an empty payload reaches save_custom_configs there is nothing left
-                # to wipe and this guard is a no-op.
-                if method in ("ui", "api") and not custom_configs:
+                # race, missing in-memory state) or, for the manual method, a configs
+                # folder that is missing or unreadable at scan time. Genuine "remove all
+                # custom configs" actions delete rows individually through the UI/API, so
+                # by the time an empty payload reaches save_custom_configs there is
+                # nothing left to wipe and this guard is a no-op.
+                if method in ("ui", "api", "manual") and not custom_configs:
                     existing_count = session.query(Custom_configs).filter(Custom_configs.method == method).count()
                     if existing_count > 0:
                         self.logger.warning(
                             f"Refusing save_custom_configs: incoming method={method!r} payload is empty while {existing_count} "
                             f"{method}-method custom config row(s) exist in the database. This indicates the caller submitted "
-                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map). Aborting "
+                            f"an incomplete payload (e.g. a service edit that lost its in-memory custom-config map, or an "
+                            f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
                         return message

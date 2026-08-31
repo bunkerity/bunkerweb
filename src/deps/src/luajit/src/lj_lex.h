@@ -13,10 +13,12 @@
 
 /* Lua lexer tokens. */
 #define TKDEF(_, __) \
-  _(and) _(break) _(do) _(else) _(elseif) _(end) _(false) \
+  _(and) _(break) _(const) _(continue) _(do) _(else) _(elseif) _(end) _(false) \
   _(for) _(function) _(goto) _(if) _(in) _(local) _(nil) _(not) _(or) \
   _(repeat) _(return) _(then) _(true) _(until) _(while) \
   __(concat, ..) __(dots, ...) __(eq, ==) __(ge, >=) __(le, <=) __(ne, ~=) \
+  __(nav, ?.) __(coal, \?\?) __(shl, <<) __(shr, >>)  __(sar, ~>>) \
+  __(and_, &&) __(or_, ||) __(ne_, !=) __(arrow, ->) \
   __(label, ::) __(number, <number>) __(name, <name>) __(string, <string>) \
   __(eof, <eof>)
 
@@ -39,6 +41,12 @@ typedef struct BCInsLine {
   BCLine line;		/* Line number for this bytecode. */
 } BCInsLine;
 
+/* Index into variable stack. */
+typedef uint16_t VarIndex;
+
+#define LJ_VINDEX_HSIZE	32	/* Hash table size. Must be a power of 2. */
+#define LJ_VINDEX_MASK	(LJ_VINDEX_HSIZE-1)
+
 /* Info for local variables. Only used during bytecode generation. */
 typedef struct VarInfo {
   GCRef name;		/* Local variable name or goto/label name. */
@@ -46,6 +54,7 @@ typedef struct VarInfo {
   BCPos endpc;		/* First point where the local variable is dead. */
   uint8_t slot;		/* Variable slot. */
   uint8_t info;		/* Variable/goto/label info. */
+  VarIndex prev;	/* Previous entry in variable hash chain. */
 } VarInfo;
 
 /* Lua lexer state. */
@@ -75,6 +84,7 @@ typedef struct LexState {
   uint32_t level;	/* Syntactical nesting level. */
   int endmark;		/* Trust bytecode end marker, even if not at EOF. */
   int fr2;		/* Generate bytecode for LJ_FR2 mode. */
+  VarIndex vhash[LJ_VINDEX_HSIZE];	/* Variable hash chain anchors. */
 } LexState;
 
 LJ_FUNC int lj_lex_setup(lua_State *L, LexState *ls);

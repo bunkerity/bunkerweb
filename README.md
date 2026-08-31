@@ -17,6 +17,7 @@
 		<img src="https://www.bestpractices.dev/projects/8001/badge">
 	</a>
 	<a href="https://gitrated.com/bunkerity/bunkerweb"><img src="https://gitrated.com/bunkerity/bunkerweb/badge" alt="GitRated rating" /></a>
+	<a href="https://score.getplumber.io/github.com/bunkerity/bunkerweb"><img src="https://score.getplumber.io/github.com/bunkerity/bunkerweb.svg" alt="Plumber CI/CD security score" /></a>
 	<br />
 	<a href="https://www.star-history.com/bunkerity/bunkerweb">
 		<picture>
@@ -249,6 +250,8 @@ In other words, the scheduler is the brain of BunkerWeb.
 
 # Setup
 
+Building container images or Linux packages from source? See the [community build guide](docs/building.md).
+
 <!--## BunkerWeb Cloud
 
 <p align="center">
@@ -459,11 +462,11 @@ This project is licensed under the terms of the [GNU Affero General Public Licen
 
 # Contribute
 
-If you would like to contribute to the plugins, you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/raw/v1.6.14/CONTRIBUTING.md) to get started.
+If you would like to contribute to the plugins, you can read the [contributing guidelines](.github/CONTRIBUTING.md) to get started.
 
 # Security policy
 
-We take security bugs as serious issues and encourage responsible disclosure; see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.6.14/SECURITY.md) for more information.
+We take security bugs as serious issues and encourage responsible disclosure; see our [security policy](.github/SECURITY.md) for more information.
 
 <!-- Star History chart hidden: GitHub restricted the stargazers API, so the chart renders an error
      notice instead of data. Uncomment once upstream serves real charts again.

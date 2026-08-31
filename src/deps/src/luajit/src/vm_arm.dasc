@@ -849,6 +849,26 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vmeta_binop			// Binop call for compatibility.
 #endif
   |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  add CARG3, BASE, RC
+  |  mov CARG4, CARG3
+  |  b >1
+  |
+  |->vmeta_bitop:
+  |  add CARG3, BASE, RB
+  |   add CARG4, BASE, RC
+  |1:
+  |  decode_OP OP, INS
+  |   add CARG2, BASE, RA
+  |    str BASE, L->base
+  |   mov CARG1, L
+  |    str PC, SAVE_PC
+  |  str OP, ARG5
+  |  bl extern lj_meta_bitop  // (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  b ->cont_nop
+  |
   |//-- Call metamethod ----------------------------------------------------
   |
   |->vmeta_call:			// Resolve and call __call metamethod.
@@ -3374,6 +3394,61 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   ins_next2
     |  strd CARG34, [BASE, RA]		// Copy result to RA.
     |   ins_next3
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  // RA = dst, RC = src
+    |  lsl RC, RC, #3
+    |  ldrd CARG12, [BASE, RC]
+    |  checktp CARG1, LJ_TISNUM
+    |  bne ->vmeta_bnot
+    |  mvn CARG1, CARG1
+    |  mvn CARG2, #~LJ_TISNUM
+    |   ins_next1
+    |   ins_next2
+    |  strd CARG12, [BASE, RA]
+    |   ins_next3
+    break;
+
+    |.macro ins_bitop, ins, shop
+    |  decode_RB8 RB, INS
+    |   decode_RC8 RC, INS
+    |  // RA = dst*8, RB = src1*8, RC = src2*8
+    |  ldrd CARG12, [BASE, RB]
+    |   ldrd CARG34, [BASE, RC]
+    |  checktp CARG2, LJ_TISNUM
+    |   checktpeq CARG4, LJ_TISNUM
+    |  bne ->vmeta_bitop
+    |.if shop == 1
+    |  and CARG3, CARG3, #31
+    |.endif
+    |  ins CARG1, CARG1, CARG3
+    |  mvn CARG2, #~LJ_TISNUM
+    |   ins_next1
+    |   ins_next2
+    |  strd CARG12, [BASE, RA]
+    |   ins_next3
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop and, 0
+    break;
+  case BC_BOR:
+    |  ins_bitop orr, 0
+    break;
+  case BC_BXOR:
+    |  ins_bitop eor, 0
+    break;
+  case BC_BSHL:
+    |  ins_bitop lsl, 1
+    break;
+  case BC_BSHR:
+    |  ins_bitop lsr, 1
+    break;
+  case BC_BSAR:
+    |  ins_bitop asr, 1
     break;
 
   /* -- Constant ops ------------------------------------------------------ */

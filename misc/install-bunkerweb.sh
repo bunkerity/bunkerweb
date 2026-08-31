@@ -7686,7 +7686,22 @@ perform_upgrade_backup() {
     if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" bwcli plugin backup save; then
         print_status "Backup completed: $BACKUP_DIRECTORY"
     else
-        print_warning "Automatic backup failed. Verify manually before continuing."
+        # The upgrade stops the services and replaces /etc/bunkerweb and the database schema.
+        # Carrying on after the backup the operator asked for has failed leaves nothing to
+        # restore from, so this aborts unless they say otherwise.
+        print_error "Pre-upgrade backup failed. Nothing was upgraded yet."
+        if [ "$TEMP_STARTED" = "yes" ]; then
+            systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+        fi
+        if [ "$INTERACTIVE_MODE" = "yes" ] \
+            && tui_yesno "Pre-upgrade Backup" \
+                "⚠️  The pre-upgrade backup failed. Upgrade anyway, without a backup?" "no"; then
+            print_warning "Continuing without a backup at your request."
+            return 0
+        fi
+        print_error "Take a backup manually (see https://docs.bunkerweb.io/latest/upgrading),"
+        print_error "or re-run with --no-auto-backup to upgrade without one."
+        exit 1
     fi
     if [ "$TEMP_STARTED" = "yes" ]; then
         systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."

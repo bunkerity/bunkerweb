@@ -1122,6 +1122,9 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Le rechargement relit le dossier"
+        Un rechargement relit `/etc/bunkerweb/configs` : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.
+
 === "Tout-en-un"
 
     Lorsque vous utilisez l'image [Tout-en-un](integrations.md#all-in-one-aio-image), vous avez deux options pour ajouter des configurations personnalisées :
@@ -2601,11 +2604,11 @@ Il y a deux catégories principales de journaux à configurer :
 
 Les journaux de service sont contrôlés par le paramètre `LOG_TYPES`, qui peut accepter plusieurs valeurs séparées par des espaces (par exemple, `LOG_TYPES="stderr syslog"`).
 
-| Valeur   | Description                                                                                                                                                                                                                                     |
-| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Écrit les journaux dans un fichier plat. La rotation externe est assurée par `logrotate` sur les installations Linux ou par votre pilote de journalisation de conteneur sous Docker. Requis pour le visualiseur de journaux de l'interface Web. |
-| `stderr` | Écrit les journaux vers l'erreur standard. Standard pour les environnements conteneurisés (`docker logs`).                                                                                                                                      |
-| `syslog` | Envoie les journaux vers un serveur syslog. Nécessite que `LOG_SYSLOG_ADDRESS` soit défini.                                                                                                                                                     |
+| Valeur   | Description                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Écrit les journaux dans un fichier plat. Sur les installations Linux, la rotation externe est assurée par `logrotate`. Dans un conteneur, rien ne fait tourner un fichier qu'un service écrit lui-même : la rétention revient à l'opérateur, montez donc le fichier dans un volume et gérez sa rotation vous-même, ou préférez `stderr`/`syslog` dans ce cas. Requis pour le visualiseur de journaux de l'interface Web. |
+| `stderr` | Écrit les journaux vers l'erreur standard. Standard pour les environnements conteneurisés (`docker logs`).                                                                                                                                                                                                                                                                                                               |
+| `syslog` | Envoie les journaux vers un serveur syslog. Nécessite que `LOG_SYSLOG_ADDRESS` soit défini.                                                                                                                                                                                                                                                                                                                              |
 
 Lors de l'utilisation de `file`, vous devriez également configurer :
 
@@ -2639,6 +2642,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Rétention des fichiers journaux {#log-file-retention}
+
+Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` dès qu'il dépasse 100 Mo, conserve sept générations compressées et utilise `copytruncate`.
+
+- **Linux** : les paquets dépendent de `logrotate`, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.
+- **All-in-one** : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec ce même fichier de politique.
+- **Docker, Autoconf, Swarm et Kubernetes** : rien à faire tourner. `src/bw/Dockerfile` remplace `access.log`, `error.log` et `modsec_audit.log` par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même à la construction de l'image, si bien que la rétention relève du pilote de journalisation de votre environnement d'exécution de conteneurs (voir [les bonnes pratiques de journalisation Docker](#docker-logging-best-practices) plus bas).
+
+`copytruncate` est ce qui permet à une seule politique de convenir à toutes. Il copie le fichier de côté et vide l'original sur place au lieu de le renommer, de sorte qu'un processus qui ne rouvre jamais son journal continue d'écrire dans le bon fichier. ModSecurity est exactement ce genre de processus : il ouvre le journal d'audit une seule fois, au chargement de la configuration, et garde le descripteur. Une rotation par renommage le laisserait écrire dans l'archive pour toujours, avec le fichier actif vide.
+
+Modifiez `/etc/logrotate.d/bunkerweb` pour changer le seuil, le nombre de générations, ou pour ajouter un `maxage`. Sur l'All-in-one, montez votre propre fichier par-dessus ce chemin.
+
+L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même.
+
 ### Valeurs par défaut et exemples d'intégration
 
 === "Linux"
@@ -2664,6 +2681,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf / Swarm"
 
     **Comportement par défaut** : `LOG_TYPES="stderr"`. Les journaux sont visibles via `docker logs`.
+
+    Ces images n'ont, dès le départ, aucun fichier journal géré par BunkerWeb à borner : `src/bw/Dockerfile` supprime `access.log`, `error.log` et `modsec_audit.log` à la construction de l'image et remplace les trois par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même, si bien que `ACCESS_LOG`, `ERROR_LOG` et `MODSECURITY_SEC_AUDIT_LOG` partent directement dans le flux de journalisation du conteneur par défaut. La rétention y relève de votre environnement d'exécution, via le pilote de journalisation (voir [les bonnes pratiques de journalisation Docker](#docker-logging-best-practices) plus bas) ou un collecteur externe ; BunkerWeb n'embarque aucun `logrotate` dans ses images.
 
     **Exemple (Adapté du guide de démarrage rapide)** : Conserver `docker logs` (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).
 
@@ -2792,6 +2811,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **Comportement par défaut** : comme Docker (`LOG_TYPES="stderr"`), mais l'image All-in-one conserve `ACCESS_LOG`, `ERROR_LOG` et `MODSECURITY_SEC_AUDIT_LOG` comme des fichiers réels sous `/var/log/bunkerweb/` (les mêmes valeurs par défaut que sous Linux), car le CrowdSec embarqué et le visualiseur de journaux de l'interface Web les lisent tous deux depuis le disque.
+
+    BunkerWeb les borne pour vous à cet endroit : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec la même politique que celle installée par les paquets Linux (voir [Rétention des fichiers journaux](#log-file-retention) plus haut). Comme la rotation se fait avec `copytruncate`, les fichiers conservent leur inode, si bien que l'analyseur CrowdSec et le visualiseur de journaux les suivent à travers une rotation sans avoir besoin de redémarrer.
+
 === "Kubernetes"
 
     **Comportement par défaut** : Les journaux sont écrits sur `stderr` et visibles via `kubectl logs`.
@@ -2868,7 +2893,7 @@ log {
 };
 ```
 
-## Meilleures pratiques de journalisation Docker
+## Meilleures pratiques de journalisation Docker {#docker-logging-best-practices}
 
 Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
 

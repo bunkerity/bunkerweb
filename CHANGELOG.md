@@ -1,6 +1,40 @@
 # Changelog
 
-## v1.6.14 - 2026/08/??
+## v1.6.15~rc1 - 2026/08/??
+
+- [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
+- [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.
+- [SECURITY] `api`: `instances_create` and `instances_update` are now admin-equivalent: a registered instance receives the configuration and TLS keys. See the API documentation.
+- [SECURITY] `ui`: update DOMPurify to 3.4.14, fixing DOM clobbering and sanitizer bypasses.
+- [FEATURE] `sessions`: a destroyed cookie session is rejected on its next use, per instance or cluster-wide with Redis. See the Sessions documentation.
+- [FEATURE] `all-in-one`: log files are rotated with logrotate; mount your own `/etc/logrotate.d/bunkerweb` to change the policy. See the All-In-One documentation.
+- [FEATURE] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` sets the audit log path, which must be a regular file under `/var/log/bunkerweb`.
+- [BUGFIX] `letsencrypt`: quarantine an incomplete renewal lineage, where every renewal for that service failed forever with no repair path.
+- [BUGFIX] `letsencrypt`: a wildcard certificate no longer shadows the certificate of every other service under the same base. (Refs #3841)
+- [BUGFIX] `customcert`: the wildcard SNI fallback is skipped for services with `USE_CUSTOM_SSL=no`, which were served another service's certificate. (Fixes #3841)
+- [BUGFIX] `letsencrypt`: certificate lookups ignore the case and a trailing dot in the requested name.
+- [BUGFIX] `ui`: the Reports view reads past discarded Redis entries instead of dropping the valid rows behind them. (Refs #3685)
+- [BUGFIX] `scheduler`: configuration and cache pushes scale their timeout with the number of services. Raise the floor with `SEND_FILES_MIN_TIMEOUT`.
+- [BUGFIX] `reverseproxy`, `grpc`: semicolon-separated header and authentication lists accept repeated whitespace, silently rejected before. (Refs #2577)
+- [BUGFIX] `database`: initialization reflects only BunkerWeb's own tables, where one unreadable leftover table aborted it (MariaDB error 1932).
+- [BUGFIX] `scheduler`: the config saver and generator log wherever the Scheduler logs; on Linux their output went to the journal.
+- [BUGFIX] `scheduler`: `systemctl reload bunkerweb-scheduler` re-reads `/etc/bunkerweb/configs`, where manual edits were overwritten until a restart.
+- [BUGFIX] `scheduler`: a custom configuration file nested too deep in the configs tree is skipped, instead of being imported under the wrong type.
+- [BUGFIX] `jobs`: a folder cache produces identical bytes when nothing changed, instead of rewriting the whole blob on every reload.
+- [BUGFIX] `pro`: a forced PRO plugin update re-imports the plugins, where their pages and hooks stayed missing.
+- [BUGFIX] `scheduler`: a multi-line setting value survives `variables.env`, where the truncated first line was saved back over a working certificate. (Fixes #3835)
+- [BUGFIX] `cli`: `bwcli` falls back to `/etc/bunkerweb/variables.env` for `DATABASE_URI` and refuses a schemaless database. (Refs #3836)
+- [BUGFIX] `linux`: the installer stops when the pre-upgrade backup fails. Pass `--no-auto-backup` to skip it. (Refs #3836)
+- [BUGFIX] `letsencrypt`: the UI reads certificate dates from the timezone-aware properties, where they were shown shifted outside UTC. (Fixes #3839)
+- [UI] PRO page: add a **Refresh UI plugins** button that re-extracts the PRO plugins from the database and reloads the workers.
+- [MISC] Add `haptics` to the default Permissions-Policy header; override `PERMISSIONS_POLICY` to allow it.
+- [DEPS] Updated lua-resty-session version to v4.2.0
+- [DEPS] Updated LuaJIT version to v2.1-20260824
+- [DEPS] Updated the web UI vendored libraries: ApexCharts to 6.10.0 and i18next to 26.4.0
+- [DEPS] Updated build tooling: cssnano to 8.0.8 and postcss to 8.5.26
+- [CONTRIBUTION] Thank you [robotter112](https://github.com/robotter112) for your contribution regarding the wildcard SNI fallback ignoring `USE_CUSTOM_SSL=no`. (#3842)
+
+## v1.6.14 - 2026/08/21
 
 - [SECURITY] `api`, `ui`: reject a configuration or plugin name ending in a newline, which passed validation and became a filename that aborted every configuration push.
 - [SECURITY] `crowdsec`: remove the rendered configurations, which hold the Local API bouncer key, when CrowdSec is disabled on the last service.

@@ -133,6 +133,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | No       | **Tamaño de Memoria IPC del Cachestore:** Tamaño del cachestore interno (ipc).                     |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | No       | **Tamaño de Memoria de Fallos del Cachestore:** Tamaño del cachestore interno (fallos).            |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | No       | **Tamaño de Memoria de Bloqueos del Cachestore:** Tamaño del cachestore interno (bloqueos).        |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`          | global   | No       | **Tamaño de Memoria de Revocación de Sesiones:** Tamaño del almacén de identificadores de sesión de cookie revocados. |
 
 === "Ajustes de Registro"
 

@@ -4,7 +4,7 @@ First off all, thanks for being here and showing your support to the project !
 
 We accept many types of contributions whether they are technical or not. Every community feedback, work or help is, and will always be, appreciated.
 
-Before getting started, review `AGENTS.md` for repository structure, tooling, and workflow expectations.
+Before getting started, review [AGENTS.md](../AGENTS.md) for repository structure, tooling, and workflow expectations.
 
 ## Talk about the project
 

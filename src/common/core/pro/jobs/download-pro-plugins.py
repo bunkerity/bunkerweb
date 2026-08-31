@@ -122,7 +122,7 @@ def clean_pro_plugins(db) -> None:
     cleaned_up_plugins = True
 
 
-def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
+def install_plugin(plugin_path: Path, db, preview: bool = True, force: bool = False) -> bool:
     plugin_file = plugin_path.joinpath("plugin.json")
 
     if not plugin_file.is_file():
@@ -160,14 +160,17 @@ def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
                 )
                 return False
 
-            if old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_checksum):
+            if not force and old_checksum and _plugin_checksum_matches_database(new_plugin_path, old_checksum):
                 LOGGER.warning(
                     f"Skipping installation of {'preview version of ' if preview else ''}Pro plugin {metadata['id']} "
                     f"(version {metadata['version']} already installed)"
                 )
                 return False
 
-            LOGGER.warning(f"Detected an integrity mismatch for {'preview version of ' if preview else ''}Pro plugin {metadata['id']}, reinstalling it...")
+            LOGGER.warning(
+                f"{'Forced update requested for' if force else 'Detected an integrity mismatch for'} "
+                f"{'preview version of ' if preview else ''}Pro plugin {metadata['id']}, reinstalling it..."
+            )
 
         if old_version != metadata["version"]:
             LOGGER.warning(
@@ -426,7 +429,7 @@ try:
     try:
         for plugin_path in temp_dir.glob("*"):
             try:
-                if install_plugin(plugin_path, db, not metadata["is_pro"]):
+                if install_plugin(plugin_path, db, not metadata["is_pro"], force=force_update):
                     plugin_nbr += 1
             except FileExistsError:
                 LOGGER.warning(f"Skipping installation of pro plugin {plugin_path.name} (already installed)")

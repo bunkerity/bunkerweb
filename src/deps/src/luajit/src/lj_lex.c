@@ -97,12 +97,18 @@ static void lex_number(LexState *ls, TValue *tv)
   StrScanFmt fmt;
   LexChar c, xp = 'e';
   lj_assertLS(lj_char_isdigit(ls->c), "bad usage");
-  if ((c = ls->c) == '0' && (lex_savenext(ls) | 0x20) == 'x')
-    xp = 'p';
+  if ((c = ls->c) == '0') {
+    lex_save(ls, c);
+    do { c = lex_next(ls); } while (c == '_');
+    if ((c | 0x20) == 'x') xp = 'p';
+  }
   while (lj_char_isident(ls->c) || ls->c == '.' ||
 	 ((ls->c == '-' || ls->c == '+') && (c | 0x20) == xp)) {
-    c = ls->c;
-    lex_savenext(ls);
+    if (LJ_LIKELY(ls->c != '_')) {
+      c = ls->c;
+      lex_save(ls, ls->c);
+    }
+    lex_next(ls);
   }
   lex_save(ls, '\0');
   fmt = lj_strscan_scan((const uint8_t *)ls->sb.b, sbuflen(&ls->sb)-1, tv,
@@ -321,7 +327,9 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
       continue;
     case '-':
       lex_next(ls);
-      if (ls->c != '-') return '-';
+      if (ls->c != '-') {
+	if (ls->c != '>') return '-'; else { lex_next(ls); return TK_arrow; }
+      }
       lex_next(ls);
       if (ls->c == '[') {  /* Long comment "--[=*[...]=*]". */
 	int sep = lex_skipeq(ls);
@@ -353,16 +361,41 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
       if (ls->c != '=') return '='; else { lex_next(ls); return TK_eq; }
     case '<':
       lex_next(ls);
-      if (ls->c != '=') return '<'; else { lex_next(ls); return TK_le; }
+      if (ls->c == '=') { lex_next(ls); return TK_le; }
+      if (ls->c == '<') { lex_next(ls); return TK_shl; }
+      return '<';
     case '>':
       lex_next(ls);
-      if (ls->c != '=') return '>'; else { lex_next(ls); return TK_ge; }
+      if (ls->c == '=') { lex_next(ls); return TK_ge; }
+      if (ls->c == '>') { lex_next(ls); return TK_shr; }
+      return '>';
     case '~':
       lex_next(ls);
-      if (ls->c != '=') return '~'; else { lex_next(ls); return TK_ne; }
+      if (ls->c == '=') { lex_next(ls); return TK_ne; }
+      if (ls->c == '>') {
+	lex_next(ls);
+	if (ls->c != '>') lj_lex_error(ls, '~', LJ_ERR_XSYMBOL);
+	lex_next(ls);
+	return TK_sar;
+      }
+      return '~';
+    case '!':
+      lex_next(ls);
+      if (ls->c != '=') return '!'; else { lex_next(ls); return TK_ne_; }
     case ':':
       lex_next(ls);
       if (ls->c != ':') return ':'; else { lex_next(ls); return TK_label; }
+    case '?':
+      lex_next(ls);
+      if (ls->c == '.') { lex_next(ls); return TK_nav; }
+      if (ls->c == '?') { lex_next(ls); return TK_coal; }
+      return '?';
+    case '&':
+      lex_next(ls);
+      if (ls->c != '&') return '&'; else { lex_next(ls); return TK_and_; }
+    case '|':
+      lex_next(ls);
+      if (ls->c != '|') return '|'; else { lex_next(ls); return TK_or_; }
     case '"':
     case '\'':
       lex_string(ls, tv);
