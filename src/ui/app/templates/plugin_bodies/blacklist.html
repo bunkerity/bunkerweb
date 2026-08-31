@@ -1,0 +1,57 @@
+{# Blacklist's purpose-built settings body, in place of the flat 23-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/blacklist
+   and /global-settings/plugins/blacklist -- so the form, the control keys, `postable_scope` and
+   the writer are all the generic ones. This file owns the LAYOUT and nothing else.
+
+   One of the four access-control bodies. They share the decision-order banner and (for the three
+   list plugins) the kind matrix; they stay four separate pages because a page may only post its
+   OWN plugin's keys. See plugin_bodies/access_control/decision_order.html for that constraint and
+   .cache/results-2026-08-31/L3-pages-access-report.md for the alternatives weighed.
+
+   HIDE, NEVER OMIT: every declared key renders on every load, and a future revision that wants a
+   section off screen must use the `hidden` attribute rather than dropping it from the loop --
+   `postable_scope` claims all 23 keys and an in-scope key the POST does not carry has its row
+   DELETED (db_methods/config_save.py:579-585). Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope. #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set ac_prefix = "BLACKLIST" -%}
+{# The two keys this file lays out by hand rather than through the matrix, so the matrix's
+   coverage backstop knows they are not missing. #}
+{%- set ac_hand_placed = ["USE_BLACKLIST", "BLACKLIST_COMMUNITY_LISTS"] -%}
+{# Four cells per row (entries, downloaded, exception, exception downloaded) -- blacklist is the
+   only one of the three that carries the exception half of the matrix. #}
+{%- set ac_col = "col-12 col-md-6 col-xxl-3 pb-3" -%}
+<div class="card-body pb-0">
+    {% include "plugin_bodies/access_control/decision_order.html" %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="enforcement"
+             aria-labelledby="access-control-enforcement-title">
+        <h6 id="access-control-enforcement-title" class="mb-1 don-jose">{{ _("settings.access_control.enforcement.title") }}</h6>
+        {# Not a tooltip: whitelist runs first and a match returns OK, which breaks the plugin loop
+           (confs/server-http/access-lua.conf:184-192), so a blacklisted client that is also
+           whitelisted is allowed -- the single most common "why is this IP still getting in". #}
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.blacklist.enforcement.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ["USE_BLACKLIST"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = "col-12 col-sm-8 col-lg-5 pb-3" %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    <section class="access-control-group mb-4"
+             data-access-control-group="community"
+             aria-labelledby="access-control-community-title">
+        <h6 id="access-control-community-title" class="mb-1 don-jose">{{ _("settings.access_control.blacklist.community.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.blacklist.community.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ["BLACKLIST_COMMUNITY_LISTS"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = "col-12 col-lg-8 pb-3" %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% include "plugin_bodies/access_control/list_matrix.html" %}
+</div>

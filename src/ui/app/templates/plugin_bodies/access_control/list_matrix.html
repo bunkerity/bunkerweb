@@ -1,0 +1,101 @@
+{# The kind-by-kind matrix shared by the three list bodies (blacklist, whitelist, greylist), plus
+   the straggler backstop every plugin body owes.
+
+   .cache/results-2026-08-24/plugin-pages-candidates.md §5.3 describes the value space of these
+   three plugins as a matrix that the generic grid renders as an undifferentiated column of up to
+   23 fields. This partial renders it AS a matrix: one section per matching kind, and inside it the
+   row of settings that act on that kind -- the entries the operator types, the lists BunkerWeb
+   downloads, and (blacklist only) the exceptions that override both.
+
+   ======================= HIDE, NEVER OMIT =======================
+   Nothing here is conditional on a mode, so every declared setting renders on every load. That is
+   not an accident to be optimised away later: `postable_scope` claims authority over all of this
+   plugin's keys and an in-scope key the POST does not carry has its row DELETED
+   (db_methods/config_save.py:579-585). If a future revision hides a section, it must hide it with
+   the `hidden` attribute -- which suppresses rendering and nothing else, so the inputs still
+   serialise. Never by dropping it from the loop. Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope.
+
+   THE DAY ONE OF THESE PLUGINS DECLARES A `multiple` SETTING, THIS FILE OWES A `get_multiples`
+   LOOP. None of the three declares one today. `_in_scope` matches a stored `FOO_2` by its BASE
+   name (models/save_scope.py:99-110), so one `multiple` in the manifest puts every suffixed row
+   inside the declared scope at once, and a body that renders no cloner posts none of them --
+   deleting them all on the next save. Copy the loop from models/plugin_settings_body.html:122-269.
+   Guarded by ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render.
+
+   Caller must set:
+     * `ac_prefix`      -- "BLACKLIST" / "WHITELIST" / "GREYLIST"
+     * `ac_hand_placed` -- the keys the caller laid out itself (its `USE_*` switch and, for
+                           blacklist, the community lists), so the backstop below does not report
+                           them as unplaced.
+     * `ac_col`         -- optional column class for a matrix cell.
+
+   THE KIND SET IS DERIVED FROM THE MANIFEST, never listed. A kind is a `multivalue` named
+   `<PREFIX>_<KIND>` that is neither a `_URLS` downloader nor an `IGNORE_` exception; its row is
+   then whichever of `<PREFIX>_<KIND>_URLS`, `<PREFIX>_IGNORE_<KIND>`,
+   `<PREFIX>_IGNORE_<KIND>_URLS` and `<PREFIX>_<KIND>_GLOBAL` the manifest actually declares. That
+   is what makes the rDNS row carry `*_RDNS_GLOBAL` on all three plugins without this file naming
+   rDNS, and what makes a new kind appear with its whole row on the day it is declared.
+   Pinned by ::test_the_access_control_matrix_derives_every_declared_kind. #}
+{%- set ac_col = ac_col | default("col-12 col-sm-6 col-lg-4 pb-3", true) -%}
+{%- set ac_hand_placed = ac_hand_placed | default([], true) -%}
+{%- set ac_ns = namespace(kinds=[]) -%}
+{%- for key, data in filtered_settings.items() -%}
+    {%- if data.get("type") == "multivalue" and key.startswith(ac_prefix ~ "_") and not key.endswith("_URLS") and not key.startswith(ac_prefix ~ "_IGNORE_") and key not in ac_hand_placed -%}
+        {%- set _ = ac_ns.kinds.append(key[ac_prefix | length + 1:]) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set ac_rows = [] -%}
+{%- for kind in ac_ns.kinds -%}
+    {%- set _ = ac_rows.append({
+        "kind": kind,
+        "settings": [ac_prefix ~ "_" ~ kind, ac_prefix ~ "_" ~ kind ~ "_URLS", ac_prefix ~ "_IGNORE_" ~ kind, ac_prefix ~ "_IGNORE_" ~ kind ~ "_URLS", ac_prefix ~ "_" ~ kind ~ "_GLOBAL"] | select("in", filtered_settings) | list,
+    }) -%}
+{%- endfor -%}
+<section class="access-control-group mb-3"
+         data-access-control-group="kinds"
+         aria-labelledby="access-control-kinds-title">
+    <h6 id="access-control-kinds-title" class="mb-1 don-jose">{{ _("settings.access_control.kinds.title") }}</h6>
+    <p class="text-muted small courier-prime mb-0">{{ _("settings.access_control.kinds.description") }}</p>
+</section>
+{% for row in ac_rows %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="kind-{{ row['kind'] | lower }}"
+             aria-labelledby="access-control-kind-{{ row['kind'] | lower }}-title">
+        <h6 id="access-control-kind-{{ row['kind'] | lower }}-title" class="mb-2 don-jose">{{ _("settings.access_control.kind." + row["kind"] | lower) }}</h6>
+        <div class="row g-2 gx-6">
+            {# `filtered_settings` and `blacklisted_settings` are applied here for the same reason
+               the generic body applies them (models/plugin_settings_body.html:14): a
+               global-context or blacklisted key must not render. None of these 47 keys is either
+               today -- the filter is what keeps that true if one becomes so. #}
+            {% for setting in row["settings"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = ac_col %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+{% endfor %}
+{# Coverage backstop, not decoration. If one of these manifests grows a setting that fits no row
+   and the caller does not hand-place it, the key would silently stop posting and `postable_scope`
+   would delete its row on the next save. Rendering the stragglers keeps the save correct on day
+   one; ::test_every_shipped_body_places_every_setting_it_declares fails loudly so the placement
+   gets done properly. Kept LAST and visible: an unplaced key is a bug the operator can still see
+   and edit. `data-plugin-body-unplaced` is the CONVENTION every body shares -- the test keys off
+   that attribute and names no plugin. #}
+{% set ac_placed = ac_rows | map(attribute="settings") | sum(start=[]) | list + ac_hand_placed %}
+{% set ac_stragglers = filtered_settings | reject("in", ac_placed) | reject("in", blacklisted_settings) | list %}
+{% if ac_stragglers %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="unplaced"
+             data-plugin-body-unplaced>
+        <h6 class="mb-1 don-jose">{{ _("settings.access_control.unplaced.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.unplaced.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ac_stragglers %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}

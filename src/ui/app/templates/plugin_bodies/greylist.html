@@ -1,0 +1,62 @@
+{# Greylist's purpose-built settings body, in place of the flat 12-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/greylist
+   and /global-settings/plugins/greylist -- so the form, the control keys, `postable_scope` and
+   the writer are all the generic ones. This file owns the LAYOUT and nothing else.
+
+   ================== WHY THIS PAGE CARRIES AN ALERT AND THE OTHERS DO NOT ==================
+   Greylist is DENY-BY-DEFAULT. `core/greylist/greylist.lua:209` returns `get_deny_status()` for a
+   request that matched no entry, and `:212` routes stream traffic through the same `access()`, so
+   an enabled greylist with every list empty denies EVERY request to the service, L7 and L4 alike.
+   Turning it on is one checkbox here and one click on the compose shelf, and the generic grid said
+   nothing at all.
+
+   The flip is already refused server-side (models/config.py, the cross-key rule after the per-key
+   loop: `USE_GREYLIST` reverts to its stored value when no `GREYLIST_*` multivalue carries an
+   entry). This body does NOT re-implement that check as a gate -- it explains it before the
+   operator hits Save, and it flags the state the server guard cannot reach: an ALREADY enabled
+   greylist whose entries were emptied by a later save, which is never re-checked because both save
+   paths strip unchanged keys from `to_check`.
+
+   HIDE, NEVER OMIT: every declared key renders on every load, and a future revision that wants a
+   section off screen must use the `hidden` attribute rather than dropping it from the loop --
+   `postable_scope` claims all 12 keys and an in-scope key the POST does not carry has its row
+   DELETED (db_methods/config_save.py:579-585). #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set ac_prefix = "GREYLIST" -%}
+{%- set ac_hand_placed = ["USE_GREYLIST"] -%}
+{%- set ac_col = "col-12 col-sm-6 col-lg-4 pb-3" -%}
+{# Derived, not hardcoded, and deliberately the same derivation the server-side guard uses:
+   `multivalue` is exactly the ten entry lists (the five direct ones plus their `_URLS` downloader
+   variants) and excludes GREYLIST_RDNS_GLOBAL, which is a `check` and feeds no entry. A greylist
+   entry list added later is covered for free, here and there. #}
+{%- set gl = namespace(has_entry=false) -%}
+{%- for key, data in filtered_settings.items() -%}
+    {%- if data.get("type") == "multivalue" and key.startswith("GREYLIST_") and config.get(key, {}).get("value", data.get("default", "")) | trim -%}
+        {%- set gl.has_entry = true -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set gl_enabled = config.get("USE_GREYLIST", {}).get("value", filtered_settings.get("USE_GREYLIST", {}).get("default", "no")) == "yes" -%}
+<div class="card-body pb-0">
+    {% include "plugin_bodies/access_control/decision_order.html" %}
+    {% if gl_enabled and not gl.has_entry %}
+        <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+            <i class="bx bx-error-circle bx-sm me-2" aria-hidden="true"></i>
+            <span>{{ _("settings.access_control.greylist.locked_out") }}</span>
+        </div>
+    {% endif %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="enforcement"
+             aria-labelledby="access-control-enforcement-title">
+        <h6 id="access-control-enforcement-title" class="mb-1 don-jose">{{ _("settings.access_control.enforcement.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.greylist.enforcement.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ["USE_GREYLIST"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = "col-12 col-sm-8 col-lg-5 pb-3" %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% include "plugin_bodies/access_control/list_matrix.html" %}
+</div>

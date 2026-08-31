@@ -1,0 +1,46 @@
+{# Whitelist's purpose-built settings body, in place of the flat 12-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/whitelist
+   and /global-settings/plugins/whitelist -- so the form, the control keys, `postable_scope` and
+   the writer are all the generic ones. This file owns the LAYOUT and nothing else.
+
+   One of the four access-control bodies; see plugin_bodies/access_control/decision_order.html for
+   why they stay four separate pages.
+
+   HIDE, NEVER OMIT: every declared key renders on every load, and a future revision that wants a
+   section off screen must use the `hidden` attribute rather than dropping it from the loop --
+   `postable_scope` claims all 12 keys and an in-scope key the POST does not carry has its row
+   DELETED (db_methods/config_save.py:579-585). #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set ac_prefix = "WHITELIST" -%}
+{%- set ac_hand_placed = ["USE_WHITELIST"] -%}
+{%- set ac_col = "col-12 col-sm-6 col-lg-4 pb-3" -%}
+<div class="card-body pb-0">
+    {% include "plugin_bodies/access_control/decision_order.html" %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="enforcement"
+             aria-labelledby="access-control-enforcement-title">
+        <h6 id="access-control-enforcement-title" class="mb-1 don-jose">{{ _("settings.access_control.enforcement.title") }}</h6>
+        {# The reach of this page, spelled out because nothing else says it: a whitelist match
+           returns OK, which breaks the plugin loop (confs/server-http/access-lua.conf:184-192), so
+           blacklist, greylist and country never run for that request.
+
+           BANS ARE NOT PART OF THAT REACH, except by IP. The ban check at access-lua.conf:74 runs
+           before the plugin chain and its fast path reads a flag only whitelist:access() sets
+           later, so the rescue that actually fires is line 84's `is_ip_whitelisted` -- and
+           bw/lua/bunkerweb/utils.lua:745-760 returns false unless `lists["IP"]` is non-empty and
+           matches. A client whitelisted by rDNS, ASN, user-agent or URI is still blocked while it
+           is banned. The copy below names the four kinds that are NOT rescued rather than leaving
+           the operator to assume all five behave alike; pinned by
+           ::test_the_whitelist_page_does_not_promise_a_ban_rescue_it_cannot_deliver. #}
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.whitelist.enforcement.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ["USE_WHITELIST"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = "col-12 col-sm-8 col-lg-5 pb-3" %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% include "plugin_bodies/access_control/list_matrix.html" %}
+</div>

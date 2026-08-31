@@ -1,0 +1,134 @@
+{# Country's purpose-built settings body, in place of three unrelated fields.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/country
+   and /global-settings/plugins/country -- so the form, the control keys, `postable_scope` and the
+   writer are all the generic ones. This file owns the LAYOUT and nothing else.
+
+   ================== THE FACT THE FLAT FORM HID ==================
+   `WHITELIST_COUNTRY` and `BLACKLIST_COUNTRY` are NOT two independent lists, and they are not
+   ORed. `core/country/country.lua:131-160` processes the whitelist FIRST and returns from inside
+   that branch either way: a country in the list is allowed, a country outside it is DENIED. The
+   blacklist branch at :163 is only reached when `WHITELIST_COUNTRY` is empty. So setting a country
+   whitelist is "allow only these and deny the rest", and it makes any stored country blacklist
+   dead configuration -- which the generic grid rendered as two equal 250-option multiselects with
+   nothing saying so.
+
+   The picker below presents that as the one choice it actually is. It carries NO `name`: it is a
+   client-side control, and an unnamed select is not serialised -- so the POST body stays exactly
+   this plugin's own keys and no route has to learn to pop a form-only key.
+
+   ======================= HIDE, NEVER OMIT =======================
+   Both country lists render on every load whatever the picker shows; the wrapper the picker turns
+   off carries the `hidden` attribute, which suppresses rendering and nothing else, so the inputs
+   inside still serialise. `postable_scope` claims all three keys and an in-scope key the POST does
+   not carry has its row DELETED (db_methods/config_save.py:579-585) -- a body that rendered only
+   the selected list would wipe the other one the first time the operator saved. Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope
+   and ::test_the_country_body_posts_both_lists_in_every_mode.
+
+   The per-mode visibility contract, read by static/js/plugin_bodies/country.js:
+     * `data-access-control-country-list="only|block"` -- the wrapper is on screen when the picker
+       is on that value, and CLEARED when it is not (switching away from a list must not leave it
+       populated, or half the old rule stays live).
+     * `data-access-control-country-clear="<mode>"` -- the conflict alert's button, which clears
+       exactly the list the runtime is ignoring.
+   Server-side visibility here and the JS agree by construction: both read the same two values.
+   With JS off the page still renders the right lists for the STORED configuration -- the picker
+   just stops being live, which is the correct degradation. #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set only_countries = config.get("WHITELIST_COUNTRY", {}).get("value", filtered_settings.get("WHITELIST_COUNTRY", {}).get("default", "")) -%}
+{%- set blocked_countries = config.get("BLACKLIST_COUNTRY", {}).get("value", filtered_settings.get("BLACKLIST_COUNTRY", {}).get("default", "")) -%}
+{%- set country_mode = "only" if only_countries else ("block" if blocked_countries else "all") -%}
+<div class="card-body pb-0">
+    {% include "plugin_bodies/access_control/decision_order.html" %}
+    {% if only_countries and blocked_countries %}
+        <div class="alert alert-warning d-flex align-items-center justify-content-between gap-2 mb-4"
+             role="alert"
+             data-access-control-country-conflict>
+            <span class="d-flex align-items-center">
+                <i class="bx bx-error bx-sm me-2" aria-hidden="true"></i>
+                <span>{{ _("settings.access_control.country.conflict.description") }}</span>
+            </span>
+            {# The fix for the antibot page's known minor, applied here from the start: an alert the
+               operator cannot act on is a dead end. Re-selecting the value the picker is already on
+               fires no `change` event, so the picker alone can never clear the dead list. #}
+            <button type="button"
+                    class="btn btn-sm btn-outline-warning flex-shrink-0"
+                    data-access-control-country-clear="block"
+                    {% if is_readonly %}disabled{% endif %}>{{ _("settings.access_control.country.conflict.clear") }}</button>
+        </div>
+    {% endif %}
+    <section class="access-control-group mb-4"
+             data-access-control-group="mode"
+             aria-labelledby="access-control-country-mode-title">
+        <h6 id="access-control-country-mode-title" class="mb-1 don-jose">{{ _("settings.access_control.country.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.country.description") }}</p>
+        <div class="row g-2 gx-6">
+            <div class="col-12 col-sm-8 col-lg-5 pb-3">
+                <div class="bw-setting-frame">
+                    <label for="access-control-country-mode" class="form-label fw-semibold text-truncate"
+                          >{{ _("settings.access_control.country.picker_label") }}</label>
+                    {# A plain wrapper, not `.form-floating`: that pattern puts a second
+                       <label for="..."> inside the control, and here both would carry the same
+                       text, which screen readers announce twice. #}
+                    <div class="mt-1 overflow-hidden position-relative">
+                        <select id="access-control-country-mode"
+                                class="form-select"
+                                data-access-control-country-mode
+                                {% if is_readonly %}disabled{% endif %}>
+                            {% for value, label_key in [("all", "settings.access_control.country.mode.all"), ("only", "settings.access_control.country.mode.only"), ("block", "settings.access_control.country.mode.block")] %}
+                                <option value="{{ value }}" {% if country_mode == value %}selected{% endif %}>{{ _(label_key) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% for setting, for_mode in [("WHITELIST_COUNTRY", "only"), ("BLACKLIST_COUNTRY", "block")] %}
+                {% if setting in filtered_settings and setting not in blacklisted_settings %}
+                    <div class="col-12 col-lg-7"
+                         data-access-control-country-list="{{ for_mode }}"
+                         {% if country_mode != for_mode %}hidden{% endif %}>
+                        <div class="row g-2 gx-6">
+                            {% set setting_data = filtered_settings[setting] %}
+                            {% set field_col_class = "col-12 pb-3" %}
+                            {% include "models/plugin_setting_field.html" %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    <section class="access-control-group mb-4"
+             data-access-control-group="exceptions"
+             data-access-control-country-exceptions
+             {% if country_mode == "all" %}hidden{% endif %}
+             aria-labelledby="access-control-country-exceptions-title">
+        <h6 id="access-control-country-exceptions-title" class="mb-1 don-jose">{{ _("settings.access_control.country.exceptions.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.country.exceptions.description") }}</p>
+        <div class="row g-2 gx-6">
+            {% for setting in ["COUNTRY_IGNORE_URI"] if setting in filtered_settings and setting not in blacklisted_settings %}
+                {% set setting_data = filtered_settings[setting] %}
+                {% set field_col_class = "col-12 col-lg-8 pb-3" %}
+                {% include "models/plugin_setting_field.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {# Coverage backstop, not decoration -- see plugin_bodies/access_control/list_matrix.html for
+       why every body ships one and why the marker attribute names no plugin. #}
+    {% set country_placed = ["WHITELIST_COUNTRY", "BLACKLIST_COUNTRY", "COUNTRY_IGNORE_URI"] %}
+    {% set country_stragglers = filtered_settings | reject("in", country_placed) | reject("in", blacklisted_settings) | list %}
+    {% if country_stragglers %}
+        <section class="access-control-group mb-4"
+                 data-access-control-group="unplaced"
+                 data-plugin-body-unplaced>
+            <h6 class="mb-1 don-jose">{{ _("settings.access_control.unplaced.title") }}</h6>
+            <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.unplaced.description") }}</p>
+            <div class="row g-2 gx-6">
+                {% for setting in country_stragglers %}
+                    {% set setting_data = filtered_settings[setting] %}
+                    {% include "models/plugin_setting_field.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>

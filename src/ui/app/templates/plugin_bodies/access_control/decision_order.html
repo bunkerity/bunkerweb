@@ -1,0 +1,81 @@
+{# The decision-order banner shared by the four access-control bodies (blacklist, whitelist,
+   greylist, country).
+
+   ================== IT RENDERS NO CONTROL, AND THAT IS THE POINT ==================
+   A per-plugin settings page may only post its OWN plugin's keys: `postable_scope` is built from
+   the one `plugin_data` the route resolved, and a key posted from outside it is a write the route
+   never authorised. So this banner carries the operator's mental model across all four pages
+   WITHOUT a single `name=` attribute -- every sibling is a link and a read-only state chip. That
+   is the whole reason the four pages stay four pages; see the lane report for the alternatives
+   weighed.
+
+   The order is the runtime's DEFAULT, read out of core/order.json's `access` list
+   (ssl, whitelist, letsencrypt, blacklist, greylist, country, ...) and its `preread` twin, which
+   is the same order for stream traffic. Default, not law: `PLUGINS_ORDER_ACCESS` and
+   `PLUGINS_ORDER_PREREAD` (common/settings.json:526/562) are multisite settings and
+   access-lua.conf:115-125 honours a per-site override, so an operator who reordered the chain sees
+   a banner drawing the default rather than their order. Reading the real order here means reading
+   two more settings the page is not given; the copy says "by default" instead.
+   `letsencrypt` also sits between whitelist and blacklist and short-circuits the ACME path -- it
+   is left out of the banner because it decides nothing about who gets in.
+
+   It is deliberately NOT the order the four settings pages appear in the sidebar, and it is not
+   alphabetical:
+     * whitelist runs FIRST and a match returns `OK` (core/whitelist/whitelist.lua:204/223), which
+       `break`s the plugin loop in confs/server-http/access-lua.conf:184-192 -- so a whitelisted
+       request never reaches blacklist, greylist or country at all.
+       BANS ARE A NARROWER STORY, and the page copy must not overstate it. The ban check at
+       access-lua.conf:74 runs BEFORE the plugin chain, so the flag it tests is still "no" on the
+       first request; the authoritative rescue is line 84's `is_ip_whitelisted`, and
+       bw/lua/bunkerweb/utils.lua:745-760 consults `lists["IP"]` and nothing else. A client
+       whitelisted by rDNS, ASN, user-agent or URI is therefore STILL denied while banned. Pinned
+       by ::test_the_whitelist_page_does_not_promise_a_ban_rescue_it_cannot_deliver.
+     * greylist is DENY-BY-DEFAULT: anything that matched nothing falls through to
+       `get_deny_status()` (core/greylist/greylist.lua:209).
+     * country's own whitelist wins over its own blacklist and is likewise deny-by-default
+       (core/country/country.lua:131-160).
+
+   The state chip is rendered only when the sibling's `USE_*` key is actually in `config`. Both
+   routes pass the FULL config (`get_service(full=True)` / `get_global_settings(full=True)`), so in
+   production it always is; guarding on presence rather than defaulting keeps this partial from
+   inventing a default it cannot read -- the sibling's manifest is not in this page's context, and
+   a hardcoded "yes" here would be a second copy of core/<plugin>/plugin.json that nothing checks.
+
+   Reads `plugin`, `config` and `service_id` from the page context. Sets nothing. #}
+{%- set ac_stages = [
+    {"id": "whitelist", "use": "USE_WHITELIST", "label": "settings.access_control.stage.whitelist"},
+    {"id": "blacklist", "use": "USE_BLACKLIST", "label": "settings.access_control.stage.blacklist"},
+    {"id": "greylist", "use": "USE_GREYLIST", "label": "settings.access_control.stage.greylist"},
+    {"id": "country", "use": none, "label": "settings.access_control.stage.country"},
+] -%}
+<section class="access-control-group mb-4"
+         data-access-control-group="order"
+         aria-labelledby="access-control-order-title">
+    <h6 id="access-control-order-title" class="mb-1 don-jose">{{ _("settings.access_control.order.title") }}</h6>
+    <p class="text-muted small courier-prime mb-2">{{ _("settings.access_control.order.description") }}</p>
+    <ol class="list-unstyled d-flex flex-wrap align-items-center gap-2 mb-0">
+        {% for stage in ac_stages %}
+            {% set stage_url = url_for("services.services_plugin_page", service=service_id, plugin=stage["id"]) if service_id else url_for("global_settings.global_settings_plugin_page", plugin=stage["id"]) %}
+            {% set stage_state = config.get(stage["use"], {}).get("value", "") if stage["use"] else none %}
+            <li class="d-flex align-items-center gap-2">
+                {% if stage["id"] == plugin %}
+                    <span class="badge bg-primary d-inline-flex align-items-center gap-1"
+                          aria-current="page"
+                          data-access-control-stage="{{ stage['id'] }}">
+                        <span>{{ _(stage["label"]) }}</span>
+                        <span class="visually-hidden">{{ _("settings.access_control.order.current") }}</span>
+                    </span>
+                {% else %}
+                    <a class="badge bg-secondary-subtle text-dark text-decoration-none"
+                       href="{{ stage_url }}"
+                       data-access-control-stage="{{ stage['id'] }}">{{ _(stage["label"]) }}</a>
+                {% endif %}
+                {% if stage["use"] and stage["use"] in config %}
+                    <span class="badge rounded-pill {{ 'bg-success-subtle' if stage_state == 'yes' else 'bg-secondary-subtle' }} text-dark"
+                         >{{ _("settings.access_control.order.on") if stage_state == "yes" else _("settings.access_control.order.off") }}</span>
+                {% endif %}
+                {% if not loop.last %}<i class="bx bx-chevron-right bx-sm text-muted" aria-hidden="true"></i>{% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</section>
