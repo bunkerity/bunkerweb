@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Quickstart guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from source
   
 
     
@@ -1134,6 +1180,17 @@
     <span class="md-ellipsis">
       
         Access and Error Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-file-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log File Retention
       
     </span>
   </a>
@@ -3481,6 +3538,10 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>Otherwise, we will need to start it :</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Reload re-reads the folder</p>
+<p>A reload re-reads <code>/etc/bunkerweb/configs</code>: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>When using the <a href="../integrations/#all-in-one-aio-image">All-in-one image</a>, you have two choices for adding custom configurations:</p>
@@ -4758,7 +4819,7 @@ USE_IPV6=yes
 <tbody>
 <tr>
 <td style="text-align: left;"><code>file</code></td>
-<td style="text-align: left;">Writes logs to a plain file. External rotation is handled by <code>logrotate</code> on Linux installs or by your container logging driver on Docker. Required for the Web UI log viewer.</td>
+<td style="text-align: left;">Writes logs to a plain file. On Linux installs, external rotation is handled by <code>logrotate</code>. In a container, nothing rotates a file a service writes itself: retention is the operator's job, so mount the file to a volume and rotate it yourself, or prefer <code>stderr</code>/<code>syslog</code> there. Required for the Web UI log viewer.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>stderr</code></td>
@@ -4797,8 +4858,18 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
+<h3 id="log-file-retention">Log File Retention</h3>
+<p>Only the integrations that keep real log files need retention, and both of them use the same mechanism: <code>logrotate</code>, with the policy BunkerWeb installs at <code>/etc/logrotate.d/bunkerweb</code>. It rotates every file matching <code>/var/log/bunkerweb/*.log</code> once it passes 100 MB, keeps seven compressed generations, and uses <code>copytruncate</code>.</p>
+<ul>
+<li><strong>Linux</strong>: the packages depend on <code>logrotate</code> and the system runs it on its own timer. Nothing else to do.</li>
+<li><strong>All-in-one</strong>: the image ships <code>logrotate</code> and runs it hourly under supervisor, using that same policy file.</li>
+<li><strong>Docker, Autoconf, Swarm and Kubernetes</strong>: nothing to rotate. <code>src/bw/Dockerfile</code> replaces <code>access.log</code>, <code>error.log</code> and <code>modsec_audit.log</code> with symlinks to the container's own stdout and stderr at build time, so retention belongs to your container runtime's logging driver (see <a href="#docker-logging-best-practices">Docker logging best practices</a> below).</li>
+</ul>
+<p><code>copytruncate</code> is what makes one policy fit all of them. It copies the file aside and empties the original in place instead of renaming it, so a writer that never reopens its log keeps writing to the right file. ModSecurity is exactly that writer: it opens the audit log once when the configuration loads and holds the descriptor. Rotating by rename would leave it writing to the archive forever, and the live file empty.</p>
+<p>Edit <code>/etc/logrotate.d/bunkerweb</code> to change the threshold, the number of generations, or to add a <code>maxage</code>. On the All-in-one, mount your own file over that path.</p>
+<p>The audit log's location is set by <code>MODSECURITY_SEC_AUDIT_LOG</code> (multisite, default <code>/var/log/bunkerweb/modsec_audit.log</code>); see the <a href="../features/#modsecurity">ModSecurity settings</a>. Pointing it outside <code>/var/log/bunkerweb</code> takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself.</p>
 <h3 id="integration-defaults-examples">Integration Defaults &amp; Examples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Default behavior</strong>: <code>LOG_TYPES="file"</code>. Logs are written to <code>/var/log/bunkerweb/*.log</code>. Rotation is handled by the system <code>logrotate</code> config installed at <code>/etc/logrotate.d/bunkerweb</code> (daily, 7-day retention, compressed via <code>copytruncate</code>).</p>
@@ -4818,6 +4889,7 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 </div>
 <div class="tabbed-block">
 <p><strong>Default behavior</strong>: <code>LOG_TYPES="stderr"</code>. Logs are visible via <code>docker logs</code>.</p>
+<p>These images have no BunkerWeb-managed log files to bound: <code>src/bw/Dockerfile</code> deletes <code>access.log</code>, <code>error.log</code> and <code>modsec_audit.log</code> at build time and replaces all three with symlinks to the container's own stdout and stderr, so <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> and <code>MODSECURITY_SEC_AUDIT_LOG</code> go straight to the container's log stream by default. Retention there is your container runtime's job, through the logging driver (see <a href="#docker-logging-best-practices">Docker logging best practices</a> below) or an external collector; BunkerWeb ships no <code>logrotate</code> inside its images.</p>
 <p><strong>Example (Adapted from the quickstart guide)</strong>: Keep <code>docker logs</code> (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both services</span>
@@ -4942,6 +5014,10 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><strong>Default behavior</strong>: same as Docker (<code>LOG_TYPES="stderr"</code>), but the All-in-one image keeps <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> and <code>MODSECURITY_SEC_AUDIT_LOG</code> as real files under <code>/var/log/bunkerweb/</code> (same defaults as Linux), because the bundled CrowdSec and the Web UI log viewer both read them from disk.</p>
+<p>BunkerWeb bounds them for you there: the image ships <code>logrotate</code> and runs it hourly under supervisor, with the same policy the Linux packages install (see <a href="#log-file-retention">Log File Retention</a> above). Because it rotates with <code>copytruncate</code>, the files keep their inode, so the CrowdSec parser and the log viewer follow them across a rotation without restarting.</p>
 </div>
 <div class="tabbed-block">
 <p><strong>Default behavior</strong>: Logs are written to <code>stderr</code> and visible via <code>kubectl logs</code>.</p>

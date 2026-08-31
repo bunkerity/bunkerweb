@@ -461,6 +461,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler depuis les sources
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -997,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Intégration Redis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-log-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rétention des journaux
       
     </span>
   </a>
@@ -1562,6 +1592,33 @@
     
   
     Guide de démarrage rapide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler depuis les sources
   
 
     
@@ -3110,6 +3167,15 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Authentification :</strong> lorsque <code>REDIS_PASSWORD</code> est défini et que la conf ne contient pas déjà <code>requirepass</code>, le Redis embarqué est lancé avec <code>requirepass</code>, ce qui maintient la cohérence entre client et serveur BunkerWeb. Le serveur embarqué ne prend en charge que l'utilisateur par défaut — ne définissez <code>REDIS_USERNAME</code> que pour cibler un Redis externe avec des ACLs.</li>
 <li>Les journaux Redis apparaissent avec le préfixe <code>[REDIS]</code> dans les journaux Docker et dans <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
+<h3 id="aio-log-retention">Rétention des journaux</h3>
+<p>Contrairement aux autres images Docker, l'All-in-one conserve <code>access.log</code>, <code>error.log</code> et <code>modsec_audit.log</code> comme de vrais fichiers sous <code>/var/log/bunkerweb/</code>. Le flux de journalisation les lit pour ajouter un préfixe à chaque ligne et appliquer <code>HIDE_SERVICE_LOGS</code>, et l'analyseur CrowdSec embarqué ainsi que le visualiseur de journaux de l'interface Web les lisent depuis le disque.</p>
+<ul>
+<li>L'image embarque <code>logrotate</code> et l'exécute toutes les heures sous supervisor. Un échec de rotation est signalé par le préfixe <code>[LOGROTATE]</code> dans les logs du conteneur.</li>
+<li>La politique est celle installée par les paquets Linux, dans <code>/etc/logrotate.d/bunkerweb</code> : tout fichier correspondant à <code>/var/log/bunkerweb/*.log</code> est tourné dès qu'il dépasse 100 Mo, sept générations compressées sont conservées, et la rotation utilise <code>copytruncate</code>.</li>
+<li><code>copytruncate</code> vide le fichier sur place au lieu de le renommer, si bien qu'il conserve son inode. Le flux de journalisation, l'analyseur CrowdSec et le visualiseur de journaux le suivent donc à travers une rotation sans avoir besoin de redémarrer, et ModSecurity continue d'écrire dans le bon fichier même s'il ne rouvre jamais son journal d'audit.</li>
+<li>Pour modifier le seuil ou le nombre de générations, montez votre propre fichier par-dessus <code>/etc/logrotate.d/bunkerweb</code>. Pour désactiver entièrement la rotation et gérer la rétention vous-même, montez un fichier vide par-dessus ce même chemin ; un volume monté sur <code>/var/log/bunkerweb</code> ne fait que déplacer les données, il n'empêche pas le <code>logrotate</code> du conteneur de continuer à les faire tourner à cet endroit.</li>
+</ul>
+<p>Voir <a href="../advanced/#log-file-retention">Rétention des fichiers journaux</a> pour savoir comment les autres intégrations gèrent cela.</p>
 <h3 id="crowdsec-integration">Intégration CrowdSec</h3>
 <p>L'image Docker <strong>tout-en-un</strong> de BunkerWeb est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.</p>
 <p>Par défaut, CrowdSec est <strong>désactivé</strong>. Pour l'activer, il suffit d'ajouter la <code>USE_CROWDSEC</code> variable d'environnement :</p>
@@ -3447,6 +3513,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>Secondes minimales entre deux reloads successifs</td>
 <td>Secondes entières</td>
 <td><code>5</code></td>
+</tr>
+<tr>
+<td><code>SEND_FILES_MIN_TIMEOUT</code></td>
+<td>Délai de lecture minimal pour l’envoi des dossiers de configuration et de cache</td>
+<td>Secondes entières</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

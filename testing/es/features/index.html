@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/es/features/">
       
       
-        <link rel="prev" href="../quickstart-guide/">
+        <link rel="prev" href="../building/">
       
       
         <link rel="next" href="../advanced/">
@@ -457,6 +457,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compilar desde el código fuente
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -774,6 +793,33 @@
     
   
     Guía de inicio rápido
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilar desde el código fuente
   
 
     
@@ -3983,6 +4029,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>No</td>
 <td><strong>Tamaño de Memoria de Bloqueos del Cachestore:</strong> Tamaño del cachestore interno (bloqueos).</td>
 </tr>
+<tr>
+<td><code>SESSIONS_REVOCATION_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>No</td>
+<td><strong>Tamaño de Memoria de Revocación de Sesiones:</strong> Tamaño del almacén de identificadores de sesión de cookie revocados.</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4275,7 +4328,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Time to wait for DNS propagation in seconds for DNS challenges.</td>
+<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -7109,56 +7162,56 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_API</code></td>
 <td><code>http://crowdsec:8080</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>URL de la API de CrowdSec:</strong> La dirección del servicio de la API Local de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_API_KEY</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Clave de API de CrowdSec:</strong> La clave de API para autenticarse con la API de CrowdSec, obtenida usando <code>cscli bouncers add</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_MODE</code></td>
 <td><code>live</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Modo de Operación:</strong> <code>live</code> (consultar la API para cada solicitud) o <code>stream</code> (almacenar en caché periódicamente todas las decisiones).</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Tráfico Interno:</strong> Establezca en <code>yes</code> para verificar el tráfico interno contra las decisiones de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
 <td><code>1000</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Tiempo de Espera de la Solicitud:</strong> Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo <code>live</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Ubicaciones Excluidas:</strong> Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
 <td><code>1</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Expiración de la Caché:</strong> El tiempo de expiración de la caché en segundos para las decisiones de IP en modo <code>live</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
 <td><code>10</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Frecuencia de Actualización:</strong> Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo <code>stream</code>.</td>
 </tr>
@@ -7179,49 +7232,49 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_APPSEC_URL</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>URL de AppSec:</strong> La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
 <td><code>passthrough</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Acción en Caso de Falla:</strong> Acción a tomar cuando AppSec devuelve un error. Puede ser <code>passthrough</code> o <code>deny</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Tiempo de Espera de Conexión:</strong> El tiempo de espera en milisegundos para conectarse al Componente AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Tiempo de Espera de Envío:</strong> El tiempo de espera en milisegundos para enviar datos al Componente AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
 <td><code>500</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Tiempo de Espera de Procesamiento:</strong> El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Enviar Siempre:</strong> Establezca en <code>yes</code> para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Verificar SSL:</strong> Establezca en <code>yes</code> para verificar el certificado SSL del Componente AppSec.</td>
 </tr>
@@ -9300,7 +9353,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Elemento de credencial:</strong> Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, <code>cloudflare_api_token 123456</code>). Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.</td>
+<td><strong>Elemento de credencial:</strong> Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, <code>cloudflare_api_token 123456</code>). Escriba la clave, un espacio y luego el valor, y no entrecomille la clave. Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
@@ -10907,6 +10960,13 @@ Para habilitar y configurar el almacenamiento en caché de archivos:
 <td>multisite</td>
 <td>no</td>
 <td><strong>Partes del Registro de Auditoría:</strong> Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG</code></td>
+<td><code>/var/log/bunkerweb/modsec_audit.log</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Ruta del Registro de Auditoría:</strong> Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar.</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
@@ -12730,7 +12790,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>URL de Ubicación:</strong> Ruta que se enviará al servidor de backend.</td>
+<td><strong>URL de Ubicación:</strong> Ruta que se enviará al servidor de backend. Un valor que comienza por <code>^</code> o termina en <code>$</code> se trata como una ubicación de expresión regular.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13120,7 +13180,7 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <pre><code>!!! tip "Integración de Autenticación"
     - La función de solicitud de autenticación permite la implementación de microservicios de autenticación centralizados
     - Su servicio de autenticación debe devolver un código de estado 200 para una autenticación exitosa o 401/403 para fallas
-    - Use la directiva `auth_request_set` para extraer y reenviar información del servicio de autenticación
+    - Use la directiva auth_request_set para extraer y reenviar información del servicio de autenticación
 </code></pre>
 <div class="tabbed-set tabbed-alternate" data-tabs="52:1"><input checked="checked" id="__tabbed_52_1" name="__tabbed_52" type="radio" /><div class="tabbed-labels"><label for="__tabbed_52_1">Configuración Avanzada</label></div>
 <div class="tabbed-content">
@@ -14008,6 +14068,15 @@ cualquier ajuste sin una clave dedicada en el chart, use <code>scheduler.extraEn
 <li>Asegúrese de que todas las instancias usen exactamente el mismo <code>SESSIONS_SECRET</code> y <code>SESSIONS_NAME</code></li>
 <li>Esto garantiza que los usuarios mantengan su sesión independientemente de qué instancia de BunkerWeb maneje sus solicitudes</li>
 </ol>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Revocación de Sesiones</p>
+<p>Sin Redis, los datos de sesión viven en la propia cookie, por lo que destruir una sesión solo la borraba del navegador y la cookie firmada seguía siendo válida hasta expirar. BunkerWeb mantiene una lista de denegación de identificadores de sesión destruidos en memoria compartida, de modo que una cookie destruida se rechaza en su siguiente uso.</p>
+<ul>
+<li>Solo se aplica cuando los datos de sesión se almacenan en la cookie. Con <code>USE_REDIS</code> en <code>yes</code>, los datos están en el servidor y destruir la sesión ya los elimina.</li>
+<li>La lista de denegación es local a cada instancia de BunkerWeb. Use Redis para revocar sesiones en todo un clúster.</li>
+<li>Ajuste su tamaño con <code>SESSIONS_REVOCATION_MEMORY_SIZE</code>. Si el almacén se llena o deja de estar disponible, la sesión se considera válida y se registra una advertencia.</li>
+</ul>
 </div>
 <h3 id="configuraciones-de-ejemplo_33">Configuraciones de Ejemplo</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="58:6"><input checked="checked" id="__tabbed_58_1" name="__tabbed_58" type="radio" /><input id="__tabbed_58_2" name="__tabbed_58" type="radio" /><input id="__tabbed_58_3" name="__tabbed_58" type="radio" /><input id="__tabbed_58_4" name="__tabbed_58" type="radio" /><input id="__tabbed_58_5" name="__tabbed_58" type="radio" /><input id="__tabbed_58_6" name="__tabbed_58" type="radio" /><div class="tabbed-labels"><label for="__tabbed_58_1">Configuración Básica</label><label for="__tabbed_58_2">Seguridad Mejorada</label><label for="__tabbed_58_3">Entorno en Clúster con Redis</label><label for="__tabbed_58_4">Sesiones de Larga Duración</label><label for="__tabbed_58_5">Sesiones entre subdominios (tenant único)</label><label for="__tabbed_58_6">Sesiones entre subdominios (tenants mixtos)</label></div>

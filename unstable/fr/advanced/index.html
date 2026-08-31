@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler depuis les sources
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Guide de démarrage rapide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler depuis les sources
   
 
     
@@ -1141,6 +1187,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#log-file-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rétention des fichiers journaux
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#valeurs-par-defaut-et-exemples-dintegration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1168,7 +1225,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#meilleures-pratiques-de-journalisation-docker" class="md-nav__link">
+  <a href="#docker-logging-best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
         Meilleures pratiques de journalisation Docker
@@ -3473,6 +3530,10 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>Sinon, nous devrons le démarrer :</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Le rechargement relit le dossier</p>
+<p>Un rechargement relit <code>/etc/bunkerweb/configs</code> : les fichiers qui y sont créés, modifiés ou supprimés sont appliqués et enregistrés en base de données. Une configuration appartenant à l'interface web ou à l'API conserve son propriétaire, seul son contenu est actualisé depuis le fichier.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>Lorsque vous utilisez l'image <a href="../integrations/#all-in-one-aio-image">Tout-en-un</a>, vous avez deux options pour ajouter des configurations personnalisées :</p>
@@ -4750,7 +4811,7 @@ USE_IPV6=yes
 <tbody>
 <tr>
 <td style="text-align: left;"><code>file</code></td>
-<td style="text-align: left;">Écrit les journaux dans un fichier plat. La rotation externe est assurée par <code>logrotate</code> sur les installations Linux ou par votre pilote de journalisation de conteneur sous Docker. Requis pour le visualiseur de journaux de l'interface Web.</td>
+<td style="text-align: left;">Écrit les journaux dans un fichier plat. Sur les installations Linux, la rotation externe est assurée par <code>logrotate</code>. Dans un conteneur, rien ne fait tourner un fichier qu'un service écrit lui-même : la rétention revient à l'opérateur, montez donc le fichier dans un volume et gérez sa rotation vous-même, ou préférez <code>stderr</code>/<code>syslog</code> dans ce cas. Requis pour le visualiseur de journaux de l'interface Web.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>stderr</code></td>
@@ -4789,8 +4850,18 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
+<h3 id="log-file-retention">Rétention des fichiers journaux</h3>
+<p>Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : <code>logrotate</code>, avec la politique que BunkerWeb installe dans <code>/etc/logrotate.d/bunkerweb</code>. Elle fait tourner tout fichier correspondant à <code>/var/log/bunkerweb/*.log</code> dès qu'il dépasse 100 Mo, conserve sept générations compressées et utilise <code>copytruncate</code>.</p>
+<ul>
+<li><strong>Linux</strong> : les paquets dépendent de <code>logrotate</code>, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.</li>
+<li><strong>All-in-one</strong> : l'image embarque <code>logrotate</code> et l'exécute toutes les heures sous supervisor, avec ce même fichier de politique.</li>
+<li><strong>Docker, Autoconf, Swarm et Kubernetes</strong> : rien à faire tourner. <code>src/bw/Dockerfile</code> remplace <code>access.log</code>, <code>error.log</code> et <code>modsec_audit.log</code> par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même à la construction de l'image, si bien que la rétention relève du pilote de journalisation de votre environnement d'exécution de conteneurs (voir <a href="#docker-logging-best-practices">les bonnes pratiques de journalisation Docker</a> plus bas).</li>
+</ul>
+<p><code>copytruncate</code> est ce qui permet à une seule politique de convenir à toutes. Il copie le fichier de côté et vide l'original sur place au lieu de le renommer, de sorte qu'un processus qui ne rouvre jamais son journal continue d'écrire dans le bon fichier. ModSecurity est exactement ce genre de processus : il ouvre le journal d'audit une seule fois, au chargement de la configuration, et garde le descripteur. Une rotation par renommage le laisserait écrire dans l'archive pour toujours, avec le fichier actif vide.</p>
+<p>Modifiez <code>/etc/logrotate.d/bunkerweb</code> pour changer le seuil, le nombre de générations, ou pour ajouter un <code>maxage</code>. Sur l'All-in-one, montez votre propre fichier par-dessus ce chemin.</p>
+<p>L'emplacement du journal d'audit est défini par <code>MODSECURITY_SEC_AUDIT_LOG</code> (multisite, par défaut <code>/var/log/bunkerweb/modsec_audit.log</code>) ; voir les <a href="../features/#modsecurity">paramètres ModSecurity</a>. Le pointer en dehors de <code>/var/log/bunkerweb</code> le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même.</p>
 <h3 id="valeurs-par-defaut-et-exemples-dintegration">Valeurs par défaut et exemples d'intégration</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Comportement par défaut</strong> : <code>LOG_TYPES="file"</code>. Les journaux sont écrits dans <code>/var/log/bunkerweb/*.log</code>. La rotation est gérée par la configuration système <code>logrotate</code> installée dans <code>/etc/logrotate.d/bunkerweb</code> (quotidienne, rétention de 7 jours, compression via <code>copytruncate</code>).</p>
@@ -4810,6 +4881,7 @@ LOG_LEVEL_1=error
 </div>
 <div class="tabbed-block">
 <p><strong>Comportement par défaut</strong> : <code>LOG_TYPES="stderr"</code>. Les journaux sont visibles via <code>docker logs</code>.</p>
+<p>Ces images n'ont, dès le départ, aucun fichier journal géré par BunkerWeb à borner : <code>src/bw/Dockerfile</code> supprime <code>access.log</code>, <code>error.log</code> et <code>modsec_audit.log</code> à la construction de l'image et remplace les trois par des liens symboliques vers la sortie standard et l'erreur standard du conteneur lui-même, si bien que <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> et <code>MODSECURITY_SEC_AUDIT_LOG</code> partent directement dans le flux de journalisation du conteneur par défaut. La rétention y relève de votre environnement d'exécution, via le pilote de journalisation (voir <a href="#docker-logging-best-practices">les bonnes pratiques de journalisation Docker</a> plus bas) ou un collecteur externe ; BunkerWeb n'embarque aucun <code>logrotate</code> dans ses images.</p>
 <p><strong>Exemple (Adapté du guide de démarrage rapide)</strong> : Conserver <code>docker logs</code> (stderr) ET envoyer vers un conteneur syslog central (nécessaire pour l'interface Web et CrowdSec).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span>
 <span class="w">  </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># On utilise une ancre pour éviter de répéter les mêmes paramètres pour les deux services</span>
@@ -4936,6 +5008,10 @@ LOG_LEVEL_1=error
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p><strong>Comportement par défaut</strong> : comme Docker (<code>LOG_TYPES="stderr"</code>), mais l'image All-in-one conserve <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> et <code>MODSECURITY_SEC_AUDIT_LOG</code> comme des fichiers réels sous <code>/var/log/bunkerweb/</code> (les mêmes valeurs par défaut que sous Linux), car le CrowdSec embarqué et le visualiseur de journaux de l'interface Web les lisent tous deux depuis le disque.</p>
+<p>BunkerWeb les borne pour vous à cet endroit : l'image embarque <code>logrotate</code> et l'exécute toutes les heures sous supervisor, avec la même politique que celle installée par les paquets Linux (voir <a href="#log-file-retention">Rétention des fichiers journaux</a> plus haut). Comme la rotation se fait avec <code>copytruncate</code>, les fichiers conservent leur inode, si bien que l'analyseur CrowdSec et le visualiseur de journaux les suivent à travers une rotation sans avoir besoin de redémarrer.</p>
+</div>
+<div class="tabbed-block">
 <p><strong>Comportement par défaut</strong> : Les journaux sont écrits sur <code>stderr</code> et visibles via <code>kubectl logs</code>.</p>
 <p><strong>Exemple</strong> : Activer le sidecar syslog intégré dans le chart Helm pour collecter les journaux pour l'interface Web (nécessite BunkerWeb 1.6.7+).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">ui</span><span class="p">:</span>
@@ -5004,7 +5080,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="meilleures-pratiques-de-journalisation-docker">Meilleures pratiques de journalisation Docker</h2>
+<h2 id="docker-logging-best-practices">Meilleures pratiques de journalisation Docker</h2>
 <p>Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation <code>json-file</code>, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.</p>
 <p>Pour éviter cela, vous pouvez configurer la rotation des journaux. Cela peut être fait pour des services spécifiques dans votre fichier <code>docker-compose.yml</code>, ou globalement pour le démon Docker.</p>
 <p><strong>Configuration par service</strong></p>

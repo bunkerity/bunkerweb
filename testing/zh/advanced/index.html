@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  从源代码构建
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     快速入门指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从源代码构建
   
 
     
@@ -1141,6 +1187,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#log-file-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        日志文件保留策略
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1168,7 +1225,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
+  <a href="#docker-logging-best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
         Docker 日志记录最佳实践
@@ -3473,6 +3530,10 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>否则，我们需要启动它：</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">重新加载会重新读取该文件夹</p>
+<p>重新加载会重新读取 <code>/etc/bunkerweb/configs</code>：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>当使用 <a href="../integrations/#all-in-one-aio-image">All-in-one 镜像</a>时，您有两种选择来添加自定义配置：</p>
@@ -4749,7 +4810,7 @@ USE_IPV6=yes
 <tbody>
 <tr>
 <td style="text-align: left;"><code>file</code></td>
-<td style="text-align: left;">将日志写入普通文件。外部轮转在 Linux 安装中由 <code>logrotate</code> 负责，在 Docker 中由您的容器日志驱动负责。Web UI 的日志查看器需要此项。</td>
+<td style="text-align: left;">将日志写入普通文件。在 Linux 安装中，外部轮转由 <code>logrotate</code> 负责。在容器中，没有任何组件会为服务自己写入的文件做轮转：保留策略由运维方自行负责，请将该文件挂载到卷并自行轮转，或在容器中改用 <code>stderr</code>/<code>syslog</code>。Web UI 的日志查看器需要此项。</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>stderr</code></td>
@@ -4788,8 +4849,18 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
+<h3 id="log-file-retention">日志文件保留策略</h3>
+<p>只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：<code>logrotate</code>，配合 BunkerWeb 安装在 <code>/etc/logrotate.d/bunkerweb</code> 的策略文件。它会在任何匹配 <code>/var/log/bunkerweb/*.log</code> 的文件超过 100 MB 时对其进行轮转，保留七个压缩后的历史版本，并使用 <code>copytruncate</code>。</p>
+<ul>
+<li><strong>Linux</strong>：软件包依赖 <code>logrotate</code>，系统会按自身的定时器运行它，无需额外操作。</li>
+<li><strong>All-in-one</strong>：该镜像内置 <code>logrotate</code>，并在 supervisor 下每小时运行一次，使用同一份策略文件。</li>
+<li><strong>Docker、Autoconf、Swarm 和 Kubernetes</strong>：没有需要轮转的内容。<code>src/bw/Dockerfile</code> 在构建时将 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 替换为指向容器自身标准输出和标准错误的符号链接，因此保留策略由您的容器运行时的日志驱动负责（参见下文的 <a href="#docker-logging-best-practices">Docker 日志最佳实践</a>）。</li>
+</ul>
+<p><code>copytruncate</code> 正是让同一套策略适用于所有这些场景的关键。它会将文件复制到别处，然后原地清空原文件，而不是重命名它，因此从不重新打开日志的写入进程会继续写入正确的文件。ModSecurity 正是这样的写入进程：它在配置加载时打开一次审计日志，并一直持有该文件描述符。如果通过重命名来轮转，它就会永远写入归档文件，而实际使用的文件则始终为空。</p>
+<p>编辑 <code>/etc/logrotate.d/bunkerweb</code> 可以更改阈值、历史版本数量，或添加 <code>maxage</code>。在 All-in-one 上，可以将您自己的文件挂载到该路径上。</p>
+<p>审计日志的位置由 <code>MODSECURITY_SEC_AUDIT_LOG</code> 设置（multisite，默认 <code>/var/log/bunkerweb/modsec_audit.log</code>）；详见 <a href="../features/#modsecurity">ModSecurity 设置</a>。如果将其指向 <code>/var/log/bunkerweb</code> 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。</p>
 <h3 id="_7">集成默认值与示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>默认行为</strong>：<code>LOG_TYPES="file"</code>。日志写入 <code>/var/log/bunkerweb/*.log</code>。轮转由安装到 <code>/etc/logrotate.d/bunkerweb</code> 的系统 <code>logrotate</code> 配置负责（每日轮转、保留 7 天，并通过 <code>copytruncate</code> 压缩）。</p>
@@ -4809,6 +4880,7 @@ LOG_LEVEL_1=error
 </div>
 <div class="tabbed-block">
 <p><strong>默认行为</strong>：<code>LOG_TYPES="stderr"</code>。日志可通过 <code>docker logs</code> 查看。</p>
+<p>这些镜像本来就没有由 BunkerWeb 管理、需要限制大小的日志文件：<code>src/bw/Dockerfile</code> 在构建时删除 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code>，并将这三个文件全部替换为指向容器自身标准输出和标准错误的符号链接，因此 <code>ACCESS_LOG</code>、<code>ERROR_LOG</code> 和 <code>MODSECURITY_SEC_AUDIT_LOG</code> 默认都会直接进入容器的日志流。这里的保留策略由您的容器运行时负责，可以依赖日志驱动（参见下文的 <a href="#docker-logging-best-practices">Docker 日志最佳实践</a>）或外部采集器；BunkerWeb 的镜像中不内置 <code>logrotate</code>。</p>
 <p><strong>示例（改编自快速入门指南）</strong>：保留 <code>docker logs</code>（stderr），并发送到中央 syslog 容器（Web UI 和 CrowdSec 所需）。</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># 使用锚点以避免为两个服务重复相同的设置</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">"127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24"</span><span class="w"> </span><span class="c1"># 确保设置正确的 IP 范围，以便调度程序可以将配置发送到实例</span>
@@ -4934,6 +5006,10 @@ LOG_LEVEL_1=error
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p><strong>默认行为</strong>：与 Docker 相同（<code>LOG_TYPES="stderr"</code>），但 All-in-one 镜像会将 <code>ACCESS_LOG</code>、<code>ERROR_LOG</code> 和 <code>MODSECURITY_SEC_AUDIT_LOG</code> 作为常规文件保留在 <code>/var/log/bunkerweb/</code> 下（与 Linux 上的默认值相同），因为内置的 CrowdSec 和 Web UI 的日志查看器都需要从磁盘上读取它们。</p>
+<p>BunkerWeb 会在这里为您限制它们：该镜像内置 <code>logrotate</code>，并在 supervisor 下每小时运行一次，使用与 Linux 软件包安装的相同策略（参见上文的<a href="#log-file-retention">日志文件保留策略</a>）。由于轮转使用 <code>copytruncate</code>，这些文件会保留其 inode，因此 CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它们。</p>
+</div>
+<div class="tabbed-block">
 <p><strong>默认行为</strong>：日志写入 <code>stderr</code>，可通过 <code>kubectl logs</code> 查看。</p>
 <p><strong>示例</strong>：在 Helm chart 中启用内置的 syslog sidecar 以收集 Web UI 的日志（需要 BunkerWeb 1.6.7+）。</p>
 <div class="highlight"><pre><span></span><code><span class="nt">ui</span><span class="p">:</span>
@@ -5002,7 +5078,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="docker">Docker 日志记录最佳实践</h2>
+<h2 id="docker-logging-best-practices">Docker 日志记录最佳实践</h2>
 <p>使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 <code>json-file</code> 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。</p>
 <p>为避免这种情况，您可以配置日志轮换。这可以在您的 <code>docker-compose.yml</code> 文件中为特定服务配置，也可以为 Docker 守护进程全局设置。</p>
 <p><strong>按服务配置</strong></p>

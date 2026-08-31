@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Aus dem Quellcode erstellen
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Schnellstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aus dem Quellcode erstellen
   
 
     
@@ -1134,6 +1180,17 @@
     <span class="md-ellipsis">
       
         Zugriffs- und Fehlerprotokolle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-file-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aufbewahrung der Protokolldateien
       
     </span>
   </a>
@@ -3473,6 +3530,10 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>Andernfalls müssen wir ihn starten:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Das Neuladen liest den Ordner erneut ein</p>
+<p>Ein Neuladen liest <code>/etc/bunkerweb/configs</code> erneut ein: dort erstellte, geänderte oder gelöschte Dateien werden angewendet und in der Datenbank gespeichert. Eine Konfiguration, die der Weboberfläche oder der API gehört, behält ihren Besitzer, nur ihr Inhalt wird aus der Datei aktualisiert.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>Bei Verwendung des <a href="../integrations/#all-in-one-aio-image">All-in-one-Images</a> haben Sie zwei Möglichkeiten, benutzerdefinierte Konfigurationen hinzuzufügen:</p>
@@ -4751,7 +4812,7 @@ USE_IPV6=yes
 <tbody>
 <tr>
 <td style="text-align: left;"><code>file</code></td>
-<td style="text-align: left;">Schreibt Protokolle in eine einfache Datei. Die externe Rotation wird bei Linux-Installationen von <code>logrotate</code> und unter Docker von Ihrem Container-Logging-Treiber übernommen. Erforderlich für den Protokollanzeiger der Web-UI.</td>
+<td style="text-align: left;">Schreibt Protokolle in eine einfache Datei. Bei Linux-Installationen übernimmt <code>logrotate</code> die externe Rotation. In einem Container rotiert nichts eine Datei, die ein Dienst selbst schreibt: Die Aufbewahrung liegt dann beim Betreiber, also die Datei in ein Volume mounten und selbst rotieren oder dort <code>stderr</code>/<code>syslog</code> bevorzugen. Erforderlich für den Protokollanzeiger der Web-UI.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>stderr</code></td>
@@ -4790,8 +4851,18 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
+<h3 id="log-file-retention">Aufbewahrung der Protokolldateien</h3>
+<p>Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: <code>logrotate</code>, mit der Richtlinie, die BunkerWeb unter <code>/etc/logrotate.d/bunkerweb</code> installiert. Sie rotiert jede Datei, die auf <code>/var/log/bunkerweb/*.log</code> passt, sobald diese 100 MB überschreitet, behält sieben komprimierte Generationen und verwendet <code>copytruncate</code>.</p>
+<ul>
+<li><strong>Linux</strong>: Die Pakete hängen von <code>logrotate</code> ab, und das System führt es über seinen eigenen Timer aus. Es ist nichts weiter zu tun.</li>
+<li><strong>All-in-one</strong>: Das Image liefert <code>logrotate</code> mit und führt es stündlich unter supervisor aus, mit derselben Richtliniendatei.</li>
+<li><strong>Docker, Autoconf, Swarm und Kubernetes</strong>: Es gibt nichts zu rotieren. <code>src/bw/Dockerfile</code> ersetzt <code>access.log</code>, <code>error.log</code> und <code>modsec_audit.log</code> beim Bauen des Images durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass die Aufbewahrung dem Logging-Treiber Ihrer Laufzeitumgebung obliegt (siehe <a href="#docker-logging-best-practices">Docker-Best-Practices für Protokolle</a> weiter unten).</li>
+</ul>
+<p><code>copytruncate</code> ist das, was eine einzige Richtlinie für alle passend macht. Es kopiert die Datei beiseite und leert das Original an Ort und Stelle, statt es umzubenennen, sodass ein Schreibprozess, der sein Protokoll nie erneut öffnet, weiterhin in die richtige Datei schreibt. ModSecurity ist genau so ein Schreibprozess: Es öffnet das Audit-Log einmal beim Laden der Konfiguration und hält den Deskriptor. Eine Rotation per Umbenennung würde dazu führen, dass es für immer in das Archiv schreibt, während die aktive Datei leer bleibt.</p>
+<p>Bearbeiten Sie <code>/etc/logrotate.d/bunkerweb</code>, um den Schwellenwert oder die Anzahl der Generationen zu ändern, oder um ein <code>maxage</code> hinzuzufügen. Mounten Sie beim All-in-one Ihre eigene Datei über diesen Pfad.</p>
+<p>Der Speicherort des Audit-Logs wird über <code>MODSECURITY_SEC_AUDIT_LOG</code> festgelegt (multisite, Standard <code>/var/log/bunkerweb/modsec_audit.log</code>); siehe die <a href="../features/#modsecurity">ModSecurity-Einstellungen</a>. Wird er außerhalb von <code>/var/log/bunkerweb</code> gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst.</p>
 <h3 id="integrations-defaults-beispiele">Integrations-Defaults &amp; Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker / Autoconf / Swarm</label><label for="__tabbed_19_3">All-in-one</label><label for="__tabbed_19_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Standardverhalten</strong>: <code>LOG_TYPES="file"</code>. Protokolle werden unter <code>/var/log/bunkerweb/*.log</code> geschrieben. Die Rotation übernimmt die installierte System-<code>logrotate</code>-Konfiguration unter <code>/etc/logrotate.d/bunkerweb</code> (täglich, 7 Tage Aufbewahrung, Komprimierung per <code>copytruncate</code>).</p>
@@ -4811,6 +4882,7 @@ LOG_LEVEL_1=error
 </div>
 <div class="tabbed-block">
 <p><strong>Standardverhalten</strong>: <code>LOG_TYPES="stderr"</code>. Protokolle sind über <code>docker logs</code> sichtbar.</p>
+<p>Diese Images haben von vornherein keine von BunkerWeb verwalteten Protokolldateien zu begrenzen: <code>src/bw/Dockerfile</code> löscht <code>access.log</code>, <code>error.log</code> und <code>modsec_audit.log</code> beim Bauen des Images und ersetzt alle drei durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> und <code>MODSECURITY_SEC_AUDIT_LOG</code> standardmäßig direkt in den Log-Stream des Containers gelangen. Die Aufbewahrung liegt dort bei Ihrer Laufzeitumgebung, über den Logging-Treiber (siehe <a href="#docker-logging-best-practices">Docker-Best-Practices für Protokolle</a> weiter unten) oder einen externen Collector; BunkerWeb liefert kein <code>logrotate</code> in seinen Images mit.</p>
 <p><strong>Beispiel (Adaptation aus dem Quickstart-Guide)</strong>: Behalten Sie <code>docker logs</code> (stderr) BEI und senden Sie zusätzlich an einen zentralen Syslog-Container (benötigt für Web UI und CrowdSec).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span>
 <span class="w">  </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Dienste zu vermeiden</span>
@@ -4935,6 +5007,10 @@ LOG_LEVEL_1=error
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><strong>Standardverhalten</strong>: wie Docker (<code>LOG_TYPES="stderr"</code>), aber das All-in-one-Image behält <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> und <code>MODSECURITY_SEC_AUDIT_LOG</code> als reguläre Dateien unter <code>/var/log/bunkerweb/</code> (dieselben Standardwerte wie unter Linux), weil sowohl das mitgelieferte CrowdSec als auch der Protokollanzeiger der Web-UI sie von der Festplatte lesen.</p>
+<p>BunkerWeb begrenzt sie dort für Sie: Das Image liefert <code>logrotate</code> mit und führt es stündlich unter supervisor aus, mit derselben Richtlinie, die auch die Linux-Pakete installieren (siehe <a href="#log-file-retention">Aufbewahrung der Protokolldateien</a> weiter oben). Da die Rotation mit <code>copytruncate</code> erfolgt, behalten die Dateien ihren Inode, sodass der CrowdSec-Parser und der Protokollanzeiger ihnen über eine Rotation hinweg folgen, ohne neu starten zu müssen.</p>
 </div>
 <div class="tabbed-block">
 <p><strong>Standardverhalten</strong>: Protokolle werden nach <code>stderr</code> geschrieben und sind über <code>kubectl logs</code> sichtbar.</p>

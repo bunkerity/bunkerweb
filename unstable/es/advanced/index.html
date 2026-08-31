@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compilar desde el código fuente
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Guía de inicio rápido
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilar desde el código fuente
   
 
     
@@ -1141,6 +1187,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#log-file-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retención de los archivos de registro
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#valores-por-defecto-e-integracion-ejemplos" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1168,7 +1225,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#buenas-practicas-de-registro-de-docker" class="md-nav__link">
+  <a href="#docker-logging-best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
         Buenas prácticas de registro de Docker
@@ -3460,6 +3517,10 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>De lo contrario, tendremos que iniciarlo:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">La recarga vuelve a leer la carpeta</p>
+<p>Una recarga vuelve a leer <code>/etc/bunkerweb/configs</code>: los archivos creados, modificados o eliminados allí se aplican y se guardan en la base de datos. Una configuración que pertenece a la interfaz web o a la API conserva su propietario, solo su contenido se actualiza desde el archivo.</p>
+</div>
 </div>
 <div class="tabbed-block">
 <p>Cuando se utiliza la <a href="../integrations/#all-in-one-aio-image">imagen Todo en uno</a>, tienes dos opciones para añadir configuraciones personalizadas:</p>
@@ -4738,7 +4799,7 @@ USE_IPV6=yes
 <tbody>
 <tr>
 <td style="text-align: left;"><code>file</code></td>
-<td style="text-align: left;">Escribe los registros en un archivo plano. La rotación externa la gestiona <code>logrotate</code> en instalaciones Linux o tu driver de logging del contenedor en Docker. Requerido para el visor de registros de la interfaz UI.</td>
+<td style="text-align: left;">Escribe los registros en un archivo plano. En instalaciones Linux, la rotación externa la gestiona <code>logrotate</code>. En un contenedor, nada rota un archivo que un servicio escribe por sí mismo: la retención es responsabilidad del operador, así que monta el archivo en un volumen y rótalo tú mismo, o prefiere <code>stderr</code>/<code>syslog</code> ahí. Requerido para el visor de registros de la interfaz UI.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>stderr</code></td>
@@ -4777,8 +4838,18 @@ ERROR_LOG_1=syslog:server=unix:/dev/log,tag=bunkerweb
 LOG_LEVEL=notice
 LOG_LEVEL_1=error
 </code></pre></div>
+<h3 id="log-file-retention">Retención de los archivos de registro</h3>
+<p>Solo las integraciones que mantienen archivos de registro reales necesitan retención, y ambas usan el mismo mecanismo: <code>logrotate</code>, con la política que BunkerWeb instala en <code>/etc/logrotate.d/bunkerweb</code>. Rota cada archivo que coincida con <code>/var/log/bunkerweb/*.log</code> en cuanto supera los 100 MB, conserva siete generaciones comprimidas y usa <code>copytruncate</code>.</p>
+<ul>
+<li><strong>Linux</strong>: los paquetes dependen de <code>logrotate</code> y el sistema lo ejecuta con su propio temporizador. No hay nada más que hacer.</li>
+<li><strong>All-in-one</strong>: la imagen incluye <code>logrotate</code> y lo ejecuta cada hora bajo supervisor, usando ese mismo archivo de política.</li>
+<li><strong>Docker, Autoconf, Swarm y Kubernetes</strong>: no hay nada que rotar. <code>src/bw/Dockerfile</code> sustituye <code>access.log</code>, <code>error.log</code> y <code>modsec_audit.log</code> por enlaces simbólicos a la salida estándar y al error estándar del propio contenedor al construir la imagen, de modo que la retención corresponde al driver de logging de tu entorno de ejecución de contenedores (consulta <a href="#docker-logging-best-practices">las buenas prácticas de logging de Docker</a> más abajo).</li>
+</ul>
+<p><code>copytruncate</code> es lo que hace que una sola política funcione para todas ellas. Copia el archivo aparte y vacía el original en el mismo sitio en lugar de renombrarlo, de modo que un proceso que nunca reabre su registro sigue escribiendo en el archivo correcto. ModSecurity es exactamente ese proceso: abre el registro de auditoría una vez, cuando se carga la configuración, y mantiene el descriptor abierto. Rotar mediante renombrado lo dejaría escribiendo en el archivo archivado para siempre, con el archivo activo vacío.</p>
+<p>Edita <code>/etc/logrotate.d/bunkerweb</code> para cambiar el umbral, el número de generaciones, o para añadir un <code>maxage</code>. En el All-in-one, monta tu propio archivo sobre esa ruta.</p>
+<p>La ubicación del registro de auditoría se establece mediante <code>MODSECURITY_SEC_AUDIT_LOG</code> (multisite, por defecto <code>/var/log/bunkerweb/modsec_audit.log</code>); consulta los <a href="../features/#modsecurity">ajustes de ModSecurity</a>. Si lo apuntas fuera de <code>/var/log/bunkerweb</code>, queda fuera de la política anterior, y en una integración de contenedores sustituye el enlace simbólico por un archivo real que nada rota. Si lo mueves, móntalo en un volumen y rótalo tú mismo.</p>
 <h3 id="valores-por-defecto-e-integracion-ejemplos">Valores por defecto e integración — Ejemplos</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker / Autoconf</label><label for="__tabbed_18_3">Kubernetes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label><label for="__tabbed_18_2">Docker / Autoconf</label><label for="__tabbed_18_3">All-in-one</label><label for="__tabbed_18_4">Kubernetes</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Comportamiento predeterminado</strong>: <code>LOG_TYPES="file"</code>. Los registros se escriben en <code>/var/log/bunkerweb/*.log</code>. La rotación la gestiona la configuración del sistema <code>logrotate</code> instalada en <code>/etc/logrotate.d/bunkerweb</code> (diaria, retención de 7 días, comprimida con <code>copytruncate</code>).</p>
@@ -4798,6 +4869,7 @@ LOG_LEVEL_1=error
 </div>
 <div class="tabbed-block">
 <p><strong>Comportamiento predeterminado</strong>: <code>LOG_TYPES="stderr"</code>. Los registros son visibles mediante <code>docker logs</code>.</p>
+<p>Estas imágenes no tienen, de entrada, ningún archivo de registro gestionado por BunkerWeb que limitar: <code>src/bw/Dockerfile</code> elimina <code>access.log</code>, <code>error.log</code> y <code>modsec_audit.log</code> al construir la imagen y sustituye los tres por enlaces simbólicos a la salida estándar y al error estándar del propio contenedor, de modo que <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> y <code>MODSECURITY_SEC_AUDIT_LOG</code> van directamente al flujo de registro del contenedor por defecto. La retención ahí es responsabilidad de tu entorno de ejecución, a través del driver de logging (consulta <a href="#docker-logging-best-practices">las buenas prácticas de logging de Docker</a> más abajo) o de un colector externo; BunkerWeb no incluye <code>logrotate</code> en sus imágenes.</p>
 <p><strong>Ejemplo (adaptado de la guía de inicio rápido)</strong>: Mantener <code>docker logs</code> (stderr) Y enviar también a un contenedor syslog central (necesario para la interfaz web y CrowdSec).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span>
 <span class="w">  </span><span class="nl">&amp;bw-env</span><span class="w"> </span><span class="c1"># Usamos un ancla para evitar repetir la misma configuración para ambos servicios</span>
@@ -4924,6 +4996,10 @@ LOG_LEVEL_1=error
 </code></pre></div>
 </div>
 <div class="tabbed-block">
+<p><strong>Comportamiento predeterminado</strong>: igual que Docker (<code>LOG_TYPES="stderr"</code>), pero la imagen All-in-one conserva <code>ACCESS_LOG</code>, <code>ERROR_LOG</code> y <code>MODSECURITY_SEC_AUDIT_LOG</code> como archivos reales bajo <code>/var/log/bunkerweb/</code> (los mismos valores por defecto que en Linux), porque tanto el CrowdSec incluido como el visor de registros de la interfaz web los leen desde disco.</p>
+<p>BunkerWeb los limita por ti ahí: la imagen incluye <code>logrotate</code> y lo ejecuta cada hora bajo supervisor, con la misma política que instalan los paquetes de Linux (consulta <a href="#log-file-retention">Retención de los archivos de registro</a> más arriba). Como la rotación se hace con <code>copytruncate</code>, los archivos conservan su inodo, de modo que el analizador de CrowdSec y el visor de registros los siguen a través de una rotación sin necesidad de reiniciar.</p>
+</div>
+<div class="tabbed-block">
 <p><strong>Comportamiento predeterminado</strong>: Los registros se escriben en <code>stderr</code> y son visibles mediante <code>kubectl logs</code>.</p>
 <p><strong>Ejemplo</strong>: Habilitar el sidecar syslog integrado en el chart de Helm para recopilar registros para la interfaz web (requiere BunkerWeb 1.6.7+).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">ui</span><span class="p">:</span>
@@ -4992,7 +5068,7 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="buenas-practicas-de-registro-de-docker">Buenas prácticas de registro de Docker</h2>
+<h2 id="docker-logging-best-practices">Buenas prácticas de registro de Docker</h2>
 <p>Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro <code>json-file</code>, lo que puede dar lugar a archivos de registro muy grandes si no se configura.</p>
 <p>Para evitar esto, puede configurar la rotación de registros. Esto se puede hacer para servicios específicos en su archivo <code>docker-compose.yml</code>, o globalmente para el demonio de Docker.</p>
 <p><strong>Configuración por servicio</strong></p>

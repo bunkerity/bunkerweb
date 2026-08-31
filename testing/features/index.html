@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/features/">
       
       
-        <link rel="prev" href="../quickstart-guide/">
+        <link rel="prev" href="../building/">
       
       
         <link rel="next" href="../advanced/">
@@ -457,6 +457,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -774,6 +793,33 @@
     
   
     Quickstart guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from source
   
 
     
@@ -3983,6 +4029,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>No</td>
 <td><strong>Cachestore Locks Memory Size:</strong> Size of the internal cachestore (locks) (for example <code>8192</code>, <code>16k</code>, <code>16m</code>).</td>
 </tr>
+<tr>
+<td><code>SESSIONS_REVOCATION_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>No</td>
+<td><strong>Sessions Revocation Memory Size:</strong> Size of the store holding revoked cookie session identifiers (for example <code>8192</code>, <code>16k</code>, <code>16m</code>).</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4275,7 +4328,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>no</td>
-<td>Time to wait for DNS propagation in seconds for DNS challenges.</td>
+<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -7102,6 +7155,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <h3 id="step-2-configure-bunkerweb-settings">Step&nbsp;2 – Configure BunkerWeb settings</h3>
 <p>Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code>, and a valid <code>CROWDSEC_API_KEY</code> that you created with <code>cscli bouncers add</code>.</p>
+<p>Every setting is <code>multisite</code>, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.</p>
 <table>
 <thead>
 <tr>
@@ -7123,56 +7177,56 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_API</code></td>
 <td><code>http://crowdsec:8080</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
-<td><strong>CrowdSec API URL:</strong> The address of the CrowdSec Local API service.</td>
+<td><strong>CrowdSec API URL:</strong> The address of the CrowdSec Local API service. Leave empty to disable decision lookups.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_API_KEY</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>CrowdSec API Key:</strong> The API key for authenticating with the CrowdSec API, obtained using <code>cscli bouncers add</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_MODE</code></td>
 <td><code>live</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Operation Mode:</strong> Either <code>live</code> (query API for each request) or <code>stream</code> (periodically cache all decisions).</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Internal Traffic:</strong> Set to <code>yes</code> to check internal traffic against CrowdSec decisions.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
 <td><code>1000</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Request Timeout:</strong> Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Excluded Locations:</strong> Comma-separated list of locations (URIs) to exclude from CrowdSec checks.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
 <td><code>1</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Cache Expiration:</strong> The cache expiration time in seconds for IP decisions in live mode.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
 <td><code>10</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Update Frequency:</strong> How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode.</td>
 </tr>
@@ -7193,49 +7247,49 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_APPSEC_URL</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>AppSec URL:</strong> The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
 <td><code>passthrough</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Failure Action:</strong> Action to take when AppSec returns an error. Can be <code>passthrough</code> or <code>deny</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Connect Timeout:</strong> The timeout in milliseconds for connecting to the AppSec Component.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Send Timeout:</strong> The timeout in milliseconds for sending data to the AppSec Component.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
 <td><code>500</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Process Timeout:</strong> The timeout in milliseconds for processing the request in the AppSec Component.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Always Send:</strong> Set to <code>yes</code> to always send requests to AppSec, even if there's an IP-level decision.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>SSL Verify:</strong> Set to <code>yes</code> to verify the AppSec Component's SSL certificate.</td>
 </tr>
@@ -7248,8 +7302,23 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>Stream mode</strong> periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.</li>
 </ul>
 </div>
+<h4 id="per-service-endpoints">Per-service endpoints</h4>
+<p>Because the endpoints are <code>multisite</code>, services on the same instance can use different CrowdSec components, or only some of them. The two features are independent:</p>
+<ul>
+<li><strong>Decision lookups</strong> are active when <code>CROWDSEC_API</code> is set. Set it to an empty string for a service to skip the Local API entirely.</li>
+<li><strong>AppSec inspection</strong> is active when <code>CROWDSEC_APPSEC_URL</code> is set. Set it to an empty string for a service to skip deep request inspection.</li>
+</ul>
+<p>A service with <code>USE_CROWDSEC</code> set to <code>yes</code> and both URLs empty checks nothing, and the instance logs that neither endpoint is defined.</p>
+<div class="admonition warning">
+<p class="admonition-title">One decision cache per instance</p>
+<p>Cached decisions live in a single shared memory zone for the whole instance, keyed by the Local API they came from. Services pointing at the same <code>CROWDSEC_API</code> reuse each other's cached decisions, which is what keeps the lookup cheap. Services pointing at different Local APIs never see each other's decisions. Sizing that zone is instance-wide, so a fleet with many distinct Local APIs and large decision lists shares one budget.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Bouncer key per Local API</p>
+<p><code>CROWDSEC_API_KEY</code> is resolved per service like every other setting. When services target different Local APIs, give each one the key registered with <code>cscli bouncers add</code> on its own CrowdSec host, otherwise the lookups are rejected as unauthenticated.</p>
+</div>
 <h3 id="example-configurations_11">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Basic Configuration</label><label for="__tabbed_16_2">Advanced Configuration with AppSec</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Basic Configuration</label><label for="__tabbed_16_2">Advanced Configuration with AppSec</label><label for="__tabbed_16_3">Per-service Configuration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This is a simple configuration for when CrowdSec runs on the same host:</p>
@@ -7275,11 +7344,38 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <span class="nt">CROWDSEC_APPSEC_SSL_VERIFY</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
 </code></pre></div>
 </div>
+<div class="tabbed-block">
+<p>AppSec on every public service, decision lookups on a subset, and one service left out entirely. The unprefixed values are the fleet-wide baseline and each service overrides only what differs:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">"app1.example.com</span><span class="nv"> </span><span class="s">app2.example.com</span><span class="nv"> </span><span class="s">intranet.example.com"</span>
+
+<span class="c1"># Baseline for every service</span>
+<span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">"yes"</span>
+<span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">"http://crowdsec:7422"</span>
+<span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="c1"># No decision lookup unless a service asks for it</span>
+<span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">""</span>
+
+<span class="c1"># app1 adds the Local API decision lookup on top of AppSec</span>
+<span class="nt">app1.example.com_CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">"http://crowdsec:8080"</span>
+<span class="nt">app1.example.com_CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">"your-api-key-here"</span>
+
+<span class="c1"># app2 keeps AppSec only, inheriting the empty CROWDSEC_API baseline</span>
+
+<span class="c1"># intranet is not checked at all</span>
+<span class="nt">intranet.example.com_USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">"no"</span>
+</code></pre></div>
+<p>A service can also point at a different CrowdSec host altogether, with its own bouncer key:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">app2.example.com_CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">"http://crowdsec-dmz:8080"</span>
+<span class="nt">app2.example.com_CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">"dmz-bouncer-key"</span>
+<span class="nt">app2.example.com_CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">"http://crowdsec-dmz:7422"</span>
+</code></pre></div>
+</div>
 </div>
 </div>
 <h3 id="step-3-validate-the-integration">Step&nbsp;3 – Validate the integration</h3>
 <ul>
 <li>In the scheduler logs, look for <code>CrowdSec configuration successfully generated</code> and <code>CrowdSec bouncer denied request</code> entries to verify that the plugin is active.</li>
+<li>In the BunkerWeb instance logs, the init phase reports how many bouncers were built and how many services they cover. Services sharing an identical configuration share one bouncer, so the two counts differ when a fleet uses several distinct endpoints.</li>
 <li>On the CrowdSec side, monitor <code>cscli metrics show</code> or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.</li>
 <li>In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.</li>
 </ul>
@@ -10917,6 +11013,13 @@ TrustedMonitor/\d+\.\d+
 <td><strong>Audit Log Parts:</strong> Which parts of requests/responses to include in audit logs.</td>
 </tr>
 <tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG</code></td>
+<td><code>/var/log/bunkerweb/modsec_audit.log</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Audit Log Path:</strong> Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support.</td>
+</tr>
+<tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
 <td><code>131072</code></td>
 <td>multisite</td>
@@ -12735,7 +12838,7 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Location URL:</strong> Path that will be proxied to the backend server.</td>
+<td><strong>Location URL:</strong> Path that will be proxied to the backend server. A value starting with <code>^</code> or ending with <code>$</code> is treated as a regex location.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -14005,6 +14108,15 @@ Setting these only on <code>bunkerweb.extraEnvs</code> has <strong>no effect</st
 <li>Ensure all instances use the exact same <code>SESSIONS_SECRET</code> and <code>SESSIONS_NAME</code></li>
 <li>This ensures users maintain their session regardless of which BunkerWeb instance handles their requests</li>
 </ol>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Session Revocation</p>
+<p>Without Redis, session data lives in the cookie itself, so destroying a session only cleared it from the browser and the signed cookie stayed valid until it timed out. BunkerWeb keeps a denylist of destroyed session identifiers in shared memory, so a destroyed cookie is rejected the next time it is presented.</p>
+<ul>
+<li>It applies only when session data is stored in the cookie. With <code>USE_REDIS</code> set to <code>yes</code>, session data is server-side and destroying a session already removes it.</li>
+<li>The denylist is local to each BunkerWeb instance. Use Redis to revoke sessions across a cluster.</li>
+<li>Size it with <code>SESSIONS_REVOCATION_MEMORY_SIZE</code>. If the store fills up or becomes unavailable, the session is treated as valid and a warning is logged.</li>
+</ul>
 </div>
 <h3 id="example-configurations_35">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="44:6"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><input id="__tabbed_44_6" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Basic Configuration</label><label for="__tabbed_44_2">Enhanced Security</label><label for="__tabbed_44_3">Clustered Environment with Redis</label><label for="__tabbed_44_4">Long-lived Sessions</label><label for="__tabbed_44_5">Cross-subdomain Sessions (single tenant)</label><label for="__tabbed_44_6">Cross-subdomain Sessions (mixed tenants)</label></div>

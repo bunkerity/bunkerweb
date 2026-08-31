@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://docs.bunkerweb.io/latest/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
@@ -12,7 +12,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/about/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/about/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
@@ -22,7 +22,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/advanced/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/advanced/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
@@ -32,7 +32,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/api/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/api/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/api/"/>
@@ -41,8 +41,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/api/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/building/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/building/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/building/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/building/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/building/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/building/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/concepts/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/concepts/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
@@ -52,7 +62,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/features/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/features/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
@@ -62,7 +72,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/integrations/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/integrations/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
@@ -72,7 +82,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/plugins/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/plugins/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
@@ -82,7 +92,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/professional-services/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/professional-services/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
@@ -92,7 +102,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/quickstart-guide/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/quickstart-guide/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
@@ -102,7 +112,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/troubleshooting/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/troubleshooting/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
@@ -112,7 +122,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/upgrading/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/upgrading/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
@@ -122,7 +132,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/web-ui/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/web-ui/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
@@ -132,7 +142,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/superpowers/plans/2026-06-17-collapsible-log-entries/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
@@ -142,7 +152,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/superpowers/plans/2026-08-03-push-swap-rc4/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/superpowers/plans/2026-08-03-push-swap-rc4/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-03-push-swap-rc4/"/>
@@ -151,8 +161,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-03-push-swap-rc4/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/superpowers/plans/2026-08-25-repository-root-cleanup/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/superpowers/specs/2026-08-03-ticket-401-fixes-design/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
@@ -162,7 +182,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
@@ -172,7 +192,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/about/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/about/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
@@ -182,7 +202,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/advanced/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/advanced/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
@@ -192,7 +212,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/api/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/api/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/api/"/>
@@ -201,8 +221,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/api/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/building/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/building/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/building/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestbuilding/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/building/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/building/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/fr/concepts/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/concepts/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
@@ -212,7 +242,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/features/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/features/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
@@ -222,7 +252,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/integrations/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/integrations/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
@@ -232,7 +262,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/plugins/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/plugins/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
@@ -242,7 +272,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/professional-services/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/professional-services/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
@@ -252,7 +282,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/quickstart-guide/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/quickstart-guide/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
@@ -262,7 +292,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/troubleshooting/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/troubleshooting/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
@@ -272,7 +302,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/upgrading/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/upgrading/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
@@ -282,7 +312,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/web-ui/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/web-ui/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
@@ -292,7 +322,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-06-17-collapsible-log-entries/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
@@ -302,7 +332,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-08-03-push-swap-rc4/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-08-03-push-swap-rc4/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-03-push-swap-rc4/"/>
@@ -311,8 +341,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-03-push-swap-rc4/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-08-25-repository-root-cleanup/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/fr/superpowers/specs/2026-08-03-ticket-401-fixes-design/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
@@ -322,7 +362,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest"/>
@@ -332,7 +372,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/about/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/about/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestabout/"/>
@@ -342,7 +382,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/advanced/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/advanced/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestadvanced/"/>
@@ -352,7 +392,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/api/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/api/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestapi/"/>
@@ -361,8 +401,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/api/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/de/building/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/building/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestbuilding/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/building/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/building/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/building/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/de/concepts/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/concepts/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestconcepts/"/>
@@ -372,7 +422,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/features/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/features/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestfeatures/"/>
@@ -382,7 +432,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/integrations/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/integrations/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestintegrations/"/>
@@ -392,7 +442,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/plugins/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/plugins/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestplugins/"/>
@@ -402,7 +452,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/professional-services/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/professional-services/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestprofessional-services/"/>
@@ -412,7 +462,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/quickstart-guide/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/quickstart-guide/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestquickstart-guide/"/>
@@ -422,7 +472,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/troubleshooting/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/troubleshooting/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latesttroubleshooting/"/>
@@ -432,7 +482,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/upgrading/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/upgrading/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestupgrading/"/>
@@ -442,7 +492,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/web-ui/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/web-ui/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestweb-ui/"/>
@@ -452,7 +502,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-06-17-collapsible-log-entries/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-06-17-collapsible-log-entries/"/>
@@ -462,7 +512,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-08-03-push-swap-rc4/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-08-03-push-swap-rc4/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-08-03-push-swap-rc4/"/>
@@ -471,8 +521,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-03-push-swap-rc4/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-08-25-repository-root-cleanup/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/de/superpowers/specs/2026-08-03-ticket-401-fixes-design/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
@@ -482,7 +542,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
@@ -492,7 +552,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/about/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/about/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
@@ -502,7 +562,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/advanced/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/advanced/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
@@ -512,7 +572,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/api/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/api/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/api/"/>
@@ -521,8 +581,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/api/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/es/building/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/building/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/building/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestbuilding/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/building/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/building/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/es/concepts/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/concepts/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
@@ -532,7 +602,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/features/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/features/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
@@ -542,7 +612,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/integrations/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/integrations/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
@@ -552,7 +622,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/plugins/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/plugins/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
@@ -562,7 +632,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/professional-services/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/professional-services/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
@@ -572,7 +642,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/quickstart-guide/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/quickstart-guide/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
@@ -582,7 +652,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/troubleshooting/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/troubleshooting/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
@@ -592,7 +662,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/upgrading/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/upgrading/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
@@ -602,7 +672,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/web-ui/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/web-ui/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
@@ -612,7 +682,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-06-17-collapsible-log-entries/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
@@ -622,7 +692,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-08-03-push-swap-rc4/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-08-03-push-swap-rc4/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-03-push-swap-rc4/"/>
@@ -631,8 +701,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-03-push-swap-rc4/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-08-25-repository-root-cleanup/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latestzh/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/es/superpowers/specs/2026-08-03-ticket-401-fixes-design/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
@@ -642,7 +722,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
@@ -652,7 +732,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/about/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/about/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
@@ -662,7 +742,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/advanced/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/advanced/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
@@ -672,7 +752,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/api/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/api/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/api/"/>
@@ -681,8 +761,18 @@
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/api/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/zh/building/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/building/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/building/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestbuilding/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/building/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/building/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/zh/concepts/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/concepts/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
@@ -692,7 +782,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/features/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/features/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
@@ -702,7 +792,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/integrations/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/integrations/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
@@ -712,7 +802,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/plugins/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/plugins/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
@@ -722,7 +812,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/professional-services/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/professional-services/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
@@ -732,7 +822,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/quickstart-guide/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/quickstart-guide/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
@@ -742,7 +832,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/troubleshooting/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/troubleshooting/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
@@ -752,7 +842,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/upgrading/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/upgrading/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
@@ -762,7 +852,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/web-ui/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/web-ui/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
@@ -772,7 +862,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-06-17-collapsible-log-entries/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-06-17-collapsible-log-entries/"/>
@@ -782,7 +872,7 @@
     </url>
     <url>
         <loc>https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-08-03-push-swap-rc4/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-08-03-push-swap-rc4/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-03-push-swap-rc4/"/>
@@ -791,8 +881,18 @@
         <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/superpowers/plans/2026-08-03-push-swap-rc4/"/>
     </url>
     <url>
+        <loc>https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-08-25-repository-root-cleanup/</loc>
+        <lastmod>2026-08-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestsuperpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/superpowers/plans/2026-08-25-repository-root-cleanup/"/>
+    </url>
+    <url>
         <loc>https://docs.bunkerweb.io/latest/zh/superpowers/specs/2026-08-03-ticket-401-fixes-design/</loc>
-        <lastmod>2026-08-21</lastmod>
+        <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://docs.bunkerweb.io/latest/zh/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>
         <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/superpowers/specs/2026-08-03-ticket-401-fixes-design/"/>

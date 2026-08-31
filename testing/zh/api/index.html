@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  从源代码构建
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     快速入门指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从源代码构建
   
 
     
@@ -1244,6 +1290,7 @@
 <ul>
 <li>网络：保持内部流量；绑定到回环或内网接口，并用 <code>API_WHITELIST_IPS</code> 限制来源 IP（默认启用）。</li>
 <li>认证到位：设置 <code>API_USERNAME</code>/<code>API_PASSWORD</code>（管理员），需要时用 <code>API_ACL_BOOTSTRAP_FILE</code> 添加更多用户/ACL；仅将 <code>API_TOKEN</code> 作为应急备用。</li>
+<li>ACL 范围：config、service、plugin 和 global settings 的<strong>写</strong>权限等同于管理员（其内容会原样渲染进 NGINX/Lua 配置，即代码执行）：只授予完全可信的用户。<code>instances_create</code> 和 <code>instances_update</code> 也一样，只是路径不同：对已注册实例的每次调用都会带上 <code>API_TOKEN</code> 管理员覆盖令牌，且 scheduler 会把生成的配置和缓存（含 TLS 私钥）推送到每个已注册实例。参见“权限与 ACL”一节。</li>
 <li>隐藏路径：反向代理时选择不易猜到的 <code>API_ROOT_PATH</code>，并在代理上同步。</li>
 <li>速率限制：保持启用，除非其他层有同等限制；<code>/auth</code> 始终限速。</li>
 <li>TLS：在代理终止，或设置 <code>API_SSL_ENABLED=yes</code> 并提供证书/密钥路径。</li>
@@ -1417,8 +1464,9 @@
 </ul>
 <div class="admonition danger">
 <p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
 <ul>
+<li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
 <li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
 <li><code>plugins</code>: <code>plugin_create</code></li>

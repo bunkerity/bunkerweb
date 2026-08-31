@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compilar desde el código fuente
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Guía de inicio rápido
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilar desde el código fuente
   
 
     
@@ -1244,6 +1290,7 @@
 <ul>
 <li>Red: mantén el tráfico interno; escucha en loopback o interfaz interna y restringe IPs de origen con <code>API_WHITELIST_IPS</code> (activo por defecto).</li>
 <li>Auth presente: define <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) y, si hace falta, <code>API_ACL_BOOTSTRAP_FILE</code> para más usuarios/ACL; guarda un <code>API_TOKEN</code> solo para emergencias.</li>
+<li>Ámbitos de ACL: los permisos de <strong>escritura</strong> de config, service, plugin y global settings son equivalentes a admin (su contenido se renderiza tal cual como NGINX/Lua, es decir, ejecución de código): concédelos solo a usuarios de plena confianza. <code>instances_create</code> e <code>instances_update</code> también lo son, por otra vía: las llamadas a una instancia registrada llevan el override de admin <code>API_TOKEN</code>, y el scheduler envía la configuración generada y la caché (claves privadas TLS incluidas) a cada instancia registrada. Ver <a href="#permisos-y-acl">Permisos y ACL</a>.</li>
 <li>Ocultar ruta: con reverse proxy, elige un <code>API_ROOT_PATH</code> poco obvio y refléjalo en el proxy.</li>
 <li>Rate limiting: déjalo activado salvo que otra capa imponga límites equivalentes; <code>/auth</code> siempre está limitado.</li>
 <li>TLS: termina en el proxy o usa <code>API_SSL_ENABLED=yes</code> con rutas de cert/clave.</li>
@@ -1417,8 +1464,9 @@
 </ul>
 <div class="admonition danger">
 <p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
 <ul>
+<li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
 <li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
 <li><code>plugins</code>: <code>plugin_create</code></li>

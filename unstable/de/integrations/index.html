@@ -461,6 +461,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Aus dem Quellcode erstellen
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -997,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Redis-Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-log-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protokollaufbewahrung
       
     </span>
   </a>
@@ -1551,6 +1581,33 @@
     
   
     Schnellstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aus dem Quellcode erstellen
   
 
     
@@ -3092,6 +3149,15 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Authentifizierung:</strong> Wird <code>REDIS_PASSWORD</code> gesetzt und die Konfigurationsdatei deklariert noch kein <code>requirepass</code>, startet das eingebettete Redis mit <code>requirepass</code>, sodass BunkerWeb-Client und -Server konsistent bleiben. Der eingebettete Server unterstützt nur den Default-Benutzer – setzen Sie <code>REDIS_USERNAME</code> ausschließlich beim Anbinden eines externen Redis mit ACLs.</li>
 <li>Redis-Protokolle erscheinen mit dem Präfix <code>[REDIS]</code> in den Docker-Protokollen sowie in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
+<h3 id="aio-log-retention">Protokollaufbewahrung</h3>
+<p>Anders als die übrigen Docker-Images bewahrt das All-In-One <code>access.log</code>, <code>error.log</code> und <code>modsec_audit.log</code> als reale Dateien unter <code>/var/log/bunkerweb/</code> auf. Der Log-Stream liest sie, um jeder Zeile ein Präfix voranzustellen und <code>HIDE_SERVICE_LOGS</code> anzuwenden, und sowohl der mitgelieferte CrowdSec-Parser als auch der Protokollanzeiger der Web-UI lesen sie von der Festplatte.</p>
+<ul>
+<li>Das Image liefert <code>logrotate</code> mit und führt es stündlich unter supervisor aus. Ein Rotationsfehler wird mit dem Präfix <code>[LOGROTATE]</code> in den Container-Logs gemeldet.</li>
+<li>Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter <code>/etc/logrotate.d/bunkerweb</code>: Jede Datei, die auf <code>/var/log/bunkerweb/*.log</code> passt, wird rotiert, sobald sie 100 MB überschreitet, sieben komprimierte Generationen werden aufbewahrt, und die Rotation verwendet <code>copytruncate</code>.</li>
+<li><code>copytruncate</code> leert die Datei an Ort und Stelle, statt sie umzubenennen, sodass sie ihren Inode behält. Der Log-Stream, der CrowdSec-Parser und der Protokollanzeiger folgen ihr daher über eine Rotation hinweg, ohne neu starten zu müssen, und ModSecurity schreibt weiterhin in die richtige Datei, obwohl es sein Audit-Log nie erneut öffnet.</li>
+<li>Um den Schwellenwert oder die Anzahl der Generationen zu ändern, mounten Sie Ihre eigene Datei über <code>/etc/logrotate.d/bunkerweb</code>. Um die Rotation vollständig zu deaktivieren und die Aufbewahrung selbst zu verwalten, mounten Sie eine leere Datei über denselben Pfad. Ein unter <code>/var/log/bunkerweb</code> gemountetes Volume ändert nur, wo die Daten liegen — es hindert das im Container laufende <code>logrotate</code> nicht daran, sie dort weiterhin zu rotieren.</li>
+</ul>
+<p>Siehe <a href="../advanced/#log-file-retention">Aufbewahrung der Protokolldateien</a> dazu, wie die anderen Integrationen damit umgehen.</p>
 <h3 id="crowdsec-integration">CrowdSec-Integration</h3>
 <p>Das BunkerWeb <strong>All-In-One</strong>-Docker-Image wird mit vollständig integriertem CrowdSec geliefert – keine zusätzlichen Container oder manuelle Einrichtung erforderlich. Befolgen Sie die nachstehenden Schritte, um CrowdSec in Ihrer Bereitstellung zu aktivieren, zu konfigurieren und zu erweitern.</p>
 <p>Standardmäßig ist CrowdSec <strong>deaktiviert</strong>. Um es zu aktivieren, fügen Sie einfach die Umgebungsvariable <code>USE_CROWDSEC</code> hinzu:</p>
@@ -3402,6 +3468,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>Mindestsekunden zwischen aufeinanderfolgenden Reloads</td>
 <td>Ganze Sekunden</td>
 <td><code>5</code></td>
+</tr>
+<tr>
+<td><code>SEND_FILES_MIN_TIMEOUT</code></td>
+<td>Minimales Lesezeitlimit für das Senden von Konfigurations- und Cache-Ordnern</td>
+<td>Ganze Sekunden</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

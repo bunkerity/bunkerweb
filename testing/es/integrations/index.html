@@ -461,6 +461,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compilar desde el código fuente
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -997,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Integración con Redis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-log-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retención de registros
       
     </span>
   </a>
@@ -1562,6 +1592,33 @@
     
   
     Guía de inicio rápido
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compilar desde el código fuente
   
 
     
@@ -3103,6 +3160,15 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Autenticación:</strong> cuando se define <code>REDIS_PASSWORD</code> y la configuración no contiene ya <code>requirepass</code>, el Redis integrado se lanza con <code>requirepass</code> para mantener la coherencia entre el cliente y el servidor de BunkerWeb. El servidor integrado solo admite el usuario predeterminado: define <code>REDIS_USERNAME</code> únicamente cuando apuntes a un Redis externo con ACLs.</li>
 <li>Los registros de Redis aparecen con el prefijo <code>[REDIS]</code> en los registros de Docker y en <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
+<h3 id="aio-log-retention">Retención de registros</h3>
+<p>A diferencia de las demás imágenes Docker, el Todo en Uno mantiene <code>access.log</code>, <code>error.log</code> y <code>modsec_audit.log</code> como archivos reales bajo <code>/var/log/bunkerweb/</code>. El flujo de registro los lee para anteponer un prefijo a cada línea y aplicar <code>HIDE_SERVICE_LOGS</code>, y tanto el analizador de CrowdSec incluido como el visor de registros de la interfaz web los leen desde el disco.</p>
+<ul>
+<li>La imagen incluye <code>logrotate</code> y lo ejecuta cada hora bajo supervisor. Un fallo de rotación se reporta con el prefijo <code>[LOGROTATE]</code> en los registros del contenedor.</li>
+<li>La política es la misma que instalan los paquetes de Linux, en <code>/etc/logrotate.d/bunkerweb</code>: cada archivo que coincide con <code>/var/log/bunkerweb/*.log</code> se rota en cuanto supera los 100 MB, se conservan siete generaciones comprimidas, y la rotación usa <code>copytruncate</code>.</li>
+<li><code>copytruncate</code> vacía el archivo en el mismo sitio en lugar de renombrarlo, por lo que conserva su inodo. El flujo de registro, el analizador de CrowdSec y el visor de registros lo siguen a través de una rotación sin necesidad de reiniciar, y ModSecurity sigue escribiendo en el archivo correcto aunque nunca reabre su registro de auditoría.</li>
+<li>Para cambiar el umbral o el número de generaciones, monta tu propio archivo sobre <code>/etc/logrotate.d/bunkerweb</code>. Para desactivar la rotación por completo y gestionar tú mismo la retención, monta un archivo vacío sobre esa misma ruta; un volumen montado en <code>/var/log/bunkerweb</code> solo cambia dónde viven los datos, no impide que el <code>logrotate</code> del contenedor los siga rotando ahí.</li>
+</ul>
+<p>Consulta <a href="../advanced/#log-file-retention">Retención de los archivos de registro</a> para ver cómo lo gestionan las demás integraciones.</p>
 <h3 id="crowdsec-integration">Integración con CrowdSec</h3>
 <p>La imagen Docker <strong>Todo en Uno</strong> de BunkerWeb viene con CrowdSec totalmente integrado, sin necesidad de contenedores adicionales ni configuración manual. Sigue los pasos a continuación para habilitar, configurar y ampliar CrowdSec en tu despliegue.</p>
 <p>Por defecto, CrowdSec está <strong>deshabilitado</strong>. Para activarlo, simplemente añade la variable de entorno <code>USE_CROWDSEC</code>:</p>
@@ -3439,6 +3505,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>Segundos mínimos entre recargas consecutivas</td>
 <td>Segundos enteros</td>
 <td><code>5</code></td>
+</tr>
+<tr>
+<td><code>SEND_FILES_MIN_TIMEOUT</code></td>
+<td>Tiempo mínimo de espera de lectura para enviar carpetas de configuración y caché</td>
+<td>Segundos enteros</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

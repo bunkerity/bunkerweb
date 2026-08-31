@@ -2683,6 +2683,17 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 - **Authentication:** when `REDIS_PASSWORD` is set and the conf does not already define `requirepass`, the embedded Redis is launched with `requirepass` so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set `REDIS_USERNAME` only when pointing at an external Redis with ACLs.
 - Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
 
+### Log Retention {#aio-log-retention}
+
+Unlike the other Docker images, the All-In-One keeps `access.log`, `error.log` and `modsec_audit.log` as real files under `/var/log/bunkerweb/`. The log stream reads them to prefix each line and to apply `HIDE_SERVICE_LOGS`, and both the bundled CrowdSec parser and the Web UI log viewer read them from disk.
+
+- The image bundles `logrotate` and runs it hourly under supervisor. A rotation failure is reported with the `[LOGROTATE]` prefix in the container logs.
+- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated once it passes 100 MB, seven compressed generations are kept, and rotation uses `copytruncate`.
+- `copytruncate` empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.
+- To change the threshold or the number of generations, mount your own file over `/etc/logrotate.d/bunkerweb`. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at `/var/log/bunkerweb` only changes where the bytes live, it does not stop the container's own `logrotate` from still rotating them there.
+
+See [Log File Retention](https://docs.bunkerweb.io/latest/advanced/#log-file-retention) for how the other integrations handle this.
+
 ### CrowdSec Integration {#crowdsec-integration}
 
 The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.
@@ -3052,6 +3063,7 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
 | `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
+| `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes                                                                                                                                                                                                    | Integer seconds                                | `30`                                   |
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
@@ -6349,15 +6361,16 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Memory Settings"
 
-    | Setting                        | Default | Context | Multiple | Description                                                                                                                                               |
-    | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
-    | `DATASTORE_LRU_SIZE`           | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | Setting                           | Default | Context | Multiple | Description                                                                                                                                               |
+    | --------------------------------- | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WORKERLOCK_MEMORY_SIZE`          | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers (for example `8192`, `48k`, `16m`).                                        |
+    | `DATASTORE_MEMORY_SIZE`           | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore (for example `8192`, `64k`, `64m`).                                                             |
+    | `DATASTORE_LRU_SIZE`              | `1k`    | global  | No       | **Datastore LRU Size:** Slot count for the shared per-worker datastore LRU. Accepts a plain integer or `k`/`m` shorthand (for example `1k`, `10k`, `1m`). |
+    | `CACHESTORE_MEMORY_SIZE`          | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore (for example `8192`, `64k`, `64m`).                                                           |
+    | `CACHESTORE_IPC_MEMORY_SIZE`      | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc) (for example `8192`, `16k`, `16m`).                                                 |
+    | `CACHESTORE_MISS_MEMORY_SIZE`     | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss) (for example `8192`, `16k`, `16m`).                                               |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE`    | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks) (for example `8192`, `16k`, `16m`).                                             |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`   | global  | No       | **Sessions Revocation Memory Size:** Size of the store holding revoked cookie session identifiers (for example `8192`, `16k`, `16m`).                     |
 
 === "Logging Settings"
 
@@ -6375,12 +6388,12 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Integration Settings"
 
-    | Setting                  | Default | Context   | Multiple | Description                                                                                                     |
-    | ------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`          | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                                          |
-    | `SWARM_MODE`             | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                                |
-    | `KUBERNETES_MODE`        | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                             |
-    | `USE_TEMPLATE`           |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings.            |
+    | Setting           | Default | Context   | Multiple | Description                                                                                          |
+    | ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
+    | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
+    | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
 
 === "Nginx Settings"
 
@@ -6483,7 +6496,7 @@ Advanced ACME certificate management with custom CA support, certificate monitor
 | `ACME_DNS_PROVIDER`                 |             | multisite | no       | DNS provider for DNS-01 challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `ACME_DNS_CREDENTIAL_ITEM`          |             | multisite | yes      | Configuration item for the DNS provider credentials (e.g. 'cloudflare_api_token 123456'). Values can be base64 encoded.                                                                                                                                                                                                                                                                                                                                                                          |
 | `ACME_DNS_CREDENTIAL_DECODE_BASE64` | `yes`       | multisite | yes      | Automatically decode base64 encoded DNS provider credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Time to wait for DNS propagation in seconds for DNS challenges.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `ACME_DNS_PROPAGATION`              | `default`   | multisite | no       | Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.                                                                                                                                                                                                                                               |
 | `ACME_DNS_ALIAS`                    |             | multisite | no       | Target zone for DNS-01 CNAME delegation. ACME PRO writes a per-cert domain alias JSON map and passes it to certbot with --dns-<provider>-domain-aliases-file, so DNS credentials only need to control the alias zone. Prerequisite: each cert domain must already have a CNAME `_acme-challenge.<domain>` -> `_acme-challenge.<target>` (and the target zone must resolve). Example: 'alias.acmeplay.org'. Silently ignored on older runtimes or with incompatible DNS providers (e.g. route53). |
 | `ACME_KEY_TYPE`                     | `ecdsa`     | multisite | no       | Key type for the certificate. ECDSA is smaller and faster; RSA has broader compatibility.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `ACME_KEY_SIZE`                     | `256`       | multisite | no       | Key size in bits. For ECDSA: 256 or 384. For RSA: 2048 or 4096.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -8257,33 +8270,50 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
 Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
+Every setting is `multisite`, so a value set without a prefix applies to all services and a value prefixed with a server name overrides it for that service only.
+
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                      |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Enable CrowdSec:** Set to `yes` to enable the CrowdSec bouncer.                                                |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service.                                             |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** The address of the CrowdSec Local API service. Leave empty to disable decision lookups.    |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API Key:** The API key for authenticating with the CrowdSec API, obtained using `cscli bouncers add`. |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Operation Mode:** Either `live` (query API for each request) or `stream` (periodically cache all decisions).   |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Internal Traffic:** Set to `yes` to check internal traffic against CrowdSec decisions.                         |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Request Timeout:** Timeout in milliseconds for HTTP requests to the CrowdSec Local API in live mode.           |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Excluded Locations:** Comma-separated list of locations (URIs) to exclude from CrowdSec checks.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Cache Expiration:** The cache expiration time in seconds for IP decisions in live mode.                        |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Update Frequency:** How often (in seconds) to pull new/expired decisions from the CrowdSec API in stream mode. |
 
 #### Application Security Component Settings
 
-| Setting                           | Default       | Context | Multiple | Description                                                                                            |
-| --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
+| Setting                           | Default       | Context   | Multiple | Description                                                                                            |
+| --------------------------------- | ------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** The URL of the CrowdSec Application Security Component. Leave empty to disable AppSec. |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Failure Action:** Action to take when AppSec returns an error. Can be `passthrough` or `deny`.       |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | no       | **Connect Timeout:** The timeout in milliseconds for connecting to the AppSec Component.               |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | no       | **Send Timeout:** The timeout in milliseconds for sending data to the AppSec Component.                |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | no       | **Process Timeout:** The timeout in milliseconds for processing the request in the AppSec Component.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Always Send:** Set to `yes` to always send requests to AppSec, even if there's an IP-level decision. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL Verify:** Set to `yes` to verify the AppSec Component's SSL certificate.                         |
 
 !!! info "About Operation Modes"
     - **Live mode** queries the CrowdSec API for each incoming request, providing real-time protection at the cost of higher latency.
     - **Stream mode** periodically downloads all decisions from the CrowdSec API and caches them locally, reducing latency with a slight delay in applying new decisions.
+
+#### Per-service endpoints
+
+Because the endpoints are `multisite`, services on the same instance can use different CrowdSec components, or only some of them. The two features are independent:
+
+- **Decision lookups** are active when `CROWDSEC_API` is set. Set it to an empty string for a service to skip the Local API entirely.
+- **AppSec inspection** is active when `CROWDSEC_APPSEC_URL` is set. Set it to an empty string for a service to skip deep request inspection.
+
+A service with `USE_CROWDSEC` set to `yes` and both URLs empty checks nothing, and the instance logs that neither endpoint is defined.
+
+!!! warning "One decision cache per instance"
+    Cached decisions live in a single shared memory zone for the whole instance, keyed by the Local API they came from. Services pointing at the same `CROWDSEC_API` reuse each other's cached decisions, which is what keeps the lookup cheap. Services pointing at different Local APIs never see each other's decisions. Sizing that zone is instance-wide, so a fleet with many distinct Local APIs and large decision lists shares one budget.
+
+!!! info "Bouncer key per Local API"
+    `CROWDSEC_API_KEY` is resolved per service like every other setting. When services target different Local APIs, give each one the key registered with `cscli bouncers add` on its own CrowdSec host, otherwise the lookups are rejected as unauthenticated.
 
 ### Example Configurations
 
@@ -8317,9 +8347,42 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Per-service Configuration"
+
+    AppSec on every public service, decision lookups on a subset, and one service left out entirely. The unprefixed values are the fleet-wide baseline and each service overrides only what differs:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline for every service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # No decision lookup unless a service asks for it
+    CROWDSEC_API_KEY: ""
+
+    # app1 adds the Local API decision lookup on top of AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 keeps AppSec only, inheriting the empty CROWDSEC_API baseline
+
+    # intranet is not checked at all
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    A service can also point at a different CrowdSec host altogether, with its own bouncer key:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Step&nbsp;3 – Validate the integration
 
 - In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- In the BunkerWeb instance logs, the init phase reports how many bouncers were built and how many services they cover. Services sharing an identical configuration share one bouncer, so the two counts differ when a fleet uses several distinct endpoints.
 - On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
 - In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
@@ -9413,7 +9476,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`        | multisite | no       | **Challenge Type:** Method used to verify domain ownership. Options: `http` or `dns`.                                                                                                                                                                                          |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |               | multisite | no       | **DNS Provider:** When using DNS challenges, the DNS provider to use (e.g., cloudflare, route53, digitalocean).                                                                                                                                                                |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`     | multisite | no       | **DNS Propagation:** The time to wait for DNS propagation in seconds. If no value is provided, the provider's default propagation time is used.                                                                                                                                |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                                                                                      |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |               | multisite | yes      | **Credential Item:** Configuration items for DNS provider authentication (e.g., `cloudflare_api_token 123456`). Write the key, whitespace, then the value, and do not quote the key. Values can be raw text, base64 encoded, or a JSON object.                                 |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`         | multisite | no       | **Decode Base64 DNS credentials:** Automatically decode base64-encoded DNS provider credentials when set to `yes`. Values matching base64 format are decoded before use (except for the `rfc2136` provider). Set to `no` if your credentials are intentionally base64 strings. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`          | multisite | no       | **Wildcard Certificates:** When set to `yes`, creates wildcard certificates for all domains. Only available with DNS challenges.                                                                                                                                               |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`          | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers.                                                                                           |
@@ -10282,6 +10345,7 @@ Follow these steps to configure and use ModSecurity:
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support.                 |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
 | `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
@@ -10511,19 +10575,19 @@ Follow these steps to deploy mutual TLS with confidence:
 
 ### Configuration Settings
 
-| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                              |
-| ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                       |
-| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                     |
-| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                              |
-| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                              |
-| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                    |
-| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.        |
-| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                      |
+| Setting                        | Default | Context   | Multiple | Description                                                                                                                                                                                                                                               |
+| ------------------------------ | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                     | `no`    | multisite | no       | **Use mutual TLS:** Enable client certificate authentication for the current site.                                                                                                                                                                        |
+| `MTLS_CA_CERTIFICATE_PRIORITY` | `file`  | multisite | no       | **Client CA bundle priority:** Source of the client CA bundle: `file` (path) or `data` (base64/PEM).                                                                                                                                                      |
+| `MTLS_CA_CERTIFICATE`          |         | multisite | no       | **Client CA bundle path:** Path to the trusted client CA bundle (PEM), readable by the Scheduler. Required when `MTLS_VERIFY_CLIENT` is `on` or `optional`.                                                                                               |
+| `MTLS_CA_CERTIFICATE_DATA`     |         | multisite | no       | **Client CA bundle data:** Trusted client CA bundle supplied directly as base64 or plaintext PEM (e.g. through the web UI).                                                                                                                               |
+| `MTLS_VERIFY_CLIENT`           | `on`    | multisite | no       | **Verify client mode:** Choose whether certificates are required (`on`), optional (`optional`), or accepted without CA validation (`optional_no_ca`).                                                                                                     |
+| `MTLS_URL`                     |         | multisite | yes      | **mTLS URL:** Regex matched against the request URI to enforce a valid client certificate only on matching paths (HTTP only). Requires `MTLS_VERIFY_CLIENT` set to `optional` or `optional_no_ca`. Leave empty to enforce mTLS on the whole site.         |
+| `MTLS_VERIFY_DEPTH`            | `2`     | multisite | no       | **Verify depth:** Maximum certificate chain depth accepted for client certificates.                                                                                                                                                                       |
 | `MTLS_FORWARD_CLIENT_HEADERS`  | `yes`   | multisite | no       | **Forward client headers:** Propagate verification results (`X-SSL-Client-*` headers with status, DN, issuer, serial, fingerprint, validity window). Client-supplied `X-SSL-*` headers are always stripped on ingress, so these values cannot be spoofed. |
-| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                        |
-| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain. |
-| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                           |
+| `MTLS_CRL_PRIORITY`            | `file`  | multisite | no       | **Client CRL priority:** Source of the CRL: `file` (path) or `data` (base64/PEM).                                                                                                                                                                         |
+| `MTLS_CRL`                     |         | multisite | no       | **Client CRL path:** Optional path to a PEM-encoded certificate revocation list, readable by the Scheduler. Applied only when the CA bundle is successfully loaded. nginx requires the CRL file to contain a CRL for every CA in the verification chain.  |
+| `MTLS_CRL_DATA`                |         | multisite | no       | **Client CRL data:** Certificate revocation list supplied directly as base64 or plaintext PEM.                                                                                                                                                            |
 
 !!! tip "Configure once, distributed everywhere"
     CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
@@ -11316,7 +11380,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
     | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server.                                                                                                                          |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location.                                             |
     | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |
@@ -12038,6 +12102,13 @@ Follow these steps to configure and use the Sessions feature:
     1. Set `USE_REDIS` to `yes` and configure your Redis connection
     2. Ensure all instances use the exact same `SESSIONS_SECRET` and `SESSIONS_NAME`
     3. This ensures users maintain their session regardless of which BunkerWeb instance handles their requests
+
+!!! info "Session Revocation"
+    Without Redis, session data lives in the cookie itself, so destroying a session only cleared it from the browser and the signed cookie stayed valid until it timed out. BunkerWeb keeps a denylist of destroyed session identifiers in shared memory, so a destroyed cookie is rejected the next time it is presented.
+
+    - It applies only when session data is stored in the cookie. With `USE_REDIS` set to `yes`, session data is server-side and destroying a session already removes it.
+    - The denylist is local to each BunkerWeb instance. Use Redis to revoke sessions across a cluster.
+    - Size it with `SESSIONS_REVOCATION_MEMORY_SIZE`. If the store fills up or becomes unavailable, the session is treated as valid and a warning is logged.
 
 ### Example Configurations
 
@@ -13596,6 +13667,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Reload re-reads the folder"
+        A reload re-reads `/etc/bunkerweb/configs`: files created, modified or deleted there are applied and saved to the database. A configuration owned by the web UI or the API keeps its owner, only its content is refreshed from the file.
+
 === "All-in-one"
 
     When using the [All-in-one image](https://docs.bunkerweb.io/latest/integrations/#all-in-one-aio-image), you have two choices for adding custom configurations:
@@ -15075,11 +15149,11 @@ There are two main categories of logs to configure:
 
 Service logs are controlled by the `LOG_TYPES` setting, which can accept multiple values separated by spaces (e.g., `LOG_TYPES="stderr syslog"`).
 
-| Value    | Description                                                                                                                                                                   |
-| :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Writes logs to a plain file. External rotation is handled by `logrotate` on Linux installs or by your container logging driver on Docker. Required for the Web UI log viewer. |
-| `stderr` | Writes logs to standard error. Standard for containerized environments (`docker logs`).                                                                                       |
-| `syslog` | Sends logs to a syslog server. Requires `LOG_SYSLOG_ADDRESS` to be set.                                                                                                       |
+| Value    | Description                                                                                                                                                                                                                                                                                                                |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Writes logs to a plain file. On Linux installs, external rotation is handled by `logrotate`. In a container, nothing rotates a file a service writes itself: retention is the operator's job, so mount the file to a volume and rotate it yourself, or prefer `stderr`/`syslog` there. Required for the Web UI log viewer. |
+| `stderr` | Writes logs to standard error. Standard for containerized environments (`docker logs`).                                                                                                                                                                                                                                    |
+| `syslog` | Sends logs to a syslog server. Requires `LOG_SYSLOG_ADDRESS` to be set.                                                                                                                                                                                                                                                    |
 
 When using `file`, you should also configure:
 
@@ -15113,6 +15187,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Log File Retention {#log-file-retention}
+
+Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` once it passes 100 MB, keeps seven compressed generations, and uses `copytruncate`.
+
+- **Linux**: the packages depend on `logrotate` and the system runs it on its own timer. Nothing else to do.
+- **All-in-one**: the image ships `logrotate` and runs it hourly under supervisor, using that same policy file.
+- **Docker, Autoconf, Swarm and Kubernetes**: nothing to rotate. `src/bw/Dockerfile` replaces `access.log`, `error.log` and `modsec_audit.log` with symlinks to the container's own stdout and stderr at build time, so retention belongs to your container runtime's logging driver (see [Docker logging best practices](#docker-logging-best-practices) below).
+
+`copytruncate` is what makes one policy fit all of them. It copies the file aside and empties the original in place instead of renaming it, so a writer that never reopens its log keeps writing to the right file. ModSecurity is exactly that writer: it opens the audit log once when the configuration loads and holds the descriptor. Rotating by rename would leave it writing to the archive forever, and the live file empty.
+
+Edit `/etc/logrotate.d/bunkerweb` to change the threshold, the number of generations, or to add a `maxage`. On the All-in-one, mount your own file over that path.
+
+The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](https://docs.bunkerweb.io/latest/features/#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself.
+
 ### Integration Defaults & Examples
 
 === "Linux"
@@ -15138,6 +15226,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf / Swarm"
 
     **Default behavior**: `LOG_TYPES="stderr"`. Logs are visible via `docker logs`.
+
+    These images have no BunkerWeb-managed log files to bound: `src/bw/Dockerfile` deletes `access.log`, `error.log` and `modsec_audit.log` at build time and replaces all three with symlinks to the container's own stdout and stderr, so `ACCESS_LOG`, `ERROR_LOG` and `MODSECURITY_SEC_AUDIT_LOG` go straight to the container's log stream by default. Retention there is your container runtime's job, through the logging driver (see [Docker logging best practices](#docker-logging-best-practices) below) or an external collector; BunkerWeb ships no `logrotate` inside its images.
 
     **Example (Adapted from the quickstart guide)**: Keep `docker logs` (stderr) AND send to a central syslog container (needed for Web UI and CrowdSec).
 
@@ -15266,6 +15356,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **Default behavior**: same as Docker (`LOG_TYPES="stderr"`), but the All-in-one image keeps `ACCESS_LOG`, `ERROR_LOG` and `MODSECURITY_SEC_AUDIT_LOG` as real files under `/var/log/bunkerweb/` (same defaults as Linux), because the bundled CrowdSec and the Web UI log viewer both read them from disk.
+
+    BunkerWeb bounds them for you there: the image ships `logrotate` and runs it hourly under supervisor, with the same policy the Linux packages install (see [Log File Retention](#log-file-retention) above). Because it rotates with `copytruncate`, the files keep their inode, so the CrowdSec parser and the log viewer follow them across a rotation without restarting.
+
 === "Kubernetes"
 
     **Default behavior**: Logs are written to `stderr` and visible via `kubectl logs`.
@@ -15342,7 +15438,7 @@ log {
 };
 ```
 
-## Docker logging best practices
+## Docker logging best practices {#docker-logging-best-practices}
 
 When using Docker, it's important to manage container logs to prevent them from consuming excessive disk space. By default, Docker uses the `json-file` logging driver, which can lead to very large log files if left unconfigured.
 
@@ -17977,7 +18073,7 @@ The BunkerWeb API is the control plane for managing instances, services, bans, p
 
 - Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with `API_WHITELIST_IPS` (enabled by default).
 - Auth present: set `API_USERNAME`/`API_PASSWORD` (admin) and, if needed, `API_ACL_BOOTSTRAP_FILE` for extra users/ACLs; keep an override `API_TOKEN` only for break-glass use.
-- ACL scopes: config, service, plugin, and global-settings **write** permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. See [Permissions and ACL](#permissions-and-acl).
+- ACL scopes: config, service, plugin, and global-settings **write** permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. `instances_create` and `instances_update` are admin-equivalent too, by a different route: calls to a registered instance carry the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and cache (TLS private keys included) to every registered instance. See [Permissions and ACL](#permissions-and-acl).
 - Path hiding: when reverse-proxying, pick an unguessable `API_ROOT_PATH` and mirror it on the proxy.
 - Rate limiting: leave it on unless another layer enforces equivalent limits; `/auth` is always rate limited.
 - TLS: terminate TLS at the proxy or set `API_SSL_ENABLED=yes` with cert/key paths.
@@ -18151,8 +18247,9 @@ Choose the flavor that matches your environment.
 - Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Each user takes a plaintext `password` or a pre-hashed `password_hash`/`password_bcrypt` (see tip below).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
@@ -19266,51 +19363,124 @@ In this structure, `user_auth.py` contains the `user_auth` blueprint, and `user_
 
 === "Docker"
 
-    1. **Backup the database**:
+    === "Easy upgrade using the install script"
 
-        - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
-        - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
-
-        ```bash
-        docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
-        ```
+        The same script used for fresh Docker installs also upgrades a stack it
+        generated. Run it from the directory holding your `docker-compose.yml`
+        and `.env` (or point it there with `--compose-dir`):
 
         ```bash
-        docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
+        LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+
+        # Verify the checksum
+        sha256sum -c install-bunkerweb.sh.sha256
+
+        # If the check is successful, run the script
+        chmod +x install-bunkerweb.sh
+        sudo ./install-bunkerweb.sh --docker --compose-dir /path/to/your/stack
         ```
 
-    2. **Upgrade BunkerWeb**:
-        - Upgrade BunkerWeb to the latest version.
-            1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
-                ```yaml
-                services:
-                    bunkerweb:
-                        image: bunkerity/bunkerweb:testing
-                        ...
-                    bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:testing
-                        ...
-                    bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:testing
-                        ...
-                    bw-ui:
-                        image: bunkerity/bunkerweb-ui:testing
-                        ...
-                ```
+        !!! danger "Security Notice"
+            **Always verify the integrity of the installation script before running it.**
 
-            2. **Restart the containers**: Restart the containers to apply the changes.
-                ```bash
-                docker compose down
-                docker compose up -d
-                ```
+            Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
 
-    3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
+            If the checksum verification fails, **do not execute the script**—it may be unsafe.
 
-        ```bash
-        docker compose logs <scheduler_container>
-        ```
+        !!! warning "Only for stacks created by this script"
+            The upgrade path recognises a stack by the `generated by install-bunkerweb.sh`
+            header in its `.env` file. A hand-written `docker-compose.yml`, an
+            All-In-One container, or a Swarm/Kubernetes deployment is not upgraded
+            by the script — use the **Manual** tab for those.
 
-    4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
+        * **How it works**:
+
+            1. Detection
+                * Reads the install type (full, manager, worker, scheduler, ui, api) back from `.env`, so you never have to restate your topology.
+                * Recovers the secrets, host ports, worker list and Compose project name from `.env`, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports.
+                * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`) and an interrupted previous upgrade are both detected correctly.
+            2. Upgrade decision
+                * Same version already running: prints the stack status and exits.
+                * Older target version: **refuses**. BunkerWeb has no downgrade migration, so the scheduler would fail to start and restart in a loop. See [Rollback](#rollback) for the supported way back.
+                * Otherwise: asks for confirmation (or proceeds directly with `-y`).
+            3. Pre-upgrade backup
+                * Runs `bwcli plugin backup save` inside the scheduler container and copies the archive to the host.
+                * Destination: `--backup-dir`, or a generated path like `/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS`.
+                * Aborts the upgrade if the backup fails, unless you pass `--no-auto-backup`.
+                * Skipped for `worker`, `ui` and `api` stacks, which own no database.
+            4. File updates
+                * `.env` is rewritten with the new image tag; any entry you added by hand is carried over.
+                * `docker-compose.yml` is regenerated only when it still matches what the script produced, so local edits survive. Pass `--overwrite-compose` to regenerate it anyway. A `.bak.<timestamp>` copy is kept either way.
+            5. Apply and verify
+                * `docker compose pull`, then `docker compose up -d` — only the containers whose image changed are recreated, so downtime is shorter than a full `down`/`up` cycle.
+                * If the pull fails nothing is recreated, the previous tag is restored in `.env`, and the running stack is left untouched.
+                * Afterwards the script re-reads the version from the container and checks that the scheduler did not enter a restart loop, which is how a failed database migration shows up.
+
+        * **Useful flags**:
+
+            | Flag                    | Effect                                                                |
+            | ----------------------- | --------------------------------------------------------------------- |
+            | `--compose-dir PATH`    | Directory holding the stack (default: current directory)              |
+            | `-v, --version VERSION` | Target version; the image tag is derived from it                      |
+            | `--image-tag TAG`       | Target image tag directly, instead of deriving it                     |
+            | `--backup-dir PATH`     | Where to store the pre-upgrade backup                                 |
+            | `--no-auto-backup`      | Skip the automatic backup (manual backup becomes your responsibility) |
+            | `--overwrite-compose`   | Regenerate `docker-compose.yml` even if it was edited locally         |
+            | `--force-type-change`   | Allow the stack to change topology (destructive)                      |
+            | `--no-pull`             | Do not pull images before recreating the stack                        |
+            | `-y, --yes`             | Unattended run; piped invocations without it exit with an error       |
+
+    === "Manual"
+
+        1. **Backup the database**:
+
+            - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
+            - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
+
+            ```bash
+            docker exec -it -e BACKUP_DIRECTORY=/path/to/backup/directory <scheduler_container> bwcli plugin backup save
+            ```
+
+            ```bash
+            docker cp <scheduler_container>:/path/to/backup/directory /path/to/backup/directory
+            ```
+
+        2. **Upgrade BunkerWeb**:
+            - Upgrade BunkerWeb to the latest version.
+                1. **Update the Docker Compose file**: Update the Docker Compose file to use the new version of the BunkerWeb image.
+                    ```yaml
+                    services:
+                        bunkerweb:
+                            image: bunkerity/bunkerweb:testing
+                            ...
+                        bw-scheduler:
+                            image: bunkerity/bunkerweb-scheduler:testing
+                            ...
+                        bw-autoconf:
+                            image: bunkerity/bunkerweb-autoconf:testing
+                            ...
+                        bw-ui:
+                            image: bunkerity/bunkerweb-ui:testing
+                            ...
+                    ```
+
+                2. **Restart the containers**: Restart the containers to apply the changes.
+                    ```bash
+                    docker compose down
+                    docker compose up -d
+                    ```
+
+        3. **Check the logs**: Check the logs of the scheduler service to ensure that the migration was successful.
+
+            ```bash
+            docker compose logs <scheduler_container>
+            ```
+
+        4. **Verify the database**: Verify that the database upgrade was successful by checking the data and configurations in the new database container.
 
 === "All-In-One (AIO)"
 

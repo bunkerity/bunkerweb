@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/fr/features/">
       
       
-        <link rel="prev" href="../quickstart-guide/">
+        <link rel="prev" href="../building/">
       
       
         <link rel="next" href="../advanced/">
@@ -457,6 +457,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler depuis les sources
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -774,6 +793,33 @@
     
   
     Guide de démarrage rapide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler depuis les sources
   
 
     
@@ -3983,6 +4029,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>Non</td>
 <td><strong>Mémoire cachestore locks :</strong> Taille du cache interne (locks).</td>
 </tr>
+<tr>
+<td><code>SESSIONS_REVOCATION_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>Non</td>
+<td><strong>Mémoire de révocation des sessions :</strong> Taille du stockage des identifiants de session cookie révoqués.</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4275,7 +4328,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>non</td>
-<td>Time to wait for DNS propagation in seconds for DNS challenges.</td>
+<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -7086,56 +7139,56 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_API</code></td>
 <td><code>http://crowdsec:8080</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>URL de l'API CrowdSec :</strong> L'adresse du service de l'API locale de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_API_KEY</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Clé API CrowdSec :</strong> La clé API pour s'authentifier auprès de l'API CrowdSec, obtenue avec <code>cscli bouncers add</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_MODE</code></td>
 <td><code>live</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Mode de fonctionnement :</strong> Soit <code>live</code> (interroge l'API pour chaque requête) ou <code>stream</code> (met en cache périodiquement toutes les décisions).</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Trafic interne :</strong> Mettre à <code>yes</code> pour vérifier le trafic interne par rapport aux décisions de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
 <td><code>1000</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Délai d'attente de la requête :</strong> Délai d'attente en millisecondes pour les requêtes HTTP vers l'API locale de CrowdSec en mode live.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Emplacements exclus :</strong> Liste d'emplacements (URI) séparés par des virgules à exclure des vérifications de CrowdSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
 <td><code>1</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Expiration du cache :</strong> Le temps d'expiration du cache en secondes pour les décisions IP en mode live.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
 <td><code>10</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Fréquence de mise à jour :</strong> À quelle fréquence (en secondes) récupérer les décisions nouvelles/expirées de l'API CrowdSec en mode stream.</td>
 </tr>
@@ -7156,49 +7209,49 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_APPSEC_URL</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>URL AppSec :</strong> L'URL du composant de sécurité applicative de CrowdSec. Laisser vide pour désactiver AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
 <td><code>passthrough</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Action en cas d'échec :</strong> Action à entreprendre lorsque AppSec renvoie une erreur. Peut être <code>passthrough</code> ou <code>deny</code>.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Délai de connexion :</strong> Le délai d'attente en millisecondes pour se connecter au composant AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Délai d'envoi :</strong> Le délai d'attente en millisecondes pour envoyer des données au composant AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
 <td><code>500</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Délai de traitement :</strong> Le délai d'attente en millisecondes pour traiter la requête dans le composant AppSec.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Toujours envoyer :</strong> Mettre à <code>yes</code> pour toujours envoyer les requêtes à AppSec, même s'il y a une décision au niveau de l'IP.</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>no</td>
 <td><strong>Vérification SSL :</strong> Mettre à <code>yes</code> pour vérifier le certificat SSL du composant AppSec.</td>
 </tr>
@@ -9260,7 +9313,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Élément d'identification :</strong> Éléments de configuration pour l'authentification du fournisseur DNS (ex. : <code>cloudflare_api_token 123456</code>). Les valeurs peuvent être du texte brut, encodées en base64 ou un objet JSON.</td>
+<td><strong>Élément d'identification :</strong> Éléments de configuration pour l'authentification du fournisseur DNS (ex. : <code>cloudflare_api_token 123456</code>). Écrivez la clé, une espace, puis la valeur, et ne mettez pas la clé entre guillemets. Les valeurs peuvent être du texte brut, encodées en base64 ou un objet JSON.</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
@@ -10852,6 +10905,13 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>no</td>
 <td><strong>Parties du journal d'audit :</strong> Quelles parties des requêtes/réponses inclure dans les journaux d'audit.</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG</code></td>
+<td><code>/var/log/bunkerweb/modsec_audit.log</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Chemin du journal d'audit :</strong> Chemin du fichier dans lequel ModSecurity écrit les entrées d'audit. Doit être un fichier régulier : l'écrivain d'audit Serial le verrouille, ce qu'un tube ou un flux ne peut pas supporter.</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
@@ -12650,7 +12710,7 @@ compris Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>set
 <td><code>/</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>URL d'emplacement :</strong> Chemin qui sera proxifié vers le serveur backend.</td>
+<td><strong>URL d'emplacement :</strong> Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par <code>^</code> ou se terminant par <code>$</code> est traitée comme un emplacement défini par une expression régulière.</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13905,6 +13965,15 @@ compris Sentinel via <code>settings.redis.redisSentinelHosts</code> et <code>set
 <li>Assurez-vous que toutes les instances utilisent exactement le même <code>SESSIONS_SECRET</code> et <code>SESSIONS_NAME</code></li>
 <li>Cela garantit que les utilisateurs conservent leur session quelle que soit l’instance BunkerWeb qui traite leurs requêtes</li>
 </ol>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Révocation des sessions</p>
+<p>Sans Redis, les données de session résident dans le cookie lui-même : détruire une session ne l’effaçait donc que du navigateur, et le cookie signé restait valide jusqu’à son expiration. BunkerWeb conserve une liste de refus des identifiants de session détruits en mémoire partagée, si bien qu’un cookie détruit est rejeté à sa prochaine utilisation.</p>
+<ul>
+<li>Ne s’applique que lorsque les données de session sont stockées dans le cookie. Avec <code>USE_REDIS</code> à <code>yes</code>, les données sont côté serveur et la destruction les supprime déjà.</li>
+<li>La liste de refus est locale à chaque instance BunkerWeb. Utilisez Redis pour révoquer les sessions à l’échelle d’un cluster.</li>
+<li>Sa taille se règle avec <code>SESSIONS_REVOCATION_MEMORY_SIZE</code>. Si le stockage est saturé ou indisponible, la session est considérée comme valide et un avertissement est journalisé.</li>
+</ul>
 </div>
 <h3 id="exemples-de-configuration_16">Exemples de configuration</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="44:6"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><input id="__tabbed_44_6" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Configuration de base</label><label for="__tabbed_44_2">Sécurité renforcée</label><label for="__tabbed_44_3">Environnement en cluster avec Redis</label><label for="__tabbed_44_4">Sessions longue durée</label><label for="__tabbed_44_5">Sessions inter-sous-domaines (tenant unique)</label><label for="__tabbed_44_6">Sessions inter-sous-domaines (tenants mixtes)</label></div>

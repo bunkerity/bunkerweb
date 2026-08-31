@@ -461,6 +461,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -997,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Redis Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-log-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Retention
       
     </span>
   </a>
@@ -1562,6 +1592,33 @@
     
   
     Quickstart guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from source
   
 
     
@@ -3115,6 +3172,15 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>Authentication:</strong> when <code>REDIS_PASSWORD</code> is set and the conf does not already define <code>requirepass</code>, the embedded Redis is launched with <code>requirepass</code> so the BunkerWeb client and server stay in sync. The embedded server only supports the default user — set <code>REDIS_USERNAME</code> only when pointing at an external Redis with ACLs.</li>
 <li>Redis logs appear with the <code>[REDIS]</code> prefix in Docker logs and in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
+<h3 id="aio-log-retention">Log Retention</h3>
+<p>Unlike the other Docker images, the All-In-One keeps <code>access.log</code>, <code>error.log</code> and <code>modsec_audit.log</code> as real files under <code>/var/log/bunkerweb/</code>. The log stream reads them to prefix each line and to apply <code>HIDE_SERVICE_LOGS</code>, and both the bundled CrowdSec parser and the Web UI log viewer read them from disk.</p>
+<ul>
+<li>The image bundles <code>logrotate</code> and runs it hourly under supervisor. A rotation failure is reported with the <code>[LOGROTATE]</code> prefix in the container logs.</li>
+<li>The policy is the one the Linux packages install, at <code>/etc/logrotate.d/bunkerweb</code>: every file matching <code>/var/log/bunkerweb/*.log</code> is rotated once it passes 100 MB, seven compressed generations are kept, and rotation uses <code>copytruncate</code>.</li>
+<li><code>copytruncate</code> empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.</li>
+<li>To change the threshold or the number of generations, mount your own file over <code>/etc/logrotate.d/bunkerweb</code>. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at <code>/var/log/bunkerweb</code> only changes where the bytes live, it does not stop the container's own <code>logrotate</code> from still rotating them there.</li>
+</ul>
+<p>See <a href="../advanced/#log-file-retention">Log File Retention</a> for how the other integrations handle this.</p>
 <h3 id="crowdsec-integration">CrowdSec Integration</h3>
 <p>The BunkerWeb <strong>All-In-One</strong> Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.</p>
 <p>By default, CrowdSec is <strong>disabled</strong>. To turn it on, simply add the <code>USE_CROWDSEC</code> environment variable:</p>
@@ -3452,6 +3518,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>Minimum seconds between successive reloads</td>
 <td>Integer seconds</td>
 <td><code>5</code></td>
+</tr>
+<tr>
+<td><code>SEND_FILES_MIN_TIMEOUT</code></td>
+<td>Minimum read timeout for configuration and cache folder pushes</td>
+<td>Integer seconds</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

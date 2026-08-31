@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://docs.bunkerweb.io/latest/zh/features/">
       
       
-        <link rel="prev" href="../quickstart-guide/">
+        <link rel="prev" href="../building/">
       
       
         <link rel="next" href="../advanced/">
@@ -457,6 +457,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  从源代码构建
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -774,6 +793,33 @@
     
   
     快速入门指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从源代码构建
   
 
     
@@ -3985,6 +4031,13 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td>否</td>
 <td><strong>缓存存储锁内存大小：</strong> 内部缓存存储（锁）的大小。</td>
 </tr>
+<tr>
+<td><code>SESSIONS_REVOCATION_MEMORY_SIZE</code></td>
+<td><code>16m</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>会话吊销内存大小：</strong> 存放已吊销 Cookie 会话标识符的存储大小。</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -4277,7 +4330,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Host: bw
 <td><code>default</code></td>
 <td>multisite</td>
 <td>否</td>
-<td>Time to wait for DNS propagation in seconds for DNS challenges.</td>
+<td>Seconds to wait for DNS propagation before the CA validates a DNS-01 challenge. 'default' applies a safe 120s wait (except route53, which polls until synced); set a number to override. Raise it if your provider is slow to publish TXT records.</td>
 </tr>
 <tr>
 <td><code>ACME_DNS_ALIAS</code></td>
@@ -7123,56 +7176,56 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_API</code></td>
 <td><code>http://crowdsec:8080</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>CrowdSec API URL：</strong> CrowdSec 本地 API 服务的地址。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_API_KEY</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>CrowdSec API 密钥：</strong> 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 <code>cscli bouncers add</code> 获取。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_MODE</code></td>
 <td><code>live</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>操作模式：</strong> <code>live</code>（为每个请求查询 API）或 <code>stream</code>（定期缓存所有决策）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ENABLE_INTERNAL</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>内部流量：</strong> 设置为 <code>yes</code> 以根据 CrowdSec 决策检查内部流量。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_REQUEST_TIMEOUT</code></td>
 <td><code>1000</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>请求超时：</strong> 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_EXCLUDE_LOCATION</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>排除的位置：</strong> 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_CACHE_EXPIRATION</code></td>
 <td><code>1</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>缓存过期时间：</strong> 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_UPDATE_FREQUENCY</code></td>
 <td><code>10</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>更新频率：</strong> 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。</td>
 </tr>
@@ -7193,49 +7246,49 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <tr>
 <td><code>CROWDSEC_APPSEC_URL</code></td>
 <td></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>AppSec URL：</strong> CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_FAILURE_ACTION</code></td>
 <td><code>passthrough</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>失败操作：</strong> 当 AppSec 返回错误时要采取的操作。可以是 <code>passthrough</code> 或 <code>deny</code>。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_CONNECT_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>连接超时：</strong> 连接到 AppSec 组件的超时时间（以毫秒为单位）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SEND_TIMEOUT</code></td>
 <td><code>100</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>发送超时：</strong> 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_PROCESS_TIMEOUT</code></td>
 <td><code>500</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>处理超时：</strong> 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_ALWAYS_SEND_TO_APPSEC</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>始终发送：</strong> 设置为 <code>yes</code> 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。</td>
 </tr>
 <tr>
 <td><code>CROWDSEC_APPSEC_SSL_VERIFY</code></td>
 <td><code>no</code></td>
-<td>global</td>
+<td>multisite</td>
 <td>否</td>
 <td><strong>SSL 验证：</strong> 设置为 <code>yes</code> 以验证 AppSec 组件的 SSL 证书。</td>
 </tr>
@@ -9318,7 +9371,7 @@ TrustedMonitor/\d+\.\d+
 <td></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>凭证项：</strong> 用于 DNS 提供商身份验证的配置项（例如 <code>cloudflare_api_token 123456</code>）。值可以是原始文本、base64 编码或 JSON 对象。</td>
+<td><strong>凭证项：</strong> 用于 DNS 提供商身份验证的配置项（例如 <code>cloudflare_api_token 123456</code>）。请依次写入键、空白字符和值，并且不要为键加引号。值可以是原始文本、base64 编码或 JSON 对象。</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64</code></td>
@@ -10910,6 +10963,13 @@ TrustedMonitor/\d+\.\d+
 <td>multisite</td>
 <td>否</td>
 <td><strong>审计日志部分：</strong> 审计日志中要包含的请求/响应的哪些部分。</td>
+</tr>
+<tr>
+<td><code>MODSECURITY_SEC_AUDIT_LOG</code></td>
+<td><code>/var/log/bunkerweb/modsec_audit.log</code></td>
+<td>multisite</td>
+<td>否</td>
+<td><strong>审计日志路径：</strong> ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。</td>
 </tr>
 <tr>
 <td><code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code></td>
@@ -12728,7 +12788,7 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <td><code>/</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>位置 URL：</strong> 将被代理到后端服务器的路径。</td>
+<td><strong>位置 URL：</strong> 将被代理到后端服务器的路径。以 <code>^</code> 开头或以 <code>$</code> 结尾的值将被视为正则表达式 location。</td>
 </tr>
 <tr>
 <td><code>REVERSE_PROXY_BUFFERING</code></td>
@@ -13998,6 +14058,15 @@ Pod 环境读取这些 Redis 设置。使用官方 Helm chart 时，请在 <code
 <li>确保所有实例使用完全相同的 <code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code></li>
 <li>这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话</li>
 </ol>
+</div>
+<div class="admonition info">
+<p class="admonition-title">会话吊销</p>
+<p>未启用 Redis 时，会话数据保存在 Cookie 本身中，因此销毁会话只会清除浏览器中的 Cookie，已签名的 Cookie 在超时前仍然有效。BunkerWeb 会在共享内存中维护一份已销毁会话标识符的拒绝列表，被销毁的 Cookie 在下次使用时会被拒绝。</p>
+<ul>
+<li>仅在会话数据存储于 Cookie 时生效。将 <code>USE_REDIS</code> 设为 <code>yes</code> 后，会话数据保存在服务端，销毁会话本身就会将其删除。</li>
+<li>拒绝列表仅在单个 BunkerWeb 实例内有效。如需在集群范围内吊销会话，请使用 Redis。</li>
+<li>通过 <code>SESSIONS_REVOCATION_MEMORY_SIZE</code> 调整其大小。若存储写满或不可用，会话将被视为有效，并记录一条警告。</li>
+</ul>
 </div>
 <h3 id="_129">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="44:6"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><input id="__tabbed_44_6" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">基本配置</label><label for="__tabbed_44_2">增强安全性</label><label for="__tabbed_44_3">带 Redis 的集群环境</label><label for="__tabbed_44_4">长效会话</label><label for="__tabbed_44_5">跨子域会话（单一租户）</label><label for="__tabbed_44_6">跨子域会话（混合租户）</label></div>

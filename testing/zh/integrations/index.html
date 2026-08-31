@@ -461,6 +461,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  从源代码构建
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -997,6 +1016,17 @@
     <span class="md-ellipsis">
       
         Redis 集成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-log-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        日志保留
       
     </span>
   </a>
@@ -1562,6 +1592,33 @@
     
   
     快速入门指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    从源代码构建
   
 
     
@@ -3103,6 +3160,15 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><strong>认证：</strong> 当 <code>REDIS_PASSWORD</code> 被设置且配置文件尚未定义 <code>requirepass</code> 时，内置 Redis 将以 <code>requirepass</code> 启动，使 BunkerWeb 客户端和服务端保持一致。内置服务端仅支持默认用户——仅当连接启用 ACL 的外部 Redis 时才设置 <code>REDIS_USERNAME</code>。</li>
 <li>Redis 日志在 Docker 日志和 <code>/var/log/bunkerweb/redis.log</code> 中以 <code>[REDIS]</code> 前缀出现。</li>
 </ul>
+<h3 id="aio-log-retention">日志保留</h3>
+<p>与其他 Docker 镜像不同，一体化镜像会将 <code>access.log</code>、<code>error.log</code> 和 <code>modsec_audit.log</code> 保留为 <code>/var/log/bunkerweb/</code> 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 <code>HIDE_SERVICE_LOGS</code>，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。</p>
+<ul>
+<li>该镜像内置 <code>logrotate</code>，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 <code>[LOGROTATE]</code> 前缀报告。</li>
+<li>策略与 Linux 软件包安装的相同，位于 <code>/etc/logrotate.d/bunkerweb</code>：任何匹配 <code>/var/log/bunkerweb/*.log</code> 的文件在超过 100 MB 时都会被轮转，保留七个压缩后的历史版本，并使用 <code>copytruncate</code> 进行轮转。</li>
+<li><code>copytruncate</code> 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。</li>
+<li>如需更改阈值或历史版本数量，请将您自己的文件挂载到 <code>/etc/logrotate.d/bunkerweb</code>。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 <code>/var/log/bunkerweb</code> 只会改变数据的存放位置，并不会阻止容器内运行的 <code>logrotate</code> 继续对其进行轮转。</li>
+</ul>
+<p>参见<a href="../advanced/#log-file-retention">日志文件保留策略</a>，了解其他集成方式如何处理这一点。</p>
 <h3 id="crowdsec-integration">CrowdSec 集成</h3>
 <p>BunkerWeb <strong>一体化</strong> Docker 镜像完全集成了 CrowdSec——无需额外的容器或手动设置。请按照以下步骤在您的部署中启用、配置和扩展 CrowdSec。</p>
 <p>默认情况下，CrowdSec 是<strong>禁用</strong>的。要开启它，只需添加 <code>USE_CROWDSEC</code> 环境变量：</p>
@@ -3436,6 +3502,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <td>连续两次 reload 之间的最小秒数</td>
 <td>整秒</td>
 <td><code>5</code></td>
+</tr>
+<tr>
+<td><code>SEND_FILES_MIN_TIMEOUT</code></td>
+<td>推送配置和缓存目录时的最小读取超时</td>
+<td>整秒</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>DISABLE_CONFIGURATION_TESTING</code></td>

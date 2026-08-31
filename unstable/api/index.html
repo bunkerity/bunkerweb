@@ -459,6 +459,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../building/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Building from source
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../features/" class="md-tabs__link">
         
   
@@ -774,6 +793,33 @@
     
   
     Quickstart guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building from source
   
 
     
@@ -1244,7 +1290,7 @@
 <ul>
 <li>Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with <code>API_WHITELIST_IPS</code> (enabled by default).</li>
 <li>Auth present: set <code>API_USERNAME</code>/<code>API_PASSWORD</code> (admin) and, if needed, <code>API_ACL_BOOTSTRAP_FILE</code> for extra users/ACLs; keep an override <code>API_TOKEN</code> only for break-glass use.</li>
-<li>ACL scopes: config, service, plugin, and global-settings <strong>write</strong> permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. See <a href="#permissions-and-acl">Permissions and ACL</a>.</li>
+<li>ACL scopes: config, service, plugin, and global-settings <strong>write</strong> permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. <code>instances_create</code> and <code>instances_update</code> are admin-equivalent too, by a different route: calls to a registered instance carry the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and cache (TLS private keys included) to every registered instance. See <a href="#permissions-and-acl">Permissions and ACL</a>.</li>
 <li>Path hiding: when reverse-proxying, pick an unguessable <code>API_ROOT_PATH</code> and mirror it on the proxy.</li>
 <li>Rate limiting: leave it on unless another layer enforces equivalent limits; <code>/auth</code> is always rate limited.</li>
 <li>TLS: terminate TLS at the proxy or set <code>API_SSL_ENABLED=yes</code> with cert/key paths.</li>
@@ -1418,8 +1464,9 @@
 </ul>
 <div class="admonition danger">
 <p class="admonition-title">These write permissions are admin-equivalent</p>
-<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:</p>
+<p>Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. <code>REVERSE_PROXY_URL</code>), uploaded plugins, and global settings — is rendered <strong>verbatim</strong> into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the <code>API_TOKEN</code> admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:</p>
 <ul>
+<li><code>instances</code>: <code>instances_create</code>, <code>instances_update</code></li>
 <li><code>configs</code>: <code>config_create</code>, <code>config_update</code>, <code>config_delete</code> (and <code>POST /configs/upload</code>)</li>
 <li><code>services</code>: <code>service_create</code>, <code>service_update</code>, <code>service_convert</code></li>
 <li><code>plugins</code>: <code>plugin_create</code></li>
