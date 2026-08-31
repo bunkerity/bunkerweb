@@ -18,6 +18,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 
 - 网络：保持内部流量；绑定到回环或内网接口，并用 `API_WHITELIST_IPS` 限制来源 IP（默认启用）。
 - 认证到位：设置 `API_USERNAME`/`API_PASSWORD`（管理员），需要时用 `API_ACL_BOOTSTRAP_FILE` 添加更多用户/ACL；仅将 `API_TOKEN` 作为应急备用。
+- ACL 范围：config、service、plugin 和 global settings 的**写**权限等同于管理员（其内容会原样渲染进 NGINX/Lua 配置，即代码执行）：只授予完全可信的用户。`instances_create` 和 `instances_update` 也一样，只是路径不同：对已注册实例的每次调用都会带上 `API_TOKEN` 管理员覆盖令牌，且 scheduler 会把生成的配置和缓存（含 TLS 私钥）推送到每个已注册实例。参见“权限与 ACL”一节。
 - 隐藏路径：反向代理时选择不易猜到的 `API_ROOT_PATH`，并在代理上同步。
 - 速率限制：保持启用，除非其他层有同等限制；`/auth` 始终限速。
 - TLS：在代理终止，或设置 `API_SSL_ENABLED=yes` 并提供证书/密钥路径。
@@ -191,8 +192,9 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
@@ -231,6 +233,20 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     }
     ```
 
+## 按实例凭据与 TLS 指纹固定
+
+每条实例记录都可以覆盖控制平面调用所使用的全局 `API_TOKEN`。可在 `POST /instances` 或 `PATCH /instances/{hostname}` 中设置 `credential`。API 使用共享 AES-256-GCM 密钥环保存该值，且绝不返回明文；`GET /instances` 只公开 `credential_set` 和 `credential_updated_at`。按实例凭据优先用于 API 扇出、Worker 操作、配置与缓存推送，以及写入该实例生成配置中的 `API_TOKEN`。在 PATCH 中发送空的 `credential` 可恢复使用全局 token。
+
+自动化集成可以通过分组环境变量声明相同字段。每组以 `BUNKERWEB_INSTANCE_HOST` 开始，并使用 `BUNKERWEB_INSTANCE_API_TOKEN`、`BUNKERWEB_INSTANCE_LISTEN_HTTPS`、`BUNKERWEB_INSTANCE_HTTPS_PORT`、`BUNKERWEB_INSTANCE_SERVER_NAME`、`BUNKERWEB_INSTANCE_TLS_MODE` 和 `BUNKERWEB_INSTANCE_TLS_FINGERPRINT`。如需更多实例，请为同组所有键添加相同的数字后缀，例如 `_1` 和 `_2`。旧的 `BUNKERWEB_INSTANCES` 列表仍会让所有主机使用全局 API 设置。
+
+TLS 信任也按实例存储：
+
+- `tls_mode: "off"` 保留兼容行为。设置了 `listen_https: true` 的实例会使用 HTTPS，但不验证证书；TLS 连接错误后还会改用明文 HTTP 重试。
+- `tls_mode: "pinned"` 会把叶证书与 `tls_fingerprint` 中的 SHA-256 摘要进行比对。允许冒号和大写十六进制，保存时会进行规范化。缺少指纹或指纹不匹配都会让调用失败，BunkerWeb 也绝不会把该实例降级到 HTTP。
+
+!!! warning "指纹固定是唯一会验证的 TLS 模式"
+    当前没有按实例 CA 验证模式。即使端点使用 HTTPS，`off` 也不会验证证书。HTTP 端点在 `pinned` 模式下没有证书可供检查，因此必须同时设置 `listen_https: true`。实例证书轮换时请更新已保存的指纹，否则控制平面对该实例的调用会失败。
+
 ## 速率限制
 
 默认启用两个字符串：`API_RATE_LIMIT`（全局，默认 `100r/m`）和 `API_RATE_LIMIT_AUTH`（默认 `10r/m` 或 `off`）。支持 NGINX 风格（`3r/s`、`40r/m`、`200r/h`）或冗长格式（`100/minute`、`200 per 30 minutes`）。通过以下方式配置：
@@ -240,6 +256,8 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - `API_RATE_LIMIT_RULES`（CSV/JSON/YAML 字符串或文件路径）
 - `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
 - 存储：内存或 Redis/Valkey（`USE_REDIS=yes` + `REDIS_*`，支持 Sentinel）。
+
+使用管理员 `API_TOKEN` 认证的请求始终不受这些限制。该 token 本身已授予完整管理员权限。BunkerWeb 自身的 Web UI、Scheduler 和 Worker 都从同一网络使用它；按 IP 限流会把整个控制平面视为一个客户端。其他 Bearer token 仍像普通调用方一样受到限制。
 
 限流策略（`limits` 提供）：
 
@@ -324,7 +342,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 | `API_RATE_LIMIT_RULES`           | 路径规则（CSV/JSON/YAML 或文件路径） | 字符串或路径                                              | unset          |
 | `API_RATE_LIMIT_STRATEGY`        | 算法                                 | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
 | `API_RATE_LIMIT_KEY`             | 键选择器                             | `ip`, `header:<Name>`                                     | `ip`           |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | 这些 IP/CIDR 跳过限流                | 空格/逗号分隔                                             | unset          |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | 这些 IP/CIDR 跳过限流（此外管理员 `API_TOKEN` 始终豁免） | 空格/逗号分隔                                             | unset          |
 | `API_RATE_LIMIT_STORAGE_OPTIONS` | 合并到存储配置的 JSON                | JSON 字符串                                               | unset          |
 
 #### Redis/Valkey（用于限流）
@@ -343,6 +361,9 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 
 !!! info "DB 提供的 Redis"
     如果 BunkerWeb 数据库配置中存在 Redis/Valkey 设置，即使未在环境中设置 `USE_REDIS`，API 也会自动复用它们用于限流。需要不同后端时可通过环境变量覆盖。
+
+!!! warning "没有 Redis 时，每个 Worker 独立限流"
+    回退存储位于各 Gunicorn Worker 的进程内存中，因此每个 Worker 都会单独执行配置的限制。例如 `MAX_WORKERS=4` 且 `API_RATE_LIMIT_AUTH=10r/m` 时，分散到各 Worker 的同一客户端每分钟最多可尝试 40 次。当限流属于安全控制时，请使用 Redis/Valkey 或只运行一个 Worker。
 
 #### Listener 与 TLS
 
@@ -377,10 +398,11 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `POST /instances`: 注册实例（hostname/port/server_name/method）。
   - `GET/PATCH/DELETE /instances/{hostname}`: 查看、更新可变字段或删除 API 管理的实例。
   - `DELETE /instances`: 批量删除 API 管理的实例；非 API 条目会被跳过。
-  - 健康/操作：`GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`。
+  - 健康/操作：`GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`。
+  - `GET /instances/{hostname}/health` 转发实例报告的状态：`ok`、`loading` 或 `reloading`；`ping` 只表示是否可达。实例重启后会保持 `loading`，直到收到配置；其定时插件在此状态下不会运行。Scheduler 据此决定是否重新推送。两个路由都需要 `instances_read`。
 - **Global settings**
   - `GET /global_settings`: 默认只返回非默认值；加 `full=true` 查看全部，加 `methods=true` 包含来源。
-  - `PATCH /global_settings`: upsert API 拥有的全局设置；只读键被拒绝。
+  - `PATCH /global_settings`: upsert API 拥有的全局设置；只读键被拒绝。由其他来源拥有的设置（`scheduler`，即环境变量，以及 `autoconf`、`manual` 或 `wizard`）不能转交给 API：整个负载会以 `409` 拒绝，并列出每个键及其所有者。重复发送外部所有者键当前已有的值不会产生冲突。
 - **Services**
   - `GET /services`: 列出服务（默认包含草稿）。
   - `GET /services/{service}`: 获取非默认或完整配置（`full=true`）；`methods=true` 包含来源。
@@ -396,9 +418,10 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
   - `DELETE /configs` 或 `DELETE /configs/{service}/{type}/{name}`: 删除 API 管理的片段；模板管理的会被跳过。
   - 支持类型：`http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`，以及 CRS/插件钩子。
 - **Bans**
-  - `GET /bans`: 汇总来自各实例的活动封禁。
-  - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。
-  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。
+  - `GET /bans`: 从数据库列出活动封禁（持久列表）。**1.7 中已变更**：过去会汇总实例内存中的封禁，实例重启后可能少报。
+  - `GET /bans/instances`: 在独立端点保留旧行为，显示每个实例当前实际执行的封禁。
+  - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。封禁会先持久化，再发送给实例。
+  - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。如果撤销无法持久化，API 会拒绝操作，因为未收到撤销的实例之后可能把该封禁重新带回集群。
 - **Plugins（UI 插件）**
   - `GET /plugins`: 列出插件；`with_data=true` 包含可用的打包字节。
   - `POST /plugins/upload`: 从 `.zip`、`.tar.gz`、`.tar.xz` 安装 UI 插件。

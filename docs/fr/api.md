@@ -18,6 +18,7 @@ L’API BunkerWeb est le plan de contrôle pour gérer instances, services, bans
 
 - Réseau : gardez le trafic interne ; liez sur loopback ou interface interne et restreignez les IP sources avec `API_WHITELIST_IPS` (activé par défaut).
 - Auth présente : définissez `API_USERNAME`/`API_PASSWORD` (admin) et, si besoin, `API_ACL_BOOTSTRAP_FILE` pour d’autres utilisateurs/ACL ; conservez un `API_TOKEN` uniquement pour le break-glass.
+- Portées ACL : les permissions d’**écriture** sur config, service, plugin et global settings sont équivalentes admin (leur contenu est rendu tel quel en NGINX/Lua, donc exécution de code) : ne les accordez qu’à des utilisateurs pleinement fiables. `instances_create` et `instances_update` le sont aussi, par une autre voie : tout appel vers une instance enregistrée transporte l’override admin `API_TOKEN`, et le scheduler pousse la configuration générée et le cache (clés privées TLS comprises) vers chaque instance enregistrée. Voir [Permissions et ACL](#permissions-et-acl).
 - Masquage de chemin : en reverse proxy, choisissez un `API_ROOT_PATH` peu devinable et reflétez-le côté proxy.
 - Rate limiting : laissez activé sauf si une autre couche impose des limites équivalentes ; `/auth` est toujours limité.
 - TLS : terminez au proxy ou activez `API_SSL_ENABLED=yes` avec chemins de cert/clé.
@@ -191,8 +192,9 @@ Choisissez la saveur adaptée à votre environnement.
 - Bootstrap des utilisateurs non admin et des permissions via `API_ACL_BOOTSTRAP_FILE` ou un `/var/lib/bunkerweb/api_acl_bootstrap.json` monté. Chaque utilisateur prend un `password` en clair ou un `password_hash`/`password_bcrypt` pré-haché (voir l'astuce ci-dessous).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
@@ -231,6 +233,20 @@ Choisissez la saveur adaptée à votre environnement.
     }
     ```
 
+## Identifiants par instance et épinglage TLS
+
+Chaque enregistrement d’instance peut remplacer le `API_TOKEN` global utilisé pour les appels du plan de contrôle. Définissez `credential` avec `POST /instances` ou `PATCH /instances/{hostname}`. L’API le stocke avec le trousseau AES-256-GCM partagé et ne renvoie jamais sa valeur en clair : `GET /instances` expose uniquement `credential_set` et `credential_updated_at`. L’identifiant par instance est prioritaire pour les appels API distribués, les actions des Workers, les envois de configuration et de cache, ainsi que le `API_TOKEN` écrit dans la configuration générée de cette instance. Envoyez un `credential` vide dans un PATCH pour revenir au token global.
+
+Les intégrations automatisées peuvent déclarer les mêmes champs avec des variables d’environnement groupées. Commencez un groupe avec `BUNKERWEB_INSTANCE_HOST`, puis utilisez `BUNKERWEB_INSTANCE_API_TOKEN`, `BUNKERWEB_INSTANCE_LISTEN_HTTPS`, `BUNKERWEB_INSTANCE_HTTPS_PORT`, `BUNKERWEB_INSTANCE_SERVER_NAME`, `BUNKERWEB_INSTANCE_TLS_MODE` et `BUNKERWEB_INSTANCE_TLS_FINGERPRINT`. Ajoutez le même suffixe numérique à chaque clé pour les instances suivantes, par exemple `_1` et `_2`. L’ancienne liste `BUNKERWEB_INSTANCES` continue d’utiliser les réglages API globaux pour chaque hôte.
+
+La confiance TLS est également stockée par instance :
+
+- `tls_mode: "off"` conserve le comportement de compatibilité. Une instance avec `listen_https: true` utilise HTTPS sans vérifier le certificat et réessaie en HTTP non chiffré après une erreur de connexion TLS.
+- `tls_mode: "pinned"` compare le certificat feuille à l’empreinte SHA-256 de `tls_fingerprint`. Les deux-points et les caractères hexadécimaux en majuscules sont acceptés puis normalisés. Une empreinte absente ou différente fait échouer l’appel, et BunkerWeb ne rétrograde jamais cette instance vers HTTP.
+
+!!! warning "L’épinglage est le seul mode TLS vérifié"
+    Il n’existe aucun mode de validation par CA propre à une instance. `off` ne vérifie pas le certificat, même avec un endpoint HTTPS. `pinned` sur un endpoint HTTP ne dispose d’aucun certificat à vérifier : associez-le à `listen_https: true`. Mettez à jour l’empreinte stockée lors de la rotation du certificat de l’instance, sinon les appels du plan de contrôle vers cette instance échoueront.
+
 ## Limitation de débit
 
 Activée par défaut avec deux chaînes : `API_RATE_LIMIT` (global, défaut `100r/m`) et `API_RATE_LIMIT_AUTH` (défaut `10r/m` ou `off`). Formats acceptés : notation style NGINX (`3r/s`, `40r/m`, `200r/h`) ou formes verbeuses (`100/minute`, `200 per 30 minutes`). Configurez via :
@@ -240,6 +256,8 @@ Activée par défaut avec deux chaînes : `API_RATE_LIMIT` (global, défaut `100
 - `API_RATE_LIMIT_RULES` (string CSV/JSON/YAML ou chemin de fichier)
 - `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
 - Stockage en mémoire ou Redis/Valkey avec `USE_REDIS=yes` plus réglages `REDIS_*` (Sentinel supporté).
+
+Les requêtes authentifiées avec le `API_TOKEN` administrateur sont exemptées, quels que soient les plafonds configurés. Ce token accorde déjà un accès administrateur complet. Les composants BunkerWeb (Web UI, Scheduler et Worker) l’utilisent depuis le même réseau ; une limite par IP compterait donc tout le plan de contrôle comme un seul client. Un autre token Bearer reste limité comme tout autre appelant.
 
 Stratégies (propulsées par `limits`) :
 
@@ -324,7 +342,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 | `API_RATE_LIMIT_RULES`           | Règles par chemin (CSV/JSON/YAML ou fichier) | Chaîne ou chemin                                          | unset          |
 | `API_RATE_LIMIT_STRATEGY`        | Algorithme                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
 | `API_RATE_LIMIT_KEY`             | Sélectionneur de clé                         | `ip`, `header:<Name>`                                     | `ip`           |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites            | Séparées par espace/virgule                               | unset          |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Exempter ces IPs/CIDR des limites (en plus du `API_TOKEN` administrateur, toujours exempté) | Séparées par espace/virgule                               | unset          |
 | `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON fusionné dans la config de stockage     | Chaîne JSON                                               | unset          |
 
 #### Redis/Valkey (pour les limites)
@@ -343,6 +361,9 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 
 !!! info "Redis fourni par la BD"
     Si la configuration BunkerWeb en base contient Redis/Valkey, l’API la réutilise automatiquement pour le rate limiting même sans `USE_REDIS` dans l’environnement. Surcharger via variables d’environnement si nécessaire.
+
+!!! warning "Sans Redis, la limite s’applique par Worker"
+    Le stockage de secours réside dans la mémoire du processus de chaque Worker Gunicorn. Chaque Worker applique donc le plafond séparément : avec `MAX_WORKERS=4` et `API_RATE_LIMIT_AUTH=10r/m`, un client réparti entre les Workers peut obtenir jusqu’à 40 tentatives par minute. Utilisez Redis/Valkey ou un seul Worker lorsque la limite sert de contrôle de sécurité.
 
 #### Listener & TLS
 
@@ -377,10 +398,11 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `POST /instances` : enregistrer une instance (hostname/port/server_name/method).
   - `GET/PATCH/DELETE /instances/{hostname}` : inspecter, mettre à jour les champs mutables ou supprimer les instances gérées par l’API.
   - `DELETE /instances` : suppression en masse des instances gérées par l’API ; celles hors API sont ignorées.
-  - Santé/actions : `GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - Santé/actions : `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - `GET /instances/{hostname}/health` relaie l’état annoncé par l’instance : `ok`, `loading` ou `reloading`. `ping` indique seulement si elle est joignable. Après un redémarrage, une instance reste en `loading` jusqu’à la réception d’une configuration ; ses plugins temporisés sont désactivés dans cet état. Le Scheduler utilise cette information pour décider d’un nouvel envoi. Les deux routes exigent `instances_read`.
 - **Global settings**
   - `GET /global_settings` : par défaut uniquement les non-defaults ; ajoutez `full=true` pour tous les réglages, `methods=true` pour la provenance.
-  - `PATCH /global_settings` : upsert des globals détenus par l’API ; les clés read-only sont rejetées.
+  - `PATCH /global_settings` : upsert des globals détenus par l’API ; les clés read-only sont rejetées. Un réglage détenu par une autre source (`scheduler`, c’est-à-dire une variable d’environnement, ainsi que `autoconf`, `manual` ou `wizard`) ne peut pas être repris : la requête entière est rejetée avec `409` et indique chaque clé et son propriétaire. Renvoyer la valeur déjà détenue par une clé externe ne crée pas de conflit.
 - **Services**
   - `GET /services` : lister les services (brouillons inclus par défaut).
   - `GET /services/{service}` : récupérer les non-defaults ou la config complète (`full=true`) ; `methods=true` inclut la provenance.
@@ -396,9 +418,10 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `DELETE /configs` ou `DELETE /configs/{service}/{type}/{name}` : supprimer les snippets gérés par l’API ; ceux gérés par template sont ignorés.
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
 - **Bans**
-  - `GET /bans` : agréger les bans actifs depuis les instances.
-  - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être objet, tableau ou JSON sérialisé.
-  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service.
+  - `GET /bans` : lister les bans actifs de la base de données, qui constitue la liste durable. **Changement en 1.7** : cette route agrégeait auparavant les bans en mémoire des instances, ce qui sous-estimait la liste après un redémarrage.
+  - `GET /bans/instances` : conserver l’ancien comportement dans un endpoint distinct et montrer ce que chaque instance applique actuellement.
+  - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être un objet, un tableau ou du JSON sérialisé. Le ban est stocké puis envoyé aux instances.
+  - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Une révocation qui ne peut pas être stockée est refusée, car une instance qui ne l’a pas reçue pourrait réintroduire le ban dans la flotte.
 - **Plugins (UI)**
   - `GET /plugins` : lister les plugins ; `with_data=true` inclut les bytes packagés quand dispo.
   - `POST /plugins/upload` : installer des plugins UI depuis `.zip`, `.tar.gz`, `.tar.xz`.

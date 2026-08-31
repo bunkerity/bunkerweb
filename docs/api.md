@@ -18,7 +18,7 @@ The BunkerWeb API is the control plane for managing instances, services, bans, p
 
 - Network: keep traffic internal; bind to loopback or an internal interface and restrict source IPs with `API_WHITELIST_IPS` (enabled by default).
 - Auth present: set `API_USERNAME`/`API_PASSWORD` (admin) and, if needed, `API_ACL_BOOTSTRAP_FILE` for extra users/ACLs; keep an override `API_TOKEN` only for break-glass use.
-- ACL scopes: config, service, plugin, and global-settings **write** permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. See [Permissions and ACL](#permissions-and-acl).
+- ACL scopes: config, service, plugin, and global-settings **write** permissions are admin-equivalent (their payload renders to raw NGINX/Lua = code execution) — grant them only to fully trusted users. `instances_create` and `instances_update` are admin-equivalent too, by a different route: calls to a registered instance carry the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and cache (TLS private keys included) to every registered instance. See [Permissions and ACL](#permissions-and-acl).
 - Path hiding: when reverse-proxying, pick an unguessable `API_ROOT_PATH` and mirror it on the proxy.
 - Rate limiting: leave it on unless another layer enforces equivalent limits; `/auth` is always rate limited.
 - TLS: terminate TLS at the proxy or set `API_SSL_ENABLED=yes` with cert/key paths.
@@ -192,8 +192,9 @@ Choose the flavor that matches your environment.
 - Bootstrap non-admin users and grants with `API_ACL_BOOTSTRAP_FILE` or a mounted `/var/lib/bunkerweb/api_acl_bootstrap.json`. Each user takes a plaintext `password` or a pre-hashed `password_hash`/`password_bcrypt` (see tip below).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
@@ -234,6 +235,20 @@ Choose the flavor that matches your environment.
 
 !!! warning "The example above grants an admin-equivalent scope"
     `config_update` is a code-execution-capable permission (see the danger note above), so this `ci` user is as powerful as an admin for configuration writes — only issue such a token to automation you fully trust. For a read-only integration, drop `config_update` and keep just the `*_read` scopes.
+
+## Per-instance credentials and TLS pinning
+
+Each instance record can override the global `API_TOKEN` used for control-plane calls. Set `credential` on `POST /instances` or `PATCH /instances/{hostname}`. The API stores it with the shared AES-256-GCM keyring and never returns the plaintext: `GET /instances` exposes only `credential_set` and `credential_updated_at`. A per-instance credential takes precedence for API fan-out, Worker actions, configuration and cache pushes, and the `API_TOKEN` written into that instance's generated configuration. Send an empty `credential` in a PATCH to return to the global token.
+
+Automated integrations can declare the same fields with grouped environment variables. Start a group with `BUNKERWEB_INSTANCE_HOST`, then use `BUNKERWEB_INSTANCE_API_TOKEN`, `BUNKERWEB_INSTANCE_LISTEN_HTTPS`, `BUNKERWEB_INSTANCE_HTTPS_PORT`, `BUNKERWEB_INSTANCE_SERVER_NAME`, `BUNKERWEB_INSTANCE_TLS_MODE`, and `BUNKERWEB_INSTANCE_TLS_FINGERPRINT`. Add the same numeric suffix to every key for more instances, for example `_1` and `_2`. The older `BUNKERWEB_INSTANCES` list still uses the global API settings for every host.
+
+TLS trust is also stored per instance:
+
+- `tls_mode: "off"` keeps the compatibility behavior. An instance with `listen_https: true` uses HTTPS without certificate verification and retries over plain HTTP after a TLS connection error.
+- `tls_mode: "pinned"` checks the leaf certificate against the SHA-256 digest in `tls_fingerprint`. Colons and uppercase hex are accepted and normalized. A missing or mismatched fingerprint fails the call, and BunkerWeb never downgrades that instance to HTTP.
+
+!!! warning "Pinning is the only verified TLS mode"
+    There is no per-instance CA-validation mode. `off` does not verify the certificate, even when the endpoint uses HTTPS. `pinned` on an HTTP endpoint has no certificate to check, so pair it with `listen_https: true`. Update the stored fingerprint when the instance certificate rotates or control-plane calls to that instance will fail.
 
 ## Rate limiting
 

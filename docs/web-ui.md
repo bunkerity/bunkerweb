@@ -377,6 +377,29 @@ log {
 - Manage UI users, roles, sessions, TOTP with recovery codes, and passkeys (WebAuthn / FIDO2) for passwordless sign-in.
 - Upgrade to BunkerWeb PRO and inspect license status from the dedicated page.
 
+### Resource groups
+
+Open **Configure → Resource groups** to maintain reusable lists of IP addresses or CIDRs, countries, ASNs, reverse-DNS suffixes, user-agent patterns, and URI patterns. Each entry has one type and can carry a comment. You can clone groups, export them as JSON, and inspect every reference before changing one.
+
+Reference a group from a supported list setting with its `@alias`, for example `@office 203.0.113.5`. Whitelist, Blacklist, Greylist, Real IP, DNSBL, and Antibot list fields accept these references. BunkerWeb keeps the token in the database and expands entries of the setting's type when it generates the configuration, so editing the group updates every consumer on the next configuration push. Workflows select groups through the editor and keep a stable group ID.
+
+The alias contains 1 to 64 letters, digits, underscores, or dashes. Built-in country aliases such as `@EU`, `@G7`, and `@SCHENGEN` are reserved. BunkerWeb refuses a reference when the group does not exist or has no entries of the required type. It also prevents deleting a group while a setting or workflow uses it.
+
+### Web cache management
+
+The **Web cache** page manages the NGINX response cache used by Reverse Proxy. It shows each instance's reporting state, on-disk entry count and size, the services whose effective `USE_PROXY_CACHE` value is enabled, and cache-status counters such as `HIT`, `MISS`, `BYPASS`, and `STALE` when the Metrics plugin reports them.
+
+You can purge one absolute HTTP(S) URL or the complete cache. URL purges reconstruct the exact `PROXY_CACHE_KEY`; provide the service's custom key template when it differs from the default. The API accepts at most 100 URLs in one request.
+
+!!! warning "A complete purge affects every cached service"
+    `scope: "all"` clears the shared `proxycache` zone on every reachable instance. It does not target one service and does not trigger an NGINX reload. An unreachable instance is skipped and nothing is queued for it, so check the per-instance result before assuming a fleet-wide purge completed.
+
+### Reports dashboard
+
+The **Reports** page covers blocked HTTP requests and blocked STREAM sessions. **Overview** charts activity over the selected range, **Attack patterns** groups ModSecurity rules and attack families, **Top offenders** ranks client IPs, countries, and ASNs, and **Event log** provides server-side search, filters, sortable columns, incident details, and CSV or Excel export. Admins can ban one offender, selected rows, or every IP in the current filtered result.
+
+`METRICS_PERSIST_TO_DB=yes` is the default and gives the event log a durable, centrally queryable source. `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` bound that history. When persistence is disabled, reports remain in instance memory or Redis and can expire sooner. If the Metrics API is unavailable, the UI falls back to the legacy instance/Redis query for the event log; the analytical dashboard tabs show an empty state until metrics are available again.
+
 ## Guided walkthrough
 
 A new install opens a **Getting started** drawer from the rocket icon in the top bar. It lists what

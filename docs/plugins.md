@@ -18,6 +18,21 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 | **VirusTotal** |  1.11   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
 |  **WebHook**   |  1.11   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |    [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)    |
 
+## Web UI management and community catalogue
+
+The **Plugins** page separates installation from activation:
+
+- External, UI, and PRO plugins can be enabled or disabled without deleting their stored package. The scheduler omits disabled plugins from the materialized plugin directories, then restores them from the database when you enable them again.
+- Core plugins are part of the BunkerWeb image and cannot be disabled at the installation layer. Use the plugin's global settings when it exposes an activation switch.
+- A plugin can ship `icon.svg`, `icon.png`, `logo.svg`, or `logo.png` at the root of its folder. BunkerWeb detects these names in that order and serves at most 512 KiB through the authenticated icon endpoint. The Web UI falls back to a built-in icon when no supported file exists.
+
+The community catalogue lists the latest releases from two fixed GitHub repositories: [`bunkerity/bunkerweb-plugins`](https://github.com/bunkerity/bunkerweb-plugins) and [`bunkerity/bunkerweb-templates`](https://github.com/bunkerity/bunkerweb-templates). The repositories themselves are the catalogue. There is no separate manifest or producer. BunkerWeb reads each item's `plugin.json` or `template.json` from the release archive, applies the plugin compatibility gate, and installs only the selected item through the existing upload path.
+
+Set the Web UI environment variable `USE_PLUGIN_CATALOG=no` to disable catalogue requests, hide both catalogue sections, and refuse catalogue installs. `off`, `false`, and `0` also disable it. This switch does not remove anything already installed. A cached listing older than 24 hours remains visible but cannot install anything until a refresh succeeds.
+
+!!! warning "Catalogue trust model"
+    HTTPS to GitHub and an exact repository allowlist protect the download path. At refresh time BunkerWeb records the release archive's SHA-256 digest; at install time it fetches the pinned tag again and refuses the item if the digest changed. This check proves that the installed bytes match the bytes that were listed. It does not prove who authored them. Write access to the two `bunkerity` repositories is the trust root, and a hostile repository publisher remains trusted. Ed25519 signing is deliberately deferred.
+
 ## How to use a plugin
 
 ### Automatic

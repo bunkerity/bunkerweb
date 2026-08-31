@@ -18,6 +18,7 @@ Die BunkerWeb API ist die Steuerungsebene zum Verwalten von Instanzen, Diensten,
 
 - Netzwerk: Traffic intern halten; an Loopback oder internes Interface binden und Quell-IPs per `API_WHITELIST_IPS` (standardmäßig aktiv) begrenzen.
 - Auth vorhanden: `API_USERNAME`/`API_PASSWORD` (Admin) setzen und bei Bedarf `API_ACL_BOOTSTRAP_FILE` für weitere Nutzer/ACLs; ein Override `API_TOKEN` nur als Notfall behalten.
+- ACL-Scopes: Schreibrechte auf Config, Service, Plugin und Global Settings sind admin-äquivalent (ihr Inhalt landet unverändert als NGINX/Lua-Code in der Konfiguration): nur an vollständig vertrauenswürdige Nutzer vergeben. `instances_create` und `instances_update` ebenso, auf anderem Weg: Aufrufe an eine registrierte Instanz tragen den `API_TOKEN`-Admin-Override, und der Scheduler schiebt die generierte Konfiguration und den Cache (inklusive privater TLS-Schlüssel) an jede registrierte Instanz. Siehe [Berechtigungen und ACL](#berechtigungen-und-acl).
 - Pfad verbergen: beim Reverse Proxy einen nicht offensichtlichen `API_ROOT_PATH` wählen und auf dem Proxy spiegeln.
 - Ratenbegrenzung: aktiviert lassen, außer eine andere Schicht erzwingt gleichwertige Limits; `/auth` ist immer begrenzt.
 - TLS: am Proxy terminieren oder `API_SSL_ENABLED=yes` mit Zertifikat/Key setzen.
@@ -191,8 +192,9 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
 - Nicht-Admin-Nutzer und Grants per `API_ACL_BOOTSTRAP_FILE` oder gemounteter `/var/lib/bunkerweb/api_acl_bootstrap.json` bootstrappen. Jeder Nutzer akzeptiert ein Klartext-`password` oder ein vorab gehashtes `password_hash`/`password_bcrypt` (siehe Tipp unten).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
@@ -231,6 +233,20 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     }
     ```
 
+## Instanzbezogene Zugangsdaten und TLS-Pinning
+
+Jeder Instanzeintrag kann den globalen `API_TOKEN` für Control-Plane-Aufrufe überschreiben. Setzen Sie `credential` bei `POST /instances` oder `PATCH /instances/{hostname}`. Die API speichert den Wert mit dem gemeinsamen AES-256-GCM-Schlüsselbund und gibt den Klartext nie zurück: `GET /instances` zeigt nur `credential_set` und `credential_updated_at`. Instanzbezogene Zugangsdaten haben Vorrang bei API-Fan-out, Worker-Aktionen, Konfigurations- und Cache-Pushes sowie beim `API_TOKEN` in der generierten Konfiguration dieser Instanz. Ein leeres `credential` in einem PATCH stellt den globalen Token wieder her.
+
+Automatisierte Integrationen können dieselben Felder über gruppierte Umgebungsvariablen setzen. Eine Gruppe beginnt mit `BUNKERWEB_INSTANCE_HOST`; dazu gehören `BUNKERWEB_INSTANCE_API_TOKEN`, `BUNKERWEB_INSTANCE_LISTEN_HTTPS`, `BUNKERWEB_INSTANCE_HTTPS_PORT`, `BUNKERWEB_INSTANCE_SERVER_NAME`, `BUNKERWEB_INSTANCE_TLS_MODE` und `BUNKERWEB_INSTANCE_TLS_FINGERPRINT`. Für weitere Instanzen erhält jeder Schlüssel denselben numerischen Suffix, zum Beispiel `_1` und `_2`. Die ältere Liste `BUNKERWEB_INSTANCES` verwendet weiterhin die globalen API-Einstellungen für alle Hosts.
+
+Auch das TLS-Vertrauen wird pro Instanz gespeichert:
+
+- `tls_mode: "off"` behält das Kompatibilitätsverhalten bei. Eine Instanz mit `listen_https: true` nutzt HTTPS ohne Zertifikatsprüfung und versucht nach einem TLS-Verbindungsfehler unverschlüsseltes HTTP.
+- `tls_mode: "pinned"` prüft das Leaf-Zertifikat gegen den SHA-256-Hash in `tls_fingerprint`. Doppelpunkte und Großbuchstaben im Hexwert werden akzeptiert und normalisiert. Ein fehlender oder abweichender Fingerabdruck lässt den Aufruf fehlschlagen; BunkerWeb stuft diese Instanz nie auf HTTP zurück.
+
+!!! warning "Pinning ist der einzige verifizierte TLS-Modus"
+    Es gibt keinen instanzbezogenen CA-Prüfmodus. `off` prüft das Zertifikat auch bei einem HTTPS-Endpunkt nicht. Ein `pinned`-Modus an einem HTTP-Endpunkt hat kein Zertifikat zu prüfen; kombinieren Sie ihn daher mit `listen_https: true`. Aktualisieren Sie den gespeicherten Fingerabdruck bei einer Zertifikatsrotation, sonst schlagen Control-Plane-Aufrufe an diese Instanz fehl.
+
 ## Ratenbegrenzung
 
 Standardmäßig aktiv mit zwei Strings: `API_RATE_LIMIT` (global, Standard `100r/m`) und `API_RATE_LIMIT_AUTH` (Standard `10r/m` oder `off`). Raten akzeptieren NGINX-Notation (`3r/s`, `40r/m`, `200r/h`) oder ausgeschriebene Formen (`100/minute`, `200 per 30 minutes`). Konfigurieren über:
@@ -240,6 +256,8 @@ Standardmäßig aktiv mit zwei Strings: `API_RATE_LIMIT` (global, Standard `100r
 - `API_RATE_LIMIT_RULES` (CSV/JSON/YAML-String oder Dateipfad)
 - `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
 - Speicherung: In-Memory oder Redis/Valkey bei `USE_REDIS=yes` plus `REDIS_*` (Sentinel unterstützt).
+
+Anfragen mit dem Admin-`API_TOKEN` sind unabhängig von den konfigurierten Limits ausgenommen. Dieser Token gewährt bereits vollständigen Admin-Zugriff. BunkerWebs eigene Komponenten (Web UI, Scheduler und Worker) verwenden ihn aus demselben Netz, sodass ein IP-basiertes Limit sonst die gesamte Control Plane als einen Client zählt. Ein anderer Bearer-Token bleibt wie jeder andere Aufrufer begrenzt.
 
 Limiter-Strategien (bereitgestellt von `limits`):
 
@@ -324,7 +342,7 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
 | `API_RATE_LIMIT_RULES`           | Pfadregeln (CSV/JSON/YAML oder Dateipfad)     | String oder Pfad                                          | unset          |
 | `API_RATE_LIMIT_STRATEGY`        | Algorithmus                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
 | `API_RATE_LIMIT_KEY`             | Schlüssel-Selektion                           | `ip`, `header:<Name>`                                     | `ip`           |
-| `API_RATE_LIMIT_EXEMPT_IPS`      | Limits für diese IPs/CIDRs überspringen       | Leer- oder kommagetrennt                                  | unset          |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Limits für diese IPs/CIDRs überspringen (zusätzlich zum immer ausgenommenen Admin-`API_TOKEN`) | Leer- oder kommagetrennt                                  | unset          |
 | `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON, das in die Storage-Konfig gemerged wird | JSON-String                                               | unset          |
 
 #### Redis/Valkey (für Rate Limits)
@@ -343,6 +361,9 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
 
 !!! info "DB-Redis"
     Wenn Redis/Valkey-Einstellungen in der BunkerWeb-Datenbank vorhanden sind, nutzt die API sie automatisch fürs Rate Limiting, auch ohne `USE_REDIS` in der Umgebung. Bei Bedarf per Umgebungsvariablen überschreiben.
+
+!!! warning "Ohne Redis gilt das Limit pro Worker"
+    Der Fallback-Speicher liegt im Prozessspeicher jedes Gunicorn-Workers. Jeder Worker setzt das konfigurierte Limit daher selbst durch: Mit `MAX_WORKERS=4` und `API_RATE_LIMIT_AUTH=10r/m` kann ein auf die Worker verteilter Client bis zu 40 Versuche pro Minute erhalten. Verwenden Sie Redis/Valkey oder nur einen Worker, wenn das Limit eine Sicherheitskontrolle ist.
 
 #### Listener & TLS
 
@@ -377,10 +398,11 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
   - `POST /instances`: Instanz registrieren (hostname/port/server_name/method).
   - `GET/PATCH/DELETE /instances/{hostname}`: inspizieren, veränderbare Felder updaten oder API-gemanagte Instanzen löschen.
   - `DELETE /instances`: API-gemanagte Instanzen en masse löschen; Einträge außerhalb der API werden übersprungen.
-  - Health/Aktionen: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - Health/Aktionen: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
+  - `GET /instances/{hostname}/health` gibt den Zustand der Instanz weiter: `ok`, `loading` oder `reloading`. `ping` beantwortet nur die Erreichbarkeit. Nach einem Neustart bleibt eine Instanz in `loading`, bis sie eine Konfiguration erhält; zeitgesteuerte Plugins sind in diesem Zustand deaktiviert. Der Scheduler nutzt diese Information für einen erneuten Push. Beide Routen benötigen `instances_read`.
 - **Global settings**
   - `GET /global_settings`: standardmäßig nur Nicht-Defaults; `full=true` für alle Settings, `methods=true` für Herkunft.
-  - `PATCH /global_settings`: API-eigene Globals upserten; read-only Keys werden abgelehnt.
+  - `PATCH /global_settings`: API-eigene Globals upserten; read-only Keys werden abgelehnt. Eine Einstellung aus einer anderen Quelle (`scheduler`, also eine Umgebungsvariable, sowie `autoconf`, `manual` oder `wizard`) kann nicht übernommen werden: Die gesamte Nutzlast wird mit `409` abgelehnt und nennt jeden Schlüssel samt Eigentümer. Das erneute Senden des bereits vorhandenen Werts erzeugt keinen Konflikt.
 - **Services**
   - `GET /services`: Dienste auflisten (Drafts standardmäßig enthalten).
   - `GET /services/{service}`: Nicht-Defaults oder volle Config holen (`full=true`); `methods=true` fügt Herkunft hinzu.
@@ -396,9 +418,10 @@ Docs oder Schema deaktivieren, indem die zugehörigen URLs auf `off|disabled|non
   - `DELETE /configs` oder `DELETE /configs/{service}/{type}/{name}`: API-gemanagte Snippets löschen; template-gemanagte werden übersprungen.
   - Unterstützte Typen: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/Plugin-Hooks.
 - **Bans**
-  - `GET /bans`: aktive Bans aus Instanzen aggregieren.
-  - `POST /bans` oder `/bans/ban`: einen oder mehrere Bans anwenden; Payload darf Objekt, Array oder JSON-String sein.
-  - `POST /bans/unban` oder `DELETE /bans`: Bans global oder pro Service entfernen.
+  - `GET /bans`: aktive Sperren aus der Datenbank auflisten (die dauerhafte Liste). **Geändert in 1.7**: Zuvor wurden die In-Memory-Sperren der Instanzen zusammengeführt, was nach einem Neustart zu wenige Einträge zeigte.
+  - `GET /bans/instances`: das frühere Verhalten als eigener Endpunkt; er zeigt, was jede Instanz gerade durchsetzt.
+  - `POST /bans` oder `/bans/ban`: eine oder mehrere Sperren anwenden; die Nutzlast kann ein Objekt, Array oder JSON-String sein. Die Sperre wird gespeichert und danach an die Instanzen gesendet.
+  - `POST /bans/unban` oder `DELETE /bans`: Sperren global oder pro Service entfernen. Eine Aufhebung, die nicht gespeichert werden kann, wird abgelehnt, weil eine Instanz sie sonst später erneut in die Flotte eintragen könnte.
 - **Plugins (UI-Plugins)**
   - `GET /plugins`: Plugins auflisten; `with_data=true` enthält Paket-Bytes, sofern verfügbar.
   - `POST /plugins/upload`: UI-Plugins aus `.zip`, `.tar.gz`, `.tar.xz` installieren.
