@@ -591,31 +591,6 @@ function initializeDataTable(config) {
 
   if (dataTable.responsive) dataTable.responsive.recalc();
 
-  dataTable.on("mouseenter", "td", function () {
-    if (dataTable.cell(this).index() === undefined) return;
-    const rowIdx = dataTable.cell(this).index().row;
-
-    dataTable
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-
-    dataTable
-      .cells()
-      .nodes()
-      .each(function (el) {
-        if (dataTable.cell(el).index().row === rowIdx)
-          el.classList.add("highlight");
-      });
-  });
-
-  dataTable.on("mouseleave", "td", function () {
-    dataTable
-      .cells()
-      .nodes()
-      .each((el) => el.classList.remove("highlight"));
-  });
-
   dataTable.on("select", function (e, dt, type, indexes) {
     const actionButton = $(".action-button");
     if (!actionButton.length) return;
