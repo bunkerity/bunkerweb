@@ -355,9 +355,13 @@ def _render_nginx_configs() -> bool:
         "LOG_LEVEL": getenv("LOG_LEVEL", ""),
         "DATABASE_URI": getenv("DATABASE_URI", ""),
     }
-    tz = getenv("TZ")
-    if tz:
-        cmd_env["TZ"] = tz
+    # The logging variables have to travel with it, same reason as `build_cmd_env` in the
+    # scheduler: without them gen/main.py falls back to LOG_TYPES=stderr, so on Linux every
+    # rendering error lands in journald while the log file only keeps the one-line summary.
+    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+        value = getenv(key)
+        if value:
+            cmd_env[key] = value
 
     LOGGER.info("Rendering NGINX configs via gen/main.py ...")
     proc = subprocess_run(

@@ -1125,6 +1125,9 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Das Neuladen liest den Ordner erneut ein"
+        Ein Neuladen liest `/etc/bunkerweb/configs` erneut ein: dort erstellte, geänderte oder gelöschte Dateien werden angewendet und in der Datenbank gespeichert. Eine Konfiguration, die der Weboberfläche oder der API gehört, behält ihren Besitzer, nur ihr Inhalt wird aus der Datei aktualisiert.
+
 === "All-in-one"
 
     Bei Verwendung des [All-in-one-Images](integrations.md#all-in-one-aio-image) haben Sie zwei Möglichkeiten, benutzerdefinierte Konfigurationen hinzuzufügen:
@@ -2605,11 +2608,11 @@ Es gibt zwei Hauptkategorien von Protokollen, die konfiguriert werden können:
 
 Service-Protokolle werden durch die Einstellung `LOG_TYPES` gesteuert, die mehrere Werte mit Leerzeichen getrennt akzeptiert (z. B. `LOG_TYPES="stderr syslog"`).
 
-| Wert     | Beschreibung                                                                                                                                                                                                                       |
-| :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Schreibt Protokolle in eine einfache Datei. Die externe Rotation wird bei Linux-Installationen von `logrotate` und unter Docker von Ihrem Container-Logging-Treiber übernommen. Erforderlich für den Protokollanzeiger der Web-UI. |
-| `stderr` | Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (`docker logs`).                                                                                                                            |
-| `syslog` | Sendet Protokolle an einen Syslog-Server. Erfordert, dass `LOG_SYSLOG_ADDRESS` gesetzt ist.                                                                                                                                        |
+| Wert     | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                   |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Schreibt Protokolle in eine einfache Datei. Bei Linux-Installationen übernimmt `logrotate` die externe Rotation. In einem Container rotiert nichts eine Datei, die ein Dienst selbst schreibt: Die Aufbewahrung liegt dann beim Betreiber, also die Datei in ein Volume mounten und selbst rotieren oder dort `stderr`/`syslog` bevorzugen. Erforderlich für den Protokollanzeiger der Web-UI. |
+| `stderr` | Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (`docker logs`).                                                                                                                                                                                                                                                                                        |
+| `syslog` | Sendet Protokolle an einen Syslog-Server. Erfordert, dass `LOG_SYSLOG_ADDRESS` gesetzt ist.                                                                                                                                                                                                                                                                                                    |
 
 Wenn Sie `file` verwenden, sollten Sie zusätzlich konfigurieren:
 
@@ -2643,6 +2646,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Aufbewahrung der Protokolldateien {#log-file-retention}
+
+Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: `logrotate`, mit der Richtlinie, die BunkerWeb unter `/etc/logrotate.d/bunkerweb` installiert. Sie rotiert jede Datei, die auf `/var/log/bunkerweb/*.log` passt, sobald diese 100 MB überschreitet, behält sieben komprimierte Generationen und verwendet `copytruncate`.
+
+- **Linux**: Die Pakete hängen von `logrotate` ab, und das System führt es über seinen eigenen Timer aus. Es ist nichts weiter zu tun.
+- **All-in-one**: Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus, mit derselben Richtliniendatei.
+- **Docker, Autoconf, Swarm und Kubernetes**: Es gibt nichts zu rotieren. `src/bw/Dockerfile` ersetzt `access.log`, `error.log` und `modsec_audit.log` beim Bauen des Images durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass die Aufbewahrung dem Logging-Treiber Ihrer Laufzeitumgebung obliegt (siehe [Docker-Best-Practices für Protokolle](#docker-logging-best-practices) weiter unten).
+
+`copytruncate` ist das, was eine einzige Richtlinie für alle passend macht. Es kopiert die Datei beiseite und leert das Original an Ort und Stelle, statt es umzubenennen, sodass ein Schreibprozess, der sein Protokoll nie erneut öffnet, weiterhin in die richtige Datei schreibt. ModSecurity ist genau so ein Schreibprozess: Es öffnet das Audit-Log einmal beim Laden der Konfiguration und hält den Deskriptor. Eine Rotation per Umbenennung würde dazu führen, dass es für immer in das Archiv schreibt, während die aktive Datei leer bleibt.
+
+Bearbeiten Sie `/etc/logrotate.d/bunkerweb`, um den Schwellenwert oder die Anzahl der Generationen zu ändern, oder um ein `maxage` hinzuzufügen. Mounten Sie beim All-in-one Ihre eigene Datei über diesen Pfad.
+
+Der Speicherort des Audit-Logs wird über `MODSECURITY_SEC_AUDIT_LOG` festgelegt (multisite, Standard `/var/log/bunkerweb/modsec_audit.log`); siehe die [ModSecurity-Einstellungen](features.md#modsecurity). Wird er außerhalb von `/var/log/bunkerweb` gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst.
+
 ### Integrations-Defaults & Beispiele
 
 === "Linux"
@@ -2668,6 +2685,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf / Swarm"
 
     **Standardverhalten**: `LOG_TYPES="stderr"`. Protokolle sind über `docker logs` sichtbar.
+
+    Diese Images haben von vornherein keine von BunkerWeb verwalteten Protokolldateien zu begrenzen: `src/bw/Dockerfile` löscht `access.log`, `error.log` und `modsec_audit.log` beim Bauen des Images und ersetzt alle drei durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass `ACCESS_LOG`, `ERROR_LOG` und `MODSECURITY_SEC_AUDIT_LOG` standardmäßig direkt in den Log-Stream des Containers gelangen. Die Aufbewahrung liegt dort bei Ihrer Laufzeitumgebung, über den Logging-Treiber (siehe [Docker-Best-Practices für Protokolle](#docker-logging-best-practices) weiter unten) oder einen externen Collector; BunkerWeb liefert kein `logrotate` in seinen Images mit.
 
     **Beispiel (Adaptation aus dem Quickstart-Guide)**: Behalten Sie `docker logs` (stderr) BEI und senden Sie zusätzlich an einen zentralen Syslog-Container (benötigt für Web UI und CrowdSec).
 
@@ -2796,6 +2815,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **Standardverhalten**: wie Docker (`LOG_TYPES="stderr"`), aber das All-in-one-Image behält `ACCESS_LOG`, `ERROR_LOG` und `MODSECURITY_SEC_AUDIT_LOG` als reguläre Dateien unter `/var/log/bunkerweb/` (dieselben Standardwerte wie unter Linux), weil sowohl das mitgelieferte CrowdSec als auch der Protokollanzeiger der Web-UI sie von der Festplatte lesen.
+
+    BunkerWeb begrenzt sie dort für Sie: Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus, mit derselben Richtlinie, die auch die Linux-Pakete installieren (siehe [Aufbewahrung der Protokolldateien](#log-file-retention) weiter oben). Da die Rotation mit `copytruncate` erfolgt, behalten die Dateien ihren Inode, sodass der CrowdSec-Parser und der Protokollanzeiger ihnen über eine Rotation hinweg folgen, ohne neu starten zu müssen.
+
 === "Kubernetes"
 
     **Standardverhalten**: Protokolle werden nach `stderr` geschrieben und sind über `kubectl logs` sichtbar.
@@ -2872,7 +2897,7 @@ log {
 };
 ```
 
-## Docker Logging Best Practices
+## Docker Logging Best Practices {#docker-logging-best-practices}
 
 Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den `json-file`-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.
 

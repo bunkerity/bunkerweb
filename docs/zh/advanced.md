@@ -1125,6 +1125,9 @@ systemctl status systemd-resolved
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "重新加载会重新读取该文件夹"
+        重新加载会重新读取 `/etc/bunkerweb/configs`：在其中创建、修改或删除的文件都会被应用并保存到数据库。归 Web UI 或 API 所有的配置会保留其所有者，只有其内容会从文件中刷新。
+
 === "All-in-one"
 
     当使用 [All-in-one 镜像](integrations.md#all-in-one-aio-image)时，您有两种选择来添加自定义配置：
@@ -2603,11 +2606,11 @@ BunkerWeb 提供灵活的日志配置，允许您同时将日志发送到多个�
 
 服务日志由 `LOG_TYPES` 设置控制，支持以空格分隔的多个值（例如 `LOG_TYPES="stderr syslog"`）。
 
-| 值       | 描述                                                                                                                              |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | 将日志写入普通文件。外部轮转在 Linux 安装中由 `logrotate` 负责，在 Docker 中由您的容器日志驱动负责。Web UI 的日志查看器需要此项。 |
-| `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。                                                          |
-| `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。                                                             |
+| 值       | 描述                                                                                                                                                                                                                                          |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | 将日志写入普通文件。在 Linux 安装中，外部轮转由 `logrotate` 负责。在容器中，没有任何组件会为服务自己写入的文件做轮转：保留策略由运维方自行负责，请将该文件挂载到卷并自行轮转，或在容器中改用 `stderr`/`syslog`。Web UI 的日志查看器需要此项。 |
+| `stderr` | 将日志写入标准错误（stderr）。容器化环境（如 `docker logs`）的标准做法。                                                                                                                                                                      |
+| `syslog` | 将日志发送到 syslog 服务器。使用此项时需要设置 `LOG_SYSLOG_ADDRESS`。                                                                                                                                                                         |
 
 使用 `file` 时，您还应该配置：
 
@@ -2641,6 +2644,20 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### 日志文件保留策略 {#log-file-retention}
+
+只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：`logrotate`，配合 BunkerWeb 安装在 `/etc/logrotate.d/bunkerweb` 的策略文件。它会在任何匹配 `/var/log/bunkerweb/*.log` 的文件超过 100 MB 时对其进行轮转，保留七个压缩后的历史版本，并使用 `copytruncate`。
+
+- **Linux**：软件包依赖 `logrotate`，系统会按自身的定时器运行它，无需额外操作。
+- **All-in-one**：该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次，使用同一份策略文件。
+- **Docker、Autoconf、Swarm 和 Kubernetes**：没有需要轮转的内容。`src/bw/Dockerfile` 在构建时将 `access.log`、`error.log` 和 `modsec_audit.log` 替换为指向容器自身标准输出和标准错误的符号链接，因此保留策略由您的容器运行时的日志驱动负责（参见下文的 [Docker 日志最佳实践](#docker-logging-best-practices)）。
+
+`copytruncate` 正是让同一套策略适用于所有这些场景的关键。它会将文件复制到别处，然后原地清空原文件，而不是重命名它，因此从不重新打开日志的写入进程会继续写入正确的文件。ModSecurity 正是这样的写入进程：它在配置加载时打开一次审计日志，并一直持有该文件描述符。如果通过重命名来轮转，它就会永远写入归档文件，而实际使用的文件则始终为空。
+
+编辑 `/etc/logrotate.d/bunkerweb` 可以更改阈值、历史版本数量，或添加 `maxage`。在 All-in-one 上，可以将您自己的文件挂载到该路径上。
+
+审计日志的位置由 `MODSECURITY_SEC_AUDIT_LOG` 设置（multisite，默认 `/var/log/bunkerweb/modsec_audit.log`）；详见 [ModSecurity 设置](features.md#modsecurity)。如果将其指向 `/var/log/bunkerweb` 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。
+
 ### 集成默认值与示例
 
 === "Linux"
@@ -2666,6 +2683,8 @@ LOG_LEVEL_1=error
 === "Docker / Autoconf / Swarm"
 
     **默认行为**：`LOG_TYPES="stderr"`。日志可通过 `docker logs` 查看。
+
+    这些镜像本来就没有由 BunkerWeb 管理、需要限制大小的日志文件：`src/bw/Dockerfile` 在构建时删除 `access.log`、`error.log` 和 `modsec_audit.log`，并将这三个文件全部替换为指向容器自身标准输出和标准错误的符号链接，因此 `ACCESS_LOG`、`ERROR_LOG` 和 `MODSECURITY_SEC_AUDIT_LOG` 默认都会直接进入容器的日志流。这里的保留策略由您的容器运行时负责，可以依赖日志驱动（参见下文的 [Docker 日志最佳实践](#docker-logging-best-practices)）或外部采集器；BunkerWeb 的镜像中不内置 `logrotate`。
 
     **示例（改编自快速入门指南）**：保留 `docker logs`（stderr），并发送到中央 syslog 容器（Web UI 和 CrowdSec 所需）。
 
@@ -2793,6 +2812,12 @@ LOG_LEVEL_1=error
         name: bw-db
     ```
 
+=== "All-in-one"
+
+    **默认行为**：与 Docker 相同（`LOG_TYPES="stderr"`），但 All-in-one 镜像会将 `ACCESS_LOG`、`ERROR_LOG` 和 `MODSECURITY_SEC_AUDIT_LOG` 作为常规文件保留在 `/var/log/bunkerweb/` 下（与 Linux 上的默认值相同），因为内置的 CrowdSec 和 Web UI 的日志查看器都需要从磁盘上读取它们。
+
+    BunkerWeb 会在这里为您限制它们：该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次，使用与 Linux 软件包安装的相同策略（参见上文的[日志文件保留策略](#log-file-retention)）。由于轮转使用 `copytruncate`，这些文件会保留其 inode，因此 CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它们。
+
 === "Kubernetes"
 
     **默认行为**：日志写入 `stderr`，可通过 `kubectl logs` 查看。
@@ -2869,7 +2894,7 @@ log {
 };
 ```
 
-## Docker 日志记录最佳实践
+## Docker 日志记录最佳实践 {#docker-logging-best-practices}
 
 使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
 

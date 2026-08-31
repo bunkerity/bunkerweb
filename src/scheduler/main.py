@@ -32,6 +32,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 from schedule import every as schedule_every, run_pending
 
 from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, create_plugin_tar_gz, plugin_tar_exclude  # type: ignore
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import _write_atomic  # type: ignore
 from api_client import SchedulerApiClient
@@ -54,6 +55,9 @@ def _strip_bootstrap_env(env: dict) -> dict:
 APPLYING_CHANGES = Event()
 
 RUN = True
+# Set by the SIGHUP handler, consumed by the main loop: rescan /etc/bunkerweb/configs
+# before it gets regenerated from the database.
+RELOAD_SCAN_CONFIGS = False
 SCHEDULER: Optional[JobScheduler] = None
 API_CLIENT: Optional[SchedulerApiClient] = None
 SCHEDULER_LOCK = Lock()
@@ -132,6 +136,34 @@ if DISABLE_CONFIGURATION_TESTING:
     LOGGER.warning("Configuration testing is disabled, changes will be applied without testing (we hope you know what you're doing) ...")
 
 
+def build_cmd_env() -> Dict[str, str]:
+    """Environment handed to the gen/ and save_config subprocesses.
+
+    The logging variables have to travel with it. Without them the child falls back to
+    LOG_TYPES=stderr, so on Linux -- where the scheduler runs with LOG_TYPES=file -- every
+    error the config saver reports lands in journald while the scheduler log file only keeps
+    the one-line "failed" summary, which reads as "no logs at all".
+    """
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+        value = getenv(key)
+        if value:
+            cmd_env[key] = value
+
+    for key, value in environ.items():
+        if "CUSTOM_CONF" in key:
+            cmd_env[key] = value
+
+    return cmd_env
+
+
 def changes_from_metadata(db_metadata: dict) -> dict:
     """The change flags the polling loop compares from one iteration to the next."""
     return {
@@ -169,26 +201,16 @@ signal(SIGTERM, handle_stop)
 
 # Function to catch SIGHUP and reload the scheduler (save_config stays in scheduler per spec)
 def handle_reload(signum, frame):
+    global RELOAD_SCAN_CONFIGS
+
     try:
         if SCHEDULER is not None and RUN:
             if API_CLIENT and API_CLIENT.readonly:
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            RELOAD_SCAN_CONFIGS = True
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
@@ -553,8 +575,7 @@ if __name__ == "__main__":
 
         dotenv_env = {}
         if tmp_variables_path.is_file():
-            with tmp_variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(tmp_variables_path)
 
         # Initialize API client
         api_url = getenv("API_URL", dotenv_env.get("API_URL", "http://bw-api:5000"))
@@ -587,20 +608,7 @@ if __name__ == "__main__":
                 env_content = "\n".join(f"{key}={value}" for key, value in environ.items() if "CUSTOM_CONF" not in key)
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             # run the config saver (first-run stays in scheduler per spec)
             proc = subprocess_run(
@@ -669,20 +677,7 @@ if __name__ == "__main__":
                 )
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
-            cmd_env = {
-                "PATH": getenv("PATH", ""),
-                "PYTHONPATH": getenv("PYTHONPATH", ""),
-                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                "DATABASE_URI": getenv("DATABASE_URI", ""),
-            }
-
-            if getenv("TZ"):
-                cmd_env["TZ"] = getenv("TZ")
-
-            for key, value in environ.items():
-                if "CUSTOM_CONF" in key:
-                    cmd_env[key] = value
+            cmd_env = build_cmd_env()
 
             proc = subprocess_run(
                 [
@@ -702,7 +697,7 @@ if __name__ == "__main__":
                 return False
             return True
 
-        def check_configs_changes():
+        def check_configs_changes(*, generate: bool = True) -> bool:
             # Checking if any custom config has been created by the user
             assert API_CLIENT is not None, "API_CLIENT is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
@@ -712,6 +707,7 @@ if __name__ == "__main__":
             for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+                    continue
 
                 content = file.read_text(encoding="utf-8")
                 service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
@@ -743,7 +739,10 @@ if __name__ == "__main__":
                 except BaseException as e:
                     LOGGER.error(f"Error while saving custom configs to database: {e}")
 
-            generate_custom_configs(API_CLIENT.get_custom_configs())
+            if generate:
+                generate_custom_configs(API_CLIENT.get_custom_configs())
+
+            return changes
 
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
@@ -1030,6 +1029,20 @@ if __name__ == "__main__":
             _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
+                    # SIGHUP: re-read /etc/bunkerweb/configs before the folder gets regenerated
+                    # from the database, otherwise a manual edit is reverted on every reload.
+                    if RELOAD_SCAN_CONFIGS:
+                        RELOAD_SCAN_CONFIGS = False
+                        if not API_CLIENT.readonly and check_configs_changes(generate=False):
+                            CONFIGS_NEED_GENERATION = True
+                            CONFIG_NEED_GENERATION = True
+                            NEED_RELOAD = True
+                            # Same reason as the read-only branch below: `continue` leaves the
+                            # try statement, so the `else` never runs. A rescan that found work
+                            # is a clean pass, not a failure.
+                            errors = 0
+                            continue
+
                     sleep(3 if API_CLIENT.readonly else 1)
                     run_pending()
                     SCHEDULER.run_pending()
