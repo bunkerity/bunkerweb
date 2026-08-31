@@ -74,7 +74,7 @@ class ApiCaller:
 
         return ret, responses
 
-    def send_files(self, path: str, url: str, timeout=(5, 10), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+    def send_files(self, path: str, url: str, timeout=(5, 30), response: bool = False) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         with BytesIO() as tgz:
             with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
                 # top-level path may itself be a symlink (resolve it); nested symlinks must stay symlinks (no dereference)
