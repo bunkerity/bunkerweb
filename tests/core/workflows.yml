@@ -1,0 +1,73 @@
+# The workflows plugin ships its own API router through the generic plugin-extension
+# mechanism (src/api/app/routers/plugin_loader.py), mounted at /workflows with the guard
+# injected at mount time -- so creating a policy through the real API, not a fixture seeded
+# straight into the database, is what proves the extension is actually wired end to end.
+#
+# One rule, one condition (country = FR), one terminal action (block): the ladder has no
+# explicit "allow" action (src/common/utils/workflow_schema.py:ACTION_TYPES is block/redirect/
+# challenge only) -- not matching any rule IS the allow outcome, so "one workflow that allows
+# and one that blocks" is one workflow evaluated against two requests, exactly like
+# tests/core/country.yml's own blacklist_good/blacklist_bad pair.
+#
+# The workflow is attached through POST /workflows itself (service_ids at creation), which
+# only flags the "workflows" plugin's config_changed (db_methods/workflows.py:
+# _flag_workflows_config_changed) -- it never touches the test framework's own config-push
+# path (generate.py's `config:` dict), so there is nothing for this suite's usual
+# restart_stack/wait_config machinery to wait on. The scheduler's change-flag poll loop
+# (src/scheduler/main.py, 1-5s) picks it up on its own; `delay` on the two requests below is
+# what gives push-configs + a reload time to land before the assertion fires.
+integrations:
+  - "Docker"
+
+config:
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+actions:
+  create_and_attach_a_blocking_workflow:
+    type: status
+    url: "http://127.0.0.1:8888/workflows"
+    method: POST
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    headers:
+      Content-Type: "application/json"
+    body: '{"name":"e2e-coverage-block-fr","description":"L5 e2e coverage: block country FR","definition":{"schema_version":1,"rules":[{"id":"block-fr","name":"Block France","condition":{"op":"country","values":["FR"]},"action":{"type":"block"}}]},"service_ids":["www.example.com"]}'
+    status: 201
+
+  a_request_that_does_not_match_any_rule_is_allowed:
+    # 8.8.8.8 is US: the ladder's only rule (country = FR) does not match, so the request
+    # reaches the backend exactly as it would with no workflow attached at all.
+    type: status
+    url: "http://www.example.com/"
+    status: 200
+    delay: 8
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+
+  a_request_that_matches_the_rule_is_blocked:
+    # 212.27.48.10 (Free.fr's public DNS) is FR in the bundled DB-IP country database -- no
+    # custom geoip source needed here, this is proving the workflow evaluator reads the same
+    # ctx.bw.country every other country-aware plugin does, not proving geoip's own sourcing
+    # (tests/core/geoip.yml already covers that). DENY_HTTP_STATUS defaults to 403
+    # (src/common/settings.json), which is what an unconfigured block action falls back to
+    # (workflow_schema.py: {"type": "block"} carries no status of its own).
+    type: status
+    url: "http://www.example.com/"
+    status: 403
+    delay: 8
+    headers:
+      X-Forwarded-For: "212.27.48.10"
+
+  the_api_router_answers_for_the_attached_workflow:
+    type: string
+    url: "http://127.0.0.1:8888/workflows?search=e2e-coverage-block-fr"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"name":"e2e-coverage-block-fr"'

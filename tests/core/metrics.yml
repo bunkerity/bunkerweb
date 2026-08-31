@@ -1,0 +1,71 @@
+# The metrics plugin buffers a blocked-request report in the Lua LRU only when a plugin set a
+# reason (metrics.lua:590 metrics:log(), `if reason then ... end`) -- a plain 404 from a missing
+# file under /var/www/html sets none, so it is invisible to the reports feature no matter how
+# many are sent. BLACKLIST_COUNTRY does set one (country.lua calls set_reason), and 403 is inside
+# the 4xx `is_report()` window, so reusing the same blacklist-by-country trick country.yml and
+# geoip.yml already rely on is what actually produces a persisted row here -- not a red herring,
+# the trigger IS the subject under test's precondition.
+#
+# The scrape-persist-reports job (every: minute) is what moves a buffered report from the Lua LRU
+# into bw_metrics_requests. Waiting a real minute is avoidable: JobScheduler.run_once() dispatches
+# EVERY job of a changed plugin regardless of its `every`, and the scheduler's reload() is called
+# on every config push -- so an action that changes a METRICS_* setting forces an immediate scrape,
+# and wait_config.py's jobs_queue_quiet() (tests/wait_config.py) blocks the next action until that
+# dispatch has actually finished, not merely started. Splitting "make the blocked request" and
+# "change a METRICS_* setting" into two actions is what lets that ordering happen: dispatching the
+# scrape in the SAME action as the blocked request would race it against the request that has not
+# been made yet.
+integrations:
+  - "Docker"
+
+config:
+  USE_REAL_IP: "yes"
+  REAL_IP_FROM: "0.0.0.0/0"
+
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
+
+actions:
+  blocked_http_request_is_buffered:
+    type: status
+    url: "http://www.example.com/"
+    status: 403
+    headers:
+      X-Forwarded-For: "8.8.8.8"
+    config:
+      BLACKLIST_COUNTRY: "US"
+
+  report_lands_in_the_database_with_the_http_discriminator:
+    # No new HTTP request here on purpose: this action's only job is to force the scrape (see
+    # the file banner) and then read what it persisted from the blocked request above.
+    type: database
+    query: "SELECT protocol, status, server_name FROM bw_metrics_requests WHERE ip = '8.8.8.8' AND reason LIKE '%country%' ORDER BY id DESC LIMIT 1"
+    result: "http|403|www.example.com"
+    config:
+      BLACKLIST_COUNTRY: "US"
+      METRICS_MAX_BLOCKED_REQUESTS: "2k"
+
+  the_api_serves_the_same_report_back:
+    # Docker only: dials the API on loopback:8888, the same pattern customcert.yml uses for the
+    # certificate inventory. `search` is the DataTables free-text filter the UI itself sends
+    # (db_methods/metrics.py); www.example.com is specific enough on a single-service stack that
+    # this is unambiguous evidence the row above and this response describe the same event.
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/metrics/requests?search=www.example.com"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"protocol":"http"'
+
+  the_api_reports_the_right_status_and_country:
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/metrics/requests?search=www.example.com"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"status":403'
