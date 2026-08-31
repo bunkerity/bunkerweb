@@ -87,6 +87,17 @@
     if (changed) boxes[0].dispatchEvent(new Event("change", { bubbles: true }));
   };
 
+  // Rendered only when BOTH lists are stored. The runtime ORs them and BOTH stay live
+  // (antibot.lua:1198-1201: an ignore-list hit exempts, OR being outside the only-list exempts), so
+  // neither is redundant -- the alert is about the rule being ambiguous, not about dead config, and
+  // the button below clears the skip list because the picker is showing the other one. Once one
+  // list is empty the warning is stale, so it goes off screen with `hidden` -- never by detaching
+  // it, for the same reason a group is hidden rather than removed.
+  const conflict = form.querySelector("[data-antibot-country-conflict]");
+  const hideConflict = () => {
+    if (conflict) conflict.hidden = true;
+  };
+
   if (picker && lists.length) {
     listen(picker, "change", () => {
       lists.forEach((wrapper) => {
@@ -94,8 +105,24 @@
         wrapper.hidden = !on;
         if (!on) clearCountryList(wrapper);
       });
+      hideConflict();
     });
   }
+
+  // The picker alone cannot resolve the conflict: it is already on the value the page opened with,
+  // and re-selecting a <select>'s current value fires no `change`. So the alert carries its own
+  // button, aimed at the list the picker is NOT showing -- both are live, so which one goes is a
+  // choice, and the picker's own value is the one the operator has already expressed.
+  form.querySelectorAll("[data-antibot-country-clear]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.antibotCountryClear;
+      lists.forEach((wrapper) => {
+        if (wrapper.dataset.antibotCountryList === target)
+          clearCountryList(wrapper);
+      });
+      hideConflict();
+    });
+  });
 
   // The server already rendered the right state; this only re-asserts it after a bfcache
   // restore, where a browser can hand back the previous `value` of the select without firing

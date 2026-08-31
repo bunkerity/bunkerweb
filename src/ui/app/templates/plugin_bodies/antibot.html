@@ -135,9 +135,24 @@
         <h6 id="antibot-group-countries-title" class="mb-1 don-jose">{{ _("settings.antibot.countries.title") }}</h6>
         <p class="text-muted small courier-prime mb-2">{{ _("settings.antibot.countries.description") }}</p>
         {% if ignore_countries and only_countries %}
-            <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
-                <i class="bx bx-error bx-sm me-2" aria-hidden="true"></i>
-                <span>{{ _("settings.antibot.countries.both_set") }}</span>
+            {# The alert needs its own way out. The picker cannot clear the ignore list from here:
+               it is already on `only`, and re-selecting the value a <select> is already on fires no
+               `change` event at all -- so without this button the warning is a dead end that stays
+               on screen until the operator works out they have to detour through `ignore`.
+               NOT dead config, unlike the country page's equivalent: antibot.lua:1198-1201 ORs the
+               two lists and both stay live, which is exactly why the rule is ambiguous and why
+               clearing one is a choice rather than a cleanup. #}
+            <div class="alert alert-warning d-flex align-items-center justify-content-between gap-2 mb-3"
+                 role="alert"
+                 data-antibot-country-conflict>
+                <span class="d-flex align-items-center">
+                    <i class="bx bx-error bx-sm me-2" aria-hidden="true"></i>
+                    <span>{{ _("settings.antibot.countries.both_set") }}</span>
+                </span>
+                <button type="button"
+                        class="btn btn-sm btn-outline-warning flex-shrink-0"
+                        data-antibot-country-clear="ignore"
+                        {% if is_readonly %}disabled{% endif %}>{{ _("settings.antibot.countries.both_set_clear") }}</button>
             </div>
         {% endif %}
         <div class="row g-2 gx-6">
