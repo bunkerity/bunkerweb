@@ -65,20 +65,22 @@ actions:
   global_limit_triggered:
     # X-Forwarded-For: random gives every request in the burst a distinct source IP,
     # so only the aggregate/global counter (not the per-IP one) can explain a 429 here.
-    # The rate has to sit below what the runner can actually produce: the handler sends the
-    # burst sequentially and each request costs ~370ms, so eight of them span three seconds
-    # -- under 5r/s, which is why this asserted a limit that could never fire.
+    # Eight requests escape a 1r/m cap only if each occupies a distinct fixed-minute bucket,
+    # crossing seven minute boundaries. Ordinary request jitter cannot create that gap.
+    # The plugin_limit_global_<server>_<minute> counter lives 60s in the instance shared dict and
+    # survives the scheduler-only restart between actions. A future global action using the same
+    # minute window before expiry inherits it.
     type: limit
     url: "http://www.example.com/global-test"
     headers:
       X-Forwarded-For: "random"
-    rate_limit: "1r/s"
+    rate_limit: "1r/m"
     expect_limited: true
     rate_exceeded_count: 8
     config:
       USE_LIMIT_REQ: "no" # isolate: per-IP/per-URL limiting must not be the cause
       USE_LIMIT_REQ_GLOBAL: "yes"
-      LIMIT_REQ_GLOBAL_RATE: "1r/s"
+      LIMIT_REQ_GLOBAL_RATE: "1r/m"
       USE_REAL_IP: "yes"
       REAL_IP_FROM: "0.0.0.0/0"
 

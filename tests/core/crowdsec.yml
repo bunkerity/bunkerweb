@@ -4,44 +4,73 @@ integrations:
   - "Autoconf"
 
 actions:
-  dirb:
-    type: tool
-    tool: "dirb"
-    arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
-    # dirb is a provocation, not an assertion: it exists to make CrowdSec ban the runner, and
-    # `blocked_live` below is what actually checks the result. It cannot be left unbounded,
-    # because it deadlocks on its own success -- once the ban lands, its remaining requests
-    # hang and it never returns. Measured: 86112 requests sent, then 0 CPU for 6.5 minutes.
-    # 30s is chosen from what the scenario needs, not from taste: the ban fires after 4
-    # `http-admin-interface-probing` events, and dirb reaches the `admin*` words in roughly the
-    # first 1% of its scan, i.e. a few seconds. 30s is a large multiple of that, and it stays
-    # well under CROWDSEC_UPDATE_FREQUENCY (60) so it cannot push the stream-mode assertions
-    # past the bouncer's next pull. Too short a bound is safe: it reds `blocked_live` with a
-    # 200 rather than passing quietly.
-    timeout: 30
+  admin_interface_probe:
+    type: script
+    # cscli hub update refreshes this scenario, whose YAML has no version field, on every
+    # CrowdSec restart; the image digest does not pin it. The filter groups by source IP and
+    # counts distinct paths returning 403/404. Six list entries provide twice the current
+    # three-event overflow threshold and buffer upstream filter/capacity drift plus log loss.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
     restart_stack: false
   blocked_live:
     type: status
     url: "http://www.example.com"
     status: 403
+    # CrowdSec creates the decision asynchronously after the third qualifying access-log event.
+    delay: 5
+    retries: 1
     # full_clean is load-bearing for not_yet_blocked_stream: live_query cached this ban in
     # lua_shared_dict crowdsec_cache, which SURVIVES reloads -- only the `down -v` behind
     # full_clean clears it. Drop this line and the not-yet assertion turns deterministically
     # 403 for a reason no log will point at.
     full_clean: true
 
-  dirb_1:
-    type: tool
-    tool: "dirb"
-    arguments: 'http://127.0.0.1 -H "Host: www.example.com" -H "User-Agent: LegitOne" -f'
-    # A bound on a provocation, nothing more -- it no longer protects the next assertion. In
-    # stream mode at the frequency below, the ban cannot reach the bouncer while dirb runs, so
-    # the scan is never blocked and cannot deadlock on its own success the way `dirb` above
-    # does. Measured on an isolated stack: the whole 4612-word scan finished in 6s and CrowdSec
-    # had already created the decision ~1s in, so the bound does not even fire. It stays because
-    # `-f` recurses into what it finds and a runner with more to find sends far more requests
-    # (86112 in the CI run this replaced), and the action's cost should stay predictable.
-    timeout: 30
+  admin_interface_probe_stream:
+    type: script
+    # Same unpinned six-path, one-IP provocation as live mode.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
     config:
       CROWDSEC_MODE: "stream"
       # An hour away: nothing the bouncer does can interfere with the scan, and the decision
@@ -58,9 +87,9 @@ actions:
       CROWDSEC_MODE: "stream"
       CROWDSEC_UPDATE_FREQUENCY: "10"
     # This assertion used to be a race against a wall clock: a 60s window opened by the end of
-    # dirb_1 and closed by the bouncer's next pull, which the harness lost outright when it
-    # spent 4min11s between the two actions. It is a property now. The bouncer arms its stream
-    # timer on the FIRST request that reaches crowdsec:access() after a reload (bouncer.lua:505
+    # admin_interface_probe_stream and closed by the bouncer's next pull, which the harness lost
+    # outright when it spent 4min11s between the two actions. It is a property now. The bouncer
+    # arms its stream timer on the FIRST request that reaches crowdsec:access() after a reload (bouncer.lua:505
     # SetupStream -> :488 `ngx.timer.at(UPDATE_FREQUENCY, stream_query)`), and measurement says
     # nothing else reaches it -- the instance API and the healthcheck never do. The restart the
     # previous action now triggers reloads the bouncer, so THIS request is what starts the
