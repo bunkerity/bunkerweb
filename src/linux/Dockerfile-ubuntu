@@ -1,4 +1,4 @@
-FROM ubuntu:resolute@sha256:3131b4cc82a783df6c9df078f86e01819a13594b865c2cad47bd1bca2b7063bb AS builder
+FROM ubuntu:resolute@sha256:2260313b31c8c011cd2eebe728008efac1b3982be73eb71348ea2648d2c0e09b AS builder
 
 # Install dependencies
 RUN apt update && \
@@ -79,19 +79,35 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
+ARG NODE_VERSION=24.11.1
+ARG NODE_SHA256_X64=60e3b0a8500819514aca603487c254298cd776de0698d3cd08f11dba5b8289a8
+ARG NODE_SHA256_ARM64=6b0863fb9f627bf4a6c5948dce1de4398174a2e05dbe717503d828e211ca01f0
+ENV PATH="/opt/node/bin:${PATH}"
+
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-    apt-get install -y nodejs npm parallel && \
-    cd /tmp && \
-    npm ci --ignore-scripts; \
+    set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends xz-utils parallel; \
+    case "$(uname -m)" in \
+    x86_64) node_arch="x64"; node_sha="$NODE_SHA256_X64" ;; \
+    aarch64) node_arch="arm64"; node_sha="$NODE_SHA256_ARM64" ;; \
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz"; \
+    echo "${node_sha}  node.tar.xz" | sha256sum -c -; \
+    mkdir -p /opt/node; \
+    tar -xJf node.tar.xz -C /opt/node --strip-components=1; \
+    rm -f node.tar.xz; \
+    node --version; npm --version; \
+    cd /tmp; \
+    npm ci --ignore-scripts --engine-strict; \
     fi
 
 # Minify JS files
-ARG SKIP_MINIFY=no
-ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
     | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
@@ -100,7 +116,6 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
     | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
@@ -109,7 +124,6 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     fi
 
 # Minify HTML files
-ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
     parallel 'npx html-minifier-terser \
@@ -126,7 +140,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:resolute@sha256:3131b4cc82a783df6c9df078f86e01819a13594b865c2cad47bd1bca2b7063bb
+FROM ubuntu:resolute@sha256:2260313b31c8c011cd2eebe728008efac1b3982be73eb71348ea2648d2c0e09b
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

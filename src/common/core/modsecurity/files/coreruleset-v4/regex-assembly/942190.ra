@@ -8,7 +8,7 @@
 ##!> assemble
   {{quotes}}
   ##!=>
-  \s*!\s*[\"'`\w]
+  \s*!\s*(?:[<=>]|{{quotes}})
   ##!> assemble
     ;?\s*
     ##!=>

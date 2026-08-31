@@ -51,7 +51,7 @@ body:
       label: BunkerWeb version
       description: What version of BunkerWeb are you running?
       placeholder: Version
-      value: 1.6.14~rc3
+      value: 1.6.15~rc1
     validations:
       required: true
   - type: dropdown
@@ -91,7 +91,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/.github/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

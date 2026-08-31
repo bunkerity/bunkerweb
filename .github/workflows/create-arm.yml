@@ -1,5 +1,8 @@
 name: Create ARM node (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     outputs:

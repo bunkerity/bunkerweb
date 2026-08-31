@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from glob import glob
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
@@ -14,6 +13,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from Configurator import Configurator
 from Templator import Templator
@@ -72,8 +72,7 @@ if __name__ == "__main__":
         if args.variables:
             variables_path = Path(args.variables)
             LOGGER.info(f"Variables : {variables_path}")
-            with variables_path.open() as f:
-                dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            dotenv_env = parse_env_file(variables_path)
 
         db = None
         if DB_PATH.is_dir():
@@ -127,11 +126,13 @@ if __name__ == "__main__":
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
 
-        # Remove old files
+        # Remove old files. iterdir(), not glob("*"), which skips dotfiles: the instance's
+        # ".bw-applied" push marker used to survive here, so a restart regenerated the whole
+        # directory as the loading configuration while still claiming the last pushed digest
+        # was applied. The scheduler then re-sent that identical configuration, the digest
+        # matched, the push was skipped, and the instance stayed on the loading config.
         LOGGER.info("Removing old files ...")
-        files = glob(join(args.output, "*"))
-        for file in files:
-            file = Path(file)
+        for file in Path(args.output).iterdir():
             if file.is_symlink() or file.is_file():
                 file.unlink()
             elif file.is_dir():

@@ -1,5 +1,8 @@
 name: Delete staging infra (REUSABLE)
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:

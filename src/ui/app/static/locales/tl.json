@@ -136,6 +136,7 @@
     "plugin_page": "Pahina ng Plugin",
     "proceed": "Magpatuloy",
     "refresh_recovery_codes": "I-refresh ang Mga Recovery Code",
+    "refresh_ui_plugins": "I-refresh ang mga plugin ng UI",
     "reload": "I-reload",
     "reset": "I-reset",
     "reset_columns": "I-reset ang Mga Hanay",
@@ -487,6 +488,7 @@
       "no_data": "Walang data"
     },
     "window": {
+      "all_time": "Buong panahon",
       "last_days": "Nakaraang {{days}} araw",
       "title": "Window ng Dashboard"
     }
@@ -1511,6 +1513,7 @@
       "force_check": "Nag-iiskedyul ng pagsusuri; nagda-download lamang kung may mga update.",
       "force_update": "Nilalaktawan ang mga pagsusuri at pinipilit ang pag-download ng PRO plugin; pinapanatili ang kasalukuyang estado sa pagkabigo.",
       "ping_instance": "I-ping ang Instance na {{hostname}}",
+      "refresh_ui_plugins": "Muling niloload ang mga PRO plugin na mayroon na ang web UI, nang walang dina-download.",
       "reload_instance": "I-reload ang Instance na {{hostname}}",
       "reset_default": "I-reset sa default na value",
       "reset_global": "I-reset sa global na value",

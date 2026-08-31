@@ -48,6 +48,13 @@ Follow these steps to configure and use the Sessions feature:
     2. Ensure all instances use the exact same `SESSIONS_SECRET` and `SESSIONS_NAME`
     3. This ensures users maintain their session regardless of which BunkerWeb instance handles their requests
 
+!!! info "Session Revocation"
+    Without Redis, session data lives in the cookie itself, so destroying a session only cleared it from the browser and the signed cookie stayed valid until it timed out. BunkerWeb keeps a denylist of destroyed session identifiers in shared memory, so a destroyed cookie is rejected the next time it is presented.
+
+    - It applies only when session data is stored in the cookie. With `USE_REDIS` set to `yes`, session data is server-side and destroying a session already removes it.
+    - The denylist is local to each BunkerWeb instance. Use Redis to revoke sessions across a cluster.
+    - Size it with `SESSIONS_REVOCATION_MEMORY_SIZE`. If the store fills up or becomes unavailable, the session is treated as valid and a warning is logged.
+
 ### Example Configurations
 
 === "Basic Configuration"

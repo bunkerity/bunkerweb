@@ -2,8 +2,19 @@
 ## [Unreleased]
 
 
+<a name="1.9.0"></a>
+## [1.9.0] - 2026-08-14
+### bug fixes
+- **pkey:** size raw key buffers dynamically [c7d3f7c](https://github.com/fffonion/lua-resty-openssl/commit/c7d3f7c50269c0d8ba70ad379a19e91727d14d76)
+- **pkey:** generalize raw key handling [165b5fc](https://github.com/fffonion/lua-resty-openssl/commit/165b5fc91cff67ad6d0fdf05d5dedcc26bf9f4f0)
+- **pkey:** identify provider-native key types [9efb493](https://github.com/fffonion/lua-resty-openssl/commit/9efb493b7b5a80fd0402e3c725c0b54b9177c3c1)
+
+### features
+- **pkey:** support post-quantum key operations [38f6e6c](https://github.com/fffonion/lua-resty-openssl/commit/38f6e6c5515590f1b1da5c24c8abc393202532dc)
+
+
 <a name="1.8.0"></a>
-## [1.8.0] - 2026-06-09
+## [1.8.0] - 2026-06-10
 ### bug fixes
 - **\*:** correct error message from bn:mod_sqr and pkey ([#233](https://github.com/fffonion/lua-resty-openssl/issues/233)) [961bd7b](https://github.com/fffonion/lua-resty-openssl/commit/961bd7b8fbb7d24c50e83a830f3c519a7f19706b)
 
@@ -685,7 +696,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.8.0...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.9.0...HEAD
+[1.9.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.1...1.8.0
 [1.7.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.4...1.7.0

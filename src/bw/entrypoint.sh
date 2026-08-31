@@ -97,6 +97,12 @@ function set_loading_state() {
 		echo "IS_LOADING=yes" >> "$nginx_variables_path"
 	fi
 
+	# The scheduler skips a push whose archive digest matches the ".bw-applied" marker left by
+	# the previous one. Editing variables.env here makes the tree differ from what that marker
+	# describes, so the push carrying IS_LOADING=no would be answered "already applied" and the
+	# instance would stay in the loading state, serving traffic with every Lua plugin disabled.
+	rm -f "$(dirname "$nginx_variables_path")/.bw-applied"
+
 	return 0
 }
 
@@ -104,6 +110,11 @@ function set_loading_state() {
 tmp_env_path="/tmp/variables.env"
 tmp_env_content="$(generate_tmp_env_content)"
 regenerate_temp_config=false
+
+# The occurrence above is heredoc content, so it only reaches the generated file and never sets
+# the shell variable the test below reads. Unset therefore behaved as "yes" on every restart that
+# kept the writable layer, which is the opposite of the documented default.
+KEEP_CONFIG_ON_RESTART="${KEEP_CONFIG_ON_RESTART:-no}"
 
 if [[ "$KEEP_CONFIG_ON_RESTART" == "no" ]] || [[ ! -f "$tmp_env_path" ]] ; then
 	regenerate_temp_config=true

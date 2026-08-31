@@ -136,6 +136,7 @@
     "plugin_page": "플러그인 페이지",
     "proceed": "계속",
     "refresh_recovery_codes": "복구 코드 갱신",
+    "refresh_ui_plugins": "UI 플러그인 새로 고침",
     "reload": "새로고침",
     "reset": "초기화",
     "reset_columns": "열 초기화",
@@ -487,6 +488,7 @@
       "no_data": "데이터 없음"
     },
     "window": {
+      "all_time": "전체 기간",
       "last_days": "지난 {{days}}일",
       "title": "대시보드 창"
     }
@@ -1511,6 +1513,7 @@
       "force_check": "확인 일정을 예약합니다. 업데이트가 있을 때만 다운로드합니다.",
       "force_update": "확인을 건너뛰고 PRO 플러그인을 강제로 다운로드합니다. 실패 시 현재 상태를 유지합니다.",
       "ping_instance": "인스턴스 {{hostname}}에 핑 보내기",
+      "refresh_ui_plugins": "웹 UI에 이미 있는 PRO 플러그인을 아무것도 내려받지 않고 다시 불러옵니다.",
       "reload_instance": "인스턴스 {{hostname}} 새로고침",
       "reset_default": "기본값으로 초기화",
       "reset_global": "전역 설정값으로 초기화",

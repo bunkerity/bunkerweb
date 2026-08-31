@@ -43,9 +43,8 @@
 local jit = require("jit")
 local jutil = require("jit.util")
 local vmdef = require("jit.vmdef")
-local bit = require("bit")
 local sub, gsub, format = string.sub, string.gsub, string.format
-local byte, band, shr = string.byte, bit.band, bit.rshift
+local byte = string.byte
 local funcinfo, funcbc, funck = jutil.funcinfo, jutil.funcbc, jutil.funck
 local funcuvname = jutil.funcuvname
 local bcnames = vmdef.bcnames
@@ -65,9 +64,9 @@ end
 local function bcline(func, pc, prefix, lineinfo)
   local ins, m, l = funcbc(func, pc, lineinfo and 1 or 0)
   if not ins then return end
-  local ma, mb, mc = band(m, 7), band(m, 15*8), band(m, 15*128)
-  local a = band(shr(ins, 8), 0xff)
-  local oidx = 6*band(ins, 0xff)
+  local ma, mb, mc = m & 7, (m >> 3) & 15, (m >> 7) & 15
+  local a = (ins >> 8) & 0xff
+  local oidx = 6 * (ins & 0xff)
   local op = sub(bcnames, oidx+1, oidx+6)
   local s
   if lineinfo then
@@ -77,43 +76,43 @@ local function bcline(func, pc, prefix, lineinfo)
     s = format("%04d %s %-6s %3s ",
       pc, prefix or "  ", op, ma == 0 and "" or a)
   end
-  local d = shr(ins, 16)
-  if mc == 13*128 then -- BCMjump
+  local d = ins >> 16
+  if mc == 13 then -- BCMjump
     return format("%s=> %04d\n", s, pc+d-0x7fff)
   end
-  if mb ~= 0 then
-    d = band(d, 0xff)
+  if mb != 0 then
+    d &= 0xff
   elseif mc == 0 then
     return s.."\n"
   end
   local kc
-  if mc == 10*128 then -- BCMstr
+  if mc == 10 then -- BCMstr
     kc = funck(func, -d-1)
-    kc = format(#kc > 40 and '"%.40s"~' or '"%s"', gsub(kc, "%c", ctlsub))
-  elseif mc == 9*128 then -- BCMnum
+    kc = format(#kc > 40 ? '"%.40s"~' : '"%s"', gsub(kc, "%c", ctlsub))
+  elseif mc == 9 then -- BCMnum
     kc = funck(func, d)
-    if op == "TSETM " then kc = kc - 2^52 end
-  elseif mc == 12*128 then -- BCMfunc
+    if op == "TSETM " then kc -= 2^52 end
+  elseif mc == 12 then -- BCMfunc
     local fi = funcinfo(funck(func, -d-1))
     if fi.ffid then
       kc = vmdef.ffnames[fi.ffid]
     else
       kc = fi.loc
     end
-  elseif mc == 5*128 then -- BCMuv
+  elseif mc == 5 then -- BCMuv
     kc = funcuvname(func, d)
   end
   if ma == 5 then -- BCMuv
     local ka = funcuvname(func, a)
     if kc then kc = ka.." ; "..kc else kc = ka end
   end
-  if mb ~= 0 then
-    local b = shr(ins, 24)
+  if mb != 0 then
+    local b = ins >> 24
     if kc then return format("%s%3d %3d  ; %s\n", s, b, d, kc) end
     return format("%s%3d %3d\n", s, b, d)
   end
   if kc then return format("%s%3d      ; %s\n", s, d, kc) end
-  if mc == 7*128 and d > 32767 then d = d - 65536 end -- BCMlits
+  if mc == 7 and d > 32767 then d -= 65536 end -- BCMlits
   return format("%s%3d\n", s, d)
 end
 
@@ -123,7 +122,7 @@ local function bctargets(func)
   for pc=1,1000000000 do
     local ins, m = funcbc(func, pc)
     if not ins then break end
-    if band(m, 15*128) == 13*128 then target[pc+shr(ins, 16)-0x7fff] = true end
+    if m & (15 << 7) == (13 << 7) then target[pc+(ins >> 16)-0x7fff] = true end
   end
   return target
 end
@@ -197,7 +196,7 @@ local function bclistoff()
   if active then
     active = false
     jit.attach(h_list)
-    if out and out ~= stdout and out ~= stderr then out:close() end
+    if out and out != stdout and out != stderr then out:close() end
     out = nil
   end
 end
@@ -207,7 +206,7 @@ local function bcliston(outfile)
   if active then bclistoff() end
   if not outfile then outfile = os.getenv("LUAJIT_LISTFILE") end
   if outfile then
-    out = outfile == "-" and stdout or assert(io.open(outfile, "w"))
+    out = outfile == "-" ? stdout : assert(io.open(outfile, "w"))
   else
     out = stderr
   end

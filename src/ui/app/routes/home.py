@@ -61,6 +61,9 @@ def home_page():
             except Exception:
                 continue
 
+    # The errors counters are cumulative; the aggregates fallback is windowed. The cards say
+    # which one they are showing, so the template needs to know which was used.
+    statuses_all_time = bool(request_statuses)
     if not request_statuses:
         request_statuses = home_aggregates.get("request_statuses", {})
 
@@ -102,4 +105,5 @@ def home_page():
         time_buckets=time_buckets,
         memory_info=memory_info,
         home_stats_days=home_stats_days,
+        statuses_all_time=statuses_all_time,
     )

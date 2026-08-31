@@ -139,8 +139,11 @@ function datastore:set(key, value, exptime, worker)
 		if not lru then
 			return false, "lru is not instantiated"
 		end
-		-- Same convention as the shared dict below : no exptime or a negative one means no expiry
-		if exptime and exptime < 0 then
+		-- Same convention as the shared dict below : no exptime, zero or a negative one means no
+		-- expiry. Zero has to be normalised too : the shared dict reads it as no expiry, while
+		-- lrucache reads it as already expired, so passing it through would make the very next
+		-- get() a miss.
+		if exptime and exptime <= 0 then
 			exptime = nil
 		end
 		lru:set(key, value, exptime)

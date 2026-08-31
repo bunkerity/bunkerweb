@@ -30,6 +30,22 @@ RESERVED_SERVICE_NAMES = frozenset({"unknown", "Web UI", "bwcli", "default serve
 # Single source of truth shared by main.py (before_request fast-paths) and the Biscuit
 # authorization middleware, so the two never drift.
 STATIC_PATH_PREFIXES = ("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")
+# Public paths that carry no privilege either, matched whole and never as a prefix: every consumer
+# below uses startswith, so listing a bare file name among the prefixes would also exempt
+# /favicon.icoX and /favicon.ico/anything from the host, authorization and revocation checks.
+STATIC_EXACT_PATHS = (
+    "/favicon.ico",
+    "/robots.txt",
+    "/security.txt",
+    "/.well-known/security.txt",
+    "/.well-known/change-password",
+)
+
+
+def is_static_path(path: str, *extra_prefixes: str) -> bool:
+    """True for the unprivileged static assets that skip the request pipeline."""
+    return path.startswith(STATIC_PATH_PREFIXES + extra_prefixes) or path in STATIC_EXACT_PATHS
+
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 # Characters that could break out of a quoted string when a username is embedded in
@@ -40,7 +56,8 @@ BCRYPT_HASH_RX = re_compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\Z")
 RECOMMENDED_BCRYPT_COST = 12  # below this, a supplied pre-hashed ADMIN_PASSWORD triggers a warning
 MIN_BCRYPT_COST = 10  # absolute floor; a supplied pre-hashed ADMIN_PASSWORD below this is refused
 MAX_PASSWORD_BYTES = 72  # bcrypt only consumes the first 72 bytes of a secret; 5.x raises ValueError on more
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
+# \Z, not $: a trailing newline would otherwise pass and become a directory name.
+PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".biscuit_private_key")

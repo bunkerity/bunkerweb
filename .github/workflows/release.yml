@@ -10,6 +10,13 @@ jobs:
   # scorecards-analysis:
   #   uses: ./.github/workflows/scorecards-analysis.yml
 
+  plumber:
+    uses: ./.github/workflows/plumber.yml
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
   codeql:
     uses: ./.github/workflows/codeql.yml
     permissions:
@@ -21,6 +28,7 @@ jobs:
   build-containers:
     permissions:
       contents: read
+      packages: write
       security-events: write # Trivy SARIF upload
     strategy:
       fail-fast: false # keep all legs running so every image uploads its Trivy SARIF even when one gates red
@@ -73,6 +81,10 @@ jobs:
 
   # Build arm64 + arm/v7 images
   build-containers-arm:
+    permissions:
+      contents: read
+      packages: write
+      security-events: write # Trivy SARIF upload
     needs: [create-arm]
     strategy:
       matrix:
@@ -116,6 +128,9 @@ jobs:
 
   # Build Linux packages
   build-packages:
+    permissions:
+      contents: read
+      packages: write
     needs: [create-arm]
     strategy:
       matrix:
@@ -172,7 +187,8 @@ jobs:
   # Wait for all builds and extract VERSION
   wait-builds:
     runs-on: ubuntu-latest
-    needs: [codeql, build-containers, build-containers-arm, build-packages]
+    needs:
+      [plumber, codeql, build-containers, build-containers-arm, build-packages]
     outputs:
       version: ${{ steps.getversion.outputs.version }}
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}

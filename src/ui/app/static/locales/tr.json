@@ -136,6 +136,7 @@
     "plugin_page": "Eklenti Sayfası",
     "proceed": "Devam Et",
     "refresh_recovery_codes": "Kurtarma Kodlarını Yenile",
+    "refresh_ui_plugins": "Arayüz eklentilerini yenile",
     "reload": "Yeniden Yükle",
     "reset": "Sıfırla",
     "reset_columns": "Sütunları Sıfırla",
@@ -487,6 +488,7 @@
       "no_data": "Veri yok"
     },
     "window": {
+      "all_time": "Tüm zamanlar",
       "last_days": "Son {{days}} gün",
       "title": "Panel penceresi"
     }
@@ -1511,6 +1513,7 @@
       "force_check": "Bir kontrol planlar; yalnızca güncellemeler varsa indirir.",
       "force_update": "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur.",
       "ping_instance": "Örneğe Ping At: {{hostname}}",
+      "refresh_ui_plugins": "Web arayüzünde zaten bulunan PRO eklentilerini hiçbir şey indirmeden yeniden yükler.",
       "reload_instance": "Örneği Yeniden Yükle: {{hostname}}",
       "reset_default": "Varsayılana sıfırla",
       "reset_global": "Küresel değere sıfırla",

@@ -498,7 +498,9 @@
 #define LJ_ARCH_BITS		64
 #define LJ_ARCH_ENDIAN		LUAJIT_BE
 #define LJ_TARGET_S390X		1
-#define LJ_TARGET_EHRETREG	0xe
+/* On s390x, _Unwind_SetGR can only be used with call-saved registers.
+   Use %r7 as EH return register; value will be moved into %r2 by the handler.  */
+#define LJ_TARGET_EHRETREG	7
 #define LJ_TARGET_JUMPRANGE	32	/* +-2^32 = +-4GB (32-bit, halfword aligned) */
 #define LJ_TARGET_MASKSHIFT	1
 #define LJ_TARGET_MASKROT	1

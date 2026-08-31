@@ -126,7 +126,7 @@ ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
     apk add --no-cache nodejs npm parallel && \
     cd /tmp && \
-    npm ci --ignore-scripts; \
+    npm ci --ignore-scripts --engine-strict; \
     fi
 
 # Minify JS files
@@ -168,10 +168,11 @@ FROM nginx:1.30.4-alpine-slim@sha256:ddde39c6e51f02fde7410c2e9c234cf2d0a4c7bdbbe
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2
+RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre2 python3 py3-pip sed sqlite postgresql-client tzdata unzip yajl supervisor brotli lmdb libfuzzy2 logrotate
 
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
+RUN apk add --no-cache "libpq>=18.5-r0" "postgresql18-client>=18.5-r0" # CVE-2026-6464 CVE-2026-6469 CVE-2026-6470 CVE-2026-6471 CVE-2026-14662 CVE-2026-14663 CVE-2026-14664 CVE-2026-14666 CVE-2026-14668 CVE-2026-14669 CVE-2026-14670 CVE-2026-14671 CVE-2026-14672 CVE-2026-14673 CVE-2026-14676 CVE-2026-14677 CVE-2026-14678 CVE-2026-14679 CVE-2026-14680 CVE-2026-15741 CVE-2026-15742 CVE-2026-16238 CVE-2026-16239 CVE-2026-16241 CVE-2026-18024 CVE-2026-18408 CVE-2026-19385
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -234,11 +235,12 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
     chmod 770 -R /etc/supervisor.d
 
+COPY --chown=root:nginx --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.14~rc3"
+LABEL version="1.6.15~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
 

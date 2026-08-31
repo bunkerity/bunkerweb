@@ -18,6 +18,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 
 - 网络：保持内部流量；绑定到回环或内网接口，并用 `API_WHITELIST_IPS` 限制来源 IP（默认启用）。
 - 认证到位：设置 `API_USERNAME`/`API_PASSWORD`（管理员），需要时用 `API_ACL_BOOTSTRAP_FILE` 添加更多用户/ACL；仅将 `API_TOKEN` 作为应急备用。
+- ACL 范围：config、service、plugin 和 global settings 的**写**权限等同于管理员（其内容会原样渲染进 NGINX/Lua 配置，即代码执行）：只授予完全可信的用户。`instances_create` 和 `instances_update` 也一样，只是路径不同：对已注册实例的每次调用都会带上 `API_TOKEN` 管理员覆盖令牌，且 scheduler 会把生成的配置和缓存（含 TLS 私钥）推送到每个已注册实例。参见“权限与 ACL”一节。
 - 隐藏路径：反向代理时选择不易猜到的 `API_ROOT_PATH`，并在代理上同步。
 - 速率限制：保持启用，除非其他层有同等限制；`/auth` 始终限速。
 - TLS：在代理终止，或设置 `API_SSL_ENABLED=yes` 并提供证书/密钥路径。
@@ -41,7 +42,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
     services:
       bunkerweb:
         # 调度器识别实例的名称
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.15-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +55,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保填写正确的实例名
@@ -76,7 +77,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.14-rc3
+        image: bunkerity/bunkerweb-api:1.6.15-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +144,7 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc1
     ```
 
 === "Linux"
@@ -191,8 +192,9 @@ BunkerWeb API 是用于管理实例、服务、封禁、插件、任务和自定
 - 通过 `API_ACL_BOOTSTRAP_FILE` 或挂载的 `/var/lib/bunkerweb/api_acl_bootstrap.json` 启动非管理员用户和权限。每个用户可使用明文 `password` 或预先哈希的 `password_hash`/`password_bcrypt`（参见下面的提示）。
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`

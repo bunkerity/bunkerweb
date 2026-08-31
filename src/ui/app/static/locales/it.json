@@ -136,6 +136,7 @@
     "plugin_page": "Pagina Plugin",
     "proceed": "Procedi",
     "refresh_recovery_codes": "Aggiorna Codici di Recupero",
+    "refresh_ui_plugins": "Ricarica i plugin dell'UI",
     "reload": "Ricarica",
     "reset": "Resetta",
     "reset_columns": "Resetta Colonne",
@@ -487,6 +488,7 @@
       "no_data": "Nessun dato"
     },
     "window": {
+      "all_time": "Totale complessivo",
       "last_days": "Ultimi {{days}} giorni",
       "title": "Finestra del dashboard"
     }
@@ -1511,6 +1513,7 @@
       "force_check": "Pianifica un controllo; scarica solo se ci sono aggiornamenti.",
       "force_update": "Salta i controlli e forza il download dei plugin PRO; mantiene lo stato attuale in caso di errore.",
       "ping_instance": "Fai Ping all'Istanza {{hostname}}",
+      "refresh_ui_plugins": "Ricarica i plugin PRO già presenti nell'interfaccia web, senza scaricare nulla.",
       "reload_instance": "Ricarica Istanza {{hostname}}",
       "reset_default": "Ripristina valore predefinito",
       "reset_global": "Ripristina valore globale",

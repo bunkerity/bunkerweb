@@ -53,7 +53,7 @@ ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   apk add --no-cache nodejs npm parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts && \
+  npm ci --ignore-scripts --engine-strict && \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
   parallel 'npx html-minifier-terser \
   --collapse-whitespace \
@@ -79,6 +79,7 @@ RUN apk add --no-cache openssl pcre2 bash python3 yajl geoip libxml2 libgd curl 
 
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
+RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -108,7 +109,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.14~rc3"
+LABEL version="1.6.15~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

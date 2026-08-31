@@ -445,6 +445,9 @@ vous pouvez forcer la mise à jour du « marqueur de changement » :
 
 Si vous avez oublié vos informations d'identification de l'interface utilisateur ou si vous rencontrez des problèmes de 2FA, vous pouvez vous connecter à la base de données pour retrouver l'accès.
 
+!!! warning "Le 2FA ne fonctionne plus après une recréation du conteneur"
+    Les clés qui déchiffrent les secrets TOTP sont stockées dans le conteneur de l'UI, dans `/var/lib/bunkerweb/.totp_encryption_keys.json`, soit `/data/lib` dans l'image. Recréer le conteneur `bw-ui` sans volume persistant sur `/data` génère un nouveau jeu de clés : les secrets conservés en base ne sont plus déchiffrables, l'inscription de l'admin est supprimée et les autres comptes doivent être réinitialisés avec le SQL ci-dessous. Montez un volume sur `/data` (voir la [documentation de l'interface web](web-ui.md)) pour conserver les clés, ou fournissez vos propres `TOTP_ENCRYPTION_KEYS`.
+
 ### Accéder à la base de données {#access-database}
 
 === "SQLite"

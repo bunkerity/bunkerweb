@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:26730869004e2b9c4b9ad09cab8625e81d256d1ce97e72df5520e806b1709f92 AS builder
+FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -45,7 +45,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.14-alpine@sha256:26730869004e2b9c4b9ad09cab8625e81d256d1ce97e72df5520e806b1709f92
+FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -56,8 +56,7 @@ RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic m
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "curl>=8.21.0-r0" # CVE-2026-11856 CVE-2026-8925 CVE-2026-8927 CVE-2026-9079 CVE-2026-10536 CVE-2026-11352 CVE-2026-11564 CVE-2026-11586 CVE-2026-12064 CVE-2026-8286 CVE-2026-8458 CVE-2026-8924 CVE-2026-8926 CVE-2026-9080 CVE-2026-9545 CVE-2026-9547 CVE-2026-8932 CVE-2026-9546
-RUN apk add --no-cache "c-ares>=1.34.8-r0" # CVE-2026-33630
+RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -86,7 +85,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.14~rc3"
+LABEL version="1.6.15~rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

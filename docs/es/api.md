@@ -18,6 +18,7 @@ La API de BunkerWeb es el plano de control para gestionar instancias, servicios,
 
 - Red: mantén el tráfico interno; escucha en loopback o interfaz interna y restringe IPs de origen con `API_WHITELIST_IPS` (activo por defecto).
 - Auth presente: define `API_USERNAME`/`API_PASSWORD` (admin) y, si hace falta, `API_ACL_BOOTSTRAP_FILE` para más usuarios/ACL; guarda un `API_TOKEN` solo para emergencias.
+- Ámbitos de ACL: los permisos de **escritura** de config, service, plugin y global settings son equivalentes a admin (su contenido se renderiza tal cual como NGINX/Lua, es decir, ejecución de código): concédelos solo a usuarios de plena confianza. `instances_create` e `instances_update` también lo son, por otra vía: las llamadas a una instancia registrada llevan el override de admin `API_TOKEN`, y el scheduler envía la configuración generada y la caché (claves privadas TLS incluidas) a cada instancia registrada. Ver [Permisos y ACL](#permisos-y-acl).
 - Ocultar ruta: con reverse proxy, elige un `API_ROOT_PATH` poco obvio y refléjalo en el proxy.
 - Rate limiting: déjalo activado salvo que otra capa imponga límites equivalentes; `/auth` siempre está limitado.
 - TLS: termina en el proxy o usa `API_SSL_ENABLED=yes` con rutas de cert/clave.
@@ -41,7 +42,7 @@ Elige el sabor que encaje con tu entorno.
     services:
       bunkerweb:
         # Nombre que usará el scheduler para identificar la instancia
-        image: bunkerity/bunkerweb:1.6.14-rc3
+        image: bunkerity/bunkerweb:1.6.15-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -54,7 +55,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de poner el nombre de instancia correcto
@@ -76,7 +77,7 @@ Elige el sabor que encaje con tu entorno.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.14-rc3
+        image: bunkerity/bunkerweb-api:1.6.15-rc1
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -143,7 +144,7 @@ Elige el sabor que encaje con tu entorno.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.14-rc3
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc1
     ```
 
 === "Linux"
@@ -191,8 +192,9 @@ Elige el sabor que encaje con tu entorno.
 - Inicializa usuarios no admin y permisos con `API_ACL_BOOTSTRAP_FILE` o un `/var/lib/bunkerweb/api_acl_bootstrap.json` montado. Cada usuario admite una `password` en texto plano o un `password_hash`/`password_bcrypt` pre-hasheado (ver el consejo a continuación).
 
 !!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user:
+    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
 
+    - `instances`: `instances_create`, `instances_update`
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
