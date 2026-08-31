@@ -25,8 +25,7 @@ class ToolData(ActionData):
     @classmethod
     def check_arguments(cls, v: Optional[str]) -> Optional[str]:
         # `tool` runs on the runner, so a URL embedded in its argv has to resolve there the same
-        # way a `url` field does. crowdsec.yml's dirb call is loopback by the author's choice, not
-        # because anything enforced it.
+        # way a `url` field does.
         if v:
             check_embedded_runner_urls(v)
         return v
