@@ -48,6 +48,21 @@ if not ARGS.category:
     LOGGER.debug(f"Integrations: {integrations}")
 
 
+# An arm has two spellings and both are load-bearing. Specs, the `--integration` CLI choices and
+# the pydantic `integrations` literals use the human one ("All-in-one"); integrations.yml keys, the
+# first field of a matrix entry, the `/tmp/tests/<arm>_tests.json` file names and the GitHub Actions
+# outputs built from them use the identifier one ("All_in_one"), because a hyphen cannot appear in a
+# GitHub expression property (`outputs.All-in-one_tests` does not parse) nor in a Python attribute.
+# `generate.py` and `integration-tests.yml` each convert at their own boundary; this is parse.py's.
+#
+# Without it `check_integration(["All-in-one"], ...)` missed the `All_in_one` key and the three specs
+# that name the arm explicitly -- upgrade, badbehavior and limit -- were dropped from the matrix with
+# nothing but a warning in a log nobody reads.
+def integration_key(name: str) -> str:
+    """integrations.yml key for an arm as a spec spells it."""
+    return name.replace("-", "_")
+
+
 def check_integration(entry: List[str], data: dict) -> bool:
     """Check if the integration exists in the integrations.yml file"""
     if entry:
@@ -95,6 +110,8 @@ if not ARGS.category:
             if isinstance(test_integrations, list):
                 for integration in test_integrations:
                     parts = integration.split(";")
+                    parts[0] = integration_key(parts[0])
+                    integration = ";".join(parts)
                     if not check_integration(parts, integrations):
                         LOGGER.warning(f"Skipping integration {integration} for {name}")
                         continue
