@@ -23,6 +23,9 @@ PyMySQL==1.2.0
 pytest==8.4.2
 pytest-cov==6.0.0
 pytest-randomly==3.16.0
+# tests/unit/integrations/test_wait_config_async_jobs.py exec_module()s tests/wait_config.py,
+# which reads variables.env through dotenv_values — so the CI venv needs it too.
+python-dotenv==1.1.1
 # tests/unit/integrations/test_spec_default_expectations.py reads tests/core/*.yml at test
 # time (the anti-drift guard) — module-level `import yaml`, so the CI venv needs it too.
 pyyaml==6.0.3
