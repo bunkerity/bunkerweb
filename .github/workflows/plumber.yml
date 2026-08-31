@@ -19,12 +19,12 @@ jobs:
       id-token: write # OIDC identity required by score-push
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: .github
           persist-credentials: false
       - name: Run Plumber
-        uses: getplumber/plumber@031bc86d1e5f661626e2000f4f8779912d608d5f # v0.4.39
+        uses: getplumber/plumber@56369e7d43c4878049ee8ec6c2d600c21af45c4e # v0.4.40
         with:
           verify-attestation: true
           config-file: .github/plumber/plumber.yaml
