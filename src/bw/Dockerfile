@@ -55,14 +55,33 @@ COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
 # Minify HTML files
+ARG NODE_VERSION=24.11.1
+ARG NODE_SHA256_X64=60e3b0a8500819514aca603487c254298cd776de0698d3cd08f11dba5b8289a8
+ARG NODE_SHA256_ARM64=6b0863fb9f627bf4a6c5948dce1de4398174a2e05dbe717503d828e211ca01f0
+ENV PATH="/opt/node/bin:${PATH}"
+
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-  apt-get update && \
-  apt-get install -y --no-install-recommends nodejs npm parallel && \
-  rm -rf /var/lib/apt/lists/* && \
-  cd /tmp && \
-  npm ci --ignore-scripts && \
+  set -eux; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends curl ca-certificates xz-utils parallel; \
+  case "$(uname -m)" in \
+  x86_64) node_arch="x64"; node_sha="$NODE_SHA256_X64" ;; \
+  aarch64) node_arch="arm64"; node_sha="$NODE_SHA256_ARM64" ;; \
+  *) apt-get install -y --no-install-recommends nodejs npm; node_arch="" ;; \
+  esac; \
+  if [ -n "$node_arch" ]; then \
+  curl -fsSLo node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz"; \
+  echo "${node_sha}  node.tar.xz" | sha256sum -c -; \
+  mkdir -p /opt/node; \
+  tar -xJf node.tar.xz -C /opt/node --strip-components=1; \
+  rm -f node.tar.xz; \
+  fi; \
+  rm -rf /var/lib/apt/lists/*; \
+  node --version; npm --version; \
+  cd /tmp; \
+  if [ -n "$node_arch" ]; then npm ci --ignore-scripts --engine-strict; else npm ci --ignore-scripts; fi; \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
   parallel 'npx html-minifier-terser \
   --collapse-whitespace \
