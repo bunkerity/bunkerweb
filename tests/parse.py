@@ -18,13 +18,26 @@ LOGGER = getLogger("PARSE")
 
 parser = ArgumentParser(prog="Tests parser", description="Parse test files and return them as a b64encoded json file.")
 parser.add_argument("type", type=str, help="Type of test to parse", choices=["core", "ui", "api"])
-parser.add_argument("--integration", type=str, help="Integration to parse tests for", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
+parser.add_argument(
+    "--integration", type=str, help="Integration to parse tests for", choices=["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"]
+)
 parser.add_argument("--category", type=str, help="Category of the test to parse actions from")
 parser.add_argument("--dev", action="store_true", help="Run in development mode")
 ARGS = parser.parse_args()
 
 LOGGER.info(f"✂ Parsing {ARGS.type} tests{' in dev mode' if ARGS.dev else ''}{', only actions from category ' + ARGS.category if ARGS.category else ''}")
 LOGGER.debug(f"Arguments: {ARGS}")
+
+# Arms a spec has to ask for BY NAME. `integrations: "all"` means "every arm this framework runs
+# a spec on by default", and Swarm is deliberately not one of them: the arm exists and works, but
+# it has been proven against a named subset of the catalogue, not against all of it. Without this
+# gate, giving the Swarm rows a runner in integrations.yml would silently enrol every `all` spec
+# — around seventy of them — in an arm none of them has ever executed on, and the resulting board
+# is indistinguishable from a broken product.
+#
+# Widening it is a one-line deletion the day the whole catalogue has been run. Until then the
+# deferral is visible here rather than hidden in a green wall.
+OPT_IN_ONLY = ("Swarm",)
 
 integrations = {}
 if not ARGS.category:
@@ -53,8 +66,18 @@ if not ARGS.category:
             name = basename(file).split(".")[0]
             test_integrations = data.get("integrations", [])
             LOGGER.debug(f"Integrations: {test_integrations}")
+            # A spec that wants every default arm PLUS an opt-in one writes
+            # `integrations: ["all", "Swarm"]`; the bare string keeps working and means the
+            # default arms only. Spelling the whole list out instead would freeze it, so a new
+            # arm would silently skip every spec that had done so.
             if test_integrations == "all":
+                test_integrations = ["all"]
+
+            if isinstance(test_integrations, list) and "all" in test_integrations:
                 for integration, arch in integrations.items():
+                    if integration in OPT_IN_ONLY:
+                        LOGGER.debug(f"Skipping {integration} for {name}: it is opt-in and this spec asks for 'all'")
+                        continue
                     for arch, specs in arch.items():
                         if isinstance(specs, dict):
                             for spec, value in specs.items():
@@ -67,7 +90,9 @@ if not ARGS.category:
                             LOGGER.debug(f"Skipping {integration} / {arch} because it's TODO")
                             continue
                         tests.append(f"{integration};{arch};{specs};{name}")
-            elif isinstance(test_integrations, list):
+                test_integrations = [entry for entry in test_integrations if entry != "all"]
+
+            if isinstance(test_integrations, list):
                 for integration in test_integrations:
                     parts = integration.split(";")
                     if not check_integration(parts, integrations):
@@ -103,7 +128,7 @@ if not ARGS.category:
                         continue
 
                     tests.append(f"{integration};{run_on};{name}")
-            else:
+            elif test_integrations:
                 LOGGER.error(f"Invalid integrations for {name}: {test_integrations}")
         else:
             LOGGER.error(f"Invalid YAML in {file}")

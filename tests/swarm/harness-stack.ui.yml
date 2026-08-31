@@ -1,0 +1,38 @@
+# Deployed on top of harness-stack.yml, and only for a `ui` run:
+#   docker stack deploy -c tests/swarm/harness-stack.yml -c tests/swarm/harness-stack.ui.yml ...
+# `docker stack deploy` merges several -c files into one stack, which is how the arm gets the
+# equivalent of the Docker arm's conditional `docker compose -f docker-compose.ui.yml up`.
+services:
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:${BW_VERSION}
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    ports:
+      # Convenience only — every spec reaches the UI through BunkerWeb (UI_HOST is
+      # http://bw-ui:7000 on bw-universe), nothing drives this publish.
+      - target: 7000
+        published: ${UI_HOST_PORT:-7000}
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: bind
+        source: /var/log/bunkerweb
+        target: /var/log/bunkerweb
+        read_only: true
+    env_file:
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}/ui.env
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-db
+
+networks:
+  bw-universe:
+    external: true
+  bw-db:
+    external: true

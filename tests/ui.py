@@ -41,7 +41,7 @@ LOGGER = getLogger("UI_TEST")
 parser = ArgumentParser(prog="Tests runner", description="Run a test.")
 parser.add_argument("test", type=str, help="Test to run")
 integration_action = parser.add_argument(
-    "integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]
+    "integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"]
 )
 ARGS = parser.parse_args()
 
@@ -83,15 +83,22 @@ if not resp:
 delay: float = action.delay
 wait_duration = delay
 
+# Swarm sits in every "controller-driven" tuple below for the same reason Autoconf does:
+# the configuration comes from labels a controller reconciles asynchronously, not from the
+# environment the stack booted with. It is NOT folded into tuples that mean "has a cluster
+# API" or "cannot use SQLite" -- see tests/scripts/start.sh for the Swarm arm's stack.
 INTEGRATION_MIN_DELAY = {
     "Docker": 0.0,
     "Linux": 0.0,
     "Autoconf": 60.0,
+    # Same 60 s as Autoconf and deliberately not the Kubernetes 90 s: the Swarm controller
+    # watches the daemon's own event stream, so it has no cluster API round trip to absorb.
+    "Swarm": 60.0,
     "Kubernetes": 90.0,
     "All-in-one": 0.0,
 }
 
-if ARGS.integration in ("Autoconf", "Kubernetes") and delay == 0.0 and wait_duration < INTEGRATION_MIN_DELAY[ARGS.integration]:
+if ARGS.integration in ("Autoconf", "Swarm", "Kubernetes") and delay == 0.0 and wait_duration < INTEGRATION_MIN_DELAY[ARGS.integration]:
     LOGGER.info(f"🔍 We need at least a {INTEGRATION_MIN_DELAY[ARGS.integration]} seconds delay to let the {ARGS.integration} stack be ready...")
     wait_duration = INTEGRATION_MIN_DELAY[ARGS.integration]
 
@@ -103,7 +110,7 @@ if wait_duration > 0:
     LOGGER.info(f"⏲ Waiting {wait_duration} seconds ...")
     for x in range(ceil(wait_duration)):
         LOGGER.debug(f"⏲ {wait_duration - x} seconds left ...")
-        if ARGS.integration in ("Autoconf", "Kubernetes") and delay == 0.0:
+        if ARGS.integration in ("Autoconf", "Swarm", "Kubernetes") and delay == 0.0:
             last_test: Optional[str] = redis_client.get("last_test")
             bw_logs = get_logs(LOGGER, ARGS.integration, last_test)
             found = 0

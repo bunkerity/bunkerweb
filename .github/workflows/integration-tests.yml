@@ -260,26 +260,30 @@ jobs:
       # Images are published by container-build.yml under their `-tests` names; the
       # framework's stacks reference bunkerity/<image>:${BW_VERSION}, hence the retag.
       - name: Pull BW docker image
-        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes'
         run: docker pull ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb:tests
       - name: Pull Scheduler docker image
-        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes'
         run: docker pull ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-scheduler:tests
       - name: Pull API docker image
-        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes'
         run: docker pull ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/api-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-api:tests
       - name: Pull Worker docker image
-        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes'
+        if: needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes'
         run: docker pull ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/worker-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-worker:tests
       - name: Pull UI docker image
-        if: inputs.TYPE == 'ui' && (needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes')
+        if: inputs.TYPE == 'ui' && (needs.setup.outputs.integration == 'Docker' || needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes')
         run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-ui:tests
+      # The Swarm ARM needs no step of its own beyond these image pulls: `tests/scripts/build.sh`
+      # runs `docker swarm init` on the runner and creates the overlay networks itself, and
+      # `cleanup_stack` leaves the swarm again — the runner is disposable either way, but the arm
+      # is written so a workstation is left exactly as it was found.
       # Docker too, for the `swarm*` specs only: they deploy tests/swarm/stack*.yml with
       # `--resolve-image never`, and that stack runs bw-autoconf. Without the image the task is
       # rejected with "No such image: bunkerity/bunkerweb-autoconf:tests", the stack never
       # converges and all three swarm specs fail on the Docker arm.
       - name: Pull Autoconf docker image
-        if: needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Kubernetes' || (needs.setup.outputs.integration == 'Docker' && startsWith(needs.setup.outputs.test, 'swarm'))
+        if: needs.setup.outputs.integration == 'Autoconf' || needs.setup.outputs.integration == 'Swarm' || needs.setup.outputs.integration == 'Kubernetes' || (needs.setup.outputs.integration == 'Docker' && startsWith(needs.setup.outputs.test, 'swarm'))
         run: docker pull ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/autoconf-tests:${{ inputs.RELEASE }} bunkerity/bunkerweb-autoconf:tests
       - name: Pull All-in-one docker image
         if: needs.setup.outputs.integration == 'All-in-one'

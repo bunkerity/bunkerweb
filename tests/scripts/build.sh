@@ -27,6 +27,55 @@ if ! groups "$(whoami)" | grep -q '\bdocker\b' ; then
   newgrp docker
 fi
 
+if [ "$integration" == "Swarm" ] ; then
+  log "BUILD" "ℹ️ " "🐝 Prepping Swarm integration ..."
+  # FIRST, before anything starts. Every helper compose pins static addresses in bw-universe /
+  # bw-services / bw-db, and on this arm those have to be attachable OVERLAYS: a Swarm service
+  # cannot join a bridge, while a standalone container joins an attachable overlay exactly the
+  # way it joins a bridge, static address included. So the networks must exist as overlays
+  # BEFORE the first container attaches to them.
+  #
+  # That ordering is load-bearing and was got wrong once: `tests/misc/docker/redis.yml` puts the
+  # harness's own redis on bw-universe at 10.20.30.50 and starts immediately below, so with this
+  # block any further down the bridge already existed AND was held by a running container --
+  # `docker network rm` a no-op, `docker network create` refused, every Swarm run dead on arrival.
+  #
+  # The two `down -v` calls release what a previous run left behind. Nothing of this run's state
+  # is lost: redis has no volume and the first `redis_cli` write happens after it restarts, below.
+  # Bringing dnsmasq down is also what makes it re-read tests/misc/conf/dnsmasq.hosts -- it parses
+  # that file once, at start, so a surviving container would keep answering 192.168.0.254 for
+  # app1.bw-services whatever the sed below writes.
+  docker compose -f tests/misc/docker/redis.yml down -v > /dev/null 2>&1
+  docker compose -f tests/misc/docker/dnsmasq.yml down -v > /dev/null 2>&1
+
+  # And the database volume, because on THIS arm a stale one is not merely stale, it is poison.
+  # The controller registers each instance as `<service>.<NodeID>.<TaskID>`, and the NodeID comes
+  # from the swarm -- which this arm creates and leaves on every run, so it is different every
+  # time. A `bw-storage` carried over from a previous run therefore holds an instance hostname
+  # that can never resolve again: the scheduler pings it through the API, gets 502, reports "one
+  # or more BunkerWeb instances are unreachable", and never clears instances_changed. bw-autoconf
+  # then waits on that flag forever, fails its healthcheck, and Swarm kills and restarts it in a
+  # loop until the stack wait times out -- 300 s of a symptom five layers from the cause.
+  # Diagnosed from exactly that: a scheduler pinging node c3u2qmzruri7a5... while `docker stack
+  # ps` showed the live task on node 5o11knc01x2xt...
+  docker volume rm -f bw-storage > /dev/null 2>&1
+
+  # Once per run, and before the first swarm_ensure_host: it is what makes "this arm created the
+  # swarm / the node label" a fact about THIS run rather than a leftover from an earlier one.
+  swarm_forget_markers
+
+  swarm_ensure_host || exit 1
+  swarm_ensure_networks || exit 1
+
+  # `192.168.0.254 app1.bw-services` and its cacheable-app sibling are static answers for
+  # containers that no longer have static addresses: the application layer is a Swarm SERVICE
+  # here (it has to be, for the controller to see its labels) and Swarm allocates its VIP from
+  # the overlay pool. Commenting the rows out makes dnsmasq forward those names to Docker's own
+  # resolver (`server=127.0.0.11` in dnsmasq.conf), which answers with the alias
+  # swarm-services.py puts on every converted service. `cleanup_stack` strips the prefix back off.
+  sed_in_place 's/^192\.168\.0\.\([0-9]*\) \(.*\.bw-services\)$/#swarm-arm 192.168.0.\1 \2/' tests/misc/conf/dnsmasq.hosts
+fi
+
 log "BUILD" "ℹ️ " "💽 Starting redis server ..."
 robust_docker_pull "tests/misc/docker/redis.yml" "redis"
 # shellcheck disable=SC2181
@@ -74,7 +123,9 @@ if [ -z "${IN_CICD:-}" ] ; then
     ["bunkerity/bunkerweb-api"]="src/api/Dockerfile"
     ["bunkerity/bunkerweb-worker"]="src/worker/Dockerfile"
   )
-  if [ "$integration" == "Autoconf" ] || [ "$integration" == "Kubernetes" ] ; then
+  # Swarm too: the arm runs a controller, and it is the same image — SWARM_MODE picks
+  # SwarmController over DockerController inside it.
+  if [ "$integration" == "Autoconf" ] || [ "$integration" == "Swarm" ] || [ "$integration" == "Kubernetes" ] ; then
     local_images["bunkerity/bunkerweb-autoconf"]="src/autoconf/Dockerfile"
   fi
   if [ "$integration" == "All-in-one" ] ; then
@@ -182,7 +233,7 @@ mkdir -p /tmp/output
 provision_www_root || exit 1
 
 if [ "$integration" != "Kubernetes" ] ; then
-  if [ "$integration" != "Linux" ] ; then
+  if [ "$integration" != "Linux" ] && [ "$integration" != "Swarm" ] ; then
     log "BUILD" "ℹ️ " "🚀 Prepping $integration integration ..."
   fi
 

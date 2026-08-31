@@ -56,7 +56,7 @@ def resolve_env_placeholders(value: str):
 
 def get_logs(
     logger: Logger,  # noqa: F811
-    integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"],
+    integration: Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"],
     since: Optional[Union[datetime, str]] = None,
     *,
     log_from: Literal["bunkerweb", "controller", "scheduler", "database"] = "bunkerweb",
@@ -75,7 +75,11 @@ def get_logs(
         return file.readlines()
 
 
-def run_command(logger: Logger, integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"], command: str) -> Tuple[int, str]:  # noqa: F811
+def run_command(
+    logger: Logger,  # noqa: F811
+    integration: Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"],
+    command: str,
+) -> Tuple[int, str]:
     command = command.split(" ")
     if command[0] != "bwcli":
         command.insert(0, "bwcli")
@@ -92,7 +96,7 @@ def run_command(logger: Logger, integration: Literal["Docker", "Linux", "Autocon
 
 def execute_query(
     logger: Logger,  # noqa: F811
-    integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"],
+    integration: Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"],
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", "oracle"],
     query: str,
     *,
@@ -108,6 +112,11 @@ def execute_query(
     own `database` action stays writable: `backup` updates rows on purpose.
     """
     if database == "sqlite":
+        # Swarm is NOT in this tuple. Autoconf and Kubernetes spread the control plane over
+        # containers that cannot share a local file, so SQLite would hand the scheduler, the API
+        # and the worker three different databases. The Swarm arm is single-node and pins all
+        # three onto one node with `node.labels.bw-state`, sharing the same `bw-storage` volume --
+        # the same arrangement the Docker arm already runs SQLite on.
         if integration in ("Autoconf", "Kubernetes"):
             raise NotImplementedError("SQLite is not supported in Autoconf and Kubernetes")
         sqlite_command = ["sqlite3"] + (["-readonly"] if readonly else []) + ["/var/lib/bunkerweb/db.sqlite3"]
@@ -167,7 +176,7 @@ if __name__ == "__main__":
     LOGGER = getLogger("UTILS")
 
     parser = ArgumentParser(prog="Runner utils", description="Utils for the test runner (will show logs of the Integration)")
-    parser.add_argument("integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
+    parser.add_argument("integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"])
     ARGS = parser.parse_args()
 
     LOGGER.info(get_logs(LOGGER, ARGS.integration))

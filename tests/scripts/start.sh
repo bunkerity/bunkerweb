@@ -11,6 +11,21 @@ log "START" "ℹ️ " "Building BunkerWeb stack for integration \"$integration\"
 BW_VERSION="$(cat /tmp/bw_version.txt)"
 export BW_VERSION
 
+if [ "$integration" == "Swarm" ] ; then
+    # Before anything else on this arm: the database compose, dnsmasq and every other helper
+    # below attach to bw-universe / bw-services / bw-db, and on Swarm those have to already
+    # exist as attachable OVERLAYS -- a Swarm service cannot join a local bridge, and a bridge
+    # left by an earlier Docker run would take the name. build.sh does the same before it starts
+    # dnsmasq; both calls are idempotent.
+    swarm_ensure_host || exit 1
+    swarm_ensure_networks || exit 1
+
+    if ! stack_has_worker ; then
+        log "START" "❌" "🐝 BunkerWeb $BW_VERSION predates the worker and the API; the Swarm arm has no stack for it"
+        exit 1
+    fi
+fi
+
 if redis_cli ping | grep -q "PONG" ; then
     log "START" "ℹ️ " "💽 Redis server is healthy ✅"
 else
@@ -292,7 +307,34 @@ if [ -n "$redis_type" ] ; then
 fi
 
 # Starting stack
-if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+if [ "$integration" == "Swarm" ] ; then
+    # An example-backed spec ships a COMPOSE file (examples/<name>/docker-compose.yml) and the
+    # framework deploys it as the stack. `docker stack deploy` would silently ignore half of it
+    # -- container_name, depends_on, the static addresses -- so the run would come up looking
+    # plausible and assert against something that is not the example. Refuse instead: this is the
+    # gap that keeps tests/main.py and SwarmTest.py alive, and it has to be visible, not papered
+    # over. See tests/README.md, "Two gaps keep the harness alive".
+    if [ -f /tmp/example_stack.txt ] ; then
+        log "START" "❌" "🐝 The Swarm arm cannot deploy an example stack (compose file, not a stack file)"
+        exit 1
+    fi
+
+    # bw-storage is declared external in tests/swarm/harness-stack.yml so that the harness's own
+    # `docker volume rm bw-storage` in cleanup_stack still finds it -- a stack-scoped volume would
+    # be called bw-tests_bw-storage and would outlive every teardown the framework knows about.
+    docker volume create bw-storage > /dev/null
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
+        log "START" "❌" "🐝 Failed to create the bw-storage volume"
+        exit 1
+    fi
+
+    # One deploy for the whole arm: BunkerWeb (global), bw-autoconf, bw-scheduler, bw-api,
+    # bw-worker, the broker, the socket proxy, the UI on a `ui` run, and the application layer
+    # converted out of /tmp/services.yml. The application is IN the stack because Swarm discovery
+    # reads service labels, so it has to be a service -- see tests/scripts/swarm-services.py.
+    swarm_deploy || exit 1
+elif [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
     # A Docker example ships the whole stack, BunkerWeb included, so the framework
     # deploys that instead of composing one of its own. Autoconf and Kubernetes examples
     # ship only their application layer and land further down, on top of this stack.
@@ -759,7 +801,11 @@ if [ -f /tmp/example_stack.txt ] && [ "$integration" != "Docker" ] ; then
         compose_up "$example_stack" "example services" "📕" || exit 1
     fi
 elif [ -f /tmp/services.yml ] ; then
-    if [ "$integration" == "Kubernetes" ] ; then
+    if [ "$integration" == "Swarm" ] ; then
+        # Already deployed: swarm_deploy folded the converted services.yml into the stack, because
+        # SwarmController discovers SERVICES and would never see a standalone container.
+        :
+    elif [ "$integration" == "Kubernetes" ] ; then
         kubectl apply -f /tmp/services.yml
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then

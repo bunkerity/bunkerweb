@@ -18,8 +18,8 @@ def is_derived_from_selenium_action(cls):
 
 def parse_action(
     logger: Logger,
-    integrations: Iterable[Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]],
-    integration: Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"],
+    integrations: Iterable[Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"]],
+    integration: Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"],
     action_str: str,
     action_data: dict,
     _type: Literal["core", "ui", "api"] = "core",

@@ -28,7 +28,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 SPEC_DIRS = ("core", "ui", "api")
-ARMS = ("Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one")
+ARMS = ("Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one")
 
 
 def _overrides():

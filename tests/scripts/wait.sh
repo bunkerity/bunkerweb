@@ -127,6 +127,60 @@ elif [ "$integration" == "All-in-one" ] ; then
         log "WAIT" "❌" "🍱 All-in-one stack is not healthy after $timeout seconds"
         exit 1
     fi
+elif [ "$integration" == "Swarm" ] ; then
+    # Two gates, because they fail differently and a single one hides the interesting case.
+    #
+    # 1. Convergence: every service at its desired replica count. This is what catches a task
+    #    that cannot be PLACED at all -- an unsatisfiable `node.labels.bw-state` constraint, an
+    #    image the daemon does not have -- which never produces an unhealthy container to inspect
+    #    because no container is ever created.
+    # 2. Health: the same healthcheck-based gate the Docker arm uses, run against the task
+    #    containers. Converged is not ready: `bunkerweb` reports running the moment the process
+    #    starts, minutes before it serves anything.
+    if ! swarm_wait_converged "$timeout" ; then
+        log "WAIT" "❌" "🐝 Swarm stack did not converge after $timeout seconds"
+        docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK"
+        docker stack ps "$SWARM_STACK" --no-trunc || true
+        log_stack
+        exit 1
+    fi
+    log "WAIT" "ℹ️ " "🐝 Every service converged ✅"
+
+    while [ $i -lt "$timeout" ] ; do
+        # Not `healthy=true` until something is found: an empty container list makes the loop
+        # below execute zero times, and "no container was unhealthy" would then be reported as a
+        # healthy stack. That is the same false green the Docker arm's fixed container list
+        # cannot produce and this filter can.
+        healthy="false"
+        # By label rather than by name, which is the one difference from the Docker arm: a Swarm
+        # task container is named <stack>_<service>.<slot>.<taskid>, so there is no fixed name to
+        # inspect.
+        for container in $(docker ps --filter "label=com.docker.stack.namespace=$SWARM_STACK" --format '{{.ID}}') ; do
+            healthy="true"
+            check="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$container" 2>/dev/null)"
+            if [ "$check" != "healthy" ] && [ "$check" != "none" ] ; then
+                healthy="false"
+                break
+            fi
+        done
+        if [ "$healthy" = "true" ] ; then
+            log "WAIT" "ℹ️ " "🐝 Swarm stack is healthy ✅"
+            break
+        fi
+        sleep 1
+        i=$((i+1))
+    done
+    if [ $i -ge "$timeout" ] ; then
+        log "WAIT" "❌" "🐝 Swarm stack is not healthy after $timeout seconds"
+        docker ps --filter "label=com.docker.stack.namespace=$SWARM_STACK" \
+            --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
+        docker stack ps "$SWARM_STACK" --no-trunc || true
+        # The whole stack's logs, bw-api / bw-worker / bw-jobs-broker included: since 1.7 a stack
+        # that never becomes ready is usually the API or the worker, and neither says so in the
+        # scheduler's log.
+        log_stack
+        exit 1
+    fi
 elif [ "$integration" == "Kubernetes" ] ; then
     # Wait for stack to all be ready
     while [ $i -lt "$timeout" ] ; do

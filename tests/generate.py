@@ -31,7 +31,7 @@ BW_ETC = Path(getenv("BW_TESTS_ETC", join(sep, "etc", "bunkerweb")))
 
 parser = ArgumentParser(prog="Tests generator", description="Generate all the files needed to run a test.")
 integration_action = parser.add_argument(
-    "integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]
+    "integration", type=str, help="Integration to test", choices=["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"]
 )
 parser.add_argument("type", type=str, help="Type of test to parse", choices=["core", "ui", "api"])
 parser.add_argument("test", type=str, help="Test to generate the files for")
@@ -175,14 +175,25 @@ if ARGS.type == "ui" and action.annotations.get("bunkerweb.io/SERVER_NAME") == "
 if ARGS.type == "ui" and action.labels.get("bunkerweb.SERVER_NAME") == "www.example.com":
     del action.labels["bunkerweb.SERVER_NAME"]
 
-if ARGS.integration in ("Autoconf", "Kubernetes"):
+if ARGS.integration in ("Autoconf", "Swarm", "Kubernetes"):
+    # Controller-driven: the services come from labels/annotations a controller reconciles,
+    # so the stack boots with no instance and no server name of its own. The f-string below
+    # is what turns the integration name into its mode flag, and it is exactly right for
+    # Swarm too -- SWARM_MODE=yes is the switch src/autoconf/main.py reads to pick
+    # SwarmController over DockerController.
     config["variables"]["BUNKERWEB_INSTANCES"] = ""
     config["variables"]["SERVER_NAME"] = ""
     config["variables"]["MULTISITE"] = "yes"
     config["variables"][f"{ARGS.integration.upper()}_MODE"] = "yes"
 
-    if database == "sqlite":
-        LOGGER.warning("🚨 SQLite is only supported in Linux, Docker and All-in-one integrations, defaulting to MariaDB")
+    # Swarm is NOT in this one. Autoconf and Kubernetes each spread the stack over containers
+    # that cannot share a local file -- Kubernetes over pods on a node, Autoconf over compose
+    # projects with separate volumes -- so SQLite would hand the scheduler, the API and the
+    # worker three different databases. The Swarm arm is single-node by construction and its
+    # three services mount the same local `bw-storage` volume, which is the same arrangement
+    # the Docker arm already runs SQLite on. A spec that asks for a real engine still gets one.
+    if database == "sqlite" and ARGS.integration != "Swarm":
+        LOGGER.warning("🚨 SQLite is only supported in Linux, Docker, Swarm and All-in-one integrations, defaulting to MariaDB")
         database = "mariadb"
 
     if ARGS.integration == "Kubernetes":
@@ -296,7 +307,7 @@ if ARGS.integration in ("Autoconf", "Kubernetes"):
 
         LOGGER.debug(f"Final labels: {services}")
 elif log_from == "controller":
-    LOGGER.warning("🚨 The 'controller' log from is only compatible with Autoconf and Kubernetes integrations, defaulting to scheduler")
+    LOGGER.warning("🚨 The 'controller' log from is only compatible with Autoconf, Swarm and Kubernetes integrations, defaulting to scheduler")
     log_from = "scheduler"
 
 

@@ -1,0 +1,304 @@
+# The BunkerWeb stack the Swarm ARM deploys — the Swarm equivalent of the five
+# `tests/docker/docker-compose.*.yml` fragments the Docker and Autoconf arms bring up one by one.
+#
+# NOT tests/swarm/stack.yml. That file is the `swarm` core SPEC's stack: it is deliberately
+# port-shifted (8083/8443/8890) and namespaced so it can be deployed BESIDE a running harness on
+# the same daemon. This one IS the harness — it takes 80/443/8888 and the harness's own network
+# names, and nothing else may be up while it runs.
+#
+# Everything the harness would create for itself is declared `external` and created by
+# `tests/scripts/start.sh` instead. That is not decoration: a Swarm service cannot attach to a
+# local bridge network ("network X not found"), so the arm pre-creates bw-universe, bw-services,
+# bw-db and bw-docker as ATTACHABLE OVERLAYS under exactly those names. Attachable is what lets
+# the unchanged helper composes (dnsmasq at 10.20.30.20, php-fpm, custom-api, crowdsec, the
+# database engines) keep their static addresses on the same networks — a standalone container
+# joins an attachable overlay the same way it joins a bridge.
+#
+# `docker stack deploy` reads this, so `container_name`, `depends_on`, `links`, `profiles` and the
+# top-level `restart:` key are silently ignored and none of them appear. Ordering comes from each
+# component's own readiness loop plus `deploy.restart_policy`.
+#
+# No `ipv4_address` anywhere: Swarm assigns task addresses from the overlay pool and rejects
+# static ones. The Docker arm's pinned .24/.26/.27 exist so a spec that narrows API_WHITELIST_IP
+# keeps the control plane inside it — the whole 10.20.30.0/24 subnet is inside the whitelist
+# `generate.py` writes, so a dynamic address in it is equally safe.
+
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:${BW_VERSION}
+    deploy:
+      # REQUIRED, not a preference. SwarmController registers each task as
+      # `<service>.<NodeID>.<TaskID>`, which only resolves for a global service, and it refuses a
+      # replicated service carrying bunkerweb.INSTANCE outright.
+      mode: global
+      labels:
+        # SERVICE labels (deploy.labels), because SwarmController reads Spec.Labels — container
+        # labels are invisible to it. This is the one structural difference between this arm and
+        # the Autoconf arm, and it is why /tmp/services.yml has to be converted before deploy
+        # (tests/scripts/swarm-services.py).
+        - "bunkerweb.INSTANCE=yes"
+        - "bunkerweb.NAMESPACE=bw-tests"
+      restart_policy:
+        condition: any
+    labels:
+      # A CONTAINER label as well, same reason the Docker arm sets one: the BunkerWeb image bakes
+      # `LABEL bunkerweb.INSTANCE` (src/bw/Dockerfile), so any *Docker* autoconf controller on the
+      # daemon queries the whole host for it and would adopt these tasks.
+      bunkerweb.NAMESPACE: "bw-tests"
+    ports:
+      # host mode, not the routing mesh: the mesh source-NATs, and the WAF would then judge every
+      # request against the ingress address instead of the client's — which silently defeats every
+      # spec that asserts on a client IP (whitelist, blacklist, greylist, limit, country).
+      #
+      # target 80/443, NOT the image's own 8080/8443. `tests/utils/config.yml` sets HTTP_PORT=80
+      # and HTTPS_PORT=443, so the instance this harness configures listens there; the shipped
+      # reference stacks (misc/integrations/swarm.*.yml) and tests/swarm/stack.yml target 8080
+      # because they do not override the ports, and copying that here cost a full run:
+      # everything converged, discovery worked, the configuration was pushed, and the request
+      # died on "Connection reset by peer" because the published port pointed at nothing.
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: udp
+        mode: host
+    volumes:
+      - type: bind
+        source: /var/www/html
+        target: /var/www/html
+      - type: bind
+        source: /tmp/output
+        target: /tmp/output
+    env_file:
+      # Short form on purpose: `docker stack deploy` reads the v3 schema, where `env_file` is a
+      # string or a list of strings. The long `- path: ... required: true` form the compose
+      # fragments use is a Compose-v2 extension and is not accepted here.
+      #
+      # A SNAPSHOT of variables.env, not the live file, and this is load-bearing. `docker stack
+      # deploy` inlines env_file at deploy time, so pointing at the live file makes this service's
+      # spec change on every action -- Swarm then recreates the task, which mints a new
+      # `<service>.<NodeID>.<TaskID>` and therefore a new instance identity, while the previous
+      # one stays in the database unreachable. The scheduler then 502s on it forever ("One or more
+      # BunkerWeb instances are unreachable"), instances_changed never clears, bw-autoconf waits
+      # on that flag until its healthcheck kills it, and the redeploy never converges.
+      #
+      # The Docker and Autoconf arms have the same property for the same reason: `restart_stack`
+      # restarts bw-scheduler on every action and `bunkerweb` ONLY when restart_whole_stack is
+      # set, so the instance keeps its boot environment for the whole run and receives new
+      # configuration through push-configs. `swarm_deploy` refreshes the snapshot on exactly that
+      # condition.
+      #
+      # Flat default, not `${BW_SWARM_INSTANCE_ENV:-${BW_TESTS_ETC:-...}/variables.env}`: the
+      # stack interpolator does NOT support a nested default and silently mis-parses it, leaving
+      # the tail as a literal -- `open /tmp/bw_swarm_instance.env/variables.env}: not a directory`.
+      # swarm_deploy always writes this path before deploying.
+      - ${BW_SWARM_INSTANCE_ENV:-/tmp/bw_swarm_instance.env}
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-services
+    logging:
+      driver: syslog
+      options:
+        tag: "bunkerweb"
+        syslog-address: "udp://10.20.30.254:514"
+
+  bw-autoconf:
+    image: bunkerity/bunkerweb-autoconf:${BW_VERSION}
+    deploy:
+      placement:
+        constraints:
+          # The Swarm API is only served by a manager, and the controller lists services,
+          # configs, tasks and nodes.
+          - "node.role == manager"
+      restart_policy:
+        condition: any
+    env_file:
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+    environment:
+      DOCKER_HOST: "tcp://bw-docker:2375"
+      # Only manage services labelled bunkerweb.NAMESPACE=bw-tests. Without it the controller
+      # queries the whole daemon for bunkerweb.INSTANCE — which the BunkerWeb image itself carries
+      # — and adopts any other BunkerWeb on the host as an instance of this stack.
+      NAMESPACES: "bw-tests"
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-docker
+      - bw-db
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:${BW_VERSION}
+    deploy:
+      placement:
+        constraints:
+          # The three services below share one local volume (`bw-storage`), so they have to land
+          # on the same node. `bw-state` is the label the shipped reference stacks under
+          # misc/integrations/swarm.*.yml use for exactly this, and start.sh sets it on the
+          # single node rather than weakening the constraint.
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    volumes:
+      - type: volume
+        source: bw-storage
+        target: /data
+      - type: bind
+        source: /var/www/html
+        target: /var/www/html
+      - type: bind
+        source: /tmp/output
+        target: /tmp/output
+    env_file:
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:${BW_VERSION}
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    ports:
+      # host mode again, and 8888 unchanged: tests/wait_config.py polls
+      # http://127.0.0.1:8888/jobs/queue by a hardcoded URL, and every arm has to answer there.
+      - target: 8888
+        published: 8888
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: volume
+        source: bw-storage
+        target: /data
+      - type: bind
+        source: /var/log/bunkerweb
+        target: /var/log/bunkerweb
+        read_only: true
+      - type: bind
+        source: /tmp/output
+        target: /tmp/output
+    env_file:
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}/api.env
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:${BW_VERSION}
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    volumes:
+      # The SAME volume as the scheduler and the API, deliberately: on SQLite the database IS a
+      # file under /data, so a private volume would hand the worker a different database.
+      - type: volume
+        source: bw-storage
+        target: /data
+      - type: bind
+        source: /var/www/html
+        target: /var/www/html
+      - type: bind
+        source: /tmp/output
+        target: /tmp/output
+    env_file:
+      - ${BW_TESTS_ETC:-/etc/bunkerweb}/worker.env
+    dns:
+      - 10.20.30.20
+    networks:
+      - bw-universe
+      - bw-db
+
+  # Job broker only — since 1.7 this is deliberately NOT the WAF datastore Redis (commit
+  # c11a70be4 split the two roles), so specs that assert on datastore keys keep talking to their
+  # own instance.
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # AOF, not RDB: a broker restart must not vaporise queued jobs.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true"
+      restart_policy:
+        condition: any
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - bw-universe
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+      restart_policy:
+        condition: any
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    environment:
+      # Wider than the Docker-autoconf proxy: the Swarm controller lists and inspects SERVICES and
+      # CONFIGS, reads their events, and resolves TASKS to build instance hostnames.
+      SERVICES: "1"
+      TASKS: "1"
+      NODES: "1"
+      CONFIGS: "1"
+      EVENTS: "1"
+      SWARM: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
+volumes:
+  bw-storage:
+    # Created by start.sh under this exact name, so `cleanup_stack`'s existing
+    # `docker volume rm bw-storage` still finds it. A stack-scoped volume would be called
+    # `bw-tests_bw-storage` and would survive every teardown the harness knows about.
+    external: true
+
+networks:
+  bw-universe:
+    external: true
+  bw-services:
+    external: true
+  bw-db:
+    external: true
+  bw-docker:
+    external: true

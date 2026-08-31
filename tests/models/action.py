@@ -5,7 +5,6 @@ from re import compile as re_compile, match
 from urllib.parse import urlsplit
 from typing import Any, Dict, Literal, Optional, Set, Tuple
 
-
 URL_IN_TEXT = re_compile(r"https?://[^\s'\"`]+")
 
 
@@ -37,8 +36,7 @@ def check_runner_host(value: str) -> None:
         ip_address(host)
     except ValueError:
         raise ValueError(
-            f"url host {host!r} is a bare name the runner cannot resolve deterministically; "
-            "use a *.example.com name or the published port on 127.0.0.1"
+            f"url host {host!r} is a bare name the runner cannot resolve deterministically; " "use a *.example.com name or the published port on 127.0.0.1"
         )
 
 
@@ -138,13 +136,26 @@ class ActionData(BaseModel):
 
 class ActionBase(ActionData):
     type: str
-    integrations: Set[Literal["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"]] = {"Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"}
+    # `generate.py` refuses an action whose integration is not in here, so this set decides which
+    # arms may run an action that names none. Swarm is in it, and that alone does NOT put 68 specs
+    # on the Swarm arm: routing is decided one layer up, in `tests/parse.py`, where Swarm is
+    # opt-in — `integrations: "all"` deliberately excludes it and a spec has to name "Swarm".
+    # This set only says "once a spec has opted in, its actions are not individually blocked".
+    integrations: Set[Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"]] = {
+        "Docker",
+        "Linux",
+        "Autoconf",
+        "Swarm",
+        "Kubernetes",
+        "All-in-one",
+    }
 
 
 class Action(ActionBase):
     Docker: Optional[ActionData] = None
     Linux: Optional[ActionData] = None
     Autoconf: Optional[ActionData] = None
+    Swarm: Optional[ActionData] = None
     Kubernetes: Optional[ActionData] = None
     All_in_one: Optional[ActionData] = None
 

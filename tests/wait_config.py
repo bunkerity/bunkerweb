@@ -105,7 +105,7 @@ def settle_ready(runs: int, previous: int, pending: int, live_instances: int, se
 
 if __name__ == "__main__":
     parser = ArgumentParser(prog="Wait for config", description="Wait for the dispatched configuration to reach the instances")
-    parser.add_argument("integration", type=str, choices=["Docker", "Linux", "Autoconf", "Kubernetes", "All-in-one"])
+    parser.add_argument("integration", type=str, choices=["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"])
     parser.add_argument("--mark", action="store_true", help="Record the current number of runs instead of waiting for a new one")
     parser.add_argument("--settle", type=int, default=5, help="Seconds the pushed and no-pending state must hold before it counts as settled")
     parser.add_argument("--timeout", type=int, default=120)

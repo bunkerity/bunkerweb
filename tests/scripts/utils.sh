@@ -382,6 +382,290 @@ function compose_up() {
     fi
 }
 
+# ------------------------------------------------------------------ the Swarm arm
+#
+# One stack, `bw-tests`, holding what the Docker and Autoconf arms bring up as five separate
+# compose projects plus the application layer. The Swarm-specific facts, once, here:
+#
+#   * A Swarm service CANNOT attach to a local bridge network — the daemon answers "network X not
+#     found". So the arm pre-creates bw-universe / bw-services / bw-db / bw-docker as ATTACHABLE
+#     OVERLAYS under exactly the names the harness already uses. Attachable is the whole trick:
+#     every unchanged helper compose (dnsmasq at 10.20.30.20, php-fpm, custom-api, crowdsec, the
+#     database engines) then joins them as a standalone container, static addresses included.
+#   * Host state is restored as found. `docker swarm init` and the `bw-state` node label are
+#     undone at teardown ONLY if this arm was the one that created them; a daemon that was
+#     already a swarm manager is left completely alone, because leaving a swarm is not
+#     recoverable from here.
+#   * The application layer is converted, not copied: SwarmController reads SERVICE labels.
+#     See tests/scripts/swarm-services.py.
+SWARM_STACK="bw-tests"
+# Marker files rather than shell variables: start.sh, wait.sh, run.sh and stop.sh are separate
+# processes and only the filesystem survives between them.
+SWARM_INIT_MARKER="/tmp/bw_swarm_initialised"
+SWARM_LABEL_MARKER="/tmp/bw_swarm_labelled"
+# See swarm_ensure_networks: one throwaway container keeps all four overlays materialised on the
+# node for the whole run. Named without `bw-api` or `bw-db` as a substring on purpose --
+# tests/utils/docker.py:get_container matches those by NAME SUBSTRING across the whole daemon.
+SWARM_NET_HOLDER="swarm-net-holder"
+# The instance's pinned environment. See swarm_deploy.
+SWARM_INSTANCE_ENV="/tmp/bw_swarm_instance.env"
+
+# Subnets the compose fragments already pin static addresses in; the overlays have to match or
+# dnsmasq (10.20.30.20) and the database engines (10.10.10.x) land somewhere else.
+SWARM_NETWORKS=("bw-universe:10.20.30.0/24" "bw-services:192.168.0.0/24" "bw-db:10.10.10.0/24" "bw-docker:")
+
+# Clear the "this arm created it" markers. Called ONCE per run, from build.sh, before the first
+# swarm_ensure_host. It cannot live inside swarm_ensure_host: that runs twice (build.sh, then
+# start.sh, and again after every full_clean), and by the second call the daemon IS in a swarm and
+# the node IS labelled -- so a reset there would erase the very record that says we made them, and
+# the host would keep a swarm this arm created. That was a real defect, caught before the first run.
+function swarm_forget_markers() {
+    rm -f "$SWARM_INIT_MARKER" "$SWARM_LABEL_MARKER"
+}
+
+function swarm_ensure_host() {
+    local state node
+    state="$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null)"
+
+    if [ "$state" != "active" ] ; then
+        log "UTILS" "ℹ️ " "🐝 Daemon is not in a swarm, initialising it (and leaving again at teardown) ..."
+        if ! docker swarm init --advertise-addr 127.0.0.1 > /dev/null ; then
+            log "UTILS" "❌" "🐝 Failed to initialise the swarm"
+            return 1
+        fi
+        touch "$SWARM_INIT_MARKER"
+    elif [ ! -f "$SWARM_INIT_MARKER" ] ; then
+        # Never `swarm leave` a swarm we did not create: on a developer's machine that would
+        # destroy state this arm has no business owning, and it cannot be undone from here. No
+        # marker means it was already there when the run started, and it stays.
+        log "UTILS" "ℹ️ " "🐝 Daemon is already a swarm node, leaving that as it is"
+    fi
+
+    node="$(docker node ls --format '{{.ID}}' | head -1)"
+    if [ -z "$node" ] ; then
+        log "UTILS" "❌" "🐝 No swarm node to place services on"
+        return 1
+    fi
+
+    # The reference stacks under misc/integrations/swarm.*.yml place the stateful services with
+    # `node.labels.bw-state`. The arm satisfies that constraint by LABELLING the single node,
+    # never by weakening the constraint in a stack file — an arm that edits the thing it is
+    # supposed to be exercising proves nothing.
+    if [ "$(docker node inspect "$node" --format '{{index .Spec.Labels "bw-state"}}' 2>/dev/null)" != "true" ] ; then
+        if ! docker node update --label-add bw-state=true "$node" > /dev/null ; then
+            log "UTILS" "❌" "🐝 Failed to label the node with bw-state=true"
+            return 1
+        fi
+        touch "$SWARM_LABEL_MARKER"
+    fi
+}
+
+function swarm_ensure_networks() {
+    local entry name subnet
+    for entry in "${SWARM_NETWORKS[@]}" ; do
+        name="${entry%%:*}"
+        subnet="${entry#*:}"
+        if docker network inspect "$name" > /dev/null 2>&1 ; then
+            # A bridge left behind by a Docker/Autoconf run on the same host would take the name
+            # and quietly starve every Swarm service of its network. Replace it.
+            if [ "$(docker network inspect "$name" --format '{{.Driver}}')" != "overlay" ] ; then
+                log "UTILS" "⚠️" "🐝 Network $name exists but is not an overlay, recreating it ..."
+                docker network rm "$name" > /dev/null 2>&1
+            else
+                continue
+            fi
+        fi
+        if [ -n "$subnet" ] ; then
+            docker network create --driver overlay --attachable --subnet "$subnet" "$name" > /dev/null
+        else
+            docker network create --driver overlay --attachable "$name" > /dev/null
+        fi
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "🐝 Failed to create the $name overlay network"
+            # Almost always a container from an earlier Docker/Autoconf run still holding the
+            # bridge of the same name, which makes the `docker network rm` above a no-op. Name it
+            # rather than leaving "already exists" as the only clue.
+            docker network inspect "$name" --format '{{range $c := .Containers}}{{$c.Name}} {{end}}' 2>/dev/null
+            return 1
+        fi
+    done
+
+    swarm_hold_networks
+}
+
+# Keep every overlay MATERIALISED on this node for the whole run.
+#
+# A swarm-scoped overlay is only resolvable BY NAME on a node while at least one container is
+# already attached to it. `docker compose` sets the container's NetworkMode to the network NAME,
+# so a compose service joining an overlay nothing is attached to fails at start with
+#
+#   failed to set up container networking: could not find a network matching network mode
+#   bw-services: network bw-services not found
+#
+# ...even though `docker network ls` lists it and compose has just warned that it exists. It is
+# not a race: it reproduced every time, and it went away the instant a container was attached.
+# `docker run --network <name>` takes a different code path and works either way, which is what
+# made this look like a compose bug at first.
+#
+# It cost a run to find: dnsmasq (bw-universe AND bw-services) died on the second network while
+# redis (bw-universe alone, started moments after creation) was fine.
+#
+# So: one throwaway container joins all four and holds them until swarm_host_restore removes it.
+function swarm_hold_networks() {
+    if [ "$(docker inspect -f '{{.State.Running}}' "$SWARM_NET_HOLDER" 2>/dev/null)" == "true" ] ; then
+        return 0
+    fi
+    docker rm -f "$SWARM_NET_HOLDER" > /dev/null 2>&1
+
+    local entry name first=""
+    for entry in "${SWARM_NETWORKS[@]}" ; do
+        name="${entry%%:*}"
+        if [ -z "$first" ] ; then
+            first="$name"
+            # `docker run --network` resolves a swarm-scoped overlay by name even when the node
+            # has no local instance yet, which is exactly what bootstraps the first one.
+            if ! docker run -d --name "$SWARM_NET_HOLDER" --network "$name" --restart unless-stopped \
+                busybox:latest sleep infinity > /dev/null ; then
+                log "UTILS" "❌" "🐝 Failed to start the network holder on $name"
+                return 1
+            fi
+            continue
+        fi
+        if ! docker network connect "$name" "$SWARM_NET_HOLDER" > /dev/null 2>&1 ; then
+            log "UTILS" "❌" "🐝 Failed to attach the network holder to $name"
+            return 1
+        fi
+    done
+}
+
+# The -c list for `docker stack deploy`, in merge order. Echoed rather than deployed so start.sh
+# and restart_stack build the same stack from one definition.
+function swarm_compose_args() {
+    local args=("-c" "tests/swarm/harness-stack.yml")
+    if [ "$type" == "ui" ] ; then
+        args+=("-c" "tests/swarm/harness-stack.ui.yml")
+    fi
+    if [ -f /tmp/services.yml ] ; then
+        # >&2 is load-bearing: this function's stdout IS the -c argument list, so the
+        # converter's own "wrote /tmp/swarm-services.yml" line would end up being passed to
+        # `docker stack deploy` as a file name.
+        if ! python3 tests/scripts/swarm-services.py /tmp/services.yml /tmp/swarm-services.yml >&2 ; then
+            return 1
+        fi
+        args+=("-c" "/tmp/swarm-services.yml")
+    else
+        rm -f /tmp/swarm-services.yml
+    fi
+    echo "${args[@]}"
+}
+
+function swarm_deploy() {
+    # Pin the instance's environment for the life of the stack. Refreshed only when the caller
+    # asks for a whole-stack restart, which is the one case the Docker arm also recreates
+    # `bunkerweb` in. See the env_file comment in tests/swarm/harness-stack.yml for why a live
+    # file here costs the instance its identity on every single action.
+    local live_env="${BW_TESTS_ETC:-/etc/bunkerweb}/variables.env"
+    if [ ! -f "$SWARM_INSTANCE_ENV" ] || [ "${restart_whole_stack:-0}" -eq 1 ] ; then
+        if ! cp "$live_env" "$SWARM_INSTANCE_ENV" ; then
+            log "UTILS" "❌" "🐝 Failed to snapshot $live_env for the instance"
+            return 1
+        fi
+    fi
+    export BW_SWARM_INSTANCE_ENV="$SWARM_INSTANCE_ENV"
+
+    local args
+    args="$(swarm_compose_args)"
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] || [ -z "$args" ] ; then
+        log "UTILS" "❌" "🐝 Failed to assemble the stack files"
+        return 1
+    fi
+
+    log "UTILS" "ℹ️ " "🐝 Deploying the $SWARM_STACK stack ($args) ..."
+    # --resolve-image never: the images are local `:tests` builds with no registry behind them,
+    # and the default (`always`) makes stack deploy try to resolve a digest and fail.
+    # --prune: a service a previous action's services.yml declared and this one does not must go,
+    # or a stale application keeps answering and the spec passes for the wrong reason.
+    # shellcheck disable=SC2086
+    if ! docker stack deploy $args --resolve-image never --prune "$SWARM_STACK" ; then
+        log "UTILS" "❌" "🐝 Deploy failed for the $SWARM_STACK stack"
+        return 1
+    fi
+}
+
+# Wait for every service in the stack to reach its desired replica count. `docker service ls`
+# prints Replicas as "running/desired", so any row where the two differ is still converging.
+function swarm_wait_converged() {
+    local timeout="${1:-180}" i=0 pending
+    while [ "$i" -lt "$timeout" ] ; do
+        pending="$(docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK" --format '{{.Replicas}}' | awk -F/ '$1 != $2' | grep -c . || true)"
+        if [ "$pending" = "0" ] ; then
+            return 0
+        fi
+        sleep 2
+        i=$((i+2))
+    done
+    return 1
+}
+
+# Everything `docker stack rm` does not do. It returns before the networks are gone, and it never
+# removes volumes at all — the next run would then boot on the previous run's database and assert
+# against rows it never created.
+# Take the stack down. Runs on EVERY cleanup_stack, including the mid-run one a `full_clean`
+# action triggers -- so it must not touch host state the rest of the run still depends on.
+function swarm_stack_down() {
+    log "UTILS" "ℹ️ " "🐝 Removing the $SWARM_STACK stack ..."
+    docker stack rm "$SWARM_STACK" > /dev/null 2>&1
+
+    local i=0
+    while [ "$i" -lt 60 ] ; do
+        docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK" --format '{{.Name}}' | grep -q . || break
+        sleep 1
+        i=$((i+1))
+    done
+
+    rm -f /tmp/swarm-services.yml "$SWARM_INSTANCE_ENV"
+}
+
+# Give the host back exactly as it was found. END OF RUN ONLY, beside the dnsmasq/syslog teardown
+# and under the same condition -- this was a real defect before it was split out: `cleanup_stack`
+# also runs mid-run for a `full_clean` action, and doing this there would leave the swarm (which
+# destroys every overlay network) while dnsmasq is still attached to two of them, wedging the rest
+# of the spec on a resolver that no longer has a network.
+function swarm_host_restore() {
+    # First, or every network removal below fails: this container is deliberately holding them.
+    docker rm -f "$SWARM_NET_HOLDER" > /dev/null 2>&1
+
+    # The overlays outlive the stack (they are external), so drop them too: a subsequent
+    # Docker/Autoconf run on the same host needs bw-universe to be a bridge again.
+    # Best effort and deliberately short: a helper container may still hold one, and the compose
+    # that owns it is brought down elsewhere in cleanup_stack.
+    local entry name i
+    for entry in "${SWARM_NETWORKS[@]}" ; do
+        name="${entry%%:*}"
+        i=0
+        while [ "$i" -lt 10 ] ; do
+            docker network rm "$name" > /dev/null 2>&1 && break
+            sleep 1
+            i=$((i+1))
+        done
+    done
+
+    if [ -f "$SWARM_LABEL_MARKER" ] ; then
+        docker node update --label-rm bw-state "$(docker node ls --format '{{.ID}}' | head -1)" > /dev/null 2>&1 || true
+        rm -f "$SWARM_LABEL_MARKER"
+    fi
+
+    # Only a swarm THIS arm created. A daemon that was already a manager keeps its swarm: leaving
+    # it would destroy state that is not ours and cannot be restored from here.
+    if [ -f "$SWARM_INIT_MARKER" ] ; then
+        log "UTILS" "ℹ️ " "🐝 Leaving the swarm this arm created ..."
+        docker swarm leave --force > /dev/null 2>&1 || true
+        rm -f "$SWARM_INIT_MARKER"
+    fi
+}
+
 if [ -z "$integration" ] ; then
     log "UTILS" "❌" "Please provide an integration name as argument"
     exit 1
@@ -416,7 +700,13 @@ function cleanup_stack () {
     fi
 
     if [ -f /tmp/services.yml ] ; then
-        if [ "$integration" == "Kubernetes" ] ; then
+        if [ "$integration" == "Swarm" ] ; then
+            # The application layer is part of the stack (converted into it by
+            # swarm-services.py), so `swarm_teardown` below takes it down with everything else.
+            # `docker compose down` here would fail on a file whose services the compose CLI
+            # never started.
+            :
+        elif [ "$integration" == "Kubernetes" ] ; then
             services_pods=$(kubectl get pods -n services -o jsonpath='{.items[*].metadata.name}')
             if echo "$services_pods" | grep -q "app1" ; then
                 kubectl delete -f /tmp/services.yml
@@ -735,7 +1025,13 @@ function cleanup_stack () {
         # ended normally, which is what this was reaching for.
     fi
 
-    if [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
+    if [ "$integration" == "Swarm" ] ; then
+        # One stack holds BunkerWeb, the control plane and the application layer, so one removal
+        # takes all of it down. The HOST state -- overlays, node label, the swarm itself -- is
+        # restored by swarm_host_restore at the end of the run, not here: this also runs mid-run
+        # for a `full_clean` action, which the rest of the spec has to survive.
+        swarm_stack_down
+    elif [ -f /tmp/example_stack.txt ] && [ "$integration" == "Docker" ] ; then
         # Example-backed run on Docker: one compose project holds the whole stack.
         example_stack="$(cat /tmp/example_stack.txt)"
         example_hook cleanup "$integration"
@@ -1100,8 +1396,11 @@ function cleanup_stack () {
             docker compose -f tests/misc/docker/"$database".yml down -v
         fi
 
+        # Swarm owns all four of its networks in swarm_host_restore below, which also tolerates
+        # one that is already gone. Doing it here as well turned a clean teardown into a failure:
+        # "network bw-db not found" -> return 1.
         networks=$(docker network ls --format "{{.Name}}")
-        if echo "$networks" | grep -q "bw-db" ; then
+        if [ "$integration" != "Swarm" ] && echo "$networks" | grep -q "bw-db" ; then
             docker network rm bw-db
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -1109,6 +1408,21 @@ function cleanup_stack () {
                 return 1
             fi
         fi
+    fi
+
+    # LAST, and only at the end of a run. Order is the whole point and it was wrong once: the
+    # stack has to be gone (swarm_stack_down, above), then the helper composes that hold the
+    # overlay networks (dnsmasq, redis, the database engine, above), and only THEN can the
+    # networks be removed, the node label dropped and the swarm left. Called earlier, it left the
+    # swarm first and every later step failed with "This node is not a swarm manager".
+    # The condition is the same one the helper-compose teardown uses: a mid-run `full_clean`
+    # cleanup must NOT restore host state the rest of the spec still needs.
+    if [ "$integration" == "Swarm" ] && { [ "$exit_code" -ne 0 ] || ($trapped && [ "$exit_code" -eq 0 ] && [ "$(basename "$0")" == "run.sh" ]) ; } ; then
+        swarm_host_restore
+
+        # Put the two `.bw-services` rows back. Reversal is a plain prefix strip, so it is exact,
+        # and it is a no-op when nothing was commented out.
+        sed_in_place 's/^#swarm-arm //' tests/misc/conf/dnsmasq.hosts
     fi
 
     log "UTILS" "ℹ️ " "🧹 Cleaned up current stack ✅"
@@ -1236,6 +1550,29 @@ function restart_stack () {
 
     BW_VERSION="$(cat /tmp/bw_version.txt)"
     export BW_VERSION
+
+    if [ "$integration" == "Swarm" ] ; then
+        # A redeploy IS the restart. `docker stack deploy` diffs each service spec against the
+        # running one and only recreates the tasks whose spec changed -- and generate.py has just
+        # rewritten variables.env / api.env / worker.env, which the deploy inlines, so every
+        # service carrying changed configuration is rolled and the untouched ones are left alone.
+        # That is cheaper and less racy than the down/up pairs the compose arms need, and
+        # `--prune` (in swarm_deploy) removes an application service the new services.yml dropped.
+        if ! swarm_deploy ; then
+            return 1
+        fi
+
+        if ! swarm_wait_converged 240 ; then
+            log "UTILS" "❌" "🐝 The stack did not converge after the redeploy"
+            docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK"
+            docker stack ps "$SWARM_STACK" --no-trunc | head -30 || true
+            return 1
+        fi
+
+        redis_cli set restart_whole_stack 0 > /dev/null
+        redis_cli set restart_services 0 > /dev/null
+        return 0
+    fi
 
     if [ "$integration" == "Docker" ] || [ "$integration" == "Autoconf" ] ; then
         if [ "$restart_whole_stack" -eq 1 ] ; then
@@ -1761,6 +2098,43 @@ function log_stack () {
 
     if ! $trapped && [ "$FOLLOW" == "yes" ] ; then
         log "UTILS" "ℹ️ " "🔍 Following logs ..."
+    fi
+
+    if [ "$integration" == "Swarm" ] ; then
+        # `docker compose logs` has nothing to show for a stack: the containers belong to Swarm
+        # tasks, not to a compose project. Dump what the k8s arm's failure dumps now cover --
+        # every service in the stack, the API, the worker and the broker included -- plus the
+        # placement view, which is the one thing that explains a service that never started at
+        # all (an unsatisfiable `node.labels.bw-state` constraint shows up nowhere else).
+        log "UTILS" "ℹ️ " "🐝 Services in the $SWARM_STACK stack ..."
+        docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK" || true
+
+        log "UTILS" "ℹ️ " "🐝 Task placement and per-task errors ..."
+        docker stack ps "$SWARM_STACK" --no-trunc || true
+
+        local services swarm_service mapped
+        if [ -n "$service" ] ; then
+            # `log_stack scheduler` and friends name the compose FRAGMENT
+            # (docker-compose.<service>.yml); the stack calls the same component bw-<service>.
+            # `bunkerweb` is the one both spell the same way. Map first, prefix afterwards --
+            # prefixing first makes every ${var/#...} below unmatchable.
+            case "$service" in
+                bunkerweb) mapped="bunkerweb" ;;
+                *) mapped="bw-$service" ;;
+            esac
+            services="${SWARM_STACK}_${mapped}"
+        else
+            services="$(docker service ls --filter "label=com.docker.stack.namespace=$SWARM_STACK" --format '{{.Name}}')"
+        fi
+
+        for swarm_service in $services ; do
+            log "UTILS" "ℹ️ " "📜 Showing $swarm_service logs ..."
+            # --raw: task ids in front of every line make the log unreadable and defeat a grep.
+            # `|| true` because a service that never converged has no log and must not abort the
+            # rest of the dump — this runs on a path that is already failing for its own reason.
+            docker service logs "$swarm_service" --no-task-ids --raw --tail 200 2>&1 || true
+        done
+        return 0
     fi
 
     # A Docker example ships its own compose project, so the framework's compose files hold no
