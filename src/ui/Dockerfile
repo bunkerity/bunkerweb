@@ -46,7 +46,7 @@ ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
   apk add --no-cache nodejs npm parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts; \
+  npm ci --ignore-scripts --engine-strict; \
   fi
 
 # Minify JS files
