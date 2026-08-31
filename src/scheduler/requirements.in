@@ -1,5 +1,5 @@
 cffi==2.1.1
-cryptography==50.0.0
+cryptography==50.0.1
 importlib-metadata==9.0.0
 pydantic==2.13.4
 python-magic==0.4.27
