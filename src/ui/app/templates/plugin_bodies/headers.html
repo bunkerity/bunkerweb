@@ -1,0 +1,215 @@
+{# Headers' purpose-built settings body, in place of the flat 13-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/headers
+   and /global-settings/plugins/headers -- so the form, the control keys, `postable_scope` and the
+   writer are all the generic ones. This file owns the LAYOUT and nothing else. The reference
+   implementation is plugin_bodies/antibot.html; read it first.
+
+   ======================= HIDE, NEVER OMIT =======================
+   Every declared setting is rendered on every load; anything that does not apply to the current
+   state carries the `hidden` attribute. `hidden` suppresses rendering only -- the inputs inside
+   still serialise, which is the entire point: `postable_scope` claims authority over every key and
+   an in-scope key the POST does not carry has its row DELETED
+   (db_methods/config_save.py:579-585). Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope.
+
+   ==================== AND THE `multiple` HALF, WHICH IS WORSE ====================
+   headers declares TWO `multiple` families -- CUSTOM_HEADER (`custom-headers`) and COOKIE_FLAGS
+   (`cookie-flags`). `_in_scope` matches a stored `CUSTOM_HEADER_2` by its BASE name
+   (models/save_scope.py:99-110), so every suffixed row an operator has ever added is inside the
+   declared scope, and a body that renders the base field but not the suffixed rows posts none of
+   them -- which DELETES every custom header past the first on the next save, silently.
+   This body therefore delegates both families to the generic block rather than reimplementing the
+   cloner: `models/plugin_settings_body.html` renders `get_multiples(filtered_settings, config)`
+   with the exact id scheme components/settings-widgets.js keys off
+   (`multiple-setting-<plugin>-<id>-<suffix>`, `.multiple-container`, `add-multiple-...`), and a
+   second hand-written copy of that markup would be a second thing to keep in step with the cloner.
+   It is included with `filtered_settings` narrowed to the two `multiple` settings, so its
+   non-multiple grid loop matches nothing and only the multiples section renders. The cost is one
+   empty `<div class="card-body row ...">` before that section; the alternative was 148 duplicated
+   lines. Pinned by ::test_every_shipped_body_renders_the_suffixed_rows_it_declares, which stores
+   two suffixed rows per family and asserts both come back out of the form.
+
+   ============ THE VISIBILITY CONTRACT, READ BY static/js/plugin_bodies/headers.js ============
+   `data-headers-when="KEY=v1|v2"` -- an AND of `key is one of these values` terms, evaluated
+   against the live controls, same shape as plugin_bodies/modsecurity.js. Absent means "always
+   visible".
+   The two notes that read a VALUE rather than a switch -- the HSTS `preload` warning and the
+   upstream shadow list -- are server-rendered only and deliberately not live: making them live
+   means reimplementing `headers:should_keep` (headers.lua:79-82) in JS, and they are advisory
+   notes, not data-loss guards, so refreshing them on save is the correct amount of machinery. #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set headers_settings = plugin_data["settings"] -%}
+{%- macro stored(key) -%}{{ config.get(key, {}).get("value", headers_settings.get(key, {}).get("default", "")) }}{%- endmacro -%}
+{%- set report_only = config.get("CONTENT_SECURITY_POLICY_REPORT_ONLY", {}).get("value", headers_settings["CONTENT_SECURITY_POLICY_REPORT_ONLY"].get("default", "no")) -%}
+{%- set hsts_value = config.get("STRICT_TRANSPORT_SECURITY", {}).get("value", headers_settings["STRICT_TRANSPORT_SECURITY"].get("default", "")) -%}
+{%- set keep_value = config.get("KEEP_UPSTREAM_HEADERS", {}).get("value", headers_settings["KEEP_UPSTREAM_HEADERS"].get("default", "")) -%}
+{# The seven headers this plugin writes, and the setting that carries each one -- headers.lua:17-25
+   (`self.all_headers`), plus Content-Security-Policy-Report-Only, which is NOT in that table but
+   is honoured by the same keep-list check at headers.lua:103. Named here rather than derived
+   from the setting id, because X_DNS_PREFETCH_CONTROL -> X-DNS-Prefetch-Control is not a
+   mechanical transform. #}
+{%- set managed_headers = [
+    ("CONTENT_SECURITY_POLICY", "Content-Security-Policy-Report-Only" if report_only == "yes" else "Content-Security-Policy"),
+    ("PERMISSIONS_POLICY", "Permissions-Policy"),
+    ("STRICT_TRANSPORT_SECURITY", "Strict-Transport-Security"),
+    ("REFERRER_POLICY", "Referrer-Policy"),
+    ("X_FRAME_OPTIONS", "X-Frame-Options"),
+    ("X_CONTENT_TYPE_OPTIONS", "X-Content-Type-Options"),
+    ("X_DNS_PREFETCH_CONTROL", "X-DNS-Prefetch-Control"),
+] -%}
+{# `should_keep` is `KEEP_UPSTREAM_HEADERS == "*"` OR a whole-word match on the list
+   (headers.lua:79-82), and a kept header only wins WHEN THE UPSTREAM ACTUALLY SENDS IT -- so this
+   is "may be overridden by your backend", not "is ignored". A header configured to the empty
+   string is left out: an empty value means "remove the header" (headers.lua:91-93), so there is
+   nothing of ours for the upstream to shadow. #}
+{%- set keep_list = keep_value.split() -%}
+{# `*` is the wildcard ONLY as the whole value. `should_keep` tests
+   `KEEP_UPSTREAM_HEADERS == "*"` first and otherwise falls through to a whole-word regex on the
+   HEADER NAME (headers.lua:79-82) -- `*` is not a name, so `"X-Frame-Options *"` keeps exactly
+   X-Frame-Options. Reading it as a member of the list made the page claim every header was
+   shadowed when one was. #}
+{%- set keep_all = keep_value.strip() == "*" -%}
+{%- set ns = namespace(shadowed=[]) -%}
+{%- for key, header in managed_headers -%}
+    {%- if (keep_all or header in keep_list) and stored(key) | trim -%}
+        {%- set ns.shadowed = ns.shadowed + [header] -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set groups = [
+    {"id": "csp", "title": "settings.headers.csp.title", "hint": "settings.headers.csp.description",
+     "settings": ["CONTENT_SECURITY_POLICY", "CONTENT_SECURITY_POLICY_REPORT_ONLY"], "col": "col-12 pb-3",
+     "notes": [
+        {"id": "csp-report-only", "level": "warning", "icon": "bx-error-circle",
+         "when": {"CONTENT_SECURITY_POLICY_REPORT_ONLY": ["yes"]},
+         "text": "settings.headers.notice.csp_report_only"}]},
+    {"id": "permissions", "title": "settings.headers.permissions.title", "hint": "settings.headers.permissions.description",
+     "settings": ["PERMISSIONS_POLICY"], "col": "col-12 pb-3"},
+    {"id": "transport", "title": "settings.headers.transport.title", "hint": "settings.headers.transport.description",
+     "settings": ["STRICT_TRANSPORT_SECURITY"], "col": "col-12 col-lg-8 pb-3"},
+    {"id": "browser", "title": "settings.headers.browser.title", "hint": "settings.headers.browser.description",
+     "settings": ["X_FRAME_OPTIONS", "X_CONTENT_TYPE_OPTIONS", "REFERRER_POLICY", "X_DNS_PREFETCH_CONTROL"]},
+    {"id": "upstream", "title": "settings.headers.upstream.title", "hint": "settings.headers.upstream.description",
+     "settings": ["KEEP_UPSTREAM_HEADERS", "REMOVE_HEADERS"], "col": "col-12 col-lg-6 pb-3"},
+    {"id": "cookies", "title": "settings.headers.cookies.title", "hint": "settings.headers.cookies.description",
+     "settings": ["COOKIE_AUTO_SECURE_FLAG"], "col": "col-12 col-sm-6 col-lg-4 pb-3"},
+] -%}
+{# Every `multiple` setting is laid out by the delegated block at the bottom rather than by the
+   group loop, so the coverage backstop knows they are not missing. DERIVED from the manifest, not
+   listed: the day headers declares a third `multiple` family it is placed and rendered without
+   anyone remembering to come back here -- which is the failure mode that deletes suffixed rows. #}
+{%- set multi = namespace(keys=[], pairs=[]) -%}
+{%- for key, data in filtered_settings.items() if data.get("multiple") and key not in blacklisted_settings -%}
+    {%- set multi.keys = multi.keys + [key] -%}
+    {%- set multi.pairs = multi.pairs + [(key, data)] -%}
+{%- endfor -%}
+{%- set placed = groups | map(attribute="settings") | sum(start=[]) | list + multi.keys -%}
+{%- macro when_attr(terms) -%}
+    {%- for key, allowed in terms.items() %}{{ key }}={{ allowed | join("|") }}{% if not loop.last %} {% endif %}{% endfor -%}
+{%- endmacro -%}
+{%- macro visible(terms) -%}
+    {#- Jinja has no `all()`. Returns "1" or "", so the caller tests it for truthiness. -#}
+    {%- set vis = namespace(ok=true) -%}
+    {%- for key, allowed in terms.items() %}{% if config.get(key, {}).get("value", headers_settings.get(key, {}).get("default", "")) not in allowed %}{% set vis.ok = false %}{% endif %}{% endfor -%}
+    {{- "1" if vis.ok else "" -}}
+{%- endmacro -%}
+<div class="card-body pb-0">
+    {% for group in groups %}
+        {% set group_settings = group["settings"] | select("in", filtered_settings) | reject("in", blacklisted_settings) | list %}
+        {% if group_settings %}
+            <section class="headers-group mb-4"
+                     data-headers-group="{{ group['id'] }}"
+                     aria-labelledby="headers-group-{{ group['id'] }}-title">
+                <h6 id="headers-group-{{ group['id'] }}-title" class="mb-1 don-jose">{{ _(group["title"]) }}</h6>
+                <p class="text-muted small courier-prime mb-2">{{ _(group["hint"]) }}</p>
+                {# NO DISPLAY UTILITY ON A CONDITIONED ELEMENT -- the layout `d-flex` lives on
+                   an inner wrapper, never on the element that carries `hidden`.
+                   `[hidden] { display: none !important }` (css/core.css:532) and
+                   `.d-flex { display: flex !important }` (:10692) have the SAME specificity
+                   (0,1,0) and both are `!important`, so the later declaration wins and `hidden`
+                   does nothing. `.alert` sets no `display`, so the attribute works here.
+                   Pinned by ::test_a_hideable_element_never_carries_a_display_utility. #}
+                {% for note in group.get("notes", []) %}
+                    <div class="alert alert-{{ note['level'] }} mb-3"
+                         role="alert"
+                         data-headers-group="{{ note['id'] }}"
+                         data-headers-when="{{ when_attr(note['when']) }}"
+                         {% if not visible(note["when"]) %}hidden{% endif %}>
+                        <div class="d-flex align-items-center">
+                            <i class="bx {{ note['icon'] }} bx-sm me-2" aria-hidden="true"></i>
+                            <span>{{ _(note["text"]) }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+                {# HSTS `preload` is the one setting on this page whose default is effectively
+                   irreversible: once the domain is submitted to the browsers' preload list,
+                   removal takes months to propagate. Nothing said so before. #}
+                {% if group["id"] == "transport" and "preload" in hsts_value %}
+                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                        <i class="bx bx-error bx-sm me-2" aria-hidden="true"></i>
+                        <span>{{ _("settings.headers.notice.hsts_preload") }}</span>
+                    </div>
+                {% endif %}
+                {# The interaction §5.5 of the candidate study calls out by name: a header on the
+                   keep list is NOT overridden when the upstream sends its own, so an operator can
+                   write a perfect CSP and never see it. The shipped default names four headers,
+                   three of which this plugin is configuring at its own defaults --
+                   Content-Security-Policy-Report-Only is on the keep list but is not emitted
+                   while report-only is off, so it is not shadowing anything. #}
+                {% if group["id"] == "upstream" and (keep_all or ns.shadowed) %}
+                    <div class="alert alert-info d-flex align-items-start mb-3" role="status">
+                        <i class="bx bx-info-circle bx-sm me-2" aria-hidden="true"></i>
+                        <span>
+                            {% if keep_all %}
+                                {{ _("settings.headers.notice.keep_all") }}
+                            {% else %}
+                                {{ _("settings.headers.notice.keep_shadows") }}
+                                {# The names sit OUTSIDE the translated sentence, in their own
+                                   element: a `{{ }}` placeholder inside the message would put a
+                                   machine-readable list at the mercy of every translation, and
+                                   there is nothing here for a translator to reorder. #}
+                                <code data-headers-shadowed="{{ ns.shadowed | join(', ') }}">{{ ns.shadowed | join(", ") }}</code>
+                            {% endif %}
+                        </span>
+                    </div>
+                {% endif %}
+                <div class="row g-2 gx-6">
+                    {% for setting in group_settings %}
+                        {% set setting_data = filtered_settings[setting] %}
+                        {% set field_col_class = group.get("col", "col-12 col-sm-6 col-lg-4 pb-3") %}
+                        {% include "models/plugin_setting_field.html" %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endfor %}
+    {# Coverage backstop, not decoration -- the convention every body ships, keyed on
+       `data-plugin-body-unplaced` so the shared test names nothing plugin-specific. If the
+       manifest grows a setting and nobody adds it to `groups`, the key would silently stop posting
+       and `postable_scope` would delete its row on the next save. Rendering the stragglers keeps
+       the save correct on day one; the suite fails loudly so the placement gets done properly. #}
+    {% set stragglers = filtered_settings | reject("in", placed) | reject("in", blacklisted_settings) | list %}
+    {% if stragglers %}
+        <section class="headers-group mb-4" data-headers-group="unplaced" data-plugin-body-unplaced>
+            <h6 class="mb-1 don-jose">{{ _("settings.headers.unplaced.title") }}</h6>
+            <p class="text-muted small courier-prime mb-2">{{ _("settings.headers.unplaced.description") }}</p>
+            <div class="row g-2 gx-6">
+                {% for setting in stragglers %}
+                    {% set setting_data = filtered_settings[setting] %}
+                    {% include "models/plugin_setting_field.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+{# The two `multiple` families, rendered by the GENERIC block so the cloner in
+   components/settings-widgets.js keeps working against the markup it was written for. Narrowing
+   `filtered_settings` to exactly the `multiple` settings makes the block's non-multiple grid loop
+   match nothing, so only its multiples section renders -- see the header of this file. #}
+{% if multi.pairs %}
+    {# A top-level `set`, not a `{% with %}` block: only a top-level assignment is exported into
+       the context an `{% include %}` receives. Last statement in the file, so clobbering
+       `filtered_settings` reaches nothing else. #}
+    {% set filtered_settings = dict(multi.pairs) %}
+    {% include "models/plugin_settings_body.html" %}
+{% endif %}

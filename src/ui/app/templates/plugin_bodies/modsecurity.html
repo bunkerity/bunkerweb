@@ -1,0 +1,218 @@
+{# ModSecurity's purpose-built settings body, in place of the flat 12-field grid.
+
+   Hosted by plugin_settings_page.html on the EXISTING routes -- /services/<svc>/plugins/modsecurity
+   and /global-settings/plugins/modsecurity -- so the form, the control keys, `postable_scope` and
+   the writer are all the generic ones. This file owns the LAYOUT and nothing else. The reference
+   implementation is plugin_bodies/antibot.html; read it first.
+
+   ======================= HIDE, NEVER OMIT =======================
+   Every declared setting is rendered on every load; a group that does not apply to the current
+   state carries the `hidden` attribute. `hidden` suppresses rendering only -- the inputs inside
+   still serialise, which is the entire point: `postable_scope` claims authority over every key
+   and an in-scope key the POST does not carry has its row DELETED
+   (db_methods/config_save.py:579-585). Turning ModSecurity off and saving must not erase the
+   audit-log parts, the body limits or the CRS plugin list the operator spent an afternoon on.
+   Pinned by tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_posts_exactly_the_declared_scope
+   (every select option and checkbox value, both scopes) and the modsecurity-specific checks below it.
+
+   modsecurity declares NO `multiple` setting, so this body has no `get_multiples` loop. The day it
+   declares one, it owes one: `_in_scope` matches a stored `FOO_2` by its BASE name
+   (models/save_scope.py:99-110), so one `multiple` in the manifest puts every suffixed row inside
+   the declared scope at once, and a body that renders no cloner posts none of them -- which
+   deletes them all. Guarded by ::test_every_shipped_body_renders_the_suffixed_rows_it_declares.
+
+   ============ THE VISIBILITY CONTRACT, READ BY static/js/plugin_bodies/modsecurity.js ============
+   `data-modsec-when="KEY=v1|v2 KEY2=v3"` -- an AND of `key is one of these values` terms. Absent
+   means "always visible". One attribute rather than antibot's one-attribute-per-condition, because
+   this page has three switches (USE_MODSECURITY, USE_MODSECURITY_CRS, MODSECURITY_CRS_VERSION) and
+   a fourth would otherwise mean a fourth attribute plus a fourth branch in the script.
+   Server-side visibility and the JS agree by construction: both evaluate the same terms against
+   the same controls. With JS off the page still renders the right groups for the STORED state --
+   the switches just stop being live, which is the correct degradation.
+
+   The banners below are `data-modsec-when` blocks with no settings, so the SAME evaluator keeps
+   them live. That is the point of the generic attribute: a warning about a state is only useful
+   if it appears while the operator is putting the page into that state, not after a round trip. #}
+{%- set setting_id_prefix = "setting-" + plugin + "-" -%}
+{%- set modsec_settings = plugin_data["settings"] -%}
+{# The switches the `when` terms are evaluated against, resolved once from the stored config with
+   the manifest default as the fallback -- the same pair models/plugin_setting_field.html uses to
+   decide what a field shows, so the groups and the fields can never disagree about the state.
+   Anything not listed here cannot be used in a `when` term, deliberately: the script evaluates the
+   same terms against live CONTROLS, and a term over a value with no control on the page would be
+   live on the server and dead in the browser. Checked by
+   ::test_a_when_term_only_names_a_control_the_page_actually_renders. #}
+{%- set state = {
+    "USE_MODSECURITY": config.get("USE_MODSECURITY", {}).get("value", modsec_settings["USE_MODSECURITY"].get("default", "")),
+    "USE_MODSECURITY_CRS": config.get("USE_MODSECURITY_CRS", {}).get("value", modsec_settings["USE_MODSECURITY_CRS"].get("default", "")),
+    "MODSECURITY_CRS_VERSION": config.get("MODSECURITY_CRS_VERSION", {}).get("value", modsec_settings["MODSECURITY_CRS_VERSION"].get("default", "")),
+    "MODSECURITY_SEC_RULE_ENGINE": config.get("MODSECURITY_SEC_RULE_ENGINE", {}).get("value", modsec_settings["MODSECURITY_SEC_RULE_ENGINE"].get("default", "")),
+} -%}
+{# The one predicate used often enough to name. The three-term ones are written out at their use
+   site: a name per combination reads worse than the combination itself. #}
+{%- set on = {"USE_MODSECURITY": ["yes"]} -%}
+{# Banners first, groups after. Both go through the same section renderer; a banner carries
+   `alert` instead of `settings`. #}
+{%- set banners = [
+    {"id": "off", "level": "secondary", "icon": "bx-info-circle",
+     "when": {"USE_MODSECURITY": ["no"]}, "text": "settings.modsecurity.notice.off"},
+    {"id": "engine-off", "level": "danger", "icon": "bx-error",
+     "when": {"USE_MODSECURITY": ["yes"], "MODSECURITY_SEC_RULE_ENGINE": ["Off"]},
+     "text": "settings.modsecurity.notice.engine_off"},
+    {"id": "engine-detect", "level": "warning", "icon": "bx-error-circle",
+     "when": {"USE_MODSECURITY": ["yes"], "MODSECURITY_SEC_RULE_ENGINE": ["DetectionOnly"]},
+     "text": "settings.modsecurity.notice.engine_detect"},
+] -%}
+{%- set groups = [
+    {"id": "engine", "title": "settings.modsecurity.engine.title", "hint": "settings.modsecurity.engine.description",
+     "settings": ["USE_MODSECURITY", "MODSECURITY_SEC_RULE_ENGINE"], "col": "col-12 col-sm-6 col-lg-4 pb-3"},
+    {"id": "crs", "title": "settings.modsecurity.crs.title", "hint": "settings.modsecurity.crs.description",
+     "when": on, "settings": ["USE_MODSECURITY_CRS", "MODSECURITY_CRS_VERSION"],
+     "notes": [
+        {"id": "crs-v3", "level": "warning", "icon": "bx-error-circle",
+         "when": {"USE_MODSECURITY": ["yes"], "USE_MODSECURITY_CRS": ["yes"], "MODSECURITY_CRS_VERSION": ["3"]},
+         "text": "settings.modsecurity.notice.crs_v3_no_plugins"}]},
+    {"id": "crs-plugins", "title": "settings.modsecurity.crs_plugins.title", "hint": "settings.modsecurity.crs_plugins.description",
+     "when": {"USE_MODSECURITY": ["yes"], "USE_MODSECURITY_CRS": ["yes"], "MODSECURITY_CRS_VERSION": ["4"]},
+     "settings": ["USE_MODSECURITY_CRS_PLUGINS", "MODSECURITY_CRS_PLUGINS"], "col": "col-12 col-lg-6 pb-3"},
+    {"id": "global-crs", "title": "settings.modsecurity.global_crs.title", "hint": "settings.modsecurity.global_crs.description",
+     "when": on, "settings": ["USE_MODSECURITY_GLOBAL_CRS"], "col": "col-12 col-sm-6 col-lg-4 pb-3"},
+    {"id": "audit", "title": "settings.modsecurity.audit.title", "hint": "settings.modsecurity.audit.description",
+     "when": on, "settings": ["MODSECURITY_SEC_AUDIT_ENGINE", "MODSECURITY_SEC_AUDIT_LOG_PARTS", "MODSECURITY_SEC_AUDIT_LOG"], "col": "col-12 col-lg-6 pb-3"},
+    {"id": "limits", "title": "settings.modsecurity.limits.title", "hint": "settings.modsecurity.limits.description",
+     "when": on, "settings": ["MODSECURITY_REQ_BODY_NO_FILES_LIMIT", "MODSECURITY_SEC_REQUEST_BODY_LIMIT", "MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION"]},
+] -%}
+{# Every key laid out above, for the coverage backstop at the bottom. Derived, never hand-listed:
+   a hand-list is only ever as right as the day it was typed. #}
+{%- set placed = groups | map(attribute="settings") | sum(start=[]) | list -%}
+{%- macro when_attr(terms) -%}
+    {%- for key, allowed in terms.items() %}{{ key }}={{ allowed | join("|") }}{% if not loop.last %} {% endif %}{% endfor -%}
+{%- endmacro -%}
+{%- macro visible(terms) -%}
+    {#- Jinja has no `all()`; a namespace is the shortest honest form. Returns "1" or "", so the
+        caller tests it for truthiness -- a macro always returns a string. -#}
+    {%- set ns = namespace(ok=true) -%}
+    {%- for key, allowed in terms.items() %}{% if state.get(key) not in allowed %}{% set ns.ok = false %}{% endif %}{% endfor -%}
+    {{- "1" if ns.ok else "" -}}
+{%- endmacro -%}
+<div class="card-body pb-0">
+    {# NO DISPLAY UTILITY ON A CONDITIONED ELEMENT -- the layout `d-flex` lives on an inner
+       wrapper, never on the element that carries `hidden`. `[hidden] { display: none !important }`
+       (css/core.css:532) and `.d-flex { display: flex !important }` (:10692) have the SAME
+       specificity (0,1,0) and both are `!important`, so the later declaration wins and `hidden`
+       does nothing at all. `.btn { display: inline-flex !important }` (:7593) defeats it the same
+       way. `.alert` itself sets no `display`, so the attribute works on this element.
+       Pinned by tests/unit/ui/test_plugin_settings_bodies.py::test_a_hideable_element_never_carries_a_display_utility. #}
+    {% for banner in banners %}
+        <div class="alert alert-{{ banner['level'] }} mb-4"
+             role="{{ "alert" if banner["level"] in ("danger", "warning") else "status" }}"
+             data-modsec-group="{{ banner['id'] }}"
+             data-modsec-when="{{ when_attr(banner['when']) }}"
+             {% if not visible(banner["when"]) %}hidden{% endif %}>
+            <div class="d-flex align-items-center">
+                <i class="bx {{ banner['icon'] }} bx-sm me-2" aria-hidden="true"></i>
+                <span>{{ _(banner["text"]) }}</span>
+            </div>
+        </div>
+    {% endfor %}
+    {% for group in groups %}
+        {# `filtered_settings` and `blacklisted_settings` are applied HERE, not in the group table,
+           for the same reason the generic body applies them (models/plugin_settings_body.html:14).
+           USE_MODSECURITY_GLOBAL_CRS is the live case: it is the plugin's only `global`-context
+           setting, so `get_filtered_settings` drops it on a SERVICE page and `postable_scope`
+           leaves it out of scope there. Its group would then render as a title over nothing --
+           hence the emptiness check below, which skips a group whose every setting was filtered
+           out rather than showing an empty band. #}
+        {% set group_settings = group["settings"] | select("in", filtered_settings) | reject("in", blacklisted_settings) | list %}
+        {% if group_settings %}
+            {% set shown = visible(group.get("when", {})) %}
+            <section class="modsec-group mb-4"
+                     data-modsec-group="{{ group['id'] }}"
+                     {% if group.get("when") %}data-modsec-when="{{ when_attr(group['when']) }}"{% endif %}
+                     {% if not shown %}hidden{% endif %}
+                     aria-labelledby="modsec-group-{{ group['id'] }}-title">
+                <h6 id="modsec-group-{{ group['id'] }}-title" class="mb-1 don-jose">{{ _(group["title"]) }}</h6>
+                {% if group.get("hint") %}<p class="text-muted small courier-prime mb-2">{{ _(group["hint"]) }}</p>{% endif %}
+                {% for note in group.get("notes", []) %}
+                    {# Same rule as the banners above: `d-flex` on the inner wrapper only. #}
+                    <div class="alert alert-{{ note['level'] }} mb-3"
+                         role="alert"
+                         data-modsec-group="{{ note['id'] }}"
+                         data-modsec-when="{{ when_attr(note['when']) }}"
+                         {% if not visible(note["when"]) %}hidden{% endif %}>
+                        <div class="d-flex align-items-center">
+                            <i class="bx {{ note['icon'] }} bx-sm me-2" aria-hidden="true"></i>
+                            <span>{{ _(note["text"]) }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="row g-2 gx-6">
+                    {% for setting in group_settings %}
+                        {% set setting_data = filtered_settings[setting] %}
+                        {% set field_col_class = group.get("col", "col-12 col-sm-6 col-lg-4 pb-3") %}
+                        {% include "models/plugin_setting_field.html" %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endfor %}
+    {# Rule tuning: the daily job this page never mentioned. Clearing a false positive happens in
+       /configs across four config types, and until now nothing on the settings page said so --
+       §5.4 of .cache/results-2026-08-24/plugin-pages-candidates.md is exactly this complaint.
+       Links only: the page holds no config list, and fetching one here would add a second data
+       path to a form page for a link the operator can follow in one click. #}
+    <section class="modsec-group mb-4"
+             data-modsec-group="tuning"
+             data-modsec-when="{{ when_attr(on) }}"
+             {% if not visible(on) %}hidden{% endif %}
+             aria-labelledby="modsec-group-tuning-title">
+        <h6 id="modsec-group-tuning-title" class="mb-1 don-jose">{{ _("settings.modsecurity.tuning.title") }}</h6>
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.modsecurity.tuning.description") }}</p>
+        <div class="d-flex flex-wrap gap-2">
+            {# CRS_PLUGINS_BEFORE / _AFTER only exist while the CRS plugins are loaded, so they
+               follow the same `when` terms the crs-plugins group does. #}
+            {% for config_type, label_key, type_when in [
+                ("MODSEC_CRS", "settings.modsecurity.tuning.modsec_crs", none),
+                ("MODSEC", "settings.modsecurity.tuning.modsec", none),
+                ("CRS_PLUGINS_BEFORE", "settings.modsecurity.tuning.crs_plugins_before", {"USE_MODSECURITY": ["yes"], "USE_MODSECURITY_CRS": ["yes"], "MODSECURITY_CRS_VERSION": ["4"]}),
+                ("CRS_PLUGINS_AFTER", "settings.modsecurity.tuning.crs_plugins_after", {"USE_MODSECURITY": ["yes"], "USE_MODSECURITY_CRS": ["yes"], "MODSECURITY_CRS_VERSION": ["4"]}),
+            ] %}
+                {# The condition goes on a plain wrapper, NOT on the <a>: `.btn` carries
+                   `display: inline-flex !important` (css/core.css:7593), which beats
+                   `[hidden]`'s `display: none !important` (:532) on equal specificity by
+                   declaration order -- a `hidden` button stays on screen. The wrapper is a bare
+                   <span> with no display utility of its own; it shrink-wraps the button and
+                   stays a flex item of the `d-flex flex-wrap gap-2` row above. #}
+                {% if type_when %}
+                    <span data-modsec-group="tuning-{{ config_type | lower }}"
+                          data-modsec-when="{{ when_attr(type_when) }}"
+                          {% if not visible(type_when) %}hidden{% endif %}>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{{ url_for('configs.configs_page', service=service_id, type=config_type) }}">
+                    <i class="bx bx-edit-alt bx-sm" aria-hidden="true"></i>&nbsp;{{ _(label_key) }}
+                </a>
+                {% if type_when %}</span>{% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {# Coverage backstop, not decoration -- the convention every body ships, keyed on
+       `data-plugin-body-unplaced` so the shared test names nothing plugin-specific. If the
+       manifest grows a setting and nobody adds it to `groups`, the key would silently stop
+       posting and `postable_scope` would delete its row on the next save. Rendering the
+       stragglers keeps the save correct on day one; the suite fails loudly so the placement gets
+       done properly. Kept LAST and visible: an unplaced key is a bug the operator can still edit. #}
+    {% set stragglers = filtered_settings | reject("in", placed) | reject("in", blacklisted_settings) | list %}
+    {% if stragglers %}
+        <section class="modsec-group mb-4" data-modsec-group="unplaced" data-plugin-body-unplaced>
+            <h6 class="mb-1 don-jose">{{ _("settings.modsecurity.unplaced.title") }}</h6>
+            <p class="text-muted small courier-prime mb-2">{{ _("settings.modsecurity.unplaced.description") }}</p>
+            <div class="row g-2 gx-6">
+                {% for setting in stragglers %}
+                    {% set setting_data = filtered_settings[setting] %}
+                    {% include "models/plugin_setting_field.html" %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
