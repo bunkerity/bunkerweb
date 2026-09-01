@@ -3,9 +3,10 @@ from logging import Logger
 from os import getenv, sep
 from pathlib import Path
 from re import sub
-from typing import List, Literal, Optional, Set, Tuple
+from typing import Dict, List, Literal, Optional, Set, Tuple
 
 from docker import DockerClient
+from docker.errors import NotFound
 from docker.models.containers import Container
 
 CONTAINER_TYPES = {
@@ -99,8 +100,24 @@ def get_docker_client() -> DockerClient:
     return DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
 
-@cache
+# Keyed on (logger, _type) like the old @cache, but a hit is verified live before being handed
+# back: restart_stack() (docker compose down + up) recreates the container under the same name
+# with a new id, and a plain @cache would keep returning a handle to the id docker already
+# removed. A single `reload()` (one container, by id) stays far cheaper than the `containers.list()`
+# scan across the whole daemon this cache exists to avoid on every poll.
+_CONTAINER_CACHE: Dict[Tuple[Logger, str], Container] = {}
+
+
 def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"]) -> Container:
+    cache_key = (logger, _type)
+    cached = _CONTAINER_CACHE.get(cache_key)
+    if cached is not None:
+        try:
+            cached.reload()
+            return cached
+        except NotFound:
+            del _CONTAINER_CACHE[cache_key]
+
     docker_client = get_docker_client()
 
     filters = CONTAINER_TYPES.get(_type)
@@ -118,6 +135,7 @@ def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "sch
         logger.error(f"No {_type.title()} container found")
         exit(1)
 
+    _CONTAINER_CACHE[cache_key] = containers[0]
     return containers[0]
 
 
@@ -130,7 +148,9 @@ def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "schedule
             stderr=True,
             timestamps=True,
         )
-        .decode("utf-8")
+        # BunkerWeb's ANSI startup banner is not valid UTF-8; a strict decode kills the
+        # assertion that asked for the logs before it ever runs (wave-11 upgrade run 1).
+        .decode("utf-8", errors="replace")
         .strip()
         .split("\n")
     )

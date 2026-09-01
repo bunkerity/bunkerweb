@@ -7,7 +7,6 @@ from sys import modules
 from types import ModuleType
 from unittest.mock import patch
 
-
 ROOT = Path(__file__).resolve().parents[3]
 UNITS_DIR = ROOT / "src" / "all-in-one" / "supervisor.d"
 LOGSTREAM = ROOT / "src" / "all-in-one" / "logstream.sh"
@@ -17,7 +16,12 @@ docker.DockerClient = type("DockerClient", (), {})
 docker_models = ModuleType("docker.models")
 docker_containers = ModuleType("docker.models.containers")
 docker_containers.Container = type("Container", (), {})
-with patch.dict(modules, {"docker": docker, "docker.models": docker_models, "docker.models.containers": docker_containers}):
+docker_errors = ModuleType("docker.errors")
+docker_errors.NotFound = type("NotFound", (Exception,), {})
+with patch.dict(
+    modules,
+    {"docker": docker, "docker.models": docker_models, "docker.models.containers": docker_containers, "docker.errors": docker_errors},
+):
     spec = spec_from_file_location("test_harness_docker", ROOT / "tests" / "utils" / "docker.py")
     docker_utils = module_from_spec(spec)
     spec.loader.exec_module(docker_utils)

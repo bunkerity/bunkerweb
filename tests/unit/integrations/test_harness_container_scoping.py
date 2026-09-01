@@ -29,7 +29,12 @@ docker.DockerClient = type("DockerClient", (), {})
 docker_models = ModuleType("docker.models")
 docker_containers = ModuleType("docker.models.containers")
 docker_containers.Container = type("Container", (), {})
-with patch.dict(modules, {"docker": docker, "docker.models": docker_models, "docker.models.containers": docker_containers}):
+docker_errors = ModuleType("docker.errors")
+docker_errors.NotFound = type("NotFound", (Exception,), {})
+with patch.dict(
+    modules,
+    {"docker": docker, "docker.models": docker_models, "docker.models.containers": docker_containers, "docker.errors": docker_errors},
+):
     spec = spec_from_file_location("test_harness_docker_scoping", ROOT / "tests" / "utils" / "docker.py")
     docker_utils = module_from_spec(spec)
     spec.loader.exec_module(docker_utils)
@@ -70,7 +75,7 @@ class FakeContainers:
 def lookup(monkeypatch, containers, _type="bunkerweb"):
     client = type("FakeClient", (), {"containers": FakeContainers(containers)})()
     monkeypatch.setattr(docker_utils, "get_docker_client", lambda: client)
-    docker_utils.get_container.cache_clear()
+    docker_utils._CONTAINER_CACHE.clear()
     return docker_utils.get_container(LOGGER, _type)
 
 
