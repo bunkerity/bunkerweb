@@ -5,6 +5,8 @@ builds nothing and publishes nothing.
 
 ## One-time setup
 
+### The `release` environment
+
 Create a `release` **environment** in the repository settings with at least one
 required reviewer.
 
@@ -13,17 +15,43 @@ job; if the environment does not exist, GitHub creates an unprotected one on
 first use and the gate passes without ever stopping. The approval step is the
 only thing standing between a tag push and Docker Hub.
 
+### A signing key on your GitHub account
+
+Release tags must be signed, and `prepare` refuses to build otherwise. Upload
+your public key under Settings -> SSH and GPG keys, and make sure the email you
+sign with is a **verified** email on that same account: GitHub reports
+`unverified_email` otherwise and the guard fails.
+
+```bash
+git config --global user.signingkey <fingerprint>
+git config --global tag.gpgSign true
+```
+
+### A tag ruleset on `v*`
+
+Create a ruleset in the repository settings targeting **tags**, pattern `v*`,
+enforcement active, with restrict creations, restrict updates and block force
+pushes. Bypass only for the maintainers who cut releases. This is what stops a
+tag being created or moved by anything holding a push token.
+
+The ruleset rule named "require signed commits" governs the commits being
+pushed, not the tag object's own signature, so it does not replace the guard in
+`prepare`.
+
 ## Cutting a release
 
 1. Set `src/VERSION` to the version you are releasing (`1.6.15`, `1.6.15~rc1`,
    `1.6.15~beta`) and add the matching `## v<version>` section to
    `CHANGELOG.md`. Merge that to the branch you are releasing from.
-2. Tag the commit, **annotated**, and push it:
+2. Tag the commit, **signed**, and push it:
 
    ```bash
-   git tag -a v1.6.15-rc1 -m v1.6.15-rc1
+   git tag -s v1.6.15-rc1 -m v1.6.15-rc1
    git push origin v1.6.15-rc1
    ```
+
+   `-s`, not `-a`: `git tag -a` is documented as making an _unsigned_ annotated
+   tag object, and the signature guard rejects it.
 
    The tag is `v` plus the version with `~` replaced by `-`. `1.6.15~rc1`
    becomes `v1.6.15-rc1`.
@@ -51,6 +79,8 @@ The channel is derived from the tag, and one workflow serves all three:
 
 - the tag does not match `src/VERSION` at the tagged commit;
 - the tag is lightweight rather than annotated;
+- the tag carries no signature GitHub can verify against a key on the signer's
+  account;
 - a GitHub release already exists for the tag (no republishing over a
   force-pushed tag);
 - `CHANGELOG.md` has no `## v<version>` section.
@@ -61,6 +91,11 @@ The channel is derived from the tag, and one workflow serves all three:
 the workflows present at the tagged commit. If `release.yml` there still has
 `on: push: branches:`, the tag fires no run at all — no error, no output. The
 branch you tag from must already carry the tag-triggered `release.yml`.
+
+**An expiring signing key fails the release, not the tag.** `git tag -s`
+happily signs with a key that GitHub will then reject, and the run dies in
+`prepare` with `expired_key`. Extend the key and **re-upload** the public key to
+GitHub: it is stored at upload time and never re-fetched from a keyserver.
 
 **An unapproved run holds the ARM VM.** `create-arm` spins up a Scaleway
 instance that `push-images` still needs, so it stays alive while the gate waits

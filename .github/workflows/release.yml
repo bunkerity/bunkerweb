@@ -54,14 +54,26 @@ jobs:
           fi
 
           # Guard 2 - annotated tags only. A lightweight tag records no tagger,
-          # so nothing links the release to a human.
-          OBJ_TYPE="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}" --jq '.object.type')"
+          # so nothing links the release to a human, and there is no tag object
+          # to carry a signature.
+          TAG_REF="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")"
+          OBJ_TYPE="$(printf '%s' "$TAG_REF" | jq -r '.object.type')"
+          OBJ_SHA="$(printf '%s' "$TAG_REF" | jq -r '.object.sha')"
           if [ "$OBJ_TYPE" != "tag" ]; then
-            echo "::error::$TAG is a lightweight tag; create it with git tag -a"
+            echo "::error::$TAG is a lightweight tag; create it with git tag -s"
             exit 1
           fi
 
-          # Guard 3 - never republish. A force-pushed tag would otherwise
+          # Guard 3 - the tag must carry a signature GitHub can verify against a
+          # key on the signer's account. The tag is what authorises the publish;
+          # unsigned, it proves nothing about who asked for the release.
+          VERIF="$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/${OBJ_SHA}" --jq '"\(.verification.verified) \(.verification.reason)"')"
+          if [ "${VERIF%% *}" != "true" ]; then
+            echo "::error::$TAG is not signed by a verifiable key (${VERIF#* }); create it with git tag -s"
+            exit 1
+          fi
+
+          # Guard 4 - never republish. A force-pushed tag would otherwise
           # overwrite published images with different bits under one version.
           # Only an explicit 404 means absent. A 403, a rate limit or a network
           # blip must not be read as permission to republish.
@@ -73,7 +85,7 @@ jobs:
             exit 1
           fi
 
-          # Guard 4 - push-github.yml builds the release body from this section
+          # Guard 5 - push-github.yml builds the release body from this section
           # and fails silently (empty body) when it is missing.
           # Exact match on the version token: "^## v1.6.15" also accepts
           # "## v1.6.150", and the dots are regex wildcards.
@@ -96,7 +108,7 @@ jobs:
             echo "hidden=$HIDDEN"
           } >> "$GITHUB_OUTPUT"
 
-          echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel." >> "$GITHUB_STEP_SUMMARY"
+          echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel, from signed tag \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
 
   plumber:
     needs: [prepare]
