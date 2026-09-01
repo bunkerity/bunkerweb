@@ -34,10 +34,17 @@ stream_log() {
     # Strip C0 control characters (except tab `\011` and newline `\012`) plus DEL so an
     # adversarial access/error/modsec payload (URI, User-Agent, matched_data) can't inject
     # ANSI/CSI/OSC escape sequences into `docker logs` output and spoof other services' lines.
+    # `tr` and `sed` write into a pipe, so libc block-buffers them at 4 KiB: without
+    # line buffering on BOTH stages, a quiet stream (the NGINX error log carrying the
+    # ModSecurity detail line of a single blocked request) never reaches `docker logs` until
+    # 4 KiB of further traffic pushes it out.
+    # `stdbuf -oL sed`, not `sed -u`: both flush per line, but `-u` also makes GNU sed read
+    # its input one byte at a time — 300k lines measured at 3.9s with `-u` against 0.06s with
+    # `-oL`, a cost paid on access.log exactly during a traffic spike.
     if [ "$stream" == "stdout" ]; then
-        exec tail -F "$log_file" | tr -d '\000-\010\013-\037\177' | sed "s/^/${prefix}/"
+        exec tail -F "$log_file" | stdbuf -oL tr -d '\000-\010\013-\037\177' | stdbuf -oL sed "s/^/${prefix}/"
     else
-        exec tail -F "$log_file" | tr -d '\000-\010\013-\037\177' | sed "s/^/${prefix}/" >&2
+        exec tail -F "$log_file" | stdbuf -oL tr -d '\000-\010\013-\037\177' | stdbuf -oL sed "s/^/${prefix}/" >&2
     fi
 }
 

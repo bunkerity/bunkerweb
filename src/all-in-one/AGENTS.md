@@ -64,6 +64,8 @@ Supervisord (`supervisord.conf`, per-service `supervisor.d/*.ini`) starts servic
 
 `logstream.sh` tails the NGINX access/error logs and the ModSecurity audit log to container stdout/stderr with prefixes (`[NGINX.ACCESS]`, `[NGINX.ERROR]`, `[MODSEC]`). `service-log-wrapper.sh` wraps a service command and tees its output with a prefix. `logging-utils.sh` implements `HIDE_SERVICE_LOGS`.
 
+Every stage of those pipelines must be line-buffered, with `stdbuf -oL` on each. `tr` and `sed` write into a pipe, so libc block-buffers them at 4 KiB and a quiet stream — the NGINX error log holding the ModSecurity detail line of a single blocked request, say — never reaches `docker logs` until unrelated traffic pushes the buffer out. Anything reading `docker logs` (the integration harness included) sees nothing. Use `stdbuf -oL sed`, never `sed -u`: both flush per line, but `-u` also drops GNU sed to one-byte input reads (300k lines: 3.9s vs 0.06s), and access.log pays that during a traffic spike. `stdbuf` is therefore a hard runtime dependency of the log pipeline — it ships with coreutils in the `nginx` base image. `tests/unit/integrations/test_all_in_one_log_flushing.py` runs the shipped pipelines and fails if a stage stops flushing.
+
 ## Bundled Dependencies
 
 Compiled in the builder stage, pinned in `deps/*.json`: Go uses per-architecture checksums, while re2 and CrowdSec use commits. Build scripts live in `scripts/` (`install-go.sh`, `install-crowdsec.sh`, `install-re2.sh`, and `utils.sh` providing `git_clone_commit`). To bump a version, edit the JSON — the Dockerfile reads it with `jq`.

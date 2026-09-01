@@ -29,5 +29,7 @@ else
 	# Strip C0 control characters (except tab `\011` and newline `\012`) plus DEL so an
 	# adversarial log payload can't inject ANSI/CSI/OSC escape sequences into
 	# `docker logs` output and spoof other services' lines.
-	exec "$@" 2>&1 | tr -d '\000-\010\013-\037\177' | while IFS= read -r line; do printf '%s%s\n' "${prefix}" "${line}"; done
+	# `stdbuf -oL` is required: `tr` writes into a pipe, so libc block-buffers it at 4 KiB
+	# and a quiet service's lines would sit there instead of reaching `docker logs`.
+	exec "$@" 2>&1 | stdbuf -oL tr -d '\000-\010\013-\037\177' | while IFS= read -r line; do printf '%s%s\n' "${prefix}" "${line}"; done
 fi
