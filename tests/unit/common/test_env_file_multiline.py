@@ -80,6 +80,63 @@ def test_wrapped_base64_needs_both_predicates():
     assert folded["USE_ANTIBOT"] == "captcha"
 
 
+def test_an_unknown_env_var_after_a_file_setting_stays_its_own_entry():
+    """The 2026-09-01 customcert regression, pinned.
+
+    The scheduler dumps its whole environment into a variables file (`scheduler/main.py`), so a
+    `file`-type setting can be followed by env vars that are not settings at all — `TZ`,
+    `HOSTNAME`, anything compose injects. Folding those into the value turned a valid single-line
+    base64 certificate into `<b64>\\nTZ=Europe/Paris`, which Python 3.14's strict decoder refuses
+    with "Excess data after padding" — and the fleet fell back to the internal 10-year cert.
+    A `KEY=value` line is a continuation only when it actually looks like wrapped base64.
+    """
+    value = "QUFBQUFB QkJCQkJC Q0NDQ0ND"
+    lines = [f"CUSTOM_SSL_CERT_DATA={value}", "TZ=Europe/Paris", "USE_ANTIBOT=captcha"]
+    folded = parse_env_lines(
+        lines,
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == value
+    assert folded["TZ"] == "Europe/Paris"
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+
+def test_a_pem_chain_keeps_every_certificate():
+    """fullchain.pem is the default ACME layout: leaf + intermediate(s) in one value. The first
+    `-----END` must not end the value when another `-----BEGIN` follows — dropping the
+    intermediates is a silent write-back the config_save truncated-PEM guard cannot see (both
+    markers are present, so the mutilated chain looks whole)."""
+    chain = "\n".join(
+        (
+            "-----BEGIN CERTIFICATE-----",
+            "AAAAleaf",
+            "-----END CERTIFICATE-----",
+            "-----BEGIN CERTIFICATE-----",
+            "AAAAintermediate",
+            "-----END CERTIFICATE-----",
+        )
+    )
+    lines = [f"CUSTOM_SSL_CERT_DATA={chain}", "USE_ANTIBOT=captcha"]
+    parsed = parse_env_lines("\n".join(lines).splitlines())
+    assert parsed["CUSTOM_SSL_CERT_DATA"] == chain
+    assert parsed["USE_ANTIBOT"] == "captcha"
+
+
+def test_wrapped_base64_with_final_padding_still_folds():
+    """The fix must not break what the folding exists for: a wrapped value whose last line ends
+    in padding still comes back whole, and the known key after it still ends the block."""
+    wrapped = "MIIBkTCB+wIJAK\nQUFBQkJCQ0ND\nZm9vYmFy=="
+    lines = [f"CUSTOM_SSL_CERT_DATA={wrapped}", "USE_ANTIBOT=captcha"]
+    folded = parse_env_lines(
+        "\n".join(lines).splitlines(),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == wrapped
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+
 @pytest.mark.parametrize(
     ("token", "expected"),
     [

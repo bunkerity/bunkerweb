@@ -6,9 +6,10 @@ truncates such a value at its first line, and the config saver then writes the t
 back to the database, destroying the certificate and taking the setting away from the UI
 in the same pass.
 
-The UI's raw editor already folds continuation lines back into the value it is editing.
-This module is that rule for the Python side, shared by every component that reads one of
-these files:
+This module is the one folding rule for the Python side, shared by every component that
+reads one of these files. (The UI's raw editor is not one of them: it validates line by
+line and refuses a line without `=` loudly — src/ui/app/routes/services.py — so it never
+truncates silently.)
 
   - src/common/gen/Configurator.py (config saver, the one that writes back to the database)
   - src/common/gen/save_config.py
@@ -33,6 +34,17 @@ KEY_RX = re_compile(r"^[A-Za-z0-9_.-]+$")
 PEM_BEGIN = "-----BEGIN"
 PEM_END = "-----END"
 
+# What a continuation line of an UNMARKED (non-PEM) folded value must look like: wrapped
+# base64 — alphabet only, optional padding at the end. `TZ=Europe/Paris` fails this,
+# `MIIBkTCB+wIJAK==` passes. Without the shape check, any env var the caller's settings
+# universe does not know (TZ, HOSTNAME, anything compose injects) that follows a `file`-type
+# setting in a dumped environment is swallowed into that setting's value — which is exactly
+# how a valid base64 certificate became `<b64>\nTZ=Europe/Paris` and failed Python 3.14's
+# strict decode with "Excess data after padding". Known residual: a bare `NAME=` with a
+# base64-shaped name (no value, no `_`/`.`/`-`) still matches and is still folded — a
+# `KEY=value` line with a NON-EMPTY value is what reliably ends the fold.
+B64_LINE_RX = re_compile(r"^[A-Za-z0-9+/]+={0,2}$")
+
 
 def parse_env_lines(
     lines: Iterable[str],
@@ -49,7 +61,12 @@ def parse_env_lines(
     A value inside a PEM block is always followed to its `-----END`, since a base64 line that
     ends on its "=" padding is otherwise indistinguishable from a declaration. Wrapped base64
     carries no such marker, so folding it needs both predicates: `is_multiline_key` to know the
-    current value can span lines, and `is_known_key` to know where the next value starts.
+    current value can span lines, and `is_known_key` to know where the next value starts. Only a
+    line shaped like wrapped base64 (`B64_LINE_RX`) continues such a value — a `KEY=value` line
+    with a non-empty value, known key or not, ends it, so env vars outside the settings universe
+    (`TZ=Europe/Paris`, `HOSTNAME=abc`) are kept as their own entries instead of being swallowed
+    into a certificate. A bare `NAME=` whose name happens to fit the base64 shape is the known
+    residual that still folds.
     """
     fold_unmarked = is_multiline_key is not None and is_known_key is not None
     variables: Dict[str, str] = {}
@@ -86,7 +103,14 @@ def parse_env_lines(
         if not stripped or stripped.startswith("#"):
             continue
 
-        folding = fold_unmarked and key is not None and not pem_closed and is_multiline_key(key)  # type: ignore[misc]
+        folding = (
+            fold_unmarked
+            and key is not None
+            and not pem_closed
+            and not declares_known
+            and B64_LINE_RX.match(stripped) is not None
+            and is_multiline_key(key)  # type: ignore[misc]
+        )
 
         # Wrapped base64 can produce a token that looks like a key. Only a key the caller
         # recognises ends the value being folded.
@@ -95,6 +119,14 @@ def parse_env_lines(
         if not declares:
             if folding or in_pem:
                 parts.append(line)
+            elif key is not None and stripped.startswith(PEM_BEGIN):
+                # A new BEGIN right after a closed block is the next certificate of a chain
+                # (fullchain.pem is the default ACME layout), not junk: reopen the block for the
+                # same key. Dropping it would be a silent write-back the config_save
+                # truncated-PEM guard cannot see — both markers stay present.
+                parts.append(line)
+                in_pem = PEM_END not in line
+                pem_closed = not in_pem
             continue
 
         flush()
