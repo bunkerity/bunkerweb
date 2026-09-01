@@ -445,7 +445,7 @@ def test_enum_labels_match_between_an_upgraded_and_a_fresh_database(upgraded_and
     constraint or a VARCHAR, so a value the model added has to be migrated in with
     `ALTER TYPE ... ADD VALUE` and can be forgotten.
 
-    `postgresql_versions/e8b4d91f6a20_..._1_7_0_beta.py` does exactly that for `web_cache`,
+    `postgresql_versions/b745cae3a655_..._1_7_0_beta.py` does exactly that for `web_cache`,
     `resource_groups` and `certificates`. The migration *not raising* is only half the answer; this
     is the other half. Note the label check passing here says nothing about PostgreSQL 11 or older,
     where `ADD VALUE` cannot run inside a transaction at all — the compose pins `postgres:16`.
@@ -465,3 +465,26 @@ def test_enum_labels_match_between_an_upgraded_and_a_fresh_database(upgraded_and
 
     assert fresh["enums"], "no ENUM types found on a fresh PostgreSQL install; this test would pass vacuously"
     assert not drift, "ENUM types whose labels differ between an upgraded and a fresh database:\n  " + "\n  ".join(drift)
+
+
+def test_no_engine_directory_has_two_migrations_for_the_same_version():
+    """`entrypoint.sh:109` resolves a version to a revision by globbing the filename.
+
+    It takes `*_upgrade_to_version_<version>.py` and pipes the result through `awk -F_ '{print $1}'`,
+    so two files matching one version give it a two-line REVISION and `alembic stamp` fails on a
+    database that is otherwise perfectly upgradable. `_revision_for` above asserts this for the one
+    version it is asked about; nothing asserted it for the set, which is what porting dev's
+    revisions into these directories puts at risk -- a version that exists on both branches under
+    two different revision ids leaves two files behind and breaks the upgrade for that version only.
+    """
+    collisions, total = [], 0
+    for directory in sorted(ALEMBIC.glob("*_versions")):
+        seen = {}
+        for path in sorted(directory.glob("*_upgrade_to_version_*.py")):
+            version = path.name.split("_upgrade_to_version_", 1)[1]
+            seen.setdefault(version, []).append(path.name)
+            total += 1
+        collisions += [f"{directory.name}: {version} -> {names}" for version, names in sorted(seen.items()) if len(names) > 1]
+
+    assert total > 100, f"only {total} migration files found across all engines; this test would pass near-vacuously"
+    assert not collisions, "versions with more than one migration file, which entrypoint.sh cannot resolve:\n  " + "\n  ".join(collisions)
