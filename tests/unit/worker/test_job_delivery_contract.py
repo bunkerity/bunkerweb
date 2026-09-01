@@ -87,7 +87,7 @@ def exit_one_sites(source_file: Path) -> list:
     try:
         tree = ast.parse(source_file.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError):
-        # Unparseable is not provably free of an exit-1 path, and this detector only ever claims
+        # An unparsable file is not provably free of an exit-1 path, and this detector only claims
         # absence. Report a site so the caller stays on the safe side.
         return [f"{source_file.name}:0 unparseable"]
 
@@ -285,7 +285,11 @@ class TestDetectorBites:
 # cleanup, bookkeeping -- is not matched, and that is a miss this predicate accepts.
 #
 # Same asymmetry as the first predicate: generous about what it lets through, never about what it
-# accuses. Its errors are missed error paths, not false alarms.
+# accuses. Its errors are usually missed error paths — with one known false-alarm shape: a helper
+# FUNCTION inside a declared job file whose `return 1` never reaches the exit code (the exclusion
+# below is file-granular, not call-graph-granular). certbot-new.py:684/847 were that case in
+# 2026-09; both call sites only tested zero/non-zero, and the resolution was `return 2`, which is
+# clearer anyway. Do the same rather than teaching this predicate call graphs.
 #
 # **Scope: files a `plugin.json` actually declares as jobs.** Only those exit codes reach
 # `tasks.py`. `certbot-auth.py` and `certbot-cleanup.py` set `status = 1` on a failed API call and
@@ -378,9 +382,9 @@ def error_paths_using_the_reload_code(core_dir=CORE) -> list:
 def test_no_job_error_path_uses_the_reload_exit_code():
     """A job that failed must not exit 1 -- that is the code for "changed, push and reload".
 
-    Currently red, deliberately and with the manager's sign-off, on the sites listed in the failure
-    message. Each one reloads nginx across the fleet because a cleanup or a fetch failed, and each
-    is recorded as a successful run. The fix is per-site: use 2, which the worker reads as a failure.
+    Green since 2026-09-01: the letsencrypt timeout paths (certbot-new.py:684/847) were the last
+    two sites, resolved with `return 2`. A new red here is a real defect -- fix the flagged site
+    to use 2 (the worker reads it as a failure), never dismiss the test.
     """
     sites = error_paths_using_the_reload_code()
     assert sites == [], "error path(s) exiting 1, which the worker reads as 'changed, reload the fleet':\n  " + "\n  ".join(sites)
@@ -434,11 +438,11 @@ class TestErrorPathDetectorBites:
         assert error_paths_using_the_reload_code(core) == []
 
     def test_the_predicate_finds_something_in_the_real_tree(self):
-        """Anti-vacuity against the live tree: the detector must match real code, not just fixtures.
+        """Anti-vacuity: the manifest walker must keep finding the declared jobs.
 
-        Drop this expectation only when the last site is fixed and
-        ``test_no_job_error_path_uses_the_reload_exit_code`` goes green -- at which point the two
-        assertions contradict each other and this one is the one to delete.
+        The contract went green on 2026-09-01, so the original "detector matches real code"
+        expectation is gone by design; what remains load-bearing is that ``declared_job_files``
+        still walks the real tree -- an empty result would make the green contract vacuous.
         """
         assert declared_job_files(), "no declared jobs found -- the manifest walker is broken"
 

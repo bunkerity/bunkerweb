@@ -681,7 +681,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
     if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT):
         LOGGER.error(f"certbot delete for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-        return 1
+        return 2
 
     return process.returncode
 
@@ -844,7 +844,7 @@ def certbot_new(
 
     if not stream_certbot(process, LOGGER_CERTBOT, CERTBOT_TIMEOUT, watch_stale_account):
         LOGGER.error(f"certbot for {service} timed out after {CERTBOT_TIMEOUT}s, killing process.")
-        return 1
+        return 2
 
     if stale_account.is_set() and account_id:
         # Purge the canonical store, not paths.config_dir: in concurrent mode config_dir is a
