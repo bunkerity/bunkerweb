@@ -23,25 +23,23 @@ config:
   # (`Configurator.get_config` fills defaults from the templates FIRST, then overrides with the
   # variables), so this is the documented way to opt back out.
   AUTO_LETS_ENCRYPT: "no"
-  # Belt to that brace, and NOT redundant. `AUTO_LETS_ENCRYPT: "no"` is the plugin default, so
-  # under the multi-layer defect below it can be dropped and the templates' "yes" can win -- which
-  # is exactly what happens when a single action is run on its own (`test.sh docker core dev
-  # "templates;order_low_then_high"`, a first-class path in build.sh): there is no earlier
-  # single-layer action to have persisted the row. Left alone that reaches the PRODUCTION ACME
-  # directory for www.example.com. This value is the plugin default's opposite AND the opposite of
-  # what every template declares, so it is stored unconditionally. Same rule as
-  # `tests/core/letsencrypt.yml`: never AUTO_LETS_ENCRYPT without pinning the directory.
+  # Belt to that brace. Historical note: before the 2026-09-01 save-path fix, a multi-layer
+  # `USE_TEMPLATE` could DROP the explicit "no" above (a value equal to the plugin default was
+  # lost to the templates' "yes") and a single-action run reached the PRODUCTION ACME directory.
+  # The fix persists the "no" in every run shape, but this line stays on its own merits — same
+  # house rule as `tests/core/letsencrypt.yml`: never AUTO_LETS_ENCRYPT without pinning the
+  # directory, whatever the rest of the config claims to guarantee.
   USE_LETS_ENCRYPT_STAGING: "yes"
   # `high` turns these three on; they are not this spec's subject and each one costs the run
   # either a challenge page in front of every assertion (antibot), a DNS round trip (dnsbl) or a
   # port scan of the client (reverse scan) -- and that last one BLOCKS the runner, whose source
   # address is the Docker gateway, where 80 and 443 are open because the stack publishes them.
   #
-  # Two of the three need a SECOND, non-default setting to actually hold. Setting a switch back
-  # to its own plugin default does not survive a template layer that turns it on: measured, not
-  # assumed -- `USE_ANTIBOT: "no"` alone still answered `302 -> /challenge` under
-  # `USE_TEMPLATE: "low high"` (see the lane report). `USE_DNSBL` is the control: its plugin
-  # default is "yes", so "no" is a non-default value and it holds on its own.
+  # The second, non-default setting each one carries below is belt-and-braces. Historical note:
+  # before the 2026-09-01 save-path fix, a switch set back to its own plugin default did NOT
+  # survive a multi-layer template (`USE_ANTIBOT: "no"` alone still answered `302 -> /challenge`
+  # under `USE_TEMPLATE: "low high"`, measured). The fix makes the "no" hold on its own; the
+  # companions stay so this spec never depends on that fix staying fixed.
   USE_ANTIBOT: "no"
   # Every URI is exempt from the challenge. Not a duplicate of the line above: the templates
   # never declare this key, so there is no layer to lose to.
@@ -57,14 +55,12 @@ config:
   # template-sourced, which is what makes the location itself the template's doing.
   REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
 
-# Every assertion below dials :443 rather than :80. In a full-spec run the explicit
-# `AUTO_LETS_ENCRYPT: "no"` above does win -- action 1 carries a SINGLE layer, where the save path
-# resolves the template correctly, persists the row, and every later action is then shielded by it
-# (`config_read.py`: a non-default method skips the layer). Run ONE action on its own and that row
-# does not exist: the templates' "yes" applies, `letsencrypt.lua:220` sets `https_configured` from
-# that setting alone -- issuance never has to succeed -- and `ssl.lua` answers :80 with a 301.
-# Dialling :443 is what makes each action independent of its predecessors, so a single-action
-# debug run measures the same thing the suite does.
+# Every assertion below dials :443 rather than :80. Since the 2026-09-01 save-path fix the
+# explicit `AUTO_LETS_ENCRYPT: "no"` above is persisted in every run shape (before it, a
+# single-action run lost it to the templates' "yes" and `ssl.lua` answered :80 with a 301 —
+# `letsencrypt.lua:220` sets `https_configured` from that setting alone, issuance never has to
+# succeed). Dialling :443 stays: it is what makes each action independent of its predecessors,
+# so a single-action debug run measures the same thing the suite does.
 
 actions:
   # A template-supplied location is a real location. `USE_REVERSE_PROXY` ("no" by default) and

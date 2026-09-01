@@ -1654,14 +1654,32 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         # Non-multisite configuration
         self.logger.debug("Checking if non-multisite settings have changed")
 
+        # USE_TEMPLATE is an ORDERED LIST -- fold its layers once, last-wins, exactly like the
+        # multisite branch (_sc_process_service, _sc_process_global_settings). Every lookup below
+        # used to filter on the RAW value, which matches nothing as soon as a second layer is
+        # present: the template default silently fell back to the PLUGIN default, so an explicit
+        # value equal to that default was dropped (the template then won at read time), clearing a
+        # template-supplied list re-inherited the old one, and the template's own values were
+        # written into bw_global_values as operator-set rows.
+        nm_template_ids = split_templates(ctx.template)
+        nm_template_layers: Dict[str, Dict[Tuple[str, int], Any]] = {}
+        if nm_template_ids:
+            for ts in session.execute(
+                select(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                .filter(Template_settings.template_id.in_(nm_template_ids))
+                .order_by(Template_settings.order)
+            ):
+                nm_template_layers.setdefault(ts.template_id, {})[(ts.setting_id, ts.suffix or 0)] = ts.default
+        nm_template_defaults = merge_template_settings(nm_template_layers, nm_template_ids)
+
         if not skip_service_management:
             server_name = ctx.config.get("SERVER_NAME", None)
             if ctx.template and server_name is None:
                 # `Template_settings.value` does not exist -- the table stores the value in
                 # `default` -- so this raised AttributeError whenever a non-multisite config set
-                # USE_TEMPLATE without a SERVER_NAME. `.scalar()` and not `.first()`: the result is
-                # split on " " a few lines down, which a Row would not survive either.
-                server_name = session.execute(select(Template_settings.default).filter_by(template_id=ctx.template, setting_id="SERVER_NAME").limit(1)).scalar()
+                # USE_TEMPLATE without a SERVER_NAME. Still a plain string and not a Row: the
+                # result is split on " " a few lines down.
+                server_name = nm_template_defaults.get(("SERVER_NAME", 0))
 
             if server_name is None or server_name:
                 server_name = server_name or "www.example.com"
@@ -1690,15 +1708,10 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         nm_multiple = {
             s.id: (self._empty_if_none(s.default), s.multiple) for s in session.execute(select(Settings.id, Settings.default, Settings.multiple)).all()
         }
-        nm_template_defaults = {}
         nm_template_slots = set()  # (group, suffix) kept alive by the template -> must not be persisted
-        if ctx.template:
-            for ts in session.execute(
-                select(Template_settings.setting_id, Template_settings.suffix, Template_settings.default).filter_by(template_id=ctx.template)
-            ):
-                nm_template_defaults[(ts.setting_id, ts.suffix or 0)] = ts.default
-                if ts.suffix and ts.suffix > 0 and ts.setting_id in nm_multiple and nm_multiple[ts.setting_id][1]:
-                    nm_template_slots.add((nm_multiple[ts.setting_id][1], ts.suffix))
+        for ts_setting_id, ts_suffix in nm_template_defaults:
+            if ts_suffix > 0 and nm_multiple.get(ts_setting_id, (None, None))[1]:
+                nm_template_slots.add((nm_multiple[ts_setting_id][1], ts_suffix))
         nm_anchored_slots = set()
         for anchor_key, anchor_value in ctx.config.items():
             anchor_suffix = 0
@@ -1762,16 +1775,14 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             )
             target_file_name, file_name_changed = _get_setting_file_name(ctx, setting.type, original_key, value_changed, current_file_name)
 
-            template_setting = None
             if ctx.template:
-                template_setting = session.execute(
-                    select(Template_settings.default).filter_by(template_id=ctx.template, setting_id=key, suffix=suffix).limit(1)
-                ).first()
                 service_template_change = True
 
             nm_mult = nm_multiple.get(key, (None, None))[1]
             nm_is_anchorless = suffix > 0 and nm_mult is not None and (nm_mult, suffix) not in nm_anchored_slots and (nm_mult, suffix) not in nm_template_slots
-            nm_default = template_setting.default if template_setting is not None else setting.default
+            # Membership, not `.get(...) or`: Template_settings.default is nullable, and a
+            # declared NULL/"" layer value must beat the plugin default like any other.
+            nm_default = nm_template_defaults[(key, suffix)] if (key, suffix) in nm_template_defaults else setting.default
 
             if not global_value:
                 # An anchorless slot's default member must be persisted, else the whole slot vanishes.
