@@ -135,6 +135,17 @@ NOT_A_DEFAULT = {
     # no PHP, which is why *that* override is a real pin and is in HEADER_PINS above. Keyed on the
     # header, not the action: the other five expectations in `check_headers` ARE defaults.
     ("headers.yml", "check_headers", "Content-Security-Policy"),
+    # `templates.yml` drives Referrer-Policy from a USE_TEMPLATE LAYER, never from the `headers`
+    # plugin default: `low` sets "no-referrer-when-downgrade", `high` sets "no-referrer", and the
+    # three actions below exist precisely because the two disagree -- the value that comes back
+    # names which layer won. The rule this meta-guard applies ("the action set the setting, so
+    # there is no default to drift") has no notion of USE_TEMPLATE, so a template-sourced value
+    # reads to it as a default. Re-checkable in one step: `grep REFERRER_POLICY
+    # src/common/core/templates/templates/{low,high}.json` -- neither value is the plugin default
+    # ("strict-origin-when-cross-origin"), which is what a real pin here would have to be.
+    ("templates.yml", "order_low_then_high", "Referrer-Policy"),
+    ("templates.yml", "order_high_then_low", "Referrer-Policy"),
+    ("templates.yml", "unknown_layer_is_skipped_and_reported", "Referrer-Policy"),
 }
 
 

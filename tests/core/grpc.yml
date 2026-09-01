@@ -1,0 +1,206 @@
+# The gRPC location family had zero coverage anywhere in the suite (17/17 settings untouched),
+# even though it renders a `location` into the same server block as `reverseproxy`, `redirect` and
+# `php` and is one of the four families the duplicate-location registry arbitrates
+# (`src/common/utils/location_claims.py`).
+#
+# Docker only, deliberately. The backend is a compose service pinned to a fixed address on
+# `bw-services`, the assertions speak HTTP/2 to :443, and neither has been proven on the
+# controller-driven arms; the Autoconf and Kubernetes shapes turn action-level `config:` into
+# globals and per-service labels/annotations respectively, which is a different test, not the same
+# one running elsewhere. Widening the arm list is a follow-up that has to be run, not assumed.
+integrations:
+  - "Docker"
+
+config:
+  # One request per action, but `LIMIT_REQ_RATE` defaults to 2r/s and the probe's own retry-free
+  # single call is not what this spec is about. Off, so a red here is always the gRPC path.
+  USE_LIMIT_REQ: "no"
+
+actions:
+  # The enable switch, from the outside: `grpc.conf` renders nothing unless USE_GRPC is "yes", and
+  # `location_claims.FAMILY_SWITCHES` mirrors that. With the switch off and a host still set, the
+  # location must not exist -- `server.conf` ships an `index` but no `root`, so an unmatched path
+  # is a 404. A regression that rendered the location anyway would answer 502 (nothing is dialling
+  # gRPC here) rather than 404.
+  not_activated:
+    type: status
+    url: "https://www.example.com/hello.HelloService/SayHello"
+    verify_ssl: false
+    raise_for_status: false
+    status: 404
+    config:
+      USE_GRPC: "no"
+      GRPC_HOST: "grpc://192.168.0.240:9000"
+    services: &grpc_backends
+      # moul/grpcbin: 9000 plaintext gRPC, 9001 TLS gRPC, and the two services this spec calls --
+      # `hello.HelloService/SayHello` (one string in, one string out) and
+      # `grpcbin.GRPCBin/HeadersUnary`, which answers with the request metadata it received. The
+      # latter is what makes GRPC_HEADERS and GRPC_CUSTOM_HOST observable without a protobuf
+      # runtime: the values land in the reply as plain strings.
+      #
+      # Addressed by IP, not by name: `dnsmasq.hosts` is where a bare name would have to be
+      # registered and it is not this spec's file to edit, and an IP literal keeps NGINX's runtime
+      # resolver out of a path whose subject is `grpc_pass`. .240 and .199 are free -- .20 is
+      # dnsmasq, .250-.252 belong to antibot's capjs stack, .254 is the shipped `app1`
+      # (`tests/misc/docker/services.yml`) and .253 the `cacheable-app` `tests/api/web-cache.yml`
+      # brings up.
+      grpcbin:
+        image: moul/grpcbin:latest@sha256:bd8f2ffdd02d0849fad2d1c754eff4402c867e7a3e0552b8992f4590f5687d20
+        container_name: grpcbin
+        restart: "unless-stopped"
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.240
+      # A socket that completes the TCP handshake and then never answers, so `grpc_read_timeout`
+      # is the only thing that can end the request. An unassigned IP would not do: the bridge
+      # answers an unanswered ARP with EHOSTUNREACH in about three seconds, which is close enough
+      # to a configured timeout to prove nothing. `-e sleep` holds ONE connection at a time, which
+      # is all a single unary call opens.
+      grpc-blackhole:
+        image: busybox:1.37.0@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+        container_name: grpc-blackhole
+        command: ["sh", "-c", "while true; do nc -l -p 9100 -e sleep 600; done"]
+        restart: "unless-stopped"
+        networks:
+          bw-services:
+            ipv4_address: 192.168.0.199
+
+  # The plugin doing its job: GRPC_URL defaults to "/", so the whole service is the gRPC location.
+  # `not_log` is a cheap guard that one family on one path saves clean; it is NOT the matched
+  # control for `duplicate_location_refused` below -- no reverse proxy is configured here, so the
+  # other family never reaches its switch. `tests/core/templates.yml` carries the real pair, where
+  # the only difference between refusal and no refusal is one template layer.
+  unary_call:
+    type: script
+    script:
+      - "python3"
+      - "tests/core/grpc/probe.py"
+      - "https://www.example.com/hello.HelloService/SayHello"
+      - "--greeting"
+      - "bunkerweb"
+      - "--expect"
+      - "hello bunkerweb"
+    not_log: "Cannot save these settings"
+    log_from: "scheduler"
+    config:
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://192.168.0.240:9000"
+    services: *grpc_backends
+
+  # Two suffixed backends on two paths, the second over TLS. This is the `hosts.list|sort` loop in
+  # `grpc.conf`: a suffix picks up its own URL, and every per-suffix setting is read from the
+  # matching `_N` key. One config, two assertions -- `restart_stack: false` on the first keeps the
+  # second from re-applying an identical config for nothing.
+  suffixed_backends_plaintext:
+    type: script
+    script:
+      - "python3"
+      - "tests/core/grpc/probe.py"
+      - "https://www.example.com/hello.HelloService/SayHello"
+      - "--greeting"
+      - "bunkerweb"
+      - "--expect"
+      - "hello bunkerweb"
+    restart_stack: false
+    config: &suffixed_config
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://192.168.0.240:9000"
+      GRPC_URL: "/hello.HelloService"
+      GRPC_HOST_1: "grpcs://192.168.0.240:9001"
+      GRPC_URL_1: "/grpcbin.GRPCBin"
+    services: *grpc_backends
+  suffixed_backends_tls:
+    type: script
+    script:
+      - "python3"
+      - "tests/core/grpc/probe.py"
+      - "https://www.example.com/grpcbin.GRPCBin/HeadersUnary"
+      - "--header"
+      - "x-suffix-probe=second-backend"
+      - "--expect"
+      - "x-suffix-probe"
+      - "--expect"
+      - "second-backend"
+    config: *suffixed_config
+    services: *grpc_backends
+
+  # GRPC_CUSTOM_HOST rewrites the Host header, which the gRPC module carries as `:authority`, and
+  # GRPC_HEADERS is a semicolon-separated list of `grpc_set_header` values. Both are read back out
+  # of the upstream's own view of the request. `--not-expect www.example.com` is what makes the
+  # first one an override rather than an addition: the template sends the custom value as Host AND
+  # as X-Forwarded-Host, so the client's own hostname must appear nowhere upstream.
+  custom_host_and_headers:
+    type: script
+    script:
+      - "python3"
+      - "tests/core/grpc/probe.py"
+      - "https://www.example.com/grpcbin.GRPCBin/HeadersUnary"
+      - "--expect"
+      - "grpc-upstream.example.net"
+      - "--expect"
+      - "x-grpc-probe"
+      - "--expect"
+      - "wave10"
+      - "--expect"
+      - "x-grpc-second"
+      - "--expect"
+      - "second-value"
+      - "--not-expect"
+      - "www.example.com"
+    config:
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://192.168.0.240:9000"
+      GRPC_CUSTOM_HOST: "grpc-upstream.example.net"
+      GRPC_HEADERS: "X-Grpc-Probe wave10; X-Grpc-Second second-value"
+    services: *grpc_backends
+
+  # The one representative assertion for the timeout/keepalive family. Asserting all of them one
+  # arm each would be nine stack restarts to prove the same `{{ setting }};` substitution nine
+  # times; asserting none of them leaves the whole family unproven. The bounds are two-sided on
+  # purpose: below 3s means the socket failed rather than timed out (so the knob proved nothing),
+  # and 25s is under the 60s default every one of these settings falls back to, so a value that
+  # never reached NGINX reds here instead of passing slowly.
+  read_timeout:
+    type: script
+    script:
+      - "python3"
+      - "tests/core/grpc/probe.py"
+      - "https://www.example.com/hello.HelloService/SayHello"
+      - "--greeting"
+      - "bunkerweb"
+      - "--status"
+      - "504"
+      - "--min-seconds"
+      - "3"
+      - "--max-seconds"
+      - "25"
+    config:
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://192.168.0.199:9100"
+      GRPC_READ_TIMEOUT: "5s"
+    services: *grpc_backends
+
+  # The registry, from the product's own save path. gRPC and the reverse proxy both landing on "/"
+  # is `duplicate location "/"` -- an [emerg] NGINX answers by refusing the whole reload -- so
+  # `inline_family_conflict` refuses it before it reaches the database. The scheduler's env IS one
+  # save, which is why this is reachable from a core spec at all. No HTTP assertion: a refused save
+  # leaves the PREVIOUS action's configuration in place, so anything this asked of :443 would be
+  # measuring the action before it.
+  duplicate_location_refused:
+    type: database
+    query: "SELECT 1"
+    result: null
+    log: "would serve / through both its reverse proxy and its gRPC settings"
+    log_from: "scheduler"
+    config:
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://192.168.0.240:9000"
+      GRPC_URL: "/"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+      REVERSE_PROXY_URL: "/"
+    services: *grpc_backends
+    # This action's whole point is a save the product REFUSES, so it leaves the previous action's
+    # configuration in the database -- an unusual state to hand the next spec on a workstation,
+    # where the `bw-storage` volume outlives a `down -v`. Wipe it on the way out.
+    full_clean: true

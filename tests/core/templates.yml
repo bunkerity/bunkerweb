@@ -1,0 +1,181 @@
+# `USE_TEMPLATE` became an ORDERED multivalue list in 1.7 ("templates multiples par service") and
+# shipped with no e2e at all: the `templates` core plugin declares no settings of its own, so the
+# coverage matrix could only ever score it 0/0. What is actually at stake is the OVERLAY -- which
+# layer wins a key both of them declare, and whether the rest of the product reads a
+# template-supplied value as a real one.
+#
+# Both are asserted against the SHIPPED templates rather than fixtures of this spec's own: a
+# template is a plugin artefact (`src/common/core/*/templates/*.json`, loaded into the database by
+# `plugins_update`), so a spec cannot invent one without shipping a plugin. `low` and `high` are
+# in the tree, disagree on `REFERRER_POLICY`, and agree on the reverse-proxy trio -- which is
+# exactly the pair of properties this needs.
+#
+# Docker only, for the same reason `grpc.yml` is: on Autoconf and Kubernetes the per-service
+# template goes through `Configurator`'s multisite branch and the settings arrive as labels or
+# annotations, which is a different code path (`__resolve_template_settings` per service, not
+# once globally). Proving it there is worth doing and is not the same test.
+integrations:
+  - "Docker"
+
+config:
+  # Every shipped security template turns ACME on. Nothing in this stack can answer an HTTP-01
+  # challenge for www.example.com, and an explicit variable beats a template layer
+  # (`Configurator.get_config` fills defaults from the templates FIRST, then overrides with the
+  # variables), so this is the documented way to opt back out.
+  AUTO_LETS_ENCRYPT: "no"
+  # Belt to that brace, and NOT redundant. `AUTO_LETS_ENCRYPT: "no"` is the plugin default, so
+  # under the multi-layer defect below it can be dropped and the templates' "yes" can win -- which
+  # is exactly what happens when a single action is run on its own (`test.sh docker core dev
+  # "templates;order_low_then_high"`, a first-class path in build.sh): there is no earlier
+  # single-layer action to have persisted the row. Left alone that reaches the PRODUCTION ACME
+  # directory for www.example.com. This value is the plugin default's opposite AND the opposite of
+  # what every template declares, so it is stored unconditionally. Same rule as
+  # `tests/core/letsencrypt.yml`: never AUTO_LETS_ENCRYPT without pinning the directory.
+  USE_LETS_ENCRYPT_STAGING: "yes"
+  # `high` turns these three on; they are not this spec's subject and each one costs the run
+  # either a challenge page in front of every assertion (antibot), a DNS round trip (dnsbl) or a
+  # port scan of the client (reverse scan) -- and that last one BLOCKS the runner, whose source
+  # address is the Docker gateway, where 80 and 443 are open because the stack publishes them.
+  #
+  # Two of the three need a SECOND, non-default setting to actually hold. Setting a switch back
+  # to its own plugin default does not survive a template layer that turns it on: measured, not
+  # assumed -- `USE_ANTIBOT: "no"` alone still answered `302 -> /challenge` under
+  # `USE_TEMPLATE: "low high"` (see the lane report). `USE_DNSBL` is the control: its plugin
+  # default is "yes", so "no" is a non-default value and it holds on its own.
+  USE_ANTIBOT: "no"
+  # Every URI is exempt from the challenge. Not a duplicate of the line above: the templates
+  # never declare this key, so there is no layer to lose to.
+  ANTIBOT_IGNORE_URI: "^/"
+  USE_DNSBL: "no"
+  USE_REVERSE_SCAN: "no"
+  # Same shape: one port, closed on the runner, so a scan that does run finds nothing and cannot
+  # ban the client mid-spec.
+  REVERSE_SCAN_PORTS: "1"
+  USE_LIMIT_REQ: "no"
+  # The templates point their reverse proxy at `http://upstream-server:8080`, which exists
+  # nowhere. Only the HOST is overridden here: `USE_REVERSE_PROXY` and `REVERSE_PROXY_URL` stay
+  # template-sourced, which is what makes the location itself the template's doing.
+  REVERSE_PROXY_HOST: "http://app1.bw-services:8080"
+
+# Every assertion below dials :443 rather than :80. In a full-spec run the explicit
+# `AUTO_LETS_ENCRYPT: "no"` above does win -- action 1 carries a SINGLE layer, where the save path
+# resolves the template correctly, persists the row, and every later action is then shielded by it
+# (`config_read.py`: a non-default method skips the layer). Run ONE action on its own and that row
+# does not exist: the templates' "yes" applies, `letsencrypt.lua:220` sets `https_configured` from
+# that setting alone -- issuance never has to succeed -- and `ssl.lua` answers :80 with a 301.
+# Dialling :443 is what makes each action independent of its predecessors, so a single-action
+# debug run measures the same thing the suite does.
+
+actions:
+  # A template-supplied location is a real location. `USE_REVERSE_PROXY` ("no" by default) and
+  # `REVERSE_PROXY_URL` both come from `low` here, so a 200 carrying the upstream's own page is
+  # only reachable if the overlay reached the renderer. Without the layer the service has no
+  # location at all and `server.conf` answers 404.
+  template_sourced_reverse_proxy_renders:
+    type: string
+    url: "https://www.example.com"
+    verify_ssl: false
+    string: "<title>Hello World</title>"
+    config:
+      USE_TEMPLATE: "low"
+
+  # A reorder is a different configuration, so the layer list has to survive the round trip
+  # BYTE FOR BYTE: not sorted, not deduplicated, not folded into the settings it resolves to.
+  # `templates_unchanged()` compares the stored string against the incoming one to decide whether
+  # a template change happened at all, and every one of those normalisations would make
+  # "low high" and "high low" compare equal -- which is the pair the two actions above rely on.
+  the_ordered_layer_list_is_persisted_verbatim:
+    type: database
+    query: "SELECT value FROM bw_services_settings WHERE setting_id = 'USE_TEMPLATE' UNION ALL SELECT value FROM bw_global_values WHERE setting_id = 'USE_TEMPLATE'"
+    result: "low high"
+    config:
+      USE_TEMPLATE: "low high"
+
+  # ORDER, not union. Both layers declare `REFERRER_POLICY` and they disagree, so the value that
+  # comes back names the winner -- and the two actions differ ONLY in the order of the same two
+  # ids. A union, a set, or a first-wins overlay would answer the same thing twice and one of
+  # these two would go red.
+  #
+  # The regexes are anchored on purpose: the handler uses `re.match`, which anchors at the start
+  # only, so a bare `no-referrer` would also match `no-referrer-when-downgrade` and the pair would
+  # assert nothing.
+  order_low_then_high:
+    type: header
+    url: "https://www.example.com"
+    verify_ssl: false
+    response_headers:
+      Referrer-Policy: "^no-referrer$"
+    config:
+      USE_TEMPLATE: "low high"
+  order_high_then_low:
+    type: header
+    url: "https://www.example.com"
+    verify_ssl: false
+    response_headers:
+      Referrer-Policy: "^no-referrer-when-downgrade$"
+    config:
+      USE_TEMPLATE: "high low"
+
+  # A typo drops ONE layer out of N instead of meaning "no template", so the resolver reports the
+  # POSITION rather than just the id. The surviving layers must still compose in their declared
+  # order, which is why this also re-asserts the header: a bogus id that quietly reset the list,
+  # or that shifted the remaining positions, would leave the warning right and the value wrong.
+  unknown_layer_is_skipped_and_reported:
+    type: header
+    url: "https://www.example.com"
+    verify_ssl: false
+    response_headers:
+      Referrer-Policy: "^no-referrer$"
+    log: 'Unknown template "nope" at position 2 of USE_TEMPLATE'
+    log_from: "scheduler"
+    config:
+      USE_TEMPLATE: "low nope high"
+
+  # The duplicate-location registry, and whether it can see a template. `SELECT 1` is a vehicle,
+  # not an assertion: `result: null` means the handler only checks the exit code, and the whole
+  # verdict of both actions is the scheduler log line. `USE_GRPC`/`GRPC_URL` are
+  # explicit in both of the next two actions; the ONLY difference is the template layer. Without
+  # it, `USE_REVERSE_PROXY` is "no", the reverse-proxy family claims nothing
+  # (`location_claims.family_enabled`), one family holds "/" and the save is clean -- so this
+  # action is the control that stops the one below from passing for any reason other than the
+  # template.
+  #
+  # It comes first for portability rather than for the Docker arm: `restart_stack()` recreates
+  # bw-scheduler between actions there, so `get_logs` only ever sees the current action. On the
+  # controller-driven arms, and for any `log_from: bunkerweb` assertion (that container survives a
+  # restart), the scan does span earlier actions -- so ordering a `not_log` before the action that
+  # provokes the string is the rule that holds everywhere.
+  location_claim_needs_the_template:
+    type: database
+    query: "SELECT 1"
+    result: null
+    not_log: "Cannot save these settings"
+    log_from: "scheduler"
+    config:
+      USE_TEMPLATE: ""
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://grpc-upstream.example.net:9000"
+      GRPC_URL: "/"
+  # Same explicit gRPC rule, one layer added. `low` supplies the switch AND the path of the
+  # reverse-proxy location, both families now land on "/", and `inline_family_conflict` refuses
+  # the save rather than letting NGINX meet `duplicate location "/"` -- an [emerg] that would
+  # refuse the whole reload. A registry blind to template-sourced values would save this happily
+  # and the service would stop reloading.
+  #
+  # No HTTP assertion, deliberately: a refused save leaves the PREVIOUS action's configuration in
+  # the database, so any request here would be measuring the action before it, not this one.
+  template_sourced_location_claim_is_refused:
+    type: database
+    query: "SELECT 1"
+    result: null
+    log: "would serve / through both its reverse proxy and its gRPC settings"
+    log_from: "scheduler"
+    config:
+      USE_TEMPLATE: "low"
+      USE_GRPC: "yes"
+      GRPC_HOST: "grpc://grpc-upstream.example.net:9000"
+      GRPC_URL: "/"
+    # This action's whole point is a save the product REFUSES, so it leaves the previous action's
+    # configuration in the database -- an unusual state to hand the next spec on a workstation,
+    # where the `bw-storage` volume outlives a `down -v`. Wipe it on the way out.
+    full_clean: true
