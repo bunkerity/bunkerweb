@@ -1062,13 +1062,6 @@ function cleanup_stack () {
             return 1
         fi
 
-        docker compose -f tests/docker/docker-compose.scheduler.yml down -v
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
-            return 1
-        fi
-
         if [ "$integration" == "Autoconf" ] ; then
             docker compose -f tests/docker/docker-compose.autoconf.yml down -v
             # shellcheck disable=SC2181
@@ -1107,6 +1100,19 @@ function cleanup_stack () {
         # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "UTILS" "❌" "🐳 Failed to stop BunkerWeb API"
+            return 1
+        fi
+
+        # Last of the four, and the order is load-bearing: this compose is the one that *declares*
+        # `bw-storage` (`name: bw-storage`, not `external`), so its `down -v` is the only call that
+        # deletes the volume -- and Docker refuses while the worker and the api still mount it.
+        # Taken down first, the delete failed with "Resource is still in use", the volume survived
+        # the `full_clean` boundary carrying the previous arm's database, and the next arm booted an
+        # older image against it: "No migration file found for database version: 1.7.0~beta".
+        docker compose -f tests/docker/docker-compose.scheduler.yml down -v
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "🐳 Failed to stop BunkerWeb Scheduler"
             return 1
         fi
 
@@ -1645,12 +1651,21 @@ function restart_stack () {
 
         # The API and the worker restart with the rest of the stack whatever the type:
         # a restarted scheduler dispatches into an API that must have reloaded too.
+        # Down always -- whatever is running is the OLD version and has to go. Up only when the
+        # version being restarted INTO has these components at all: they arrived in 1.7, and the
+        # upgrade spec restarts into 1.6.x, where the pull fails with "repository does not exist".
+        # Same guard start.sh puts on the same two composes.
         for _component in api worker ; do
             docker compose -f "tests/docker/docker-compose.${_component}.yml" down
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "UTILS" "❌" "🐳 Failed to stop BunkerWeb ${_component}"
                 return 1
+            fi
+
+            if ! stack_has_worker ; then
+                log "UTILS" "ℹ️ " "🐳 BunkerWeb $BW_VERSION predates the ${_component}, not restarting it"
+                continue
             fi
 
             docker compose -f "tests/docker/docker-compose.${_component}.yml" up -d
