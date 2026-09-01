@@ -55,4 +55,4 @@ R : Oui. Deux offres existent :
 - BunkerWeb PRO Standard : accès complet, sans support technique.
 - BunkerWeb PRO Enterprise : accès complet, avec support dédié.
 
-Un essai gratuit d’1 mois est disponible avec le code `freetrial`. Rendez‑vous sur le [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) pour l’activer.
+Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).

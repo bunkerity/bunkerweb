@@ -4646,7 +4646,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

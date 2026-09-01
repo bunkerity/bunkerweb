@@ -292,7 +292,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## 升级到 PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO 免费试用"
-    在 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc) 使用代码 `freetrial` 可试用一个月。
+    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
 
 将 PRO 许可证粘贴到 UI 的 **PRO** 页面（或预先设置 `PRO_LICENSE_KEY` 供向导使用）。升级由 scheduler 在后台下载；应用后在 UI 中查看到期时间和服务上限。
 
