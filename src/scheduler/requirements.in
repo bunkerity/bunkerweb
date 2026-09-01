@@ -36,7 +36,7 @@ https://github.com/bunkerity/certbot-dns-transip/archive/7b4f24d12f6fb21b2145912
 
 cffi==2.1.1
 cryptography==50.0.1
-importlib-metadata==9.0.0
+importlib-metadata==9.0.1
 maxminddb==3.1.1
 pydantic==2.13.4
 python-magic==0.4.27
