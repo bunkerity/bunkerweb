@@ -219,19 +219,6 @@ updates:
       prefix: "deps/common/db"
     target-branch: "dev"
 
-  # Terraform
-  - package-ecosystem: "terraform"
-    directory: "/tests/terraform"
-    schedule:
-      interval: "daily"
-      time: "09:00"
-      timezone: "Europe/Paris"
-    assignees:
-      - "fl0ppy-d1sk"
-    commit-message:
-      prefix: "deps/terraform"
-    target-branch: "dev"
-
   # Migration
   - package-ecosystem: "docker"
     directory: "/misc/migration"
