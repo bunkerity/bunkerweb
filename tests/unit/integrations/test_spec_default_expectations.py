@@ -34,6 +34,15 @@ def _default(plugin: str, setting: str) -> str:
     return settings[setting]["default"]
 
 
+TEMPLATES = PLUGINS / "templates" / "templates"
+
+
+def _template_value(template_id: str, setting: str) -> str:
+    settings = json.loads((TEMPLATES / f"{template_id}.json").read_text(encoding="utf-8"))["settings"]
+    assert setting in settings, f"{setting} is no longer declared by the {template_id} template"
+    return settings[setting]
+
+
 def _action(spec: str, name: str, integration: str = "") -> dict:
     actions = yaml.safe_load((CORE / spec).read_text(encoding="utf-8"))["actions"]
     assert name in actions, f"action {name} disappeared from {spec}"
@@ -79,6 +88,27 @@ STATUS_PINS = [
     ("redirect.yml", "check_status", "redirect", "REDIRECT_TO_STATUS_CODE"),
 ]
 
+# (spec, action, response header, setting) -- `templates.yml` actions whose expectation comes
+# from a USE_TEMPLATE layer rather than a plugin default.
+TEMPLATE_PINS = [
+    ("templates.yml", "order_low_then_high", "Referrer-Policy", "REFERRER_POLICY"),
+    ("templates.yml", "order_high_then_low", "Referrer-Policy", "REFERRER_POLICY"),
+    ("templates.yml", "unknown_layer_is_skipped_and_reported", "Referrer-Policy", "REFERRER_POLICY"),
+]
+
+
+def _winning_template(spec: str, action: str) -> str:
+    """The template id that wins a shared key: last one applied among the surviving layers
+    (later layers overlay earlier ones; an unknown id like `nope` is skipped by the resolver,
+    so it never wins). Read from the action's own `USE_TEMPLATE`, not hardcoded, so a spec edit
+    that reorders or drops a layer changes what this test checks against, not just what it
+    reads -- pinning the winner by hand let a flipped layer order (`"low high"` -> `"high low"`)
+    stay green even though the pinned header value was then wrong for the new order."""
+    use_template = (_action(spec, action).get("config") or {}).get("USE_TEMPLATE", "")
+    layers = [tid for tid in use_template.split() if (TEMPLATES / f"{tid}.json").is_file()]
+    assert layers, f"{spec}:{action} sets no USE_TEMPLATE layer with a shipped template; this pin is stale"
+    return layers[-1]
+
 
 @pytest.mark.parametrize("spec,action,integration,header,plugin,setting", HEADER_PINS, ids=lambda v: str(v))
 def test_header_expectation_still_matches_the_shipped_default(spec, action, integration, header, plugin, setting):
@@ -99,6 +129,18 @@ def test_path_expectation_still_matches_the_shipped_default(spec, action, plugin
 @pytest.mark.parametrize("spec,action,plugin,setting", STATUS_PINS, ids=lambda v: str(v))
 def test_status_expectation_still_matches_the_shipped_default(spec, action, plugin, setting):
     assert str(_action(spec, action)["status"]) == _default(plugin, setting)
+
+
+@pytest.mark.parametrize("spec,action,header,setting", TEMPLATE_PINS, ids=lambda v: str(v))
+def test_template_expectation_still_matches_the_pinned_layer(spec, action, header, setting):
+    regex = _action(spec, action)["response_headers"][header]
+    assert regex is not None, f"{spec}:{action} now asserts {header} is absent; this pin is stale"
+    template_id = _winning_template(spec, action)
+    value = _template_value(template_id, setting)
+    assert re.match(regex, value), (
+        f"{spec}:{action} pins {header} with {regex!r}, which no longer matches {template_id}.json's "
+        f"{setting} value {value!r}. Resync the spec with the new template value in the same change."
+    )
 
 
 # ── The meta-guard ──────────────────────────────────────────────────────────────────────────────
@@ -135,17 +177,11 @@ NOT_A_DEFAULT = {
     # no PHP, which is why *that* override is a real pin and is in HEADER_PINS above. Keyed on the
     # header, not the action: the other five expectations in `check_headers` ARE defaults.
     ("headers.yml", "check_headers", "Content-Security-Policy"),
-    # `templates.yml` drives Referrer-Policy from a USE_TEMPLATE LAYER, never from the `headers`
-    # plugin default: `low` sets "no-referrer-when-downgrade", `high` sets "no-referrer", and the
-    # three actions below exist precisely because the two disagree -- the value that comes back
-    # names which layer won. The rule this meta-guard applies ("the action set the setting, so
-    # there is no default to drift") has no notion of USE_TEMPLATE, so a template-sourced value
-    # reads to it as a default. Re-checkable in one step: `grep REFERRER_POLICY
-    # src/common/core/templates/templates/{low,high}.json` -- neither value is the plugin default
-    # ("strict-origin-when-cross-origin"), which is what a real pin here would have to be.
-    ("templates.yml", "order_low_then_high", "Referrer-Policy"),
-    ("templates.yml", "order_high_then_low", "Referrer-Policy"),
-    ("templates.yml", "unknown_layer_is_skipped_and_reported", "Referrer-Policy"),
+    # `templates.yml`'s three Referrer-Policy expectations used to live here too: they come from a
+    # USE_TEMPLATE layer, not the `headers` plugin default, so the meta-guard's "the action set the
+    # setting" rule (which has no notion of USE_TEMPLATE) misreads them as unpinned defaults. They
+    # are now re-derived from the template JSON by TEMPLATE_PINS above instead of exempted here --
+    # see the `pinned` set in test_every_default_derived_header_expectation_is_pinned.
 }
 
 
@@ -183,11 +219,13 @@ def _default_derived_expectations():
 
 def test_every_default_derived_header_expectation_is_pinned():
     pinned = {(spec, action, header) for spec, action, _, header, _, _ in HEADER_PINS}
+    pinned |= {(spec, action, header) for spec, action, header, _ in TEMPLATE_PINS}
     unpinned = [entry for entry in _default_derived_expectations() if entry not in pinned]
     assert not unpinned, (
         "these response_headers expectations pin a plugin default that nothing re-derives:\n  "
         + "\n  ".join(f"{spec}:{action} -> {header}" for spec, action, header in unpinned)
-        + "\nAdd them to HEADER_PINS, or to NOT_A_DEFAULT with the reason they are not one."
+        + "\nAdd them to HEADER_PINS, to TEMPLATE_PINS if it is USE_TEMPLATE-sourced, or to "
+        + "NOT_A_DEFAULT with the reason it is neither."
     )
 
 
