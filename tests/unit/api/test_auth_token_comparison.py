@@ -5,23 +5,20 @@ presented value comes straight off an Authorization header -- so `Bearer é` rea
 TypeError and the caller got a 500 instead of a 401. The rate limiter grew a second call site of
 the same comparison (the admin-token exemption), which is what made it worth one helper.
 
-`app/auth/common.py` only imports `Request` from fastapi for a type hint, so a stub is enough to
-load it here rather than pulling fastapi into the unit requirements.
+`app/auth/common.py` only imports `Request` from fastapi for a type hint. fastapi is pinned in
+tests/unit/requirements.in since 2026-09-01, so the real module is always importable here — this
+file used to install a stub into sys.modules when fastapi was absent, WITHOUT restoring it, which
+poisoned every later `from fastapi import ...` in the run (12 collection-order-dependent errors
+in test_downgrade_hold). No stub, no leak.
 """
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from sys import modules
-from types import ModuleType
 
 COMMON = Path(__file__).resolve().parents[3] / "src" / "api" / "app" / "auth" / "common.py"
 
 
 def _load_common():
-    if "fastapi" not in modules:
-        stub = ModuleType("fastapi")
-        stub.Request = object  # type: ignore[attr-defined]
-        modules["fastapi"] = stub
     spec = spec_from_file_location("bw_api_auth_common", COMMON)
     assert spec and spec.loader
     module = module_from_spec(spec)
