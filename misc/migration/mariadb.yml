@@ -1,3 +1,7 @@
+# Same project name as docker-compose.yml so both halves land on the same project-scoped
+# `bw-db` network. See the comment there for why the fixed `name:` keys were removed.
+name: migration
+
 services:
   bw-db:
     image: mariadb:11
@@ -8,10 +12,7 @@ services:
       MYSQL_USER: "bunkerweb"
       MYSQL_PASSWORD: "secret"
     networks:
-      bw-db:
-        aliases:
-          - bw-db
+      - bw-db
 
 networks:
   bw-db:
-    name: bw-db

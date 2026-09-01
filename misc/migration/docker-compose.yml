@@ -1,3 +1,12 @@
+# Project-scoped on purpose. This stack used to declare `name: bw-universe` / `name: bw-db` and
+# give its `bunkerity/bunkerweb:${TAG}` service the alias `bunkerweb` -- the harness's own network
+# names and its own alias. A create.sh run therefore joined any live `tests/scripts/test.sh` stack
+# and round-robined the harness's `http://bunkerweb:5000` between the real instance and a
+# 1.5.0-beta one with no `/pro_plugins` route, failing another lane's run with a 404 that had
+# nothing to do with it (wave 11, lane L-B). Compose now prefixes every network with this project
+# name, and the services are reachable under their own service names, so no alias is needed.
+name: migration
+
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:${TAG}
@@ -11,9 +20,7 @@ services:
       USE_WHITELIST: "no"
       SEND_ANONYMOUS_REPORT: "no"
     networks:
-      bw-universe:
-        aliases:
-          - bunkerweb
+      - bw-universe
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:${TAG}
@@ -32,15 +39,9 @@ services:
       - bw-db:/usr/share/bunkerweb/db
       - bw-sqlite:/var/lib/bunkerweb
     networks:
-      bw-universe:
-        aliases:
-          - bw-scheduler
-      bw-db:
-        aliases:
-          - bw-scheduler
-      bw-docker:
-        aliases:
-          - bw-scheduler
+      - bw-universe
+      - bw-db
+      - bw-docker
 
   bw-docker:
     image: tecnativa/docker-socket-proxy:nightly
@@ -50,9 +51,7 @@ services:
       CONTAINERS: "1"
       LOG_LEVEL: "warning"
     networks:
-      bw-docker:
-        aliases:
-          - bw-docker
+      - bw-docker
 
 volumes:
   bw-data:
@@ -63,13 +62,13 @@ volumes:
     name: bw-sqlite
 
 networks:
+  # The subnet stays fixed because API_WHITELIST_IP above names it. Two stacks cannot hold the
+  # same subnet at once, so a create.sh run started while the harness is up now fails loudly on
+  # "Pool overlaps with other one on this address space" instead of silently joining it.
   bw-universe:
-    name: bw-universe
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-db:
-    name: bw-db
   bw-docker:
-    name: bw-docker

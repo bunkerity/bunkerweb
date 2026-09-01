@@ -4,6 +4,13 @@
 # applies all existing migrations in bulk, then generates only the new one.
 set -euo pipefail
 
+# Pin the compose project rather than trusting the `name: migration` in each file: an exported
+# COMPOSE_PROJECT_NAME outranks that key, which would rename every network and volume this script
+# creates -- MIGRATION_DB_NETWORK below would point at nothing, and the stack would land in
+# whatever project the caller's environment names, which is how it collided with the test harness
+# in the first place.
+export COMPOSE_PROJECT_NAME="migration"
+
 log() {
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
 }
@@ -67,6 +74,40 @@ version_lt() {
   else
     return 1  # v1 is not less than v2
   fi
+}
+
+# Block until the database server actually accepts a connection.
+#
+# Without this the BunkerWeb stack starts the instant `docker compose up -d` returns for the
+# database, which is long before the server is usable. The scheduler's own retry loop hides half of
+# it -- it reports "Database connection established" and its config generator then reports
+# "Database tables initialized" -- while the tables never appear, the scheduler waits forever on
+# "Database is not initialized", and this script gives up at its 60s health timeout with no clue
+# why. Observed on MariaDB 11.8 (2026-09-01), where the server is ~8s behind the container.
+#
+# Engine-agnostic on purpose: it is the check entrypoint.sh already makes, run from the migration
+# image, so it needs no per-engine client and covers any engine added to databases.json.
+# The compose files are project-scoped (`name: migration`), so the network compose creates for
+# `bw-db` is `migration_bw-db`. Referenced by that name here and in the migration run below.
+MIGRATION_DB_NETWORK="migration_bw-db"
+
+wait_for_database() {
+  docker run --rm --network="$MIGRATION_DB_NETWORK" -e DATABASE_URI --entrypoint python3 local/bw-migration -c '
+import os
+import time
+
+from sqlalchemy import create_engine
+
+uri = os.environ["DATABASE_URI"]
+for _ in range(60):
+    try:
+        create_engine(uri).connect().close()
+        break
+    except Exception:
+        time.sleep(2)
+else:
+    raise SystemExit("database never accepted a connection")
+'
 }
 
 # Fetch and process tags
@@ -195,6 +236,16 @@ for entry in "${db_entries[@]}"; do
       find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
       exit 1
     fi
+
+    log "⏳ Waiting for $database to accept connections"
+    if ! wait_for_database; then
+      log "❌ $database never became reachable"
+      docker compose -f "$database.yml" down -v --remove-orphans
+      docker compose down -v --remove-orphans
+      find "$db_dir" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+      exit 1
+    fi
+    log "✅ $database is accepting connections"
   fi
 
   log "🚀 Starting Docker stack for BunkerWeb"
@@ -232,7 +283,7 @@ for entry in "${db_entries[@]}"; do
   # Run the migration (applies existing migrations in bulk + generates new one)
   log "🦃 Running migration for $first_tag → $target_tag ($database)"
   if ! docker run --rm \
-    --network=bw-db \
+    --network="$MIGRATION_DB_NETWORK" \
     -v bw-data:/data \
     -v bw-db:/db \
     -v bw-sqlite:/var/lib/bunkerweb \
