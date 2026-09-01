@@ -176,11 +176,12 @@ def test_kubernetes_internal_api_clients_receive_api_token(manifest, image):
 
 def test_staging_builds_and_pushes_every_job_component():
     # The `loads` half of this guard read staging-tests.yml, which pulled the api and worker
-    # `-tests` images into the legacy harness's stack. That harness is gone and staging has no
-    # test stack to load anything into, so what is left to protect is the build/push chain: a
-    # staging release that ships bunkerweb and the scheduler but forgets api or worker gives
-    # users a fleet where the scheduler dispatches into nothing. `integration-tests.yml` is
-    # where the loading guarantee lives now -- test_integration_workflow_retags_every_job_component.
+    # `-tests` images into the legacy harness's stack. That harness is gone, and so is
+    # staging-tests.yml itself (wave 11): staging.yml now runs the same integration-tests.yml
+    # pipeline every other pipeline uses, so the loading guarantee lives there instead --
+    # test_integration_workflow_retags_every_job_component, below. What is left to protect here
+    # is the build/push chain: a staging release that ships bunkerweb and the scheduler but
+    # forgets api or worker gives users a fleet where the scheduler dispatches into nothing.
     staging = _workflow("staging.yml")
     images = staging["jobs"]["build-containers"]["strategy"]["matrix"]["image"]
     assert {"api", "worker"} <= set(images)

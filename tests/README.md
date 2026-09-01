@@ -380,37 +380,84 @@ integration and architecture to a runner. The values are JSON and feed `runs-on`
 ## CI
 
 `.github/workflows/integration-tests.yml` is the reusable entry point. It takes `TYPE`,
-`TEST` (`INTEGRATION;ARCH;RUNS_ON;TEST`) and `RELEASE`. `1.7-dev.yml` parses the specs,
-then fans out one job per integration. `container-build.yml` publishes the images under
-their `-tests` names and the workflow retags them to what the stacks reference.
+`TEST` (`INTEGRATION;ARCH;RUNS_ON;TEST`) and `RELEASE`. `1.7-dev.yml`, `dev.yml`, `ui.yml`
+and `staging.yml` each parse the specs, then fan out one job per integration.
+`container-build.yml` publishes the images under their `-tests` names and the workflow
+retags them to what the stacks reference.
+
+`tests/parse.py "core"|"api"|"ui"` is invoked from four workflows. `1.7-dev.yml` (`core` and
+`api`), `dev.yml` (`core`) and `ui.yml` (`ui`) all pass `--dev` and read
+`utils/integrations.yml`'s `dev:` block — `ubuntu/noble` alone on Linux, every other
+integration a single `ubuntu-latest` row. `staging.yml` (`core` and `api`) is the one caller
+that does **not** pass `--dev`: it reads the `staging:` block instead, which is identical to
+`dev:` for every integration except Linux, where it carries 9 live distro rows (`el/8`, `el/9`,
+`el/10`, `fedora/43`, `fedora/44`, `ubuntu/noble`, `ubuntu/jammy`, `debian/bookworm`,
+`debian/trixie` — aarch64/arm64 stay `TODO`). This is deliberate: `staging`/`fix-cve` publish
+to Docker Hub, ghcr and packagecloud, so that pipeline runs a wider Linux spread than the dev
+pipelines. GitHub caps a single job's matrix at 256 entries, and 9 distros × the framework's
+"all"-eligible core specs (42 at the time of writing) is 378 — too many for one job — so
+`staging.yml` filters the parsed `Linux_tests` list down to 4 of the 9 distros
+(`ubuntu/noble`, `debian/bookworm`, `el/9`, `fedora/44`: one current release per package
+family/arch) before fanning out. Every core spec still runs on both `dpkg` and `rpm`; the
+tradeoff is breadth of distros, not breadth of specs. This has headroom to ~64 core specs
+before it needs widening again (256 / 4) — see the comment in `staging.yml`'s
+`parse-tests-core` job for the exact mechanism and the reduce-or-shard escape hatch.
 
 ## The legacy harness (deleted)
 
 `tests/main.py`, the `*Test.py` classes, the `tests/examples/<name>.json` scenario
 descriptors and `legacy-requirements.{in,txt}` were deleted once the two gaps that kept them
 alive closed: the Swarm arm above, and Linux example mode. `staging-tests.yml` was the only
-pipeline that ran them; it no longer runs anything (see its header). `tests/requirements.txt`
-has always belonged to this framework and is unaffected.
+pipeline that ran them; it briefly ran nothing (wave 10) and was itself deleted in wave 11
+once `staging.yml` grew its own `parse-tests-*` / `run-*-tests-*` jobs (the same pattern
+`1.7-dev.yml`/`dev.yml` already used) instead of calling out to a separate reusable file.
+`staging-create-infra.yml` and `staging-delete-infra.yml` — the terraform+ansible jobs that
+provisioned the legacy harness's self-hosted runners — went with it too. This is **not**
+because the framework has no self-hosted runners at all: `integration-tests.yml`'s `setup`
+job runs on `[self-hosted, fireactions]` for every arm, `staging.yml` included. It is because
+the specific `bw-docker`/`bw-autoconf`/`bw-linux` labels the now-orphaned `tests/ansible/`
+playbooks registered (their only caller, `tests/create.sh`, has no workflow left that runs
+it) are referenced nowhere in the current framework — nothing routes a test to them,
+and (see the real-domain paragraph below) nothing in the current framework knows how to test
+against a real domain even if it did. Keeping the two infra workflows would have meant
+provisioning and destroying four cloud infrastructures on every `staging`/`fix-cve` push for
+runner labels nothing used.
+`tests/requirements.txt` has always belonged to this framework and is unaffected.
 
 All 25 scenarios have a spec in `core/example-*.yml`, one per `examples/<name>/` directory,
 covering the same *integrations* the descriptors declared — plus Linux on `php-singlesite` and
 `proxy-protocol`, which the harness never ran there. Two arms were deliberately **not**
 carried over, and each spec says so in its `integrations:` block:
 
-- `nextcloud` on Linux and `wordpress` on Linux. Example mode deploys a compose file; the
-  Linux integration installs a package into a systemd container, and the framework's PHP
-  there is the `php:fpm-alpine` helper, which ships no database extensions and has no
-  database beside it. Both answer 500 rather than testing anything.
+- `nextcloud` on Linux and `wordpress` on Linux, still not enrolled as of wave 11. The original
+  blocker — no database next to the Linux images' php-fpm — is fixed (`tests/linux/Dockerfile-*`
+  now carry `mariadb-server`, and each example's `setup-linux.sh` provisions it). `wordpress`
+  looks otherwise ready (its `variables.env` already sets `LOCAL_PHP`/`LOCAL_PHP_PATH`, and
+  `mysqli`/`pdo_mysql` are its only hard-required extensions) but has not been run against the
+  real harness. `nextcloud` has two more gaps: no image ships `unzip` (its `setup-linux.sh`
+  needs it), and `variables.env` sets neither `LOCAL_PHP` nor `LOCAL_PHP_PATH` at all, so the
+  Linux integration never hands it a running php-fpm to reach.
 
 The harness never ran a Swarm scenario at all: no descriptor declared `swarm` in its `kinds`,
 and `staging.yml`'s matrix only ever passed `docker`, `autoconf`, `k8s` and `linux`.
 
-Two things went with it and were **not** replaced, both tracked as PO decisions rather than
-closed here. The harness ran its 4 Linux example scenarios across 10 distros; the framework
-runs 40 core Linux specs against `ubuntu/noble` only, because all four `parse.py` callers pass
-`--dev` and nothing calls the `staging:` block whose 9 distro rows are live. And it exercised
-released artifacts on staging infrastructure against real domains with real Let's Encrypt
-certificates — the dev pipelines run local stacks behind dnsmasq with a self-signed fallback.
+Two things went with it. One is **partly recovered as of wave 11**: `staging.yml` now runs
+Linux specs on 4 distros instead of 1 — `ubuntu/noble` alone was the old "40 specs on one
+distro" gap for every pipeline; `staging.yml` now covers both package families
+(`ubuntu/noble` + `debian/bookworm` for `dpkg`, `el/9` + `fedora/44` for `rpm`), not the
+`staging:` block's full 9-distro spread — the 256-job matrix cap makes running all 9 against
+every spec impossible in a single job (see the CI section above). `1.7-dev.yml`/`dev.yml`/`ui.yml`
+are unchanged — still `--dev`, still one distro, by design: they gate merges, not publishes.
+The other is **not recoverable without new harness code, and is not attempted here**: the
+legacy harness tested released artifacts on self-hosted runners against real domains with real
+Let's Encrypt certificates
+(`ROOT_DOMAIN`/`TEST_DOMAINS_*` env vars consumed only by the deleted `*Test.py` classes — grep
+confirms zero references anywhere in the current framework). This framework's domains are the
+fixed `*.example.com` names in `tests/misc/conf/dnsmasq.hosts`, resolved by a local dnsmasq
+container to `127.0.0.1` or a fixed overlay IP; there is no code path that takes a
+runtime-supplied domain, requests a real certificate for it, and serves it from an
+internet-reachable runner. Building one would be a new feature, not a CI port. Every current
+pipeline, `staging.yml` included, runs local stacks behind dnsmasq with a self-signed fallback.
 
 ### Retired per-feature stacks
 

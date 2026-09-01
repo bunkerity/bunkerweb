@@ -7,6 +7,13 @@ on:
     branches: [staging, fix-cve]
   workflow_dispatch:
 
+concurrency:
+  # Scoped by ref, not just by workflow (unlike 1.7-dev.yml, which only ever triggers on one
+  # branch): staging.yml triggers on both `staging` and `fix-cve`, and those two should queue
+  # independently rather than blocking each other.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # Build Docker images
   build-containers:
@@ -53,7 +60,6 @@ jobs:
   build-packages:
     permissions:
       contents: read
-      packages: write
     strategy:
       matrix:
         linux:
@@ -95,7 +101,6 @@ jobs:
       RELEASE: testing
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
-      TEST: true
       PLATFORMS: linux/amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -108,63 +113,162 @@ jobs:
       contents: read
       security-events: write
 
-  # Create infrastructures and prepare tests
-  create-infras:
-    needs: [codeql, build-containers, build-packages]
-    strategy:
-      matrix:
-        type: [docker, autoconf, k8s, linux]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  # Integration tests — same framework and images as 1.7-dev.yml/dev.yml, but parsed WITHOUT
+  # --dev so tests/utils/integrations.yml's `staging:` block is used instead of `dev:`. That
+  # block is the only one with more than one Linux runner row (9 live distros vs `dev:`'s
+  # ubuntu/noble alone); every other integration resolves to the same single `ubuntu-latest`
+  # row either way. This is the real-artifact test gate the legacy harness used to provide —
+  # see tests/README.md "The legacy harness (deleted)" for what it recovers and what it does
+  # not (real domains / real Let's Encrypt certs: not portable at all with the current
+  # framework, see below — NOT because there is "no self-hosted fleet". There is one:
+  # integration-tests.yml's `setup` job runs on `[self-hosted, fireactions]` for every arm,
+  # staging included. The actually-dead thing is the `bw-docker`/`bw-autoconf`/`bw-linux`
+  # runner labels the now-orphaned ansible playbooks (tests/ansible/, no caller left) used
+  # to register — nothing in this repo references those labels any more).
+  parse-tests-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse core tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "core"
+          # GitHub caps a single job's matrix at 256 entries. `staging:`'s Linux block is 9
+          # distros; at today's 42 "all"-eligible core specs that is 378 Linux matrix entries
+          # on its own, so the raw staging: spread cannot run as one job's matrix at all.
+          # Subset to one current release per package family/arch instead of sharding the job:
+          # ubuntu/noble + debian/bookworm (deb), el/9 + fedora/44 (rpm) — 4x dev.yml's single
+          # distro, not the full 9x, but every core spec still runs on both package families.
+          # ponytail: fixed 4-distro allowlist, ceiling ~64 core specs (256 / 4) before this
+          # needs widening again — reduce the allowlist, or shard run-Linux-tests-core into
+          # multiple jobs over disjoint distros, if the core spec count gets there.
+          python3 -c "
+          import json
+          allow = {'ubuntu/noble', 'debian/bookworm', 'el/9', 'fedora/44'}
+          path = '/tmp/tests/Linux_tests.json'
+          data = json.load(open(path))
+          json.dump([t for t in data if t.split(';')[2] in allow], open(path, 'w'))
+          "
+          echo "Linux_tests=$(cat /tmp/tests/Linux_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Autoconf_tests=$(cat /tmp/tests/Autoconf_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "Kubernetes_tests=$(cat /tmp/tests/Kubernetes_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+          echo "All_in_one_tests=$(cat /tmp/tests/All_in_one_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Linux_tests: ${{ steps.parse_tests.outputs.Linux_tests }}
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
+      Autoconf_tests: ${{ steps.parse_tests.outputs.Autoconf_tests }}
+      Kubernetes_tests: ${{ steps.parse_tests.outputs.Kubernetes_tests }}
+      All_in_one_tests: ${{ steps.parse_tests.outputs.All_in_one_tests }}
 
-  staging-tests:
-    needs: [create-infras]
-    strategy:
-      matrix:
-        type: [docker, autoconf, k8s, linux]
-        include:
-          - type: docker
-            runs_on: "['self-hosted', 'bw-docker']"
-          - type: autoconf
-            runs_on: "['self-hosted', 'bw-autoconf']"
-          - type: k8s
-            runs_on: "['ubuntu-latest']"
-          - type: linux
-            runs_on: "['self-hosted', 'bw-linux']"
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: ${{ matrix.type }}
-      RUNS_ON: ${{ matrix.runs_on }}
-    secrets:
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
-      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
+  parse-tests-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - id: parse_tests
+        name: Parse api tests
+        run: |
+          pip install --require-hashes -r tests/requirements.txt
+          python3 tests/parse.py "api"
+          echo "Docker_tests=$(cat /tmp/tests/Docker_tests.json || echo "[]")" >> $GITHUB_OUTPUT
+    outputs:
+      Docker_tests: ${{ steps.parse_tests.outputs.Docker_tests }}
 
-  # Delete infrastructures
-  delete-infras:
-    if: ${{ always() }}
-    needs: [staging-tests]
+  run-Docker-tests-core:
+    needs: [build-containers, parse-tests-core]
     strategy:
+      fail-fast: false
       matrix:
-        type: [docker, autoconf, k8s, linux]
-    uses: ./.github/workflows/staging-delete-infra.yml
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
     with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+
+  run-Autoconf-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Autoconf_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+
+  run-Linux-tests-core:
+    needs: [build-packages, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Linux_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+
+  run-Kubernetes-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.Kubernetes_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+
+  run-All-in-one-tests-core:
+    needs: [build-containers, parse-tests-core]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-core.outputs.All_in_one_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: core
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+
+  run-Docker-tests-api:
+    needs: [build-containers, parse-tests-api]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.parse-tests-api.outputs.Docker_tests) }}
+    uses: ./.github/workflows/integration-tests.yml
+    with:
+      TYPE: api
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
 
   # Push Docker images
   push-images:
-    needs: [staging-tests]
+    needs:
+      [
+        codeql,
+        run-Docker-tests-core,
+        run-Autoconf-tests-core,
+        run-Linux-tests-core,
+        run-Kubernetes-tests-core,
+        run-All-in-one-tests-core,
+        run-Docker-tests-api,
+      ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -200,7 +304,16 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [staging-tests]
+    needs:
+      [
+        codeql,
+        run-Docker-tests-core,
+        run-Autoconf-tests-core,
+        run-Linux-tests-core,
+        run-Kubernetes-tests-core,
+        run-All-in-one-tests-core,
+        run-Docker-tests-api,
+      ]
     strategy:
       matrix:
         linux:

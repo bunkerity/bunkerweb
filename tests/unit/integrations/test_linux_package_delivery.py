@@ -49,8 +49,13 @@ ARCH_TOKENS = {"rpm": {"x86_64", "aarch64"}, "deb": {"amd64", "arm64"}}
 PLATFORM_ARCHES = {"linux/amd64": {"amd64", "x86_64"}, "linux/arm64": {"arm64", "aarch64"}}
 
 # Every workflow that runs the Linux arm, with the section of integrations.yml its parse.py call
-# reads. All three pass `--dev`; staging.yml has no Linux arm at all since the legacy harness went.
-CALLERS = (("1.7-dev.yml", "dev"), ("dev.yml", "dev"), ("ui.yml", "dev"))
+# reads. `1.7-dev.yml`/`dev.yml`/`ui.yml` pass `--dev`. `staging.yml` (wave 11) does not -- it
+# reads `staging:` instead, then its own `parse-tests-core` job further filters the 9 live
+# `staging:` distros down to 4 before turning them into a matrix (GitHub's 256-job cap; see the
+# comment there). That runtime filter is not this guard's concern: this checks that every distro
+# the *section* declares live has a package built for it, which staging.yml's build-packages
+# matrix satisfies for all 9, filtered or not.
+CALLERS = (("1.7-dev.yml", "dev"), ("dev.yml", "dev"), ("ui.yml", "dev"), ("staging.yml", "staging"))
 
 
 def _live_linux_specs(section):

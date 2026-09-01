@@ -238,7 +238,6 @@ jobs:
   build-packages:
     permissions:
       contents: read
-      packages: write
     needs: [prepare, create-arm]
     strategy:
       matrix:
@@ -282,7 +281,6 @@ jobs:
       RELEASE: ${{ needs.prepare.outputs.channel }}
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
-      TEST: false
       PLATFORMS: ${{ matrix.platforms }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

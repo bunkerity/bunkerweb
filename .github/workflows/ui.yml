@@ -38,7 +38,6 @@ jobs:
   build-packages:
     permissions:
       contents: read
-      packages: write
     strategy:
       matrix:
         linux: [ubuntu]
@@ -50,7 +49,6 @@ jobs:
       RELEASE: ui
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
-      TEST: true
       PLATFORMS: linux/amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
