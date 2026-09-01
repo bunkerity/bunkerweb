@@ -281,7 +281,7 @@ end
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
 	for _, uri in ipairs(self.lists["URI"]) do
-		if regex_match(self.ctx.bw.uri, uri) then
+		if regex_match(self.ctx.bw.uri, uri, nil, "GREYLIST_URI(_URLS)") then
 			return true, "URI " .. uri
 		end
 	end
@@ -292,7 +292,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for _, ua in ipairs(self.lists["USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ua, nil, "GREYLIST_USER_AGENT(_URLS)") then
 			return true, "UA " .. ua
 		end
 	end

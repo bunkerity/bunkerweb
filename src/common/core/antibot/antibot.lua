@@ -1227,10 +1227,10 @@ function antibot:is_ignored_uri()
 	local uri = self.ctx.bw.uri
 	local request_uri = self.ctx.bw.request_uri
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if regex_match(uri, ignore_uri) then
+		if regex_match(uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri) then
+		if request_uri and request_uri ~= uri and regex_match(request_uri, ignore_uri, nil, "ANTIBOT_IGNORE_URI") then
 			return true, "URI " .. ignore_uri
 		end
 	end
@@ -1241,7 +1241,7 @@ end
 function antibot:is_ignored_ua()
 	-- Check if UA is in ignore list
 	for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ignore_ua, nil, "ANTIBOT_IGNORE_USER_AGENT") then
 			return true, "UA " .. ignore_ua
 		end
 	end

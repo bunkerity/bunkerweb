@@ -1168,14 +1168,62 @@ utils.new_cachestore = function(ctx, pool)
 	return require "bunkerweb.cachestore":new(use_redis, ctx, pool == nil or pool)
 end
 
-utils.regex_match = function(str, regex, options)
-	local all_options = "o"
-	if options then
-		all_options = all_options .. options
+local RELOG_INTERVAL = 3600
+-- per worker, per subsystem; cache key -> { ts = <last logged>, err = <compile error> }
+local bad_regexes = {}
+
+-- os.time has no JIT recorder in LuaJIT (lib_os.c declares no LJLIB_REC), so calling it aborts
+-- the enclosing trace. Keep it off the happy path: only the already-failed branches read it.
+local os_time = os.time
+
+local function log_bad_regex(regex, err, source)
+	-- ngx.var is unavailable in init and init_worker and raises inside a timer. pcall guards the
+	-- capability instead of enumerating phases, so a future caller in a new phase degrades to
+	-- "-" rather than dying.
+	local ok, server_name = pcall(function()
+		return var.server_name
+	end)
+	-- %q escapes a newline as backslash plus a real newline, which would split this entry over
+	-- two log lines; collapse it so the record stays parseable.
+	local quoted = (("%q"):format(regex):gsub("\\\n", "\\n"))
+	logger:log(
+		ERR,
+		("invalid regex for %s on server %s : %s (regex = %s)"):format(
+			source or "an unidentified setting",
+			(ok and server_name) or "-",
+			err,
+			quoted
+		)
+	)
+end
+
+local function relog_bad_regex(regex, bad, source)
+	local now = os_time()
+	if now - bad.ts >= RELOG_INTERVAL then
+		bad.ts = now
+		log_bad_regex(regex, bad.err, source)
+	end
+end
+
+utils.regex_match = function(str, regex, options, source)
+	local all_options = "o" .. (options or "")
+	-- Compile validity depends on the flags, so the memo key includes them.
+	local key = all_options .. "\0" .. regex
+	local bad = bad_regexes[key]
+	if bad then
+		relog_bad_regex(regex, bad, source)
+		return nil
 	end
 	local match, err = re_match(str, regex, all_options)
 	if err then
-		logger:log(ERR, "error while matching regex " .. regex .. "with string " .. str)
+		-- ngx.re.match reports runtime failures through the same channel as compile failures,
+		-- but a no-match returns nil with no error (lua-resty-core regex.lua:672-678), so an
+		-- empty subject isolates compile failure exactly. Only that case is memoized.
+		local _, probe_err = re_match("", regex, all_options)
+		if probe_err then
+			bad_regexes[key] = { ts = os_time(), err = probe_err }
+		end
+		log_bad_regex(regex, err, source)
 		return nil
 	end
 	return match

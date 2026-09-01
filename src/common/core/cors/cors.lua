@@ -99,12 +99,17 @@ function cors:access()
 		end
 	end
 
+	-- CORS_ALLOW_ORIGIN="self" is the default and is replaced above by SERVER_NAME, so naming
+	-- the raw setting would send the operator to a value that holds no regex at all.
+	local origin_source = self.variables["CORS_ALLOW_ORIGIN"] == "self" and "SERVER_NAME (via CORS_ALLOW_ORIGIN=self)"
+		or "CORS_ALLOW_ORIGIN"
+
 	-- Deny as soon as possible if needed
 	if
 		self.ctx.bw.http_origin
 		and self.variables["CORS_DENY_REQUEST"] == "yes"
 		and allow_origin ~= "*"
-		and not regex_match(self.ctx.bw.http_origin, allow_origin)
+		and not regex_match(self.ctx.bw.http_origin, allow_origin, nil, origin_source)
 	then
 		self:set_metric("counters", "failed_cors", 1)
 		return self:ret(

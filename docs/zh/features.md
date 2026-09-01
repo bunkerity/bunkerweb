@@ -3906,6 +3906,8 @@ STREAM 支持 :warning:
 
         建议在生产环境中启用 HTTP/3 之前进行彻底测试。
 
+        当 `USE_PROXY_PROTOCOL` 设置为 `yes` 时，HTTP/3 会被静默禁用。NGINX 无法在 QUIC 监听器上读取 PROXY protocol 标头，因此即使 `HTTP3` 仍显示为 `yes`，也不会生成 `quic` 监听器或 `Alt-Svc` 标头，并且 `LIMIT_CONN_MAX_HTTP3` 不会生效。请在上游终止 PROXY protocol，或仅使用 HTTP/1.1 和 HTTP/2。
+
 === "静态文件服务"
 
     **文件服务配置**
@@ -4089,19 +4091,19 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 ### 配置设置
 
-| 设置                                  | 默认值         | 上下文    | 多选 | 描述                                                                                                                                        |
-| ------------------------------------- | -------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                            |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                 |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| 设置                                  | 默认值                                | 上下文    | 多选 | 描述                                                                                                                                        |
+| ------------------------------------- | ------------------------------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | 否   | **启用 ModSecurity：** 开启 ModSecurity Web 应用程序防火墙保护。                                                                            |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | 否   | **使用核心规则集：** 为 ModSecurity 启用 OWASP 核心规则集。                                                                                 |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。                |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
 
 !!! warning "ModSecurity 和 OWASP 核心规则集"
     **我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)**，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。
@@ -4670,20 +4672,6 @@ Prometheus exporter for BunkerWeb internal metrics.
 | `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global | 否     | Listening port of the Prometheus exporter.                               |
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global | 否     | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global | 否     | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
-
-### Grafana 仪表板
-
-插件将 Grafana 仪表板安装在 `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/dashboards/bunkerweb.json`。将其导入 Grafana，并选择一个抓取该导出器的 Prometheus 数据源。设置 `USE_MONITORING=yes` 和 `USE_PROMETHEUS_EXPORTER=yes`，并将 Prometheus 服务器地址加入 `PROMETHEUS_EXPORTER_ALLOW_IP`。如果允许列表不包含该地址，端点会拒绝抓取请求。
-
-该仪表板显示请求速率和状态类别、攻击者 IP 和 URI 排名表、根据直方图桶计算的延迟百分位数、上游状态和延迟、TLS 协议分布、缓存结果以及 NGINX 共享字典利用率。预测行显示共享字典预计何时耗尽。模板变量 `job`、`instance` 和 `server_name` 用于筛选面板。
-
-### Zabbix 模板
-
-插件将采用 Zabbix 7.0 LTS 导出格式的模板安装在 `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/templates/zabbix/bunkerweb.yaml`。在 Zabbix 中打开 _Data collection → Templates → Import_ 并导入模板，然后为每个 BunkerWeb 实例创建一个主机。为每个主机添加一个地址指向对应实例的接口，并关联 _BunkerWeb by HTTP_ 模板。抓取 URL 使用 `{HOST.CONN}`，因此接口地址决定抓取哪个实例。每个主机必须对应一个实例，因为导出器提供每个实例各自的内存计数器，不会聚合整个集群的数据。
-
-一个 HTTP agent 主监控项每个间隔抓取一次 `/metrics`，其他监控项都从该响应中获取值。BunkerWeb 端无需安装其他组件。低级别发现会为每个服务和 NGINX 共享字典创建监控项。Zabbix 会针对导出器不可达、Monitoring 插件未初始化、指标收集错误、持续的服务器错误、攻击率升高、后端故障、使用已弃用的 TLS 版本以及预计共享字典耗尽触发随附的触发器。
-
-设置 `USE_MONITORING=yes` 和 `USE_PROMETHEUS_EXPORTER=yes`，并将 Zabbix 服务器或代理地址加入 `PROMETHEUS_EXPORTER_ALLOW_IP`。如果允许列表不包含该地址，端点会拒绝抓取请求。所有阈值都使用宏，包括 `{$BUNKERWEB.5XX.WARN}`、`{$BUNKERWEB.ATTACKS.MAX}` 和 `{$BUNKERWEB.SHM.TIMELEFT}`，因此无需编辑模板即可按主机覆盖阈值。如果更改了 `PROMETHEUS_EXPORTER_PORT` 或 `PROMETHEUS_EXPORTER_URL`，请相应设置 `{$BUNKERWEB.EXPORTER.PORT}` 和 `{$BUNKERWEB.EXPORTER.PATH}`。
 
 ## Real IP
 

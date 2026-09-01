@@ -337,7 +337,7 @@ function authbasic:matches_scope()
 	end
 
 	if matcher.kind == "regex" and matcher.value ~= "" then
-		return regex_match(uri, matcher.value, matcher.options) ~= nil
+		return regex_match(uri, matcher.value, matcher.options, "AUTH_BASIC_LOCATION") ~= nil
 	end
 
 	return false

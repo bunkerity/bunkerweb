@@ -3844,6 +3844,8 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
 
         Gründliche Tests werden empfohlen, bevor HTTP/3 in Produktionsumgebungen aktiviert wird.
 
+        HTTP/3 wird stillschweigend deaktiviert, wenn `USE_PROXY_PROTOCOL` auf `yes` gesetzt ist. NGINX kann den PROXY-Protocol-Header auf einem QUIC-Listener nicht lesen, daher werden weder ein `quic`-Listener noch ein `Alt-Svc`-Header erzeugt, obwohl `HTTP3` weiterhin `yes` meldet, und `LIMIT_CONN_MAX_HTTP3` bleibt wirkungslos. Beenden Sie das PROXY-Protocol vorgelagert oder beschränken Sie sich auf HTTP/1.1 und HTTP/2.
+
 === "Bereitstellung statischer Dateien"
 
     **Konfiguration der Dateibereitstellung**
@@ -4027,19 +4029,19 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 
 ### Konfigurationseinstellungen
 
-| Einstellung                           | Standard       | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                    |
-| ------------------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                               |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                            |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                   |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                          |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                           |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                   |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein     | **Audit-Protokoll-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist.                                   |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`). |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                 |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | nein     | **CRS-Plugin-Liste:** Leerzeichengetrennte Liste von Plugins zum Herunterladen und Installieren (`plugin-name[/tag]` oder URL).                                                 |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                        |
+| Einstellung                           | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                       |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | nein     | **ModSecurity aktivieren:** Schalten Sie den Schutz der ModSecurity Web Application Firewall ein.                                                                                                                  |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | nein     | **Core Rule Set verwenden:** Aktivieren Sie das OWASP Core Rule Set für ModSecurity.                                                                                                                               |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | nein     | **CRS-Version:** Die Version des zu verwendenden OWASP Core Rule Set. Optionen: `3` oder `4`. Hinweis: `nightly` ist veraltet und verwendet standardmäßig v4.                                                      |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                                                             |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                                                              |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                                                      |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein     | **Audit-Protokoll-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der serielle Audit-Writer sperrt sie, was bei einer Pipe oder einem Stream nicht möglich ist. |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`).                                    |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                                                    |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | nein     | **CRS-Plugin-Liste:** Leerzeichengetrennte Liste von Plugins zum Herunterladen und Installieren (`plugin-name[/tag]` oder URL).                                                                                    |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                                                           |
 
 !!! warning "ModSecurity und das OWASP Core Rule Set"
     **Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
@@ -4608,20 +4610,6 @@ Prometheus exporter for BunkerWeb internal metrics.
 | `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global  | nein     | Listening port of the Prometheus exporter.                               |
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | nein     | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | nein     | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
-
-### Grafana-Dashboard
-
-Das Plugin installiert ein Grafana-Dashboard unter `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/dashboards/bunkerweb.json`. Importieren Sie es in Grafana und wählen Sie eine Prometheus-Datenquelle aus, die den Exporter abfragt. Setzen Sie `USE_MONITORING=yes` und `USE_PROMETHEUS_EXPORTER=yes` und fügen Sie die Adresse des Prometheus-Servers zu `PROMETHEUS_EXPORTER_ALLOW_IP` hinzu. Der Endpunkt lehnt die Abfrage ab, wenn diese Adresse nicht in der Zulassungsliste steht.
-
-Das Dashboard zeigt Anfrageraten und Statusklassen, Angriffe mit Ranglisten für Angreifer-IPs und URIs, Latenzperzentile aus den Histogramm-Buckets, Upstream-Status und -Latenz, die Verteilung der TLS-Protokolle, Cache-Ergebnisse und die Auslastung der NGINX Shared Dictionaries. Die Prognosezeile zeigt die voraussichtliche Erschöpfung der Shared Dictionaries. Die Template-Variablen `job`, `instance` und `server_name` filtern die Panels.
-
-### Zabbix-Vorlage
-
-Das Plugin installiert eine Vorlage im Zabbix-7.0-LTS-Exportformat unter `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/templates/zabbix/bunkerweb.yaml`. Öffnen Sie in Zabbix _Data collection → Templates → Import_, importieren Sie die Vorlage und erstellen Sie anschließend einen Host pro BunkerWeb-Instanz. Weisen Sie jedem Host eine Schnittstelle zu, deren Adresse auf die jeweilige Instanz verweist, und verknüpfen Sie die Vorlage _BunkerWeb by HTTP_ mit dem Host. Die Scrape-URL verwendet `{HOST.CONN}`, sodass die Schnittstellenadresse die Instanz auswählt. Jeder Host muss genau eine Instanz darstellen, da der Exporter instanzbezogene In-Memory-Zähler bereitstellt und keine Daten über einen Cluster aggregiert.
-
-Ein HTTP-Agent-Master-Item ruft `/metrics` einmal pro Intervall ab. Alle anderen Items beziehen ihre Werte aus dieser Antwort. Auf der BunkerWeb-Seite müssen Sie nichts weiter installieren. Low-Level Discovery erstellt Items für jeden Dienst und jedes NGINX Shared Dictionary. Zabbix löst die enthaltenen Trigger bei einem nicht erreichbaren Exporter, einem nicht initialisierten Monitoring-Plugin, Fehlern bei der Metrikerfassung, anhaltenden Serverfehlern, erhöhten Angriffsraten, einem fehlerhaften Backend, veralteten TLS-Versionen und der voraussichtlichen Erschöpfung eines Shared Dictionary aus.
-
-Setzen Sie `USE_MONITORING=yes` und `USE_PROMETHEUS_EXPORTER=yes` und fügen Sie die Adresse des Zabbix-Servers oder -Proxys zu `PROMETHEUS_EXPORTER_ALLOW_IP` hinzu. Der Endpunkt lehnt die Abfrage ab, wenn diese Adresse nicht in der Zulassungsliste steht. Jeder Schwellenwert verwendet ein Makro, darunter `{$BUNKERWEB.5XX.WARN}`, `{$BUNKERWEB.ATTACKS.MAX}` und `{$BUNKERWEB.SHM.TIMELEFT}`. Sie können die Schwellenwerte pro Host überschreiben, ohne die Vorlage zu bearbeiten. Wenn Sie `PROMETHEUS_EXPORTER_PORT` oder `PROMETHEUS_EXPORTER_URL` geändert haben, setzen Sie `{$BUNKERWEB.EXPORTER.PORT}` und `{$BUNKERWEB.EXPORTER.PATH}` auf die entsprechenden Werte.
 
 ## Real IP
 

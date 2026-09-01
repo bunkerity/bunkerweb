@@ -145,6 +145,8 @@
 
         建议在生产环境中启用 HTTP/3 之前进行彻底测试。
 
+        当 `USE_PROXY_PROTOCOL` 设置为 `yes` 时，HTTP/3 会被静默禁用。NGINX 无法在 QUIC 监听器上读取 PROXY protocol 标头，因此即使 `HTTP3` 仍显示为 `yes`，也不会生成 `quic` 监听器或 `Alt-Svc` 标头，并且 `LIMIT_CONN_MAX_HTTP3` 不会生效。请在上游终止 PROXY protocol，或仅使用 HTTP/1.1 和 HTTP/2。
+
 === "静态文件服务"
 
     **文件服务配置**
