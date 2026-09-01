@@ -1,16 +1,117 @@
-name: Automatic push (RELEASE)
+name: Release (tag push)
 
 permissions: read-all
 
 on:
   push:
-    branches: [master]
+    tags: ["v*"]
+
+# One shared ARM VM and one shared image cache namespace: every release run
+# serializes. Never cancel, a half-published release must finish or be aborted
+# by hand.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   # scorecards-analysis:
   #   uses: ./.github/workflows/scorecards-analysis.yml
 
+  # Derive the channel from the tag and refuse a tag that does not add up.
+  # Everything else hangs off this job, so a bad tag costs seconds, not a build.
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.derive.outputs.version }}
+      versionrpm: ${{ steps.derive.outputs.versionrpm }}
+      channel: ${{ steps.derive.outputs.channel }}
+      prerelease: ${{ steps.derive.outputs.prerelease }}
+      hidden: ${{ steps.derive.outputs.hidden }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Derive channel and version from the tag
+        id: derive
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '\n' < src/VERSION)"
+
+          # Guard 1 - the tag must match src/VERSION at the tagged commit,
+          # otherwise every image and package ships under the wrong version.
+          EXPECTED="v${VERSION//\~/-}"
+          if [ "$TAG" != "$EXPECTED" ]; then
+            echo "::error::tag $TAG does not match src/VERSION ($VERSION); expected $EXPECTED"
+            exit 1
+          fi
+
+          # Guard 2 - annotated tags only. A lightweight tag records no tagger,
+          # so nothing links the release to a human, and there is no tag object
+          # to carry a signature.
+          TAG_REF="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")"
+          OBJ_TYPE="$(printf '%s' "$TAG_REF" | jq -r '.object.type')"
+          OBJ_SHA="$(printf '%s' "$TAG_REF" | jq -r '.object.sha')"
+          if [ "$OBJ_TYPE" != "tag" ]; then
+            echo "::error::$TAG is a lightweight tag; create it with git tag -s"
+            exit 1
+          fi
+
+          # Guard 3 - the tag must carry a signature GitHub can verify against a
+          # key on the signer's account. The tag is what authorises the publish;
+          # unsigned, it proves nothing about who asked for the release.
+          VERIF="$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/${OBJ_SHA}" --jq '"\(.verification.verified) \(.verification.reason)"')"
+          if [ "${VERIF%% *}" != "true" ]; then
+            echo "::error::$TAG is not signed by a verifiable key (${VERIF#* }); create it with git tag -s"
+            exit 1
+          fi
+
+          # Guard 4 - never republish. A force-pushed tag would otherwise
+          # overwrite published images with different bits under one version.
+          # Only an explicit 404 means absent. A 403, a rate limit or a network
+          # blip must not be read as permission to republish.
+          if REL_ERR="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --silent 2>&1)"; then
+            echo "::error::a GitHub release already exists for $TAG; refusing to republish"
+            exit 1
+          elif ! printf '%s' "$REL_ERR" | grep -q 'HTTP 404'; then
+            echo "::error::cannot determine whether a release exists for $TAG: $REL_ERR"
+            exit 1
+          fi
+
+          # Guard 5 - push-github.yml builds the release body from this section
+          # and fails silently (empty body) when it is missing.
+          # Exact match on the version token: "^## v1.6.15" also accepts
+          # "## v1.6.150", and the dots are regex wildcards.
+          if ! awk -v want="v${VERSION}" '$1 == "##" && $2 == want { found = 1 } END { exit !found }' CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## v${VERSION}' section"
+            exit 1
+          fi
+
+          case "$TAG" in
+            *-rc*)   CHANNEL=rc     ; PRERELEASE=true  ; HIDDEN=true  ;;
+            *-beta*) CHANNEL=beta   ; PRERELEASE=true  ; HIDDEN=false ;;
+            *)       CHANNEL=latest ; PRERELEASE=false ; HIDDEN=false ;;
+          esac
+
+          {
+            echo "version=$VERSION"
+            echo "versionrpm=${VERSION//-/_}"
+            echo "channel=$CHANNEL"
+            echo "prerelease=$PRERELEASE"
+            echo "hidden=$HIDDEN"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel, from signed tag \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
+
   codeql:
+    needs: [prepare]
     uses: ./.github/workflows/codeql.yml
     permissions:
       actions: read
@@ -19,6 +120,7 @@ jobs:
 
   # Build amd64 + 386 containers images
   build-containers:
+    needs: [prepare]
     permissions:
       contents: read
       packages: write
@@ -30,8 +132,7 @@ jobs:
           [bunkerweb, scheduler, bwcli, autoconf, ui, api, worker, all-in-one]
         arch: [linux/amd64, linux/386]
         include:
-          - release: latest
-            cache: false
+          - cache: false
             push: false
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -56,7 +157,7 @@ jobs:
             cache_suffix: "386"
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: ${{ matrix.release }}
+      RELEASE: ${{ needs.prepare.outputs.channel }}
       ARCH: ${{ matrix.arch }}
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
@@ -70,6 +171,7 @@ jobs:
 
   # Create ARM environment
   create-arm:
+    needs: [prepare]
     uses: ./.github/workflows/create-arm.yml
     secrets:
       SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
@@ -85,15 +187,14 @@ jobs:
       contents: read
       packages: write
       security-events: write # Trivy SARIF upload
-    needs: [create-arm]
+    needs: [prepare, create-arm]
     strategy:
       matrix:
         image:
           [bunkerweb, scheduler, bwcli, autoconf, ui, api, worker, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
         include:
-          - release: latest
-            cache: false
+          - cache: false
             push: false
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -118,7 +219,7 @@ jobs:
             cache_suffix: armv7
     uses: ./.github/workflows/container-build.yml
     with:
-      RELEASE: ${{ matrix.release }}
+      RELEASE: ${{ needs.prepare.outputs.channel }}
       ARCH: ${{ matrix.arch }}
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
@@ -138,7 +239,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [create-arm]
+    needs: [prepare, create-arm]
     strategy:
       matrix:
         linux:
@@ -156,7 +257,6 @@ jobs:
           ]
         platforms: [linux/amd64, linux/arm64]
         include:
-          - release: latest
           - linux: ubuntu
             package: deb
           - linux: ubuntu-noble
@@ -179,7 +279,7 @@ jobs:
             package: deb
     uses: ./.github/workflows/linux-build.yml
     with:
-      RELEASE: ${{ matrix.release }}
+      RELEASE: ${{ needs.prepare.outputs.channel }}
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
       TEST: false
@@ -191,29 +291,31 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
-  # Wait for all builds and extract VERSION
-  wait-builds:
+  # Publication gate. `environment:` is not allowed on a job that calls a
+  # reusable workflow, so this plain job carries it and everything that
+  # publishes hangs off it. It sits after every build and the Trivy hard gate,
+  # so you only ever approve something already green.
+  #
+  # The `release` environment MUST exist with required reviewers. If it does
+  # not, GitHub creates an unprotected one on the fly and this gate passes
+  # without stopping.
+  gate:
     runs-on: ubuntu-latest
-    needs: [codeql, build-containers, build-containers-arm, build-packages]
-    outputs:
-      version: ${{ steps.getversion.outputs.version }}
-      versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
+    timeout-minutes: 10
+    environment: release
+    needs:
+      [prepare, codeql, build-containers, build-containers-arm, build-packages]
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Get VERSION
-        id: getversion
-        run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
-      - name: Get VERSION (for RPM based)
-        id: getversionrpm
-        run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
+      - name: Approved
+        run: |
+          echo "Publishing \`${{ needs.prepare.outputs.version }}\` to the \`${{ needs.prepare.outputs.channel }}\` channel." >> "$GITHUB_STEP_SUMMARY"
 
   # Push Docker images
   push-images:
     permissions:
       contents: read
       packages: write
-    needs: [create-arm, wait-builds]
+    needs: [prepare, create-arm, push-gh]
     strategy:
       matrix:
         image:
@@ -228,7 +330,6 @@ jobs:
             bunkerweb-all-in-one,
           ]
         include:
-          - release: latest
           - image: bunkerweb
             cache_from: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -257,8 +358,8 @@ jobs:
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: ${{ matrix.image }}
-      TAGS: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ matrix.release }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
-      CACHE_FROM: ${{ matrix.cache_from }}-${{ matrix.release }}
+      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
+      CACHE_FROM: ${{ matrix.cache_from }}-${{ needs.prepare.outputs.channel }}
       DOCKERFILE: ${{ matrix.dockerfile }}
       TARGET: ${{ matrix.target }}
     secrets:
@@ -270,7 +371,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [wait-builds]
+    needs: [prepare, push-gh]
     strategy:
       matrix:
         linux:
@@ -288,8 +389,7 @@ jobs:
           ]
         arch: [amd64, arm64]
         include:
-          - release: latest
-            repo: bunkerweb
+          - repo: bunkerweb
           - linux: ubuntu
             separator: _
             suffix: ""
@@ -408,7 +508,7 @@ jobs:
       LINUX: ${{ matrix.linux }}
       VERSION: ${{ matrix.version }}
       PACKAGE: ${{ matrix.package }}
-      BW_VERSION: ${{ matrix.package == 'rpm' && needs.wait-builds.outputs.versionrpm || needs.wait-builds.outputs.version }}
+      BW_VERSION: ${{ matrix.package == 'rpm' && needs.prepare.outputs.versionrpm || needs.prepare.outputs.version }}
       PACKAGE_ARCH: ${{ matrix.package_arch }}
       ARCH: ${{ matrix.arch }}
     secrets:
@@ -416,37 +516,40 @@ jobs:
 
   # Create doc PDF
   doc-pdf:
-    needs: [wait-builds, push-images, push-packages]
+    needs: [prepare, gate]
     uses: ./.github/workflows/doc-to-pdf.yml
     with:
-      VERSION: ${{ needs.wait-builds.outputs.version }}
+      VERSION: ${{ needs.prepare.outputs.version }}
 
   # Push on GH
   push-gh:
-    needs: [wait-builds, doc-pdf]
+    needs: [prepare, doc-pdf]
     permissions:
       contents: write
       discussions: write
     uses: ./.github/workflows/push-github.yml
     with:
-      VERSION: ${{ needs.wait-builds.outputs.version }}
-      PRERELEASE: false
+      VERSION: ${{ needs.prepare.outputs.version }}
+      PRERELEASE: ${{ needs.prepare.outputs.prerelease == 'true' }}
 
   # Push doc
   push-doc:
-    needs: [wait-builds, push-gh]
+    needs: [prepare, push-images, push-packages]
     permissions:
       contents: write
     uses: ./.github/workflows/push-doc.yml
     with:
-      VERSION: ${{ needs.wait-builds.outputs.version }}
-      ALIAS: latest
+      VERSION: ${{ needs.prepare.outputs.version }}
+      ALIAS: ${{ needs.prepare.outputs.channel }}
+      HIDDEN: ${{ needs.prepare.outputs.hidden == 'true' }}
     secrets:
       BUNKERBOT_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
 
   # Remove ARM VM
   rm-arm:
-    if: ${{ always() }}
+    # `always()` alone also fires when `prepare` rejected the tag and create-arm
+    # never ran, which deletes an empty ARM_ID and fails noisily.
+    if: ${{ always() && needs.create-arm.outputs.id != '' }}
     needs: [create-arm, push-images, build-packages]
     uses: ./.github/workflows/rm-arm.yml
     secrets:

@@ -86,8 +86,6 @@ def test_bwcli_named_target_is_built_and_published_by_every_release_workflow():
         "1.7-dev.yml": ("build-containers",),
         "dev.yml": ("build-containers",),
         "staging.yml": ("build-containers",),
-        "beta.yml": ("build-containers", "build-containers-arm"),
-        "rc.yml": ("build-containers", "build-containers-arm"),
         "release.yml": ("build-containers", "build-containers-arm"),
     }
     build_row = {"image": "bwcli", "dockerfile": "src/scheduler/Dockerfile", "target": "bwcli"}
@@ -104,7 +102,7 @@ def test_bwcli_named_target_is_built_and_published_by_every_release_workflow():
     assert any("bwcli-tests:testing" in run and "bunkerweb-bwcli:testing" in run for run in staging_runs)
 
     push_row = {"image": "bunkerweb-bwcli", "cache_from": "bwcli", "dockerfile": "src/scheduler/Dockerfile", "target": "bwcli"}
-    for workflow_name in ("beta.yml", "rc.yml", "release.yml"):
+    for workflow_name in ("release.yml",):
         push_job = _workflow(workflow_name)["jobs"]["push-images"]
         assert "bunkerweb-bwcli" in push_job["strategy"]["matrix"]["image"], workflow_name
         assert push_row in push_job["strategy"]["matrix"]["include"], workflow_name
