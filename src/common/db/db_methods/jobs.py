@@ -10,17 +10,29 @@ from model import Jobs, Jobs_cache, Jobs_runs  # type: ignore
 
 from .common import DatabaseMixinBase
 
+# 4 KiB, well under the 64 KiB TEXT of MySQL/MariaDB (the tightest of the four engines): a
+# judgement call, not an engine limit. A job run records why it failed, it is not a log store.
+JOB_RUN_ERROR_MAX_LENGTH = 4096
+
 
 class DatabaseJobsMixin(DatabaseMixinBase):
     """Job runs and job cache management."""
 
-    def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
-        """Add a job run."""
+    def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None, error: Optional[str] = None) -> str:
+        """Add a job run. ``error`` is the failure message, if the caller could observe one."""
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
-            session.add(Jobs_runs(job_name=job_name, success=success, start_date=start_date, end_date=end_date or datetime.now().astimezone()))
+            # MySQL/MariaDB TEXT tops out at 64 KiB and rejects (strict mode) or truncates anything
+            # longer, so a traceback-sized message would fail the insert on those engines only. A
+            # job run is not a log store; the first 4 KiB is the part an operator reads anyway.
+            if error and len(error) > JOB_RUN_ERROR_MAX_LENGTH:
+                error = error[: JOB_RUN_ERROR_MAX_LENGTH - 3] + "..."
+
+            session.add(
+                Jobs_runs(job_name=job_name, success=success, start_date=start_date, end_date=end_date or datetime.now().astimezone(), error=error or None)
+            )
 
             try:
                 session.commit()
@@ -135,9 +147,10 @@ class DatabaseJobsMixin(DatabaseMixinBase):
                             "start_date": job_run.start_date.astimezone().isoformat(),
                             "end_date": job_run.end_date.astimezone().isoformat(),
                             "success": job_run.success,
+                            "error": job_run.error,
                         }
                         for job_run in session.execute(
-                            select(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date)
+                            select(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date, Jobs_runs.error)
                             .filter_by(job_name=job.name)
                             .order_by(Jobs_runs.end_date.desc())
                             .limit(10)
@@ -162,7 +175,10 @@ class DatabaseJobsMixin(DatabaseMixinBase):
         """Get the newest run for a job."""
         with self._db_session() as session:
             job_run = session.execute(
-                select(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date).filter_by(job_name=job_name).order_by(Jobs_runs.end_date.desc()).limit(1)
+                select(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date, Jobs_runs.error)
+                .filter_by(job_name=job_name)
+                .order_by(Jobs_runs.end_date.desc())
+                .limit(1)
             ).first()
 
         if job_run is None:
@@ -171,6 +187,7 @@ class DatabaseJobsMixin(DatabaseMixinBase):
             "success": job_run.success,
             "start_date": job_run.start_date.astimezone().isoformat(),
             "end_date": job_run.end_date.astimezone().isoformat(),
+            "error": job_run.error,
         }
 
     def get_job_cache_file(

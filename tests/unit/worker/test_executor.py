@@ -39,3 +39,40 @@ class TestIsAllowedJobPath:
 
     def test_allowed_roots_constant(self):
         assert _mod.ALLOWED_ROOTS  # non-empty tuple of roots
+
+
+class TestLastError:
+    """`run` returns a bare int, so a job that never even loads is recorded as "2" and nothing else.
+    `last_error` is what lets `tasks.execute_job` put the reason on the job run instead."""
+
+    def test_a_refused_path_leaves_the_reason_behind(self, tmp_path):
+        ex = JobExecutor(LOGGER)
+
+        assert ex.run({"name": "evil", "path": str(tmp_path), "file": "x.py"}) == 2
+        assert "outside allowed job directories" in ex.last_error
+
+    def test_a_successful_run_clears_the_previous_reason(self, tmp_path, monkeypatch):
+        """The executor is reused across dispatches in a worker child, so a stale message would be
+        attributed to the next job that fails for an unrelated reason."""
+        job = tmp_path / "jobs"
+        job.mkdir()
+        (job / "ok.py").write_text("x = 1\n")
+        monkeypatch.setattr(_mod, "ALLOWED_ROOTS", (tmp_path,))
+
+        ex = JobExecutor(LOGGER)
+        ex.run({"name": "evil", "path": str(tmp_path.parent), "file": "x.py"})
+        assert ex.last_error is not None
+
+        assert ex.run({"name": "ok", "path": str(tmp_path), "file": "ok.py"}) == 0
+        assert ex.last_error is None
+
+    def test_a_job_that_raises_reports_what_it_raised(self, tmp_path, monkeypatch):
+        job = tmp_path / "jobs"
+        job.mkdir()
+        (job / "boom.py").write_text("raise RuntimeError('upstream unreachable')\n")
+        monkeypatch.setattr(_mod, "ALLOWED_ROOTS", (tmp_path,))
+
+        ex = JobExecutor(LOGGER)
+
+        assert ex.run({"name": "boom", "path": str(tmp_path), "file": "boom.py"}) == 2
+        assert "upstream unreachable" in ex.last_error

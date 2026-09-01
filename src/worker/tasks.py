@@ -393,7 +393,13 @@ def execute_job(self, job_data: dict) -> dict:
         )
         if db:
             with suppress(Exception):
-                db.add_job_run(name, False, start, datetime.now().astimezone())
+                db.add_job_run(
+                    name,
+                    False,
+                    start,
+                    datetime.now().astimezone(),
+                    error=f"Abandoned after {attempt} deliveries (limit {MAX_DELIVERY_ATTEMPTS}) -- the job keeps killing its worker",
+                )
         return {
             "duration_seconds": 0.0,
             "name": name,
@@ -421,6 +427,10 @@ def execute_job(self, job_data: dict) -> dict:
 
     ret = 2
     success = False
+    # Why this run failed, in the operator's words rather than an exit code. Only this frame sees
+    # all three sources (a non-zero SystemExit, an exception, the executor's own refusals), so it
+    # is where the message is assembled for Jobs_runs.error.
+    error: Optional[str] = None
 
     try:
         os.environ.clear()
@@ -453,8 +463,10 @@ def execute_job(self, job_data: dict) -> dict:
         ret = exc.code if isinstance(exc.code, int) else 1
         success = ret in (0, 1)
         if not success:
+            error = f"Job exited with code {ret}"
             logger.error(f"[{run_id}] Job {plugin}/{name} exited with code {ret}")
     except Exception as exc:
+        error = f"Job crashed: {exc}"
         logger.error(f"[{run_id}] Job {plugin}/{name} crashed: {exc}")
     finally:
         os.environ.clear()
@@ -469,9 +481,14 @@ def execute_job(self, job_data: dict) -> dict:
     end = datetime.now().astimezone()
     duration = (end - start).total_seconds()
 
+    # The executor returns a bare 2 for a job it could not even load or import; the reason it
+    # logged is the only description of that failure there is.
+    if not success and error is None:
+        error = executor.last_error
+
     if db:
         try:
-            err = db.add_job_run(name, success, start, end)
+            err = db.add_job_run(name, success, start, end, error=error)
             if err:
                 logger.error(f"[{run_id}] Failed to record job run: {err}")
         except Exception as exc:

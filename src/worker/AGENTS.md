@@ -62,7 +62,9 @@ Hard and soft time limits are `task_time_limit` / `task_soft_time_limit`; concur
 
 **`JobExecutor.run` itself only ever returns `0` or `2`** (path outside `ALLOWED_ROOTS`, missing file, or any exception during load/execution). The `1` path is reachable **only** when the job script raises `SystemExit(1)` — i.e. calls `sys.exit(1)`. That is the convention every job in `src/common/core/*/jobs/` follows. A plain `return 1` from the job module does nothing: module return values are discarded and reported as `0`.
 
-Every run is persisted with `db.add_job_run(name, success, start, end)`.
+Every run is persisted with `db.add_job_run(name, success, start, end, error=...)`. `error` is the
+failure message and is `None` on success — a non-zero `SystemExit`, an exception, or the message
+`JobExecutor` kept in `last_error` when it returned `2` without ever reaching the job.
 
 ### Reload broadcast
 

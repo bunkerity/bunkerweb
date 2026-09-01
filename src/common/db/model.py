@@ -274,6 +274,11 @@ class Jobs_runs(Base):
     success: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=False)
     start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # Why the failure happened, when it did. Without it the UI can only say "failed -- check Jobs",
+    # because a run row otherwise carries no message at all and the reason lives only in the
+    # worker's stdout. Nullable and free-form on purpose: a successful run has nothing to say, and
+    # the text is whatever the worker could observe (an exit code, an exception, a give-up notice).
+    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     job: Mapped["Jobs"] = relationship("Jobs", back_populates="runs")
 

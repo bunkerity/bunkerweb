@@ -324,6 +324,71 @@ class TestAbandonment:
         assert recorded_name == "certbot-renew"
         assert recorded_success is False
         assert isinstance(db.add_job_run.call_args[0][2], datetime)
+        # "failed" with no cause is what the Jobs page used to be able to show. Giving up has a
+        # cause the operator cannot otherwise guess, so it goes on the row.
+        assert "Abandoned after" in db.add_job_run.call_args.kwargs["error"]
+
+
+class TestFailureReason:
+    """What a failed run records *besides* the fact that it failed.
+
+    `bw_jobs_runs` carried no message, so the UI could only say "failed -- check Jobs" and the
+    reason lived in the worker's stdout. `execute_job` is the one frame that sees all three sources
+    of it, so this pins each of them to the value that reaches `add_job_run`.
+    """
+
+    def _record(self, monkeypatch):
+        db = Mock()
+        db.add_job_run = Mock(return_value="")
+        monkeypatch.setattr(TASKS, "get_worker_db", lambda: db)
+        with _with_redis(_FakeRedis(counts={"bw:job_attempt:run-1": 1})):
+            TASKS.execute_job(_Self(), dict(JOB))
+        return db.add_job_run.call_args
+
+    def test_a_non_zero_exit_records_the_code(self, stub_runtime, monkeypatch):
+        stub_runtime.run = Mock(side_effect=SystemExit(2))
+
+        call = self._record(monkeypatch)
+
+        assert call.args[1] is False
+        assert call.kwargs["error"] == "Job exited with code 2"
+
+    def test_a_crash_records_what_was_raised(self, stub_runtime, monkeypatch):
+        stub_runtime.run = Mock(side_effect=RuntimeError("no route to the ACME directory"))
+
+        call = self._record(monkeypatch)
+
+        assert call.kwargs["error"] == "Job crashed: no route to the ACME directory"
+
+    def test_a_job_the_executor_refused_records_the_executor_s_own_reason(self, stub_runtime, monkeypatch):
+        """`JobExecutor.run` returns a bare `2` for a path it refused or a module it could not
+        import; the message it kept is the only description of that failure that exists."""
+        stub_runtime.run = Mock(return_value=2)
+        stub_runtime.last_error = "Job file not found: /x/jobs/certbot-renew.py"
+
+        call = self._record(monkeypatch)
+
+        assert call.kwargs["error"] == "Job file not found: /x/jobs/certbot-renew.py"
+
+    def test_a_successful_run_records_no_reason(self, stub_runtime, monkeypatch):
+        """Anti-vacuity: a message on every row would make the UI show a cause for jobs that
+        worked."""
+        stub_runtime.run = Mock(return_value=0)
+        stub_runtime.last_error = None
+
+        call = self._record(monkeypatch)
+
+        assert call.args[1] is True
+        assert call.kwargs["error"] is None
+
+    def test_a_job_that_signalled_a_change_is_not_a_failure(self, stub_runtime, monkeypatch):
+        """Exit 1 is "something changed", the success path -- it must not be recorded as a cause."""
+        stub_runtime.run = Mock(side_effect=SystemExit(1))
+
+        call = self._record(monkeypatch)
+
+        assert call.args[1] is True
+        assert call.kwargs["error"] is None
 
     def test_a_dead_database_does_not_stop_the_job_being_dropped(self, stub_runtime, monkeypatch):
         """Recording the give-up is best-effort; failing to record it must not raise back into

@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from db_methods.jobs import JOB_RUN_ERROR_MAX_LENGTH  # type: ignore
 from fixtures.seed import seed_minimal
 
 DT = datetime(2024, 1, 1, tzinfo=timezone.utc)
@@ -50,6 +51,41 @@ class TestJobRuns:
 
     def test_get_last_job_run_returns_none_for_an_absent_job(self, jdb):
         assert jdb.get_last_job_run("missing-job") is None
+
+    def test_a_failure_reason_survives_the_round_trip(self, jdb):
+        """The column exists so the UI can say *why* a job failed instead of "failed -- check Jobs".
+        A run row that stores the message but no read path returns it would be write-only, so both
+        readers are asserted here, not just the insert."""
+        assert jdb.add_job_run("testjob", False, DT, DT, error="Job exited with code 2") == ""
+
+        assert jdb.get_last_job_run("testjob")["error"] == "Job exited with code 2"
+        assert jdb.get_jobs()["testjob"]["history"][0]["error"] == "Job exited with code 2"
+
+    def test_a_successful_run_stores_no_reason(self, jdb):
+        jdb.add_job_run("testjob", True, DT, DT)
+
+        assert jdb.get_last_job_run("testjob")["error"] is None
+
+    def test_an_empty_reason_is_stored_as_null_rather_than_an_empty_string(self, jdb):
+        """`""` and `None` read back differently and would make the UI render an empty cause box."""
+        jdb.add_job_run("testjob", False, DT, DT, error="")
+
+        assert jdb.get_last_job_run("testjob")["error"] is None
+
+    def test_an_oversized_reason_is_truncated_instead_of_failing_the_insert(self, jdb):
+        """MySQL/MariaDB TEXT stops at 64 KiB and rejects a longer value in strict mode, so an
+        untruncated traceback would lose the whole run row -- on two of the four engines only."""
+        assert jdb.add_job_run("testjob", False, DT, DT, error="x" * (JOB_RUN_ERROR_MAX_LENGTH * 3)) == ""
+
+        stored = jdb.get_last_job_run("testjob")["error"]
+        assert len(stored) == JOB_RUN_ERROR_MAX_LENGTH
+        assert stored.endswith("...")
+
+    def test_a_reason_exactly_at_the_limit_is_kept_whole(self, jdb):
+        """The boundary the truncation must not eat into."""
+        assert jdb.add_job_run("testjob", False, DT, DT, error="y" * JOB_RUN_ERROR_MAX_LENGTH) == ""
+
+        assert jdb.get_last_job_run("testjob")["error"] == "y" * JOB_RUN_ERROR_MAX_LENGTH
 
 
 class TestJobCache:
