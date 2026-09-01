@@ -11,6 +11,26 @@ body:
     attributes:
       value: >
         📊 Please check the live service status first: https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template. If an incident is ongoing, reference it in your report.
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Select the primary area involved.
+      options:
+        - Web UI
+        - API
+        - Scheduler
+        - Core plugins
+        - External plugins
+        - Docker / Autoconf
+        - Swarm
+        - Kubernetes
+        - Linux
+        - All-in-one
+        - Documentation
+        - Other / unsure
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -77,6 +97,13 @@ body:
       label: Linux distribution (if applicable)
       description: What Linux distribution are you using? (e.g. Ubuntu Server 18.04)
       placeholder: Linux distribution
+  - type: checkboxes
+    id: duplicate-search
+    attributes:
+      label: Duplicate search
+      options:
+        - label: I searched open and closed issues and did not find an existing report
+          required: true
   - type: checkboxes
     id: removed-private-data
     attributes:
