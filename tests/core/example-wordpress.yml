@@ -6,11 +6,15 @@ example: wordpress
 integrations:
   - "Docker"
   - "Autoconf"
-  # Not Linux: the framework's PHP for that integration is the `php:fpm-alpine` helper
-  # (tests/misc/docker/php.yml), which ships no mysqli and has no database next to it, so
-  # WordPress answers 500 on every request. A reader on Linux installs php-fpm and php-mysql
-  # from their distribution; giving the helper the same would be a change to every integration
-  # for one example. Same reason keeps `nextcloud` off Linux.
+  # Still not enrolled. A real proof run (2026-09-01, coordinator) got the stack healthy and
+  # the DB provisioned, then 500'd on the page: on this arm PHP executes in the php:fpm-alpine
+  # HELPER container (LOCAL_PHP=/run/php/php-fpm.sock is ITS socket, shared via the host's
+  # /run/php), which carries no mysqli and cannot reach the mariadb socket inside
+  # bunkerweb-linux -- the distro php-fpm+extensions these images now carry are not what nginx
+  # talks to. Enrolling needs either the helper taught mysqli+a TCP DB path, or LOCAL_PHP
+  # pointed at the distro fpm's own socket (per-distro path, php8.3-fpm.sock on noble) with a
+  # pool drop-in -- the php-singlesite www.conf pattern. Until one of those lands and runs
+  # green, this arm stays off.
 
 actions:
   string_check:

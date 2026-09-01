@@ -7,8 +7,16 @@ integrations:
   - "Docker"
   - "Autoconf"
   - "Kubernetes"
-  # Not Linux: same blocker as `wordpress` — the framework's PHP there is the
-  # `php:fpm-alpine` helper, with no database extensions and no database beside it.
+  # Still not Linux, and not for the reason this comment used to give: the Linux images now
+  # carry mariadb-server and a php-fpm mysql extension (tests/linux/Dockerfile-*), and
+  # setup-linux.sh now provisions the database. What is left blocks the arm on its own:
+  # `unzip` is not in any Linux image (setup-linux.sh unzips the download); Nextcloud's own
+  # `OC_Util::checkServer()` hard-requires several PHP extensions php-fpm alone does not ship
+  # (dom, SimpleXML, xmlreader, xmlwriter, zip, gd, curl, mbstring); and, unlike wordpress,
+  # examples/nextcloud/variables.env sets neither LOCAL_PHP nor LOCAL_PHP_PATH -- the Linux
+  # integration never hands index.php to php-fpm at all today, since the Docker/Autoconf/
+  # Kubernetes arms all reach php-fpm through the example's own reverse-proxied container
+  # instead. Closing this needs all three, not just a database.
 
 actions:
   string_check:

@@ -26,7 +26,7 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
     /lib/systemd/system/systemd-update-utmp*
 
 RUN apt update && \
-    apt-get install php-fpm curl gnupg2 ca-certificates python3-pip -y && \
+    apt-get install php-fpm php-mysql mariadb-server curl gnupg2 ca-certificates python3-pip -y && \
     curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /usr/share/keyrings/nginx-archive-keyring.gpg && \
     gpg --batch --no-default-keyring --keyring /usr/share/keyrings/nginx-archive-keyring.gpg --list-keys --with-colons | awk -F: '/^fpr:/ { print $10 }' | grep -qx "$EXPECTED_FPR" || { echo "ERROR: expected fingerprint $EXPECTED_FPR not found in keyring" >&2; exit 1; } && \
     . /etc/os-release && \
