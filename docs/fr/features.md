@@ -4797,6 +4797,20 @@ Prometheus exporter for BunkerWeb internal metrics.
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | non      | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | non      | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
+### Tableau de bord Grafana
+
+Le plugin installe un tableau de bord Grafana dans `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/dashboards/bunkerweb.json`. Importez-le dans Grafana et sélectionnez une source de données Prometheus qui interroge l’exporteur. Définissez `USE_MONITORING=yes` et `USE_PROMETHEUS_EXPORTER=yes`, puis ajoutez l’adresse du serveur Prometheus à `PROMETHEUS_EXPORTER_ALLOW_IP`. Le point de terminaison refuse la collecte si la liste des adresses autorisées ne contient pas cette adresse.
+
+Le tableau de bord affiche les taux de requêtes et les classes d’état, les attaques avec des classements des IP attaquantes et des URI, les centiles de latence calculés à partir des buckets d’histogramme, l’état et la latence des serveurs en amont, la répartition des protocoles TLS, les résultats du cache et l’utilisation des dictionnaires partagés NGINX. La ligne de prévision indique l’épuisement prévu des dictionnaires partagés. Les variables de modèle `job`, `instance` et `server_name` filtrent les panneaux.
+
+### Modèle Zabbix
+
+Le plugin installe un modèle au format d’export Zabbix 7.0 LTS dans `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/templates/zabbix/bunkerweb.yaml`. Dans Zabbix, ouvrez _Data collection → Templates → Import_, importez le modèle, puis créez un hôte par instance BunkerWeb. Ajoutez à chaque hôte une interface dont l’adresse pointe vers son instance et associez-lui le modèle _BunkerWeb by HTTP_. L’URL de collecte utilise `{HOST.CONN}`, donc l’adresse de l’interface sélectionne l’instance. Chaque hôte doit représenter une instance, car l’exporteur fournit des compteurs en mémoire propres à chaque instance et n’agrège pas les données d’un cluster.
+
+Un élément maître de type agent HTTP interroge `/metrics` une fois par intervalle. Tous les autres éléments tirent leurs valeurs de cette réponse. Vous n’avez rien d’autre à installer côté BunkerWeb. La découverte de bas niveau crée des éléments pour chaque service et chaque dictionnaire partagé NGINX. Zabbix déclenche les alertes fournies si l’exporteur est inaccessible, si le plugin Monitoring n’est pas initialisé, si la collecte des métriques signale des erreurs, si les erreurs serveur persistent, si le taux d’attaques augmente, si un backend échoue, si des versions obsolètes de TLS sont utilisées ou si un dictionnaire partagé risque de s’épuiser.
+
+Définissez `USE_MONITORING=yes` et `USE_PROMETHEUS_EXPORTER=yes`, puis ajoutez l’adresse du serveur ou du proxy Zabbix à `PROMETHEUS_EXPORTER_ALLOW_IP`. Le point de terminaison refuse la collecte si la liste des adresses autorisées ne contient pas cette adresse. Chaque seuil utilise une macro, notamment `{$BUNKERWEB.5XX.WARN}`, `{$BUNKERWEB.ATTACKS.MAX}` et `{$BUNKERWEB.SHM.TIMELEFT}`. Vous pouvez remplacer les seuils par hôte sans modifier le modèle. Si vous avez modifié `PROMETHEUS_EXPORTER_PORT` ou `PROMETHEUS_EXPORTER_URL`, adaptez `{$BUNKERWEB.EXPORTER.PORT}` et `{$BUNKERWEB.EXPORTER.PATH}` à ces valeurs.
+
 ## Real IP
 
 Prise en charge STREAM :warning:

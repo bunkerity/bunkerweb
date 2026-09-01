@@ -5115,6 +5115,20 @@ Prometheus exporter for BunkerWeb internal metrics.
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | no       | HTTP URL of the Prometheus exporter.                                     |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | no       | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
+### Grafana dashboard
+
+The plugin installs a Grafana dashboard at `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/dashboards/bunkerweb.json`. Import it into Grafana and select a Prometheus data source that scrapes the exporter. Set `USE_MONITORING=yes` and `USE_PROMETHEUS_EXPORTER=yes`, and add the Prometheus server address to `PROMETHEUS_EXPORTER_ALLOW_IP`. The endpoint refuses the scrape if the allowlist does not include that address.
+
+The dashboard covers request rates and status classes, attacks with ranked attacker IP and URI tables, latency percentiles from histogram buckets, upstream status and latency, TLS protocol distribution, cache outcomes, and NGINX shared dictionary utilization. Use the forecasting row to see projected shared dictionary exhaustion. The `job`, `instance`, and `server_name` template variables filter the panels.
+
+### Zabbix template
+
+The plugin installs a Zabbix 7.0 LTS template at `/etc/bunkerweb/pro/plugins/prometheus_exporter/assets/templates/zabbix/bunkerweb.yaml`. In Zabbix, open _Data collection → Templates → Import_, import the template, then create one host per BunkerWeb instance. Give each host an interface whose address points at its instance and link the _BunkerWeb by HTTP_ template to it. The scrape URL uses `{HOST.CONN}`, so the interface address selects the instance. Each host must represent one instance because the exporter serves per-instance in-memory counters and does not aggregate across a cluster.
+
+One HTTP agent master item scrapes `/metrics` once per interval, and every other item derives from that response. You do not need to install anything else on the BunkerWeb side. Low-level discovery creates items for each service and NGINX shared dictionary. Zabbix raises the included triggers for an unreachable exporter, an uninitialized Monitoring plugin, metric collection errors, sustained server errors, elevated attack rates, a failing backend, deprecated TLS versions, and projected shared dictionary exhaustion.
+
+Set `USE_MONITORING=yes` and `USE_PROMETHEUS_EXPORTER=yes`, and add the Zabbix server or proxy address to `PROMETHEUS_EXPORTER_ALLOW_IP`. The endpoint refuses the scrape if the allowlist does not include that address. Every threshold uses a macro, including `{$BUNKERWEB.5XX.WARN}`, `{$BUNKERWEB.ATTACKS.MAX}`, and `{$BUNKERWEB.SHM.TIMELEFT}`, so you can override thresholds per host without editing the template. If you changed `PROMETHEUS_EXPORTER_PORT` or `PROMETHEUS_EXPORTER_URL`, set `{$BUNKERWEB.EXPORTER.PORT}` and `{$BUNKERWEB.EXPORTER.PATH}` to match.
+
 ## Real IP
 
 STREAM support :warning:
