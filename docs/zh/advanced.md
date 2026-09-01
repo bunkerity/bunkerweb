@@ -2643,7 +2643,7 @@ LOG_LEVEL_1=error
 
 ### 日志文件保留策略 {#log-file-retention}
 
-只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：`logrotate`，配合 BunkerWeb 安装在 `/etc/logrotate.d/bunkerweb` 的策略文件。它会在任何匹配 `/var/log/bunkerweb/*.log` 的文件超过 100 MB 时对其进行轮转，保留七个压缩后的历史版本，并使用 `copytruncate`。
+只有保留真实日志文件的集成方式才需要保留策略，且这两者都使用同一套机制：`logrotate`，配合 BunkerWeb 安装在 `/etc/logrotate.d/bunkerweb` 的策略文件。它会每天轮转任何匹配 `/var/log/bunkerweb/*.log` 的文件，若文件超过 100 MB 则提前轮转，保留十四个编号的历史版本（`modsec_audit.log.1`、`.2.gz` 等），并使用 `copytruncate`。
 
 - **Linux**：软件包依赖 `logrotate`，系统会按自身的定时器运行它，无需额外操作。
 - **All-in-one**：该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次，使用同一份策略文件。
@@ -2653,13 +2653,17 @@ LOG_LEVEL_1=error
 
 编辑 `/etc/logrotate.d/bunkerweb` 可以更改阈值、历史版本数量，或添加 `maxage`。在 All-in-one 上，可以将您自己的文件挂载到该路径上。
 
-审计日志的位置由 `MODSECURITY_SEC_AUDIT_LOG` 设置（multisite，默认 `/var/log/bunkerweb/modsec_audit.log`）；详见 [ModSecurity 设置](features.md#modsecurity)。如果将其指向 `/var/log/bunkerweb` 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。
+其中有两条指令至关重要。`maxsize` 才能让 `daily` 生效：与之相似的 `size` 与所有时间间隔指令互斥，只会按大小轮转。而添加 `dateext` 会让每个归档以日期命名，于是同一日期上的第二次轮转会以 `destination ... already exists, skipping rotation` 失败，使正在写入的文件直到日期变化前都不会被轮转。
+
+审计日志的位置由 `MODSECURITY_SEC_AUDIT_LOG` 设置（multisite，默认 `/var/log/bunkerweb/modsec_audit.log`）；详见 [ModSecurity 设置](features.md#modsecurity)。如果将其指向 `/var/log/bunkerweb` 之外，它就不再受上述策略约束；在容器集成方式下，这样做还会用一个不会被任何机制轮转的真实文件取代符号链接。如果您移动了它，请将其挂载到卷上并自行轮转。该设置只接受 `/var/log/bunkerweb` 下的路径，因此无法指向 `/data`：若要在重建容器后保留审计历史，请将卷挂载到 `/var/log/bunkerweb` 本身，这样保留的是整套日志，而不仅仅是审计日志。
+
+在 `MODSECURITY_SEC_AUDIT_LOG_PARTS` 的默认值 `BCFH` 下，部分 `C` 会把请求正文写入审计日志。在将该文件复制到其他地方之前，请将其视为敏感数据。
 
 ### 集成默认值与示例
 
 === "Linux"
 
-    **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。轮转由安装到 `/etc/logrotate.d/bunkerweb` 的系统 `logrotate` 配置负责（每日轮转、保留 7 天，并通过 `copytruncate` 压缩）。
+    **默认行为**：`LOG_TYPES="file"`。日志写入 `/var/log/bunkerweb/*.log`。轮转由安装到 `/etc/logrotate.d/bunkerweb` 的系统 `logrotate` 配置负责（每日轮转或超过 100 MB 时轮转、保留十四个历史版本，并通过 `copytruncate` 压缩）。
 
     **示例**：保留本地文件（供 Web UI 使用），同时镜像到系统 syslog。
 

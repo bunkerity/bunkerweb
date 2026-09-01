@@ -1437,7 +1437,7 @@ Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Pers
 Anders als die übrigen Docker-Images bewahrt das All-In-One `access.log`, `error.log` und `modsec_audit.log` als reale Dateien unter `/var/log/bunkerweb/` auf. Der Log-Stream liest sie, um jeder Zeile ein Präfix voranzustellen und `HIDE_SERVICE_LOGS` anzuwenden, und sowohl der mitgelieferte CrowdSec-Parser als auch der Protokollanzeiger der Web-UI lesen sie von der Festplatte.
 
 - Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus. Ein Rotationsfehler wird mit dem Präfix `[LOGROTATE]` in den Container-Logs gemeldet.
-- Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter `/etc/logrotate.d/bunkerweb`: Jede Datei, die auf `/var/log/bunkerweb/*.log` passt, wird rotiert, sobald sie 100 MB überschreitet, sieben komprimierte Generationen werden aufbewahrt, und die Rotation verwendet `copytruncate`.
+- Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter `/etc/logrotate.d/bunkerweb`: Jede Datei, die auf `/var/log/bunkerweb/*.log` passt, wird täglich rotiert, oder früher, sobald sie 100 MB überschreitet, vierzehn nummerierte Generationen werden aufbewahrt, und die Rotation verwendet `copytruncate`.
 - `copytruncate` leert die Datei an Ort und Stelle, statt sie umzubenennen, sodass sie ihren Inode behält. Der Log-Stream, der CrowdSec-Parser und der Protokollanzeiger folgen ihr daher über eine Rotation hinweg, ohne neu starten zu müssen, und ModSecurity schreibt weiterhin in die richtige Datei, obwohl es sein Audit-Log nie erneut öffnet.
 - Um den Schwellenwert oder die Anzahl der Generationen zu ändern, mounten Sie Ihre eigene Datei über `/etc/logrotate.d/bunkerweb`. Um die Rotation vollständig zu deaktivieren und die Aufbewahrung selbst zu verwalten, mounten Sie eine leere Datei über denselben Pfad. Ein unter `/var/log/bunkerweb` gemountetes Volume ändert nur, wo die Daten liegen — es hindert das im Container laufende `logrotate` nicht daran, sie dort weiterhin zu rotieren.
 
@@ -3394,6 +3394,10 @@ To add a new application protected by BunkerWeb:
 
 Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.
 
+!!! warning "DNS_RESOLVERS muss den DNS-Service des Clusters benennen"
+
+    Geben Sie `DNS_RESOLVERS` den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service `kube-dns.kube-system.svc.cluster.local`, auch wenn CoreDNS die Implementierung dahinter ist.
+
 ### Ingress-Ressourcen
 
 Sobald der BunkerWeb-Kubernetes-Stack erfolgreich eingerichtet und betriebsbereit ist (weitere Informationen finden Sie in den Autoconf-Protokollen), können Sie mit der Bereitstellung von Webanwendungen im Cluster fortfahren und Ihre Ingress-Ressource deklarieren.
@@ -3697,7 +3701,8 @@ settings:
     # Ersetzen Sie dies durch Ihren DNS-Resolver
     # um ihn zu erhalten: kubectl exec in einem zufälligen Pod, dann cat /etc/resolv.conf
     # wenn Sie eine IP als Nameserver haben, führen Sie eine umgekehrte DNS-Suche durch: nslookup <IP>
-    # meistens ist es coredns.kube-system.svc.cluster.local oder kube-dns.kube-system.svc.cluster.local
+    # meistens ist es kube-dns.kube-system.svc.cluster.local, der Service, hinter dem
+    # CoreDNS auf einem Standard-Cluster steht
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # Wir berücksichtigen nur Ingress-Ressourcen mit ingressClass bunkerweb, um Konflikte mit dem vorhandenen Ingress-Controller zu vermeiden

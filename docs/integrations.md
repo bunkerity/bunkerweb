@@ -1449,7 +1449,7 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 Unlike the other Docker images, the All-In-One keeps `access.log`, `error.log` and `modsec_audit.log` as real files under `/var/log/bunkerweb/`. The log stream reads them to prefix each line and to apply `HIDE_SERVICE_LOGS`, and both the bundled CrowdSec parser and the Web UI log viewer read them from disk.
 
 - The image bundles `logrotate` and runs it hourly under supervisor. A rotation failure is reported with the `[LOGROTATE]` prefix in the container logs.
-- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated once it passes 100 MB, seven compressed generations are kept, and rotation uses `copytruncate`.
+- The policy is the one the Linux packages install, at `/etc/logrotate.d/bunkerweb`: every file matching `/var/log/bunkerweb/*.log` is rotated daily, or earlier if it passes 100 MB, fourteen numbered generations are kept, and rotation uses `copytruncate`.
 - `copytruncate` empties the file in place instead of renaming it, so it keeps its inode. The log stream, the CrowdSec parser and the log viewer therefore follow it across a rotation without restarting, and ModSecurity keeps writing to the right file even though it never reopens its audit log.
 - To change the threshold or the number of generations, mount your own file over `/etc/logrotate.d/bunkerweb`. To disable rotation entirely and manage retention yourself, mount an empty file over that same path; mounting a volume at `/var/log/bunkerweb` only changes where the bytes live, it does not stop the container's own `logrotate` from still rotating them there.
 
@@ -3519,6 +3519,10 @@ To add a new application protected by BunkerWeb:
 
 Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
 
+!!! warning "DNS_RESOLVERS must name the cluster DNS Service"
+
+    Give `DNS_RESOLVERS` the cluster DNS Service, whose ClusterIP is stable for the life of the Service, and never a pod IP. nginx resolves that value once, when it parses its configuration, and reuses the address it got until the next reload, so anything pod-scoped keeps working only until those pods move: a rolling CoreDNS restart then leaves every lookup timing out. On a stock cluster the Service is `kube-dns.kube-system.svc.cluster.local`, including when CoreDNS is the implementation behind it.
+
 ### Ingress resources
 
 Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.
@@ -3822,7 +3826,8 @@ settings:
     # Replace with your DNS resolver
     # to get it: kubectl exec in a random pod then cat /etc/resolv.conf
     # if you have an IP as nameserver then do a reverse DNS lookup: nslookup <IP>
-    # most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local
+    # most of the time it's kube-dns.kube-system.svc.cluster.local, which is the Service
+    # CoreDNS sits behind on a stock cluster
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller

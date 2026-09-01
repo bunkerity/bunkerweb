@@ -2646,7 +2646,7 @@ LOG_LEVEL_1=error
 
 ### Log File Retention {#log-file-retention}
 
-Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` once it passes 100 MB, keeps seven compressed generations, and uses `copytruncate`.
+Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` daily, or earlier if the file passes 100 MB, keeps fourteen numbered generations (`modsec_audit.log.1`, `.2.gz` and so on), and uses `copytruncate`.
 
 - **Linux**: the packages depend on `logrotate` and the system runs it on its own timer. Nothing else to do.
 - **All-in-one**: the image ships `logrotate` and runs it hourly under supervisor, using that same policy file.
@@ -2656,13 +2656,17 @@ Only the integrations that keep real log files need retention, and both of them 
 
 Edit `/etc/logrotate.d/bunkerweb` to change the threshold, the number of generations, or to add a `maxage`. On the All-in-one, mount your own file over that path.
 
-The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](features.md#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself.
+Two directives there are load-bearing. `maxsize` is what keeps `daily` alive: the similar `size` is mutually exclusive with the interval directives, so it would rotate on size only. And adding `dateext` would name every archive after the date, which makes a second rotation on the same date fail with `destination ... already exists, skipping rotation`, leaving the live file unrotated until the date changes.
+
+The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](features.md#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself. The setting only accepts a path under `/var/log/bunkerweb`, so it cannot point at `/data`: to keep the audit history across a container recreation, mount a volume on `/var/log/bunkerweb` itself, which persists the whole log set rather than the audit log alone.
+
+With the default `MODSECURITY_SEC_AUDIT_LOG_PARTS` of `BCFH`, part `C` puts the request body in the audit log. Treat the file as sensitive before copying it anywhere.
 
 ### Integration Defaults & Examples
 
 === "Linux"
 
-    **Default behavior**: `LOG_TYPES="file"`. Logs are written to `/var/log/bunkerweb/*.log`. Rotation is handled by the system `logrotate` config installed at `/etc/logrotate.d/bunkerweb` (daily, 7-day retention, compressed via `copytruncate`).
+    **Default behavior**: `LOG_TYPES="file"`. Logs are written to `/var/log/bunkerweb/*.log`. Rotation is handled by the system `logrotate` config installed at `/etc/logrotate.d/bunkerweb` (daily or past 100 MB, fourteen generations, compressed via `copytruncate`).
 
     **Example**: Keep local files (for Web UI) and also mirror to the system syslog.
 

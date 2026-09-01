@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.6.15~rc1 - 2026/08/??
+## v1.6.15~rc2 - 2026/09/??
+
+- [BUGFIX] `linux`, `all-in-one`: log rotation runs on every pass instead of stopping after the first one of the day, and keeps fourteen generations. (Fixes #3838)
+- [BUGFIX] `kubernetes`: the example manifests point `DNS_RESOLVERS` at the `kube-dns` Service, where the previous value named a Service most clusters do not have. (Refs #2524)
+- [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)
+
+## v1.6.15~rc1 - 2026/08/31
 
 - [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
 - [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.

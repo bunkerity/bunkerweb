@@ -1444,7 +1444,7 @@ L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persist
 Contrairement aux autres images Docker, l'All-in-one conserve `access.log`, `error.log` et `modsec_audit.log` comme de vrais fichiers sous `/var/log/bunkerweb/`. Le flux de journalisation les lit pour ajouter un préfixe à chaque ligne et appliquer `HIDE_SERVICE_LOGS`, et l'analyseur CrowdSec embarqué ainsi que le visualiseur de journaux de l'interface Web les lisent depuis le disque.
 
 - L'image embarque `logrotate` et l'exécute toutes les heures sous supervisor. Un échec de rotation est signalé par le préfixe `[LOGROTATE]` dans les logs du conteneur.
-- La politique est celle installée par les paquets Linux, dans `/etc/logrotate.d/bunkerweb` : tout fichier correspondant à `/var/log/bunkerweb/*.log` est tourné dès qu'il dépasse 100 Mo, sept générations compressées sont conservées, et la rotation utilise `copytruncate`.
+- La politique est celle installée par les paquets Linux, dans `/etc/logrotate.d/bunkerweb` : tout fichier correspondant à `/var/log/bunkerweb/*.log` est tourné chaque jour, ou plus tôt s'il dépasse 100 Mo, quatorze générations numérotées sont conservées, et la rotation utilise `copytruncate`.
 - `copytruncate` vide le fichier sur place au lieu de le renommer, si bien qu'il conserve son inode. Le flux de journalisation, l'analyseur CrowdSec et le visualiseur de journaux le suivent donc à travers une rotation sans avoir besoin de redémarrer, et ModSecurity continue d'écrire dans le bon fichier même s'il ne rouvre jamais son journal d'audit.
 - Pour modifier le seuil ou le nombre de générations, montez votre propre fichier par-dessus `/etc/logrotate.d/bunkerweb`. Pour désactiver entièrement la rotation et gérer la rétention vous-même, montez un fichier vide par-dessus ce même chemin ; un volume monté sur `/var/log/bunkerweb` ne fait que déplacer les données, il n'empêche pas le `logrotate` du conteneur de continuer à les faire tourner à cet endroit.
 
@@ -3367,6 +3367,10 @@ Pour ajouter une nouvelle application protégée par BunkerWeb :
 
 Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.
 
+!!! warning "DNS_RESOLVERS doit désigner le Service DNS du cluster"
+
+    Donnez à `DNS_RESOLVERS` le Service DNS du cluster, dont la ClusterIP reste stable pendant toute la vie du Service, et jamais une IP de pod. nginx résout cette valeur une seule fois, au moment où il analyse sa configuration, et réutilise l'adresse obtenue jusqu'au rechargement suivant : ce qui pointe vers des pods ne fonctionne donc que jusqu'à leur déplacement, et un redémarrage progressif de CoreDNS laisse alors toutes les résolutions en échec. Sur un cluster standard, ce Service est `kube-dns.kube-system.svc.cluster.local`, y compris lorsque CoreDNS est l'implémentation qui se trouve derrière.
+
 ### Ressources d'entrée
 
 Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et opérationnelle (reportez-vous aux journaux autoconf pour plus d'informations), vous pouvez procéder au déploiement d'applications Web au sein du cluster et déclarer votre ressource d'entrée.
@@ -3670,7 +3674,8 @@ settings:
     # Replace with your DNS resolver
     # to get it: kubectl exec in a random pod then cat /etc/resolv.conf
     # if you have an IP as nameserver then do a reverse DNS lookup: nslookup <IP>
-    # most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local
+    # la plupart du temps c'est kube-dns.kube-system.svc.cluster.local, le Service
+    # derrière lequel se trouve CoreDNS sur un cluster standard
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller

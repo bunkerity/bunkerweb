@@ -2644,7 +2644,7 @@ LOG_LEVEL_1=error
 
 ### Rétention des fichiers journaux {#log-file-retention}
 
-Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` dès qu'il dépasse 100 Mo, conserve sept générations compressées et utilise `copytruncate`.
+Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` chaque jour, ou plus tôt si le fichier dépasse 100 Mo, conserve quatorze générations numérotées (`modsec_audit.log.1`, `.2.gz`, etc.) et utilise `copytruncate`.
 
 - **Linux** : les paquets dépendent de `logrotate`, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.
 - **All-in-one** : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec ce même fichier de politique.
@@ -2654,13 +2654,17 @@ Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'
 
 Modifiez `/etc/logrotate.d/bunkerweb` pour changer le seuil, le nombre de générations, ou pour ajouter un `maxage`. Sur l'All-in-one, montez votre propre fichier par-dessus ce chemin.
 
-L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même.
+Deux directives y sont déterminantes. `maxsize` est ce qui garde `daily` actif : la directive `size`, très proche, est exclusive des directives d'intervalle et ne ferait donc tourner qu'à la taille. Et ajouter `dateext` nommerait chaque archive d'après la date, si bien qu'une deuxième rotation le même jour échouerait avec `destination ... already exists, skipping rotation`, laissant le fichier actif non tourné jusqu'au changement de date.
+
+L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même. Le paramètre n'accepte qu'un chemin sous `/var/log/bunkerweb`, il ne peut donc pas pointer vers `/data` : pour conserver l'historique d'audit après une recréation du conteneur, montez un volume sur `/var/log/bunkerweb` lui-même, ce qui préserve l'ensemble des journaux et pas seulement le journal d'audit.
+
+Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la partie `C` place le corps de la requête dans le journal d'audit. Traitez ce fichier comme sensible avant de le copier ailleurs.
 
 ### Valeurs par défaut et exemples d'intégration
 
 === "Linux"
 
-    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`. La rotation est gérée par la configuration système `logrotate` installée dans `/etc/logrotate.d/bunkerweb` (quotidienne, rétention de 7 jours, compression via `copytruncate`).
+    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`. La rotation est gérée par la configuration système `logrotate` installée dans `/etc/logrotate.d/bunkerweb` (quotidienne ou au-delà de 100 Mo, quatorze générations, compression via `copytruncate`).
 
     **Exemple** : Conserver les fichiers locaux (pour l'interface Web) et les reproduire également vers le syslog système.
 

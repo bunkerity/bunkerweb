@@ -1437,7 +1437,7 @@ BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化�
 与其他 Docker 镜像不同，一体化镜像会将 `access.log`、`error.log` 和 `modsec_audit.log` 保留为 `/var/log/bunkerweb/` 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 `HIDE_SERVICE_LOGS`，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。
 
 - 该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 `[LOGROTATE]` 前缀报告。
-- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件在超过 100 MB 时都会被轮转，保留七个压缩后的历史版本，并使用 `copytruncate` 进行轮转。
+- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件都会每天轮转，若超过 100 MB 则提前轮转，保留十四个编号的历史版本，并使用 `copytruncate` 进行轮转。
 - `copytruncate` 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。
 - 如需更改阈值或历史版本数量，请将您自己的文件挂载到 `/etc/logrotate.d/bunkerweb`。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 `/var/log/bunkerweb` 只会改变数据的存放位置，并不会阻止容器内运行的 `logrotate` 继续对其进行轮转。
 
@@ -3391,6 +3391,10 @@ To add a new application protected by BunkerWeb:
 
 除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
+!!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
+
+    请将 `DNS_RESOLVERS` 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 `kube-dns.kube-system.svc.cluster.local`，即使其背后的实现是 CoreDNS 也是如此。
+
 ### Ingress 资源
 
 一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。
@@ -3694,7 +3698,8 @@ settings:
     # 替换为您的 DNS 解析器
     # 获取方法：在任意 pod 中执行 kubectl exec，然后 cat /etc/resolv.conf
     # 如果您的 nameserver 是一个 IP，则执行反向 DNS 查找：nslookup <IP>
-    # 大多数情况下是 coredns.kube-system.svc.cluster.local 或 kube-dns.kube-system.svc.cluster.local
+    # 大多数情况下是 kube-dns.kube-system.svc.cluster.local，在标准集群上
+    # CoreDNS 正是位于该 Service 之后
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # 我们只考虑带有 ingressClass bunkerweb 的 Ingress 资源，以避免与现有 ingress 控制器冲突
