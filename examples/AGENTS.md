@@ -5,7 +5,7 @@ Agent guide for user-facing deployment recipes in `examples/`. `CLAUDE.md` here 
 ## Recipe Rules
 
 - Examples are documentation-quality deployment recipes. Keep commands, service names, environment variables, and setup steps reproducible for users.
-- Only selected examples are integration fixtures; their descriptors live in [tests/examples/](../tests/examples/), not beside each recipe.
+- Only selected examples are integration fixtures; their specs live in [tests/core/](../tests/core/) as `example-<name>.yml`, not beside each recipe.
 - Use placeholders for credentials, domains, certificates, and tokens. Never turn an example into a source of real secrets.
 - Compose parsing and validation are read-only checks; starting stacks, creating infrastructure, or publishing images need explicit authorization.
 

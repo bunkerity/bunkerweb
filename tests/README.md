@@ -88,10 +88,10 @@ already in use`, and a log dump against them prints empty sections under every h
 The framework's own `bw-db` network is skipped for the same reason — it claims
 10.10.10.0/24, which `examples/proxy-protocol` wants for its `net-proxy`.
 
-Three traps when you move a scenario over from `tests/examples/<name>.json`. The legacy
-harness casefolds both sides of a string assertion, it used `requests` and followed
-redirects, and it never verified TLS; this framework does none of that by default.
-Migrated assertions therefore carry `ignore_case: true`, `follow_redirects: true` and
+Three traps came over with the example scenarios the deleted legacy harness used to run.
+That harness casefolded both sides of a string assertion, it used `requests` and followed
+redirects, and it never verified TLS; this framework does none of that by default. The
+migrated assertions in `core/example-*.yml` therefore carry `ignore_case: true`, `follow_redirects: true` and
 `verify_ssl: false`. The last one is not optional on an example stack: the domains only
 resolve through the framework's dnsmasq, Let's Encrypt can never issue for them, and
 BunkerWeb serves its self-signed fallback. Write new specs without the first two: assert
@@ -225,11 +225,12 @@ Once a stack is up, you can drive narrower loops:
 HEADLESS=1 .venv-tests/bin/python tests/ui.py "panel;login" Docker
 ```
 
-`parse.py` emits one matrix entry per spec file. For Docker that is **58 core, 9 api and 7
-ui** entries. The migration conception recorded 37/8/7, and that 37 is still the plain-spec
-count: core reaches 58 because of the 21 `example-*` specs that replaced
-`tests/examples/<name>.json` (the Kubernetes-only ones do not appear in the Docker matrix). api
-gained `instances-validation`, which arrived with the source working tree.
+`parse.py` emits one matrix entry per spec file. For Docker that is **68 core, 9 api and 7
+ui** entries (measured 2026-09-01; re-measure rather than trusting this line). The migration
+conception recorded 37/8/7. core reaches 68 as 47 plain specs — the conception's 37 plus the
+arms added since — and the 21 `example-*` specs that replaced the legacy harness's example
+scenarios; the other four are single-arm and so absent from the Docker matrix — three
+Kubernetes-only, plus `example-autoconf-configs` on Autoconf. api gained `instances-validation`, which arrived with the source working tree.
 
 An `xpath` or `ui` action drives Firefox through Selenium, and `core_handlers/selenium_common.py`
 looks for the driver at `./geckodriver` or `/usr/local/bin/geckodriver` — nowhere else. CI installs
@@ -368,8 +369,10 @@ Three more traps a `ui` spec hits sooner or later, all handled in `utils/ui.py` 
 Docker, Linux, Autoconf, Kubernetes, All-in-one. `utils/integrations.yml` maps each
 integration and architecture to a runner. The values are JSON and feed `runs-on` directly.
 
-- **Swarm**: not ported yet. Its rows sit at `TODO`, and `tests/main.py` with `SwarmTest.py`
-  stay in the tree until someone ports it.
+- **Swarm**: a real per-spec arm, deliberately opt-in. `tests/parse.py`'s `OPT_IN_ONLY`
+  routes a spec there only when the spec names `Swarm` by name, so `integrations: "all"`
+  cannot enrol seventy specs in an arm none of them has ever run on. Widening it is a
+  one-line deletion once the catalogue has been proven against a real swarm.
 - **ARM**: disabled. The builds provision an ARM node on demand (`create-arm.yml`, buildx
   over SSH, then `rm-arm.yml`). A test matrix would hold that node for a whole run instead
   of one build, so we priced it out rather than enabling it by default.
@@ -381,29 +384,33 @@ integration and architecture to a runner. The values are JSON and feed `runs-on`
 then fans out one job per integration. `container-build.yml` publishes the images under
 their `-tests` names and the workflow retags them to what the stacks reference.
 
-## The legacy harness
+## The legacy harness (deleted)
 
-`tests/main.py` and the `*Test.py` classes predate the migration. One pipeline still calls
-them, `staging-tests.yml`, which exercises released artifacts on staging infrastructure
-with real domains rather than a stack on a runner. They pin their own dependencies in
-`legacy-requirements.{in,txt}`; `tests/requirements.txt` belongs to the framework.
+`tests/main.py`, the `*Test.py` classes, the `tests/examples/<name>.json` scenario
+descriptors and `legacy-requirements.{in,txt}` were deleted once the two gaps that kept them
+alive closed: the Swarm arm above, and Linux example mode. `staging-tests.yml` was the only
+pipeline that ran them; it no longer runs anything (see its header). `tests/requirements.txt`
+has always belonged to this framework and is unaffected.
 
-Scenario descriptors sit in `tests/examples/<name>.json`, one per `examples/<name>/`
-directory, and the `name` field points back at the directory to deploy. They used to live
-inside the example folder, which put test assertions in documentation that users copy.
-Adding a scenario means adding a file here, not editing the example.
+All 25 scenarios have a spec in `core/example-*.yml`, one per `examples/<name>/` directory,
+covering the same *integrations* the descriptors declared — plus Linux on `php-singlesite` and
+`proxy-protocol`, which the harness never ran there. Two arms were deliberately **not**
+carried over, and each spec says so in its `integrations:` block:
 
-Every scenario now has a spec in `core/example-*.yml`, and the 51 example stacks carry the
-1.7 topology, so the framework covers what the harness covers on Docker, Autoconf and
-Kubernetes. Two gaps keep the harness alive:
+- `nextcloud` on Linux and `wordpress` on Linux. Example mode deploys a compose file; the
+  Linux integration installs a package into a systemd container, and the framework's PHP
+  there is the `php:fpm-alpine` helper, which ships no database extensions and has no
+  database beside it. Both answer 500 rather than testing anything.
 
-- **Swarm**, which the framework does not run at all.
-- **Linux examples**. Example mode deploys a compose file; the Linux integration installs a
-  package into a systemd container instead, so `behind-reverse-proxy`, `nextcloud`,
-  `php-multisite` and `wordpress` still get their Linux pass from the harness. Their specs
-  cover the container integrations and mark the Linux row `not converted`.
+The harness never ran a Swarm scenario at all: no descriptor declared `swarm` in its `kinds`,
+and `staging.yml`'s matrix only ever passed `docker`, `autoconf`, `k8s` and `linux`.
 
-Delete `tests/main.py`, the `*Test.py` classes and `tests/examples/` once both close.
+Two things went with it and were **not** replaced, both tracked as PO decisions rather than
+closed here. The harness ran its 4 Linux example scenarios across 10 distros; the framework
+runs 40 core Linux specs against `ubuntu/noble` only, because all four `parse.py` callers pass
+`--dev` and nothing calls the `staging:` block whose 9 distro rows are live. And it exercised
+released artifacts on staging infrastructure against real domains with real Let's Encrypt
+certificates — the dev pipelines run local stacks behind dnsmasq with a self-signed fallback.
 
 ### Retired per-feature stacks
 
@@ -412,7 +419,7 @@ Delete `tests/main.py`, the `*Test.py` classes and `tests/examples/` once both c
 them. All thirty pinned `bunkerity/bunkerweb:1.6.0-beta` and declared no `bw-api` and no
 `bw-worker`, so on 1.7 they could not start at all: the scheduler dispatches through the API
 and the Celery broker, and neither was in those stacks. Nothing referenced them either — the
-harness drives `tests/examples/*.json` now, not `core/<name>/`. Removed, along with
+`core/example-*.yml` specs cover those stacks now, not `core/<name>/`. Removed, along with
 `tests/linux.sh`, which nothing had called for some time.
 
 `core/internalcert/` stayed. It is not a stack: it runs one container with its own volume and

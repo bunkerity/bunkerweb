@@ -311,9 +311,9 @@ if [ "$integration" == "Swarm" ] ; then
     # An example-backed spec ships a COMPOSE file (examples/<name>/docker-compose.yml) and the
     # framework deploys it as the stack. `docker stack deploy` would silently ignore half of it
     # -- container_name, depends_on, the static addresses -- so the run would come up looking
-    # plausible and assert against something that is not the example. Refuse instead: this is the
-    # gap that keeps tests/main.py and SwarmTest.py alive, and it has to be visible, not papered
-    # over. See tests/README.md, "Two gaps keep the harness alive".
+    # plausible and assert against something that is not the example. Refuse instead: the gap has
+    # to be visible, not papered over. It is the one thing the deleted legacy harness could not do
+    # either -- no descriptor ever declared `swarm`. See tests/README.md, "The legacy harness".
     if [ -f /tmp/example_stack.txt ] ; then
         log "START" "❌" "🐝 The Swarm arm cannot deploy an example stack (compose file, not a stack file)"
         exit 1

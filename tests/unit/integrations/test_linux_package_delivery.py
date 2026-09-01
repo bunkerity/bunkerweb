@@ -34,7 +34,6 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 
 INTEGRATION_TESTS = (WORKFLOWS / "integration-tests.yml").read_text(encoding="utf-8")
 LINUX_BUILD = (WORKFLOWS / "linux-build.yml").read_text(encoding="utf-8")
-STAGING_TESTS = (WORKFLOWS / "staging-tests.yml").read_text(encoding="utf-8")
 
 PACKAGES = safe_load((ROOT / "tests" / "utils" / "packages.yml").read_text(encoding="utf-8"))["packages_info"]
 INTEGRATIONS = safe_load((ROOT / "tests" / "utils" / "integrations.yml").read_text(encoding="utf-8"))
@@ -50,7 +49,7 @@ ARCH_TOKENS = {"rpm": {"x86_64", "aarch64"}, "deb": {"amd64", "arm64"}}
 PLATFORM_ARCHES = {"linux/amd64": {"amd64", "x86_64"}, "linux/arm64": {"arm64", "aarch64"}}
 
 # Every workflow that runs the Linux arm, with the section of integrations.yml its parse.py call
-# reads. All three pass `--dev`; staging.yml drives the legacy staging-tests.yml instead.
+# reads. All three pass `--dev`; staging.yml has no Linux arm at all since the legacy harness went.
 CALLERS = (("1.7-dev.yml", "dev"), ("dev.yml", "dev"), ("ui.yml", "dev"))
 
 
@@ -129,12 +128,3 @@ def test_the_test_images_stay_package_free():
     assert dockerfiles, "no tests/linux/Dockerfile-* found -- the guard below would pass vacuously"
     offenders = [path.name for path in dockerfiles if re.search(r"^COPY .*package-", path.read_text(encoding="utf-8"), re.M)]
     assert not offenders, f"a package COPY is back in {offenders}; the Build Linux image step has no package-* directory to copy from"
-
-
-def test_the_distro_test_image_push_still_has_its_consumer():
-    """linux-build.yml's `<distro>-tests` push is no longer what the Linux arm installs from, but
-    it is not dead: staging-tests.yml pulls it as the systemd runtime the legacy staging arm runs.
-    Dropping either half alone leaves a push nothing reads, or a pull with nothing behind it."""
-    assert "tags: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}" in LINUX_BUILD
-    pulled = set(re.findall(r"docker pull ghcr\.io/bunkerity/(?P<distro>[\w.-]+)-tests:testing", STAGING_TESTS))
-    assert pulled, "staging-tests.yml no longer pulls any <distro>-tests image; linux-build.yml's push would have no consumer left"

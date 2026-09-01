@@ -1,12 +1,41 @@
-name: Perform staging tests (REUSABLE)
+name: Perform staging tests (REUSABLE — no test gate)
+
+# The legacy integration harness this workflow drove (`tests/main.py` and the `*Test.py`
+# classes) was deleted. Every *integration* it covered is now a spec under `tests/core/`, run
+# by `.github/workflows/integration-tests.yml` from the dev pipelines — but that is a trade,
+# not parity. This arm ran 4 example scenarios across 10 distros; the framework runs 40 core
+# Linux specs against ubuntu/noble alone, because all four `parse.py` callers pass `--dev` and
+# the 9 distro rows in `integrations.yml`'s `staging:` block have no caller at all. It also
+# tested released artifacts against real domains with real Let's Encrypt certificates on
+# staging infrastructure, which no dev pipeline does. See `tests/README.md`.
+#
+# DECIDE BEFORE THE NEXT PUSH TO `staging` OR `fix-cve`. As it stands, such a push provisions
+# four cloud infrastructures with self-hosted runners, runs this five-second echo, destroys
+# them, and then `push-images` and `push-packages` publish eight images to Docker Hub and ghcr
+# and ten distro packages to packagecloud with NO integration gate in front of them.
+#
+# This file is kept, and kept callable with the same inputs and secrets, only so `staging.yml`'s
+# `uses:` and the `needs: [staging-tests]` of `delete-infras`, `push-images` and `push-packages`
+# stay valid. It annotates every run instead of passing silently.
+#
+# Two ways out, both the PO's call, neither in scope for the deletion:
+#   1. drop the `staging-tests` job from `staging.yml`. Either keep the infra jobs and repoint
+#      those three `needs:` at `create-infras`, or — since the infras existed only to host this
+#      arm — delete `staging-create-infra.yml` and `staging-delete-infra.yml` too and repoint
+#      at `[codeql, build-containers, build-packages]`;
+#   2. port the staging arm to `integration-tests.yml`, which means `staging.yml` growing the
+#      `parse.py` matrix step the dev pipelines already have, and a caller for the `staging:`
+#      block. This is the only option that recovers the distro spread and the real-domain
+#      coverage rather than accepting their loss.
 
 permissions:
   contents: read
-  packages: read
 
 on:
   workflow_call:
     inputs:
+      # Both inputs are unused while there is no gate. They stay declared because
+      # `staging.yml` passes them and `required: true` is part of the existing contract.
       TYPE:
         required: true
         type: string
@@ -14,8 +43,8 @@ on:
         required: true
         type: string
     secrets:
-      # Every secret below is consumed behind an `inputs.TYPE` condition, so none
-      # is required on every call.
+      # Same reason: `staging.yml` passes all seven, and a secret passed to a reusable
+      # workflow that does not declare it is a hard error.
       SECRET_KEY:
         required: false
       PRIVATE_REGISTRY:
@@ -33,170 +62,10 @@ on:
 
 jobs:
   tests:
-    runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
+    runs-on: ubuntu-latest
     steps:
-      # Prepare
-      - name: Checkout source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Login to ghcr
-        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing local/bunkerweb-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
-      - run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing local/scheduler-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
-      - run: docker pull ghcr.io/bunkerity/api-tests:testing && docker tag ghcr.io/bunkerity/api-tests:testing local/api-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
-      - run: docker pull ghcr.io/bunkerity/worker-tests:testing && docker tag ghcr.io/bunkerity/worker-tests:testing local/worker-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
-      - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
-        if: contains(fromJSON('["autoconf"]'), inputs.TYPE)
-      - name: Install test dependencies
-        run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/legacy-requirements.txt
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
-        if: inputs.TYPE == 'k8s'
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: tf-k8s
-          path: /tmp
-        if: inputs.TYPE == 'k8s'
-      - run: |
-          echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
-          rm -f /tmp/.secret_key
-          tar xf /tmp/terraform.tar -C /
-          mkdir /tmp/reg
-          cp tests/terraform/k8s-reg.tf /tmp/reg
-          cp tests/terraform/providers.tf /tmp/reg
-          cd /tmp/reg
-          export TF_VAR_k8s_reg_user=${REG_USER}
-          export TF_VAR_k8s_reg_token=${REG_TOKEN}
-          terraform init
-          terraform apply -auto-approve
+      - name: No staging test gate
         env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          REG_USER: ${{ github.actor }}
-          REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: inputs.TYPE == 'k8s'
-      - uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
-        if: inputs.TYPE == 'k8s'
-        with:
-          version: "v1.29.1"
-      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
-        if: inputs.TYPE == 'k8s'
-      - name: Pull BW linux ubuntu test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
-      - name: Pull BW linux debian Bookworm test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-bookworm-tests:testing && docker tag ghcr.io/bunkerity/debian-bookworm-tests:testing local/debian-bookworm:latest
-      - name: Pull BW linux debian Trixie test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-trixie-tests:testing && docker tag ghcr.io/bunkerity/debian-trixie-tests:testing local/debian-trixie:latest
-      - name: Pull BW linux fedora 43 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-43-tests:testing && docker tag ghcr.io/bunkerity/fedora-43-tests:testing local/fedora-43:latest
-      - name: Pull BW linux fedora 44 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-44-tests:testing && docker tag ghcr.io/bunkerity/fedora-44-tests:testing local/fedora-44:latest
-      - name: Pull BW linux rhel-8 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-8-tests:testing && docker tag ghcr.io/bunkerity/rhel-8-tests:testing local/rhel-8:latest
-      - name: Pull BW linux rhel-9 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-9-tests:testing && docker tag ghcr.io/bunkerity/rhel-9-tests:testing local/rhel-9:latest
-      - name: Pull BW linux rhel-10 test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-10-tests:testing && docker tag ghcr.io/bunkerity/rhel-10-tests:testing local/rhel-10:latest
-      - name: Pull BW linux ubuntu noble test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/ubuntu-noble-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-noble-tests:testing local/ubuntu-noble:latest
-      - name: Pull BW linux ubuntu jammy test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/ubuntu-jammy-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-jammy-tests:testing local/ubuntu-jammy:latest
-      # Do tests
-      - name: Run tests
-        if: inputs.TYPE == 'docker'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run tests
-        if: inputs.TYPE == 'autoconf'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run tests
-        if: inputs.TYPE == 'k8s'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "kubernetes"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-          KUBECONFIG: "/tmp/k8s/kubeconfig"
-          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          IMAGE_TAG: "testing"
-      - name: Run Linux ubuntu tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian Bookworm tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-bookworm"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian Trixie tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-trixie"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux fedora 43 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-43"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux fedora 44 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-44"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel-8 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-8"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel-9 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-9"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel-10 tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-10"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux ubuntu-noble tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-noble"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux ubuntu-jammy tests
-        if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-jammy"
-        env:
-          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
-          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+          TYPE: ${{ inputs.TYPE }}
+        run: |
+          echo "::warning title=No staging test gate::The legacy harness was deleted and the staging arm ($TYPE) has not been ported to integration-tests.yml, so nothing is tested here. See the header of .github/workflows/staging-tests.yml."

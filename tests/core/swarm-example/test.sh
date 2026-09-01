@@ -1,6 +1,6 @@
 #!/bin/bash
 # The scenario `examples/swarm-configs/` never had: it is one of the six example directories with
-# no manifest in `examples/` and none in `tests/examples/` either, so nothing has ever exercised it.
+# no manifest in `examples/` and none in the deleted legacy harness either, so nothing has ever exercised it.
 #
 # It is the only shipped example that demonstrates Swarm *configs* -- one global and three scoped
 # with CONFIG_SITE -- through `docker config create`, which is the only route Swarm has for custom

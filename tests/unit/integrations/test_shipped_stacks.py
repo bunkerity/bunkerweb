@@ -174,19 +174,23 @@ def test_kubernetes_internal_api_clients_receive_api_token(manifest, image):
     assert re.search(r'- name: API_TOKEN\n\s+value: "changeme"', workload)
 
 
-def test_staging_builds_and_loads_every_job_component():
+def test_staging_builds_and_pushes_every_job_component():
+    # The `loads` half of this guard read staging-tests.yml, which pulled the api and worker
+    # `-tests` images into the legacy harness's stack. That harness is gone and staging has no
+    # test stack to load anything into, so what is left to protect is the build/push chain: a
+    # staging release that ships bunkerweb and the scheduler but forgets api or worker gives
+    # users a fleet where the scheduler dispatches into nothing. `integration-tests.yml` is
+    # where the loading guarantee lives now -- test_integration_workflow_retags_every_job_component.
     staging = _workflow("staging.yml")
-    runner = (ROOT / ".github" / "workflows" / "staging-tests.yml").read_text(encoding="utf-8")
     images = staging["jobs"]["build-containers"]["strategy"]["matrix"]["image"]
     assert {"api", "worker"} <= set(images)
     assert any(
         row.get("image") == "worker" and row.get("dockerfile") == "src/worker/Dockerfile"
         for row in staging["jobs"]["build-containers"]["strategy"]["matrix"]["include"]
     )
-    assert any("bunkerity/bunkerweb-worker:testing" in step.get("run", "") for step in staging["jobs"]["push-images"]["steps"])
+    pushed = " ".join(step.get("run", "") for step in staging["jobs"]["push-images"]["steps"])
     for image in ("api", "worker"):
-        assert f"ghcr.io/bunkerity/{image}-tests:testing" in runner
-        assert f"local/{image}-tests:latest" in runner
+        assert f"docker push bunkerity/bunkerweb-{image}:testing" in pushed
 
 
 def test_integration_workflow_retags_every_job_component():

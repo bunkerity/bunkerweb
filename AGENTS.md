@@ -21,7 +21,7 @@ Primary instruction file for AI coding agents in this repository.
 - `src/autoconf/`: Docker/Swarm/Kubernetes event-driven config sync.
 - `src/linux/` and `src/all-in-one/`: packaging and distribution targets.
 - `src/deps/`: vendored third-party code — treat as external unless the task targets it.
-- `examples/`: user-facing deployment recipes; only selected examples are e2e fixtures, with tested scenario descriptors in `tests/examples/`.
+- `examples/`: user-facing deployment recipes; only selected examples are e2e fixtures, each driven by a `tests/core/example-<name>.yml` spec.
 - `tests/`: the YAML-spec integration framework (`tests/scripts/test.sh`) and the pytest unit suite (`tests/unit/`).
 - `docs/`: user-facing documentation, partly generated from plugin metadata.
 
@@ -42,7 +42,7 @@ Primary instruction file for AI coding agents in this repository.
 - Dev stack (recommended): `docker compose -f misc/dev/docker-compose.ui.api.yml up -d`
 - Integration tests: `./tests/scripts/test.sh <integration> <type> <release> <category>`, e.g. `./tests/scripts/test.sh docker core dev headers`
 - Unit tests: `.venv-unit/bin/pytest`
-- Both suites, their setup and their traps: [tests/AGENTS.md](tests/AGENTS.md). `tests/main.py` is the **legacy** harness, not the entry point.
+- Both suites, their setup and their traps: [tests/AGENTS.md](tests/AGENTS.md). `tests/scripts/test.sh` is the only integration entry point; the legacy `tests/main.py` harness was deleted.
 
 For packaging commands and distro-specific build details, use [BUILD.md](BUILD.md) instead of duplicating steps here.
 
