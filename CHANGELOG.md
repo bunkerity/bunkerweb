@@ -4,6 +4,8 @@
 
 - [BUGFIX] `linux`, `all-in-one`: log rotation runs on every pass instead of stopping after the first one of the day, and keeps fourteen generations. (Fixes #3838)
 - [BUGFIX] `kubernetes`: the example manifests point `DNS_RESOLVERS` at the `kube-dns` Service, where the previous value named a Service most clusters do not have. (Refs #2524)
+- [BUGFIX] `cli`: `bwcli` uses the configured `DATABASE_URI` instead of the loading render's SQLite default. (Fixes #3836)
+- [BUGFIX] `linux`: the pre-upgrade backup no longer aborts the upgrade when the scheduler is stopped. (Refs #3836)
 - [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)
 
 ## v1.6.15~rc1 - 2026/08/31

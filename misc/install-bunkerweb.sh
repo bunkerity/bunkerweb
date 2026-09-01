@@ -8342,7 +8342,20 @@ perform_upgrade_backup() {
     mkdir -p "$BACKUP_DIRECTORY" || {
         print_warning "Unable to create backup directory $BACKUP_DIRECTORY. Skipping automatic backup."; return 0; }
     print_step "Creating pre-upgrade backup in $BACKUP_DIRECTORY"
-    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" bwcli plugin backup save; then
+    # This runs before the package is replaced, so it uses the installed bwcli, which reads
+    # /etc/nginx/variables.env first and finds DATABASE_URI's default there whenever the
+    # scheduler has not rendered the real config yet. Every CLI version prefers the environment,
+    # so passing it here fixes the backup on the version being upgraded away from, not only on
+    # the one being installed. Full Stack and Manager keep the URI in variables.env, Scheduler
+    # Only in scheduler.env; worker, ui and api never reach this line.
+    local _db_uri="" _env_file
+    for _env_file in /etc/bunkerweb/variables.env /etc/bunkerweb/scheduler.env ; do
+        _db_uri="$(sed -n 's/^DATABASE_URI=\(..*\)/\1/p' "$_env_file" 2>/dev/null | tail -n1 | tr -d '\r')"
+        [ -n "$_db_uri" ] && break
+    done
+    # env is load-bearing: without it the expanded word is not recognised as an assignment
+    # prefix and becomes the command name. An empty _db_uri expands to nothing.
+    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" env ${_db_uri:+DATABASE_URI="$_db_uri"} bwcli plugin backup save; then
         print_status "Backup completed: $BACKUP_DIRECTORY"
     else
         # The upgrade stops the services and replaces /etc/bunkerweb and the database schema.

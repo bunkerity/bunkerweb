@@ -23,7 +23,11 @@ from logger import getLogger  # type: ignore
 from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 from env_file import parse_env_file  # type: ignore
 
-VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"), Path(sep, "etc", "bunkerweb", "variables.env"))
+# The operator's file first. /etc/nginx/variables.env is generated output: during the loading
+# render it carries plugin defaults for every setting start.sh does not whitelist, DATABASE_URI
+# among them, so reading it first made a default beat the configured value. The scheduler takes
+# its own DATABASE_URI from /etc/bunkerweb/variables.env, and bwcli has to agree with it.
+VARIABLES_PATHS = (Path(sep, "etc", "bunkerweb", "variables.env"), Path(sep, "etc", "nginx", "variables.env"))
 
 
 def format_remaining_time(seconds):
@@ -92,11 +96,11 @@ class CLI(ApiCaller):
             # Update environment with secrets
             environ.update(docker_secrets)
 
-        # /etc/nginx/variables.env only exists once an instance has rendered its configuration,
-        # while a Linux install keeps DATABASE_URI in /etc/bunkerweb/variables.env. Reading the
-        # generated file alone leaves DATABASE_URI empty whenever the instance has not written
-        # it yet, and the CLI then talks to the default SQLite path instead of the database the
-        # rest of the stack uses.
+        # Both files are read, the operator's first. /etc/nginx/variables.env is generated
+        # output: while the instance renders its loading configuration it carries plugin
+        # defaults for every setting start.sh does not whitelist, DATABASE_URI included. It is
+        # not missing the key, it holds the wrong value, so it must not win. Keys the operator's
+        # file does not set are still taken from it.
         self.__variables = {}
         self.__db = None
         for variables_path in VARIABLES_PATHS:
