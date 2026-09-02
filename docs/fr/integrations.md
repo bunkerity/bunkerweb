@@ -2993,6 +2993,44 @@ controller:
    - **Annotation du pod** : `bunkerweb.io/INSTANCE: "yes"`
    - **Variable d'environnement** : `KUBERNETES_MODE: "yes"`
 
+!!! warning "Définissez `API_TOKEN` sur Kubernetes"
+
+    L'API interne sur le port 5000 est un plan de contrôle privilégié : elle expose `/ping`, `/reload`, `/confs` et `/stop`. Les IP des pods sont dynamiques, donc `API_WHITELIST_IP` doit couvrir le CIDR des pods du cluster et ne peut pas à elle seule écarter les autres charges de travail. Définissez `API_TOKEN` sur les pods BunkerWeb et sur chaque composant qui les appelle, y compris le Scheduler, l'interface web et le service API s'il est déployé, et conservez-le dans un Secret ; sans cela, tout pod capable d'atteindre le port 5000 peut piloter le plan de données.
+
+    Créez le Secret dans chaque namespace qui exécute un pod BunkerWeb, en remplaçant `your-namespace` si nécessaire :
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Utilisez le même token dans les pods BunkerWeb et dans chaque appelant de l'API d'instance. L'omettre chez un appelant empêche ce composant d'utiliser l'API d'instance :
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Restreignez `API_WHITELIST_IP` au CIDR réel des pods de votre cluster plutôt qu'à toute la plage RFC1918 lorsque vous le connaissez.
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3031,6 +3069,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3133,6 +3176,11 @@ spec:
               value: "yes"
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
   ---
   apiVersion: v1
   kind: Service
@@ -3160,7 +3208,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                             |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API                                 |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API. Restreignez-la au CIDR réel des pods du cluster et associez-la à `API_TOKEN` ; la liste blanche seule n'isole pas l'API des autres charges de travail |
+| `API_TOKEN`               | *(depuis un Secret)* | Requis sur Kubernetes : doit correspondre sur les pods BunkerWeb et sur chaque appelant de l'API d'instance, y compris le Scheduler, l'interface web et le service API s'il est déployé |
 
 ##### Étape 3 : Création des Services
 
