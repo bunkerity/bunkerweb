@@ -89,9 +89,13 @@ class API:
             scheme = urlsplit(self.__endpoint).scheme
             if scheme == "https":
                 self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
+                # replace(..., 1) strips the scheme prefix. lstrip takes a character set, so it
+                # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
+                # came through intact while a named one lost its first letters and the retry
+                # failed to resolve.
                 resp = request(
                     method,
-                    f"http://{self.__endpoint.lstrip('https://')}{url if not url.startswith('/') else url[1:]}",
+                    f"{self.__endpoint.replace('https://', 'http://', 1)}{url if not url.startswith('/') else url[1:]}",
                     timeout=timeout,
                     headers=deepcopy(headers),
                     verify=False,
