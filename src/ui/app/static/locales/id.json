@@ -26,7 +26,7 @@
       "issue_count": "Jumlah kesalahan dan peringatan",
       "level_filter": "Filter baris log berdasarkan level",
       "local_time": "Tampilkan timestamp dalam waktu lokal",
-      "collapse_multiline": "Tutup entri multi-baris",
+      "collapse_multiline": "Ciutkan entri multi-baris",
       "next_issue": "Kesalahan atau peringatan berikutnya",
       "prev_issue": "Kesalahan atau peringatan sebelumnya",
       "search_logs": "Cari log",
@@ -145,7 +145,7 @@
     "save": "Simpan",
     "save_changes": "Simpan Perubahan",
     "local_time": "Waktu lokal",
-    "collapse_multiline": "Tutup",
+    "collapse_multiline": "Ciutkan",
     "search": "Cari",
     "wrap": "Lipat",
     "select_file": "Pilih File",
@@ -446,7 +446,7 @@
       },
       "ram": {
         "critical_high": "Kritis: Sistem kehabisan memori!",
-        "good_high": "Memori excellent untuk lingkungan produksi",
+        "good_high": "Kapasitas memori sangat baik untuk lingkungan produksi",
         "info_medium": "Pertimbangkan upgrade ke 16GB+ untuk penggunaan produksi",
         "title": "RAM Sistem",
         "usage": "{{percent}}% digunakan",
@@ -488,7 +488,7 @@
     },
     "window": {
       "last_days": "{{days}} hari terakhir",
-      "title": "Jendela dasbor"
+      "title": "Rentang waktu dasbor"
     }
   },
   "datatable": {
@@ -719,8 +719,8 @@
       "username": "Nama Pengguna",
       "wildcard_certificates": "Sertifikat Wildcard",
       "zerossl_api_key": "Kunci API ZeroSSL",
-      "zerossl_api_retry": "Pencarian Ulang API ZeroSSL",
-      "zerossl_api_retry_delay": "Penundaan Pencarian Ulang API ZeroSSL",
+      "zerossl_api_retry": "Percobaan Ulang API ZeroSSL",
+      "zerossl_api_retry_delay": "Penundaan Percobaan Ulang API ZeroSSL",
       "zerossl_api_connect_timeout": "Batas Waktu Koneksi API ZeroSSL",
       "zerossl_api_max_time": "Waktu Maks API ZeroSSL"
     },
@@ -770,7 +770,7 @@
     "locked_settings_hint": "Pengaturan yang dikunci disorot"
   },
   "link": {
-    "back_to_login": "Kembali ke Masuk",
+    "back_to_login": "Kembali ke Halaman Masuk",
     "forgot_password": "Lupa Kata Sandi?",
     "here": "di sini",
     "more_info": "Info Lebih Lanjut",
@@ -945,7 +945,7 @@
         "not_available": "Halaman plugin belum tersedia selama fase beta.",
         "pre_render_error": "Kesalahan pra-render",
         "no_content": "Plugin ini tidak menyediakan halaman yang disematkan.",
-        "dedicated_page_unavailable": "Plugin ini dikelola di halaman khusus yang belum dimuat. Muat ulang UI web untuk mengaksesnya."
+        "dedicated_page_unavailable": "Plugin ini dikelola di halaman khusus yang belum dimuat. Mulai ulang UI web untuk mengaksesnya."
       }
     },
     "type": {
@@ -1057,7 +1057,7 @@
     "async": "Async",
     "clear": "Hapus Semua",
     "collapse_0": "Panel Pencarian",
-    "collapse_message": "Tutup Semua",
+    "collapse_message": "Ciutkan Semua",
     "collapse_plural": "Panel Pencarian (%d)",
     "count": "{total}",
     "countFiltered": "{shown} ({total})",
@@ -1444,7 +1444,7 @@
       "step_settings_empty": "Belum ada pengaturan yang ditambahkan ke langkah ini.",
       "step_settings_selection_title": "Pilih pengaturan yang ada",
       "steps": "Langkah",
-      "steps_help": "Organisasi pengaturan menjadi langkah panduan. Pilih pengaturan atau konfigurasi mana yang termasuk dalam setiap langkah.",
+      "steps_help": "Atur pengaturan menjadi langkah-langkah terpandu. Pilih pengaturan atau konfigurasi yang termasuk dalam setiap langkah.",
       "summary_clone_info": "Saat ini mengkloning dari {{template}}.",
       "summary_counts_configs": "Konfigurasi",
       "summary_counts_settings": "Pengaturan",
@@ -1608,8 +1608,8 @@
     "download_log": "Unduh file log ini",
     "issue_count": "Kesalahan dan peringatan di tampilan ini",
     "local_time": "Tampilkan timestamp dalam waktu lokal Anda",
-    "collapse_multiline": "Tutup entri multi-baris (tracebacks, payloads)",
-    "collapse_raw_values": "Tutup nilai multi-baris (sertifikat, kunci)",
+    "collapse_multiline": "Ciutkan entri multi-baris (tracebacks, payloads)",
+    "collapse_raw_values": "Ciutkan nilai multi-baris (sertifikat, kunci)",
     "next_issue": "Lompat ke kesalahan atau peringatan berikutnya",
     "prev_issue": "Lompat ke kesalahan atau peringatan sebelumnya",
     "search_logs": "Cari log (Ctrl+F)",
@@ -1666,7 +1666,7 @@
         "hostname": "Nama host atau URL Instans",
         "last_seen": "Tanggal dan waktu Instans terakhir dilihat",
         "method": "Metode pembuatan Instans (misalnya, ui, autoconf)",
-        "name": "Nama yang ditentukan pengguna atau auto-generate untuk Instans",
+        "name": "Nama Instans yang ditentukan pengguna atau dibuat otomatis",
         "select_all": "Pilih semua Instans",
         "type": "Tipe Instans (misalnya, Container, Statis)"
       },
@@ -1731,7 +1731,7 @@
         "id": "ID Template",
         "last_update": "Tanggal pembaruan terakhir Template",
         "method": "Metode pembuatan Template",
-        "name": "Nama Template yang ditentukan pengguna atau auto-generate",
+        "name": "Nama Template yang ditentukan pengguna atau dibuat otomatis",
         "plugin": "Plugin yang berisi Template",
         "select_all": "Pilih semua Template",
         "settings": "Jumlah pengaturan Template",
@@ -1752,8 +1752,8 @@
     "wildcard_certificates": "Buat sertifikat wildcard (*.domain.com). Memerlukan tantangan DNS.",
     "wildcard_dns_only": "Sertifikat wildcard hanya didukung dengan tipe tantangan DNS.",
     "zerossl_api_key": "Kunci API ZeroSSL opsional yang digunakan oleh zerossl-bot.",
-    "zerossl_api_retry": "Jumlah pencarian ulang untuk permintaan API ZeroSSL (0 menonaktifkan pencarian ulang).",
-    "zerossl_api_retry_delay": "Penundaan dalam detik antara pencarian ulang API ZeroSSL.",
+    "zerossl_api_retry": "Jumlah percobaan ulang untuk permintaan API ZeroSSL (0 menonaktifkan percobaan ulang).",
+    "zerossl_api_retry_delay": "Penundaan dalam detik antara percobaan ulang API ZeroSSL.",
     "zerossl_api_connect_timeout": "Batas waktu koneksi dalam detik untuk panggilan API ZeroSSL.",
     "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL."
   },
