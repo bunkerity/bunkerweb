@@ -168,17 +168,19 @@ function start() {
             # defaults to the empty string, so testing the value skipped it entirely and
             # the temp config was generated with no token at all.
             if [[ -v "defaults[$key]" ]]; then
-                # Set variable if defined and non-empty in the file
-                [[ -n "$value" ]] && eval "${key}=\"$value\""
+                # Set variable if defined and non-empty in the file. printf -v assigns without
+                # evaluating: /etc/bunkerweb is owned by nginx:nginx and every unit runs as root,
+                # so eval here ran a value's command substitution as root.
+                [[ -n "$value" ]] && printf -v "$key" '%s' "$value"
             fi
         done < "$env_file"
     fi
 
     # Assign default values for unset variables
     for key in "${!defaults[@]}"; do
-        eval "value=\${${key}:-}"
+        value="${!key:-}"
         if [ -z "$value" ]; then
-            eval "${key}=\"${defaults[$key]}\""
+            printf -v "$key" '%s' "${defaults[$key]}"
         fi
     done
 
