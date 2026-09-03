@@ -350,7 +350,7 @@ jobs:
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: ${{ matrix.image }}
-      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
+      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
       CACHE_FROM: ${{ matrix.cache_from }}-${{ needs.prepare.outputs.channel }}
       DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
@@ -359,6 +359,8 @@ jobs:
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
+      GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
 
   # Push Linux packages
   push-packages:

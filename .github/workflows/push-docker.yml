@@ -30,6 +30,10 @@ on:
         required: true
       ARM_SSH_IP:
         required: true
+      GITLAB_REGISTRY_USER:
+        required: true
+      GITLAB_REGISTRY_TOKEN:
+        required: true
 
 jobs:
   push:
@@ -53,6 +57,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitLab registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
       - name: Setup SSH for ARM node
         run: |
           mkdir -p ~/.ssh
