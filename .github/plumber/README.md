@@ -15,7 +15,7 @@ It complements the existing CodeQL (source code) and OSSF Scorecard
 |---|---|
 | `.plumber.yaml` | Root-discovered policy overlay on top of `plumber:default` |
 | `.github/plumber/README.md` | This file |
-| `.github/workflows/plumber.yml` | Reusable workflow invoked by the `dev` and `master` workflows |
+| `.github/workflows/plumber.yml` | Reusable workflow invoked by the `dev` and `release` workflows |
 
 ## Running it locally
 
@@ -40,8 +40,9 @@ pinned by commit SHA in the workflows.
 
 ## Gating
 
-The `master` and `dev` workflows invoke Plumber directly, and the reusable
-workflow also runs weekly. It is gated at `min-score: B` with
+The `dev` workflow (push to `dev`) and the `release` workflow (tag push)
+invoke Plumber directly, and the reusable workflow also runs weekly. It is
+gated at `min-score: B` with
 `soft-fail: false`, so scores of C, D or E fail the run. Results land in the
 Code Scanning tab.
 
