@@ -210,8 +210,23 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitLab registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
       - name: Push ${{ matrix.image.from }} to ${{ matrix.image.to }}
-        run: docker pull ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev bunkerity/${{ matrix.image.to }}:dev && docker tag ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev ghcr.io/bunkerity/${{ matrix.image.to }}:dev && docker push bunkerity/${{ matrix.image.to }}:dev && docker push ghcr.io/bunkerity/${{ matrix.image.to }}:dev
+        run: |
+          SRC="ghcr.io/bunkerity/${{ matrix.image.from }}-tests:dev"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/${{ matrix.image.to }}:dev" \
+            "ghcr.io/bunkerity/${{ matrix.image.to }}:dev" \
+            "registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image.to }}:dev"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
 
   # Push Linux packages
   push-packages:

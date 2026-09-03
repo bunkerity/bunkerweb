@@ -174,18 +174,78 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitLab registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
       - name: Push BW image
-        run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
+        run: |
+          SRC="ghcr.io/bunkerity/bunkerweb-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb:testing" \
+            "ghcr.io/bunkerity/bunkerweb:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
       - name: Push scheduler image
-        run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
+        run: |
+          SRC="ghcr.io/bunkerity/scheduler-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb-scheduler:testing" \
+            "ghcr.io/bunkerity/bunkerweb-scheduler:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-scheduler:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
       - name: Push autoconf image
-        run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
+        run: |
+          SRC="ghcr.io/bunkerity/autoconf-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb-autoconf:testing" \
+            "ghcr.io/bunkerity/bunkerweb-autoconf:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-autoconf:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
       - name: Push UI image
-        run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
+        run: |
+          SRC="ghcr.io/bunkerity/ui-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb-ui:testing" \
+            "ghcr.io/bunkerity/bunkerweb-ui:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-ui:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
       - name: Push API image
-        run: docker pull ghcr.io/bunkerity/api-tests:testing && docker tag ghcr.io/bunkerity/api-tests:testing bunkerity/bunkerweb-api:testing && docker push bunkerity/bunkerweb-api:testing && docker tag bunkerity/bunkerweb-api:testing ghcr.io/bunkerity/bunkerweb-api:testing && docker push ghcr.io/bunkerity/bunkerweb-api:testing
+        run: |
+          SRC="ghcr.io/bunkerity/api-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb-api:testing" \
+            "ghcr.io/bunkerity/bunkerweb-api:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-api:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
       - name: Push all-in-one image
-        run: docker pull ghcr.io/bunkerity/all-in-one-tests:testing && docker tag ghcr.io/bunkerity/all-in-one-tests:testing bunkerity/bunkerweb-all-in-one:testing && docker push bunkerity/bunkerweb-all-in-one:testing && docker tag bunkerity/bunkerweb-all-in-one:testing ghcr.io/bunkerity/bunkerweb-all-in-one:testing && docker push ghcr.io/bunkerity/bunkerweb-all-in-one:testing
+        run: |
+          SRC="ghcr.io/bunkerity/all-in-one-tests:testing"
+          docker pull "$SRC"
+          for DST in \
+            "bunkerity/bunkerweb-all-in-one:testing" \
+            "ghcr.io/bunkerity/bunkerweb-all-in-one:testing" \
+            "registry.gitlab.com/bunkerity/bunkerweb/bunkerweb-all-in-one:testing"; do
+            docker tag "$SRC" "$DST"
+            docker push "$DST"
+          done
 
   # Push Linux packages
   push-packages:
