@@ -257,6 +257,16 @@ La création d'un modèle personnalisé est un processus simple qui implique la 
 
 - **Sélection d'un modèle**: une fois le modèle personnalisé défini, les utilisateurs peuvent le sélectionner pendant le processus de configuration en mode facile d'un service dans l'interface utilisateur Web. Un modèle peut également être sélectionné avec le `USE_TEMPLATE` paramètre dans la configuration. Le nom du fichier modèle (sans l' `.json` extension) doit être spécifié comme valeur du `USE_TEMPLATE` paramètre.
 
+!!! warning "Les modèles et les paramètres que vous configurez"
+
+    Lorsqu'un modèle déclare un paramètre que vous configurez aussi, ce qui s'applique dépend de l'endroit où le modèle est sélectionné :
+
+    * sélectionné sur le service (`www.example.com_USE_TEMPLATE=medium`) : la valeur du modèle l'emporte sur celle des paramètres globaux ;
+    * sélectionné globalement (`USE_TEMPLATE=medium`) : la valeur des paramètres globaux l'emporte sur celle du modèle ;
+    * une valeur définie sur le service lui-même l'emporte toujours sur les deux.
+
+    C'est important parce que les modèles `low`, `medium` et `api` fixent `CONTENT_SECURITY_POLICY` à une valeur vide, et `low` fait de même pour `PERMISSIONS_POLICY` : un service qui sélectionne l'un d'eux n'envoie pas cet en-tête, même si vos paramètres globaux contiennent une politique. Définissez la valeur sur le service, `www.example.com_CONTENT_SECURITY_POLICY=...`, pour la conserver.
+
 Exemple de fichier modèle personnalisé:
 ```json
 {

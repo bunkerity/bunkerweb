@@ -431,7 +431,7 @@
   "USE_TEMPLATE": {
     "context": "multisite",
     "default": "",
-    "help": "Config template to use that will override the default values of specific settings.",
+    "help": "Config template to use that overrides the default values of specific settings; a value set on the service overrides the template.",
     "id": "use-template",
     "label": "Use template",
     "regex": "^.*$",

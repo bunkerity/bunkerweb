@@ -257,6 +257,16 @@ Crear una plantilla personalizada es un proceso sencillo que implica definir las
 
 * **Selección de una plantilla**: Una vez definida la plantilla personalizada, los usuarios pueden seleccionarla durante el proceso de configuración en modo fácil de un servicio en la interfaz de usuario web. También se puede seleccionar una plantilla con la configuración `USE_TEMPLATE` en la configuración. El nombre del archivo de la plantilla (sin la extensión `.json`) debe especificarse como el valor de la configuración `USE_TEMPLATE`.
 
+!!! warning "Las plantillas y los ajustes que usted configura"
+
+    Cuando una plantilla declara un ajuste que usted también configura, cuál se aplica depende de dónde se haya seleccionado la plantilla:
+
+    * seleccionada en el servicio (`www.example.com_USE_TEMPLATE=medium`): el valor de la plantilla prevalece sobre el de la configuración global;
+    * seleccionada globalmente (`USE_TEMPLATE=medium`): el valor de la configuración global prevalece sobre el de la plantilla;
+    * un valor definido en el propio servicio prevalece siempre sobre ambos.
+
+    Esto importa porque las plantillas `low`, `medium` y `api` establecen `CONTENT_SECURITY_POLICY` en un valor vacío, y `low` hace lo mismo con `PERMISSIONS_POLICY`: un servicio que seleccione una de ellas no envía esa cabecera aunque su configuración global contenga una política. Defina el valor en el servicio, `www.example.com_CONTENT_SECURITY_POLICY=...`, para conservarlo.
+
 Ejemplo de un archivo de plantilla personalizada:
 ```json
 {

@@ -3196,16 +3196,20 @@ class Database:
         services = config["SERVER_NAME"]["value"].split()
         services_set = set(services)  # O(1) lookup for service prefix matching
 
+        if service:
+            # Strip the prefix in one pass. Stripping inside the loop below popped every key and
+            # re-inserted the stripped one, so an un-prefixed key later in the same snapshot popped
+            # the value that had just been renamed onto it and dropped it on the `continue`. A
+            # globally declared template writes exactly such keys (the block above fills the
+            # un-prefixed name whenever no global row shadows it), so every setting the service set
+            # for itself disappeared from its own configuration.
+            prefix = f"{service}_"
+            config = {key[len(prefix) :]: data for key, data in config.items() if key.startswith(prefix)}  # noqa: E203
+
         # Process config items - use list(items()) which is more memory efficient than copy().items()
         # for large dicts since it creates a list of tuples, not a full dict copy
         for key, data in list(config.items()):
-            new_value = None
-            if service:
-                data = config.pop(key)
-                if not key.startswith(f"{service}_"):
-                    continue
-                key = key.replace(f"{service}_", "")
-                new_value = data
+            new_value = data if service else None
 
             if not methods:
                 new_value = data["value"]
@@ -3556,6 +3560,14 @@ class Database:
 
             db_services = query.all()
 
+            # A service with no row of its own inherits the global value, and for USE_TEMPLATE that
+            # template is in force at render time (get_config materialises {service}_USE_TEMPLATE
+            # for every service). Reporting the missing row as "no template" told the operator the
+            # opposite of what the generator does.
+            inherited = dict(
+                session.query(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE"))).all()
+            )
+
         for service in db_services:
             services.append(
                 {
@@ -3564,8 +3576,8 @@ class Database:
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or "",
-                    "security_mode": service.security_mode or "block",
+                    "template": service.template or inherited.get("USE_TEMPLATE") or "",
+                    "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                 }
             )
 

@@ -4,6 +4,7 @@
 
 - [SECURITY] `mtls`: a service with `USE_MTLS=yes` no longer serves unverified clients before the CA bundle is distributed; an invalid CA keeps the last good bundle.
 - [SECURITY] `whitelist`: a service with `USE_WHITELIST=no` no longer lifts an active ban, and the global `WHITELIST_IP` fallback only applies while whitelisting is on globally.
+- [BUGFIX] `api`, `ui`: a service's settings are reported the way they are rendered, so a value the service's template overrides is no longer answered with the global one; a service's own settings no longer disappear from its configuration when a template is selected globally; the services list and easy mode name the template in force. (Fixes #3866)
 - [BUGFIX] `linux`, `all-in-one`: log rotation runs on every pass instead of stopping after the first one of the day, and keeps fourteen generations. (Fixes #3838)
 - [BUGFIX] `kubernetes`: the example manifests point `DNS_RESOLVERS` at the `kube-dns` Service instead of one most clusters do not have. (Refs #2524)
 - [BUGFIX] `cli`, `linux`: `bwcli` and the pre-upgrade backup read `DATABASE_URI` from `scheduler.env` too; the backup no longer aborts a stopped-scheduler upgrade. (Fixes #3836)
@@ -27,6 +28,7 @@
 - [BUGFIX] `core`: a failed push-swap rollback parks unrestored entries under `.bw-rescue.<timestamp>` instead of deleting them; remove it by hand.
 - [BUGFIX] `api`: a plugin id starting with `.bw-` is refused, a failed instance call answers 502 instead of 500, and a folder push gets its own body-write deadline.
 - [BUGFIX] `db`: `save_config` no longer empties the configuration it is handed, so autoconf stops reloading on every reconcile; query-string credentials are masked in the logs.
+- [DOCS] `templates`: document that a template's value beats one set in the global settings, and that setting it on the service overrides the template.
 - [DOCS] `integrations`, `metrics`, `crowdsec`: document `KEEP_CONFIG_ON_RESTART`, correct `SEND_FILES_MIN_TIMEOUT` and `DISABLE_ONLINE_API`, and sync the translated READMEs.
 - [ALL-IN-ONE] Update the bundled CrowdSec to `v1.8.0`, fixing two datasource denial of service issues.
 - [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)

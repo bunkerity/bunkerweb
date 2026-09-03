@@ -267,6 +267,13 @@
                                                                               data-i18n="tooltip.different_from_template">
                                                                             <i class="bx bx-edit-alt bw-xs"></i>
                                                                         </span>
+                                                                    {% elif setting_template %}
+                                                                        <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="From template: {{ setting_template }}">
+                                                                            <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                        </span>
                                                                     {% endif %}
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
