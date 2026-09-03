@@ -2645,18 +2645,46 @@ _docker_version_core() {
     esac
 }
 
-# 0 when $2 (target) is an OLDER release than $1 (installed), comparing the
-# numeric core only. A suffix-only difference is never a downgrade: rc builds
-# carry their own Alembic revisions, so 1.6.14~rc1 -> 1.6.14 is a real forward
-# migration and must stay allowed. Comparing the full strings would break that,
-# because `sort -V` orders 1.6.15 BEFORE 1.6.15-rc1.
-# Returns 1 (not a downgrade) whenever either side has no comparable core.
+# Pre-release rank for a version/tag whose numeric core already matches
+# another one: stable (no `-`/`~` suffix) always outranks any rcN, and a
+# higher N outranks a lower one. Maps to a fixed-width "rcNNNNN" token so a
+# plain lexicographic sort orders it correctly against another rc token and
+# against "zzz" (stable, or any suffix this does not recognise — never
+# mistaken for older than a known rc).
+_docker_prerelease_rank() {
+    local v="${1:-}" suffix n
+    suffix="${v#*[-~]}"
+    [ "$suffix" = "$v" ] && { printf 'zzz'; return 0; }
+    case "$suffix" in
+        rc[0-9]*)
+            n="${suffix#rc}"
+            n="${n%%[!0-9]*}"
+            printf 'rc%05d' "$((10#$n))"
+            ;;
+        *) printf 'zzz' ;;
+    esac
+}
+
+# 0 when $2 (target) is an OLDER release than $1 (installed): either a lower
+# numeric core, or the same core with an older pre-release rank (stable beats
+# any rcN, a higher rcN beats a lower one, rcN -> stable is always forward).
+# Comparing the full strings would break the core check, because `sort -V`
+# orders 1.6.15 BEFORE 1.6.15-rc1.
+# Returns 1 (not a downgrade) whenever either side has no comparable core,
+# which also leaves floating tags (latest, testing) unordered.
 _docker_is_downgrade() {
-    local _from_core _to_core _older
+    local _from_core _to_core _from_rank _to_rank _older
     _from_core=$(_docker_version_core "${1:-}")
     _to_core=$(_docker_version_core "${2:-}")
     [ -n "$_from_core" ] && [ -n "$_to_core" ] || return 1
-    [ "$_from_core" = "$_to_core" ] && return 1
+    if [ "$_from_core" = "$_to_core" ]; then
+        _from_rank=$(_docker_prerelease_rank "${1:-}")
+        _to_rank=$(_docker_prerelease_rank "${2:-}")
+        [ "$_from_rank" = "$_to_rank" ] && return 1
+        _older=$(printf '%s\n%s\n' "$_from_rank" "$_to_rank" | sort | head -n1)
+        [ "$_older" = "$_to_rank" ]
+        return $?
+    fi
     _older=$(printf '%s\n%s\n' "$_from_core" "$_to_core" | sort -V | head -n1)
     [ "$_older" = "$_to_core" ]
 }
@@ -8313,6 +8341,21 @@ Proceed with topology change?" "no"; then
     fi
 }
 
+# Resolve DATABASE_URI the same way the running scheduler would: variables.env
+# is exported first and scheduler.env last (bunkerweb-scheduler.sh:89-91), so
+# a value set in scheduler.env wins over one left in variables.env. Takes the
+# two env file paths as arguments so it stays pure and testable; defaults to
+# the real ones on the host.
+_upgrade_backup_database_uri() {
+    local _variables_env="${1:-/etc/bunkerweb/variables.env}" _scheduler_env="${2:-/etc/bunkerweb/scheduler.env}"
+    local _db_uri="" _val _env_file
+    for _env_file in "$_variables_env" "$_scheduler_env" ; do
+        _val="$(sed -n 's/^DATABASE_URI=\(..*\)/\1/p' "$_env_file" 2>/dev/null | tail -n1 | tr -d '\r')"
+        [ -n "$_val" ] && _db_uri="$_val"
+    done
+    printf '%s' "$_db_uri"
+}
+
 perform_upgrade_backup() {
     local TEMP_STARTED="no"
     [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
@@ -8348,11 +8391,8 @@ perform_upgrade_backup() {
     # so passing it here fixes the backup on the version being upgraded away from, not only on
     # the one being installed. Full Stack and Manager keep the URI in variables.env, Scheduler
     # Only in scheduler.env; worker, ui and api never reach this line.
-    local _db_uri="" _env_file
-    for _env_file in /etc/bunkerweb/variables.env /etc/bunkerweb/scheduler.env ; do
-        _db_uri="$(sed -n 's/^DATABASE_URI=\(..*\)/\1/p' "$_env_file" 2>/dev/null | tail -n1 | tr -d '\r')"
-        [ -n "$_db_uri" ] && break
-    done
+    local _db_uri
+    _db_uri=$(_upgrade_backup_database_uri)
     # env is load-bearing: without it the expanded word is not recognised as an assignment
     # prefix and becomes the command name. An empty _db_uri expands to nothing.
     if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" env ${_db_uri:+DATABASE_URI="$_db_uri"} bwcli plugin backup save; then
