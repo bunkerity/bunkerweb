@@ -2023,6 +2023,21 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
     - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée.
     - Le **mode Stream** télécharge périodiquement toutes les décisions de l'API CrowdSec et les met en cache localement, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
 
+#### Points de terminaison par service
+
+Comme les points de terminaison sont `multisite`, les services d'une même instance peuvent utiliser des composants CrowdSec différents, ou seulement certains d'entre eux. Les deux fonctionnalités sont indépendantes :
+
+- Les **recherches de décisions** sont actives lorsque `CROWDSEC_API` est défini. Définissez-le sur une chaîne vide pour qu'un service ignore entièrement la Local API.
+- L'**inspection AppSec** est active lorsque `CROWDSEC_APPSEC_URL` est défini. Définissez-le sur une chaîne vide pour qu'un service ignore l'inspection approfondie des requêtes.
+
+Un service avec `USE_CROWDSEC` à `yes` et les deux URL vides ne vérifie rien, et l'instance consigne qu'aucun point de terminaison n'est défini.
+
+!!! warning "Un cache de décisions par instance"
+    Les décisions mises en cache résident dans une seule zone de mémoire partagée pour toute l'instance, indexée par la Local API dont elles proviennent. Les services pointant vers la même `CROWDSEC_API` réutilisent les décisions mises en cache les uns des autres, ce qui garde la recherche peu coûteuse. Les services pointant vers des Local API différentes ne voient jamais les décisions les unes des autres. Le dimensionnement de cette zone est à l'échelle de l'instance, donc une flotte avec de nombreuses Local API distinctes et de longues listes de décisions partage un même budget.
+
+!!! info "Clé de bouncer par Local API"
+    `CROWDSEC_API_KEY` est résolu par service comme tout autre paramètre. Lorsque des services ciblent des Local API différentes, attribuez à chacun la clé enregistrée avec `cscli bouncers add` sur son propre hôte CrowdSec, sinon les recherches sont rejetées comme non authentifiées.
+
 ### Exemples de configurations
 
 === "Configuration de base"
@@ -2053,6 +2068,38 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Configuration par service"
+
+    AppSec sur chaque service public, recherches de décisions sur un sous-ensemble, et un service entièrement exclu. Les valeurs sans préfixe constituent la base commune à toute la flotte, et chaque service ne surcharge que ce qui diffère :
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Base commune pour chaque service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Pas de recherche de décisions sauf si un service en fait la demande
+    CROWDSEC_API_KEY: ""
+
+    # app1 ajoute la recherche de décisions de la Local API en plus d'AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 conserve uniquement AppSec, héritant de la base CROWDSEC_API vide
+
+    # intranet n'est pas vérifié du tout
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un service peut aussi pointer vers un hôte CrowdSec entièrement différent, avec sa propre clé de bouncer :
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Étape&nbsp;3 – Valider l’intégration
@@ -3569,6 +3616,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
 | `METRICS_MEMORY_SIZE`                | `16m`  | global    | non      | **Taille mémoire :** taille du stockage interne des métriques (par exemple `8192`, `16m`, `32m`).                                                                                                                     |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`   | global    | non      | **Maximum de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker par worker. Accepte la notation abrégée `k`/`m`.                                                                                     |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`  | global    | non      | **Maximum Redis de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker dans Redis. Accepte la notation abrégée `k`/`m`.                                                                               |
+| `METRICS_REDIS_TTL`                  | `2592000` | global | non      | **TTL Redis des métriques :** secondes avant l'expiration des clés de métriques Redis (`0` = permanent) ; renouvelé à chaque synchronisation afin que les données actives n'expirent jamais, ce qui permet aux données abandonnées de devenir évictables sous `volatile-lru` pour que Redis se rétablisse en cas de pression mémoire (maxmemory). Accepte la notation abrégée `k`/`m`. |
 | `MAX_LRU_HISTORY`                    | `1k`   | global    | non      | **Historique LRU maximal :** nombre d'emplacements LRU par worker et limite du tableau d'historique des événements par clé (traces de blocage, traces d'authentification, etc.). Accepte la notation abrégée `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`  | global    | non      | **Enregistrer les métriques dans Redis :** mettez `yes` pour stocker les métriques (compteurs et tableaux) dans Redis pour l'agrégation.                                                                              |
 
@@ -3576,7 +3624,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     Le paramètre `METRICS_MEMORY_SIZE` doit être ajusté selon votre volume de trafic et le nombre d'instances. Les valeurs brutes en octets et les suffixes `k`/`m` sont pris en charge. Pour les sites à fort trafic, envisagez d'augmenter cette valeur afin de garantir la capture de toutes les métriques sans perte de données.
 
 !!! info "Intégration Redis"
-    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb.
+    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb. Sous pression `maxmemory` de Redis, les nouveaux rapports sont mis en mémoire tampon par worker et synchronisés dès que de la mémoire se libère, de sorte que les rapports de requêtes bloquées ne sont pas perdus tant que Redis est plein.
 
 !!! warning "Considérations de performance"
     Définir des valeurs très élevées pour `METRICS_MAX_BLOCKED_REQUESTS` ou `METRICS_MAX_BLOCKED_REQUESTS_REDIS` peut augmenter l'utilisation de la mémoire. Surveillez les ressources système et ajustez ces valeurs selon vos besoins réels et les ressources disponibles.
@@ -3989,7 +4037,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Moteur de règles :** Contrôle si les règles sont appliquées. Options : `On`, `DetectionOnly`, ou `Off`.                                                                                                                     |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Moteur d'audit :** Contrôle le fonctionnement de la journalisation d'audit. Options : `On`, `Off`, ou `RelevantOnly`.                                                                                                       |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | no       | **Parties du journal d'audit :** Quelles parties des requêtes/réponses inclure dans les journaux d'audit.                                                                                                                     |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Chemin du journal d'audit :** Chemin du fichier dans lequel ModSecurity écrit les entrées d'audit. Doit être un fichier régulier : l'écrivain d'audit Serial le verrouille, ce qu'un tube ou un flux ne peut pas supporter. |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Chemin du journal d'audit :** Chemin du fichier dans lequel ModSecurity écrit les entrées d'audit. Doit être un fichier régulier : l'écrivain d'audit Serial le verrouille, ce qu'un tube ou un flux ne peut pas supporter. Le chemin doit se terminer par `.log`. La rotation via ce suffixe ne s'applique que là où logrotate est installé (les paquets Linux et l'image All-In-One) ; sur Docker, Swarm et Kubernetes, un nom différent du nom par défaut n'est ni diffusé ni fait tourner et croît sans limite dans le conteneur, car seul `modsec_audit.log` est lié au flux de journaux du conteneur. |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Limite du corps de requête (sans fichiers) :** Taille maximale pour les corps de requête sans téléversement de fichiers. Accepte les octets bruts ou un suffixe lisible (`k`, `m`, `g`).                                    |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Activer les plugins CRS :** Active des jeux de règles de plugins supplémentaires pour le Core Rule Set.                                                                                                                     |
 | `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Liste des plugins CRS :** Liste de plugins séparés par des espaces à télécharger et installer (`nom-plugin[/tag]` ou URL).                                                                                                  |
@@ -4237,7 +4285,7 @@ Suivez ces étapes pour déployer le mutual TLS sereinement :
     Les bundles d’AC et les listes de révocation n’ont pas besoin d’être montés dans les conteneurs BunkerWeb. Fournissez-les uniquement au Scheduler, sous forme de chemin de fichier ou de données en ligne ; le Scheduler les valide, les met en cache et les distribue à chaque instance. Les mises à jour sont prises en compte et redistribuées automatiquement lors de la prochaine exécution du job.
 
 !!! warning "Bundle d’AC obligatoire en mode strict"
-    Lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`, le Scheduler doit pouvoir valider et mettre en cache un bundle d’AC client. En l’absence de bundle valide, BunkerWeb ignore les directives mTLS sur chaque instance afin que le service ne tourne pas avec une référence de certificat invalide ou manquante. Réservez `optional_no_ca` au diagnostic, car ce mode affaiblit l’authentification. Après un redémarrage du Scheduler avec un `/var/cache/bunkerweb` non persistant, le mTLS reste désactivé jusqu’à ce que la première exécution du job se termine et redistribue le bundle d’AC ; utilisez donc un volume de cache persistant lorsqu’une politique d’application stricte est requise.
+    Lorsque `MTLS_VERIFY_CLIENT` vaut `on` ou `optional`, le Scheduler doit pouvoir valider et mettre en cache un bundle d’AC client. Tant qu’aucun bundle n’a été validé et distribué, chaque instance bascule sur une AC de remplacement à laquelle aucun client ne peut se rattacher. Avec `on`, tout client est donc rejeté, là où le service tournait auparavant sans aucune vérification client. Avec `optional`, un client qui ne présente pas de certificat passe quand même, puisque c’est le sens de ce mode ; l’application pour ces requêtes vient de `MTLS_URL` lorsqu’il est défini, et rien ne les contrôle lorsqu’il est laissé vide. Un client qui présente un certificat est rejeté, car rien ne permet de le valider. Réservez `optional_no_ca` au diagnostic, car ce mode affaiblit l’authentification. Après un redémarrage du Scheduler avec un `/var/cache/bunkerweb` non persistant, cet état persiste jusqu’à ce que la première exécution du job se termine et redistribue le bundle d’AC ; utilisez donc un volume de cache persistant lorsqu’une politique d’application stricte est requise.
 
 !!! info "Certificat approuvé vs. vérification"
     BunkerWeb réutilise le même bundle d’AC pour vérifier les clients et bâtir la chaîne de confiance, garantissant une cohérence OCSP/CRL et durant le handshake.
@@ -4991,7 +5039,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
     | --------------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`   | multisite | no       | **Activer le Reverse Proxy :** Mettre à `yes` pour activer la fonctionnalité de reverse proxy.                                                                                                                                                    |
     | `REVERSE_PROXY_HOST`              |        | multisite | yes      | **Hôte Backend :** URL complète de la ressource proxifiée (proxy_pass).                                                                                                                                                                           |
-    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière.                                             |
+    | `REVERSE_PROXY_URL`               | `/`    | multisite | yes      | **URL d'emplacement :** Chemin qui sera proxifié vers le serveur backend. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Préfixez éventuellement par `~`, `~*`, `=` ou `^~` suivi d'un espace pour définir explicitement le modificateur d'emplacement nginx ; aucun espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur.                                             |
     | `REVERSE_PROXY_BUFFERING`         | `yes`  | multisite | yes      | **Mise en tampon de la réponse :** Active ou désactive la mise en tampon des réponses de la ressource proxifiée.                                                                                                                                  |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`  | multisite | yes      | **Mise en tampon des requêtes :** Active ou désactive la mise en tampon des requêtes vers la ressource proxifiée.                                                                                                                                 |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`   | multisite | yes      | **Keep-Alive :** Active ou désactive les connexions keepalive avec la ressource proxifiée.                                                                                                                                                        |
