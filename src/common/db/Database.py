@@ -11,7 +11,7 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
@@ -127,24 +127,56 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
 
 # Greedy to the last "@" of the authority so an unencoded "@" inside the password is
 # covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
-# drag the host into the mask.
-DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+# drag the host into the mask. The username class is SQLAlchemy's own, "@" and whitespace
+# included: this pass also runs on RAW text, where the username is not percent-encoded, and a
+# username the class rejects makes the whole match fail and leaves the password in the log.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^\s/?#]*@")
+
+# The same span SQLAlchemy's own parser uses: a username that stops at the first ":" and a password
+# that stops at the first "@". Both classes are its classes character for character, so every DSN it
+# parses is one this matches. Narrowing either of them, by whitespace or by anything else, is a DSN
+# that parses, fails the round trip, then matches nothing and reaches the log in cleartext. Only
+# used once make_url has confirmed there is a password, so the wide classes cannot drag a host into
+# the mask the way they would on arbitrary text.
+DB_URI_AUTHORITY_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^@]*@")
+
+# Several drivers take the credential in the query string instead of the authority
+# (`?password=`, `?sslpassword=`, `?token=`), where render_as_string(hide_password=True) leaves
+# it untouched. Matched on the parameter NAME so a driver-specific spelling is covered too, and
+# the value is cut at the next separator so the rest of the DSN survives the mask.
+DB_URI_QUERY_SECRET_RX = re_compile(r"([?&][^=&\s]*(?:password|passwd|pwd|secret|token|api[-_]?key)[^=&\s]*=)[^&#\s]*", IGNORECASE)
 
 
 def mask_db_uri(db_string: str) -> str:
-    """Return a database URI with its password replaced, safe to log.
+    """Return a database URI, or any text that may embed one, safe to log.
 
     Callers reach this on malformed input, which make_url() either rejects outright
-    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    or, worse, parses wrongly, so the regexes have to be able to stand on their own. Driver
+    exceptions are passed through here for the same reason: they quote the DSN they failed on.
     """
     if not db_string:
         return db_string
     masked = db_string
     with suppress(BaseException):
-        masked = make_url(db_string).render_as_string(hide_password=True)
+        url = make_url(db_string)
+        # make_url anchors at the start and its query group stops at the first newline, so a driver
+        # message that merely BEGINS with a URI parses, and rendering it back would drop the failure
+        # reason the operator needs (these call sites exit right after logging). Only let it rewrite
+        # a string it reproduces exactly; anything else keeps its own text and is masked by regex.
+        if url.render_as_string(hide_password=False) == db_string:
+            masked = url.render_as_string(hide_password=True)
+        elif url.password:
+            # A password carrying "/", "?" or "#" does not survive the round trip (render_as_string
+            # percent-encodes it) and is outside DB_URI_PASSWORD_RX's class as well, so without
+            # this neither masker fires and the credential reaches the log verbatim.
+            # `openssl rand -base64` produces "/" routinely. Matched by span rather than by the
+            # value of url.password, which is percent-DECODED and so does not occur in the text
+            # being masked whenever the operator escaped a delimiter.
+            masked = DB_URI_AUTHORITY_PASSWORD_RX.sub(r"\1***@", masked, count=1)
     # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
     # the part before it for the password and hides that, leaving the rest to reach the log.
-    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    masked = DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    return DB_URI_QUERY_SECRET_RX.sub(r"\1***", masked)
 
 
 class Database:
@@ -341,7 +373,7 @@ class Database:
             self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {e}")
+            self.logger.error(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
             error = True
         finally:
             if error:
@@ -394,7 +426,7 @@ class Database:
                         connection_target = mask_db_uri(self.database_uri_readonly)
                         reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {mask_db_uri(str(e))}")
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -409,12 +441,12 @@ class Database:
                 elif log:
                     # Reason once, then the terse line: repeating the exception every 5 seconds is
                     # noise, but withholding it for the whole window leaves nothing to act on.
-                    detail = "" if reason_logged else f" : {e}"
+                    detail = "" if reason_logged else f" : {mask_db_uri(str(e))}"
                     reason_logged = True
                     self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                self.logger.error(f"Error when trying to connect to the database: {mask_db_uri(str(e))}")
                 exit(1)
 
         if log:
@@ -1709,6 +1741,16 @@ class Database:
                                between our read and our flush. Set False on the retry
                                itself so a genuine conflict cannot loop.
         """
+        # The pass below pops as it goes (DATABASE_URI, then every `<service>_IS_DRAFT` marker),
+        # so it drains whatever dict it is handed. Two things went wrong with that: the conflict
+        # retry replayed the drained dict and published services the caller had marked as drafts,
+        # and a caller that keeps its payload (autoconf hands over its long-lived config) saw it
+        # come back short and read the difference as a configuration change on the next pass.
+        # Drain a copy and leave the caller's dict, which is also what the retry replays. Shallow
+        # on purpose: this carries every setting of every service, and only its own keys are ever
+        # removed, never a value mutated in place.
+        retry_config = config
+        config = config.copy()
         to_put = []
         to_update = []
         to_delete = []
@@ -2647,7 +2689,7 @@ class Database:
             # session in another.
             self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
             return self.save_config(
-                config,
+                retry_config,
                 method,
                 changed,
                 file_names,
