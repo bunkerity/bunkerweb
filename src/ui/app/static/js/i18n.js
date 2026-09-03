@@ -299,6 +299,8 @@ $(document).ready(function () {
       function (err) {
         if (err) return console.error("Error initializing i18next:", err);
 
+        document.documentElement.lang = i18next.language;
+
         loadPluginTranslations(i18next.language).then(function () {
           applyTranslations();
           updateLanguageSelector(i18next.language);
@@ -309,6 +311,7 @@ $(document).ready(function () {
 
         i18next.on("languageChanged", function (lng) {
           i18next.language = getAlpha2(lng);
+          document.documentElement.lang = i18next.language;
           loadPluginTranslations(i18next.language).then(function () {
             applyTranslations();
             updateLanguageSelector(lng);
