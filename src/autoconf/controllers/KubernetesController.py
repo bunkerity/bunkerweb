@@ -5,7 +5,7 @@ from ipaddress import ip_address
 from logging import DEBUG
 from os import getenv, sep
 from pathlib import Path
-from re import split as re_split
+from re import match as re_match, split as re_split, sub as re_sub
 from threading import Lock, Thread
 from time import sleep, time
 from traceback import format_exc
@@ -19,6 +19,17 @@ from controllers.Controller import Controller
 
 # Written by main.py once the controller starts and checked by healthcheck-autoconf.sh.
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy")
+
+# A watch.Watch().stream() call that ran at least this long before returning without an
+# exception is treated as a healthy, established connection the Kubernetes API server closed
+# on its own (a randomized idle-connection timeout, commonly on the order of 30-60+ minutes),
+# not a failure -- this is the only way a watch for a resource kind with zero objects (a fresh
+# cluster with no Ingress yet, an optional Gateway API route kind with no instances) ever gets
+# a signal at all, since it never receives a single event. A connection that returns cleanly
+# before this threshold (typically instantly, e.g. an immediately-refused connection) still
+# counts as a failed attempt, so a watch that cannot connect at all still exhausts its retries
+# in seconds, same as before.
+WATCH_ESTABLISHED_SECONDS = 60
 
 
 class KubernetesController(Controller):
@@ -558,26 +569,58 @@ class KubernetesController(Controller):
             self._logger.info(f"Detected Kubernetes changes: {summary}")
         self._event_summary.clear()
 
-    def _mark_unhealthy(self, why: str) -> None:
-        """Drop the health marker so the orchestrator can restart a controller whose
-        watches are no longer streaming. Rebuilding the process is what recovers a
-        credential the API server has started rejecting."""
-        self._logger.error(f"Marking autoconf unhealthy: {why}")
-        with suppress(OSError):
-            HEALTHY_PATH.unlink(missing_ok=True)
+    @staticmethod
+    def _sanitize_watch_type(watch_type: str) -> str:
+        return re_sub(r"[^A-Za-z0-9_-]", "_", watch_type)
 
-    def _mark_healthy(self) -> None:
-        if HEALTHY_PATH.is_file():
+    def _watch_healthy_path(self, watch_type: str) -> Path:
+        """One marker per watch_type: a watch stuck retrying must not be hidden
+        behind a sibling watch that is still streaming fine, which is what sharing
+        a single HEALTHY_PATH across every watch used to allow."""
+        return HEALTHY_PATH.with_name(f"{HEALTHY_PATH.name}.{self._sanitize_watch_type(watch_type)}")
+
+    def _write_expected_watch_types(self, watch_types) -> None:
+        """Published once per run so the healthcheck knows which per-watch markers
+        it must require, and seeds every marker healthy for this run.
+
+        Seeding rather than clearing matters: a watch for a resource kind with zero
+        objects (a fresh Ingress-less cluster, an optional Gateway API route kind
+        with no instances yet) never receives a single watch event, so gating the
+        marker on event delivery would fail the liveness probe forever on an
+        entirely healthy, merely quiet, watch. Marker absence must mean one thing
+        only: _mark_unhealthy ran because this watch actually exhausted its
+        retries, not "has not happened to see an event yet"."""
+        expected_path = HEALTHY_PATH.with_name(f"{HEALTHY_PATH.name}.expected")
+        sanitized = sorted({self._sanitize_watch_type(watch_type) for watch_type in watch_types})
+        with suppress(OSError):
+            expected_path.parent.mkdir(parents=True, exist_ok=True)
+            expected_path.write_text("\n".join(sanitized) + ("\n" if sanitized else ""))
+        for watch_type in sanitized:
+            with suppress(OSError):
+                HEALTHY_PATH.with_name(f"{HEALTHY_PATH.name}.{watch_type}").write_text("ok")
+
+    def _mark_unhealthy(self, watch_type: str, why: str) -> None:
+        """Drop this watch's health marker so the healthcheck fails even while
+        sibling watches keep streaming. Rebuilding the process is what recovers a
+        credential the API server has started rejecting."""
+        self._logger.error(f"Marking autoconf unhealthy for watch {watch_type}: {why}")
+        with suppress(OSError):
+            self._watch_healthy_path(watch_type).unlink(missing_ok=True)
+
+    def _mark_healthy(self, watch_type: str) -> None:
+        path = self._watch_healthy_path(watch_type)
+        if path.is_file():
             return
         with suppress(OSError):
-            HEALTHY_PATH.parent.mkdir(parents=True, exist_ok=True)
-            HEALTHY_PATH.write_text("ok")
-            self._logger.info("Kubernetes watch is streaming again, autoconf marked healthy")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("ok")
+            self._logger.info(f"Kubernetes watch {watch_type} is streaming again, autoconf marked healthy")
 
     def _get_stream_with_retries(self, watch_type, what, retries=5):
         attempt = 0
         ignored = False
         while attempt < retries:
+            started = time()
             try:
                 if not ignored:
                     self._logger.info(f"Starting Kubernetes watch for {watch_type}, attempt {attempt + 1}/{retries}")
@@ -600,13 +643,21 @@ class KubernetesController(Controller):
             except Exception as e:
                 self._logger.debug(format_exc())
                 self._logger.error(f"Unexpected error while watching {watch_type}:\n{e}")
+            else:
+                # The stream ended without raising. If it had been running a while, this is
+                # the API server closing an established, healthy connection on its own idle
+                # timeout, not a failure: reconnect immediately and reset the retry budget.
+                if time() - started >= WATCH_ESTABLISHED_SECONDS:
+                    self._mark_healthy(watch_type)
+                    attempt = 0
+                    continue
             attempt += 1
             self._logger.warning(f"Retrying {watch_type} in 5 seconds...")
             sleep(5)
         # Returning here would end the caller's for loop without an exception, which reads
         # as a clean stream close: the watch would restart instantly, forever, while the
         # controller reconciled nothing and still looked healthy.
-        self._mark_unhealthy(f"watch for {watch_type} failed {retries} times in a row")
+        self._mark_unhealthy(watch_type, f"failed {retries} times in a row")
         raise RuntimeError(f"Failed to watch {watch_type} after {retries} retries")
 
     def _get_watchers(self) -> Dict[str, Any]:
@@ -619,7 +670,7 @@ class KubernetesController(Controller):
             applied = False
             try:
                 for event in self._get_stream_with_retries(watch_type, what):
-                    self._mark_healthy()
+                    self._mark_healthy(watch_type)
                     applied = False
                     self._internal_lock.acquire()
                     locked = True
@@ -712,6 +763,7 @@ class KubernetesController(Controller):
     def process_events(self):
         self._start_settings_recheck_worker()
         watchers = self._get_watchers()
+        self._write_expected_watch_types(watchers.keys())
         threads = [Thread(target=self._watch, args=(watch_type, watcher)) for watch_type, watcher in watchers.items()]
         backend_retry_thread = Thread(target=self._pending_backends_worker, daemon=True)
         backend_retry_thread.start()
@@ -719,6 +771,20 @@ class KubernetesController(Controller):
             thread.start()
         for thread in threads:
             thread.join()
+
+    def _is_valid_reverse_proxy_url(self, url: str) -> bool:
+        """Whether `url` would pass REVERSE_PROXY_URL's own validation.
+
+        An Ingress path or Gateway API route path is cluster-supplied, not typed by an
+        operator: a path the plugin's regex rejects must not be written into
+        REVERSE_PROXY_URL_N anyway, because the reverse-proxy template falls back to "/"
+        for a URL Configurator drops as invalid, silently proxying the whole site instead
+        of the narrow path this rule was meant to scope. Checked here so the caller can
+        skip the rule entirely with a clear warning instead."""
+        regex = self._settings.get("REVERSE_PROXY_URL", {}).get("regex")
+        if not regex:
+            return True
+        return re_match(regex, url) is not None
 
     def note_missing_backend(self, namespace: str, service_name: str) -> None:
         """Record a referenced-but-not-yet-visible backend Service so the retry

@@ -68,6 +68,9 @@ class IngressController(KubernetesController):
                 if not path.path:
                     self._logger.warning("Ignoring unsupported ingress rule without path.")
                     continue
+                elif not self._is_valid_reverse_proxy_url(path.path):
+                    self._logger.warning(f"Ignoring ingress rule with path {path.path!r}: not a valid REVERSE_PROXY_URL.")
+                    continue
                 elif not path.backend.service:
                     self._logger.warning("Ignoring unsupported ingress rule without backend service.")
                     continue
