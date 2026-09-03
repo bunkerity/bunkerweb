@@ -167,7 +167,12 @@
     "upload_photo": "Neues Foto hochladen",
     "view_details": "Details anzeigen",
     "view_raw_data": "Rohdaten anzeigen",
-    "wipe_other_sessions": "Andere Sitzungen löschen"
+    "wipe_other_sessions": "Andere Sitzungen löschen",
+    "ban_all_filtered": "Alle übereinstimmenden Meldungen sperren",
+    "filtered_actions": "Gefilterte Aktionen",
+    "unban_all_filtered": "Alle übereinstimmenden Sperren aufheben",
+    "update_duration_all_filtered": "Dauer für alle übereinstimmenden Sperren aktualisieren",
+    "validate_certificate": "Zertifikat überprüfen"
   },
   "country": {
     "AD": "Andorra",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste löschen möchten?",
       "unban_confirmation_alert": "Sind Sie sicher, dass Sie die Sperre für die ausgewählte IP-Adresse aufheben möchten?",
       "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?",
-      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:"
+      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:",
+      "ban_filtered_confirmation": "IPs aus allen {{count}} übereinstimmenden Meldungen sperren? Doppelte Ziele werden nur einmal angewendet.",
+      "unban_filtered_confirmation": "Sind Sie sicher, dass Sie alle {{count}} übereinstimmenden Sperren aufheben möchten?",
+      "update_filtered_duration_alert": "Wählen Sie eine neue Dauer für alle {{count}} übereinstimmenden Sperren:"
     },
     "button": {
       "fetch_global_settings_confirm": "Globale Einstellungen anwenden",
@@ -1765,6 +1773,13 @@
     "prompt": "Bitte geben Sie Ihren TOTP-Code ein."
   },
   "validation": {
+    "certificate_checking": "Wird überprüft ...",
+    "certificate_expires_in": "läuft in {{days}} Tagen ab",
+    "certificate_failed": "Die Überprüfungsanfrage ist fehlgeschlagen.",
+    "certificate_file_mode": "Hier können nur eingefügte oder hochgeladene Daten überprüft werden. Ein Zertifikatspfad wird vom Scheduler gelesen, auf den die Web-UI keinen Zugriff hat.",
+    "certificate_missing": "Geben Sie zuerst sowohl das Zertifikat als auch den Schlüssel an.",
+    "certificate_subject": "Betreff:",
+    "certificate_valid": "Zertifikat und Schlüssel stimmen überein.",
     "default_field_name": "Dieses Feld",
     "invalid_date": "Ungültiges Datum",
     "ip_global_duplicate": "Diese IP-Adresse ist bereits global gesperrt.",

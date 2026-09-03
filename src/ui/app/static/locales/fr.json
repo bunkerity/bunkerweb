@@ -168,7 +168,11 @@
     "upload_photo": "Télécharger Nouvelle Photo",
     "view_details": "Voir les détails",
     "view_raw_data": "Voir les données brutes",
-    "wipe_other_sessions": "Effacer les Autres Sessions"
+    "wipe_other_sessions": "Effacer les Autres Sessions",
+    "ban_all_filtered": "Bannir tous les rapports correspondants",
+    "filtered_actions": "Actions filtrées",
+    "unban_all_filtered": "Débannir tous les bannissements correspondants",
+    "update_duration_all_filtered": "Mettre à jour la durée de tous les bannissements correspondants"
   },
   "country": {
     "AD": "Andorre",
@@ -845,7 +849,10 @@
       "services_deletion_confirmation": "Êtes-vous sûr de vouloir supprimer les services sélectionnés ?",
       "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
       "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?",
-      "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :"
+      "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
+      "ban_filtered_confirmation": "Bannir les IP des {{count}} rapports correspondants ? Les cibles en double ne seront appliquées qu'une seule fois.",
+      "unban_filtered_confirmation": "Êtes-vous sûr de vouloir débannir les {{count}} bannissements correspondants ?",
+      "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :"
     },
     "button": {
       "fetch_global_settings_confirm": "Appliquer les paramètres globaux",

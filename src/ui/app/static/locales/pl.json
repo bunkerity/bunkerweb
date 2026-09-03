@@ -167,7 +167,12 @@
     "upload_photo": "Prześlij nowe zdjęcie",
     "view_details": "Zobacz szczegóły",
     "view_raw_data": "Wyświetl ręczne dane",
-    "wipe_other_sessions": "Wyczyść inne sesje"
+    "wipe_other_sessions": "Wyczyść inne sesje",
+    "ban_all_filtered": "Zablokuj wszystkie pasujące zgłoszenia",
+    "filtered_actions": "Filtrowane akcje",
+    "unban_all_filtered": "Odblokuj wszystkie pasujące blokady",
+    "update_duration_all_filtered": "Zaktualizuj czas trwania wszystkich pasujących blokad",
+    "validate_certificate": "Zweryfikuj certyfikat"
   },
   "country": {
     "AD": "Andora",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Czy na pewno chcesz usunąć wybrane usługi?",
       "unban_confirmation_alert": "Czy na pewno chcesz odblokować wybrany adres IP?",
       "unban_confirmation_alert_plural": "Czy na pewno chcesz odblokować wybrane adresy IP?",
-      "update_duration_alert": "Wybierz nowy czas trwania dla wybranych blokad:"
+      "update_duration_alert": "Wybierz nowy czas trwania dla wybranych blokad:",
+      "ban_filtered_confirmation": "Zablokować adresy IP ze wszystkich {{count}} pasujących zgłoszeń? Zduplikowane cele zostaną zastosowane tylko raz.",
+      "unban_filtered_confirmation": "Czy na pewno chcesz odblokować wszystkie {{count}} pasujące blokady?",
+      "update_filtered_duration_alert": "Wybierz nowy czas trwania dla wszystkich {{count}} pasujących blokad:"
     },
     "button": {
       "fetch_global_settings_confirm": "Zastosuj ustawienia globalne",
@@ -1765,6 +1773,13 @@
     "prompt": "Wprowadź swój kod TOTP."
   },
   "validation": {
+    "certificate_checking": "Sprawdzanie ...",
+    "certificate_expires_in": "wygasa za {{days}} dni",
+    "certificate_failed": "Żądanie weryfikacji nie powiodło się.",
+    "certificate_file_mode": "Tutaj można sprawdzić wyłącznie wklejone lub przesłane dane. Ścieżka certyfikatu jest odczytywana przez harmonogram, do którego interfejs webowy nie ma dostępu.",
+    "certificate_missing": "Najpierw podaj zarówno certyfikat, jak i klucz.",
+    "certificate_subject": "Temat:",
+    "certificate_valid": "Certyfikat i klucz są zgodne.",
     "default_field_name": "To pole",
     "invalid_date": "Nieprawidłowa data",
     "ip_global_duplicate": "Ten adres IP jest już globalnie zablokowany.",

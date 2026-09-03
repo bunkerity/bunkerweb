@@ -167,7 +167,12 @@
     "upload_photo": "Mag-upload ng Bagong Larawan",
     "view_details": "Tingnan ang Mga Detalye",
     "view_raw_data": "Tingnan ang Raw Data",
-    "wipe_other_sessions": "Burahin ang Ibang Mga Session"
+    "wipe_other_sessions": "Burahin ang Ibang Mga Session",
+    "ban_all_filtered": "I-ban ang lahat ng tumutugmang ulat",
+    "filtered_actions": "Mga na-filter na aksyon",
+    "unban_all_filtered": "Alisin ang ban sa lahat ng tumutugmang ban",
+    "update_duration_all_filtered": "I-update ang tagal para sa lahat ng tumutugmang ban",
+    "validate_certificate": "I-validate ang certificate"
   },
   "country": {
     "AD": "Andora",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Sigurado ka bang gusto mong burahin ang mga napiling serbisyo?",
       "unban_confirmation_alert": "Sigurado ka bang gusto mong i-unban ang napiling IP address?",
       "unban_confirmation_alert_plural": "Sigurado ka bang gusto mong i-unban ang mga napiling IP address?",
-      "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:"
+      "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:",
+      "ban_filtered_confirmation": "I-ban ang mga IP mula sa lahat ng {{count}} tumutugmang ulat? Ang mga duplicate na target ay ilalapat lamang nang isang beses.",
+      "unban_filtered_confirmation": "Sigurado ka bang gusto mong alisin ang ban sa lahat ng {{count}} tumutugmang ban?",
+      "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:"
     },
     "button": {
       "fetch_global_settings_confirm": "Ilapat ang mga pandaigdigang setting",
@@ -1765,6 +1773,13 @@
     "prompt": "Mangyaring ipasok ang iyong TOTP code."
   },
   "validation": {
+    "certificate_checking": "Sinusuri ...",
+    "certificate_expires_in": "mag-e-expire sa {{days}} araw",
+    "certificate_failed": "Nabigo ang kahilingan sa pag-validate.",
+    "certificate_file_mode": "Data lamang na na-paste o na-upload ang maaaring suriin dito. Binabasa ng scheduler ang landas ng certificate, na wala sa access ng web UI.",
+    "certificate_missing": "Ibigay muna ang certificate at ang key.",
+    "certificate_subject": "Paksa:",
+    "certificate_valid": "Magkatugma ang certificate at ang key.",
     "default_field_name": "Ang field na ito",
     "invalid_date": "Hindi valid na petsa",
     "ip_global_duplicate": "Ang IP address na ito ay pandaigdigang na-ban na.",

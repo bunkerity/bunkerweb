@@ -167,7 +167,12 @@
     "upload_photo": "Carica Nuova Foto",
     "view_details": "Visualizza Dettagli",
     "view_raw_data": "Visualizza Dati Grezzi",
-    "wipe_other_sessions": "Pulisci Altre Sessioni"
+    "wipe_other_sessions": "Pulisci Altre Sessioni",
+    "ban_all_filtered": "Vieta tutti i report corrispondenti",
+    "filtered_actions": "Azioni filtrate",
+    "unban_all_filtered": "Sblocca tutti i divieti corrispondenti",
+    "update_duration_all_filtered": "Aggiorna la durata di tutti i divieti corrispondenti",
+    "validate_certificate": "Convalida certificato"
   },
   "country": {
     "AD": "Andorra",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Sei sicuro di voler eliminare i servizi selezionati?",
       "unban_confirmation_alert": "Sei sicuro di voler sbloccare l'indirizzo IP selezionato?",
       "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?",
-      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:"
+      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:",
+      "ban_filtered_confirmation": "Vietare gli IP di tutti i {{count}} report corrispondenti? Gli obiettivi duplicati verranno applicati una sola volta.",
+      "unban_filtered_confirmation": "Sei sicuro di voler sbloccare tutti i {{count}} divieti corrispondenti?",
+      "update_filtered_duration_alert": "Seleziona una nuova durata per tutti i {{count}} divieti corrispondenti:"
     },
     "button": {
       "fetch_global_settings_confirm": "Applica impostazioni globali",
@@ -1765,6 +1773,13 @@
     "prompt": "Inserisci il tuo codice TOTP."
   },
   "validation": {
+    "certificate_checking": "Verifica in corso ...",
+    "certificate_expires_in": "scade tra {{days}} giorni",
+    "certificate_failed": "La richiesta di convalida non è riuscita.",
+    "certificate_file_mode": "Qui è possibile verificare solo i dati incollati o caricati. Il percorso del certificato viene letto dallo scheduler, a cui l'interfaccia web non ha accesso.",
+    "certificate_missing": "Fornisci prima sia il certificato che la chiave.",
+    "certificate_subject": "Oggetto:",
+    "certificate_valid": "Il certificato e la chiave corrispondono.",
     "default_field_name": "Questo campo",
     "invalid_date": "Data non valida",
     "ip_global_duplicate": "Questo indirizzo IP è già bloccato globalmente.",

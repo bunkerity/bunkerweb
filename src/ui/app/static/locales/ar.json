@@ -167,7 +167,12 @@
     "upload_photo": "تحميل صورة جديدة",
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
-    "wipe_other_sessions": "مسح الجلسات الأخرى"
+    "wipe_other_sessions": "مسح الجلسات الأخرى",
+    "ban_all_filtered": "حظر جميع التقارير المطابقة",
+    "filtered_actions": "إجراءات مُصفّاة",
+    "unban_all_filtered": "رفع الحظر عن جميع الحظورات المطابقة",
+    "update_duration_all_filtered": "تحديث المدة لجميع الحظورات المطابقة",
+    "validate_certificate": "التحقق من الشهادة"
   },
   "country": {
     "AD": "أندورا",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
       "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
-      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:"
+      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:",
+      "ban_filtered_confirmation": "هل تريد حظر عناوين IP من جميع التقارير المطابقة البالغ عددها {{count}}؟ سيتم تطبيق الأهداف المكررة مرة واحدة فقط.",
+      "unban_filtered_confirmation": "هل أنت متأكد أنك تريد رفع الحظر عن جميع الحظورات المطابقة البالغ عددها {{count}}؟",
+      "update_filtered_duration_alert": "حدد مدة جديدة لجميع الحظورات المطابقة البالغ عددها {{count}}:"
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -1765,6 +1773,13 @@
     "prompt": "يرجى إدخال رمز TOTP الخاص بك."
   },
   "validation": {
+    "certificate_checking": "جارٍ التحقق ...",
+    "certificate_expires_in": "تنتهي الصلاحية خلال {{days}} يومًا",
+    "certificate_failed": "فشل طلب التحقق.",
+    "certificate_file_mode": "يمكن التحقق هنا فقط من البيانات الملصقة أو المرفوعة. يقرأ المُجدوِل مسار الشهادة، وواجهة الويب لا تملك صلاحية الوصول إليه.",
+    "certificate_missing": "يرجى تقديم الشهادة والمفتاح أولاً.",
+    "certificate_subject": "الموضوع:",
+    "certificate_valid": "الشهادة والمفتاح متطابقان.",
     "default_field_name": "هذا الحقل",
     "invalid_date": "تاريخ غير صالح",
     "ip_global_duplicate": "عنوان IP هذا محظور عالميًا بالفعل.",

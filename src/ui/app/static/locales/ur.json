@@ -167,7 +167,12 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
+    "ban_all_filtered": "مماثل تمام رپورٹس پر پابندی لگائیں",
+    "filtered_actions": "فلٹر شدہ اقدامات",
+    "unban_all_filtered": "مماثل تمام پابندیاں ہٹائیں",
+    "update_duration_all_filtered": "مماثل تمام پابندیوں کی مدت اپ ڈیٹ کریں",
+    "validate_certificate": "سرٹیفکیٹ کی تصدیق کریں"
   },
   "country": {
     "AD": "انڈورا",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
-      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
+      "ban_filtered_confirmation": "مماثل تمام {{count}} رپورٹس سے IPs پر پابندی لگائیں؟ نقل شدہ اہداف صرف ایک بار لاگو ہوں گے۔",
+      "unban_filtered_confirmation": "کیا آپ واقعی مماثل تمام {{count}} پابندیاں ہٹانا چاہتے ہیں؟",
+      "update_filtered_duration_alert": "مماثل تمام {{count}} پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
       "fetch_global_settings_confirm": "گلوبل سیٹنگز لاگو کریں",
@@ -1765,6 +1773,13 @@
     "prompt": "براہ کرم اپنا TOTP کوڈ درج کریں۔"
   },
   "validation": {
+    "certificate_checking": "جانچا جا رہا ہے ...",
+    "certificate_expires_in": "{{days}} دن میں میعاد ختم ہو جائے گی",
+    "certificate_failed": "تصدیقی درخواست ناکام ہو گئی۔",
+    "certificate_file_mode": "یہاں صرف پیسٹ یا اپ لوڈ کیا گیا ڈیٹا چیک کیا جا سکتا ہے۔ سرٹیفکیٹ کا راستہ شیڈیولر پڑھتا ہے، جس تک ویب UI کی رسائی نہیں ہے۔",
+    "certificate_missing": "پہلے سرٹیفکیٹ اور کلید دونوں فراہم کریں۔",
+    "certificate_subject": "موضوع:",
+    "certificate_valid": "سرٹیفکیٹ اور کلید مماثل ہیں۔",
     "default_field_name": "یہ فیلڈ",
     "invalid_date": "غلط تاریخ",
     "ip_global_duplicate": "یہ IP ایڈریس پہلے ہی عالمی طور پر پابندی عائد ہے۔",

@@ -166,7 +166,13 @@
     "upload_photo": "Unggah Foto Baru",
     "view_details": "Lihat Detail",
     "view_raw_data": "Lihat Data Mentah",
-    "wipe_other_sessions": "Hapus Sesi Lain"
+    "wipe_other_sessions": "Hapus Sesi Lain",
+    "ban_all_filtered": "Larang semua laporan yang cocok",
+    "filtered_actions": "Tindakan terfilter",
+    "unban_all_filtered": "Batalkan semua larangan yang cocok",
+    "update_duration_all_filtered": "Perbarui durasi untuk semua larangan yang cocok",
+    "validate_certificate": "Validasi sertifikat",
+    "refresh_ui_plugins": "Perbarui plugin UI"
   },
   "country": {
     "AD": "Andorra",
@@ -487,6 +493,7 @@
       "no_data": "Tidak ada data"
     },
     "window": {
+      "all_time": "Sepanjang waktu",
       "last_days": "{{days}} hari terakhir",
       "title": "Rentang waktu dasbor"
     }
@@ -842,7 +849,10 @@
       "services_deletion_confirmation": "Apakah Anda yakin ingin menghapus layanan yang dipilih?",
       "unban_confirmation_alert": "Apakah Anda yakin ingin membatalkan larangan alamat IP yang dipilih?",
       "unban_confirmation_alert_plural": "Apakah Anda yakin ingin membatalkan larangan alamat IP yang dipilih?",
-      "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:"
+      "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:",
+      "ban_filtered_confirmation": "Larang IP dari semua {{count}} laporan yang cocok? Target duplikat hanya akan diterapkan sekali.",
+      "unban_filtered_confirmation": "Apakah Anda yakin ingin membatalkan semua {{count}} larangan yang cocok?",
+      "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:"
     },
     "button": {
       "fetch_global_settings_confirm": "Terapkan pengaturan global",
@@ -1042,6 +1052,7 @@
     }
   },
   "reports": {
+    "retention_notice": "Laporan adalah buffer memori bergulir: entri terlama akan dihapus setelah batas yang dikonfigurasi tercapai. Kecuali Redis diaktifkan, laporan juga akan dihapus saat BunkerWeb dimulai ulang.",
     "security_incident": "Insiden Keamanan",
     "security_report_data": "Data Laporan Keamanan"
   },
@@ -1510,6 +1521,7 @@
       "force_check": "Menjadwalkan pengecekan; hanya mengunduh jika ada pembaruan.",
       "force_update": "Melewati pengecekan dan memaksa unduhan plugin PRO; mempertahankan status saat ini jika gagal.",
       "ping_instance": "Ping Instans {{hostname}}",
+      "refresh_ui_plugins": "Memuat ulang plugin PRO yang sudah dimiliki UI web, tanpa mengunduh apa pun.",
       "reload_instance": "Muat Ulang Instans {{hostname}}",
       "reset_default": "Atur ulang ke nilai default",
       "reset_global": "Atur ulang ke nilai global",
@@ -1761,6 +1773,13 @@
     "prompt": "Silakan masukkan kode TOTP Anda."
   },
   "validation": {
+    "certificate_checking": "Memeriksa ...",
+    "certificate_expires_in": "kedaluwarsa dalam {{days}} hari",
+    "certificate_failed": "Permintaan validasi gagal.",
+    "certificate_file_mode": "Hanya data yang ditempel atau diunggah yang dapat diperiksa di sini. Jalur sertifikat dibaca oleh scheduler, yang tidak dapat diakses oleh UI web.",
+    "certificate_missing": "Berikan sertifikat dan kunci terlebih dahulu.",
+    "certificate_subject": "Subjek:",
+    "certificate_valid": "Sertifikat dan kunci cocok.",
     "default_field_name": "Bidang ini",
     "invalid_date": "Tanggal tidak valid",
     "ip_global_duplicate": "Alamat IP ini sudah dilarang secara global.",
