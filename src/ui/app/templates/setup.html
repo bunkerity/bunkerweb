@@ -96,6 +96,9 @@
                                 </div>
                             </div>
                             <div class="card-body p-2 pb-8">
+                                {% if notice %}
+                                    <div class="alert alert-warning" role="alert">{{ notice }}</div>
+                                {% endif %}
                                 <div class="d-flex justify-content-center">
                                     <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
                                          aria-label="breadcrumb">
