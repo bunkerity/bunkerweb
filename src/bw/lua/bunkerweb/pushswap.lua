@@ -147,14 +147,46 @@ function pushswap.swap(destination, staging)
 		for i = #undo, 1, -1 do
 			local ok = move_entry(undo[i].from, undo[i].to)
 			if not ok then
-				stuck[#stuck + 1] = undo[i].to
+				stuck[#stuck + 1] = undo[i]
 			end
 		end
-		execute("rm -rf " .. quote(trash))
-		if #stuck > 0 then
-			return "rollback incomplete, left in place: " .. table.concat(stuck, ", ")
+		if #stuck == 0 then
+			execute("rm -rf " .. quote(trash))
+			return nil
 		end
-		return nil
+		-- Whatever could not be moved back is still at its recorded source. For a parked old
+		-- entry that source is inside trash, and it is then the only surviving copy. Trash is a
+		-- fixed name that the next swap opens by removing, so the copy has to leave it, and the
+		-- message has to name where it went or it points at a path that will not be there.
+		--
+		-- A bare rename, not move_entry: both names are children of the destination so rename(2)
+		-- cannot report EXDEV here, and the copy fallback would only ever fire on the disk-full
+		-- case this rescue exists for, where it leaves half a copy and reports it as the whole
+		-- one. os.time has second resolution, so the name takes a counter until one is free and
+		-- two failures inside one second cannot land on each other.
+		local kept = trash
+		local base = destination .. "/" .. pushswap.RESERVED_PREFIX .. "rescue." .. tostring(os.time())
+		for i = 0, 9 do
+			local candidate = i == 0 and base or (base .. "." .. i)
+			if not run("test -e " .. quote(candidate)) then
+				if rename(trash, candidate) then
+					kept = candidate
+				end
+				break
+			end
+		end
+		local left = {}
+		for _, item in ipairs(stuck) do
+			-- The entry an operator has to repair is the destination one either way: a park that
+			-- could not be restored left the old copy in the parked tree, a placement that could
+			-- not be undone left the new entry live in the destination.
+			local source = item.from
+			if kept ~= trash and source:sub(1, #trash + 1) == trash .. "/" then
+				source = kept .. source:sub(#trash + 1)
+			end
+			left[#left + 1] = item.target .. " (copy kept at " .. source .. ")"
+		end
+		return "rollback incomplete, left in place: " .. table.concat(left, ", ")
 	end
 
 	local function abort(message)
@@ -175,13 +207,13 @@ function pushswap.swap(destination, staging)
 			if not ok then
 				return abort("cannot park " .. name .. ": " .. tostring(err))
 			end
-			undo[#undo + 1] = { from = parked, to = target }
+			undo[#undo + 1] = { from = parked, to = target, target = target }
 		end
 		local ok, err = move_entry(staging .. "/" .. name, target)
 		if not ok then
 			return abort("cannot place " .. name .. ": " .. tostring(err))
 		end
-		undo[#undo + 1] = { from = target, to = staging .. "/" .. name }
+		undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 	end
 
 	for name in pairs(existing) do
@@ -191,7 +223,7 @@ function pushswap.swap(destination, staging)
 			if not ok then
 				return abort("cannot sweep " .. name .. ": " .. tostring(err))
 			end
-			undo[#undo + 1] = { from = parked, to = destination .. "/" .. name }
+			undo[#undo + 1] = { from = parked, to = destination .. "/" .. name, target = destination .. "/" .. name }
 		end
 	end
 
