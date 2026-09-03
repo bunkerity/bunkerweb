@@ -93,6 +93,7 @@
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | 否   | **内存大小：** 指标内部存储的大小（例如，`8192`、`16m`、`32m`）。                                |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | 否   | **最大被阻止请求数：** 每个工作进程要存储的最大被阻止请求数。支持 `k`/`m` 简写。                 |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | 否   | **Redis 最大被阻止请求数：** 在 Redis 中要存储的最大被阻止请求数。支持 `k`/`m` 简写。            |
+| `METRICS_REDIS_TTL`                  | `2592000`| global    | 否   | **指标 Redis TTL：** Redis 指标键过期前的秒数（`0` = 永久）；每次同步都会刷新，因此活跃数据永不过期，而被遗弃的数据可在 `volatile-lru` 下被驱逐，从而让 Redis 从 maxmemory 压力中恢复。支持 `k`/`m` 简写。 |
 | `MAX_LRU_HISTORY`                    | `1k`     | global    | 否   | **最大 LRU 历史：** 每个工作进程的 LRU 槽位数量，以及每个键的事件历史数组上限（阻止轨迹、身份验证轨迹等）。支持 `k`/`m` 简写。 |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | 否   | **将指标保存到 Redis：** 设置为 `yes` 以将指标（计数器和表）保存到 Redis，以实现集群范围的聚合。 |
 
@@ -100,7 +101,7 @@
     应根据您的流量和实例数量调整 `METRICS_MEMORY_SIZE` 设置。支持原始字节值以及 `k`/`m` 后缀。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。
 
 !!! info "Redis 集成"
-    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。
+    当 BunkerWeb 配置为使用[Redis](#redis)时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。在 Redis `maxmemory` 压力下，新报告会按工作进程缓冲，并在内存释放后同步，因此在 Redis 已满期间不会丢失被阻止请求的报告。
 
 !!! warning "性能注意事项"
     为 `METRICS_MAX_BLOCKED_REQUESTS` 或 `METRICS_MAX_BLOCKED_REQUESTS_REDIS` 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。

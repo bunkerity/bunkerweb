@@ -321,6 +321,21 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
     - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
 
+#### 按服务的端点
+
+由于这些端点是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或只使用其中一部分。这两个功能相互独立：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于活动状态。将其设为空字符串可让某个服务完全跳过 Local API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于活动状态。将其设为空字符串可让某个服务跳过深度请求检测。
+
+如果某个服务的 `USE_CROWDSEC` 设为 `yes` 但两个 URL 都为空，则该服务不会进行任何检查，实例会记录未定义任何端点。
+
+!!! warning "每个实例一个决策缓存"
+    缓存的决策存放在整个实例共用的单个共享内存区中，按其来源的 Local API 建立索引。指向同一个 `CROWDSEC_API` 的服务会相互复用缓存的决策，这也是查询保持低成本的原因。指向不同 Local API 的服务永远看不到彼此的决策。该区域的大小是实例级别的，因此拥有多个不同 Local API 和大型决策列表的集群会共用同一份预算。
+
+!!! info "每个 Local API 一个 Bouncer 密钥"
+    `CROWDSEC_API_KEY` 与其他设置一样按服务解析。当服务指向不同的 Local API 时，请为每个服务分配在其各自 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过身份验证而被拒绝。
+
 ### 示例配置
 
 === "基本配置"
@@ -351,6 +366,38 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "按服务配置"
+
+    在每个公开服务上启用 AppSec，在一部分服务上启用决策查询，并完全排除一个服务。不带前缀的值是整个集群的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某个服务需要，否则不进行决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之上增加 Local API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 仅保留 AppSec，继承空的 CROWDSEC_API 基线
+
+    # intranet 完全不进行检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    服务也可以指向完全不同的 CrowdSec 主机，并使用自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### 第&nbsp;3&nbsp;步 – 验证集成
