@@ -21,7 +21,7 @@ from tarfile import TarFile, open as tar_open
 from threading import Event, Lock
 from time import monotonic, sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Set, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union, cast
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
@@ -39,7 +39,7 @@ from JobScheduler import JobScheduler
 from jobs import Job, _write_atomic  # type: ignore
 from API import API  # type: ignore
 
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
 
 APPLYING_CHANGES = Event()
 BACKING_UP_FAILOVER = Event()
@@ -121,6 +121,23 @@ if not SEND_FILES_MIN_TIMEOUT.isdigit():
 
 SEND_FILES_MIN_TIMEOUT = int(SEND_FILES_MIN_TIMEOUT)
 
+# Cadence for work the loop is holding on to: a configuration push the once-jobs are waiting for,
+# and a manual custom-config edit whose database write was refused. Both have to be retried by the
+# loop itself, since neither an instance coming back nor a database recovering produces a change
+# the loop watches for, and neither may be retried on every iteration.
+PENDING_RETRY_DELAY = 30
+
+# How many times the once-jobs may be deferred before they run anyway. Deferring them is not free:
+# SCHEDULER.reload() is the only path that reaches JobScheduler.setup(), so while it is skipped no
+# periodic job is registered at all. A configuration check that fails because a job has not yet
+# created the file it needs would otherwise deadlock, the jobs waiting on a push that waits on the
+# jobs, so the deferral is bounded and then gives way.
+PRE_PUSH_MAX_DEFERRALS = 3
+
+# Backoff ceiling for the pending custom-config rescan: a database that stays broken must not keep
+# rescanning the folder every PENDING_RETRY_DELAY seconds for the life of the process.
+PENDING_RETRY_MAX_DELAY = 600
+
 DISABLE_CONFIGURATION_TESTING = getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes"
 
 if DISABLE_CONFIGURATION_TESTING:
@@ -138,14 +155,19 @@ if IGNORE_REGEX_CHECK:
 
 
 def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
-    """Return full scheme://host:port for an instance based on HTTPS settings."""
-    listen_https = bool(db_instance.get("listen_https", False))
-    host = db_instance.get("hostname", "127.0.0.1")
-    http_port = int(db_instance.get("port", 5000) or 5000)
-    https_port = int(db_instance.get("https_port", 5443) or 5443)
-    scheme = "https" if listen_https else "http"
-    port = https_port if listen_https else http_port
-    return f"{scheme}://{host}:{port}"
+    """Return full scheme://host:port for an instance based on HTTPS settings.
+
+    Rendered by the same builder API.from_instance uses, because every endpoint comparison in this
+    module weighs one against the other. A bare IPv6 hostname is bracketed on one side only when the
+    two disagree, and then no comparison ever matches: the instance is appended to SCHEDULER.apis
+    again on each successful send and receives one upload per duplicate.
+    """
+    return API.build_endpoint(
+        db_instance.get("hostname", "127.0.0.1"),
+        port=db_instance.get("port"),
+        listen_https=bool(db_instance.get("listen_https", False)),
+        https_port=db_instance.get("https_port"),
+    )
 
 
 def build_cmd_env() -> Dict[str, str]:
@@ -159,12 +181,14 @@ def build_cmd_env() -> Dict[str, str]:
     cmd_env = {
         "PATH": getenv("PATH", ""),
         "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
         "LOG_LEVEL": getenv("LOG_LEVEL", ""),
         "DATABASE_URI": getenv("DATABASE_URI", ""),
     }
 
-    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+    # Forwarded only when set. An empty CUSTOM_LOG_LEVEL is not "unset" to the child, it is an
+    # override that hides LOG_LEVEL and drops it back to INFO, and SCHEDULER_LOG_TO_FILE has to
+    # travel too or a file-logging child with no explicit path falls back to stderr.
+    for key in ("TZ", "CUSTOM_LOG_LEVEL", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "SCHEDULER_LOG_TO_FILE", "DATABASE_LOG_LEVEL"):
         value = getenv(key)
         if value:
             cmd_env[key] = value
@@ -289,21 +313,24 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
     success, responses = (api_caller or SCHEDULER).send_files(
         file_path.as_posix(),
         endpoint,
-        # Bounded both ways: healthcheck_job submits five of these into a four-worker pool and
-        # blocks the scheduler loop on the results, so an unbounded value stalls it for two waves.
-        timeout=(5, min(120, max(1, SEND_FILES_MIN_TIMEOUT, 3 * len(SCHEDULER.env.get("SERVER_NAME", "www.example.com").split())))),
+        timeout=folder_push_timeout(SEND_FILES_MIN_TIMEOUT, len(SCHEDULER.env.get("SERVER_NAME", "www.example.com").split())),
         response=True,
     )
     fails = []
 
+    # A push aimed at one instance says nothing about the others: they are simply absent from
+    # responses, which the loop below would read as "down" and write to the database before evicting
+    # them. The healthcheck pushes to a single loading instance, so without this one restarting node
+    # drops every other node in the cluster.
+    targeted = {api.endpoint for api in api_caller.apis} if api_caller is not None else None
+
     if not IGNORE_FAIL_SENDING_CONFIG:
         for db_instance in SCHEDULER.db.get_instances():
-            index = -1
+            instance_endpoint = f"{_instance_endpoint(db_instance)}/"
+            if targeted is not None and instance_endpoint not in targeted:
+                continue
             with SCHEDULER_LOCK:
-                for i, api in enumerate(SCHEDULER.apis):
-                    if api.endpoint == f"{_instance_endpoint(db_instance)}/":
-                        index = i
-                        break
+                known = any(api.endpoint == instance_endpoint for api in SCHEDULER.apis)
 
             status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
 
@@ -311,20 +338,22 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
             if ret:
                 logger.error(f"Couldn't update instance {db_instance['hostname']} status to down in the database: {ret}")
 
+            port_display = db_instance["https_port"] if db_instance.get("listen_https") else db_instance["port"]
+
+            # The database update above runs with the lock released, so a position read before it is
+            # already stale here: two concurrent failing sends to the same instance both kept index 0
+            # and the second delete raised IndexError. Address the entry by endpoint, which stays
+            # correct whatever the other thread did in between.
             with SCHEDULER_LOCK:
                 if status == "success":
                     success = True
-                    if index == -1:
-                        logger.debug(
-                            f"Adding {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} to the list of reachable instances"
-                        )
+                    if not any(api.endpoint == instance_endpoint for api in SCHEDULER.apis):
+                        logger.debug(f"Adding {db_instance['hostname']}:{port_display} to the list of reachable instances")
                         SCHEDULER.apis.append(API.from_instance(db_instance))
-                elif index != -1:
-                    fails.append(f"{db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']}")
-                    logger.debug(
-                        f"Removing {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} from the list of reachable instances"
-                    )
-                    del SCHEDULER.apis[index]
+                elif known:
+                    fails.append(f"{db_instance['hostname']}:{port_display}")
+                    logger.debug(f"Removing {db_instance['hostname']}:{port_display} from the list of reachable instances")
+                    SCHEDULER.apis[:] = [api for api in SCHEDULER.apis if api.endpoint != instance_endpoint]
 
     if not success:
         logger.error(f"Error while sending {file_path} to BunkerWeb instances")
@@ -570,6 +599,16 @@ def generate_caches() -> Set[str]:
                 continue
 
             LOGGER.debug(f"Checking if {resource_path} should be removed")
+            if resource_path.is_symlink():
+                # Both type tests below follow the link. A live target outside the cache would be
+                # re-permissioned through it, and a dangling one makes both tests false, leaving
+                # stat() to raise and take the whole scheduler down. Restored cache entries are
+                # regular files, and the links an archive carries live under ignored_dirs, so a
+                # link reached here is never cache content.
+                if resource_path not in plugin_cache_files:
+                    LOGGER.debug(f"Removing non-cached symlink {resource_path}")
+                    resource_path.unlink(missing_ok=True)
+                continue
             if resource_path not in plugin_cache_files and resource_path.is_file():
                 LOGGER.debug(f"Removing non-cached file {resource_path}")
                 resource_path.unlink(missing_ok=True)
@@ -584,9 +623,11 @@ def generate_caches() -> Set[str]:
                 rmtree(resource_path, ignore_errors=True)
                 continue
 
-            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
-            if resource_path.stat().st_mode & 0o777 != desired_perms:
-                resource_path.chmod(desired_perms)
+            # Directories only: a retained regular cache file keeps the 0640 it was restored with.
+            if resource_path.is_dir():
+                desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
+                if resource_path.stat().st_mode & 0o777 != desired_perms:
+                    resource_path.chmod(desired_perms)
 
     return failed_restores
 
@@ -619,6 +660,142 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
     return True
 
 
+def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool, bool]:
+    """Generate and push the configuration the once-jobs are about to validate against.
+
+    Returns (took_it, rendered). The second half matters to the caller: a render that happened here
+    must not happen again in the same iteration. Plugins need their API endpoints loaded on the
+    instances and jobs validate against the running configuration; certbot-new is the expensive
+    case, since a service added now has no server{} on the instance yet, so an ACME probe falls to
+    the default server, and the job is "once", so nothing retries it until the next change. On the
+    first start the instance may still be booting, hence the wait, which also repopulates
+    SCHEDULER.apis after the startup sends emptied it; later it is already known.
+    """
+    assert SCHEDULER is not None
+
+    if not (wait_for_reachable_instance() if first_start else SCHEDULER.apis):
+        return False, False
+
+    LOGGER.info("Generating and sending the configuration before running jobs ...")
+    if not generate_configs():
+        return False, False
+
+    futures = [
+        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
+        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),
+    ]
+    push_failed = False
+    for future in futures:
+        # A send that raised is a failed push, not a reason to leave: unhandled here it reaches the
+        # outer handler, which turns a transient outage into stop(1).
+        try:
+            future.result()
+        except BaseException as e:
+            LOGGER.error(f"Exception while sending the configuration before running jobs : {e}")
+            push_failed = True
+
+    reloaded, responses = SCHEDULER.send_to_apis(
+        "POST",
+        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+        response=True,
+    )
+
+    # send_to_apis answers False when any single instance failed, so one node failing its own
+    # configuration check would otherwise hold back the jobs of every other node. One instance
+    # running the new configuration is what the jobs need.
+    took_it = reloaded or any(isinstance(resp, dict) and resp.get("status") == "success" for resp in (responses or {}).values())
+
+    # An empty API list answers True, so the reload result on its own does not say the configuration
+    # reached anything. IGNORE_FAIL_SENDING_CONFIG is the operator saying to proceed regardless.
+    if not SCHEDULER.apis:
+        return False, True
+    return IGNORE_FAIL_SENDING_CONFIG or (took_it and not push_failed), True
+
+
+def pre_push_deferral(pushed: bool, deferrals: int) -> Tuple[bool, int]:
+    """Decide whether to hold the once-jobs back for another attempt, and count the deferral.
+
+    Returns (defer, deferrals). Holding them back is not free: SCHEDULER.reload() is the only path
+    that reaches JobScheduler.setup(), so for as long as it is skipped no periodic job is registered
+    at all, and a configuration check that fails because a job has not yet produced the file it needs
+    would deadlock the two against each other. The deferral is therefore bounded and then gives way,
+    which costs one round of jobs running against a configuration nothing took and buys back a
+    scheduler that cannot be stuck with an empty schedule.
+    """
+    if pushed or deferrals >= PRE_PUSH_MAX_DEFERRALS:
+        return False, 0
+    return True, deferrals + 1
+
+
+def custom_configs_save_failed(err: str) -> bool:
+    """Whether save_custom_configs refused the write, as opposed to reporting on it.
+
+    Its return value is one overloaded string: a per-config warning means the rest of the payload
+    landed, anything else means nothing was written. The caller cannot read it as a boolean, because
+    on a refused write it regenerates /etc/bunkerweb/configs from the database and writes it over
+    the edit that is still only on disk.
+    """
+    return any(not (line.startswith("Service ") and line.endswith(" not found, please check your config")) for line in err.splitlines() if line.strip())
+
+
+def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
+    # Checking if any custom config has been created by the user
+    assert SCHEDULER is not None, "SCHEDULER is not defined"
+    LOGGER.info("Checking if there are any changes in custom configs ...")
+    custom_configs = []
+    db_configs = SCHEDULER.db.get_custom_configs()
+    changes = False
+    for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
+        if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
+            LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
+            continue
+
+        content = file.read_text(encoding="utf-8")
+        service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
+        config_type = file.parent.parent.name if service_id else file.parent.name
+
+        saving = True
+        in_db = False
+        from_template = False
+        for db_conf in db_configs:
+            if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
+                in_db = True
+                if db_conf["template"]:
+                    from_template = True
+
+        if from_template or (not in_db and content.startswith("# CREATED BY ENV")):
+            saving = False
+            changes = not from_template
+
+        if saving:
+            custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
+
+    changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
+
+    if changes:
+        saved = True
+        try:
+            err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
+            if err:
+                LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
+                saved = not custom_configs_save_failed(err)
+        except BaseException as e:
+            LOGGER.error(f"Error while saving custom configs to database: {e}")
+            saved = False
+
+        # A read-only database was never going to take the write and remains the source of truth for
+        # the folder, so its refusal is not the one this guards against: rendering the folder from it
+        # is exactly what a read-only scheduler is for.
+        if not saved and not SCHEDULER.db.readonly:
+            return None
+
+    if generate:
+        generate_custom_configs(SCHEDULER.db.get_custom_configs())
+
+    return changes
+
+
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -630,139 +807,153 @@ def healthcheck_job():
         return
 
     HEALTHCHECK_EVENT.set()
+    try:
+        # The early return below used to leave the event set for the life of the process, and every
+        # later healthcheck then reported itself as already running and did nothing.
+        if APPLYING_CHANGES.is_set():
+            return
 
-    if APPLYING_CHANGES.is_set():
-        return
+        env = None
 
-    env = None
-
-    for db_instance in SCHEDULER.db.get_instances():
-        bw_instance = API.from_instance(db_instance)
-        try:
+        for db_instance in SCHEDULER.db.get_instances():
+            bw_instance = API.from_instance(db_instance)
             try:
-                sent, err, status, resp = bw_instance.request("GET", "health")
-            except BaseException as e:
-                err = str(e)
-                sent = False
-                status = 500
-                resp = {"status": "down", "msg": err}
+                try:
+                    sent, err, status, resp = bw_instance.request("GET", "health")
+                except BaseException as e:
+                    err = str(e)
+                    sent = False
+                    status = 500
+                    resp = {"status": "down", "msg": err}
 
-            HEALTHCHECK_LOGGER.debug(resp)
+                HEALTHCHECK_LOGGER.debug(resp)
 
-            success = True
-            if not sent:
-                HEALTHCHECK_LOGGER.warning(
-                    f"Can't send API request to {bw_instance.endpoint}health : {err}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
-                )
-                success = False
-            elif status != 200:
-                HEALTHCHECK_LOGGER.warning(
-                    f"Error while sending API request to {bw_instance.endpoint}health : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
-                )
-                success = False
+                success = True
+                if not sent:
+                    HEALTHCHECK_LOGGER.warning(
+                        f"Can't send API request to {bw_instance.endpoint}health : {err}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
+                    )
+                    success = False
+                elif status != 200:
+                    HEALTHCHECK_LOGGER.warning(
+                        f"Error while sending API request to {bw_instance.endpoint}health : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ..."
+                    )
+                    success = False
 
-            if not success:
-                ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
+                if not success:
+                    ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
+                    if ret:
+                        HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
+
+                    for i, api in enumerate(SCHEDULER.apis):
+                        if api.endpoint == bw_instance.endpoint:
+                            HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
+                            del SCHEDULER.apis[i]
+                            break
+                    continue
+
+                if resp["msg"] == "loading":
+                    if db_instance["status"] == "failover":
+                        # Pushing from here is not an option: this runs on the scheduler loop and would
+                        # submit five tasks into a four-worker pool. Clearing the status that made the
+                        # push be skipped is enough, the next healthcheck takes the normal loading path
+                        # and the main loop targets the instance again. Without it the instance keeps
+                        # its loading configuration, with every is_loading-gated control bypassed,
+                        # until an unrelated configuration change happens to come along.
+                        HEALTHCHECK_LOGGER.warning(
+                            f"Instance {db_instance['hostname']} is in failover mode and loading, marking it down so its configuration is pushed again ..."
+                        )
+                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "down")
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
+                        continue
+
+                    HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
+                    api_caller = ApiCaller([bw_instance])
+
+                    if env is None:
+                        env = SCHEDULER.db.get_config()
+                        env["DATABASE_URI"] = SCHEDULER.db.database_uri
+                        tz = getenv("TZ")
+                        if tz:
+                            env["TZ"] = tz
+
+                    generate_configs(HEALTHCHECK_LOGGER)
+
+                    tmp_futures = [
+                        SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb,
+                            CUSTOM_CONFIGS_PATH,
+                            "/custom_configs",
+                            HEALTHCHECK_LOGGER,
+                            api_caller=api_caller,
+                        ),
+                        SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb,
+                            EXTERNAL_PLUGINS_PATH,
+                            "/plugins",
+                            HEALTHCHECK_LOGGER,
+                            api_caller=api_caller,
+                        ),
+                        SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb,
+                            PRO_PLUGINS_PATH,
+                            "/pro_plugins",
+                            HEALTHCHECK_LOGGER,
+                            api_caller=api_caller,
+                        ),
+                        SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb,
+                            CONFIG_PATH,
+                            "/confs",
+                            HEALTHCHECK_LOGGER,
+                            api_caller=api_caller,
+                        ),
+                        SCHEDULER_TASKS_EXECUTOR.submit(
+                            send_file_to_bunkerweb,
+                            CACHE_PATH,
+                            "/cache",
+                            HEALTHCHECK_LOGGER,
+                            api_caller=api_caller,
+                        ),
+                    ]
+                    for future in tmp_futures:
+                        future.result()
+
+                    if not api_caller.send_to_apis(
+                        "POST",
+                        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
+                    )[0]:
+                        HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
+                        ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
+                        if ret:
+                            HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
+                        continue
+                    HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
+
+                ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up")
                 if ret:
                     HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
 
+                found = False
+                for api in SCHEDULER.apis:
+                    if api.endpoint == bw_instance.endpoint:
+                        found = True
+                        break
+                if not found:
+                    HEALTHCHECK_LOGGER.debug(f"Adding {bw_instance.endpoint} to the list of reachable instances")
+                    SCHEDULER.apis.append(bw_instance)
+            except BaseException as e:
+                HEALTHCHECK_LOGGER.error(f"Exception while checking instance {bw_instance.endpoint}: {e}")
                 for i, api in enumerate(SCHEDULER.apis):
                     if api.endpoint == bw_instance.endpoint:
                         HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
                         del SCHEDULER.apis[i]
                         break
-                continue
 
-            if resp["msg"] == "loading":
-                if db_instance["status"] == "failover":
-                    HEALTHCHECK_LOGGER.warning(f"Instance {db_instance['hostname']} is in failover mode, skipping sending config ...")
-                    continue
-
-                HEALTHCHECK_LOGGER.info(f"Instance {bw_instance.endpoint} is loading, sending config ...")
-                api_caller = ApiCaller([bw_instance])
-
-                if env is None:
-                    env = SCHEDULER.db.get_config()
-                    env["DATABASE_URI"] = SCHEDULER.db.database_uri
-                    tz = getenv("TZ")
-                    if tz:
-                        env["TZ"] = tz
-
-                generate_configs(HEALTHCHECK_LOGGER)
-
-                tmp_futures = [
-                    SCHEDULER_TASKS_EXECUTOR.submit(
-                        send_file_to_bunkerweb,
-                        CUSTOM_CONFIGS_PATH,
-                        "/custom_configs",
-                        HEALTHCHECK_LOGGER,
-                        api_caller=api_caller,
-                    ),
-                    SCHEDULER_TASKS_EXECUTOR.submit(
-                        send_file_to_bunkerweb,
-                        EXTERNAL_PLUGINS_PATH,
-                        "/plugins",
-                        HEALTHCHECK_LOGGER,
-                        api_caller=api_caller,
-                    ),
-                    SCHEDULER_TASKS_EXECUTOR.submit(
-                        send_file_to_bunkerweb,
-                        PRO_PLUGINS_PATH,
-                        "/pro_plugins",
-                        HEALTHCHECK_LOGGER,
-                        api_caller=api_caller,
-                    ),
-                    SCHEDULER_TASKS_EXECUTOR.submit(
-                        send_file_to_bunkerweb,
-                        CONFIG_PATH,
-                        "/confs",
-                        HEALTHCHECK_LOGGER,
-                        api_caller=api_caller,
-                    ),
-                    SCHEDULER_TASKS_EXECUTOR.submit(
-                        send_file_to_bunkerweb,
-                        CACHE_PATH,
-                        "/cache",
-                        HEALTHCHECK_LOGGER,
-                        api_caller=api_caller,
-                    ),
-                ]
-                for future in tmp_futures:
-                    future.result()
-
-                if not api_caller.send_to_apis(
-                    "POST",
-                    f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
-                )[0]:
-                    HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
-                    ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
-                    if ret:
-                        HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to loading in the database: {ret}")
-                    continue
-                HEALTHCHECK_LOGGER.info(f"Successfully reloaded instance {bw_instance.endpoint}")
-
-            ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up")
-            if ret:
-                HEALTHCHECK_LOGGER.error(f"Couldn't update instance {bw_instance.endpoint} status to down in the database: {ret}")
-
-            found = False
-            for api in SCHEDULER.apis:
-                if api.endpoint == bw_instance.endpoint:
-                    found = True
-                    break
-            if not found:
-                HEALTHCHECK_LOGGER.debug(f"Adding {bw_instance.endpoint} to the list of reachable instances")
-                SCHEDULER.apis.append(bw_instance)
-        except BaseException as e:
-            HEALTHCHECK_LOGGER.error(f"Exception while checking instance {bw_instance.endpoint}: {e}")
-            for i, api in enumerate(SCHEDULER.apis):
-                if api.endpoint == bw_instance.endpoint:
-                    HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
-                    del SCHEDULER.apis[i]
-                    break
-
-    HEALTHCHECK_EVENT.clear()
+    finally:
+        HEALTHCHECK_EVENT.clear()
 
 
 def backup_failover():
@@ -922,53 +1113,6 @@ if __name__ == "__main__":
                 return False
             return True
 
-        def check_configs_changes(*, generate: bool = True) -> bool:
-            # Checking if any custom config has been created by the user
-            assert SCHEDULER is not None, "SCHEDULER is not defined"
-            LOGGER.info("Checking if there are any changes in custom configs ...")
-            custom_configs = []
-            db_configs = SCHEDULER.db.get_custom_configs()
-            changes = False
-            for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
-                if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
-                    LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
-                    continue
-
-                content = file.read_text(encoding="utf-8")
-                service_id = file.parent.name if file.parent.name not in CUSTOM_CONFIGS_DIRS else None
-                config_type = file.parent.parent.name if service_id else file.parent.name
-
-                saving = True
-                in_db = False
-                from_template = False
-                for db_conf in db_configs:
-                    if db_conf["service_id"] == service_id and db_conf["name"] == file.stem:
-                        in_db = True
-                        if db_conf["template"]:
-                            from_template = True
-
-                if from_template or (not in_db and content.startswith("# CREATED BY ENV")):
-                    saving = False
-                    changes = not from_template
-
-                if saving:
-                    custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem), "is_draft": False})
-
-            changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
-
-            if changes:
-                try:
-                    err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
-                    if err:
-                        LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
-                except BaseException as e:
-                    LOGGER.error(f"Error while saving custom configs to database: {e}")
-
-            if generate:
-                generate_custom_configs(SCHEDULER.db.get_custom_configs())
-
-            return changes
-
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
@@ -1099,8 +1243,13 @@ if __name__ == "__main__":
         CHANGES = []
 
         changed_plugins = []
+        changes = {}
         old_changes = {}
         healthcheck_job_run = False
+        pre_push_retry_at = None
+        pre_push_deferrals = 0
+        configs_rescan_at = None
+        configs_rescan_delay = PENDING_RETRY_DELAY
 
         while True:
             task_futures.clear()
@@ -1109,34 +1258,39 @@ if __name__ == "__main__":
                 LOGGER.warning("Waiting for the failover backup to finish ...")
                 sleep(1)
 
-            # Generate and reload BEFORE running the jobs whenever both are pending, not only on
-            # the first start: plugins need their API endpoints loaded on the instances, and jobs
-            # validate against the running configuration. certbot-new is the expensive case — a
-            # service added now has no server{} on the instance yet, so an ACME probe falls to the
-            # default server, and the job is "once", so nothing retries until the next change.
-            # On the first start the instance may still be booting, hence the wait (which also
-            # repopulates SCHEDULER.apis, emptied by the startup sends); later it is already known.
+            # Whenever both are pending, the configuration is generated and pushed before the jobs
+            # run, not only on the first start. pre_push_configuration carries the reasoning.
             pre_push_done = False
-            if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE and (wait_for_reachable_instance() if FIRST_START else SCHEDULER.apis):
-                LOGGER.info("Generating and sending the configuration before running jobs ...")
-                if generate_configs():
-                    first_start_futures = [
-                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"),
-                        SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"),
-                    ]
-                    for future in first_start_futures:
-                        future.result()
-                    first_start_futures.clear()
+            pre_push_failed = False
+            pre_push_rendered = False
+            if CONFIG_NEED_GENERATION and RUN_JOBS_ONCE:
+                # A fault in here is a failed push, not a reason to leave: uncaught it reaches the
+                # outer handler, which turns it into stop(1).
+                try:
+                    pre_push_done, pre_push_rendered = pre_push_configuration(env, FIRST_START)
+                except BaseException as e:
+                    LOGGER.error(f"Exception while pushing the configuration before running jobs : {e}")
+                    pre_push_done, pre_push_rendered = False, False
 
-                    SCHEDULER.send_to_apis(
-                        "POST",
-                        f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split())),
-                    )
+                # Cleared on any render, not only on success: the body of this iteration renders and
+                # pushes again otherwise, doubling the work on every deferred attempt.
+                if pre_push_rendered:
                     CONFIG_NEED_GENERATION = False
-                    pre_push_done = True
 
-            if RUN_JOBS_ONCE:
+                pre_push_failed, pre_push_deferrals = pre_push_deferral(pre_push_done, pre_push_deferrals)
+                if pre_push_failed:
+                    LOGGER.error(
+                        "The configuration the once-jobs depend on reached no instance, deferring them for "
+                        f"{PENDING_RETRY_DELAY}s ({pre_push_deferrals}/{PRE_PUSH_MAX_DEFERRALS}) rather than running them "
+                        "against a configuration nothing received ..."
+                    )
+                elif not pre_push_done:
+                    LOGGER.error(
+                        f"The configuration still reached no instance after {PRE_PUSH_MAX_DEFERRALS} attempts, running the jobs "
+                        "anyway: holding them back any longer would leave every periodic job unregistered."
+                    )
+
+            if RUN_JOBS_ONCE and not pre_push_failed:
                 # Only run jobs once
                 if not SCHEDULER.reload(
                     env
@@ -1156,16 +1310,23 @@ if __name__ == "__main__":
                 else:
                     LOGGER.info("All jobs in run_once() were successful")
                     if SCHEDULER.db.readonly:
-                        failed_restores = generate_caches()
-                        if failed_restores:
-                            LOGGER.error(
-                                f"generate_caches() failed to restore: {', '.join(sorted(failed_restores))}. "
-                                "Affected plugins will run with stale or empty on-disk cache."
-                            )
+                        try:
+                            failed_restores = generate_caches()
+                        except BaseException as e:
+                            LOGGER.error(f"Exception while restoring the job caches : {e}")
+                        else:
+                            if failed_restores:
+                                LOGGER.error(
+                                    f"generate_caches() failed to restore: {', '.join(sorted(failed_restores))}. "
+                                    "Affected plugins will run with stale or empty on-disk cache."
+                                )
                 healthcheck_job_run = False
                 # Jobs may have created files needed by config templates (e.g. api-server-cert.pem),
-                # so undo the flag the push above cleared and let the normal path render again.
-                if pre_push_done:
+                # so undo the flag the push above cleared and let the normal path render again. Keyed
+                # on the render, not on the push succeeding: the jobs also run once the deferral has
+                # given way, and that render is the only thing that carries what they produced to the
+                # instances.
+                if pre_push_rendered:
                     LOGGER.info("Regenerating config after once-jobs to pick up files created by jobs (e.g. api-server-cert.pem)")
                     CONFIG_NEED_GENERATION = True
 
@@ -1317,10 +1478,13 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Error while setting changes to checked in the database: {e}")
 
-            FIRST_START = False
+            # A pre-job push that reached no instance leaves its work pending: the once-jobs have to
+            # run against the configuration the instances actually hold, and a job scheduled "once"
+            # is retried by nothing once its flag has been cleared.
+            FIRST_START = FIRST_START and pre_push_failed
             NEED_RELOAD = False
-            RUN_JOBS_ONCE = False
-            CONFIG_NEED_GENERATION = False
+            RUN_JOBS_ONCE = pre_push_failed
+            CONFIG_NEED_GENERATION = pre_push_failed
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
             PRO_PLUGINS_NEED_GENERATION = False
@@ -1351,19 +1515,40 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             LOGGER.info("Executing job scheduler ...")
+            pre_push_retry_at = monotonic() + PENDING_RETRY_DELAY if pre_push_failed else None
             errors = 0
             _gc_counter = 0
             while RUN and not NEED_RELOAD:
                 try:
                     # SIGHUP: re-read /etc/bunkerweb/configs before the folder gets regenerated
                     # from the database, otherwise a manual edit is reverted on every reload.
-                    if RELOAD_SCAN_CONFIGS:
+                    if RELOAD_SCAN_CONFIGS and (configs_rescan_at is None or monotonic() >= configs_rescan_at):
                         RELOAD_SCAN_CONFIGS = False
-                        if not SCHEDULER.db.readonly and check_configs_changes(generate=False):
-                            CONFIGS_NEED_GENERATION = True
-                            CONFIG_NEED_GENERATION = True
-                            NEED_RELOAD = True
-                            continue
+                        configs_rescan_at = None
+                        if not SCHEDULER.db.readonly:
+                            scanned = check_configs_changes(generate=False)
+                            if scanned is None:
+                                # The write was refused. Reporting a change here would regenerate the
+                                # folder from the database that just refused it, over the edit that
+                                # only exists on disk, so keep the scan pending and come back to it,
+                                # backing off so a database that stays broken is not rescanned at the
+                                # base cadence for the life of the process.
+                                RELOAD_SCAN_CONFIGS = True
+                                configs_rescan_at = monotonic() + configs_rescan_delay
+                                configs_rescan_delay = min(PENDING_RETRY_MAX_DELAY, configs_rescan_delay * 2)
+                            else:
+                                configs_rescan_delay = PENDING_RETRY_DELAY
+                                if scanned:
+                                    CONFIGS_NEED_GENERATION = True
+                                    CONFIG_NEED_GENERATION = True
+                                    NEED_RELOAD = True
+                                    continue
+
+                    if pre_push_retry_at is not None and monotonic() >= pre_push_retry_at:
+                        pre_push_retry_at = None
+                        LOGGER.info("Retrying the configuration push the once-jobs are waiting for ...")
+                        NEED_RELOAD = True
+                        continue
 
                     sleep(3 if SCHEDULER.db.readonly else 1)
                     run_pending()
