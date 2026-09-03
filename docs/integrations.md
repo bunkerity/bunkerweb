@@ -1561,7 +1561,7 @@ Notes:
 
 #### Disable the Central API
 
-To run CrowdSec entirely locally, with no registration and no traffic to CrowdSec's servers, set `DISABLE_ONLINE_API` to `true`:
+To opt out of the Central API and Console registration, with no signal sent and no community blocklist pulled, set `DISABLE_ONLINE_API` to `true`. This does not stop hub updates: the collection and parser catalog is still fetched from the CrowdSec hub regardless of this setting.
 
 ```bash
 docker run -d \
@@ -1685,6 +1685,9 @@ services:
 
 !!! tip "Skipping labelled containers"
     When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    Unlike the settings above, `KEEP_CONFIG_ON_RESTART` is read directly by the `bunkerweb` container's own entrypoint from its process environment, not from the scheduler or the database, so it must be set on the `bunkerweb` container itself. Set to `yes` to keep the previously generated configuration across a container restart instead of rendering the loading configuration. Default `no`.
 
 ### Using Docker secrets
 
@@ -1829,7 +1832,7 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Seconds between scheduler health checks                                                                                                                                                                                                                           | Integer seconds                                | `30`                                   |
 | `RELOAD_MIN_TIMEOUT`            | Minimum seconds between successive reloads                                                                                                                                                                                                                        | Integer seconds                                | `5`                                    |
-| `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes                                                                                                                                                                                                    | Integer seconds                                | `30`                                   |
+| `SEND_FILES_MIN_TIMEOUT`        | Minimum read timeout for configuration and cache folder pushes; an explicit value is never reduced, and only the value derived from the service count is capped at 120 seconds, so the effective timeout is whichever is higher. The connect timeout stays a fixed 5 seconds and the body send has its own separate timeout. | Integer seconds                                | `30`                                   |
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
@@ -2588,6 +2591,12 @@ MY_SETTING_2=value2
 When installed, BunkerWeb comes with three services `bunkerweb`, `bunkerweb-scheduler` and `bunkerweb-ui` that you can manage using `systemctl`.
 
 If you manually edit the BunkerWeb configuration using `/etc/bunkerweb/variables.env` a restart of the `bunkerweb-scheduler` service will be enough to generate and reload the configuration without any downtime. But depending on the case (such as changing listening ports) you might need to restart the `bunkerweb` service.
+
+The `bunkerweb` service's entrypoint also reads the following variable directly, outside the normal settings flow:
+
+| Setting                  | Description                                                                                                                                                                                      | Accepted values | Default |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------- |
+| `KEEP_CONFIG_ON_RESTART` | Keep the previously generated configuration on restart of the `bunkerweb` service instead of rendering the loading configuration. Read from the environment or `/etc/bunkerweb/variables.env`, never from the database. | `yes` or `no`    | `no`    |
 
 ### High availability
 

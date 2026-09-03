@@ -1549,7 +1549,7 @@ Notas:
 
 #### Desactivar la API central
 
-Para ejecutar CrowdSec de forma totalmente local, sin registro y sin tráfico hacia los servidores de CrowdSec, establezca `DISABLE_ONLINE_API` en `true`:
+Para desactivar el registro en la Central API y la Console, sin enviar señales ni descargar la lista de bloqueo comunitaria, establezca `DISABLE_ONLINE_API` en `true`. Esto no detiene las actualizaciones del hub: el catálogo de colecciones y parsers se sigue obteniendo del hub de CrowdSec independientemente de este ajuste:
 
 ```bash
 docker run -d \
@@ -1671,6 +1671,9 @@ services:
 
 !!! tip "Omitir contenedores etiquetados"
     Cuando un contenedor debe ser ignorado por autoconf, establece `DOCKER_IGNORE_LABELS` en el controlador. Proporciona una lista de claves de etiquetas separadas por espacios o comas (por ejemplo `bunkerweb.SERVER_NAME`) o solo el sufijo (`SERVER_NAME`). Cualquier contenedor o fuente de configuración personalizada que lleve una etiqueta coincidente se omite durante el descubrimiento, y la etiqueta se ignora al traducir las configuraciones.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    A diferencia de los ajustes anteriores, `KEEP_CONFIG_ON_RESTART` es leído directamente por el propio entrypoint del contenedor `bunkerweb` desde su entorno de proceso, no desde el scheduler ni la base de datos, por lo que debe establecerse en el propio contenedor `bunkerweb`. Establézcalo en `yes` para mantener la configuración generada previamente al reiniciar el contenedor en lugar de renderizar la configuración de carga. Predeterminado `no`.
 
 ### Usando secretos de Docker
 
@@ -1815,7 +1818,7 @@ El programador es el worker del plano de control que lee configuraciones, genera
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Segundos entre healthchecks del programador                                                                                                                                                                                                                                                    | Segundos enteros                              | `30`                                         |
 | `RELOAD_MIN_TIMEOUT`            | Segundos mínimos entre recargas consecutivas                                                                                                                                                                                                                                                   | Segundos enteros                              | `5`                                          |
-| `SEND_FILES_MIN_TIMEOUT`        | Tiempo mínimo de espera de lectura para enviar carpetas de configuración y caché                                                                                                                                                                                                                | Segundos enteros                              | `30`                                         |
+| `SEND_FILES_MIN_TIMEOUT`        | Tiempo mínimo de espera de lectura para el envío de carpetas de configuración y caché; un valor explícito nunca se reduce, y solo el valor derivado del número de servicios se limita a 120 segundos, por lo que el tiempo efectivo es el mayor de los dos. El tiempo de conexión permanece fijo en 5 segundos y el envío del cuerpo tiene su propio tiempo de espera. | Segundos enteros                              | `30`                                         |
 | `DISABLE_CONFIGURATION_TESTING` | Saltar pruebas de configuración antes de aplicar                                                                                                                                                                                                                                               | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Continuar incluso si algunas instancias no reciben la configuración                                                                                                                                                                                                                            | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_REGEX_CHECK`            | Omitir validación regex de configuraciones (compartido con autoconf)                                                                                                                                                                                                                           | `yes` o `no`                                  | `no`                                         |
@@ -2473,6 +2476,12 @@ MY_SETTING_2=value2
 Cuando se instala, BunkerWeb viene con tres servicios `bunkerweb`, `bunkerweb-scheduler` y `bunkerweb-ui` que puedes gestionar usando `systemctl`.
 
 Si editas manualmente la configuración de BunkerWeb usando `/etc/bunkerweb/variables.env`, un reinicio del servicio `bunkerweb-scheduler` será suficiente para generar y recargar la configuración sin ningún tiempo de inactividad. Pero dependiendo del caso (como cambiar los puertos de escucha) es posible que necesites reiniciar el servicio `bunkerweb`.
+
+El entrypoint del servicio `bunkerweb` también lee directamente la siguiente variable, fuera del flujo normal de configuración:
+
+| Ajuste                    | Descripción                                                                                                                                                                                                         | Valores aceptados | Predeterminado |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- |
+| `KEEP_CONFIG_ON_RESTART`  | Mantiene la configuración generada previamente al reiniciar el servicio `bunkerweb` en lugar de renderizar la configuración de carga. Se lee desde el entorno o `/etc/bunkerweb/variables.env`, nunca desde la base de datos. | `yes` o `no`        | `no`            |
 
 ### Alta disponibilidad
 

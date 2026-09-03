@@ -1549,7 +1549,7 @@ docker run -d \
 
 #### 禁用中央 API
 
-若要让 CrowdSec 完全在本地运行，不进行注册、也不与 CrowdSec 服务器通信，请将 `DISABLE_ONLINE_API` 设为 `true`：
+若要选择退出 Central API 和 Console 注册（不发送任何信号，也不拉取社区黑名单），请将 `DISABLE_ONLINE_API` 设为 `true`。这不会停止 hub 更新：无论此设置如何，collection 和 parser 目录仍会从 CrowdSec hub 获取：
 
 ```bash
 docker run -d \
@@ -1670,6 +1670,9 @@ services:
 
 !!! info "完整列表"
     有关环境变量的完整列表，请参阅文档的[设置部分](features.md)。
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes` 可在容器重启时保留之前生成的配置，而不是渲染加载配置。默认值为 `no`。
 
 ### 使用 Docker secrets
 
@@ -1814,7 +1817,7 @@ volumes:
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
 | `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                                                                                                                                                               | 整秒                                    | `30`                          |
 | `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                                                                                                                                                         | 整秒                                    | `5`                           |
-| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时                                                                                                                                                     | 整秒                                    | `30`                          |
+| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。                                                                                          | 整秒                                    | `30`                          |
 | `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                     | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                           | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                 | `yes` 或 `no`                           | `no`                          |
@@ -2472,6 +2475,12 @@ MY_SETTING_2=value2
 安装后，BunkerWeb 带有三个服务 `bunkerweb`、`bunkerweb-scheduler` 和 `bunkerweb-ui`，您可以使用 `systemctl` 来管理它们。
 
 如果您手动编辑了 BunkerWeb 的配置（使用 `/etc/bunkerweb/variables.env`），重启 `bunkerweb-scheduler` 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 `bunkerweb` 服务。
+
+`bunkerweb` 服务的入口点还会在正常设置流程之外，直接读取以下变量：
+
+| 设置                        | 描述                                                                                          | 可选值        | 默认值 |
+| --------------------------- | --------------------------------------------------------------------------------------------- | ------------- | ------ |
+| `KEEP_CONFIG_ON_RESTART`   | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
 
 ### 高可用性
 
