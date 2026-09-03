@@ -109,10 +109,10 @@
     "MODSECURITY_SEC_AUDIT_LOG": {
       "context": "multisite",
       "default": "/var/log/bunkerweb/modsec_audit.log",
-      "help": "Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which is not possible on a pipe or a stream.",
+      "help": "Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which is not possible on a pipe or a stream. Must end in .log, under /var/log/bunkerweb/.",
       "id": "modsecurity-sec-audit-log",
       "label": "SecAuditLog",
-      "regex": "^/var/log/bunkerweb/[\\w-][\\w.-]*$",
+      "regex": "^/var/log/bunkerweb/[\\w-][\\w.-]*\\.log$",
       "type": "text"
     },
     "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
