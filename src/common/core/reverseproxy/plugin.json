@@ -27,10 +27,10 @@
     "REVERSE_PROXY_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location.",
+      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location. Optionally prefix with ~, ~*, = or ^~ followed by one space to set the nginx location modifier explicitly; no spaces, ;, { or } are allowed elsewhere in the value.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^.+$",
+      "regex": "^(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
