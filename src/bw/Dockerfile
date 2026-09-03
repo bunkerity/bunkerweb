@@ -51,7 +51,7 @@ COPY src/deps/package-lock.json package-lock.json
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-  apk add --no-cache nodejs npm parallel && \
+  apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
   cd /tmp && \
   npm ci --ignore-scripts --engine-strict && \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
