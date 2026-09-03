@@ -100,9 +100,17 @@ utils.has_variable = function(variable, value)
 	local multisite = variables["global"]["MULTISITE"] == "yes"
 	if multisite then
 		local servers = variables["global"]["SERVER_NAME"]
+		local global_value = variables["global"][variable]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][variable] == value then
+			-- Same effective-value rule as get_variable: a service inherits the global value for
+			-- every key its own table does not carry, otherwise a partially populated service
+			-- hides a setting that is enabled globally and every hook gated on this returns false.
+			local server_value = variables[server][variable]
+			if server_value == nil then
+				server_value = global_value
+			end
+			if server_value == value then
 				return true, "success"
 			end
 		end
