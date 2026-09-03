@@ -1,4 +1,4 @@
-importlib-metadata==9.0.0
+importlib-metadata==9.0.1
 pip==26.2.1
 pip-tools==7.6.1
 setuptools<81
