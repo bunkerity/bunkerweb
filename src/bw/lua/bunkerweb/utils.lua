@@ -462,10 +462,31 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		server_name = var.server_name
 	end
 
+	local variables, variables_err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't get variables : " .. variables_err
+	end
+	local global_variables = variables["global"] or {}
+
+	-- Effective USE_WHITELIST for a service, same rule as get_variable: the service value when
+	-- its table carries one, the global value otherwise. The stored lists exist for every
+	-- service whether or not the plugin is enabled for it, so without this gate a service with
+	-- whitelisting turned off still lifts an active ban through its own configured entries.
+	local function whitelist_enabled(name)
+		local value = variables[name] and variables[name]["USE_WHITELIST"]
+		if value == nil then
+			value = global_variables["USE_WHITELIST"]
+		end
+		return value == "yes"
+	end
+
 	-- Helper to check a specific service whitelist list
 	local function check_service(name)
 		if not name or name == "" then
 			return nil, "no service name"
+		end
+		if not whitelist_enabled(name) then
+			return false, "ok"
 		end
 		-- Fast path: check whitelist cache for the service
 		local cache = require("bunkerweb.cachestore"):new(false)
@@ -510,11 +531,7 @@ utils.is_ip_whitelisted = function(ip, server_name)
 	end
 
 	-- Fallback: iterate all configured services (covers default-server paths)
-	local variables, err = internalstore:get("variables", true)
-	if not variables then
-		return nil, "can't get variables : " .. err
-	end
-	local servers = variables["global"] and variables["global"]["SERVER_NAME"] or ""
+	local servers = global_variables["SERVER_NAME"] or ""
 	for srv in servers:gmatch("%S+") do
 		local ok, info = check_service(srv)
 		if ok then
@@ -522,9 +539,10 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		end
 	end
 
-	-- Last resort: check global whitelist IPs directly (useful when no services matched)
-	local global_wl = variables["global"] and variables["global"]["WHITELIST_IP"] or ""
-	if global_wl ~= "" then
+	-- Last resort: check global whitelist IPs directly (useful when no services matched).
+	-- Gated the same way: a global list is only in force while whitelisting is on globally.
+	local global_wl = global_variables["WHITELIST_IP"] or ""
+	if global_wl ~= "" and global_variables["USE_WHITELIST"] == "yes" then
 		local networks = {}
 		for n in global_wl:gmatch("%S+") do
 			table.insert(networks, n)
