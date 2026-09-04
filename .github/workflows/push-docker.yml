@@ -30,14 +30,22 @@ on:
         required: true
       ARM_SSH_IP:
         required: true
+      GITLAB_REGISTRY_USER:
+        required: true
+      GITLAB_REGISTRY_TOKEN:
+        required: true
 
 jobs:
   push:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       # Prepare
       - name: Check out repository code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }} # pin every job in a run to one commit
+          persist-credentials: false
       - name: Login to Docker Hub
         uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
@@ -49,6 +57,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitLab registry
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_REGISTRY_USER }}
+          password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
       - name: Setup SSH for ARM node
         run: |
           mkdir -p ~/.ssh

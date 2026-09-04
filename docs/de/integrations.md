@@ -1437,7 +1437,7 @@ Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Pers
 Anders als die übrigen Docker-Images bewahrt das All-In-One `access.log`, `error.log` und `modsec_audit.log` als reale Dateien unter `/var/log/bunkerweb/` auf. Der Log-Stream liest sie, um jeder Zeile ein Präfix voranzustellen und `HIDE_SERVICE_LOGS` anzuwenden, und sowohl der mitgelieferte CrowdSec-Parser als auch der Protokollanzeiger der Web-UI lesen sie von der Festplatte.
 
 - Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus. Ein Rotationsfehler wird mit dem Präfix `[LOGROTATE]` in den Container-Logs gemeldet.
-- Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter `/etc/logrotate.d/bunkerweb`: Jede Datei, die auf `/var/log/bunkerweb/*.log` passt, wird rotiert, sobald sie 100 MB überschreitet, sieben komprimierte Generationen werden aufbewahrt, und die Rotation verwendet `copytruncate`.
+- Es gilt dieselbe Richtlinie, die auch die Linux-Pakete installieren, unter `/etc/logrotate.d/bunkerweb`: Jede Datei, die auf `/var/log/bunkerweb/*.log` passt, wird täglich rotiert, oder früher, sobald sie 100 MB überschreitet, vierzehn nummerierte Generationen werden aufbewahrt, und die Rotation verwendet `copytruncate`.
 - `copytruncate` leert die Datei an Ort und Stelle, statt sie umzubenennen, sodass sie ihren Inode behält. Der Log-Stream, der CrowdSec-Parser und der Protokollanzeiger folgen ihr daher über eine Rotation hinweg, ohne neu starten zu müssen, und ModSecurity schreibt weiterhin in die richtige Datei, obwohl es sein Audit-Log nie erneut öffnet.
 - Um den Schwellenwert oder die Anzahl der Generationen zu ändern, mounten Sie Ihre eigene Datei über `/etc/logrotate.d/bunkerweb`. Um die Rotation vollständig zu deaktivieren und die Aufbewahrung selbst zu verwalten, mounten Sie eine leere Datei über denselben Pfad. Ein unter `/var/log/bunkerweb` gemountetes Volume ändert nur, wo die Daten liegen — es hindert das im Container laufende `logrotate` nicht daran, sie dort weiterhin zu rotieren.
 
@@ -1548,7 +1548,7 @@ Hinweise:
 
 #### Central API deaktivieren
 
-Um CrowdSec vollständig lokal zu betreiben, ohne Registrierung und ohne Datenverkehr zu den Servern von CrowdSec, setzen Sie `DISABLE_ONLINE_API` auf `true`:
+Um die Registrierung bei der Central API und der Console zu deaktivieren, ohne dass Signale gesendet oder die Community-Blocklist abgerufen werden, setzen Sie `DISABLE_ONLINE_API` auf `true`. Dies stoppt keine Hub-Updates: Der Katalog für Collections und Parser wird unabhängig von dieser Einstellung weiterhin aus dem CrowdSec-Hub abgerufen.
 
 ```bash
 docker run -d \
@@ -1670,6 +1670,9 @@ services:
 
 !!! tip "Beschriftete Container überspringen"
     Wenn ein Container von autoconf ignoriert werden soll, setzen Sie `DOCKER_IGNORE_LABELS` auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (zum Beispiel `bunkerweb.SERVER_NAME`) oder nur das Suffix (`SERVER_NAME`). Jeder Container oder jede benutzerdefinierte Konfigurationsquelle mit einem übereinstimmenden Label wird bei der Erkennung übersprungen, und das Label wird bei der Übersetzung der Einstellungen ignoriert.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    Anders als die obigen Einstellungen wird `KEEP_CONFIG_ON_RESTART` direkt vom Entrypoint des `bunkerweb`-Containers aus dessen Prozessumgebung gelesen, nicht vom Scheduler oder der Datenbank, und muss daher am `bunkerweb`-Container selbst gesetzt werden. Auf `yes` setzen, um die zuvor generierte Konfiguration bei einem Container-Neustart beizubehalten, anstatt die Lade-Konfiguration zu rendern. Standard `no`.
 
 ### Verwendung von Docker-Secrets
 
@@ -1814,7 +1817,7 @@ Der Scheduler ist der Control-Plane-Worker, der Einstellungen liest, Konfigurati
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Sekunden zwischen Scheduler-Healthchecks                                                                                                                                                                                                                                                                             | Ganze Sekunden                                  | `30`                                  |
 | `RELOAD_MIN_TIMEOUT`            | Mindestsekunden zwischen aufeinanderfolgenden Reloads                                                                                                                                                                                                                                                                | Ganze Sekunden                                  | `5`                                   |
-| `SEND_FILES_MIN_TIMEOUT`        | Minimales Lesezeitlimit für das Senden von Konfigurations- und Cache-Ordnern                                                                                                                                                                                                                                         | Ganze Sekunden                                  | `30`                                  |
+| `SEND_FILES_MIN_TIMEOUT`        | Mindest-Lesezeitlimit für das Senden von Konfigurations- und Cache-Ordnern; ein expliziter Wert wird nie verringert, und nur der aus der Anzahl der Dienste abgeleitete Wert wird auf 120 Sekunden begrenzt, sodass der tatsächliche Wert der jeweils höhere ist. Das Verbindungs-Timeout bleibt fest bei 5 Sekunden, und das Senden des Bodys hat ein eigenes separates Timeout.                 | Ganze Sekunden                                  | `30`                                  |
 | `DISABLE_CONFIGURATION_TESTING` | Konfigtests vor dem Anwenden überspringen                                                                                                                                                                                                                                                                            | `yes` oder `no`                                 | `no`                                  |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Fortfahren, auch wenn einige Instanzen keine Konfig erhalten                                                                                                                                                                                                                                                         | `yes` oder `no`                                 | `no`                                  |
 | `IGNORE_REGEX_CHECK`            | Regex-Validierung für Einstellungen überspringen (geteilt mit Autoconf)                                                                                                                                                                                                                                              | `yes` oder `no`                                 | `no`                                  |
@@ -2472,6 +2475,12 @@ Bei der Installation wird BunkerWeb mit drei Diensten `bunkerweb`, `bunkerweb-sc
 
 Wenn Sie die BunkerWeb-Konfiguration manuell über `/etc/bunkerweb/variables.env` bearbeiten, reicht ein Neustart des `bunkerweb-scheduler`-Dienstes aus, um die Konfiguration ohne Ausfallzeit zu generieren und neu zu laden. In bestimmten Fällen (z. B. bei Änderung der lauschenden Ports) müssen Sie jedoch möglicherweise den `bunkerweb`-Dienst neu starten.
 
+Der Entrypoint des `bunkerweb`-Dienstes liest außerdem direkt die folgende Variable, außerhalb des normalen Einstellungsflusses:
+
+| Einstellung               | Beschreibung                                                                                                                                                                                                                             | Zulässige Werte | Standard |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------- |
+| `KEEP_CONFIG_ON_RESTART`  | Behält beim Neustart des `bunkerweb`-Dienstes die zuvor generierte Konfiguration anstatt die Lade-Konfiguration zu rendern. Wird aus der Umgebung oder `/etc/bunkerweb/variables.env` gelesen, niemals aus der Datenbank.               | `yes` oder `no`  | `no`     |
+
 ### Hochverfügbarkeit
 
 Der Scheduler kann von der BunkerWeb-Instanz getrennt werden, um eine hohe Verfügbarkeit zu gewährleisten. In diesem Fall wird der Scheduler auf einem separaten Server installiert und kann mehrere BunkerWeb-Instanzen verwalten.
@@ -2991,6 +3000,44 @@ controller:
    - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
    - **Environment variable**: `KUBERNETES_MODE: "yes"`
 
+!!! warning "Set `API_TOKEN` on Kubernetes"
+
+    The internal API on port 5000 is a privileged control plane: it serves `/ping`, `/reload`, `/confs` and `/stop`. Pod IPs are dynamic, so `API_WHITELIST_IP` has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set `API_TOKEN` on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.
+
+    Create the Secret in every namespace that runs a BunkerWeb pod, replacing `your-namespace` as needed:
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3029,6 +3076,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3130,6 +3182,11 @@ spec:
               value: "yes"  # Enable Kubernetes mode
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: MULTISITE
               value: "yes"
             - name: USE_REVERSE_PROXY
@@ -3180,6 +3237,11 @@ spec:
           env:
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
 ```
 
 ###### Important Environment Variables
@@ -3188,7 +3250,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
+| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
 
 
 ##### Step 3: Creating Services
@@ -3393,6 +3456,10 @@ To add a new application protected by BunkerWeb:
 #### Vollständige YAML-Dateien
 
 Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.
+
+!!! warning "DNS_RESOLVERS muss den DNS-Service des Clusters benennen"
+
+    Geben Sie `DNS_RESOLVERS` den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service `kube-dns.kube-system.svc.cluster.local`, auch wenn CoreDNS die Implementierung dahinter ist.
 
 ### Ingress-Ressourcen
 
@@ -3697,7 +3764,8 @@ settings:
     # Ersetzen Sie dies durch Ihren DNS-Resolver
     # um ihn zu erhalten: kubectl exec in einem zufälligen Pod, dann cat /etc/resolv.conf
     # wenn Sie eine IP als Nameserver haben, führen Sie eine umgekehrte DNS-Suche durch: nslookup <IP>
-    # meistens ist es coredns.kube-system.svc.cluster.local oder kube-dns.kube-system.svc.cluster.local
+    # meistens ist es kube-dns.kube-system.svc.cluster.local, der Service, hinter dem
+    # CoreDNS auf einem Standard-Cluster steht
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # Wir berücksichtigen nur Ingress-Ressourcen mit ingressClass bunkerweb, um Konflikte mit dem vorhandenen Ingress-Controller zu vermeiden

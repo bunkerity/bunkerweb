@@ -165,7 +165,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
     | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
     | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
-    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that overrides the default values of specific settings; a value set on the service overrides the template. |
 
 === "Nginx Settings"
 
@@ -1931,7 +1931,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.8.0 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -3962,6 +3962,8 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
         Thorough testing is recommended before enabling HTTP/3 in production environments.
 
+        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
+
 === "Static File Serving"
 
     **File Serving Configuration**
@@ -4145,19 +4147,19 @@ Follow these steps to configure and use ModSecurity:
 
 ### Configuration Settings
 
-| Setting                               | Default        | Context   | Multiple | Description                                                                                                                                                                               |
-| ------------------------------------- | -------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`          | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                          |
-| `USE_MODSECURITY_CRS`                 | `yes`          | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                    |
-| `MODSECURITY_CRS_VERSION`             | `4`            | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                    |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support.                 |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
-| `MODSECURITY_CRS_PLUGINS`             |                | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                        |
+| Setting                               | Default                               | Context   | Multiple | Description                                                                                                                                                                               |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Enable ModSecurity:** Turn on ModSecurity Web Application Firewall protection.                                                                                                          |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Use Core Rule Set:** Enable the OWASP Core Rule Set for ModSecurity.                                                                                                                    |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **CRS Version:** The version of the OWASP Core Rule Set to use. Options: `3` or `4`. Note: `nightly` is deprecated and defaults to v4.                                                    |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Rule Engine:** Control whether rules are enforced. Options: `On`, `DetectionOnly`, or `Off`.                                                                                            |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Audit Engine:** Control how audit logging works. Options: `On`, `Off`, or `RelevantOnly`.                                                                                               |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | no       | **Audit Log Parts:** Which parts of requests/responses to include in audit logs.                                                                                                          |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Audit Log Path:** Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which a pipe or stream can't support. The path must end in `.log`. Rotation via that suffix only applies where logrotate is installed (the Linux packages and the All-In-One image); on Docker, Swarm and Kubernetes a non-default name is neither streamed nor rotated and grows unbounded inside the container, because only `modsec_audit.log` is symlinked into the container's log stream.                 |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Request Body Limit (No Files):** Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (`k`, `m`, `g`), e.g. `131072`, `256k`, `1m`, `2g`. |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Enable CRS Plugins:** Enable additional plugin rule sets for the Core Rule Set.                                                                                                         |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **CRS Plugins List:** Space-separated list of plugins to download and install (`plugin-name[/tag]` or URL).                                                                               |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **Global CRS:** When enabled, applies CRS rules globally at the HTTP level rather than per server.                                                                                        |
 
 !!! warning "ModSecurity and the OWASP Core Rule Set"
     **We strongly recommend keeping both ModSecurity and the OWASP Core Rule Set (CRS) enabled** to provide robust protection against common web vulnerabilities. While occasional false positives may occur, they can be resolved with some effort by fine-tuning rules or using predefined exclusions.
@@ -4402,7 +4404,7 @@ Follow these steps to deploy mutual TLS with confidence:
     CA bundles and revocation lists do not need to be mounted into the BunkerWeb containers. Supply them to the Scheduler only, as a file path or inline data; the Scheduler validates them, caches them, and distributes them to every instance. Updates are picked up and redistributed automatically on the next job run.
 
 !!! warning "Provide the CA bundle for strict modes"
-    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. If none is available, BunkerWeb skips the mTLS directives on every instance so the service does not run with an invalid or missing certificate reference. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, mTLS stays disabled until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
+    When `MTLS_VERIFY_CLIENT` is `on` or `optional`, the Scheduler must be able to validate and cache a client CA bundle. Until it has validated and distributed one, every instance falls back to a placeholder CA that no client can chain to. With `on` that means every client is rejected, where the service previously ran with client verification switched off entirely. With `optional` a client that presents no certificate is still allowed through, which is what that mode means; enforcement for those requests comes from `MTLS_URL` when it is set, and nothing enforces them when it is left empty. A client that does present a certificate is rejected, because nothing can be validated against the placeholder. Use `optional_no_ca` only for diagnostics because it weakens client authentication. After a Scheduler restart with a non-persistent `/var/cache/bunkerweb`, that state lasts until the first job run completes and redistributes the CA bundle, so use a persistent cache volume where a strict enforcement posture is required.
 
 !!! info "Trusted certificate vs. verification"
     BunkerWeb reuses the same CA bundle for client verification and for building trust chains, keeping revocation checks and handshake validation consistent.
@@ -4710,7 +4712,7 @@ Follow these steps to configure and use the Pro features:
 - **BunkerWeb PRO Standard:** Full access to Pro features without technical support.
 - **BunkerWeb PRO Enterprise:** Full access to Pro features with dedicated technical support.
 
-You can explore Pro features with a free 1-month trial by using the promo code `freetrial`. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to activate your trial and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
+You can explore Pro features with a free 30-day trial. Start it from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) and learn more about flexible pricing options based on the number of services protected by BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5193,7 +5195,7 @@ Follow these steps to configure and use the Reverse Proxy feature:
     | --------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_REVERSE_PROXY`               | `no`    | multisite | no       | **Enable Reverse Proxy:** Set to `yes` to enable reverse proxy functionality.                                                                                                               |
     | `REVERSE_PROXY_HOST`              |         | multisite | yes      | **Backend Host:** Full URL of the proxied resource (proxy_pass).                                                                                                                            |
-    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location.                                             |
+    | `REVERSE_PROXY_URL`               | `/`     | multisite | yes      | **Location URL:** Path that will be proxied to the backend server. A value starting with `^` or ending with `$` is treated as a regex location. Optionally prefix with `~`, `~*`, `=` or `^~` followed by one space to set the nginx location modifier explicitly; no spaces, `;`, `{` or `}` are allowed elsewhere in the value.                                             |
     | `REVERSE_PROXY_BUFFERING`         | `yes`   | multisite | yes      | **Response Buffering:** Enable or disable buffering of responses from proxied resource.                                                                                                     |
     | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`   | multisite | yes      | **Request Buffering:** Enable or disable buffering of requests to the proxied resource.                                                                                                     |
     | `REVERSE_PROXY_KEEPALIVE`         | `no`    | multisite | yes      | **Keep-Alive:** Enable or disable keepalive connections with the proxied resource.                                                                                                          |

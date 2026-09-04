@@ -9,6 +9,7 @@ local clogger = require "bunkerweb.logger"
 local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
 local pushswap = require "bunkerweb.pushswap"
+local reslock = require "resty.lock"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
 local utils = require "bunkerweb.utils"
@@ -38,6 +39,7 @@ local ERR = ngx.ERR
 local HTTP_OK = ngx.HTTP_OK
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
 local kill = rsignal.kill
 local get_master_pid = process.get_master_pid
@@ -196,11 +198,58 @@ api.global.GET["^/health$"] = function(self)
 	return self:response(HTTP_OK, "success", "ok")
 end
 
-api.global.POST["^/reload"] = function(self)
-	-- Get test argument
-	local args = ngx.req.get_uri_args()
-	local test_arg = args.test or "yes"
+-- Both the swap and the reload path take one instance-wide lock: "nginx -t" and the master's
+-- reconfiguration both re-read the pushed trees, and a rename sequence that is part way through
+-- exposes a tree that is neither the old one nor the new one.
+--
+-- resty.lock over a shared dict, not a lock file: exclusion across workers is what a shared dict
+-- gives by construction, and the entry expires on its own if a worker dies holding it. A file
+-- lock has to hand-roll both, and a stale-file break cannot be made atomic with the shell.
+--
+-- A wait spends the caller's budget and only ever bounds the loser, which never performs the
+-- work: it answers 503, and the scheduler retries that. So the wait has to stay under the budget,
+-- because a caller that runs out instead records a failure and marks the instance down for a swap
+-- that is running, and it should sit as close under it as request overhead allows, because the
+-- wait is what the retries have to cover. A reload is called with
+-- max(RELOAD_MIN_TIMEOUT, 3 * services), five seconds by default, and the retry is three attempts
+-- two seconds apart, so a lock held longer than 3 * wait + 4 seconds is a reload that is given up
+-- on: thirteen seconds at a wait of three, seven at a wait of one. That retry belongs to the
+-- scheduler's caller alone; a reload driven straight through the API client reads the 503 as a
+-- failed reload. A push carries the folder budget, which is sized for the archive rather than for
+-- a config test, so it can afford to queue longer.
+--
+-- The expiry is the other way round, and it is the one number here that has to be generous.
+-- resty.lock releases by deleting the key without checking who owns it, so a critical section
+-- that outlives the expiry releases the lock of whoever took it next, and two swaps run at once.
+-- The critical section is renames, one "nginx -t" on the reload path, and on the first push after
+-- a container start a copy of whatever overlayfs refuses to rename out of the image layer. No
+-- caller measures that, so this is a ceiling and not a derivation: fifteen minutes is past any
+-- swap that is still making progress. Overshooting costs availability, and only after a worker
+-- was killed holding the lock: pushes and reloads answer 503 until the key expires while the
+-- instance keeps serving the configuration it already has.
+local SWAP_LOCK_KEY = "pushswap"
+local SWAP_LOCK_EXPTIME = 900
+local RELOAD_LOCK_WAIT = 3
+local PUSH_LOCK_WAIT = 10
 
+local function acquire_swap_lock(seconds)
+	local lock, err = reslock:new("worker_lock", { timeout = seconds, exptime = SWAP_LOCK_EXPTIME })
+	if not lock then
+		logger:log(ERR, "cannot create the swap lock: " .. tostring(err))
+		return nil
+	end
+	local elapsed
+	elapsed, err = lock:lock(SWAP_LOCK_KEY)
+	if not elapsed then
+		logger:log(ERR, "cannot take the swap lock: " .. tostring(err))
+		return nil
+	end
+	return lock
+end
+
+-- The body returns the response triple instead of sending it, so the wrapper has one
+-- place to release the swap lock whichever way the reload ends.
+local function reload_locked(test_arg)
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
@@ -221,7 +270,7 @@ api.global.POST["^/reload"] = function(self)
 		then
 			logger:log(NOTICE, "Nginx configuration syntax is valid (non-root permission warnings ignored)")
 		else
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result
 		end
 	end
 
@@ -234,10 +283,10 @@ api.global.POST["^/reload"] = function(self)
 		if err == "Operation not permitted" then
 			local rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
 			if rc == 0 or rc == true then
-				return self:response(HTTP_OK, "success", "reload successful")
+				return HTTP_OK, "success", "reload successful"
 			end
 		end
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+		return HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err
 	end
 
 	-- Create temporary file to indicate reconfiguration
@@ -249,7 +298,26 @@ api.global.POST["^/reload"] = function(self)
 		logger:log(ERR, "Failed to create reload indicator file: " .. err)
 	end
 
-	return self:response(HTTP_OK, "success", "reload successful")
+	return HTTP_OK, "success", "reload successful"
+end
+
+api.global.POST["^/reload"] = function(self)
+	-- Get test argument
+	local args = ngx.req.get_uri_args()
+	local test_arg = args.test or "yes"
+
+	local lock = acquire_swap_lock(RELOAD_LOCK_WAIT)
+	if not lock then
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "a push swap is in progress")
+	end
+	-- pcall so an error inside the section still releases the lock: leaving it held costs every
+	-- later push and reload until it expires.
+	local ran, status, level, message = pcall(reload_locked, test_arg)
+	lock:unlock()
+	if not ran then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
+	end
+	return self:response(status, level, message)
 end
 
 api.global.POST["^/stop$"] = function(self)
@@ -262,7 +330,12 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. ".tar.gz"
+	-- Everything this request owns on disk carries the worker and the connection. A name built
+	-- from the URI alone is shared by every push to that URI, and two of them then write into one
+	-- file: the scheduler retries a push while the first attempt may still be uploading, and a
+	-- second scheduler or the UI reaches the same instance on its own.
+	local request_id = tostring(ngx.worker.pid()) .. "." .. tostring(ngx.var.connection)
+	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. "." .. request_id .. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. self.ctx.bw.uri:sub(2)
 	if self.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
@@ -290,7 +363,11 @@ api.global.POST["^/confs$"] = function(self)
 		-- luacheck: ignore 421
 		local typ, res, err = form:read()
 		if not typ then
+			-- A body that stops mid-upload leaves a partial archive under a name only this
+			-- request uses, so nothing later truncates it: it has to go now or every aborted
+			-- push adds one file to the directory Nginx also writes its client bodies into.
 			file:close()
+			os.remove(tmp)
 			return self:response(HTTP_BAD_REQUEST, "error", err)
 		end
 		if typ == "eof" then
@@ -314,7 +391,16 @@ api.global.POST["^/confs$"] = function(self)
 	-- Extract into a staging area inside the destination first: it validates the
 	-- archive before anything is touched, and keeps every later rename on the same
 	-- filesystem even when the destination is a mount point.
-	local staging = destination .. "/" .. pushswap.RESERVED_PREFIX .. "staging"
+	--
+	-- The name carries the worker and the connection because the scheduler pushes several
+	-- folders to one instance at the same time, and a shared staging path means one push
+	-- extracts into, and deletes, another one's tree. The reserved prefix keeps it out of the
+	-- stale-entry sweep. Connection numbers do not repeat, so a directory left behind by a
+	-- worker that died mid-push is never reused: the swap clears it on the normal failure paths,
+	-- and where the archived source is the destination the archive does carry it back, but the
+	-- swap skips reserved names on the way in so it is never placed again. A killed worker still
+	-- leaks one directory.
+	local staging = destination .. "/" .. pushswap.RESERVED_PREFIX .. "staging." .. request_id
 	local extract = "rm -rf '"
 		.. staging
 		.. "' && mkdir -p '"
@@ -330,15 +416,34 @@ api.global.POST["^/confs$"] = function(self)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "cannot extract archive")
 	end
 
-	local ok, err = pushswap.swap(destination, staging)
+	-- Extraction only added this request's own staging directory, which nothing else reads or
+	-- writes. The destructive part starts here, so this is where the lock has to be held.
+	local lock = acquire_swap_lock(PUSH_LOCK_WAIT)
+	if not lock then
+		execute("rm -rf '" .. staging .. "'")
+		os.remove(tmp)
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "another push swap is in progress")
+	end
+
+	-- pcall so an error inside the section still releases the lock: leaving it held costs every
+	-- later push and reload until it expires.
+	local ran, ok, err = pcall(pushswap.swap, destination, staging)
+	if ran and ok and digest then
+		local written, write_err = pushswap.write_applied(destination, digest)
+		if not written then
+			-- Only costs a redundant push next loop, but it is invisible otherwise.
+			logger:log(ERR, "cannot record the applied digest for " .. destination .. ": " .. tostring(write_err))
+		end
+	end
+	lock:unlock()
 	os.remove(tmp)
+	if not ran then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "swap failed: " .. tostring(ok))
+	end
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
 	end
 
-	if digest then
-		pushswap.write_applied(destination, digest)
-	end
 	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 

@@ -167,7 +167,12 @@
     "upload_photo": "Carregar Nova Foto",
     "view_details": "Ver Detalhes",
     "view_raw_data": "Ver Dados Brutos",
-    "wipe_other_sessions": "Limpar Outras Sessões"
+    "wipe_other_sessions": "Limpar Outras Sessões",
+    "ban_all_filtered": "Bloquear todos os relatórios correspondentes",
+    "filtered_actions": "Ações filtradas",
+    "unban_all_filtered": "Desbloquear todos os bloqueios correspondentes",
+    "update_duration_all_filtered": "Atualizar duração de todos os bloqueios correspondentes",
+    "validate_certificate": "Validar certificado"
   },
   "country": {
     "AD": "Andorra",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Tem certeza de que deseja excluir os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
-      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:"
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
+      "ban_filtered_confirmation": "Bloquear IPs de todos os {{count}} relatórios correspondentes? Os alvos duplicados serão aplicados uma única vez.",
+      "unban_filtered_confirmation": "Tem certeza de que deseja desbloquear todos os {{count}} bloqueios correspondentes?",
+      "update_filtered_duration_alert": "Selecione uma nova duração para todos os {{count}} bloqueios correspondentes:"
     },
     "button": {
       "fetch_global_settings_confirm": "Aplicar configurações globais",
@@ -1765,6 +1773,13 @@
     "prompt": "Por favor, insira seu código TOTP."
   },
   "validation": {
+    "certificate_checking": "Verificando ...",
+    "certificate_expires_in": "expira em {{days}} dias",
+    "certificate_failed": "A solicitação de validação falhou.",
+    "certificate_file_mode": "Somente dados colados ou enviados podem ser verificados aqui. Um caminho de certificado é lido pelo agendador, ao qual a interface web não tem acesso.",
+    "certificate_missing": "Forneça o certificado e a chave primeiro.",
+    "certificate_subject": "Assunto:",
+    "certificate_valid": "O certificado e a chave correspondem.",
     "default_field_name": "Este campo",
     "invalid_date": "Data inválida",
     "ip_global_duplicate": "Este endereço IP já está bloqueado globalmente.",

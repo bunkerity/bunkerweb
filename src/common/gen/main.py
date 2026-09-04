@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from contextlib import suppress
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
+from re import sub as re_sub
 from shutil import rmtree
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -126,17 +128,23 @@ if __name__ == "__main__":
             default_config = {setting: data["default"] for setting, data in full_config.items()}
             full_config = {setting: data["value"] for setting, data in full_config.items()}
 
-        # Remove old files. iterdir(), not glob("*"), which skips dotfiles: the instance's
-        # ".bw-applied" push marker used to survive here, so a restart regenerated the whole
-        # directory as the loading configuration while still claiming the last pushed digest
-        # was applied. The scheduler then re-sent that identical configuration, the digest
-        # matched, the push was skipped, and the instance stayed on the loading config.
+        # Remove old files. iterdir(), not glob("*"), so dotfiles go too.
         LOGGER.info("Removing old files ...")
         for file in Path(args.output).iterdir():
             if file.is_symlink() or file.is_file():
                 file.unlink()
             elif file.is_dir():
                 rmtree(file.as_posix(), ignore_errors=True)
+
+        # The applied-digest marker for a pushed destination lives outside it, keyed by path,
+        # so the wipe above cannot reach it. Regenerating replaces the content the instance
+        # last acknowledged: a marker left behind makes the next push of that same content
+        # answer "already applied", and the instance keeps serving what this run overwrote.
+        # Keep the key in step with pushswap.applied_path.
+        # A marker this process cannot remove costs one redundant push; aborting the render would
+        # cost the configuration.
+        with suppress(OSError):
+            Path(sep, "var", "tmp", "bunkerweb", "pushswap", f"{re_sub(r'[^A-Za-z0-9]+', '_', output_path.as_posix())}.applied").unlink(missing_ok=True)
 
         # Render the templates
         LOGGER.info("Rendering templates ...")

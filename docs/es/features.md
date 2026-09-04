@@ -1919,7 +1919,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
+        image: crowdsecurity/crowdsec:v1.8.0 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
         volumes:
           - cs-data:/var/lib/crowdsec/data # Para persistir los datos de CrowdSec
           - bw-logs:/var/log:ro # Los registros de BunkerWeb para que CrowdSec los analice
@@ -2086,6 +2086,21 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
     - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
+#### Endpoints por servicio
+
+Como los endpoints son `multisite`, los servicios de la misma instancia pueden usar diferentes componentes de CrowdSec, o solo algunos de ellos. Las dos funciones son independientes:
+
+- **Las consultas de decisiones** están activas cuando `CROWDSEC_API` está definido. Establézcalo en una cadena vacía para que un servicio omita por completo la Local API.
+- **La inspección de AppSec** está activa cuando `CROWDSEC_APPSEC_URL` está definido. Establézcalo en una cadena vacía para que un servicio omita la inspección profunda de solicitudes.
+
+Un servicio con `USE_CROWDSEC` en `yes` y ambas URL vacías no verifica nada, y la instancia registra que no se ha definido ningún endpoint.
+
+!!! warning "Una caché de decisiones por instancia"
+    Las decisiones en caché residen en una única zona de memoria compartida para toda la instancia, indexada por la Local API de la que provienen. Los servicios que apuntan a la misma `CROWDSEC_API` reutilizan las decisiones en caché entre sí, lo que mantiene la consulta económica. Los servicios que apuntan a Local API distintas nunca ven las decisiones de los demás. El tamaño de esa zona es a nivel de instancia, por lo que una flota con muchas Local API distintas y listas de decisiones grandes comparte un mismo presupuesto.
+
+!!! info "Clave de bouncer por Local API"
+    `CROWDSEC_API_KEY` se resuelve por servicio como cualquier otro ajuste. Cuando los servicios apuntan a Local API distintas, asigne a cada uno la clave registrada con `cscli bouncers add` en su propio host de CrowdSec; de lo contrario, las consultas se rechazarán por no estar autenticadas.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"
@@ -2116,6 +2131,38 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Configuración por servicio"
+
+    AppSec en cada servicio público, consultas de decisiones en un subconjunto, y un servicio completamente excluido. Los valores sin prefijo son la línea base para toda la flota, y cada servicio solo sobrescribe lo que difiere:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Línea base para cada servicio
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Sin consulta de decisiones salvo que un servicio la solicite
+    CROWDSEC_API_KEY: ""
+
+    # app1 añade la consulta de decisiones de la Local API además de AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 mantiene solo AppSec, heredando la línea base vacía de CROWDSEC_API
+
+    # intranet no se verifica en absoluto
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un servicio también puede apuntar a un host de CrowdSec completamente distinto, con su propia clave de bouncer:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Paso&nbsp;3 – Validar la integración
@@ -3669,6 +3716,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 | `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                                                                                   |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`.                                                              |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`.                                                           |
+| `METRICS_REDIS_TTL`                  | `2592000`         | global    | no       | **TTL de Métricas en Redis:** segundos antes de que las claves de métricas en Redis expiren (`0` = permanente); se renueva en cada sincronización para que los datos activos nunca expiren, permitiendo que los datos abandonados sean desalojables bajo `volatile-lru` para que Redis se recupere de la presión de memoria (maxmemory). Acepta la notación abreviada `k`/`m`. |
 | `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster.                                                              |
 
@@ -3676,7 +3724,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Se admiten valores brutos en bytes y sufijos `k`/`m`. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
 
 !!! info "Integración con Redis"
-    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb.
+    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb. Bajo presión de `maxmemory` en Redis, los nuevos informes se almacenan en búfer por trabajador y se sincronizan en cuanto se libera memoria, de modo que los informes de solicitudes bloqueadas no se pierden mientras Redis está lleno.
 
 !!! warning "Consideraciones de Rendimiento"
     Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.
@@ -3896,6 +3944,8 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
         Se recomienda realizar pruebas exhaustivas antes de habilitar HTTP/3 en entornos de producción.
 
+        HTTP/3 se desactiva silenciosamente cuando `USE_PROXY_PROTOCOL` es `yes`. NGINX no puede leer la cabecera del PROXY protocol en un listener QUIC, por lo que no se genera ningún listener `quic` ni cabecera `Alt-Svc` aunque `HTTP3` siga indicando `yes`, y `LIMIT_CONN_MAX_HTTP3` no tiene efecto. Termine el PROXY protocol aguas arriba, o limítese a HTTP/1.1 y HTTP/2.
+
 === "Entrega de Archivos Estáticos"
 
     **Configuración de Entrega de Archivos**
@@ -4079,19 +4129,19 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 ### Ajustes de Configuración
 
-| Ajuste                                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                    |
-| ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
-| `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar.             |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`          | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`             | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                   | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                   |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
+| Ajuste                                | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. La ruta debe terminar en `.log`. La rotación mediante esa extensión solo se aplica donde logrotate está instalado (los paquetes de Linux y la imagen All-In-One); en Docker, Swarm y Kubernetes, un nombre distinto del predeterminado no se transmite ni se rota, y crece sin límite dentro del contenedor, porque solo `modsec_audit.log` está enlazado al streaming de logs del contenedor.         |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`. |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                             |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                   |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
     **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
@@ -4336,7 +4386,7 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
     Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
 !!! warning "Paquete de CA obligatorio en modos estrictos"
-    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Si no hay ninguno disponible, BunkerWeb omite las directivas de mTLS en cada instancia para que el servicio no se ejecute con una referencia de certificado inválida o inexistente. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, el mTLS permanece deshabilitado hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
+    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Mientras no haya validado y distribuido uno, cada instancia recurre a una CA de marcador de posición con la que ningún cliente puede formar una cadena de confianza. Con `on` eso significa que se rechaza a todos los clientes, donde antes el servicio funcionaba sin ninguna verificación de cliente. Con `optional` un cliente que no presenta certificado sigue pasando, que es lo que significa ese modo; la aplicación para esas peticiones proviene de `MTLS_URL` cuando está definido, y no hay ninguna cuando se deja vacío. Un cliente que sí presenta un certificado es rechazado, porque no hay nada contra lo que validarlo. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, ese estado se mantiene hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.
@@ -4644,7 +4694,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5130,7 +5180,7 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
 | --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
 | `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular.                                                                              |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor.                                                                              |
 | `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
 | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
 | `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |

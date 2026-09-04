@@ -21,10 +21,14 @@ jobs:
   rm:
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }} # pin every job in a run to one commit
+          persist-credentials: false
       - name: Delete ARM VM
         uses: scaleway/action-scw@2e34a1eb35cf3cac627f24643a101fea269cbd83
         with:

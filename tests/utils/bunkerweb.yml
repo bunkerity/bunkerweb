@@ -65,9 +65,11 @@ spec:
             - name: KUBERNETES_MODE
               value: "yes"
             # replace with your DNS resolvers
-            # e.g. : kube-dns.kube-system.svc.cluster.local
+            # nginx resolves this once, when it parses its configuration, and keeps the
+            # address until the next reload. Use the cluster DNS Service name, whose
+            # ClusterIP is stable, and never a pod IP.
             - name: DNS_RESOLVERS
-              value: "coredns.kube-system.svc.cluster.local"
+              value: "kube-dns.kube-system.svc.cluster.local"
             - name: USE_API
               value: "yes"
             - name: API_WHITELIST_IP

@@ -478,7 +478,7 @@ def list_misconfigured(services: Dict[str, Dict[str, Union[str, bool, int, Dict[
     return sorted(name for name, config in services.items() if config.get("misconfigured"))
 
 
-def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
+def extract_wildcard_groups(domains: List[str], service: str) -> Dict[str, List[str]]:
     cleaned_labels: List[List[str]] = []
 
     for domain in domains:
@@ -499,7 +499,7 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
 
     groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
-        for base in _determine_wildcard_bases(labels_list):
+        for base in _determine_wildcard_bases(labels_list, service):
             base = base.strip(".")
             if not base:
                 continue
@@ -540,7 +540,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
 
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
-        wildcard_groups = extract_wildcard_groups(list(unique_names))
+        wildcard_groups = extract_wildcard_groups(list(unique_names), service)
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
         for base, names in wildcard_groups.items():
@@ -555,7 +555,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     return entries
 
 
-def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+def _determine_wildcard_bases(labels_list: List[List[str]], service: str) -> Set[str]:
     if not labels_list:
         return set()
 
@@ -576,7 +576,21 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
             break
 
     if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
-        return {".".join(common_suffix)}
+        base = ".".join(common_suffix)
+        # A wildcard matches exactly one label, so *.base plus base cover names of at most
+        # len(common_suffix) + 1 labels. Anything deeper would be dropped from the certificate
+        # while still being served, so refuse the whole group instead of issuing one that omits it.
+        uncovered = sorted(".".join(labels) for labels in labels_list if len(labels) > len(common_suffix) + 1)
+        if uncovered:
+            covered = sorted(".".join(labels) for labels in labels_list if len(labels) <= len(common_suffix) + 1)
+            LOGGER.error(
+                f"[Service: {service}] Wildcard group *.{base} cannot cover {', '.join(uncovered)} alongside "
+                f"{', '.join(covered)} "
+                "(a wildcard matches a single label); skipping this group, nothing is issued for any of those "
+                "names until they are split into separate services."
+            )
+            return set()
+        return {base}
 
     bases: Set[str] = set()
     for labels in labels_list:

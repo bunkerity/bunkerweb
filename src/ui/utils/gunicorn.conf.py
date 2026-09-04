@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, dumps, loads
@@ -609,6 +610,13 @@ def on_starting(server):
     except BaseException as e:
         LOGGER.error(f"Exception while fetching latest release information: {e}")
 
+    # Preserve the TOTP replay counter across a restart: it is the only key in this file that
+    # outlives a single run, so a literal overwrite here would silently re-enable replayed codes.
+    existing_totp_last_counter = {}
+    if UI_DATA_FILE.is_file():
+        with suppress(JSONDecodeError, OSError):
+            existing_totp_last_counter = loads(UI_DATA_FILE.read_text(encoding="utf-8")).get("totp_last_counter", {})
+
     UI_DATA_FILE.write_text(
         dumps(
             {
@@ -616,6 +624,7 @@ def on_starting(server):
                 "LATEST_VERSION_LAST_CHECK": datetime.now().astimezone().isoformat(),
                 "TO_FLASH": [],
                 "READONLY_MODE": DB.readonly,
+                "totp_last_counter": existing_totp_last_counter,
             }
         ),
         encoding="utf-8",
@@ -684,4 +693,15 @@ def post_fork(server, worker):
 
 def on_exit(server):
     HEALTH_FILE.unlink(missing_ok=True)
-    UI_DATA_FILE.unlink(missing_ok=True)
+
+    # Keep the TOTP replay counter instead of dropping the whole file: on_starting only sees it
+    # again if it survives here, and losing it would let a previously used code be replayed.
+    totp_last_counter = {}
+    if UI_DATA_FILE.is_file():
+        with suppress(JSONDecodeError, OSError):
+            totp_last_counter = loads(UI_DATA_FILE.read_text(encoding="utf-8")).get("totp_last_counter", {})
+
+    if totp_last_counter:
+        UI_DATA_FILE.write_text(dumps({"totp_last_counter": totp_last_counter}), encoding="utf-8")
+    else:
+        UI_DATA_FILE.unlink(missing_ok=True)

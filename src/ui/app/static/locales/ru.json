@@ -167,7 +167,12 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии"
+    "wipe_other_sessions": "Очистить другие сессии",
+    "ban_all_filtered": "Забанить все совпадающие отчёты",
+    "filtered_actions": "Отфильтрованные действия",
+    "unban_all_filtered": "Разбанить все совпадающие баны",
+    "update_duration_all_filtered": "Обновить продолжительность всех совпадающих банов",
+    "validate_certificate": "Проверить сертификат"
   },
   "country": {
     "AD": "Андорра",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
+      "ban_filtered_confirmation": "Забанить IP из всех {{count}} совпадающих отчётов? Повторяющиеся цели будут применены только один раз.",
+      "unban_filtered_confirmation": "Вы уверены, что хотите разбанить все {{count}} совпадающих банов?",
+      "update_filtered_duration_alert": "Выберите новую продолжительность для всех {{count}} совпадающих банов:"
     },
     "button": {
       "fetch_global_settings_confirm": "Применить глобальные настройки",
@@ -1765,6 +1773,13 @@
     "prompt": "Пожалуйста, введите ваш TOTP-код."
   },
   "validation": {
+    "certificate_checking": "Проверка ...",
+    "certificate_expires_in": "истекает через {{days}} дн.",
+    "certificate_failed": "Запрос на проверку не выполнен.",
+    "certificate_file_mode": "Здесь можно проверить только вставленные или загруженные данные. Путь к сертификату считывается планировщиком, к которому у веб-интерфейса нет доступа.",
+    "certificate_missing": "Сначала укажите сертификат и ключ.",
+    "certificate_subject": "Тема:",
+    "certificate_valid": "Сертификат и ключ совпадают.",
     "default_field_name": "Это поле",
     "invalid_date": "Неверная дата",
     "ip_global_duplicate": "Этот IP-адрес уже забанен глобально.",

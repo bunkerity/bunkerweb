@@ -167,7 +167,12 @@
     "upload_photo": "새 사진 업로드",
     "view_details": "상세 보기",
     "view_raw_data": "원본 데이터 보기",
-    "wipe_other_sessions": "다른 세션 로그아웃"
+    "wipe_other_sessions": "다른 세션 로그아웃",
+    "ban_all_filtered": "일치하는 모든 보고서 차단",
+    "filtered_actions": "필터링된 작업",
+    "unban_all_filtered": "일치하는 모든 차단 해제",
+    "update_duration_all_filtered": "일치하는 모든 차단의 기간 업데이트",
+    "validate_certificate": "인증서 검증"
   },
   "country": {
     "AD": "안도라",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "선택한 서비스를 삭제하시겠습니까?",
       "unban_confirmation_alert": "선택한 IP 주소의 차단을 해제하시겠습니까?",
       "unban_confirmation_alert_plural": "선택한 IP 주소들의 차단을 해제하시겠습니까?",
-      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:"
+      "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
+      "ban_filtered_confirmation": "일치하는 {{count}}개 보고서의 모든 IP를 차단하시겠습니까? 중복된 대상은 한 번만 적용됩니다.",
+      "unban_filtered_confirmation": "일치하는 {{count}}개 차단을 모두 해제하시겠습니까?",
+      "update_filtered_duration_alert": "일치하는 {{count}}개 차단 모두에 대해 새로운 기간을 선택하세요:"
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -1765,6 +1773,13 @@
     "prompt": "TOTP 코드를 입력해 주세요."
   },
   "validation": {
+    "certificate_checking": "확인 중 ...",
+    "certificate_expires_in": "{{days}}일 후 만료",
+    "certificate_failed": "검증 요청이 실패했습니다.",
+    "certificate_file_mode": "여기서는 붙여넣거나 업로드한 데이터만 확인할 수 있습니다. 인증서 경로는 스케줄러가 읽으며, 웹 UI는 이에 접근할 수 없습니다.",
+    "certificate_missing": "먼저 인증서와 키를 모두 입력하세요.",
+    "certificate_subject": "제목:",
+    "certificate_valid": "인증서와 키가 일치합니다.",
     "default_field_name": "이 필드",
     "invalid_date": "유효하지 않은 날짜입니다.",
     "ip_global_duplicate": "이 IP 주소는 이미 전역 차단 목록에 있습니다.",

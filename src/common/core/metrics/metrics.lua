@@ -27,6 +27,15 @@ end
 -- ones the LRU has since evicted. Nothing else ever deletes their Redis counterpart.
 local synced_redis_keys = {}
 
+-- The cold-start seeding is retried until it succeeds, but a read that never succeeds (a Redis
+-- ACL without SCAN, a proxy that does not implement it) is bounded: a broken SCAN trips the
+-- breaker that stops the sync writing to Redis at all, so retrying that one forever turns a
+-- single degraded cycle into a permanent one. Twelve attempts is a minute at the timer interval,
+-- which covers the transient failures the retry exists for. Counts failed reads only, never an
+-- unreachable Redis: see where it is incremented.
+local MAX_SEED_ATTEMPTS = 12
+local seed_attempts = 0
+
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
@@ -243,12 +252,16 @@ end
 -- budget caps how many entries may be seeded. Redis can hold far more keys than the LRU has
 -- slots (one per client IP for some plugins), and seeding past the cap would evict the counters
 -- the shared dict just restored, which is the very loss this is here to prevent.
+-- Returns true when the whole keyspace was walked without a transport error, false when a
+-- broken cursor or a failed batch left counters unseeded. The caller uses that to decide
+-- whether the cold-start restore may be marked done.
 local function seed_counters_from_redis(self, wid, budget)
 	local prefix = "metrics:"
 	local suffix = ":" .. wid
 	local cursor = "0"
 	local seeded = 0
 	local skipped = 0
+	local complete = true
 	repeat
 		local res, err = self:redis_call("scan", cursor, "MATCH", prefix .. "*" .. suffix, "COUNT", 100)
 		-- The cursor is checked too: a reply without one leaves it nil, which is neither "0" nor
@@ -260,7 +273,7 @@ local function seed_counters_from_redis(self, wid, budget)
 			-- prevent. Skipping one cycle's sync is cheaper than destroying the history.
 			self.redis_ok = false
 			self:log_throttled(ERR, "seed_scan", "Can't list metric counters in Redis: " .. (err or "unexpected reply"))
-			return
+			return false
 		end
 		cursor = res[1]
 
@@ -271,12 +284,8 @@ local function seed_counters_from_redis(self, wid, budget)
 		for _, redis_key in ipairs(res[2] or {}) do
 			local key = redis_key:sub(#prefix + 1, -(#suffix + 1))
 			if key ~= "" and lru:get(key) == nil then
-				if seeded + #wanted >= budget then
-					skipped = skipped + 1
-				else
-					wanted[#wanted + 1] = key
-					keys[#keys + 1] = redis_key
-				end
+				wanted[#wanted + 1] = key
+				keys[#keys + 1] = redis_key
 			end
 		end
 
@@ -288,6 +297,7 @@ local function seed_counters_from_redis(self, wid, budget)
 				-- abandoning it here leaves every remaining counter unseeded, and the sync later
 				-- in this same cycle then writes the cold values over the Redis ones this exists
 				-- to protect. One bad batch should cost that batch, not the rest.
+				complete = false
 				self:log_throttled(
 					ERR,
 					"seed_get",
@@ -297,9 +307,16 @@ local function seed_counters_from_redis(self, wid, budget)
 				for i, key in ipairs(wanted) do
 					local value = values[i]
 					local number = value ~= nil and value ~= null and tonumber(value) or nil
+					-- The budget is spent here rather than before the MGET: a list-typed key (a
+					-- table metric shares this key shape and answers with nil) is not a counter
+					-- and must not consume a slot a real counter could have used.
 					if number then
-						lru:set(key, number)
-						seeded = seeded + 1
+						if seeded >= budget then
+							skipped = skipped + 1
+						else
+							lru:set(key, number)
+							seeded = seeded + 1
+						end
 					end
 				end
 			end
@@ -326,6 +343,8 @@ local function seed_counters_from_redis(self, wid, budget)
 				.. " more, whose totals will be overwritten the next time they are incremented, raise MAX_LRU_HISTORY"
 		)
 	end
+
+	return complete
 end
 
 local function refresh_request_ttls(self, ttl, wid)
@@ -539,8 +558,15 @@ function metrics:timer()
 	-- Purpose of following code is to populate the LRU cache.
 	-- In case of a reload, everything in LRU cache is removed
 	-- so we need to copy it from SHM cache if it exists.
+	-- "setup" records how far the cold-start restore got: nil before it starts, "shm" once the
+	-- shared dict has been copied back, true once the Redis seeding has completed too. The two
+	-- halves have opposite retry rules. The shared-dict copy overwrites the LRU unconditionally,
+	-- so replaying it would roll counters back to their last synced value and it may only run
+	-- once. The Redis seeding only fills keys the LRU does not already hold, so it is safe to
+	-- retry and must be retried: marking it done after a transient connection failure remembers
+	-- a restore that never happened and those counters are lost for the life of the worker.
 	local setup = lru:get("setup")
-	local cold_start = not setup
+	local cold_start = setup ~= true
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
 			if key:match("_" .. wid .. "$") then
@@ -560,13 +586,18 @@ function metrics:timer()
 				end
 			end
 		end
-		lru:set("setup", true)
+		lru:set("setup", "shm")
+		-- The budget belongs to this cold start, not to the worker: an evicted marker starts a
+		-- new one, which must not inherit an exhausted count.
+		seed_attempts = 0
 	end
 
 	self.redis_ok = nil
 	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"]) or 0
 	-- Stays true after the OOM breaker trips redis_ok, so the TTL refresh still runs.
 	local redis_connected = false
+	-- Nothing to seed when Redis is not in use, so the cold-start restore is already done.
+	local seed_complete = not self.use_redis
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()
 		if not self.redis_ok then
@@ -579,6 +610,7 @@ function metrics:timer()
 			)
 		else
 			redis_connected = true
+			seed_complete = true
 			self_heal_request_facets(self)
 			if cold_start and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 				-- Seed only into the slots the shared-dict restore left free, so nothing it
@@ -588,8 +620,31 @@ function metrics:timer()
 				-- of zero on every cold start and the seeding below never ran at all.
 				local budget = lru:capacity() - #lru:get_keys()
 				if budget > 0 then
-					seed_counters_from_redis(self, wid, budget)
+					seed_complete = seed_counters_from_redis(self, wid, budget)
 				end
+			end
+		end
+	end
+
+	-- Only now, with the seeding actually done, is the cold-start restore finished. Left unset
+	-- on failure so the next timer retries it, before the sync below can write cold counters
+	-- over the totals Redis still holds.
+	if cold_start then
+		if seed_complete then
+			lru:set("setup", true)
+		elseif redis_connected then
+			-- Only a seeding that ran and failed counts against the bound. An unreachable Redis
+			-- never reaches the seeding, so it never trips the breaker and costs nothing beyond
+			-- the connect this cycle would attempt anyway: retrying through an outage is free,
+			-- and giving up on one would abandon the counters the moment Redis came back.
+			seed_attempts = seed_attempts + 1
+			if seed_attempts >= MAX_SEED_ATTEMPTS then
+				self:log_throttled(
+					ERR,
+					"seed_giveup",
+					"Giving up on restoring metric counters from Redis after " .. seed_attempts .. " failed reads"
+				)
+				lru:set("setup", true)
 			end
 		end
 	end

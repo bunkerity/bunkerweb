@@ -124,7 +124,7 @@ ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-    apk add --no-cache nodejs npm parallel && \
+    apk add --no-cache "nodejs>=24.18.1-r0" "npm>=11.12.1-r0" parallel && \
     cd /tmp && \
     npm ci --ignore-scripts --engine-strict; \
     fi
@@ -173,6 +173,9 @@ RUN apk add --no-cache bash coreutils curl geoip grep libgcc libgd libmagic libp
 # Fix CVEs
 RUN apk add --no-cache "python3>=3.14.7-r0" "pyc>=3.14.7-r0" # CVE-2026-7210
 RUN apk add --no-cache "libpq>=18.5-r0" "postgresql18-client>=18.5-r0" # CVE-2026-6464 CVE-2026-6469 CVE-2026-6470 CVE-2026-6471 CVE-2026-14662 CVE-2026-14663 CVE-2026-14664 CVE-2026-14666 CVE-2026-14668 CVE-2026-14669 CVE-2026-14670 CVE-2026-14671 CVE-2026-14672 CVE-2026-14673 CVE-2026-14676 CVE-2026-14677 CVE-2026-14678 CVE-2026-14679 CVE-2026-14680 CVE-2026-15741 CVE-2026-15742 CVE-2026-16238 CVE-2026-16239 CVE-2026-16241 CVE-2026-18024 CVE-2026-18408 CVE-2026-19385
+RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "expat>=2.8.4-r0" "libexpat>=2.8.4-r0" # CVE-2026-66046 CVE-2026-76641 CVE-2026-76956 CVE-2026-76957
+RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 CVE-2026-18924 CVE-2026-19931 CVE-2026-80229 CVE-2026-80230 CVE-2026-80231 CVE-2026-80255 CVE-2026-80256 CVE-2026-82208 CVE-2026-82209
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

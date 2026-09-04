@@ -164,50 +164,55 @@ try:
     def _get(server: str, key: str, default: str = "") -> str:
         return getenv(f"{server}_{key}", default) if multisite else getenv(key, default)
 
-    skipped_servers = []
+    # Only an operator decision (mTLS turned off, or the CA setting removed) purges the cached
+    # bundle. A configured but unusable CA keeps the last known-good cache so instances stay on a
+    # real trust anchor instead of one nothing can be validated against.
+    purge_servers = []
     for first_server in all_domains:
         if _get(first_server, "USE_MTLS", "no") != "yes":
-            skipped_servers.append(first_server)
+            purge_servers.append(first_server)
             continue
 
         verify_mode = _get(first_server, "MTLS_VERIFY_CLIENT", "on")
+        # With nothing cached there is no last-good bundle to fall back on, so a failure here must
+        # not be reported as continuity: `on` and `optional` drop to the placeholder and
+        # `optional_no_ca` gets no CA at all, and no client certificate can be validated either way.
+        fallback = (
+            "keeping the last distributed one"
+            if Path(sep, "var", "cache", "bunkerweb", "mtls", first_server, CA_CACHE_NAME).is_file()
+            else "no bundle is currently distributed, so no client certificate can be validated"
+        )
         ca_priority = _get(first_server, "MTLS_CA_CERTIFICATE_PRIORITY", "file")
         ca_path = _get(first_server, "MTLS_CA_CERTIFICATE")
         ca_data = _get(first_server, "MTLS_CA_CERTIFICATE_DATA")
 
         if not ca_path and not ca_data:
             if verify_mode != "optional_no_ca":
-                LOGGER.warning(
-                    f"No client CA bundle configured for {first_server}; mTLS stays disabled for that service "
+                LOGGER.error(
+                    f"No client CA bundle configured for {first_server}; no client certificate can be validated "
+                    "until one is configured and distributed "
                     "(set MTLS_CA_CERTIFICATE or MTLS_CA_CERTIFICATE_DATA)"
                 )
             else:
                 LOGGER.info(f"Service {first_server} runs mTLS with optional_no_ca and no client CA bundle configured")
-            skipped_servers.append(first_server)
+            purge_servers.append(first_server)
             continue
 
         use_file = ca_priority == "file" and ca_path
         ca_file = process_pem_data(ca_data if not use_file else "", ca_path if use_file else None, "CA", first_server)
         if not ca_file:
-            if verify_mode != "optional_no_ca":
-                LOGGER.warning(f"No valid client CA bundle for {first_server}; mTLS stays disabled for that service")
-                failed = True
-            skipped_servers.append(first_server)
+            LOGGER.error(f"No valid client CA bundle for {first_server}; {fallback}")
+            failed = True
             continue
 
         LOGGER.info(f"Checking client CA bundle for {first_server} ...")
         need_reload, err = check_ca(ca_file, first_server)
         if isinstance(err, BaseException):
-            LOGGER.error(f"Exception while checking {first_server}'s client CA bundle, skipping ... \n{err}")
-            skipped_servers.append(first_server)
+            LOGGER.error(f"Exception while checking {first_server}'s client CA bundle ({fallback}) ... \n{err}")
             failed = True
             continue
         elif err:
-            if verify_mode != "optional_no_ca":
-                LOGGER.warning(f"Error while checking {first_server}'s client CA bundle : {err} mTLS stays disabled for that service")
-            else:
-                LOGGER.warning(f"Error while checking {first_server}'s client CA bundle : {err}")
-            skipped_servers.append(first_server)
+            LOGGER.error(f"Error while checking {first_server}'s client CA bundle : {err} ({fallback})")
             failed = True
             continue
         elif need_reload:
@@ -249,7 +254,7 @@ try:
 
         LOGGER.info(f"No change in {first_server}'s CRL")
 
-    for first_server in skipped_servers:
+    for first_server in purge_servers:
         JOB.del_cache(CA_CACHE_NAME, service_id=first_server)
         JOB.del_cache(CRL_CACHE_NAME, service_id=first_server)
 

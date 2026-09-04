@@ -1444,7 +1444,7 @@ L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persist
 Contrairement aux autres images Docker, l'All-in-one conserve `access.log`, `error.log` et `modsec_audit.log` comme de vrais fichiers sous `/var/log/bunkerweb/`. Le flux de journalisation les lit pour ajouter un préfixe à chaque ligne et appliquer `HIDE_SERVICE_LOGS`, et l'analyseur CrowdSec embarqué ainsi que le visualiseur de journaux de l'interface Web les lisent depuis le disque.
 
 - L'image embarque `logrotate` et l'exécute toutes les heures sous supervisor. Un échec de rotation est signalé par le préfixe `[LOGROTATE]` dans les logs du conteneur.
-- La politique est celle installée par les paquets Linux, dans `/etc/logrotate.d/bunkerweb` : tout fichier correspondant à `/var/log/bunkerweb/*.log` est tourné dès qu'il dépasse 100 Mo, sept générations compressées sont conservées, et la rotation utilise `copytruncate`.
+- La politique est celle installée par les paquets Linux, dans `/etc/logrotate.d/bunkerweb` : tout fichier correspondant à `/var/log/bunkerweb/*.log` est tourné chaque jour, ou plus tôt s'il dépasse 100 Mo, quatorze générations numérotées sont conservées, et la rotation utilise `copytruncate`.
 - `copytruncate` vide le fichier sur place au lieu de le renommer, si bien qu'il conserve son inode. Le flux de journalisation, l'analyseur CrowdSec et le visualiseur de journaux le suivent donc à travers une rotation sans avoir besoin de redémarrer, et ModSecurity continue d'écrire dans le bon fichier même s'il ne rouvre jamais son journal d'audit.
 - Pour modifier le seuil ou le nombre de générations, montez votre propre fichier par-dessus `/etc/logrotate.d/bunkerweb`. Pour désactiver entièrement la rotation et gérer la rétention vous-même, montez un fichier vide par-dessus ce même chemin ; un volume monté sur `/var/log/bunkerweb` ne fait que déplacer les données, il n'empêche pas le `logrotate` du conteneur de continuer à les faire tourner à cet endroit.
 
@@ -1555,7 +1555,7 @@ Notes :
 
 #### Désactiver l'API centrale
 
-Pour faire fonctionner CrowdSec entièrement en local, sans enregistrement ni trafic vers les serveurs de CrowdSec, définissez `DISABLE_ONLINE_API` à `true` :
+Pour désactiver l'enregistrement auprès de la Central API et de la Console, sans envoi de signal ni récupération de la liste de blocage communautaire, définissez `DISABLE_ONLINE_API` à `true`. Cela n'arrête pas les mises à jour du hub : le catalogue des collections et parseurs continue d'être récupéré depuis le hub CrowdSec quel que soit ce paramètre :
 
 ```bash
 docker run -d \
@@ -1679,6 +1679,9 @@ services:
 
 !!! tip "Ignorer les conteneurs étiquetés"
     Lorsqu'un conteneur doit être ignoré par autoconf, définissez `DOCKER_IGNORE_LABELS` sur le contrôleur. Fournissez une liste de clés d'étiquettes séparées par des espaces ou des virgules (par exemple `bunkerweb.SERVER_NAME`) ou simplement le suffixe (`SERVER_NAME`). Tout conteneur ou source de configuration personnalisée portant une étiquette correspondante est ignoré lors de la découverte, et l'étiquette est ignorée lors de la traduction des paramètres.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    Contrairement aux paramètres ci-dessus, `KEEP_CONFIG_ON_RESTART` est lu directement par le point d'entrée du conteneur `bunkerweb` lui-même depuis son environnement de processus, pas depuis le Scheduler ni la base de données, et doit donc être défini sur le conteneur `bunkerweb` lui-même. Mettre à `yes` pour conserver la configuration générée précédemment lors d'un redémarrage du conteneur au lieu de générer la configuration de chargement. Défaut `no`.
 
 ### Utilisation des secrets Docker
 
@@ -1823,7 +1826,7 @@ Le Scheduler est le worker du plan de contrôle qui lit les paramètres, rend le
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
 | `HEALTHCHECK_INTERVAL`          | Secondes entre les healthchecks du Scheduler                                                                                                                                                                                                                                                | Secondes entières                          | `30`                                       |
 | `RELOAD_MIN_TIMEOUT`            | Secondes minimales entre deux reloads successifs                                                                                                                                                                                                                                            | Secondes entières                          | `5`                                        |
-| `SEND_FILES_MIN_TIMEOUT`        | Délai de lecture minimal pour l’envoi des dossiers de configuration et de cache                                                                                                                                                                                                             | Secondes entières                          | `30`                                       |
+| `SEND_FILES_MIN_TIMEOUT`        | Délai minimal de lecture pour l'envoi des dossiers de configuration et de cache ; une valeur explicite n'est jamais réduite, et seule la valeur dérivée du nombre de services est plafonnée à 120 secondes, donc le délai effectif est le plus élevé des deux. Le délai de connexion reste fixé à 5 secondes et l'envoi du corps dispose de son propre délai séparé.       | Secondes entières                          | `30`                                       |
 | `DISABLE_CONFIGURATION_TESTING` | Sauter les tests de configuration avant application                                                                                                                                                                                                                                         | `yes` ou `no`                              | `no`                                       |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Continuer même si certaines instances ne reçoivent pas la config                                                                                                                                                                                                                            | `yes` ou `no`                              | `no`                                       |
 | `IGNORE_REGEX_CHECK`            | Ignorer la validation regex des paramètres (partagé avec autoconf)                                                                                                                                                                                                                          | `yes` ou `no`                              | `no`                                       |
@@ -2476,6 +2479,12 @@ Une fois installé, BunkerWeb est livré avec trois services `bunkerweb`, `bunke
 
 Si vous modifiez manuellement la configuration de BunkerWeb à l'aide `/etc/bunkerweb/variables.env` d'un redémarrage du `bunkerweb-scheduler` service, il suffira de générer et de recharger la configuration sans aucun temps d'arrêt. Mais selon le cas (par exemple, en changeant de port d'écoute), vous devrez peut-être redémarrer le `bunkerweb` service.
 
+Le point d'entrée du service `bunkerweb` lit également directement la variable suivante, en dehors du flux normal des paramètres :
+
+| Paramètre                 | Description                                                                                                                                                                                                     | Valeurs acceptées | Défaut |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------ |
+| `KEEP_CONFIG_ON_RESTART`  | Conserve la configuration générée précédemment lors d'un redémarrage du service `bunkerweb` au lieu de générer la configuration de chargement. Lu depuis l'environnement ou `/etc/bunkerweb/variables.env`, jamais depuis la base de données. | `yes` ou `no`       | `no`   |
+
 ### Haute disponibilité
 
 Le Scheduler peut être détaché de l'instance BunkerWeb pour fournir une haute disponibilité. Dans ce cas, le Scheduler sera installé sur un serveur séparé et pourra gérer plusieurs instances BunkerWeb.
@@ -2993,6 +3002,44 @@ controller:
    - **Annotation du pod** : `bunkerweb.io/INSTANCE: "yes"`
    - **Variable d'environnement** : `KUBERNETES_MODE: "yes"`
 
+!!! warning "Définissez `API_TOKEN` sur Kubernetes"
+
+    L'API interne sur le port 5000 est un plan de contrôle privilégié : elle expose `/ping`, `/reload`, `/confs` et `/stop`. Les IP des pods sont dynamiques, donc `API_WHITELIST_IP` doit couvrir le CIDR des pods du cluster et ne peut pas à elle seule écarter les autres charges de travail. Définissez `API_TOKEN` sur les pods BunkerWeb et sur chaque composant qui les appelle, y compris le Scheduler, l'interface web et le service API s'il est déployé, et conservez-le dans un Secret ; sans cela, tout pod capable d'atteindre le port 5000 peut piloter le plan de données.
+
+    Créez le Secret dans chaque namespace qui exécute un pod BunkerWeb, en remplaçant `your-namespace` si nécessaire :
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Utilisez le même token dans les pods BunkerWeb et dans chaque appelant de l'API d'instance. L'omettre chez un appelant empêche ce composant d'utiliser l'API d'instance :
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Restreignez `API_WHITELIST_IP` au CIDR réel des pods de votre cluster plutôt qu'à toute la plage RFC1918 lorsque vous le connaissez.
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3031,6 +3078,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3133,6 +3185,11 @@ spec:
               value: "yes"
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
   ---
   apiVersion: v1
   kind: Service
@@ -3160,7 +3217,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                             |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API                                 |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l'API. Restreignez-la au CIDR réel des pods du cluster et associez-la à `API_TOKEN` ; la liste blanche seule n'isole pas l'API des autres charges de travail |
+| `API_TOKEN`               | *(depuis un Secret)* | Requis sur Kubernetes : doit correspondre sur les pods BunkerWeb et sur chaque appelant de l'API d'instance, y compris le Scheduler, l'interface web et le service API s'il est déployé |
 
 ##### Étape 3 : Création des Services
 
@@ -3366,6 +3424,10 @@ Pour ajouter une nouvelle application protégée par BunkerWeb :
 #### Fichiers YAML complets
 
 Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.
+
+!!! warning "DNS_RESOLVERS doit désigner le Service DNS du cluster"
+
+    Donnez à `DNS_RESOLVERS` le Service DNS du cluster, dont la ClusterIP reste stable pendant toute la vie du Service, et jamais une IP de pod. nginx résout cette valeur une seule fois, au moment où il analyse sa configuration, et réutilise l'adresse obtenue jusqu'au rechargement suivant : ce qui pointe vers des pods ne fonctionne donc que jusqu'à leur déplacement, et un redémarrage progressif de CoreDNS laisse alors toutes les résolutions en échec. Sur un cluster standard, ce Service est `kube-dns.kube-system.svc.cluster.local`, y compris lorsque CoreDNS est l'implémentation qui se trouve derrière.
 
 ### Ressources d'entrée
 
@@ -3670,7 +3732,8 @@ settings:
     # Replace with your DNS resolver
     # to get it: kubectl exec in a random pod then cat /etc/resolv.conf
     # if you have an IP as nameserver then do a reverse DNS lookup: nslookup <IP>
-    # most of the time it's coredns.kube-system.svc.cluster.local or kube-dns.kube-system.svc.cluster.local
+    # la plupart du temps c'est kube-dns.kube-system.svc.cluster.local, le Service
+    # derrière lequel se trouve CoreDNS sur un cluster standard
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # We only consider Ingress resources with ingressClass bunkerweb to avoid conflicts with existing ingress controller

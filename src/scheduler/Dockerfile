@@ -1,4 +1,4 @@
-FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc AS builder
+FROM python:3.14-alpine@sha256:3f818d6811ff5f3f2b5e5d836df3d25c2dd2e588d3b4981338a8ba17e422f74f AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -45,7 +45,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.14-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc
+FROM python:3.14-alpine@sha256:3f818d6811ff5f3f2b5e5d836df3d25c2dd2e588d3b4981338a8ba17e422f74f
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -57,6 +57,7 @@ RUN apk add --no-cache bash unzip curl libgcc libstdc++ libpq openssl libmagic m
 
 # Fix CVEs
 RUN apk add --no-cache "openssl>=3.5.8-r0" "libssl3>=3.5.8-r0" "libcrypto3>=3.5.8-r0" # CVE-2026-14456 CVE-2026-14457 CVE-2026-18798 CVE-2026-54874 CVE-2026-63072 CVE-2026-63073 CVE-2026-63074 CVE-2026-63075 CVE-2026-63076 CVE-2026-75803
+RUN apk add --no-cache "curl>=8.22.0-r0" "libcurl>=8.22.0-r0" # CVE-2026-13608 CVE-2026-18924 CVE-2026-19931 CVE-2026-80229 CVE-2026-80230 CVE-2026-80231 CVE-2026-80255 CVE-2026-80256 CVE-2026-82208 CVE-2026-82209
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

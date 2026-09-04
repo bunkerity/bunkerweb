@@ -31,7 +31,7 @@ Wenn Sie der Meinung sind, dass eine neue Integration unterstützt werden sollte
 ## Einstellungen
 
 !!! tip "BunkerWeb PRO Einstellungen"
-    Einige Plugins sind der **PRO-Version** vorbehalten. Möchten Sie BunkerWeb PRO einen Monat lang schnell testen? Verwenden Sie den Code `freetrial` bei Ihrer Bestellung im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) oder klicken Sie [hier](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc), um den Promo-Code direkt anzuwenden (wird an der Kasse wirksam).
+    Einige Plugins sind der **PRO-Version** vorbehalten. Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 Sobald BunkerWeb in Ihre Umgebung integriert ist, müssen Sie es konfigurieren, um Ihre Webanwendungen bereitzustellen und zu schützen.
 
@@ -256,6 +256,16 @@ Das Erstellen einer benutzerdefinierten Vorlage ist ein unkomplizierter Prozess,
 *   **Vorlagendatei**: Die benutzerdefinierte Vorlage wird in einer JSON-Datei in einem `templates`-Ordner im Plugin-Verzeichnis definiert, die der angegebenen Struktur entspricht. Die Vorlagendatei enthält einen Namen, die Einstellungen, benutzerdefinierten Konfigurationen und Schritte, die erforderlich sind, um BunkerWeb gemäß den Präferenzen des Benutzers zu konfigurieren.
 
 *   **Auswählen einer Vorlage**: Sobald die benutzerdefinierte Vorlage definiert ist, können Benutzer sie während des Einfachmodus-Konfigurationsprozesses eines Dienstes in der Web-UI auswählen. Eine Vorlage kann auch mit der Einstellung `USE_TEMPLATE` in der Konfiguration ausgewählt werden. Der Name der Vorlagendatei (ohne die `.json`-Erweiterung) sollte als Wert der Einstellung `USE_TEMPLATE` angegeben werden.
+
+!!! warning "Vorlagen und selbst konfigurierte Einstellungen"
+
+    Wenn eine Vorlage eine Einstellung deklariert, die Sie ebenfalls konfigurieren, hängt es davon ab, wo die Vorlage ausgewählt wurde, welcher Wert gilt:
+
+    * am Dienst ausgewählt (`www.example.com_USE_TEMPLATE=medium`): der Wert der Vorlage gewinnt gegenüber dem Wert aus den globalen Einstellungen;
+    * global ausgewählt (`USE_TEMPLATE=medium`): der Wert aus den globalen Einstellungen gewinnt gegenüber dem der Vorlage;
+    * ein direkt am Dienst gesetzter Wert gewinnt immer gegenüber beiden.
+
+    Das ist wichtig, weil die Vorlagen `low`, `medium` und `api` `CONTENT_SECURITY_POLICY` auf einen leeren Wert setzen und `low` dasselbe für `PERMISSIONS_POLICY` tut: Ein Dienst, der eine davon auswählt, sendet diesen Header nicht, selbst wenn Ihre globalen Einstellungen eine Richtlinie enthalten. Setzen Sie den Wert am Dienst, `www.example.com_CONTENT_SECURITY_POLICY=...`, um ihn zu behalten.
 
 Beispiel für eine benutzerdefinierte Vorlagendatei:
 ```json

@@ -2645,7 +2645,7 @@ LOG_LEVEL_1=error
 
 ### Aufbewahrung der Protokolldateien {#log-file-retention}
 
-Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: `logrotate`, mit der Richtlinie, die BunkerWeb unter `/etc/logrotate.d/bunkerweb` installiert. Sie rotiert jede Datei, die auf `/var/log/bunkerweb/*.log` passt, sobald diese 100 MB überschreitet, behält sieben komprimierte Generationen und verwendet `copytruncate`.
+Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: `logrotate`, mit der Richtlinie, die BunkerWeb unter `/etc/logrotate.d/bunkerweb` installiert. Sie rotiert jede Datei, die auf `/var/log/bunkerweb/*.log` passt, täglich oder früher, sobald die Datei 100 MB überschreitet, behält vierzehn nummerierte Generationen (`modsec_audit.log.1`, `.2.gz` und so weiter) und verwendet `copytruncate`.
 
 - **Linux**: Die Pakete hängen von `logrotate` ab, und das System führt es über seinen eigenen Timer aus. Es ist nichts weiter zu tun.
 - **All-in-one**: Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus, mit derselben Richtliniendatei.
@@ -2655,13 +2655,17 @@ Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbe
 
 Bearbeiten Sie `/etc/logrotate.d/bunkerweb`, um den Schwellenwert oder die Anzahl der Generationen zu ändern, oder um ein `maxage` hinzuzufügen. Mounten Sie beim All-in-one Ihre eigene Datei über diesen Pfad.
 
-Der Speicherort des Audit-Logs wird über `MODSECURITY_SEC_AUDIT_LOG` festgelegt (multisite, Standard `/var/log/bunkerweb/modsec_audit.log`); siehe die [ModSecurity-Einstellungen](features.md#modsecurity). Wird er außerhalb von `/var/log/bunkerweb` gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst.
+Zwei Direktiven sind dort tragend. `maxsize` hält `daily` am Leben: Das ähnliche `size` schließt die Intervall-Direktiven aus und würde nur nach Größe rotieren. Und `dateext` würde jedes Archiv nach dem Datum benennen, sodass eine zweite Rotation am selben Datum mit `destination ... already exists, skipping rotation` fehlschlägt und die aktive Datei bis zum Datumswechsel unrotiert bleibt.
+
+Der Speicherort des Audit-Logs wird über `MODSECURITY_SEC_AUDIT_LOG` festgelegt (multisite, Standard `/var/log/bunkerweb/modsec_audit.log`); siehe die [ModSecurity-Einstellungen](features.md#modsecurity). Wird er außerhalb von `/var/log/bunkerweb` gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst. Die Einstellung akzeptiert nur einen Pfad unterhalb von `/var/log/bunkerweb` und kann daher nicht auf `/data` zeigen: Um den Audit-Verlauf über eine Neuerstellung des Containers hinweg zu behalten, mounten Sie ein Volume auf `/var/log/bunkerweb` selbst, was den gesamten Protokollsatz erhält und nicht nur das Audit-Log.
+
+Mit dem Standardwert `BCFH` von `MODSECURITY_SEC_AUDIT_LOG_PARTS` legt Teil `C` den Anfragetext im Audit-Log ab. Behandeln Sie die Datei als sensibel, bevor Sie sie irgendwohin kopieren.
 
 ### Integrations-Defaults & Beispiele
 
 === "Linux"
 
-    **Standardverhalten**: `LOG_TYPES="file"`. Protokolle werden unter `/var/log/bunkerweb/*.log` geschrieben. Die Rotation übernimmt die installierte System-`logrotate`-Konfiguration unter `/etc/logrotate.d/bunkerweb` (täglich, 7 Tage Aufbewahrung, Komprimierung per `copytruncate`).
+    **Standardverhalten**: `LOG_TYPES="file"`. Protokolle werden unter `/var/log/bunkerweb/*.log` geschrieben. Die Rotation übernimmt die installierte System-`logrotate`-Konfiguration unter `/etc/logrotate.d/bunkerweb` (täglich oder ab 100 MB, vierzehn Generationen, Komprimierung per `copytruncate`).
 
     **Beispiel**: Lokale Dateien behalten (für die Web-UI) und zusätzlich an den System-Syslog spiegeln.
 

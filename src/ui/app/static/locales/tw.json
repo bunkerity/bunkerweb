@@ -167,7 +167,12 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段"
+    "wipe_other_sessions": "清除其他工作階段",
+    "ban_all_filtered": "封鎖所有符合條件的報告",
+    "filtered_actions": "篩選後的操作",
+    "unban_all_filtered": "解除所有符合條件的封鎖",
+    "update_duration_all_filtered": "更新所有符合條件封鎖的期限",
+    "validate_certificate": "驗證憑證"
   },
   "country": {
     "AD": "安道爾",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "update_duration_alert": "請為選定的封鎖選擇新的期限："
+      "update_duration_alert": "請為選定的封鎖選擇新的期限：",
+      "ban_filtered_confirmation": "封鎖全部 {{count}} 筆符合條件報告中的 IP？重複的目標僅會套用一次。",
+      "unban_filtered_confirmation": "您確定要解除全部 {{count}} 筆符合條件的封鎖嗎？",
+      "update_filtered_duration_alert": "請為全部 {{count}} 筆符合條件的封鎖選擇新的期限："
     },
     "button": {
       "fetch_global_settings_confirm": "套用全域設定",
@@ -1765,6 +1773,13 @@
     "prompt": "請輸入您的 TOTP 代碼。"
   },
   "validation": {
+    "certificate_checking": "檢查中 ...",
+    "certificate_expires_in": "將於 {{days}} 天後到期",
+    "certificate_failed": "驗證請求失敗。",
+    "certificate_file_mode": "此處僅能檢查貼上或上傳的資料。憑證路徑由排程器讀取，網頁介面無法存取該路徑。",
+    "certificate_missing": "請先同時提供憑證與金鑰。",
+    "certificate_subject": "主旨：",
+    "certificate_valid": "憑證與金鑰相符。",
     "default_field_name": "此欄位",
     "invalid_date": "無效日期",
     "ip_global_duplicate": "此 IP 位址已被全域封鎖。",

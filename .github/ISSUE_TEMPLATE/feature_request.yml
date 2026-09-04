@@ -11,6 +11,26 @@ body:
     attributes:
       value: >
         📊 Wondering if your request is driven by an outage? Double-check https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template to confirm it's not caused by an ongoing incident.
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Select the primary area involved.
+      options:
+        - Web UI
+        - API
+        - Scheduler
+        - Core plugins
+        - External plugins
+        - Docker / Autoconf
+        - Swarm
+        - Kubernetes
+        - Linux
+        - All-in-one
+        - Documentation
+        - Other / unsure
+    validations:
+      required: true
   - type: textarea
     id: whats-needed-and-why
     attributes:
@@ -23,6 +43,13 @@ body:
     attributes:
       label: Implementations ideas (optional)
       description: How it should be used and integrated into the project ? List some posts, research papers or codes that we can use as implementation.
+  - type: checkboxes
+    id: duplicate-search
+    attributes:
+      label: Duplicate search
+      options:
+        - label: I searched open and closed issues and did not find an existing request
+          required: true
   - type: checkboxes
     id: terms
     attributes:

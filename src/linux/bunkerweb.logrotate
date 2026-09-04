@@ -2,14 +2,12 @@
 {
     su nginx nginx
     daily
-    size 100M
-    rotate 7
+    maxsize 100M
+    rotate 14
     copytruncate
     compress
     delaycompress
     missingok
     notifempty
-    dateext
-    dateformat -%Y-%m-%d
     create 0640 nginx nginx
 }

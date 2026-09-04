@@ -97,11 +97,13 @@ function set_loading_state() {
 		echo "IS_LOADING=yes" >> "$nginx_variables_path"
 	fi
 
-	# The scheduler skips a push whose archive digest matches the ".bw-applied" marker left by
-	# the previous one. Editing variables.env here makes the tree differ from what that marker
-	# describes, so the push carrying IS_LOADING=no would be answered "already applied" and the
-	# instance would stay in the loading state, serving traffic with every Lua plugin disabled.
-	rm -f "$(dirname "$nginx_variables_path")/.bw-applied"
+	# The scheduler skips a push whose archive digest matches the applied marker left by the
+	# previous one. That marker lives outside the tree it describes, keyed by destination path,
+	# so a push never archives its own bookkeeping. Editing variables.env here makes the tree
+	# differ from what the marker describes, so the push carrying IS_LOADING=no would be
+	# answered "already applied" and the instance would stay in the loading state, serving
+	# traffic with every Lua plugin disabled.
+	rm -f "/var/tmp/bunkerweb/pushswap/$(dirname "$nginx_variables_path" | sed 's/[^[:alnum:]][^[:alnum:]]*/_/g').applied"
 
 	return 0
 }

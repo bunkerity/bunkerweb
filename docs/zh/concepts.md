@@ -31,7 +31,7 @@
 ## 设置
 
 !!! tip "BunkerWeb PRO 设置"
-    某些插件是为 **PRO 版本**保留的。想快速测试 BunkerWeb PRO 一个月吗？在 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)下单时使用代码 `freetrial`，或者点击[这里](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc)直接应用促销代码（将在结账时生效）。
+    某些插件是为 **PRO 版本**保留的。通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
 
 一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。
 
@@ -256,6 +256,16 @@ BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。�
 *   **模板文件**：自定义模板在插件目录内的 `templates` 文件夹中的一个符合指定结构的 JSON 文件中定义。模板文件包含一个名称、设置、自定义配置以及根据用户偏好配置 BunkerWeb 所需的步骤。
 
 *   **选择模板**：一旦定义了自定义模板，用户就可以在 Web UI 中服务的简单模式配置过程中选择它。也可以使用配置中的 `USE_TEMPLATE` 设置来选择模板。模板文件的名称（不带 `.json` 扩展名）应指定为 `USE_TEMPLATE` 设置的值。
+
+!!! warning "模板与您自行配置的设置"
+
+    当模板声明的设置同时也被您自行配置时，以哪一个为准取决于模板是在哪里选择的：
+
+    * 在服务上选择（`www.example.com_USE_TEMPLATE=medium`）：模板的值优先于您在全局设置中的值；
+    * 全局选择（`USE_TEMPLATE=medium`）：您在全局设置中的值优先于模板的值；
+    * 在服务本身设置的值始终优先于以上两者。
+
+    这一点很重要，因为 `low`、`medium` 和 `api` 模板会把 `CONTENT_SECURITY_POLICY` 设为空值，`low` 对 `PERMISSIONS_POLICY` 也是如此：即使您的全局设置中配置了策略，选择这些模板的服务也不会发送该响应头。若要保留您的值，请在服务上设置 `www.example.com_CONTENT_SECURITY_POLICY=...`。
 
 自定义模板文件示例：
 ```json

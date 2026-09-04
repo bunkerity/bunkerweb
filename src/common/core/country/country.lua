@@ -188,10 +188,10 @@ function country:is_ignored_uri()
 	end
 	local request_uri = self.ctx.bw.request_uri
 	for _, pattern in ipairs(self.ignore_uri) do
-		if regex_match(uri, pattern) then
+		if regex_match(uri, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
-		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern) then
+		if request_uri and request_uri ~= uri and regex_match(request_uri, pattern, nil, "COUNTRY_IGNORE_URI") then
 			return true, pattern
 		end
 	end

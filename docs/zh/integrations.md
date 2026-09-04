@@ -1437,7 +1437,7 @@ BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化�
 与其他 Docker 镜像不同，一体化镜像会将 `access.log`、`error.log` 和 `modsec_audit.log` 保留为 `/var/log/bunkerweb/` 下的真实文件。日志流会读取这些文件，为每一行添加前缀并应用 `HIDE_SERVICE_LOGS`，内置的 CrowdSec 解析器和 Web UI 的日志查看器也会从磁盘读取它们。
 
 - 该镜像内置 `logrotate`，并在 supervisor 下每小时运行一次。轮转失败会在容器日志中以 `[LOGROTATE]` 前缀报告。
-- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件在超过 100 MB 时都会被轮转，保留七个压缩后的历史版本，并使用 `copytruncate` 进行轮转。
+- 策略与 Linux 软件包安装的相同，位于 `/etc/logrotate.d/bunkerweb`：任何匹配 `/var/log/bunkerweb/*.log` 的文件都会每天轮转，若超过 100 MB 则提前轮转，保留十四个编号的历史版本，并使用 `copytruncate` 进行轮转。
 - `copytruncate` 会原地清空文件而不是重命名它，因此文件会保留其 inode。日志流、CrowdSec 解析器和日志查看器无需重启即可在轮转后继续跟踪它，并且 ModSecurity 会持续写入正确的文件，即使它从未重新打开其审计日志。
 - 如需更改阈值或历史版本数量，请将您自己的文件挂载到 `/etc/logrotate.d/bunkerweb`。如需完全禁用轮转并自行管理保留策略，请将一个空文件挂载到同一路径；将卷挂载到 `/var/log/bunkerweb` 只会改变数据的存放位置，并不会阻止容器内运行的 `logrotate` 继续对其进行轮转。
 
@@ -1549,7 +1549,7 @@ docker run -d \
 
 #### 禁用中央 API
 
-若要让 CrowdSec 完全在本地运行，不进行注册、也不与 CrowdSec 服务器通信，请将 `DISABLE_ONLINE_API` 设为 `true`：
+若要选择退出 Central API 和 Console 注册（不发送任何信号，也不拉取社区黑名单），请将 `DISABLE_ONLINE_API` 设为 `true`。这不会停止 hub 更新：无论此设置如何，collection 和 parser 目录仍会从 CrowdSec hub 获取：
 
 ```bash
 docker run -d \
@@ -1670,6 +1670,9 @@ services:
 
 !!! info "完整列表"
     有关环境变量的完整列表，请参阅文档的[设置部分](features.md)。
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    与上述设置不同，`KEEP_CONFIG_ON_RESTART` 由 `bunkerweb` 容器自身的入口点直接从其进程环境中读取，而不是从调度器或数据库读取，因此必须在 `bunkerweb` 容器本身上设置。设置为 `yes` 可在容器重启时保留之前生成的配置，而不是渲染加载配置。默认值为 `no`。
 
 ### 使用 Docker secrets
 
@@ -1814,7 +1817,7 @@ volumes:
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------- |
 | `HEALTHCHECK_INTERVAL`          | 调度器健康检查的间隔秒数                                                                                                                                                               | 整秒                                    | `30`                          |
 | `RELOAD_MIN_TIMEOUT`            | 连续两次 reload 之间的最小秒数                                                                                                                                                         | 整秒                                    | `5`                           |
-| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时                                                                                                                                                     | 整秒                                    | `30`                          |
+| `SEND_FILES_MIN_TIMEOUT`        | 推送配置和缓存目录时的最小读取超时；显式设定的值绝不会被降低，仅由服务数量推导出的超时值会被限制在 120 秒以内，因此实际生效的超时取两者中较大者。连接超时固定为 5 秒，正文发送有其独立的超时。                                                                                          | 整秒                                    | `30`                          |
 | `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                     | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                           | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                 | `yes` 或 `no`                           | `no`                          |
@@ -2473,6 +2476,12 @@ MY_SETTING_2=value2
 
 如果您手动编辑了 BunkerWeb 的配置（使用 `/etc/bunkerweb/variables.env`），重启 `bunkerweb-scheduler` 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 `bunkerweb` 服务。
 
+`bunkerweb` 服务的入口点还会在正常设置流程之外，直接读取以下变量：
+
+| 设置                        | 描述                                                                                          | 可选值        | 默认值 |
+| --------------------------- | --------------------------------------------------------------------------------------------- | ------------- | ------ |
+| `KEEP_CONFIG_ON_RESTART`   | 重启 `bunkerweb` 服务时保留之前生成的配置，而不是重新渲染加载配置。从环境变量或 `/etc/bunkerweb/variables.env` 读取，绝不从数据库读取。 | `yes` 或 `no` | `no`   |
+
 ### 高可用性
 
 调度器可以与 BunkerWeb 实例分离，以提供高可用性。在这种情况下，调度器将安装在一台独立的服务器上，并能够管理多个 BunkerWeb 实例。
@@ -2988,6 +2997,44 @@ controller:
    - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
    - **Environment variable**: `KUBERNETES_MODE: "yes"`
 
+!!! warning "Set `API_TOKEN` on Kubernetes"
+
+    The internal API on port 5000 is a privileged control plane: it serves `/ping`, `/reload`, `/confs` and `/stop`. Pod IPs are dynamic, so `API_WHITELIST_IP` has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set `API_TOKEN` on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.
+
+    Create the Secret in every namespace that runs a BunkerWeb pod, replacing `your-namespace` as needed:
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
+
   ```yaml
   apiVersion: apps/v1
   kind: Deployment
@@ -3026,6 +3073,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3127,6 +3179,11 @@ spec:
               value: "yes"  # Enable Kubernetes mode
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: MULTISITE
               value: "yes"
             - name: USE_REVERSE_PROXY
@@ -3177,6 +3234,11 @@ spec:
           env:
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
 ```
 
 ###### Important Environment Variables
@@ -3185,7 +3247,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
+| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
 
 
 ##### Step 3: Creating Services
@@ -3390,6 +3453,10 @@ To add a new application protected by BunkerWeb:
 #### 完整的 YAML 文件
 
 除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
+
+!!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
+
+    请将 `DNS_RESOLVERS` 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 `kube-dns.kube-system.svc.cluster.local`，即使其背后的实现是 CoreDNS 也是如此。
 
 ### Ingress 资源
 
@@ -3694,7 +3761,8 @@ settings:
     # 替换为您的 DNS 解析器
     # 获取方法：在任意 pod 中执行 kubectl exec，然后 cat /etc/resolv.conf
     # 如果您的 nameserver 是一个 IP，则执行反向 DNS 查找：nslookup <IP>
-    # 大多数情况下是 coredns.kube-system.svc.cluster.local 或 kube-dns.kube-system.svc.cluster.local
+    # 大多数情况下是 kube-dns.kube-system.svc.cluster.local，在标准集群上
+    # CoreDNS 正是位于该 Service 之后
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # 我们只考虑带有 ingressClass bunkerweb 的 Ingress 资源，以避免与现有 ingress 控制器冲突

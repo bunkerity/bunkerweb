@@ -1,8 +1,11 @@
 from base64 import b64encode
+from contextlib import contextmanager, suppress
 from io import BytesIO
 from json import loads as json_loads
+import fcntl
+import os
 from bcrypt import checkpw
-from typing import List, Optional
+from typing import Iterator, List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
 from passlib.pwd import genword
 from qrcode import make
@@ -66,13 +69,37 @@ class Totp:
         elif not totp_secret:
             totp_secret = user.totp_secret
 
-        try:
-            tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user) if user else None)
-            if user:
-                self.set_last_counter(user, tmatch)
+        if not user:
+            try:
+                self._totp.verify(token, totp_secret, window=3)
+                return True
+            except (MalformedTokenError, TokenError):
+                return False
+
+        # Read last_counter, verify against it, and persist the new counter as one atomic
+        # section: gunicorn runs multiple worker processes, each with its own in-memory lock,
+        # so without a cross-process lock two workers can both read the same last_counter and
+        # both accept the same code before either write lands.
+        with self._replay_counter_lock():
+            try:
+                tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
+            except (MalformedTokenError, TokenError):
+                return False
+            self.set_last_counter(user, tmatch)
             return True
-        except (MalformedTokenError, TokenError):
-            return False
+
+    @contextmanager
+    def _replay_counter_lock(self) -> Iterator[None]:
+        """Serialize TOTP replay-counter verify-then-write across gunicorn worker processes."""
+        lock_path = LIB_DIR.joinpath(".totp_last_counter.lock")
+        fd = os.open(lock_path.as_posix(), os.O_CREAT | os.O_RDWR, 0o600)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            with suppress(OSError):
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
 
     def get_totp_uri(self, username: str, totp_secret: str) -> str:
         """Generate provisioning url for use with the qrcode scanner built into the app"""
@@ -96,8 +123,10 @@ class Totp:
         """Cache last_counter."""
         DATA.load_from_file()
         # set_nested persists to disk; a plain nested assignment would only touch this
-        # worker's in-memory copy and be dropped by the next load_from_file().
-        DATA.set_nested(["totp_last_counter", user.get_id()], tmatch.counter)
+        # worker's in-memory copy and be dropped by the next load_from_file(). keep_max is
+        # defense in depth: callers holding _replay_counter_lock() already guarantee this
+        # can't regress, but the flag keeps that true even if something calls this directly.
+        DATA.set_nested(["totp_last_counter", user.get_id()], tmatch.counter, keep_max=True)
 
 
 totp = Totp()

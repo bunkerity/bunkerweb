@@ -2645,7 +2645,7 @@ LOG_LEVEL_1=error
 
 ### Retención de los archivos de registro {#log-file-retention}
 
-Solo las integraciones que mantienen archivos de registro reales necesitan retención, y ambas usan el mismo mecanismo: `logrotate`, con la política que BunkerWeb instala en `/etc/logrotate.d/bunkerweb`. Rota cada archivo que coincida con `/var/log/bunkerweb/*.log` en cuanto supera los 100 MB, conserva siete generaciones comprimidas y usa `copytruncate`.
+Solo las integraciones que mantienen archivos de registro reales necesitan retención, y ambas usan el mismo mecanismo: `logrotate`, con la política que BunkerWeb instala en `/etc/logrotate.d/bunkerweb`. Rota cada archivo que coincida con `/var/log/bunkerweb/*.log` a diario, o antes si el archivo supera los 100 MB, conserva catorce generaciones numeradas (`modsec_audit.log.1`, `.2.gz`, etc.) y usa `copytruncate`.
 
 - **Linux**: los paquetes dependen de `logrotate` y el sistema lo ejecuta con su propio temporizador. No hay nada más que hacer.
 - **All-in-one**: la imagen incluye `logrotate` y lo ejecuta cada hora bajo supervisor, usando ese mismo archivo de política.
@@ -2655,13 +2655,17 @@ Solo las integraciones que mantienen archivos de registro reales necesitan reten
 
 Edita `/etc/logrotate.d/bunkerweb` para cambiar el umbral, el número de generaciones, o para añadir un `maxage`. En el All-in-one, monta tu propio archivo sobre esa ruta.
 
-La ubicación del registro de auditoría se establece mediante `MODSECURITY_SEC_AUDIT_LOG` (multisite, por defecto `/var/log/bunkerweb/modsec_audit.log`); consulta los [ajustes de ModSecurity](features.md#modsecurity). Si lo apuntas fuera de `/var/log/bunkerweb`, queda fuera de la política anterior, y en una integración de contenedores sustituye el enlace simbólico por un archivo real que nada rota. Si lo mueves, móntalo en un volumen y rótalo tú mismo.
+Dos directivas son decisivas ahí. `maxsize` es lo que mantiene vivo a `daily`: la directiva `size`, muy parecida, es excluyente con las directivas de intervalo y rotaría solo por tamaño. Y añadir `dateext` nombraría cada archivo comprimido según la fecha, de modo que una segunda rotación en la misma fecha falla con `destination ... already exists, skipping rotation` y deja el archivo activo sin rotar hasta que cambie la fecha.
+
+La ubicación del registro de auditoría se establece mediante `MODSECURITY_SEC_AUDIT_LOG` (multisite, por defecto `/var/log/bunkerweb/modsec_audit.log`); consulta los [ajustes de ModSecurity](features.md#modsecurity). Si lo apuntas fuera de `/var/log/bunkerweb`, queda fuera de la política anterior, y en una integración de contenedores sustituye el enlace simbólico por un archivo real que nada rota. Si lo mueves, móntalo en un volumen y rótalo tú mismo. El ajuste solo acepta una ruta bajo `/var/log/bunkerweb`, así que no puede apuntar a `/data`: para conservar el historial de auditoría tras recrear el contenedor, monta un volumen sobre `/var/log/bunkerweb`, lo que preserva todo el conjunto de registros y no solo el de auditoría.
+
+Con el valor por defecto `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la parte `C` coloca el cuerpo de la petición en el registro de auditoría. Trata el archivo como sensible antes de copiarlo a ningún sitio.
 
 ### Valores por defecto e integración — Ejemplos
 
 === "Linux"
 
-    **Comportamiento predeterminado**: `LOG_TYPES="file"`. Los registros se escriben en `/var/log/bunkerweb/*.log`. La rotación la gestiona la configuración del sistema `logrotate` instalada en `/etc/logrotate.d/bunkerweb` (diaria, retención de 7 días, comprimida con `copytruncate`).
+    **Comportamiento predeterminado**: `LOG_TYPES="file"`. Los registros se escriben en `/var/log/bunkerweb/*.log`. La rotación la gestiona la configuración del sistema `logrotate` instalada en `/etc/logrotate.d/bunkerweb` (diaria o al superar 100 MB, catorce generaciones, comprimida con `copytruncate`).
 
     **Ejemplo**: Mantener archivos locales (para la interfaz web) y también enviar una copia al syslog del sistema.
 

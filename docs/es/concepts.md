@@ -31,7 +31,7 @@ Si crees que se debería admitir una nueva integración, no dudes en abrir un [n
 ## Configuraciones
 
 !!! tip "Configuraciones de BunkerWeb PRO"
-    Algunos plugins están reservados para la **versión PRO**. ¿Quieres probar rápidamente BunkerWeb PRO durante un mes? Usa el código `freetrial` al realizar tu pedido en el [panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) o haciendo clic [aquí](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) para aplicar directamente el código de promoción (se hará efectivo al finalizar la compra).
+    Algunos plugins están reservados para la **versión PRO**. Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 Una vez que BunkerWeb esté integrado en tu entorno, necesitarás configurarlo para servir y proteger tus aplicaciones web.
 
@@ -256,6 +256,16 @@ Crear una plantilla personalizada es un proceso sencillo que implica definir las
 * **Archivo de plantilla**: La plantilla personalizada se define en un archivo JSON en una carpeta `templates` dentro del directorio del plugin que se adhiere a la estructura especificada. El archivo de plantilla contiene un nombre, las configuraciones, las configuraciones personalizadas y los pasos necesarios para configurar BunkerWeb de acuerdo con las preferencias del usuario.
 
 * **Selección de una plantilla**: Una vez definida la plantilla personalizada, los usuarios pueden seleccionarla durante el proceso de configuración en modo fácil de un servicio en la interfaz de usuario web. También se puede seleccionar una plantilla con la configuración `USE_TEMPLATE` en la configuración. El nombre del archivo de la plantilla (sin la extensión `.json`) debe especificarse como el valor de la configuración `USE_TEMPLATE`.
+
+!!! warning "Las plantillas y los ajustes que usted configura"
+
+    Cuando una plantilla declara un ajuste que usted también configura, cuál se aplica depende de dónde se haya seleccionado la plantilla:
+
+    * seleccionada en el servicio (`www.example.com_USE_TEMPLATE=medium`): el valor de la plantilla prevalece sobre el de la configuración global;
+    * seleccionada globalmente (`USE_TEMPLATE=medium`): el valor de la configuración global prevalece sobre el de la plantilla;
+    * un valor definido en el propio servicio prevalece siempre sobre ambos.
+
+    Esto importa porque las plantillas `low`, `medium` y `api` establecen `CONTENT_SECURITY_POLICY` en un valor vacío, y `low` hace lo mismo con `PERMISSIONS_POLICY`: un servicio que seleccione una de ellas no envía esa cabecera aunque su configuración global contenga una política. Defina el valor en el servicio, `www.example.com_CONTENT_SECURITY_POLICY=...`, para conservarlo.
 
 Ejemplo de un archivo de plantilla personalizada:
 ```json

@@ -27,7 +27,7 @@ for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for 
 from common_utils import effective_cpu_count  # type: ignore
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
 
 
 class JobScheduler(ApiCaller):
@@ -426,7 +426,7 @@ class JobScheduler(ApiCaller):
                         if not self.send_files(
                             cache_path,
                             "/cache",
-                            timeout=(5, min(120, max(1, int(send_files_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split())))),
+                            timeout=folder_push_timeout(int(send_files_min_timeout), len(self.env.get("SERVER_NAME", "www.example.com").split())),
                         ):
                             success = False
                             self.__logger.error(f"Error while sending '{cache_path}' folder")

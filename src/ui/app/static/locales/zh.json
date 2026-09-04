@@ -167,7 +167,12 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话"
+    "wipe_other_sessions": "清除其他会话",
+    "ban_all_filtered": "封禁所有匹配的报告",
+    "filtered_actions": "筛选后的操作",
+    "unban_all_filtered": "解禁所有匹配的封禁",
+    "update_duration_all_filtered": "更新所有匹配封禁的期限",
+    "validate_certificate": "验证证书"
   },
   "country": {
     "AD": "安道尔",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
-      "update_duration_alert": "请为选定的封禁选择新的期限："
+      "update_duration_alert": "请为选定的封禁选择新的期限：",
+      "ban_filtered_confirmation": "封禁全部 {{count}} 条匹配报告中的 IP？重复的目标只会应用一次。",
+      "unban_filtered_confirmation": "您确定要解禁全部 {{count}} 条匹配的封禁吗？",
+      "update_filtered_duration_alert": "请为全部 {{count}} 条匹配的封禁选择新的期限："
     },
     "button": {
       "fetch_global_settings_confirm": "应用全局设置",
@@ -1765,6 +1773,13 @@
     "prompt": "请输入您的 TOTP 代码。"
   },
   "validation": {
+    "certificate_checking": "检查中 ...",
+    "certificate_expires_in": "将在 {{days}} 天后过期",
+    "certificate_failed": "验证请求失败。",
+    "certificate_file_mode": "此处只能检查粘贴或上传的数据。证书路径由调度程序读取，Web UI 无法访问该路径。",
+    "certificate_missing": "请先提供证书和密钥。",
+    "certificate_subject": "主题：",
+    "certificate_valid": "证书和密钥匹配。",
     "default_field_name": "此字段",
     "invalid_date": "无效日期",
     "ip_global_duplicate": "此 IP 地址已被全局封禁。",

@@ -93,6 +93,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 | `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                      |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`. |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`. |
+| `METRICS_REDIS_TTL`                  | `2592000`         | global    | no       | **TTL de Métricas en Redis:** segundos antes de que las claves de métricas en Redis expiren (`0` = permanente); se renueva en cada sincronización para que los datos activos nunca expiren, permitiendo que los datos abandonados sean desalojables bajo `volatile-lru` para que Redis se recupere de la presión de memoria (maxmemory). Acepta la notación abreviada `k`/`m`. |
 | `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster. |
 
@@ -100,7 +101,7 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Se admiten valores brutos en bytes y sufijos `k`/`m`. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
 
 !!! info "Integración con Redis"
-    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb.
+    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb. Bajo presión de `maxmemory` en Redis, los nuevos informes se almacenan en búfer por trabajador y se sincronizan en cuanto se libera memoria, de modo que los informes de solicitudes bloqueadas no se pierden mientras Redis está lleno.
 
 !!! warning "Consideraciones de Rendimiento"
     Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.

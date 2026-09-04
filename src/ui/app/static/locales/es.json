@@ -167,7 +167,12 @@
     "upload_photo": "Subir Nueva Foto",
     "view_details": "Ver Detalles",
     "view_raw_data": "Ver Datos sin Procesar",
-    "wipe_other_sessions": "Limpiar Otras Sesiones"
+    "wipe_other_sessions": "Limpiar Otras Sesiones",
+    "ban_all_filtered": "Bloquear todos los informes coincidentes",
+    "filtered_actions": "Acciones filtradas",
+    "unban_all_filtered": "Desbloquear todos los bloqueos coincidentes",
+    "update_duration_all_filtered": "Actualizar la duración de todos los bloqueos coincidentes",
+    "validate_certificate": "Validar certificado"
   },
   "country": {
     "AD": "Andorra",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "¿Estás seguro de que quieres eliminar los servicios seleccionados?",
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
       "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
-      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:"
+      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:",
+      "ban_filtered_confirmation": "¿Bloquear las IP de los {{count}} informes coincidentes? Los objetivos duplicados se aplicarán una sola vez.",
+      "unban_filtered_confirmation": "¿Estás seguro de que quieres desbloquear los {{count}} bloqueos coincidentes?",
+      "update_filtered_duration_alert": "Selecciona una nueva duración para los {{count}} bloqueos coincidentes:"
     },
     "button": {
       "fetch_global_settings_confirm": "Aplicar ajustes globales",
@@ -1765,6 +1773,13 @@
     "prompt": "Por favor, introduce tu código TOTP."
   },
   "validation": {
+    "certificate_checking": "Comprobando ...",
+    "certificate_expires_in": "expira en {{days}} días",
+    "certificate_failed": "La solicitud de validación ha fallado.",
+    "certificate_file_mode": "Aquí solo se pueden comprobar los datos pegados o subidos. El programador lee la ruta del certificado, a la que la interfaz web no tiene acceso.",
+    "certificate_missing": "Proporciona primero tanto el certificado como la clave.",
+    "certificate_subject": "Asunto:",
+    "certificate_valid": "El certificado y la clave coinciden.",
     "default_field_name": "Este campo",
     "invalid_date": "Fecha inválida",
     "ip_global_duplicate": "Esta dirección IP ya está bloqueada globalmente.",

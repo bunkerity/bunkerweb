@@ -96,6 +96,9 @@
                                 </div>
                             </div>
                             <div class="card-body p-2 pb-8">
+                                {% if notice %}
+                                    <div class="alert alert-warning" role="alert">{{ notice }}</div>
+                                {% endif %}
                                 <div class="d-flex justify-content-center">
                                     <nav class="p-3 template-steps-container align-items-center mw-100 rounded-top"
                                          aria-label="breadcrumb">
@@ -1671,13 +1674,10 @@
                                                 <span class="text-primary shine">BunkerWeb PRO free trial</span>
                                             </h5>
                                             <p class="mb-0 mt-2 text-primary">
-                                                Want to quickly test BunkerWeb PRO for one month? Use the code <strong>freetrial</strong> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc"
+                                                Start a 30-day BunkerWeb PRO free trial from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
     target="_blank"
     rel="noopener"
-    class="alert-link">BunkerWeb panel</a> or by <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
-    target="_blank"
-    rel="noopener"
-    class="alert-link">clicking here</a> to directly apply the promo code (will be effective at checkout).
+    class="alert-link">BunkerWeb panel</a>.
                                             </p>
                                         </div>
                                         <div class="pt-1 pb-4">

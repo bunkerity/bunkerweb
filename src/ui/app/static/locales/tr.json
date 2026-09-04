@@ -167,7 +167,12 @@
     "upload_photo": "Yeni Fotoğraf Yükle",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
-    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır",
+    "ban_all_filtered": "Eşleşen tüm raporları yasakla",
+    "filtered_actions": "Filtrelenmiş işlemler",
+    "unban_all_filtered": "Eşleşen tüm yasakların yasağını kaldır",
+    "update_duration_all_filtered": "Eşleşen tüm yasakların süresini güncelle",
+    "validate_certificate": "Sertifikayı doğrula"
   },
   "country": {
     "AD": "Andorra",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
+      "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki tüm IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez uygulanacaktır.",
+      "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünün yasağını kaldırmak istediğinizden emin misiniz?",
+      "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni bir süre seçin:"
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -1765,6 +1773,13 @@
     "prompt": "Lütfen TOTP kodunuzu girin."
   },
   "validation": {
+    "certificate_checking": "Kontrol ediliyor ...",
+    "certificate_expires_in": "{{days}} gün içinde sona erecek",
+    "certificate_failed": "Doğrulama isteği başarısız oldu.",
+    "certificate_file_mode": "Burada yalnızca yapıştırılan veya yüklenen veriler kontrol edilebilir. Sertifika yolu, web arayüzünün erişimi olmayan zamanlayıcı tarafından okunur.",
+    "certificate_missing": "Önce hem sertifikayı hem de anahtarı girin.",
+    "certificate_subject": "Konu:",
+    "certificate_valid": "Sertifika ve anahtar eşleşiyor.",
     "default_field_name": "Bu alan",
     "invalid_date": "Geçersiz tarih",
     "ip_global_duplicate": "Bu IP adresi zaten küresel olarak yasaklanmış.",

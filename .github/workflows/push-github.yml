@@ -17,9 +17,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       # Checkout
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # Pin the install script default to the testing channel before checksum/upload,
       # so a script downloaded from the Testing release defaults to the testing version
       # instead of the hardcoded stable one. Must run BEFORE the checksum step.
@@ -49,15 +52,8 @@ jobs:
         run: |
           VERSION="${{ inputs.VERSION }}"
           echo "version=${VERSION//\~/-}" >> "$GITHUB_OUTPUT"
-      # Create tag
-      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
-        name: Create tag
-        if: inputs.VERSION != 'testing'
-        with:
-          tag: "v${{ steps.sanitize.outputs.version }}"
-          message: "v${{ steps.sanitize.outputs.version }}"
-          force_push_tag: true
-      # Create tag
+      # Create tag. Versioned releases are TRIGGERED by their tag, so it
+      # already exists; only the rolling `testing` tag is minted here.
       - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         name: Create tag
         if: inputs.VERSION == 'testing'
@@ -136,6 +132,7 @@ jobs:
             - Autoconf : `bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ steps.sanitize.outputs.version }}`
             - UI : `bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ steps.sanitize.outputs.version }}`
             - API : `bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}` or `ghcr.io/bunkerity/bunkerweb-api:${{ steps.sanitize.outputs.version }}`
+            GitLab mirror : `registry.gitlab.com/bunkerity/bunkerweb/<image>:${{ steps.sanitize.outputs.version }}` (same digests)
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 

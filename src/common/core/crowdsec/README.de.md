@@ -154,7 +154,7 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
+        image: crowdsecurity/crowdsec:v1.8.0 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
         volumes:
           - cs-data:/var/lib/crowdsec/data # Zum Persistieren der CrowdSec-Daten
           - bw-logs:/var/log:ro # Die BunkerWeb-Protokolle, die von CrowdSec analysiert werden sollen
@@ -319,6 +319,21 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
     - Der **Live-Modus** fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.
     - Der **Stream-Modus** lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.
 
+#### Endpunkte pro Dienst
+
+Da die Endpunkte `multisite` sind, können Dienste auf derselben Instanz unterschiedliche CrowdSec-Komponenten verwenden, oder nur einen Teil davon. Die beiden Funktionen sind unabhängig voneinander:
+
+- **Entscheidungsabfragen** sind aktiv, wenn `CROWDSEC_API` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die Local API vollständig zu überspringen.
+- **AppSec-Prüfung** ist aktiv, wenn `CROWDSEC_APPSEC_URL` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die tiefgehende Anfrageprüfung zu überspringen.
+
+Ein Dienst, bei dem `USE_CROWDSEC` auf `yes` gesetzt ist und beide URLs leer sind, prüft nichts, und die Instanz protokolliert, dass kein Endpunkt definiert ist.
+
+!!! warning "Ein Entscheidungs-Cache pro Instanz"
+    Zwischengespeicherte Entscheidungen befinden sich in einer einzigen Shared-Memory-Zone für die gesamte Instanz, indiziert nach der Local API, von der sie stammen. Dienste, die auf dieselbe `CROWDSEC_API` verweisen, verwenden gegenseitig ihre zwischengespeicherten Entscheidungen, was die Abfrage günstig hält. Dienste, die auf unterschiedliche Local APIs verweisen, sehen sich gegenseitig nie ihre Entscheidungen. Die Größe dieser Zone gilt instanzweit, sodass sich eine Flotte mit vielen unterschiedlichen Local APIs und großen Entscheidungslisten ein Budget teilt.
+
+!!! info "Bouncer-Schlüssel pro Local API"
+    `CROWDSEC_API_KEY` wird wie jede andere Einstellung pro Dienst aufgelöst. Wenn Dienste unterschiedliche Local APIs ansprechen, geben Sie jedem den mit `cscli bouncers add` auf seinem eigenen CrowdSec-Host registrierten Schlüssel, andernfalls werden die Abfragen als nicht authentifiziert abgelehnt.
+
 ### Konfigurationsbeispiele
 
 === "Basiskonfiguration"
@@ -349,6 +364,38 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Konfiguration pro Dienst"
+
+    AppSec für jeden öffentlichen Dienst, Entscheidungsabfragen für eine Teilmenge, und ein Dienst vollständig ausgenommen. Die Werte ohne Präfix sind die flottenweite Baseline, und jeder Dienst überschreibt nur das, was abweicht:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline für jeden Dienst
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Keine Entscheidungsabfrage, sofern ein Dienst sie nicht anfordert
+    CROWDSEC_API_KEY: ""
+
+    # app1 fügt zusätzlich zu AppSec die Local-API-Entscheidungsabfrage hinzu
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 behält nur AppSec, erbt die leere CROWDSEC_API-Baseline
+
+    # intranet wird überhaupt nicht geprüft
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Ein Dienst kann auch auf einen komplett anderen CrowdSec-Host verweisen, mit seinem eigenen Bouncer-Schlüssel:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Schritt&nbsp;3 – Integration validieren

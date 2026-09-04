@@ -376,7 +376,7 @@ end
 function whitelist:is_whitelisted_uri()
 	-- Check if URI is in whitelist
 	for _, uri in ipairs(self.lists["URI"]) do
-		if regex_match(self.ctx.bw.uri, uri) then
+		if regex_match(self.ctx.bw.uri, uri, nil, "WHITELIST_URI(_URLS)") then
 			return true, "URI " .. uri
 		end
 	end
@@ -387,7 +387,7 @@ end
 function whitelist:is_whitelisted_ua()
 	-- Check if UA is in whitelist
 	for _, ua in ipairs(self.lists["USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ua, nil, "WHITELIST_USER_AGENT(_URLS)") then
 			return true, "UA " .. ua
 		end
 	end

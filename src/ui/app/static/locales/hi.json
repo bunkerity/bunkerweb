@@ -167,7 +167,12 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
+    "ban_all_filtered": "सभी मिलान वाली रिपोर्ट प्रतिबंधित करें",
+    "filtered_actions": "फ़िल्टर की गई कार्रवाइयां",
+    "unban_all_filtered": "सभी मिलान वाले प्रतिबंध हटाएं",
+    "update_duration_all_filtered": "सभी मिलान वाले प्रतिबंधों की अवधि अपडेट करें",
+    "validate_certificate": "प्रमाणपत्र सत्यापित करें"
   },
   "country": {
     "AD": "अंडोरा",
@@ -844,7 +849,10 @@
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
-      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
+      "ban_filtered_confirmation": "सभी {{count}} मिलान वाली रिपोर्ट से IP प्रतिबंधित करें? डुप्लिकेट लक्ष्य केवल एक बार लागू किए जाएंगे।",
+      "unban_filtered_confirmation": "क्या आप वाकई सभी {{count}} मिलान वाले प्रतिबंध हटाना चाहते हैं?",
+      "update_filtered_duration_alert": "सभी {{count}} मिलान वाले प्रतिबंधों के लिए एक नई अवधि चुनें:"
     },
     "button": {
       "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
@@ -1765,6 +1773,13 @@
     "prompt": "कृपया अपना TOTP कोड दर्ज करें।"
   },
   "validation": {
+    "certificate_checking": "जांच की जा रही है ...",
+    "certificate_expires_in": "{{days}} दिनों में समाप्त होगा",
+    "certificate_failed": "सत्यापन अनुरोध विफल रहा।",
+    "certificate_file_mode": "यहां केवल पेस्ट किया गया या अपलोड किया गया डेटा जांचा जा सकता है। प्रमाणपत्र पथ शेड्यूलर द्वारा पढ़ा जाता है, जिस तक वेब UI की पहुंच नहीं है।",
+    "certificate_missing": "पहले प्रमाणपत्र और कुंजी दोनों उपलब्ध कराएं।",
+    "certificate_subject": "विषय:",
+    "certificate_valid": "प्रमाणपत्र और कुंजी मेल खाते हैं।",
     "default_field_name": "यह फ़ील्ड",
     "invalid_date": "अमान्य दिनांक",
     "ip_global_duplicate": "यह आईपी पता पहले से ही विश्व स्तर पर प्रतिबंधित है।",

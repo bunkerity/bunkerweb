@@ -10,7 +10,7 @@ from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import argv as sys_argv, exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -23,7 +23,44 @@ from logger import getLogger  # type: ignore
 from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 from env_file import parse_env_file  # type: ignore
 
-VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"), Path(sep, "etc", "bunkerweb", "variables.env"))
+# bwcli has to resolve the database the running scheduler resolved, so it reads the operator's
+# files the way the scheduler's unit exports them: variables.env then the per-service file, later
+# wins (src/common/helpers/utils.sh export_env_file, called twice by bunkerweb-scheduler.sh). A
+# Scheduler Only install puts DATABASE_URI in scheduler.env and nowhere else, so dropping that
+# file left bwcli talking to a different database than the scheduler. misc/install-bunkerweb.sh
+# resolves the same URI from the same two files for the upgrade backup
+# (`_upgrade_backup_database_uri`), value-based where this is presence-based, so the two differ on
+# a key the later file sets to the empty string.
+OPERATOR_VARIABLES_PATHS = (Path(sep, "etc", "bunkerweb", "variables.env"), Path(sep, "etc", "bunkerweb", "scheduler.env"))
+
+# /etc/nginx/variables.env is generated output: during the loading render it carries plugin
+# defaults for every setting start.sh does not whitelist, DATABASE_URI among them, so a value read
+# from it must never beat one an operator wrote. It only fills keys the operator's files leave
+# unset.
+GENERATED_VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"),)
+
+VARIABLES_PATHS = OPERATOR_VARIABLES_PATHS + GENERATED_VARIABLES_PATHS
+
+
+def resolve_variables(
+    operator_paths: Tuple[Path, ...] = OPERATOR_VARIABLES_PATHS,
+    generated_paths: Tuple[Path, ...] = GENERATED_VARIABLES_PATHS,
+) -> Dict[str, str]:
+    """Merge the variables files the way the scheduler's environment ends up merged.
+
+    The operator's files override one another in order, the generated one only fills gaps. The
+    process environment is not merged in here: it wins at lookup time, see `__get_variable`.
+    """
+    variables: Dict[str, str] = {}
+    for path in operator_paths:
+        if path.is_file():
+            variables.update(parse_env_file(path))
+    for path in generated_paths:
+        if path.is_file():
+            for key, value in parse_env_file(path).items():
+                if not variables.get(key):
+                    variables[key] = value
+    return variables
 
 
 def format_remaining_time(seconds):
@@ -92,19 +129,8 @@ class CLI(ApiCaller):
             # Update environment with secrets
             environ.update(docker_secrets)
 
-        # /etc/nginx/variables.env only exists once an instance has rendered its configuration,
-        # while a Linux install keeps DATABASE_URI in /etc/bunkerweb/variables.env. Reading the
-        # generated file alone leaves DATABASE_URI empty whenever the instance has not written
-        # it yet, and the CLI then talks to the default SQLite path instead of the database the
-        # rest of the stack uses.
-        self.__variables = {}
+        self.__variables = resolve_variables()
         self.__db = None
-        for variables_path in VARIABLES_PATHS:
-            if not variables_path.is_file():
-                continue
-            for key, value in parse_env_file(variables_path).items():
-                if not self.__variables.get(key):
-                    self.__variables[key] = value
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore

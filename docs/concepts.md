@@ -31,7 +31,7 @@ If you think a new integration should be supported, do not hesitate to open a [n
 ## Settings
 
 !!! tip "BunkerWeb PRO settings"
-    Some plugins are reserved for the **PRO version**. Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
+    Some plugins are reserved for the **PRO version**. Start a 30-day BunkerWeb PRO free trial from the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -256,6 +256,16 @@ Creating a custom template is a straightforward process that involves defining t
 * **Template file**: The custom template is defined in a JSON file in a `templates` folder inside the plugin directory that adheres to the specified structure. The template file contains a name, the settings, custom configurations, and steps required to configure BunkerWeb according to the user's preferences.
 
 * **Selecting a template**: Once the custom template is defined, users can select it during the easy-mode configuration process of a service in the web UI. A template can also be selected with the `USE_TEMPLATE` setting in the configuration. The name of the template file (without the `.json` extension) should be specified as the value of the `USE_TEMPLATE` setting.
+
+!!! warning "Templates and settings you configure yourself"
+
+    Where a template declares a setting you also configure yourself, which one applies depends on where the template is selected:
+
+    * selected on the service (`www.example.com_USE_TEMPLATE=medium`), the template's value wins over the value you set in the global settings;
+    * selected globally (`USE_TEMPLATE=medium`), the value you set in the global settings wins over the template's;
+    * a value set on the service itself always wins over both.
+
+    This matters because the `low`, `medium` and `api` templates set `CONTENT_SECURITY_POLICY` to an empty value, and `low` does the same for `PERMISSIONS_POLICY`: a service that selects one of them sends no such header even when your global settings carry a policy. Set the value on the service, `www.example.com_CONTENT_SECURITY_POLICY=...`, to keep it.
 
 Example of a custom template file:
 ```json
