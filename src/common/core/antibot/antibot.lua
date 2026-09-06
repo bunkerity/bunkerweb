@@ -13,6 +13,7 @@ local ngx = ngx
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local OK = ngx.OK
+local HTTP_OK = ngx.HTTP_OK or 200
 local ERR = ngx.ERR
 local INFO = ngx.INFO
 local get_phase = ngx.get_phase
@@ -20,6 +21,7 @@ local tonumber = tonumber
 local tostring = tostring
 local get_session = utils.get_session
 local get_deny_status = utils.get_deny_status
+local set_reason = utils.set_reason
 local rand = utils.rand
 local now = ngx.now
 local captcha_new = captcha.new
@@ -323,6 +325,47 @@ function antibot:header()
 	return self:ret(true, "successfully overridden CSP header")
 end
 
+-- Record "a challenge page was served" as the request's reason, so it reaches the Reports page.
+--
+-- Antibot answers the request itself: access() ends on ngx.OK and the content phase renders the
+-- challenge, so the origin is never reached and the row's status is the challenge page's own 200.
+-- The dispatcher only calls set_reason() for a status in its reason_statuses set
+-- (confs/server-http/access-lua.conf: the deny status, 400, 405, 429), and ngx.OK is not one of
+-- them, so without this call metrics:log() buffers nothing at all -- get_reason() is what gates
+-- the buffer (metrics.lua), not the status. Same pattern as crowdsec:access() on its served
+-- remediation and workflows:apply() on its redirect. The "antibot" reason is in the report
+-- allowlist on both halves of the filter (is_report() in core/metrics/metrics.lua,
+-- _SELF_SERVED_REASONS in db_methods/metrics.py); dropping it from either makes these rows
+-- invisible again.
+--
+-- http_status is the status the challenge page is served with, not ngx.status read here: during
+-- the access phase nothing has been sent yet, so ngx.status is still the default and reading it
+-- would record noise. The content phase renders the page without touching the status, hence 200.
+function antibot:set_challenge_reason()
+	-- Never overwrite a reason another plugin already recorded for the SAME remediation. CrowdSec
+	-- delegates a `captcha` decision to this plugin (crowdsec.lua) and records why -- the LAPI
+	-- scenario, or the AppSec verdict -- before handing over; set_reason() overwrites
+	-- unconditionally (utils.lua), so without this the Reports row would lose the decision and read
+	-- as a bare "antibot" challenge nobody asked for. Matched on the recorded remediation and not on
+	-- the plugin id: any plugin that records "this request is being challenged" and lets the chain
+	-- continue owns that reason. That includes a workflow challenge rule observed under
+	-- SECURITY_MODE=detect, which records `action = "challenge"` and lets the chain continue
+	-- (workflows.lua) -- the rule is the cause, so it keeps the row and this call adds nothing.
+	-- A reason recorded for a DIFFERENT remediation -- the same detect branch on a `redirect` or a
+	-- block rule -- is not about this challenge and is still replaced by it.
+	local recorded = self.ctx.bw.reason and self.ctx.bw.reason_data
+	local recorded_action = type(recorded) == "table" and recorded.action
+	if recorded_action == "captcha" or recorded_action == "challenge" then
+		return
+	end
+	set_reason(self.id, {
+		source = "antibot",
+		provider = self.provider,
+		action = "challenge",
+		http_status = HTTP_OK,
+	}, self.ctx)
+end
+
 function antibot:access()
 	-- Effective provider : an explicit workflow rule wins over the service setting, so a
 	-- service with USE_ANTIBOT=no still challenges when a policy says so.
@@ -481,6 +524,7 @@ function antibot:access()
 	-- Display challenge needed
 	if self.ctx.bw.request_method == "GET" then
 		self.ctx.bw.antibot_display_content = true
+		self:set_challenge_reason()
 		return self:ret(true, "displaying challenge to client", ngx.OK)
 	end
 
@@ -499,6 +543,7 @@ function antibot:access()
 		end
 		self:prepare_challenge()
 		self.ctx.bw.antibot_display_content = true
+		self:set_challenge_reason()
 		return self:ret(true, "displaying challenge to client", OK)
 	end
 
