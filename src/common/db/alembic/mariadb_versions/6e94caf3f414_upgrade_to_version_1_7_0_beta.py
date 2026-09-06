@@ -1,8 +1,8 @@
 """Upgrade to version 1.7.0~beta
 
-Revision ID: 8d8506341eb7
-Revises: 82bf69b29509
-Create Date: 2026-09-01 14:35:01.823119
+Revision ID: 6e94caf3f414
+Revises: 581b304b1118
+Create Date: 2026-09-03 09:03:46.441238
 
 """
 
@@ -14,8 +14,8 @@ from sqlalchemy.dialects import mysql
 import model
 
 # revision identifiers, used by Alembic.
-revision: str = "8d8506341eb7"
-down_revision: Union[str, None] = "82bf69b29509"
+revision: str = "6e94caf3f414"
+down_revision: Union[str, None] = "581b304b1118"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -352,8 +352,13 @@ def upgrade() -> None:
     op.add_column("bw_instances", sa.Column("credential_nonce", sa.LargeBinary(length=12), nullable=True))
     op.add_column("bw_instances", sa.Column("credential_key_id", sa.String(length=128), nullable=True))
     op.add_column("bw_instances", sa.Column("credential_updated_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column("bw_instances", sa.Column("credential_revoked_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column("bw_instances", sa.Column("tls_mode", sa.Enum("off", "pinned", name="instance_tls_mode_enum"), server_default="off", nullable=False))
     op.add_column("bw_instances", sa.Column("tls_fingerprint", sa.String(length=64), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_code_state", sa.String(length=16), server_default="none", nullable=False))
+    op.add_column("bw_instances", sa.Column("enroll_token_hash", sa.String(length=128), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_token_expires_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_failures", sa.Integer(), server_default="0", nullable=False))
     op.alter_column(
         "bw_instances",
         "method",
@@ -364,6 +369,7 @@ def upgrade() -> None:
     op.add_column("bw_jobs_runs", sa.Column("error", sa.Text(), nullable=True))
     op.add_column("bw_metadata", sa.Column("certificates_changed", sa.Boolean(), nullable=True))
     op.add_column("bw_metadata", sa.Column("last_certificates_change", sa.DateTime(timezone=True), nullable=True))
+    op.add_column("bw_metadata", sa.Column("template_values_cleaned_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column(
         "bw_metadata",
         sa.Column("certificate_keyring", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True),
@@ -438,6 +444,39 @@ def upgrade() -> None:
         type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
         existing_nullable=False,
     )
+    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=None, existing_nullable=True)
+    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column(
+        "bw_metadata",
+        "pro_status",
+        existing_type=sa.Enum("active", "invalid", "expired", "suspended", name="pro_status_enum"),
+        server_default=None,
+        existing_nullable=False,
+    )
+    op.alter_column(
+        "bw_plugins", "type", existing_type=sa.Enum("core", "external", "ui", "pro", name="plugin_types_enum"), server_default=None, existing_nullable=False
+    )
+    op.alter_column("bw_services", "is_draft", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_templates", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column(
+        "bw_templates",
+        "method",
+        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
+        server_default=None,
+        existing_nullable=False,
+    )
+    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "language", existing_type=sa.String(length=2), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "theme", existing_type=sa.Enum("light", "dark", name="themes_enum"), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
     # ### end Alembic commands ###
 
 
@@ -445,6 +484,53 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     # Revert the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.15~rc1' WHERE id = 1")
+    op.alter_column(
+        "bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
+    )
+    op.alter_column(
+        "bw_ui_users", "theme", existing_type=sa.Enum("light", "dark", name="themes_enum"), server_default=sa.text("'light'"), existing_nullable=False
+    )
+    op.alter_column("bw_ui_users", "language", existing_type=sa.String(length=2), server_default=sa.text("'en'"), existing_nullable=False)
+    op.alter_column(
+        "bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
+    )
+    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column(
+        "bw_templates",
+        "method",
+        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
+        server_default=sa.text("'manual'"),
+        existing_nullable=False,
+    )
+    op.alter_column(
+        "bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
+    )
+    op.alter_column(
+        "bw_templates", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
+    )
+    op.alter_column("bw_services", "is_draft", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column(
+        "bw_plugins",
+        "type",
+        existing_type=sa.Enum("core", "external", "ui", "pro", name="plugin_types_enum"),
+        server_default=sa.text("'core'"),
+        existing_nullable=False,
+    )
+    op.alter_column(
+        "bw_metadata",
+        "pro_status",
+        existing_type=sa.Enum("active", "invalid", "expired", "suspended", name="pro_status_enum"),
+        server_default=sa.text("'invalid'"),
+        existing_nullable=False,
+    )
+    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=True)
+    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=sa.text("5443"), existing_nullable=False)
     op.alter_column(
         "bw_ui_users",
         "method",
@@ -518,6 +604,7 @@ def downgrade() -> None:
     op.drop_column("bw_plugins", "enabled")
     op.drop_column("bw_metadata", "certificate_keyring_active")
     op.drop_column("bw_metadata", "certificate_keyring")
+    op.drop_column("bw_metadata", "template_values_cleaned_at")
     op.drop_column("bw_metadata", "last_certificates_change")
     op.drop_column("bw_metadata", "certificates_changed")
     op.drop_column("bw_jobs_runs", "error")
@@ -528,8 +615,13 @@ def downgrade() -> None:
         type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
         existing_nullable=False,
     )
+    op.drop_column("bw_instances", "enroll_failures")
+    op.drop_column("bw_instances", "enroll_token_expires_at")
+    op.drop_column("bw_instances", "enroll_token_hash")
+    op.drop_column("bw_instances", "enroll_code_state")
     op.drop_column("bw_instances", "tls_fingerprint")
     op.drop_column("bw_instances", "tls_mode")
+    op.drop_column("bw_instances", "credential_revoked_at")
     op.drop_column("bw_instances", "credential_updated_at")
     op.drop_column("bw_instances", "credential_key_id")
     op.drop_column("bw_instances", "credential_nonce")

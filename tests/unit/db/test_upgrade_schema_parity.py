@@ -366,7 +366,7 @@ def test_enum_labels_match_between_an_upgraded_and_a_fresh_database(upgraded_and
     constraint or a VARCHAR, so a value the model added has to be migrated in with
     `ALTER TYPE ... ADD VALUE` and can be forgotten.
 
-    `postgresql_versions/b745cae3a655_..._1_7_0_beta.py` does exactly that for `web_cache`,
+    `postgresql_versions/3d2c304bf84e_..._1_7_0_beta.py` does exactly that for `web_cache`,
     `resource_groups` and `certificates`. The migration *not raising* is only half the answer; this
     is the other half. Note the label check passing here says nothing about PostgreSQL 11 or older,
     where `ADD VALUE` cannot run inside a transaction at all — the compose pins `postgres:16`.

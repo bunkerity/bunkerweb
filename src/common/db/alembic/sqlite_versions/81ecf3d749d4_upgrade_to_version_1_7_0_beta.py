@@ -1,8 +1,8 @@
 """Upgrade to version 1.7.0~beta
 
-Revision ID: c1af042488a9
+Revision ID: 81ecf3d749d4
 Revises: 447a2b82a6c7
-Create Date: 2026-09-01 14:33:53.060269
+Create Date: 2026-09-03 09:02:57.884205
 
 """
 
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import mysql
 import model
 
 # revision identifiers, used by Alembic.
-revision: str = "c1af042488a9"
+revision: str = "81ecf3d749d4"
 down_revision: Union[str, None] = "447a2b82a6c7"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -350,8 +350,13 @@ def upgrade() -> None:
         batch_op.add_column(sa.Column("credential_nonce", sa.LargeBinary(length=12), nullable=True))
         batch_op.add_column(sa.Column("credential_key_id", sa.String(length=128), nullable=True))
         batch_op.add_column(sa.Column("credential_updated_at", sa.DateTime(timezone=True), nullable=True))
+        batch_op.add_column(sa.Column("credential_revoked_at", sa.DateTime(timezone=True), nullable=True))
         batch_op.add_column(sa.Column("tls_mode", sa.Enum("off", "pinned", name="instance_tls_mode_enum"), server_default="off", nullable=False))
         batch_op.add_column(sa.Column("tls_fingerprint", sa.String(length=64), nullable=True))
+        batch_op.add_column(sa.Column("enroll_code_state", sa.String(length=16), server_default="none", nullable=False))
+        batch_op.add_column(sa.Column("enroll_token_hash", sa.String(length=128), nullable=True))
+        batch_op.add_column(sa.Column("enroll_token_expires_at", sa.DateTime(timezone=True), nullable=True))
+        batch_op.add_column(sa.Column("enroll_failures", sa.Integer(), server_default="0", nullable=False))
 
     with op.batch_alter_table("bw_jobs_runs", schema=None) as batch_op:
         batch_op.add_column(sa.Column("error", sa.Text(), nullable=True))
@@ -359,6 +364,7 @@ def upgrade() -> None:
     with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
         batch_op.add_column(sa.Column("certificates_changed", sa.Boolean(), nullable=True))
         batch_op.add_column(sa.Column("last_certificates_change", sa.DateTime(timezone=True), nullable=True))
+        batch_op.add_column(sa.Column("template_values_cleaned_at", sa.DateTime(timezone=True), nullable=True))
         batch_op.add_column(
             sa.Column("certificate_keyring", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True)
         )
@@ -390,13 +396,70 @@ def upgrade() -> None:
             existing_nullable=False,
         )
 
+    with op.batch_alter_table("bw_global_values", schema=None) as batch_op:
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=None, existing_nullable=True)
+        batch_op.alter_column(
+            "value",
+            existing_type=sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"),
+            server_default=None,
+            existing_nullable=True,
+        )
+
+    with op.batch_alter_table("bw_jobs", schema=None) as batch_op:
+        batch_op.alter_column("run_async", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+
+    with op.batch_alter_table("bw_jobs_runs", schema=None) as batch_op:
+        batch_op.alter_column("success", existing_type=sa.Boolean(), server_default=None, existing_nullable=True)
+
+    with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
+        batch_op.alter_column("is_pro", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+        batch_op.alter_column("pro_overlapped", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+        batch_op.alter_column("pro_services", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+        batch_op.alter_column(
+            "pro_status",
+            existing_type=sa.Enum("active", "invalid", "expired", "suspended", name="pro_status_enum"),
+            server_default=None,
+            existing_nullable=False,
+        )
+
+    with op.batch_alter_table("bw_plugins", schema=None) as batch_op:
+        batch_op.alter_column(
+            "type", existing_type=sa.Enum("core", "external", "ui", "pro", name="plugin_types_enum"), server_default=None, existing_nullable=False
+        )
+
+    with op.batch_alter_table("bw_selects", schema=None) as batch_op:
+        batch_op.alter_column("order", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+        batch_op.alter_column("value", existing_type=sa.String(length=256), server_default=None, existing_nullable=True)
+
+    with op.batch_alter_table("bw_services_settings", schema=None) as batch_op:
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=None, existing_nullable=True)
+        batch_op.alter_column(
+            "value",
+            existing_type=sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"),
+            server_default=None,
+            existing_nullable=True,
+        )
+
+    with op.batch_alter_table("bw_template_settings", schema=None) as batch_op:
+        batch_op.alter_column("default", existing_type=sa.Text(), server_default=None, existing_nullable=True)
+        batch_op.alter_column("order", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=None, existing_nullable=True)
+
+    with op.batch_alter_table("bw_ui_user_sessions", schema=None) as batch_op:
+        batch_op.alter_column("user_agent", existing_type=sa.Text(), server_default=None, existing_nullable=True)
+
     with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("admin", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+        batch_op.alter_column("creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+        batch_op.alter_column("language", existing_type=sa.String(length=2), server_default=None, existing_nullable=False)
         batch_op.alter_column(
             "method",
             existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
             server_default=None,
             existing_nullable=False,
         )
+        batch_op.alter_column("theme", existing_type=sa.Enum("light", "dark", name="themes_enum"), server_default=None, existing_nullable=False)
+        batch_op.alter_column("update_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
 
     # ### end Alembic commands ###
 
@@ -406,12 +469,95 @@ def downgrade() -> None:
     # Revert the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.15~rc1' WHERE id = 1")
     with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("update_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("(CURRENT_TIMESTAMP)"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("theme", existing_type=sa.Enum("light", "dark", name="themes_enum"), server_default=sa.text("'light'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
         batch_op.alter_column(
             "method",
             existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
             server_default=sa.text("'manual'"),
             existing_nullable=False,
         )
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("language", existing_type=sa.String(length=2), server_default=sa.text("'en'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("(CURRENT_TIMESTAMP)"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.alter_column("admin", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_ui_user_sessions", schema=None) as batch_op:
+        batch_op.alter_column("user_agent", existing_type=sa.Text(), server_default=sa.text("('')"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_template_settings", schema=None) as batch_op:
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_template_settings", schema=None) as batch_op:
+        batch_op.alter_column("order", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_template_settings", schema=None) as batch_op:
+        batch_op.alter_column("default", existing_type=sa.Text(), server_default=sa.text("('')"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_services_settings", schema=None) as batch_op:
+        batch_op.alter_column(
+            "value",
+            existing_type=sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"),
+            server_default=sa.text("('')"),
+            existing_nullable=True,
+        )
+
+    with op.batch_alter_table("bw_services_settings", schema=None) as batch_op:
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_selects", schema=None) as batch_op:
+        batch_op.alter_column("value", existing_type=sa.String(length=256), server_default=sa.text("('')"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_selects", schema=None) as batch_op:
+        batch_op.alter_column("order", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_plugins", schema=None) as batch_op:
+        batch_op.alter_column(
+            "type", existing_type=sa.Enum("core", "external", "ui", "pro", name="plugin_types_enum"), server_default=sa.text("'core'"), existing_nullable=False
+        )
+
+    with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
+        batch_op.alter_column(
+            "pro_status",
+            existing_type=sa.Enum("active", "invalid", "expired", "suspended", name="pro_status_enum"),
+            server_default=sa.text("'invalid'"),
+            existing_nullable=False,
+        )
+
+    with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
+        batch_op.alter_column("pro_services", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
+        batch_op.alter_column("pro_overlapped", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
+        batch_op.alter_column("is_pro", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_jobs_runs", schema=None) as batch_op:
+        batch_op.alter_column("success", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_jobs", schema=None) as batch_op:
+        batch_op.alter_column("run_async", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+
+    with op.batch_alter_table("bw_global_values", schema=None) as batch_op:
+        batch_op.alter_column(
+            "value",
+            existing_type=sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"),
+            server_default=sa.text("('')"),
+            existing_nullable=True,
+        )
+
+    with op.batch_alter_table("bw_global_values", schema=None) as batch_op:
+        batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=True)
 
     with op.batch_alter_table("bw_template_custom_configs", schema=None) as batch_op:
         batch_op.alter_column(
@@ -442,6 +588,7 @@ def downgrade() -> None:
     with op.batch_alter_table("bw_metadata", schema=None) as batch_op:
         batch_op.drop_column("certificate_keyring_active")
         batch_op.drop_column("certificate_keyring")
+        batch_op.drop_column("template_values_cleaned_at")
         batch_op.drop_column("last_certificates_change")
         batch_op.drop_column("certificates_changed")
 
@@ -449,8 +596,13 @@ def downgrade() -> None:
         batch_op.drop_column("error")
 
     with op.batch_alter_table("bw_instances", schema=None) as batch_op:
+        batch_op.drop_column("enroll_failures")
+        batch_op.drop_column("enroll_token_expires_at")
+        batch_op.drop_column("enroll_token_hash")
+        batch_op.drop_column("enroll_code_state")
         batch_op.drop_column("tls_fingerprint")
         batch_op.drop_column("tls_mode")
+        batch_op.drop_column("credential_revoked_at")
         batch_op.drop_column("credential_updated_at")
         batch_op.drop_column("credential_key_id")
         batch_op.drop_column("credential_nonce")

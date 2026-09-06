@@ -1,8 +1,8 @@
 """Upgrade to version 1.7.0~beta
 
-Revision ID: 304a4e42d82f
-Revises: 581b304b1118
-Create Date: 2026-09-01 14:34:22.771611
+Revision ID: 3d2c304bf84e
+Revises: 292f91a16c0d
+Create Date: 2026-09-03 09:06:10.757208
 
 """
 
@@ -11,11 +11,12 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
+from sqlalchemy.dialects import postgresql
 import model
 
 # revision identifiers, used by Alembic.
-revision: str = "304a4e42d82f"
-down_revision: Union[str, None] = "581b304b1118"
+revision: str = "3d2c304bf84e"
+down_revision: Union[str, None] = "292f91a16c0d"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -26,6 +27,21 @@ def upgrade() -> None:
     op.execute("UPDATE bw_metadata SET version = '1.7.0~beta' WHERE id = 1")
     # Force a Pro plugins re-check after the version change
     op.execute("UPDATE bw_metadata SET last_pro_check = NULL WHERE id = 1")
+    op.execute("DO $$ BEGIN CREATE TYPE instance_tls_mode_enum AS ENUM ('off', 'pinned'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;")
+    op.execute(
+        "DO $$ BEGIN CREATE TYPE methods_enum AS ENUM ('api', 'ui', 'scheduler', 'autoconf', 'manual', 'wizard'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
+    )
+    op.execute(
+        "DO $$ BEGIN CREATE TYPE resource_kinds_enum AS ENUM ('ip', 'country', 'asn', 'rdns', 'user_agent', 'uri'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;"
+    )
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'web_cache'")
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'resource_groups'")
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'certificates'")
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'redirects'")
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'upstreams'")
+    op.execute("ALTER TYPE api_resource_enum ADD VALUE IF NOT EXISTS 'workflows'")
+    op.execute("ALTER TYPE settings_types_enum ADD VALUE IF NOT EXISTS 'size'")
+    op.execute("ALTER TYPE settings_types_enum ADD VALUE IF NOT EXISTS 'duration'")
     op.create_table(
         "bw_bans",
         sa.Column("id", sa.Integer(), sa.Identity(always=False, start=1, increment=1), nullable=False),
@@ -189,7 +205,7 @@ def upgrade() -> None:
         sa.Column("id", sa.String(length=256), nullable=False),
         sa.Column("name", sa.String(length=256), nullable=False),
         sa.Column("description", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True),
-        sa.Column("method", sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"), nullable=False),
+        sa.Column("method", postgresql.ENUM("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum", create_type=False), nullable=False),
         sa.Column("plugin_id", sa.String(length=64), nullable=True),
         sa.Column("creation_date", sa.DateTime(timezone=True), nullable=False),
         sa.Column("last_update", sa.DateTime(timezone=True), nullable=False),
@@ -242,7 +258,7 @@ def upgrade() -> None:
         "bw_resource_group_entries",
         sa.Column("id", sa.Integer(), sa.Identity(always=False, start=1, increment=1), nullable=False),
         sa.Column("group_id", sa.String(length=256), nullable=False),
-        sa.Column("kind", sa.Enum("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum"), nullable=False),
+        sa.Column("kind", postgresql.ENUM("ip", "country", "asn", "rdns", "user_agent", "uri", name="resource_kinds_enum", create_type=False), nullable=False),
         sa.Column("value", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False),
         sa.Column("comment", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True),
         sa.Column("order", sa.Integer(), nullable=False),
@@ -282,88 +298,24 @@ def upgrade() -> None:
         sa.UniqueConstraint("resource_id", "order"),
     )
     op.create_index(op.f("ix_bw_upstream_servers_resource_id"), "bw_upstream_servers", ["resource_id"], unique=False)
-    op.alter_column(
-        "bw_api_user_permissions",
-        "resource_type",
-        existing_type=mysql.ENUM("instances", "global_config", "services", "configs", "plugins", "cache", "bans", "jobs"),
-        type_=sa.Enum(
-            "instances",
-            "global_config",
-            "services",
-            "configs",
-            "plugins",
-            "cache",
-            "web_cache",
-            "bans",
-            "jobs",
-            "resource_groups",
-            "certificates",
-            "redirects",
-            "upstreams",
-            "workflows",
-            name="api_resource_enum",
-        ),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_custom_configs",
-        "type",
-        existing_type=mysql.ENUM(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "default_server_stream",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-        ),
-        type_=sa.Enum(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-            name="custom_configs_types_enum",
-        ),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_custom_configs",
-        "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_global_values",
-        "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        existing_nullable=False,
-    )
     op.add_column("bw_instances", sa.Column("credential_ciphertext", sa.LargeBinary(length=4294967295), nullable=True))
     op.add_column("bw_instances", sa.Column("credential_nonce", sa.LargeBinary(length=12), nullable=True))
     op.add_column("bw_instances", sa.Column("credential_key_id", sa.String(length=128), nullable=True))
     op.add_column("bw_instances", sa.Column("credential_updated_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("bw_instances", sa.Column("tls_mode", sa.Enum("off", "pinned", name="instance_tls_mode_enum"), server_default="off", nullable=False))
-    op.add_column("bw_instances", sa.Column("tls_fingerprint", sa.String(length=64), nullable=True))
-    op.alter_column(
+    op.add_column("bw_instances", sa.Column("credential_revoked_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
         "bw_instances",
-        "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        existing_nullable=False,
+        sa.Column("tls_mode", postgresql.ENUM("off", "pinned", name="instance_tls_mode_enum", create_type=False), server_default="off", nullable=False),
     )
+    op.add_column("bw_instances", sa.Column("tls_fingerprint", sa.String(length=64), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_code_state", sa.String(length=16), server_default="none", nullable=False))
+    op.add_column("bw_instances", sa.Column("enroll_token_hash", sa.String(length=128), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_token_expires_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column("bw_instances", sa.Column("enroll_failures", sa.Integer(), server_default="0", nullable=False))
     op.add_column("bw_jobs_runs", sa.Column("error", sa.Text(), nullable=True))
     op.add_column("bw_metadata", sa.Column("certificates_changed", sa.Boolean(), nullable=True))
     op.add_column("bw_metadata", sa.Column("last_certificates_change", sa.DateTime(timezone=True), nullable=True))
+    op.add_column("bw_metadata", sa.Column("template_values_cleaned_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column(
         "bw_metadata",
         sa.Column("certificate_keyring", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mariadb").with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=True),
@@ -371,73 +323,60 @@ def upgrade() -> None:
     op.add_column("bw_metadata", sa.Column("certificate_keyring_active", sa.String(length=128), nullable=True))
     op.add_column("bw_plugins", sa.Column("enabled", sa.Boolean(), server_default=sa.text("true"), nullable=False))
     op.add_column("bw_plugins", sa.Column("icon", sa.String(length=256), nullable=True))
+    op.add_column("bw_settings", sa.Column("case_insensitive", sa.Boolean(), server_default=sa.text("false"), nullable=False))
+    op.alter_column("bw_instances", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_instances", "last_seen", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "end_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "start_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=None, existing_nullable=True)
+    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=None, existing_nullable=False)
+    op.alter_column(
+        "bw_metadata",
+        "pro_status",
+        existing_type=postgresql.ENUM("active", "invalid", "expired", "suspended", name="pro_status_enum", create_type=False),
+        server_default=None,
+        existing_nullable=False,
+    )
     op.alter_column(
         "bw_plugins",
-        "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
+        "type",
+        existing_type=postgresql.ENUM("core", "external", "ui", "pro", name="plugin_types_enum", create_type=False),
         server_default=None,
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
         existing_nullable=False,
     )
+    op.alter_column("bw_templates", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
     op.alter_column(
-        "bw_services",
+        "bw_templates",
         "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
+        existing_type=postgresql.ENUM("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum", create_type=False),
+        server_default=None,
         existing_nullable=False,
     )
+    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
+    op.alter_column("bw_ui_users", "language", existing_type=sa.String(length=2), server_default=None, existing_nullable=False)
     op.alter_column(
-        "bw_services_settings",
+        "bw_ui_users",
         "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        existing_nullable=False,
-    )
-    op.add_column("bw_settings", sa.Column("case_insensitive", sa.Boolean(), server_default=sa.text("false"), nullable=False))
-    op.alter_column(
-        "bw_settings",
-        "type",
-        existing_type=mysql.ENUM("password", "text", "number", "file", "check", "select", "multiselect", "multivalue"),
-        type_=sa.Enum("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration", name="settings_types_enum"),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_template_custom_configs",
-        "type",
-        existing_type=mysql.ENUM(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "default_server_stream",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-        ),
-        type_=sa.Enum(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-            name="custom_configs_types_enum",
-        ),
+        existing_type=postgresql.ENUM("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum", create_type=False),
+        server_default=None,
         existing_nullable=False,
     )
     op.alter_column(
         "bw_ui_users",
-        "method",
-        existing_type=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
+        "theme",
+        existing_type=postgresql.ENUM("light", "dark", name="themes_enum", create_type=False),
         server_default=None,
-        type_=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
         existing_nullable=False,
     )
+    op.alter_column("bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=None, existing_nullable=False)
     # ### end Alembic commands ###
 
 
@@ -446,163 +385,97 @@ def downgrade() -> None:
     # Revert the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.15~rc1' WHERE id = 1")
     op.alter_column(
+        "bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+    )
+    op.alter_column(
+        "bw_ui_users",
+        "theme",
+        existing_type=postgresql.ENUM("light", "dark", name="themes_enum", create_type=False),
+        server_default=sa.text("'light'::themes_enum"),
+        existing_nullable=False,
+    )
+    op.alter_column(
         "bw_ui_users",
         "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        existing_nullable=False,
-        existing_server_default=sa.text("'manual'"),
-    )
-    op.alter_column(
-        "bw_template_custom_configs",
-        "type",
-        existing_type=sa.Enum(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-            name="custom_configs_types_enum",
-        ),
-        type_=mysql.ENUM(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "default_server_stream",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-        ),
+        existing_type=postgresql.ENUM("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum", create_type=False),
+        server_default=sa.text("'manual'::methods_enum"),
         existing_nullable=False,
     )
+    op.alter_column("bw_ui_users", "language", existing_type=sa.String(length=2), server_default=sa.text("'en'::character varying"), existing_nullable=False)
     op.alter_column(
-        "bw_settings",
-        "type",
-        existing_type=sa.Enum(
-            "password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration", name="settings_types_enum"
-        ),
-        type_=mysql.ENUM("password", "text", "number", "file", "check", "select", "multiselect", "multivalue"),
-        existing_nullable=False,
+        "bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
     )
-    op.drop_column("bw_settings", "case_insensitive")
+    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=False)
     op.alter_column(
-        "bw_services_settings",
+        "bw_templates",
         "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
+        existing_type=postgresql.ENUM("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum", create_type=False),
+        server_default=sa.text("'manual'::methods_enum"),
         existing_nullable=False,
     )
     op.alter_column(
-        "bw_services",
-        "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
+        "bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=sa.text("timezone('utc'::text, now())"), existing_nullable=False
+    )
+    op.alter_column(
+        "bw_templates",
+        "creation_date",
+        existing_type=sa.DateTime(timezone=True),
+        server_default=sa.text("timezone('utc'::text, now())"),
         existing_nullable=False,
     )
     op.alter_column(
         "bw_plugins",
-        "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
+        "type",
+        existing_type=postgresql.ENUM("core", "external", "ui", "pro", name="plugin_types_enum", create_type=False),
+        server_default=sa.text("'core'::plugin_types_enum"),
         existing_nullable=False,
-        existing_server_default=sa.text("'manual'"),
     )
+    op.alter_column(
+        "bw_metadata",
+        "pro_status",
+        existing_type=postgresql.ENUM("active", "invalid", "expired", "suspended", name="pro_status_enum", create_type=False),
+        server_default=sa.text("'invalid'::pro_status_enum"),
+        existing_nullable=False,
+    )
+    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=False)
+    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=True)
+    op.alter_column(
+        "bw_jobs_runs", "start_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+    )
+    op.alter_column("bw_jobs_runs", "end_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False)
+    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=False)
+    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=sa.text("false"), existing_nullable=False)
+    op.alter_column("bw_instances", "last_seen", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False)
+    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=sa.text("5443"), existing_nullable=False)
+    op.alter_column(
+        "bw_instances", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+    )
+    op.drop_column("bw_settings", "case_insensitive")
     op.drop_column("bw_plugins", "icon")
     op.drop_column("bw_plugins", "enabled")
     op.drop_column("bw_metadata", "certificate_keyring_active")
     op.drop_column("bw_metadata", "certificate_keyring")
+    op.drop_column("bw_metadata", "template_values_cleaned_at")
     op.drop_column("bw_metadata", "last_certificates_change")
     op.drop_column("bw_metadata", "certificates_changed")
     op.drop_column("bw_jobs_runs", "error")
-    op.alter_column(
-        "bw_instances",
-        "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        existing_nullable=False,
-    )
+    op.drop_column("bw_instances", "enroll_failures")
+    op.drop_column("bw_instances", "enroll_token_expires_at")
+    op.drop_column("bw_instances", "enroll_token_hash")
+    op.drop_column("bw_instances", "enroll_code_state")
     op.drop_column("bw_instances", "tls_fingerprint")
     op.drop_column("bw_instances", "tls_mode")
+    op.drop_column("bw_instances", "credential_revoked_at")
     op.drop_column("bw_instances", "credential_updated_at")
     op.drop_column("bw_instances", "credential_key_id")
     op.drop_column("bw_instances", "credential_nonce")
     op.drop_column("bw_instances", "credential_ciphertext")
-    op.alter_column(
-        "bw_global_values",
-        "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_custom_configs",
-        "method",
-        existing_type=sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
-        type_=mysql.ENUM("ui", "scheduler", "autoconf", "manual", "wizard"),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_custom_configs",
-        "type",
-        existing_type=sa.Enum(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-            name="custom_configs_types_enum",
-        ),
-        type_=mysql.ENUM(
-            "http",
-            "stream",
-            "server_http",
-            "server_stream",
-            "default_server_http",
-            "default_server_stream",
-            "modsec",
-            "modsec_crs",
-            "crs_plugins_before",
-            "crs_plugins_after",
-        ),
-        existing_nullable=False,
-    )
-    op.alter_column(
-        "bw_api_user_permissions",
-        "resource_type",
-        existing_type=sa.Enum(
-            "instances",
-            "global_config",
-            "services",
-            "configs",
-            "plugins",
-            "cache",
-            "web_cache",
-            "bans",
-            "jobs",
-            "resource_groups",
-            "certificates",
-            "redirects",
-            "upstreams",
-            "workflows",
-            name="api_resource_enum",
-        ),
-        type_=mysql.ENUM("instances", "global_config", "services", "configs", "plugins", "cache", "bans", "jobs"),
-        existing_nullable=False,
-    )
     op.rename_table("bw_ui_user_preferences", "bw_ui_user_columns_preferences")
-    op.alter_column("bw_ui_user_columns_preferences", "key", existing_type=mysql.VARCHAR(length=256), new_column_name="table_name", existing_nullable=False)
-    op.alter_column("bw_ui_user_columns_preferences", "value", existing_type=mysql.TEXT(), new_column_name="columns", existing_nullable=False)
+    op.alter_column("bw_ui_user_columns_preferences", "key", existing_type=sa.VARCHAR(length=256), new_column_name="table_name", existing_nullable=False)
+    op.alter_column("bw_ui_user_columns_preferences", "value", existing_type=sa.TEXT(), new_column_name="columns", existing_nullable=False)
     op.drop_index(op.f("ix_bw_upstream_servers_resource_id"), table_name="bw_upstream_servers")
     op.drop_table("bw_upstream_servers")
     op.drop_index(op.f("ix_bw_resource_group_usages_plugin_id"), table_name="bw_resource_group_usages")
