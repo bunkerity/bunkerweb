@@ -57,6 +57,13 @@ local get_master_pid = process.get_master_pid
 local execute = os.execute
 local open = io.open
 local remove = os.remove
+local rename = os.rename
+-- Written by the entrypoint when this instance redeems its enrollment code, and rewritten by
+-- POST /credential when the control plane rotates it. Its presence is what makes this instance
+-- refuse the shared API_TOKEN: an enrolled instance answers to its own credential and nothing else.
+local INSTANCE_CREDENTIAL_PATH = "/var/lib/bunkerweb/instance-credential.json"
+-- io.open's third return value. Only "no such file" may be read as "this instance never enrolled".
+local ENOENT = 2
 -- Set by the entrypoint when a restart kept its configuration: the instance serves and enforces
 -- normally but still owes the scheduler a fresh push. Cleared by POST /confs.
 local NEEDS_CONFIG_PATH = "/var/tmp/bunkerweb_needs_config"
@@ -167,9 +174,99 @@ local function secure_compare(a, b)
 	return diff == 0
 end
 
+-- Read this instance's own credential.
+--
+-- Returns the credential, or nil plus a second value saying WHY there is none. "absent" means the
+-- instance was never enrolled and the historical API_TOKEN behaviour applies. Anything else means
+-- the file is there but unusable, and that must NOT fall back to the shared token: an enrolled
+-- instance whose file turns unreadable (permissions, a truncated write, a half-restored volume)
+-- would otherwise silently start accepting the one key enrollment exists to take away from it.
+local function read_instance_credential()
+	-- luacheck: ignore 211
+	local file, open_err, errno = open(INSTANCE_CREDENTIAL_PATH, "r")
+	if not file then
+		-- Only ENOENT means "never enrolled". io.open answers nil for EVERY failure, so treating
+		-- them all as absent is the fail-open this function exists to prevent: a credential file
+		-- the worker cannot read (a volume restored root-owned, an SELinux relabel, a Linux arm
+		-- where run_as_nginx did not take) would send an enrolled instance straight back to
+		-- accepting the shared API_TOKEN, silently.
+		if errno == ENOENT then
+			return nil, "absent"
+		end
+		logger:log(
+			ERR,
+			"can't read the stored instance credential ("
+				.. tostring(open_err)
+				.. "), refusing every token until it is repaired"
+		)
+		return nil, "unreadable"
+	end
+	local content = file:read("*a")
+	file:close()
+	if not content or content == "" then
+		logger:log(ERR, "the stored instance credential file is empty, refusing every token until it is repaired")
+		return nil, "unreadable"
+	end
+	local ok, decoded = pcall(decode, content)
+	if not ok or type(decoded) ~= "table" or type(decoded.credential) ~= "string" or decoded.credential == "" then
+		logger:log(ERR, "the stored instance credential is unreadable, refusing every token until it is repaired")
+		return nil, "unreadable"
+	end
+	return decoded.credential, decoded.code_fingerprint
+end
+
+-- Replace the stored credential, keeping the fingerprint of the code it was first minted from so a
+-- restart carrying that same code still does not try to redeem it again. Written to a temp file
+-- and renamed: a torn write here would leave the instance unable to authenticate anything at all.
+local function write_instance_credential(credential)
+	local _, fingerprint = read_instance_credential()
+	local payload = { credential = credential }
+	-- `fingerprint` only carries a value on the success return; the failure returns put the reason
+	-- string there, and neither is a fingerprint worth keeping.
+	if type(fingerprint) == "string" and fingerprint ~= "absent" and fingerprint ~= "unreadable" then
+		payload.code_fingerprint = fingerprint
+	end
+	-- Per-writer temp name: two concurrent rotations sharing one ".tmp" would interleave their
+	-- writes and rename a spliced file into place.
+	local tmp_path = INSTANCE_CREDENTIAL_PATH
+		.. "."
+		.. tostring(ngx.worker.pid())
+		.. "."
+		.. tostring(ngx.now())
+		.. ".tmp"
+	-- Narrow the window before any content exists: the worker umask would otherwise create it
+	-- world-readable and only the chmod below would close it, with the credential already written.
+	execute("umask 077; : > " .. tmp_path)
+	local file, err = open(tmp_path, "w")
+	if not file then
+		return "can't open " .. tmp_path .. " : " .. (err or "unknown error")
+	end
+	file:write(encode(payload))
+	file:close()
+	if not execute("chmod 600 " .. tmp_path) then
+		remove(tmp_path)
+		return "can't restrict the permissions of " .. tmp_path
+	end
+	local ok, rename_err = rename(tmp_path, INSTANCE_CREDENTIAL_PATH)
+	if not ok then
+		remove(tmp_path)
+		return "can't replace " .. INSTANCE_CREDENTIAL_PATH .. " : " .. (rename_err or "unknown error")
+	end
+	return nil
+end
+
 function api:is_allowed_token()
+	-- A credential file that exists but cannot be read is NOT "never enrolled": falling back to
+	-- API_TOKEN there would hand the shared key back to the one instance that had it taken away.
+	if self.instance_credential_state == "unreadable" then
+		return false, "instance credential unreadable"
+	end
+	-- An enrolled instance answers to its own credential and to nothing else: the shared
+	-- API_TOKEN stops being a key to it, which is the entire point of enrollment (PO ruling
+	-- 2026-09-02). Rows that never enrolled keep the historical behaviour below.
+	local expected = self.instance_credential or self.api_token
 	-- If no token configured, allow
-	if not self.api_token or self.api_token == "" then
+	if not expected or expected == "" then
 		return true, "ok"
 	end
 	local headers = ngx_req.get_headers(tonumber((get_variable("MAX_HEADERS", false))) or 100)
@@ -178,7 +275,7 @@ function api:is_allowed_token()
 	if not provided then
 		return false, "missing API token"
 	end
-	if not secure_compare(provided, self.api_token) then
+	if not secure_compare(provided, expected) then
 		return false, "invalid API token"
 	end
 	return true, "ok"
@@ -201,6 +298,14 @@ function api:initialize(ctx)
 	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
+	end
+
+	-- Read straight from disk rather than caching in a shared dict: this runs only for
+	-- control-plane requests, and a per-worker cache would need cross-worker invalidation the
+	-- moment POST /credential rewrites the file.
+	self.instance_credential, self.instance_credential_state = read_instance_credential()
+	if self.instance_credential then
+		self.instance_credential_state = "enrolled"
 	end
 end
 
@@ -509,6 +614,47 @@ api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 api.global.POST["^/plugins$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/pro_plugins$"] = api.global.POST["^/confs$"]
+
+-- Second phase of a credential rotation. The control plane mints the new credential, hands it over
+-- here authenticated with the OLD one, and only writes it to its own database once this answered
+-- 200 -- so a failure leaves both sides on the old credential rather than locking the instance out.
+-- Reached through the same dispatcher as every other route, hence behind the same IP whitelist and
+-- the same token check.
+api.global.POST["^/credential$"] = function(self)
+	read_body()
+	local data = get_body_data()
+	if not data then
+		local data_file = get_body_file()
+		if data_file then
+			local file, err = open(data_file)
+			if not file then
+				return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+			end
+			data = file:read("*a")
+			file:close()
+		end
+	end
+	if not data then
+		return self:response(HTTP_BAD_REQUEST, "error", "missing body")
+	end
+
+	local ok, payload = pcall(decode, data)
+	if not ok then
+		return self:response(HTTP_BAD_REQUEST, "error", "can't decode JSON : " .. tostring(payload))
+	end
+	if type(payload) ~= "table" or type(payload.credential) ~= "string" or payload.credential == "" then
+		return self:response(HTTP_BAD_REQUEST, "error", "missing credential")
+	end
+
+	local err = write_instance_credential(payload.credential)
+	if err then
+		logger:log(ERR, "could not store the rotated credential : " .. err)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "could not store the credential")
+	end
+
+	logger:log(NOTICE, "stored a rotated instance credential")
+	return self:response(HTTP_OK, "success", "credential updated")
+end
 
 api.global.POST["^/unban$"] = function(self)
 	read_body()

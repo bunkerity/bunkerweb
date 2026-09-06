@@ -86,6 +86,19 @@ EOF
 }
 
 
+# Redeem a one-time enrollment code, if one was handed to this boot, before the first render:
+# api.lua reads the stored credential at init and an instance that starts unenrolled refuses every
+# push until it has one. Never fatal -- the instance boots loudly unenrolled instead of crash-looping.
+redeem_enrollment_code "ENTRYPOINT"
+
+# An instance that WAS enrolled and no longer holds its credential is deaf to the control plane in
+# a way nothing reports: it answers only to a credential it lost, so every push is refused. Refuse
+# to start instead, with the one message that says how to recover (PO ruling 2026-09-02). A fresh
+# instance, or one that just redeemed a code above, is untouched by this.
+if ! check_instance_credential "ENTRYPOINT"; then
+	exit 1
+fi
+
 # ensure the internal default-server certificate exists before any render/start
 if ! generate_default_server_cert; then
 	log "ENTRYPOINT" "❌" "Failed to provision the internal default-server certificate"

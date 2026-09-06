@@ -748,3 +748,183 @@ function init_reload_config() {
 			;;
 	esac
 }
+
+# Path of this instance's own control-plane credential, minted by redeeming a one-time enrollment
+# code. Read back by api.lua, which -- when it exists -- accepts ONLY this credential and refuses
+# the global API_TOKEN (PO ruling 2026-09-02).
+INSTANCE_CREDENTIAL_FILE="${INSTANCE_CREDENTIAL_FILE:-/var/lib/bunkerweb/instance-credential.json}"
+
+# Redeem a one-time enrollment code against the control-plane API and persist the credential it
+# mints. No-op unless INSTANCE_ENROLLMENT_CODE is set. Re-running with the SAME code is a no-op:
+# the persisted credential wins, which is what makes a restart safe. A DIFFERENT code re-enrolls,
+# and that is the only way out of a revoked state. Never returns non-zero for a failed enrollment:
+# the instance must still boot, loudly unenrolled, rather than crash-loop.
+function redeem_enrollment_code() {
+	local caller="${1:-ENTRYPOINT}"
+
+	if [ -z "${INSTANCE_ENROLLMENT_CODE:-}" ] ; then
+		return 0
+	fi
+
+	# Take the code out of this shell's environment right away. Everything below works off the
+	# local copy, so no early return can leave it behind for a child process or for the generated
+	# environment file -- and the failure paths are exactly where that used to happen.
+	local code="$INSTANCE_ENROLLMENT_CODE"
+	unset INSTANCE_ENROLLMENT_CODE
+
+	if [ -z "${API_URL:-}" ] ; then
+		log "$caller" "❌" "an enrollment code is set but API_URL is not, cannot enroll"
+		return 0
+	fi
+
+	local enroll_hostname="${INSTANCE_ENROLLMENT_HOSTNAME:-}"
+	if [ -z "$enroll_hostname" ] ; then
+		enroll_hostname="$(hostname)"
+		log "$caller" "⚠️" "INSTANCE_ENROLLMENT_HOSTNAME is not set, falling back to $enroll_hostname : it must match the hostname registered in the control plane"
+	fi
+
+	# Assignment prefixes, not argv: these land in the child's environment, where
+	# /proc/<pid>/cmdline cannot show the code to every local user.
+	local rc=0
+	BW_ENROLL_FILE="$INSTANCE_CREDENTIAL_FILE" \
+	BW_ENROLL_HOSTNAME="$enroll_hostname" \
+	BW_ENROLL_API_URL="$API_URL" \
+	BW_ENROLL_CODE="$code" \
+	python3 - <<'PYEOF' || rc=$?
+import json
+import os
+import sys
+import tempfile
+import urllib.error
+import urllib.request
+from hashlib import sha256
+
+path = os.environ["BW_ENROLL_FILE"]
+code = os.environ["BW_ENROLL_CODE"]
+fingerprint = sha256(code.encode("utf-8")).hexdigest()
+
+# Already redeemed with this very code: keep what we have. Re-redeeming would burn a code that has
+# already been consumed and answer 401, which would look like a failure on every restart.
+try:
+    with open(path, "r", encoding="utf-8") as stored_file:
+        stored = json.load(stored_file)
+    if stored.get("credential") and stored.get("code_fingerprint") == fingerprint:
+        sys.exit(2)
+except (OSError, ValueError):
+    pass
+
+request = urllib.request.Request(
+    os.environ["BW_ENROLL_API_URL"].rstrip("/") + "/instances/enroll",
+    data=json.dumps({"hostname": os.environ["BW_ENROLL_HOSTNAME"], "code": code}).encode("utf-8"),
+    headers={"Content-Type": "application/json", "User-Agent": "bwapi"},
+    method="POST",
+)
+try:
+    # TLS verification stays on, like every other control-plane client (base_api_client.py): this
+    # exchange hands out a long-lived credential, it is the last place to accept an unverified peer.
+    with urllib.request.urlopen(request, timeout=10) as response:
+        payload = json.load(response)
+except (urllib.error.URLError, OSError, ValueError) as exc:
+    # Never echo the body: a rejection is opaque by design and the request carried the code.
+    print(f"enrollment request failed: {type(exc).__name__}", file=sys.stderr)
+    sys.exit(1)
+
+credential = payload.get("credential") if isinstance(payload, dict) else None
+if not credential:
+    print("enrollment response carried no credential", file=sys.stderr)
+    sys.exit(1)
+
+# Atomic: a torn credential file leaves the instance unable to authenticate anything at all.
+descriptor, tmp_path = tempfile.mkstemp(dir=os.path.dirname(path) or ".")
+try:
+    with os.fdopen(descriptor, "w", encoding="utf-8") as tmp_file:
+        json.dump({"credential": credential, "code_fingerprint": fingerprint}, tmp_file)
+    os.chmod(tmp_path, 0o600)
+    os.replace(tmp_path, path)
+except BaseException:
+    os.unlink(tmp_path)
+    raise
+PYEOF
+
+	if [ $rc -eq 2 ] ; then
+		log "$caller" "ℹ️" "Instance already enrolled with this code, keeping the stored credential"
+		return 0
+	fi
+	if [ $rc -ne 0 ] ; then
+		log "$caller" "❌" "Enrollment failed, this instance has no credential of its own : pushes to it will be refused until it is enrolled"
+		return 0
+	fi
+
+	# No chmod/chown here: the file is created 0600 by mkstemp and renamed into place, by the same
+	# user the NGINX workers run as (the Docker image runs as nginx:nginx, and the Linux arm calls
+	# this through run_as_nginx). Re-widening it afterwards would only add a window.
+	log "$caller" "ℹ️" "Instance enrolled successfully, credential stored in $INSTANCE_CREDENTIAL_FILE"
+	return 0
+}
+
+# Local evidence that this instance HAS held a control-plane credential. It sits next to the
+# credential itself, so it lives and dies with the same volume -- deliberately: an instance that
+# never enrolled has neither file and must boot normally, while an instance whose data survived but
+# whose credential file did not is the shape worth refusing on, because the control plane keeps
+# dialing it with a credential it no longer holds and every push fails with nothing to read.
+# The bound this implies is real and deliberate: a container recreated with NO data volume loses the
+# marker together with the credential and boots as a fresh instance, so the message below must not
+# blame that case -- only the control plane can see it (report-L-A3.md §6 Q2).
+INSTANCE_ENROLLED_MARKER="${INSTANCE_ENROLLED_MARKER:-/var/lib/bunkerweb/instance-enrolled}"
+
+# Is there a credential file we could actually authenticate with? A file that exists but carries no
+# credential is the same outage as a missing one -- api.lua refuses every request rather than fall
+# back to API_TOKEN -- so it counts as missing here.
+# Only ONE answer is allowed to refuse a boot: "the credential is not there". Everything else --
+# a file we are not allowed to read, a missing or broken interpreter -- is an unknown, and an
+# unknown that refuses would be a self-inflicted outage on an instance whose credential is fine.
+function _instance_credential_is_usable() {
+	[ -f "$INSTANCE_CREDENTIAL_FILE" ] || return 1
+
+	local python_bin rc=0
+	python_bin="$(get_python_bin)"
+	BW_CREDENTIAL_FILE="$INSTANCE_CREDENTIAL_FILE" "$python_bin" - <<'PYEOF' || rc=$?
+import json
+import os
+import sys
+
+try:
+    with open(os.environ["BW_CREDENTIAL_FILE"], "r", encoding="utf-8") as stored_file:
+        stored = json.load(stored_file)
+except PermissionError:
+    # Unreadable is not absent. An older install left this file root-owned and the service now
+    # runs as nginx; telling that operator to re-enroll would be the wrong fix for a chmod.
+    sys.exit(2)
+except (OSError, ValueError):
+    sys.exit(1)
+sys.exit(0 if isinstance(stored, dict) and stored.get("credential") else 1)
+PYEOF
+
+	# 1 -- and only 1 -- means "no credential here". 2 is unreadable, 127 is no interpreter; both
+	# leave the question open, and an open question must not stop the instance from starting.
+	[ "$rc" -ne 1 ]
+}
+
+# Refuse to start an instance that was enrolled and has lost its credential (PO ruling 2026-09-02).
+# Must run AFTER redeem_enrollment_code: a boot carrying a fresh code re-enrolls and is fine, and
+# only a boot left with no usable credential is refused. Returns 1 on that exact shape; the caller
+# exits. Also self-healing on upgrade: an instance enrolled before this marker existed gets one the
+# first time it boots holding a credential.
+function check_instance_credential() {
+	local caller="${1:-ENTRYPOINT}"
+
+	if _instance_credential_is_usable ; then
+		if [ ! -f "$INSTANCE_ENROLLED_MARKER" ] ; then
+			if ! printf '%s\n' "This instance holds a control-plane credential. Deleting this file makes a lost credential undetectable at boot." > "$INSTANCE_ENROLLED_MARKER" 2> /dev/null ; then
+				log "$caller" "⚠️" "Could not write $INSTANCE_ENROLLED_MARKER : a lost credential will not be detected on the next start"
+			fi
+		fi
+		return 0
+	fi
+
+	# Never enrolled as far as this filesystem knows: nothing to protect, boot as usual.
+	[ -f "$INSTANCE_ENROLLED_MARKER" ] || return 0
+
+	log "$caller" "❌" "This instance was enrolled but its credential is gone ($INSTANCE_CREDENTIAL_FILE is missing or unreadable) while $INSTANCE_ENROLLED_MARKER survived, so the file was deleted, truncated, or restored without it. The control plane still dials this instance with a credential it no longer holds, so every push to it would be refused with nothing to read. To bring it back: issue a new enrollment code for it (Instances page in the web UI, or POST /instances/<hostname>/enroll on the API) and pass it as INSTANCE_ENROLLMENT_CODE on the next start. If you removed the credential deliberately and want this instance back on the shared API_TOKEN, delete $INSTANCE_ENROLLED_MARKER too and start it again. Refusing to start."
+	return 1
+}

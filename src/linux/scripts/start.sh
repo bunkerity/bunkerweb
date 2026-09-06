@@ -132,6 +132,12 @@ function start() {
         [HTTP_PORT]="80"
         [HTTPS_PORT]="443"
         [KEEP_CONFIG_ON_RESTART]="yes"
+        # Secure enrollment. Declared here because the loader below only honours keys that exist in
+        # this map -- an unlisted key in variables.env is silently dropped, which is how a code set
+        # by the operator would have looked like "enrollment just does nothing".
+        [API_URL]=""
+        [INSTANCE_ENROLLMENT_CODE]=""
+        [INSTANCE_ENROLLMENT_HOSTNAME]=""
     )
 
     # File containing the environment variables
@@ -190,6 +196,28 @@ function start() {
     if ! run_as_nginx env API_LISTEN_HTTPS="$API_LISTEN_HTTPS" bash -c \
         'source /usr/share/bunkerweb/helpers/utils.sh; generate_default_server_cert && generate_api_server_cert'; then
         log "SYSTEMCTL" "❌" "Failed to provision internal certificates"
+        exit 1
+    fi
+
+    # Redeem a one-time enrollment code, if one was configured, before the first render. Run as
+    # nginx like the certificates above, so the credential file is owned by the user api.lua reads
+    # it as. Never fatal: an instance that cannot enroll still boots, loudly unenrolled.
+    if [ -n "$INSTANCE_ENROLLMENT_CODE" ] ; then
+        # Exported, NOT passed as `env VAR=value` arguments: an argv element is world-readable in
+        # /proc/<pid>/cmdline for the life of the call, and any local user could `ps auxww` the
+        # join code and race the instance to redeem it. run_as_nginx uses setpriv/runuser/sudo -E/
+        # su -m, all of which carry the environment through.
+        export API_URL INSTANCE_ENROLLMENT_CODE INSTANCE_ENROLLMENT_HOSTNAME
+        run_as_nginx bash -c 'source /usr/share/bunkerweb/helpers/utils.sh; redeem_enrollment_code "SYSTEMCTL"' || true
+        unset INSTANCE_ENROLLMENT_CODE
+    fi
+
+    # An instance that WAS enrolled and no longer holds its credential answers only to a credential
+    # it lost, so every control-plane push to it is refused with nothing to read. Refuse to start
+    # instead, with the one message that says how to recover (PO ruling 2026-09-02). Unconditional:
+    # the loss is exactly the case where no enrollment code was configured. Run as nginx like the
+    # redemption above, so the marker it may write is owned by the user api.lua reads as.
+    if ! run_as_nginx bash -c 'source /usr/share/bunkerweb/helpers/utils.sh; check_instance_credential "SYSTEMCTL"' ; then
         exit 1
     fi
 
