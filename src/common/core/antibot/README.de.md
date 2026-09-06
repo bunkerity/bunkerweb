@@ -265,6 +265,12 @@ Beispiele:
 
     Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
+### Herausforderungen auf der Berichtsseite
+
+Jede von Antibot ausgelieferte Herausforderungsseite wird als Bericht erfasst und erscheint in der Spalte **Grund** der Berichtsseite als *Antibot challenge (captcha) served*, samt verwendetem Anbieter. BunkerWeb beantwortet eine Herausforderung selbst mit einem 200, statt die Anfrage an Ihre Anwendung weiterzureichen; der Bericht wird deshalb anhand seines Grundes und nicht anhand seines Status behalten — der Berichtsfilter behält sonst nur Blockierungen (4xx), Erkennungen und blockierte Stream-Sitzungen.
+
+Antibot fordert jeden nicht identifizierten Besucher eines geschützten Dienstes heraus, nicht nur verdächtige, also entsteht ein Bericht pro ausgelieferter Herausforderung — deutlich mehr als bei einem Blacklist-Treffer oder einer CrowdSec-Entscheidung. Zuerst füllt sich `METRICS_MAX_BLOCKED_REQUESTS` — der In-Memory-Puffer pro Worker, standardmäßig `1k` (bzw. `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, bei Verwendung von Redis). Ist er voll, wird das Älteste zuerst verworfen, also echte blockierte Anfragen zugunsten von Herausforderungen; erhöhen Sie ihn daher zuerst. Passen Sie danach `METRICS_RETENTION_DAYS` und `METRICS_RETENTION_MAX_ROWS` für den gespeicherten Verlauf an, oder setzen Sie `METRICS_PERSIST_TO_DB=no`, wenn Sie diesen Verlauf gar nicht speichern möchten. Die Analyse-Tabs der Berichtsseite sind nicht betroffen: eine ausgelieferte Herausforderung erscheint im Ereignisprotokoll, zählt aber nie als Blockierung und taucht daher weder unter **Top-Angreifer** noch auf der Bedrohungskarte auf.
+
 ### Konfigurationsbeispiele
 
 === "Cookie-Herausforderung"

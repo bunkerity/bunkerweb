@@ -265,6 +265,12 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
+### Challenges in the Reports page
+
+Every challenge page Antibot serves is recorded as a report and reads as *Antibot challenge (captcha) served* in the **Reason** column of the Reports page, with the provider that was used. BunkerWeb answers a challenge itself with a 200 instead of forwarding the request to your application, so the report is kept on the reason it carries rather than on its status — the Reports filter otherwise keeps only blocks (4xx), detections and blocked stream sessions.
+
+Antibot challenges every unidentified visitor of a protected service, not only visitors it suspects, so this is one report per challenge served — a far higher volume than a blacklist hit or a CrowdSec decision. The setting that fills first is `METRICS_MAX_BLOCKED_REQUESTS` — the per-worker in-memory buffer, `1k` by default (`METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, when Redis is in use). Once full it evicts oldest-first, discarding genuine blocked requests to make room for challenges, so raise it first; then size `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` for the stored history, or set `METRICS_PERSIST_TO_DB=no` if you do not want that history kept at all. The Reports page's analytical tabs are unaffected: a served challenge is listed in the event log but never counted as a block, so it does not appear in **Top offenders** or on the threat map.
+
 ### Example Configurations
 
 === "Cookie Challenge"

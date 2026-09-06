@@ -261,6 +261,12 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
+### Los desafíos en la página de Informes
+
+Cada página de desafío que Antibot sirve se registra como un informe y se lee como *Antibot challenge (captcha) served* en la columna **Motivo** de la página de Informes, con el proveedor utilizado. BunkerWeb responde un desafío por sí mismo con un 200 en lugar de reenviar la petición a su aplicación, así que el informe se conserva por el motivo que lleva y no por su estado — el filtro de Informes solo conserva, por lo demás, los bloqueos (4xx), las detecciones y las sesiones de flujo bloqueadas.
+
+Antibot desafía a todo visitante no identificado de un servicio protegido, no solo a los que sospecha, de modo que se genera un informe por desafío servido — un volumen muy superior al de un acierto de lista negra o de una decisión de CrowdSec. El ajuste que se llena primero es `METRICS_MAX_BLOCKED_REQUESTS`: el búfer en memoria por worker, `1k` de forma predeterminada (o `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, si se usa Redis). Cuando se llena, descarta primero lo más antiguo, es decir, peticiones bloqueadas reales para dejar sitio a los desafíos; auméntelo primero. Después dimensione `METRICS_RETENTION_DAYS` y `METRICS_RETENTION_MAX_ROWS` para el historial almacenado, o ponga `METRICS_PERSIST_TO_DB=no` si no desea almacenarlo. Las pestañas analíticas de la página de Informes no se ven afectadas: un desafío servido aparece en el registro de eventos pero nunca cuenta como bloqueo, así que no sale en **Principales atacantes** ni en el mapa de amenazas.
+
 ### Configuraciones de ejemplo
 
 === "Desafío de Cookie"

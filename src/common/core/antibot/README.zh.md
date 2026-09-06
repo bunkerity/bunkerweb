@@ -265,6 +265,12 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
 
+### 「报告」页面中的挑战
+
+Antibot 提供的每一个挑战页面都会记录为一条报告，并在「报告」页面的**原因**列中显示为 *Antibot challenge (captcha) served*，同时标明所用的提供方。BunkerWeb 会自行以 200 响应挑战，而不会把请求转发给您的应用，因此该报告依据其携带的原因而非其状态保留下来——否则「报告」筛选器只会保留拦截（4xx）、检测以及被拦截的 stream 会话。
+
+Antibot 会对受保护服务的每一位未识别访客发起挑战，而不仅仅是可疑访客，因此每提供一次挑战就产生一条报告——其数量远高于黑名单命中或 CrowdSec 裁决。最先被填满的是 `METRICS_MAX_BLOCKED_REQUESTS`——每个 worker 的内存缓冲区，默认 `1k`（使用 Redis 时为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`，默认 `10k`）。一旦填满就会优先淘汰最旧的记录，也就是用真实的被拦截请求为挑战腾出空间，因此请先调高它。随后再按存储历史的需要调整 `METRICS_RETENTION_DAYS` 与 `METRICS_RETENTION_MAX_ROWS`，若完全不希望保存，可设置 `METRICS_PERSIST_TO_DB=no`。「报告」页面的分析标签页不受影响：已提供的挑战会出现在事件日志中，但绝不会计为一次拦截，因此不会出现在**主要攻击者**或威胁地图中。
+
 ### 示例配置
 
 === "Cookie 挑战"

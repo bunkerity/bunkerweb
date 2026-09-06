@@ -265,6 +265,12 @@ Exemples :
 
     Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
 
+### Les défis dans la page Rapports
+
+Chaque page de défi servie par Antibot est enregistrée comme un rapport et se lit *Antibot challenge (captcha) served* dans la colonne **Raison** de la page Rapports, avec le fournisseur utilisé. BunkerWeb répond lui-même à un défi avec un 200 au lieu de transmettre la requête à votre application : le rapport est donc conservé sur la raison qu'il porte et non sur son statut — le filtre des Rapports ne garde sinon que les blocages (4xx), les détections et les sessions stream bloquées.
+
+Antibot défie tout visiteur non identifié d'un service protégé, et pas seulement ceux qu'il soupçonne : cela fait un rapport par défi servi, un volume bien supérieur à celui d'une liste noire ou d'une décision CrowdSec. Le réglage qui sature en premier est `METRICS_MAX_BLOCKED_REQUESTS` : le tampon en mémoire par worker, `1k` par défaut (ou `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, avec Redis). Une fois plein, il évince le plus ancien d'abord — donc de vraies requêtes bloquées pour faire place à des défis ; augmentez-le en premier. Dimensionnez ensuite `METRICS_RETENTION_DAYS` et `METRICS_RETENTION_MAX_ROWS` pour l'historique stocké, ou passez `METRICS_PERSIST_TO_DB=no` si vous ne souhaitez pas le conserver. Les onglets analytiques de la page Rapports ne sont pas concernés : un défi servi apparaît dans le journal d'événements mais n'est jamais compté comme un blocage, donc ni dans **Principaux attaquants** ni sur la carte des menaces.
+
 ### Exemples de configuration
 
 === "Défi Cookie"
