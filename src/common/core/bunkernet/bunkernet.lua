@@ -204,6 +204,18 @@ function bunkernet:log(bypass_checks)
 	if reason == "bunkernet" then
 		return self:ret(true, "skipping report because the reason is bunkernet")
 	end
+	-- A reason is no longer proof of a block. Three plugins now record one for an action that let
+	-- the client carry on : crowdsec on a served AppSec challenge or captcha, antibot on every
+	-- challenge page it serves, workflows on a redirect. Those are exactly the rows the Reports
+	-- filter keeps on their reason rather than on a 4xx (is_report() in core/metrics/metrics.lua),
+	-- and reporting them here would push every challenged visitor -- most of them human -- to the
+	-- shared BunkerNet database as an attacker, with USE_BUNKERNET defaulting to yes. Keyed on the
+	-- remediation the plugin recorded, not on the reason: a future plugin that challenges rather
+	-- than blocks gets the same treatment without touching this file.
+	local action = type(reason_data) == "table" and reason_data.action
+	if action == "challenge" or action == "captcha" or action == "redirect" then
+		return self:ret(true, "skipping report : the remediation was '" .. action .. "', the client was not blocked")
+	end
 
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
