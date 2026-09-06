@@ -33,6 +33,26 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "DEFAULT_SERVER_STREAM_PORTS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Ports on which the default server accepts stream (TCP) connections that match no configured service; leave empty to disable. Refused for a port a stream service listens on, a port an HTTP/HTTPS listener uses, or a port BunkerWeb binds for itself. Normally set on the reserved default-server service.",
+      "id": "default-server-stream-ports",
+      "label": "Default server stream ports",
+      "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
+      "type": "text",
+      "multiple": "default-server-stream-ports"
+    },
+    "DEFAULT_SERVER_STREAM_PORTS_SSL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Which of the default server stream ports above are served over TLS; leave empty for plain TCP only. Every value must also be listed in \"Default server stream ports\" — this is the TLS switch of the ports the default server already declares, not a second set of listeners, and a port that is only here is refused.",
+      "id": "default-server-stream-ports-ssl",
+      "label": "Default server stream ports (TLS)",
+      "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
+      "type": "text",
+      "multiple": "default-server-stream-ports-ssl"
+    },
     "ALLOWED_METHODS": {
       "context": "multisite",
       "default": "GET|POST|HEAD|QUERY",

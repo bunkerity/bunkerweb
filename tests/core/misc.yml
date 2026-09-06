@@ -103,6 +103,103 @@ actions:
     url: "http://www.example.com/?id=/etc/passwd"
     config:
       DENY_HTTP_STATUS: "444"
+  # --- the reserved `default-server` pseudo-service (conception option (b)) ---
+  #
+  # The default server is now a permanent row in `bw_services` whose settings render INTO the
+  # default block, through three phase runners restricted to a curated plugin subset
+  # (`src/common/utils/default_server.py`). Every unit test around it renders or executes a
+  # fragment; these two are the only checks that the whole chain -- seeding, save, generation,
+  # the runner's context rebind and `plugin:initialize` resolving against it -- works at once.
+  #
+  # `CUSTOM_HEADER` is a `headers` (curated) multisite setting scoped to the reserved id. If the
+  # rebind is missing the plugin resolves against `ngx.var.server_name`, which is the literal `_`
+  # inside this block, and the header simply never appears -- the failure this pins is silent.
+  default_server_service_settings_apply:
+    type: header
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "http://127.0.0.1"
+    response_headers:
+      X-Default-Server: "^reserved$"
+    config:
+      default-server_CUSTOM_HEADER: "X-Default-Server: reserved"
+  # The other half: a curated setting scoped to the reserved service must NOT leak into a real
+  # service's block. `default-server_*` keys are per-service like any other, so a service that
+  # never asked for the header must not get it.
+  default_server_service_settings_do_not_leak:
+    type: header
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "http://www.example.com"
+    response_headers:
+      # `null` is the harness's "must not be present" (tests/models/header.py), not an empty match.
+      X-Default-Server: null
+    restart_stack: false
+  # A refused plugin is never rendered into the default block and never applies there. `redirect`
+  # assumes a `Host` to route, so it is outside the curated subset: setting it on the reserved
+  # service must leave the default server answering 200, not redirecting.
+  default_server_refused_plugin_does_not_apply:
+    type: status
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "http://127.0.0.1"
+    status: 200
+    config:
+      default-server_CUSTOM_HEADER: null
+      default-server_REDIRECT_TO: "https://example.com"
+  # --- the stream default server (PO ruling 6, opt-in) ---
+  #
+  # `DEFAULT_SERVER_STREAM_PORTS` on the reserved service opens one `default_server` stream block
+  # per declared port that answers and closes. Probed at the TCP level because that is all there is
+  # to observe: no HTTP assertion type can express "the connection is accepted and then closed".
+  # Probed from INSIDE the container: `tests/docker/docker-compose.bunkerweb.yml` publishes 80 and
+  # 443 only, so a stream port declared here is never reachable from the runner. `container_name`
+  # is `bunkerweb` there. `timeout 5` distinguishes the two failures that matter -- exit 124 is
+  # "the port accepted and then hung", which is what a block missing its `return ""` handler would
+  # do; a refused connection exits non-zero without reaching the echo.
+  default_server_stream_port_answers_and_closes:
+    type: script
+    integrations:
+      - "Docker"
+    script:
+      [
+        "bash",
+        "-c",
+        "docker exec bunkerweb timeout 5 bash -c 'exec 3<>/dev/tcp/127.0.0.1/19999 && head -c 1 <&3; true' && echo 'default_server_stream: accepted and closed'",
+      ]
+    result: "default_server_stream: accepted and closed"
+    config:
+      default-server_CUSTOM_HEADER: null
+      default-server_REDIRECT_TO: null
+      default-server_DEFAULT_SERVER_STREAM_PORTS: "19999"
+  # `DEFAULT_SERVER_STREAM_PORTS_SSL` is the TLS switch of those ports. Probed with `openssl
+  # s_client` rather than a raw socket, because the observable difference IS the handshake: the
+  # block presents the internal default-server certificate and then closes, exactly as the plain
+  # one accepts and closes. A port listed here that is NOT in the port list above opens nothing --
+  # that half is pinned in `tests/unit/gen/test_default_server_stream.py`, where a refusal message
+  # can be read.
+  default_server_stream_ssl_port_completes_a_handshake:
+    type: script
+    integrations:
+      - "Docker"
+    script:
+      [
+        "bash",
+        "-c",
+        "docker exec bunkerweb timeout 5 openssl s_client -connect 127.0.0.1:19998 -servername unknown.example.com </dev/null 2>/dev/null | grep -q 'BEGIN CERTIFICATE' && echo 'default_server_stream_ssl: handshake completed'",
+      ]
+    result: "default_server_stream_ssl: handshake completed"
+    config:
+      default-server_CUSTOM_HEADER: null
+      default-server_REDIRECT_TO: null
+      default-server_DEFAULT_SERVER_STREAM_PORTS: "19998"
+      default-server_DEFAULT_SERVER_STREAM_PORTS_SSL: "19998"
   # TODO: make open_file_cache tests
   # TODO: make anonymous reporting tests
   # TODO: make http3 tests when available (maybe with https://aioquic.readthedocs.io/en/latest/)
