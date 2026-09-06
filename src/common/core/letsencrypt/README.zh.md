@@ -64,6 +64,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | 否   | **Certbot 日志备份上限：** Certbot 每个任务保留的轮转 `letsencrypt.log` 备份数量。Certbot 自带的默认值 `1000` 很容易迅速堆积；`50` 是一个更合理的上限。设置为 `0` 时仅保留当前日志。 |
 
 !!! info "信息和行为"
+    - 只有同时设置 `AUTO_LETS_ENCRYPT=yes`、`LETS_ENCRYPT_CHALLENGE=http` 和 `LETS_ENCRYPT_PASSTHROUGH=no` 时，才会启用本地 `/.well-known/acme-challenge/` 处理。HTTPS 重定向和访问检查的例外还要求请求中的确切令牌对应一个可读且非空的文件。删除令牌后会立即恢复正常检查。其他服务对该路径应用正常的路由和访问规则。
     - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
     - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
     - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
@@ -85,6 +86,8 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 !!! warning "通配符证书"
     通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 `USE_LETS_ENCRYPT_WILDCARD` 设置为 `yes` 并正确配置您的 DNS 提供商凭据。
+
+    通配符仅覆盖一级域名：`*.example.com` 不覆盖 `a.b.example.com`。无法覆盖全部已配置主机名的分组会被拒绝，相关服务会被报告为配置错误。请将这些名称拆分到不同服务中。有效分组仍会继续处理；如果无法签发任何证书，任务将失败。其他分组成功签发的证书仍会请求重新加载。
 
 !!! warning "速率限制"
     Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 `USE_LETS_ENCRYPT_STAGING` 设置为 `yes` 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。

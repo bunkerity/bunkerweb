@@ -64,6 +64,7 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | nein     | **Maximale Certbot-Log-Backups:** Anzahl rotierter `letsencrypt.log`-Backups, die Certbot pro Job behält. Certbots eigener Standardwert von 1000 sammelt sich schnell an; `50` ist ein sinnvoller Grenzwert. Setzen Sie `0`, um nur das aktuelle Log zu behalten.                                                                                                      |
 
 !!! info "Informationen und Verhalten"
+    - Die lokale Verarbeitung von `/.well-known/acme-challenge/` ist nur aktiv, wenn `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` und `LETS_ENCRYPT_PASSTHROUGH=no` gesetzt sind. Die Ausnahmen für HTTPS-Weiterleitung und Zugriff setzen zusätzlich voraus, dass genau das angeforderte Token als lesbare, nicht leere Datei existiert. Nach dem Löschen des Tokens gelten sofort wieder die normalen Prüfungen. Andere Dienste wenden ihre normalen Routing- und Zugriffsregeln auf diesen Pfad an.
     - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus.
     - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet.
     - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen.
@@ -85,6 +86,8 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 
 !!! warning "Wildcard-Zertifikate"
     Wildcard-Zertifikate sind nur mit DNS-Challenges verfügbar. Wenn Sie sie verwenden möchten, müssen Sie die Einstellung `USE_LETS_ENCRYPT_WILDCARD` auf `yes` setzen und Ihre DNS-Anbieter-Anmeldeinformationen korrekt konfigurieren.
+
+    Ein Wildcard-Zertifikat deckt nur eine Ebene ab: `*.example.com` gilt nicht für `a.b.example.com`. Gruppen, die nicht alle konfigurierten Hostnamen abdecken können, werden abgelehnt und der betroffene Dienst als fehlkonfiguriert gemeldet. Teilen Sie diese Namen auf separate Dienste auf. Gültige Gruppen werden weiterhin verarbeitet; kann kein Zertifikat ausgestellt werden, schlägt der Job fehl. Erfolgreich ausgestellte Zertifikate anderer Gruppen lösen weiterhin eine Neuladung aus.
 
 !!! warning "Ratenbegrenzungen"
     Let's Encrypt hat Ratenbegrenzungen für die Ausstellung von Zertifikaten. Verwenden Sie beim Testen von Konfigurationen die Staging-Umgebung, indem Sie `USE_LETS_ENCRYPT_STAGING` auf `yes` setzen, um zu vermeiden, dass Sie die Produktions-Ratenbegrenzungen erreichen. Staging-Zertifikate sind von Browsern nicht vertrauenswürdig, aber nützlich zur Validierung Ihrer Einrichtung.
