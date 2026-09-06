@@ -105,6 +105,16 @@ class ApiClient(BaseApiClient):
     def delete_instances(self, hostnames):
         return self._delete("/instances", json={"instances": list(hostnames)})
 
+    def enroll_instance(self, hostname, ttl_seconds=None):
+        """Issue a single-use enrollment code. The code is in the response and nowhere else."""
+        return self._post(f"/instances/{hostname}/enroll", json={"ttl_seconds": ttl_seconds} if ttl_seconds else {})
+
+    def rotate_instance_credential(self, hostname):
+        return self._post(f"/instances/{hostname}/rotate")
+
+    def revoke_instance_credential(self, hostname):
+        return self._post(f"/instances/{hostname}/revoke")
+
     def ping_instances(self):
         return self._get("/instances/ping")
 

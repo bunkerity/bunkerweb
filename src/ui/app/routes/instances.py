@@ -113,6 +113,45 @@ def instances_new():
     return redirect(url_for("loading", next=url_for("instances.instances_page"), message=f"Creating new instance {instance['hostname']}"))
 
 
+# Credential lifecycle. JSON rather than the form/redirect flow the other actions use: the
+# enrollment code is shown exactly once, in a modal, and must never end up in a flash message or a
+# redirect URL where it would survive in history or the server log.
+@instances.route("/instances/<string:hostname>/enroll", methods=["POST"])
+@login_required
+def instances_enroll(hostname: str):
+    if API_CLIENT.readonly:
+        return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    try:
+        data = API_CLIENT.enroll_instance(hostname)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return jsonify({"status": "error", "message": e.message}), 502
+    return jsonify({"status": "success", "hostname": hostname, "code": data.get("code")}), 200
+
+
+@instances.route("/instances/<string:hostname>/rotate", methods=["POST"])
+@login_required
+def instances_rotate(hostname: str):
+    if API_CLIENT.readonly:
+        return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    try:
+        API_CLIENT.rotate_instance_credential(hostname)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return jsonify({"status": "error", "message": e.message}), 502
+    return jsonify({"status": "success", "hostname": hostname}), 200
+
+
+@instances.route("/instances/<string:hostname>/revoke", methods=["POST"])
+@login_required
+def instances_revoke(hostname: str):
+    if API_CLIENT.readonly:
+        return jsonify({"status": "error", "message": "Database is in read-only mode"}), 403
+    try:
+        API_CLIENT.revoke_instance_credential(hostname)
+    except (ApiClientError, ApiUnavailableError) as e:
+        return jsonify({"status": "error", "message": e.message}), 502
+    return jsonify({"status": "success", "hostname": hostname}), 200
+
+
 @instances.route("/instances/<string:action>", methods=["POST"])
 @login_required
 def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TODO: see if we can support start and restart

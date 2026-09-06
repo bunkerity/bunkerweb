@@ -130,7 +130,31 @@
                     <tr>
                         <td></td>
                         <td></td>
-                        <td>{{ instance.hostname }}</td>
+                        <td>
+                            {{ instance.hostname }}
+                            {# `Instance` is an object, not a mapping: `.get` resolves to Undefined and calling it
+                               raises, which 500s the page. Subscript falls back to getattr, and `default(_, true)`
+                               covers an instance built before these attributes existed. #}
+                            {# Enrollment is a control-plane-owned concept. An `autoconf` row can legitimately
+                               hold a credential (the reconcile's `env["API_TOKEN"]`), which derives to
+                               "enrolled" -- but it cannot be enrolled, rotated or revoked, so a green chip on
+                               it only misleads. `is_enrollable_method`, NOT `is_ui_api_method`: a `manual` row
+                               is enrollable since the 2026-09-02 ruling while staying undeletable from here,
+                               so the delete predicate would hide the chip on the Docker/Linux default shape. #}
+                            {% set can_enroll_instance = is_enrollable_method(instance['method']) %}
+                            {% set enrollment_state = instance['enrollment_state']|default('none', true) if can_enroll_instance else 'none' %}
+                            {% if enrollment_state != 'none' %}
+                                {% set enrollment_variant = {'pending': 'warning', 'enrolled': 'success', 'revoked': 'danger'}.get(enrollment_state, 'secondary') %}
+                                <span class="badge bg-label-{{ enrollment_variant }} ms-1"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="bottom"
+                                      data-bs-original-title="{{ _("tooltip.instance_credential_age", updated=instance['credential_updated_at']|default('-', true)) }}"
+                                     >{{ _("instance.enrollment." ~ enrollment_state) }}</span>
+                            {% endif %}
+                            {% if instance['tls_mode']|default('off', true) == 'pinned' %}
+                                <span class="badge bg-label-info ms-1">{{ _("instance.tls.pinned") }}</span>
+                            {% endif %}
+                        </td>
                         <td>{{ instance.name }}</td>
                         <td id="method-{{ instance.hostname }}">{{ instance.method }}</td>
                         <td>
@@ -187,6 +211,47 @@
                                         <i class="bx bx-stop" aria-hidden="true"></i>
                                     </button>
                                 </div>
+                                {# Enrollment only applies to rows the control plane can own a credential on:
+                                   an autoconf row is re-sourced from its orchestrator on every reconcile, which
+                                   would wipe a minted credential. NOT the delete predicate -- a `manual` row is
+                                   enrollable but still not deletable from here. #}
+                                {% set enroll_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.enroll_disabled_by_method' if not can_enroll_instance else 'tooltip.button.enroll_instance')) %}
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="{{ _(enroll_tooltip_key, hostname=instance['hostname'], method=instance['method']) }}">
+                                    <button type="button"
+                                            data-instance="{{ instance['hostname'] }}"
+                                            class="icon-btn enroll-instance{% if not can_enroll_instance or is_readonly %} disabled{% endif %}"
+                                            aria-label="{{ _("tooltip.button.enroll_instance", hostname=instance['hostname']) }}">
+                                        <i class="bx bx-key" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                {# Rotation is refused with a 409 on autoconf rows (the API guards it too):
+                                   handing one a minted credential its orchestrator never re-sources locks the
+                                   control plane out until someone deletes a file on the box. A `manual` row is
+                                   safe now -- the config-save rebuild carries its credential across. #}
+                                {% if can_enroll_instance and instance['credential_updated_at']|default(none, true) %}
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="bottom"
+                                         data-bs-original-title="{{ _("tooltip.button.rotate_credential", hostname=instance['hostname']) }}">
+                                        <button type="button"
+                                                data-instance="{{ instance['hostname'] }}"
+                                                class="icon-btn rotate-credential{% if is_readonly %} disabled{% endif %}"
+                                                aria-label="{{ _("tooltip.button.rotate_credential", hostname=instance['hostname']) }}">
+                                            <i class="bx bx-revision" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                    <div data-bs-toggle="tooltip"
+                                         data-bs-placement="bottom"
+                                         data-bs-original-title="{{ _("tooltip.button.revoke_credential", hostname=instance['hostname']) }}">
+                                        <button type="button"
+                                                data-instance="{{ instance['hostname'] }}"
+                                                class="icon-btn danger revoke-credential{% if is_readonly %} disabled{% endif %}"
+                                                aria-label="{{ _("tooltip.button.revoke_credential", hostname=instance['hostname']) }}">
+                                            <i class="bx bx-block" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
                                 {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if not can_delete_instance else 'tooltip.button.delete_instance')) %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
@@ -335,6 +400,47 @@
                                    >{{ _("button.close") }}</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade"
+             id="modal-enroll-instance"
+             aria-labelledby="modal-enroll-instance-title"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-enroll-instance-title">{{ _("modal.title.enroll_instance") }}</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="{{ _("aria.label.close") }}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning" role="alert">{{ _("modal.body.enroll_shown_once") }}</div>
+                        <p class="mb-2">{{ _("modal.body.enroll_description") }}</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium" for="enroll-code">{{ _("form.label.enrollment_code") }}</label>
+                            <input type="text" class="form-control" id="enroll-code" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium" for="enroll-docker">{{ _("form.label.enroll_oneliner_docker") }}</label>
+                            <textarea class="form-control font-monospace" id="enroll-docker" rows="3" readonly></textarea>
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label fw-medium" for="enroll-linux">{{ _("form.label.enroll_oneliner_linux") }}</label>
+                            <textarea class="form-control font-monospace" id="enroll-linux" rows="3" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal"
+                               >{{ _("button.close") }}</button>
+                    </div>
                 </div>
             </div>
         </div>

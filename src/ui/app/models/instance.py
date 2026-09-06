@@ -70,6 +70,13 @@ class Instance:
     creation_date: datetime
     last_seen: datetime
     apiCaller: ApiCaller
+    # Secure enrollment, read-only for the Instances page (chip, TLS badge, credential age).
+    # Optional and defaulted: this class has no `get`, so a template asking for something the
+    # object does not carry raises rather than rendering empty, and every existing caller
+    # constructs it positionally without these.
+    enrollment_state: str
+    tls_mode: str
+    credential_updated_at: Optional[str]
 
     def __init__(
         self,
@@ -81,6 +88,9 @@ class Instance:
         creation_date: datetime,
         last_seen: datetime,
         apiCaller: ApiCaller,
+        enrollment_state: str = "none",
+        tls_mode: str = "off",
+        credential_updated_at: Optional[str] = None,
     ) -> None:
         self.hostname = hostname
         self.name = name
@@ -90,6 +100,9 @@ class Instance:
         self.creation_date = creation_date
         self.last_seen = last_seen
         self.apiCaller = apiCaller or ApiCaller()
+        self.enrollment_state = enrollment_state or "none"
+        self.tls_mode = tls_mode or "off"
+        self.credential_updated_at = credential_updated_at
 
     @staticmethod
     def from_hostname(hostname: str, db) -> Optional["Instance"]:
@@ -106,6 +119,9 @@ class Instance:
             instance["creation_date"],
             instance["last_seen"],
             ApiCaller([API.from_instance(instance)]),
+            instance.get("enrollment_state", "none"),
+            instance.get("tls_mode", "off"),
+            instance.get("credential_updated_at"),
         )
 
     @property
@@ -523,6 +539,9 @@ class InstancesUtils:
                 self._parse_dt(instance["creation_date"]),
                 self._parse_dt(instance["last_seen"]),
                 ApiCaller([API.from_instance(instance)]),
+                instance.get("enrollment_state", "none"),
+                instance.get("tls_mode", "off"),
+                instance.get("credential_updated_at"),
             )
             for instance in instances_data
             if not status or instance["status"] == status

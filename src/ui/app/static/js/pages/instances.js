@@ -694,6 +694,100 @@ $(document).ready(function () {
     // actionLock released by page navigation
   });
 
+  // Credential lifecycle. The enrollment code is rendered into the modal and never into a flash
+  // message or a URL: it is shown once and must not survive in history or the server log.
+  function credentialAction(hostname, action) {
+    return $.post(`${window.location.pathname}/${hostname}/${action}`, {
+      csrf_token: $("#csrf_token").val(),
+    });
+  }
+
+  $(document).on("click", ".enroll-instance", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+    const instance = $(this).data("instance");
+    credentialAction(instance, "enroll")
+      .done(function (data) {
+        const code = data.code || "";
+        $("#enroll-code").val(code);
+        // The -v is not optional: the credential lives under /var/lib/bunkerweb (symlinked to
+        // /data), and the code is single-use -- recreate the container without a volume and the
+        // instance comes back with no credential and no way to redeem one.
+        $("#enroll-docker").val(
+          `docker run -v bw-data:/data -e API_URL=<control-plane-api-url> -e INSTANCE_ENROLLMENT_HOSTNAME=${instance} -e INSTANCE_ENROLLMENT_CODE=${code} ...`,
+        );
+        $("#enroll-linux").val(
+          `printf 'API_URL=<control-plane-api-url>\nINSTANCE_ENROLLMENT_HOSTNAME=${instance}\nINSTANCE_ENROLLMENT_CODE=${code}\n' >> /etc/bunkerweb/variables.env && systemctl restart bunkerweb`,
+        );
+        $("#modal-enroll-instance").modal("show");
+      })
+      .fail(function (xhr) {
+        alert(
+          (xhr.responseJSON && xhr.responseJSON.message) ||
+            t("alert.enroll_failed", "Could not issue an enrollment code."),
+        );
+      })
+      .always(function () {
+        actionLock = false;
+      });
+  });
+
+  $(document).on(
+    "click",
+    ".rotate-credential, .revoke-credential",
+    function () {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      if (actionLock) return;
+      const action = $(this).hasClass("rotate-credential")
+        ? "rotate"
+        : "revoke";
+      if (
+        !confirm(
+          action === "rotate"
+            ? t(
+                "confirm.rotate_credential",
+                "Rotate this instance's credential? It fails if the instance is unreachable.",
+              )
+            : t(
+                "confirm.revoke_credential",
+                "Revoke this instance's credential? The control plane will stop being able to reach it.",
+              ),
+        )
+      )
+        return;
+      actionLock = true;
+      const instance = $(this).data("instance");
+      credentialAction(instance, action)
+        .done(function () {
+          window.location.reload();
+        })
+        .fail(function (xhr) {
+          alert(
+            (xhr.responseJSON && xhr.responseJSON.message) ||
+              t("alert.credential_action_failed", "The action failed."),
+          );
+          actionLock = false;
+        });
+    },
+  );
+
   $(document).on("click", ".delete-instance", function () {
     if (isReadOnly) {
       alert(
