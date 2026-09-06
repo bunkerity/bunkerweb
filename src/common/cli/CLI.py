@@ -32,6 +32,11 @@ from env_file import parse_env_file  # type: ignore
 # its own DATABASE_URI from /etc/bunkerweb/variables.env, and bwcli has to agree with it.
 VARIABLES_PATHS = (Path(sep, "etc", "bunkerweb", "variables.env"), Path(sep, "etc", "nginx", "variables.env"))
 
+# Minted by redeem_enrollment_code() (utils.sh) and read back by api.lua: once this file exists,
+# the local instance refuses the global API_TOKEN and answers only to this credential. bwcli has
+# to agree, or every command against an enrolled bare-container instance 401s.
+INSTANCE_CREDENTIAL_FILE = Path(sep, "var", "lib", "bunkerweb", "instance-credential.json")
+
 
 def is_mounted(path, mountinfo=Path("/proc/self/mountinfo")) -> bool:
     """Detect ordinary and bind mounts; pathlib alone misses same-device binds."""
@@ -278,10 +283,26 @@ class CLI(ApiCaller):
                 listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
                 https_port=int(self.__get_variable("API_HTTPS_PORT", "5443") or "5443"),
             )
-            self.apis.append(API(endpoint, server_name, token=api_token))
+            # An enrolled bare instance refuses API_TOKEN (see INSTANCE_CREDENTIAL_FILE above), so
+            # prefer its own credential here too; a never-enrolled instance has no such file and
+            # keeps using the global token.
+            self.apis.append(API(endpoint, server_name, token=self.__instance_credential() or api_token))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
+
+    def __instance_credential(self) -> Optional[str]:
+        """This instance's own credential, minted by redeem_enrollment_code(). Absence is the
+        normal, unenrolled case and stays quiet; a present-but-unreadable file is not, hence the
+        one warning."""
+        if not INSTANCE_CREDENTIAL_FILE.is_file():
+            return None
+        try:
+            credential = loads(INSTANCE_CREDENTIAL_FILE.read_text(encoding="utf-8")).get("credential")
+        except (OSError, ValueError, AttributeError) as e:
+            self.__logger.warning(f"Instance credential file {INSTANCE_CREDENTIAL_FILE} is unreadable, falling back to the global API token: {e}")
+            return None
+        return credential or None
 
     def __adapt_display_width(self):
         """Determine appropriate display width based on terminal size"""

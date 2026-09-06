@@ -1871,6 +1871,12 @@ The image internally requires `/var/lib/bunkerweb/backups` to be mounted and wri
 backup command opens the database. `bwcli plugin backup save` accepts the long
 `--directory PATH` form; `-d` remains the plugin command's debug flag.
 
+This dedicated image always ships a database module, so the credential note that follows does not
+apply to it: when `bwcli` instead runs **inside a BunkerWeb instance container** (`docker exec <bw
+container> bwcli …`, which ships no local database module), it authenticates with the instance's
+own credential from `/var/lib/bunkerweb/instance-credential.json` when that file exists (an
+enrolled instance), falling back to the global `API_TOKEN` otherwise.
+
 ### Scheduler container settings
 
 The scheduler is the control-plane worker that reads settings, renders configs, and pushes them to BunkerWeb instances. Settings are centralized here with defaults and accepted values.
@@ -3606,6 +3612,10 @@ To add a new application protected by BunkerWeb:
 
 Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
 
+!!! warning "DNS_RESOLVERS must name the cluster DNS Service"
+
+    Give `DNS_RESOLVERS` the cluster DNS Service, whose ClusterIP is stable for the life of the Service, and never a pod IP. nginx resolves that value once, when it parses its configuration, and reuses the address it got until the next reload, so anything pod-scoped keeps working only until those pods move: a rolling CoreDNS restart then leaves every lookup timing out. On a stock cluster the Service is `kube-dns.kube-system.svc.cluster.local`, including when CoreDNS is the implementation behind it.
+
 ### Ingress resources
 
 Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.
@@ -3638,10 +3648,6 @@ spec:
     - host: www.example.com
       http:
         paths:
-!!! warning "DNS_RESOLVERS must name the cluster DNS Service"
-
-    Give `DNS_RESOLVERS` the cluster DNS Service, whose ClusterIP is stable for the life of the Service, and never a pod IP. nginx resolves that value once, when it parses its configuration, and reuses the address it got until the next reload, so anything pod-scoped keeps working only until those pods move: a rolling CoreDNS restart then leaves every lookup timing out. On a stock cluster the Service is `kube-dns.kube-system.svc.cluster.local`, including when CoreDNS is the implementation behind it.
-
           - path: /
             pathType: Prefix
             backend:
