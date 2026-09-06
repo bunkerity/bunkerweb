@@ -262,3 +262,26 @@ def test_web_cache_acl_mapping():
     assert resolve("/web_cache/metrics", "OPTIONS") == ("web_cache", "web_cache_read")
     assert resolve("/web-cache/purge", "POST") == ("web_cache", "web_cache_purge")
     assert resolve("/web-cache/purge", "DELETE") == ("web_cache", None)
+
+
+def test_status_hides_the_reserved_default_server(monkeypatch):
+    """`proxycache` is not part of the default server's curated plugin subset, so the reserved row
+    never renders a cache and its toggle here could only ever be inert. An operator's OWN service
+    that took the name before 1.7 reserved it is a real service and stays listed."""
+    from default_server import DEFAULT_SERVER_ID  # type: ignore
+
+    db = Mock()
+    db.get_services.return_value = [
+        {"id": "online.example", "method": "ui", "is_draft": False},
+        {"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False},
+    ]
+    db.get_config.return_value = {"USE_PROXY_CACHE": "yes"}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+    caller = Mock()
+    caller.send_to_apis.return_value = True, {"node": {"status": "success"}}
+
+    assert [row["id"] for row in ROUTER.web_cache_status(caller).content["services"]] == ["online.example"]
+
+    db.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "ui", "is_draft": False}]
+
+    assert [row["id"] for row in ROUTER.web_cache_status(caller).content["services"]] == [DEFAULT_SERVER_ID]

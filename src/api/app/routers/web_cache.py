@@ -3,6 +3,8 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+from default_server import is_reserved_default_server  # type: ignore
+
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller
 from ..schemas import WebCachePurgeRequest
@@ -45,7 +47,12 @@ def _service_cache_statuses() -> list[dict]:
             "enabled": config.get(f"{service['id']}_USE_PROXY_CACHE", config.get("USE_PROXY_CACHE", "no")) == "yes",
             "is_draft": bool(service.get("is_draft")),
         }
+        # The reserved `default-server` row is not a proxy-cache subject: `proxycache` is not in
+        # DEFAULT_SERVER_PLUGINS, so the default server block never renders a cache it could purge,
+        # and listing it here offers an operator a row whose toggle can only ever be inert. An
+        # operator's OWN service that took the name is a real service and stays listed.
         for service in db.get_services(with_drafts=True)
+        if not is_reserved_default_server(service)
     ]
 
 

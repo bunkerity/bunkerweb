@@ -11,7 +11,12 @@
    client parser uses it to tell a real `KEY=value` line apart from a
    continuation line of a multiline value (PEM cert/key, base64 block). #}
 {% set known_keys = namespace(keys=[], bases=[], multiline=[], multiline_bases=[]) %}
-{% for plugin_data in plugins.values() %}
+{# `allowed_plugins` narrows this editor to a curated subset -- the reserved default server passes
+   DEFAULT_SERVER_PLUGINS (routes/services.py). Same guard as models/compose_shelf.html, and needed
+   for the same reason: without it the raw pane offers every refused plugin AND the SERVER_NAME
+   field, which is how a save through this tab forks the default server into a second service.
+   Undefined (falsy) on every other page, which means "no allowlist". #}
+{% for plugin, plugin_data in plugins.items() if (not allowed_plugins) or plugin in allowed_plugins %}
     {% set filtered_settings = get_filtered_settings(plugin_data["settings"], (current_endpoint == "global-config" or current_endpoint == "global-settings")) %}
     {% if filtered_settings %}
         {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}

@@ -34,6 +34,15 @@
             {{ button(id="services-create-btn", label="Create service", i18n_key="button.create_service", size="sm", icon="bx-plus", tag="a", href=url_for('services.services_service_page', service='new'), disabled=is_readonly) }}
         </div>
     {% endcall %}
+    {# Single-site: the reserved `default-server` row is not seeded and the API hides it, so the
+       pinned "Default server" entry is absent. One sentence rather than silence -- otherwise the
+       only trace of the feature an operator ever sees is the documentation. #}
+    {% if single_site %}
+        <div class="alert alert-secondary d-flex align-items-center" role="note">
+            <i class="bx bx-info-circle me-2" aria-hidden="true"></i>
+            <span>{{ _("service.default_server.single_site") }}</span>
+        </div>
+    {% endif %}
     {% set ns = namespace(online_services=0, draft_services=0) %}
     {% for service in services %}
         {% if service['is_draft'] %}
