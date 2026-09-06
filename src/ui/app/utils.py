@@ -186,6 +186,11 @@ COLUMNS_PREFERENCES_DEFAULTS = {
 UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
 EDITABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"wizard"})
 
+# Mirror of `ENROLLABLE_METHODS` in `db_methods/instances.py`, which is what the API guards read.
+# Kept separate from `UI_API_METHODS` on purpose: the two answer different questions, and since the
+# 2026-09-02 ruling they are no longer the same set. `tests/unit/ui/test_instances_enrollment_ui.py`
+# pins them to each other so this copy cannot drift.
+ENROLLABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"manual"})
 
 def stop(status, _stop: bool = True):
     if _stop:
@@ -291,6 +296,19 @@ def is_ui_api_method(method: Optional[str]) -> bool:
 
 
 def can_delete_service(service: Dict[str, Any]) -> bool:
+def is_enrollable_method(method: Optional[str]) -> bool:
+    """Can the control plane own a credential on this row -- enroll, rotate, revoke?
+
+    Deliberately NOT `is_ui_api_method`. That one answers "can the UI delete this row", and a
+    `manual` row -- declared through BUNKERWEB_INSTANCES / BUNKERWEB_INSTANCE_* -- is enrollable
+    since the 2026-09-02 ruling while staying undeletable from the UI: the environment would
+    re-create it on the next config save. Rendering the enrollment chip or the rotate/revoke pair
+    off the delete predicate would leave the Docker and Linux default shape with no way to see or
+    manage an enrollment the API accepts.
+    """
+    return method in ENROLLABLE_METHODS
+
+
     """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
     method = service.get("method")
     if is_ui_api_method(method):

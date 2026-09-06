@@ -19,7 +19,7 @@ from pathlib import Path
 from conftest import english  # what a converted template renders for a key
 from jinja2 import ChoiceLoader, DictLoader, Environment, FileSystemLoader
 
-from app.utils import can_delete_service, is_editable_method, is_ui_api_method  # type: ignore
+from app.utils import can_delete_service, is_editable_method, is_enrollable_method, is_ui_api_method  # type: ignore
 
 TEMPLATES = Path(__file__).resolve().parents[3] / "src" / "ui" / "app" / "templates"
 CSS = TEMPLATES.parent / "static" / "css" / "overrides.css"
@@ -41,6 +41,7 @@ def _render_dashboard_page(template, **context):
         can_delete_service=can_delete_service,
         is_editable_method=is_editable_method,
         is_ui_api_method=is_ui_api_method,
+        is_enrollable_method=is_enrollable_method,
     )
     env.filters["to_iso"] = lambda value: value
     return env.get_template(template).render(**context)

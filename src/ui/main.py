@@ -61,6 +61,7 @@ from app.utils import (
     human_readable_number,
     is_editable_method,
     is_plugin_active,
+    is_enrollable_method,
     is_session_revoked,
     is_ui_api_method,
     stop,
@@ -879,6 +880,7 @@ with app.app_context():
         is_plugin_active_for_service=is_plugin_active_for_service,
         is_ui_api_method=is_ui_api_method,
         can_delete_service=can_delete_service,
+        is_enrollable_method=is_enrollable_method,
         resource_kind_for_setting=resource_kind_for_setting,
     )
 

@@ -258,30 +258,41 @@ if __name__ == "__main__":
             changes.append("custom_configs")
             LOGGER.info("Custom configs successfully saved to database")
 
-        err = db.update_instances([], method="manual", changed=False)
+        # One rebuild, not "delete every manual row then re-add each one". The old shape dropped
+        # any control-plane-minted credential and the enrollment that produced it on EVERY config
+        # save, which is why `manual` rows were not enrollable at all; `update_instances()` now
+        # carries those columns across for a hostname that is still declared here, and drops them
+        # with the row for one that has disappeared from the environment (PO ruling 2026-09-02).
+        err = db.update_instances(
+            [
+                {
+                    "hostname": inst["hostname"],
+                    "name": "manual instance",
+                    "status": "loading",
+                    "env": {
+                        "API_HTTP_PORT": inst["port"],
+                        "API_HTTPS_PORT": inst["https_port"],
+                        "API_LISTEN_HTTPS": "yes" if inst["listen_https"] else "no",
+                        "API_SERVER_NAME": inst["server_name"],
+                        # None when the operator declared no BUNKERWEB_INSTANCE_API_TOKEN_n, which
+                        # is what lets an enrolled row keep the credential it was minted.
+                        "API_TOKEN": inst["credential"],
+                    },
+                    "tls_mode": inst["tls_mode"],
+                    "tls_fingerprint": inst["tls_fingerprint"],
+                }
+                for inst in instance_defs
+            ],
+            method="manual",
+            changed=False,
+        )
+
         if err:
-            LOGGER.warning(f"Couldn't clear manual instances from database : {err}, instances may be incorrect")
+            LOGGER.warning(f"Couldn't save the declared instances to database : {err}, instances may be incorrect")
+        else:
+            LOGGER.info(f"{len(instance_defs)} declared instance(s) successfully saved to database")
 
         changes.append("instances")
-
-        for inst in instance_defs:
-            err = db.add_instance(
-                inst["hostname"],
-                inst["port"],
-                inst["server_name"],
-                method="manual",
-                changed=False,
-                listen_https=inst["listen_https"],
-                https_port=inst["https_port"],
-                credential=inst["credential"],
-                tls_mode=inst["tls_mode"],
-                tls_fingerprint=inst["tls_fingerprint"],
-            )
-
-            if err:
-                LOGGER.warning(err)
-            else:
-                LOGGER.info(f"Instance {inst['hostname']} successfully saved to database")
 
         if not args.no_check_changes:
             # update changes in db
