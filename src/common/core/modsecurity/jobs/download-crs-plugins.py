@@ -11,7 +11,7 @@ from subprocess import CalledProcessError, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
-from typing import Dict, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 from uuid import uuid4
 from json import dumps, loads
 from shutil import copy, copytree, move, rmtree
@@ -32,7 +32,7 @@ for deps_path in [
 
 from magic import Magic
 from requests import get, head
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, Timeout
 
 from common_utils import bytes_hash, safe_tar_extractall, safe_zip_extractall  # type: ignore
 from logger import getLogger  # type: ignore
@@ -47,6 +47,150 @@ TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
 LOGGER = getLogger("MODSECURITY.DOWNLOAD.CRS_PLUGINS")
 status = 0
+
+# Exponential backoff schedule for a retryable failure (timeout, connection error, 5xx, or a
+# GitHub rate limit). A response's own Retry-After header wins over this schedule when present --
+# GitHub tells us exactly when it will accept the next call.
+RETRY_BACKOFFS_SECONDS = (2, 4, 8)
+
+
+def _is_rate_limited(response) -> bool:
+    """A plain 429, or a GitHub secondary-rate-limit 403 (its rate-limit 403s carry this header;
+    an auth/permission 403 does not)."""
+    if response.status_code == 429:
+        return True
+    return response.status_code == 403 and response.headers.get("X-RateLimit-Remaining") == "0"
+
+
+def _retry_after_seconds(response) -> Optional[int]:
+    """Clamped to the longest of our own backoffs: GitHub's primary rate limit sends a
+    ``Retry-After`` in MINUTES, and honouring it uncapped can sleep past
+    ``src/worker/app.py``'s ``task_soft_time_limit`` -- a killed task loses its delivery
+    (``src/worker/tasks.py``), which the flat pre-fix 3s sleep could never do. A capped wait that
+    is too short just means one more retry loop; an uncapped one that is too long can lose the job.
+    """
+    value = response.headers.get("Retry-After")
+    if not value:
+        return None
+    try:
+        return max(0, min(int(float(value)), max(RETRY_BACKOFFS_SECONDS)))
+    except (TypeError, ValueError):
+        return None
+
+
+def request_with_retry(request_fn, *args, max_retries: int = 4, **kwargs):
+    """Call ``request_fn(*args, **kwargs)`` (a ``requests.get``/``requests.head`` bound call),
+    retrying up to ``max_retries`` total attempts (the first try plus up to
+    ``len(RETRY_BACKOFFS_SECONDS)`` retries -- default 4: one attempt, then up to three retries so
+    all of 2s/4s/8s are reachable) on a connection failure, a read timeout, a 5xx, or a GitHub
+    rate limit -- honouring the response's ``Retry-After`` header when present, falling back to
+    ``RETRY_BACKOFFS_SECONDS`` otherwise.
+
+    Returns the last response once retries are exhausted -- a 5xx/429/403 caller already knows
+    how to turn that into a failure via ``raise_for_status``/its own status-code check -- or
+    re-raises the last connection/timeout error, so every existing caller's error handling is
+    unchanged.
+    """
+    last_exc: Optional[BaseException] = None
+    for attempt in range(max_retries):
+        try:
+            response = request_fn(*args, **kwargs)
+        except (ConnectionError, Timeout) as e:
+            last_exc = e
+            if attempt == max_retries - 1:
+                raise
+            delay = RETRY_BACKOFFS_SECONDS[min(attempt, len(RETRY_BACKOFFS_SECONDS) - 1)]
+            LOGGER.warning(f"{type(e).__name__}, retrying in {delay}s... ({attempt + 1}/{max_retries})")
+            sleep(delay)
+            continue
+
+        if (response.status_code >= 500 or _is_rate_limited(response)) and attempt < max_retries - 1:
+            delay = _retry_after_seconds(response) or RETRY_BACKOFFS_SECONDS[min(attempt, len(RETRY_BACKOFFS_SECONDS) - 1)]
+            LOGGER.warning(f"Got status code {response.status_code}, retrying in {delay}s... ({attempt + 1}/{max_retries})")
+            # Every current caller passes stream=True, so the connection is not returned to the
+            # pool until the body is read or the response is closed -- an unclosed retried 5xx
+            # would pin a pooled connection per retry, which the old ConnectionError-only loop
+            # could never do (there was no response object to leak on that path).
+            response.close()
+            sleep(delay)
+            continue
+
+        return response
+
+    raise last_exc or RuntimeError("request_with_retry: max_retries <= 0")  # pragma: no cover -- defensive, unreachable at max_retries=4
+
+
+def should_keep_previous_cache(service_plugins: Dict[str, Set[str]], crs_plugins_dir: Path) -> bool:
+    """True when ``service_plugins`` ended up with NOTHING for ANY service but a previous run's
+    plugin set is still on disk -- the signal to skip the destructive CRS_PLUGINS_DIR swap and
+    the job-cache write below, so this run cannot replace a working, previously-cached plugin set
+    with an empty one.
+
+    Covers the brief's own CI-red scenario: a registry/version LOOKUP failing for every
+    configured plugin, so `service_plugins` never gets touched at all and stays every-value-empty
+    from its `{service: set() for service in services}` initialisation. It does NOT cover every
+    plugin's ARCHIVE download then failing after a successful lookup: `service_plugins[service] =
+    plugins` (pre-existing, in the registry-resolution branch, well above the "Loop on plugins"
+    section this function's caller runs after) aliases the RESOLVED URL SET into this same dict
+    the moment a lookup succeeds -- so `any(service_plugins.values())` is already True from that
+    alone, before a single byte is downloaded. A lookup-success-then-every-download-fails run
+    therefore still wipes CRS_PLUGINS_DIR. Out of scope for this bugfix (the brief's failure mode
+    is the lookup, not the download), recorded here rather than silently claimed as covered.
+    """
+    any_installed_this_run = any(service_plugins.values())
+    had_existing_plugins = crs_plugins_dir.is_dir() and any(crs_plugins_dir.iterdir())
+    return not any_installed_this_run and had_existing_plugins
+
+
+def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]]) -> bool:
+    """Publish this run's downloaded plugin set (or keep the previous one, see
+    ``should_keep_previous_cache``) and push it to the job cache. Returns ``render_changed``.
+
+    A top-level function, not inlined in the script body: ``tests/unit/jobs/test_render_time_reflag.py``
+    lifts the ``plugins_json = dumps(`` .. ``if not cached:`` span verbatim from this file's own
+    source and dedents it by exactly one level, so that span must stay at a single indentation
+    level -- it cannot live inside an ``if``/``else`` in the script body.
+    """
+    global status
+
+    if should_keep_previous_cache(service_plugins, CRS_PLUGINS_DIR):
+        # Every plugin failed to resolve or download this run (see the retry/skip handling
+        # above) -- wiping CRS_PLUGINS_DIR now would replace a working, previously-cached plugin
+        # set with nothing, which is worse than leaving it stale for one run. Keep it as-is and
+        # report a failure instead of silently shipping an empty set.
+        LOGGER.error("No Core Rule Set (CRS) plugin could be resolved or downloaded this run, keeping the previously cached plugin set...")
+        status = 2
+        return False
+
+    rmtree(CRS_PLUGINS_DIR, ignore_errors=True)
+    if NEW_PLUGINS_DIR.is_dir():
+        copytree(NEW_PLUGINS_DIR, CRS_PLUGINS_DIR)
+    else:
+        CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # sorted(), not list(): the template emits one include per entry in the order this mapping gives,
+    # so an unordered set would reshuffle the CRS plugin includes on every run and make the change
+    # test below fire every day for nothing.
+    plugins_json = dumps({service: sorted(plugins) for service, plugins in service_plugins.items()}, indent=2).encode()
+
+    # This mapping is the render input: an already-installed plugin id keeps its extracted directory
+    # untouched (the `move()` above), so the plugin files can only change when an id does, and an id
+    # carries its version. Read the previous fingerprint BEFORE cache_file overwrites it.
+    render_changed = bytes_hash(plugins_json) != JOB.cache_hash("crs-plugins.json")
+
+    cached, err = JOB.cache_file("crs-plugins.json", plugins_json)
+    if not cached:
+        LOGGER.error(f"Failed to cache crs-plugins.json :\n{err}")
+        status = 2
+
+    cached, err = JOB.cache_dir(CRS_PLUGINS_DIR)
+    if not cached:
+        LOGGER.error(f"Error while saving Core Rule Set (CRS) plugins data to db cache: {err}")
+        status = 2
+    else:
+        LOGGER.info("Successfully saved Core Rule Set (CRS) plugins data to db cache.")
+
+    return render_changed
 
 
 def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
@@ -69,18 +213,7 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
         # Try fetching the latest release
         release_api_url = f"{repo_url.replace('github.com', 'api.github.com/repos', 1)}/releases"
         LOGGER.debug(f"Checking {release_api_url}...")
-        max_retries = 3
-        retry_count = 0
-        while retry_count < max_retries:
-            try:
-                response = get(release_api_url, timeout=8)
-                break
-            except ConnectionError as e:
-                retry_count += 1
-                if retry_count == max_retries:
-                    raise e
-                LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                sleep(3)
+        response = request_with_retry(get, release_api_url, timeout=8)
         response.raise_for_status()
         releases = response.json()
         latest_release = None
@@ -97,18 +230,7 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
             for branch in ("main", "master"):
                 branch_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
                 LOGGER.debug(f"Checking {branch_url}...")
-                max_retries = 3
-                retry_count = 0
-                while retry_count < max_retries:
-                    try:
-                        branch_check = head(branch_url, timeout=8)
-                        break
-                    except ConnectionError as e:
-                        retry_count += 1
-                        if retry_count == max_retries:
-                            raise e
-                        LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                        sleep(3)
+                branch_check = request_with_retry(head, branch_url, timeout=8)
                 if branch_check.status_code < 400:
                     return True, branch_url
 
@@ -213,23 +335,13 @@ try:
             with BytesIO() as content:
                 try:
                     # Download the file
-                    max_retries = 3
-                    retry_count = 0
-                    while retry_count < max_retries:
-                        try:
-                            resp = get(
-                                "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
-                                headers={"User-Agent": "BunkerWeb"},
-                                stream=True,
-                                timeout=8,
-                            )
-                            break
-                        except ConnectionError as e:
-                            retry_count += 1
-                            if retry_count == max_retries:
-                                raise e
-                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                            sleep(3)
+                    resp = request_with_retry(
+                        get,
+                        "https://raw.githubusercontent.com/coreruleset/plugin-registry/refs/heads/main/README.md",
+                        headers={"User-Agent": "BunkerWeb"},
+                        stream=True,
+                        timeout=8,
+                    )
                     if resp.status_code != 200:
                         LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
                         sys_exit(2)
@@ -312,7 +424,23 @@ try:
 
                 if plugin_version:
                     LOGGER.info(f"Plugin {plugin} found in the registry, fetching version {plugin_version}...")
-                    success, url = get_download_url(plugin_data["repository"], plugin_version)
+                    try:
+                        success, url = get_download_url(plugin_data["repository"], plugin_version)
+                    except RuntimeError as e:
+                        # Retries in get_download_url/request_with_retry are exhausted -- a real
+                        # infra failure, not a registry data problem. Skip this ONE plugin rather
+                        # than letting it (an uncaught exception used to) crash the whole job and
+                        # discard every other service/plugin's work; whatever this plugin already
+                        # had on disk stays untouched (see the final-swap guard below). Deliberately
+                        # NOT `status = 2`: every OTHER plugin that resolves fine in the same run
+                        # still needs `status == 1` to reach the swap and flag modsecurity for a
+                        # re-render (see swap_and_cache_plugins) -- poisoning status here would ship
+                        # those plugins to disk and the DB cache but never reference them in the
+                        # rendered conf, and never retry, since the next run's fingerprint would
+                        # then match. should_keep_previous_cache already owns the "nothing at all
+                        # resolved" failure signal.
+                        LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}) after retries: {e}")
+                        continue
                     if not success:
                         LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}): {url}")
                         continue
@@ -326,7 +454,13 @@ try:
                     continue
 
                 LOGGER.info(f"Plugin {plugin} found in the registry, fetching latest version...")
-                success, url = get_download_url(plugin_data["repository"])
+                try:
+                    success, url = get_download_url(plugin_data["repository"])
+                except RuntimeError as e:
+                    # See the identical comment on the version-pinned branch above: no `status = 2`
+                    # here either, for the same reason.
+                    LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} after retries: {e}")
+                    continue
                 if not success:
                     LOGGER.error(f"Failed to get the download URL for plugin {plugin_name}: {url}")
                     continue
@@ -359,18 +493,7 @@ try:
             with BytesIO() as content:
                 try:
                     # Download the file
-                    max_retries = 3
-                    retry_count = 0
-                    while retry_count < max_retries:
-                        try:
-                            resp = get(crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
-                            break
-                        except ConnectionError as e:
-                            retry_count += 1
-                            if retry_count == max_retries:
-                                raise e
-                            LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
-                            sleep(3)
+                    resp = request_with_retry(get, crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin}...")
                         continue
@@ -516,33 +639,7 @@ try:
 
         service_plugins[service].update(installed_plugins)
 
-    rmtree(CRS_PLUGINS_DIR, ignore_errors=True)
-    if NEW_PLUGINS_DIR.is_dir():
-        copytree(NEW_PLUGINS_DIR, CRS_PLUGINS_DIR)
-    else:
-        CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
-
-    # sorted(), not list(): the template emits one include per entry in the order this mapping gives,
-    # so an unordered set would reshuffle the CRS plugin includes on every run and make the change
-    # test below fire every day for nothing.
-    plugins_json = dumps({service: sorted(plugins) for service, plugins in service_plugins.items()}, indent=2).encode()
-
-    # This mapping is the render input: an already-installed plugin id keeps its extracted directory
-    # untouched (the `move()` above), so the plugin files can only change when an id does, and an id
-    # carries its version. Read the previous fingerprint BEFORE cache_file overwrites it.
-    render_changed = bytes_hash(plugins_json) != JOB.cache_hash("crs-plugins.json")
-
-    cached, err = JOB.cache_file("crs-plugins.json", plugins_json)
-    if not cached:
-        LOGGER.error(f"Failed to cache crs-plugins.json :\n{err}")
-        status = 2
-
-    cached, err = JOB.cache_dir(CRS_PLUGINS_DIR)
-    if not cached:
-        LOGGER.error(f"Error while saving Core Rule Set (CRS) plugins data to db cache: {err}")
-        status = 2
-    else:
-        LOGGER.info("Successfully saved Core Rule Set (CRS) plugins data to db cache.")
+    render_changed = swap_and_cache_plugins(service_plugins)
 
     if status == 0:
         status = 1
