@@ -44,6 +44,7 @@ description:
       - Docker
       - Linux
       - Kubernetes
+      - Swarm
       - Caching
       - Geoblocking
     videos:

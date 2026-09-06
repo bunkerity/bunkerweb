@@ -242,11 +242,13 @@ The following backend databases are supported: SQLite, MariaDB, MySQL, and Postg
 To make things automagically work together, a dedicated service called the scheduler is in charge of:
 
 - Storing the settings and custom configurations inside the database
-- Executing various tasks (called jobs)
+- Dispatching various tasks (called jobs) to a pool of Worker services for execution
 - Generating a configuration which is understood by BunkerWeb
 - Being the intermediary for other services (like web UI or autoconf)
 
-In other words, the scheduler is the brain of BunkerWeb.
+In other words, the scheduler is the brain of BunkerWeb. Jobs themselves run in independent Worker
+services, backed by a Redis/Valkey broker, so scaling job execution no longer means scaling the
+scheduler itself.
 
 # Setup
 
@@ -277,7 +279,7 @@ List of supported Linux distros:
 - Fedora 44
 - RHEL, CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
-You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
+You will find more information in the [Linux section](https://docs.bunkerweb.io/1.7.0~beta/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
 ## Docker
 
@@ -290,8 +292,10 @@ We provide ready-to-use prebuilt images for x64, x86, armv7, and arm64 platforms
 Docker integration key concepts are:
 
 - **Environment variables** to configure BunkerWeb
-- **Scheduler** container to store configuration and execute jobs
+- **Scheduler** container to store configuration and dispatch jobs
+- **Worker** container(s), backed by a Redis/Valkey broker, to execute those jobs
 - **Networks** to expose ports for clients and connect to upstream web services
+- **bwcli** companion image for one-off CLI operations (backups, plugin management, …) against a running stack
 
 You will find more information in the [Docker integration section](https://docs.bunkerweb.io/1.7.0~beta/integrations/?utm_campaign=self&utm_source=github#docker) of the documentation.
 
