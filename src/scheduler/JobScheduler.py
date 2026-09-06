@@ -14,16 +14,19 @@ from logging import Logger
 from pathlib import Path
 from re import compile as re_compile
 from sys import modules as sys_modules
-from typing import Any, Dict, List, Optional
+from time import monotonic
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import schedule
 from sys import path as sys_path
 from threading import Lock
+from stat import S_ISDIR, S_ISLNK, S_IMODE
 
 # Add dependencies to sys.path
 for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from cache_restore import cache_tree  # type: ignore
 from common_utils import effective_cpu_count  # type: ignore
 from Database import Database, DEFAULT_POOL_MAX_OVERFLOW, DEFAULT_POOL_SIZE  # type: ignore
 from logger import getLogger  # type: ignore
@@ -37,6 +40,13 @@ class JobScheduler(ApiCaller):
     _SCHEDULER_WORKERS_AUTO_CEILING = 8
     _SCHEDULER_WORKERS_AUTO_FLOOR = 2
     _SCHEDULER_WORKERS_AUTO_MULTIPLIER = 2
+
+    # run_pending() is called once a second from the scheduler main loop. Retrying a failed
+    # publication at that cadence turns one unreachable instance into a generator storm on the
+    # scheduler and a folder-push storm on the instances that are still up, so a failure backs
+    # off exponentially between these bounds and the delay resets once a publication succeeds.
+    PUBLISH_RETRY_MIN_DELAY = 1
+    PUBLISH_RETRY_MAX_DELAY = 300
 
     @classmethod
     def _auto_max_workers(cls) -> int:
@@ -54,6 +64,7 @@ class JobScheduler(ApiCaller):
         db: Optional[Database] = None,
         lock: Optional[Lock] = None,
         apis: Optional[list] = None,
+        generate_configs: Optional[Callable[[], bool]] = None,
     ):
         super().__init__(apis or [])
         self.__logger = logger or getLogger("SCHEDULER.JOB_SCHEDULER")
@@ -70,6 +81,12 @@ class JobScheduler(ApiCaller):
         # instead of only knowing that "at least one" did.
         self.__failed_jobs: List[str] = []
         self.__job_reload = False
+        self.__job_regenerate = False
+        # A push or reload failure must not re-render what generate_configs() already produced.
+        self.__configs_generated = False
+        self.__publish_retry_at: Optional[float] = None
+        self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+        self.__generate_configs = generate_configs
         self.__executor = ThreadPoolExecutor(max_workers=self.__resolve_max_workers())
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
@@ -327,6 +344,11 @@ class JobScheduler(ApiCaller):
         if ret == 1:
             with self.__thread_lock:
                 self.__job_reload = True
+                if (plugin, name) in (("mtls", "client-cert"), ("modsecurity", "download-crs-plugins")):
+                    self.__job_regenerate = True
+                    # A render kept from before a failed push predates this job's change, and
+                    # the retry would publish it. Every new request renders again.
+                    self.__configs_generated = False
 
         if self.__job_success and (ret < 0 or ret >= 2):
             success = False
@@ -362,12 +384,15 @@ class JobScheduler(ApiCaller):
 
         try:
             # Process directories and files in a single pass
-            for item in cache_path.rglob("*"):
-                current_mode = item.stat().st_mode & 0o777
-                target_mode = DIR_MODE if item.is_dir() else FILE_MODE
+            for item in cache_tree(cache_path):
+                mode = item.lstat().st_mode
+                if S_ISLNK(mode):
+                    continue
+                current_mode = S_IMODE(mode)
+                target_mode = DIR_MODE if S_ISDIR(mode) else FILE_MODE
 
                 if current_mode != target_mode:
-                    item.chmod(target_mode)
+                    item.chmod(target_mode, follow_symlinks=False)
 
             self.__cache_permissions_updated = True
         except Exception as e:
@@ -389,7 +414,7 @@ class JobScheduler(ApiCaller):
     def run_pending(self) -> bool:
         pending_jobs = [job for job in schedule.jobs if job.should_run]
 
-        if not pending_jobs:
+        if not pending_jobs and not (self.__job_reload and self.__publish_due()):
             return True
 
         if self.try_database_readonly():
@@ -399,7 +424,6 @@ class JobScheduler(ApiCaller):
         with self.__thread_lock:
             self.__job_success = True
             self.__failed_jobs = []
-        self.__job_reload = False
 
         try:
             # Use ThreadPoolExecutor to run jobs
@@ -414,31 +438,15 @@ class JobScheduler(ApiCaller):
 
             if self.__job_reload:
                 try:
-                    if self.apis:
-                        cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
-                        send_files_min_timeout = self.env.get("SEND_FILES_MIN_TIMEOUT", "30")
-
-                        if not send_files_min_timeout.isdigit():
-                            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
-                            send_files_min_timeout = 30
-
-                        self.__logger.info(f"Sending '{cache_path}' folder...")
-                        if not self.send_files(
-                            cache_path,
-                            "/cache",
-                            timeout=folder_push_timeout(int(send_files_min_timeout), len(self.env.get("SERVER_NAME", "www.example.com").split())),
-                        ):
-                            success = False
-                            self.__logger.error(f"Error while sending '{cache_path}' folder")
-                        else:
-                            self.__logger.info(f"Successfully sent '{cache_path}' folder")
-
-                    if not self.__reload():
+                    if self.__publish_pending():
+                        self.__clear_pending_publication()
+                    else:
                         success = False
+                        self.__defer_publish_retry()
                 except Exception as e:
                     success = False
+                    self.__defer_publish_retry()
                     self.__logger.error(f"Exception while reloading after job scheduling: {e}")
-                self.__job_reload = False
 
             if pending_jobs:
                 self.__logger.info("All scheduled jobs have been executed")
@@ -460,6 +468,69 @@ class JobScheduler(ApiCaller):
 
             self.__update_cache_permissions()
 
+    def __publish_due(self) -> bool:
+        """False while a failed publication is backing off, so idle ticks stay cheap."""
+        return self.__publish_retry_at is None or monotonic() >= self.__publish_retry_at
+
+    def __defer_publish_retry(self) -> None:
+        self.__publish_retry_at = monotonic() + self.__publish_retry_delay
+        self.__logger.debug(f"Next pending publication retry in {self.__publish_retry_delay}s")
+        self.__publish_retry_delay = min(self.PUBLISH_RETRY_MAX_DELAY, self.__publish_retry_delay * 2)
+
+    def __clear_pending_publication(self) -> None:
+        self.__job_reload = False
+        self.__job_regenerate = False
+        self.__configs_generated = False
+        self.__publish_retry_at = None
+        self.__publish_retry_delay = self.PUBLISH_RETRY_MIN_DELAY
+
+    def consume_pending_publication(self) -> Tuple[bool, bool]:
+        """Hand the pending (reload, regenerate) state to a caller that publishes it itself.
+
+        run_once()/run_single() only record what their jobs changed; the caller that ran them
+        publishes right after. Without this the next run_pending() rediscovers the same flags and
+        renders, pushes and reloads a second time for every applied change.
+        """
+        with self.__thread_lock:
+            pending = (self.__job_reload, self.__job_regenerate)
+            self.__clear_pending_publication()
+        return pending
+
+    def __publish_pending(self) -> bool:
+        """Only acknowledge a changed generation after every publication step succeeds."""
+        if self.__job_regenerate and not self.__configs_generated:
+            # Before the API check: with no instance the flags are cleared below, and the
+            # healthcheck only renders for an instance that answers "loading". One that stayed
+            # up behind a partition is re-added without a render, and both regenerate-worthy
+            # jobs report a change once a day, so /etc/nginx would keep the old generation.
+            if self.__generate_configs is None or not self.__generate_configs():
+                self.__logger.error("Configuration generation failed; keeping the pending job publication for retry")
+                return False
+            self.__configs_generated = True
+        if not self.apis:
+            # No instance to publish to: /etc/nginx is current (rendered above) and nothing is
+            # left pending, exactly as __reload() answered True for an empty API list. The push
+            # is deliberately left to the next change or to the healthcheck, which serves an
+            # instance that answers "loading"; latching the flags here only burns main-loop ticks.
+            return True
+
+        send_files_min_timeout = self.env.get("SEND_FILES_MIN_TIMEOUT", "30")
+        if not send_files_min_timeout.isdigit():
+            self.__logger.error("SEND_FILES_MIN_TIMEOUT must be an integer, defaulting to 30")
+            send_files_min_timeout = "30"
+        paths = [(os.path.join(os.sep, "var", "cache", "bunkerweb"), "/cache")]
+        if self.__job_regenerate:
+            paths.append((os.path.join(os.sep, "etc", "nginx"), "/confs"))
+        for path, endpoint in paths:
+            if not self.send_files(
+                path,
+                endpoint,
+                timeout=folder_push_timeout(int(send_files_min_timeout), len(self.env.get("SERVER_NAME", "www.example.com").split())),
+            ):
+                self.__logger.error(f"Error sending '{path}'; keeping the pending job publication for retry")
+                return False
+        return self.__reload()
+
     @property
     def failed_jobs(self) -> List[str]:
         """Names of jobs (``plugin/name``) that failed in the most recent run batch."""
@@ -474,7 +545,6 @@ class JobScheduler(ApiCaller):
         with self.__thread_lock:
             self.__job_success = True
             self.__failed_jobs = []
-        self.__job_reload = False
 
         plugins = plugins or []
 
