@@ -60,6 +60,11 @@
         label: translate("workflows.aria.resourceGroup", "Resource group"),
         kind: "group",
       },
+      {
+        op: "crowdsec",
+        label: t("workflows.condition.crowdsec", "CrowdSec verdict"),
+        kind: "crowdsec",
+      },
     ],
     actions: [
       {
@@ -100,6 +105,15 @@
   // documented override, for a rule whose whole purpose is capping a rate.
   var BLOCK_STATUSES = [429];
   var GROUP_KINDS = ["ip", "country", "asn"];
+  // Mirrors CROWDSEC_FIELDS / CROWDSEC_VALUES in workflow_schema.py. Closed sets of two words
+  // each: the AppSec rule id and the LAPI scenario are deliberately absent (the runtime cannot
+  // know the first and only knows the second on the request that created the decision), and so
+  // is the `challenge` remediation, which CrowdSec serves itself before the workflows run.
+  var CROWDSEC_FIELDS = ["source", "remediation"];
+  var CROWDSEC_VALUES = {
+    source: ["appsec", "lapi"],
+    remediation: ["ban", "captcha"],
+  };
   var URI_MATCHES = {
     exact: t("workflows.uri_match.exact", "is exactly"),
     prefix: t("workflows.uri_match.prefix", "starts with"),
@@ -114,6 +128,7 @@
     method: { icon: "bx-transfer", verb: "is" },
     uri: { icon: "bx-link", verb: "matches", mono: true },
     group: { icon: "bx-collection", verb: "is in the group" },
+    crowdsec: { icon: "bx-shield-x", verb: "is" },
   };
   var ACTION_META = {
     block: { icon: "bx-block", tone: "t-block" },
@@ -132,6 +147,10 @@
     shown: null,
     errors: {},
     errorList: [],
+    // Non-blocking notices from /validate: a draft that reads a CrowdSec verdict on a service
+    // where CrowdSec is off. Never a save blocker — the leaf answers UNKNOWN there, which can
+    // only ever make the rule NOT match.
+    warnings: [],
     summaries: {},
     readonly: false,
     groups: {},
@@ -287,6 +306,12 @@
         kind: node.kind || "ip",
         group_id: node.group_id || "",
       });
+    if (node.op === "crowdsec")
+      return key({
+        op: "crowdsec",
+        field: node.field || "remediation",
+        values: (node.values || []).map(String),
+      });
     return key({
       op: node.op || "ip",
       values: (node.values || []).map(String),
@@ -307,6 +332,8 @@
       return { op: "uri", match: node.match, value: node.value };
     if (node.op === "group")
       return { op: "group", kind: node.kind, group_id: node.group_id };
+    if (node.op === "crowdsec")
+      return { op: "crowdsec", field: node.field, values: node.values.slice() };
     return { op: node.op, values: node.values.slice() };
   }
 
@@ -410,6 +437,8 @@
     if (op === "uri") return key({ op: "uri", match: "prefix", value: "/" });
     if (op === "group")
       return key({ op: "group", kind: "ip", group_id: firstGroupFor("ip") });
+    if (op === "crowdsec")
+      return key({ op: "crowdsec", field: "remediation", values: [] });
     return key({ op: op, values: [] });
   }
 
@@ -421,13 +450,27 @@
      reference, and carrying either across produces junk that is invalid on arrival. */
   function convertLeaf(node, op) {
     var next = newLeaf(op);
-    if (next.values && node && node.values && node.values.length)
+    if (bridges(node, op) && node.values.length)
       next.values = node.values.slice();
     return next;
   }
 
+  /* crowdsec holds a list too, but of a closed vocabulary of its own: carrying addresses into
+     it (or "ban" out of it) produces a leaf that is invalid on arrival, which is exactly what
+     the uri/group exclusion above avoids. */
+  function bridges(node, op) {
+    var next = newLeaf(op);
+    return !!(
+      next.values &&
+      node &&
+      node.values &&
+      op !== "crowdsec" &&
+      node.op !== "crowdsec"
+    );
+  }
+
   function carriesValues(node, op) {
-    return !!(node && node.values && node.values.length && newLeaf(op).values);
+    return !!(node && node.values && node.values.length && bridges(node, op));
   }
 
   function newRule() {
@@ -658,7 +701,47 @@
         (idMessage ? errBlock(path + ".group_id", idMessage) : "")
       );
     }
+    if (node.op === "crowdsec") return crowdsecValues(node, path);
     return valueChips(node, path);
+  }
+
+  /* The two CrowdSec vocabularies are closed sets of two and three words, so their values are
+     toggles rather than the free-text chips the address, country and method leaves use: there
+     is nothing to type and nothing to mistype, and "which words are allowed here" is answered
+     by the control itself instead of by a validation error after the fact. */
+  function crowdsecValues(node, path) {
+    var selected = node.values || [];
+    var html = (CROWDSEC_VALUES[node.field] || [])
+      .map(function (value) {
+        var on = selected.indexOf(value) !== -1;
+        var label = translate("workflows.crowdsec_value." + value, value);
+        if (STATE.readonly) {
+          return on
+            ? '<span class="bw-flow-val">' + esc(label) + "</span>"
+            : "";
+        }
+        return (
+          '<button type="button" class="bw-flow-val bw-flow-cs-val' +
+          (on ? " is-on" : "") +
+          '" data-wf-csval="' +
+          node._k +
+          ":" +
+          value +
+          '" aria-pressed="' +
+          (on ? "true" : "false") +
+          '">' +
+          esc(label) +
+          "</button>"
+        );
+      })
+      .join("");
+    return (
+      '<div class="bw-flow-vals" data-wf-node="' +
+      esc(path) +
+      '">' +
+      html +
+      "</div>"
+    );
   }
 
   function predicate(node, path) {
@@ -677,11 +760,31 @@
               node.match,
               translate("workflows.aria.uriMatch", "URI match mode"),
             )
-        : node.op === "group"
-          ? translate("workflows.verb.isIn", "is in")
-          : (node.values || []).length > 1
-            ? translate("workflows.verb.isOneOf", "is one of")
-            : translate("workflows.verb." + node.op, meta.verb);
+        : node.op === "crowdsec"
+          ? STATE.readonly
+            ? translate(
+                "workflows.crowdsec_field." + node.field,
+                node.field + " is",
+              )
+            : selectHtml(
+                "bw-flow-pred-op-select",
+                CROWDSEC_FIELDS.map(function (field) {
+                  return {
+                    value: field,
+                    label: translate(
+                      "workflows.crowdsec_field." + field,
+                      field + " is",
+                    ),
+                  };
+                }),
+                node.field,
+                translate("workflows.aria.crowdsecField", "CrowdSec fact"),
+              )
+          : node.op === "group"
+            ? translate("workflows.verb.isIn", "is in")
+            : (node.values || []).length > 1
+              ? translate("workflows.verb.isOneOf", "is one of")
+              : translate("workflows.verb." + node.op, meta.verb);
     var typePicker = STATE.readonly
       ? "<span>" + esc(spec.label) + "</span>"
       : selectHtml(
@@ -1939,8 +2042,21 @@
       : translate("workflows.errors.rule", "Rule {{n}}", { n: index + 1 });
   }
 
+  function warningsHtml() {
+    if (!STATE.warnings.length) return "";
+    return (
+      '<div class="alert alert-warning wf-warnings" role="status"><ul>' +
+      STATE.warnings
+        .map(function (warning) {
+          return "<li>" + esc(warning.message) + "</li>";
+        })
+        .join("") +
+      "</ul></div>"
+    );
+  }
+
   function panelHtml() {
-    if (!STATE.errorList.length) return "";
+    if (!STATE.errorList.length) return warningsHtml();
     var count = STATE.errorList.length;
     return (
       '<div class="alert alert-danger wf-errors" role="alert">' +
@@ -2475,6 +2591,8 @@
   function validate() {
     if (!STATE.rules.length) {
       setErrors([]);
+      // Cleared with the errors: a notice about a rule that no longer exists is worse than none.
+      STATE.warnings = [];
       STATE.summaries = {};
       paint();
       return;
@@ -2495,12 +2613,14 @@
         }
         if (body.valid) {
           setErrors([]);
+          STATE.warnings = body.warnings || [];
           STATE.summaries = {};
           (body.summaries || []).forEach(function (entry, index) {
             var rule = STATE.rules[index];
             if (rule) STATE.summaries[rule.id] = entry.summary;
           });
         } else {
+          STATE.warnings = [];
           setErrors(body.errors);
         }
         paint();
@@ -2587,6 +2707,9 @@
       country: value("wf-test-country"),
       asn: value("wf-test-asn") === "" ? null : Number(value("wf-test-asn")),
       request_number: Number(value("wf-test-number") || 1),
+      crowdsec: value("wf-test-crowdsec") || "unavailable",
+      crowdsec_source: value("wf-test-crowdsec-source"),
+      crowdsec_remediation: value("wf-test-crowdsec-remediation"),
       whitelisted: !!(document.getElementById("wf-test-whitelisted") || {})
         .checked,
     };
@@ -3081,6 +3204,27 @@
         return;
       }
 
+      var toggleValue = hit("[data-wf-csval]");
+      if (toggleValue) {
+        // key:value — the value itself never holds a colon, both vocabularies are single words.
+        var csSplit = toggleValue.dataset.wfCsval.split(":");
+        var csHit = locate(csSplit[0]);
+        if (csHit) {
+          var at = csHit.node.values.indexOf(csSplit[1]);
+          if (at === -1) csHit.node.values.push(csSplit[1]);
+          else csHit.node.values.splice(at, 1);
+          touch();
+          if (!csHit.node.values.length)
+            say(
+              translate(
+                "workflows.say.lastValueRemoved",
+                "Last value removed — this condition cannot be saved until it holds one.",
+              ),
+            );
+        }
+        return;
+      }
+
       var addValue = hit("[data-wf-addval]");
       if (addValue) return inlineValue(addValue, addValue.dataset.wfAddval);
 
@@ -3197,7 +3341,12 @@
         var opHit = host ? locate(host.dataset.wfKey) : null;
         if (!opHit) return;
         if (opHit.node.op === "uri") opHit.node.match = target.value;
-        else if (opHit.node.op === "group") {
+        else if (opHit.node.op === "crowdsec") {
+          // The two fields have disjoint vocabularies, so the selection cannot carry over: a
+          // "ban" left behind on a source leaf is a value the API refuses.
+          opHit.node.field = target.value;
+          opHit.node.values = [];
+        } else if (opHit.node.op === "group") {
           opHit.node.kind = target.value;
           opHit.node.group_id = firstGroupFor(target.value);
         }
@@ -3679,6 +3828,22 @@
       };
       geoSelect.addEventListener("change", syncGeo);
       syncGeo();
+    }
+
+    var crowdsecSelect = document.getElementById("wf-test-crowdsec");
+    if (crowdsecSelect) {
+      var syncCrowdsec = function () {
+        var fields = document.getElementById("wf-test-crowdsec-fields");
+        // A source and a remediation only exist on a request CrowdSec actually remediated:
+        // showing them for the other two states would invite a contradiction the API refuses.
+        if (fields)
+          fields.classList.toggle(
+            "d-none",
+            crowdsecSelect.value !== "remediated",
+          );
+      };
+      crowdsecSelect.addEventListener("change", syncCrowdsec);
+      syncCrowdsec();
     }
 
     /* This file is deferred, so it can render before i18next has fetched its catalogue, and

@@ -20,8 +20,11 @@ A condition is a tree of `ALL` / `ANY` / `NOT` nodes over:
 | URI | the normalised path — exact, prefix or regular expression |
 | HTTP method | the request method |
 | Resource group | an IP, country or ASN group you maintain elsewhere, referenced by id |
+| CrowdSec verdict | what CrowdSec decided about the request — its source (`appsec` or `lapi`) and the remediation it asked for (`ban` or `captcha`) |
 
 Conditions are **three-valued**. A predicate is true, false, or *unknown* when the fact it needs is unavailable — a missing GeoIP database, for example. A rule only matches when its tree resolves to true, so a broken database makes a rule stop matching rather than start matching by accident.
+
+A **CrowdSec verdict** condition is undecided on a service CrowdSec did not judge, and false on a request CrowdSec judged and had nothing against — two different facts, and neither of them matches. For a workflow to answer *instead of* CrowdSec rather than after it, set `CROWDSEC_DEFER_TO_WORKFLOWS` to `yes` on the service: CrowdSec then hands its verdict over instead of applying it, and it is applied unchanged whenever no rule matched.
 
 ### Rate thresholds are a gate, not an action
 

@@ -1106,6 +1106,17 @@ def test_the_workflow_editor_dynamic_i18n_keys_resolve():
     for key in ("workflows.entry_title", "workflows.entry_sub", "workflows.exit_title", "workflows.exit_sub"):
         assert _resolves_in_locale(locale, key), key
 
+    # The CrowdSec leaf builds both its field label and every value label from data, so the
+    # static scan sees neither. Read the two vocabularies out of the editor itself rather than
+    # restating them, or the check stops covering a value the day one is added.
+    fields = re.search(r"var CROWDSEC_FIELDS = \[(.*?)\];", editor, re.DOTALL)
+    values = re.search(r"var CROWDSEC_VALUES = \{(.*?)\n  \};", editor, re.DOTALL)
+    assert fields and values, "the CrowdSec vocabularies are gone from the editor"
+    for field in re.findall(r'"(\w+)"', fields.group(1)):
+        assert _resolves_in_locale(locale, f"workflows.crowdsec_field.{field}"), field
+    for value in re.findall(r'"(\w+)"', values.group(1)):
+        assert _resolves_in_locale(locale, f"workflows.crowdsec_value.{value}"), value
+
 
 def test_a_composed_key_prefix_still_names_something_real():
     """`_("tooltip.button.convert_config_to_" ~ state)` builds its key at render time, so the

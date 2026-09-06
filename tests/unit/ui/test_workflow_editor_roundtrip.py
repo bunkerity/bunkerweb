@@ -38,6 +38,10 @@ CONDITION = {
         },
         {"op": "not", "node": {"op": "any", "nodes": [{"op": "method", "values": ["GET"]}]}},
         {"op": "not", "node": {"op": "ip", "values": ["203.0.113.0/24"]}},
+        # The CrowdSec leaf is a value list with a `field` discriminator, so it is the one kind
+        # that loses half of itself if either direction of the rewrite forgets a key.
+        {"op": "crowdsec", "field": "remediation", "values": ["ban", "captcha"]},
+        {"op": "not", "node": {"op": "crowdsec", "field": "source", "values": ["appsec"]}},
     ],
 }
 
@@ -154,7 +158,9 @@ def test_a_not_leaf_survives_as_a_not_group(node, tmp_path):
     """not(<leaf>) has no group to show, so it becomes not(any([leaf])) — the same meaning."""
     definition = _round_trip(node, tmp_path, DEFINITION)
     negations = [node for node in definition["rules"][0]["condition"]["nodes"] if node["op"] == "not"]
-    assert len(negations) == 2
+    # Three: the NOT group the operator built, and the two NOT-of-a-leaf shapes (an IP list and a
+    # CrowdSec verdict) that the view has to rewrite into one.
+    assert len(negations) == 3
     for negation in negations:
         assert negation["node"]["op"] == "any"
 

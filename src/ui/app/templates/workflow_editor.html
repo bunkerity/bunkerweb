@@ -143,6 +143,30 @@
                     {{ _("workflows.test.number_help") }}
                 </p>
 
+                <label for="wf-test-crowdsec">{{ _("workflows.test.crowdsec") }}</label>
+                <select id="wf-test-crowdsec" class="form-select form-select-sm">
+                    <option value="unavailable">{{ _("workflows.test.crowdsec_unavailable") }}</option>
+                    <option value="allowed">{{ _("workflows.test.crowdsec_allowed") }}</option>
+                    <option value="remediated">{{ _("workflows.test.crowdsec_remediated") }}</option>
+                </select>
+                <p class="wf-test-help">{{ _("workflows.test.crowdsec_help") }}</p>
+
+                <div id="wf-test-crowdsec-fields" class="d-none">
+                    <label for="wf-test-crowdsec-source">{{ _("workflows.test.crowdsec_source") }}</label>
+                    <select id="wf-test-crowdsec-source" class="form-select form-select-sm">
+                        {% for source in ["appsec", "lapi"] %}
+                            <option value="{{ source }}">{{ _("workflows.crowdsec_value." ~ source) }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="wf-test-crowdsec-remediation">{{ _("workflows.test.crowdsec_remediation") }}</label>
+                    <select id="wf-test-crowdsec-remediation" class="form-select form-select-sm">
+                        {% for remediation in ["ban", "captcha"] %}
+                            <option value="{{ remediation }}">{{ _("workflows.crowdsec_value." ~ remediation) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <label for="wf-test-service">{{ _("workflows.test.service") }}</label>
                 <select id="wf-test-service" class="form-select form-select-sm">
                     {% for service in workflow.services or [] %}<option value="{{ service }}">{{ service }}</option>{% endfor %}

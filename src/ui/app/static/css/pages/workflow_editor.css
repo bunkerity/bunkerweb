@@ -673,6 +673,22 @@
   border-color: color-mix(in srgb, var(--bs-warning) 45%, transparent);
   background: color-mix(in srgb, var(--bs-warning) 10%, transparent);
 }
+/* The CrowdSec vocabularies are closed sets, so their values are toggles rather than typed
+   chips. Unselected reads as an outline of the same chip, selected as the filled chip every
+   other leaf already uses — one visual language, two states. */
+.bw-flow-cs-val {
+  cursor: pointer;
+  opacity: 0.45;
+  background: transparent;
+}
+.bw-flow-cs-val.is-on {
+  opacity: 1;
+  background: color-mix(in srgb, var(--wf-accent) 7%, transparent);
+}
+[data-bs-theme="dark"] .bw-flow-cs-val.is-on {
+  background: color-mix(in srgb, var(--wf-accent) 10%, transparent);
+}
+
 .bw-flow-val-rm {
   border: 0;
   background: transparent;
