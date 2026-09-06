@@ -377,6 +377,12 @@ log {
 - Manage UI users, roles, sessions, TOTP with recovery codes, and passkeys (WebAuthn / FIDO2) for passwordless sign-in.
 - Upgrade to BunkerWeb PRO and inspect license status from the dedicated page.
 
+### The default server entry
+
+The services list always shows one pinned entry at the top labelled **Default server**, with a one-line explainer under it. It is the reserved `default-server` service: the block that answers requests matching no configured service — an unknown hostname, a raw IP address, a `Host` nobody serves.
+
+Open it to configure the certificate it presents, its TLS settings, response headers, error pages and whitelist. Only those apply: reverse proxy, gRPC, redirects, sessions, antibot, mTLS, CORS and HTTP basic auth are not offered on its page, because the block has no hostname to route and no service identity to bind to. It offers no delete, clone or convert action either — it is permanent, and it is never counted against the PRO service quota.
+
 ### Resource groups
 
 Open **Configure → Resource groups** to maintain reusable lists of IP addresses or CIDRs, countries, ASNs, reverse-DNS suffixes, user-agent patterns, and URI patterns. Each entry has one type and can carry a comment. You can clone groups, export them as JSON, and inspect every reference before changing one.
@@ -398,16 +404,16 @@ You can purge one absolute HTTP(S) URL or the complete cache. URL purges reconst
 
 The **Reports** page covers blocked HTTP requests and blocked STREAM sessions. **Overview** charts activity over the selected range, **Attack patterns** groups ModSecurity rules and attack families, **Top offenders** ranks client IPs, countries, and ASNs, and **Event log** provides server-side search, filters, sortable columns, incident details, and CSV or Excel export. Admins can ban one offender, selected rows, or every IP in the current filtered result.
 
+A report covers every request a plugin blocked (a 4xx), every request it merely detected under `SECURITY_MODE=detect`, and every blocked STREAM session. Three security actions do not end on a block code and are kept anyway, on the reason they carry rather than on their status: a CrowdSec 1.8 bot-detection challenge page, which BunkerWeb serves itself with a 200 instead of forwarding the request to your application; a `workflows` rule whose action is a redirect, which ends on a 3xx; and an antibot challenge page, served the same way as CrowdSec's. Note that an antibot challenge is shown to every unidentified visitor of a protected service, not only to a detected attacker, so enabling antibot on a busy service adds a report per challenge. The setting that fills first is `METRICS_MAX_BLOCKED_REQUESTS` (the per-worker in-memory buffer, `1k` by default, or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when Redis is in use): once it is full it evicts oldest-first, which discards genuine blocked requests to make room for challenges. Raise it first, then size `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` for the stored history. The analytical tabs are unaffected: **Overview**, **Top offenders** and the threat map count blocked and detected requests only, never a served challenge.
+
+Where a plugin records what it decided, the **Reason** column shows it as a sentence instead of a bare plugin name: *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: …)*, *Antibot challenge (captcha) served* or *Security workflow api-shield: redirect* rather than just `crowdsec`, `antibot` or `workflows`, and the incident details keep the raw fields underneath. Sorting and the Reason filter still work on the underlying value, so a saved filter does not change meaning.
+
 `METRICS_PERSIST_TO_DB=yes` is the default and gives the event log a durable, centrally queryable source. `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` bound that history. When persistence is disabled, reports remain in instance memory or Redis and can expire sooner. If the Metrics API is unavailable, the UI falls back to the legacy instance/Redis query for the event log; the analytical dashboard tabs show an empty state until metrics are available again.
 
 ## Guided walkthrough
 
 A new install opens a **Getting started** drawer from the rocket icon in the top bar. It lists what
 is left to do, ticks each item off on its own, and disappears once everything is done — or as soon
-A report covers every request a plugin blocked (a 4xx), every request it merely detected under `SECURITY_MODE=detect`, and every blocked STREAM session. Three security actions do not end on a block code and are kept anyway, on the reason they carry rather than on their status: a CrowdSec 1.8 bot-detection challenge page, which BunkerWeb serves itself with a 200 instead of forwarding the request to your application; a `workflows` rule whose action is a redirect, which ends on a 3xx; and an antibot challenge page, served the same way as CrowdSec's. Note that an antibot challenge is shown to every unidentified visitor of a protected service, not only to a detected attacker, so enabling antibot on a busy service adds a report per challenge. The setting that fills first is `METRICS_MAX_BLOCKED_REQUESTS` (the per-worker in-memory buffer, `1k` by default, or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` when Redis is in use): once it is full it evicts oldest-first, which discards genuine blocked requests to make room for challenges. Raise it first, then size `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` for the stored history. The analytical tabs are unaffected: **Overview**, **Top offenders** and the threat map count blocked and detected requests only, never a served challenge.
-
-Where a plugin records what it decided, the **Reason** column shows it as a sentence instead of a bare plugin name: *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: …)*, *Antibot challenge (captcha) served* or *Security workflow api-shield: redirect* rather than just `crowdsec`, `antibot` or `workflows`, and the incident details keep the raw fields underneath. Sorting and the Reason filter still work on the underlying value, so a saved filter does not change meaning.
-
 as you dismiss it.
 
 Nothing is stored about what you have *seen*: each item is re-derived from the running

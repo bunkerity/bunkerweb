@@ -359,7 +359,7 @@ _SET_BY_THE_HOST_PAGE = {"blacklisted_settings", "service_method", "is_draft"}
 # service-only entries; a name that appears here and in neither route is the failure this pair of
 # tests exists to catch.
 REQUIRED_FROM_ROUTE = {"config", "shelf_plugin_scope", "activation_map", "control_keys", "global_page", "service_id"}
-SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order", "current_template"}
+SERVICE_ONLY_FROM_ROUTE = {"templates", "clone", "attachments", "plugin_order", "current_template", "allowed_plugins"}
 
 
 def _locally_bound(tree):

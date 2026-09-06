@@ -96,6 +96,9 @@ def test_a_row_carries_facts_rather_than_markup(services_route):
             "creation_date": rows[0]["creation_date"],
             "last_update": rows[0]["last_update"],
             "deletable": rows[0]["deletable"],
+            # The reserved default server flag: `services.js` pins that row and swaps its name for
+            # the "Default server" label off this boolean, so the id comparison stays server-side.
+            "reserved": False,
             "link_port": "",
         }
     ]

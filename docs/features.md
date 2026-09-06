@@ -4282,6 +4282,43 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     !!! warning "SNI Enforcement"
         Enabling strict SNI validation provides stronger security but may cause issues if BunkerWeb is behind a reverse proxy that forwards HTTPS requests without preserving SNI information. Test thoroughly before enabling in production environments.
 
+=== "Configuring the Default Server"
+
+    **The default server is a service you can edit**
+
+    The block that answers requests matching no configured service — an unknown hostname, a raw IP address, a `Host` nobody serves — is exposed as a **reserved service named `default-server`**. It appears pinned at the top of the services list in the web UI and is returned by `GET /services` flagged `reserved: true`.
+
+    !!! warning "Multisite only"
+        This is a **multisite feature**: everything on this page applies when `MULTISITE` is `yes`. Per-service settings are only materialised and only resolvable at runtime in multisite mode, so with `MULTISITE=no` the reserved service is inert and invisible — the reserved row is not listed by `GET /services`, not shown in the web UI, never appears in `SERVER_NAME` — a service of *yours* that happens to carry that name is a different matter, see the upgrade note at the end of this paragraph — and the three phase runners below are not rendered. The default server behaves exactly as it did before 1.7, and the global `DEFAULT_SERVER_SSL_*` certificate override keeps working. On an existing single-site deployment the row is not created at all; on a brand-new install it may be created before `MULTISITE` has been written for the first time, in which case it simply sits in the database doing nothing. Set `MULTISITE=yes` and the reserved service is there at the next configuration save, with no restart. If a service of yours is already named `default-server`, it is **not** adopted: an error is logged naming it, and — unlike the reserved service — it can still be renamed and deleted so you can move it out of the way. With `MULTISITE=no` it also keeps being served exactly like any other service of yours: the name stays in `SERVER_NAME` and its `server{}` block is rendered, with a warning at each generation asking you to rename it before you switch `MULTISITE` on.
+
+    It is a real service row, so its certificate, TLS settings, response headers, error pages and whitelist are stored and edited exactly like any other service's. It is also permanent: it cannot be created, renamed, converted to a draft or deleted, it is never counted against the PRO service quota, and an autoconf deployment that removes its last ingress does not remove it.
+
+    Only the settings that make sense without a hostname are offered on its page: the certificate providers, TLS, `errors`, `headers`, `whitelist` and the miscellaneous settings. Reverse proxy, gRPC, redirects, sessions, antibot, mTLS, CORS and HTTP basic auth are not — there is no `Host` to route and no service identity to bind to, so those settings would be stored and never applied.
+
+    Those settings really run: the default server executes the `set`, `access` and `header` phases of that curated subset, which it never did before. So that upgrading a deployment does not change what its catch-all block answers, the reserved service is **seeded** on creation with `AUTO_REDIRECT_HTTP_TO_HTTPS=no`, `REDIRECT_HTTP_TO_HTTPS=no` and `USE_WHITELIST=no` — visible on its page, and yours to change. Only on creation: an existing row is never rewritten. On a **fresh** install the row can be created before the settings table is populated, in which case it carries no seeded values and the catch-all follows your global settings; upgrades, where there is behaviour to preserve, always seed.
+
+    One behaviour is new by design: `ALLOWED_METHODS` now applies here too, so a request to a hostname you do not serve using a method outside `GET|POST|HEAD|QUERY` is answered with `405` instead of the default page. Bans are enforced on the default server and the response headers are emitted there, both of which are the point of making it configurable.
+
+    !!! info "Where the certificate lives"
+        The certificate the default server presents is set with the four **global** `DEFAULT_SERVER_SSL_*` settings of the [Custom SSL certificate](#custom-ssl-certificate) plugin, not with a per-service one. The Default server page links straight to them.
+
+    **Stream (TCP) catch-all**
+
+    In `stream`, there is no SNI on plain TCP and none at all on UDP, so NGINX selects a block by `address:port` alone: a default server on a port a service listens on would win there and answer that service's traffic. The stream default server is therefore opt-in and owns its own ports.
+
+    | Setting                        | Default | Context   | Multiple | Description                                                                                                                                                             |
+    | ------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `DEFAULT_SERVER_STREAM_PORTS`  |         | multisite | yes      | **Default Server Stream Ports:** Ports on which the default server accepts stream (TCP) connections matching no configured service. Empty disables it, which is the default. |
+    | `DEFAULT_SERVER_STREAM_PORTS_SSL` |      | multisite | yes      | **Default Server Stream Ports (TLS):** Which of those ports are served over TLS. Must be a subset of `DEFAULT_SERVER_STREAM_PORTS`; empty means plain TCP only.               |
+
+    Set it on the reserved service, for example `default-server_DEFAULT_SERVER_STREAM_PORTS=9000` (and `_1`, `_2`, … for more ports). It is a multisite setting like any other, so setting it **globally** also reaches the default server and opens the listener there — if that is not what you want, scope it to `default-server`.
+
+    Three kinds of port are **refused** when you save them on the reserved service — its page in the web UI, or `PATCH /services/default-server` — each naming what already holds it: a port any stream service listens on (without SNI the default server would answer that service's traffic), a port used by an HTTP or HTTPS listener anywhere in the deployment, and a port BunkerWeb binds for itself (the healthcheck server, the internal API, and on the all-in-one image its web UI and API service). The middle one is not a preference: `http{}` and `stream{}` open their own sockets, so the same port in both makes NGINX refuse to start — and `8080`, the default `HTTP_PORT`, is exactly that case.
+
+    Written **globally** instead, the same value is accepted — the global settings page is not the reserved service's save path — and resolved at generation time: the offending port is dropped from the default server's block and the reason is logged. The same happens to a port a stream service claims *after* you saved it. Either way the real service always keeps its port.
+
+    A port also listed in `DEFAULT_SERVER_STREAM_PORTS_SSL` is served with `ssl` and presents the `DEFAULT_SERVER_SSL_*` certificate. That list is the TLS switch of the ports above, not a second set of listeners: a port in it that `DEFAULT_SERVER_STREAM_PORTS` does not contain is refused when you save it, and dropped with a log line if it reached the database another way. Every connection is answered and closed; the stream default server never proxies.
+
 === "Deny HTTP Status"
 
     **HTTP Status Control**
@@ -4379,6 +4416,8 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
         Thorough testing is recommended before enabling HTTP/3 in production environments.
 
+        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
+
 === "Static File Serving"
 
     **File Serving Configuration**
@@ -4440,8 +4479,6 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     !!! success "Benefits of File Caching"
         - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
         - **Security:** Mitigates timing attacks by caching error responses and reduces the impact of DoS attacks targeting the filesystem.
-        HTTP/3 is silently disabled when `USE_PROXY_PROTOCOL` is set to `yes`. NGINX cannot read the PROXY protocol header on a QUIC listener, so no `quic` listener and no `Alt-Svc` header are generated even though `HTTP3` still reports `yes`, and `LIMIT_CONN_MAX_HTTP3` has no effect. Terminate the PROXY protocol upstream, or accept HTTP/1.1 and HTTP/2 only.
-
 
     | Setting                    | Default                 | Context   | Multiple | Description                                                                                          |
     | -------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |

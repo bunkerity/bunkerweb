@@ -51,15 +51,29 @@ $(document).ready(function () {
   // not valid in one. Same substitution the template did.
   const idFor = (name) => String(name).replace(/\./g, "-");
 
-  function renderName(id) {
+  function renderName(id, row) {
     const safeId = escapeAttr(id);
     const icon = isReadOnly ? "show" : "edit";
     const key = isReadOnly
       ? "tooltip.link.view_service"
       : "tooltip.link.edit_service";
-    return `<a href="${servicesUrl}/${encodeURIComponent(id)}" class="d-flex align-items-center"
+    const link = `<a href="${servicesUrl}/${encodeURIComponent(id)}" class="d-flex align-items-center"
        data-bs-toggle="tooltip" data-bs-placement="bottom"
-       data-bs-original-title="${escapeAttr(t(key, isReadOnly ? "View Service {{service}}" : "Edit Service {{service}}", { service: id }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${safeId}</a>`;
+       data-bs-original-title="${escapeAttr(t(key, isReadOnly ? "View Service {{service}}" : "Edit Service {{service}}", { service: id }))}"><i class="bx bx-${icon} bx-xs"></i>&nbsp;${
+         row && row.reserved
+           ? escapeAttr(t("service.default_server.name", "Default server"))
+           : safeId
+       }</a>`;
+    // The reserved default server is not a hostname anybody typed, so it is shown by its label with
+    // the one line that says what it answers — otherwise "default-server" in a list of real domains
+    // reads like a service somebody created by mistake.
+    if (!(row && row.reserved)) return link;
+    return `${link}<small class="text-muted d-block" data-i18n="service.default_server.explainer">${escapeAttr(
+      t(
+        "service.default_server.explainer",
+        "Answers requests that match no configured service: unknown hostnames, raw IP access. Configure its certificate, TLS, headers and error pages here.",
+      ),
+    )}</small>`;
   }
 
   function renderType(type, name) {
@@ -112,11 +126,36 @@ $(document).ready(function () {
       deleteOptions = `{"method": "${safeMethod}"}`;
     }
 
+    // The reserved default server gets ONE action, the one that means something for it. Access
+    // (there is no https://default-server), clone, convert to draft and delete are all either
+    // nonsense or refused by the API, and an icon that always answers 403 is worse than no icon.
+    if (row.reserved === true) {
+      return `
+      <div class="row-actions">
+        <a role="button" class="icon-btn" href="${servicesUrl}/${encodeURIComponent(id)}"
+           data-bs-toggle="tooltip" data-bs-placement="bottom"
+           data-bs-original-title="${t(
+             isReadOnly
+               ? "tooltip.link.view_default_server"
+               : "tooltip.link.edit_default_server",
+             isReadOnly ? "View the default server" : "Edit the default server",
+           )}"
+           data-i18n="${isReadOnly ? "tooltip.link.view_default_server" : "tooltip.link.edit_default_server"}"><i class="bx bx-${editIcon}"></i></a>
+        <button type="button" class="icon-btn info export-service" data-service-id="${safeId}"
+                data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-original-title="${t("tooltip.link.export_service", "Export service {{service}} configuration", { service: id })}"
+                data-i18n="tooltip.link.export_service"
+                data-i18n-options='{"service": "${safeId}"}'><i class="bx bx-export" aria-hidden="true"></i></button>
+      </div>`;
+    }
+
     const convertTo = isDraft ? "online" : "draft";
     // A service that listens where the fleet does keeps a bare https://<name> link: the rendered
     // port is not the published one there (the images publish 443:8443), so adding it would break
     // a link that works. `link_port` is only set when the service declared HTTPS ports of its own.
-    const linkPort = row.link_port ? `:${escapeAttr(String(row.link_port))}` : "";
+    const linkPort = row.link_port
+      ? `:${escapeAttr(String(row.link_port))}`
+      : "";
 
     return `
       <div class="row-actions">
@@ -652,8 +691,8 @@ $(document).ready(function () {
         },
         {
           targets: 2,
-          render: (data, type) =>
-            type === "display" ? renderName(data) : data,
+          render: (data, type, row) =>
+            type === "display" ? renderName(data, row) : data,
         },
         {
           targets: [7, 8],

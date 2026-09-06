@@ -14,6 +14,17 @@ from flask_login import login_required
 from regex import search, sub
 
 from common_utils import split_templates  # type: ignore
+from default_server import (  # type: ignore
+    DEFAULT_SERVER_PLUGINS,
+    DEFAULT_SERVER_RESERVED_MESSAGE,
+    DEFAULT_SERVER_SERVER_TYPE_MESSAGE,
+    DEFAULT_SERVER_STREAM_PORTS_SETTING,
+    DEFAULT_SERVER_STREAM_SSL_PORTS_SETTING,
+    default_server_stream_refusal,
+    is_default_server,
+    is_reserved_default_server,
+)
+from ports import collect_ports  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, CORE_PLUGINS_PATH, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -127,8 +138,18 @@ def services_page():
         seen_service_ids.add(service_id)
     services_with_configs = sorted(seen_service_ids)
 
+    # The reserved default server is a multisite-only feature (PO ruling 2026-09-06). The API hides
+    # its row in single-site mode, so there is nothing to pin here -- one sentence saying why is what
+    # replaces it, rather than leaving the operator to wonder where the page went. Defaults to
+    # "multisite" when the API cannot answer: a wrong explainer is worse than none.
+    try:
+        single_site = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("MULTISITE",)).get("MULTISITE") != "yes"
+    except Exception:  # nosec B110 - the page renders without the notice rather than not at all
+        single_site = False
+
     return render_template(
         "services.html",
+        single_site=single_site,
         services=services_list,
         services_with_configs=services_with_configs,
     )
@@ -163,6 +184,25 @@ def _local_iso(value) -> str:
     return moment.astimezone().isoformat()
 
 
+def _reserved_default_server(service: str) -> bool:
+    """Is ``service`` the RESERVED default server row -- id and method both?
+
+    A row an operator created under that name before 1.7 reserved it is an ordinary service that
+    must keep its rename and its delete: those two are the only way back from a site `http.conf`
+    already dropped from its roster by name.
+
+    Fails CLOSED when the API cannot answer. The one caller is the rename refusal, and the failure
+    it prevents -- the default server silently forked into a second, billable service -- is not
+    something to trade for a save going through during an API hiccup.
+    """
+    if not is_default_server(service):
+        return False
+    try:
+        return any(is_reserved_default_server(row) for row in API_CLIENT.get_services(with_drafts=True))
+    except (ApiClientError, ApiUnavailableError):
+        return True
+
+
 def _service_rows(services_list) -> List[Dict[str, Any]]:
     """One flat dict per service, holding the facts a row is built from and nothing else.
 
@@ -182,6 +222,12 @@ def _service_rows(services_list) -> List[Dict[str, Any]]:
                 "creation_date": _local_iso(service.get("creation_date")),
                 "last_update": _local_iso(service.get("last_update")),
                 "deletable": can_delete_service(service),
+                # Pins the row and swaps its name for the "Default server" label + explainer in
+                # services.js. A boolean rather than a name comparison in the client, so the
+                # reserved id stays a server-side fact. Id AND method: a service an operator created
+                # under the reserved name is an ordinary row that must stay deletable and renamable,
+                # so it must not be pinned and relabelled as the default server.
+                "reserved": is_reserved_default_server(service),
                 # Only when this service moved off the fleet's HTTPS listener; empty otherwise, so
                 # a deployment that does not use per-service ports adds nothing to the row.
                 "link_port": service.get("link_port") or "",
@@ -243,7 +289,11 @@ def _filter_and_sort_services(rows, search_value, search_panes, order_column_ind
             return str(value or "")
         return str(value or "").lower()
 
-    return sorted(filtered, key=sort_key, reverse=order_direction == "desc")
+    ordered = sorted(filtered, key=sort_key, reverse=order_direction == "desc")
+    # The reserved default server is PINNED first, whatever the column and direction: it is not one
+    # service among the operator's, it is the block the others fall through to, and burying it on
+    # page 7 of a name-sorted table is how an operator concludes there is nowhere to configure it.
+    return sorted(ordered, key=lambda row: not row.get("reserved"))
 
 
 def _service_pane_options(rows, filtered):
@@ -524,6 +574,14 @@ def services_convert():
 
         for db_service in db_services:
             if db_service["id"] in services:
+                # By id, not by method. `wizard` already fails the check below, but that is a
+                # consequence of the method chosen to avoid a `methods_enum` migration, not the
+                # reason -- and drafting the reserved row is deletion by another name: it drops out
+                # of SERVER_NAME, the default server falls back to the global-only rendering, and
+                # every setting on its page stops applying with no error anywhere.
+                if is_reserved_default_server(db_service):
+                    non_editable_services.add(db_service["id"])
+                    continue
                 if not is_ui_api_method(db_service["method"]):
                     non_editable_services.add(db_service["id"])
                     continue
@@ -604,7 +662,11 @@ def services_delete():
             if db_service["id"] in services:
                 if not can_delete_service(db_service):
                     non_deletable_services.add(db_service["id"])
-                    if db_service["method"] == "autoconf":
+                    if is_reserved_default_server(db_service):
+                        non_deletable_reasons[db_service["id"]] = (
+                            "the reserved default server, which answers requests matching no service and cannot be removed"
+                        )
+                    elif db_service["method"] == "autoconf":
                         non_deletable_reasons[db_service["id"]] = "online autoconf service (convert it to draft first)"
                     else:
                         non_deletable_reasons[db_service["id"]] = "not a UI/API service"
@@ -1531,6 +1593,50 @@ def services_service_page(service: str):
                 is_readonly=is_readonly_request(API_CLIENT.readonly),
             )
 
+        # The stream default server's port list, refused here as well as in the API services router
+        # (the approved gate asks for both). This page does NOT save through that router --
+        # `update_service` goes to `BW_CONFIG.edit_service` -> `save_config` -- so without this the
+        # page the operator is told to configure the default server on would accept a port a stream
+        # service already listens on, save it, and have it dropped at generation time with the
+        # reason in a log nobody is reading. Judged on the merge, because the port and the service
+        # that owns it can be saved in different requests.
+        # The name this payload asks for, read the way the pane that posted it is read (`raw`
+        # re-keys on its own `server_name` above). Empty when the payload carries none, which every
+        # curated save does.
+        posted_name = (server_name if mode == "raw" else variables.get("SERVER_NAME", "")).split(" ")[0].strip()
+
+        # Nothing may TAKE the reserved id. `POST /services` refuses it (api/app/routers/services.py)
+        # and this page creates services too, with no such refusal: in multisite the collision was
+        # caught only incidentally, by `models/config.py`'s "already exists" check, which depends on
+        # the reserved row being in the roster -- and in single-site it is not.
+        if service == "new" and is_default_server(posted_name):
+            return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
+
+        if is_default_server(service):
+            # Refused, not ignored: the reserved id never reaches either roster loop, so a stored
+            # SERVER_TYPE would show on the page and switch nothing.
+            if "SERVER_TYPE" in variables:
+                return handle_error(DEFAULT_SERVER_SERVER_TYPE_MESSAGE, "services")
+            # The rename refusal the API has had since DS-B (api/app/routers/services.py), missing
+            # here. This page does NOT save through that router -- `update_service` goes to
+            # `BW_CONFIG.edit_service` -> `save_config` -- and a posted SERVER_NAME re-keys the whole
+            # payload (`mode == "raw"` above) and then reaches `edit_service`, which pops every
+            # `default-server*` key and appends the payload under the new name. `save_config` keeps
+            # the reserved row regardless, so the result is not a rename at all: the default server
+            # is FORKED into a second, billable service while the operator believes they moved it.
+            if posted_name and posted_name != service and _reserved_default_server(service):
+                return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
+            try:
+                merged = BW_CONFIG.get_config(methods=False, with_drafts=True) | {f"{service}_{key}": value for key, value in variables.items()}
+            except Exception:  # nosec B110 - a config the API cannot serve is reported by the save itself
+                merged = {}
+            # Both lists: an SSL port the port list does not contain is refused the same way a
+            # colliding port is, and the page submits the two fields together.
+            declared = collect_ports(variables, DEFAULT_SERVER_STREAM_PORTS_SETTING) + collect_ports(variables, DEFAULT_SERVER_STREAM_SSL_PORTS_SETTING)
+            refusal = default_server_stream_refusal(merged, declared) if merged else None
+            if refusal:
+                return handle_error(refusal, "services")
+
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
         CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone, file_setting_names, scope=scope)
 
@@ -1652,6 +1758,7 @@ def services_service_page(service: str):
         flash(f"Could not fetch attached {family}s for this service.", "error")
 
     service_id = "" if service == "new" else service
+    default_server = _reserved_default_server(service_id)
     return render_template(
         "service_settings.html",
         config=db_config,
@@ -1681,6 +1788,11 @@ def services_service_page(service: str):
         # client-side (app/models/service_attachments.py explains why counts and not key sets).
         template_overlaps=template_overlap_context(db_templates),
         plugin_order=core_plugin_order(),
+        # The reserved default server: no attachable-resources band (nothing to attach to a block
+        # with no hostname) and a shelf narrowed to the curated subset. `None` everywhere else, and
+        # the shelf reads a falsy `allowed_plugins` as "no allowlist".
+        default_server=default_server,
+        allowed_plugins=DEFAULT_SERVER_PLUGINS if default_server else None,
     )
 
 
@@ -1701,6 +1813,13 @@ def services_plugin_page(service: str, plugin: str):
     if not plugin_data:
         LOGGER.warning(f"Plugin not found on the service plugin page: {plugin!r}")
         return handle_error("Plugin not found", "services")
+
+    # The reserved default server exposes a curated subset (utils/default_server.py). The shelf
+    # already hides the rest, and this closes the direct URL: a page that saved settings the default
+    # server block never renders would be a form that silently does nothing.
+    if _reserved_default_server(service) and plugin not in DEFAULT_SERVER_PLUGINS:
+        LOGGER.warning(f"Plugin {plugin!r} is not part of the default server subset")
+        return handle_error("This plugin does not apply to the default server", "services")
 
     try:
         db_config = API_CLIENT.get_service(service, full=True, methods=True, with_drafts=True)

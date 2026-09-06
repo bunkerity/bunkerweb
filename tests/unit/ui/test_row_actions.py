@@ -147,7 +147,11 @@ def test_the_access_link_carries_a_moved_services_own_port():
     for every deployment that uses no per-service port."""
     actions = _renderer_source(SERVICES_JS.read_text(encoding="utf-8"))
 
-    assert 'const linkPort = row.link_port ? `:${escapeAttr(String(row.link_port))}` : "";' in actions
+    # Whitespace-normalised rather than quoted verbatim: this statement is 82 characters and
+    # Prettier's printWidth is 80, so the hook wraps it onto three lines the moment anything in this
+    # file is formatted. Pinning the unwrapped literal made the test fail on a reformat that changed
+    # nothing.
+    assert 'const linkPort = row.link_port ? `:${escapeAttr(String(row.link_port))}` : "";' in " ".join(actions.split())
 
 
 def test_the_page_ships_no_rows_at_all():

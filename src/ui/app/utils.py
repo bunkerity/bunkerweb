@@ -19,6 +19,7 @@ from regex import compile as re_compile, match
 from requests import get
 
 from logger import getLogger  # type: ignore
+from default_server import is_reserved_default_server  # type: ignore
 from service_classification import count_snapshot  # type: ignore
 from password_utils import (  # type: ignore  # noqa: F401
     BCRYPT_HASH_RX as BCRYPT_HASH_RX,
@@ -185,12 +186,12 @@ COLUMNS_PREFERENCES_DEFAULTS = {
 
 UI_API_METHODS: FrozenSet[str] = frozenset({"ui", "api"})
 EDITABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"wizard"})
-
 # Mirror of `ENROLLABLE_METHODS` in `db_methods/instances.py`, which is what the API guards read.
 # Kept separate from `UI_API_METHODS` on purpose: the two answer different questions, and since the
 # 2026-09-02 ruling they are no longer the same set. `tests/unit/ui/test_instances_enrollment_ui.py`
 # pins them to each other so this copy cannot drift.
 ENROLLABLE_METHODS: FrozenSet[str] = UI_API_METHODS | frozenset({"manual"})
+
 
 def stop(status, _stop: bool = True):
     if _stop:
@@ -295,7 +296,6 @@ def is_ui_api_method(method: Optional[str]) -> bool:
     return method in UI_API_METHODS
 
 
-def can_delete_service(service: Dict[str, Any]) -> bool:
 def is_enrollable_method(method: Optional[str]) -> bool:
     """Can the control plane own a credential on this row -- enroll, rotate, revoke?
 
@@ -309,7 +309,18 @@ def is_enrollable_method(method: Optional[str]) -> bool:
     return method in ENROLLABLE_METHODS
 
 
+def can_delete_service(service: Dict[str, Any]) -> bool:
     """Services deletable from the UI: ui/api methods always, autoconf only when drafted."""
+    # Explicit rather than implied. The reserved default server is seeded with method "wizard",
+    # which `is_ui_api_method` already refuses -- but that is a consequence of the method chosen to
+    # avoid a `methods_enum` migration, not the reason the row is undeletable. Stating it here means
+    # a later change of seeding method cannot silently make it deletable.
+    #
+    # Id AND method: a service an operator created under the reserved name before 1.7 reserved it is
+    # not the default server, gets no server block of its own any more, and deleting it is half of
+    # the only recovery the product offers (the other half is the rename).
+    if is_reserved_default_server(service):
+        return False
     method = service.get("method")
     if is_ui_api_method(method):
         return True

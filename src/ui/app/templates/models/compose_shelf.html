@@ -179,7 +179,13 @@
 {% set is_stream = (not global_page) and (config.get("SERVER_TYPE") or {}).get("value", "http") == "stream" %}
 {% set counts = namespace(total=0, on=0, locked=0, folded=0) %}
 {% set shelf_body %}
-    {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], global_page) %}
+    {# `allowed_plugins` is an OPT-IN allowlist, passed by exactly one page: the reserved
+       default-server pseudo-service, which exposes a curated subset
+       (utils/default_server.py:DEFAULT_SERVER_PLUGINS) because it has no service identity for
+       `reverseproxy`, `redirect`, `sessions`, `antibot`, `mtls`, `cors` or `authbasic` to act on.
+       Undefined or empty everywhere else, and `not undefined` is true, so every other page keeps
+       the full shelf. #}
+    {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], global_page) and ((not allowed_plugins) or plugin in allowed_plugins) %}
         {% set settings = plugin_data["settings"] or {} %}
         {% set declaration = activation_map.get(plugin) %}
         {% set scope = shelf_plugin_scope(plugin, plugin_data, config, global_page=global_page, is_pro_version=is_pro_version, blacklisted=blacklisted_settings, is_stream=is_stream, activation_map=activation_map) %}

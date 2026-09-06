@@ -19,7 +19,36 @@
        forms -- the parser would close the compose form at the inner tag and orphan the shelf.
        Its template picker reaches the shelf's USE_TEMPLATE input by name, across that boundary
        (static/js/pages/service-resources.js:66). #}
-    {% include "models/service_resources_band.html" %}
+    {% if default_server %}
+        {# The reserved default server. It is a service row so that its certificate, TLS, headers and
+           error pages can be stored and edited like any other -- but it is not a service an operator
+           created, it has no hostname, and there is nothing to attach to it: an upstream pool, a
+           redirect and a workflow all need a `Host` to act on, and a certificate attached here would
+           be indexed on a SNI this block only ever answers when nothing matched. The band is
+           therefore not rendered, and the shelf below is narrowed to the curated subset. #}
+        <div class="alert alert-primary d-flex align-items-center" role="alert">
+            <i class="bx bx-shield-quarter me-2" aria-hidden="true"></i>
+            <span>{{ _("service.default_server.explainer") }}</span>
+        </div>
+        {# The certificate override (DEFAULT_SERVER_SSL_CERT / _KEY and their _DATA twins) is a set
+           of GLOBAL customcert settings, so the shelf below -- which renders multisite settings for
+           a service -- cannot show it. One click to where it is edited, rather than leaving an
+           operator to find four global settings by name. #}
+        <div class="card mb-3">
+            <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h6 class="mb-1">{{ _("service.default_server.certificate.title") }}</h6>
+                    <small class="text-muted">{{ _("service.default_server.certificate.help") }}</small>
+                </div>
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('global_settings.global_settings_plugin_page', plugin='customcert') }}">
+                    <i class="bx bx-certification me-1" aria-hidden="true"></i>{{ _("service.default_server.certificate.action") }}
+                </a>
+            </div>
+        </div>
+    {% else %}
+        {% include "models/service_resources_band.html" %}
+    {% endif %}
     <div class="tab-content p-0 position-relative">
         {# Compose is this page's default pane, so `mode` is anything-but-raw here. The easy and
            advanced panes are gone: per-plugin editing lives on /services/<svc>/plugins/<plugin>

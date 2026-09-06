@@ -103,6 +103,10 @@ Please note that multisite mode is implicit when using the web User Interface. Y
   <figcaption>Apply a setting to all services from the web UI</figcaption>
 </figure>
 
+!!! info "The reserved `default-server` service"
+
+    Alongside the services you create, multisite mode always carries one reserved service named `default-server`. It is the block that answers requests matching **no** configured service — an unknown hostname, a raw IP address, a `Host` nobody serves — exposed as a service so its certificate, TLS settings, response headers and error pages can be configured like any other. It is pinned at the top of the services list in the web UI and cannot be created, renamed, drafted or deleted, and it is never counted against the PRO service quota. See [Configuring the Default Server](features.md#miscellaneous).
+
 !!! info "Going further"
 
     You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples) directory of the repository.

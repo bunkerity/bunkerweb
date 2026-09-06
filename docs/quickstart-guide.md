@@ -583,6 +583,10 @@ You can now log in with the administrator account you created during the setup w
 
         You can create a draft service to save your progress and come back to it later. Just click on the `🌐 Online` button to toggle the service to draft mode.
 
+    !!! info "The pinned `Default server` entry"
+
+        The first row of the list is not one of your services: it is the reserved **Default server**, which answers requests matching no configured service. Open it to set the certificate, TLS, headers and error pages it uses. It offers no delete, no clone and no draft — see [Configuring the Default Server](features.md#miscellaneous).
+
     === "Easy mode"
 
         In this mode, you can choose among the available templates and fill in the required fields.
