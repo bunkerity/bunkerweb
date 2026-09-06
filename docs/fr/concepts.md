@@ -31,7 +31,7 @@ Si vous pensez qu'une nouvelle intégration doit être prise en charge, n'hésit
 ## Paramètres
 
 !!! tip "Paramètres BunkerWeb PRO"
-    Certains plugins sont réservés à la **version PRO**. Vous souhaitez tester rapidement BunkerWeb PRO pendant un mois ? Utilisez le code `freetrial` lors de votre commande sur le [panneau BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) ou en cliquant [ici](https://panel.bunkerweb.io/cart.php?language=french&a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) pour appliquer directement le code promo (sera effectif à la caisse).
+    Certains plugins sont réservés à la **version PRO**. Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc).
 
 Une fois BunkerWeb intégré à votre environnement, vous devrez le configurer pour servir et protéger vos applications Web.
 

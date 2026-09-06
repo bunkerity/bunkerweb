@@ -292,7 +292,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Mise à niveau vers PRO {#upgrade-to-pro}
 
 !!! tip "Essai gratuit BunkerWeb PRO"
-    Utilisez le code `freetrial` sur le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) pour un mois d’essai.
+    Essayez gratuitement BunkerWeb PRO pendant 30 jours depuis le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc).
 
 Collez votre clé PRO dans la page **PRO** de l’UI (ou pré-renseignez `PRO_LICENSE_KEY` pour l’assistant). Les mises à niveau sont téléchargées en arrière-plan par le scheduler ; vérifiez l’UI pour l’expiration et les limites de services une fois appliquées.
 

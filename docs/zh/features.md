@@ -4115,6 +4115,8 @@ STREAM 支持 :warning:
 
         建议在生产环境中启用 HTTP/3 之前进行彻底测试。
 
+        当 `USE_PROXY_PROTOCOL` 设置为 `yes` 时，HTTP/3 会被静默禁用。NGINX 无法在 QUIC 监听器上读取 PROXY protocol 标头，因此即使 `HTTP3` 仍显示为 `yes`，也不会生成 `quic` 监听器或 `Alt-Svc` 标头，并且 `LIMIT_CONN_MAX_HTTP3` 不会生效。请在上游终止 PROXY protocol，或仅使用 HTTP/1.1 和 HTTP/2。
+
 === "静态文件服务"
 
     **文件服务配置**
@@ -4858,7 +4860,7 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 - **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
 - **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
-您可以使用促销码 `freetrial` 免费试用 Pro 功能 1 个月。请访问 [BunkerWeb 面板](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。
+您可以免费试用 BunkerWeb PRO 的全部 Pro 功能 30 天。请前往 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)开始试用，并了解根据受 BunkerWeb PRO 保护的服务数量灵活定价的方案。
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
