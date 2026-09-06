@@ -35,6 +35,8 @@ local GLOBAL_SCOPE = "global"
 -- phase (init_by_lua, master process) and inherited by every worker on fork, so a
 -- request only ever reads them.
 local bouncers = {}
+local challenge_prefixes = {}
+local failed_scopes = {}
 
 local function read_file(path)
 	local file = open(path, "r")
@@ -119,6 +121,7 @@ function crowdsec:init()
 
 	local scopes, err = get_scopes()
 	if not scopes then
+		bouncers, challenge_prefixes, failed_scopes = {}, {}, {}
 		return self:ret(false, err)
 	end
 
@@ -144,10 +147,16 @@ function crowdsec:init()
 	end
 
 	local prefixes, distinct_apis = cache_partition.prefixes(api_urls)
+	if not prefixes then
+		-- Reset every module-level table so a later health check cannot report stale services.
+		bouncers, challenge_prefixes, failed_scopes = {}, {}, {}
+		return self:ret(false, distinct_apis)
+	end
 
 	-- Services whose rendered configuration is byte-identical share one instance
 	local by_conf = {}
 	local resolved = {}
+	local challenges = {}
 	local instances = 0
 	for _, entry in ipairs(loaded) do
 		if by_conf[entry.content] then
@@ -172,9 +181,15 @@ function crowdsec:init()
 				end
 			end
 		end
+		if resolved[entry.scope] then
+			challenges[entry.scope] =
+				cache_partition.challenge_prefix(entry.scope, entry.content, resolved[entry.scope].GetCaptchaTemplate())
+		end
 	end
 
 	bouncers = resolved
+	challenge_prefixes = challenges
+	failed_scopes = failed
 
 	if instances == 0 then
 		return self:ret(false, "no CrowdSec configuration could be loaded for service(s) " .. concat(failed, ", "))
@@ -196,13 +211,14 @@ function crowdsec:access()
 		return self:ret(true, "CrowdSec plugin not enabled")
 	end
 	-- Pick the bouncer of this service, falling back to the singlesite one
-	local bouncer = bouncers[self.ctx.bw.server_name] or bouncers[GLOBAL_SCOPE]
+	local scope = bouncers[self.ctx.bw.server_name] and self.ctx.bw.server_name or GLOBAL_SCOPE
+	local bouncer = bouncers[scope]
 	if not bouncer then
 		-- init() already logged why. Fail open rather than take the service down.
 		return self:ret(true, "no CrowdSec bouncer loaded for this service")
 	end
 	-- Do the check
-	local ok, err, banned = bouncer.Allow(self.ctx.bw.remote_addr)
+	local ok, err, banned = bouncer.Allow(self.ctx.bw.remote_addr, challenge_prefixes[scope])
 	if not ok then
 		return self:ret(false, "Error while executing CrowdSec bouncer : " .. err)
 	end
@@ -215,8 +231,16 @@ end
 
 function crowdsec:api()
 	if self.ctx.bw.uri == "/crowdsec/ping" and self.ctx.bw.request_method == "POST" then
-		-- Check crowdsec connection
-		if not self:is_needed() then
+		-- The API vhost's settings do not describe the services being checked.
+		local enabled, enable_err = has_variable("USE_CROWDSEC", "yes")
+		if enabled == nil then
+			return self:ret(
+				true,
+				"Can't check CrowdSec enablement : " .. tostring(enable_err),
+				HTTP_INTERNAL_SERVER_ERROR
+			)
+		end
+		if not enabled then
 			return self:ret(true, "CrowdSec plugin is not enabled", HTTP_OK)
 		end
 
@@ -224,24 +248,47 @@ function crowdsec:api()
 		-- to test : ping every distinct bouncer and report the first failure.
 		local tested = {}
 		local checked = 0
+		local checked_lapis = 0
+		local bouncer_failure
 		for scope, bouncer in pairs(bouncers) do
 			if not tested[bouncer] then
 				tested[bouncer] = true
 				checked = checked + 1
-				local ok, err = bouncer.Allow("127.0.0.1")
+				local ok, err, checked_lapi = bouncer.Health()
 				if not ok then
-					return self:ret(
-						true,
-						"Error while executing CrowdSec bouncer for service " .. scope .. " : " .. err,
-						HTTP_INTERNAL_SERVER_ERROR
-					)
+					bouncer_failure = "Error while executing CrowdSec bouncer for service " .. scope .. " : " .. err
+					break
+				end
+				if checked_lapi then
+					checked_lapis = checked_lapis + 1
 				end
 			end
+		end
+		-- Report a missing configuration and an unreachable Local API together, so fixing
+		-- one does not hide the other until the next reload.
+		if #failed_scopes > 0 then
+			local message = "No CrowdSec configuration loaded for service(s) "
+				.. concat(failed_scopes, ", ")
+				.. "; their requests bypass CrowdSec until the next reload"
+			if bouncer_failure then
+				message = message .. ". " .. bouncer_failure
+			end
+			return self:ret(true, message, HTTP_INTERNAL_SERVER_ERROR)
+		end
+		if bouncer_failure then
+			return self:ret(true, bouncer_failure, HTTP_INTERNAL_SERVER_ERROR)
 		end
 		if checked == 0 then
 			return self:ret(true, "No CrowdSec bouncer loaded", HTTP_INTERNAL_SERVER_ERROR)
 		end
-		return self:ret(true, "The test request is successful", HTTP_OK)
+		if checked_lapis == 0 then
+			return self:ret(
+				true,
+				"CrowdSec configuration loaded; no Local API configured; AppSec health is not checked",
+				HTTP_OK
+			)
+		end
+		return self:ret(true, "Authenticated Local API checks succeeded; AppSec health is not checked", HTTP_OK)
 	end
 	return self:ret(false, "success")
 end

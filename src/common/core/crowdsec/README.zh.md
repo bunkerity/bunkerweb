@@ -27,11 +27,16 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 - 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
 - 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
 
+!!! warning "显式启动一体化容器中的代理"
+    只有一体化容器设置了不带服务前缀的环境变量 `USE_CROWDSEC=yes`，并使用本机 `CROWDSEC_API`（默认为 `http://127.0.0.1:8000`）时，才会启动内置 CrowdSec 代理。仅为某个服务启用 CrowdSec 不会启动内置代理。使用外部本地 API 时，需要单独启动并配置该代理。
+
 ### 集成流程
 
 1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
 2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
 3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
+
+    此检查会向每个已配置的本地 API 发送经过身份验证的只读请求。如果 API 无法访问、凭据被拒绝、响应无效或某个服务的 bouncer 无法加载，检查将失败。对于仅使用 AppSec 的服务，此检查只确认配置已加载，不验证 AppSec 连接或检测功能。
 
 以下各节将依次说明这些步骤。
 
