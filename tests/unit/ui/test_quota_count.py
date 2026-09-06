@@ -93,9 +93,9 @@ def test_the_pro_page_shows_both_numbers():
 
 
 def test_the_billable_label_exists_in_every_locale():
-    """A key missing from one of the 18 catalogs renders as its own id on that page."""
+    """A key missing from one of the 19 catalogs renders as its own id on that page."""
     locales = sorted((_ROOT / "src" / "ui" / "app" / "static" / "locales").glob("*.json"))
-    assert len(locales) == 18
+    assert len(locales) == 19
     for path in locales:
         catalog = json.loads(path.read_text(encoding="utf-8"))
         text = catalog["pro"]["status"]["billable_services_count"]

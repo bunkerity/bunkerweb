@@ -4,24 +4,25 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 
 | File    | Created By                    | Checked By               |
 | ------- | ----------------------------- | ------------------------ |
-| ar.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| bn.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| br.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| de.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| ar.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| bn.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| br.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| de.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
 | en.json | Manual (@TheophileDiot)       | Manual (@TheophileDiot)  |
-| es.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| fr.json | Manual (@TheophileDiot)       | Manual (@TheophileDiot)  |
-| hi.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| it.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| ko.json | Manual (@rayshoo)             | Manual (@rayshoo)        |
-| pl.json | Manual (@tomkolp) via Weblate | Manual (@tomkolp)        |
-| pt.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| ru.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| tl.json | Manual (@Cleverguns)          | Manual (@Cleverguns)     |
-| tr.json | Manual (@wiseweb-works)       | Manual (@wiseweb-works)  |
-| tw.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| ur.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
-| zh.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| es.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| fr.json | Manual (@TheophileDiot)       | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| hi.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| id.json | Manual (@teguh02) + AI (Anthropic:claude-sonnet-5) | AI (Anthropic:claude-sonnet-5) |
+| it.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| ko.json | Manual (@rayshoo)             | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| pl.json | Manual (@tomkolp) via Weblate | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| pt.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| ru.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| tl.json | Manual (@Cleverguns)          | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| tr.json | Manual (@wiseweb-works)       | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| tw.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| ur.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
+| zh.json | AI (Google:Gemini-2.5-pro)    | AI (Anthropic:claude-sonnet-5) — untranslated-key sweep only |
 
 **Table columns:**
 - **File**: The locale file name.
