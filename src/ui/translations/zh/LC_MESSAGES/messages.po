@@ -58,8 +58,14 @@ msgstr "TLS & 证书"
 msgid "alert.configs_import_invalid_file"
 msgstr "请上传一个有效的自定义配置导出文件 (.json)。"
 
+msgid "alert.credential_action_failed"
+msgstr "操作失败。"
+
 msgid "alert.custom_end_date_required"
 msgstr "请选择一个自定义结束日期。"
+
+msgid "alert.enroll_failed"
+msgstr "无法签发注册码。"
 
 msgid "alert.important"
 msgstr "重要"
@@ -87,6 +93,9 @@ msgstr "此操作在只读模式下被禁用。"
 
 msgid "alert.services_import_invalid_file"
 msgstr "请上传有效的服务导出文件（.env 或 .zip）。"
+
+msgid "antibot.reason.sentence"
+msgstr "已提供反机器人质询(%(provider)s)"
 
 msgid "aria.label.clear_search"
 msgstr "清除搜索"
@@ -994,6 +1003,12 @@ msgstr "插件列表无法加载，因此此页面无法安全编辑。 等待 A
 msgid "configs.subtitle"
 msgstr "面向您服务的自定义 NGINX 配置片段——创建、编辑并管理 HTTP、ModSecurity 和 stream 层级的覆盖配置。"
 
+msgid "confirm.revoke_credential"
+msgstr "撤销此实例的凭证?控制平面将无法再连接它。"
+
+msgid "confirm.rotate_credential"
+msgstr "轮换此实例的凭证?如果实例不可达,操作将失败。"
+
 msgid "country.AD"
 msgstr "安道尔"
 
@@ -1750,6 +1765,27 @@ msgstr "津巴布韦"
 msgid "country.not_applicable"
 msgstr "不适用"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "请求已阻止"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "验证码质询"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "机器人检测质询"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s:%(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s:%(action)s(场景:%(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "一个或多个任务在最近一次运行中失败。"
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "服务"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "主要拦截原因"
+msgstr "主要报告原因"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "总请求数"
@@ -2317,6 +2353,9 @@ msgstr "安全密钥请求失败。请重试。"
 msgid "flash.check_jobs_for_details"
 msgstr "请查看任务页面以获取详情。"
 
+msgid "flash.configuration_pending_instance"
+msgstr "配置尚未应用——正在等待实例启动。"
+
 msgid "flash.easter_egg"
 msgstr "如果你读到了这条信息，说明你很好奇"
 
@@ -2463,6 +2502,15 @@ msgstr "用于 Let's Encrypt 的邮箱"
 
 msgid "form.label.end_date"
 msgstr "结束日期"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "注册码"
 
 msgid "form.label.hostname"
 msgstr "主机名"
@@ -2646,6 +2694,18 @@ msgstr "密码必须至少包含 1 个大写字母。"
 
 msgid "input_list.view_all_settings"
 msgstr "查看所有 %(count)s 设置"
+
+msgid "instance.enrollment.enrolled"
+msgstr "已注册"
+
+msgid "instance.enrollment.pending"
+msgstr "注册待处理"
+
+msgid "instance.enrollment.revoked"
+msgstr "已撤销"
+
+msgid "instance.tls.pinned"
+msgstr "TLS 已固定"
 
 msgid "instance.type.container"
 msgstr "容器"
@@ -2937,6 +2997,12 @@ msgstr "由全局设置使用"
 msgid "modal.body.delete_template_services_list"
 msgstr "由服务使用：%(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "使用这些变量启动实例。它会在启动时使用一次该注册码,并获得自己的凭证。"
+
+msgid "modal.body.enroll_shown_once"
+msgstr "此注册码仅显示一次。请立即复制——之后将无法再次显示。"
+
 msgid "modal.body.export_services_intro"
 msgstr "将导出所选服务。启用下面的选项可将其附加的自定义配置打包到 .zip 存档中。"
 
@@ -3046,6 +3112,9 @@ msgstr "删除模板"
 
 msgid "modal.title.edit_template"
 msgstr "编辑模板：%(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "注册实例"
 
 msgid "modal.title.export_services"
 msgstr "导出服务"
@@ -4208,6 +4277,24 @@ msgstr "阻止"
 msgid "security_mode.detect"
 msgstr "检测"
 
+msgid "service.default_server.certificate.action"
+msgstr "编辑证书覆盖"
+
+msgid "service.default_server.certificate.help"
+msgstr "为未知主机名提供的证书。这是自定义证书插件的全局设置,若覆盖了已配置的服务则会被拒绝。"
+
+msgid "service.default_server.certificate.title"
+msgstr "默认服务器证书"
+
+msgid "service.default_server.explainer"
+msgstr "响应不匹配任何已配置服务的请求:未知主机名、直接 IP 访问。请在此处配置其证书、TLS、请求头和错误页面。"
+
+msgid "service.default_server.name"
+msgstr "默认服务器"
+
+msgid "service.default_server.single_site"
+msgstr "当 MULTISITE 设置为 yes 时,默认服务器变为可配置;在单站点模式下,它保留内置行为,响应不匹配任何已配置服务的请求。"
+
 msgid "service.resources.attach"
 msgstr "附加"
 
@@ -4837,6 +4924,12 @@ msgstr "无法连接到博客获取新闻更新。"
 
 msgid "status.default_server"
 msgstr "默认服务器"
+
+msgid "status.deferred"
+msgstr "已推迟"
+
+msgid "status.deferred_tooltip"
+msgstr "已推迟——正在等待实例启动:%(reason)s"
 
 msgid "status.done"
 msgstr "已完成"
@@ -5990,6 +6083,9 @@ msgstr "删除服务 %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "删除模板 %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "为 %(hostname)s 签发注册码"
+
 msgid "tooltip.button.force_check"
 msgstr "安排检查；仅在有更新时下载。"
 
@@ -6010,6 +6106,12 @@ msgstr "重置为默认值"
 
 msgid "tooltip.button.reset_global"
 msgstr "重置为全局值"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "撤销 %(hostname)s 的凭证"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "轮换 %(hostname)s 的凭证"
 
 msgid "tooltip.button.run_job"
 msgstr "运行任务 %(job)s"
@@ -6152,6 +6254,9 @@ msgstr "电子邮件必须在 1 到 256 个字符之间。"
 msgid "tooltip.email_lets_encrypt"
 msgstr "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。"
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s 来自其环境(%(method)s);注册仅适用于控制平面拥有的实例"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "获取全局设置并应用于当前模板"
 
@@ -6160,6 +6265,9 @@ msgstr "跟随模式仅在最新页面可用"
 
 msgid "tooltip.global_settings_source"
 msgstr "值继承自全局设置。"
+
+msgid "tooltip.instance_credential_age"
+msgstr "凭证上次更新时间:%(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "实例 %(hostname)s 当前未响应 ('up')。"
@@ -6206,6 +6314,9 @@ msgstr "下载 %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "编辑自定义配置 %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "编辑默认服务器"
+
 msgid "tooltip.link.edit_service"
 msgstr "编辑服务 %(service)s"
 
@@ -6223,6 +6334,9 @@ msgstr "在全局设置中管理 %(name)s 的激活"
 
 msgid "tooltip.link.view_config"
 msgstr "查看自定义配置 %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "查看默认服务器"
 
 msgid "tooltip.link.view_file"
 msgstr "查看 %(filename)s"
@@ -7073,6 +7187,9 @@ msgstr "更改组合方式，当前为"
 msgid "workflows.aria.conditionType"
 msgstr "条件类型"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec 事实"
+
 msgid "workflows.aria.denyStatus"
 msgstr "拒绝状态码"
 
@@ -7241,6 +7358,9 @@ msgstr "规则会被复制，但服务附加不会被复制。"
 msgid "workflows.clone_name"
 msgstr "副本名称"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec 判定"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7255,6 +7375,24 @@ msgstr "删除此规则？其下的所有规则都将上移一位。"
 
 msgid "workflows.copySuffix"
 msgstr "（副本）"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "处置方式为"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "来源为"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "封禁"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "验证码"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "本地 API"
 
 msgid "workflows.delete"
 msgstr "删除工作流程"
@@ -7388,6 +7526,9 @@ msgstr "规则按顺序评估，首个匹配的规则生效。带请求率阈值
 msgid "workflows.readonly"
 msgstr "数据库是只读的。可以查看工作流程，但不能修改。"
 
+msgid "workflows.reason.sentence"
+msgstr "安全工作流 %(workflow)s:%(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "已禁用"
 
@@ -7510,6 +7651,27 @@ msgstr "假设条件"
 
 msgid "workflows.test.country"
 msgstr "国家/地区"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec 已放行"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "工作流运行前,CrowdSec 对该请求做出的判定。CrowdSec 从未评估过的请求,与没有任何不利证据的请求并不相同:前者使 CrowdSec 条件处于未确定状态,后者使其为假。"
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec 已处置"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "处置方式"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "判定来源"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec 未评估此请求"
 
 msgid "workflows.test.detail_challenge"
 msgstr "质询将接管处理；安全栈的其余部分仍会运行。"

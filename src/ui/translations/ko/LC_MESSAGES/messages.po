@@ -58,8 +58,14 @@ msgstr "TLS & 인증서"
 msgid "alert.configs_import_invalid_file"
 msgstr "유효한 사용자 지정 구성 파일(.json)을 업로드하십시오."
 
+msgid "alert.credential_action_failed"
+msgstr "작업이 실패했습니다."
+
 msgid "alert.custom_end_date_required"
 msgstr "사용자 지정 종료 날짜를 선택해 주세요."
+
+msgid "alert.enroll_failed"
+msgstr "등록 코드를 발급할 수 없습니다."
 
 msgid "alert.important"
 msgstr "중요"
@@ -87,6 +93,9 @@ msgstr "읽기 전용 모드에서는 이 작업을 수행할 수 없습니다."
 
 msgid "alert.services_import_invalid_file"
 msgstr "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요."
+
+msgid "antibot.reason.sentence"
+msgstr "안티봇 챌린지(%(provider)s)가 제공됨"
 
 msgid "aria.label.clear_search"
 msgstr "검색 지우기"
@@ -994,6 +1003,12 @@ msgstr "플러그인 목록을 로드할 수 없으므로 이 페이지를 안�
 msgid "configs.subtitle"
 msgstr "서비스용 사용자 지정 NGINX 구성 조각 — HTTP, ModSecurity 및 스트림 수준 오버라이드를 생성, 편집 및 관리합니다."
 
+msgid "confirm.revoke_credential"
+msgstr "이 인스턴스의 자격 증명을 취소하시겠습니까? 컨트롤 플레인이 더 이상 접근할 수 없게 됩니다."
+
+msgid "confirm.rotate_credential"
+msgstr "이 인스턴스의 자격 증명을 교체하시겠습니까? 인스턴스에 접근할 수 없으면 실패합니다."
+
 msgid "country.AD"
 msgstr "안도라"
 
@@ -1750,6 +1765,27 @@ msgstr "짐바브웨"
 msgid "country.not_applicable"
 msgstr "해당 없음"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "요청 차단됨"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "캡차 챌린지"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "봇 탐지 챌린지"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (시나리오: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "하나 이상의 작업이 마지막 실행에서 실패했습니다."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "서비스"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "주요 차단 사유"
+msgstr "주요 보고서 사유"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "전체 요청"
@@ -2317,6 +2353,9 @@ msgstr "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
 msgid "flash.check_jobs_for_details"
 msgstr "자세한 내용은 작업 페이지를 확인하세요."
 
+msgid "flash.configuration_pending_instance"
+msgstr "구성이 아직 적용되지 않음 — 인스턴스 기동 대기 중."
+
 msgid "flash.easter_egg"
 msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
 
@@ -2463,6 +2502,15 @@ msgstr "Let's Encrypt용 이메일"
 
 msgid "form.label.end_date"
 msgstr "종료 날짜"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "등록 코드"
 
 msgid "form.label.hostname"
 msgstr "호스트 이름"
@@ -2646,6 +2694,18 @@ msgstr "비밀번호에 대문자가 최소 1개 포함되어야 합니다."
 
 msgid "input_list.view_all_settings"
 msgstr "모든 %(count)s 설정 보기"
+
+msgid "instance.enrollment.enrolled"
+msgstr "등록됨"
+
+msgid "instance.enrollment.pending"
+msgstr "등록 대기 중"
+
+msgid "instance.enrollment.revoked"
+msgstr "취소됨"
+
+msgid "instance.tls.pinned"
+msgstr "TLS 고정됨"
 
 msgid "instance.type.container"
 msgstr "컨테이너"
@@ -2937,6 +2997,12 @@ msgstr "전역 설정에서 사용 중"
 msgid "modal.body.delete_template_services_list"
 msgstr "사용 중인 서비스: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "이 변수들로 인스턴스를 시작하세요. 부팅 시 코드를 한 번 사용하고 고유한 자격 증명을 받습니다."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "이 코드는 한 번만 표시됩니다. 지금 복사하세요 — 다시 표시할 수 없습니다."
+
 msgid "modal.body.export_services_intro"
 msgstr "선택한 서비스가 내보내집니다. 아래 옵션을 활성화하면 첨부된 사용자 지정 설정을 .zip 아카이브에 함께 묶습니다."
 
@@ -3046,6 +3112,9 @@ msgstr "템플릿 삭제"
 
 msgid "modal.title.edit_template"
 msgstr "템플릿 수정: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "인스턴스 등록"
 
 msgid "modal.title.export_services"
 msgstr "서비스 내보내기"
@@ -4208,6 +4277,24 @@ msgstr "차단"
 msgid "security_mode.detect"
 msgstr "탐지"
 
+msgid "service.default_server.certificate.action"
+msgstr "인증서 재정의 편집"
+
+msgid "service.default_server.certificate.help"
+msgstr "알려지지 않은 호스트 이름에 제시되는 인증서입니다. 사용자 지정 인증서 플러그인의 전역 설정이며, 구성된 서비스를 포함하면 거부됩니다."
+
+msgid "service.default_server.certificate.title"
+msgstr "기본 서버 인증서"
+
+msgid "service.default_server.explainer"
+msgstr "구성된 서비스와 일치하지 않는 요청에 응답합니다: 알려지지 않은 호스트 이름, 직접 IP 접근. 여기서 인증서, TLS, 헤더 및 오류 페이지를 구성하세요."
+
+msgid "service.default_server.name"
+msgstr "기본 서버"
+
+msgid "service.default_server.single_site"
+msgstr "MULTISITE가 yes로 설정되면 기본 서버를 구성할 수 있게 됩니다. 단일 사이트 모드에서는 내장된 동작을 유지하며 구성된 서비스와 일치하지 않는 요청에 응답합니다."
+
 msgid "service.resources.attach"
 msgstr "연결"
 
@@ -4837,6 +4924,12 @@ msgstr "소식 업데이트를 위해 블로그에 연결할 수 없습니다."
 
 msgid "status.default_server"
 msgstr "기본 서버"
+
+msgid "status.deferred"
+msgstr "지연됨"
+
+msgid "status.deferred_tooltip"
+msgstr "지연됨 — 인스턴스 기동 대기 중: %(reason)s"
 
 msgid "status.done"
 msgstr "완료됨"
@@ -5990,6 +6083,9 @@ msgstr "서비스 %(name)s 삭제"
 msgid "tooltip.button.delete_template"
 msgstr "템플릿 %(name)s 삭제"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "%(hostname)s에 대한 등록 코드 발급"
+
 msgid "tooltip.button.force_check"
 msgstr "확인 일정을 예약합니다. 업데이트가 있을 때만 다운로드합니다."
 
@@ -6010,6 +6106,12 @@ msgstr "기본값으로 초기화"
 
 msgid "tooltip.button.reset_global"
 msgstr "전역 설정값으로 초기화"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "%(hostname)s의 자격 증명 취소"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "%(hostname)s의 자격 증명 교체"
 
 msgid "tooltip.button.run_job"
 msgstr "작업 %(job)s 실행"
@@ -6152,6 +6254,9 @@ msgstr "이메일은 1자에서 256자 사이여야 합니다."
 msgid "tooltip.email_lets_encrypt"
 msgstr "인증서 관리 및 알림을 위해 Let's Encrypt에 등록할 이메일 주소입니다."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s은 해당 환경(%(method)s)에서 제공됩니다. 등록은 컨트롤 플레인이 소유한 인스턴스에만 적용됩니다"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "전역 설정을 가져와 현재 템플릿에 적용합니다."
 
@@ -6160,6 +6265,9 @@ msgstr "추적 모드는 마지막 페이지에서만 사용 가능합니다."
 
 msgid "tooltip.global_settings_source"
 msgstr "전역 설정에서 상속된 값입니다."
+
+msgid "tooltip.instance_credential_age"
+msgstr "자격 증명 마지막 업데이트: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "인스턴스 %(hostname)s 가 현재 응답하지 않습니다 ('up' 상태 아님)."
@@ -6206,6 +6314,9 @@ msgstr "%(filename)s 다운로드"
 msgid "tooltip.link.edit_config"
 msgstr "사용자 정의 설정 %(name)s 수정"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "기본 서버 편집"
+
 msgid "tooltip.link.edit_service"
 msgstr "서비스 %(service)s 수정"
 
@@ -6223,6 +6334,9 @@ msgstr "전역 설정에서 %(name)s 활성화 관리"
 
 msgid "tooltip.link.view_config"
 msgstr "사용자 정의 설정 %(name)s 보기"
+
+msgid "tooltip.link.view_default_server"
+msgstr "기본 서버 보기"
 
 msgid "tooltip.link.view_file"
 msgstr "%(filename)s 보기"
@@ -7073,6 +7187,9 @@ msgstr "조합 연산자 변경, 현재"
 msgid "workflows.aria.conditionType"
 msgstr "조건 유형"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec 사실"
+
 msgid "workflows.aria.denyStatus"
 msgstr "거부 상태 코드"
 
@@ -7241,6 +7358,9 @@ msgstr "규칙은 복사되지만, 서비스 연결은 복사되지 않습니다
 msgid "workflows.clone_name"
 msgstr "복제 이름"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec 판정"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7255,6 +7375,24 @@ msgstr "이 규칙을 삭제하시겠습니까? 아래의 모든 규칙이 한 �
 
 msgid "workflows.copySuffix"
 msgstr " (사본)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "처리 방식이"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "소스가"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "차단"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "캡차"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "로컬 API"
 
 msgid "workflows.delete"
 msgstr "워크플로우 삭제"
@@ -7388,6 +7526,9 @@ msgstr "규칙은 순서대로 평가되며 처음 일치한 규칙이 적용됩
 msgid "workflows.readonly"
 msgstr "데이터베이스는 읽기 전용입니다. 워크플로우는 검사할 수 있지만 변경할 수 없습니다."
 
+msgid "workflows.reason.sentence"
+msgstr "보안 워크플로 %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "비활성화됨"
 
@@ -7510,6 +7651,27 @@ msgstr "가정"
 
 msgid "workflows.test.country"
 msgstr "국가"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec가 허용함"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "워크플로가 실행되기 전에 CrowdSec가 이 요청에 대해 결정한 내용입니다. CrowdSec가 한 번도 평가하지 않은 요청은 불리한 근거가 전혀 없는 요청과 같지 않습니다. 전자는 CrowdSec 조건을 미결정 상태로 남기고, 후자는 이를 거짓으로 만듭니다."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec가 처리함"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "처리 방식"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "판정 소스"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec가 이 요청을 평가하지 않음"
 
 msgid "workflows.test.detail_challenge"
 msgstr "챌린지가 처리를 맡고 나머지 보안 스택도 계속 실행됩니다."

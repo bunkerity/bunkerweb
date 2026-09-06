@@ -144,8 +144,10 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # keys); 2549 adds the 36 `settings.access_control.*` keys and the 42
     # `settings.modsecurity.*` / `settings.headers.*` keys of the wave 8 configuration pages;
     # 2565 adds the 16 `settings.access_control.rules.*` keys of the composite-rule editor.
+    # 2619 adds the 54 wave-12 keys of the instance-enrollment/credential lifecycle, the
+    # default-server certificate copy, and the CrowdSec-verdict workflow-condition family.
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2565
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2619
 
 
 @pytest.mark.parametrize("code", CODES)

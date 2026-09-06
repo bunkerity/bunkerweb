@@ -33,7 +33,9 @@
     "plugin_file_invalid": "請上傳有效的外掛程式封存檔（.zip、.tar.gz 或 .tar.xz）。",
     "plugin_file_too_large": "外掛程式封存檔超過 50 MB 的限制。",
     "plugin_upload_failed": "上傳外掛程式封存檔時發生錯誤。請再試一次。",
-    "services_import_invalid_file": "請上傳有效的服務匯出檔（.env 或 .zip）。"
+    "services_import_invalid_file": "請上傳有效的服務匯出檔（.env 或 .zip）。",
+    "credential_action_failed": "操作失敗。",
+    "enroll_failed": "無法發出註冊碼。"
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "剛才"
     },
-    "warning": "警告"
+    "warning": "警告",
+    "configuration_pending_instance": "尚未套用組態——正在等待執行個體啟動。"
   },
   "footer": {
     "blog": "部落格",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API 重試延遲",
       "zerossl_api_connect_timeout": "ZeroSSL API 連線逾時",
       "zerossl_api_max_time": "ZeroSSL API 最長時間",
-      "passkey_name": "密碼金鑰名稱"
+      "passkey_name": "密碼金鑰名稱",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "註冊碼"
     },
     "placeholder": {
       "2fa_code": "輸入代碼",
@@ -914,6 +920,14 @@
       "container": "容器",
       "pod": "Pod",
       "static": "靜態"
+    },
+    "enrollment": {
+      "enrolled": "已註冊",
+      "pending": "註冊處理中",
+      "revoked": "已撤銷"
+    },
+    "tls": {
+      "pinned": "TLS 已固定"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "請為選定的封鎖選擇新的期限：",
       "ban_filtered_confirmation": "要封鎖所有 {{count}} 份相符報告中的 IP 嗎？重複的目標只會套用一次。",
       "unban_filtered_confirmation": "確定要解除所有 {{count}} 個相符的封鎖嗎？",
-      "update_filtered_duration_alert": "為所有 {{count}} 個相符的封鎖選擇新時間："
+      "update_filtered_duration_alert": "為所有 {{count}} 個相符的封鎖選擇新時間：",
+      "enroll_description": "使用這些變數啟動執行個體。它會在開機時使用一次此註冊碼,並取得專屬憑證。",
+      "enroll_shown_once": "此代碼僅顯示一次。請立即複製——之後將無法再次顯示。"
     },
     "button": {
       "fetch_global_settings_confirm": "套用全域設定",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "重設範本設定？",
       "security_report_details": "安全報告詳細資訊",
       "server_name_not_unique": "伺服器名稱不是唯一的",
-      "update_duration": "更新封鎖期限"
+      "update_duration": "更新封鎖期限",
+      "enroll_instance": "註冊執行個體"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "選用",
     "no_file_selected": "未選取檔案",
     "no_url_available": "沒有可用的 URL",
-    "unknown": "未知"
+    "unknown": "未知",
+    "deferred": "已延後",
+    "deferred_tooltip": "已延後——正在等待執行個體啟動:{{reason}}"
   },
   "step": {
     "next": "下一步",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "更新封鎖期限",
       "value_from_global": "來自全域設定的值",
       "back_to_file_upload": "返回檔案上傳",
-      "switch_to_text_editor": "切換至文字編輯器"
+      "switch_to_text_editor": "切換至文字編輯器",
+      "enroll_instance": "為 {{hostname}} 發出註冊碼",
+      "revoke_credential": "撤銷 {{hostname}} 的憑證",
+      "rotate_credential": "輪替 {{hostname}} 的憑證"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
@@ -2284,7 +2306,9 @@
       "view_file": "檢視 {{filename}}",
       "view_service": "檢視服務 {{service}}",
       "manage_activation": "在全局設定中管理 {{name}} 的啟用",
-      "view_template": "檢視範本 {{template}}"
+      "view_template": "檢視範本 {{template}}",
+      "edit_default_server": "編輯預設伺服器",
+      "view_default_server": "檢視預設伺服器"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API 重試之間的延遲秒數。",
     "zerossl_api_connect_timeout": "ZeroSSL API 呼叫的連線逾時秒數。",
     "zerossl_api_max_time": "每個 ZeroSSL API 請求的最大總秒數。",
-    "config_global_types_available": "現在可為自訂設定選取全域類型。"
+    "config_global_types_available": "現在可為自訂設定選取全域類型。",
+    "enroll_disabled_by_method": "{{hostname}} 來自其環境({{method}});註冊僅適用於控制平面擁有的執行個體",
+    "instance_credential_age": "憑證上次更新時間:{{updated}}"
   },
   "totp": {
     "cant_access": "無法使用您的驗證器嗎？",
@@ -2826,7 +2852,8 @@
       "window": "時間範圍（秒）",
       "changePosition": "規則 {{n}}／{{total}}，變更位置",
       "newValue": "新值",
-      "positionMove": "位置 {{n}}／{{total}} — 點擊以移動"
+      "positionMove": "位置 {{n}}／{{total}} — 點擊以移動",
+      "crowdsecField": "CrowdSec 事實"
     },
     "attach": "連接到服務",
     "attach_help": "規則僅在工作流程連接到的服務上執行。",
@@ -3005,7 +3032,14 @@
       "v_match": "相符",
       "v_unknown": "未知",
       "v_unknown_help": "無法判定此規則需要的資訊，因此它永遠不會相符。",
-      "whitelisted": "此用戶端位於允許清單中"
+      "whitelisted": "此用戶端位於允許清單中",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec 已允許",
+      "crowdsec_help": "CrowdSec 在工作流程執行前對此請求做出的判定。CrowdSec 從未評估過的請求,與沒有任何不利證據的請求並不相同:前者會讓 CrowdSec 條件處於未確定狀態,後者則使其為否。",
+      "crowdsec_remediated": "CrowdSec 已處置",
+      "crowdsec_remediation": "處置方式",
+      "crowdsec_source": "判定來源",
+      "crowdsec_unavailable": "CrowdSec 未評估此請求"
     },
     "threshold": "僅在超過請求率門檻時",
     "threshold_count": "請求",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP 方法",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec 判定"
     },
     "uri_match": {
       "exact": "完全等於",
       "prefix": "以此開頭",
       "regex": "符合規則運算式"
+    },
+    "crowdsec_field": {
+      "remediation": "處置方式為",
+      "source": "來源為"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "封鎖",
+      "captcha": "驗證碼",
+      "lapi": "本地 API"
+    },
+    "reason": {
+      "sentence": "安全工作流程 {{workflow}}:{{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "已連結資源",
       "unavailable": "不可用",
       "nothing_available": "沒有可連結的項目。"
+    },
+    "default_server": {
+      "certificate": {
+        "action": "編輯憑證覆寫",
+        "help": "為未知主機名稱提供的憑證。這是自訂憑證外掛的全域設定,若涵蓋已設定的服務則會被拒絕。",
+        "title": "預設伺服器憑證"
+      },
+      "explainer": "回應與任何已設定服務都不相符的請求:未知主機名稱、直接 IP 存取。請在此設定其憑證、TLS、標頭與錯誤頁面。",
+      "name": "預設伺服器",
+      "single_site": "當 MULTISITE 設為 yes 時,預設伺服器會變成可設定;在單站台模式下,它會保留內建行為,並回應與任何已設定服務都不相符的請求。"
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "新增內容"
     },
     "subtitle": "BunkerWeb 的所有版本，最新在前，直接來自本安裝隨附的變更日誌。"
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "已提供反機器人驗證挑戰({{provider}})"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "要撤銷此執行個體的憑證嗎?控制平面將無法再連線至它。",
+    "rotate_credential": "要輪替此執行個體的憑證嗎?若執行個體無法連線則會失敗。"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "請求已封鎖",
+        "captcha": "驗證碼挑戰",
+        "challenge": "機器人偵測挑戰"
+      },
+      "sentence": "{{source}}:{{action}}",
+      "sentence_scenario": "{{source}}:{{action}}(情境:{{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

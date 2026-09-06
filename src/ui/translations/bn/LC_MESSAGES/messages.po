@@ -58,8 +58,14 @@ msgstr "TLS & সার্টিফিকেট"
 msgid "alert.configs_import_invalid_file"
 msgstr "অনুগ্রহ করে একটি বৈধ কাস্টম কনফিগারেশন এক্সপোর্ট ফাইল (.json) আপলোড করুন।"
 
+msgid "alert.credential_action_failed"
+msgstr "কার্যক্রমটি ব্যর্থ হয়েছে।"
+
 msgid "alert.custom_end_date_required"
 msgstr "অনুগ্রহ করে একটি কাস্টম শেষ তারিখ নির্বাচন করুন।"
+
+msgid "alert.enroll_failed"
+msgstr "একটি এনরোলমেন্ট কোড ইস্যু করা যায়নি।"
 
 msgid "alert.important"
 msgstr "গুরুত্বপূর্ণ"
@@ -87,6 +93,9 @@ msgstr "এই ক্রিয়াটি শুধুমাত্র পঠন
 
 msgid "alert.services_import_invalid_file"
 msgstr "অনুগ্রহ করে একটি বৈধ সার্ভিস এক্সপোর্ট ফাইল আপলোড করুন (.env বা .zip)।"
+
+msgid "antibot.reason.sentence"
+msgstr "অ্যান্টিবট চ্যালেঞ্জ (%(provider)s) পরিবেশন করা হয়েছে"
 
 msgid "aria.label.clear_search"
 msgstr "অনুসন্ধান মুছুন"
@@ -994,6 +1003,12 @@ msgstr "প্লাগইন তালিকা লোড করা যায�
 msgid "configs.subtitle"
 msgstr "আপনার পরিষেবাগুলির জন্য কাস্টম NGINX কনফিগারেশন স্নিপেট — তৈরি, সম্পাদনা, এবং HTTP, ModSecurity, এবং স্ট্রিম-লেভেল ওভাররাইডগুলি পরিচালনা করুন।"
 
+msgid "confirm.revoke_credential"
+msgstr "এই ইনস্ট্যান্সের ক্রেডেনশিয়াল প্রত্যাহার করবেন? কন্ট্রোল প্লেন এটির সাথে সংযোগ করতে পারবে না।"
+
+msgid "confirm.rotate_credential"
+msgstr "এই ইনস্ট্যান্সের ক্রেডেনশিয়াল ঘোরাবেন? ইনস্ট্যান্স অ্যাক্সেসযোগ্য না হলে ব্যর্থ হবে।"
+
 msgid "country.AD"
 msgstr "অ্যান্ডোরা"
 
@@ -1750,6 +1765,27 @@ msgstr "জিম্বাবুয়ে"
 msgid "country.not_applicable"
 msgstr "প্রযোজ্য নয়"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "রিকোয়েস্ট ব্লক করা হয়েছে"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "ক্যাপচা চ্যালেঞ্জ"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "বট-সনাক্তকরণ চ্যালেঞ্জ"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (দৃশ্যকল্প: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "একটি বা একাধিক কাজ তাদের শেষ রানে ব্যর্থ হয়েছে।"
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "পরিষেবা"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "ব্লকের প্রধান কারণ"
+msgstr "রিপোর্টের প্রধান কারণ"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "মোট অনুরোধ"
@@ -2317,6 +2353,9 @@ msgstr "সিকিউরিটি-কী অনুরোধ ব্যর্থ
 msgid "flash.check_jobs_for_details"
 msgstr "বিস্তারিত জানতে জব পেজ দেখুন।"
 
+msgid "flash.configuration_pending_instance"
+msgstr "কনফিগারেশন এখনো প্রয়োগ হয়নি — একটি ইনস্ট্যান্স চালু হওয়ার জন্য অপেক্ষা করা হচ্ছে।"
+
 msgid "flash.easter_egg"
 msgstr "যদি আপনি এটি পড়েন, তার মানে আপনি কৌতূহলী"
 
@@ -2463,6 +2502,15 @@ msgstr "Let's Encrypt-এর জন্য ইমেল"
 
 msgid "form.label.end_date"
 msgstr "শেষ তারিখ"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "এনরোলমেন্ট কোড"
 
 msgid "form.label.hostname"
 msgstr "হোস্টনাম"
@@ -2646,6 +2694,18 @@ msgstr "পাসওয়ার্ডে অন্তত ১টি বড় �
 
 msgid "input_list.view_all_settings"
 msgstr "সমস্ত %(count)s সেটিংস দেখুন"
+
+msgid "instance.enrollment.enrolled"
+msgstr "নিবন্ধিত"
+
+msgid "instance.enrollment.pending"
+msgstr "নিবন্ধন অপেক্ষমাণ"
+
+msgid "instance.enrollment.revoked"
+msgstr "প্রত্যাহৃত"
+
+msgid "instance.tls.pinned"
+msgstr "TLS পিন করা হয়েছে"
 
 msgid "instance.type.container"
 msgstr "কন্টেইনার"
@@ -2941,6 +3001,12 @@ msgstr "গ্লোবাল সেটিংস দ্বারা ব্যব
 msgid "modal.body.delete_template_services_list"
 msgstr "এই পরিষেবাগুলি ব্যবহার করছে: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "এই ভেরিয়েবলগুলো দিয়ে ইনস্ট্যান্স শুরু করুন। এটি বুট হওয়ার সময় কোডটি একবার ব্যবহার করে এবং নিজের ক্রেডেনশিয়াল পায়।"
+
+msgid "modal.body.enroll_shown_once"
+msgstr "এই কোডটি একবারই দেখানো হয়। এখনই এটি কপি করুন — এটি আর দেখানো যাবে না।"
+
 msgid "modal.body.export_services_intro"
 msgstr "নির্বাচিত পরিষেবাগুলি রপ্তানি করা হবে। তাদের সংযুক্ত কাস্টম কনফিগারেশন একটি .zip আর্কাইভে অন্তর্ভুক্ত করতে নিচের বিকল্পটি সক্রিয় করুন।"
 
@@ -3051,6 +3117,9 @@ msgstr "টেমপ্লেটগুলি মুছুন"
 
 msgid "modal.title.edit_template"
 msgstr "টেমপ্লেট সম্পাদনা করুন: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "ইনস্ট্যান্স নিবন্ধন করুন"
 
 msgid "modal.title.export_services"
 msgstr "পরিষেবা রপ্তানি করুন"
@@ -4213,6 +4282,24 @@ msgstr "অবরোধ"
 msgid "security_mode.detect"
 msgstr "সনাক্ত"
 
+msgid "service.default_server.certificate.action"
+msgstr "সার্টিফিকেট ওভাররাইড সম্পাদনা করুন"
+
+msgid "service.default_server.certificate.help"
+msgstr "অজানা হোস্টনেমের জন্য উপস্থাপিত সার্টিফিকেট। এটি কাস্টম সার্টিফিকেট প্লাগইনের একটি গ্লোবাল সেটিং, এবং এটি কোনো কনফিগার করা সার্ভিস কভার করলে প্রত্যাখ্যাত হয়।"
+
+msgid "service.default_server.certificate.title"
+msgstr "ডিফল্ট সার্ভার সার্টিফিকেট"
+
+msgid "service.default_server.explainer"
+msgstr "যেসব রিকোয়েস্ট কোনো কনফিগার করা সার্ভিসের সাথে মেলে না তাদের সাড়া দেয়: অজানা হোস্টনেম, সরাসরি IP অ্যাক্সেস। এখানে এর সার্টিফিকেট, TLS, হেডার এবং এরর পেজ কনফিগার করুন।"
+
+msgid "service.default_server.name"
+msgstr "ডিফল্ট সার্ভার"
+
+msgid "service.default_server.single_site"
+msgstr "MULTISITE yes-এ সেট করা হলে ডিফল্ট সার্ভার কনফিগারযোগ্য হয়ে যায়; সিঙ্গেল-সাইট মোডে এটি তার বিল্ট-ইন আচরণ বজায় রাখে এবং যেসব রিকোয়েস্ট কোনো কনফিগার করা সার্ভিসের সাথে মেলে না তাদের সাড়া দেয়।"
+
 msgid "service.resources.attach"
 msgstr "সংযুক্ত করুন"
 
@@ -4842,6 +4929,12 @@ msgstr "সংবাদ আপডেটের জন্য ব্লগের �
 
 msgid "status.default_server"
 msgstr "ডিফল্ট সার্ভার"
+
+msgid "status.deferred"
+msgstr "বিলম্বিত"
+
+msgid "status.deferred_tooltip"
+msgstr "বিলম্বিত — একটি ইনস্ট্যান্স চালু হওয়ার জন্য অপেক্ষা করা হচ্ছে: %(reason)s"
 
 msgid "status.done"
 msgstr "সম্পন্ন"
@@ -5995,6 +6088,9 @@ msgstr "পরিষেবা %(name)s মুছুন"
 msgid "tooltip.button.delete_template"
 msgstr "টেমপ্লেট %(name)s মুছুন"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "%(hostname)s-এর জন্য এনরোলমেন্ট কোড ইস্যু করুন"
+
 msgid "tooltip.button.force_check"
 msgstr "একটি চেক নির্ধারণ করে; শুধুমাত্র আপডেট থাকলে ডাউনলোড করে।"
 
@@ -6015,6 +6111,12 @@ msgstr "ডিফল্ট মানে রিসেট করুন"
 
 msgid "tooltip.button.reset_global"
 msgstr "গ্লোবাল মানে রিসেট করুন"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "%(hostname)s-এর ক্রেডেনশিয়াল প্রত্যাহার করুন"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "%(hostname)s-এর ক্রেডেনশিয়াল ঘোরান"
 
 msgid "tooltip.button.run_job"
 msgstr "কার্য %(job)s চালান"
@@ -6157,6 +6259,9 @@ msgstr "ইমেল অবশ্যই ১ থেকে ২৫৬ অক্ষ�
 msgid "tooltip.email_lets_encrypt"
 msgstr "শংসাপত্র পরিচালনা এবং বিজ্ঞপ্তির জন্য Let's Encrypt-এর সাথে নিবন্ধন করার ইমেল ঠিকানা।"
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s তার নিজের এনভায়রনমেন্ট (%(method)s) থেকে এসেছে; এনরোলমেন্ট শুধুমাত্র কন্ট্রোল প্লেনের মালিকানাধীন ইনস্ট্যান্সের ক্ষেত্রে প্রযোজ্য"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "গ্লোবাল সেটিংস আনুন এবং সেগুলি বর্তমান টেমপ্লেটে প্রয়োগ করুন"
 
@@ -6165,6 +6270,9 @@ msgstr "ফলো মোড শুধুমাত্র সর্বশেষ �
 
 msgid "tooltip.global_settings_source"
 msgstr "মান গ্লোবাল সেটিংস থেকে উত্তরাধিকার সূত্রে প্রাপ্ত।"
+
+msgid "tooltip.instance_credential_age"
+msgstr "ক্রেডেনশিয়াল সর্বশেষ আপডেট হয়েছে: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "ইনস্ট্যান্স %(hostname)s বর্তমানে প্রতিক্রিয়া দিচ্ছে না ('up')।"
@@ -6211,6 +6319,9 @@ msgstr "%(filename)s ডাউনলোড করুন"
 msgid "tooltip.link.edit_config"
 msgstr "কাস্টম কনফিগারেশন %(name)s সম্পাদনা করুন"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "ডিফল্ট সার্ভার সম্পাদনা করুন"
+
 msgid "tooltip.link.edit_service"
 msgstr "পরিষেবা %(service)s সম্পাদনা করুন"
 
@@ -6228,6 +6339,9 @@ msgstr "%(name)s-এর বিশ্বব্যাপী সেটিংস-এ
 
 msgid "tooltip.link.view_config"
 msgstr "কাস্টম কনফিগারেশন %(name)s দেখুন"
+
+msgid "tooltip.link.view_default_server"
+msgstr "ডিফল্ট সার্ভার দেখুন"
 
 msgid "tooltip.link.view_file"
 msgstr "%(filename)s দেখুন"
@@ -7078,6 +7192,9 @@ msgstr "সমন্বয়কারী পরিবর্তন করুন,
 msgid "workflows.aria.conditionType"
 msgstr "শর্তের ধরন"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec ফ্যাক্ট"
+
 msgid "workflows.aria.denyStatus"
 msgstr "প্রত্যাখ্যান স্ট্যাটাস"
 
@@ -7246,6 +7363,9 @@ msgstr "নিয়মগুলি কপি করা হয়েছে; পরি�
 msgid "workflows.clone_name"
 msgstr "কপির নাম"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec সিদ্ধান্ত"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "এই নিয়মটি মুছবেন? এর নিচের 
 
 msgid "workflows.copySuffix"
 msgstr " (অনুলিপি)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "প্রতিকার হলো"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "উৎস হলো"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "নিষেধাজ্ঞা"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "ক্যাপচা"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "লোকাল API"
 
 msgid "workflows.delete"
 msgstr "ওয়ার্কফ্লো মুছুন"
@@ -7393,6 +7531,9 @@ msgstr "নিয়মগুলি ক্রমানুসারে মূল্�
 msgid "workflows.readonly"
 msgstr "ডাটাবেসটি শুধুমাত্র পড়ার জন্য। ওয়ার্কফ্লোগুলি পরিদর্শন করা যেতে পারে কিন্তু পরিবর্তন করা যায় না।"
 
+msgid "workflows.reason.sentence"
+msgstr "সিকিউরিটি ওয়ার্কফ্লো %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "নিষ্ক্রিয়"
 
@@ -7515,6 +7656,27 @@ msgstr "অনুমান"
 
 msgid "workflows.test.country"
 msgstr "দেশ"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec এটি অনুমোদন করেছে"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "ওয়ার্কফ্লো চলার আগে এই রিকোয়েস্টের ব্যাপারে CrowdSec যা সিদ্ধান্ত নিয়েছে। যে রিকোয়েস্ট CrowdSec কখনো মূল্যায়ন করেনি, সেটি এমন রিকোয়েস্টের মতো নয় যার বিরুদ্ধে কিছুই নেই: প্রথমটি CrowdSec-এর শর্তকে অনির্ধারিত রাখে, দ্বিতীয়টি এটিকে মিথ্যা করে দেয়।"
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec এটির প্রতিকার করেছে"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "প্রতিকার"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "সিদ্ধান্তের উৎস"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec এই রিকোয়েস্ট মূল্যায়ন করেনি"
 
 msgid "workflows.test.detail_challenge"
 msgstr "চ্যালেঞ্জ নিয়ন্ত্রণ নেয়; নিরাপত্তা স্ট্যাকের বাকি অংশ তবুও চলে।"

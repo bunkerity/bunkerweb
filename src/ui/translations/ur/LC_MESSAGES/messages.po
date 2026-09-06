@@ -58,8 +58,14 @@ msgstr "TLS اور سرٹیفکیٹس"
 msgid "alert.configs_import_invalid_file"
 msgstr "براہ کرم ایک معتبر سفارشی کنفیگریشنز کی تصدیر فائل (.json) اپ لوڈ کریں۔"
 
+msgid "alert.credential_action_failed"
+msgstr "کارروائی ناکام ہو گئی۔"
+
 msgid "alert.custom_end_date_required"
 msgstr "براہ کرم ایک حسب ضرورت اختتامی تاریخ منتخب کریں۔"
+
+msgid "alert.enroll_failed"
+msgstr "اندراج کوڈ جاری نہیں کیا جا سکا۔"
 
 msgid "alert.important"
 msgstr "اہم"
@@ -87,6 +93,9 @@ msgstr "یہ عمل صرف پڑھنے کے موڈ میں غیر فعال ہے۔"
 
 msgid "alert.services_import_invalid_file"
 msgstr "براہ کرم درست سروسز ایکسپورٹ فائل اپ لوڈ کریں (.env یا .zip)۔"
+
+msgid "antibot.reason.sentence"
+msgstr "اینٹی بوٹ چیلنج (%(provider)s) پیش کیا گیا"
 
 msgid "aria.label.clear_search"
 msgstr "تلاش صاف کریں"
@@ -994,6 +1003,12 @@ msgstr "پلگ ان کی فہرست لوڈ نہیں ہو سکی، اس لیے ی
 msgid "configs.subtitle"
 msgstr "آپ کے سروسز کے لیے سفارشی NGINX کنفیگریشن اسنیپس - HTTP، ModSecurity، اور اسٹریم لیول کے لیے بنائیں، ترمیم کریں، اور کاولٹن کریں۔"
 
+msgid "confirm.revoke_credential"
+msgstr "اس انسٹینس کی کریڈینشل منسوخ کریں؟ کنٹرول پلین اس تک مزید رسائی حاصل نہیں کر سکے گا۔"
+
+msgid "confirm.rotate_credential"
+msgstr "اس انسٹینس کی کریڈینشل گھمائیں؟ اگر انسٹینس ناقابل رسائی ہو تو ناکام ہو جاتا ہے۔"
+
 msgid "country.AD"
 msgstr "انڈورا"
 
@@ -1750,6 +1765,27 @@ msgstr "زمبابوے"
 msgid "country.not_applicable"
 msgstr "لاگو نہیں"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "درخواست بلاک کر دی گئی"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "کیپچا چیلنج"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "بوٹ کی نشاندہی کا چیلنج"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (منظرنامہ: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "ایک یا زیادہ جابز اپنی آخری کوشش میں ناکام ہوئیں۔"
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "خدمات"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "بلاک ہونے کی اہم وجوہات"
+msgstr "رپورٹ کی اہم وجوہات"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "کل درخواستیں"
@@ -2317,6 +2353,9 @@ msgstr "سیکیورٹی کلید کی درخواست ناکام ہوئی۔ دو
 msgid "flash.check_jobs_for_details"
 msgstr "تفصیلات کے لیے جابز کا صفحہ دیکھیں۔"
 
+msgid "flash.configuration_pending_instance"
+msgstr "تشکیل ابھی تک لاگو نہیں ہوئی — انسٹینس کے آنے کا انتظار ہے۔"
+
 msgid "flash.easter_egg"
 msgstr "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں"
 
@@ -2463,6 +2502,15 @@ msgstr "Let's Encrypt کے لیے ای میل"
 
 msgid "form.label.end_date"
 msgstr "اختتامی تاریخ"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "اندراج کوڈ"
 
 msgid "form.label.hostname"
 msgstr "ہوسٹ نام"
@@ -2646,6 +2694,18 @@ msgstr "پاس ورڈ میں کم از کم 1 بڑا حرف ہونا چاہیے�
 
 msgid "input_list.view_all_settings"
 msgstr "تمام %(count)s سیٹنگز دیکھیں"
+
+msgid "instance.enrollment.enrolled"
+msgstr "اندراج شدہ"
+
+msgid "instance.enrollment.pending"
+msgstr "اندراج زیر التوا"
+
+msgid "instance.enrollment.revoked"
+msgstr "منسوخ شدہ"
+
+msgid "instance.tls.pinned"
+msgstr "TLS پن شدہ"
 
 msgid "instance.type.container"
 msgstr "کنٹینر"
@@ -2941,6 +3001,12 @@ msgstr "عالمی ترتیبات کے ذریعہ استعمال کیا جاتا
 msgid "modal.body.delete_template_services_list"
 msgstr "سروسز کے ذریعہ استعمال کیا جاتا ہے: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "ان متغیرات کے ساتھ انسٹینس شروع کریں۔ یہ بوٹ کے وقت کوڈ ایک بار استعمال کرتا ہے اور اپنی الگ کریڈینشل حاصل کرتا ہے۔"
+
+msgid "modal.body.enroll_shown_once"
+msgstr "یہ کوڈ صرف ایک بار دکھایا جاتا ہے۔ ابھی اسے کاپی کر لیں — یہ دوبارہ نہیں دکھایا جا سکے گا۔"
+
 msgid "modal.body.export_services_intro"
 msgstr "منتخب کردہ خدمات برآمد کی جائیں گی۔ ان کی منسلک کسٹم کنفیگریشنز کو .zip آرکائیو میں شامل کرنے کے لیے نیچے دیا گیا اختیار فعال کریں۔"
 
@@ -3051,6 +3117,9 @@ msgstr "ٹیمپلیٹس حذف کریں"
 
 msgid "modal.title.edit_template"
 msgstr "ٹیمپلیٹ میں ترمیم کریں: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "انسٹینس کا اندراج کریں"
 
 msgid "modal.title.export_services"
 msgstr "خدمات برآمد کریں"
@@ -4213,6 +4282,24 @@ msgstr "بلاک"
 msgid "security_mode.detect"
 msgstr "دریافت"
 
+msgid "service.default_server.certificate.action"
+msgstr "سرٹیفکیٹ اوور رائیڈ میں ترمیم کریں"
+
+msgid "service.default_server.certificate.help"
+msgstr "نامعلوم ہوسٹ نیم کے لیے پیش کیا جانے والا سرٹیفکیٹ۔ یہ کسٹم سرٹیفکیٹ پلگ ان کی ایک عالمی ترتیب ہے، اور اگر یہ کسی تشکیل شدہ سروس کا احاطہ کرے تو مسترد کر دیا جاتا ہے۔"
+
+msgid "service.default_server.certificate.title"
+msgstr "ڈیفالٹ سرور سرٹیفکیٹ"
+
+msgid "service.default_server.explainer"
+msgstr "ان درخواستوں کا جواب دیتا ہے جو کسی تشکیل شدہ سروس سے میل نہیں کھاتیں: نامعلوم ہوسٹ نیم، خام IP رسائی۔ اس کا سرٹیفکیٹ، TLS، ہیڈرز اور ایرر صفحات یہاں تشکیل دیں۔"
+
+msgid "service.default_server.name"
+msgstr "ڈیفالٹ سرور"
+
+msgid "service.default_server.single_site"
+msgstr "جب MULTISITE کو yes پر سیٹ کیا جائے تو ڈیفالٹ سرور قابل تشکیل ہو جاتا ہے؛ سنگل سائٹ موڈ میں یہ اپنا بلٹ اِن طرزِ عمل برقرار رکھتا ہے اور ان درخواستوں کا جواب دیتا ہے جو کسی تشکیل شدہ سروس سے میل نہیں کھاتیں۔"
+
 msgid "service.resources.attach"
 msgstr "منسلک کریں"
 
@@ -4842,6 +4929,12 @@ msgstr "خبروں کی اپ ڈیٹس کے لیے بلاگ سے رابطہ نہ�
 
 msgid "status.default_server"
 msgstr "ڈیفالٹ سرور"
+
+msgid "status.deferred"
+msgstr "مؤخر"
+
+msgid "status.deferred_tooltip"
+msgstr "مؤخر — انسٹینس کے آنے کا انتظار ہے: %(reason)s"
 
 msgid "status.done"
 msgstr "مکمل"
@@ -5995,6 +6088,9 @@ msgstr "سروس %(name)s حذف کریں"
 msgid "tooltip.button.delete_template"
 msgstr "ٹیمپلیٹ %(name)s حذف کریں"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "%(hostname)s کے لیے اندراج کوڈ جاری کریں"
+
 msgid "tooltip.button.force_check"
 msgstr "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔"
 
@@ -6015,6 +6111,12 @@ msgstr "ڈیفالٹ قدر پر ری سیٹ کریں"
 
 msgid "tooltip.button.reset_global"
 msgstr "عالمی قدر پر ری سیٹ کریں"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "%(hostname)s کی کریڈینشل منسوخ کریں"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "%(hostname)s کی کریڈینشل گھمائیں"
 
 msgid "tooltip.button.run_job"
 msgstr "ٹاسک %(job)s چلائیں"
@@ -6157,6 +6259,9 @@ msgstr "ای میل 1 اور 256 حروف کے درمیان ہونا چاہیے�
 msgid "tooltip.email_lets_encrypt"
 msgstr "Let's Encrypt کے ساتھ سرٹیفکیٹ کے انتظام اور اطلاعات کے لیے رجسٹر کرنے والا ای میل ایڈریس۔"
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s اپنے ماحول (%(method)s) سے حاصل ہوا ہے؛ اندراج صرف ان انسٹینسز پر لاگو ہوتا ہے جو کنٹرول پلین کی ملکیت ہیں"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "گلوبل سیٹنگز کو بازیافت کریں اور انہیں موجودہ ٹیمپلیٹ پر لاگو کریں"
 
@@ -6165,6 +6270,9 @@ msgstr "فالو موڈ صرف تازہ ترین صفحے پر دستیاب ہے
 
 msgid "tooltip.global_settings_source"
 msgstr "قدر عالمی سیٹنگز سے وراثت میں ملی ہے۔"
+
+msgid "tooltip.instance_credential_age"
+msgstr "کریڈینشل کی آخری تازہ کاری: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "انسٹینس %(hostname)s فی الحال جواب نہیں دے رہا ہے ('up')۔"
@@ -6211,6 +6319,9 @@ msgstr "%(filename)s ڈاؤن لوڈ کریں"
 msgid "tooltip.link.edit_config"
 msgstr "کسٹم کنفیگریشن %(name)s میں ترمیم کریں"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "ڈیفالٹ سرور میں ترمیم کریں"
+
 msgid "tooltip.link.edit_service"
 msgstr "سروس %(service)s میں ترمیم کریں"
 
@@ -6228,6 +6339,9 @@ msgstr "عالمی سیٹنگز میں %(name)s کی فعالیت کا انتظ�
 
 msgid "tooltip.link.view_config"
 msgstr "کسٹم کنفیگریشن %(name)s دیکھیں"
+
+msgid "tooltip.link.view_default_server"
+msgstr "ڈیفالٹ سرور دیکھیں"
 
 msgid "tooltip.link.view_file"
 msgstr "%(filename)s دیکھیں"
@@ -7078,6 +7192,9 @@ msgstr "رابطہ تبدیل کریں، فی الحال"
 msgid "workflows.aria.conditionType"
 msgstr "شرط کی قسم"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec حقیقت"
+
 msgid "workflows.aria.denyStatus"
 msgstr "انکار اسٹیٹس"
 
@@ -7246,6 +7363,9 @@ msgstr "قوانین کاپی کیے جاتے ہیں، سروس کے جوڑ نہ
 msgid "workflows.clone_name"
 msgstr "کاپی کا نام"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec فیصلہ"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "یہ اصول حذف کریں؟ اس کے نیچے موجود سب اص�
 
 msgid "workflows.copySuffix"
 msgstr " (نقل)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "تدارک ہے"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "ماخذ ہے"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "پابندی"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "کیپچا"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "مقامی API"
 
 msgid "workflows.delete"
 msgstr "ورک فلو کو حذف کریں"
@@ -7393,6 +7531,9 @@ msgstr "اصولوں کی ترتیب سے جانچ ہوتی ہے اور پہلا
 msgid "workflows.readonly"
 msgstr "ڈیٹا بیسreadonly ہے۔ ورک فلو کا جائزہ لیا جا سکتا ہے لیکن تبدیل نہیں کیا جا سکتا۔"
 
+msgid "workflows.reason.sentence"
+msgstr "سیکیورٹی ورک فلو %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "غیر فعال"
 
@@ -7515,6 +7656,27 @@ msgstr "مفروضے"
 
 msgid "workflows.test.country"
 msgstr "ملک"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec نے اجازت دی"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "ورک فلوز چلنے سے پہلے CrowdSec نے اس درخواست کے بارے میں جو فیصلہ کیا۔ وہ درخواست جس کا CrowdSec نے کبھی جائزہ ہی نہیں لیا، اس درخواست جیسی نہیں ہے جس کے خلاف کچھ بھی نہیں ہے: پہلی CrowdSec کی شرط کو غیر واضح چھوڑ دیتی ہے، دوسری اسے غلط بنا دیتی ہے۔"
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec نے تدارک کیا"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "تدارک"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "فیصلے کا ماخذ"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec نے اس درخواست کا جائزہ نہیں لیا"
 
 msgid "workflows.test.detail_challenge"
 msgstr "چیلنج عمل سنبھال لیتا ہے؛ باقی سکیورٹی اسٹیک پھر بھی چلتا ہے۔"

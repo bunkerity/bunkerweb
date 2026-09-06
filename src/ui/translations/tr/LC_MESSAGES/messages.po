@@ -58,8 +58,14 @@ msgstr "TLS & sertifikalar"
 msgid "alert.configs_import_invalid_file"
 msgstr "Lütfen geçerli özel yapılandırma dışı dosyasını (.json) yükleyin."
 
+msgid "alert.credential_action_failed"
+msgstr "İşlem başarısız oldu."
+
 msgid "alert.custom_end_date_required"
 msgstr "Lütfen özel bir bitiş tarihi seçin."
+
+msgid "alert.enroll_failed"
+msgstr "Kayıt kodu verilemedi."
 
 msgid "alert.important"
 msgstr "Önemli"
@@ -87,6 +93,9 @@ msgstr "Bu işlem salt okunur modda devre dışı."
 
 msgid "alert.services_import_invalid_file"
 msgstr "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin."
+
+msgid "antibot.reason.sentence"
+msgstr "Bot karşıtı doğrulama (%(provider)s) sunuldu"
 
 msgid "aria.label.clear_search"
 msgstr "Aramayı temizle"
@@ -994,6 +1003,12 @@ msgstr "Eklenti listesi yüklenemedi, bu nedenle bu sayfa güvenli bir şekilde 
 msgid "configs.subtitle"
 msgstr "Hizmetleriniz için özel NGINX yapılandırma parçacıkları — HTTP, ModSecurity ve akış düzeyinde geçersiz kılmalar için oluşturun, düzenleyin ve yönetin."
 
+msgid "confirm.revoke_credential"
+msgstr "Bu örneğin kimlik bilgisi iptal edilsin mi? Kontrol düzlemi ona artık erişemeyecek."
+
+msgid "confirm.rotate_credential"
+msgstr "Bu örneğin kimlik bilgisi döndürülsün mü? Örnek erişilemezse başarısız olur."
+
 msgid "country.AD"
 msgstr "Andorra"
 
@@ -1750,6 +1765,27 @@ msgstr "Zimbabve"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "istek engellendi"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "captcha doğrulaması"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "bot tespiti doğrulaması"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (senaryo: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "Bir veya daha fazla iş son çalıştırmasında başarısız oldu."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Servisler"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "En sık engelleme nedenleri"
+msgstr "En sık rapor nedenleri"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Toplam İstekler"
@@ -2317,6 +2353,9 @@ msgstr "Güvenlik anahtarı isteği başarısız oldu. Tekrar deneyin."
 msgid "flash.check_jobs_for_details"
 msgstr "Ayrıntılar için İşler sayfasını kontrol edin."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Yapılandırma henüz uygulanmadı — bir örneğin başlaması bekleniyor."
+
 msgid "flash.easter_egg"
 msgstr "Bunu okuyorsan meraklısın demektir"
 
@@ -2463,6 +2502,15 @@ msgstr "Let's Encrypt için E-posta"
 
 msgid "form.label.end_date"
 msgstr "Bitiş Tarihi"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Kayıt kodu"
 
 msgid "form.label.hostname"
 msgstr "Ana bilgisayar adı"
@@ -2646,6 +2694,18 @@ msgstr "Şifre en az 1 büyük harf içermelidir."
 
 msgid "input_list.view_all_settings"
 msgstr "Tüm %(count)s ayarları görüntüle"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Kayıtlı"
+
+msgid "instance.enrollment.pending"
+msgstr "Kayıt beklemede"
+
+msgid "instance.enrollment.revoked"
+msgstr "İptal edildi"
+
+msgid "instance.tls.pinned"
+msgstr "TLS sabitlendi"
 
 msgid "instance.type.container"
 msgstr "Konteyner"
@@ -2937,6 +2997,12 @@ msgstr "Küresel ayarlar tarafından kullanılıyor"
 msgid "modal.body.delete_template_services_list"
 msgstr "Servisler tarafından kullanılıyor: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "Örneği bu değişkenlerle başlatın. Kodu önyüklemede bir kez kullanır ve kendi kimlik bilgisini alır."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "Bu kod yalnızca bir kez gösterilir. Şimdi kopyalayın — bir daha gösterilemez."
+
 msgid "modal.body.export_services_intro"
 msgstr "Seçilen hizmetler dışa aktarılacak. Ekli özel yapılandırmalarını bir .zip arşivine eklemek için aşağıdaki seçeneği etkinleştirin."
 
@@ -3046,6 +3112,9 @@ msgstr "Şablonları sil"
 
 msgid "modal.title.edit_template"
 msgstr "Şablonu düzenle: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "Örneği kaydet"
 
 msgid "modal.title.export_services"
 msgstr "Hizmetleri dışa aktar"
@@ -4208,6 +4277,24 @@ msgstr "Engelle"
 msgid "security_mode.detect"
 msgstr "Tespit Et"
 
+msgid "service.default_server.certificate.action"
+msgstr "Sertifika geçersiz kılmasını düzenle"
+
+msgid "service.default_server.certificate.help"
+msgstr "Bilinmeyen bir ana bilgisayar adı için sunulan sertifika. Özel sertifika eklentisinin genel bir ayarıdır ve yapılandırılmış bir hizmeti kapsıyorsa reddedilir."
+
+msgid "service.default_server.certificate.title"
+msgstr "Varsayılan sunucu sertifikası"
+
+msgid "service.default_server.explainer"
+msgstr "Yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar: bilinmeyen ana bilgisayar adları, doğrudan IP erişimi. Sertifikasını, TLS'sini, başlıklarını ve hata sayfalarını buradan yapılandırın."
+
+msgid "service.default_server.name"
+msgstr "Varsayılan sunucu"
+
+msgid "service.default_server.single_site"
+msgstr "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
+
 msgid "service.resources.attach"
 msgstr "Bağla"
 
@@ -4837,6 +4924,12 @@ msgstr "Haber güncellemeleri için bloga bağlanılamadı."
 
 msgid "status.default_server"
 msgstr "varsayılan sunucu"
+
+msgid "status.deferred"
+msgstr "Ertelendi"
+
+msgid "status.deferred_tooltip"
+msgstr "Ertelendi — bir örneğin başlaması bekleniyor: %(reason)s"
 
 msgid "status.done"
 msgstr "Tamamlandı"
@@ -5990,6 +6083,9 @@ msgstr "Servisi Sil: %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Şablonu Sil: %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "%(hostname)s için kayıt kodu ver"
+
 msgid "tooltip.button.force_check"
 msgstr "Bir kontrol planlar; yalnızca güncellemeler varsa indirir."
 
@@ -6010,6 +6106,12 @@ msgstr "Varsayılana sıfırla"
 
 msgid "tooltip.button.reset_global"
 msgstr "Küresel değere sıfırla"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "%(hostname)s kimlik bilgisini iptal et"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "%(hostname)s kimlik bilgisini döndür"
 
 msgid "tooltip.button.run_job"
 msgstr "İşi Çalıştır: %(job)s"
@@ -6152,6 +6254,9 @@ msgstr "E-posta 1 ile 256 karakter arasında olmalıdır."
 msgid "tooltip.email_lets_encrypt"
 msgstr "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s kendi ortamından (%(method)s) alınıyor; kayıt yalnızca kontrol düzleminin sahip olduğu örneklere uygulanır"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Genel ayarları al ve bunları mevcut şablona uygula"
 
@@ -6160,6 +6265,9 @@ msgstr "Takip modu sadece son sayfada kullanılabilir"
 
 msgid "tooltip.global_settings_source"
 msgstr "Değer genel ayarlardan miras alınmıştır."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Kimlik bilgisi son güncelleme: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "Örnek %(hostname)s şu anda yanıt vermiyor ('açık' değil)."
@@ -6206,6 +6314,9 @@ msgstr "%(filename)s İndir"
 msgid "tooltip.link.edit_config"
 msgstr "%(name)s Özel Yapılandırmasını Düzenle"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "Varsayılan sunucuyu düzenle"
+
 msgid "tooltip.link.edit_service"
 msgstr "%(service)s Servisini Düzenle"
 
@@ -6223,6 +6334,9 @@ msgstr "%(name)s'i küresel ayarlarda etkinleştir"
 
 msgid "tooltip.link.view_config"
 msgstr "%(name)s Özel Yapılandırmasını Görüntüle"
+
+msgid "tooltip.link.view_default_server"
+msgstr "Varsayılan sunucuyu görüntüle"
 
 msgid "tooltip.link.view_file"
 msgstr "%(filename)s Görüntüle"
@@ -7073,6 +7187,9 @@ msgstr "Birleştiriciyi değiştir, şu anda"
 msgid "workflows.aria.conditionType"
 msgstr "Koşul türü"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec verisi"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Reddetme durumu"
 
@@ -7241,6 +7358,9 @@ msgstr "Kurallar kopyalanır, hizmet bağlantıları kopyalanmaz."
 msgid "workflows.clone_name"
 msgstr "Kopyanın adı"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec kararı"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7255,6 +7375,24 @@ msgstr "Bu kural silinsin mi? Altındaki tüm kurallar bir konum yukarı taşın
 
 msgid "workflows.copySuffix"
 msgstr " (kopya)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "iyileştirme şu"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "kaynak şu"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "yasaklama"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "captcha"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "yerel API"
 
 msgid "workflows.delete"
 msgstr "İş akışını sil"
@@ -7388,6 +7526,9 @@ msgstr "Kurallar sırayla değerlendirilir ve eşleşen ilk kural kazanır. Bir 
 msgid "workflows.readonly"
 msgstr "Veritabanı salt okunurdur. İş akışları incelenebilir, ancak değiştirilemez."
 
+msgid "workflows.reason.sentence"
+msgstr "Güvenlik iş akışı %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Devre dışı"
 
@@ -7510,6 +7651,27 @@ msgstr "Varsayımlar"
 
 msgid "workflows.test.country"
 msgstr "Ülke"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec izin verdi"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "İş akışları çalışmadan önce CrowdSec'in bu istek hakkında verdiği karar. CrowdSec'in hiç değerlendirmediği bir istek, aleyhinde hiçbir şey olmayan bir istekle aynı değildir: birincisi bir CrowdSec koşulunu belirsiz bırakır, ikincisi onu yanlış yapar."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec iyileştirdi"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "İyileştirme"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Karar kaynağı"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec bu isteği değerlendirmedi"
 
 msgid "workflows.test.detail_challenge"
 msgstr "Doğrulama denetimi devralır; güvenlik yığınının geri kalanı çalışmaya devam eder."

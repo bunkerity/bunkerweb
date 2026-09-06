@@ -58,8 +58,14 @@ msgstr "TLS & сертификаты"
 msgid "alert.configs_import_invalid_file"
 msgstr "Пожалуйста, загрузите действительный файл экспорта пользовательских настроек (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "Действие не выполнено."
+
 msgid "alert.custom_end_date_required"
 msgstr "Пожалуйста, выберите пользовательскую дату окончания."
+
+msgid "alert.enroll_failed"
+msgstr "Не удалось выпустить код регистрации."
 
 msgid "alert.important"
 msgstr "Важно"
@@ -87,6 +93,9 @@ msgstr "Это действие отключено в режиме только 
 
 msgid "alert.services_import_invalid_file"
 msgstr "Загрузите корректный файл экспорта сервисов (.env или .zip)."
+
+msgid "antibot.reason.sentence"
+msgstr "Антибот-проверка (%(provider)s) выполнена"
 
 msgid "aria.label.clear_search"
 msgstr "Очистить поиск"
@@ -994,6 +1003,12 @@ msgstr "Список плагинов не удалось загрузить, п
 msgid "configs.subtitle"
 msgstr "Пользовательские фрагменты конфигурации NGINX для ваших сервисов — создавайте, редактируйте и управляйте HTTP, ModSecurity и переопределениями на уровне потока."
 
+msgid "confirm.revoke_credential"
+msgstr "Отозвать учётные данные этого экземпляра? Панель управления больше не сможет к нему подключиться."
+
+msgid "confirm.rotate_credential"
+msgstr "Сменить учётные данные этого экземпляра? Не выполнится, если экземпляр недоступен."
+
 msgid "country.AD"
 msgstr "Андорра"
 
@@ -1750,6 +1765,27 @@ msgstr "Зимбабве"
 msgid "country.not_applicable"
 msgstr "Н/Д"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "запрос заблокирован"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "проверка капчей"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "проверка на бота"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (сценарий: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "Одна или несколько задач завершились с ошибкой при последнем запуске."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Сервисы"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "Основные причины блокировки"
+msgstr "Основные причины в отчётах"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Всего запросов"
@@ -2317,6 +2353,9 @@ msgstr "Запрос ключа безопасности завершился о
 msgid "flash.check_jobs_for_details"
 msgstr "Подробности см. на странице «Задачи»."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Конфигурация ещё не применена — ожидание запуска экземпляра."
+
 msgid "flash.easter_egg"
 msgstr "Если вы это читаете, значит, вы любопытны"
 
@@ -2463,6 +2502,15 @@ msgstr "Email для Let's Encrypt"
 
 msgid "form.label.end_date"
 msgstr "Дата окончания"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Код регистрации"
 
 msgid "form.label.hostname"
 msgstr "Имя хоста"
@@ -2646,6 +2694,18 @@ msgstr "Пароль должен содержать не менее 1 загл�
 
 msgid "input_list.view_all_settings"
 msgstr "Просмотреть все %(count)s настроек"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Зарегистрирован"
+
+msgid "instance.enrollment.pending"
+msgstr "Регистрация ожидается"
+
+msgid "instance.enrollment.revoked"
+msgstr "Отозван"
+
+msgid "instance.tls.pinned"
+msgstr "TLS закреплён"
 
 msgid "instance.type.container"
 msgstr "Контейнер"
@@ -2945,6 +3005,12 @@ msgstr "Используется глобальными настройками"
 msgid "modal.body.delete_template_services_list"
 msgstr "Используется сервисами: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "Запустите экземпляр с этими переменными. Он использует код один раз при запуске и получает собственные учётные данные."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "Этот код показывается только один раз. Скопируйте его сейчас — повторно он не отобразится."
+
 msgid "modal.body.export_services_intro"
 msgstr "Выбранные службы будут экспортированы. Включите параметр ниже, чтобы добавить их прикрепленные пользовательские конфигурации в архив .zip."
 
@@ -3056,6 +3122,9 @@ msgstr "Удалить шаблоны"
 
 msgid "modal.title.edit_template"
 msgstr "Редактировать шаблон: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "Зарегистрировать экземпляр"
 
 msgid "modal.title.export_services"
 msgstr "Экспорт служб"
@@ -4218,6 +4287,24 @@ msgstr "Блокировка"
 msgid "security_mode.detect"
 msgstr "Обнаружение"
 
+msgid "service.default_server.certificate.action"
+msgstr "Изменить замену сертификата"
+
+msgid "service.default_server.certificate.help"
+msgstr "Сертификат, предъявляемый для неизвестного имени хоста. Это глобальная настройка плагина пользовательского сертификата, отклоняется, если охватывает настроенную службу."
+
+msgid "service.default_server.certificate.title"
+msgstr "Сертификат сервера по умолчанию"
+
+msgid "service.default_server.explainer"
+msgstr "Отвечает на запросы, не соответствующие ни одной настроенной службе: неизвестные имена хостов, доступ по прямому IP. Здесь настраиваются его сертификат, TLS, заголовки и страницы ошибок."
+
+msgid "service.default_server.name"
+msgstr "Сервер по умолчанию"
+
+msgid "service.default_server.single_site"
+msgstr "Сервер по умолчанию становится настраиваемым, когда MULTISITE установлен в yes; в односайтовом режиме он сохраняет встроенное поведение и отвечает на запросы, не соответствующие ни одной настроенной службе."
+
 msgid "service.resources.attach"
 msgstr "Прикрепить"
 
@@ -4847,6 +4934,12 @@ msgstr "Не удалось подключиться к блогу для пол
 
 msgid "status.default_server"
 msgstr "сервер по умолчанию"
+
+msgid "status.deferred"
+msgstr "Отложено"
+
+msgid "status.deferred_tooltip"
+msgstr "Отложено — ожидание запуска экземпляра: %(reason)s"
 
 msgid "status.done"
 msgstr "Завершенные"
@@ -6000,6 +6093,9 @@ msgstr "Удалить сервис %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Удалить Шаблон %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "Выпустить код регистрации для %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "Запланировать проверку; загрузка только при наличии обновлений."
 
@@ -6020,6 +6116,12 @@ msgstr "Сбросить на значение по умолчанию"
 
 msgid "tooltip.button.reset_global"
 msgstr "Сбросить до глобального значения"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "Отозвать учётные данные %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "Сменить учётные данные %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "Запустить задачу %(job)s"
@@ -6162,6 +6264,9 @@ msgstr "Email должен содержать от 1 до 256 символов."
 msgid "tooltip.email_lets_encrypt"
 msgstr "Адрес электронной почты для регистрации в Let's Encrypt для управления сертификатами и уведомлениями."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s получен из своей среды (%(method)s); регистрация применяется только к экземплярам, принадлежащим панели управления"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Получить глобальные настройки и применить их к текущему шаблону"
 
@@ -6170,6 +6275,9 @@ msgstr "Режим слежения доступен только на посл�
 
 msgid "tooltip.global_settings_source"
 msgstr "Значение унаследовано от глобальных настроек."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Учётные данные обновлены: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "Экземпляр %(hostname)s в настоящее время не отвечает ('up')."
@@ -6216,6 +6324,9 @@ msgstr "Скачать %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "Редактировать кастомную конфигурацию %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "Изменить сервер по умолчанию"
+
 msgid "tooltip.link.edit_service"
 msgstr "Редактировать сервис %(service)s"
 
@@ -6233,6 +6344,9 @@ msgstr "Управление активацией %(name)s в глобальны
 
 msgid "tooltip.link.view_config"
 msgstr "Просмотреть кастомную конфигурацию %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "Просмотреть сервер по умолчанию"
 
 msgid "tooltip.link.view_file"
 msgstr "Просмотреть %(filename)s"
@@ -7083,6 +7197,9 @@ msgstr "Изменить логическую связку, сейчас"
 msgid "workflows.aria.conditionType"
 msgstr "Тип условия"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "Факт CrowdSec"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Код отказа"
 
@@ -7251,6 +7368,9 @@ msgstr "Правила копируются, а прикрепления к се
 msgid "workflows.clone_name"
 msgstr "Название копии"
 
+msgid "workflows.condition.crowdsec"
+msgstr "Вердикт CrowdSec"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7265,6 +7385,24 @@ msgstr "Удалить это правило? Все правила ниже п�
 
 msgid "workflows.copySuffix"
 msgstr " (копия)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "устранение —"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "источник —"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "бан"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "капча"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "локальный API"
 
 msgid "workflows.delete"
 msgstr "Удалить рабочий процесс"
@@ -7398,6 +7536,9 @@ msgstr "Правила оцениваются в порядке, и первое
 msgid "workflows.readonly"
 msgstr "База данных только для чтения. Рабочие процессы можно просматривать, но не изменять."
 
+msgid "workflows.reason.sentence"
+msgstr "Workflow безопасности %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Отключено"
 
@@ -7520,6 +7661,27 @@ msgstr "Допущения"
 
 msgid "workflows.test.country"
 msgstr "Страна"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec разрешил"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "Что CrowdSec решил по этому запросу до выполнения workflow. Запрос, который CrowdSec никогда не оценивал, — не то же самое, что запрос, против которого ничего нет: первый оставляет условие CrowdSec неопределённым, второй делает его ложным."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec устранил угрозу"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "Устранение"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Источник вердикта"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec не оценивал этот запрос"
 
 msgid "workflows.test.detail_challenge"
 msgstr "Проверка перехватывает управление; остальная часть стека безопасности продолжает работу."

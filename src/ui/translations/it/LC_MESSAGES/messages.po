@@ -58,8 +58,14 @@ msgstr "TLS & certificati"
 msgid "alert.configs_import_invalid_file"
 msgstr "Si prega di caricare un file di esportazione di configurazioni personalizzate valido (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "L'azione non è riuscita."
+
 msgid "alert.custom_end_date_required"
 msgstr "Seleziona una data di fine personalizzata."
+
+msgid "alert.enroll_failed"
+msgstr "Non è stato possibile emettere un codice di enrollment."
 
 msgid "alert.important"
 msgstr "Importante"
@@ -87,6 +93,9 @@ msgstr "Questa azione è disabilitata in modalità di sola lettura."
 
 msgid "alert.services_import_invalid_file"
 msgstr "Carica un file di esportazione dei servizi valido (.env o .zip)."
+
+msgid "antibot.reason.sentence"
+msgstr "Sfida antibot (%(provider)s) mostrata"
 
 msgid "aria.label.clear_search"
 msgstr "Cancella ricerca"
@@ -994,6 +1003,12 @@ msgstr "L'elenco dei plugin non è stato caricato, quindi questa pagina non può
 msgid "configs.subtitle"
 msgstr "Snippet di configurazione NGINX personalizzati per i tuoi servizi — crea, modifica e gestisci le sovrascritture di HTTP, ModSecurity e a livello di flusso."
 
+msgid "confirm.revoke_credential"
+msgstr "Revocare la credenziale di questa istanza? Il control plane non potrà più raggiungerla."
+
+msgid "confirm.rotate_credential"
+msgstr "Ruotare la credenziale di questa istanza? Fallisce se l'istanza non è raggiungibile."
+
 msgid "country.AD"
 msgstr "Andorra"
 
@@ -1750,6 +1765,27 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/D"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "richiesta bloccata"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "sfida captcha"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "sfida di rilevamento bot"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (scenario: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "Uno o più job sono falliti nella loro ultima esecuzione."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Servizi"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "Principali motivi di blocco"
+msgstr "Principali motivi di report"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Richieste Totali"
@@ -2317,6 +2353,9 @@ msgstr "La richiesta della chiave di sicurezza non è riuscita. Riprova."
 msgid "flash.check_jobs_for_details"
 msgstr "Controlla la pagina Job per i dettagli."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Configurazione non ancora applicata — in attesa che un'istanza si avvii."
+
 msgid "flash.easter_egg"
 msgstr "Se stai leggendo questo, significa che sei curioso"
 
@@ -2463,6 +2502,15 @@ msgstr "Email per Let's Encrypt"
 
 msgid "form.label.end_date"
 msgstr "Data Fine"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Codice di enrollment"
 
 msgid "form.label.hostname"
 msgstr "Nome Host"
@@ -2646,6 +2694,18 @@ msgstr "La password deve contenere almeno 1 lettera maiuscola."
 
 msgid "input_list.view_all_settings"
 msgstr "Visualizza tutte le %(count)s impostazioni"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Registrata"
+
+msgid "instance.enrollment.pending"
+msgstr "Registrazione in sospeso"
+
+msgid "instance.enrollment.revoked"
+msgstr "Revocata"
+
+msgid "instance.tls.pinned"
+msgstr "TLS fissato"
 
 msgid "instance.type.container"
 msgstr "Container"
@@ -2941,6 +3001,12 @@ msgstr "Utilizzato dalle impostazioni globali"
 msgid "modal.body.delete_template_services_list"
 msgstr "Utilizzato dai servizi: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "Avviare l'istanza con queste variabili. Consuma il codice una sola volta all'avvio e riceve una propria credenziale."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "Questo codice viene mostrato una sola volta. Copiatelo ora — non potrà essere mostrato di nuovo."
+
 msgid "modal.body.export_services_intro"
 msgstr "I servizi selezionati verranno esportati. Abilita l'opzione seguente per includere le configurazioni personalizzate allegate in un archivio .zip."
 
@@ -3051,6 +3117,9 @@ msgstr "Elimina modelli"
 
 msgid "modal.title.edit_template"
 msgstr "Modifica modello: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "Registra istanza"
 
 msgid "modal.title.export_services"
 msgstr "Esporta servizi"
@@ -4213,6 +4282,24 @@ msgstr "Blocca"
 msgid "security_mode.detect"
 msgstr "Rileva"
 
+msgid "service.default_server.certificate.action"
+msgstr "Modifica il certificato di override"
+
+msgid "service.default_server.certificate.help"
+msgstr "Il certificato presentato per un hostname sconosciuto. È un'impostazione globale del plugin di certificato personalizzato ed è rifiutato se copre un servizio configurato."
+
+msgid "service.default_server.certificate.title"
+msgstr "Certificato del server predefinito"
+
+msgid "service.default_server.explainer"
+msgstr "Risponde alle richieste che non corrispondono a nessun servizio configurato: hostname sconosciuti, accesso diretto tramite IP. Configura qui il suo certificato, TLS, header e pagine di errore."
+
+msgid "service.default_server.name"
+msgstr "Server predefinito"
+
+msgid "service.default_server.single_site"
+msgstr "Il server predefinito diventa configurabile quando MULTISITE è impostato su yes; in modalità a sito singolo mantiene il suo comportamento integrato e risponde alle richieste che non corrispondono a nessun servizio configurato."
+
 msgid "service.resources.attach"
 msgstr "Associa"
 
@@ -4842,6 +4929,12 @@ msgstr "Impossibile connettersi al blog per le notizie."
 
 msgid "status.default_server"
 msgstr "server predefinito"
+
+msgid "status.deferred"
+msgstr "Differito"
+
+msgid "status.deferred_tooltip"
+msgstr "Differito — in attesa che un'istanza si avvii: %(reason)s"
 
 msgid "status.done"
 msgstr "Completati"
@@ -5995,6 +6088,9 @@ msgstr "Elimina Servizio %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Elimina Modello %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "Emetti un codice di enrollment per %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "Pianifica un controllo; scarica solo se ci sono aggiornamenti."
 
@@ -6015,6 +6111,12 @@ msgstr "Ripristina valore predefinito"
 
 msgid "tooltip.button.reset_global"
 msgstr "Ripristina valore globale"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "Revoca la credenziale di %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "Ruota la credenziale di %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "Esegui Processo %(job)s"
@@ -6157,6 +6259,9 @@ msgstr "L'email deve avere tra 1 e 256 caratteri."
 msgid "tooltip.email_lets_encrypt"
 msgstr "L'indirizzo email da registrare con Let's Encrypt per la gestione dei certificati e le notifiche."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s proviene dal proprio ambiente (%(method)s); l'enrollment si applica solo alle istanze possedute dal control plane"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Recupera le impostazioni globali e applicale al modello attuale"
 
@@ -6165,6 +6270,9 @@ msgstr "La modalità seguimento è disponibile solo sull'ultima pagina"
 
 msgid "tooltip.global_settings_source"
 msgstr "Valore ereditato dalle impostazioni globali."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Credenziale aggiornata l'ultima volta: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "L'istanza %(hostname)s non risponde attualmente ('up')."
@@ -6211,6 +6319,9 @@ msgstr "Scarica %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "Modifica Configurazione Personalizzata %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "Modifica il server predefinito"
+
 msgid "tooltip.link.edit_service"
 msgstr "Modifica Servizio %(service)s"
 
@@ -6228,6 +6339,9 @@ msgstr "Gestisci l'attivazione di %(name)s nelle impostazioni globali"
 
 msgid "tooltip.link.view_config"
 msgstr "Visualizza Configurazione Personalizzata %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "Visualizza il server predefinito"
 
 msgid "tooltip.link.view_file"
 msgstr "Visualizza %(filename)s"
@@ -7078,6 +7192,9 @@ msgstr "Cambia combinatore, attualmente"
 msgid "workflows.aria.conditionType"
 msgstr "Tipo di condizione"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "Fatto CrowdSec"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Stato di rifiuto"
 
@@ -7246,6 +7363,9 @@ msgstr "Le regole vengono copiate; gli allegamenti ai servizi non."
 msgid "workflows.clone_name"
 msgstr "Nome della copia"
 
+msgid "workflows.condition.crowdsec"
+msgstr "Verdetto CrowdSec"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "Eliminare questa regola? Tutte quelle sottostanti saliranno di una posiz
 
 msgid "workflows.copySuffix"
 msgstr " (copia)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "il rimedio è"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "la fonte è"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "blocco"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "captcha"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "API locale"
 
 msgid "workflows.delete"
 msgstr "Elimina flusso di lavoro"
@@ -7393,6 +7531,9 @@ msgstr "Le regole vengono valutate in ordine e la prima che corrisponde vince. U
 msgid "workflows.readonly"
 msgstr "Il database è di sola lettura. I flussi di lavoro possono essere ispezionati ma non modificati."
 
+msgid "workflows.reason.sentence"
+msgstr "Workflow di sicurezza %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Disattivata"
 
@@ -7515,6 +7656,27 @@ msgstr "Presupposti"
 
 msgid "workflows.test.country"
 msgstr "Paese"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec l'ha consentita"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "Ciò che CrowdSec ha deciso su questa richiesta prima dell'esecuzione dei workflow. Una richiesta che CrowdSec non ha mai valutato non è la stessa cosa di una senza nulla contro di essa: la prima lascia indeterminata una condizione CrowdSec, la seconda la rende falsa."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec l'ha rimediata"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "Rimedio"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Fonte del verdetto"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec non ha valutato questa richiesta"
 
 msgid "workflows.test.detail_challenge"
 msgstr "La sfida prende il controllo; il resto dello stack di sicurezza continua a essere eseguito."

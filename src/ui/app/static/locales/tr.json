@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Geçerli bir eklenti arşivi (.zip, .tar.gz veya .tar.xz) yükleyin.",
     "plugin_file_too_large": "Eklenti arşivi 50 MB sınırını aşıyor.",
     "plugin_upload_failed": "Eklenti arşivi yüklenirken bir hata oluştu. Tekrar deneyin.",
-    "services_import_invalid_file": "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin."
+    "services_import_invalid_file": "Geçerli bir hizmet dışa aktarma dosyası (.env veya .zip) yükleyin.",
+    "credential_action_failed": "İşlem başarısız oldu.",
+    "enroll_failed": "Kayıt kodu verilemedi."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "az önce"
     },
-    "warning": "Uyarı"
+    "warning": "Uyarı",
+    "configuration_pending_instance": "Yapılandırma henüz uygulanmadı — bir örneğin başlaması bekleniyor."
   },
   "footer": {
     "blog": "Blog",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API Yeniden Deneme Gecikmesi",
       "zerossl_api_connect_timeout": "ZeroSSL API Bağlantı Zaman Aşımı",
       "zerossl_api_max_time": "ZeroSSL API Azami Süre",
-      "passkey_name": "Parola anahtarı adı"
+      "passkey_name": "Parola anahtarı adı",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "Kayıt kodu"
     },
     "placeholder": {
       "2fa_code": "Kod girin",
@@ -914,6 +920,14 @@
       "container": "Konteyner",
       "pod": "Pod",
       "static": "Statik"
+    },
+    "enrollment": {
+      "enrolled": "Kayıtlı",
+      "pending": "Kayıt beklemede",
+      "revoked": "İptal edildi"
+    },
+    "tls": {
+      "pinned": "TLS sabitlendi"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
       "ban_filtered_confirmation": "Eşleşen {{count}} rapordaki IP'ler yasaklansın mı? Yinelenen hedefler yalnızca bir kez engellenir.",
       "unban_filtered_confirmation": "Eşleşen {{count}} yasağın tümünü kaldırmak istediğinizden emin misiniz?",
-      "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni süre seçin:"
+      "update_filtered_duration_alert": "Eşleşen {{count}} yasağın tümü için yeni süre seçin:",
+      "enroll_description": "Örneği bu değişkenlerle başlatın. Kodu önyüklemede bir kez kullanır ve kendi kimlik bilgisini alır.",
+      "enroll_shown_once": "Bu kod yalnızca bir kez gösterilir. Şimdi kopyalayın — bir daha gösterilemez."
     },
     "button": {
       "fetch_global_settings_confirm": "Genel ayarları uygula",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
       "security_report_details": "Güvenlik Raporu Detayları",
       "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
-      "update_duration": "Yasaklama Süresini Güncelle"
+      "update_duration": "Yasaklama Süresini Güncelle",
+      "enroll_instance": "Örneği kaydet"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "İsteğe bağlı",
     "no_file_selected": "Dosya seçilmedi",
     "no_url_available": "Kullanılabilir URL yok",
-    "unknown": "Bilinmiyor"
+    "unknown": "Bilinmiyor",
+    "deferred": "Ertelendi",
+    "deferred_tooltip": "Ertelendi — bir örneğin başlaması bekleniyor: {{reason}}"
   },
   "step": {
     "next": "İleri",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "Yasak süresini güncelleyin",
       "value_from_global": "Genel ayarlardan gelen değer",
       "back_to_file_upload": "Dosya yüklemeye dön",
-      "switch_to_text_editor": "Metin düzenleyiciye geç"
+      "switch_to_text_editor": "Metin düzenleyiciye geç",
+      "enroll_instance": "{{hostname}} için kayıt kodu ver",
+      "revoke_credential": "{{hostname}} kimlik bilgisini iptal et",
+      "rotate_credential": "{{hostname}} kimlik bilgisini döndür"
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",
@@ -2284,7 +2306,9 @@
       "view_file": "{{filename}} Görüntüle",
       "view_service": "{{service}} Servisini Görüntüle",
       "manage_activation": "{{name}}'i küresel ayarlarda etkinleştir",
-      "view_template": "{{template}} Şablonunu Görüntüle"
+      "view_template": "{{template}} Şablonunu Görüntüle",
+      "edit_default_server": "Varsayılan sunucuyu düzenle",
+      "view_default_server": "Varsayılan sunucuyu görüntüle"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API yeniden denemeleri arasındaki saniye cinsinden gecikme.",
     "zerossl_api_connect_timeout": "ZeroSSL API çağrıları için saniye cinsinden bağlantı zaman aşımı.",
     "zerossl_api_max_time": "Her ZeroSSL API isteği için saniye cinsinden azami toplam süre.",
-    "config_global_types_available": "Artık özel yapılandırmanız için genel türleri seçebilirsiniz."
+    "config_global_types_available": "Artık özel yapılandırmanız için genel türleri seçebilirsiniz.",
+    "enroll_disabled_by_method": "{{hostname}} kendi ortamından ({{method}}) alınıyor; kayıt yalnızca kontrol düzleminin sahip olduğu örneklere uygulanır",
+    "instance_credential_age": "Kimlik bilgisi son güncelleme: {{updated}}"
   },
   "totp": {
     "cant_access": "Kimlik doğrulama kodunuza erişemiyor musunuz?",
@@ -2826,7 +2852,8 @@
       "window": "Saniye cinsinden pencere",
       "changePosition": "Kural {{n}} / {{total}}, konumu değiştir",
       "newValue": "Yeni değer",
-      "positionMove": "Konum {{n}} / {{total}} — taşımak için tıklayın"
+      "positionMove": "Konum {{n}} / {{total}} — taşımak için tıklayın",
+      "crowdsecField": "CrowdSec verisi"
     },
     "attach": "Hizmetlere ekle",
     "attach_help": "Kurallar yalnızca bir iş akışının eklendiği hizmetlerde uygulanır.",
@@ -3005,7 +3032,14 @@
       "v_match": "EŞLEŞTİ",
       "v_unknown": "BİLİNMİYOR",
       "v_unknown_help": "Bu kuralın gerektirdiği bir bilgi belirlenemedi; bu nedenle kural hiçbir zaman eşleşemez.",
-      "whitelisted": "Bu istemci izin listesinde"
+      "whitelisted": "Bu istemci izin listesinde",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec izin verdi",
+      "crowdsec_help": "İş akışları çalışmadan önce CrowdSec'in bu istek hakkında verdiği karar. CrowdSec'in hiç değerlendirmediği bir istek, aleyhinde hiçbir şey olmayan bir istekle aynı değildir: birincisi bir CrowdSec koşulunu belirsiz bırakır, ikincisi onu yanlış yapar.",
+      "crowdsec_remediated": "CrowdSec iyileştirdi",
+      "crowdsec_remediation": "İyileştirme",
+      "crowdsec_source": "Karar kaynağı",
+      "crowdsec_unavailable": "CrowdSec bu isteği değerlendirmedi"
     },
     "threshold": "Sadece bir hızın üzerinde",
     "threshold_count": "İstekler",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP yöntemi",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec kararı"
     },
     "uri_match": {
       "exact": "tam olarak eşittir",
       "prefix": "ile başlar",
       "regex": "düzenli ifadeyle eşleşir"
+    },
+    "crowdsec_field": {
+      "remediation": "iyileştirme şu",
+      "source": "kaynak şu"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "yasaklama",
+      "captcha": "captcha",
+      "lapi": "yerel API"
+    },
+    "reason": {
+      "sentence": "Güvenlik iş akışı {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "Bağlı kaynaklar",
       "unavailable": "Kullanılamıyor",
       "nothing_available": "Bağlanabilecek kaynak yok."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "Sertifika geçersiz kılmasını düzenle",
+        "help": "Bilinmeyen bir ana bilgisayar adı için sunulan sertifika. Özel sertifika eklentisinin genel bir ayarıdır ve yapılandırılmış bir hizmeti kapsıyorsa reddedilir.",
+        "title": "Varsayılan sunucu sertifikası"
+      },
+      "explainer": "Yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar: bilinmeyen ana bilgisayar adları, doğrudan IP erişimi. Sertifikasını, TLS'sini, başlıklarını ve hata sayfalarını buradan yapılandırın.",
+      "name": "Varsayılan sunucu",
+      "single_site": "MULTISITE yes olarak ayarlandığında varsayılan sunucu yapılandırılabilir hâle gelir; tek site modunda yerleşik davranışını korur ve yapılandırılmış herhangi bir hizmetle eşleşmeyen istekleri yanıtlar."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "Yenilikler"
     },
     "subtitle": "BunkerWeb'in tüm sürümleri, en yenisi başta olmak üzere, bu kurulumla gelen değişiklik günlüğünden."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Bot karşıtı doğrulama ({{provider}}) sunuldu"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Bu örneğin kimlik bilgisi iptal edilsin mi? Kontrol düzlemi ona artık erişemeyecek.",
+    "rotate_credential": "Bu örneğin kimlik bilgisi döndürülsün mü? Örnek erişilemezse başarısız olur."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "istek engellendi",
+        "captcha": "captcha doğrulaması",
+        "challenge": "bot tespiti doğrulaması"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

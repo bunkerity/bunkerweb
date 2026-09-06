@@ -33,7 +33,9 @@
     "plugin_file_invalid": "请上传有效的插件归档文件（.zip、.tar.gz 或 .tar.xz）。",
     "plugin_file_too_large": "插件归档文件超过 50 MB 的限制。",
     "plugin_upload_failed": "上传插件归档文件时发生错误。请重试。",
-    "services_import_invalid_file": "请上传有效的服务导出文件（.env 或 .zip）。"
+    "services_import_invalid_file": "请上传有效的服务导出文件（.env 或 .zip）。",
+    "credential_action_failed": "操作失败。",
+    "enroll_failed": "无法签发注册码。"
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "刚才"
     },
-    "warning": "警告"
+    "warning": "警告",
+    "configuration_pending_instance": "配置尚未应用——正在等待实例启动。"
   },
   "footer": {
     "blog": "博客",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API 重试延迟",
       "zerossl_api_connect_timeout": "ZeroSSL API 连接超时",
       "zerossl_api_max_time": "ZeroSSL API 最大时长",
-      "passkey_name": "通行密钥名称"
+      "passkey_name": "通行密钥名称",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "注册码"
     },
     "placeholder": {
       "2fa_code": "输入代码",
@@ -914,6 +920,14 @@
       "container": "容器",
       "pod": "Pod",
       "static": "静态"
+    },
+    "enrollment": {
+      "enrolled": "已注册",
+      "pending": "注册待处理",
+      "revoked": "已撤销"
+    },
+    "tls": {
+      "pinned": "TLS 已固定"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "请为选定的封禁选择新的期限：",
       "ban_filtered_confirmation": "要封禁所有 {{count}} 个匹配报告中的 IP 吗？重复目标只会应用一次。",
       "unban_filtered_confirmation": "确定要解除所有 {{count}} 个匹配的封禁吗？",
-      "update_filtered_duration_alert": "为所有 {{count}} 个匹配的封禁选择新时长："
+      "update_filtered_duration_alert": "为所有 {{count}} 个匹配的封禁选择新时长：",
+      "enroll_description": "使用这些变量启动实例。它会在启动时使用一次该注册码,并获得自己的凭证。",
+      "enroll_shown_once": "此注册码仅显示一次。请立即复制——之后将无法再次显示。"
     },
     "button": {
       "fetch_global_settings_confirm": "应用全局设置",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "重置模板配置？",
       "security_report_details": "安全报告详情",
       "server_name_not_unique": "服务器名称不是唯一的",
-      "update_duration": "更新封禁期限"
+      "update_duration": "更新封禁期限",
+      "enroll_instance": "注册实例"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "可选",
     "no_file_selected": "未选择文件",
     "no_url_available": "没有可用的 URL",
-    "unknown": "未知"
+    "unknown": "未知",
+    "deferred": "已推迟",
+    "deferred_tooltip": "已推迟——正在等待实例启动:{{reason}}"
   },
   "step": {
     "next": "下一步",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "更新禁令时长",
       "value_from_global": "来自全局设置的值",
       "back_to_file_upload": "返回文件上传",
-      "switch_to_text_editor": "切换到文本编辑器"
+      "switch_to_text_editor": "切换到文本编辑器",
+      "enroll_instance": "为 {{hostname}} 签发注册码",
+      "revoke_credential": "撤销 {{hostname}} 的凭证",
+      "rotate_credential": "轮换 {{hostname}} 的凭证"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
@@ -2284,7 +2306,9 @@
       "view_file": "查看 {{filename}}",
       "view_service": "查看服务 {{service}}",
       "manage_activation": "在全局设置中管理 {{name}} 的激活",
-      "view_template": "查看模板 {{template}}"
+      "view_template": "查看模板 {{template}}",
+      "edit_default_server": "编辑默认服务器",
+      "view_default_server": "查看默认服务器"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API 重试之间的延迟秒数。",
     "zerossl_api_connect_timeout": "ZeroSSL API 调用的连接超时秒数。",
     "zerossl_api_max_time": "每个 ZeroSSL API 请求的最大总时长（秒）。",
-    "config_global_types_available": "现在可以为自定义配置选择全局类型。"
+    "config_global_types_available": "现在可以为自定义配置选择全局类型。",
+    "enroll_disabled_by_method": "{{hostname}} 来自其环境({{method}});注册仅适用于控制平面拥有的实例",
+    "instance_credential_age": "凭证上次更新时间:{{updated}}"
   },
   "totp": {
     "cant_access": "无法访问您的身份验证器？",
@@ -2826,7 +2852,8 @@
       "window": "时间窗口（秒）",
       "changePosition": "规则 {{n}} / {{total}}，更改位置",
       "newValue": "新值",
-      "positionMove": "位置 {{n}} / {{total}} — 点击移动"
+      "positionMove": "位置 {{n}} / {{total}} — 点击移动",
+      "crowdsecField": "CrowdSec 事实"
     },
     "attach": "附加到服务",
     "attach_help": "规则仅在工作流程附加到的服务上执行。",
@@ -3005,7 +3032,14 @@
       "v_match": "已匹配",
       "v_unknown": "未知",
       "v_unknown_help": "无法确定此规则所需的信息，因此规则永远无法匹配。",
-      "whitelisted": "此客户端在白名单中"
+      "whitelisted": "此客户端在白名单中",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec 已放行",
+      "crowdsec_help": "工作流运行前,CrowdSec 对该请求做出的判定。CrowdSec 从未评估过的请求,与没有任何不利证据的请求并不相同:前者使 CrowdSec 条件处于未确定状态,后者使其为假。",
+      "crowdsec_remediated": "CrowdSec 已处置",
+      "crowdsec_remediation": "处置方式",
+      "crowdsec_source": "判定来源",
+      "crowdsec_unavailable": "CrowdSec 未评估此请求"
     },
     "threshold": "仅高于速率",
     "threshold_count": "请求",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP 方法",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec 判定"
     },
     "uri_match": {
       "exact": "完全等于",
       "prefix": "以此开头",
       "regex": "与正则表达式匹配"
+    },
+    "crowdsec_field": {
+      "remediation": "处置方式为",
+      "source": "来源为"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "封禁",
+      "captcha": "验证码",
+      "lapi": "本地 API"
+    },
+    "reason": {
+      "sentence": "安全工作流 {{workflow}}:{{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "附加的资源",
       "unavailable": "不可用",
       "nothing_available": "没有可关联的项目。"
+    },
+    "default_server": {
+      "certificate": {
+        "action": "编辑证书覆盖",
+        "help": "为未知主机名提供的证书。这是自定义证书插件的全局设置,若覆盖了已配置的服务则会被拒绝。",
+        "title": "默认服务器证书"
+      },
+      "explainer": "响应不匹配任何已配置服务的请求:未知主机名、直接 IP 访问。请在此处配置其证书、TLS、请求头和错误页面。",
+      "name": "默认服务器",
+      "single_site": "当 MULTISITE 设置为 yes 时,默认服务器变为可配置;在单站点模式下,它保留内置行为,响应不匹配任何已配置服务的请求。"
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "新增内容"
     },
     "subtitle": "BunkerWeb 的所有版本，最新在前，直接来自本安装附带的变更日志。"
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "已提供反机器人质询({{provider}})"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "撤销此实例的凭证?控制平面将无法再连接它。",
+    "rotate_credential": "轮换此实例的凭证?如果实例不可达,操作将失败。"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "请求已阻止",
+        "captcha": "验证码质询",
+        "challenge": "机器人检测质询"
+      },
+      "sentence": "{{source}}:{{action}}",
+      "sentence_scenario": "{{source}}:{{action}}(场景:{{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

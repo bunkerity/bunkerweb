@@ -58,8 +58,14 @@ msgstr "TLS & 憑證"
 msgid "alert.configs_import_invalid_file"
 msgstr "請上傳有效的自訂設定匯出檔案（.json）。"
 
+msgid "alert.credential_action_failed"
+msgstr "操作失敗。"
+
 msgid "alert.custom_end_date_required"
 msgstr "請選擇一個自訂結束日期。"
+
+msgid "alert.enroll_failed"
+msgstr "無法發出註冊碼。"
 
 msgid "alert.important"
 msgstr "重要"
@@ -87,6 +93,9 @@ msgstr "此操作在唯讀模式下被禁用。"
 
 msgid "alert.services_import_invalid_file"
 msgstr "請上傳有效的服務匯出檔（.env 或 .zip）。"
+
+msgid "antibot.reason.sentence"
+msgstr "已提供反機器人驗證挑戰(%(provider)s)"
 
 msgid "aria.label.clear_search"
 msgstr "清除搜尋"
@@ -994,6 +1003,12 @@ msgstr "外掛程式列表無法載入，因此此頁面無法安全編輯。 �
 msgid "configs.subtitle"
 msgstr "針對您服務的自訂 NGINX 設定片段 — 建立、編輯並管理 HTTP、ModSecurity 與 stream 層級的覆寫設定。"
 
+msgid "confirm.revoke_credential"
+msgstr "要撤銷此執行個體的憑證嗎?控制平面將無法再連線至它。"
+
+msgid "confirm.rotate_credential"
+msgstr "要輪替此執行個體的憑證嗎?若執行個體無法連線則會失敗。"
+
 msgid "country.AD"
 msgstr "安道爾"
 
@@ -1750,6 +1765,27 @@ msgstr "辛巴威"
 msgid "country.not_applicable"
 msgstr "不適用"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "請求已封鎖"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "驗證碼挑戰"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "機器人偵測挑戰"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s:%(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s:%(action)s(情境:%(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "有一項或多項工作在上次執行時失敗。"
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "服務"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "主要封鎖原因"
+msgstr "主要報告原因"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "總請求數"
@@ -2317,6 +2353,9 @@ msgstr "安全金鑰請求失敗。請再試一次。"
 msgid "flash.check_jobs_for_details"
 msgstr "請查看「工作」頁面以取得詳細資訊。"
 
+msgid "flash.configuration_pending_instance"
+msgstr "尚未套用組態——正在等待執行個體啟動。"
+
 msgid "flash.easter_egg"
 msgstr "如果你讀到這條訊息，表示你很好奇"
 
@@ -2463,6 +2502,15 @@ msgstr "用於 Let's Encrypt 的電子郵件"
 
 msgid "form.label.end_date"
 msgstr "結束日期"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "註冊碼"
 
 msgid "form.label.hostname"
 msgstr "主機名稱"
@@ -2646,6 +2694,18 @@ msgstr "密碼必須至少包含 1 個大寫字母。"
 
 msgid "input_list.view_all_settings"
 msgstr "檢視所有 %(count)s 設定"
+
+msgid "instance.enrollment.enrolled"
+msgstr "已註冊"
+
+msgid "instance.enrollment.pending"
+msgstr "註冊處理中"
+
+msgid "instance.enrollment.revoked"
+msgstr "已撤銷"
+
+msgid "instance.tls.pinned"
+msgstr "TLS 已固定"
 
 msgid "instance.type.container"
 msgstr "容器"
@@ -2937,6 +2997,12 @@ msgstr "由全域設定使用"
 msgid "modal.body.delete_template_services_list"
 msgstr "由服務使用：%(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "使用這些變數啟動執行個體。它會在開機時使用一次此註冊碼,並取得專屬憑證。"
+
+msgid "modal.body.enroll_shown_once"
+msgstr "此代碼僅顯示一次。請立即複製——之後將無法再次顯示。"
+
 msgid "modal.body.export_services_intro"
 msgstr "將匯出所選服務。啟用下方選項，可將其附加的自訂設定打包到 .zip 封存檔中。"
 
@@ -3046,6 +3112,9 @@ msgstr "刪除範本"
 
 msgid "modal.title.edit_template"
 msgstr "編輯範本：%(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "註冊執行個體"
 
 msgid "modal.title.export_services"
 msgstr "匯出服務"
@@ -4208,6 +4277,24 @@ msgstr "封鎖"
 msgid "security_mode.detect"
 msgstr "偵測"
 
+msgid "service.default_server.certificate.action"
+msgstr "編輯憑證覆寫"
+
+msgid "service.default_server.certificate.help"
+msgstr "為未知主機名稱提供的憑證。這是自訂憑證外掛的全域設定,若涵蓋已設定的服務則會被拒絕。"
+
+msgid "service.default_server.certificate.title"
+msgstr "預設伺服器憑證"
+
+msgid "service.default_server.explainer"
+msgstr "回應與任何已設定服務都不相符的請求:未知主機名稱、直接 IP 存取。請在此設定其憑證、TLS、標頭與錯誤頁面。"
+
+msgid "service.default_server.name"
+msgstr "預設伺服器"
+
+msgid "service.default_server.single_site"
+msgstr "當 MULTISITE 設為 yes 時,預設伺服器會變成可設定;在單站台模式下,它會保留內建行為,並回應與任何已設定服務都不相符的請求。"
+
 msgid "service.resources.attach"
 msgstr "連結"
 
@@ -4837,6 +4924,12 @@ msgstr "無法連線至部落格以取得新聞更新。"
 
 msgid "status.default_server"
 msgstr "預設伺服器"
+
+msgid "status.deferred"
+msgstr "已延後"
+
+msgid "status.deferred_tooltip"
+msgstr "已延後——正在等待執行個體啟動:%(reason)s"
 
 msgid "status.done"
 msgstr "已完成"
@@ -5990,6 +6083,9 @@ msgstr "刪除服務 %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "刪除範本 %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "為 %(hostname)s 發出註冊碼"
+
 msgid "tooltip.button.force_check"
 msgstr "排程檢查；僅在有更新時下載。"
 
@@ -6010,6 +6106,12 @@ msgstr "重設為預設值"
 
 msgid "tooltip.button.reset_global"
 msgstr "重設為全域值"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "撤銷 %(hostname)s 的憑證"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "輪替 %(hostname)s 的憑證"
 
 msgid "tooltip.button.run_job"
 msgstr "執行任務 %(job)s"
@@ -6152,6 +6254,9 @@ msgstr "電子郵件必須在 1 到 256 個字元之間。"
 msgid "tooltip.email_lets_encrypt"
 msgstr "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。"
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s 來自其環境(%(method)s);註冊僅適用於控制平面擁有的執行個體"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "取得全域設定並應用於當前範本"
 
@@ -6160,6 +6265,9 @@ msgstr "追蹤模式僅在最新頁面可用"
 
 msgid "tooltip.global_settings_source"
 msgstr "值繼承自全域設定。"
+
+msgid "tooltip.instance_credential_age"
+msgstr "憑證上次更新時間:%(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "執行個體 %(hostname)s 目前未回應 ('up')。"
@@ -6206,6 +6314,9 @@ msgstr "下載 %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "編輯自訂設定 %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "編輯預設伺服器"
+
 msgid "tooltip.link.edit_service"
 msgstr "編輯服務 %(service)s"
 
@@ -6223,6 +6334,9 @@ msgstr "在全局設定中管理 %(name)s 的啟用"
 
 msgid "tooltip.link.view_config"
 msgstr "檢視自訂設定 %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "檢視預設伺服器"
 
 msgid "tooltip.link.view_file"
 msgstr "檢視 %(filename)s"
@@ -7073,6 +7187,9 @@ msgstr "變更組合方式，目前為"
 msgid "workflows.aria.conditionType"
 msgstr "條件類型"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec 事實"
+
 msgid "workflows.aria.denyStatus"
 msgstr "拒絕狀態碼"
 
@@ -7241,6 +7358,9 @@ msgstr "規則會被複製，但服務連接不會。"
 msgid "workflows.clone_name"
 msgstr "複製名稱"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec 判定"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7255,6 +7375,24 @@ msgstr "要刪除此規則嗎？其下方的所有規則都會上移一個位置
 
 msgid "workflows.copySuffix"
 msgstr "（副本）"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "處置方式為"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "來源為"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "封鎖"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "驗證碼"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "本地 API"
 
 msgid "workflows.delete"
 msgstr "刪除工作流程"
@@ -7388,6 +7526,9 @@ msgstr "規則會按順序評估，且第一個匹配的規則會生效。具有
 msgid "workflows.readonly"
 msgstr "資料庫僅供讀取。可以檢視工作流程，但無法修改。"
 
+msgid "workflows.reason.sentence"
+msgstr "安全工作流程 %(workflow)s:%(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "已停用"
 
@@ -7510,6 +7651,27 @@ msgstr "假設條件"
 
 msgid "workflows.test.country"
 msgstr "國家/地區"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec 已允許"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "CrowdSec 在工作流程執行前對此請求做出的判定。CrowdSec 從未評估過的請求,與沒有任何不利證據的請求並不相同:前者會讓 CrowdSec 條件處於未確定狀態,後者則使其為否。"
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec 已處置"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "處置方式"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "判定來源"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec 未評估此請求"
 
 msgid "workflows.test.detail_challenge"
 msgstr "驗證挑戰會接管處理；安全堆疊的其餘部分仍會執行。"

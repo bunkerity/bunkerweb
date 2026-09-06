@@ -33,7 +33,9 @@
     "plugin_file_invalid": "유효한 플러그인 아카이브(.zip, .tar.gz 또는 .tar.xz)를 업로드하세요.",
     "plugin_file_too_large": "플러그인 아카이브가 50 MB 제한을 초과합니다.",
     "plugin_upload_failed": "플러그인 아카이브를 업로드하는 중 오류가 발생했습니다. 다시 시도해 주세요.",
-    "services_import_invalid_file": "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요."
+    "services_import_invalid_file": "유효한 서비스 내보내기 파일(.env 또는 .zip)을 업로드하세요.",
+    "credential_action_failed": "작업이 실패했습니다.",
+    "enroll_failed": "등록 코드를 발급할 수 없습니다."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "방금 전"
     },
-    "warning": "경고"
+    "warning": "경고",
+    "configuration_pending_instance": "구성이 아직 적용되지 않음 — 인스턴스 기동 대기 중."
   },
   "footer": {
     "blog": "블로그",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API 재시도 지연",
       "zerossl_api_connect_timeout": "ZeroSSL API 연결 시간 초과",
       "zerossl_api_max_time": "ZeroSSL API 최대 시간",
-      "passkey_name": "패스키 이름"
+      "passkey_name": "패스키 이름",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "등록 코드"
     },
     "placeholder": {
       "2fa_code": "코드 입력",
@@ -914,6 +920,14 @@
       "container": "컨테이너",
       "pod": "포드(Pod)",
       "static": "정적"
+    },
+    "enrollment": {
+      "enrolled": "등록됨",
+      "pending": "등록 대기 중",
+      "revoked": "취소됨"
+    },
+    "tls": {
+      "pinned": "TLS 고정됨"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "선택한 차단 항목에 대해 새로운 기간을 선택하세요:",
       "ban_filtered_confirmation": "일치하는 보고서 {{count}}개의 IP를 모두 차단하시겠습니까? 중복 대상은 한 번만 적용됩니다.",
       "unban_filtered_confirmation": "일치하는 차단 {{count}}개를 모두 해제하시겠습니까?",
-      "update_filtered_duration_alert": "일치하는 차단 {{count}}개의 새 기간을 선택하세요:"
+      "update_filtered_duration_alert": "일치하는 차단 {{count}}개의 새 기간을 선택하세요:",
+      "enroll_description": "이 변수들로 인스턴스를 시작하세요. 부팅 시 코드를 한 번 사용하고 고유한 자격 증명을 받습니다.",
+      "enroll_shown_once": "이 코드는 한 번만 표시됩니다. 지금 복사하세요 — 다시 표시할 수 없습니다."
     },
     "button": {
       "fetch_global_settings_confirm": "전역 설정 적용",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "템플릿 설정을 초기화하시겠습니까?",
       "security_report_details": "보안 보고서 세부 정보",
       "server_name_not_unique": "서버 이름이 중복됩니다",
-      "update_duration": "차단 기간 업데이트"
+      "update_duration": "차단 기간 업데이트",
+      "enroll_instance": "인스턴스 등록"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "선택 사항",
     "no_file_selected": "선택된 파일 없음",
     "no_url_available": "사용 가능한 URL 없음",
-    "unknown": "알 수 없음"
+    "unknown": "알 수 없음",
+    "deferred": "지연됨",
+    "deferred_tooltip": "지연됨 — 인스턴스 기동 대기 중: {{reason}}"
   },
   "step": {
     "next": "다음",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "금지 기간 업데이트",
       "value_from_global": "전역 설정에서 가져온 값",
       "back_to_file_upload": "파일 업로드로 돌아가기",
-      "switch_to_text_editor": "텍스트 편집기로 전환"
+      "switch_to_text_editor": "텍스트 편집기로 전환",
+      "enroll_instance": "{{hostname}}에 대한 등록 코드 발급",
+      "revoke_credential": "{{hostname}}의 자격 증명 취소",
+      "rotate_credential": "{{hostname}}의 자격 증명 교체"
     },
     "cannot_delete_original_ban": "원본 차단 항목은 삭제할 수 없습니다.",
     "cannot_remove_disabled": "하나 이상의 설정이 비활성화되어 있어 제거할 수 없습니다.",
@@ -2284,7 +2306,9 @@
       "view_file": "{{filename}} 보기",
       "view_service": "서비스 {{service}} 보기",
       "manage_activation": "전역 설정에서 {{name}} 활성화 관리",
-      "view_template": "템플릿 {{template}} 보기"
+      "view_template": "템플릿 {{template}} 보기",
+      "edit_default_server": "기본 서버 편집",
+      "view_default_server": "기본 서버 보기"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API 재시도 간 지연 시간(초)입니다.",
     "zerossl_api_connect_timeout": "ZeroSSL API 호출의 연결 시간 초과(초)입니다.",
     "zerossl_api_max_time": "각 ZeroSSL API 요청의 최대 총 시간(초)입니다.",
-    "config_global_types_available": "이제 사용자 지정 설정에서 전역 유형을 선택할 수 있습니다."
+    "config_global_types_available": "이제 사용자 지정 설정에서 전역 유형을 선택할 수 있습니다.",
+    "enroll_disabled_by_method": "{{hostname}}은 해당 환경({{method}})에서 제공됩니다. 등록은 컨트롤 플레인이 소유한 인스턴스에만 적용됩니다",
+    "instance_credential_age": "자격 증명 마지막 업데이트: {{updated}}"
   },
   "totp": {
     "cant_access": "인증 코드를 사용할 수 없으신가요?",
@@ -2826,7 +2852,8 @@
       "window": "시간 범위(초)",
       "changePosition": "규칙 {{n}} / {{total}}, 위치 변경",
       "newValue": "새 값",
-      "positionMove": "위치 {{n}} / {{total}} — 클릭하여 이동"
+      "positionMove": "위치 {{n}} / {{total}} — 클릭하여 이동",
+      "crowdsecField": "CrowdSec 사실"
     },
     "attach": "서비스에 연결",
     "attach_help": "규칙은 워크플로우가 연결된 서비스에서만 적용됩니다.",
@@ -3005,7 +3032,14 @@
       "v_match": "일치",
       "v_unknown": "알 수 없음",
       "v_unknown_help": "이 규칙에 필요한 정보를 확인할 수 없어 절대 일치할 수 없습니다.",
-      "whitelisted": "이 클라이언트는 허용 목록에 있음"
+      "whitelisted": "이 클라이언트는 허용 목록에 있음",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec가 허용함",
+      "crowdsec_help": "워크플로가 실행되기 전에 CrowdSec가 이 요청에 대해 결정한 내용입니다. CrowdSec가 한 번도 평가하지 않은 요청은 불리한 근거가 전혀 없는 요청과 같지 않습니다. 전자는 CrowdSec 조건을 미결정 상태로 남기고, 후자는 이를 거짓으로 만듭니다.",
+      "crowdsec_remediated": "CrowdSec가 처리함",
+      "crowdsec_remediation": "처리 방식",
+      "crowdsec_source": "판정 소스",
+      "crowdsec_unavailable": "CrowdSec가 이 요청을 평가하지 않음"
     },
     "threshold": "속도 기준 이상",
     "threshold_count": "요청",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP 메서드",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec 판정"
     },
     "uri_match": {
       "exact": "정확히 일치",
       "prefix": "다음으로 시작",
       "regex": "정규식과 일치"
+    },
+    "crowdsec_field": {
+      "remediation": "처리 방식이",
+      "source": "소스가"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "차단",
+      "captcha": "캡차",
+      "lapi": "로컬 API"
+    },
+    "reason": {
+      "sentence": "보안 워크플로 {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "연결된 자원",
       "unavailable": "사용 불가능",
       "nothing_available": "연결할 수 있는 항목이 없습니다."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "인증서 재정의 편집",
+        "help": "알려지지 않은 호스트 이름에 제시되는 인증서입니다. 사용자 지정 인증서 플러그인의 전역 설정이며, 구성된 서비스를 포함하면 거부됩니다.",
+        "title": "기본 서버 인증서"
+      },
+      "explainer": "구성된 서비스와 일치하지 않는 요청에 응답합니다: 알려지지 않은 호스트 이름, 직접 IP 접근. 여기서 인증서, TLS, 헤더 및 오류 페이지를 구성하세요.",
+      "name": "기본 서버",
+      "single_site": "MULTISITE가 yes로 설정되면 기본 서버를 구성할 수 있게 됩니다. 단일 사이트 모드에서는 내장된 동작을 유지하며 구성된 서비스와 일치하지 않는 요청에 응답합니다."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "새로운 기능"
     },
     "subtitle": "이 설치본에 포함된 변경 로그에서 가져온 모든 BunkerWeb 릴리스입니다. 최신 순으로 표시됩니다."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "안티봇 챌린지({{provider}})가 제공됨"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "이 인스턴스의 자격 증명을 취소하시겠습니까? 컨트롤 플레인이 더 이상 접근할 수 없게 됩니다.",
+    "rotate_credential": "이 인스턴스의 자격 증명을 교체하시겠습니까? 인스턴스에 접근할 수 없으면 실패합니다."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "요청 차단됨",
+        "captcha": "캡차 챌린지",
+        "challenge": "봇 탐지 챌린지"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (시나리오: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

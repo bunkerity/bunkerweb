@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Unggah arsip plugin yang valid (.zip, .tar.gz, atau .tar.xz).",
     "plugin_file_too_large": "Arsip plugin melebihi batas 50 MB.",
     "plugin_upload_failed": "Terjadi kesalahan saat mengunggah arsip plugin. Silakan coba lagi.",
-    "services_import_invalid_file": "Unggah file ekspor layanan yang valid (.env atau .zip)."
+    "services_import_invalid_file": "Unggah file ekspor layanan yang valid (.env atau .zip).",
+    "credential_action_failed": "Tindakan gagal.",
+    "enroll_failed": "Tidak dapat menerbitkan kode pendaftaran."
   },
   "aria": {
     "label": {
@@ -813,7 +815,8 @@
     "time": {
       "just_now": "baru saja"
     },
-    "warning": "Peringatan"
+    "warning": "Peringatan",
+    "configuration_pending_instance": "Konfigurasi belum diterapkan — menunggu instans aktif."
   },
   "footer": {
     "blog": "Blog",
@@ -906,7 +909,10 @@
       "zerossl_api_retry_delay": "Penundaan Percobaan Ulang API ZeroSSL",
       "zerossl_api_connect_timeout": "Batas Waktu Koneksi API ZeroSSL",
       "zerossl_api_max_time": "Waktu Maks API ZeroSSL",
-      "passkey_name": "Nama passkey"
+      "passkey_name": "Nama passkey",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "Kode pendaftaran"
     },
     "placeholder": {
       "2fa_code": "Masukkan kode",
@@ -938,6 +944,14 @@
       "container": "Container",
       "pod": "Pod",
       "static": "Statis"
+    },
+    "enrollment": {
+      "enrolled": "Terdaftar",
+      "pending": "Pendaftaran tertunda",
+      "revoked": "Dicabut"
+    },
+    "tls": {
+      "pinned": "TLS di-pin"
     }
   },
   "instances": {
@@ -1077,7 +1091,9 @@
       "unban_confirmation_alert_plural": "Apakah Anda yakin ingin membatalkan larangan alamat IP yang dipilih?",
       "unban_filtered_confirmation": "Apakah Anda yakin ingin membatalkan larangan untuk semua {{count}} larangan yang cocok?",
       "update_duration_alert": "Pilih durasi baru untuk larangan yang dipilih:",
-      "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:"
+      "update_filtered_duration_alert": "Pilih durasi baru untuk semua {{count}} larangan yang cocok:",
+      "enroll_description": "Mulai instans dengan variabel ini. Kode digunakan satu kali saat boot dan instans menerima kredensialnya sendiri.",
+      "enroll_shown_once": "Kode ini hanya ditampilkan sekali. Salin sekarang — kode tidak dapat ditampilkan lagi."
     },
     "button": {
       "fetch_global_settings_confirm": "Terapkan pengaturan global",
@@ -1113,7 +1129,8 @@
       "reset_template_config": "Atur Ulang Konfigurasi Template?",
       "security_report_details": "Detail Laporan Keamanan",
       "server_name_not_unique": "Nama Server Tidak Unik",
-      "update_duration": "Perbarui Durasi Larangan"
+      "update_duration": "Perbarui Durasi Larangan",
+      "enroll_instance": "Daftarkan instans"
     }
   },
   "mode": {
@@ -1907,7 +1924,9 @@
     "yes": "Ya",
     "no_file_selected": "Tidak ada file yang dipilih",
     "no_url_available": "Tidak ada URL yang tersedia",
-    "unknown": "Tidak diketahui"
+    "unknown": "Tidak diketahui",
+    "deferred": "Ditangguhkan",
+    "deferred_tooltip": "Ditangguhkan — menunggu instans aktif: {{reason}}"
   },
   "step": {
     "next": "Berikutnya",
@@ -2272,7 +2291,10 @@
       "update_ban_duration": "Perbarui durasi larangan",
       "value_from_global": "Nilai dari pengaturan global",
       "back_to_file_upload": "Kembali ke unggah file",
-      "switch_to_text_editor": "Beralih ke editor teks"
+      "switch_to_text_editor": "Beralih ke editor teks",
+      "enroll_instance": "Terbitkan kode pendaftaran untuk {{hostname}}",
+      "revoke_credential": "Cabut kredensial {{hostname}}",
+      "rotate_credential": "Rotasi kredensial {{hostname}}"
     },
     "cannot_delete_original_ban": "Tidak dapat menghapus entri Larangan asli.",
     "cannot_remove_disabled": "Tidak dapat menghapus karena satu atau lebih pengaturan dinonaktifkan.",
@@ -2338,7 +2360,9 @@
       "view_file": "Lihat {{filename}}",
       "view_service": "Lihat Layanan {{service}}",
       "view_template": "Lihat Template {{template}}",
-      "manage_activation": "Kelola aktivasi {{name}} di pengaturan global"
+      "manage_activation": "Kelola aktivasi {{name}} di pengaturan global",
+      "edit_default_server": "Edit server default",
+      "view_default_server": "Lihat server default"
     },
     "modal": {
       "title": {
@@ -2520,7 +2544,9 @@
     "zerossl_api_retry_delay": "Penundaan dalam detik antara percobaan ulang API ZeroSSL.",
     "zerossl_api_connect_timeout": "Batas waktu koneksi dalam detik untuk panggilan API ZeroSSL.",
     "zerossl_api_max_time": "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL.",
-    "config_global_types_available": "Anda sekarang dapat memilih jenis global untuk konfigurasi kustom Anda."
+    "config_global_types_available": "Anda sekarang dapat memilih jenis global untuk konfigurasi kustom Anda.",
+    "enroll_disabled_by_method": "{{hostname}} berasal dari environment-nya ({{method}}); pendaftaran hanya berlaku untuk instans yang dimiliki oleh control plane",
+    "instance_credential_age": "Kredensial terakhir diperbarui: {{updated}}"
   },
   "totp": {
     "cant_access": "Tidak dapat mengakses autentikator Anda?",
@@ -2753,7 +2779,8 @@
       "ruleErrors": "{{count}} masalah validasi pada aturan ini",
       "changePosition": "Aturan {{n}} dari {{total}}, ubah posisi",
       "newValue": "Nilai baru",
-      "positionMove": "Posisi {{n}} dari {{total}} — klik untuk memindahkan"
+      "positionMove": "Posisi {{n}} dari {{total}} — klik untuk memindahkan",
+      "crowdsecField": "Fakta CrowdSec"
     },
     "attach": "Lampirkan ke layanan",
     "attach_help": "Aturan hanya diberlakukan pada layanan tempat sebuah alur kerja dilampirkan.",
@@ -2932,7 +2959,14 @@
       "v_match": "COCOK",
       "v_unknown": "TIDAK DIKETAHUI",
       "v_unknown_help": "Sebuah fakta yang dibutuhkan aturan ini tidak dapat ditentukan, sehingga tidak akan pernah bisa cocok.",
-      "whitelisted": "Klien ini di-whitelist"
+      "whitelisted": "Klien ini di-whitelist",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec mengizinkannya",
+      "crowdsec_help": "Keputusan CrowdSec tentang permintaan ini sebelum workflow berjalan. Permintaan yang tidak pernah dinilai oleh CrowdSec tidak sama dengan permintaan yang tidak memiliki bukti negatif apa pun: yang pertama membuat kondisi CrowdSec tidak ditentukan, yang kedua membuatnya salah.",
+      "crowdsec_remediated": "CrowdSec meremediasinya",
+      "crowdsec_remediation": "Remediasi",
+      "crowdsec_source": "Sumber keputusan",
+      "crowdsec_unavailable": "CrowdSec tidak menilai permintaan ini"
     },
     "threshold": "Hanya di atas laju",
     "threshold_count": "Permintaan",
@@ -2983,12 +3017,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "Metode HTTP",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "Keputusan CrowdSec"
     },
     "uri_match": {
       "exact": "sama persis dengan",
       "prefix": "dimulai dengan",
       "regex": "cocok dengan regex"
+    },
+    "crowdsec_field": {
+      "remediation": "remediasi adalah",
+      "source": "sumber adalah"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "larangan",
+      "captcha": "captcha",
+      "lapi": "API lokal"
+    },
+    "reason": {
+      "sentence": "Workflow keamanan {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3147,6 +3195,16 @@
       "title": "Sumber daya terlampir",
       "unavailable": "Tidak tersedia",
       "nothing_available": "Tidak ada yang tersedia untuk dilampirkan."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "Edit override sertifikat",
+        "help": "Sertifikat yang disajikan untuk nama host yang tidak dikenal. Ini adalah pengaturan global plugin sertifikat khusus, dan ditolak jika mencakup layanan yang telah dikonfigurasi.",
+        "title": "Sertifikat server default"
+      },
+      "explainer": "Menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun: nama host yang tidak dikenal, akses IP langsung. Konfigurasikan sertifikat, TLS, header, dan halaman error di sini.",
+      "name": "Server default",
+      "single_site": "Server default menjadi dapat dikonfigurasi ketika MULTISITE diatur ke yes; dalam mode situs tunggal ia mempertahankan perilaku bawaannya dan menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun."
     }
   },
   "timings": {
@@ -3180,5 +3238,29 @@
       "title": "Yang baru"
     },
     "subtitle": "Setiap rilis BunkerWeb, terbaru lebih dulu, langsung dari changelog yang disertakan dengan instalasi ini."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Tantangan antibot ({{provider}}) disajikan"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Cabut kredensial instans ini? Control plane tidak akan bisa menjangkaunya lagi.",
+    "rotate_credential": "Rotasi kredensial instans ini? Gagal jika instans tidak dapat dijangkau."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "permintaan diblokir",
+        "captcha": "tantangan captcha",
+        "challenge": "tantangan deteksi bot"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (skenario: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

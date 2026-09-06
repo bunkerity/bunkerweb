@@ -58,8 +58,14 @@ msgstr "TLS & sertipiko"
 msgid "alert.configs_import_invalid_file"
 msgstr "Mangyaring i-upload ang isang valid na file ng custom na configuration (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "Nabigo ang aksyon."
+
 msgid "alert.custom_end_date_required"
 msgstr "Mangyaring pumili ng pasadyang petsa ng pagtatapos."
+
+msgid "alert.enroll_failed"
+msgstr "Hindi maibigay ang enrollment code."
 
 msgid "alert.important"
 msgstr "Mahalaga"
@@ -87,6 +93,9 @@ msgstr "Ang aksyong ito ay hindi pinagana sa read-only na mode."
 
 msgid "alert.services_import_invalid_file"
 msgstr "Mangyaring mag-upload ng wastong services export file (.env o .zip)."
+
+msgid "antibot.reason.sentence"
+msgstr "Naihatid ang antibot challenge (%(provider)s)"
 
 msgid "aria.label.clear_search"
 msgstr "Linisin ang paghahanap"
@@ -994,6 +1003,12 @@ msgstr "Hindi ma-load ang listahan ng plugin, kaya hindi ligtas na mabago ang pa
 msgid "configs.subtitle"
 msgstr "Mga snippet ng custom na configuration ng NGINX para sa iyong mga serbisyo — lumikha, i-edit, at pamahalaan ang HTTP, ModSecurity, at mga override sa antas ng stream."
 
+msgid "confirm.revoke_credential"
+msgstr "I-revoke ang credential ng instance na ito? Hindi na ito maaabot ng control plane."
+
+msgid "confirm.rotate_credential"
+msgstr "I-rotate ang credential ng instance na ito? Mabibigo kung hindi maabot ang instance."
+
 msgid "country.AD"
 msgstr "Andora"
 
@@ -1750,6 +1765,27 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "Hindi Naaangkop"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "na-block ang request"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "hamon ng captcha"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "hamon sa pagtukoy ng bot"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (senaryo: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "May isa o higit pang job na nabigo sa huli nitong pagpapatakbo."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Mga Serbisyo"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "Pangunahing dahilan ng pag-block"
+msgstr "Pangunahing dahilan ng ulat"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Kabuuang Mga Kahilingan"
@@ -2317,6 +2353,9 @@ msgstr "Nabigo ang request sa security key. Subukan muli."
 msgid "flash.check_jobs_for_details"
 msgstr "Tingnan ang pahina ng Jobs para sa detalye."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Hindi pa naaplay ang configuration — hinihintay ang isang instance na mag-start."
+
 msgid "flash.easter_egg"
 msgstr "Kung nabasa mo ito, ibig sabihin ay mausisa ka"
 
@@ -2463,6 +2502,15 @@ msgstr "Email para sa Let's Encrypt"
 
 msgid "form.label.end_date"
 msgstr "Petsa ng Pagtatapos"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Code ng pagpapatala"
 
 msgid "form.label.hostname"
 msgstr "Hostname"
@@ -2646,6 +2694,18 @@ msgstr "Ang password ay dapat may hindi bababa sa 1 malaking titik."
 
 msgid "input_list.view_all_settings"
 msgstr "Tingnan ang lahat ng %(count)s setting"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Naka-enroll"
+
+msgid "instance.enrollment.pending"
+msgstr "Naghihintay ang enrollment"
+
+msgid "instance.enrollment.revoked"
+msgstr "Na-revoke"
+
+msgid "instance.tls.pinned"
+msgstr "Naka-pin ang TLS"
 
 msgid "instance.type.container"
 msgstr "Container"
@@ -2941,6 +3001,12 @@ msgstr "Ginagamit ng mga pandaigdigang setting"
 msgid "modal.body.delete_template_services_list"
 msgstr "Ginagamit ng mga serbisyo: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "I-start ang instance gamit ang mga variable na ito. Ginagamit nito ang code isang beses sa boot at nakakakuha ito ng sariling credential."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "Minsan lang ipapakita ang code na ito. Kopyahin ito ngayon — hindi na ito maipapakita ulit."
+
 msgid "modal.body.export_services_intro"
 msgstr "Iae-export ang mga napiling serbisyo. I-enable ang opsyon sa ibaba upang isama ang kanilang mga naka-attach na custom na configuration sa isang .zip archive."
 
@@ -3051,6 +3117,9 @@ msgstr "Burahin ang template"
 
 msgid "modal.title.edit_template"
 msgstr "I-edit ang template: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "I-enroll ang instance"
 
 msgid "modal.title.export_services"
 msgstr "I-export ang mga serbisyo"
@@ -4213,6 +4282,24 @@ msgstr "I-block"
 msgid "security_mode.detect"
 msgstr "I-detect"
 
+msgid "service.default_server.certificate.action"
+msgstr "I-edit ang override ng certificate"
+
+msgid "service.default_server.certificate.help"
+msgstr "Ang certificate na ipinapakita para sa hindi kilalang hostname. Isa itong global setting ng custom certificate plugin, at tinatanggihan ito kung sakop nito ang isang naka-configure na service."
+
+msgid "service.default_server.certificate.title"
+msgstr "Certificate ng default server"
+
+msgid "service.default_server.explainer"
+msgstr "Sinasagot ang mga request na hindi tugma sa anumang naka-configure na service: hindi kilalang hostname, direktang pag-access sa IP. I-configure dito ang certificate, TLS, headers, at error pages nito."
+
+msgid "service.default_server.name"
+msgstr "Default na Server"
+
+msgid "service.default_server.single_site"
+msgstr "Nagiging configurable ang default server kapag naka-set sa yes ang MULTISITE; sa single-site mode, pinapanatili nito ang built-in nitong behavior at sinasagot ang mga request na hindi tugma sa anumang naka-configure na service."
+
 msgid "service.resources.attach"
 msgstr "Ikabit"
 
@@ -4842,6 +4929,12 @@ msgstr "Hindi makakonekta sa blog para sa mga update sa balita."
 
 msgid "status.default_server"
 msgstr "Default na Server"
+
+msgid "status.deferred"
+msgstr "Naantala"
+
+msgid "status.deferred_tooltip"
+msgstr "Naantala — hinihintay ang isang instance na mag-start: %(reason)s"
 
 msgid "status.done"
 msgstr "Tapos na"
@@ -5995,6 +6088,9 @@ msgstr "Burahin ang Serbisyo na %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Burahin ang Template na %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "Magbigay ng enrollment code para sa %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "Nag-iiskedyul ng pagsusuri; nagda-download lamang kung may mga update."
 
@@ -6015,6 +6111,12 @@ msgstr "I-reset sa default na value"
 
 msgid "tooltip.button.reset_global"
 msgstr "I-reset sa global na value"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "I-revoke ang credential ng %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "I-rotate ang credential ng %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "Patakbuhin ang Trabaho na %(job)s"
@@ -6157,6 +6259,9 @@ msgstr "Ang email ay dapat na may 1 hanggang 256 na character."
 msgid "tooltip.email_lets_encrypt"
 msgstr "Ang email address na irerehistro sa Let's Encrypt para sa pamamahala ng certificate at mga abiso."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "Galing sa sariling environment ang %(hostname)s (%(method)s); ang enrollment ay para lang sa mga instance na pag-aari ng control plane"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Kunin ang mga pandaigdigang setting at ilapat ang mga ito sa kasalukuyang template"
 
@@ -6165,6 +6270,9 @@ msgstr "Ang follow mode ay available lamang sa pinakabagong pahina"
 
 msgid "tooltip.global_settings_source"
 msgstr "Value na minana mula sa mga pandaigdigang setting."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Huling na-update ang credential: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "Ang Instance na %(hostname)s ay kasalukuyang hindi tumutugon ('up')."
@@ -6211,6 +6319,9 @@ msgstr "I-download ang %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "I-edit ang Custom Config na %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "I-edit ang default server"
+
 msgid "tooltip.link.edit_service"
 msgstr "I-edit ang Serbisyo na %(service)s"
 
@@ -6228,6 +6339,9 @@ msgstr "Pamahalaan ang pag-activate ng %(name)s sa mga pangkalahatang setting"
 
 msgid "tooltip.link.view_config"
 msgstr "Tingnan ang Custom Config na %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "Tingnan ang default server"
 
 msgid "tooltip.link.view_file"
 msgstr "Tingnan ang %(filename)s"
@@ -7078,6 +7192,9 @@ msgstr "Baguhin ang combinator, kasalukuyang"
 msgid "workflows.aria.conditionType"
 msgstr "Uri ng kondisyon"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "Fact ng CrowdSec"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Katayuan ng pagtanggi"
 
@@ -7246,6 +7363,9 @@ msgstr "Ang mga panuntunan ay kinokopya; ang mga attachment sa serbisyo ay hindi
 msgid "workflows.clone_name"
 msgstr "Pangalan ng kopya"
 
+msgid "workflows.condition.crowdsec"
+msgstr "Verdict ng CrowdSec"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "Burahin ang patakarang ito? Aakyat nang isang puwesto ang lahat ng nasa 
 
 msgid "workflows.copySuffix"
 msgstr " (kopya)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "ang remediyasyon ay"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "ang source ay"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "ban"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "captcha"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "Lokal na API"
 
 msgid "workflows.delete"
 msgstr "Burahin ang daloy ng trabaho"
@@ -7393,6 +7531,9 @@ msgstr "Ang mga panuntunan ay sinusuri sa pagkakasunod-sunod at ang unang na tum
 msgid "workflows.readonly"
 msgstr "Ang database ay hindi mababago. Maaaring suriin ang mga daloy ng trabaho ngunit hindi mababago."
 
+msgid "workflows.reason.sentence"
+msgstr "Workflow ng seguridad %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Naka-disable"
 
@@ -7515,6 +7656,27 @@ msgstr "Mga palagay"
 
 msgid "workflows.test.country"
 msgstr "Bansa"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "Pinayagan ito ng CrowdSec"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "Ang desisyon ng CrowdSec sa request na ito bago tumakbo ang mga workflow. Ang request na hindi pa kailanman na-evaluate ng CrowdSec ay hindi katulad ng request na walang laban dito: iniiwan ng una ang kondisyon ng CrowdSec bilang hindi tiyak, ginagawa itong mali ng pangalawa."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "Na-remediate ito ng CrowdSec"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "Remediyasyon"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Pinagmulan ng verdict"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "Hindi ni-evaluate ng CrowdSec ang request na ito"
 
 msgid "workflows.test.detail_challenge"
 msgstr "Kukunin ng challenge ang kontrol; tatakbo pa rin ang natitirang security stack."

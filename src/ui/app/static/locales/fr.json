@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Veuillez téléverser une archive de plugin valide (.zip, .tar.gz ou .tar.xz).",
     "plugin_file_too_large": "L’archive du plugin dépasse la limite de 50 MB.",
     "plugin_upload_failed": "Une erreur s’est produite lors du téléversement de l’archive du plugin. Veuillez réessayer.",
-    "services_import_invalid_file": "Veuillez téléverser un fichier d’exportation de services valide (.env ou .zip)."
+    "services_import_invalid_file": "Veuillez téléverser un fichier d’exportation de services valide (.env ou .zip).",
+    "credential_action_failed": "L'action a échoué.",
+    "enroll_failed": "Impossible de générer un code d'enrôlement."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "à l'instant"
     },
-    "warning": "Avertissement"
+    "warning": "Avertissement",
+    "configuration_pending_instance": "Configuration pas encore appliquée — en attente qu'une instance démarre."
   },
   "footer": {
     "blog": "Blog",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "Délai de nouvelle tentative API ZeroSSL",
       "zerossl_api_connect_timeout": "Délai de connexion API ZeroSSL",
       "zerossl_api_max_time": "Durée maximale API ZeroSSL",
-      "passkey_name": "Nom de la clé d'accès"
+      "passkey_name": "Nom de la clé d'accès",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "Code d'enrôlement"
     },
     "placeholder": {
       "2fa_code": "Entrez le code",
@@ -914,6 +920,14 @@
       "container": "Conteneur",
       "pod": "Pod",
       "static": "Statique"
+    },
+    "enrollment": {
+      "enrolled": "Enrôlée",
+      "pending": "Enrôlement en attente",
+      "revoked": "Révoquée"
+    },
+    "tls": {
+      "pinned": "TLS épinglé"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
       "ban_filtered_confirmation": "Bannir les adresses IP issues des {{count}} signalements correspondants ? Chaque cible en double ne sera traitée qu’une fois.",
       "unban_filtered_confirmation": "Voulez-vous vraiment lever les {{count}} bannissements correspondants ?",
-      "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :"
+      "update_filtered_duration_alert": "Sélectionnez une nouvelle durée pour les {{count}} bannissements correspondants :",
+      "enroll_description": "Démarrez l'instance avec ces variables. Elle utilise le code une seule fois au démarrage et reçoit son propre identifiant.",
+      "enroll_shown_once": "Ce code n'est affiché qu'une fois. Copiez-le maintenant — il ne pourra plus être affiché."
     },
     "button": {
       "fetch_global_settings_confirm": "Appliquer les paramètres globaux",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "Réinitialiser la configuration du modèle ?",
       "security_report_details": "Détails du rapport de sécurité",
       "server_name_not_unique": "Le nom du serveur n’est pas unique",
-      "update_duration": "Modifier la durée du bannissement"
+      "update_duration": "Modifier la durée du bannissement",
+      "enroll_instance": "Enrôler l'instance"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "Facultatif",
     "no_file_selected": "Aucun fichier sélectionné",
     "no_url_available": "Aucune URL disponible",
-    "unknown": "Inconnu"
+    "unknown": "Inconnu",
+    "deferred": "Différé",
+    "deferred_tooltip": "Différé — en attente qu'une instance démarre : {{reason}}"
   },
   "step": {
     "next": "Suivant",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "Mettre à jour la durée de blocage",
       "value_from_global": "Valeur provenant des paramètres globaux",
       "back_to_file_upload": "Revenir au téléversement de fichier",
-      "switch_to_text_editor": "Passer à l’éditeur de texte"
+      "switch_to_text_editor": "Passer à l’éditeur de texte",
+      "enroll_instance": "Générer un code d'enrôlement pour {{hostname}}",
+      "revoke_credential": "Révoquer l'identifiant de {{hostname}}",
+      "rotate_credential": "Faire pivoter l'identifiant de {{hostname}}"
     },
     "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement d'origine.",
     "cannot_remove_disabled": "Impossible de supprimer car un ou plusieurs paramètres sont désactivés.",
@@ -2284,7 +2306,9 @@
       "view_file": "Voir {{filename}}",
       "view_service": "Voir le service {{service}}",
       "manage_activation": "Gérer l'activation de {{name}} dans les paramètres globaux",
-      "view_template": "Voir le modèle {{template}}"
+      "view_template": "Voir le modèle {{template}}",
+      "edit_default_server": "Modifier le serveur par défaut",
+      "view_default_server": "Voir le serveur par défaut"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "Délai en secondes entre les nouvelles tentatives d'appel à l'API ZeroSSL.",
     "zerossl_api_connect_timeout": "Délai de connexion en secondes pour les appels API ZeroSSL.",
     "zerossl_api_max_time": "Durée totale maximale en secondes pour chaque requête API ZeroSSL.",
-    "config_global_types_available": "Vous pouvez maintenant sélectionner des types globaux pour votre configuration personnalisée."
+    "config_global_types_available": "Vous pouvez maintenant sélectionner des types globaux pour votre configuration personnalisée.",
+    "enroll_disabled_by_method": "{{hostname}} provient de son environnement ({{method}}) ; l'enrôlement ne s'applique qu'aux instances possédées par le plan de contrôle",
+    "instance_credential_age": "Identifiant mis à jour le : {{updated}}"
   },
   "totp": {
     "cant_access": "Ne pouvez pas accéder à votre authentificateur ?",
@@ -2826,7 +2852,8 @@
       "window": "Fenêtre en secondes",
       "changePosition": "Règle {{n}} sur {{total}}, changer de position",
       "newValue": "Nouvelle valeur",
-      "positionMove": "Position {{n}} sur {{total}} — cliquer pour déplacer"
+      "positionMove": "Position {{n}} sur {{total}} — cliquer pour déplacer",
+      "crowdsecField": "Fait CrowdSec"
     },
     "attach": "Associer aux services",
     "attach_help": "Les règles ne sont appliquées qu'aux services auxquels un flux de travail est associé.",
@@ -3005,7 +3032,14 @@
       "v_match": "CORRESPONDANCE",
       "v_unknown": "INCONNU",
       "v_unknown_help": "Un fait requis par cette règle n’a pas pu être déterminé ; elle ne peut donc jamais correspondre.",
-      "whitelisted": "Ce client est sur liste blanche"
+      "whitelisted": "Ce client est sur liste blanche",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec l'a autorisée",
+      "crowdsec_help": "Ce que CrowdSec a décidé pour cette requête avant l'exécution des workflows. Une requête que CrowdSec n'a jamais jugée n'est pas la même chose qu'une requête sans rien contre elle : la première laisse une condition CrowdSec indéterminée, la seconde la rend fausse.",
+      "crowdsec_remediated": "CrowdSec l'a remédiée",
+      "crowdsec_remediation": "Remédiation",
+      "crowdsec_source": "Source du verdict",
+      "crowdsec_unavailable": "CrowdSec n'a pas jugé cette requête"
     },
     "threshold": "Uniquement au-dessus d'un taux",
     "threshold_count": "Requêtes",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "Méthode HTTP",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "Verdict CrowdSec"
     },
     "uri_match": {
       "exact": "est exactement",
       "prefix": "commence par",
       "regex": "correspond à l’expression régulière"
+    },
+    "crowdsec_field": {
+      "remediation": "la remédiation est",
+      "source": "la source est"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "bannissement",
+      "captcha": "captcha",
+      "lapi": "API locale"
+    },
+    "reason": {
+      "sentence": "Workflow de sécurité {{workflow}} : {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "Ressources associées",
       "unavailable": "Non disponible",
       "nothing_available": "Aucune ressource disponible à associer."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "Modifier le certificat de remplacement",
+        "help": "Le certificat présenté pour un nom d'hôte inconnu. C'est un réglage global du plugin de certificat personnalisé, refusé s'il couvre un service configuré.",
+        "title": "Certificat du serveur par défaut"
+      },
+      "explainer": "Répond aux requêtes qui ne correspondent à aucun service configuré : noms d'hôte inconnus, accès par IP brute. Configurez ici son certificat, son TLS, ses en-têtes et ses pages d'erreur.",
+      "name": "Serveur par défaut",
+      "single_site": "Le serveur par défaut devient configurable quand MULTISITE est réglé sur yes ; en mode mono-site, il conserve son comportement intégré et répond aux requêtes qui ne correspondent à aucun service configuré."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "Nouveautés"
     },
     "subtitle": "Toutes les versions de BunkerWeb, la plus récente en premier, directement depuis le journal des modifications livré avec cette installation."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Défi anti-bot ({{provider}}) délivré"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Révoquer l'identifiant de cette instance ? Le plan de contrôle ne pourra plus la contacter.",
+    "rotate_credential": "Faire pivoter l'identifiant de cette instance ? Échoue si l'instance est inaccessible."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "requête bloquée",
+        "captcha": "défi captcha",
+        "challenge": "défi anti-bot"
+      },
+      "sentence": "{{source}} : {{action}}",
+      "sentence_scenario": "{{source}} : {{action}} (scénario : {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

@@ -33,7 +33,9 @@
     "plugin_file_invalid": "يرجى تحميل أرشيف إضافة صالح (.zip أو .tar.gz أو .tar.xz).",
     "plugin_file_too_large": "يتجاوز أرشيف الإضافة حد 50 MB.",
     "plugin_upload_failed": "حدث خطأ أثناء تحميل أرشيف الإضافة. حاول مرة أخرى.",
-    "services_import_invalid_file": "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zip)."
+    "services_import_invalid_file": "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zip).",
+    "credential_action_failed": "فشل الإجراء.",
+    "enroll_failed": "تعذر إصدار رمز تسجيل."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "الآن"
     },
-    "warning": "تحذير"
+    "warning": "تحذير",
+    "configuration_pending_instance": "التهيئة لم تُطبَّق بعد — في انتظار تشغيل نسخة."
   },
   "footer": {
     "blog": "المدونة",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "مهلة إعادة المحاولة لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_connect_timeout": "مهلة الاتصال لواجهة برمجة تطبيقات ZeroSSL",
       "zerossl_api_max_time": "الوقت الأقصى لواجهة برمجة تطبيقات ZeroSSL",
-      "passkey_name": "اسم مفتاح المرور"
+      "passkey_name": "اسم مفتاح المرور",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "رمز التسجيل"
     },
     "placeholder": {
       "2fa_code": "أدخل الرمز",
@@ -914,6 +920,14 @@
       "container": "حاوية",
       "pod": "Pod",
       "static": "ثابت"
+    },
+    "enrollment": {
+      "enrolled": "مُسجَّلة",
+      "pending": "التسجيل قيد الانتظار",
+      "revoked": "مُبطَلة"
+    },
+    "tls": {
+      "pinned": "TLS مُثبَّت"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "حدد مدة جديدة لعمليات الحظر المحددة:",
       "ban_filtered_confirmation": "هل تريد حظر عناوين IP من كل التقارير المطابقة وعددها {{count}}؟ ستُطبق الأهداف المكررة مرة واحدة.",
       "unban_filtered_confirmation": "هل تريد بالتأكيد إلغاء كل عمليات الحظر المطابقة وعددها {{count}}؟",
-      "update_filtered_duration_alert": "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها {{count}}:"
+      "update_filtered_duration_alert": "حدد مدة جديدة لكل عمليات الحظر المطابقة وعددها {{count}}:",
+      "enroll_description": "شغّل النسخة بهذه المتغيرات. تستخدم الرمز مرة واحدة عند الإقلاع وتحصل على بيانات اعتماد خاصة بها.",
+      "enroll_shown_once": "يُعرض هذا الرمز مرة واحدة فقط. انسخه الآن — لن يمكن عرضه مرة أخرى."
     },
     "button": {
       "fetch_global_settings_confirm": "تطبيق الإعدادات العامة",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "إعادة تعيين تكوين القالب؟",
       "security_report_details": "تفاصيل تقرير الأمان",
       "server_name_not_unique": "اسم الخادم ليس فريدًا",
-      "update_duration": "تحديث مدة الحظر"
+      "update_duration": "تحديث مدة الحظر",
+      "enroll_instance": "تسجيل نسخة"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "اختياري",
     "no_file_selected": "لم يتم تحديد ملف",
     "no_url_available": "لا يتوفر URL",
-    "unknown": "مجهول"
+    "unknown": "مجهول",
+    "deferred": "مؤجَّل",
+    "deferred_tooltip": "مؤجَّل — في انتظار تشغيل نسخة: {{reason}}"
   },
   "step": {
     "next": "التالي",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "تحديث مدة الحظر",
       "value_from_global": "قيمة من الإعدادات العامة",
       "back_to_file_upload": "العودة إلى تحميل الملف",
-      "switch_to_text_editor": "التبديل إلى محرر النصوص"
+      "switch_to_text_editor": "التبديل إلى محرر النصوص",
+      "enroll_instance": "إصدار رمز تسجيل لـ {{hostname}}",
+      "revoke_credential": "إبطال بيانات اعتماد {{hostname}}",
+      "rotate_credential": "تدوير بيانات اعتماد {{hostname}}"
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
     "cannot_remove_disabled": "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل.",
@@ -2284,7 +2306,9 @@
       "view_file": "عرض {{filename}}",
       "view_service": "عرض الخدمة {{service}}",
       "manage_activation": "إدارة تفعيل {{name}} في الإعدادات العامة",
-      "view_template": "عرض القالب {{template}}"
+      "view_template": "عرض القالب {{template}}",
+      "edit_default_server": "تعديل الخادم الافتراضي",
+      "view_default_server": "عرض الخادم الافتراضي"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "التأخير بالثواني بين محاولات إعادة واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_connect_timeout": "مهلة الاتصال بالثواني لطلبات واجهة برمجة تطبيقات ZeroSSL.",
     "zerossl_api_max_time": "الوقت الإجمالي الأقصى بالثواني لكل طلب واجهة برمجة تطبيقات ZeroSSL.",
-    "config_global_types_available": "يمكنك الآن تحديد الأنواع العامة لتكوينك المخصص."
+    "config_global_types_available": "يمكنك الآن تحديد الأنواع العامة لتكوينك المخصص.",
+    "enroll_disabled_by_method": "{{hostname}} مصدرها بيئتها ({{method}})؛ ينطبق التسجيل فقط على النسخ التي تملكها لوحة التحكم",
+    "instance_credential_age": "آخر تحديث لبيانات الاعتماد: {{updated}}"
   },
   "totp": {
     "cant_access": "هل لا يمكنك الوصول إلى رمز المصادقة الخاص بك؟",
@@ -2826,7 +2852,8 @@
       "window": "النافذة بالثواني",
       "changePosition": "القاعدة {{n}} من {{total}}، تغيير الموضع",
       "newValue": "قيمة جديدة",
-      "positionMove": "الموضع {{n}} من {{total}} — انقر للنقل"
+      "positionMove": "الموضع {{n}} من {{total}} — انقر للنقل",
+      "crowdsecField": "معطى CrowdSec"
     },
     "attach": "إرفاق بالخدمات",
     "attach_help": "يتم تطبيق القواعد فقط على الخدمات التي تم إرفاق سير العمل بها.",
@@ -3005,7 +3032,14 @@
       "v_match": "متطابق",
       "v_unknown": "مجهول",
       "v_unknown_help": "تعذر تحديد معلومة تحتاجها هذه القاعدة، لذلك لا يمكن أن تتطابق أبدًا.",
-      "whitelisted": "هذا العميل في القائمة البيضاء"
+      "whitelisted": "هذا العميل في القائمة البيضاء",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "سمح CrowdSec بالطلب",
+      "crowdsec_help": "ما قرره CrowdSec بشأن هذا الطلب قبل تشغيل سير العمل. الطلب الذي لم يُقيّمه CrowdSec مطلقًا ليس مثل الطلب الذي لا يوجد ضده شيء: الأول يترك شرط CrowdSec غير محدد، والثاني يجعله خاطئًا.",
+      "crowdsec_remediated": "عالج CrowdSec الطلب",
+      "crowdsec_remediation": "المعالجة",
+      "crowdsec_source": "مصدر الحكم",
+      "crowdsec_unavailable": "لم يُقيّم CrowdSec هذا الطلب"
     },
     "threshold": "فقط فوق قيمة معينة",
     "threshold_count": "طلبات",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "طريقة HTTP",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "حكم CrowdSec"
     },
     "uri_match": {
       "exact": "يساوي تمامًا",
       "prefix": "يبدأ بـ",
       "regex": "يطابق التعبير النمطي"
+    },
+    "crowdsec_field": {
+      "remediation": "المعالجة هي",
+      "source": "المصدر هو"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "حظر",
+      "captcha": "كابتشا",
+      "lapi": "API محلي"
+    },
+    "reason": {
+      "sentence": "سير عمل الأمان {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "الموارد المرفقة",
       "unavailable": "غير متوفر",
       "nothing_available": "لا يوجد شيء متاح للربط."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "تعديل شهادة التجاوز",
+        "help": "الشهادة المُقدَّمة لاسم مضيف غير معروف. إنها إعداد عام لإضافة الشهادة المخصصة، وتُرفض إذا كانت تغطي خدمة مُهيَّأة.",
+        "title": "شهادة الخادم الافتراضي"
+      },
+      "explainer": "تستجيب للطلبات التي لا تطابق أي خدمة مُهيَّأة: أسماء مضيف غير معروفة، الوصول بعنوان IP مباشر. هيّئ هنا شهادتها وTLS ورؤوسها وصفحات الخطأ.",
+      "name": "الخادم الافتراضي",
+      "single_site": "يصبح الخادم الافتراضي قابلاً للتهيئة عندما يُضبط MULTISITE على yes؛ في وضع الموقع الواحد يحافظ على سلوكه المدمج ويستجيب للطلبات التي لا تطابق أي خدمة مُهيَّأة."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "ما الجديد"
     },
     "subtitle": "جميع إصدارات BunkerWeb، الأحدث أولاً، مأخوذة مباشرة من سجل التغييرات المرفق بهذا التثبيت."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "تم تقديم تحدي مكافحة الروبوتات ({{provider}})"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "هل تريد إبطال بيانات اعتماد هذه النسخة؟ ستفقد لوحة التحكم القدرة على الوصول إليها.",
+    "rotate_credential": "هل تريد تدوير بيانات اعتماد هذه النسخة؟ يفشل إذا كانت النسخة غير قابلة للوصول."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "طلب محظور",
+        "captcha": "تحدي كابتشا",
+        "challenge": "تحدي كشف الروبوتات"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (السيناريو: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

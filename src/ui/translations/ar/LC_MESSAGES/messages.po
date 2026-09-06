@@ -58,8 +58,14 @@ msgstr "TLS والشهادات"
 msgid "alert.configs_import_invalid_file"
 msgstr "الرجاء تحميل ملف تصدير التكوينات المخصصة صالح (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "فشل الإجراء."
+
 msgid "alert.custom_end_date_required"
 msgstr "يرجى تحديد تاريخ انتهاء مخصص."
+
+msgid "alert.enroll_failed"
+msgstr "تعذر إصدار رمز تسجيل."
 
 msgid "alert.important"
 msgstr "هام"
@@ -87,6 +93,9 @@ msgstr "هذا الإجراء معطل في وضع القراءة فقط."
 
 msgid "alert.services_import_invalid_file"
 msgstr "يرجى تحميل ملف تصدير خدمات صالح (.env أو .zip)."
+
+msgid "antibot.reason.sentence"
+msgstr "تم تقديم تحدي مكافحة الروبوتات (%(provider)s)"
 
 msgid "aria.label.clear_search"
 msgstr "مسح البحث"
@@ -994,6 +1003,12 @@ msgstr "لا يمكن تحميل قائمة الإضافات، لذلك لا ي�
 msgid "configs.subtitle"
 msgstr "مقتطفات تكوين NGINX المخصصة لخدماتك — أنشئ وقم بتحرير وإدارة تجاوزات HTTP و ModSecurity ومستوى التدفق."
 
+msgid "confirm.revoke_credential"
+msgstr "هل تريد إبطال بيانات اعتماد هذه النسخة؟ ستفقد لوحة التحكم القدرة على الوصول إليها."
+
+msgid "confirm.rotate_credential"
+msgstr "هل تريد تدوير بيانات اعتماد هذه النسخة؟ يفشل إذا كانت النسخة غير قابلة للوصول."
+
 msgid "country.AD"
 msgstr "أندورا"
 
@@ -1750,6 +1765,27 @@ msgstr "زيمبابوي"
 msgid "country.not_applicable"
 msgstr "غير متاح"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "طلب محظور"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "تحدي كابتشا"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "تحدي كشف الروبوتات"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (السيناريو: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "فشلت مهمة واحدة أو أكثر في آخر تشغيل لها."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "الخدمات"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "أهم أسباب الحظر"
+msgstr "أهم أسباب التقارير"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "إجمالي الطلبات"
@@ -2317,6 +2353,9 @@ msgstr "فشل طلب مفتاح الأمان. حاول مرة أخرى."
 msgid "flash.check_jobs_for_details"
 msgstr "راجع صفحة المهام للحصول على التفاصيل."
 
+msgid "flash.configuration_pending_instance"
+msgstr "التهيئة لم تُطبَّق بعد — في انتظار تشغيل نسخة."
+
 msgid "flash.easter_egg"
 msgstr "إذا قرأت هذا، فهذا يعني أنك فضولي"
 
@@ -2463,6 +2502,15 @@ msgstr "البريد الإلكتروني لـ Let's Encrypt"
 
 msgid "form.label.end_date"
 msgstr "تاريخ الانتهاء"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "رمز التسجيل"
 
 msgid "form.label.hostname"
 msgstr "اسم المضيف"
@@ -2646,6 +2694,18 @@ msgstr "يجب أن تحتوي كلمة المرور على حرف كبير وا
 
 msgid "input_list.view_all_settings"
 msgstr "عرض جميع %(count)s الإعدادات"
+
+msgid "instance.enrollment.enrolled"
+msgstr "مُسجَّلة"
+
+msgid "instance.enrollment.pending"
+msgstr "التسجيل قيد الانتظار"
+
+msgid "instance.enrollment.revoked"
+msgstr "مُبطَلة"
+
+msgid "instance.tls.pinned"
+msgstr "TLS مُثبَّت"
 
 msgid "instance.type.container"
 msgstr "حاوية"
@@ -2957,6 +3017,12 @@ msgstr "يُستخدم هذا القالب أيضًا كقالب عالمي. س�
 msgid "modal.body.delete_template_services_list"
 msgstr "الخدمات التي تستخدم هذا القالب: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "شغّل النسخة بهذه المتغيرات. تستخدم الرمز مرة واحدة عند الإقلاع وتحصل على بيانات اعتماد خاصة بها."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "يُعرض هذا الرمز مرة واحدة فقط. انسخه الآن — لن يمكن عرضه مرة أخرى."
+
 msgid "modal.body.export_services_intro"
 msgstr "سيتم تصدير الخدمات المحددة. فعّل الخيار أدناه لتضمين التكوينات المخصصة المرفقة بها في أرشيف .zip."
 
@@ -3071,6 +3137,9 @@ msgstr "حذف القوالب"
 
 msgid "modal.title.edit_template"
 msgstr "تعديل القالب: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "تسجيل نسخة"
 
 msgid "modal.title.export_services"
 msgstr "تصدير الخدمات"
@@ -4233,6 +4302,24 @@ msgstr "حظر"
 msgid "security_mode.detect"
 msgstr "اكتشاف"
 
+msgid "service.default_server.certificate.action"
+msgstr "تعديل شهادة التجاوز"
+
+msgid "service.default_server.certificate.help"
+msgstr "الشهادة المُقدَّمة لاسم مضيف غير معروف. إنها إعداد عام لإضافة الشهادة المخصصة، وتُرفض إذا كانت تغطي خدمة مُهيَّأة."
+
+msgid "service.default_server.certificate.title"
+msgstr "شهادة الخادم الافتراضي"
+
+msgid "service.default_server.explainer"
+msgstr "تستجيب للطلبات التي لا تطابق أي خدمة مُهيَّأة: أسماء مضيف غير معروفة، الوصول بعنوان IP مباشر. هيّئ هنا شهادتها وTLS ورؤوسها وصفحات الخطأ."
+
+msgid "service.default_server.name"
+msgstr "الخادم الافتراضي"
+
+msgid "service.default_server.single_site"
+msgstr "يصبح الخادم الافتراضي قابلاً للتهيئة عندما يُضبط MULTISITE على yes؛ في وضع الموقع الواحد يحافظ على سلوكه المدمج ويستجيب للطلبات التي لا تطابق أي خدمة مُهيَّأة."
+
 msgid "service.resources.attach"
 msgstr "ربط"
 
@@ -4862,6 +4949,12 @@ msgstr "تعذر الاتصال بالمدونة للحصول على تحديث�
 
 msgid "status.default_server"
 msgstr "الخادم الافتراضي"
+
+msgid "status.deferred"
+msgstr "مؤجَّل"
+
+msgid "status.deferred_tooltip"
+msgstr "مؤجَّل — في انتظار تشغيل نسخة: %(reason)s"
 
 msgid "status.done"
 msgstr "مكتمل"
@@ -6015,6 +6108,9 @@ msgstr "حذف الخدمة %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "حذف القالب %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "إصدار رمز تسجيل لـ %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "جدولة تحقق؛ يتم التنزيل فقط إذا كانت هناك تحديثات."
 
@@ -6035,6 +6131,12 @@ msgstr "إعادة التعيين إلى القيمة الافتراضية"
 
 msgid "tooltip.button.reset_global"
 msgstr "إعادة التعيين إلى القيمة العامة"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "إبطال بيانات اعتماد %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "تدوير بيانات اعتماد %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "تشغيل المهمة %(job)s"
@@ -6177,6 +6279,9 @@ msgstr "يجب أن يكون البريد الإلكتروني بين 1 و 256 �
 msgid "tooltip.email_lets_encrypt"
 msgstr "عنوان البريد الإلكتروني المطلوب تسجيله لدى Let's Encrypt لإدارة الشهادات والإشعارات."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s مصدرها بيئتها (%(method)s)؛ ينطبق التسجيل فقط على النسخ التي تملكها لوحة التحكم"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "جلب الإعدادات العامة وتطبيقها على القالب الحالي"
 
@@ -6185,6 +6290,9 @@ msgstr "وضع المتابعة متاح فقط في الصفحة الأحدث"
 
 msgid "tooltip.global_settings_source"
 msgstr "القيمة موروثة من الإعدادات العامة."
+
+msgid "tooltip.instance_credential_age"
+msgstr "آخر تحديث لبيانات الاعتماد: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "المثيل %(hostname)s لا يستجيب حاليًا ('up')."
@@ -6231,6 +6339,9 @@ msgstr "تنزيل %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "تحرير التكوين المخصص %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "تعديل الخادم الافتراضي"
+
 msgid "tooltip.link.edit_service"
 msgstr "تحرير الخدمة %(service)s"
 
@@ -6248,6 +6359,9 @@ msgstr "إدارة تفعيل %(name)s في الإعدادات العامة"
 
 msgid "tooltip.link.view_config"
 msgstr "عرض التكوين المخصص %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "عرض الخادم الافتراضي"
 
 msgid "tooltip.link.view_file"
 msgstr "عرض %(filename)s"
@@ -7098,6 +7212,9 @@ msgstr "تغيير عامل الربط، الحالي"
 msgid "workflows.aria.conditionType"
 msgstr "نوع الشرط"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "معطى CrowdSec"
+
 msgid "workflows.aria.denyStatus"
 msgstr "حالة الرفض"
 
@@ -7266,6 +7383,9 @@ msgstr "يتم نسخ القواعد، ولكن ليس إرفاق الخدمات
 msgid "workflows.clone_name"
 msgstr "اسم النسخة"
 
+msgid "workflows.condition.crowdsec"
+msgstr "حكم CrowdSec"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7280,6 +7400,24 @@ msgstr "هل تريد حذف هذه القاعدة؟ ستتحرك كل القو�
 
 msgid "workflows.copySuffix"
 msgstr " (نسخة)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "المعالجة هي"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "المصدر هو"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "حظر"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "كابتشا"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "API محلي"
 
 msgid "workflows.delete"
 msgstr "حذف سير العمل"
@@ -7413,6 +7551,9 @@ msgstr "يتم تقييم القواعد بالترتيب، والقاعدة ا�
 msgid "workflows.readonly"
 msgstr "قاعدة البيانات للقراءة فقط. يمكن فحص سير العمل، ولكن لا يمكن تعديلها."
 
+msgid "workflows.reason.sentence"
+msgstr "سير عمل الأمان %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "معطلة"
 
@@ -7535,6 +7676,27 @@ msgstr "الافتراضات"
 
 msgid "workflows.test.country"
 msgstr "البلد"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "سمح CrowdSec بالطلب"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "ما قرره CrowdSec بشأن هذا الطلب قبل تشغيل سير العمل. الطلب الذي لم يُقيّمه CrowdSec مطلقًا ليس مثل الطلب الذي لا يوجد ضده شيء: الأول يترك شرط CrowdSec غير محدد، والثاني يجعله خاطئًا."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "عالج CrowdSec الطلب"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "المعالجة"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "مصدر الحكم"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "لم يُقيّم CrowdSec هذا الطلب"
 
 msgid "workflows.test.detail_challenge"
 msgstr "يتولى اختبار التحقق المعالجة، وتستمر بقية حزمة الأمان في العمل."

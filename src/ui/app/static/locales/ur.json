@@ -33,7 +33,9 @@
     "plugin_file_invalid": "براہ کرم درست پلگ ان آرکائیو اپ لوڈ کریں (.zip، .tar.gz، یا .tar.xz)۔",
     "plugin_file_too_large": "پلگ ان آرکائیو 50 MB کی حد سے بڑا ہے۔",
     "plugin_upload_failed": "پلگ ان آرکائیو اپ لوڈ کرتے وقت خرابی ہوئی۔ دوبارہ کوشش کریں۔",
-    "services_import_invalid_file": "براہ کرم درست سروسز ایکسپورٹ فائل اپ لوڈ کریں (.env یا .zip)۔"
+    "services_import_invalid_file": "براہ کرم درست سروسز ایکسپورٹ فائل اپ لوڈ کریں (.env یا .zip)۔",
+    "credential_action_failed": "کارروائی ناکام ہو گئی۔",
+    "enroll_failed": "اندراج کوڈ جاری نہیں کیا جا سکا۔"
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "ابھی ابھی"
     },
-    "warning": "انتباہ"
+    "warning": "انتباہ",
+    "configuration_pending_instance": "تشکیل ابھی تک لاگو نہیں ہوئی — انسٹینس کے آنے کا انتظار ہے۔"
   },
   "footer": {
     "blog": "بلاگ",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API دوبارہ کوشش میں تاخیر",
       "zerossl_api_connect_timeout": "ZeroSSL API کنکشن ٹائم آؤٹ",
       "zerossl_api_max_time": "ZeroSSL API زیادہ سے زیادہ وقت",
-      "passkey_name": "پاس کی کا نام"
+      "passkey_name": "پاس کی کا نام",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "اندراج کوڈ"
     },
     "placeholder": {
       "2fa_code": "کوڈ درج کریں",
@@ -914,6 +920,14 @@
       "container": "کنٹینر",
       "pod": "پوڈ",
       "static": "سٹیٹک"
+    },
+    "enrollment": {
+      "enrolled": "اندراج شدہ",
+      "pending": "اندراج زیر التوا",
+      "revoked": "منسوخ شدہ"
+    },
+    "tls": {
+      "pinned": "TLS پن شدہ"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
       "ban_filtered_confirmation": "تمام {{count}} مماثل رپورٹس کے IP پر پابندی لگائیں؟ دہرائے گئے اہداف ایک بار لاگو ہوں گے۔",
       "unban_filtered_confirmation": "کیا آپ تمام {{count}} مماثل پابندیاں ہٹانا چاہتے ہیں؟",
-      "update_filtered_duration_alert": "تمام {{count}} مماثل پابندیوں کے لیے نئی مدت منتخب کریں:"
+      "update_filtered_duration_alert": "تمام {{count}} مماثل پابندیوں کے لیے نئی مدت منتخب کریں:",
+      "enroll_description": "ان متغیرات کے ساتھ انسٹینس شروع کریں۔ یہ بوٹ کے وقت کوڈ ایک بار استعمال کرتا ہے اور اپنی الگ کریڈینشل حاصل کرتا ہے۔",
+      "enroll_shown_once": "یہ کوڈ صرف ایک بار دکھایا جاتا ہے۔ ابھی اسے کاپی کر لیں — یہ دوبارہ نہیں دکھایا جا سکے گا۔"
     },
     "button": {
       "fetch_global_settings_confirm": "گلوبل سیٹنگز لاگو کریں",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
       "security_report_details": "سیکورٹی رپورٹ کی تفصیلات",
       "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
-      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
+      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں",
+      "enroll_instance": "انسٹینس کا اندراج کریں"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "اختیاری",
     "no_file_selected": "کوئی فائل منتخب نہیں",
     "no_url_available": "کوئی URL دستیاب نہیں",
-    "unknown": "نامعلوم"
+    "unknown": "نامعلوم",
+    "deferred": "مؤخر",
+    "deferred_tooltip": "مؤخر — انسٹینس کے آنے کا انتظار ہے: {{reason}}"
   },
   "step": {
     "next": "اگلا",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "پابندی کی مدت اپ ڈیٹ کریں",
       "value_from_global": "عالمی سیٹنگز سے قدر",
       "back_to_file_upload": "فائل اپ لوڈ پر واپس جائیں",
-      "switch_to_text_editor": "ٹیکسٹ ایڈیٹر پر جائیں"
+      "switch_to_text_editor": "ٹیکسٹ ایڈیٹر پر جائیں",
+      "enroll_instance": "{{hostname}} کے لیے اندراج کوڈ جاری کریں",
+      "revoke_credential": "{{hostname}} کی کریڈینشل منسوخ کریں",
+      "rotate_credential": "{{hostname}} کی کریڈینشل گھمائیں"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
     "cannot_remove_disabled": "ہٹایا نہیں جا سکتا کیونکہ ایک یا زیادہ سیٹنگز غیر فعال ہیں۔",
@@ -2284,7 +2306,9 @@
       "view_file": "{{filename}} دیکھیں",
       "view_service": "سروس {{service}} دیکھیں",
       "manage_activation": "عالمی سیٹنگز میں {{name}} کی فعالیت کا انتظام کریں",
-      "view_template": "ٹیمپلیٹ {{template}} دیکھیں"
+      "view_template": "ٹیمپلیٹ {{template}} دیکھیں",
+      "edit_default_server": "ڈیفالٹ سرور میں ترمیم کریں",
+      "view_default_server": "ڈیفالٹ سرور دیکھیں"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API کی دوبارہ کوششوں کے درمیان سیکنڈ میں تاخیر۔",
     "zerossl_api_connect_timeout": "ZeroSSL API کالز کے لیے سیکنڈ میں کنکشن ٹائم آؤٹ۔",
     "zerossl_api_max_time": "ہر ZeroSSL API درخواست کے لیے سیکنڈ میں زیادہ سے زیادہ کل وقت۔",
-    "config_global_types_available": "اب آپ اپنی کسٹم کنفیگریشن کے لیے عالمی اقسام منتخب کر سکتے ہیں۔"
+    "config_global_types_available": "اب آپ اپنی کسٹم کنفیگریشن کے لیے عالمی اقسام منتخب کر سکتے ہیں۔",
+    "enroll_disabled_by_method": "{{hostname}} اپنے ماحول ({{method}}) سے حاصل ہوا ہے؛ اندراج صرف ان انسٹینسز پر لاگو ہوتا ہے جو کنٹرول پلین کی ملکیت ہیں",
+    "instance_credential_age": "کریڈینشل کی آخری تازہ کاری: {{updated}}"
   },
   "totp": {
     "cant_access": "کیا آپ کو اپنا تصدیق کوڈ حاصل نہیں ہے؟",
@@ -2826,7 +2852,8 @@
       "window": "سیکنڈ میں دورانیہ",
       "changePosition": "{{total}} میں سے اصول {{n}}، مقام تبدیل کریں",
       "newValue": "نئی قدر",
-      "positionMove": "{{total}} میں سے مقام {{n}} — منتقل کرنے کے لیے کلک کریں"
+      "positionMove": "{{total}} میں سے مقام {{n}} — منتقل کرنے کے لیے کلک کریں",
+      "crowdsecField": "CrowdSec حقیقت"
     },
     "attach": "سرویس سے جوڑیں",
     "attach_help": "قوانین صرف ان سروسز پر نافذ ہوتے ہیں جن سے ورک فلو جوڑا گیا ہے۔",
@@ -3005,7 +3032,14 @@
       "v_match": "مماثل",
       "v_unknown": "نامعلوم",
       "v_unknown_help": "اس اصول کو درکار حقیقت معلوم نہیں ہو سکی، اس لیے یہ کبھی مماثل نہیں ہو سکتا۔",
-      "whitelisted": "یہ کلائنٹ سفید فہرست میں ہے"
+      "whitelisted": "یہ کلائنٹ سفید فہرست میں ہے",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec نے اجازت دی",
+      "crowdsec_help": "ورک فلوز چلنے سے پہلے CrowdSec نے اس درخواست کے بارے میں جو فیصلہ کیا۔ وہ درخواست جس کا CrowdSec نے کبھی جائزہ ہی نہیں لیا، اس درخواست جیسی نہیں ہے جس کے خلاف کچھ بھی نہیں ہے: پہلی CrowdSec کی شرط کو غیر واضح چھوڑ دیتی ہے، دوسری اسے غلط بنا دیتی ہے۔",
+      "crowdsec_remediated": "CrowdSec نے تدارک کیا",
+      "crowdsec_remediation": "تدارک",
+      "crowdsec_source": "فیصلے کا ماخذ",
+      "crowdsec_unavailable": "CrowdSec نے اس درخواست کا جائزہ نہیں لیا"
     },
     "threshold": "فقط ریٹ کے اوپر",
     "threshold_count": "درخواستیں",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP طریقہ",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec فیصلہ"
     },
     "uri_match": {
       "exact": "بالکل یہی ہے",
       "prefix": "سے شروع ہوتا ہے",
       "regex": "ریجیکس سے مماثل ہے"
+    },
+    "crowdsec_field": {
+      "remediation": "تدارک ہے",
+      "source": "ماخذ ہے"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "پابندی",
+      "captcha": "کیپچا",
+      "lapi": "مقامی API"
+    },
+    "reason": {
+      "sentence": "سیکیورٹی ورک فلو {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "جوڑے ہوئے ریسورس",
       "unavailable": "موجود نہیں",
       "nothing_available": "منسلک کرنے کے لیے کچھ دستیاب نہیں۔"
+    },
+    "default_server": {
+      "certificate": {
+        "action": "سرٹیفکیٹ اوور رائیڈ میں ترمیم کریں",
+        "help": "نامعلوم ہوسٹ نیم کے لیے پیش کیا جانے والا سرٹیفکیٹ۔ یہ کسٹم سرٹیفکیٹ پلگ ان کی ایک عالمی ترتیب ہے، اور اگر یہ کسی تشکیل شدہ سروس کا احاطہ کرے تو مسترد کر دیا جاتا ہے۔",
+        "title": "ڈیفالٹ سرور سرٹیفکیٹ"
+      },
+      "explainer": "ان درخواستوں کا جواب دیتا ہے جو کسی تشکیل شدہ سروس سے میل نہیں کھاتیں: نامعلوم ہوسٹ نیم، خام IP رسائی۔ اس کا سرٹیفکیٹ، TLS، ہیڈرز اور ایرر صفحات یہاں تشکیل دیں۔",
+      "name": "ڈیفالٹ سرور",
+      "single_site": "جب MULTISITE کو yes پر سیٹ کیا جائے تو ڈیفالٹ سرور قابل تشکیل ہو جاتا ہے؛ سنگل سائٹ موڈ میں یہ اپنا بلٹ اِن طرزِ عمل برقرار رکھتا ہے اور ان درخواستوں کا جواب دیتا ہے جو کسی تشکیل شدہ سروس سے میل نہیں کھاتیں۔"
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "کیا نیا ہے"
     },
     "subtitle": "اس انسٹالیشن کے ساتھ آنے والے چینج لاگ سے براہِ راست، BunkerWeb کے تمام ریلیزز، نیا پہلے۔"
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "اینٹی بوٹ چیلنج ({{provider}}) پیش کیا گیا"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "اس انسٹینس کی کریڈینشل منسوخ کریں؟ کنٹرول پلین اس تک مزید رسائی حاصل نہیں کر سکے گا۔",
+    "rotate_credential": "اس انسٹینس کی کریڈینشل گھمائیں؟ اگر انسٹینس ناقابل رسائی ہو تو ناکام ہو جاتا ہے۔"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "درخواست بلاک کر دی گئی",
+        "captcha": "کیپچا چیلنج",
+        "challenge": "بوٹ کی نشاندہی کا چیلنج"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (منظرنامہ: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

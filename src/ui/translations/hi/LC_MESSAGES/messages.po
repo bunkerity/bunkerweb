@@ -58,8 +58,14 @@ msgstr "TLS & प्रमाणपत्र"
 msgid "alert.configs_import_invalid_file"
 msgstr "कृपया एक वैध कस्टम कॉन्फ़िगरेशन निर्यात फ़ाइल (.json) अपलोड करें।"
 
+msgid "alert.credential_action_failed"
+msgstr "कार्रवाई विफल हो गई।"
+
 msgid "alert.custom_end_date_required"
 msgstr "कृपया एक कस्टम अंतिम तिथि चुनें।"
+
+msgid "alert.enroll_failed"
+msgstr "नामांकन कोड जारी नहीं किया जा सका।"
 
 msgid "alert.important"
 msgstr "महत्वपूर्ण"
@@ -87,6 +93,9 @@ msgstr "यह क्रिया रीड-ओनली मोड में अ
 
 msgid "alert.services_import_invalid_file"
 msgstr "कृपया एक मान्य सेवा निर्यात फ़ाइल अपलोड करें (.env या .zip)।"
+
+msgid "antibot.reason.sentence"
+msgstr "एंटीबॉट चुनौती (%(provider)s) प्रस्तुत की गई"
 
 msgid "aria.label.clear_search"
 msgstr "खोज साफ़ करें"
@@ -994,6 +1003,12 @@ msgstr "प्लगइन की सूची लोड नहीं हो प
 msgid "configs.subtitle"
 msgstr "अपने सेवाओं के लिए कस्टम NGINX कॉन्फ़िगरेशन स्निपेट — बनाएँ, संपादित करें, और प्रबंधित करें HTTP, ModSecurity, और स्ट्रीम-स्तरीय ओवरराइड।"
 
+msgid "confirm.revoke_credential"
+msgstr "इस इंस्टेंस का क्रेडेंशियल रद्द करें? कंट्रोल प्लेन अब इसे एक्सेस नहीं कर पाएगा।"
+
+msgid "confirm.rotate_credential"
+msgstr "इस इंस्टेंस का क्रेडेंशियल घुमाएं? यदि इंस्टेंस पहुँच योग्य नहीं है तो विफल हो जाता है।"
+
 msgid "country.AD"
 msgstr "अंडोरा"
 
@@ -1750,6 +1765,27 @@ msgstr "ज़िम्बाब्वे"
 msgid "country.not_applicable"
 msgstr "लागू नहीं"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "अनुरोध अवरोधित"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "कैप्चा चुनौती"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "बॉट-पहचान चुनौती"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (परिदृश्य: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "एक या अधिक जॉब अपने पिछले रन में विफल रहे।"
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "सेवाएं"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "ब्लॉक होने के मुख्य कारण"
+msgstr "रिपोर्ट के मुख्य कारण"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "कुल अनुरोध"
@@ -2317,6 +2353,9 @@ msgstr "सुरक्षा-कुंजी अनुरोध विफल �
 msgid "flash.check_jobs_for_details"
 msgstr "विवरण के लिए जॉब्स पेज देखें।"
 
+msgid "flash.configuration_pending_instance"
+msgstr "कॉन्फ़िगरेशन अभी लागू नहीं हुआ — किसी इंस्टेंस के चालू होने की प्रतीक्षा है।"
+
 msgid "flash.easter_egg"
 msgstr "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं"
 
@@ -2463,6 +2502,15 @@ msgstr "Let's Encrypt के लिए ईमेल"
 
 msgid "form.label.end_date"
 msgstr "अंतिम तिथि"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "नामांकन कोड"
 
 msgid "form.label.hostname"
 msgstr "होस्टनाम"
@@ -2646,6 +2694,18 @@ msgstr "पासवर्ड में कम से कम 1 बड़ा अ�
 
 msgid "input_list.view_all_settings"
 msgstr "सभी %(count)s सेटिंग्स देखें"
+
+msgid "instance.enrollment.enrolled"
+msgstr "नामांकित"
+
+msgid "instance.enrollment.pending"
+msgstr "नामांकन लंबित"
+
+msgid "instance.enrollment.revoked"
+msgstr "रद्द"
+
+msgid "instance.tls.pinned"
+msgstr "TLS पिन किया गया"
 
 msgid "instance.type.container"
 msgstr "कंटेनर"
@@ -2941,6 +3001,12 @@ msgstr "वैश्विक सेटिंग्स द्वारा उप
 msgid "modal.body.delete_template_services_list"
 msgstr "सेवाओं द्वारा उपयोग किया जाता है: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "इंस्टेंस को इन वेरिएबल के साथ शुरू करें। यह बूट के समय कोड का एक बार उपयोग करता है और अपना स्वयं का क्रेडेंशियल प्राप्त करता है।"
+
+msgid "modal.body.enroll_shown_once"
+msgstr "यह कोड केवल एक बार दिखाया जाता है। इसे अभी कॉपी कर लें — इसे फिर से नहीं दिखाया जा सकेगा।"
+
 msgid "modal.body.export_services_intro"
 msgstr "चयनित सेवाएँ निर्यात की जाएँगी। उनके संलग्न कस्टम कॉन्फ़िगरेशन को .zip आर्काइव में शामिल करने के लिए नीचे दिया गया विकल्प सक्षम करें।"
 
@@ -3051,6 +3117,9 @@ msgstr "टेम्पलेट हटाएं"
 
 msgid "modal.title.edit_template"
 msgstr "टेम्प्लेट संपादित करें: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "इंस्टेंस नामांकित करें"
 
 msgid "modal.title.export_services"
 msgstr "सेवाएँ निर्यात करें"
@@ -4213,6 +4282,24 @@ msgstr "ब्लॉक"
 msgid "security_mode.detect"
 msgstr "पता लगाना"
 
+msgid "service.default_server.certificate.action"
+msgstr "सर्टिफिकेट ओवरराइड संपादित करें"
+
+msgid "service.default_server.certificate.help"
+msgstr "अज्ञात होस्टनेम के लिए प्रस्तुत किया गया सर्टिफिकेट। यह कस्टम सर्टिफिकेट प्लगइन की एक वैश्विक सेटिंग है, और यदि यह किसी कॉन्फ़िगर की गई सेवा को कवर करता है तो इसे अस्वीकार कर दिया जाता है।"
+
+msgid "service.default_server.certificate.title"
+msgstr "डिफ़ॉल्ट सर्वर सर्टिफिकेट"
+
+msgid "service.default_server.explainer"
+msgstr "उन अनुरोधों का जवाब देता है जो किसी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते: अज्ञात होस्टनेम, सीधी IP एक्सेस। इसका सर्टिफिकेट, TLS, हेडर और एरर पेज यहाँ कॉन्फ़िगर करें।"
+
+msgid "service.default_server.name"
+msgstr "डिफ़ॉल्ट सर्वर"
+
+msgid "service.default_server.single_site"
+msgstr "जब MULTISITE को yes पर सेट किया जाता है तो डिफ़ॉल्ट सर्वर कॉन्फ़िगर करने योग्य हो जाता है; सिंगल-साइट मोड में यह अपने बिल्ट-इन व्यवहार को बनाए रखता है और उन अनुरोधों का जवाब देता है जो किसी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते।"
+
 msgid "service.resources.attach"
 msgstr "संलग्न करें"
 
@@ -4842,6 +4929,12 @@ msgstr "समाचार अपडेट के लिए ब्लॉग स�
 
 msgid "status.default_server"
 msgstr "डिफ़ॉल्ट सर्वर"
+
+msgid "status.deferred"
+msgstr "स्थगित"
+
+msgid "status.deferred_tooltip"
+msgstr "स्थगित — किसी इंस्टेंस के चालू होने की प्रतीक्षा है: %(reason)s"
 
 msgid "status.done"
 msgstr "पूर्ण"
@@ -5995,6 +6088,9 @@ msgstr "सेवा %(name)s हटाएं"
 msgid "tooltip.button.delete_template"
 msgstr "टेम्पलेट %(name)s हटाएं"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "%(hostname)s के लिए नामांकन कोड जारी करें"
+
 msgid "tooltip.button.force_check"
 msgstr "एक जांच शेड्यूल करता है; केवल अपडेट होने पर डाउनलोड करता है।"
 
@@ -6015,6 +6111,12 @@ msgstr "डिफ़ॉल्ट मान पर रीसेट करें"
 
 msgid "tooltip.button.reset_global"
 msgstr "वैश्विक मान पर रीसेट करें"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "%(hostname)s का क्रेडेंशियल रद्द करें"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "%(hostname)s का क्रेडेंशियल घुमाएं"
 
 msgid "tooltip.button.run_job"
 msgstr "कार्य %(job)s चलाएं"
@@ -6157,6 +6259,9 @@ msgstr "ईमेल 1 और 256 वर्णों के बीच होन�
 msgid "tooltip.email_lets_encrypt"
 msgstr "प्रमाणपत्र प्रबंधन और सूचनाओं के लिए Let's Encrypt के साथ पंजीकरण करने हेतु ईमेल पता।"
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s अपने वातावरण (%(method)s) से प्राप्त है; नामांकन केवल उन इंस्टेंस पर लागू होता है जो कंट्रोल प्लेन के स्वामित्व में हैं"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "ग्लोबल सेटिंग्स लाएँ और उन्हें वर्तमान टेम्पलेट पर लागू करें"
 
@@ -6165,6 +6270,9 @@ msgstr "फ़ॉलो मोड केवल नवीनतम पृष्�
 
 msgid "tooltip.global_settings_source"
 msgstr "मान ग्लोबल सेटिंग्स से विरासत में मिला है।"
+
+msgid "tooltip.instance_credential_age"
+msgstr "क्रेडेंशियल अंतिम बार अपडेट किया गया: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "इंस्टेंस %(hostname)s वर्तमान में प्रतिक्रिया नहीं दे रहा है ('up')।"
@@ -6211,6 +6319,9 @@ msgstr "डाउनलोड %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "कस्टम कॉन्फ़िगरेशन %(name)s संपादित करें"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "डिफ़ॉल्ट सर्वर संपादित करें"
+
 msgid "tooltip.link.edit_service"
 msgstr "सेवा %(service)s संपादित करें"
 
@@ -6228,6 +6339,9 @@ msgstr "वैश्विक सेटिंग्स में %(name)s को
 
 msgid "tooltip.link.view_config"
 msgstr "कस्टम कॉन्फ़िगरेशन %(name)s देखें"
+
+msgid "tooltip.link.view_default_server"
+msgstr "डिफ़ॉल्ट सर्वर देखें"
 
 msgid "tooltip.link.view_file"
 msgstr "देखें %(filename)s"
@@ -7078,6 +7192,9 @@ msgstr "संयोजक बदलें, वर्तमान"
 msgid "workflows.aria.conditionType"
 msgstr "शर्त का प्रकार"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec तथ्य"
+
 msgid "workflows.aria.denyStatus"
 msgstr "अस्वीकार स्थिति"
 
@@ -7246,6 +7363,9 @@ msgstr "नियम कॉपी किए जाते हैं, लेकि
 msgid "workflows.clone_name"
 msgstr "प्रतिलिपि का नाम"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec निर्णय"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "यह नियम हटाएँ? इसके नीचे के �
 
 msgid "workflows.copySuffix"
 msgstr " (प्रतिलिपि)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "उपचार है"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "स्रोत है"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "प्रतिबंध"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "कैप्चा"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "लोकल API"
 
 msgid "workflows.delete"
 msgstr "वर्कफ़्लो हटाएं"
@@ -7393,6 +7531,9 @@ msgstr "नियमों का मूल्यांकन क्रम म�
 msgid "workflows.readonly"
 msgstr "डेटाबेस केवल पढ़ने के लिए है। वर्कफ़्लो देखे जा सकते हैं लेकिन नहीं बदले जा सकते।"
 
+msgid "workflows.reason.sentence"
+msgstr "सुरक्षा वर्कफ़्लो %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "अक्षम"
 
@@ -7515,6 +7656,27 @@ msgstr "मान्यताएँ"
 
 msgid "workflows.test.country"
 msgstr "देश"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec ने इसकी अनुमति दी"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "वर्कफ़्लो चलने से पहले CrowdSec ने इस अनुरोध के बारे में जो तय किया। वह अनुरोध जिसका CrowdSec ने कभी मूल्यांकन ही नहीं किया, उस अनुरोध जैसा नहीं है जिसके विरुद्ध कुछ भी नहीं है: पहला CrowdSec की शर्त को अनिश्चित छोड़ देता है, दूसरा उसे गलत बना देता है।"
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec ने इसका उपचार किया"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "उपचार"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "निर्णय का स्रोत"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec ने इस अनुरोध का मूल्यांकन नहीं किया"
 
 msgid "workflows.test.detail_challenge"
 msgstr "चुनौती नियंत्रण लेती है; शेष सुरक्षा स्टैक फिर भी चलता है।"

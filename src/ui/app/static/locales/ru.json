@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Загрузите корректный архив плагина (.zip, .tar.gz или .tar.xz).",
     "plugin_file_too_large": "Архив плагина превышает ограничение в 50 MB.",
     "plugin_upload_failed": "При загрузке архива плагина произошла ошибка. Повторите попытку.",
-    "services_import_invalid_file": "Загрузите корректный файл экспорта сервисов (.env или .zip)."
+    "services_import_invalid_file": "Загрузите корректный файл экспорта сервисов (.env или .zip).",
+    "credential_action_failed": "Действие не выполнено.",
+    "enroll_failed": "Не удалось выпустить код регистрации."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "только что"
     },
-    "warning": "Предупреждение"
+    "warning": "Предупреждение",
+    "configuration_pending_instance": "Конфигурация ещё не применена — ожидание запуска экземпляра."
   },
   "footer": {
     "blog": "Блог",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "Задержка повтора API ZeroSSL",
       "zerossl_api_connect_timeout": "Таймаут подключения API ZeroSSL",
       "zerossl_api_max_time": "Максимальное время API ZeroSSL",
-      "passkey_name": "Имя ключа доступа"
+      "passkey_name": "Имя ключа доступа",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "Код регистрации"
     },
     "placeholder": {
       "2fa_code": "Введите код",
@@ -914,6 +920,14 @@
       "container": "Контейнер",
       "pod": "Pod",
       "static": "Статический"
+    },
+    "enrollment": {
+      "enrolled": "Зарегистрирован",
+      "pending": "Регистрация ожидается",
+      "revoked": "Отозван"
+    },
+    "tls": {
+      "pinned": "TLS закреплён"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
       "ban_filtered_confirmation": "Заблокировать IP из всех {{count}} подходящих отчётов? Повторяющиеся цели будут применены один раз.",
       "unban_filtered_confirmation": "Снять все {{count}} подходящих блокировок?",
-      "update_filtered_duration_alert": "Выберите новый срок для всех {{count}} подходящих блокировок:"
+      "update_filtered_duration_alert": "Выберите новый срок для всех {{count}} подходящих блокировок:",
+      "enroll_description": "Запустите экземпляр с этими переменными. Он использует код один раз при запуске и получает собственные учётные данные.",
+      "enroll_shown_once": "Этот код показывается только один раз. Скопируйте его сейчас — повторно он не отобразится."
     },
     "button": {
       "fetch_global_settings_confirm": "Применить глобальные настройки",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "Сбросить конфигурацию шаблона?",
       "security_report_details": "Детали отчета о безопасности",
       "server_name_not_unique": "Имя сервера не уникально",
-      "update_duration": "Обновить срок бана"
+      "update_duration": "Обновить срок бана",
+      "enroll_instance": "Зарегистрировать экземпляр"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "Необязательно",
     "no_file_selected": "Файл не выбран",
     "no_url_available": "URL недоступен",
-    "unknown": "Неизвестно"
+    "unknown": "Неизвестно",
+    "deferred": "Отложено",
+    "deferred_tooltip": "Отложено — ожидание запуска экземпляра: {{reason}}"
   },
   "step": {
     "next": "Далее",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "Обновить продолжительность блокировки",
       "value_from_global": "Значение из глобальных настроек",
       "back_to_file_upload": "Вернуться к загрузке файла",
-      "switch_to_text_editor": "Переключиться на текстовый редактор"
+      "switch_to_text_editor": "Переключиться на текстовый редактор",
+      "enroll_instance": "Выпустить код регистрации для {{hostname}}",
+      "revoke_credential": "Отозвать учётные данные {{hostname}}",
+      "rotate_credential": "Сменить учётные данные {{hostname}}"
     },
     "cannot_delete_original_ban": "Невозможно удалить исходную запись бана.",
     "cannot_remove_disabled": "Невозможно удалить, так как одна или несколько настроек отключены.",
@@ -2284,7 +2306,9 @@
       "view_file": "Просмотреть {{filename}}",
       "view_service": "Просмотреть сервис {{service}}",
       "manage_activation": "Управление активацией {{name}} в глобальных настройках",
-      "view_template": "Просмотреть Шаблон {{template}}"
+      "view_template": "Просмотреть Шаблон {{template}}",
+      "edit_default_server": "Изменить сервер по умолчанию",
+      "view_default_server": "Просмотреть сервер по умолчанию"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "Задержка в секундах между повторами API ZeroSSL.",
     "zerossl_api_connect_timeout": "Таймаут подключения в секундах для вызовов API ZeroSSL.",
     "zerossl_api_max_time": "Максимальное общее время в секундах для каждого запроса API ZeroSSL.",
-    "config_global_types_available": "Теперь для пользовательской конфигурации можно выбирать глобальные типы."
+    "config_global_types_available": "Теперь для пользовательской конфигурации можно выбирать глобальные типы.",
+    "enroll_disabled_by_method": "{{hostname}} получен из своей среды ({{method}}); регистрация применяется только к экземплярам, принадлежащим панели управления",
+    "instance_credential_age": "Учётные данные обновлены: {{updated}}"
   },
   "totp": {
     "cant_access": "Не можете получить доступ к своему аутентификатору?",
@@ -2826,7 +2852,8 @@
       "window": "Окно в секундах",
       "changePosition": "Правило {{n}} из {{total}}, изменить позицию",
       "newValue": "Новое значение",
-      "positionMove": "Позиция {{n}} из {{total}} — нажмите, чтобы переместить"
+      "positionMove": "Позиция {{n}} из {{total}} — нажмите, чтобы переместить",
+      "crowdsecField": "Факт CrowdSec"
     },
     "attach": "Прикрепить к сервисам",
     "attach_help": "Правила применяются только к тем сервисам, к которым прикреплен рабочий процесс.",
@@ -3005,7 +3032,14 @@
       "v_match": "СОВПАДЕНИЕ",
       "v_unknown": "НЕИЗВЕСТНО",
       "v_unknown_help": "Не удалось определить необходимый правилу факт, поэтому оно никогда не сработает.",
-      "whitelisted": "Этот клиент находится в белом списке"
+      "whitelisted": "Этот клиент находится в белом списке",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec разрешил",
+      "crowdsec_help": "Что CrowdSec решил по этому запросу до выполнения workflow. Запрос, который CrowdSec никогда не оценивал, — не то же самое, что запрос, против которого ничего нет: первый оставляет условие CrowdSec неопределённым, второй делает его ложным.",
+      "crowdsec_remediated": "CrowdSec устранил угрозу",
+      "crowdsec_remediation": "Устранение",
+      "crowdsec_source": "Источник вердикта",
+      "crowdsec_unavailable": "CrowdSec не оценивал этот запрос"
     },
     "threshold": "Только при превышении скорости",
     "threshold_count": "Запросы",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP-метод",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "Вердикт CrowdSec"
     },
     "uri_match": {
       "exact": "точно совпадает",
       "prefix": "начинается с",
       "regex": "соответствует регулярному выражению"
+    },
+    "crowdsec_field": {
+      "remediation": "устранение —",
+      "source": "источник —"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "бан",
+      "captcha": "капча",
+      "lapi": "локальный API"
+    },
+    "reason": {
+      "sentence": "Workflow безопасности {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "Прикрепленные ресурсы",
       "unavailable": "Недоступно",
       "nothing_available": "Нет доступных ресурсов для прикрепления."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "Изменить замену сертификата",
+        "help": "Сертификат, предъявляемый для неизвестного имени хоста. Это глобальная настройка плагина пользовательского сертификата, отклоняется, если охватывает настроенную службу.",
+        "title": "Сертификат сервера по умолчанию"
+      },
+      "explainer": "Отвечает на запросы, не соответствующие ни одной настроенной службе: неизвестные имена хостов, доступ по прямому IP. Здесь настраиваются его сертификат, TLS, заголовки и страницы ошибок.",
+      "name": "Сервер по умолчанию",
+      "single_site": "Сервер по умолчанию становится настраиваемым, когда MULTISITE установлен в yes; в односайтовом режиме он сохраняет встроенное поведение и отвечает на запросы, не соответствующие ни одной настроенной службе."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "Что нового"
     },
     "subtitle": "Все выпуски BunkerWeb, начиная с самого нового, прямо из журнала изменений, поставляемого с этой установкой."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Антибот-проверка ({{provider}}) выполнена"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Отозвать учётные данные этого экземпляра? Панель управления больше не сможет к нему подключиться.",
+    "rotate_credential": "Сменить учётные данные этого экземпляра? Не выполнится, если экземпляр недоступен."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "запрос заблокирован",
+        "captcha": "проверка капчей",
+        "challenge": "проверка на бота"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (сценарий: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

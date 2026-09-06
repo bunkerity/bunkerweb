@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Mangyaring mag-upload ng wastong plugin archive (.zip, .tar.gz, o .tar.xz).",
     "plugin_file_too_large": "Lumampas sa limitasyong 50 MB ang plugin archive.",
     "plugin_upload_failed": "Nagkaroon ng error habang ina-upload ang plugin archive. Subukan muli.",
-    "services_import_invalid_file": "Mangyaring mag-upload ng wastong services export file (.env o .zip)."
+    "services_import_invalid_file": "Mangyaring mag-upload ng wastong services export file (.env o .zip).",
+    "credential_action_failed": "Nabigo ang aksyon.",
+    "enroll_failed": "Hindi maibigay ang enrollment code."
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "ngayon lang"
     },
-    "warning": "Babala"
+    "warning": "Babala",
+    "configuration_pending_instance": "Hindi pa naaplay ang configuration — hinihintay ang isang instance na mag-start."
   },
   "footer": {
     "blog": "Blog",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "Pagkaantala ng Ulit ng ZeroSSL API",
       "zerossl_api_connect_timeout": "Connect Timeout ng ZeroSSL API",
       "zerossl_api_max_time": "Max na Oras ng ZeroSSL API",
-      "passkey_name": "Pangalan ng passkey"
+      "passkey_name": "Pangalan ng passkey",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "Code ng pagpapatala"
     },
     "placeholder": {
       "2fa_code": "Ipasok ang code",
@@ -914,6 +920,14 @@
       "container": "Container",
       "pod": "Pod",
       "static": "Static"
+    },
+    "enrollment": {
+      "enrolled": "Naka-enroll",
+      "pending": "Naghihintay ang enrollment",
+      "revoked": "Na-revoke"
+    },
+    "tls": {
+      "pinned": "Naka-pin ang TLS"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "Pumili ng bagong tagal para sa mga napiling ban:",
       "ban_filtered_confirmation": "I-ban ang mga IP mula sa lahat ng {{count}} tumutugmang report? Isang beses lang ilalapat ang mga dobleng target.",
       "unban_filtered_confirmation": "Sigurado ka bang aalisin ang lahat ng {{count}} tumutugmang ban?",
-      "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:"
+      "update_filtered_duration_alert": "Pumili ng bagong tagal para sa lahat ng {{count}} tumutugmang ban:",
+      "enroll_description": "I-start ang instance gamit ang mga variable na ito. Ginagamit nito ang code isang beses sa boot at nakakakuha ito ng sariling credential.",
+      "enroll_shown_once": "Minsan lang ipapakita ang code na ito. Kopyahin ito ngayon — hindi na ito maipapakita ulit."
     },
     "button": {
       "fetch_global_settings_confirm": "Ilapat ang mga pandaigdigang setting",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "I-reset ang Configuration ng Template?",
       "security_report_details": "Detalye ng Security Report",
       "server_name_not_unique": "Ang Pangalan ng Server ay Hindi Natatangi",
-      "update_duration": "I-update ang Tagal ng Ban"
+      "update_duration": "I-update ang Tagal ng Ban",
+      "enroll_instance": "I-enroll ang instance"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "Opsyonal",
     "no_file_selected": "Walang napiling file",
     "no_url_available": "Walang available na URL",
-    "unknown": "Hindi alam"
+    "unknown": "Hindi alam",
+    "deferred": "Naantala",
+    "deferred_tooltip": "Naantala — hinihintay ang isang instance na mag-start: {{reason}}"
   },
   "step": {
     "next": "Susunod",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "Baguhin ang tagal ng pagbabawal",
       "value_from_global": "Value mula sa mga pandaigdigang setting",
       "back_to_file_upload": "Bumalik sa pag-upload ng file",
-      "switch_to_text_editor": "Lumipat sa text editor"
+      "switch_to_text_editor": "Lumipat sa text editor",
+      "enroll_instance": "Magbigay ng enrollment code para sa {{hostname}}",
+      "revoke_credential": "I-revoke ang credential ng {{hostname}}",
+      "rotate_credential": "I-rotate ang credential ng {{hostname}}"
     },
     "cannot_delete_original_ban": "Hindi mabura ang orihinal na entry ng Ban.",
     "cannot_remove_disabled": "Hindi maaaring alisin dahil ang isa o higit pang setting ay hindi pinagana.",
@@ -2284,7 +2306,9 @@
       "view_file": "Tingnan ang {{filename}}",
       "view_service": "Tingnan ang Serbisyo na {{service}}",
       "manage_activation": "Pamahalaan ang pag-activate ng {{name}} sa mga pangkalahatang setting",
-      "view_template": "Tingnan ang Template na {{template}}"
+      "view_template": "Tingnan ang Template na {{template}}",
+      "edit_default_server": "I-edit ang default server",
+      "view_default_server": "Tingnan ang default server"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "Pagkaantala sa segundo sa pagitan ng mga ulit ng ZeroSSL API.",
     "zerossl_api_connect_timeout": "Connection timeout sa segundo para sa mga tawag ng ZeroSSL API.",
     "zerossl_api_max_time": "Maximum na kabuuang oras sa segundo para sa bawat kahilingan ng ZeroSSL API.",
-    "config_global_types_available": "Maaari ka nang pumili ng mga global na uri para sa iyong custom na configuration."
+    "config_global_types_available": "Maaari ka nang pumili ng mga global na uri para sa iyong custom na configuration.",
+    "enroll_disabled_by_method": "Galing sa sariling environment ang {{hostname}} ({{method}}); ang enrollment ay para lang sa mga instance na pag-aari ng control plane",
+    "instance_credential_age": "Huling na-update ang credential: {{updated}}"
   },
   "totp": {
     "cant_access": "Hindi makakuha ng access sa iyong authenticator?",
@@ -2826,7 +2852,8 @@
       "window": "Window sa segundo",
       "changePosition": "Patakaran {{n}} sa {{total}}, baguhin ang posisyon",
       "newValue": "Bagong value",
-      "positionMove": "Posisyon {{n}} sa {{total}} — i-click upang ilipat"
+      "positionMove": "Posisyon {{n}} sa {{total}} — i-click upang ilipat",
+      "crowdsecField": "Fact ng CrowdSec"
     },
     "attach": "Ikabit sa mga serbisyo",
     "attach_help": "Ang mga panuntunan ay ipinapatupad lamang sa mga serbisyo kung saan nakakabit ang isang daloy ng trabaho.",
@@ -3005,7 +3032,14 @@
       "v_match": "TUMUGMA",
       "v_unknown": "HINDI ALAM",
       "v_unknown_help": "Hindi matukoy ang fact na kailangan ng patakarang ito, kaya hindi ito kailanman tutugma.",
-      "whitelisted": "Nasa whitelist ang client na ito"
+      "whitelisted": "Nasa whitelist ang client na ito",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "Pinayagan ito ng CrowdSec",
+      "crowdsec_help": "Ang desisyon ng CrowdSec sa request na ito bago tumakbo ang mga workflow. Ang request na hindi pa kailanman na-evaluate ng CrowdSec ay hindi katulad ng request na walang laban dito: iniiwan ng una ang kondisyon ng CrowdSec bilang hindi tiyak, ginagawa itong mali ng pangalawa.",
+      "crowdsec_remediated": "Na-remediate ito ng CrowdSec",
+      "crowdsec_remediation": "Remediyasyon",
+      "crowdsec_source": "Pinagmulan ng verdict",
+      "crowdsec_unavailable": "Hindi ni-evaluate ng CrowdSec ang request na ito"
     },
     "threshold": "Lamang sa itaas ng rate",
     "threshold_count": "Mga kahilingan",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "Paraan ng HTTP",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "Verdict ng CrowdSec"
     },
     "uri_match": {
       "exact": "ay eksaktong",
       "prefix": "nagsisimula sa",
       "regex": "tumutugma sa regex"
+    },
+    "crowdsec_field": {
+      "remediation": "ang remediyasyon ay",
+      "source": "ang source ay"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "ban",
+      "captcha": "captcha",
+      "lapi": "Lokal na API"
+    },
+    "reason": {
+      "sentence": "Workflow ng seguridad {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "Mga nakakabit na mapagkukunan",
       "unavailable": "Hindi magagamit",
       "nothing_available": "Walang available na maikakabit."
+    },
+    "default_server": {
+      "certificate": {
+        "action": "I-edit ang override ng certificate",
+        "help": "Ang certificate na ipinapakita para sa hindi kilalang hostname. Isa itong global setting ng custom certificate plugin, at tinatanggihan ito kung sakop nito ang isang naka-configure na service.",
+        "title": "Certificate ng default server"
+      },
+      "explainer": "Sinasagot ang mga request na hindi tugma sa anumang naka-configure na service: hindi kilalang hostname, direktang pag-access sa IP. I-configure dito ang certificate, TLS, headers, at error pages nito.",
+      "name": "Default na Server",
+      "single_site": "Nagiging configurable ang default server kapag naka-set sa yes ang MULTISITE; sa single-site mode, pinapanatili nito ang built-in nitong behavior at sinasagot ang mga request na hindi tugma sa anumang naka-configure na service."
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "Ano ang bago"
     },
     "subtitle": "Lahat ng release ng BunkerWeb, pinakabago muna, mula mismo sa changelog na kasama ng installation na ito."
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Naihatid ang antibot challenge ({{provider}})"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "I-revoke ang credential ng instance na ito? Hindi na ito maaabot ng control plane.",
+    "rotate_credential": "I-rotate ang credential ng instance na ito? Mabibigo kung hindi maabot ang instance."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "na-block ang request",
+        "captcha": "hamon ng captcha",
+        "challenge": "hamon sa pagtukoy ng bot"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (senaryo: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

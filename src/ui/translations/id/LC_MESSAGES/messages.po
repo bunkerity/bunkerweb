@@ -58,8 +58,14 @@ msgstr "TLS & sertifikat"
 msgid "alert.configs_import_invalid_file"
 msgstr "Unggah file ekspor konfigurasi khusus yang valid (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "Tindakan gagal."
+
 msgid "alert.custom_end_date_required"
 msgstr "Silakan pilih tanggal akhir kustom."
+
+msgid "alert.enroll_failed"
+msgstr "Tidak dapat menerbitkan kode pendaftaran."
 
 msgid "alert.important"
 msgstr "Penting"
@@ -88,6 +94,9 @@ msgstr "Tindakan ini dinonaktifkan dalam mode hanya-baca."
 msgid "alert.services_import_invalid_file"
 msgstr "Unggah file ekspor layanan yang valid (.env atau .zip)."
 
+msgid "antibot.reason.sentence"
+msgstr "Tantangan antibot (%(provider)s) disajikan"
+
 msgid "aria.label.clear_search"
 msgstr "Bersihkan pencarian"
 
@@ -95,7 +104,7 @@ msgid "aria.label.close"
 msgstr "Tutup"
 
 msgid "aria.label.collapse_multiline"
-msgstr "Tutup entri multi-baris"
+msgstr "Ciutkan entri multi-baris"
 
 msgid "aria.label.configs_dropzone"
 msgstr "Pilih file ekspor konfigurasi kustom atau letakkan di sini"
@@ -383,7 +392,7 @@ msgid "button.close"
 msgstr "Tutup"
 
 msgid "button.collapse_multiline"
-msgstr "Tutup"
+msgstr "Ciutkan"
 
 msgid "button.columns"
 msgstr "Kolom"
@@ -993,6 +1002,12 @@ msgstr "Daftar plugin tidak dapat dimuat, jadi halaman ini tidak dapat diedit de
 
 msgid "configs.subtitle"
 msgstr "Cuplikan konfigurasi NGINX khusus untuk layanan Anda — buat, edit, dan kelola override tingkat HTTP, ModSecurity, dan stream."
+
+msgid "confirm.revoke_credential"
+msgstr "Cabut kredensial instans ini? Control plane tidak akan bisa menjangkaunya lagi."
+
+msgid "confirm.rotate_credential"
+msgstr "Rotasi kredensial instans ini? Gagal jika instans tidak dapat dijangkau."
 
 msgid "country.AD"
 msgstr "Andorra"
@@ -1750,6 +1765,27 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "permintaan diblokir"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "tantangan captcha"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "tantangan deteksi bot"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (skenario: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "Satu atau beberapa tugas gagal pada eksekusi terakhirnya."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Layanan"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "Alasan teratas pemblokiran"
+msgstr "Alasan teratas laporan"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Total Permintaan"
@@ -1940,7 +1976,7 @@ msgid "dashboard.window.last_days"
 msgstr "%(days)s hari terakhir"
 
 msgid "dashboard.window.title"
-msgstr "Jendela dasbor"
+msgstr "Rentang waktu dasbor"
 
 msgid "datatable.bulk_select_all_done"
 msgstr "Semua %(count)s %(entity)s yang cocok dipilih."
@@ -2317,6 +2353,9 @@ msgstr "Permintaan kunci keamanan gagal. Silakan coba lagi."
 msgid "flash.check_jobs_for_details"
 msgstr "Periksa halaman Tugas untuk detailnya."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Konfigurasi belum diterapkan — menunggu instans aktif."
+
 msgid "flash.easter_egg"
 msgstr "Jika Anda membaca ini, berarti Anda penasaran"
 
@@ -2464,6 +2503,15 @@ msgstr "Email untuk Let's Encrypt"
 msgid "form.label.end_date"
 msgstr "Tanggal Akhir"
 
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Kode pendaftaran"
+
 msgid "form.label.hostname"
 msgstr "Nama Host"
 
@@ -2588,10 +2636,10 @@ msgid "form.label.zerossl_api_max_time"
 msgstr "Waktu Maks API ZeroSSL"
 
 msgid "form.label.zerossl_api_retry"
-msgstr "Pencarian Ulang API ZeroSSL"
+msgstr "Percobaan Ulang API ZeroSSL"
 
 msgid "form.label.zerossl_api_retry_delay"
-msgstr "Penundaan Pencarian Ulang API ZeroSSL"
+msgstr "Penundaan Percobaan Ulang API ZeroSSL"
 
 msgid "form.placeholder.2fa_code"
 msgstr "Masukkan kode"
@@ -2646,6 +2694,18 @@ msgstr "Kata sandi harus memiliki minimal 1 huruf kapital."
 
 msgid "input_list.view_all_settings"
 msgstr "Lihat semua %(count)s pengaturan"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Terdaftar"
+
+msgid "instance.enrollment.pending"
+msgstr "Pendaftaran tertunda"
+
+msgid "instance.enrollment.revoked"
+msgstr "Dicabut"
+
+msgid "instance.tls.pinned"
+msgstr "TLS di-pin"
 
 msgid "instance.type.container"
 msgstr "Container"
@@ -2717,7 +2777,7 @@ msgid "legend.locked_settings_hint"
 msgstr "Pengaturan yang dikunci disorot"
 
 msgid "link.back_to_login"
-msgstr "Kembali ke Masuk"
+msgstr "Kembali ke Halaman Masuk"
 
 msgid "link.forgot_password"
 msgstr "Lupa Kata Sandi?"
@@ -2941,6 +3001,12 @@ msgstr "Digunakan oleh pengaturan global"
 msgid "modal.body.delete_template_services_list"
 msgstr "Digunakan oleh layanan: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "Mulai instans dengan variabel ini. Kode digunakan satu kali saat boot dan instans menerima kredensialnya sendiri."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "Kode ini hanya ditampilkan sekali. Salin sekarang — kode tidak dapat ditampilkan lagi."
+
 msgid "modal.body.export_services_intro"
 msgstr "Layanan yang dipilih akan diekspor. Aktifkan opsi di bawah untuk membundel konfigurasi kustom yang dilampirkan ke arsip .zip."
 
@@ -3051,6 +3117,9 @@ msgstr "Hapus template"
 
 msgid "modal.title.edit_template"
 msgstr "Edit template: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "Daftarkan instans"
 
 msgid "modal.title.export_services"
 msgstr "Ekspor layanan"
@@ -3338,7 +3407,7 @@ msgid "plugin.page.status.deactivated"
 msgstr "Plugin dinonaktifkan; oleh karena itu, tidak ada informasi yang tersedia."
 
 msgid "plugin.page.status.dedicated_page_unavailable"
-msgstr "Plugin ini dikelola di halaman khusus yang belum dimuat. Muat ulang UI web untuk mengaksesnya."
+msgstr "Plugin ini dikelola di halaman khusus yang belum dimuat. Mulai ulang UI web untuk mengaksesnya."
 
 msgid "plugin.page.status.metrics_deactivated"
 msgstr "Plugin metrik tidak diaktifkan; oleh karena itu, tidak ada informasi yang tersedia."
@@ -4052,7 +4121,7 @@ msgid "searchpane.collapse_0"
 msgstr "Panel Pencarian"
 
 msgid "searchpane.collapse_message"
-msgstr "Tutup Semua"
+msgstr "Ciutkan Semua"
 
 msgid "searchpane.collapse_plural"
 msgstr "Panel Pencarian (%d)"
@@ -4212,6 +4281,24 @@ msgstr "Blokir"
 
 msgid "security_mode.detect"
 msgstr "Deteksi"
+
+msgid "service.default_server.certificate.action"
+msgstr "Edit override sertifikat"
+
+msgid "service.default_server.certificate.help"
+msgstr "Sertifikat yang disajikan untuk nama host yang tidak dikenal. Ini adalah pengaturan global plugin sertifikat khusus, dan ditolak jika mencakup layanan yang telah dikonfigurasi."
+
+msgid "service.default_server.certificate.title"
+msgstr "Sertifikat server default"
+
+msgid "service.default_server.explainer"
+msgstr "Menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun: nama host yang tidak dikenal, akses IP langsung. Konfigurasikan sertifikat, TLS, header, dan halaman error di sini."
+
+msgid "service.default_server.name"
+msgstr "Server default"
+
+msgid "service.default_server.single_site"
+msgstr "Server default menjadi dapat dikonfigurasi ketika MULTISITE diatur ke yes; dalam mode situs tunggal ia mempertahankan perilaku bawaannya dan menjawab permintaan yang tidak cocok dengan layanan yang dikonfigurasi mana pun."
 
 msgid "service.resources.attach"
 msgstr "Lampirkan"
@@ -4842,6 +4929,12 @@ msgstr "Tidak dapat terhubung ke blog untuk pembaruan berita."
 
 msgid "status.default_server"
 msgstr "Server Default"
+
+msgid "status.deferred"
+msgstr "Ditangguhkan"
+
+msgid "status.deferred_tooltip"
+msgstr "Ditangguhkan — menunggu instans aktif: %(reason)s"
 
 msgid "status.done"
 msgstr "Selesai"
@@ -5627,7 +5720,7 @@ msgid "template.editor.steps"
 msgstr "Langkah"
 
 msgid "template.editor.steps_help"
-msgstr "Organisasi pengaturan menjadi langkah panduan. Pilih pengaturan atau konfigurasi mana yang termasuk dalam setiap langkah."
+msgstr "Atur pengaturan menjadi langkah-langkah terpandu. Pilih pengaturan atau konfigurasi yang termasuk dalam setiap langkah."
 
 msgid "template.editor.summary_clone_info"
 msgstr "Saat ini mengkloning dari %(template)s."
@@ -5995,6 +6088,9 @@ msgstr "Hapus Layanan %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Hapus Template %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "Terbitkan kode pendaftaran untuk %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "Menjadwalkan pengecekan; hanya mengunduh jika ada pembaruan."
 
@@ -6015,6 +6111,12 @@ msgstr "Atur ulang ke nilai default"
 
 msgid "tooltip.button.reset_global"
 msgstr "Atur ulang ke nilai global"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "Cabut kredensial %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "Rotasi kredensial %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "Jalankan Pekerjaan %(job)s"
@@ -6050,10 +6152,10 @@ msgid "tooltip.challenge_type"
 msgstr "Tipe tantangan yang digunakan untuk verifikasi Let's Encrypt (http atau dns)."
 
 msgid "tooltip.collapse_multiline"
-msgstr "Tutup entri multi-baris (tracebacks, payloads)"
+msgstr "Ciutkan entri multi-baris (tracebacks, payloads)"
 
 msgid "tooltip.collapse_raw_values"
-msgstr "Tutup nilai multi-baris (sertifikat, kunci)"
+msgstr "Ciutkan nilai multi-baris (sertifikat, kunci)"
 
 msgid "tooltip.config_global_types_available"
 msgstr "Anda sekarang dapat memilih jenis global untuk konfigurasi kustom Anda."
@@ -6157,6 +6259,9 @@ msgstr "Email harus antara 1 dan 256 karakter."
 msgid "tooltip.email_lets_encrypt"
 msgstr "Alamat email yang didaftarkan ke Let's Encrypt untuk manajemen sertifikat dan notifikasi."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s berasal dari environment-nya (%(method)s); pendaftaran hanya berlaku untuk instans yang dimiliki oleh control plane"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Ambil pengaturan global dan terapkan ke template saat ini"
 
@@ -6165,6 +6270,9 @@ msgstr "Mode ikuti hanya tersedia di halaman terbaru"
 
 msgid "tooltip.global_settings_source"
 msgstr "Nilai diwarisi dari pengaturan global."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Kredensial terakhir diperbarui: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "Instans %(hostname)s saat ini tidak merespons ('aktif')."
@@ -6211,6 +6319,9 @@ msgstr "Unduh %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "Edit Konfigurasi Kustom %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "Edit server default"
+
 msgid "tooltip.link.edit_service"
 msgstr "Edit Layanan %(service)s"
 
@@ -6228,6 +6339,9 @@ msgstr "Kelola aktivasi %(name)s di pengaturan global"
 
 msgid "tooltip.link.view_config"
 msgstr "Lihat Konfigurasi Kustom %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "Lihat server default"
 
 msgid "tooltip.link.view_file"
 msgstr "Lihat %(filename)s"
@@ -6431,7 +6545,7 @@ msgid "tooltip.table.instances.method"
 msgstr "Metode pembuatan Instans (misalnya, ui, autoconf)"
 
 msgid "tooltip.table.instances.name"
-msgstr "Nama yang ditentukan pengguna atau auto-generate untuk Instans"
+msgstr "Nama Instans yang ditentukan pengguna atau dibuat otomatis"
 
 msgid "tooltip.table.instances.select_all"
 msgstr "Pilih semua Instans"
@@ -6614,7 +6728,7 @@ msgid "tooltip.table.templates.method"
 msgstr "Metode pembuatan Template"
 
 msgid "tooltip.table.templates.name"
-msgstr "Nama Template yang ditentukan pengguna atau auto-generate"
+msgstr "Nama Template yang ditentukan pengguna atau dibuat otomatis"
 
 msgid "tooltip.table.templates.plugin"
 msgstr "Plugin yang berisi Template"
@@ -6683,10 +6797,10 @@ msgid "tooltip.zerossl_api_max_time"
 msgstr "Waktu total maksimum dalam detik untuk setiap permintaan API ZeroSSL."
 
 msgid "tooltip.zerossl_api_retry"
-msgstr "Jumlah pencarian ulang untuk permintaan API ZeroSSL (0 menonaktifkan pencarian ulang)."
+msgstr "Jumlah percobaan ulang untuk permintaan API ZeroSSL (0 menonaktifkan percobaan ulang)."
 
 msgid "tooltip.zerossl_api_retry_delay"
-msgstr "Penundaan dalam detik antara pencarian ulang API ZeroSSL."
+msgstr "Penundaan dalam detik antara percobaan ulang API ZeroSSL."
 
 msgid "totp.cant_access"
 msgstr "Tidak dapat mengakses autentikator Anda?"
@@ -7078,6 +7192,9 @@ msgstr "Ubah kombinator, saat ini"
 msgid "workflows.aria.conditionType"
 msgstr "Jenis kondisi"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "Fakta CrowdSec"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Status tolak"
 
@@ -7246,6 +7363,9 @@ msgstr "Aturan disalin; lampiran layanan tidak."
 msgid "workflows.clone_name"
 msgstr "Nama salinan"
 
+msgid "workflows.condition.crowdsec"
+msgstr "Keputusan CrowdSec"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "Hapus aturan ini? Semua yang di bawahnya naik satu posisi."
 
 msgid "workflows.copySuffix"
 msgstr " (salinan)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "remediasi adalah"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "sumber adalah"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "larangan"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "captcha"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "API lokal"
 
 msgid "workflows.delete"
 msgstr "Hapus alur kerja"
@@ -7393,6 +7531,9 @@ msgstr "Aturan dievaluasi secara berurutan dan yang pertama cocok menang. Aturan
 msgid "workflows.readonly"
 msgstr "Basis data bersifat baca-saja. Alur kerja dapat diperiksa tetapi tidak dapat diubah."
 
+msgid "workflows.reason.sentence"
+msgstr "Workflow keamanan %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Dinonaktifkan"
 
@@ -7515,6 +7656,27 @@ msgstr "Asumsi"
 
 msgid "workflows.test.country"
 msgstr "Negara"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec mengizinkannya"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "Keputusan CrowdSec tentang permintaan ini sebelum workflow berjalan. Permintaan yang tidak pernah dinilai oleh CrowdSec tidak sama dengan permintaan yang tidak memiliki bukti negatif apa pun: yang pertama membuat kondisi CrowdSec tidak ditentukan, yang kedua membuatnya salah."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec meremediasinya"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "Remediasi"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Sumber keputusan"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec tidak menilai permintaan ini"
 
 msgid "workflows.test.detail_challenge"
 msgstr "Tantangan mengambil alih; sisa tumpukan keamanan tetap berjalan."

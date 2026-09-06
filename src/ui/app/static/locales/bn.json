@@ -33,7 +33,9 @@
     "plugin_file_invalid": "অনুগ্রহ করে একটি বৈধ প্লাগইন আর্কাইভ আপলোড করুন (.zip, .tar.gz, বা .tar.xz)।",
     "plugin_file_too_large": "প্লাগইন আর্কাইভটি 50 MB সীমা অতিক্রম করেছে।",
     "plugin_upload_failed": "প্লাগইন আর্কাইভ আপলোড করার সময় একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।",
-    "services_import_invalid_file": "অনুগ্রহ করে একটি বৈধ সার্ভিস এক্সপোর্ট ফাইল আপলোড করুন (.env বা .zip)।"
+    "services_import_invalid_file": "অনুগ্রহ করে একটি বৈধ সার্ভিস এক্সপোর্ট ফাইল আপলোড করুন (.env বা .zip)।",
+    "credential_action_failed": "কার্যক্রমটি ব্যর্থ হয়েছে।",
+    "enroll_failed": "একটি এনরোলমেন্ট কোড ইস্যু করা যায়নি।"
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "এইমাত্র"
     },
-    "warning": "সতর্কতা"
+    "warning": "সতর্কতা",
+    "configuration_pending_instance": "কনফিগারেশন এখনো প্রয়োগ হয়নি — একটি ইনস্ট্যান্স চালু হওয়ার জন্য অপেক্ষা করা হচ্ছে।"
   },
   "footer": {
     "blog": "ব্লগ",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার বিলম্ব",
       "zerossl_api_connect_timeout": "ZeroSSL API সংযোগ টাইমআউট",
       "zerossl_api_max_time": "ZeroSSL API সর্বোচ্চ সময়",
-      "passkey_name": "পাসকির নাম"
+      "passkey_name": "পাসকির নাম",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "এনরোলমেন্ট কোড"
     },
     "placeholder": {
       "2fa_code": "কোড লিখুন",
@@ -914,6 +920,14 @@
       "container": "কন্টেইনার",
       "pod": "পড",
       "static": "স্ট্যাটিক"
+    },
+    "enrollment": {
+      "enrolled": "নিবন্ধিত",
+      "pending": "নিবন্ধন অপেক্ষমাণ",
+      "revoked": "প্রত্যাহৃত"
+    },
+    "tls": {
+      "pinned": "TLS পিন করা হয়েছে"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
       "ban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া রিপোর্টের IP ব্লক করবেন? একই লক্ষ্য একবারই প্রয়োগ হবে।",
       "unban_filtered_confirmation": "সব {{count}}টি মিলে যাওয়া ব্লক তুলে নিতে চান?",
-      "update_filtered_duration_alert": "সব {{count}}টি মিলে যাওয়া ব্লকের জন্য নতুন সময়কাল বাছুন:"
+      "update_filtered_duration_alert": "সব {{count}}টি মিলে যাওয়া ব্লকের জন্য নতুন সময়কাল বাছুন:",
+      "enroll_description": "এই ভেরিয়েবলগুলো দিয়ে ইনস্ট্যান্স শুরু করুন। এটি বুট হওয়ার সময় কোডটি একবার ব্যবহার করে এবং নিজের ক্রেডেনশিয়াল পায়।",
+      "enroll_shown_once": "এই কোডটি একবারই দেখানো হয়। এখনই এটি কপি করুন — এটি আর দেখানো যাবে না।"
     },
     "button": {
       "fetch_global_settings_confirm": "গ্লোবাল সেটিংস প্রয়োগ করুন",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "টেমপ্লেট কনফিগারেশন রিসেট করবেন?",
       "security_report_details": "নিরাপত্তা রিপোর্ট বিবরণ",
       "server_name_not_unique": "সার্ভারের নাম অনন্য নয়",
-      "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
+      "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন",
+      "enroll_instance": "ইনস্ট্যান্স নিবন্ধন করুন"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "ঐচ্ছিক",
     "no_file_selected": "কোনো ফাইল নির্বাচন করা হয়নি",
     "no_url_available": "কোনো URL উপলব্ধ নেই",
-    "unknown": "অজানা"
+    "unknown": "অজানা",
+    "deferred": "বিলম্বিত",
+    "deferred_tooltip": "বিলম্বিত — একটি ইনস্ট্যান্স চালু হওয়ার জন্য অপেক্ষা করা হচ্ছে: {{reason}}"
   },
   "step": {
     "next": "পরবর্তী",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "ব্যানের সময়কাল আপডেট করুন",
       "value_from_global": "গ্লোবাল সেটিংস থেকে মান",
       "back_to_file_upload": "ফাইল আপলোডে ফিরে যান",
-      "switch_to_text_editor": "টেক্সট এডিটরে যান"
+      "switch_to_text_editor": "টেক্সট এডিটরে যান",
+      "enroll_instance": "{{hostname}}-এর জন্য এনরোলমেন্ট কোড ইস্যু করুন",
+      "revoke_credential": "{{hostname}}-এর ক্রেডেনশিয়াল প্রত্যাহার করুন",
+      "rotate_credential": "{{hostname}}-এর ক্রেডেনশিয়াল ঘোরান"
     },
     "cannot_delete_original_ban": "মূল নিষেধাজ্ঞা এন্ট্রি মুছতে পারে না।",
     "cannot_remove_disabled": "অপসারণ করা যাবে না কারণ এক বা একাধিক সেটিংস নিষ্ক্রিয়।",
@@ -2284,7 +2306,9 @@
       "view_file": "{{filename}} দেখুন",
       "view_service": "পরিষেবা {{service}} দেখুন",
       "manage_activation": "{{name}}-এর বিশ্বব্যাপী সেটিংস-এ সক্রিয়করণ পরিচালনা করুন",
-      "view_template": "টেমপ্লেট {{template}} দেখুন"
+      "view_template": "টেমপ্লেট {{template}} দেখুন",
+      "edit_default_server": "ডিফল্ট সার্ভার সম্পাদনা করুন",
+      "view_default_server": "ডিফল্ট সার্ভার দেখুন"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API পুনরায় চেষ্টার মধ্যে সেকেন্ডে বিলম্ব।",
     "zerossl_api_connect_timeout": "ZeroSSL API কলের জন্য সেকেন্ডে সংযোগ টাইমআউট।",
     "zerossl_api_max_time": "প্রতি ZeroSSL API অনুরোধের জন্য সেকেন্ডে সর্বোচ্চ মোট সময়।",
-    "config_global_types_available": "এখন আপনার কাস্টম কনফিগারেশনের জন্য গ্লোবাল টাইপ নির্বাচন করতে পারবেন।"
+    "config_global_types_available": "এখন আপনার কাস্টম কনফিগারেশনের জন্য গ্লোবাল টাইপ নির্বাচন করতে পারবেন।",
+    "enroll_disabled_by_method": "{{hostname}} তার নিজের এনভায়রনমেন্ট ({{method}}) থেকে এসেছে; এনরোলমেন্ট শুধুমাত্র কন্ট্রোল প্লেনের মালিকানাধীন ইনস্ট্যান্সের ক্ষেত্রে প্রযোজ্য",
+    "instance_credential_age": "ক্রেডেনশিয়াল সর্বশেষ আপডেট হয়েছে: {{updated}}"
   },
   "totp": {
     "cant_access": "আপনার প্রমাণীকরণ কোড অ্যাক্সেস করতে পারছেন না?",
@@ -2826,7 +2852,8 @@
       "window": "সেকেন্ডে সময়সীমা",
       "changePosition": "{{total}}টির মধ্যে {{n}} নম্বর নিয়ম, অবস্থান পরিবর্তন করুন",
       "newValue": "নতুন মান",
-      "positionMove": "{{total}}টির মধ্যে {{n}} নম্বর অবস্থান — সরাতে ক্লিক করুন"
+      "positionMove": "{{total}}টির মধ্যে {{n}} নম্বর অবস্থান — সরাতে ক্লিক করুন",
+      "crowdsecField": "CrowdSec ফ্যাক্ট"
     },
     "attach": "পরিষেবার সাথে যুক্ত করুন",
     "attach_help": "নিয়মগুলি শুধুমাত্র সেই পরিষেবাগুলিতে প্রয়োগ করা হয় যেগুলিতে একটি ওয়ার্কফ্লো যুক্ত করা হয়েছে।",
@@ -3005,7 +3032,14 @@
       "v_match": "মিলেছে",
       "v_unknown": "অজানা",
       "v_unknown_help": "এই নিয়মের প্রয়োজনীয় তথ্য নির্ধারণ করা যায়নি, তাই এটি কখনো মিলতে পারে না।",
-      "whitelisted": "এই ক্লায়েন্ট অনুমোদিত তালিকায় আছে"
+      "whitelisted": "এই ক্লায়েন্ট অনুমোদিত তালিকায় আছে",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec এটি অনুমোদন করেছে",
+      "crowdsec_help": "ওয়ার্কফ্লো চলার আগে এই রিকোয়েস্টের ব্যাপারে CrowdSec যা সিদ্ধান্ত নিয়েছে। যে রিকোয়েস্ট CrowdSec কখনো মূল্যায়ন করেনি, সেটি এমন রিকোয়েস্টের মতো নয় যার বিরুদ্ধে কিছুই নেই: প্রথমটি CrowdSec-এর শর্তকে অনির্ধারিত রাখে, দ্বিতীয়টি এটিকে মিথ্যা করে দেয়।",
+      "crowdsec_remediated": "CrowdSec এটির প্রতিকার করেছে",
+      "crowdsec_remediation": "প্রতিকার",
+      "crowdsec_source": "সিদ্ধান্তের উৎস",
+      "crowdsec_unavailable": "CrowdSec এই রিকোয়েস্ট মূল্যায়ন করেনি"
     },
     "threshold": "শুধুমাত্র একটি নির্দিষ্ট হার",
     "threshold_count": "অনুরোধ",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP পদ্ধতি",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec সিদ্ধান্ত"
     },
     "uri_match": {
       "exact": "হুবহু মেলে",
       "prefix": "দিয়ে শুরু হয়",
       "regex": "রেগেক্সের সাথে মেলে"
+    },
+    "crowdsec_field": {
+      "remediation": "প্রতিকার হলো",
+      "source": "উৎস হলো"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "নিষেধাজ্ঞা",
+      "captcha": "ক্যাপচা",
+      "lapi": "লোকাল API"
+    },
+    "reason": {
+      "sentence": "সিকিউরিটি ওয়ার্কফ্লো {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "সংযুক্ত রিসোর্স",
       "unavailable": "উপলব্ধ নয়",
       "nothing_available": "সংযুক্ত করার মতো কিছু নেই।"
+    },
+    "default_server": {
+      "certificate": {
+        "action": "সার্টিফিকেট ওভাররাইড সম্পাদনা করুন",
+        "help": "অজানা হোস্টনেমের জন্য উপস্থাপিত সার্টিফিকেট। এটি কাস্টম সার্টিফিকেট প্লাগইনের একটি গ্লোবাল সেটিং, এবং এটি কোনো কনফিগার করা সার্ভিস কভার করলে প্রত্যাখ্যাত হয়।",
+        "title": "ডিফল্ট সার্ভার সার্টিফিকেট"
+      },
+      "explainer": "যেসব রিকোয়েস্ট কোনো কনফিগার করা সার্ভিসের সাথে মেলে না তাদের সাড়া দেয়: অজানা হোস্টনেম, সরাসরি IP অ্যাক্সেস। এখানে এর সার্টিফিকেট, TLS, হেডার এবং এরর পেজ কনফিগার করুন।",
+      "name": "ডিফল্ট সার্ভার",
+      "single_site": "MULTISITE yes-এ সেট করা হলে ডিফল্ট সার্ভার কনফিগারযোগ্য হয়ে যায়; সিঙ্গেল-সাইট মোডে এটি তার বিল্ট-ইন আচরণ বজায় রাখে এবং যেসব রিকোয়েস্ট কোনো কনফিগার করা সার্ভিসের সাথে মেলে না তাদের সাড়া দেয়।"
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "নতুন কী"
     },
     "subtitle": "এই ইনস্টলেশনের সঙ্গে আসা চেঞ্জলগ থেকে সরাসরি, BunkerWeb-এর সব রিলিজ, নতুনটি আগে।"
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "অ্যান্টিবট চ্যালেঞ্জ ({{provider}}) পরিবেশন করা হয়েছে"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "এই ইনস্ট্যান্সের ক্রেডেনশিয়াল প্রত্যাহার করবেন? কন্ট্রোল প্লেন এটির সাথে সংযোগ করতে পারবে না।",
+    "rotate_credential": "এই ইনস্ট্যান্সের ক্রেডেনশিয়াল ঘোরাবেন? ইনস্ট্যান্স অ্যাক্সেসযোগ্য না হলে ব্যর্থ হবে।"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "রিকোয়েস্ট ব্লক করা হয়েছে",
+        "captcha": "ক্যাপচা চ্যালেঞ্জ",
+        "challenge": "বট-সনাক্তকরণ চ্যালেঞ্জ"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (দৃশ্যকল্প: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }

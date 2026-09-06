@@ -33,7 +33,9 @@
     "plugin_file_invalid": "कृपया एक मान्य प्लगइन आर्काइव अपलोड करें (.zip, .tar.gz, या .tar.xz)।",
     "plugin_file_too_large": "प्लगइन आर्काइव 50 MB की सीमा से अधिक है।",
     "plugin_upload_failed": "प्लगइन आर्काइव अपलोड करते समय त्रुटि हुई। कृपया फिर से प्रयास करें।",
-    "services_import_invalid_file": "कृपया एक मान्य सेवा निर्यात फ़ाइल अपलोड करें (.env या .zip)।"
+    "services_import_invalid_file": "कृपया एक मान्य सेवा निर्यात फ़ाइल अपलोड करें (.env या .zip)।",
+    "credential_action_failed": "कार्रवाई विफल हो गई।",
+    "enroll_failed": "नामांकन कोड जारी नहीं किया जा सका।"
   },
   "aria": {
     "label": {
@@ -789,7 +791,8 @@
     "time": {
       "just_now": "अभी"
     },
-    "warning": "चेतावनी"
+    "warning": "चेतावनी",
+    "configuration_pending_instance": "कॉन्फ़िगरेशन अभी लागू नहीं हुआ — किसी इंस्टेंस के चालू होने की प्रतीक्षा है।"
   },
   "footer": {
     "blog": "ब्लॉग",
@@ -882,7 +885,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयास विलंब",
       "zerossl_api_connect_timeout": "ZeroSSL API कनेक्शन टाइमआउट",
       "zerossl_api_max_time": "ZeroSSL API अधिकतम समय",
-      "passkey_name": "पासकी का नाम"
+      "passkey_name": "पासकी का नाम",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux",
+      "enrollment_code": "नामांकन कोड"
     },
     "placeholder": {
       "2fa_code": "कोड दर्ज करें",
@@ -914,6 +920,14 @@
       "container": "कंटेनर",
       "pod": "पॉड",
       "static": "स्थैतिक"
+    },
+    "enrollment": {
+      "enrolled": "नामांकित",
+      "pending": "नामांकन लंबित",
+      "revoked": "रद्द"
+    },
+    "tls": {
+      "pinned": "TLS पिन किया गया"
     }
   },
   "instances": {
@@ -1053,7 +1067,9 @@
       "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
       "ban_filtered_confirmation": "सभी {{count}} मेल खाते रिपोर्ट के IP प्रतिबंधित करें? दोहराए गए लक्ष्य एक बार लागू होंगे।",
       "unban_filtered_confirmation": "क्या आप सभी {{count}} मेल खाते प्रतिबंध हटाना चाहते हैं?",
-      "update_filtered_duration_alert": "सभी {{count}} मेल खाते प्रतिबंधों के लिए नई अवधि चुनें:"
+      "update_filtered_duration_alert": "सभी {{count}} मेल खाते प्रतिबंधों के लिए नई अवधि चुनें:",
+      "enroll_description": "इंस्टेंस को इन वेरिएबल के साथ शुरू करें। यह बूट के समय कोड का एक बार उपयोग करता है और अपना स्वयं का क्रेडेंशियल प्राप्त करता है।",
+      "enroll_shown_once": "यह कोड केवल एक बार दिखाया जाता है। इसे अभी कॉपी कर लें — इसे फिर से नहीं दिखाया जा सकेगा।"
     },
     "button": {
       "fetch_global_settings_confirm": "ग्लोबल सेटिंग्स लागू करें",
@@ -1089,7 +1105,8 @@
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
       "security_report_details": "सुरक्षा रिपोर्ट विवरण",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
-      "update_duration": "प्रतिबंध अवधि अपडेट करें"
+      "update_duration": "प्रतिबंध अवधि अपडेट करें",
+      "enroll_instance": "इंस्टेंस नामांकित करें"
     }
   },
   "mode": {
@@ -1853,7 +1870,9 @@
     "optional": "वैकल्पिक",
     "no_file_selected": "कोई फ़ाइल चयनित नहीं",
     "no_url_available": "कोई URL उपलब्ध नहीं",
-    "unknown": "अज्ञात"
+    "unknown": "अज्ञात",
+    "deferred": "स्थगित",
+    "deferred_tooltip": "स्थगित — किसी इंस्टेंस के चालू होने की प्रतीक्षा है: {{reason}}"
   },
   "step": {
     "next": "अगला",
@@ -2218,7 +2237,10 @@
       "update_ban_duration": "बैन अवधि अपडेट करें",
       "value_from_global": "ग्लोबल सेटिंग्स से मान",
       "back_to_file_upload": "फ़ाइल अपलोड पर वापस जाएँ",
-      "switch_to_text_editor": "टेक्स्ट एडिटर पर जाएँ"
+      "switch_to_text_editor": "टेक्स्ट एडिटर पर जाएँ",
+      "enroll_instance": "{{hostname}} के लिए नामांकन कोड जारी करें",
+      "revoke_credential": "{{hostname}} का क्रेडेंशियल रद्द करें",
+      "rotate_credential": "{{hostname}} का क्रेडेंशियल घुमाएं"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
     "cannot_remove_disabled": "हटाया नहीं जा सकता क्योंकि एक या अधिक सेटिंग्स अक्षम हैं।",
@@ -2284,7 +2306,9 @@
       "view_file": "देखें {{filename}}",
       "view_service": "सेवा {{service}} देखें",
       "manage_activation": "वैश्विक सेटिंग्स में {{name}} को सक्रिय करना प्रबंधित करें",
-      "view_template": "टेम्पलेट {{template}} देखें"
+      "view_template": "टेम्पलेट {{template}} देखें",
+      "edit_default_server": "डिफ़ॉल्ट सर्वर संपादित करें",
+      "view_default_server": "डिफ़ॉल्ट सर्वर देखें"
     },
     "modal": {
       "title": {
@@ -2466,7 +2490,9 @@
     "zerossl_api_retry_delay": "ZeroSSL API पुनः प्रयासों के बीच सेकंड में विलंब।",
     "zerossl_api_connect_timeout": "ZeroSSL API कॉल के लिए सेकंड में कनेक्शन टाइमआउट।",
     "zerossl_api_max_time": "प्रत्येक ZeroSSL API अनुरोध के लिए सेकंड में अधिकतम कुल समय।",
-    "config_global_types_available": "अब आप अपनी कस्टम कॉन्फ़िगरेशन के लिए ग्लोबल प्रकार चुन सकते हैं।"
+    "config_global_types_available": "अब आप अपनी कस्टम कॉन्फ़िगरेशन के लिए ग्लोबल प्रकार चुन सकते हैं।",
+    "enroll_disabled_by_method": "{{hostname}} अपने वातावरण ({{method}}) से प्राप्त है; नामांकन केवल उन इंस्टेंस पर लागू होता है जो कंट्रोल प्लेन के स्वामित्व में हैं",
+    "instance_credential_age": "क्रेडेंशियल अंतिम बार अपडेट किया गया: {{updated}}"
   },
   "totp": {
     "cant_access": "क्या आपको अपना प्रमाणीकरण कोड नहीं मिल रहा है?",
@@ -2826,7 +2852,8 @@
       "window": "सेकंड में समयावधि",
       "changePosition": "{{total}} में से नियम {{n}}, स्थिति बदलें",
       "newValue": "नया मान",
-      "positionMove": "{{total}} में से स्थिति {{n}} — स्थानांतरित करने के लिए क्लिक करें"
+      "positionMove": "{{total}} में से स्थिति {{n}} — स्थानांतरित करने के लिए क्लिक करें",
+      "crowdsecField": "CrowdSec तथ्य"
     },
     "attach": "सेवाओं से जोड़ें",
     "attach_help": "नियम केवल उन सेवाओं पर लागू होते हैं जिनसे वर्कफ़्लो जुड़ा हुआ है।",
@@ -3005,7 +3032,14 @@
       "v_match": "मेल खाया",
       "v_unknown": "अज्ञात",
       "v_unknown_help": "इस नियम के लिए आवश्यक तथ्य निर्धारित नहीं हो सका, इसलिए यह कभी मेल नहीं खा सकता।",
-      "whitelisted": "यह क्लाइंट श्वेतसूची में है"
+      "whitelisted": "यह क्लाइंट श्वेतसूची में है",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec ने इसकी अनुमति दी",
+      "crowdsec_help": "वर्कफ़्लो चलने से पहले CrowdSec ने इस अनुरोध के बारे में जो तय किया। वह अनुरोध जिसका CrowdSec ने कभी मूल्यांकन ही नहीं किया, उस अनुरोध जैसा नहीं है जिसके विरुद्ध कुछ भी नहीं है: पहला CrowdSec की शर्त को अनिश्चित छोड़ देता है, दूसरा उसे गलत बना देता है।",
+      "crowdsec_remediated": "CrowdSec ने इसका उपचार किया",
+      "crowdsec_remediation": "उपचार",
+      "crowdsec_source": "निर्णय का स्रोत",
+      "crowdsec_unavailable": "CrowdSec ने इस अनुरोध का मूल्यांकन नहीं किया"
     },
     "threshold": "केवल एक दर से ऊपर",
     "threshold_count": "अनुरोध",
@@ -3056,12 +3090,26 @@
     "condition": {
       "ip": "IP / CIDR",
       "method": "HTTP विधि",
-      "uri": "URI"
+      "uri": "URI",
+      "crowdsec": "CrowdSec निर्णय"
     },
     "uri_match": {
       "exact": "बिल्कुल समान है",
       "prefix": "से शुरू होता है",
       "regex": "रेगेक्स से मेल खाता है"
+    },
+    "crowdsec_field": {
+      "remediation": "उपचार है",
+      "source": "स्रोत है"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "प्रतिबंध",
+      "captcha": "कैप्चा",
+      "lapi": "लोकल API"
+    },
+    "reason": {
+      "sentence": "सुरक्षा वर्कफ़्लो {{workflow}}: {{action}}"
     }
   },
   "request_path": {
@@ -3117,6 +3165,16 @@
       "title": "संलग्न संसाधन",
       "unavailable": "उपलब्ध नहीं",
       "nothing_available": "संलग्न करने के लिए कुछ उपलब्ध नहीं है।"
+    },
+    "default_server": {
+      "certificate": {
+        "action": "सर्टिफिकेट ओवरराइड संपादित करें",
+        "help": "अज्ञात होस्टनेम के लिए प्रस्तुत किया गया सर्टिफिकेट। यह कस्टम सर्टिफिकेट प्लगइन की एक वैश्विक सेटिंग है, और यदि यह किसी कॉन्फ़िगर की गई सेवा को कवर करता है तो इसे अस्वीकार कर दिया जाता है।",
+        "title": "डिफ़ॉल्ट सर्वर सर्टिफिकेट"
+      },
+      "explainer": "उन अनुरोधों का जवाब देता है जो किसी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते: अज्ञात होस्टनेम, सीधी IP एक्सेस। इसका सर्टिफिकेट, TLS, हेडर और एरर पेज यहाँ कॉन्फ़िगर करें।",
+      "name": "डिफ़ॉल्ट सर्वर",
+      "single_site": "जब MULTISITE को yes पर सेट किया जाता है तो डिफ़ॉल्ट सर्वर कॉन्फ़िगर करने योग्य हो जाता है; सिंगल-साइट मोड में यह अपने बिल्ट-इन व्यवहार को बनाए रखता है और उन अनुरोधों का जवाब देता है जो किसी कॉन्फ़िगर की गई सेवा से मेल नहीं खाते।"
     }
   },
   "onboarding": {
@@ -3180,5 +3238,29 @@
       "title": "नया क्या है"
     },
     "subtitle": "इस इंस्टॉलेशन के साथ आए चेंजलॉग से सीधे, BunkerWeb की सभी रिलीज़, नवीनतम पहले।"
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "एंटीबॉट चुनौती ({{provider}}) प्रस्तुत की गई"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "इस इंस्टेंस का क्रेडेंशियल रद्द करें? कंट्रोल प्लेन अब इसे एक्सेस नहीं कर पाएगा।",
+    "rotate_credential": "इस इंस्टेंस का क्रेडेंशियल घुमाएं? यदि इंस्टेंस पहुँच योग्य नहीं है तो विफल हो जाता है।"
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "अनुरोध अवरोधित",
+        "captcha": "कैप्चा चुनौती",
+        "challenge": "बॉट-पहचान चुनौती"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (परिदृश्य: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
   }
 }
