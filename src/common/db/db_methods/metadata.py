@@ -7,9 +7,10 @@ from os import environ, urandom
 from typing import Any, Dict, List, Literal, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from certificate_utils import ACTIVE_KEY_ENV, KEYS_ENV  # type: ignore
-from model import Metadata, Plugins  # type: ignore
+from common_utils import merge_template_settings, split_templates  # type: ignore
+from model import Global_values, Metadata, Plugins, Template_settings  # type: ignore
 
-from sqlalchemy import or_, select, text, update
+from sqlalchemy import delete, or_, select, text, update
 
 from .common import DatabaseMixinBase, retry_on_transient_db_errors
 
@@ -132,6 +133,132 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
             except BaseException as e:
                 return f"Error: {e}"
 
+    def cleanup_template_polluted_global_values(self) -> List[Tuple[str, str, str]]:
+        """One-shot cleanup of ``bw_global_values`` rows a pre-fix (< c965d81ec) multi-layer
+        template save wrote as ``method="scheduler"`` rows carrying the TEMPLATE's own value,
+        instead of leaving the setting unset. Those rows do not self-heal (the update branch
+        in ``config_save.py`` only deletes a row on a VALUE CHANGE) and they then shield future
+        template edits: ``config_read`` skips a layer's default for any key whose stored row
+        carries a non-default method. See ``.cache/results-2026-09-01-wave11/report-L-B.md``,
+        "Open questions" Q1.
+
+        A row is pollution only if it matches ALL of:
+          * ``method == "scheduler"``
+          * its ``setting_id`` is one the currently active global ``USE_TEMPLATE`` layers declare
+          * its value equals THAT LAYER'S resolved (last-wins across layers) default
+
+        Post-fix, ``config_save`` never stores a row whose value equals the resolved template
+        default (it is implicit and gets skipped or deleted instead of written), so every row
+        this rule matches today predates the fix -- safe to delete unconditionally, and no
+        future save can ever create a false positive here again. That guarantee assumes a
+        non-NULL layer default: ``Template_settings.default`` is nullable, and a NULL layer
+        default compares here as ``""`` (``_empty_if_none``) while ``config_save.py`` compares
+        it raw (``value == nm_default``, no normalisation) -- a real, PO-parked divergence
+        (L-B "Open questions" Q2), not something this function should silently paper over by
+        picking a side.
+
+        Guarded by ``bw_metadata.template_values_cleaned_at``: NULL means no pass has completed,
+        a timestamp means one has and this returns immediately. The marker is written in the same
+        transaction as the deletes, so a failed sweep leaves it NULL and the next process retries.
+        The in-process flag on the caller (``get_metadata``'s ``self``) is kept in front of it: it
+        is what stops the marker SELECT itself from running on every ``get_metadata()`` call in a
+        long-lived process (the API's ``get_db()`` singleton serves it on every UI page). It is not
+        sufficient on its own -- "once per ``Database`` instance" is **not** once per process: a
+        fresh ``Database`` is built per job execution (``jobs.py``'s ``Job.__init__``, since
+        ``src/worker/executor.py`` loads each job module from scratch with no caching), per
+        ``gen/save_config.py`` subprocess (every scheduler boot and every SIGHUP/config save), and
+        per ``bwcli`` invocation, which is what made the sweep run over and over.
+
+        The marker is deliberately NOT set on the "no active template layers" early return: a stack
+        that adopts templates later would otherwise find the sweep already disabled before it could
+        ever match a row. The residual, accepted: pollution left by a template that is swapped out
+        *after* the first completed pass is never swept. It is pre-fix legacy data only, and the
+        recovery is one row delete.
+        """
+        deleted: List[Tuple[str, str, str]] = []
+        if self.readonly:
+            return deleted
+
+        try:
+            with self._db_session() as session:
+                marker = session.execute(select(Metadata.template_values_cleaned_at).filter_by(id=1).limit(1)).first()
+                if marker is not None and marker.template_values_cleaned_at is not None:
+                    return deleted
+
+                use_template_row = session.execute(select(Global_values.value).filter_by(setting_id="USE_TEMPLATE", suffix=0).limit(1)).first()
+                template_used = self._empty_if_none(use_template_row.value) if use_template_row else ""
+                template_ids = split_templates(template_used)
+                if not template_ids:
+                    return deleted
+
+                layers: Dict[str, Dict[Tuple[str, int], Optional[str]]] = {}
+                owning_layer: Dict[Tuple[str, int], str] = {}
+                for ts in session.execute(
+                    select(Template_settings.template_id, Template_settings.setting_id, Template_settings.suffix, Template_settings.default)
+                    .filter(Template_settings.template_id.in_(template_ids))
+                    .order_by(Template_settings.order)
+                ):
+                    layers.setdefault(ts.template_id, {})[(ts.setting_id, ts.suffix or 0)] = ts.default
+
+                # Replayed in declared layer order so the last layer to declare a key wins --
+                # the same precedence merge_template_settings folds the values with below.
+                for template_id in template_ids:
+                    for key in layers.get(template_id, {}):
+                        owning_layer[key] = template_id
+
+                defaults = merge_template_settings(layers, template_ids)
+                if not defaults:
+                    return deleted
+
+                declared_setting_ids = {setting_id for setting_id, _ in defaults}
+
+                candidates = session.execute(
+                    select(Global_values.setting_id, Global_values.suffix, Global_values.value).filter(
+                        Global_values.method == "scheduler",
+                        Global_values.setting_id.in_(declared_setting_ids),
+                    )
+                ).all()
+
+                for row in candidates:
+                    key = (row.setting_id, row.suffix or 0)
+                    if key not in defaults:
+                        continue
+                    row_value = self._empty_if_none(row.value)
+                    if row_value != self._empty_if_none(defaults[key]):
+                        continue
+
+                    result = session.execute(
+                        delete(Global_values).where(
+                            Global_values.setting_id == row.setting_id,
+                            Global_values.suffix == row.suffix,
+                            Global_values.method == "scheduler",
+                        )
+                    )
+                    # Only log/report a row that THIS call actually removed. Several Database
+                    # instances can reach this concurrently (see the frequency note above); a
+                    # second one racing the first would otherwise log a "deleted" line for a row
+                    # the first already removed, misrepresenting the audit trail the brief asked
+                    # for a log of.
+                    if result.rowcount:
+                        deleted.append((row.setting_id, row_value, owning_layer.get(key, "")))
+
+                # A pass completed: stamp it in the SAME transaction as the deletes, so a failure
+                # anywhere above rolls the marker back with them and the next process retries.
+                session.execute(update(Metadata).filter_by(id=1).values({"template_values_cleaned_at": datetime.now().astimezone()}))
+                session.commit()
+        except BaseException as e:
+            # debug, not error: a transient lock-wait/permission failure here must not land a "❌"
+            # in the scheduler log stream that tests/core/db.yml's not_log assertions watch for
+            # (Criticos round 3) -- this is a best-effort one-shot cleanup, not a required step,
+            # and the empty return already tells every caller nothing was cleaned up this call.
+            self.logger.debug(f"Error while cleaning up template-polluted global values: {e}")
+            return []
+
+        for setting_id, value, template_id in deleted:
+            self.logger.info(f"Deleted template-polluted bw_global_values row: setting={setting_id!r} value={value!r} layer={template_id!r}")
+
+        return deleted
+
     @retry_on_transient_db_errors
     def get_metadata(self) -> Dict[str, Any]:
         """Get the metadata from the database"""
@@ -194,6 +321,15 @@ class DatabaseMetadataMixin(DatabaseMixinBase):
                     plugin.id: plugin.last_config_change
                     for plugin in session.execute(select(Plugins.id, Plugins.last_config_change).filter_by(config_changed=True)).all()
                 }
+
+        # Gated on is_initialized, not merely "after the session block": a fresh install has no
+        # bw_global_values table yet (initialize_db() creates the schema, this only reads it), and
+        # the cleanup's own error handling would otherwise log an ERROR-level "no such table" on
+        # every call until the schema exists -- exactly the noisy, misleading failure this is meant
+        # to avoid, not reproduce.
+        if data["is_initialized"] and not getattr(self, "_template_defaults_cleanup_attempted", False):
+            self._template_defaults_cleanup_attempted = True
+            self.cleanup_template_polluted_global_values()
 
         return data
 

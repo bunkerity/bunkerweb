@@ -807,6 +807,10 @@ class Metadata(Base):
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
 
+    # One-shot marker for `cleanup_template_polluted_global_values`: NULL means the sweep has
+    # never completed a pass, a timestamp means it has and must not run again. A datetime rather
+    # than a boolean — same single column, no server_default, and it answers "when" for support.
+    template_values_cleaned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class JSONText(TypeDecorator):
     """
