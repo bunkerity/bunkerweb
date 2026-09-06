@@ -33,7 +33,9 @@
     "plugin_file_invalid": "Please upload a valid plugin archive (.zip, .tar.gz, or .tar.xz).",
     "plugin_file_too_large": "The plugin archive exceeds the 50 MB limit.",
     "plugin_upload_failed": "An error occurred while uploading the plugin archive. Please try again.",
-    "services_import_invalid_file": "Please upload a valid services export file (.env or .zip)."
+    "services_import_invalid_file": "Please upload a valid services export file (.env or .zip).",
+    "enroll_failed": "Could not issue an enrollment code.",
+    "credential_action_failed": "The action failed."
   },
   "aria": {
     "label": {
@@ -581,7 +583,7 @@
         "title": "Services"
       },
       "top_reasons": {
-        "title": "Top reasons for blocks"
+        "title": "Top report reasons"
       },
       "total_requests": {
         "title": "Total Requests"
@@ -804,6 +806,7 @@
   },
   "flash": {
     "check_jobs_for_details": "Check the Jobs page for details.",
+    "configuration_pending_instance": "Configuration not applied yet — waiting for an instance to come up.",
     "easter_egg": "If you read this, it means that you're curious",
     "error": "Error",
     "last_configuration_change_failed": "Your last configuration change could not be applied.",
@@ -906,7 +909,10 @@
       "zerossl_api_retry_delay": "ZeroSSL API Retry Delay",
       "zerossl_api_connect_timeout": "ZeroSSL API Connect Timeout",
       "zerossl_api_max_time": "ZeroSSL API Max Time",
-      "passkey_name": "Passkey name"
+      "passkey_name": "Passkey name",
+      "enrollment_code": "Enrollment code",
+      "enroll_oneliner_docker": "Docker",
+      "enroll_oneliner_linux": "Linux"
     },
     "placeholder": {
       "2fa_code": "Enter code",
@@ -934,6 +940,14 @@
     "view_all_settings": "View all {{count}} settings"
   },
   "instance": {
+    "enrollment": {
+      "enrolled": "Enrolled",
+      "pending": "Pending enrollment",
+      "revoked": "Revoked"
+    },
+    "tls": {
+      "pinned": "TLS pinned"
+    },
     "type": {
       "container": "Container",
       "pod": "Pod",
@@ -1077,7 +1091,9 @@
       "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
       "unban_filtered_confirmation": "Are you sure you want to unban all {{count}} matching bans?",
       "update_duration_alert": "Select a new duration for the selected bans:",
-      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:"
+      "update_filtered_duration_alert": "Select a new duration for all {{count}} matching bans:",
+      "enroll_shown_once": "This code is shown once. Copy it now — it cannot be displayed again.",
+      "enroll_description": "Start the instance with these variables. It redeems the code once at boot and receives its own credential."
     },
     "button": {
       "fetch_global_settings_confirm": "Apply global settings",
@@ -1113,7 +1129,8 @@
       "reset_template_config": "Reset Template Configuration?",
       "security_report_details": "Security Report Details",
       "server_name_not_unique": "Server Name Is Not Unique",
-      "update_duration": "Update Ban Duration"
+      "update_duration": "Update Ban Duration",
+      "enroll_instance": "Enroll instance"
     }
   },
   "mode": {
@@ -1907,7 +1924,9 @@
     "yes": "Yes",
     "no_file_selected": "No file selected",
     "no_url_available": "No URL available",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "deferred": "Deferred",
+    "deferred_tooltip": "Deferred — waiting for an instance to come up: {{reason}}"
   },
   "step": {
     "next": "Next",
@@ -2272,7 +2291,10 @@
       "update_ban_duration": "Update ban duration",
       "value_from_global": "Value from global settings",
       "back_to_file_upload": "Back to file upload",
-      "switch_to_text_editor": "Switch to text editor"
+      "switch_to_text_editor": "Switch to text editor",
+      "enroll_instance": "Issue an enrollment code for {{hostname}}",
+      "rotate_credential": "Rotate the credential of {{hostname}}",
+      "revoke_credential": "Revoke the credential of {{hostname}}"
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
@@ -2338,7 +2360,9 @@
       "view_file": "View {{filename}}",
       "view_service": "View Service {{service}}",
       "view_template": "View Template {{template}}",
-      "manage_activation": "Manage activation of {{name}} in global settings"
+      "manage_activation": "Manage activation of {{name}} in global settings",
+      "view_default_server": "View the default server",
+      "edit_default_server": "Edit the default server"
     },
     "modal": {
       "title": {
@@ -2520,7 +2544,9 @@
     "zerossl_api_retry_delay": "Delay in seconds between ZeroSSL API retries.",
     "zerossl_api_connect_timeout": "Connection timeout in seconds for ZeroSSL API calls.",
     "zerossl_api_max_time": "Maximum total time in seconds for each ZeroSSL API request.",
-    "config_global_types_available": "You can now select global types for your custom configuration."
+    "config_global_types_available": "You can now select global types for your custom configuration.",
+    "instance_credential_age": "Credential last updated: {{updated}}",
+    "enroll_disabled_by_method": "{{hostname}} is sourced from its environment ({{method}}); enrollment only applies to instances the control plane owns"
   },
   "totp": {
     "cant_access": "Can't access your authenticator?",
@@ -2753,7 +2779,8 @@
       "ruleErrors": "{{count}} validation problems in this rule",
       "changePosition": "Rule {{n}} of {{total}}, change position",
       "newValue": "New value",
-      "positionMove": "Position {{n}} of {{total}} — click to move"
+      "positionMove": "Position {{n}} of {{total}} — click to move",
+      "crowdsecField": "CrowdSec fact"
     },
     "attach": "Attach to services",
     "attach_help": "Rules are only enforced on the services a workflow is attached to.",
@@ -2897,6 +2924,13 @@
       "assume_regex_budget": "Assumes the instance's regex budget is not exhausted.",
       "assumptions": "Assumptions",
       "country": "Country",
+      "crowdsec": "CrowdSec",
+      "crowdsec_allowed": "CrowdSec allowed it",
+      "crowdsec_help": "What CrowdSec decided about this request before the workflows ran. A request CrowdSec never judged is not the same as one it had nothing against: the first leaves a CrowdSec condition undecided, the second makes it false.",
+      "crowdsec_remediated": "CrowdSec remediated it",
+      "crowdsec_remediation": "Remediation",
+      "crowdsec_source": "Verdict source",
+      "crowdsec_unavailable": "CrowdSec did not judge this request",
       "detail_challenge": "The challenge takes over; the rest of the security stack still runs.",
       "detail_detect": "This service is in detect mode, so nothing is actually enforced.",
       "detail_status": "The client sees {{status}}.",
@@ -2981,6 +3015,7 @@
       "redirect": "Send it elsewhere"
     },
     "condition": {
+      "crowdsec": "CrowdSec verdict",
       "ip": "IP / CIDR",
       "method": "HTTP method",
       "uri": "URI"
@@ -2989,6 +3024,19 @@
       "exact": "is exactly",
       "prefix": "starts with",
       "regex": "matches the regex"
+    },
+    "reason": {
+      "sentence": "Security workflow {{workflow}}: {{action}}"
+    },
+    "crowdsec_field": {
+      "remediation": "remediation is",
+      "source": "source is"
+    },
+    "crowdsec_value": {
+      "appsec": "AppSec",
+      "ban": "ban",
+      "captcha": "captcha",
+      "lapi": "Local API"
     }
   },
   "request_path": {
@@ -3107,6 +3155,16 @@
     "subtitle": "Reverse-proxy cache status, aggregate hit-rate metrics and immediate purge controls."
   },
   "service": {
+    "default_server": {
+      "certificate": {
+        "action": "Edit the certificate override",
+        "help": "The certificate presented for an unknown hostname. It is a global setting of the custom certificate plugin, and it is refused if it covers a configured service.",
+        "title": "Default server certificate"
+      },
+      "explainer": "Answers requests that match no configured service: unknown hostnames, raw IP access. Configure its certificate, TLS, headers and error pages here.",
+      "name": "Default server",
+      "single_site": "The default server becomes configurable when MULTISITE is set to yes; in single-site mode it keeps its built-in behaviour and answers requests that match no configured service."
+    },
     "resources": {
       "attach": "Attach",
       "conflict": {
@@ -3180,5 +3238,29 @@
       "title": "What's new"
     },
     "subtitle": "Every release of BunkerWeb, newest first, straight from the changelog shipped with this installation."
+  },
+  "crowdsec": {
+    "reason": {
+      "action": {
+        "ban": "request blocked",
+        "captcha": "captcha challenge",
+        "challenge": "bot-detection challenge"
+      },
+      "sentence": "{{source}}: {{action}}",
+      "sentence_scenario": "{{source}}: {{action}} (scenario: {{scenario}})",
+      "source": {
+        "appsec": "CrowdSec AppSec",
+        "lapi": "CrowdSec LAPI"
+      }
+    }
+  },
+  "antibot": {
+    "reason": {
+      "sentence": "Antibot challenge ({{provider}}) served"
+    }
+  },
+  "confirm": {
+    "revoke_credential": "Revoke this instance's credential? The control plane will stop being able to reach it.",
+    "rotate_credential": "Rotate this instance's credential? It fails if the instance is unreachable."
   }
 }

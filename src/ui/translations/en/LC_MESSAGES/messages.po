@@ -58,8 +58,14 @@ msgstr "TLS & certificates"
 msgid "alert.configs_import_invalid_file"
 msgstr "Please upload a valid custom configurations export file (.json)."
 
+msgid "alert.credential_action_failed"
+msgstr "The action failed."
+
 msgid "alert.custom_end_date_required"
 msgstr "Please select a custom end date."
+
+msgid "alert.enroll_failed"
+msgstr "Could not issue an enrollment code."
 
 msgid "alert.important"
 msgstr "Important"
@@ -87,6 +93,9 @@ msgstr "This action is disabled in read-only mode."
 
 msgid "alert.services_import_invalid_file"
 msgstr "Please upload a valid services export file (.env or .zip)."
+
+msgid "antibot.reason.sentence"
+msgstr "Antibot challenge (%(provider)s) served"
 
 msgid "aria.label.clear_search"
 msgstr "Clear search"
@@ -994,6 +1003,12 @@ msgstr "The plugin list could not be loaded, so this page cannot be edited safel
 msgid "configs.subtitle"
 msgstr "Custom NGINX configuration snippets for your services — create, edit, and manage HTTP, ModSecurity, and stream-level overrides."
 
+msgid "confirm.revoke_credential"
+msgstr "Revoke this instance's credential? The control plane will stop being able to reach it."
+
+msgid "confirm.rotate_credential"
+msgstr "Rotate this instance's credential? It fails if the instance is unreachable."
+
 msgid "country.AD"
 msgstr "Andorra"
 
@@ -1750,6 +1765,27 @@ msgstr "Zimbabwe"
 msgid "country.not_applicable"
 msgstr "N/A"
 
+msgid "crowdsec.reason.action.ban"
+msgstr "request blocked"
+
+msgid "crowdsec.reason.action.captcha"
+msgstr "captcha challenge"
+
+msgid "crowdsec.reason.action.challenge"
+msgstr "bot-detection challenge"
+
+msgid "crowdsec.reason.sentence"
+msgstr "%(source)s: %(action)s"
+
+msgid "crowdsec.reason.sentence_scenario"
+msgstr "%(source)s: %(action)s (scenario: %(scenario)s)"
+
+msgid "crowdsec.reason.source.appsec"
+msgstr "CrowdSec AppSec"
+
+msgid "crowdsec.reason.source.lapi"
+msgstr "CrowdSec LAPI"
+
 msgid "dashboard.alert.jobs_failed"
 msgstr "One or more jobs failed on their last run."
 
@@ -1805,7 +1841,7 @@ msgid "dashboard.card.services.title"
 msgstr "Services"
 
 msgid "dashboard.card.top_reasons.title"
-msgstr "Top reasons for blocks"
+msgstr "Top report reasons"
 
 msgid "dashboard.card.total_requests.title"
 msgstr "Total Requests"
@@ -2317,6 +2353,9 @@ msgstr "The security-key request failed. Please try again."
 msgid "flash.check_jobs_for_details"
 msgstr "Check the Jobs page for details."
 
+msgid "flash.configuration_pending_instance"
+msgstr "Configuration not applied yet — waiting for an instance to come up."
+
 msgid "flash.easter_egg"
 msgstr "If you read this, it means that you're curious"
 
@@ -2463,6 +2502,15 @@ msgstr "Email for Let's Encrypt"
 
 msgid "form.label.end_date"
 msgstr "End Date"
+
+msgid "form.label.enroll_oneliner_docker"
+msgstr "Docker"
+
+msgid "form.label.enroll_oneliner_linux"
+msgstr "Linux"
+
+msgid "form.label.enrollment_code"
+msgstr "Enrollment code"
 
 msgid "form.label.hostname"
 msgstr "Hostname"
@@ -2646,6 +2694,18 @@ msgstr "Password must have at least 1 uppercase letter."
 
 msgid "input_list.view_all_settings"
 msgstr "View all %(count)s settings"
+
+msgid "instance.enrollment.enrolled"
+msgstr "Enrolled"
+
+msgid "instance.enrollment.pending"
+msgstr "Pending enrollment"
+
+msgid "instance.enrollment.revoked"
+msgstr "Revoked"
+
+msgid "instance.tls.pinned"
+msgstr "TLS pinned"
 
 msgid "instance.type.container"
 msgstr "Container"
@@ -2941,6 +3001,12 @@ msgstr "Used by the global settings"
 msgid "modal.body.delete_template_services_list"
 msgstr "Used by services: %(services)s"
 
+msgid "modal.body.enroll_description"
+msgstr "Start the instance with these variables. It redeems the code once at boot and receives its own credential."
+
+msgid "modal.body.enroll_shown_once"
+msgstr "This code is shown once. Copy it now — it cannot be displayed again."
+
 msgid "modal.body.export_services_intro"
 msgstr "The selected services will be exported. Enable the option below to bundle their attached custom configurations into a .zip archive."
 
@@ -3051,6 +3117,9 @@ msgstr "Delete template"
 
 msgid "modal.title.edit_template"
 msgstr "Edit template: %(name)s"
+
+msgid "modal.title.enroll_instance"
+msgstr "Enroll instance"
 
 msgid "modal.title.export_services"
 msgstr "Export services"
@@ -4213,6 +4282,24 @@ msgstr "Block"
 msgid "security_mode.detect"
 msgstr "Detect"
 
+msgid "service.default_server.certificate.action"
+msgstr "Edit the certificate override"
+
+msgid "service.default_server.certificate.help"
+msgstr "The certificate presented for an unknown hostname. It is a global setting of the custom certificate plugin, and it is refused if it covers a configured service."
+
+msgid "service.default_server.certificate.title"
+msgstr "Default server certificate"
+
+msgid "service.default_server.explainer"
+msgstr "Answers requests that match no configured service: unknown hostnames, raw IP access. Configure its certificate, TLS, headers and error pages here."
+
+msgid "service.default_server.name"
+msgstr "Default server"
+
+msgid "service.default_server.single_site"
+msgstr "The default server becomes configurable when MULTISITE is set to yes; in single-site mode it keeps its built-in behaviour and answers requests that match no configured service."
+
 msgid "service.resources.attach"
 msgstr "Attach"
 
@@ -4842,6 +4929,12 @@ msgstr "Could not connect to the blog for news updates."
 
 msgid "status.default_server"
 msgstr "Default Server"
+
+msgid "status.deferred"
+msgstr "Deferred"
+
+msgid "status.deferred_tooltip"
+msgstr "Deferred — waiting for an instance to come up: %(reason)s"
 
 msgid "status.done"
 msgstr "Completed"
@@ -5995,6 +6088,9 @@ msgstr "Delete Service %(name)s"
 msgid "tooltip.button.delete_template"
 msgstr "Delete Template %(name)s"
 
+msgid "tooltip.button.enroll_instance"
+msgstr "Issue an enrollment code for %(hostname)s"
+
 msgid "tooltip.button.force_check"
 msgstr "Schedules a check; downloads only if updates exist."
 
@@ -6015,6 +6111,12 @@ msgstr "Reset to default value"
 
 msgid "tooltip.button.reset_global"
 msgstr "Reset to global value"
+
+msgid "tooltip.button.revoke_credential"
+msgstr "Revoke the credential of %(hostname)s"
+
+msgid "tooltip.button.rotate_credential"
+msgstr "Rotate the credential of %(hostname)s"
 
 msgid "tooltip.button.run_job"
 msgstr "Run Job %(job)s"
@@ -6157,6 +6259,9 @@ msgstr "Email must be between 1 and 256 characters."
 msgid "tooltip.email_lets_encrypt"
 msgstr "The email address to register with Let's Encrypt for certificate management and notifications."
 
+msgid "tooltip.enroll_disabled_by_method"
+msgstr "%(hostname)s is sourced from its environment (%(method)s); enrollment only applies to instances the control plane owns"
+
 msgid "tooltip.fetch_global_settings"
 msgstr "Fetch global settings and apply them to the current template"
 
@@ -6165,6 +6270,9 @@ msgstr "Follow mode is only available on the latest page"
 
 msgid "tooltip.global_settings_source"
 msgstr "Value inherited from global settings."
+
+msgid "tooltip.instance_credential_age"
+msgstr "Credential last updated: %(updated)s"
 
 msgid "tooltip.instance_not_up"
 msgstr "Instance %(hostname)s is currently not responding ('up')."
@@ -6211,6 +6319,9 @@ msgstr "Download %(filename)s"
 msgid "tooltip.link.edit_config"
 msgstr "Edit Custom Config %(name)s"
 
+msgid "tooltip.link.edit_default_server"
+msgstr "Edit the default server"
+
 msgid "tooltip.link.edit_service"
 msgstr "Edit Service %(service)s"
 
@@ -6228,6 +6339,9 @@ msgstr "Manage activation of %(name)s in global settings"
 
 msgid "tooltip.link.view_config"
 msgstr "View Custom Config %(name)s"
+
+msgid "tooltip.link.view_default_server"
+msgstr "View the default server"
 
 msgid "tooltip.link.view_file"
 msgstr "View %(filename)s"
@@ -7078,6 +7192,9 @@ msgstr "Change combinator, currently"
 msgid "workflows.aria.conditionType"
 msgstr "Condition type"
 
+msgid "workflows.aria.crowdsecField"
+msgstr "CrowdSec fact"
+
 msgid "workflows.aria.denyStatus"
 msgstr "Deny status"
 
@@ -7246,6 +7363,9 @@ msgstr "The rules are copied; the service attachments are not."
 msgid "workflows.clone_name"
 msgstr "Name of the copy"
 
+msgid "workflows.condition.crowdsec"
+msgstr "CrowdSec verdict"
+
 msgid "workflows.condition.ip"
 msgstr "IP / CIDR"
 
@@ -7260,6 +7380,24 @@ msgstr "Delete this rule? Everything below it moves up one position."
 
 msgid "workflows.copySuffix"
 msgstr " (copy)"
+
+msgid "workflows.crowdsec_field.remediation"
+msgstr "remediation is"
+
+msgid "workflows.crowdsec_field.source"
+msgstr "source is"
+
+msgid "workflows.crowdsec_value.appsec"
+msgstr "AppSec"
+
+msgid "workflows.crowdsec_value.ban"
+msgstr "ban"
+
+msgid "workflows.crowdsec_value.captcha"
+msgstr "captcha"
+
+msgid "workflows.crowdsec_value.lapi"
+msgstr "Local API"
 
 msgid "workflows.delete"
 msgstr "Delete workflow"
@@ -7393,6 +7531,9 @@ msgstr "Rules are evaluated in order and the first one that matches wins. A rule
 msgid "workflows.readonly"
 msgstr "The database is read-only. Workflows can be inspected but not changed."
 
+msgid "workflows.reason.sentence"
+msgstr "Security workflow %(workflow)s: %(action)s"
+
 msgid "workflows.rule.disabled"
 msgstr "Disabled"
 
@@ -7515,6 +7656,27 @@ msgstr "Assumptions"
 
 msgid "workflows.test.country"
 msgstr "Country"
+
+msgid "workflows.test.crowdsec"
+msgstr "CrowdSec"
+
+msgid "workflows.test.crowdsec_allowed"
+msgstr "CrowdSec allowed it"
+
+msgid "workflows.test.crowdsec_help"
+msgstr "What CrowdSec decided about this request before the workflows ran. A request CrowdSec never judged is not the same as one it had nothing against: the first leaves a CrowdSec condition undecided, the second makes it false."
+
+msgid "workflows.test.crowdsec_remediated"
+msgstr "CrowdSec remediated it"
+
+msgid "workflows.test.crowdsec_remediation"
+msgstr "Remediation"
+
+msgid "workflows.test.crowdsec_source"
+msgstr "Verdict source"
+
+msgid "workflows.test.crowdsec_unavailable"
+msgstr "CrowdSec did not judge this request"
 
 msgid "workflows.test.detail_challenge"
 msgstr "The challenge takes over; the rest of the security stack still runs."
