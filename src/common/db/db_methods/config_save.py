@@ -23,6 +23,7 @@ from model import (  # type: ignore
 from common_utils import merge_template_settings, split_templates  # type: ignore
 
 from location_claims import LOCATION_TRIGGERS, inline_family_conflict, inline_location_conflict  # type: ignore
+from default_server import DEFAULT_SERVER_ID, is_reserved_default_server  # type: ignore
 from redirect_resolver import config_servers, scan_prefixes  # type: ignore
 from resource_group_resolver import is_rule_key, kind_for_key, validate_resource_group_refs  # type: ignore
 from ports import list_moved, port_list_setting  # type: ignore
@@ -64,6 +65,18 @@ class _SaveConfigContext:
     # row only for keys in this set. Empty means the scheduler never touches ui/api rows
     # (the incoming config is treated as default-filled, not user-declared).
     explicit_keys: frozenset = field(default_factory=frozenset)
+
+
+def _is_reserved(service: Any) -> bool:
+    """Is this ``bw_services`` ROW the reserved default server -- id AND method?
+
+    The three deletion-ownership lists below all used to test the id alone, which also caught an
+    operator's own service that took the name before 1.7 reserved it. That row has no ``server{}``
+    block any more (``http.conf`` drops the id by name, whatever the method) and the seeding refuses
+    to adopt it, so renaming or deleting it is the only recovery the product offers -- and excluding
+    it here made both the API and the UI answer success while the row survived.
+    """
+    return is_reserved_default_server({"id": service.id, "method": service.method})
 
 
 def _scheduler_can_override(ctx: _SaveConfigContext, full_key: str, incoming_value: Any) -> bool:
@@ -710,6 +723,25 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                 retry_on_conflict=False,
             )
 
+        # Second seeding trigger for the reserved `default-server` row. The API lifespan is the
+        # first, and it decides on the MULTISITE value the database holds AT THAT MOMENT -- which on
+        # a fresh install is "never written" and on a long-lived single-site install is "no".
+        # Neither is final: THIS is the call that writes MULTISITE at all, and an operator can flip
+        # it to `yes` years later, from the global settings page, with nothing restarting the API
+        # afterwards. Without this the row (and the whole Default server page) would appear only at
+        # the next API boot. `seed_default_server_service` owns the multisite decision and returns on
+        # a primary-key hit, so this is one SELECT per save and a no-op everywhere else.
+        #
+        # Outside the session block, like the retry above and for the same reason: it opens a scoped
+        # session of its own.
+        #
+        # `skip_service_management` is deliberately NOT honoured here. It means "do not reconcile the
+        # roster from SERVER_NAME"; the global-settings save that flips MULTISITE is exactly that
+        # kind of save, and it is the one this exists for.
+        error = self.seed_default_server_service()
+        if error:
+            self.logger.warning(f"Unable to seed the reserved default-server service: {error}")
+
         return changed_plugins
 
     def _sc_compute_drafted_service_ids(
@@ -979,10 +1011,27 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # SERVER_NAME may remove. "wizard" stays out because the wizard service cannot be deleted
             # at all (api/app/routers/services.py:240, 403). The autoconf branches below are autoconf's
             # ingress-teardown semantics, covered by the same token.
-            method_services = [s for s in db_services if s.method == ctx.method or (s.method in ("ui", "api") and ctx.method in ("ui", "api"))]
+            # `_is_reserved` on all three lists below: the reserved `default-server` row is
+            # PERMANENT (conception option (b), PO ruling 3) and it is seeded with method "wizard",
+            # which puts it in the way of two different branches.
+            #   * `foreign_services` -- anything not autoconf/scheduler. A permanent wizard row makes
+            #     it permanently non-empty, so autoconf's legitimate "last ingress removed" teardown
+            #     ("SERVER_NAME" empty) would abandon the whole save in EVERY autoconf deployment.
+            #   * `method_services` / `missing_ids` -- deletion ownership. The reserved row is never
+            #     deletable by a save that omits it, whatever method is saving.
+            #
+            # All three test the ROW (id AND method), not the id (DS-B4, PO ruling 4 of 2026-09-06).
+            # An operator's own service that took the name before 1.7 reserved it is a real service:
+            # excluding it here made `DELETE /services/default-server` and the UI bulk delete answer
+            # 200 while the row survived, which is the recovery path the ruling exists to open. It
+            # also has to count as a foreign service, or autoconf's empty-`SERVER_NAME` teardown
+            # would delete somebody's `ui` row on the strength of its name.
+            method_services = [
+                s for s in db_services if not _is_reserved(s) and (s.method == ctx.method or (s.method in ("ui", "api") and ctx.method in ("ui", "api")))
+            ]
             if not services and method_services and (ctx.method == "autoconf" or "SERVER_NAME" not in ctx.config):
                 if ctx.method == "autoconf":
-                    foreign_services = [s for s in db_services if s.method not in ("autoconf", "scheduler")]
+                    foreign_services = [s for s in db_services if not _is_reserved(s) and s.method not in ("autoconf", "scheduler")]
                     if not foreign_services:
                         self.logger.debug(
                             f"Received empty SERVER_NAME for autoconf and all {len(method_services)} existing service(s) are autoconf-owned; "
@@ -1021,7 +1070,12 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                     for service in db_services
                     # method-decision: deliberate: DELETION ownership again -- the removal path. Same reason as above: widening this
                     # would make the undeletable wizard service deletable through a save that omits it.
-                    if (service.method == ctx.method or (service.method in ("ui", "api") and ctx.method in ("ui", "api"))) and service.id not in services
+                    # The reserved default-server row is excluded outright: it is never deleted by a
+                    # save that omits it, whatever method saves. By ROW, not by id -- see the
+                    # method_services comment above.
+                    if not _is_reserved(service)
+                    and (service.method == ctx.method or (service.method in ("ui", "api") and ctx.method in ("ui", "api")))
+                    and service.id not in services
                 ]
 
             if missing_ids:
@@ -1085,6 +1139,19 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
         self.logger.debug("Checking if the drafts have changed")
         drafts = {service for service in services if ctx.config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
+        # The reserved default server is never drafted, whatever the method saving. A draft row drops
+        # out of SERVER_NAME, so the block silently falls back to the global-only rendering and every
+        # setting on its page stops applying with no error anywhere -- the API calls that "deletion by
+        # another name" and refuses it, and the UI convert refuses it too. Discarded from the SET
+        # rather than skipped in the loop below, because this set becomes `ctx.drafts` and is read
+        # again where a service absent from `db_ids` is created with `is_draft=name in ctx.drafts`.
+        # Stated explicitly rather than left to the `wizard` method the row happens to be seeded
+        # with, for the reason `can_delete_service` states -- but on the ROW, so an operator's own
+        # service that took the name can still be drafted (DS-B4, PO ruling 4): without that,
+        # `POST /services/<id>/convert?convert_to=draft` on such a row answered 200 and changed
+        # nothing.
+        if any(is_reserved_default_server({"id": service.id, "method": service.method}) for service in db_services):
+            drafts.discard(DEFAULT_SERVER_ID)
         db_drafts = {service.id for service in db_services if service.is_draft}
 
         if db_drafts:

@@ -4,12 +4,42 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
+from default_server import (  # type: ignore
+    DEFAULT_SERVER_ID,
+    DEFAULT_SERVER_RESERVED_MESSAGE,
+    DEFAULT_SERVER_SERVER_TYPE_MESSAGE,
+    DEFAULT_SERVER_STREAM_PORTS_SETTING,
+    DEFAULT_SERVER_STREAM_SSL_PORTS_SETTING,
+    default_server_stream_refusal,
+    is_default_server,
+    is_reserved_default_server,
+)
+from ports import collect_ports  # type: ignore
+
 from ..auth.guard import guard
 from ..http01 import http01_refusals_for
 from ..utils import get_db
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
 
 router = APIRouter(prefix="/services", tags=["services"])
+
+# One sentence, said the same way on every refusal, because it is the only place an operator finds
+# out WHY the id is refused (PO ruling 7).
+RESERVED_SERVICE_MESSAGE = f"{DEFAULT_SERVER_RESERVED_MESSAGE} Edit its certificate, TLS, headers and error pages with " f"PATCH /services/{DEFAULT_SERVER_ID}."
+
+
+def _reserved_refusal() -> JSONResponse:
+    """403, not 400: the request is well-formed, the operation is forbidden on this id."""
+    return JSONResponse(status_code=403, content={"status": "error", "message": RESERVED_SERVICE_MESSAGE})
+
+
+def _declared_stream_ports(variables: Optional[Dict[str, Any]]) -> List[str]:
+    """The stream-port values a request carries, base key and numbered suffixes, for BOTH lists.
+
+    The SSL list is in here too because a refusal on it -- an SSL port the port list does not
+    contain -- is just as much "something this request asked for" as a colliding port is.
+    """
+    return collect_ports(variables or {}, DEFAULT_SERVER_STREAM_PORTS_SETTING) + collect_ports(variables or {}, DEFAULT_SERVER_STREAM_SSL_PORTS_SETTING)
 
 
 def _iso(dt) -> Optional[str]:
@@ -26,9 +56,20 @@ def list_services(with_drafts: bool = True) -> JSONResponse:
         with_drafts: Include draft services in the results (default: True)
     """
     services = get_db().get_services(with_drafts=with_drafts)
+    # Single-site: the reserved row is not part of the product there (PO ruling 2026-09-06). The
+    # seeding stands down, but a database that was multisite once still holds the row, and every
+    # client -- the UI list first -- would otherwise pin a page whose settings render nowhere. An
+    # operator's own service that merely took the name is NOT hidden: it is a real service.
+    if not _is_multisite():
+        services = [it for it in services if not is_reserved_default_server(it)]
     for it in services:
         it["creation_date"] = _iso(it.get("creation_date"))
         it["last_update"] = _iso(it.get("last_update"))
+        # The reserved default server is returned like any other service -- it is configurable, and
+        # a client that hides it would hide the only place its certificate can be set -- but flagged
+        # so a UI knows to pin it and to offer no delete. Id AND method: a row that only took the
+        # name carries none of the refusals, so it must not be flagged as if it did.
+        it["reserved"] = is_reserved_default_server(it)
     return JSONResponse(status_code=200, content={"status": "success", "services": services})
 
 
@@ -147,6 +188,37 @@ def _service_method(service: str) -> Optional[str]:
     return None
 
 
+def _is_multisite() -> bool:
+    """Whether this deployment runs in multisite mode.
+
+    The reserved default server is a multisite-only feature (PO ruling 2026-09-06): single-site has
+    no per-service settings materialisation and no per-site variables table, so the row would be a
+    page whose every setting resolves to the globals. Read live rather than cached -- an operator
+    can flip MULTISITE from the global settings page while this process runs.
+
+    `Database.is_multisite` rather than `get_config`: this runs on `GET /services`, the hottest
+    endpoint the web UI has, and `get_config` rebuilds `SERVER_NAME` from `bw_services` on the way
+    to answering a one-key question.
+
+    Fails OPEN (multisite) on a database hiccup: the only thing this gate does is HIDE the reserved
+    row, and hiding it takes the operator's Default server page away. Showing it for a moment on a
+    single-site deployment is the cheaper of the two mistakes.
+    """
+    with suppress(Exception):
+        return get_db().is_multisite()
+    return True
+
+
+def _is_reserved(service: str) -> bool:
+    """Whether ``service`` is the reserved default server AND is the row this API refuses to touch.
+
+    The id alone is not the answer: a row an operator created under that name before 1.7 reserved it
+    is not the reserved service, is not adopted by the seeding, and must stay renamable and
+    deletable -- it is the only way out of a site `http.conf` already dropped from its roster.
+    """
+    return is_reserved_default_server({"id": service, "method": _service_method(service)})
+
+
 @router.post("", dependencies=[Depends(guard)])
 def create_service(req: ServiceCreateRequest) -> JSONResponse:
     """Create a new service with the specified configuration.
@@ -158,6 +230,9 @@ def create_service(req: ServiceCreateRequest) -> JSONResponse:
     name = req.server_name.split(" ")[0].strip()
     if not name:
         return JSONResponse(status_code=422, content={"status": "error", "message": "server_name is required"})
+
+    if is_default_server(name):
+        return _reserved_refusal()
 
     err = _invalid_server_name(name)
     if err:
@@ -223,6 +298,17 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
         err = _invalid_server_name(new_name)
         if err:
             return JSONResponse(status_code=400, content={"status": "error", "message": f"Invalid server_name: {err}"})
+        if new_name != service and (is_default_server(new_name) or _is_reserved(service)):
+            # Both directions: the reserved service cannot be renamed away, and no other service may
+            # take the reserved id. Renaming it to itself is not a rename, and stays allowed so a
+            # PATCH that echoes back the current server_name is not a 403.
+            #
+            # Asymmetric on purpose. Taking the id is refused whatever the target row is. Renaming
+            # AWAY from it is refused only for the reserved row itself: a service an operator
+            # created under that name before 1.7 reserved it gets no server block any more
+            # (`http.conf` drops the id by name, whatever the method) and the seeding refuses to
+            # adopt it, so this rename is its only recovery.
+            return _reserved_refusal()
         if new_name != service and new_name in services_list:
             return JSONResponse(status_code=400, content={"status": "error", "message": f"Service {new_name} already exists"})
 
@@ -241,6 +327,9 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
 
     # Draft flag update
     if req.is_draft is not None:
+        if _is_reserved(target) and bool(req.is_draft):
+            # Same reason as POST /{service}/convert: a drafted default server is a deleted one.
+            return _reserved_refusal()
         conf[f"{target}_IS_DRAFT"] = "yes" if bool(req.is_draft) else "no"
 
     # Update provided variables (unprefixed)
@@ -255,6 +344,20 @@ def update_service(service: str, req: ServiceUpdateRequest) -> JSONResponse:
     refusal = _http01_refusal(conf, target)
     if refusal:
         return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
+
+    # Only when the reserved service itself is being edited. A PATCH on an ordinary service that
+    # happens to take a port the default server declared is NOT refused: the gate's rule is to fail
+    # safe towards the real service, so that collision is resolved at generation time by dropping
+    # the reserved block instead.
+    if is_default_server(target):
+        if "SERVER_TYPE" in (req.variables or {}):
+            return JSONResponse(status_code=400, content={"status": "error", "message": DEFAULT_SERVER_SERVER_TYPE_MESSAGE})
+        # Only the ports THIS request declares: a service can take a port the reserved list already
+        # held, and refusing every later write on the reserved service for it would lock the whole
+        # resource over stored state the renderer already neutralises by dropping the port.
+        refusal = default_server_stream_refusal(conf, _declared_stream_ports(req.variables))
+        if refusal:
+            return JSONResponse(status_code=400, content={"status": "error", "message": refusal})
 
     return _persist_config(conf)
 
@@ -272,6 +375,11 @@ def delete_service(service: str) -> JSONResponse:
         return JSONResponse(status_code=404, content={"status": "error", "message": f"Service {service} not found"})
 
     svc = next((s for s in get_db().get_services(with_drafts=True) if s.get("id") == service), None)
+    # The reserved row only -- an operator's own service that took the name stays deletable, which
+    # with the rename above is the second half of its recovery path.
+    if is_reserved_default_server(svc or {"id": service, "method": _service_method(service)}):
+        return _reserved_refusal()
+
     if (svc.get("method") if svc else _service_method(service)) == "wizard":
         return JSONResponse(status_code=403, content={"status": "error", "message": f"Service {service} is managed by wizard and cannot be deleted"})
 
@@ -302,6 +410,13 @@ def convert_service(service: str, convert_to: str = Query(..., pattern="^(online
         service: Service identifier
         convert_to: Target status ("online" or "draft")
     """
+    if _is_reserved(service):
+        # Drafting it is deletion by another name: a draft row drops out of SERVER_NAME, the default
+        # server falls silently back to the global-only rendering and every setting on its page stops
+        # applying with no error anywhere. The reserved row only, for the same reason as the rename
+        # and the delete above.
+        return _reserved_refusal()
+
     conf = _full_config_snapshot()
     services_list = (conf.get("SERVER_NAME", "") or "").split()
     to_convert = [s for s in (service,) if s in services_list]

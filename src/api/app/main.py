@@ -40,6 +40,18 @@ async def lifespan(_app: FastAPI):
         import_legacy_certificates()
     except Exception as exc:
         LOGGER.warning(f"Unable to initialize the certificate inventory: {exc}")
+    try:
+        # The reserved `default-server` pseudo-service. Seeded here rather than in a migration
+        # because it is DATA, not schema: an upgraded database gains the row on its first boot with
+        # the API, a fresh one on its first boot full stop, and the call is a no-op on every boot
+        # after that. The API is where this belongs -- it owns the database.
+        from .utils import get_db
+
+        error = get_db().seed_default_server_service()
+        if error:
+            LOGGER.warning(f"Unable to seed the reserved default-server service: {error}")
+    except Exception as exc:
+        LOGGER.warning(f"Unable to seed the reserved default-server service: {exc}")
     yield
     from .utils import _DB_INSTANCE, _API_DB_INSTANCE
 

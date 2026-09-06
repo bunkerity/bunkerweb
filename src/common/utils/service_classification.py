@@ -49,6 +49,8 @@ one-line change plus a version bump; it is deliberately not a heuristic.
 from re import compile as re_compile
 from typing import Any, Dict, Iterable, List, Mapping, NamedTuple, Optional, Sequence, Union
 
+from default_server import strip_default_server  # type: ignore
+
 # Bump on ANY change to the allowlist below. The pair (algorithm, allowlist) is
 # what makes two components provably agree, and what the license contract will
 # eventually carry (open PO decision #2 — see the ADR).
@@ -415,7 +417,10 @@ def split_services(snapshot: Mapping[str, Any], service_names: Optional[Sequence
     cannot steal its keys.
     """
     if service_names is None:
-        service_names = setting_value(snapshot.get("SERVER_NAME", "")).split()
+        # The reserved `default-server` pseudo-service is a row in `bw_services`, so it appears in
+        # SERVER_NAME like any other -- and it must never be billed: it is the block that answers
+        # requests matching no service, not a service an operator created (PO ruling 3).
+        service_names = strip_default_server(setting_value(snapshot.get("SERVER_NAME", "")).split())
 
     services: Dict[str, Dict[str, Any]] = {name: {} for name in service_names}
     claimed = set()
