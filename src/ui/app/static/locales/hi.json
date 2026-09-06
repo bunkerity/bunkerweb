@@ -90,10 +90,10 @@
   "bans": {
     "chart": {
       "timeseries": {
-        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
-        "series": "Active bans",
-        "subtitle": "Selected range",
-        "title": "Active bans per interval"
+        "note": "कोई प्रतिबंध हर उस इंटरवल में गिना जाता है जिसमें वह लागू था। उसी IP को फिर से प्रतिबंधित करने से उसकी मूल तारीख फिर से लिखी जाती है, इसलिए यह दिखाता है कि कितने प्रतिबंध सक्रिय थे, प्रतिबंध घटनाओं का इतिहास नहीं।",
+        "series": "सक्रिय प्रतिबंध",
+        "subtitle": "चयनित सीमा",
+        "title": "प्रति इंटरवल सक्रिय प्रतिबंध"
       }
     },
     "subtitle": "आपके BunkerWeb इंस्टेंस में अवरुद्ध IP पते — जोड़ें, हटाएं, या प्रतिबंध अवधि समायोजित करें।",
@@ -518,7 +518,7 @@
   },
   "dashboard": {
     "alert": {
-      "jobs_failed": "One or more jobs failed on their last run."
+      "jobs_failed": "एक या अधिक जॉब अपने पिछले रन में विफल रहे।"
     },
     "card": {
       "blocked_requests": {
@@ -527,7 +527,7 @@
       "blocked_unique_ips": {
         "title": "अवरुद्ध अद्वितीय आईपी"
       },
-      "hide": "Hide this card",
+      "hide": "यह कार्ड छिपाएँ",
       "instances": {
         "status": "{{up}} चालू / {{down}} बंद / {{loading}} लोड हो रहा है",
         "title": "इंस्टेंस"
@@ -548,7 +548,7 @@
         "usage": "{{percent}}% उपयोग किया गया",
         "warning_low": "चेतावनी: कम मेमोरी प्रदर्शन को प्रभावित कर सकती है"
       },
-      "restore": "Restore hidden cards",
+      "restore": "छिपे हुए कार्ड पुनर्स्थापित करें",
       "services": {
         "status": "{{online}} ऑनलाइन / {{draft}} ड्राफ्ट",
         "title": "सेवाएं"
@@ -779,8 +779,8 @@
     "webauthn_request_failed": "सुरक्षा-कुंजी अनुरोध विफल रहा। कृपया फिर से प्रयास करें।"
   },
   "flash": {
-    "check_jobs_for_details": "Check the Jobs page for details.",
-    "last_configuration_change_failed": "Your last configuration change could not be applied.",
+    "check_jobs_for_details": "विवरण के लिए जॉब्स पेज देखें।",
+    "last_configuration_change_failed": "आपका अंतिम कॉन्फ़िगरेशन परिवर्तन लागू नहीं किया जा सका।",
     "easter_egg": "यदि आप इसे पढ़ रहे हैं, तो इसका मतलब है कि आप जिज्ञासु हैं",
     "error": "त्रुटि",
     "message": "सूचना",
@@ -1160,8 +1160,8 @@
     "title": "न्यूज़लेटर से जुड़ें"
   },
   "notice": {
-    "already_subscribed": "Already subscribed",
-    "dismiss_mfa": "Don't remind me again"
+    "already_subscribed": "पहले से सदस्यता ली गई है",
+    "dismiss_mfa": "मुझे फिर याद न दिलाएँ"
   },
   "pagination": {
     "page": "पृष्ठ"
@@ -1210,16 +1210,16 @@
       "tab_enabled": "सक्षम"
     },
     "catalog": {
-      "tab": "Available",
-      "install": "Install",
-      "install_failed": "Install failed",
-      "learn_more": "Learn more",
-      "version": "Version {{version}}",
-      "incompatible": "This release declares no BunkerWeb compatibility; this is {{current}}",
-      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
-      "trust_notice": "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges.",
-      "incompatible_declared": "This release supports BunkerWeb {{supported}}; this is {{current}}",
-      "release": "Read from release {{tag}}"
+      "tab": "उपलब्ध",
+      "install": "इंस्टॉल करें",
+      "install_failed": "इंस्टॉल विफल",
+      "learn_more": "अधिक जानें",
+      "version": "संस्करण {{version}}",
+      "incompatible": "यह रिलीज़ किसी BunkerWeb संगतता की घोषणा नहीं करती; वर्तमान संस्करण {{current}} है",
+      "stale": "कैटलॉग हाल ही में रीफ्रेश नहीं हो सका, इसलिए जब तक यह फिर से अद्यतित नहीं हो जाता, इंस्टॉल करना अक्षम है।",
+      "trust_notice": "कम्युनिटी आइटम उन रिपॉजिटरी से पढ़े जाते हैं जिन्हें BunkerWeb संगठन GitHub पर, TLS के माध्यम से प्रकाशित करता है, और जो इंस्टॉल किया गया है उसकी जांच सूचीबद्ध की गई चीज़ों से की जाती है — लेकिन यहां कुछ भी क्रिप्टोग्राफिक रूप से हस्ताक्षरित नहीं है। एक इंस्टॉल किया गया प्लगइन पूर्ण BunkerWeb अनुमतियों के साथ कोड चलाता है।",
+      "incompatible_declared": "यह रिलीज़ BunkerWeb {{supported}} का समर्थन करती है; वर्तमान संस्करण {{current}} है",
+      "release": "रिलीज़ {{tag}} से पढ़ें"
     }
   },
   "pro": {
@@ -1493,234 +1493,234 @@
     },
     "antibot": {
       "capjs": {
-        "hint": "Needs a Cap.js server; the frontend and backend URLs may differ.",
+        "hint": "एक Cap.js सर्वर की आवश्यकता है; फ्रंटएंड और बैकएंड URL भिन्न हो सकते हैं।",
         "title": "Cap.js"
       },
       "captcha": {
-        "hint": "Rendered by BunkerWeb itself — no third-party account, no outbound request.",
-        "title": "Built-in captcha"
+        "hint": "BunkerWeb द्वारा स्वयं रेंडर किया गया — कोई थर्ड-पार्टी अकाउंट नहीं, कोई आउटबाउंड अनुरोध नहीं।",
+        "title": "बिल्ट-इन कैप्चा"
       },
       "challenge": {
-        "description": "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid.",
-        "title": "Challenge behaviour"
+        "description": "चुनौती कहां प्रस्तुत की जाती है, विज़िटर के पास इसे हल करने के लिए कितना समय है, और हल की गई चुनौती कितने समय तक मान्य रहती है।",
+        "title": "चुनौती व्यवहार"
       },
       "countries": {
-        "both_set": "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous.",
-        "description": "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded.",
+        "both_set": "दोनों देश सूचियाँ सेट हैं। ये संयुक्त हैं, परस्पर-अनन्य नहीं: यदि विज़िटर का देश स्किप सूची में है या प्रतिबंध सूची से बाहर है, तो वह छूट प्राप्त है। नियम को स्पष्ट बनाने के लिए इनमें से एक को साफ़ करें।",
+        "description": "देश के अनुसार विज़िटर को छूट दें, या चुनौती को कुछ देशों तक सीमित करें। GeoIP डेटाबेस लोड होना आवश्यक है।",
         "mode": {
-          "all": "Challenge every country",
-          "ignore": "Skip the challenge for these countries",
-          "only": "Challenge only these countries"
+          "all": "हर देश को चुनौती दें",
+          "ignore": "इन देशों के लिए चुनौती छोड़ें",
+          "only": "केवल इन देशों को चुनौती दें"
         },
-        "picker_label": "Country filter",
-        "title": "Countries",
-        "both_set_clear": "Clear the skip list"
+        "picker_label": "देश फ़िल्टर",
+        "title": "देश",
+        "both_set_clear": "स्किप सूची साफ़ करें"
       },
-      "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
+      "disabled_notice": "इस स्कोप के लिए एंटीबॉट बंद है। इसे कॉन्फ़िगर करने के लिए एक चुनौती मोड चुनें।",
       "exemptions": {
-        "description": "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing.",
-        "title": "Exemptions"
+        "description": "इनमें से किसी से मेल खाने वाले अनुरोध चुनौती को पूरी तरह छोड़ देते हैं। कुछ भी मेल न खाने के लिए सूची को खाली छोड़ें।",
+        "title": "छूट"
       },
       "hcaptcha": {
-        "hint": "Needs a site registered at hcaptcha.com.",
+        "hint": "hcaptcha.com पर पंजीकृत साइट की आवश्यकता है।",
         "title": "hCaptcha"
       },
       "mcaptcha": {
-        "hint": "Needs an mCaptcha instance — the hosted demo or your own.",
+        "hint": "एक mCaptcha इंस्टेंस की आवश्यकता है — होस्ट किया गया डेमो या आपका अपना।",
         "title": "mCaptcha"
       },
       "mode": {
-        "description": "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back.",
-        "title": "Challenge mode"
+        "description": "विज़िटर को कौन-सी चुनौती पास करनी है। नीचे केवल चुने गए प्रदाता के फ़ील्ड दिखाए जाते हैं; अन्य अपने सहेजे गए मान बनाए रखते हैं और वापस स्विच करने पर लौट आते हैं।",
+        "title": "चुनौती मोड"
       },
       "recaptcha": {
         "classic": {
-          "hint": "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition.",
-          "title": "reCAPTCHA classic"
+          "hint": "साझा सीक्रेट के साथ google.com/recaptcha/api/siteverify के विरुद्ध सत्यापित। इस संस्करण में Enterprise फ़ील्ड नज़रअंदाज़ किए जाते हैं।",
+          "title": "क्लासिक reCAPTCHA"
         },
         "enterprise": {
-          "hint": "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition.",
+          "hint": "Google Cloud प्रोजेक्ट और API कुंजी के साथ recaptchaenterprise.googleapis.com के विरुद्ध सत्यापित। इस संस्करण में क्लासिक सीक्रेट नज़रअंदाज़ किया जाता है।",
           "title": "reCAPTCHA Enterprise"
         },
-        "hint": "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions.",
+        "hint": "google.com/recaptcha पर पंजीकृत साइट की आवश्यकता है। साइट कुंजी और न्यूनतम स्कोर दोनों संस्करणों पर लागू होते हैं।",
         "title": "Google reCAPTCHA"
       },
       "turnstile": {
-        "hint": "Needs a site registered in the Cloudflare dashboard.",
+        "hint": "Cloudflare डैशबोर्ड में पंजीकृत साइट की आवश्यकता है।",
         "title": "Cloudflare Turnstile"
       },
       "unplaced": {
-        "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
-        "title": "Other settings"
+        "description": "प्लगइन द्वारा घोषित लेकिन अभी ऊपर किसी सेक्शन में नहीं रखा गया। फिर भी सामान्य रूप से सहेजा जाता है।",
+        "title": "अन्य सेटिंग्स"
       }
     },
     "access_control": {
       "order": {
-        "title": "Decision order",
-        "description": "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD.",
-        "current": "current page",
-        "on": "On",
-        "off": "Off"
+        "title": "निर्णय क्रम",
+        "description": "डिफ़ॉल्ट रूप से हर अनुरोध इस क्रम में इन चार जांचों से गुजरता है, और जो पहले निर्णय लेता है, वही निर्णय लेता है। व्हाइटलिस्ट मिलान तुरंत प्रक्रिया समाप्त कर देता है: अनुरोध की अनुमति दी जाती है और अगली तीन जांचें कभी नहीं चलतीं। क्रम स्वयं PLUGINS_ORDER_ACCESS और PLUGINS_ORDER_PREREAD के माध्यम से प्रति सेवा कॉन्फ़िगर करने योग्य है।",
+        "current": "वर्तमान पेज",
+        "on": "चालू",
+        "off": "बंद"
       },
       "stage": {
-        "whitelist": "Whitelist",
-        "blacklist": "Blacklist",
-        "greylist": "Greylist",
-        "country": "Country"
+        "whitelist": "व्हाइटलिस्ट",
+        "blacklist": "ब्लैकलिस्ट",
+        "greylist": "ग्रेलिस्ट",
+        "country": "देश"
       },
       "enforcement": {
-        "title": "Enforcement"
+        "title": "प्रवर्तन"
       },
       "kinds": {
-        "title": "What is matched",
-        "description": "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+        "title": "क्या मिलान किया जाता है",
+        "description": "प्रत्येक प्रकार के मिलान के लिए एक सेक्शन। प्रत्येक में, आपके द्वारा टाइप की गई प्रविष्टियाँ और BunkerWeb द्वारा डाउनलोड की गई सूचियाँ एक साथ जांची जाती हैं; इनमें से किसी एक से मेल खाने वाला क्लाइंट सेक्शन से मेल खाता है।"
       },
       "kind": {
-        "ip": "IP addresses and networks",
-        "rdns": "Reverse DNS",
-        "asn": "Autonomous systems (ASN)",
-        "user_agent": "User agents",
-        "uri": "URIs"
+        "ip": "IP पते और नेटवर्क",
+        "rdns": "रिवर्स DNS",
+        "asn": "स्वायत्त सिस्टम (ASN)",
+        "user_agent": "यूज़र एजेंट",
+        "uri": "URI"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet given a place on this page. They still save normally."
+        "title": "अन्य सेटिंग्स",
+        "description": "प्लगइन द्वारा घोषित लेकिन अभी इस पेज पर कोई स्थान नहीं दिया गया। फिर भी सामान्य रूप से सहेजा जाता है।"
       },
       "whitelist": {
         "enforcement": {
-          "description": "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+          "description": "व्हाइटलिस्ट पहले चलती है और बाकी सब कुछ ओवरराइड करती है: मिलान सीधे अनुमत होता है, इसलिए ब्लैकलिस्ट, ग्रेलिस्ट और देश कभी अनुरोध नहीं देखते। प्रतिबंध एकमात्र अपवाद हैं, और केवल IP द्वारा — रिवर्स DNS, ASN, यूज़र एजेंट या URI द्वारा यहां मेल खाने वाला क्लाइंट प्रतिबंधित रहते हुए भी ब्लॉक रहता है। इस सूची को केवल उन क्लाइंट्स तक सीमित रखें जिन्हें कभी बाहर नहीं किया जाना चाहिए।"
         }
       },
       "blacklist": {
         "enforcement": {
-          "description": "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+          "description": "ब्लैकलिस्ट व्हाइटलिस्ट के बाद चलती है, इसलिए व्हाइटलिस्टेड क्लाइंट यहां कभी ब्लॉक नहीं होता। प्रत्येक पंक्ति में, अपवाद सूचियाँ उस पंक्ति की अपनी प्रविष्टियों और डाउनलोड की गई सूचियों को ओवरराइड करती हैं।"
         },
         "community": {
-          "title": "Community lists",
-          "description": "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+          "title": "कम्युनिटी सूचियाँ",
+          "description": "BunkerWeb के बाहर बनाए रखी गई और आपके लिए रीफ्रेश की गई चुनी हुई सूचियाँ। ये नीचे दी गई प्रविष्टियों जैसा ही मिलान प्रदान करती हैं।"
         }
       },
       "greylist": {
         "enforcement": {
-          "description": "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+          "description": "ग्रेलिस्ट डिफ़ॉल्ट रूप से अस्वीकार करती है: जब तक यह चालू है, नीचे दी गई किसी भी प्रविष्टि से मेल न खाने वाली कोई भी चीज़ अस्वीकृत होती है, HTTP और स्ट्रीम ट्रैफ़िक दोनों पर। पहले प्रविष्टियाँ जोड़ें, फिर इसे चालू करें — सभी सूचियाँ खाली होने पर इसे चालू करने वाला सेव अस्वीकृत होता है।"
         },
-        "locked_out": "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+        "locked_out": "ग्रेलिस्टिंग चालू है और कोई प्रविष्टि कॉन्फ़िगर नहीं है, इसलिए इस सेवा के लिए हर अनुरोध अस्वीकृत होता है। नीचे कम से कम एक प्रविष्टि जोड़ें, या ग्रेलिस्टिंग बंद करें।"
       },
       "country": {
-        "title": "Country rule",
-        "description": "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list.",
-        "picker_label": "Country rule",
+        "title": "देश नियम",
+        "description": "एक नियम, दो सूचियाँ नहीं। देशों के एक समूह को अनुमति देने से हर दूसरा देश अस्वीकृत हो जाता है और संग्रहीत ब्लॉक सूची निष्क्रिय कॉन्फ़िगरेशन बन जाती है — BunkerWeb पहले अनुमति सूची जांचता है और कभी ब्लॉक सूची तक नहीं पहुंचता।",
+        "picker_label": "देश नियम",
         "mode": {
-          "all": "No country rule",
-          "only": "Allow only these countries",
-          "block": "Block these countries"
+          "all": "कोई देश नियम नहीं",
+          "only": "केवल इन देशों को अनुमति दें",
+          "block": "इन देशों को ब्लॉक करें"
         },
         "conflict": {
-          "description": "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set.",
-          "clear": "Clear the block list"
+          "description": "दोनों देश सूचियाँ संग्रहीत हैं, और केवल अनुमति सूची लागू होती है: नीचे दी गई ब्लॉक सूची तब तक कभी नहीं देखी जाती जब तक अनुमति सूची सेट है।",
+          "clear": "ब्लॉक सूची साफ़ करें"
         },
         "exceptions": {
-          "title": "Exceptions",
-          "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
+          "title": "अपवाद",
+          "description": "जिन अनुरोधों का URI इनमें से किसी पैटर्न से मेल खाता है, वे देश नियम को पूरी तरह से छोड़ देते हैं।"
         }
       },
       "rules": {
-        "title": "Composite rules",
-        "description": "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name.",
-        "rule": "Rule",
-        "add_term": "Add a term",
-        "remove_term": "Remove this term",
-        "negate": "NOT",
-        "negate_help": "Invert this term: the rule matches when the term does NOT match.",
-        "kind": "What this term matches on",
-        "value": "Value, or @group",
-        "expression": "Saved as:",
+        "title": "समग्र नियम",
+        "description": "कोई नियम तभी मेल खाता है जब उसकी हर शर्त मेल खाती है। नियमों की जांच ऊपर दी गई सूचियों के साथ की जाती है, और उनमें से किसी से मेल खाने वाला क्लाइंट इस चरण से मेल खाता है। मान एक संसाधन समूह हो सकता है, @नाम के रूप में लिखा गया।",
+        "rule": "नियम",
+        "add_term": "एक शर्त जोड़ें",
+        "remove_term": "इस शर्त को हटाएँ",
+        "negate": "नहीं",
+        "negate_help": "इस शर्त को उलटें: नियम तब मेल खाता है जब शर्त मेल नहीं खाती।",
+        "kind": "यह शर्त किससे मेल खाती है",
+        "value": "मान, या @समूह",
+        "expression": "इस रूप में सहेजा गया:",
         "kind_ip": "IP",
-        "kind_country": "Country",
+        "kind_country": "देश",
         "kind_asn": "ASN",
-        "kind_rdns": "Reverse DNS",
-        "kind_ua": "User agent",
+        "kind_rdns": "रिवर्स DNS",
+        "kind_ua": "यूज़र एजेंट",
         "kind_uri": "URI"
       }
     },
     "modsecurity": {
       "engine": {
-        "title": "Engine",
-        "description": "Whether ModSecurity is loaded at all, and what it does with a rule match."
+        "title": "इंजन",
+        "description": "क्या ModSecurity बिल्कुल लोड है, और नियम मेल खाने पर यह क्या करता है।"
       },
       "crs": {
         "title": "OWASP Core Rule Set",
-        "description": "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+        "description": "साझा नियम सेट जिसे BunkerWeb ModSecurity के ऊपर लोड करता है। संस्करण 4 वर्तमान है; संस्करण 3 उन सेवाओं के लिए रखा गया है जो अभी भी इसके नियम आईडी पर निर्भर हैं।"
       },
       "crs_plugins": {
-        "title": "Core Rule Set plugins",
-        "description": "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+        "title": "Core Rule Set प्लगइन",
+        "description": "Core Rule Set के लिए प्रकाशित नियम पैक, स्टार्टअप पर डाउनलोड और इंस्टॉल किए जाते हैं। एक प्लगइन नाम, नाम/टैग, या URL दें।"
       },
       "global_crs": {
-        "title": "Global CRS mode",
-        "description": "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+        "title": "ग्लोबल CRS मोड",
+        "description": "हर सेवा के बजाय पूरे इंस्टेंस के लिए एक बार Core Rule Set लोड करता है। कई सेवाओं के साथ तेज़ी से लोड होता है, लेकिन इसके चालू रहते हुए सेवा-सीमित modsec-crs कॉन्फ़िगरेशन अस्वीकृत हो जाते हैं: इसके बजाय एक ग्लोबल बनाएं और इसे Host नियम से सीमित करें।"
       },
       "audit": {
-        "title": "Audit log",
-        "description": "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+        "title": "ऑडिट लॉग",
+        "description": "ModSecurity अपने ऑडिट लॉग में क्या लिखता है, और हर लेनदेन का कितना हिस्सा रखता है। भाग A और Z हमेशा शामिल होते हैं।"
       },
       "limits": {
-        "title": "Request body limits",
-        "description": "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+        "title": "अनुरोध बॉडी सीमाएँ",
+        "description": "ModSecurity अनुरोध बॉडी का कितना हिस्सा जांचता है, और सीमा से अधिक बॉडी का क्या होता है। NGINX पहले MAX_CLIENT_SIZE लागू करता है, इसलिए इससे ऊपर की सीमा का कोई प्रभाव नहीं होता।"
       },
       "tuning": {
-        "title": "Rule tuning",
-        "description": "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded.",
-        "modsec_crs": "Before the Core Rule Set",
-        "modsec": "After the Core Rule Set",
-        "crs_plugins_before": "Before CRS plugins",
-        "crs_plugins_after": "After CRS plugins"
+        "title": "नियम ट्यूनिंग",
+        "description": "फ़ॉल्स पॉज़िटिव को ठीक करना एक कस्टम कॉन्फ़िगरेशन है, कोई सेटिंग नहीं। ये चार जगहें हैं जहां नियम अपवाद जा सकता है, उनके लोड होने के क्रम में।",
+        "modsec_crs": "Core Rule Set से पहले",
+        "modsec": "Core Rule Set के बाद",
+        "crs_plugins_before": "CRS प्लगइन से पहले",
+        "crs_plugins_after": "CRS प्लगइन के बाद"
       },
       "notice": {
-        "off": "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again.",
-        "engine_off": "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree.",
-        "engine_detect": "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked.",
-        "crs_v3_no_plugins": "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+        "off": "ModSecurity बंद है। नीचे कुछ भी लागू नहीं होता, लेकिन हर मान रखा जाता है और इसे फिर चालू करने पर वापस आ जाता है।",
+        "engine_off": "ModSecurity सक्षम है लेकिन SecRuleEngine Off है, इसलिए किसी अनुरोध की जांच नहीं की जाती। दोनों सेटिंग्स \"चालू\" का अर्थ रखती हैं और वर्तमान में असहमत हैं।",
+        "engine_detect": "SecRuleEngine DetectionOnly है: मिलान लॉग किए जाते हैं और कुछ भी ब्लॉक नहीं होता।",
+        "crs_v3_no_plugins": "Core Rule Set 3 प्लगइन लोड नहीं कर सकता। प्लगइन स्विच और प्लगइन सूची रखी जाती हैं और संस्करण 4 पर फिर से लागू होंगी, लेकिन अभी कुछ नहीं करतीं।"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "अन्य सेटिंग्स",
+        "description": "प्लगइन द्वारा घोषित लेकिन अभी इस पेज पर नहीं रखा गया। फिर भी सामान्य रूप से सहेजा जाता है।"
       }
     },
     "headers": {
       "csp": {
         "title": "Content Security Policy",
-        "description": "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+        "description": "Content-Security-Policy के रूप में भेजी गई नीति। गलत निर्देश साइट की अपनी स्क्रिप्ट को तोड़ सकता है बिना सर्वर-साइड पर कुछ दिखे, इसलिए पहले report-only उपयोग करना सुरक्षित क्रम है।"
       },
       "permissions": {
         "title": "Permissions Policy",
-        "description": "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+        "description": "यह साइट किन ब्राउज़र फ़ीचर का उपयोग कर सकती है, feature=(allowlist) क्लॉज़ की कॉमा-सेपरेटेड सूची के रूप में। () पर छोड़ी गई प्रविष्टि उस API को सभी के लिए अक्षम कर देती है, आपके अपने पेज सहित।"
       },
       "transport": {
-        "title": "HTTPS enforcement",
-        "description": "The Strict-Transport-Security header. Only sent over HTTPS."
+        "title": "HTTPS प्रवर्तन",
+        "description": "Strict-Transport-Security हेडर। केवल HTTPS पर भेजा जाता है।"
       },
       "browser": {
-        "title": "Browser protections",
-        "description": "Small fixed-value headers. An empty value removes the header instead of sending it."
+        "title": "ब्राउज़र सुरक्षा",
+        "description": "छोटे निश्चित-मान हेडर। खाली मान हेडर को भेजने के बजाय हटा देता है।"
       },
       "upstream": {
-        "title": "Upstream and removed headers",
-        "description": "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+        "title": "अपस्ट्रीम और हटाए गए हेडर",
+        "description": "अपस्ट्रीम के अपने रिस्पॉन्स हेडर में से कौन-से बचते हैं, और कौन-से रिस्पॉन्स जाने से पहले हटाए जाते हैं।"
       },
       "cookies": {
-        "title": "Cookies",
-        "description": "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+        "title": "कुकीज़",
+        "description": "अपस्ट्रीम द्वारा लौटाए गए हर Set-Cookie में जोड़े गए फ़्लैग। प्रति-कुकी फ़्लैग नियम नीचे दोहराई जा सकने वाली सेटिंग्स में हैं।"
       },
       "notice": {
-        "csp_report_only": "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce.",
-        "hsts_preload": "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then.",
-        "keep_shadows": "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:",
-        "keep_all": "The keep list is *, so every header the upstream sends wins over the values configured here."
+        "csp_report_only": "report-only चालू है: नीति Content-Security-Policy-Report-Only के रूप में भेजी जाती है, इसलिए उल्लंघनों की रिपोर्ट की जाती है और कुछ भी ब्लॉक नहीं होता। लागू करने के लिए इसे बंद करें।",
+        "hsts_preload": "इस मान में preload शामिल है। एक बार डोमेन ब्राउज़रों की preload सूची में सबमिट हो जाने के बाद, हटाने में उपयोगकर्ताओं तक पहुंचने में महीनों लगते हैं -- तब तक हर सबडोमेन केवल HTTPS होता है।",
+        "keep_shadows": "जब अपस्ट्रीम अपने खुद के हेडर भेजता है तो ये उससे ही बनाए रखे जाते हैं, इसलिए यहां कॉन्फ़िगर किए गए मान केवल एक फ़ॉलबैक हैं:",
+        "keep_all": "रखने वाली सूची * है, इसलिए अपस्ट्रीम द्वारा भेजा गया हर हेडर यहां कॉन्फ़िगर किए गए मानों पर हावी रहता है।"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "अन्य सेटिंग्स",
+        "description": "प्लगइन द्वारा घोषित लेकिन अभी इस पेज पर नहीं रखा गया। फिर भी सामान्य रूप से सहेजा जाता है।"
       }
     }
   },
@@ -2127,16 +2127,16 @@
     },
     "title": "सेवा टेम्पलेट",
     "catalog": {
-      "heading": "Available templates",
-      "subheading": "Curated service templates published by the BunkerWeb organisation.",
-      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration.",
-      "no_compat_notice": "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+      "heading": "उपलब्ध टेम्पलेट",
+      "subheading": "BunkerWeb संगठन द्वारा प्रकाशित चुनी हुई सेवा टेम्पलेट।",
+      "layer_warning": "एक टेम्पलेट एक लेयर है: पहले से टेम्पलेट का उपयोग कर रही सेवा में एक जोड़ने से उसका प्रभावी कॉन्फ़िगरेशन बदल जाता है।",
+      "no_compat_notice": "यह कैटलॉग किसी BunkerWeb संगतता की घोषणा नहीं करता। यदि कोई टेम्पलेट ऐसी सेटिंग बताता है जो इस BunkerWeb के पास नहीं है, तो इंस्टॉल के समय उसे अस्वीकार कर दिया जाता है।"
     }
   },
   "theme": {
     "dark": "डार्क",
     "light": "लाइट",
-    "system": "System"
+    "system": "सिस्टम"
   },
   "threatmap": {
     "exit_fullscreen": "पूर्ण स्क्रीन से बाहर निकलें",
@@ -3098,19 +3098,19 @@
       "none": "कोई संलग्न नहीं",
       "primary": "प्राथमिक प्रमाणपत्र",
       "template": {
-        "add": "Add",
-        "add_label": "Template to add as a layer",
-        "adding": "Saving applies {{names}}. Many settings can move at once.",
-        "move_down": "Move this template later",
-        "move_up": "Move this template earlier",
+        "add": "जोड़ें",
+        "add_label": "लेयर के रूप में जोड़ने के लिए टेम्पलेट",
+        "adding": "सहेजने से {{names}} लागू होंगे। कई सेटिंग्स एक साथ बदल सकती हैं।",
+        "move_down": "इस टेम्पलेट को बाद में चलाएँ",
+        "move_up": "इस टेम्पलेट को पहले चलाएँ",
         "none": "कोई टेम्पलेट नहीं",
-        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
-        "overridden_badge": "overridden",
-        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
+        "note": "यह कोई संसाधन नहीं है: टेम्पलेट एक सेटिंग है। टेम्पलेट सहेजते समय क्रम से लागू होते हैं, और बाद वाला पहले वाले को ओवरराइड करता है।",
+        "overridden_badge": "ओवरराइड किया गया",
+        "overridden_by": "{{name}} इस टेम्पलेट की {{count}} सेटिंग्स को ओवरराइड करता है।",
         "pending": "सहेजने पर लागू होता है",
-        "remove": "Remove this template",
-        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
-        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
+        "remove": "इस टेम्पलेट को हटाएँ",
+        "removing": "सहेजने से {{names}} अलग हो जाएँगे। उन टेम्पलेट द्वारा दिए गए मान हटा दिए जाएँगे।",
+        "reordered": "सहेजने से टेम्पलेट का क्रम बदल जाता है। बाद के टेम्पलेट पहले वालों को ओवरराइड करते हैं, इसलिए प्रभावी मान बदल जाते हैं।",
         "switching": "सहेजने से यह सेवा \"{{from}}\" से \"{{to}}\" में बदल जाती है। वर्तमान टेम्पलेट द्वारा प्रदान किए गए मान हटा दिए जाते हैं और {{to}} के मान लागू किए जाते हैं — कई सेटिंग्स एक साथ बदल जाती हैं।",
         "unwired": "यह पृष्ठ USE_TEMPLATE को पोस्ट नहीं करता है, इसलिए इसे यहां से नहीं बदला जा सकता है।"
       },

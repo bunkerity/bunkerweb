@@ -90,10 +90,10 @@
   "bans": {
     "chart": {
       "timeseries": {
-        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
-        "series": "Active bans",
-        "subtitle": "Selected range",
-        "title": "Active bans per interval"
+        "note": "封禁在其生效的每个区间内都会计入。再次封禁同一个 IP 会重写其原始日期,因此这里显示的是每个区间内有多少封禁处于激活状态,而不是封禁事件的历史记录。",
+        "series": "活跃封禁",
+        "subtitle": "所选范围",
+        "title": "每区间的活跃封禁"
       }
     },
     "subtitle": "您的 BunkerWeb 实例中被封禁的 IP 地址——添加、移除或调整封禁时长。",
@@ -518,7 +518,7 @@
   },
   "dashboard": {
     "alert": {
-      "jobs_failed": "One or more jobs failed on their last run."
+      "jobs_failed": "一个或多个任务在最近一次运行中失败。"
     },
     "card": {
       "blocked_requests": {
@@ -527,7 +527,7 @@
       "blocked_unique_ips": {
         "title": "被阻止的唯一 IP"
       },
-      "hide": "Hide this card",
+      "hide": "隐藏此卡片",
       "instances": {
         "status": "{{up}} 运行中 / {{down}} 已停止 / {{loading}} 加载中",
         "title": "实例"
@@ -548,7 +548,7 @@
         "usage": "{{percent}}% 已使用",
         "warning_low": "警告：内存不足可能影响性能"
       },
-      "restore": "Restore hidden cards",
+      "restore": "恢复已隐藏的卡片",
       "services": {
         "status": "{{online}} 在线 / {{draft}} 草稿",
         "title": "服务"
@@ -779,8 +779,8 @@
     "webauthn_request_failed": "安全密钥请求失败。请重试。"
   },
   "flash": {
-    "check_jobs_for_details": "Check the Jobs page for details.",
-    "last_configuration_change_failed": "Your last configuration change could not be applied.",
+    "check_jobs_for_details": "请查看任务页面以获取详情。",
+    "last_configuration_change_failed": "您上一次的配置更改未能应用。",
     "easter_egg": "如果你读到了这条信息，说明你很好奇",
     "error": "错误",
     "message": "信息",
@@ -870,7 +870,7 @@
       "theme": "主题",
       "type": "类型",
       "ui_host": "UI 主机",
-      "ui_url": "UI URL",
+      "ui_url": "界面 URL",
       "use_custom_ssl": "使用自定义 SSL",
       "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
       "use_proxy_protocol": "使用 PROXY 协议",
@@ -1160,8 +1160,8 @@
     "title": "加入新闻通讯"
   },
   "notice": {
-    "already_subscribed": "Already subscribed",
-    "dismiss_mfa": "Don't remind me again"
+    "already_subscribed": "已订阅",
+    "dismiss_mfa": "不再提醒我"
   },
   "pagination": {
     "page": "页"
@@ -1210,16 +1210,16 @@
       "tab_enabled": "已启用"
     },
     "catalog": {
-      "tab": "Available",
-      "install": "Install",
-      "install_failed": "Install failed",
-      "learn_more": "Learn more",
-      "version": "Version {{version}}",
-      "incompatible": "This release declares no BunkerWeb compatibility; this is {{current}}",
-      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
-      "trust_notice": "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges.",
-      "incompatible_declared": "This release supports BunkerWeb {{supported}}; this is {{current}}",
-      "release": "Read from release {{tag}}"
+      "tab": "可用",
+      "install": "安装",
+      "install_failed": "安装失败",
+      "learn_more": "了解更多",
+      "version": "版本 {{version}}",
+      "incompatible": "此版本未声明与 BunkerWeb 兼容;当前版本为 {{current}}",
+      "stale": "目录最近未能刷新,因此在恢复最新状态之前已禁用安装。",
+      "trust_notice": "社区项目通过 TLS 从 BunkerWeb 组织在 GitHub 上发布的仓库中读取,安装的内容会与列出的内容进行核对——但这里的内容都没有经过加密签名。已安装的插件会以 BunkerWeb 的全部权限运行代码。",
+      "incompatible_declared": "此版本支持 BunkerWeb {{supported}};当前版本为 {{current}}",
+      "release": "从发行版 {{tag}} 读取"
     }
   },
   "pro": {
@@ -1422,7 +1422,7 @@
     "collapse_message": "全部折叠",
     "collapse_plural": "搜索窗格 (%d)",
     "count": "{total}",
-    "countFiltered": "{shown} ({total})",
+    "countFiltered": "{shown}({total})",
     "country": "国家/地区",
     "created": "创建时间",
     "data": "数据",
@@ -1493,234 +1493,234 @@
     },
     "antibot": {
       "capjs": {
-        "hint": "Needs a Cap.js server; the frontend and backend URLs may differ.",
+        "hint": "需要 Cap.js 服务器;前端和后端 URL 可能不同。",
         "title": "Cap.js"
       },
       "captcha": {
-        "hint": "Rendered by BunkerWeb itself — no third-party account, no outbound request.",
-        "title": "Built-in captcha"
+        "hint": "由 BunkerWeb 自行渲染——无需第三方账号,不产生出站请求。",
+        "title": "内置验证码"
       },
       "challenge": {
-        "description": "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid.",
-        "title": "Challenge behaviour"
+        "description": "验证的呈现位置、访客有多长时间来解答,以及已解答的验证保持有效的时长。",
+        "title": "验证行为"
       },
       "countries": {
-        "both_set": "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous.",
-        "description": "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded.",
+        "both_set": "两份国家列表均已设置。它们会合并而非互斥:只要访客所在国家在跳过列表中,或不在限制列表中,即可豁免。清除其中一个可使规则变得明确。",
+        "description": "按国家豁免访客,或将验证限制在少数国家。这需要已加载 GeoIP 数据库。",
         "mode": {
-          "all": "Challenge every country",
-          "ignore": "Skip the challenge for these countries",
-          "only": "Challenge only these countries"
+          "all": "对每个国家进行验证",
+          "ignore": "对这些国家跳过验证",
+          "only": "仅对这些国家进行验证"
         },
-        "picker_label": "Country filter",
-        "title": "Countries",
-        "both_set_clear": "Clear the skip list"
+        "picker_label": "国家筛选器",
+        "title": "国家",
+        "both_set_clear": "清除跳过列表"
       },
-      "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
+      "disabled_notice": "此范围内的 Antibot 已关闭。请选择验证模式以进行配置。",
       "exemptions": {
-        "description": "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing.",
-        "title": "Exemptions"
+        "description": "匹配其中任一项的请求会完全跳过验证。将列表留空即不匹配任何内容。",
+        "title": "豁免项"
       },
       "hcaptcha": {
-        "hint": "Needs a site registered at hcaptcha.com.",
+        "hint": "需要在 hcaptcha.com 注册的网站。",
         "title": "hCaptcha"
       },
       "mcaptcha": {
-        "hint": "Needs an mCaptcha instance — the hosted demo or your own.",
+        "hint": "需要一个 mCaptcha 实例——可使用托管的演示版,或您自己的实例。",
         "title": "mCaptcha"
       },
       "mode": {
-        "description": "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back.",
-        "title": "Challenge mode"
+        "description": "访客必须通过哪种验证。下方仅显示所选提供商的字段;其他字段会保留其已保存的值,并在您切换回去时再次显示。",
+        "title": "验证模式"
       },
       "recaptcha": {
         "classic": {
-          "hint": "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition.",
-          "title": "reCAPTCHA classic"
+          "hint": "使用共享密钥对照 google.com/recaptcha/api/siteverify 进行验证。此版本会忽略 Enterprise 字段。",
+          "title": "经典版 reCAPTCHA"
         },
         "enterprise": {
-          "hint": "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition.",
+          "hint": "使用 Google Cloud 项目和 API 密钥对照 recaptchaenterprise.googleapis.com 进行验证。此版本会忽略经典密钥。",
           "title": "reCAPTCHA Enterprise"
         },
-        "hint": "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions.",
+        "hint": "需要在 google.com/recaptcha 注册的网站。站点密钥和最低分数适用于两个版本。",
         "title": "Google reCAPTCHA"
       },
       "turnstile": {
-        "hint": "Needs a site registered in the Cloudflare dashboard.",
+        "hint": "需要在 Cloudflare 控制台中注册的网站。",
         "title": "Cloudflare Turnstile"
       },
       "unplaced": {
-        "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
-        "title": "Other settings"
+        "description": "由插件声明,但尚未安排到上方任何部分。它们仍会正常保存。",
+        "title": "其他设置"
       }
     },
     "access_control": {
       "order": {
-        "title": "Decision order",
-        "description": "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD.",
-        "current": "current page",
-        "on": "On",
-        "off": "Off"
+        "title": "判定顺序",
+        "description": "默认情况下,每个请求都会按此顺序经过这四项检查,由最先做出判断的检查决定结果。匹配白名单会立即结束该流程:请求被允许,之后的三项检查将永远不会运行。该顺序本身可通过 PLUGINS_ORDER_ACCESS 和 PLUGINS_ORDER_PREREAD 按服务单独配置。",
+        "current": "当前页面",
+        "on": "开启",
+        "off": "关闭"
       },
       "stage": {
-        "whitelist": "Whitelist",
-        "blacklist": "Blacklist",
-        "greylist": "Greylist",
-        "country": "Country"
+        "whitelist": "白名单",
+        "blacklist": "黑名单",
+        "greylist": "灰名单",
+        "country": "国家"
       },
       "enforcement": {
-        "title": "Enforcement"
+        "title": "强制执行"
       },
       "kinds": {
-        "title": "What is matched",
-        "description": "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+        "title": "匹配的对象",
+        "description": "每种匹配类型都有一个部分。在每个部分中,您输入的条目与 BunkerWeb 下载的列表会一并检查;匹配其中任一项的客户端即匹配该部分。"
       },
       "kind": {
-        "ip": "IP addresses and networks",
-        "rdns": "Reverse DNS",
-        "asn": "Autonomous systems (ASN)",
-        "user_agent": "User agents",
-        "uri": "URIs"
+        "ip": "IP 地址和网络",
+        "rdns": "反向 DNS",
+        "asn": "自治系统(ASN)",
+        "user_agent": "用户代理",
+        "uri": "URI"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet given a place on this page. They still save normally."
+        "title": "其他设置",
+        "description": "由插件声明,但尚未在此页面分配位置。它们仍会正常保存。"
       },
       "whitelist": {
         "enforcement": {
-          "description": "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+          "description": "白名单最先执行,并覆盖其他一切:匹配项会直接被允许,因此黑名单、灰名单和国家规则永远不会看到该请求。封禁是唯一的例外,并且仅按 IP 判断——在此通过反向 DNS、ASN、用户代理或 URI 匹配的客户端,若正被封禁,仍会被阻止。请将此列表限制为绝不能被排除在外的客户端。"
         }
       },
       "blacklist": {
         "enforcement": {
-          "description": "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+          "description": "黑名单在白名单之后执行,因此已在白名单中的客户端在此绝不会被阻止。在每一行中,例外列表会优先于该行自身的条目及已下载的列表。"
         },
         "community": {
-          "title": "Community lists",
-          "description": "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+          "title": "社区列表",
+          "description": "在 BunkerWeb 之外维护并自动为您刷新的精选列表。它们采用与下方条目相同的匹配方式。"
         }
       },
       "greylist": {
         "enforcement": {
-          "description": "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+          "description": "灰名单默认拒绝:启用时,任何不匹配下方条目的内容都会被拒绝,HTTP 和流量流量均如此。请先添加条目,再启用它——若在所有列表均为空时保存并启用,该操作将被拒绝。"
         },
-        "locked_out": "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+        "locked_out": "灰名单已启用但尚未配置任何条目,因此发送到此服务的每个请求都会被拒绝。请在下方至少添加一个条目,或关闭灰名单。"
       },
       "country": {
-        "title": "Country rule",
-        "description": "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list.",
-        "picker_label": "Country rule",
+        "title": "国家规则",
+        "description": "只有一条规则,而不是两份列表。允许一组国家会拒绝所有其他国家,并使已保存的阻止列表成为无效配置——BunkerWeb 会先检查允许列表,永远不会用到阻止列表。",
+        "picker_label": "国家规则",
         "mode": {
-          "all": "No country rule",
-          "only": "Allow only these countries",
-          "block": "Block these countries"
+          "all": "无国家规则",
+          "only": "仅允许这些国家",
+          "block": "阻止这些国家"
         },
         "conflict": {
-          "description": "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set.",
-          "clear": "Clear the block list"
+          "description": "两份国家列表都会被存储,但只有允许列表会被强制执行:只要设置了允许列表,下方的阻止列表就永远不会被参考。",
+          "clear": "清除阻止列表"
         },
         "exceptions": {
-          "title": "Exceptions",
-          "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
+          "title": "例外",
+          "description": "URI 匹配这些模式之一的请求会完全跳过国家规则。"
         }
       },
       "rules": {
-        "title": "Composite rules",
-        "description": "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name.",
-        "rule": "Rule",
-        "add_term": "Add a term",
-        "remove_term": "Remove this term",
-        "negate": "NOT",
-        "negate_help": "Invert this term: the rule matches when the term does NOT match.",
-        "kind": "What this term matches on",
-        "value": "Value, or @group",
-        "expression": "Saved as:",
+        "title": "复合规则",
+        "description": "规则仅在其所有条件都匹配时才算匹配。规则会与上方列表一并检查,匹配其中任一项的客户端即匹配此阶段。值可以是资源组,写法为 @名称。",
+        "rule": "规则",
+        "add_term": "添加条件",
+        "remove_term": "移除此条件",
+        "negate": "非",
+        "negate_help": "反转此条件:当条件不匹配时,规则即匹配。",
+        "kind": "此条件比较的对象",
+        "value": "值,或 @组",
+        "expression": "保存为:",
         "kind_ip": "IP",
-        "kind_country": "Country",
+        "kind_country": "国家",
         "kind_asn": "ASN",
-        "kind_rdns": "Reverse DNS",
-        "kind_ua": "User agent",
+        "kind_rdns": "反向 DNS",
+        "kind_ua": "用户代理",
         "kind_uri": "URI"
       }
     },
     "modsecurity": {
       "engine": {
-        "title": "Engine",
-        "description": "Whether ModSecurity is loaded at all, and what it does with a rule match."
+        "title": "引擎",
+        "description": "ModSecurity 是否加载,以及在规则匹配时它会执行的操作。"
       },
       "crs": {
         "title": "OWASP Core Rule Set",
-        "description": "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+        "description": "BunkerWeb 加载在 ModSecurity 之上的共享规则集。版本 4 是当前版本;版本 3 则为仍依赖其规则 ID 的服务保留。"
       },
       "crs_plugins": {
-        "title": "Core Rule Set plugins",
-        "description": "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+        "title": "Core Rule Set 插件",
+        "description": "为 Core Rule Set 发布的规则包,会在启动时下载并安装。请提供插件名称、名称/标签,或 URL。"
       },
       "global_crs": {
-        "title": "Global CRS mode",
-        "description": "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+        "title": "全局 CRS 模式",
+        "description": "为整个实例加载一次 Core Rule Set,而不是每个服务加载一次。在服务数量较多时加载更快,但启用此选项时,限定于单个服务的 modsec-crs 配置会被拒绝:请改为创建一个全局配置,并用 Host 规则限定其范围。"
       },
       "audit": {
-        "title": "Audit log",
-        "description": "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+        "title": "审计日志",
+        "description": "ModSecurity 写入自身审计日志的内容,以及每笔事务保留多少内容。A 和 Z 部分始终包含在内。"
       },
       "limits": {
-        "title": "Request body limits",
-        "description": "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+        "title": "请求正文限制",
+        "description": "ModSecurity 会检查请求正文的多少内容,以及超出限制的正文会发生什么。NGINX 会先强制执行 MAX_CLIENT_SIZE,因此高于该值的限制不会产生任何效果。"
       },
       "tuning": {
-        "title": "Rule tuning",
-        "description": "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded.",
-        "modsec_crs": "Before the Core Rule Set",
-        "modsec": "After the Core Rule Set",
-        "crs_plugins_before": "Before CRS plugins",
-        "crs_plugins_after": "After CRS plugins"
+        "title": "规则调优",
+        "description": "清除误报是一种自定义配置,而不是设置。以下是规则排除可以放置的四个位置,按其加载顺序排列。",
+        "modsec_crs": "Core Rule Set 之前",
+        "modsec": "Core Rule Set 之后",
+        "crs_plugins_before": "CRS 插件之前",
+        "crs_plugins_after": "CRS 插件之后"
       },
       "notice": {
-        "off": "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again.",
-        "engine_off": "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree.",
-        "engine_detect": "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked.",
-        "crs_v3_no_plugins": "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+        "off": "ModSecurity 已关闭。下方的设置均不会生效,但每个值都会保留,并在您重新开启时恢复。",
+        "engine_off": "ModSecurity 已启用,但 SecRuleEngine 处于 Off 状态,因此不会检查任何请求。这两项设置都表示“开启”,但目前彼此矛盾。",
+        "engine_detect": "SecRuleEngine 设置为 DetectionOnly:匹配项会被记录,但不会阻止任何内容。",
+        "crs_v3_no_plugins": "Core Rule Set 3 无法加载插件。插件开关和插件列表会被保留,并将在版本 4 中重新生效,但目前不会执行任何操作。"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "其他设置",
+        "description": "由插件声明,但尚未在此页面安排位置。它们仍会正常保存。"
       }
     },
     "headers": {
       "csp": {
         "title": "Content Security Policy",
-        "description": "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+        "description": "以 Content-Security-Policy 形式发送的策略。错误的指令会在服务器端毫无迹象的情况下破坏网站自身的脚本,因此先使用仅报告模式才是安全的做法。"
       },
       "permissions": {
         "title": "Permissions Policy",
-        "description": "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+        "description": "此网站可以使用哪些浏览器功能,以逗号分隔的 feature=(allowlist) 子句列表表示。留空为 () 的条目会为所有人(包括您自己的页面)禁用该 API。"
       },
       "transport": {
-        "title": "HTTPS enforcement",
-        "description": "The Strict-Transport-Security header. Only sent over HTTPS."
+        "title": "HTTPS 强制执行",
+        "description": "Strict-Transport-Security 标头。仅通过 HTTPS 发送。"
       },
       "browser": {
-        "title": "Browser protections",
-        "description": "Small fixed-value headers. An empty value removes the header instead of sending it."
+        "title": "浏览器防护",
+        "description": "值固定的小型标头。空值会移除该标头,而不是发送它。"
       },
       "upstream": {
-        "title": "Upstream and removed headers",
-        "description": "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+        "title": "上游标头和已移除的标头",
+        "description": "上游自身的响应标头中,哪些会保留下来,哪些会在响应发出前被剥离。"
       },
       "cookies": {
-        "title": "Cookies",
-        "description": "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+        "title": "Cookie",
+        "description": "添加到上游返回的每个 Set-Cookie 中的标志。按 Cookie 设置的标志规则位于下方可重复的设置中。"
       },
       "notice": {
-        "csp_report_only": "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce.",
-        "hsts_preload": "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then.",
-        "keep_shadows": "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:",
-        "keep_all": "The keep list is *, so every header the upstream sends wins over the values configured here."
+        "csp_report_only": "仅报告模式已开启:策略以 Content-Security-Policy-Report-Only 的形式发出,因此违规会被报告,但不会阻止任何内容。关闭此选项即可强制执行。",
+        "hsts_preload": "此值包含 preload。域名一旦提交到浏览器的 preload 列表,移除后需要数月才能影响到用户——在此之前,每个子域名都仅限 HTTPS。",
+        "keep_shadows": "当上游发送自身的标头时,这些标头会保留来自上游的值,因此此处配置的值仅作为后备:",
+        "keep_all": "保留列表为 *,因此上游发送的每个标头都会优先于此处配置的值。"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "其他设置",
+        "description": "由插件声明,但尚未在此页面安排位置。它们仍会正常保存。"
       }
     }
   },
@@ -1770,7 +1770,7 @@
     },
     "step4": {
       "label": {
-        "final_url": "BunkerWeb UI URL"
+        "final_url": "BunkerWeb 界面 URL"
       },
       "subtitle": "在完成设置前检查您的设置。",
       "title": "概览"
@@ -2127,16 +2127,16 @@
     },
     "title": "服务模板",
     "catalog": {
-      "heading": "Available templates",
-      "subheading": "Curated service templates published by the BunkerWeb organisation.",
-      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration.",
-      "no_compat_notice": "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+      "heading": "可用模板",
+      "subheading": "由 BunkerWeb 组织发布的精选服务模板。",
+      "layer_warning": "模板是一种图层:将模板添加到已使用模板的服务会更改其实际生效的配置。",
+      "no_compat_notice": "此目录未声明与 BunkerWeb 兼容。如果模板指定了此 BunkerWeb 不具备的设置,安装时将被拒绝。"
     }
   },
   "theme": {
     "dark": "深色",
     "light": "浅色",
-    "system": "System"
+    "system": "系统"
   },
   "threatmap": {
     "exit_fullscreen": "退出全屏",
@@ -2509,7 +2509,7 @@
     "expiring_help": "30 天或更短",
     "file_extensions": "使用以下文件扩展名：{{extensions}}。",
     "file_select": "选择一个 PEM 文件。",
-    "file_selected": "{{name}} ({{size}} KiB)",
+    "file_selected": "{{name}}({{size}} KiB)",
     "file_size_limit": "该文件不得超过 1 MiB。",
     "fingerprint": "SHA-256 指纹",
     "issuer": "颁发者",
@@ -3098,19 +3098,19 @@
       "none": "未附加",
       "primary": "首选证书",
       "template": {
-        "add": "Add",
-        "add_label": "Template to add as a layer",
-        "adding": "Saving applies {{names}}. Many settings can move at once.",
-        "move_down": "Move this template later",
-        "move_up": "Move this template earlier",
+        "add": "添加",
+        "add_label": "要作为图层添加的模板",
+        "adding": "保存后将应用 {{names}}。多项设置可能同时更改。",
+        "move_down": "将此模板后移",
+        "move_up": "将此模板前移",
         "none": "未有模板",
-        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
-        "overridden_badge": "overridden",
-        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
+        "note": "这不是一种资源:模板是一项设置。模板会在保存时按顺序应用,较新的模板会覆盖较早的模板。",
+        "overridden_badge": "已覆盖",
+        "overridden_by": "{{name}} 覆盖了此模板的 {{count}} 项设置。",
         "pending": "在保存时生效",
-        "remove": "Remove this template",
-        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
-        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
+        "remove": "移除此模板",
+        "removing": "保存后将解除与 {{names}} 的关联。这些模板提供的值将被删除。",
+        "reordered": "保存后将更改模板顺序。较新的模板会覆盖较早的模板,因此实际生效的值会改变。",
         "switching": "保存时，此服务从“{{from}}”切换到“{{to}}”。当前模板提供的所有值将被删除，并应用 {{to}} 的值——许多设置同时更改。",
         "unwired": "此页面无法更改 USE_TEMPLATE，因此模板无法在此处更改。"
       },

@@ -20,7 +20,7 @@ msgid "about.build_with"
 msgstr "제작 도구"
 
 msgid "about.gnu_license"
-msgstr "GNU Affero General Public License v3.0"
+msgstr "GNU Affero 일반 공중 사용 허가서 v3.0"
 
 msgid "about.license_title"
 msgstr "라이선스"
@@ -215,16 +215,16 @@ msgid "banner.support"
 msgstr "BunkerWeb에 대한 프리미엄 기술 지원이나 맞춤형 컨설팅이 필요하신가요? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">전문 서비스</a>를 확인해 보세요."
 
 msgid "bans.chart.timeseries.note"
-msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+msgstr "차단은 적용되어 있던 모든 구간에서 집계됩니다. 동일한 IP를 다시 차단하면 원래 날짜가 다시 기록되므로, 이 그래프는 차단 이벤트의 이력이 아니라 각 구간에서 활성 상태였던 차단 수를 보여줍니다."
 
 msgid "bans.chart.timeseries.series"
-msgstr "Active bans"
+msgstr "활성 차단"
 
 msgid "bans.chart.timeseries.subtitle"
-msgstr "Selected range"
+msgstr "선택한 기간"
 
 msgid "bans.chart.timeseries.title"
-msgstr "Active bans per interval"
+msgstr "구간별 활성 차단"
 
 msgid "bans.stats.card.by_reason"
 msgstr "사유별 차단"
@@ -1751,7 +1751,7 @@ msgid "country.not_applicable"
 msgstr "해당 없음"
 
 msgid "dashboard.alert.jobs_failed"
-msgstr "One or more jobs failed on their last run."
+msgstr "하나 이상의 작업이 마지막 실행에서 실패했습니다."
 
 msgid "dashboard.card.blocked_requests.title"
 msgstr "차단된 요청"
@@ -1763,7 +1763,7 @@ msgid "dashboard.card.certificates.title"
 msgstr "인증서"
 
 msgid "dashboard.card.hide"
-msgstr "Hide this card"
+msgstr "이 카드 숨기기"
 
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s 실행 중 / %(down)s 중지 / %(loading)s 로딩 중"
@@ -1796,7 +1796,7 @@ msgid "dashboard.card.ram.warning_low"
 msgstr "주의: 메모리 부족으로 성능이 저하될 수 있습니다."
 
 msgid "dashboard.card.restore"
-msgstr "Restore hidden cards"
+msgstr "숨긴 카드 복원"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s 온라인 / %(draft)s 초안"
@@ -2315,7 +2315,7 @@ msgid "error.webauthn_request_failed"
 msgstr "보안 키 요청에 실패했습니다. 다시 시도해 주세요."
 
 msgid "flash.check_jobs_for_details"
-msgstr "Check the Jobs page for details."
+msgstr "자세한 내용은 작업 페이지를 확인하세요."
 
 msgid "flash.easter_egg"
 msgstr "이 글을 보고 계신다면 호기심이 많으시군요!"
@@ -2324,7 +2324,7 @@ msgid "flash.error"
 msgstr "오류"
 
 msgid "flash.last_configuration_change_failed"
-msgstr "Your last configuration change could not be applied."
+msgstr "마지막 구성 변경 사항을 적용할 수 없었습니다."
 
 msgid "flash.message"
 msgstr "정보"
@@ -3243,10 +3243,10 @@ msgid "newsletter.title"
 msgstr "뉴스레터 가입"
 
 msgid "notice.already_subscribed"
-msgstr "Already subscribed"
+msgstr "이미 구독 중입니다"
 
 msgid "notice.dismiss_mfa"
-msgstr "Don't remind me again"
+msgstr "다시 알리지 않기"
 
 msgid "onboarding.dismiss"
 msgstr "닫기"
@@ -3366,34 +3366,34 @@ msgid "plugin.type.ui"
 msgstr "UI"
 
 msgid "plugins.catalog.incompatible"
-msgstr "This release declares no BunkerWeb compatibility; this is %(current)s"
+msgstr "이 릴리스는 BunkerWeb 호환성을 선언하지 않습니다. 현재 버전은 %(current)s입니다"
 
 msgid "plugins.catalog.incompatible_declared"
-msgstr "This release supports BunkerWeb %(supported)s; this is %(current)s"
+msgstr "이 릴리스는 BunkerWeb %(supported)s을(를) 지원합니다. 현재 버전은 %(current)s입니다"
 
 msgid "plugins.catalog.install"
-msgstr "Install"
+msgstr "설치"
 
 msgid "plugins.catalog.install_failed"
-msgstr "Install failed"
+msgstr "설치 실패"
 
 msgid "plugins.catalog.learn_more"
-msgstr "Learn more"
+msgstr "더 알아보기"
 
 msgid "plugins.catalog.release"
-msgstr "Read from release %(tag)s"
+msgstr "릴리스 %(tag)s에서 읽기"
 
 msgid "plugins.catalog.stale"
-msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+msgstr "카탈로그가 최근에 새로고침되지 않아 다시 최신 상태가 될 때까지 설치가 비활성화됩니다."
 
 msgid "plugins.catalog.tab"
-msgstr "Available"
+msgstr "사용 가능"
 
 msgid "plugins.catalog.trust_notice"
-msgstr "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+msgstr "커뮤니티 항목은 BunkerWeb 조직이 GitHub에 게시한 저장소에서 TLS를 통해 읽어오며, 설치되는 내용은 목록과 대조하여 확인됩니다 — 다만 여기에는 암호학적으로 서명된 것이 없습니다. 설치된 플러그인은 BunkerWeb의 모든 권한으로 코드를 실행합니다."
 
 msgid "plugins.catalog.version"
-msgstr "Version %(version)s"
+msgstr "버전 %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "활성"
@@ -4257,43 +4257,43 @@ msgid "service.resources.primary"
 msgstr "주요 인증서"
 
 msgid "service.resources.template.add"
-msgstr "Add"
+msgstr "추가"
 
 msgid "service.resources.template.add_label"
-msgstr "Template to add as a layer"
+msgstr "레이어로 추가할 템플릿"
 
 msgid "service.resources.template.adding"
-msgstr "Saving applies %(names)s. Many settings can move at once."
+msgstr "저장하면 %(names)s이(가) 적용됩니다. 여러 설정이 한 번에 바뀔 수 있습니다."
 
 msgid "service.resources.template.move_down"
-msgstr "Move this template later"
+msgstr "이 템플릿을 뒤로 이동"
 
 msgid "service.resources.template.move_up"
-msgstr "Move this template earlier"
+msgstr "이 템플릿을 앞으로 이동"
 
 msgid "service.resources.template.none"
 msgstr "템플릿 없음"
 
 msgid "service.resources.template.note"
-msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+msgstr "리소스가 아닙니다: 템플릿은 설정입니다. 템플릿은 저장 시 순서대로 적용되며, 나중 템플릿이 이전 템플릿을 덮어씁니다."
 
 msgid "service.resources.template.overridden_badge"
-msgstr "overridden"
+msgstr "재정의됨"
 
 msgid "service.resources.template.overridden_by"
-msgstr "%(name)s overrides %(count)s of this template’s settings."
+msgstr "%(name)s이(가) 이 템플릿의 설정 %(count)s개를 재정의합니다."
 
 msgid "service.resources.template.pending"
 msgstr "저장 시 적용"
 
 msgid "service.resources.template.remove"
-msgstr "Remove this template"
+msgstr "이 템플릿 제거"
 
 msgid "service.resources.template.removing"
-msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+msgstr "저장하면 %(names)s이(가) 분리됩니다. 해당 템플릿이 제공한 값은 삭제됩니다."
 
 msgid "service.resources.template.reordered"
-msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
+msgstr "저장하면 템플릿 순서가 변경됩니다. 나중 템플릿이 이전 템플릿을 재정의하므로 실제 적용되는 값이 바뀝니다."
 
 msgid "service.resources.template.switching"
 msgstr "저장하면 이 서비스가 “%(from)s”에서 “%(to)s”로 전환됩니다. 현재 템플릿에서 제공된 값은 삭제되고, %(to)s의 값이 적용됩니다. 여러 설정이 한 번에 변경됩니다."
@@ -4323,385 +4323,385 @@ msgid "services.with_configs"
 msgstr "사용자 정의 설정과 함께"
 
 msgid "settings.access_control.blacklist.community.description"
-msgstr "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+msgstr "BunkerWeb 외부에서 관리되고 자동으로 갱신되는 큐레이션된 목록입니다. 아래 항목과 동일한 방식으로 매칭에 반영됩니다."
 
 msgid "settings.access_control.blacklist.community.title"
-msgstr "Community lists"
+msgstr "커뮤니티 목록"
 
 msgid "settings.access_control.blacklist.enforcement.description"
-msgstr "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+msgstr "블랙리스트는 화이트리스트 이후에 적용되므로, 화이트리스트에 등록된 클라이언트는 여기서 차단되지 않습니다. 각 행에서 예외 목록은 해당 행 자체의 항목과 다운로드된 목록보다 우선합니다."
 
 msgid "settings.access_control.country.conflict.clear"
-msgstr "Clear the block list"
+msgstr "차단 목록 지우기"
 
 msgid "settings.access_control.country.conflict.description"
-msgstr "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set."
+msgstr "두 국가 목록 모두 저장되지만 허용 목록만 적용됩니다: 허용 목록이 설정되어 있는 동안에는 아래의 차단 목록이 참조되지 않습니다."
 
 msgid "settings.access_control.country.description"
-msgstr "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list."
+msgstr "규칙은 하나이지 두 개의 목록이 아닙니다. 특정 국가 집합을 허용하면 그 외 모든 국가가 거부되며, 저장된 차단 목록은 무의미한 설정이 됩니다 — BunkerWeb은 허용 목록을 먼저 확인하며 차단 목록에는 도달하지 않습니다."
 
 msgid "settings.access_control.country.exceptions.description"
-msgstr "Requests whose URI matches one of these patterns skip the country rule entirely."
+msgstr "URI가 이 패턴 중 하나와 일치하는 요청은 국가 규칙을 완전히 건너뜁니다."
 
 msgid "settings.access_control.country.exceptions.title"
-msgstr "Exceptions"
+msgstr "예외"
 
 msgid "settings.access_control.country.mode.all"
-msgstr "No country rule"
+msgstr "국가 규칙 없음"
 
 msgid "settings.access_control.country.mode.block"
-msgstr "Block these countries"
+msgstr "이 국가들을 차단"
 
 msgid "settings.access_control.country.mode.only"
-msgstr "Allow only these countries"
+msgstr "이 국가들만 허용"
 
 msgid "settings.access_control.country.picker_label"
-msgstr "Country rule"
+msgstr "국가 규칙"
 
 msgid "settings.access_control.country.title"
-msgstr "Country rule"
+msgstr "국가 규칙"
 
 msgid "settings.access_control.enforcement.title"
-msgstr "Enforcement"
+msgstr "적용"
 
 msgid "settings.access_control.greylist.enforcement.description"
-msgstr "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+msgstr "그레이리스트는 기본적으로 거부합니다: 활성화되어 있는 동안 아래 항목 중 어느 것과도 일치하지 않는 요청은 HTTP와 스트림 트래픽 모두에서 거부됩니다. 먼저 항목을 추가한 후 활성화하세요 — 모든 목록이 비어 있는 상태로 활성화하는 저장은 거부됩니다."
 
 msgid "settings.access_control.greylist.locked_out"
-msgstr "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+msgstr "그레이리스트가 활성화되어 있지만 구성된 항목이 없어 이 서비스에 대한 모든 요청이 거부됩니다. 아래에 항목을 하나 이상 추가하거나 그레이리스트를 비활성화하세요."
 
 msgid "settings.access_control.kind.asn"
-msgstr "Autonomous systems (ASN)"
+msgstr "자율 시스템 (ASN)"
 
 msgid "settings.access_control.kind.ip"
-msgstr "IP addresses and networks"
+msgstr "IP 주소 및 네트워크"
 
 msgid "settings.access_control.kind.rdns"
-msgstr "Reverse DNS"
+msgstr "역방향 DNS"
 
 msgid "settings.access_control.kind.uri"
-msgstr "URIs"
+msgstr "URI"
 
 msgid "settings.access_control.kind.user_agent"
-msgstr "User agents"
+msgstr "사용자 에이전트"
 
 msgid "settings.access_control.kinds.description"
-msgstr "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+msgstr "일치 유형마다 하나의 섹션이 있습니다. 각 섹션에서 직접 입력한 항목과 BunkerWeb이 다운로드한 목록이 함께 확인되며, 둘 중 하나와 일치하는 클라이언트는 해당 섹션과 일치합니다."
 
 msgid "settings.access_control.kinds.title"
-msgstr "What is matched"
+msgstr "일치 대상"
 
 msgid "settings.access_control.order.current"
-msgstr "current page"
+msgstr "현재 페이지"
 
 msgid "settings.access_control.order.description"
-msgstr "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD."
+msgstr "기본적으로 모든 요청은 이 네 가지 검사를 이 순서로 거치며, 먼저 결정을 내린 검사가 우선합니다. 화이트리스트 일치는 즉시 검사를 종료합니다: 요청이 허용되고 이후의 세 가지 검사는 실행되지 않습니다. 순서 자체는 PLUGINS_ORDER_ACCESS와 PLUGINS_ORDER_PREREAD를 통해 서비스별로 구성할 수 있습니다."
 
 msgid "settings.access_control.order.off"
-msgstr "Off"
+msgstr "꺼짐"
 
 msgid "settings.access_control.order.on"
-msgstr "On"
+msgstr "켜짐"
 
 msgid "settings.access_control.order.title"
-msgstr "Decision order"
+msgstr "결정 순서"
 
 msgid "settings.access_control.rules.add_term"
-msgstr "Add a term"
+msgstr "조건 추가"
 
 msgid "settings.access_control.rules.description"
-msgstr "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name."
+msgstr "규칙은 모든 조건이 일치할 때만 일치합니다. 규칙은 위 목록과 함께 확인되며, 그중 하나라도 일치하는 클라이언트는 이 단계와 일치합니다. 값은 @이름으로 작성된 리소스 그룹일 수 있습니다."
 
 msgid "settings.access_control.rules.expression"
-msgstr "Saved as:"
+msgstr "저장된 형식:"
 
 msgid "settings.access_control.rules.kind"
-msgstr "What this term matches on"
+msgstr "이 조건이 비교하는 대상"
 
 msgid "settings.access_control.rules.kind_asn"
 msgstr "ASN"
 
 msgid "settings.access_control.rules.kind_country"
-msgstr "Country"
+msgstr "국가"
 
 msgid "settings.access_control.rules.kind_ip"
 msgstr "IP"
 
 msgid "settings.access_control.rules.kind_rdns"
-msgstr "Reverse DNS"
+msgstr "역방향 DNS"
 
 msgid "settings.access_control.rules.kind_ua"
-msgstr "User agent"
+msgstr "사용자 에이전트"
 
 msgid "settings.access_control.rules.kind_uri"
 msgstr "URI"
 
 msgid "settings.access_control.rules.negate"
-msgstr "NOT"
+msgstr "아님"
 
 msgid "settings.access_control.rules.negate_help"
-msgstr "Invert this term: the rule matches when the term does NOT match."
+msgstr "이 조건을 반전합니다: 조건이 일치하지 않을 때 규칙이 일치합니다."
 
 msgid "settings.access_control.rules.remove_term"
-msgstr "Remove this term"
+msgstr "이 조건 제거"
 
 msgid "settings.access_control.rules.rule"
-msgstr "Rule"
+msgstr "규칙"
 
 msgid "settings.access_control.rules.title"
-msgstr "Composite rules"
+msgstr "복합 규칙"
 
 msgid "settings.access_control.rules.value"
-msgstr "Value, or @group"
+msgstr "값 또는 @그룹"
 
 msgid "settings.access_control.stage.blacklist"
-msgstr "Blacklist"
+msgstr "블랙리스트"
 
 msgid "settings.access_control.stage.country"
-msgstr "Country"
+msgstr "국가"
 
 msgid "settings.access_control.stage.greylist"
-msgstr "Greylist"
+msgstr "그레이리스트"
 
 msgid "settings.access_control.stage.whitelist"
-msgstr "Whitelist"
+msgstr "화이트리스트"
 
 msgid "settings.access_control.unplaced.description"
-msgstr "Declared by the plugin but not yet given a place on this page. They still save normally."
+msgstr "플러그인에서 선언했지만 아직 이 페이지에 배치되지 않은 설정입니다. 그래도 정상적으로 저장됩니다."
 
 msgid "settings.access_control.unplaced.title"
-msgstr "Other settings"
+msgstr "기타 설정"
 
 msgid "settings.access_control.whitelist.enforcement.description"
-msgstr "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+msgstr "화이트리스트가 가장 먼저 적용되어 다른 모든 것을 무시합니다: 일치하면 곧바로 허용되므로 블랙리스트, 그레이리스트, 국가 검사는 해당 요청을 보지 못합니다. 차단만이 유일한 예외이며, 그것도 IP 기준일 때만입니다 — 역방향 DNS, ASN, 사용자 에이전트 또는 URI로 여기서 일치한 클라이언트라도 차단 중이면 계속 차단됩니다. 이 목록은 절대 차단되어서는 안 되는 클라이언트로만 제한하세요."
 
 msgid "settings.antibot.capjs.hint"
-msgstr "Needs a Cap.js server; the frontend and backend URLs may differ."
+msgstr "Cap.js 서버가 필요합니다. 프런트엔드와 백엔드 URL이 다를 수 있습니다."
 
 msgid "settings.antibot.capjs.title"
 msgstr "Cap.js"
 
 msgid "settings.antibot.captcha.hint"
-msgstr "Rendered by BunkerWeb itself — no third-party account, no outbound request."
+msgstr "BunkerWeb 자체에서 렌더링됩니다 — 제3자 계정도, 외부 요청도 없습니다."
 
 msgid "settings.antibot.captcha.title"
-msgstr "Built-in captcha"
+msgstr "내장 캡차"
 
 msgid "settings.antibot.challenge.description"
-msgstr "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid."
+msgstr "챌린지가 제공되는 위치, 방문자가 이를 풀 수 있는 시간, 그리고 해결된 챌린지가 유효한 기간입니다."
 
 msgid "settings.antibot.challenge.title"
-msgstr "Challenge behaviour"
+msgstr "챌린지 동작"
 
 msgid "settings.antibot.countries.both_set"
-msgstr "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous."
+msgstr "두 국가 목록이 모두 설정되어 있습니다. 이들은 배타적이지 않고 결합됩니다: 방문자의 국가가 제외 목록에 있거나 제한 목록 밖에 있으면 예외로 처리됩니다. 규칙을 명확히 하려면 둘 중 하나를 비우세요."
 
 msgid "settings.antibot.countries.both_set_clear"
-msgstr "Clear the skip list"
+msgstr "제외 목록 지우기"
 
 msgid "settings.antibot.countries.description"
-msgstr "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded."
+msgstr "국가별로 방문자를 예외 처리하거나, 챌린지를 일부 국가로 제한합니다. GeoIP 데이터베이스가 로드되어 있어야 합니다."
 
 msgid "settings.antibot.countries.mode.all"
-msgstr "Challenge every country"
+msgstr "모든 국가에 챌린지"
 
 msgid "settings.antibot.countries.mode.ignore"
-msgstr "Skip the challenge for these countries"
+msgstr "이 국가들은 챌린지 건너뛰기"
 
 msgid "settings.antibot.countries.mode.only"
-msgstr "Challenge only these countries"
+msgstr "이 국가들에만 챌린지"
 
 msgid "settings.antibot.countries.picker_label"
-msgstr "Country filter"
+msgstr "국가 필터"
 
 msgid "settings.antibot.countries.title"
-msgstr "Countries"
+msgstr "국가"
 
 msgid "settings.antibot.disabled_notice"
-msgstr "Antibot is off for this scope. Pick a challenge mode to configure it."
+msgstr "이 범위에서는 안티봇이 꺼져 있습니다. 구성하려면 챌린지 모드를 선택하세요."
 
 msgid "settings.antibot.exemptions.description"
-msgstr "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing."
+msgstr "이 중 하나와 일치하는 요청은 챌린지를 완전히 건너뜁니다. 아무것도 일치시키지 않으려면 목록을 비워 두세요."
 
 msgid "settings.antibot.exemptions.title"
-msgstr "Exemptions"
+msgstr "예외"
 
 msgid "settings.antibot.hcaptcha.hint"
-msgstr "Needs a site registered at hcaptcha.com."
+msgstr "hcaptcha.com에 등록된 사이트가 필요합니다."
 
 msgid "settings.antibot.hcaptcha.title"
 msgstr "hCaptcha"
 
 msgid "settings.antibot.mcaptcha.hint"
-msgstr "Needs an mCaptcha instance — the hosted demo or your own."
+msgstr "mCaptcha 인스턴스가 필요합니다 — 호스팅된 데모 또는 직접 운영하는 인스턴스입니다."
 
 msgid "settings.antibot.mcaptcha.title"
 msgstr "mCaptcha"
 
 msgid "settings.antibot.mode.description"
-msgstr "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back."
+msgstr "방문자가 통과해야 하는 챌린지입니다. 아래에는 선택한 제공업체의 필드만 표시됩니다. 다른 필드는 저장된 값을 유지하며 다시 전환하면 돌아옵니다."
 
 msgid "settings.antibot.mode.title"
-msgstr "Challenge mode"
+msgstr "챌린지 모드"
 
 msgid "settings.antibot.recaptcha.classic.hint"
-msgstr "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition."
+msgstr "공유 비밀 키로 google.com/recaptcha/api/siteverify와 대조하여 검증됩니다. 이 버전에서는 Enterprise 필드가 무시됩니다."
 
 msgid "settings.antibot.recaptcha.classic.title"
-msgstr "reCAPTCHA classic"
+msgstr "reCAPTCHA 클래식"
 
 msgid "settings.antibot.recaptcha.enterprise.hint"
-msgstr "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition."
+msgstr "Google Cloud 프로젝트와 API 키로 recaptchaenterprise.googleapis.com과 대조하여 검증됩니다. 이 버전에서는 클래식 비밀 키가 무시됩니다."
 
 msgid "settings.antibot.recaptcha.enterprise.title"
 msgstr "reCAPTCHA Enterprise"
 
 msgid "settings.antibot.recaptcha.hint"
-msgstr "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions."
+msgstr "google.com/recaptcha에 등록된 사이트가 필요합니다. 사이트 키와 최소 점수는 두 버전 모두에 적용됩니다."
 
 msgid "settings.antibot.recaptcha.title"
 msgstr "Google reCAPTCHA"
 
 msgid "settings.antibot.turnstile.hint"
-msgstr "Needs a site registered in the Cloudflare dashboard."
+msgstr "Cloudflare 대시보드에 등록된 사이트가 필요합니다."
 
 msgid "settings.antibot.turnstile.title"
 msgstr "Cloudflare Turnstile"
 
 msgid "settings.antibot.unplaced.description"
-msgstr "Declared by the plugin but not yet placed in a section above. They still save normally."
+msgstr "플러그인에서 선언했지만 아직 위 섹션에 배치되지 않은 설정입니다. 그래도 정상적으로 저장됩니다."
 
 msgid "settings.antibot.unplaced.title"
-msgstr "Other settings"
+msgstr "기타 설정"
 
 msgid "settings.custom_config.title"
 msgstr "사용자 정의 설정"
 
 msgid "settings.headers.browser.description"
-msgstr "Small fixed-value headers. An empty value removes the header instead of sending it."
+msgstr "값이 고정된 작은 헤더입니다. 값을 비우면 헤더를 전송하는 대신 제거합니다."
 
 msgid "settings.headers.browser.title"
-msgstr "Browser protections"
+msgstr "브라우저 보호"
 
 msgid "settings.headers.cookies.description"
-msgstr "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+msgstr "업스트림이 반환하는 모든 Set-Cookie에 추가되는 플래그입니다. 쿠키별 플래그 규칙은 아래의 반복 설정에 있습니다."
 
 msgid "settings.headers.cookies.title"
-msgstr "Cookies"
+msgstr "쿠키"
 
 msgid "settings.headers.csp.description"
-msgstr "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+msgstr "Content-Security-Policy로 전송되는 정책입니다. 잘못된 지시문은 서버 측에서 아무런 표시 없이 사이트 자체 스크립트를 깨뜨리므로, 먼저 report-only로 적용하는 것이 안전한 순서입니다."
 
 msgid "settings.headers.csp.title"
 msgstr "Content Security Policy"
 
 msgid "settings.headers.notice.csp_report_only"
-msgstr "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce."
+msgstr "Report-only가 활성화되어 있습니다: 정책이 Content-Security-Policy-Report-Only로 전송되므로 위반 사항은 보고되지만 아무것도 차단되지 않습니다. 강제 적용하려면 이를 끄세요."
 
 msgid "settings.headers.notice.hsts_preload"
-msgstr "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then."
+msgstr "이 값에는 preload가 포함되어 있습니다. 도메인이 브라우저의 preload 목록에 제출되면, 제거해도 사용자에게 반영되기까지 몇 달이 걸립니다 — 그때까지는 모든 하위 도메인이 HTTPS 전용으로 유지됩니다."
 
 msgid "settings.headers.notice.keep_all"
-msgstr "The keep list is *, so every header the upstream sends wins over the values configured here."
+msgstr "보존 목록이 *이므로 업스트림이 보내는 모든 헤더가 여기서 설정한 값보다 우선합니다."
 
 msgid "settings.headers.notice.keep_shadows"
-msgstr "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:"
+msgstr "이 헤더들은 업스트림이 자체 값을 보낼 때 그대로 유지되므로, 여기서 설정한 값은 대체값(fallback)일 뿐입니다:"
 
 msgid "settings.headers.permissions.description"
-msgstr "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+msgstr "이 사이트가 사용할 수 있는 브라우저 기능을, feature=(allowlist) 절을 쉼표로 구분한 목록으로 지정합니다. ()로 남겨둔 항목은 자체 페이지를 포함해 모든 사람에게 해당 API를 비활성화합니다."
 
 msgid "settings.headers.permissions.title"
 msgstr "Permissions Policy"
 
 msgid "settings.headers.transport.description"
-msgstr "The Strict-Transport-Security header. Only sent over HTTPS."
+msgstr "Strict-Transport-Security 헤더입니다. HTTPS를 통해서만 전송됩니다."
 
 msgid "settings.headers.transport.title"
-msgstr "HTTPS enforcement"
+msgstr "HTTPS 적용"
 
 msgid "settings.headers.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "플러그인에서 선언했지만 아직 이 페이지에 배치되지 않은 설정입니다. 그래도 정상적으로 저장됩니다."
 
 msgid "settings.headers.unplaced.title"
-msgstr "Other settings"
+msgstr "기타 설정"
 
 msgid "settings.headers.upstream.description"
-msgstr "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+msgstr "업스트림 자체 응답 헤더 중 유지되는 것과, 응답이 전송되기 전에 제거되는 것입니다."
 
 msgid "settings.headers.upstream.title"
-msgstr "Upstream and removed headers"
+msgstr "업스트림 및 제거된 헤더"
 
 msgid "settings.modsecurity.audit.description"
-msgstr "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+msgstr "ModSecurity가 자체 감사 로그에 기록하는 내용과, 각 트랜잭션을 얼마나 보관하는지입니다. A와 Z 파트는 항상 포함됩니다."
 
 msgid "settings.modsecurity.audit.title"
-msgstr "Audit log"
+msgstr "감사 로그"
 
 msgid "settings.modsecurity.crs.description"
-msgstr "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+msgstr "ModSecurity 위에 BunkerWeb이 로드하는 공유 규칙 세트입니다. 버전 4가 현재 버전이며, 버전 3은 여전히 해당 규칙 ID에 의존하는 서비스를 위해 유지됩니다."
 
 msgid "settings.modsecurity.crs.title"
 msgstr "OWASP Core Rule Set"
 
 msgid "settings.modsecurity.crs_plugins.description"
-msgstr "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+msgstr "Core Rule Set용으로 게시된 규칙 팩으로, 시작 시 다운로드되어 설치됩니다. 플러그인 이름, 이름/태그 또는 URL을 입력하세요."
 
 msgid "settings.modsecurity.crs_plugins.title"
-msgstr "Core Rule Set plugins"
+msgstr "Core Rule Set 플러그인"
 
 msgid "settings.modsecurity.engine.description"
-msgstr "Whether ModSecurity is loaded at all, and what it does with a rule match."
+msgstr "ModSecurity가 로드되어 있는지 여부와, 규칙 일치 시 수행할 동작입니다."
 
 msgid "settings.modsecurity.engine.title"
-msgstr "Engine"
+msgstr "엔진"
 
 msgid "settings.modsecurity.global_crs.description"
-msgstr "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+msgstr "서비스마다 로드하는 대신 인스턴스 전체에 대해 Core Rule Set을 한 번만 로드합니다. 서비스가 많을 때 더 빠르게 로드되지만, 활성화되어 있는 동안에는 서비스 범위의 modsec-crs 구성이 거부됩니다: 대신 전역 구성을 만들고 Host 규칙으로 범위를 지정하세요."
 
 msgid "settings.modsecurity.global_crs.title"
-msgstr "Global CRS mode"
+msgstr "전역 CRS 모드"
 
 msgid "settings.modsecurity.limits.description"
-msgstr "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+msgstr "ModSecurity가 검사하는 요청 본문의 범위와, 제한을 초과한 본문에 어떤 일이 일어나는지입니다. NGINX가 먼저 MAX_CLIENT_SIZE를 적용하므로, 이보다 큰 제한은 효과가 없습니다."
 
 msgid "settings.modsecurity.limits.title"
-msgstr "Request body limits"
+msgstr "요청 본문 제한"
 
 msgid "settings.modsecurity.notice.crs_v3_no_plugins"
-msgstr "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+msgstr "Core Rule Set 3은 플러그인을 로드할 수 없습니다. 플러그인 스위치와 플러그인 목록은 유지되며 버전 4에서 다시 적용되지만, 지금은 아무 효과가 없습니다."
 
 msgid "settings.modsecurity.notice.engine_detect"
-msgstr "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked."
+msgstr "SecRuleEngine이 DetectionOnly로 설정되어 있습니다: 일치 항목은 기록되지만 아무것도 차단되지 않습니다."
 
 msgid "settings.modsecurity.notice.engine_off"
-msgstr "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree."
+msgstr "ModSecurity는 활성화되어 있지만 SecRuleEngine이 Off이므로 어떤 요청도 검사되지 않습니다. 두 설정 모두 \"켜짐\"을 의미하지만 현재 서로 일치하지 않습니다."
 
 msgid "settings.modsecurity.notice.off"
-msgstr "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again."
+msgstr "ModSecurity가 꺼져 있습니다. 아래 항목은 적용되지 않지만 모든 값은 유지되며 다시 켜면 그대로 돌아옵니다."
 
 msgid "settings.modsecurity.tuning.crs_plugins_after"
-msgstr "After CRS plugins"
+msgstr "CRS 플러그인 이후"
 
 msgid "settings.modsecurity.tuning.crs_plugins_before"
-msgstr "Before CRS plugins"
+msgstr "CRS 플러그인 이전"
 
 msgid "settings.modsecurity.tuning.description"
-msgstr "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded."
+msgstr "오탐을 해제하는 것은 설정이 아니라 사용자 지정 구성입니다. 다음은 규칙 예외를 배치할 수 있는 네 곳이며, 로드되는 순서대로 나열됩니다."
 
 msgid "settings.modsecurity.tuning.modsec"
-msgstr "After the Core Rule Set"
+msgstr "Core Rule Set 이후"
 
 msgid "settings.modsecurity.tuning.modsec_crs"
-msgstr "Before the Core Rule Set"
+msgstr "Core Rule Set 이전"
 
 msgid "settings.modsecurity.tuning.title"
-msgstr "Rule tuning"
+msgstr "규칙 조정"
 
 msgid "settings.modsecurity.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "플러그인에서 선언했지만 아직 이 페이지에 배치되지 않은 설정입니다. 그래도 정상적으로 저장됩니다."
 
 msgid "settings.modsecurity.unplaced.title"
-msgstr "Other settings"
+msgstr "기타 설정"
 
 msgid "settings.multiple.description"
 msgstr "이 플러그인에 대한 여러 설정 인스턴스를 여기에서 구성합니다."
@@ -5694,16 +5694,16 @@ msgid "template.none"
 msgstr "템플릿 없음"
 
 msgid "templates.catalog.heading"
-msgstr "Available templates"
+msgstr "사용 가능한 템플릿"
 
 msgid "templates.catalog.layer_warning"
-msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+msgstr "템플릿은 레이어입니다: 이미 템플릿을 사용 중인 서비스에 템플릿을 추가하면 실제 적용되는 구성이 변경됩니다."
 
 msgid "templates.catalog.no_compat_notice"
-msgstr "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+msgstr "이 카탈로그는 BunkerWeb 호환성을 선언하지 않습니다. 이 BunkerWeb에 없는 설정을 지정하는 템플릿은 설치 시 거부됩니다."
 
 msgid "templates.catalog.subheading"
-msgstr "Curated service templates published by the BunkerWeb organisation."
+msgstr "BunkerWeb 조직이 게시한 엄선된 서비스 템플릿입니다."
 
 msgid "templates.gallery.delete_selected"
 msgstr "선택 항목 삭제"
@@ -5757,7 +5757,7 @@ msgid "theme.light"
 msgstr "밝게"
 
 msgid "theme.system"
-msgstr "System"
+msgstr "시스템"
 
 msgid "threatmap.attacks_today"
 msgstr "오늘의 공격"

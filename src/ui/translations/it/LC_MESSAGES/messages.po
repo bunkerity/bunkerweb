@@ -215,16 +215,16 @@ msgid "banner.support"
 msgstr "Hai bisogno di supporto premium o consulenza su misura per BunkerWeb? Dai un'occhiata ai nostri <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">servizi professionali</a>."
 
 msgid "bans.chart.timeseries.note"
-msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+msgstr "Un ban viene conteggiato in ogni intervallo in cui è stato in vigore. Bannare di nuovo lo stesso IP riscrive la sua data originale, quindi questo mostra quanti ban erano attivi, non una cronologia degli eventi di ban."
 
 msgid "bans.chart.timeseries.series"
-msgstr "Active bans"
+msgstr "Ban attivi"
 
 msgid "bans.chart.timeseries.subtitle"
-msgstr "Selected range"
+msgstr "Intervallo selezionato"
 
 msgid "bans.chart.timeseries.title"
-msgstr "Active bans per interval"
+msgstr "Ban attivi per intervallo"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Ban per motivo"
@@ -1280,7 +1280,7 @@ msgid "country.GY"
 msgstr "Guyana"
 
 msgid "country.HK"
-msgstr "Hong Kong"
+msgstr "RAS di Hong Kong"
 
 msgid "country.HM"
 msgstr "Isole Heard e McDonald"
@@ -1433,13 +1433,13 @@ msgid "country.ML"
 msgstr "Mali"
 
 msgid "country.MM"
-msgstr "Myanmar"
+msgstr "Myanmar (Birmania)"
 
 msgid "country.MN"
 msgstr "Mongolia"
 
 msgid "country.MO"
-msgstr "Macao"
+msgstr "RAS di Macao"
 
 msgid "country.MP"
 msgstr "Isole Marianne Settentrionali"
@@ -1751,7 +1751,7 @@ msgid "country.not_applicable"
 msgstr "N/D"
 
 msgid "dashboard.alert.jobs_failed"
-msgstr "One or more jobs failed on their last run."
+msgstr "Uno o più job sono falliti nella loro ultima esecuzione."
 
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Richieste Bloccate"
@@ -1763,7 +1763,7 @@ msgid "dashboard.card.certificates.title"
 msgstr "Certificati"
 
 msgid "dashboard.card.hide"
-msgstr "Hide this card"
+msgstr "Nascondi questa scheda"
 
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s attive / %(down)s inattive / %(loading)s in caricamento"
@@ -1796,7 +1796,7 @@ msgid "dashboard.card.ram.warning_low"
 msgstr "Avviso: memoria insufficiente potrebbe influire sulle prestazioni"
 
 msgid "dashboard.card.restore"
-msgstr "Restore hidden cards"
+msgstr "Ripristina schede nascoste"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s online / %(draft)s bozza"
@@ -2315,7 +2315,7 @@ msgid "error.webauthn_request_failed"
 msgstr "La richiesta della chiave di sicurezza non è riuscita. Riprova."
 
 msgid "flash.check_jobs_for_details"
-msgstr "Check the Jobs page for details."
+msgstr "Controlla la pagina Job per i dettagli."
 
 msgid "flash.easter_egg"
 msgstr "Se stai leggendo questo, significa che sei curioso"
@@ -2324,7 +2324,7 @@ msgid "flash.error"
 msgstr "Errore"
 
 msgid "flash.last_configuration_change_failed"
-msgstr "Your last configuration change could not be applied."
+msgstr "L'ultima modifica alla configurazione non è stata applicata."
 
 msgid "flash.message"
 msgstr "Info"
@@ -3248,10 +3248,10 @@ msgid "newsletter.title"
 msgstr "Iscriviti alla Newsletter"
 
 msgid "notice.already_subscribed"
-msgstr "Already subscribed"
+msgstr "Già iscritto"
 
 msgid "notice.dismiss_mfa"
-msgstr "Don't remind me again"
+msgstr "Non ricordarmelo più"
 
 msgid "onboarding.dismiss"
 msgstr "Ignora"
@@ -3371,34 +3371,34 @@ msgid "plugin.type.ui"
 msgstr "UI"
 
 msgid "plugins.catalog.incompatible"
-msgstr "This release declares no BunkerWeb compatibility; this is %(current)s"
+msgstr "Questa release non dichiara compatibilità con BunkerWeb; la versione attuale è %(current)s"
 
 msgid "plugins.catalog.incompatible_declared"
-msgstr "This release supports BunkerWeb %(supported)s; this is %(current)s"
+msgstr "Questa release supporta BunkerWeb %(supported)s; la versione attuale è %(current)s"
 
 msgid "plugins.catalog.install"
-msgstr "Install"
+msgstr "Installa"
 
 msgid "plugins.catalog.install_failed"
-msgstr "Install failed"
+msgstr "Installazione non riuscita"
 
 msgid "plugins.catalog.learn_more"
-msgstr "Learn more"
+msgstr "Scopri di più"
 
 msgid "plugins.catalog.release"
-msgstr "Read from release %(tag)s"
+msgstr "Leggi dalla release %(tag)s"
 
 msgid "plugins.catalog.stale"
-msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+msgstr "Il catalogo non è stato aggiornato di recente, quindi l'installazione è disabilitata finché non torna aggiornato."
 
 msgid "plugins.catalog.tab"
-msgstr "Available"
+msgstr "Disponibile"
 
 msgid "plugins.catalog.trust_notice"
-msgstr "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+msgstr "Gli elementi della community vengono letti dai repository che l'organizzazione BunkerWeb pubblica su GitHub, tramite TLS, e ciò che viene installato è verificato rispetto a ciò che era elencato — ma nulla qui è firmato crittograficamente. Un plugin installato esegue codice con tutti i privilegi di BunkerWeb."
 
 msgid "plugins.catalog.version"
-msgstr "Version %(version)s"
+msgstr "Versione %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Attivo"
@@ -4265,40 +4265,40 @@ msgid "service.resources.template.add"
 msgstr "Add"
 
 msgid "service.resources.template.add_label"
-msgstr "Template to add as a layer"
+msgstr "Modello da aggiungere come livello"
 
 msgid "service.resources.template.adding"
-msgstr "Saving applies %(names)s. Many settings can move at once."
+msgstr "Salvando si applicano %(names)s. Molte impostazioni possono cambiare contemporaneamente."
 
 msgid "service.resources.template.move_down"
-msgstr "Move this template later"
+msgstr "Sposta questo modello più tardi"
 
 msgid "service.resources.template.move_up"
-msgstr "Move this template earlier"
+msgstr "Sposta questo modello più presto"
 
 msgid "service.resources.template.none"
 msgstr "Nessun modello"
 
 msgid "service.resources.template.note"
-msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+msgstr "Non è una risorsa: un modello è un'impostazione. I modelli si applicano al salvataggio, in ordine, e uno più recente sovrascrive uno precedente."
 
 msgid "service.resources.template.overridden_badge"
-msgstr "overridden"
+msgstr "sovrascritto"
 
 msgid "service.resources.template.overridden_by"
-msgstr "%(name)s overrides %(count)s of this template’s settings."
+msgstr "%(name)s sovrascrive %(count)s impostazioni di questo modello."
 
 msgid "service.resources.template.pending"
 msgstr "Si applica al salvataggio"
 
 msgid "service.resources.template.remove"
-msgstr "Remove this template"
+msgstr "Rimuovi questo modello"
 
 msgid "service.resources.template.removing"
-msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+msgstr "Salvando si scollega %(names)s. I valori forniti da quei modelli verranno eliminati."
 
 msgid "service.resources.template.reordered"
-msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
+msgstr "Salvando si modifica l'ordine dei modelli. I modelli successivi sovrascrivono quelli precedenti, quindi i valori effettivi cambiano."
 
 msgid "service.resources.template.switching"
 msgstr "Salvare sposta questo servizio da “%(from)s” a “%(to)s”. I valori forniti dal modello corrente vengono eliminati e quelli di %(to)s vengono applicati — molte impostazioni vengono spostate contemporaneamente."
@@ -4328,79 +4328,79 @@ msgid "services.with_configs"
 msgstr "Con configurazioni personalizzate"
 
 msgid "settings.access_control.blacklist.community.description"
-msgstr "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+msgstr "Liste selezionate mantenute al di fuori di BunkerWeb e aggiornate per te. Alimentano la stessa corrispondenza delle voci sottostanti."
 
 msgid "settings.access_control.blacklist.community.title"
-msgstr "Community lists"
+msgstr "Liste della community"
 
 msgid "settings.access_control.blacklist.enforcement.description"
-msgstr "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+msgstr "La blacklist viene eseguita dopo la whitelist, quindi un client presente nella whitelist non viene mai bloccato qui. In ogni riga, le liste di eccezioni sovrascrivono le voci proprie di quella riga e le liste scaricate."
 
 msgid "settings.access_control.country.conflict.clear"
-msgstr "Clear the block list"
+msgstr "Cancella la lista di blocco"
 
 msgid "settings.access_control.country.conflict.description"
-msgstr "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set."
+msgstr "Entrambe le liste dei paesi vengono memorizzate, e solo la lista di autorizzazione viene applicata: la lista di blocco sottostante non viene mai consultata finché è impostata una lista di autorizzazione."
 
 msgid "settings.access_control.country.description"
-msgstr "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list."
+msgstr "Una regola, non due liste. Autorizzare un insieme di paesi nega ogni altro paese e rende una lista di blocco memorizzata una configurazione morta — BunkerWeb controlla prima la lista di autorizzazione e non raggiunge mai la lista di blocco."
 
 msgid "settings.access_control.country.exceptions.description"
-msgstr "Requests whose URI matches one of these patterns skip the country rule entirely."
+msgstr "Le richieste il cui URI corrisponde a uno di questi pattern saltano completamente la regola del paese."
 
 msgid "settings.access_control.country.exceptions.title"
-msgstr "Exceptions"
+msgstr "Eccezioni"
 
 msgid "settings.access_control.country.mode.all"
-msgstr "No country rule"
+msgstr "Nessuna regola sul paese"
 
 msgid "settings.access_control.country.mode.block"
-msgstr "Block these countries"
+msgstr "Blocca questi paesi"
 
 msgid "settings.access_control.country.mode.only"
-msgstr "Allow only these countries"
+msgstr "Consenti solo questi paesi"
 
 msgid "settings.access_control.country.picker_label"
-msgstr "Country rule"
+msgstr "Regola sul paese"
 
 msgid "settings.access_control.country.title"
-msgstr "Country rule"
+msgstr "Regola sul paese"
 
 msgid "settings.access_control.enforcement.title"
-msgstr "Enforcement"
+msgstr "Applicazione"
 
 msgid "settings.access_control.greylist.enforcement.description"
-msgstr "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+msgstr "La greylist nega per impostazione predefinita: mentre è attiva, tutto ciò che non corrisponde a nessuna delle voci sottostanti viene negato, sia sul traffico HTTP che stream. Aggiungi prima le voci, poi attivala — un salvataggio che la attiva con tutte le liste vuote viene rifiutato."
 
 msgid "settings.access_control.greylist.locked_out"
-msgstr "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+msgstr "La greylist è attiva e nessuna voce è configurata, quindi ogni richiesta a questo servizio viene negata. Aggiungi almeno una voce sottostante, oppure disattiva la greylist."
 
 msgid "settings.access_control.kind.asn"
-msgstr "Autonomous systems (ASN)"
+msgstr "Sistemi autonomi (ASN)"
 
 msgid "settings.access_control.kind.ip"
-msgstr "IP addresses and networks"
+msgstr "Indirizzi IP e reti"
 
 msgid "settings.access_control.kind.rdns"
-msgstr "Reverse DNS"
+msgstr "DNS inverso"
 
 msgid "settings.access_control.kind.uri"
 msgstr "URIs"
 
 msgid "settings.access_control.kind.user_agent"
-msgstr "User agents"
+msgstr "User agent"
 
 msgid "settings.access_control.kinds.description"
-msgstr "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+msgstr "Una sezione per ogni tipo di corrispondenza. In ciascuna, le voci che digiti e le liste scaricate da BunkerWeb vengono verificate insieme; un client che corrisponde a una qualsiasi di esse corrisponde alla sezione."
 
 msgid "settings.access_control.kinds.title"
-msgstr "What is matched"
+msgstr "Cosa viene confrontato"
 
 msgid "settings.access_control.order.current"
-msgstr "current page"
+msgstr "pagina corrente"
 
 msgid "settings.access_control.order.description"
-msgstr "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD."
+msgstr "Per impostazione predefinita, ogni richiesta attraversa questi quattro controlli in questo ordine, e il primo che decide, decide. Una corrispondenza nella whitelist termina immediatamente il percorso: la richiesta viene consentita e i tre controlli successivi non vengono mai eseguiti. L'ordine stesso è configurabile per servizio, tramite PLUGINS_ORDER_ACCESS e PLUGINS_ORDER_PREREAD."
 
 msgid "settings.access_control.order.off"
 msgstr "Off"
@@ -4409,31 +4409,31 @@ msgid "settings.access_control.order.on"
 msgstr "On"
 
 msgid "settings.access_control.order.title"
-msgstr "Decision order"
+msgstr "Ordine di decisione"
 
 msgid "settings.access_control.rules.add_term"
-msgstr "Add a term"
+msgstr "Aggiungi un termine"
 
 msgid "settings.access_control.rules.description"
-msgstr "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name."
+msgstr "Una regola corrisponde solo quando ognuno dei suoi termini corrisponde. Le regole vengono verificate insieme alle liste sopra, e un client che corrisponde a una qualsiasi di esse corrisponde a questa fase. I valori possono essere un gruppo di risorse, scritto @nome."
 
 msgid "settings.access_control.rules.expression"
-msgstr "Saved as:"
+msgstr "Salvato come:"
 
 msgid "settings.access_control.rules.kind"
-msgstr "What this term matches on"
+msgstr "Con cosa questo termine confronta"
 
 msgid "settings.access_control.rules.kind_asn"
 msgstr "ASN"
 
 msgid "settings.access_control.rules.kind_country"
-msgstr "Country"
+msgstr "Paese"
 
 msgid "settings.access_control.rules.kind_ip"
 msgstr "IP"
 
 msgid "settings.access_control.rules.kind_rdns"
-msgstr "Reverse DNS"
+msgstr "DNS inverso"
 
 msgid "settings.access_control.rules.kind_ua"
 msgstr "User agent"
@@ -4445,25 +4445,25 @@ msgid "settings.access_control.rules.negate"
 msgstr "NOT"
 
 msgid "settings.access_control.rules.negate_help"
-msgstr "Invert this term: the rule matches when the term does NOT match."
+msgstr "Inverti questo termine: la regola corrisponde quando il termine NON corrisponde."
 
 msgid "settings.access_control.rules.remove_term"
-msgstr "Remove this term"
+msgstr "Rimuovi questo termine"
 
 msgid "settings.access_control.rules.rule"
 msgstr "Rule"
 
 msgid "settings.access_control.rules.title"
-msgstr "Composite rules"
+msgstr "Regole composite"
 
 msgid "settings.access_control.rules.value"
-msgstr "Value, or @group"
+msgstr "Valore, oppure @gruppo"
 
 msgid "settings.access_control.stage.blacklist"
 msgstr "Blacklist"
 
 msgid "settings.access_control.stage.country"
-msgstr "Country"
+msgstr "Paese"
 
 msgid "settings.access_control.stage.greylist"
 msgstr "Greylist"
@@ -4472,241 +4472,241 @@ msgid "settings.access_control.stage.whitelist"
 msgstr "Whitelist"
 
 msgid "settings.access_control.unplaced.description"
-msgstr "Declared by the plugin but not yet given a place on this page. They still save normally."
+msgstr "Dichiarato dal plugin ma non ancora assegnato a un posto in questa pagina. Viene comunque salvato normalmente."
 
 msgid "settings.access_control.unplaced.title"
-msgstr "Other settings"
+msgstr "Altre impostazioni"
 
 msgid "settings.access_control.whitelist.enforcement.description"
-msgstr "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+msgstr "La whitelist viene eseguita per prima e sovrascrive tutto il resto: una corrispondenza viene consentita direttamente, quindi blacklist, greylist e paese non vedono mai la richiesta. I ban sono l'unica eccezione, e solo tramite IP — un client corrispondente qui tramite DNS inverso, ASN, user agent o URI viene comunque bloccato mentre è bannato. Mantieni questa lista limitata ai client che non devono mai essere esclusi."
 
 msgid "settings.antibot.capjs.hint"
-msgstr "Needs a Cap.js server; the frontend and backend URLs may differ."
+msgstr "Richiede un server Cap.js; gli URL di frontend e backend possono differire."
 
 msgid "settings.antibot.capjs.title"
 msgstr "Cap.js"
 
 msgid "settings.antibot.captcha.hint"
-msgstr "Rendered by BunkerWeb itself — no third-party account, no outbound request."
+msgstr "Renderizzato da BunkerWeb stesso — nessun account di terze parti, nessuna richiesta in uscita."
 
 msgid "settings.antibot.captcha.title"
-msgstr "Built-in captcha"
+msgstr "Captcha integrato"
 
 msgid "settings.antibot.challenge.description"
-msgstr "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid."
+msgstr "Dove viene presentata la sfida, quanto tempo ha un visitatore per risolverla, e per quanto tempo rimane valida una sfida risolta."
 
 msgid "settings.antibot.challenge.title"
-msgstr "Challenge behaviour"
+msgstr "Comportamento della sfida"
 
 msgid "settings.antibot.countries.both_set"
-msgstr "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous."
+msgstr "Entrambe le liste dei paesi sono impostate. Vengono combinate, non sono esclusive: un visitatore è esente se il suo paese è nella lista di esclusione OPPURE fuori dalla lista di restrizione. Svuota una delle due per rendere la regola inequivocabile."
 
 msgid "settings.antibot.countries.both_set_clear"
-msgstr "Clear the skip list"
+msgstr "Cancella la lista di esclusione"
 
 msgid "settings.antibot.countries.description"
-msgstr "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded."
+msgstr "Esenta i visitatori per paese, oppure limita la sfida ad alcuni paesi. Richiede che il database GeoIP sia caricato."
 
 msgid "settings.antibot.countries.mode.all"
-msgstr "Challenge every country"
+msgstr "Sfida ogni paese"
 
 msgid "settings.antibot.countries.mode.ignore"
-msgstr "Skip the challenge for these countries"
+msgstr "Salta la sfida per questi paesi"
 
 msgid "settings.antibot.countries.mode.only"
-msgstr "Challenge only these countries"
+msgstr "Sfida solo questi paesi"
 
 msgid "settings.antibot.countries.picker_label"
-msgstr "Country filter"
+msgstr "Filtro paese"
 
 msgid "settings.antibot.countries.title"
-msgstr "Countries"
+msgstr "Paesi"
 
 msgid "settings.antibot.disabled_notice"
-msgstr "Antibot is off for this scope. Pick a challenge mode to configure it."
+msgstr "Antibot è disattivato per questo ambito. Scegli una modalità di sfida per configurarlo."
 
 msgid "settings.antibot.exemptions.description"
-msgstr "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing."
+msgstr "Le richieste che corrispondono a una qualsiasi di queste saltano completamente la sfida. Lascia una lista vuota per non far corrispondere nulla."
 
 msgid "settings.antibot.exemptions.title"
-msgstr "Exemptions"
+msgstr "Esenzioni"
 
 msgid "settings.antibot.hcaptcha.hint"
-msgstr "Needs a site registered at hcaptcha.com."
+msgstr "Richiede un sito registrato su hcaptcha.com."
 
 msgid "settings.antibot.hcaptcha.title"
 msgstr "hCaptcha"
 
 msgid "settings.antibot.mcaptcha.hint"
-msgstr "Needs an mCaptcha instance — the hosted demo or your own."
+msgstr "Richiede un'istanza mCaptcha — la demo ospitata oppure la tua."
 
 msgid "settings.antibot.mcaptcha.title"
 msgstr "mCaptcha"
 
 msgid "settings.antibot.mode.description"
-msgstr "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back."
+msgstr "Quale sfida devono superare i visitatori. Sotto vengono mostrati solo i campi del provider scelto; gli altri mantengono i loro valori salvati e ritornano quando si passa di nuovo a essi."
 
 msgid "settings.antibot.mode.title"
-msgstr "Challenge mode"
+msgstr "Modalità sfida"
 
 msgid "settings.antibot.recaptcha.classic.hint"
-msgstr "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition."
+msgstr "Verificato rispetto a google.com/recaptcha/api/siteverify con il segreto condiviso. I campi Enterprise vengono ignorati in questa edizione."
 
 msgid "settings.antibot.recaptcha.classic.title"
 msgstr "reCAPTCHA classic"
 
 msgid "settings.antibot.recaptcha.enterprise.hint"
-msgstr "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition."
+msgstr "Verificato rispetto a recaptchaenterprise.googleapis.com con un progetto Google Cloud e una chiave API. Il segreto classico viene ignorato in questa edizione."
 
 msgid "settings.antibot.recaptcha.enterprise.title"
 msgstr "reCAPTCHA Enterprise"
 
 msgid "settings.antibot.recaptcha.hint"
-msgstr "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions."
+msgstr "Richiede un sito registrato su google.com/recaptcha. La chiave del sito e il punteggio minimo si applicano a entrambe le edizioni."
 
 msgid "settings.antibot.recaptcha.title"
 msgstr "Google reCAPTCHA"
 
 msgid "settings.antibot.turnstile.hint"
-msgstr "Needs a site registered in the Cloudflare dashboard."
+msgstr "Richiede un sito registrato nella dashboard di Cloudflare."
 
 msgid "settings.antibot.turnstile.title"
 msgstr "Cloudflare Turnstile"
 
 msgid "settings.antibot.unplaced.description"
-msgstr "Declared by the plugin but not yet placed in a section above. They still save normally."
+msgstr "Dichiarato dal plugin ma non ancora collocato in una sezione sopra. Viene comunque salvato normalmente."
 
 msgid "settings.antibot.unplaced.title"
-msgstr "Other settings"
+msgstr "Altre impostazioni"
 
 msgid "settings.custom_config.title"
 msgstr "Configurazione Personalizzata"
 
 msgid "settings.headers.browser.description"
-msgstr "Small fixed-value headers. An empty value removes the header instead of sending it."
+msgstr "Piccoli header a valore fisso. Un valore vuoto rimuove l'header invece di inviarlo."
 
 msgid "settings.headers.browser.title"
-msgstr "Browser protections"
+msgstr "Protezioni del browser"
 
 msgid "settings.headers.cookies.description"
-msgstr "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+msgstr "Flag aggiunti a ogni Set-Cookie restituito dall'upstream. Le regole dei flag per cookie si trovano nelle impostazioni ripetibili sottostanti."
 
 msgid "settings.headers.cookies.title"
-msgstr "Cookies"
+msgstr "Cookie"
 
 msgid "settings.headers.csp.description"
-msgstr "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+msgstr "La policy inviata come Content-Security-Policy. Una direttiva errata interrompe gli script propri del sito senza nulla di visibile lato server, quindi usare prima report-only è l'ordine sicuro."
 
 msgid "settings.headers.csp.title"
 msgstr "Content Security Policy"
 
 msgid "settings.headers.notice.csp_report_only"
-msgstr "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce."
+msgstr "Report-only è attivo: la policy viene inviata come Content-Security-Policy-Report-Only, quindi le violazioni vengono segnalate e nulla viene bloccato. Disattivalo per applicarla."
 
 msgid "settings.headers.notice.hsts_preload"
-msgstr "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then."
+msgstr "Questo valore contiene preload. Una volta che il dominio è stato inviato alla lista di preload dei browser, la rimozione impiega mesi per raggiungere gli utenti -- fino ad allora ogni sottodominio è solo HTTPS."
 
 msgid "settings.headers.notice.keep_all"
-msgstr "The keep list is *, so every header the upstream sends wins over the values configured here."
+msgstr "La lista di conservazione è *, quindi ogni header inviato dall'upstream prevale sui valori configurati qui."
 
 msgid "settings.headers.notice.keep_shadows"
-msgstr "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:"
+msgstr "Questi header vengono mantenuti dall'upstream quando invia i propri, quindi i valori configurati qui sono solo un fallback:"
 
 msgid "settings.headers.permissions.description"
-msgstr "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+msgstr "Quali funzionalità del browser questo sito può usare, come elenco separato da virgole di clausole feature=(allowlist). Una voce lasciata a () disabilita quella API per tutti, incluse le tue pagine."
 
 msgid "settings.headers.permissions.title"
 msgstr "Permissions Policy"
 
 msgid "settings.headers.transport.description"
-msgstr "The Strict-Transport-Security header. Only sent over HTTPS."
+msgstr "L'header Strict-Transport-Security. Inviato solo tramite HTTPS."
 
 msgid "settings.headers.transport.title"
-msgstr "HTTPS enforcement"
+msgstr "Applicazione HTTPS"
 
 msgid "settings.headers.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "Dichiarato dal plugin ma non ancora collocato in questa pagina. Viene comunque salvato normalmente."
 
 msgid "settings.headers.unplaced.title"
-msgstr "Other settings"
+msgstr "Altre impostazioni"
 
 msgid "settings.headers.upstream.description"
-msgstr "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+msgstr "Quali degli header di risposta propri dell'upstream sopravvivono, e quali vengono rimossi prima che la risposta parta."
 
 msgid "settings.headers.upstream.title"
-msgstr "Upstream and removed headers"
+msgstr "Header upstream e rimossi"
 
 msgid "settings.modsecurity.audit.description"
-msgstr "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+msgstr "Cosa scrive ModSecurity nel proprio log di audit, e quanto conserva di ogni transazione. Le parti A e Z sono sempre incluse."
 
 msgid "settings.modsecurity.audit.title"
-msgstr "Audit log"
+msgstr "Log di audit"
 
 msgid "settings.modsecurity.crs.description"
-msgstr "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+msgstr "Il set di regole condiviso che BunkerWeb carica sopra ModSecurity. La versione 4 è quella attuale; la versione 3 viene mantenuta per i servizi che dipendono ancora dai suoi ID regola."
 
 msgid "settings.modsecurity.crs.title"
 msgstr "OWASP Core Rule Set"
 
 msgid "settings.modsecurity.crs_plugins.description"
-msgstr "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+msgstr "Pacchetti di regole pubblicati per il Core Rule Set, scaricati e installati all'avvio. Fornisci un nome plugin, un nome/tag, oppure un URL."
 
 msgid "settings.modsecurity.crs_plugins.title"
-msgstr "Core Rule Set plugins"
+msgstr "Plugin del Core Rule Set"
 
 msgid "settings.modsecurity.engine.description"
-msgstr "Whether ModSecurity is loaded at all, and what it does with a rule match."
+msgstr "Se ModSecurity è caricato o meno, e cosa fa in caso di corrispondenza di una regola."
 
 msgid "settings.modsecurity.engine.title"
 msgstr "Engine"
 
 msgid "settings.modsecurity.global_crs.description"
-msgstr "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+msgstr "Carica il Core Rule Set una volta per l'intera istanza invece che una volta per servizio. Più veloce da caricare con molti servizi, ma le configurazioni modsec-crs limitate a un servizio vengono rifiutate mentre è attivo: crea invece una configurazione globale e delimitala con una regola Host."
 
 msgid "settings.modsecurity.global_crs.title"
-msgstr "Global CRS mode"
+msgstr "Modalità CRS globale"
 
 msgid "settings.modsecurity.limits.description"
-msgstr "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+msgstr "Quanto del corpo di una richiesta ispeziona ModSecurity, e cosa succede a un corpo che supera il limite. NGINX applica prima MAX_CLIENT_SIZE, quindi un limite superiore ad esso non ha alcun effetto."
 
 msgid "settings.modsecurity.limits.title"
-msgstr "Request body limits"
+msgstr "Limiti del corpo della richiesta"
 
 msgid "settings.modsecurity.notice.crs_v3_no_plugins"
-msgstr "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+msgstr "Core Rule Set 3 non può caricare plugin. L'interruttore dei plugin e l'elenco dei plugin vengono mantenuti e si applicheranno di nuovo alla versione 4, ma per ora non fanno nulla."
 
 msgid "settings.modsecurity.notice.engine_detect"
-msgstr "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked."
+msgstr "SecRuleEngine è DetectionOnly: le corrispondenze vengono registrate e nulla viene bloccato."
 
 msgid "settings.modsecurity.notice.engine_off"
-msgstr "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree."
+msgstr "ModSecurity è attivo ma SecRuleEngine è su Off, quindi nessuna richiesta viene ispezionata. Entrambe le impostazioni significano \"attivo\" e attualmente sono in disaccordo."
 
 msgid "settings.modsecurity.notice.off"
-msgstr "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again."
+msgstr "ModSecurity è disattivato. Nulla sottostante viene applicato, ma ogni valore viene mantenuto e ritorna quando lo riattivi."
 
 msgid "settings.modsecurity.tuning.crs_plugins_after"
-msgstr "After CRS plugins"
+msgstr "Dopo i plugin CRS"
 
 msgid "settings.modsecurity.tuning.crs_plugins_before"
-msgstr "Before CRS plugins"
+msgstr "Prima dei plugin CRS"
 
 msgid "settings.modsecurity.tuning.description"
-msgstr "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded."
+msgstr "Correggere un falso positivo è una configurazione personalizzata, non un'impostazione. Questi sono i quattro punti in cui può andare un'esclusione di regola, nell'ordine in cui vengono caricati."
 
 msgid "settings.modsecurity.tuning.modsec"
-msgstr "After the Core Rule Set"
+msgstr "Dopo il Core Rule Set"
 
 msgid "settings.modsecurity.tuning.modsec_crs"
-msgstr "Before the Core Rule Set"
+msgstr "Prima del Core Rule Set"
 
 msgid "settings.modsecurity.tuning.title"
-msgstr "Rule tuning"
+msgstr "Regolazione delle regole"
 
 msgid "settings.modsecurity.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "Dichiarato dal plugin ma non ancora collocato in questa pagina. Viene comunque salvato normalmente."
 
 msgid "settings.modsecurity.unplaced.title"
-msgstr "Other settings"
+msgstr "Altre impostazioni"
 
 msgid "settings.multiple.description"
 msgstr "Configura qui multiple istanze di impostazioni per questo plugin."
@@ -5699,16 +5699,16 @@ msgid "template.none"
 msgstr "Nessun Modello"
 
 msgid "templates.catalog.heading"
-msgstr "Available templates"
+msgstr "Modelli disponibili"
 
 msgid "templates.catalog.layer_warning"
-msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+msgstr "Un modello è un livello: aggiungerne uno a un servizio che già utilizza modelli ne modifica la configurazione effettiva."
 
 msgid "templates.catalog.no_compat_notice"
-msgstr "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+msgstr "Questo catalogo non dichiara compatibilità con BunkerWeb. Un modello viene rifiutato all'installazione se nomina un'impostazione che questo BunkerWeb non possiede."
 
 msgid "templates.catalog.subheading"
-msgstr "Curated service templates published by the BunkerWeb organisation."
+msgstr "Modelli di servizio selezionati pubblicati dall'organizzazione BunkerWeb."
 
 msgid "templates.gallery.delete_selected"
 msgstr "Elimina selezionati"

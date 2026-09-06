@@ -90,10 +90,10 @@
   "bans": {
     "chart": {
       "timeseries": {
-        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
-        "series": "Active bans",
-        "subtitle": "Selected range",
-        "title": "Active bans per interval"
+        "note": "Un bannissement compte pour chaque intervalle où il était en vigueur. Rebannir la même IP réécrit sa date d'origine, donc ceci montre combien de bannissements étaient actifs, pas un historique des événements de bannissement.",
+        "series": "Bannissements actifs",
+        "subtitle": "Plage sélectionnée",
+        "title": "Bannissements actifs par intervalle"
       }
     },
     "subtitle": "Adresses IP bloquées sur vos instances BunkerWeb — ajoutez, supprimez ou ajustez les durées de blocage.",
@@ -290,7 +290,7 @@
     "BJ": "Bénin",
     "BL": "Saint-Barthélemy",
     "BM": "Bermudes",
-    "BN": "Brunei Darussalam",
+    "BN": "Brunei",
     "BO": "Bolivie",
     "BQ": "Pays-Bas Caribéens",
     "BR": "Brésil",
@@ -306,7 +306,7 @@
     "CF": "République Centrafricaine",
     "CG": "République du Congo",
     "CH": "Suisse",
-    "CI": "Côte d'Ivoire",
+    "CI": "Côte d’Ivoire",
     "CK": "Îles Cook",
     "CL": "Chili",
     "CM": "Cameroun",
@@ -332,7 +332,7 @@
     "ER": "Érythrée",
     "ES": "Espagne",
     "ET": "Éthiopie",
-    "EU": "Europe",
+    "EU": "Union européenne",
     "FI": "Finlande",
     "FJ": "Fidji",
     "FK": "Îles Malouines (Falkland)",
@@ -358,7 +358,7 @@
     "GU": "Guam",
     "GW": "Guinée-Bissau",
     "GY": "Guyana",
-    "HK": "Hong Kong",
+    "HK": "R.A.S. chinoise de Hong Kong",
     "HM": "Îles Heard et McDonald",
     "HN": "Honduras",
     "HR": "Croatie",
@@ -409,9 +409,9 @@
     "MH": "Îles Marshall",
     "MK": "Macédoine du Nord",
     "ML": "Mali",
-    "MM": "Myanmar",
+    "MM": "Myanmar (Birmanie)",
     "MN": "Mongolie",
-    "MO": "Macao",
+    "MO": "R.A.S. chinoise de Macao",
     "MP": "Îles Mariannes du Nord",
     "MQ": "Martinique",
     "MR": "Mauritanie",
@@ -446,12 +446,12 @@
     "PM": "Saint-Pierre-et-Miquelon",
     "PN": "Îles Pitcairn",
     "PR": "Porto Rico",
-    "PS": "Palestine",
+    "PS": "Territoires palestiniens",
     "PT": "Portugal",
     "PW": "Palaos",
     "PY": "Paraguay",
     "QA": "Qatar",
-    "RE": "Réunion",
+    "RE": "La Réunion",
     "RO": "Roumanie",
     "RS": "Serbie",
     "RU": "Fédération de Russie",
@@ -473,7 +473,7 @@
     "SR": "Suriname",
     "SS": "Soudan du Sud",
     "ST": "Sao Tomé-et-Principe",
-    "SV": "El Salvador",
+    "SV": "Salvador",
     "SX": "Sint Maarten (partie néerlandaise)",
     "SY": "Syrie",
     "SZ": "Eswatini",
@@ -484,7 +484,7 @@
     "TH": "Thaïlande",
     "TJ": "Tadjikistan",
     "TK": "Tokelau",
-    "TL": "Timor-Leste",
+    "TL": "Timor oriental",
     "TM": "Turkménistan",
     "TN": "Tunisie",
     "TO": "Tonga",
@@ -504,7 +504,7 @@
     "VE": "Venezuela",
     "VG": "Îles Vierges Britanniques",
     "VI": "Îles Vierges Américaines",
-    "VN": "Vietnam",
+    "VN": "Viêt Nam",
     "VU": "Vanuatu",
     "WF": "Wallis-et-Futuna",
     "WS": "Samoa",
@@ -518,7 +518,7 @@
   },
   "dashboard": {
     "alert": {
-      "jobs_failed": "One or more jobs failed on their last run."
+      "jobs_failed": "Une ou plusieurs tâches ont échoué lors de leur dernière exécution."
     },
     "card": {
       "blocked_requests": {
@@ -527,7 +527,7 @@
       "blocked_unique_ips": {
         "title": "Adresses IP uniques bloquées"
       },
-      "hide": "Hide this card",
+      "hide": "Masquer cette carte",
       "instances": {
         "status": "{{up}} actives / {{down}} inactives / {{loading}} chargement",
         "title": "Instances"
@@ -548,7 +548,7 @@
         "usage": "{{percent}} % utilisée",
         "warning_low": "Attention : une faible mémoire peut affecter les performances"
       },
-      "restore": "Restore hidden cards",
+      "restore": "Restaurer les cartes masquées",
       "services": {
         "status": "{{online}} en ligne · {{draft}} en brouillon",
         "title": "Services"
@@ -779,8 +779,8 @@
     "webauthn_request_failed": "La requête de clé de sécurité a échoué. Veuillez réessayer."
   },
   "flash": {
-    "check_jobs_for_details": "Check the Jobs page for details.",
-    "last_configuration_change_failed": "Your last configuration change could not be applied.",
+    "check_jobs_for_details": "Consultez la page Tâches pour plus de détails.",
+    "last_configuration_change_failed": "Votre dernière modification de configuration n'a pas pu être appliquée.",
     "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux",
     "error": "Erreur",
     "message": "Info",
@@ -1160,8 +1160,8 @@
     "title": "S’inscrire à la newsletter"
   },
   "notice": {
-    "already_subscribed": "Already subscribed",
-    "dismiss_mfa": "Don't remind me again"
+    "already_subscribed": "Déjà abonné",
+    "dismiss_mfa": "Ne plus me le rappeler"
   },
   "pagination": {
     "page": "Page"
@@ -1210,16 +1210,16 @@
       "tab_enabled": "Activé"
     },
     "catalog": {
-      "tab": "Available",
-      "install": "Install",
-      "install_failed": "Install failed",
-      "learn_more": "Learn more",
+      "tab": "Disponible",
+      "install": "Installer",
+      "install_failed": "Échec de l'installation",
+      "learn_more": "En savoir plus",
       "version": "Version {{version}}",
-      "incompatible": "This release declares no BunkerWeb compatibility; this is {{current}}",
-      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
-      "trust_notice": "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges.",
-      "incompatible_declared": "This release supports BunkerWeb {{supported}}; this is {{current}}",
-      "release": "Read from release {{tag}}"
+      "incompatible": "Cette version ne déclare aucune compatibilité avec BunkerWeb ; la version actuelle est {{current}}",
+      "stale": "Le catalogue n'a pas pu être actualisé récemment, donc l'installation est désactivée jusqu'à ce qu'il soit de nouveau à jour.",
+      "trust_notice": "Les éléments communautaires sont lus depuis les dépôts que l'organisation BunkerWeb publie sur GitHub, via TLS, et ce qui est installé est vérifié par rapport à ce qui était répertorié — mais rien ici n'est signé cryptographiquement. Un plugin installé exécute du code avec tous les privilèges de BunkerWeb.",
+      "incompatible_declared": "Cette version prend en charge BunkerWeb {{supported}} ; la version actuelle est {{current}}",
+      "release": "Lire depuis la version {{tag}}"
     }
   },
   "pro": {
@@ -1493,152 +1493,152 @@
     },
     "antibot": {
       "capjs": {
-        "hint": "Needs a Cap.js server; the frontend and backend URLs may differ.",
+        "hint": "Nécessite un serveur Cap.js ; les URL du frontend et du backend peuvent différer.",
         "title": "Cap.js"
       },
       "captcha": {
-        "hint": "Rendered by BunkerWeb itself — no third-party account, no outbound request.",
-        "title": "Built-in captcha"
+        "hint": "Rendu par BunkerWeb lui-même — aucun compte tiers, aucune requête sortante.",
+        "title": "Captcha intégré"
       },
       "challenge": {
-        "description": "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid.",
-        "title": "Challenge behaviour"
+        "description": "Où le défi est présenté, combien de temps un visiteur a pour le résoudre, et combien de temps un défi résolu reste valide.",
+        "title": "Comportement du défi"
       },
       "countries": {
-        "both_set": "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous.",
-        "description": "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded.",
+        "both_set": "Les deux listes de pays sont définies. Elles sont combinées, non exclusives : un visiteur est exempté si son pays figure dans la liste d'exclusion OU en dehors de la liste de restriction. Videz l'une d'elles pour rendre la règle non ambiguë.",
+        "description": "Exemptez les visiteurs par pays, ou restreignez le défi à quelques pays. Nécessite que la base de données GeoIP soit chargée.",
         "mode": {
-          "all": "Challenge every country",
-          "ignore": "Skip the challenge for these countries",
-          "only": "Challenge only these countries"
+          "all": "Défier tous les pays",
+          "ignore": "Ignorer le défi pour ces pays",
+          "only": "Défier uniquement ces pays"
         },
-        "picker_label": "Country filter",
-        "title": "Countries",
-        "both_set_clear": "Clear the skip list"
+        "picker_label": "Filtre de pays",
+        "title": "Pays",
+        "both_set_clear": "Effacer la liste d'exclusion"
       },
-      "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
+      "disabled_notice": "Antibot est désactivé pour cette portée. Choisissez un mode de défi pour le configurer.",
       "exemptions": {
-        "description": "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing.",
+        "description": "Les requêtes correspondant à l'un de ces critères ignorent entièrement le défi. Laissez une liste vide pour ne rien faire correspondre.",
         "title": "Exemptions"
       },
       "hcaptcha": {
-        "hint": "Needs a site registered at hcaptcha.com.",
+        "hint": "Nécessite un site enregistré sur hcaptcha.com.",
         "title": "hCaptcha"
       },
       "mcaptcha": {
-        "hint": "Needs an mCaptcha instance — the hosted demo or your own.",
+        "hint": "Nécessite une instance mCaptcha — la démo hébergée ou la vôtre.",
         "title": "mCaptcha"
       },
       "mode": {
-        "description": "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back.",
-        "title": "Challenge mode"
+        "description": "Quel défi les visiteurs doivent réussir. Seuls les champs du fournisseur choisi sont affichés ci-dessous ; les autres conservent leurs valeurs enregistrées et reviennent lorsque vous rebasculez.",
+        "title": "Mode de défi"
       },
       "recaptcha": {
         "classic": {
-          "hint": "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition.",
+          "hint": "Vérifié auprès de google.com/recaptcha/api/siteverify avec le secret partagé. Les champs Enterprise sont ignorés dans cette édition.",
           "title": "reCAPTCHA classic"
         },
         "enterprise": {
-          "hint": "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition.",
+          "hint": "Vérifié auprès de recaptchaenterprise.googleapis.com avec un projet Google Cloud et une clé API. Le secret classique est ignoré dans cette édition.",
           "title": "reCAPTCHA Enterprise"
         },
-        "hint": "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions.",
+        "hint": "Nécessite un site enregistré sur google.com/recaptcha. La clé du site et le score minimum s'appliquent aux deux éditions.",
         "title": "Google reCAPTCHA"
       },
       "turnstile": {
-        "hint": "Needs a site registered in the Cloudflare dashboard.",
+        "hint": "Nécessite un site enregistré dans le tableau de bord Cloudflare.",
         "title": "Cloudflare Turnstile"
       },
       "unplaced": {
-        "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
-        "title": "Other settings"
+        "description": "Déclaré par le plugin mais pas encore placé dans une section ci-dessus. Toujours enregistré normalement.",
+        "title": "Autres paramètres"
       }
     },
     "access_control": {
       "order": {
-        "title": "Decision order",
-        "description": "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD.",
-        "current": "current page",
+        "title": "Ordre de décision",
+        "description": "Par défaut, chaque requête traverse ces quatre vérifications dans cet ordre, et la première qui décide, décide. Une correspondance dans la liste blanche met fin au parcours immédiatement : la requête est autorisée et les trois vérifications suivantes ne s'exécutent jamais. L'ordre lui-même est configurable par service, via PLUGINS_ORDER_ACCESS et PLUGINS_ORDER_PREREAD.",
+        "current": "page actuelle",
         "on": "On",
         "off": "Off"
       },
       "stage": {
-        "whitelist": "Whitelist",
-        "blacklist": "Blacklist",
-        "greylist": "Greylist",
-        "country": "Country"
+        "whitelist": "Liste blanche",
+        "blacklist": "Liste noire",
+        "greylist": "Liste grise",
+        "country": "Pays"
       },
       "enforcement": {
-        "title": "Enforcement"
+        "title": "Application"
       },
       "kinds": {
-        "title": "What is matched",
-        "description": "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+        "title": "Ce qui est comparé",
+        "description": "Une section par type de correspondance. Dans chacune, les entrées que vous saisissez et les listes que BunkerWeb télécharge sont vérifiées ensemble ; un client correspondant à l'une ou l'autre correspond à la section."
       },
       "kind": {
-        "ip": "IP addresses and networks",
-        "rdns": "Reverse DNS",
-        "asn": "Autonomous systems (ASN)",
+        "ip": "Adresses IP et réseaux",
+        "rdns": "DNS inversé",
+        "asn": "Systèmes autonomes (ASN)",
         "user_agent": "User agents",
         "uri": "URIs"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet given a place on this page. They still save normally."
+        "title": "Autres paramètres",
+        "description": "Déclaré par le plugin mais sans emplacement sur cette page pour l'instant. Toujours enregistré normalement."
       },
       "whitelist": {
         "enforcement": {
-          "description": "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+          "description": "La liste blanche s'exécute en premier et remplace tout le reste : une correspondance est directement autorisée, donc la liste noire, la liste grise et le pays ne voient jamais la requête. Les bannissements sont la seule exception, et uniquement par IP — un client correspondant ici par DNS inversé, ASN, user agent ou URI est tout de même bloqué tant qu'il est banni. Réservez cette liste aux clients qui ne doivent jamais être exclus."
         }
       },
       "blacklist": {
         "enforcement": {
-          "description": "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+          "description": "La liste noire s'exécute après la liste blanche, donc un client présent dans la liste blanche n'est jamais bloqué ici. Sur chaque ligne, les listes d'exceptions remplacent les propres entrées de cette ligne et les listes téléchargées."
         },
         "community": {
-          "title": "Community lists",
-          "description": "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+          "title": "Listes de la communauté",
+          "description": "Listes sélectionnées maintenues en dehors de BunkerWeb et actualisées pour vous. Elles alimentent la même correspondance que les entrées ci-dessous."
         }
       },
       "greylist": {
         "enforcement": {
-          "description": "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+          "description": "La liste grise refuse par défaut : tant qu'elle est activée, tout ce qui ne correspond à aucune des entrées ci-dessous est refusé, tant sur le trafic HTTP que sur le trafic stream. Ajoutez d'abord les entrées, puis activez-la — un enregistrement qui l'active avec toutes les listes vides est refusé."
         },
-        "locked_out": "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+        "locked_out": "La liste grise est activée et aucune entrée n'est configurée, donc chaque requête vers ce service est refusée. Ajoutez au moins une entrée ci-dessous, ou désactivez la liste grise."
       },
       "country": {
-        "title": "Country rule",
-        "description": "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list.",
-        "picker_label": "Country rule",
+        "title": "Règle de pays",
+        "description": "Une règle, pas deux listes. Autoriser un ensemble de pays refuse tous les autres pays et rend une liste de blocage stockée obsolète — BunkerWeb vérifie d'abord la liste d'autorisation et n'atteint jamais la liste de blocage.",
+        "picker_label": "Règle de pays",
         "mode": {
-          "all": "No country rule",
-          "only": "Allow only these countries",
-          "block": "Block these countries"
+          "all": "Aucune règle de pays",
+          "only": "Autoriser uniquement ces pays",
+          "block": "Bloquer ces pays"
         },
         "conflict": {
-          "description": "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set.",
-          "clear": "Clear the block list"
+          "description": "Les deux listes de pays sont stockées, et seule la liste d'autorisation est appliquée : la liste de blocage ci-dessous n'est jamais consultée tant qu'une liste d'autorisation est définie.",
+          "clear": "Effacer la liste de blocage"
         },
         "exceptions": {
           "title": "Exceptions",
-          "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
+          "description": "Les requêtes dont l'URI correspond à l'un de ces motifs ignorent entièrement la règle de pays."
         }
       },
       "rules": {
-        "title": "Composite rules",
-        "description": "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name.",
+        "title": "Règles composites",
+        "description": "Une règle correspond uniquement lorsque chacun de ses termes correspond. Les règles sont vérifiées aux côtés des listes ci-dessus, et un client correspondant à l'une d'elles correspond à cette étape. Les valeurs peuvent être un groupe de ressources, écrit @nom.",
         "rule": "Rule",
-        "add_term": "Add a term",
-        "remove_term": "Remove this term",
+        "add_term": "Ajouter un terme",
+        "remove_term": "Supprimer ce terme",
         "negate": "NOT",
-        "negate_help": "Invert this term: the rule matches when the term does NOT match.",
-        "kind": "What this term matches on",
-        "value": "Value, or @group",
-        "expression": "Saved as:",
+        "negate_help": "Inverser ce terme : la règle correspond lorsque le terme NE correspond PAS.",
+        "kind": "Ce à quoi ce terme correspond",
+        "value": "Valeur, ou @groupe",
+        "expression": "Enregistré comme :",
         "kind_ip": "IP",
-        "kind_country": "Country",
+        "kind_country": "Pays",
         "kind_asn": "ASN",
-        "kind_rdns": "Reverse DNS",
+        "kind_rdns": "DNS inversé",
         "kind_ua": "User agent",
         "kind_uri": "URI"
       }
@@ -1646,81 +1646,81 @@
     "modsecurity": {
       "engine": {
         "title": "Engine",
-        "description": "Whether ModSecurity is loaded at all, and what it does with a rule match."
+        "description": "Si ModSecurity est chargé ou non, et ce qu'il fait lors d'une correspondance de règle."
       },
       "crs": {
         "title": "OWASP Core Rule Set",
-        "description": "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+        "description": "L'ensemble de règles partagé que BunkerWeb charge par-dessus ModSecurity. La version 4 est l'actuelle ; la version 3 est conservée pour les services qui dépendent encore de ses identifiants de règles."
       },
       "crs_plugins": {
-        "title": "Core Rule Set plugins",
-        "description": "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+        "title": "Plugins du Core Rule Set",
+        "description": "Packs de règles publiés pour le Core Rule Set, téléchargés et installés au démarrage. Indiquez un nom de plugin, un nom/tag, ou une URL."
       },
       "global_crs": {
-        "title": "Global CRS mode",
-        "description": "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+        "title": "Mode CRS global",
+        "description": "Charge le Core Rule Set une fois pour toute l'instance au lieu d'une fois par service. Plus rapide à charger avec de nombreux services, mais les configurations modsec-crs propres à un service sont refusées tant que c'est activé : créez-en une globale et délimitez-la avec une règle Host à la place."
       },
       "audit": {
-        "title": "Audit log",
-        "description": "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+        "title": "Journal d'audit",
+        "description": "Ce que ModSecurity écrit dans son propre journal d'audit, et la quantité de chaque transaction qu'il conserve. Les parties A et Z sont toujours incluses."
       },
       "limits": {
-        "title": "Request body limits",
-        "description": "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+        "title": "Limites du corps de la requête",
+        "description": "Quelle part du corps d'une requête ModSecurity inspecte, et ce qui arrive à un corps qui dépasse la limite. NGINX applique d'abord MAX_CLIENT_SIZE, donc une limite supérieure à celle-ci n'a aucun effet."
       },
       "tuning": {
-        "title": "Rule tuning",
-        "description": "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded.",
-        "modsec_crs": "Before the Core Rule Set",
-        "modsec": "After the Core Rule Set",
-        "crs_plugins_before": "Before CRS plugins",
-        "crs_plugins_after": "After CRS plugins"
+        "title": "Réglage des règles",
+        "description": "Corriger un faux positif est une configuration personnalisée, pas un paramètre. Voici les quatre endroits où une exclusion de règle peut aller, dans l'ordre où ils sont chargés.",
+        "modsec_crs": "Avant le Core Rule Set",
+        "modsec": "Après le Core Rule Set",
+        "crs_plugins_before": "Avant les plugins CRS",
+        "crs_plugins_after": "Après les plugins CRS"
       },
       "notice": {
-        "off": "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again.",
-        "engine_off": "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree.",
-        "engine_detect": "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked.",
-        "crs_v3_no_plugins": "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+        "off": "ModSecurity est désactivé. Rien ci-dessous n'est appliqué, mais chaque valeur est conservée et revient lorsque vous le réactivez.",
+        "engine_off": "ModSecurity est activé mais SecRuleEngine est sur Off, donc aucune requête n'est inspectée. Ces deux paramètres signifient tous deux « activé » et sont actuellement en désaccord.",
+        "engine_detect": "SecRuleEngine est en DetectionOnly : les correspondances sont journalisées et rien n'est bloqué.",
+        "crs_v3_no_plugins": "Le Core Rule Set 3 ne peut pas charger de plugins. Le sélecteur de plugin et la liste de plugins sont conservés et s'appliqueront à nouveau en version 4, mais ne font rien pour le moment."
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "Autres paramètres",
+        "description": "Déclaré par le plugin mais pas encore placé sur cette page. Toujours enregistré normalement."
       }
     },
     "headers": {
       "csp": {
         "title": "Content Security Policy",
-        "description": "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+        "description": "La politique envoyée sous forme de Content-Security-Policy. Une directive erronée casse les scripts propres au site sans rien de visible côté serveur, donc utiliser report-only en premier est l'ordre sûr."
       },
       "permissions": {
         "title": "Permissions Policy",
-        "description": "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+        "description": "Quelles fonctionnalités du navigateur ce site peut utiliser, sous forme de liste séparée par des virgules de clauses feature=(allowlist). Une entrée laissée à () désactive cette API pour tout le monde, y compris vos propres pages."
       },
       "transport": {
-        "title": "HTTPS enforcement",
-        "description": "The Strict-Transport-Security header. Only sent over HTTPS."
+        "title": "Application de HTTPS",
+        "description": "L'en-tête Strict-Transport-Security. Envoyé uniquement en HTTPS."
       },
       "browser": {
-        "title": "Browser protections",
-        "description": "Small fixed-value headers. An empty value removes the header instead of sending it."
+        "title": "Protections du navigateur",
+        "description": "Petits en-têtes à valeur fixe. Une valeur vide supprime l'en-tête au lieu de l'envoyer."
       },
       "upstream": {
-        "title": "Upstream and removed headers",
-        "description": "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+        "title": "En-têtes upstream et supprimés",
+        "description": "Lesquels des propres en-têtes de réponse de l'upstream survivent, et lesquels sont supprimés avant que la réponse ne parte."
       },
       "cookies": {
         "title": "Cookies",
-        "description": "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+        "description": "Flags ajoutés à chaque Set-Cookie renvoyé par l'upstream. Les règles de flag par cookie se trouvent dans les paramètres répétables ci-dessous."
       },
       "notice": {
-        "csp_report_only": "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce.",
-        "hsts_preload": "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then.",
-        "keep_shadows": "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:",
-        "keep_all": "The keep list is *, so every header the upstream sends wins over the values configured here."
+        "csp_report_only": "Le mode report-only est activé : la politique est envoyée sous forme de Content-Security-Policy-Report-Only, donc les violations sont signalées et rien n'est bloqué. Désactivez-le pour l'appliquer.",
+        "hsts_preload": "Cette valeur contient preload. Une fois le domaine soumis à la liste de préchargement des navigateurs, le retrait prend des mois à atteindre les utilisateurs -- chaque sous-domaine est en HTTPS uniquement jusque-là.",
+        "keep_shadows": "Ces en-têtes sont conservés depuis l'upstream lorsqu'il envoie les siens, donc les valeurs configurées ici ne sont qu'un repli :",
+        "keep_all": "La liste de conservation est *, donc chaque en-tête envoyé par l'upstream l'emporte sur les valeurs configurées ici."
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "Autres paramètres",
+        "description": "Déclaré par le plugin mais pas encore placé sur cette page. Toujours enregistré normalement."
       }
     }
   },
@@ -2127,10 +2127,10 @@
     },
     "title": "Modèles de service",
     "catalog": {
-      "heading": "Available templates",
-      "subheading": "Curated service templates published by the BunkerWeb organisation.",
-      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration.",
-      "no_compat_notice": "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+      "heading": "Modèles disponibles",
+      "subheading": "Modèles de service sélectionnés publiés par l'organisation BunkerWeb.",
+      "layer_warning": "Un modèle est une couche : en ajouter un à un service qui utilise déjà des modèles modifie sa configuration effective.",
+      "no_compat_notice": "Ce catalogue ne déclare aucune compatibilité avec BunkerWeb. Un modèle est refusé à l'installation s'il nomme un paramètre que ce BunkerWeb ne possède pas."
     }
   },
   "theme": {
@@ -3099,18 +3099,18 @@
       "primary": "Certificat principal",
       "template": {
         "add": "Add",
-        "add_label": "Template to add as a layer",
-        "adding": "Saving applies {{names}}. Many settings can move at once.",
-        "move_down": "Move this template later",
-        "move_up": "Move this template earlier",
+        "add_label": "Modèle à ajouter comme couche",
+        "adding": "Enregistrer applique {{names}}. De nombreux paramètres peuvent changer en même temps.",
+        "move_down": "Exécuter ce modèle plus tard",
+        "move_up": "Exécuter ce modèle plus tôt",
         "none": "Aucun modèle",
-        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
-        "overridden_badge": "overridden",
-        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
+        "note": "Ce n'est pas une ressource : un modèle est un paramètre. Les modèles s'appliquent lors de l'enregistrement, dans l'ordre, et un modèle ultérieur remplace un modèle antérieur.",
+        "overridden_badge": "remplacé",
+        "overridden_by": "{{name}} remplace {{count}} des paramètres de ce modèle.",
         "pending": "S'applique lors de l'enregistrement",
-        "remove": "Remove this template",
-        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
-        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
+        "remove": "Supprimer ce modèle",
+        "removing": "Enregistrer détache {{names}}. Les valeurs que ces modèles fournissaient seront abandonnées.",
+        "reordered": "Enregistrer modifie l'ordre des modèles. Les modèles ultérieurs remplacent les modèles antérieurs, donc les valeurs effectives changent.",
         "switching": "Enregistrer modifie ce service de « {{from}} » à « {{to}} ». Les valeurs fournies par le modèle actuel sont supprimées et les valeurs de {{to}} sont appliquées : de nombreux paramètres sont modifiés en même temps.",
         "unwired": "Cette page n'envoie pas le paramètre USE_TEMPLATE ; le modèle ne peut donc pas être modifié ici."
       },

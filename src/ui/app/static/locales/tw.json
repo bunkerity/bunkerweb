@@ -90,10 +90,10 @@
   "bans": {
     "chart": {
       "timeseries": {
-        "note": "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events.",
-        "series": "Active bans",
-        "subtitle": "Selected range",
-        "title": "Active bans per interval"
+        "note": "封鎖在其生效的每個區間都會計入。重新封鎖同一個 IP 會重寫其原始日期,因此這裡顯示的是每個區間有多少封鎖是啟用中的,而不是封鎖事件的歷史紀錄。",
+        "series": "啟用中的封鎖",
+        "subtitle": "選取的範圍",
+        "title": "每區間啟用中的封鎖"
       }
     },
     "subtitle": "跨您所有 BunkerWeb 執行個體的封鎖 IP 位址 — 建立、移除或調整封鎖期限。",
@@ -518,7 +518,7 @@
   },
   "dashboard": {
     "alert": {
-      "jobs_failed": "One or more jobs failed on their last run."
+      "jobs_failed": "有一項或多項工作在上次執行時失敗。"
     },
     "card": {
       "blocked_requests": {
@@ -527,7 +527,7 @@
       "blocked_unique_ips": {
         "title": "已封鎖的唯一 IP"
       },
-      "hide": "Hide this card",
+      "hide": "隱藏此卡片",
       "instances": {
         "status": "{{up}} 執行中 / {{down}} 已停止 / {{loading}} 載入中",
         "title": "執行個體"
@@ -548,7 +548,7 @@
         "usage": "{{percent}}% 已使用",
         "warning_low": "警告：記憶體不足可能影響效能"
       },
-      "restore": "Restore hidden cards",
+      "restore": "還原隱藏的卡片",
       "services": {
         "status": "{{online}} 線上 / {{draft}} 草稿",
         "title": "服務"
@@ -779,8 +779,8 @@
     "webauthn_request_failed": "安全金鑰請求失敗。請再試一次。"
   },
   "flash": {
-    "check_jobs_for_details": "Check the Jobs page for details.",
-    "last_configuration_change_failed": "Your last configuration change could not be applied.",
+    "check_jobs_for_details": "請查看「工作」頁面以取得詳細資訊。",
+    "last_configuration_change_failed": "無法套用您上一次的設定變更。",
     "easter_egg": "如果你讀到這條訊息，表示你很好奇",
     "error": "錯誤",
     "message": "訊息",
@@ -870,7 +870,7 @@
       "theme": "主題",
       "type": "類型",
       "ui_host": "UI 主機",
-      "ui_url": "UI URL",
+      "ui_url": "介面網址",
       "use_custom_ssl": "使用自訂 SSL",
       "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
       "use_proxy_protocol": "使用 PROXY 協定",
@@ -1160,8 +1160,8 @@
     "title": "加入新聞通訊"
   },
   "notice": {
-    "already_subscribed": "Already subscribed",
-    "dismiss_mfa": "Don't remind me again"
+    "already_subscribed": "已訂閱",
+    "dismiss_mfa": "不再提醒我"
   },
   "pagination": {
     "page": "頁"
@@ -1210,16 +1210,16 @@
       "tab_enabled": "已啟用"
     },
     "catalog": {
-      "tab": "Available",
-      "install": "Install",
-      "install_failed": "Install failed",
-      "learn_more": "Learn more",
-      "version": "Version {{version}}",
-      "incompatible": "This release declares no BunkerWeb compatibility; this is {{current}}",
-      "stale": "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again.",
-      "trust_notice": "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges.",
-      "incompatible_declared": "This release supports BunkerWeb {{supported}}; this is {{current}}",
-      "release": "Read from release {{tag}}"
+      "tab": "可用",
+      "install": "安裝",
+      "install_failed": "安裝失敗",
+      "learn_more": "了解更多",
+      "version": "版本 {{version}}",
+      "incompatible": "此版本未聲明與 BunkerWeb 相容;目前版本為 {{current}}",
+      "stale": "此目錄最近未能重新整理,因此在恢復最新狀態之前已停用安裝功能。",
+      "trust_notice": "社群項目是透過 TLS 從 BunkerWeb 組織於 GitHub 上發佈的儲存庫讀取,安裝的內容會與列出的內容進行核對——但這裡的內容都沒有經過加密簽署。已安裝的外掛程式會以 BunkerWeb 的完整權限執行程式碼。",
+      "incompatible_declared": "此版本支援 BunkerWeb {{supported}};目前版本為 {{current}}",
+      "release": "從版本 {{tag}} 讀取"
     }
   },
   "pro": {
@@ -1422,7 +1422,7 @@
     "collapse_message": "全部摺疊",
     "collapse_plural": "搜尋窗格 (%d)",
     "count": "{total}",
-    "countFiltered": "{shown} ({total})",
+    "countFiltered": "{shown}({total})",
     "country": "國家/地區",
     "created": "建立時間",
     "data": "資料",
@@ -1493,234 +1493,234 @@
     },
     "antibot": {
       "capjs": {
-        "hint": "Needs a Cap.js server; the frontend and backend URLs may differ.",
+        "hint": "需要 Cap.js 伺服器;前端與後端網址可能不同。",
         "title": "Cap.js"
       },
       "captcha": {
-        "hint": "Rendered by BunkerWeb itself — no third-party account, no outbound request.",
-        "title": "Built-in captcha"
+        "hint": "由 BunkerWeb 自行算繪——不需第三方帳號,也不會有對外請求。",
+        "title": "內建驗證碼"
       },
       "challenge": {
-        "description": "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid.",
-        "title": "Challenge behaviour"
+        "description": "驗證的呈現位置、訪客有多少時間可以解答,以及已解答的驗證能維持有效多久。",
+        "title": "驗證行為"
       },
       "countries": {
-        "both_set": "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous.",
-        "description": "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded.",
+        "both_set": "兩份國家清單都已設定。它們會合併而非互斥:只要訪客的國家在略過清單中,或不在限制清單中,即可豁免。清除其中一份可讓規則變得明確。",
+        "description": "依國家豁免訪客,或將驗證限制在少數幾個國家。需要已載入 GeoIP 資料庫。",
         "mode": {
-          "all": "Challenge every country",
-          "ignore": "Skip the challenge for these countries",
-          "only": "Challenge only these countries"
+          "all": "對每個國家進行驗證",
+          "ignore": "對這些國家略過驗證",
+          "only": "只對這些國家進行驗證"
         },
-        "picker_label": "Country filter",
-        "title": "Countries",
-        "both_set_clear": "Clear the skip list"
+        "picker_label": "國家篩選器",
+        "title": "國家",
+        "both_set_clear": "清除略過清單"
       },
-      "disabled_notice": "Antibot is off for this scope. Pick a challenge mode to configure it.",
+      "disabled_notice": "此範圍的 Antibot 已關閉。請選擇一種驗證模式以進行設定。",
       "exemptions": {
-        "description": "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing.",
-        "title": "Exemptions"
+        "description": "符合其中任一項的請求會完全略過驗證。將清單留空即不會比對到任何項目。",
+        "title": "豁免項目"
       },
       "hcaptcha": {
-        "hint": "Needs a site registered at hcaptcha.com.",
+        "hint": "需要在 hcaptcha.com 註冊的網站。",
         "title": "hCaptcha"
       },
       "mcaptcha": {
-        "hint": "Needs an mCaptcha instance — the hosted demo or your own.",
+        "hint": "需要一個 mCaptcha 執行個體——可使用託管的示範版本,或您自己的執行個體。",
         "title": "mCaptcha"
       },
       "mode": {
-        "description": "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back.",
-        "title": "Challenge mode"
+        "description": "訪客必須通過哪種驗證。下方只會顯示所選提供者的欄位;其他欄位會保留其已儲存的值,並在您切換回去時再次顯示。",
+        "title": "驗證模式"
       },
       "recaptcha": {
         "classic": {
-          "hint": "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition.",
-          "title": "reCAPTCHA classic"
+          "hint": "使用共用密鑰對照 google.com/recaptcha/api/siteverify 進行驗證。此版本會忽略 Enterprise 欄位。",
+          "title": "傳統版 reCAPTCHA"
         },
         "enterprise": {
-          "hint": "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition.",
+          "hint": "使用 Google Cloud 專案與 API 金鑰對照 recaptchaenterprise.googleapis.com 進行驗證。此版本會忽略傳統密鑰。",
           "title": "reCAPTCHA Enterprise"
         },
-        "hint": "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions.",
+        "hint": "需要在 google.com/recaptcha 註冊的網站。網站金鑰與最低分數適用於兩個版本。",
         "title": "Google reCAPTCHA"
       },
       "turnstile": {
-        "hint": "Needs a site registered in the Cloudflare dashboard.",
+        "hint": "需要在 Cloudflare 儀表板中註冊的網站。",
         "title": "Cloudflare Turnstile"
       },
       "unplaced": {
-        "description": "Declared by the plugin but not yet placed in a section above. They still save normally.",
-        "title": "Other settings"
+        "description": "由外掛程式宣告,但尚未配置到上方任何區段。它們仍會照常儲存。",
+        "title": "其他設定"
       }
     },
     "access_control": {
       "order": {
-        "title": "Decision order",
-        "description": "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD.",
-        "current": "current page",
-        "on": "On",
-        "off": "Off"
+        "title": "判斷順序",
+        "description": "預設情況下,每個請求都會依此順序經過這四項檢查,由最先做出判斷的檢查決定結果。符合白名單會立即結束檢查:請求會被允許,之後的三項檢查永遠不會執行。此順序本身可透過 PLUGINS_ORDER_ACCESS 與 PLUGINS_ORDER_PREREAD 依服務個別設定。",
+        "current": "目前頁面",
+        "on": "開啟",
+        "off": "關閉"
       },
       "stage": {
-        "whitelist": "Whitelist",
-        "blacklist": "Blacklist",
-        "greylist": "Greylist",
-        "country": "Country"
+        "whitelist": "白名單",
+        "blacklist": "黑名單",
+        "greylist": "灰名單",
+        "country": "國家"
       },
       "enforcement": {
-        "title": "Enforcement"
+        "title": "強制執行"
       },
       "kinds": {
-        "title": "What is matched",
-        "description": "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+        "title": "比對的對象",
+        "description": "每種比對類型各有一個區段。在每個區段中,您輸入的項目與 BunkerWeb 下載的清單會一併檢查;符合其中任一項的用戶端即符合該區段。"
       },
       "kind": {
-        "ip": "IP addresses and networks",
-        "rdns": "Reverse DNS",
-        "asn": "Autonomous systems (ASN)",
-        "user_agent": "User agents",
-        "uri": "URIs"
+        "ip": "IP 位址與網路",
+        "rdns": "反向 DNS",
+        "asn": "自治系統(ASN)",
+        "user_agent": "使用者代理",
+        "uri": "URI"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet given a place on this page. They still save normally."
+        "title": "其他設定",
+        "description": "由外掛程式宣告,但尚未在此頁面配置位置。它們仍會照常儲存。"
       },
       "whitelist": {
         "enforcement": {
-          "description": "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+          "description": "白名單最先執行,並覆蓋其他一切:符合項目會直接被允許,因此黑名單、灰名單與國家規則永遠不會看到該請求。封鎖是唯一的例外,而且僅限於以 IP 為依據——在此透過反向 DNS、ASN、使用者代理或 URI 符合的用戶端,若正被封鎖,仍會被擋下。請將此清單限於絕不能被排除在外的用戶端。"
         }
       },
       "blacklist": {
         "enforcement": {
-          "description": "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+          "description": "黑名單會在白名單之後執行,因此已在白名單中的用戶端絕不會在此被封鎖。在每一列中,例外清單會優先於該列自身的項目及下載的清單。"
         },
         "community": {
-          "title": "Community lists",
-          "description": "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+          "title": "社群清單",
+          "description": "在 BunkerWeb 之外維護並自動為您更新的精選清單。它們與下方項目採用相同的比對方式。"
         }
       },
       "greylist": {
         "enforcement": {
-          "description": "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+          "description": "灰名單預設為拒絕:啟用時,任何不符合下方項目的請求都會被拒絕,HTTP 與串流流量皆同。請先新增項目,再啟用它——若在所有清單皆為空的情況下儲存並啟用,將會被拒絕。"
         },
-        "locked_out": "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+        "locked_out": "灰名單已啟用但尚未設定任何項目,因此傳送到此服務的每個請求都會被拒絕。請在下方新增至少一個項目,或關閉灰名單。"
       },
       "country": {
-        "title": "Country rule",
-        "description": "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list.",
-        "picker_label": "Country rule",
+        "title": "國家規則",
+        "description": "只有一條規則,而不是兩份清單。允許一組國家會拒絕所有其他國家,並使已儲存的封鎖清單成為無效設定——BunkerWeb 會先檢查允許清單,永遠不會用到封鎖清單。",
+        "picker_label": "國家規則",
         "mode": {
-          "all": "No country rule",
-          "only": "Allow only these countries",
-          "block": "Block these countries"
+          "all": "沒有國家規則",
+          "only": "只允許這些國家",
+          "block": "封鎖這些國家"
         },
         "conflict": {
-          "description": "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set.",
-          "clear": "Clear the block list"
+          "description": "兩份國家清單都會被儲存,但只會強制執行允許清單:只要設定了允許清單,下方的封鎖清單就永遠不會被參考。",
+          "clear": "清除封鎖清單"
         },
         "exceptions": {
-          "title": "Exceptions",
-          "description": "Requests whose URI matches one of these patterns skip the country rule entirely."
+          "title": "例外",
+          "description": "URI 符合這些模式之一的請求會完全略過國家規則。"
         }
       },
       "rules": {
-        "title": "Composite rules",
-        "description": "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name.",
-        "rule": "Rule",
-        "add_term": "Add a term",
-        "remove_term": "Remove this term",
-        "negate": "NOT",
-        "negate_help": "Invert this term: the rule matches when the term does NOT match.",
-        "kind": "What this term matches on",
-        "value": "Value, or @group",
-        "expression": "Saved as:",
+        "title": "複合規則",
+        "description": "規則只有在其所有條件都符合時才算符合。規則會與上方清單一併檢查,只要符合其中任一項的用戶端即符合此階段。值可以是資源群組,寫法為 @名稱。",
+        "rule": "規則",
+        "add_term": "新增條件",
+        "remove_term": "移除此條件",
+        "negate": "非",
+        "negate_help": "反轉此條件:當條件「不」符合時,規則即符合。",
+        "kind": "此條件比對的對象",
+        "value": "值,或 @群組",
+        "expression": "儲存為:",
         "kind_ip": "IP",
-        "kind_country": "Country",
+        "kind_country": "國家",
         "kind_asn": "ASN",
-        "kind_rdns": "Reverse DNS",
-        "kind_ua": "User agent",
+        "kind_rdns": "反向 DNS",
+        "kind_ua": "使用者代理",
         "kind_uri": "URI"
       }
     },
     "modsecurity": {
       "engine": {
-        "title": "Engine",
-        "description": "Whether ModSecurity is loaded at all, and what it does with a rule match."
+        "title": "引擎",
+        "description": "ModSecurity 是否有載入,以及在規則相符時會執行什麼動作。"
       },
       "crs": {
         "title": "OWASP Core Rule Set",
-        "description": "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+        "description": "BunkerWeb 載入在 ModSecurity 之上的共用規則集。版本 4 是目前版本;版本 3 則保留給仍依賴其規則識別碼的服務使用。"
       },
       "crs_plugins": {
-        "title": "Core Rule Set plugins",
-        "description": "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+        "title": "Core Rule Set 外掛程式",
+        "description": "為 Core Rule Set 發佈的規則套件,會在啟動時下載並安裝。請提供外掛程式名稱、名稱/標籤,或網址。"
       },
       "global_crs": {
-        "title": "Global CRS mode",
-        "description": "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+        "title": "全域 CRS 模式",
+        "description": "整個執行個體只載入一次 Core Rule Set,而不是每個服務各載入一次。在服務數量多時載入速度較快,但啟用此選項時,限定於單一服務的 modsec-crs 設定會被拒絕:請改為建立全域設定,並以 Host 規則限定其範圍。"
       },
       "audit": {
-        "title": "Audit log",
-        "description": "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+        "title": "稽核記錄",
+        "description": "ModSecurity 寫入自身稽核記錄的內容,以及每筆交易保留多少資料。A 與 Z 部分永遠都會包含在內。"
       },
       "limits": {
-        "title": "Request body limits",
-        "description": "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+        "title": "請求主體限制",
+        "description": "ModSecurity 會檢查請求主體的多少內容,以及超出限制的主體會發生什麼事。NGINX 會先強制執行 MAX_CLIENT_SIZE,因此高於此值的限制不會有任何作用。"
       },
       "tuning": {
-        "title": "Rule tuning",
-        "description": "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded.",
-        "modsec_crs": "Before the Core Rule Set",
-        "modsec": "After the Core Rule Set",
-        "crs_plugins_before": "Before CRS plugins",
-        "crs_plugins_after": "After CRS plugins"
+        "title": "規則調校",
+        "description": "清除誤判是一項自訂設定,而不是一般設定。以下是規則排除可以放置的四個位置,依載入順序排列。",
+        "modsec_crs": "Core Rule Set 之前",
+        "modsec": "Core Rule Set 之後",
+        "crs_plugins_before": "CRS 外掛程式之前",
+        "crs_plugins_after": "CRS 外掛程式之後"
       },
       "notice": {
-        "off": "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again.",
-        "engine_off": "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree.",
-        "engine_detect": "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked.",
-        "crs_v3_no_plugins": "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+        "off": "ModSecurity 已關閉。下方的設定都不會套用,但每個值都會保留,並在您重新開啟時恢復。",
+        "engine_off": "ModSecurity 已啟用,但 SecRuleEngine 為 Off,因此不會檢查任何請求。這兩項設定都代表「開啟」,但目前彼此矛盾。",
+        "engine_detect": "SecRuleEngine 設定為 DetectionOnly:相符項目會被記錄,但不會封鎖任何內容。",
+        "crs_v3_no_plugins": "Core Rule Set 3 無法載入外掛程式。外掛程式開關與外掛程式清單會被保留,並會在版本 4 重新套用,但目前不會有任何作用。"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "其他設定",
+        "description": "由外掛程式宣告,但尚未在此頁面配置位置。它們仍會照常儲存。"
       }
     },
     "headers": {
       "csp": {
         "title": "Content Security Policy",
-        "description": "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+        "description": "以 Content-Security-Policy 傳送的政策。錯誤的指令會在伺服器端毫無跡象的情況下破壞網站自身的指令碼,因此先使用僅報告模式才是安全的做法。"
       },
       "permissions": {
         "title": "Permissions Policy",
-        "description": "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+        "description": "此網站可使用哪些瀏覽器功能,以逗號分隔的 feature=(allowlist) 子句清單表示。若某項目留空為 (),即會為所有人(包括您自己的頁面)停用該 API。"
       },
       "transport": {
-        "title": "HTTPS enforcement",
-        "description": "The Strict-Transport-Security header. Only sent over HTTPS."
+        "title": "HTTPS 強制執行",
+        "description": "Strict-Transport-Security 標頭。僅透過 HTTPS 傳送。"
       },
       "browser": {
-        "title": "Browser protections",
-        "description": "Small fixed-value headers. An empty value removes the header instead of sending it."
+        "title": "瀏覽器保護",
+        "description": "值固定的小型標頭。空值會移除該標頭,而不是傳送它。"
       },
       "upstream": {
-        "title": "Upstream and removed headers",
-        "description": "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+        "title": "上游與已移除的標頭",
+        "description": "上游自身的回應標頭中,哪些會保留下來,哪些會在回應送出前被移除。"
       },
       "cookies": {
-        "title": "Cookies",
-        "description": "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+        "title": "Cookie",
+        "description": "加入到上游回傳的每個 Set-Cookie 的旗標。個別 Cookie 的旗標規則位於下方可重複的設定中。"
       },
       "notice": {
-        "csp_report_only": "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce.",
-        "hsts_preload": "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then.",
-        "keep_shadows": "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:",
-        "keep_all": "The keep list is *, so every header the upstream sends wins over the values configured here."
+        "csp_report_only": "僅報告模式已啟用:政策會以 Content-Security-Policy-Report-Only 的形式送出,因此違規會被回報,但不會封鎖任何內容。關閉此選項即可強制執行。",
+        "hsts_preload": "此值包含 preload。網域一旦提交至瀏覽器的 preload 清單,移除後需要數個月才能反映到使用者身上——在此之前,每個子網域都僅限 HTTPS。",
+        "keep_shadows": "當上游傳送自己的標頭時,這些標頭會保留來自上游的值,因此此處設定的值僅作為備援:",
+        "keep_all": "保留清單為 *,因此上游傳送的每個標頭都會覆蓋此處設定的值。"
       },
       "unplaced": {
-        "title": "Other settings",
-        "description": "Declared by the plugin but not yet placed on this page. They still save normally."
+        "title": "其他設定",
+        "description": "由外掛程式宣告,但尚未在此頁面配置位置。它們仍會照常儲存。"
       }
     }
   },
@@ -1770,7 +1770,7 @@
     },
     "step4": {
       "label": {
-        "final_url": "BunkerWeb UI URL"
+        "final_url": "BunkerWeb 介面網址"
       },
       "subtitle": "在完成設定前檢查您的設定。",
       "title": "概觀"
@@ -2127,16 +2127,16 @@
     },
     "title": "服務範本",
     "catalog": {
-      "heading": "Available templates",
-      "subheading": "Curated service templates published by the BunkerWeb organisation.",
-      "layer_warning": "A template is a layer: adding one to a service that already uses templates changes its effective configuration.",
-      "no_compat_notice": "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+      "heading": "可用的範本",
+      "subheading": "由 BunkerWeb 組織發佈的精選服務範本。",
+      "layer_warning": "範本是一種圖層:將範本新增到已使用範本的服務會變更其實際生效的設定。",
+      "no_compat_notice": "此目錄未聲明與 BunkerWeb 相容。若範本指定了此 BunkerWeb 不具備的設定,安裝時將被拒絕。"
     }
   },
   "theme": {
     "dark": "深色",
     "light": "淺色",
-    "system": "System"
+    "system": "系統"
   },
   "threatmap": {
     "exit_fullscreen": "退出全螢幕",
@@ -2509,7 +2509,7 @@
     "expiring_help": "30 天或更短",
     "file_extensions": "請使用以下檔案擴展名：{{extensions}}。",
     "file_select": "選擇一個 PEM 檔案。",
-    "file_selected": "{{name}} ({{size}} KiB)",
+    "file_selected": "{{name}}({{size}} KiB)",
     "file_size_limit": "檔案不得超過 1 MiB。",
     "fingerprint": "SHA-256 指紋",
     "issuer": "發行者",
@@ -3098,19 +3098,19 @@
       "none": "未連結",
       "primary": "主要憑證",
       "template": {
-        "add": "Add",
-        "add_label": "Template to add as a layer",
-        "adding": "Saving applies {{names}}. Many settings can move at once.",
-        "move_down": "Move this template later",
-        "move_up": "Move this template earlier",
+        "add": "新增",
+        "add_label": "要新增為圖層的範本",
+        "adding": "儲存後將套用 {{names}}。多項設定可能同時變更。",
+        "move_down": "將此範本往後移",
+        "move_up": "將此範本往前移",
         "none": "沒有範本",
-        "note": "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one.",
-        "overridden_badge": "overridden",
-        "overridden_by": "{{name}} overrides {{count}} of this template’s settings.",
+        "note": "這不是資源:範本是一項設定。範本會在儲存時依序套用,較晚的範本會覆蓋較早的範本。",
+        "overridden_badge": "已覆蓋",
+        "overridden_by": "{{name}} 覆蓋了此範本的 {{count}} 項設定。",
         "pending": "儲存時套用",
-        "remove": "Remove this template",
-        "removing": "Saving detaches {{names}}. The values those templates supplied are dropped.",
-        "reordered": "Saving changes the template order. Later templates override earlier ones, so the effective values change.",
+        "remove": "移除此範本",
+        "removing": "儲存後將解除與 {{names}} 的關聯。這些範本提供的值將被刪除。",
+        "reordered": "儲存後將變更範本順序。較晚的範本會覆蓋較早的範本,因此實際生效的值會改變。",
         "switching": "儲存時，此服務從「{{from}}」變為「{{to}}」。目前範本提供的值會被移除，並應用「{{to}}」的設定 — 許多設定會一次性更改。",
         "unwired": "此頁面不會提交 USE_TEMPLATE，因此無法在此處變更範本。"
       },

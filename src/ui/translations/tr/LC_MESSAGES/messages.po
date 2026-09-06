@@ -215,16 +215,16 @@ msgid "banner.support"
 msgstr "BunkerWeb için premium destek veya özel danışmanlık mı gerekiyor? <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">Profesyonel hizmetlerimize</a> göz atın."
 
 msgid "bans.chart.timeseries.note"
-msgstr "A ban counts in every interval it was in force. Re-banning the same IP rewrites its original date, so this shows how many bans were active, not a history of ban events."
+msgstr "Bir yasaklama, yürürlükte olduğu her aralıkta sayılır. Aynı IP'yi tekrar yasaklamak orijinal tarihini yeniden yazar, bu yüzden bu grafik yasaklama olaylarının bir geçmişini değil, her aralıkta kaç yasaklamanın aktif olduğunu gösterir."
 
 msgid "bans.chart.timeseries.series"
-msgstr "Active bans"
+msgstr "Aktif yasaklamalar"
 
 msgid "bans.chart.timeseries.subtitle"
-msgstr "Selected range"
+msgstr "Seçilen aralık"
 
 msgid "bans.chart.timeseries.title"
-msgstr "Active bans per interval"
+msgstr "Aralık başına aktif yasaklamalar"
 
 msgid "bans.stats.card.by_reason"
 msgstr "Nedene göre yasaklar"
@@ -1070,13 +1070,13 @@ msgid "country.BJ"
 msgstr "Benin"
 
 msgid "country.BL"
-msgstr "Saint Barthélemy"
+msgstr "Saint Barthelemy"
 
 msgid "country.BM"
 msgstr "Bermuda"
 
 msgid "country.BN"
-msgstr "Brunei Darussalam"
+msgstr "Brunei"
 
 msgid "country.BO"
 msgstr "Bolivya"
@@ -1124,7 +1124,7 @@ msgid "country.CH"
 msgstr "İsviçre"
 
 msgid "country.CI"
-msgstr "Côte d'Ivoire"
+msgstr "Côte d’Ivoire"
 
 msgid "country.CK"
 msgstr "Cook Adaları"
@@ -1280,7 +1280,7 @@ msgid "country.GY"
 msgstr "Guyana"
 
 msgid "country.HK"
-msgstr "Hong Kong"
+msgstr "Çin Hong Kong ÖİB"
 
 msgid "country.HM"
 msgstr "Heard Adası ve McDonald Adaları"
@@ -1433,13 +1433,13 @@ msgid "country.ML"
 msgstr "Mali"
 
 msgid "country.MM"
-msgstr "Myanmar"
+msgstr "Myanmar (Burma)"
 
 msgid "country.MN"
 msgstr "Moğolistan"
 
 msgid "country.MO"
-msgstr "Macao"
+msgstr "Çin Makao ÖİB"
 
 msgid "country.MP"
 msgstr "Kuzey Mariana Adaları"
@@ -1559,7 +1559,7 @@ msgid "country.QA"
 msgstr "Katar"
 
 msgid "country.RE"
-msgstr "Réunion"
+msgstr "Reunion"
 
 msgid "country.RO"
 msgstr "Romanya"
@@ -1751,7 +1751,7 @@ msgid "country.not_applicable"
 msgstr "N/A"
 
 msgid "dashboard.alert.jobs_failed"
-msgstr "One or more jobs failed on their last run."
+msgstr "Bir veya daha fazla iş son çalıştırmasında başarısız oldu."
 
 msgid "dashboard.card.blocked_requests.title"
 msgstr "Engellenen İstekler"
@@ -1763,7 +1763,7 @@ msgid "dashboard.card.certificates.title"
 msgstr "Sertifikalar"
 
 msgid "dashboard.card.hide"
-msgstr "Hide this card"
+msgstr "Bu kartı gizle"
 
 msgid "dashboard.card.instances.status"
 msgstr "%(up)s aktif / %(down)s deaktif / %(loading)s yükleniyor"
@@ -1796,7 +1796,7 @@ msgid "dashboard.card.ram.warning_low"
 msgstr "Uyarı: Düşük bellek performansı etkileyebilir"
 
 msgid "dashboard.card.restore"
-msgstr "Restore hidden cards"
+msgstr "Gizli kartları geri yükle"
 
 msgid "dashboard.card.services.status"
 msgstr "%(online)s çevrimiçi / %(draft)s taslak"
@@ -2315,7 +2315,7 @@ msgid "error.webauthn_request_failed"
 msgstr "Güvenlik anahtarı isteği başarısız oldu. Tekrar deneyin."
 
 msgid "flash.check_jobs_for_details"
-msgstr "Check the Jobs page for details."
+msgstr "Ayrıntılar için İşler sayfasını kontrol edin."
 
 msgid "flash.easter_egg"
 msgstr "Bunu okuyorsan meraklısın demektir"
@@ -2324,7 +2324,7 @@ msgid "flash.error"
 msgstr "Hata"
 
 msgid "flash.last_configuration_change_failed"
-msgstr "Your last configuration change could not be applied."
+msgstr "Son yapılandırma değişikliğiniz uygulanamadı."
 
 msgid "flash.message"
 msgstr "Bilgi"
@@ -3243,10 +3243,10 @@ msgid "newsletter.title"
 msgstr "Bültene Katıl"
 
 msgid "notice.already_subscribed"
-msgstr "Already subscribed"
+msgstr "Zaten abone olundu"
 
 msgid "notice.dismiss_mfa"
-msgstr "Don't remind me again"
+msgstr "Bir daha hatırlatma"
 
 msgid "onboarding.dismiss"
 msgstr "Kapat"
@@ -3366,34 +3366,34 @@ msgid "plugin.type.ui"
 msgstr "UI"
 
 msgid "plugins.catalog.incompatible"
-msgstr "This release declares no BunkerWeb compatibility; this is %(current)s"
+msgstr "Bu sürüm BunkerWeb uyumluluğu bildirmiyor; şu an %(current)s"
 
 msgid "plugins.catalog.incompatible_declared"
-msgstr "This release supports BunkerWeb %(supported)s; this is %(current)s"
+msgstr "Bu sürüm BunkerWeb %(supported)s sürümünü destekliyor; şu an %(current)s"
 
 msgid "plugins.catalog.install"
-msgstr "Install"
+msgstr "Yükle"
 
 msgid "plugins.catalog.install_failed"
-msgstr "Install failed"
+msgstr "Yükleme başarısız oldu"
 
 msgid "plugins.catalog.learn_more"
-msgstr "Learn more"
+msgstr "Daha fazla bilgi"
 
 msgid "plugins.catalog.release"
-msgstr "Read from release %(tag)s"
+msgstr "%(tag)s sürümünden oku"
 
 msgid "plugins.catalog.stale"
-msgstr "The catalogue could not be refreshed recently, so installing is disabled until it is up to date again."
+msgstr "Katalog yakın zamanda yenilenemedi, bu yüzden tekrar güncel olana kadar yükleme devre dışı."
 
 msgid "plugins.catalog.tab"
-msgstr "Available"
+msgstr "Mevcut"
 
 msgid "plugins.catalog.trust_notice"
-msgstr "Community items are read from the repositories the BunkerWeb organisation publishes on GitHub, over TLS, and what is installed is checked against what was listed — but nothing here is cryptographically signed. An installed plugin runs code with full BunkerWeb privileges."
+msgstr "Topluluk öğeleri, BunkerWeb kuruluşunun GitHub'da yayımladığı depolardan TLS üzerinden okunur ve yüklenen şey listelenenle karşılaştırılarak kontrol edilir — ancak burada hiçbir şey kriptografik olarak imzalanmamıştır. Yüklenen bir eklenti, tüm BunkerWeb ayrıcalıklarıyla kod çalıştırır."
 
 msgid "plugins.catalog.version"
-msgstr "Version %(version)s"
+msgstr "Sürüm %(version)s"
 
 msgid "plugins.marketplace.active"
 msgstr "Etkin"
@@ -4260,40 +4260,40 @@ msgid "service.resources.template.add"
 msgstr "Add"
 
 msgid "service.resources.template.add_label"
-msgstr "Template to add as a layer"
+msgstr "Katman olarak eklenecek şablon"
 
 msgid "service.resources.template.adding"
-msgstr "Saving applies %(names)s. Many settings can move at once."
+msgstr "Kaydetmek %(names)s şablonunu uygular. Birçok ayar aynı anda değişebilir."
 
 msgid "service.resources.template.move_down"
-msgstr "Move this template later"
+msgstr "Bu şablonu daha sonraya taşı"
 
 msgid "service.resources.template.move_up"
-msgstr "Move this template earlier"
+msgstr "Bu şablonu daha öncesine taşı"
 
 msgid "service.resources.template.none"
 msgstr "Şablon yok"
 
 msgid "service.resources.template.note"
-msgstr "Not a resource: a template is a setting. Templates apply on Save, in order, and a later one overrides an earlier one."
+msgstr "Bir kaynak değildir: şablon bir ayardır. Şablonlar kaydetme sırasında, sırayla uygulanır ve sonraki bir şablon öncekini geçersiz kılar."
 
 msgid "service.resources.template.overridden_badge"
-msgstr "overridden"
+msgstr "geçersiz kılındı"
 
 msgid "service.resources.template.overridden_by"
-msgstr "%(name)s overrides %(count)s of this template’s settings."
+msgstr "%(name)s, bu şablonun %(count)s ayarını geçersiz kılıyor."
 
 msgid "service.resources.template.pending"
 msgstr "Kaydetmede uygulanır"
 
 msgid "service.resources.template.remove"
-msgstr "Remove this template"
+msgstr "Bu şablonu kaldır"
 
 msgid "service.resources.template.removing"
-msgstr "Saving detaches %(names)s. The values those templates supplied are dropped."
+msgstr "Kaydetmek %(names)s bağlantısını keser. Bu şablonların sağladığı değerler silinir."
 
 msgid "service.resources.template.reordered"
-msgstr "Saving changes the template order. Later templates override earlier ones, so the effective values change."
+msgstr "Kaydetmek şablon sırasını değiştirir. Sonraki şablonlar öncekileri geçersiz kılar, bu yüzden geçerli değerler değişir."
 
 msgid "service.resources.template.switching"
 msgstr "Kaydetmek, bu servisi \"%(from)s\"'den \"%(to)s\"'e geçirir. Mevcut şablon tarafından sağlanan değerler silinir ve \"%(to)s\"'in değerleri uygulanır — birçok ayar aynı anda değiştirilir."
@@ -4323,79 +4323,79 @@ msgid "services.with_configs"
 msgstr "Özel yapılandırmalarla"
 
 msgid "settings.access_control.blacklist.community.description"
-msgstr "Curated lists maintained outside BunkerWeb and refreshed for you. They feed the same matching as the entries below."
+msgstr "BunkerWeb dışında tutulan ve sizin için otomatik yenilenen seçilmiş listeler. Aşağıdaki girişlerle aynı eşleştirmeyi besler."
 
 msgid "settings.access_control.blacklist.community.title"
-msgstr "Community lists"
+msgstr "Topluluk listeleri"
 
 msgid "settings.access_control.blacklist.enforcement.description"
-msgstr "The blacklist runs after the whitelist, so a client that is whitelisted is never blocked here. On each row, the exception lists override that row's own entries and downloaded lists."
+msgstr "Kara liste beyaz listeden sonra çalışır, bu yüzden beyaz listede olan bir istemci burada asla engellenmez. Her satırda, istisna listeleri o satırın kendi girişlerini ve indirilen listeleri geçersiz kılar."
 
 msgid "settings.access_control.country.conflict.clear"
-msgstr "Clear the block list"
+msgstr "Engelleme listesini temizle"
 
 msgid "settings.access_control.country.conflict.description"
-msgstr "Both country lists are stored, and only the allow list is enforced: the block list below is never consulted while an allow list is set."
+msgstr "Her iki ülke listesi de saklanır, ancak yalnızca izin listesi uygulanır: izin listesi ayarlıyken aşağıdaki engelleme listesine asla başvurulmaz."
 
 msgid "settings.access_control.country.description"
-msgstr "One rule, not two lists. Allowing a set of countries denies every other country and makes a stored block list dead configuration — BunkerWeb checks the allow list first and never reaches the block list."
+msgstr "İki liste değil, tek kural. Bir ülke kümesine izin vermek diğer tüm ülkeleri reddeder ve kaydedilmiş bir engelleme listesini ölü bir yapılandırmaya dönüştürür — BunkerWeb önce izin listesini kontrol eder ve asla engelleme listesine ulaşmaz."
 
 msgid "settings.access_control.country.exceptions.description"
-msgstr "Requests whose URI matches one of these patterns skip the country rule entirely."
+msgstr "URI'si bu kalıplardan birine uyan istekler ülke kuralını tamamen atlar."
 
 msgid "settings.access_control.country.exceptions.title"
-msgstr "Exceptions"
+msgstr "İstisnalar"
 
 msgid "settings.access_control.country.mode.all"
-msgstr "No country rule"
+msgstr "Ülke kuralı yok"
 
 msgid "settings.access_control.country.mode.block"
-msgstr "Block these countries"
+msgstr "Bu ülkeleri engelle"
 
 msgid "settings.access_control.country.mode.only"
-msgstr "Allow only these countries"
+msgstr "Yalnızca bu ülkelere izin ver"
 
 msgid "settings.access_control.country.picker_label"
-msgstr "Country rule"
+msgstr "Ülke kuralı"
 
 msgid "settings.access_control.country.title"
-msgstr "Country rule"
+msgstr "Ülke kuralı"
 
 msgid "settings.access_control.enforcement.title"
-msgstr "Enforcement"
+msgstr "Uygulama"
 
 msgid "settings.access_control.greylist.enforcement.description"
-msgstr "The greylist is deny-by-default: while it is on, anything that matches none of the entries below is denied, on HTTP and on stream traffic alike. Add the entries first, then turn it on — a save that enables it with every list empty is refused."
+msgstr "Gri liste varsayılan olarak reddeder: açıkken, aşağıdaki girişlerden hiçbiriyle eşleşmeyen her şey, hem HTTP hem de stream trafiğinde reddedilir. Önce girişleri ekleyin, ardından açın — tüm listeler boşken onu etkinleştiren bir kayıt reddedilir."
 
 msgid "settings.access_control.greylist.locked_out"
-msgstr "Greylisting is on and no entry is configured, so every request to this service is denied. Add at least one entry below, or turn greylisting off."
+msgstr "Gri liste açık ve hiçbir giriş yapılandırılmamış, bu yüzden bu servise gelen her istek reddediliyor. Aşağıya en az bir giriş ekleyin veya gri listeyi kapatın."
 
 msgid "settings.access_control.kind.asn"
-msgstr "Autonomous systems (ASN)"
+msgstr "Otonom sistemler (ASN)"
 
 msgid "settings.access_control.kind.ip"
-msgstr "IP addresses and networks"
+msgstr "IP adresleri ve ağlar"
 
 msgid "settings.access_control.kind.rdns"
-msgstr "Reverse DNS"
+msgstr "Ters DNS"
 
 msgid "settings.access_control.kind.uri"
 msgstr "URIs"
 
 msgid "settings.access_control.kind.user_agent"
-msgstr "User agents"
+msgstr "Kullanıcı aracıları"
 
 msgid "settings.access_control.kinds.description"
-msgstr "One section per kind of match. In each, the entries you type and the lists BunkerWeb downloads are checked together; a client matching either one matches the section."
+msgstr "Her eşleşme türü için bir bölüm. Her birinde, girdiğiniz girişler ve BunkerWeb'in indirdiği listeler birlikte kontrol edilir; ikisinden birine uyan bir istemci o bölümle eşleşir."
 
 msgid "settings.access_control.kinds.title"
-msgstr "What is matched"
+msgstr "Neyle eşleştirilir"
 
 msgid "settings.access_control.order.current"
-msgstr "current page"
+msgstr "geçerli sayfa"
 
 msgid "settings.access_control.order.description"
-msgstr "By default every request walks these four checks in this order, and the first one to decide, decides. A whitelist match ends the walk immediately: the request is allowed and the three checks after it never run. The order itself is configurable per service, through PLUGINS_ORDER_ACCESS and PLUGINS_ORDER_PREREAD."
+msgstr "Varsayılan olarak her istek bu dört kontrolden bu sırayla geçer ve karar veren ilk kontrol geçerli olur. Beyaz liste eşleşmesi süreci hemen sonlandırır: istek izin verilir ve sonraki üç kontrol asla çalışmaz. Sıranın kendisi PLUGINS_ORDER_ACCESS ve PLUGINS_ORDER_PREREAD ile servis başına yapılandırılabilir."
 
 msgid "settings.access_control.order.off"
 msgstr "Off"
@@ -4404,34 +4404,34 @@ msgid "settings.access_control.order.on"
 msgstr "On"
 
 msgid "settings.access_control.order.title"
-msgstr "Decision order"
+msgstr "Karar sırası"
 
 msgid "settings.access_control.rules.add_term"
-msgstr "Add a term"
+msgstr "Bir terim ekle"
 
 msgid "settings.access_control.rules.description"
-msgstr "A rule matches only when every one of its terms matches. Rules are checked alongside the lists above and a client matching any one of them matches this stage. Values may be a resource group, written @name."
+msgstr "Bir kural yalnızca terimlerinin her biri eşleştiğinde eşleşir. Kurallar yukarıdaki listelerle birlikte kontrol edilir ve bunlardan herhangi biriyle eşleşen bir istemci bu aşamayla eşleşir. Değerler @isim şeklinde yazılmış bir kaynak grubu olabilir."
 
 msgid "settings.access_control.rules.expression"
-msgstr "Saved as:"
+msgstr "Şu şekilde kaydedildi:"
 
 msgid "settings.access_control.rules.kind"
-msgstr "What this term matches on"
+msgstr "Bu terimin neyle karşılaştırıldığı"
 
 msgid "settings.access_control.rules.kind_asn"
 msgstr "ASN"
 
 msgid "settings.access_control.rules.kind_country"
-msgstr "Country"
+msgstr "Ülke"
 
 msgid "settings.access_control.rules.kind_ip"
 msgstr "IP"
 
 msgid "settings.access_control.rules.kind_rdns"
-msgstr "Reverse DNS"
+msgstr "Ters DNS"
 
 msgid "settings.access_control.rules.kind_ua"
-msgstr "User agent"
+msgstr "Kullanıcı aracısı"
 
 msgid "settings.access_control.rules.kind_uri"
 msgstr "URI"
@@ -4440,268 +4440,268 @@ msgid "settings.access_control.rules.negate"
 msgstr "NOT"
 
 msgid "settings.access_control.rules.negate_help"
-msgstr "Invert this term: the rule matches when the term does NOT match."
+msgstr "Bu terimi tersine çevir: terim eşleşMEDİĞİNDE kural eşleşir."
 
 msgid "settings.access_control.rules.remove_term"
-msgstr "Remove this term"
+msgstr "Bu terimi kaldır"
 
 msgid "settings.access_control.rules.rule"
 msgstr "Rule"
 
 msgid "settings.access_control.rules.title"
-msgstr "Composite rules"
+msgstr "Bileşik kurallar"
 
 msgid "settings.access_control.rules.value"
-msgstr "Value, or @group"
+msgstr "Değer veya @grup"
 
 msgid "settings.access_control.stage.blacklist"
-msgstr "Blacklist"
+msgstr "Kara liste"
 
 msgid "settings.access_control.stage.country"
-msgstr "Country"
+msgstr "Ülke"
 
 msgid "settings.access_control.stage.greylist"
-msgstr "Greylist"
+msgstr "Gri liste"
 
 msgid "settings.access_control.stage.whitelist"
-msgstr "Whitelist"
+msgstr "Beyaz liste"
 
 msgid "settings.access_control.unplaced.description"
-msgstr "Declared by the plugin but not yet given a place on this page. They still save normally."
+msgstr "Eklenti tarafından tanımlandı ancak bu sayfada henüz bir yer verilmedi. Yine de normal şekilde kaydedilirler."
 
 msgid "settings.access_control.unplaced.title"
-msgstr "Other settings"
+msgstr "Diğer ayarlar"
 
 msgid "settings.access_control.whitelist.enforcement.description"
-msgstr "The whitelist runs first and overrides everything else: a match is allowed straight through, so blacklist, greylist and country never see the request. Bans are the one exception, and only by IP — a client matched here by reverse DNS, ASN, user agent or URI is still blocked while it is banned. Keep this list to the clients that must never be locked out."
+msgstr "Beyaz liste önce çalışır ve diğer her şeyi geçersiz kılar: bir eşleşme doğrudan izin verilir, bu yüzden kara liste, gri liste ve ülke isteği hiç görmez. Yasaklamalar tek istisnadır ve yalnızca IP üzerinden — ters DNS, ASN, kullanıcı aracısı veya URI ile burada eşleşen bir istemci, yasaklıyken yine de engellenir. Bu listeyi yalnızca hiçbir zaman dışlanmaması gereken istemcilerle sınırlı tutun."
 
 msgid "settings.antibot.capjs.hint"
-msgstr "Needs a Cap.js server; the frontend and backend URLs may differ."
+msgstr "Bir Cap.js sunucusu gerektirir; frontend ve backend URL'leri farklı olabilir."
 
 msgid "settings.antibot.capjs.title"
 msgstr "Cap.js"
 
 msgid "settings.antibot.captcha.hint"
-msgstr "Rendered by BunkerWeb itself — no third-party account, no outbound request."
+msgstr "BunkerWeb'in kendisi tarafından oluşturulur — üçüncü taraf hesabı yok, giden istek yok."
 
 msgid "settings.antibot.captcha.title"
-msgstr "Built-in captcha"
+msgstr "Yerleşik captcha"
 
 msgid "settings.antibot.challenge.description"
-msgstr "Where the challenge is served, how long a visitor has to solve it, and how long a solved challenge stays valid."
+msgstr "Doğrulamanın nerede sunulduğu, bir ziyaretçinin çözmek için ne kadar süresi olduğu ve çözülen bir doğrulamanın ne kadar süre geçerli kaldığı."
 
 msgid "settings.antibot.challenge.title"
-msgstr "Challenge behaviour"
+msgstr "Doğrulama davranışı"
 
 msgid "settings.antibot.countries.both_set"
-msgstr "Both country lists are set. They are combined, not exclusive: a visitor is exempt if their country is in the skip list OR outside the restrict list. Clear one of them to make the rule unambiguous."
+msgstr "Her iki ülke listesi de ayarlı. Bunlar birbirini dışlamaz, birleştirilir: bir ziyaretçinin ülkesi atlama listesindeyse VEYA kısıtlama listesinin dışındaysa muaf tutulur. Kuralı belirsiz olmaktan çıkarmak için ikisinden birini temizleyin."
 
 msgid "settings.antibot.countries.both_set_clear"
-msgstr "Clear the skip list"
+msgstr "Atlama listesini temizle"
 
 msgid "settings.antibot.countries.description"
-msgstr "Exempt visitors by country, or restrict the challenge to a few countries. Requires the GeoIP database to be loaded."
+msgstr "Ziyaretçileri ülkeye göre muaf tutun veya doğrulamayı birkaç ülkeyle sınırlayın. GeoIP veritabanının yüklenmiş olmasını gerektirir."
 
 msgid "settings.antibot.countries.mode.all"
-msgstr "Challenge every country"
+msgstr "Her ülkeyi doğrula"
 
 msgid "settings.antibot.countries.mode.ignore"
-msgstr "Skip the challenge for these countries"
+msgstr "Bu ülkeler için doğrulamayı atla"
 
 msgid "settings.antibot.countries.mode.only"
-msgstr "Challenge only these countries"
+msgstr "Yalnızca bu ülkeleri doğrula"
 
 msgid "settings.antibot.countries.picker_label"
-msgstr "Country filter"
+msgstr "Ülke filtresi"
 
 msgid "settings.antibot.countries.title"
-msgstr "Countries"
+msgstr "Ülkeler"
 
 msgid "settings.antibot.disabled_notice"
-msgstr "Antibot is off for this scope. Pick a challenge mode to configure it."
+msgstr "Antibot bu kapsam için kapalı. Yapılandırmak için bir doğrulama modu seçin."
 
 msgid "settings.antibot.exemptions.description"
-msgstr "Requests matching any of these skip the challenge entirely. Leave a list empty to match nothing."
+msgstr "Bunlardan herhangi biriyle eşleşen istekler doğrulamayı tamamen atlar. Hiçbir şeyle eşleşmemesi için listeyi boş bırakın."
 
 msgid "settings.antibot.exemptions.title"
-msgstr "Exemptions"
+msgstr "Muafiyetler"
 
 msgid "settings.antibot.hcaptcha.hint"
-msgstr "Needs a site registered at hcaptcha.com."
+msgstr "hcaptcha.com'a kayıtlı bir site gerektirir."
 
 msgid "settings.antibot.hcaptcha.title"
 msgstr "hCaptcha"
 
 msgid "settings.antibot.mcaptcha.hint"
-msgstr "Needs an mCaptcha instance — the hosted demo or your own."
+msgstr "Bir mCaptcha örneği gerektirir — barındırılan demo veya kendi örneğiniz."
 
 msgid "settings.antibot.mcaptcha.title"
 msgstr "mCaptcha"
 
 msgid "settings.antibot.mode.description"
-msgstr "Which challenge visitors have to pass. Only the chosen provider's fields are shown below; the others keep their stored values and come back when you switch back."
+msgstr "Ziyaretçilerin hangi doğrulamayı geçmesi gerektiği. Aşağıda yalnızca seçilen sağlayıcının alanları gösterilir; diğerleri kayıtlı değerlerini korur ve tekrar geçtiğinizde geri gelir."
 
 msgid "settings.antibot.mode.title"
-msgstr "Challenge mode"
+msgstr "Doğrulama modu"
 
 msgid "settings.antibot.recaptcha.classic.hint"
-msgstr "Verified against google.com/recaptcha/api/siteverify with the shared secret. The Enterprise fields are ignored in this edition."
+msgstr "Paylaşılan gizli anahtarla google.com/recaptcha/api/siteverify'a karşı doğrulanır. Bu sürümde Enterprise alanları yok sayılır."
 
 msgid "settings.antibot.recaptcha.classic.title"
 msgstr "reCAPTCHA classic"
 
 msgid "settings.antibot.recaptcha.enterprise.hint"
-msgstr "Verified against recaptchaenterprise.googleapis.com with a Google Cloud project and API key. The classic secret is ignored in this edition."
+msgstr "Bir Google Cloud projesi ve API anahtarıyla recaptchaenterprise.googleapis.com'a karşı doğrulanır. Bu sürümde klasik gizli anahtar yok sayılır."
 
 msgid "settings.antibot.recaptcha.enterprise.title"
 msgstr "reCAPTCHA Enterprise"
 
 msgid "settings.antibot.recaptcha.hint"
-msgstr "Needs a site registered at google.com/recaptcha. The site key and the minimum score apply to both editions."
+msgstr "google.com/recaptcha'ya kayıtlı bir site gerektirir. Site anahtarı ve minimum puan her iki sürüm için de geçerlidir."
 
 msgid "settings.antibot.recaptcha.title"
 msgstr "Google reCAPTCHA"
 
 msgid "settings.antibot.turnstile.hint"
-msgstr "Needs a site registered in the Cloudflare dashboard."
+msgstr "Cloudflare panelinde kayıtlı bir site gerektirir."
 
 msgid "settings.antibot.turnstile.title"
 msgstr "Cloudflare Turnstile"
 
 msgid "settings.antibot.unplaced.description"
-msgstr "Declared by the plugin but not yet placed in a section above. They still save normally."
+msgstr "Eklenti tarafından tanımlandı ancak yukarıdaki bir bölüme henüz yerleştirilmedi. Yine de normal şekilde kaydedilirler."
 
 msgid "settings.antibot.unplaced.title"
-msgstr "Other settings"
+msgstr "Diğer ayarlar"
 
 msgid "settings.custom_config.title"
 msgstr "Özel Yapılandırma"
 
 msgid "settings.headers.browser.description"
-msgstr "Small fixed-value headers. An empty value removes the header instead of sending it."
+msgstr "Sabit değerli küçük başlıklar. Boş bir değer, başlığı göndermek yerine kaldırır."
 
 msgid "settings.headers.browser.title"
-msgstr "Browser protections"
+msgstr "Tarayıcı korumaları"
 
 msgid "settings.headers.cookies.description"
-msgstr "Flags added to every Set-Cookie the upstream returns. Per-cookie flag rules are in the repeatable settings below."
+msgstr "Upstream'in döndürdüğü her Set-Cookie'ye eklenen bayraklar. Çerez başına bayrak kuralları aşağıdaki tekrarlanabilir ayarlardadır."
 
 msgid "settings.headers.cookies.title"
-msgstr "Cookies"
+msgstr "Çerezler"
 
 msgid "settings.headers.csp.description"
-msgstr "The policy sent as Content-Security-Policy. A wrong directive breaks the site's own scripts with nothing to see server-side, so report-only first is the safe order."
+msgstr "Content-Security-Policy olarak gönderilen politika. Yanlış bir yönerge, sunucu tarafında görünür hiçbir şey olmadan sitenin kendi betiklerini bozar, bu yüzden önce report-only kullanmak güvenli sıradır."
 
 msgid "settings.headers.csp.title"
 msgstr "Content Security Policy"
 
 msgid "settings.headers.notice.csp_report_only"
-msgstr "Report-only is on: the policy goes out as Content-Security-Policy-Report-Only, so violations are reported and nothing is blocked. Turn it off to enforce."
+msgstr "Report-only açık: politika Content-Security-Policy-Report-Only olarak gönderilir, bu yüzden ihlaller raporlanır ve hiçbir şey engellenmez. Uygulamak için bunu kapatın."
 
 msgid "settings.headers.notice.hsts_preload"
-msgstr "This value contains preload. Once the domain is submitted to the browsers' preload list, removal takes months to reach users -- every subdomain is HTTPS-only until then."
+msgstr "Bu değer preload içeriyor. Alan adı tarayıcıların preload listesine gönderildikten sonra, kaldırmanın kullanıcılara ulaşması aylar sürer -- o zamana kadar her alt alan adı yalnızca HTTPS'dir."
 
 msgid "settings.headers.notice.keep_all"
-msgstr "The keep list is *, so every header the upstream sends wins over the values configured here."
+msgstr "Koruma listesi *, bu yüzden upstream'in gönderdiği her başlık burada yapılandırılan değerlere üstün gelir."
 
 msgid "settings.headers.notice.keep_shadows"
-msgstr "These headers are kept from the upstream when it sends its own, so the values configured here are only a fallback:"
+msgstr "Bu başlıklar, upstream kendi başlıklarını gönderdiğinde korunur, bu yüzden burada yapılandırılan değerler yalnızca bir yedektir:"
 
 msgid "settings.headers.permissions.description"
-msgstr "Which browser features this site may use, as a comma-separated list of feature=(allowlist) clauses. An entry left at () disables that API for everyone, including your own pages."
+msgstr "Bu sitenin hangi tarayıcı özelliklerini kullanabileceği, virgülle ayrılmış feature=(allowlist) yan tümceleri listesi olarak. () olarak bırakılan bir giriş, kendi sayfalarınız dahil herkes için o API'yi devre dışı bırakır."
 
 msgid "settings.headers.permissions.title"
 msgstr "Permissions Policy"
 
 msgid "settings.headers.transport.description"
-msgstr "The Strict-Transport-Security header. Only sent over HTTPS."
+msgstr "Strict-Transport-Security başlığı. Yalnızca HTTPS üzerinden gönderilir."
 
 msgid "settings.headers.transport.title"
-msgstr "HTTPS enforcement"
+msgstr "HTTPS uygulaması"
 
 msgid "settings.headers.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "Eklenti tarafından tanımlandı ancak bu sayfaya henüz yerleştirilmedi. Yine de normal şekilde kaydedilirler."
 
 msgid "settings.headers.unplaced.title"
-msgstr "Other settings"
+msgstr "Diğer ayarlar"
 
 msgid "settings.headers.upstream.description"
-msgstr "Which of the upstream's own response headers survive, and which are stripped before the response leaves."
+msgstr "Upstream'in kendi yanıt başlıklarından hangilerinin kaldığı ve yanıt gönderilmeden önce hangilerinin çıkarıldığı."
 
 msgid "settings.headers.upstream.title"
-msgstr "Upstream and removed headers"
+msgstr "Upstream ve kaldırılan başlıklar"
 
 msgid "settings.modsecurity.audit.description"
-msgstr "What ModSecurity writes to its own audit log, and how much of each transaction it keeps. Parts A and Z are always included."
+msgstr "ModSecurity'nin kendi denetim günlüğüne ne yazdığı ve her işlemden ne kadarını sakladığı. A ve Z bölümleri her zaman dahildir."
 
 msgid "settings.modsecurity.audit.title"
-msgstr "Audit log"
+msgstr "Denetim günlüğü"
 
 msgid "settings.modsecurity.crs.description"
-msgstr "The shared rule set BunkerWeb loads on top of ModSecurity. Version 4 is the current one; version 3 is kept for services that still depend on its rule ids."
+msgstr "BunkerWeb'in ModSecurity üzerine yüklediği paylaşılan kural seti. Sürüm 4 mevcut olandır; sürüm 3, hâlâ kural kimliklerine bağımlı servisler için korunur."
 
 msgid "settings.modsecurity.crs.title"
 msgstr "OWASP Core Rule Set"
 
 msgid "settings.modsecurity.crs_plugins.description"
-msgstr "Rule packs published for the Core Rule Set, downloaded and installed at startup. Give a plugin name, a name/tag, or a URL."
+msgstr "Core Rule Set için yayımlanan, başlangıçta indirilip yüklenen kural paketleri. Bir eklenti adı, ad/etiket veya URL verin."
 
 msgid "settings.modsecurity.crs_plugins.title"
-msgstr "Core Rule Set plugins"
+msgstr "Core Rule Set eklentileri"
 
 msgid "settings.modsecurity.engine.description"
-msgstr "Whether ModSecurity is loaded at all, and what it does with a rule match."
+msgstr "ModSecurity'nin hiç yüklenip yüklenmediği ve bir kural eşleşmesinde ne yaptığı."
 
 msgid "settings.modsecurity.engine.title"
 msgstr "Engine"
 
 msgid "settings.modsecurity.global_crs.description"
-msgstr "Loads the Core Rule Set once for the whole instance instead of once per service. Faster to load with many services, but service-scoped modsec-crs configs are refused while it is on: create a global one and scope it with a Host rule instead."
+msgstr "Core Rule Set'i servis başına bir kez yerine tüm örnek için bir kez yükler. Çok sayıda servisle yüklemesi daha hızlıdır, ancak bu açıkken servis kapsamlı modsec-crs yapılandırmaları reddedilir: bunun yerine global bir tane oluşturun ve bir Host kuralıyla kapsamını belirleyin."
 
 msgid "settings.modsecurity.global_crs.title"
-msgstr "Global CRS mode"
+msgstr "Global CRS modu"
 
 msgid "settings.modsecurity.limits.description"
-msgstr "How much of a request body ModSecurity inspects, and what happens to a body that exceeds the limit. NGINX enforces MAX_CLIENT_SIZE first, so a limit above it has no effect."
+msgstr "ModSecurity'nin bir istek gövdesinin ne kadarını incelediği ve limiti aşan bir gövdeye ne olduğu. NGINX önce MAX_CLIENT_SIZE'ı uygular, bu yüzden ondan yüksek bir limitin hiçbir etkisi olmaz."
 
 msgid "settings.modsecurity.limits.title"
-msgstr "Request body limits"
+msgstr "İstek gövdesi limitleri"
 
 msgid "settings.modsecurity.notice.crs_v3_no_plugins"
-msgstr "Core Rule Set 3 cannot load plugins. The plugin switch and plugin list are kept and will apply again on version 4, but they do nothing right now."
+msgstr "Core Rule Set 3 eklenti yükleyemez. Eklenti anahtarı ve eklenti listesi korunur ve sürüm 4'te tekrar uygulanacaktır, ancak şu anda hiçbir şey yapmazlar."
 
 msgid "settings.modsecurity.notice.engine_detect"
-msgstr "SecRuleEngine is DetectionOnly: matches are logged and nothing is blocked."
+msgstr "SecRuleEngine DetectionOnly olarak ayarlı: eşleşmeler günlüğe kaydedilir ve hiçbir şey engellenmez."
 
 msgid "settings.modsecurity.notice.engine_off"
-msgstr "ModSecurity is enabled but SecRuleEngine is Off, so no request is inspected. These two settings both mean \"on\" and they currently disagree."
+msgstr "ModSecurity etkin ancak SecRuleEngine Off, bu yüzden hiçbir istek incelenmez. Bu iki ayar da \"açık\" anlamına gelir ve şu anda birbiriyle çelişiyorlar."
 
 msgid "settings.modsecurity.notice.off"
-msgstr "ModSecurity is off. Nothing below is applied, but every value is kept and comes back when you turn it on again."
+msgstr "ModSecurity kapalı. Aşağıdakilerin hiçbiri uygulanmaz, ancak her değer korunur ve tekrar açtığınızda geri gelir."
 
 msgid "settings.modsecurity.tuning.crs_plugins_after"
-msgstr "After CRS plugins"
+msgstr "CRS eklentilerinden sonra"
 
 msgid "settings.modsecurity.tuning.crs_plugins_before"
-msgstr "Before CRS plugins"
+msgstr "CRS eklentilerinden önce"
 
 msgid "settings.modsecurity.tuning.description"
-msgstr "Clearing a false positive is a custom config, not a setting. These are the four places a rule exclusion can go, in the order they are loaded."
+msgstr "Yanlış bir pozitifi temizlemek bir ayar değil, özel bir yapılandırmadır. İşte bir kural istisnasının gidebileceği, yüklenme sırasına göre dört yer."
 
 msgid "settings.modsecurity.tuning.modsec"
-msgstr "After the Core Rule Set"
+msgstr "Core Rule Set'ten sonra"
 
 msgid "settings.modsecurity.tuning.modsec_crs"
-msgstr "Before the Core Rule Set"
+msgstr "Core Rule Set'ten önce"
 
 msgid "settings.modsecurity.tuning.title"
-msgstr "Rule tuning"
+msgstr "Kural ayarlaması"
 
 msgid "settings.modsecurity.unplaced.description"
-msgstr "Declared by the plugin but not yet placed on this page. They still save normally."
+msgstr "Eklenti tarafından tanımlandı ancak bu sayfaya henüz yerleştirilmedi. Yine de normal şekilde kaydedilirler."
 
 msgid "settings.modsecurity.unplaced.title"
-msgstr "Other settings"
+msgstr "Diğer ayarlar"
 
 msgid "settings.multiple.description"
 msgstr "Bu eklenti için ayarların birden fazla örneğini burada yapılandırabilirsiniz."
@@ -5694,16 +5694,16 @@ msgid "template.none"
 msgstr "Şablon Yok"
 
 msgid "templates.catalog.heading"
-msgstr "Available templates"
+msgstr "Kullanılabilir şablonlar"
 
 msgid "templates.catalog.layer_warning"
-msgstr "A template is a layer: adding one to a service that already uses templates changes its effective configuration."
+msgstr "Şablon bir katmandır: zaten şablon kullanan bir servise bir tane daha eklemek, geçerli yapılandırmasını değiştirir."
 
 msgid "templates.catalog.no_compat_notice"
-msgstr "This catalogue declares no BunkerWeb compatibility. A template is refused at install time if it names a setting this BunkerWeb does not have."
+msgstr "Bu katalog BunkerWeb uyumluluğu bildirmiyor. Bu BunkerWeb'de olmayan bir ayarı adlandıran bir şablon, yükleme sırasında reddedilir."
 
 msgid "templates.catalog.subheading"
-msgstr "Curated service templates published by the BunkerWeb organisation."
+msgstr "BunkerWeb kuruluşu tarafından yayımlanan seçilmiş servis şablonları."
 
 msgid "templates.gallery.delete_selected"
 msgstr "Seçilenleri sil"
