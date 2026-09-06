@@ -7,6 +7,8 @@ from model import Global_values, Services, Services_settings, Settings, Template
 
 from common_utils import split_templates  # type: ignore
 
+from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD  # type: ignore
+
 from resource_group_resolver import value_for_validation  # type: ignore
 
 from ports import port_list_setting  # type: ignore
@@ -166,7 +168,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
 
             is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes"
 
-            services = select(Services.id, Services.is_draft)
+            services = select(Services.id, Services.is_draft, Services.method)
 
             if not with_drafts:
                 services = services.filter_by(is_draft=False)
@@ -268,7 +270,31 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                         "template": None,
                     }
             else:
-                servers = " ".join(db_service.id for db_service in session.execute(services))
+                # The reserved default server is a MULTISITE-only feature (PO ruling 2026-09-06): it
+                # is the per-service materialisation above that gives its row meaning, and in
+                # single-site nothing does. Leaving the id in the roster would put it in
+                # `server_name` -- non-multisite renders ONE block from the WHOLE string
+                # (`Templator._render_server`) -- and hand a real service a hostname nobody asked
+                # for. The seeding stands down in single-site too; this is the guard for a database
+                # that was multisite once, or that an operator flipped back.
+                #
+                # THIS IS NOT THE NON-MULTISITE BRANCH. The condition above is
+                # `not global_only and is_multisite`, so a `global_only=True` read lands here in
+                # EVERY mode -- and that is the shape the UI's service-exists check uses
+                # (`ui/app/routes/services.py`, via `GET /global_settings`). Stripping unconditionally
+                # here made `/services/default-server` redirect back to the list on a multisite
+                # deployment, i.e. it killed the page this whole chantier exists to provide. So the
+                # mode is re-established, never assumed.
+                #
+                # And it is not re-read from `config` either: `filtered_settings` is topped up with
+                # MULTISITE only when `global_only` is False (:112), so on exactly the call above
+                # `is_multisite` is False whatever the deployment. `_stored_multisite` goes to the
+                # tables. It costs one scalar, and only when the reserved row is actually present.
+                rows = list(session.execute(services))
+                strip = any(row.id == DEFAULT_SERVER_ID and row.method == DEFAULT_SERVER_METHOD for row in rows) and not (
+                    is_multisite or ("MULTISITE" not in config and self._stored_multisite(session) == "yes")
+                )
+                servers = " ".join(row.id for row in rows if not (strip and row.id == DEFAULT_SERVER_ID))
 
             config["SERVER_NAME"] = {
                 "value": servers,

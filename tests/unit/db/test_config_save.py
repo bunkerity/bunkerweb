@@ -336,7 +336,9 @@ class TestSaveConfigMultisite:
             },
             "scheduler",
         )
-        assert {s["id"] for s in seeded.get_services()} == {
+        # `default-server` is the reserved pseudo-service: a multisite save seeds it (DS-B4), and
+        # it is not one of the services this test is about.
+        assert {s["id"] for s in seeded.get_services()} - {"default-server"} == {
             "app1.example.com",
             "app2.example.com",
         }
