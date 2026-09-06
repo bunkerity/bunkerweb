@@ -37,6 +37,10 @@ _bw_wipe_secret_tmpfiles() {
 
 # EXIT hook — runs on every exit path (normal, error, signal). Keep callees idempotent.
 _bw_install_cleanup() {
+    # Until recreation begins, restore the complete original upgrade configuration.
+    if declare -F _docker_restore_upgrade_files >/dev/null 2>&1; then
+        _docker_restore_upgrade_files || true
+    fi
     # Wipe plaintext credential tempfiles first.
     _bw_wipe_secret_tmpfiles
     # _gum_cleanup defined later; guard against early-exit.
@@ -226,7 +230,7 @@ DOCKER_OVERWRITE_EXISTING="no"     # --overwrite-compose: back up + overwrite ex
 DOCKER_AUTO_INSTALL=""             # "yes" (--install-docker): install Docker if missing, no prompt
 DOCKER_NEED_INSTALL="no"           # "yes" when check_docker_prereqs deferred a Docker install to after the confirm
 DOCKER_PULL="yes"                  # --no-pull sets this to "no"
-DOCKER_WAIT_TIMEOUT=180            # seconds to wait for the stack to become ready
+DOCKER_WAIT_TIMEOUT=600            # seconds to wait for the stack to become healthy and stable
 DOCKER_DB_PASSWORD_GENERATED=""    # MariaDB bunkerweb-user password (operator-set or generated)
 DOCKER_TOTP_KEY_GENERATED=""       # TOTP_ENCRYPTION_KEYS value
 DOCKER_API_TOKEN_GENERATED=""      # API_TOKEN value (generated for full/ui/api, prompted for manager/worker/scheduler)
@@ -1960,7 +1964,17 @@ _docker_render_compose_variant() {
 }
 
 render_docker_compose() {
+    if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+        print_error "Refusing to replace a symlinked docker-compose.yml; update its target manually."
+        return 1
+    fi
+    local _original="$DOCKER_COMPOSE_FILE" _tmp
+    _tmp=$(mktemp "${DOCKER_COMPOSE_FILE}.XXXXXX") || return 1
+    _bw_register_secret_tmpfile "$_tmp"
+    DOCKER_COMPOSE_FILE="$_tmp"
     _docker_render_compose_variant
+    DOCKER_COMPOSE_FILE="$_original"
+    mv -f "$_tmp" "$DOCKER_COMPOSE_FILE"
     chmod 644 "$DOCKER_COMPOSE_FILE" 2>/dev/null || true
     print_status "Wrote $DOCKER_COMPOSE_FILE."
     if ! _docker_compose config -q >/dev/null 2>&1; then
@@ -1994,8 +2008,7 @@ _docker_record_compose_checksum() {
 # untouched old file look edited, the fallback direction is the safe one — we
 # preserve the operator's file and only patch the tag.
 _docker_compose_is_pristine() {
-    # A symlink must never be re-rendered: the renderers use `cat >`, which
-    # follows the link and truncates a file outside the stack directory.
+    # A symlink names an operator-owned compose file, not our generated template.
     [ -L "$DOCKER_COMPOSE_FILE" ] && return 1
 
     local _actual
@@ -2027,19 +2040,90 @@ _docker_compose_is_pristine() {
 # known keys: a list would need updating every time a renderer gains a variable,
 # and forgetting to update it loses operator data silently.
 _DOCKER_ENV_SNAPSHOT=""
+_DOCKER_UPGRADE_SNAPSHOT=""
+_DOCKER_RECREATION_STARTED="no"
+
+# Keep originals until the first `up`: even a partial recreation may migrate the DB.
+_docker_snapshot_upgrade_files() {
+    [ "$UPGRADE_SCENARIO" = "yes" ] || return 0
+    _DOCKER_UPGRADE_ENV_TARGET="$DOCKER_ENV_FILE"
+    _DOCKER_UPGRADE_COMPOSE_TARGET="$DOCKER_COMPOSE_FILE"
+    _DOCKER_UPGRADE_SNAPSHOT=$(mktemp -d /tmp/bw-upgrade.XXXXXX) || return 1
+    cp -pP "$DOCKER_ENV_FILE" "$_DOCKER_UPGRADE_SNAPSHOT/.env" || return 1
+    cp -pP "$DOCKER_COMPOSE_FILE" "$_DOCKER_UPGRADE_SNAPSHOT/docker-compose.yml" || return 1
+    _DOCKER_RECREATION_STARTED=no
+}
+
+_docker_restore_upgrade_files() {
+    [ -n "${_DOCKER_UPGRADE_SNAPSHOT:-}" ] || return 0
+    if [ "${_DOCKER_RECREATION_STARTED:-no}" != "yes" ]; then
+        local _name _target
+        for _name in .env docker-compose.yml; do
+            case "$_name" in .env) _target="$_DOCKER_UPGRADE_ENV_TARGET" ;; *) _target="$_DOCKER_UPGRADE_COMPOSE_TARGET" ;; esac
+            if [ -e "$_DOCKER_UPGRADE_SNAPSHOT/$_name" ] || [ -L "$_DOCKER_UPGRADE_SNAPSHOT/$_name" ]; then
+                if ! mv -f "$_DOCKER_UPGRADE_SNAPSHOT/$_name" "$_target"; then
+                    print_error "Could not restore $_name; original retained in $_DOCKER_UPGRADE_SNAPSHOT."
+                    return 1
+                fi
+            fi
+        done
+        print_status "Restored the original .env and docker-compose.yml; no containers were recreated."
+    fi
+    # Paths are fixed members of our private mktemp directory; never shred a link's target.
+    local _file
+    for _file in "$_DOCKER_UPGRADE_SNAPSHOT/.env" "$_DOCKER_UPGRADE_SNAPSHOT/docker-compose.yml"; do
+        if [ -L "$_file" ]; then rm -f "$_file"; elif [ -f "$_file" ]; then _bw_shred "$_file"; fi
+    done
+    rmdir "$_DOCKER_UPGRADE_SNAPSHOT"
+    _DOCKER_UPGRADE_SNAPSHOT=""
+}
+
+# Accept literal assignments, including Compose's optional export and whitespace.
+# Reject syntax we cannot preserve rather than changing its effective value on rewrite.
+_docker_env_last_assignments() {
+    awk '
+        /^[[:space:]]*(#|$)/ { next }
+        {
+            assignment = $0
+            sub(/^[[:space:]]+/, "", assignment)
+            sub(/^export[[:space:]]+/, "", assignment)
+            if (assignment !~ /^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=/) { invalid = NR; exit }
+            equal = index(assignment, "=")
+            name = substr(assignment, 1, equal - 1)
+            sub(/[[:space:]]+$/, "", name)
+            value = substr(assignment, equal + 1)
+            sub(/^[[:space:]]+/, "", value)
+            # Compose requires a literal space before an inline comment, not a tab.
+            sub(/ +#.*$/, "", value)
+            sub(/[[:space:]]+$/, "", value)
+            if (value ~ /[$\\\047"]/) { invalid = NR; exit }
+            last[name] = NR; line[NR] = name "=" value; key[NR] = name
+        }
+        END {
+            if (invalid) {
+                print "Unsupported Docker .env syntax at line " invalid "; automatic rewrite requires literal assignments without quotes, interpolation, or escapes." > "/dev/stderr"
+                exit 1
+            }
+            for (i = 1; i <= NR; i++) if (i == last[key[i]]) print line[i]
+        }
+    ' "$1"
+}
 
 _docker_capture_env_extras() {
     # Upgrades only. Overwriting an unrelated stack's .env must not inherit its
     # variables — those belong to somebody else's project, not to this one.
     [ "$UPGRADE_SCENARIO" = "yes" ] || return 0
     [ -f "$DOCKER_ENV_FILE" ] || return 0
-    _DOCKER_ENV_SNAPSHOT=$(_bw_mk_secret_tmpfile) || return 0
+    _docker_env_last_assignments "$DOCKER_ENV_FILE" >/dev/null || return 1
+    _DOCKER_ENV_SNAPSHOT=$(_bw_mk_secret_tmpfile) || return 1
+    _bw_register_secret_tmpfile "$_DOCKER_ENV_SNAPSHOT"
     cat "$DOCKER_ENV_FILE" > "$_DOCKER_ENV_SNAPSHOT"
 }
 
 _docker_restore_env_extras() {
     [ -n "$_DOCKER_ENV_SNAPSHOT" ] && [ -f "$_DOCKER_ENV_SNAPSHOT" ] || return 0
-    local _line _k _carried=0
+    local _line _k _carried=0 _assignments
+    _assignments=$(_docker_env_last_assignments "$_DOCKER_ENV_SNAPSHOT") || return 1
     while IFS= read -r _line || [ -n "$_line" ]; do
         case "$_line" in ''|'#'*) continue ;; esac
         case "$_line" in *=*) : ;; *) continue ;; esac
@@ -2050,7 +2134,7 @@ _docker_restore_env_extras() {
             printf '%s\n' "$_line" >> "$DOCKER_ENV_FILE"
             _carried=$((_carried + 1))
         fi
-    done < "$_DOCKER_ENV_SNAPSHOT"
+    done <<< "$_assignments"
     chmod 600 "$DOCKER_ENV_FILE" 2>/dev/null || true
     [ "$_carried" -gt 0 ] && \
         print_status "Carried over $_carried custom entr$([ "$_carried" = 1 ] && echo y || echo ies) from the previous .env."
@@ -2059,24 +2143,143 @@ _docker_restore_env_extras() {
     return 0
 }
 
-# Poll until every service reports 'running', or DOCKER_WAIT_TIMEOUT elapses.
-# Returns 0 when ready, 1 on timeout (caller surfaces a logs hint, not fatal).
+# Resolve expected images after pulling, and record restart counts before recreation.
+declare -A _DOCKER_EXPECTED_IMAGES=() _DOCKER_RESTART_COUNTS=() _DOCKER_HEALTH_REQUIRED=()
+
+_docker_service_image() {
+    local _config
+    # --images SERVICE also lists its dependencies. Read this service's image
+    # from Compose's normalized YAML, without emitting its environment values.
+    _config=$(_docker_compose config "$1") || return 1
+    awk -v service="$1" '
+        /^services:$/ { services = 1; next }
+        services && /^[^ ]/ { exit }
+        services && /^  [^ ]/ {
+            name = substr($0, 3, length($0) - 3)
+            gsub(/^[\047"]|[\047"]$/, "", name)
+            selected = name == service
+        }
+        selected && /^    image: / {
+            image = substr($0, 12)
+            gsub(/^[\047"]|[\047"]$/, "", image)
+            print image
+            exit
+        }
+    ' <<< "$_config"
+}
+
+_docker_prepare_upgrade_verification() {
+    local _services _svc _image _expected _requested _repo _ids _cid _restarts
+    _DOCKER_EXPECTED_IMAGES=()
+    _DOCKER_RESTART_COUNTS=()
+    _DOCKER_HEALTH_REQUIRED=()
+    _services=$(_docker_compose config --services) || return 1
+    [ -n "$_services" ] || return 1
+    for _svc in $_services; do
+        _image=$(_docker_service_image "$_svc") || return 1
+        [ -n "$_image" ] || return 1
+        # A fresh install may legitimately have no local image yet (--no-pull):
+        # Compose pulls it implicitly on `up -d`. Only an upgrade needs the
+        # pre-recreation identity, to tell "recreated" from "never restarted".
+        if ! _expected=$(docker image inspect --format '{{.Id}}' "$_image" 2>/dev/null) || [ -z "$_expected" ]; then
+            [ "$UPGRADE_SCENARIO" != "yes" ] || return 1
+            _expected=""
+        fi
+        _repo=${_image%%@*}
+        # Strip the tag only when the last path segment carries one, so a registry
+        # port (localhost:5000/bunkerity/bunkerweb) survives an untagged reference.
+        case "${_repo##*/}" in *:*) _repo=${_repo%:*} ;; esac
+        _repo=${_repo#docker.io/}
+        _repo=${_repo#index.docker.io/}
+        # Match the repository by suffix so a registry mirror or pull-through
+        # cache (mirror.corp/bunkerity/bunkerweb, ghcr.io/bunkerity/bunkerweb)
+        # is guarded too, and resolve the requested tag from that same repo.
+        case "$_repo" in
+            bunkerity/bunkerweb|bunkerity/bunkerweb-scheduler|bunkerity/bunkerweb-ui|bunkerity/bunkerweb-api|bunkerity/bunkerweb-autoconf|\
+            */bunkerity/bunkerweb|*/bunkerity/bunkerweb-scheduler|*/bunkerity/bunkerweb-ui|*/bunkerity/bunkerweb-api|*/bunkerity/bunkerweb-autoconf)
+                _DOCKER_HEALTH_REQUIRED[$_svc]=yes
+                if [ "$_image" != "${_image%%@*}" ]; then
+                    print_error "The image configured for $_svc is pinned by digest ($_image), so rewriting the image tag cannot upgrade it. Point docker-compose.yml at a tag, then re-run."
+                    return 1
+                fi
+                if [ -n "$_expected" ]; then
+                    _requested=$(docker image inspect --format '{{.Id}}' "${_repo}:${DOCKER_IMAGE_TAG}") || return 1
+                    if [ "$_expected" != "$_requested" ]; then
+                        print_error "The image configured for $_svc ($_image, $_expected) does not match the requested BunkerWeb image (${_repo}:${DOCKER_IMAGE_TAG}, $_requested). Check hard-coded image tags in docker-compose.yml."
+                        return 1
+                    fi
+                fi
+                ;;
+        esac
+        case "$_svc" in bunkerweb|bw-scheduler|bw-ui|bw-api|bw-autoconf) _DOCKER_HEALTH_REQUIRED[$_svc]=yes ;; esac
+        _DOCKER_EXPECTED_IMAGES[$_svc]="$_expected"
+        _ids=$(_docker_compose ps -a -q "$_svc") || return 1
+        for _cid in $_ids; do
+            _restarts=$(docker inspect --format '{{.RestartCount}}' "$_cid") || return 1
+            case "$_restarts" in ''|*[!0-9]*) return 1 ;; esac
+            _DOCKER_RESTART_COUNTS[$_cid]="$_restarts"
+        done
+    done
+}
+
+# Require the expected image and two healthy samples at least ten seconds apart,
+# under one deadline. Infrastructure without a healthcheck must remain running.
+# 0 = ready, 1 = hard evidence the deployment is wrong, 2 = deadline expired
+# without a verdict (the stack is left running; the caller must not treat that
+# as a failed upgrade).
 wait_for_docker_stack_ready() {
     local deadline=$(( $(date +%s) + DOCKER_WAIT_TIMEOUT ))
-    local total running=0
-    total=$(_docker_compose ps --services 2>/dev/null | grep -c . || echo 0)
-    [ "$total" -gt 0 ] || total=5
-    print_status "Waiting for $total services to start (timeout ${DOCKER_WAIT_TIMEOUT}s)..."
-    while [ "$(date +%s)" -lt "$deadline" ]; do
-        running=$(_docker_compose ps --services --status running 2>/dev/null | grep -c . || echo 0)
-        if [ "$running" -ge "$total" ]; then
-            print_status "All $total services are running."
-            return 0
+    local _svc _ids _cid _state _image _restarts _status _health _now _ready _sample _previous="" _healthy_since="" _delay _want
+    [ "${#_DOCKER_EXPECTED_IMAGES[@]}" -gt 0 ] || return 1
+    print_status "Waiting for healthy, stable services (timeout ${DOCKER_WAIT_TIMEOUT}s)..."
+    while [ "$(date +%s)" -le "$deadline" ]; do
+        _ready=yes
+        _sample=""
+        for _svc in "${!_DOCKER_EXPECTED_IMAGES[@]}"; do
+            _ids=$(_docker_compose ps -a -q "$_svc") || return 1
+            [ -n "$_ids" ] || { _ready=no; continue; }
+            for _cid in $_ids; do
+                _state=$(docker inspect --format '{{.Image}} {{.RestartCount}} {{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$_cid") || return 1
+                read -r _image _restarts _status _health <<< "$_state"
+                case "$_restarts" in ''|*[!0-9]*) return 1 ;; esac
+                # An empty expected ID means the image was absent on a fresh
+                # install and Compose pulled it during `up -d`; nothing to compare.
+                _want=${_DOCKER_EXPECTED_IMAGES[$_svc]}
+                if { [ -n "$_want" ] && [ "$_image" != "$_want" ]; } || [ "$_restarts" != "${_DOCKER_RESTART_COUNTS[$_cid]:-0}" ]; then
+                    print_warning "$_svc has an unexpected image or restarted during deployment."
+                    return 1
+                fi
+                [ "$_status" = running ] || _ready=no
+                case "$_health" in
+                    healthy) : ;;
+                    none)
+                        [ "${_DOCKER_HEALTH_REQUIRED[$_svc]:-no}" = no ] || _ready=no
+                        ;;
+                    *) _ready=no ;;
+                esac
+                _sample="${_sample} ${_cid}"
+            done
+        done
+        _now=$(date +%s)
+        [ "$_now" -le "$deadline" ] || break
+        if [ "$_ready" = yes ]; then
+            if [ -z "$_healthy_since" ] || [ "$_sample" != "$_previous" ]; then
+                _healthy_since=$_now
+            elif [ "$((_now - _healthy_since))" -ge 10 ]; then
+                print_status "All services have the expected images and remained healthy for 10 seconds."
+                return 0
+            fi
+        else
+            _healthy_since=""
         fi
-        sleep 3
+        _previous=$_sample
+        _delay=$((deadline - _now))
+        [ "$_delay" -gt 0 ] || break
+        [ "$_delay" -le 2 ] || _delay=2
+        sleep "$_delay"
     done
-    print_warning "Timed out waiting for the stack ($running/$total services running)."
-    return 1
+    print_warning "Services were not confirmed healthy after ${DOCKER_WAIT_TIMEOUT}s. The stack is left running and nothing was rolled back."
+    return 2
 }
 
 # Post-install summary — per-type entry point, management hints. Secrets are
@@ -2217,7 +2420,10 @@ _docker_check_existing() {
     # left it. .env is always rebuilt, with hand-added keys carried over.
     if [ "$UPGRADE_SCENARIO" = "yes" ]; then
         _docker_backup_file "$DOCKER_ENV_FILE"
-        if [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
+        if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+            DOCKER_COMPOSE_RENDER_MODE="preserve"
+            print_status "Keeping the symlinked docker-compose.yml and its target; --overwrite-compose does not replace symlinks."
+        elif [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
             DOCKER_COMPOSE_RENDER_MODE="rerender"
             print_status "Regenerating docker-compose.yml from the current template (--overwrite-compose)."
         elif _docker_compose_is_pristine; then
@@ -2246,6 +2452,10 @@ your version is kept either way." "yes"; then
         return 0
     fi
 
+    if [ -L "$DOCKER_COMPOSE_FILE" ]; then
+        print_error "Refusing to replace a symlinked docker-compose.yml; update its target manually."
+        exit 1
+    fi
     print_warning "Found existing files in $DOCKER_PROJECT_DIR: $existing"
     if [ "$DOCKER_OVERWRITE_EXISTING" = "yes" ]; then
         print_status "Proceeding with overwrite (--overwrite-compose)."
@@ -2377,28 +2587,6 @@ _docker_verify_running_version() {
     return 0
 }
 
-# The scheduler entrypoint runs 'alembic upgrade head' on start and exits 1 when
-# it fails. Under restart:unless-stopped that becomes a crash loop, so "is it
-# running right now" can catch it mid-restart and pass by accident — the restart
-# counter is the reliable signal.
-_docker_verify_scheduler_migration() {
-    _skip_backup_for_type && return 0
-    local _cid _restarts
-    _cid=$(_docker_compose ps -q bw-scheduler 2>/dev/null)
-    if [ -z "$_cid" ]; then
-        print_warning "bw-scheduler container not found after the upgrade."
-        return 1
-    fi
-    _restarts=$(docker inspect --format '{{.State.RestartCount}}' "$_cid" 2>/dev/null || echo 0)
-    case "$_restarts" in ''|*[!0-9]*) _restarts=0 ;; esac
-    if [ "$_restarts" -gt 0 ]; then
-        print_warning "bw-scheduler restarted ${_restarts} time(s) after the upgrade — the database migration most likely failed:"
-        _docker_compose logs bw-scheduler --tail 100 || true
-        return 1
-    fi
-    return 0
-}
-
 # Orchestrator for INSTALL_TYPE=docker. Renders files, brings the stack up,
 # waits for readiness, prints the summary. Called from main(); exits the script.
 docker_install_flow() {
@@ -2418,8 +2606,9 @@ docker_install_flow() {
     # running stack and its files exactly as they were.
     _docker_upgrade_backup
 
+    _docker_snapshot_upgrade_files || { print_error "Cannot save the original upgrade files."; exit 1; }
     _docker_check_existing
-    _docker_capture_env_extras
+    _docker_capture_env_extras || { print_error "Cannot safely preserve the existing Docker .env."; exit 1; }
     render_docker_env
     _docker_restore_env_extras
     if [ "$DOCKER_COMPOSE_RENDER_MODE" = "preserve" ]; then
@@ -2439,26 +2628,18 @@ docker_install_flow() {
 
     if [ "$DOCKER_PULL" = "yes" ]; then
         print_step "📥 Pulling container images"
-        if ! run_cmd _docker_compose pull; then
+        if ! _docker_compose pull; then
             print_error "Failed to pull the container images."
             if [ "$UPGRADE_SCENARIO" = "yes" ]; then
-                # Nothing was recreated yet, so the old stack is still serving.
-                # Put the tag back so .env stops advertising a version that was
-                # never fetched, and a later run re-detects the real state.
-                [ -n "$DOCKER_INSTALLED_TAG" ] && {
-                    DOCKER_IMAGE_TAG="$DOCKER_INSTALLED_TAG"
-                    # Re-snapshot first: the earlier restore consumed the
-                    # original one, and rendering without a live snapshot would
-                    # drop the operator's custom .env keys on the way back.
-                    _docker_capture_env_extras
-                    render_docker_env
-                    _docker_restore_env_extras
-                    print_status "Restored the previous image tag (${DOCKER_INSTALLED_TAG}) in $DOCKER_ENV_FILE."
-                }
                 print_error "The stack was NOT recreated — the previous version is still running."
             fi
             exit 1
         fi
+    fi
+
+    if ! _docker_prepare_upgrade_verification; then
+        print_error "Could not resolve deployment images and restart baselines; no containers were recreated."
+        exit 1
     fi
 
     print_step "🚀 Starting the stack"
@@ -2469,15 +2650,25 @@ docker_install_flow() {
     # No --remove-orphans: a topology change is already gated behind
     # --force-type-change, and running it with a mismatched project name would
     # remove containers this stack does not own.
-    run_cmd _docker_compose up -d
-
-    wait_for_docker_stack_ready || \
-        print_warning "Check progress with: cd $DOCKER_PROJECT_DIR && docker compose ps"
+    local _verified=yes _timed_out=no _rc=0
+    _DOCKER_RECREATION_STARTED=yes
+    if ! _docker_compose up -d; then
+        _verified=no
+    else
+        wait_for_docker_stack_ready || _rc=$?
+        # A slow first start (DB connect, migration, first job run, first push)
+        # is not a failed deployment: warn, keep the stack, exit 2.
+        if [ "$_rc" = 2 ]; then
+            _timed_out=yes
+        elif [ "$_rc" != 0 ]; then
+            _verified=no
+        fi
+        [ "$_rc" = 0 ] || print_warning "Check progress with: cd $DOCKER_PROJECT_DIR && docker compose ps"
+        [ "$_timed_out" = no ] || print_warning "Wait longer with --docker-wait-timeout N."
+    fi
 
     if [ "$UPGRADE_SCENARIO" = "yes" ]; then
-        local _verified="yes"
         _docker_verify_running_version   || _verified="no"
-        _docker_verify_scheduler_migration || _verified="no"
         if [ "$_verified" != "yes" ]; then
             print_error "Upgrade verification failed — see the warnings above."
             # No automatic rollback: 'alembic upgrade head' may already have
@@ -2494,8 +2685,13 @@ docker_install_flow() {
             exit 1
         fi
     fi
+    [ "$_verified" = yes ] || { print_error "The stack did not become ready."; exit 1; }
 
     show_docker_final_info
+    if [ "$_timed_out" = yes ]; then
+        print_warning "The services were not confirmed healthy within ${DOCKER_WAIT_TIMEOUT}s; nothing was rolled back."
+        exit 2
+    fi
 }
 
 # Generate a URL-safe random secret of N characters (default 32).
@@ -3237,7 +3433,8 @@ _docker_load_existing_env() {
     # type is known before the menu) and ask_docker_preferences calls it again.
     [ "$_DOCKER_ENV_LOADED" = "yes" ] && return 0
     _DOCKER_ENV_LOADED="yes"
-    local _loaded="no" _pair _k _v
+    local _loaded="no" _pair _k _v _assignments
+    _assignments=$(_docker_env_last_assignments "$DOCKER_ENV_FILE") || exit 1
     while IFS= read -r _pair || [ -n "$_pair" ]; do
         case "$_pair" in ''|'#'*) continue ;; esac
         _k=${_pair%%=*}
@@ -3269,7 +3466,7 @@ _docker_load_existing_env() {
             BW_TAG)               DOCKER_INSTALLED_TAG="$_v" ;;
             _BW_COMPOSE_SHA256)   _BW_RECORDED_COMPOSE_SHA256="$_v" ;;
         esac
-    done < "$DOCKER_ENV_FILE"
+    done <<< "$_assignments"
 
     # MANAGER_IP_INPUT is never stored verbatim — only the composed worker
     # whitelist is (render_docker_env writes "127.0.0.0/8 ${MANAGER_IP_INPUT}").
@@ -7187,7 +7384,7 @@ usage() {
     echo "                           on an upgrade, regenerate docker-compose.yml even if it was edited"
     echo "  --install-docker         Install Docker via the official convenience script if missing"
     echo "  --no-pull                Skip 'docker compose pull' before starting the stack"
-    echo "  --docker-wait-timeout N  Seconds to wait for the stack to become ready (default: 180)"
+    echo "  --docker-wait-timeout N  Seconds to wait for the stack to become ready (default: 600)"
     echo "  --http-port N            Host HTTP port      (default: 80;   bunkerweb)"
     echo "  --https-port N           Host HTTPS/QUIC port (default: 443; bunkerweb)"
     echo "  --api-port N             Host worker-API port (default: 5000; worker)"
