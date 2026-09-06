@@ -108,12 +108,39 @@ def test_the_import_writes_nothing_outside_the_sandbox(scheduler_import):
         assert (sandbox / expected).is_dir(), f"{expected} was not created under the sandbox"
 
 
-class FakeApiClient:
-    """Just the four calls healthcheck_job makes."""
+NO_PENDING_CHANGES = {
+    "pro_plugins_changed": False,
+    "last_pro_plugins_change": None,
+    "external_plugins_changed": False,
+    "last_external_plugins_change": None,
+    "custom_configs_changed": False,
+    "last_custom_configs_change": None,
+    "plugins_config_changed": {},
+    "instances_changed": False,
+    "last_instances_change": None,
+    "certificates_changed": False,
+    "last_certificates_change": None,
+}
 
-    def __init__(self, instances, health):
+
+PENDING_CHANGES = NO_PENDING_CHANGES | {"custom_configs_changed": True, "instances_changed": True}
+
+
+class FakeApiClient:
+    """Just the calls healthcheck_job makes.
+
+    ``get_metadata`` reports an idle scheduler by default, so the loading-state tests below
+    exercise only the branch they are about: with changes pending, the "fleet up but the apply
+    never landed" re-dispatch would fire too and their dispatch counts would stop meaning what
+    they say.
+    """
+
+    readonly = False
+
+    def __init__(self, instances, health, metadata=None):
         self._instances = instances
         self._health = health
+        self._metadata = NO_PENDING_CHANGES if metadata is None else metadata
         self.status_updates = []
 
     def get_instances(self):
@@ -125,6 +152,9 @@ class FakeApiClient:
     def update_instance(self, hostname, status):
         self.status_updates.append((hostname, status))
         return ""
+
+    def get_metadata(self):
+        return self._metadata
 
 
 class FakeScheduler:
@@ -140,8 +170,8 @@ class FakeScheduler:
 def harness(scheduler_main, monkeypatch):
     """Wire the module globals healthcheck_job reads, and reset the loading set."""
 
-    def _install(instances, health):
-        api_client = FakeApiClient(instances, health)
+    def _install(instances, health, metadata=None):
+        api_client = FakeApiClient(instances, health, metadata)
         scheduler = FakeScheduler()
         monkeypatch.setattr(scheduler_main, "API_CLIENT", api_client)
         monkeypatch.setattr(scheduler_main, "SCHEDULER", scheduler)
@@ -190,8 +220,14 @@ def test_a_stuck_instance_stops_reloading_the_fleet_every_pass(harness, schedule
     The instance is marked up before this branch, so each dispatch is a complete push-configs --
     render, upload, fleet reload. `/health` also fails toward "loading", so a datastore hiccup
     lands here too. After the fast attempts the cadence drops to one in LOADING_SLOW_RETRY_EVERY.
+
+    Driven with the change flags RAISED, which is the state this backoff actually has to survive:
+    an instance reports loading precisely because the push never landed, so pending flags are its
+    normal companion, not a corner case. Fed an idle scheduler instead, the "fleet up but the
+    apply never landed" re-dispatch would be suppressed for the wrong reason and this test would
+    pass without proving anything about the co-occurrence.
     """
-    _api, scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "loading"})
+    _api, scheduler = harness([{"hostname": "bw", "status": "up"}], {"bw": "loading"}, metadata=PENDING_CHANGES)
 
     _run_passes(scheduler_main, scheduler_main.LOADING_SLOW_RETRY_EVERY)
 

@@ -118,6 +118,18 @@ LOADING_INSTANCES: Dict[str, int] = {}
 # one attempt every N passes. Retrying is not free -- see the comment in healthcheck_job.
 LOADING_FAST_RETRIES = 3
 LOADING_SLOW_RETRY_EVERY = 20
+# Consecutive healthchecks that found pending changes on a reachable, non-loading fleet, and the
+# rate the re-dispatch drops to after the first. Same shape and the same reason as the loading
+# retries above: the first observation is almost always a push that deferred and only needs
+# re-dispatching, but a push that keeps failing *before* it can mark anything down is not
+# self-limiting. push-configs exits 2 at the render step on a broken template or custom config
+# (`Aborting push: NGINX config rendering failed`), which is upstream of both the per-instance
+# upload and the failover marking -- so every status stays "up", nothing reports loading, and the
+# flags stay raised. Unbounded, that would re-run a full materialize + ProcessPoolExecutor render
+# of the whole config tree on the heavy queue every HEALTHCHECK_INTERVAL, ten times more often
+# than the 300s re-arm it is meant to improve on.
+PENDING_REDISPATCH_PASSES = 0
+PENDING_REDISPATCH_SLOW_RETRY_EVERY = 20
 
 # Shared executor to reuse worker threads across scheduler tasks
 SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
@@ -179,6 +191,64 @@ def changes_from_metadata(db_metadata: dict) -> dict:
         "certificates_changed": db_metadata.get("certificates_changed", False),
         "last_certificates_change": db_metadata.get("last_certificates_change"),
     }
+
+
+# The change flags a job clears when it acknowledges an apply. Kept in one place: the healthcheck
+# re-dispatch and the APPLY_RETRY_INTERVAL re-arm both test it.
+PENDING_CHANGE_FLAGS = (
+    "pro_plugins_changed",
+    "external_plugins_changed",
+    "custom_configs_changed",
+    "plugins_config_changed",
+    "instances_changed",
+    "certificates_changed",
+)
+
+
+def has_pending_changes(changes: dict) -> bool:
+    """Whether any change flag is still raised, i.e. no job has acknowledged the apply yet.
+
+    `plugins_config_changed` is a {plugin_id: timestamp} dict rather than a bool, so it needs the
+    same truthiness test as the others but reads differently; spelling the tuple once is what
+    keeps the healthcheck's re-dispatch and the APPLY_RETRY_INTERVAL re-arm from drifting apart,
+    which is exactly how `plugins_config_changed` once went missing from one of two copies of
+    this list in autoconf.
+    """
+    return any(changes.get(flag) for flag in PENDING_CHANGE_FLAGS)
+
+
+def refresh_instance_statuses() -> bool:
+    """Ping every registered instance and write the result to its ``status`` column.
+
+    Returns whether the whole fleet answered.
+
+    Must run BEFORE push-configs is dispatched. push-configs filters the registered instances on
+    this column and, when every one of them reads "down", deliberately exits 0 and leaves the
+    change flags pending for a later run. The column is telemetry this loop writes, so refreshing
+    it after the dispatch -- which is what the loop did until now -- handed the worker whatever
+    the *previous* scheduler process left behind. On an upgrade that is "down" for every instance,
+    so the first push after the migration deferred against a fleet that was already serving:
+    CI run 33528164796, autoconf/mysql arm, has push-configs logging "All 1 registered BunkerWeb
+    instance(s) are down" at 16:44:14 and the loop logging "All BunkerWeb instances are up" at
+    16:44:15 -- one second later and one step too late. Nothing re-examined that decision, so the
+    configuration sat unapplied until the APPLY_RETRY_INTERVAL re-arm 300s on, past the health
+    window the integration harness (and any orchestrator's readiness probe) allows.
+    """
+    try:
+        success = True
+        # Update instance statuses (push + reload happen in the worker now)
+        for db_instance in API_CLIENT.get_instances():
+            hostname = db_instance["hostname"]
+            is_up = API_CLIENT.ping_instance(hostname)
+            ret = API_CLIENT.update_instance(hostname, "up" if is_up else "down")
+            if ret:
+                LOGGER.error(f"Couldn't update instance {hostname} status: {ret}")
+            elif not is_up:
+                success = False
+        return success
+    except BaseException as e:
+        LOGGER.error(f"Exception while updating instance statuses : {e}")
+        return False
 
 
 def handle_stop(signum, frame):
@@ -433,6 +503,8 @@ def generate_caches():
 
 
 def healthcheck_job():
+    global PENDING_REDISPATCH_PASSES
+
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
         return
@@ -449,6 +521,7 @@ def healthcheck_job():
         return
 
     recovered = False
+    fleet_reachable = True
     still_loading: Dict[str, int] = {}
     try:
         for db_instance in API_CLIENT.get_instances():
@@ -461,6 +534,7 @@ def healthcheck_job():
                 HEALTHCHECK_LOGGER.error(f"Exception while checking instance {hostname}: {e}")
 
             if health is None:
+                fleet_reachable = False
                 HEALTHCHECK_LOGGER.warning(f"Instance {hostname} is not reachable, healthcheck will be retried in {HEALTHCHECK_INTERVAL} seconds ...")
                 ret = API_CLIENT.update_instance(hostname, "down")
                 if ret:
@@ -532,6 +606,48 @@ def healthcheck_job():
                             "It is still enforcing the configuration it restarted with, so traffic is protected, but that "
                             "configuration is now stale -- re-pushing, and this needs an operator."
                         )
+
+        # A push that was deferred rather than lost leaves no transition for the branches above to
+        # catch. push-configs exits 0 without applying when every registered instance reads
+        # "down", and the scheduler's own boot pass then marks them "up" -- so by the first
+        # healthcheck there is no down → up edge left to see, the instance is simply up with the
+        # change flags still raised. Until now nothing noticed: the APPLY_RETRY_INTERVAL re-arm
+        # was the only path back, 300s later, which is the whole reason the mariadb/mysql upgrade
+        # arms of CI run 33528164796 timed out with a healthy fleet and an unapplied config.
+        #
+        # Three guards, none of them decoration:
+        #   fleet_reachable -- while an instance is genuinely down the flags are *supposed* to
+        #     stay raised and a re-dispatch would just defer again; the down → up branch above
+        #     covers that case when it comes back.
+        #   not still_loading -- an instance that is up but loading is the *normal* companion of
+        #     pending flags (it is loading precisely because the push never landed), and the
+        #     branch above deliberately backs that off to one attempt every
+        #     LOADING_SLOW_RETRY_EVERY passes because each dispatch is a full render + upload +
+        #     fleet reload. Without this clause that backoff is dead: `recovered` is False on the
+        #     passes it skips, so this branch would re-dispatch on every one of them.
+        #   not readonly -- `run_single` logs an error and returns True on a read-only database
+        #     without queueing anything, so the flags can never clear; re-dispatching would emit
+        #     a warning and an error every pass, forever.
+        if not recovered and fleet_reachable and not still_loading and SCHEDULER is not None and not API_CLIENT.readonly:
+            try:
+                metadata = API_CLIENT.get_metadata()
+                if not isinstance(metadata, str) and has_pending_changes(changes_from_metadata(metadata)):
+                    PENDING_REDISPATCH_PASSES += 1
+                    if PENDING_REDISPATCH_PASSES == 1:
+                        HEALTHCHECK_LOGGER.warning("Changes are still pending while every instance is up; re-dispatching push-configs ...")
+                        recovered = True
+                    elif PENDING_REDISPATCH_PASSES % PENDING_REDISPATCH_SLOW_RETRY_EVERY == 0:
+                        HEALTHCHECK_LOGGER.error(
+                            f"Changes have been pending for {PENDING_REDISPATCH_PASSES} consecutive healthchecks with every instance up. "
+                            "The push is failing before it can mark an instance down -- a broken template or custom config would do "
+                            "this -- so retrying at the full rate would re-render the whole configuration every pass; re-dispatching "
+                            "once now, but this needs an operator."
+                        )
+                        recovered = True
+                else:
+                    PENDING_REDISPATCH_PASSES = 0
+            except BaseException as e:
+                HEALTHCHECK_LOGGER.error(f"Exception while checking for pending changes: {e}")
 
         if recovered and SCHEDULER is not None:
             try:
@@ -878,6 +994,10 @@ if __name__ == "__main__":
         while True:
             task_futures.clear()
 
+            # Before any dispatch, deliberately: push-configs reads the statuses this writes.
+            # See refresh_instance_statuses.
+            success = refresh_instance_statuses()
+
             if RUN_JOBS_ONCE:
                 # Dispatch all `once` jobs to workers (includes the
                 # push-configs job, which renders + ships the NGINX config
@@ -915,21 +1035,6 @@ if __name__ == "__main__":
                 LOGGER.info("Configuration change detected — dispatching push-configs ...")
                 if not SCHEDULER.run_single("push-configs"):
                     LOGGER.error("Failed to dispatch push-configs job")
-
-            try:
-                success = True
-                # Update instance statuses (push + reload happen in the worker now)
-                for db_instance in API_CLIENT.get_instances():
-                    hostname = db_instance["hostname"]
-                    is_up = API_CLIENT.ping_instance(hostname)
-                    ret = API_CLIENT.update_instance(hostname, "up" if is_up else "down")
-                    if ret:
-                        LOGGER.error(f"Couldn't update instance {hostname} status: {ret}")
-                    elif not is_up:
-                        success = False
-            except BaseException as e:
-                LOGGER.error(f"Exception while updating instance statuses : {e}")
-                success = False
 
             try:
                 API_CLIENT.set_metadata({"failover": not success, "failover_message": ""})
@@ -1155,10 +1260,7 @@ if __name__ == "__main__":
                     # forever. Forgetting what we last saw makes the next poll treat the pending
                     # flags as new and dispatch again.
                     # ponytail: fixed interval, no backoff -- add one only if flapping shows up.
-                    still_pending = bool(changes["plugins_config_changed"]) or any(
-                        changes[key]
-                        for key in ("pro_plugins_changed", "external_plugins_changed", "custom_configs_changed", "instances_changed", "certificates_changed")
-                    )
+                    still_pending = has_pending_changes(changes)
                     if still_pending and last_dispatch is not None and (datetime.now().astimezone() - last_dispatch).total_seconds() >= APPLY_RETRY_INTERVAL:
                         LOGGER.warning(
                             f"Configuration changes are still pending {APPLY_RETRY_INTERVAL}s after the last dispatch; "
