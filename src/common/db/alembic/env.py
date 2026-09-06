@@ -127,41 +127,88 @@ _RENAMED_TABLES = {
 }
 
 
-# (table, column) -> the server default an *upgraded* database carries that the model never declared,
-# written as the SQL literal the revision should restore on the way down.
+# (table, column) pairs whose server default exists only in an *upgraded* database: some revision
+# wrote it, `model.py` never declared it, so a freshly installed database has no default there and
+# the two shapes have differed ever since. `bw_ui_users.method` and `bw_plugins.method` were the
+# first two found (`mariadb_versions/d4d8df48d14d`, 1.5.5); the rest of the class came out of the
+# survey below. The stored value is unaffected either way -- SQLAlchemy always sends the column,
+# which is why nothing noticed.
 #
-# `_drop_server_defaults_the_model_does_not_declare` converges these wherever autogenerate produced
-# an `alter_column` to hang the drop on, which is MySQL and MariaDB only: SQLite sees no change at
-# all (both the old and the new `methods_enum` render as the same VARCHAR length) and PostgreSQL runs
-# with `compare_server_default` off, so on those two engines autogenerate emits nothing to modify.
-# Left there, an upgraded SQLite/PostgreSQL database keeps a default a freshly installed one never
-# gets -- and, since 2026-09-01, disagrees with an upgraded MySQL/MariaDB one as well.
+# `_drop_server_defaults_the_model_does_not_declare` converges this class wherever autogenerate
+# produced an `alter_column` to hang the drop on, which is a minority of it: SQLite mostly sees no
+# change at all and PostgreSQL runs with `compare_server_default` off, so on those two engines
+# autogenerate emits nothing to modify and the drift survives every regeneration. These pairs are
+# therefore emitted outright, and *only* these -- a blanket "every column whose reflected default the
+# model does not declare" sweep would also strip PostgreSQL's `nextval('..._id_seq')` off every
+# serial primary key, so the class is written down rather than computed.
 #
-# Which columns those are cannot be derived from either schema. A blanket "every column whose
-# reflected default the model does not declare" sweep would also strip PostgreSQL's
-# `nextval('..._id_seq')` off every serial primary key, so the pairs are named here instead. The
-# model still decides -- a default it declares is left alone -- and so does the live database: the op
-# is emitted only while the default is really there, which is what stops it being re-emitted forever
-# once this revision has shipped.
+# The list is the output of `.cache/results-2026-09-02-wave12/survey-server-defaults-L-G.py`: every
+# revision's `upgrade()` AST-folded in chain order, per engine, intersected with the columns
+# `model.py` still declares without a `server_default` of its own. It has to be derived that way and
+# not from `test_upgrade_schema_parity`, which cannot see this class at all: that test builds its
+# "upgraded" side from `model.py` at the v1.6.13 *tag*, so a default only an older revision ever
+# wrote is absent from both of its sides and the comparison is green while the drift is real.
 #
-# Not every engine has both. `bw_plugins.method` was given the default by the MySQL/MariaDB 1.5.5
-# revision (`mariadb_versions/d4d8df48d14d`) and by no SQLite or PostgreSQL revision ever -- their
-# 1.5.5 revisions (`sqlite_versions/c9586782cd77`, `postgresql_versions/7deca2941c74`) add it to
-# `bw_ui_users` only. So the drop lands twice on MySQL/MariaDB and once on SQLite/PostgreSQL, and
-# that asymmetry is the live-database gate reporting the truth rather than a gap.
+# Not every engine carries every pair -- `bw_selects.value` is SQLite-only, `bw_instances.https_port`
+# is on the other three -- and nothing here says which. The live database decides, per engine,
+# through `_reflected_server_default`; that gate is also what stops the op being re-emitted forever
+# once the drop has shipped and the next generation baseline no longer has the default.
 #
-# THIS IS NOT THE WHOLE CLASS. It converges these two *columns*, not these two tables:
-# `bw_ui_users` alone still carries five more server defaults the model does not declare --
-# `admin`, `theme`, `creation_date`, `update_date` (`sqlite_versions/1e1fc017a424:277-282`) and
-# `language` (`sqlite_versions/4e98a08c5902:22`). Same defect, same table, not in scope here.
+# The downgrade restores the default the database really had, read back off it rather than named
+# here. The spelling is engine-specific and not interchangeable: `sa.false()` compiles to `0` on
+# MySQL and `false` on PostgreSQL, where `SET DEFAULT 0` on a boolean column is a type error, and
+# `bw_templates.creation_date` is `CURRENT_TIMESTAMP` on MySQL against `timezone('utc', now())` on
+# PostgreSQL, which are different instants for a column with no timezone. One literal per pair could
+# not be right on all four, and a per-engine table of 35 literals would be 105 unverifiable strings.
 #
-# Adding a pair that is also in `_IGNORED_ALTER_COLUMNS` makes the two filters contradict each
-# other: the strip runs first and removes autogenerate's op, then this pass sees none and appends a
-# fresh one. Check both lists before extending either.
-_UNDECLARED_SERVER_DEFAULTS = {
-    ("bw_plugins", "method"): "'manual'",
-    ("bw_ui_users", "method"): "'manual'",
-}
+# Sorted on use, not merely written sorted: this is a set, and the op order it produces has to be
+# stable or two regenerations of the same schema differ.
+#
+# Adding a pair that is also in `_IGNORED_ALTER_COLUMNS` makes the two filters contradict each other
+# -- the strip runs first and removes autogenerate's op, then this pass sees none and appends a fresh
+# one. The assertion below is that check, so it cannot rot silently.
+_UNDECLARED_SERVER_DEFAULTS = frozenset(
+    {
+        ("bw_global_values", "suffix"),
+        ("bw_global_values", "value"),
+        ("bw_instances", "creation_date"),
+        ("bw_instances", "https_port"),
+        ("bw_instances", "last_seen"),
+        ("bw_instances", "listen_https"),
+        ("bw_jobs", "run_async"),
+        ("bw_jobs_runs", "end_date"),
+        ("bw_jobs_runs", "start_date"),
+        ("bw_jobs_runs", "success"),
+        ("bw_metadata", "is_pro"),
+        ("bw_metadata", "non_draft_services"),
+        ("bw_metadata", "pro_overlapped"),
+        ("bw_metadata", "pro_services"),
+        ("bw_metadata", "pro_status"),
+        ("bw_plugins", "method"),
+        ("bw_plugins", "type"),
+        ("bw_selects", "order"),
+        ("bw_selects", "value"),
+        ("bw_services", "is_draft"),
+        ("bw_services_settings", "suffix"),
+        ("bw_services_settings", "value"),
+        ("bw_template_settings", "default"),
+        ("bw_template_settings", "order"),
+        ("bw_template_settings", "suffix"),
+        ("bw_templates", "creation_date"),
+        ("bw_templates", "last_update"),
+        ("bw_templates", "method"),
+        ("bw_ui_user_sessions", "user_agent"),
+        ("bw_ui_users", "admin"),
+        ("bw_ui_users", "creation_date"),
+        ("bw_ui_users", "language"),
+        ("bw_ui_users", "method"),
+        ("bw_ui_users", "theme"),
+        ("bw_ui_users", "update_date"),
+    }
+)
+
+_CONTRADICTORY = _UNDECLARED_SERVER_DEFAULTS & _IGNORED_ALTER_COLUMNS
+assert not _CONTRADICTORY, f"a column cannot be both stripped and converged: {sorted(_CONTRADICTORY)}"
 
 
 class _VersionUpdateOp(ExecuteSQLOp):
@@ -310,11 +357,30 @@ def _rewrite_renamed_tables(container, reverse=False):
 
 
 def _named_enums(container, into):
-    """Every named `Enum` reachable from an op container, as {type name: [labels]}."""
+    """Every named `Enum` an op container would put in the database, as {type name: [labels]}.
+
+    `alter_column` counts, and used not to. `_render_item` stamps `create_type=False` on *every*
+    PostgreSQL enum it renders, including one reached through `modify_type` -- so a
+    varchar-to-named-enum `alter_column`, which is what widening a plain string column into an enum
+    generates, would render a type with nothing anywhere creating it and the revision would die on
+    `type "..." does not exist`. Nothing generates that shape today; the next model change that turns
+    a `String` column into an `Enum` does, and it would fail at the operator rather than here.
+
+    `existing_type` is deliberately not read: a type reached only through it is what autogenerate
+    reflected off the column, so it is already in the database. The `DO $$ ... duplicate_object`
+    block would be a no-op for it, but including it would also resurrect a type on a downgrade path
+    that dropped it, and there is no reason to.
+    """
     for op in container.ops:
-        columns = op.columns if isinstance(op, CreateTableOp) else [op.column] if isinstance(op, AddColumnOp) else []
-        for column in columns:
-            column_type = getattr(column, "type", None)
+        if isinstance(op, CreateTableOp):
+            types = [getattr(column, "type", None) for column in op.columns]
+        elif isinstance(op, AddColumnOp):
+            types = [getattr(op.column, "type", None)]
+        elif isinstance(op, AlterColumnOp):
+            types = [op.modify_type]
+        else:
+            types = []
+        for column_type in types:
             if isinstance(column_type, SAEnum) and column_type.name:
                 into[column_type.name] = list(column_type.enums)
         if isinstance(op, OpContainer):
@@ -378,6 +444,31 @@ def _sql_literal(value):
     return f"'{escaped}'"
 
 
+def _server_default_text(existing):
+    """The SQL text of a reflected server default, whatever wrapper it arrived in.
+
+    Autogenerate hands `existing_server_default` over as a `DefaultClause` on some paths and as the
+    bare `TextClause` inside it on others, and `str()` on a `DefaultClause` renders the object, not
+    the SQL. Unwrap both, then stringify.
+    """
+    arg = getattr(existing, "arg", existing)
+    return str(getattr(arg, "text", arg))
+
+
+def _is_a_sequence_default(existing):
+    """Whether a reflected server default is a sequence hook rather than drift to converge.
+
+    PostgreSQL renders a serial primary key's generator as `nextval('..._id_seq'::regclass)`, and
+    `model.py` declares no `server_default` for those columns -- the sequence is the dialect's own
+    doing, not something a revision wrote. The sweep below would therefore read every serial PK as
+    undeclared drift and drop its default, leaving a NOT NULL column with no generator: the next
+    INSERT that omits the id fails. `_UNDECLARED_SERVER_DEFAULTS` is written down by hand partly to
+    avoid exactly this (see its comment), but this pass is not gated on that list, so it needs the
+    check itself.
+    """
+    return "nextval(" in _server_default_text(existing).lower()
+
+
 def _drop_server_defaults_the_model_does_not_declare(container):
     """Stop an `alter_column` carrying forward a server default that only the database has.
 
@@ -392,6 +483,10 @@ def _drop_server_defaults_the_model_does_not_declare(container):
     Converging on the model rather than on the database, because the model is what a fresh install
     builds from and what the parity contract compares against. Upgrade direction only -- a downgrade
     is supposed to put the old shape back, server default included.
+
+    Unlike `_drop_undeclared_server_defaults_autogenerate_missed`, this pass is not restricted to
+    `_UNDECLARED_SERVER_DEFAULTS`: it fires on *any* `alter_column` autogenerate emitted. That is
+    what `_is_a_sequence_default` is for -- see its docstring.
     """
     if container is None:
         return
@@ -400,7 +495,7 @@ def _drop_server_defaults_the_model_does_not_declare(container):
         if isinstance(op, OpContainer):
             _drop_server_defaults_the_model_does_not_declare(op)
         elif isinstance(op, AlterColumnOp) and _has_reflected_default(op):
-            if declared.get((op.table_name, op.column_name), False) is None:
+            if declared.get((op.table_name, op.column_name), False) is None and not _is_a_sequence_default(op.existing_server_default):
                 op.modify_server_default = None
 
 
@@ -420,26 +515,30 @@ def _find_alter_column(container, table_name, column_name):
     return None
 
 
-def _database_has_a_server_default(migration_context, table_name, column_name):
-    """Whether the database being generated against still carries a server default on that column.
+def _reflected_server_default(migration_context, table_name, column_name):
+    """The server default the database being generated against still carries there, as SQL text.
 
-    Keyed on the live database rather than on `_UNDECLARED_SERVER_DEFAULTS` alone, so the op stops
-    being emitted once the drop has shipped and the next generation baseline no longer has the
-    default -- otherwise every future head would carry a `DROP DEFAULT` for something already gone.
-    Only the presence is read, not the text: the reflected spelling differs per engine
-    (`'manual'` on SQLite, `'manual'::methods_enum` on PostgreSQL) while the four revisions should
-    say the same thing.
+    `None` when there is none, when the table does not exist yet, or when there is no bind to ask --
+    all three mean "nothing to converge here", which is also what makes the op stop being emitted
+    once the drop has shipped and the next generation baseline no longer has the default. Otherwise
+    every future head would carry a `DROP DEFAULT` for something already gone.
+
+    The text is what the downgrade restores, so it is read rather than named: the spelling is
+    per-engine (`'manual'` on SQLite against `'manual'::methods_enum` on PostgreSQL) and, for the
+    boolean and timestamp columns in `_UNDECLARED_SERVER_DEFAULTS`, per-engine in a way that is not
+    interchangeable. This is the same round-trip alembic itself does through
+    `existing_server_default`, which is reflected text fed back as SQL.
     """
     bind = getattr(migration_context, "bind", None)
     if bind is None:
-        return False
+        return None
     inspector = inspect(bind)
     if not inspector.has_table(table_name):
-        return False
+        return None
     for column in inspector.get_columns(table_name):
         if column["name"] == column_name:
-            return column.get("default") is not None
-    return False
+            return column.get("default")
+    return None
 
 
 def _drop_undeclared_server_defaults_autogenerate_missed(migration_context, upgrade_ops, downgrade_ops):
@@ -448,62 +547,105 @@ def _drop_undeclared_server_defaults_autogenerate_missed(migration_context, upgr
     `_drop_server_defaults_the_model_does_not_declare` can only edit an op that exists. For the pairs
     in `_UNDECLARED_SERVER_DEFAULTS` the op is emitted outright when there is none, so that all four
     engines' upgraded databases agree with a fresh install *on those columns* -- not on every column
-    they carry an undeclared default for; see the map's comment for the rest of the class.
+    they carry an undeclared default for; see the list's comment for how the class was derived.
 
-    The downgrade puts the default back explicitly. It has to be `server_default=` rather than the
-    `existing_server_default=` the MySQL/MariaDB revisions get away with: there a downgrade is a
-    `MODIFY` that restates the whole column definition, so the restated default comes back on its
-    own, while `ALTER COLUMN` on SQLite and PostgreSQL changes only what it is told to change.
+    The downgrade puts the default back explicitly, except where autogenerate's own reverse op
+    already does -- see `_the_reverse_op_restates_the_whole_column`.
+
+    `existing_type` and `existing_nullable` are taken from the *model*, not from the database. They
+    are unused on PostgreSQL and overridden by reflection inside a SQLite batch block, but on
+    MySQL/MariaDB a DateTime downgrade compiles to `MySQLChangeColumn`, which rewrites the whole
+    column definition from exactly those two. They agree with every upgraded database today; the day
+    a listed column's type or nullability differs between the model and an upgraded database, the
+    downgrade would silently retype it.
     """
     if upgrade_ops is None:
         return
-    for (table_name, column_name), default in _UNDECLARED_SERVER_DEFAULTS.items():
-        # A KeyError here means the map is stale -- fail the generation rather than silently skip.
+    # Sorted because the container is a set: unsorted iteration would order the emitted ops by hash
+    # and two regenerations of the same schema would produce two different revisions.
+    #
+    # Grouped by table rather than one container per column: on SQLite every `ModifyTableOps` is a
+    # `batch_alter_table`, and a batch block is a full table copy (`CREATE TABLE _alembic_tmp_x` +
+    # `INSERT .. SELECT` + `DROP` + `RENAME`). Ungrouped, `bw_ui_users` was copied five times and
+    # `bw_metadata` four, on the engine with the least atomic DDL and for no gain.
+    grouped = {}
+    for table_name, column_name in sorted(_UNDECLARED_SERVER_DEFAULTS):
+        # A KeyError here means the list is stale -- fail the generation rather than silently skip.
         column = target_metadata.tables[table_name].columns[column_name]
         if column.server_default is not None:
             continue  # the model declares one now; a fresh install gets it too, nothing to converge
-        if not _database_has_a_server_default(migration_context, table_name, column_name):
-            continue  # already converged, or generating against a database that never had it
+        default = _reflected_server_default(migration_context, table_name, column_name)
+        if default is None:
+            continue  # already converged, this engine never had it, or the table is not there yet
 
         existing = _find_alter_column(upgrade_ops, table_name, column_name)
         if existing is not None:
-            # MySQL/MariaDB: autogenerate restated the default through `existing_server_default` and
-            # the pass above already dropped it. Setting it again is a no-op; setting it on an op
-            # that reached here another way (a type change with no reflected default) is the fix.
+            # Autogenerate already emitted an op for this column and
+            # `_drop_server_defaults_the_model_does_not_declare` already dropped the default on it,
+            # so the upgrade side is covered. Setting it again is a no-op; setting it on an op that
+            # reached here another way (a type change with no reflected default) is the fix.
             existing.modify_server_default = None
-            continue
+        else:
+            grouped.setdefault(table_name, []).append(
+                AlterColumnOp(
+                    table_name,
+                    column_name,
+                    modify_server_default=None,
+                    existing_type=column.type,
+                    existing_nullable=column.nullable,
+                    existing_server_default=DefaultClause(text(default)),
+                )
+            )
 
-        upgrade_ops.ops.append(
+        if downgrade_ops is None or (existing is not None and _the_reverse_op_restates_the_whole_column(migration_context)):
+            continue
+        downgrade_ops.ops.insert(
+            0,
             ModifyTableOps(
                 table_name,
                 ops=[
                     AlterColumnOp(
                         table_name,
                         column_name,
-                        modify_server_default=None,
+                        modify_server_default=DefaultClause(text(default)),
                         existing_type=column.type,
                         existing_nullable=column.nullable,
-                        existing_server_default=DefaultClause(text(default)),
                     )
                 ],
-            )
+            ),
         )
-        if downgrade_ops is not None:
-            downgrade_ops.ops.insert(
-                0,
-                ModifyTableOps(
-                    table_name,
-                    ops=[
-                        AlterColumnOp(
-                            table_name,
-                            column_name,
-                            modify_server_default=DefaultClause(text(default)),
-                            existing_type=column.type,
-                            existing_nullable=column.nullable,
-                        )
-                    ],
-                ),
-            )
+
+    for table_name, ops in grouped.items():
+        upgrade_ops.ops.append(ModifyTableOps(table_name, ops=ops))
+
+
+def _the_reverse_op_restates_the_whole_column(migration_context):
+    """Whether an `alter_column` autogenerate emitted brings its `existing_server_default` back down.
+
+    Only on MySQL and MariaDB, where a downgrade compiles to `MODIFY`/`CHANGE` -- one statement
+    restating the entire column definition, default included -- so restoring it a second time would
+    be a redundant whole-table rewrite.
+
+    Everywhere else the reused op does *not* carry its own downgrade, and this is the difference
+    between converging a default and losing it: `ALTER COLUMN ... TYPE` on PostgreSQL changes only
+    the type, and a SQLite batch block rebuilds the table by reflecting the *already-converged*
+    one, so neither puts the default back. Nothing reaches that branch today -- the reuse case is
+    MySQL/MariaDB-only in the current heads -- but adding one label to `methods_enum`, `themes_enum`,
+    `plugin_types_enum` or `pro_status_enum` renders as a VARCHAR-length `alter_column` on SQLite,
+    and five listed columns sit on those types.
+
+    The restore is inserted at the *front* of the downgrade, so it runs before autogenerate's own
+    reverse op for the same column. Measured rather than assumed: a SQLite batch rebuild reflects the
+    table it is rebuilding, so a default set by an earlier op survives it (`VARCHAR(16) DEFAULT
+    'manual'` -> `VARCHAR(8) DEFAULT 'manual'`). On PostgreSQL the ordering cannot bite either, for a
+    different reason -- the only reuse shape an enum produces there would be a *narrowing*, and
+    PostgreSQL cannot remove a value from an enum type at all, so no downgrade ever changes one back.
+    """
+    dialect = getattr(migration_context, "dialect", None)
+    if dialect is None:
+        bind = getattr(migration_context, "bind", None)
+        dialect = bind.dialect if bind is not None else None
+    return dialect is not None and dialect.name in ("mysql", "mariadb")
 
 
 def _has_reflected_default(op):
