@@ -195,7 +195,7 @@ def _get_filtered_bans(source):
 
 def _get_filtered_report_bans(source):
     if not BW_INSTANCES_UTILS:
-        return []
+        return [], 0
 
     try:
         config = BW_CONFIG.get_config(methods=False, with_drafts=True) if BW_CONFIG else {}
@@ -215,7 +215,28 @@ def _get_filtered_report_bans(source):
 
     targets = []
     seen = set()
+    skipped = 0
     for report in result.get("data", []):
+        # A report row is no longer proof of a block. Antibot records one for every challenge page
+        # it serves, CrowdSec for a served AppSec challenge or captcha, workflows for a redirect --
+        # all rows the operator asked to *see* in Reports, none of them a client that was stopped.
+        # Without this skip, one click on "Ban all matching reports" from an unfiltered Reports page
+        # bans every visitor who was merely shown a captcha, which is the opposite of the intent and
+        # is an outage on a feature that is on by default. Keyed on the remediation the plugin
+        # recorded rather than on the reason token, so a future plugin that challenges instead of
+        # blocking inherits this without editing the file. Mirrors the same guard in
+        # ``bunkernet:log()`` (src/common/core/bunkernet/bunkernet.lua), which had the same problem.
+        # isinstance and not `(… or {}).get(…)`: ``data`` is whatever JSON the plugin stored, and
+        # badbehavior's is an *array* of per-IP increment records (``badbehavior.lua``), which the
+        # ban replay carries into the report. ``[].get`` raises AttributeError, and this runs inside
+        # a route with no try around it -- a 500 on the very button this guard exists to protect,
+        # on a plugin that is on by default. ``security-reason.js`` guards the same shape with
+        # ``typeof verdict !== "object"``; the Lua twin gets it free because indexing a Lua array
+        # with ``.action`` is nil. Python has no such mercy.
+        data = report.get("data")
+        if isinstance(data, dict) and str(data.get("action") or "").lower() in ("challenge", "captcha", "redirect"):
+            skipped += 1
+            continue
         ip = report.get("ip")
         server_name = str(report.get("server_name") or "_")
         ban_scope = "global" if server_name == "_" else "service"
@@ -234,7 +255,9 @@ def _get_filtered_report_bans(source):
             }
         )
 
-    return targets
+    # The caller flashes this: banning fewer IPs than the page lists is correct but surprising, and
+    # a silent difference between "1000 reports" and "40 bans" reads as a bug.
+    return targets, skipped
 
 
 @bans.route("/bans", methods=["GET"])
@@ -355,6 +378,14 @@ def bans_fetch():
             "ip": escape(str(ban.get("ip", "N/A"))),
             "country": escape(str(ban.get("country", "N/A"))),
             "reason": escape(str(ban.get("reason", "N/A"))),
+            # The verdict the banning plugin recorded, passed through as the dict the DB returns.
+            # Not escaped here: the Reason column renders it through the shared
+            # `formatSecurityReason` helper, which escapes every value it interpolates exactly
+            # once — escaping it twice would print `&#39;` at the user.
+            # Sent only for the reasons that helper renders. It ignores every other one, and a
+            # badbehavior ban's reason_data is the whole per-IP increment list — shipping that on
+            # every draw, for up to 1000 rows a page, would be payload nothing reads.
+            "reason_data": (ban.get("reason_data") or {}) if str(ban.get("reason") or "").lower() in _SENTENCE_REASONS else {},
             "scope": escape(str(ban.get("ban_scope", "global"))),
             "service": escape(str(ban.get("service") or "_")),
             "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
@@ -378,14 +409,6 @@ def bans_fetch():
         service = ban.get("service")
         # Normalize service to "_" for global bans or when service is None
         if ban.get("ban_scope") == "global" or service is None:
-            # The verdict the banning plugin recorded, passed through as the dict the DB returns.
-            # Not escaped here: the Reason column renders it through the shared
-            # `formatSecurityReason` helper, which escapes every value it interpolates exactly
-            # once — escaping it twice would print `&#39;` at the user.
-            # Sent only for the reasons that helper renders. It ignores every other one, and a
-            # badbehavior ban's reason_data is the whole per-IP increment list — shipping that on
-            # every draw, for up to 1000 rows a page, would be payload nothing reads.
-            "reason_data": (ban.get("reason_data") or {}) if str(ban.get("reason") or "").lower() in _SENTENCE_REASONS else {},
             service = "_"
         return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"  # noqa: E231
 
@@ -730,7 +753,9 @@ def bans_ban():
     if selection_mode == "filtered":
         if request.form.get("source") != "reports":
             return handle_error("Invalid filtered ban source.", "bans", True)
-        bans = _get_filtered_report_bans(request.form)
+        bans, skipped_challenges = _get_filtered_report_bans(request.form)
+        if skipped_challenges:
+            flash(f"Skipped {skipped_challenges} report(s) whose client was challenged or redirected rather than blocked.", "info")
     elif selection_mode == "explicit":
         raw_bans = request.form.get("bans", "")
         if not raw_bans:

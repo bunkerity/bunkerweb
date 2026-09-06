@@ -228,7 +228,7 @@
         {% if "home-card-top-reasons" not in hidden_home_cards | default([], true) %}
         <div class="col-12 col-lg-4">
             <div class="home-async-chart h-100" id="requests-reasons-async">
-                {% call card(id="home-card-top-reasons", hideable=true, classes="h-100", title="Top reasons for blocks", title_key="dashboard.card.top_reasons.title", subtitle="By trigger rule", subtitle_key="dashboard.panel.reasons_sub", uppercase=true, separator=false) %}
+                {% call card(id="home-card-top-reasons", hideable=true, classes="h-100", title="Top report reasons", title_key="dashboard.card.top_reasons.title", subtitle="By trigger rule", subtitle_key="dashboard.panel.reasons_sub", uppercase=true, separator=false) %}
                     <table class="table table-sm mb-0">
                         <tbody id="home-top-reasons-body"></tbody>
                     </table>
