@@ -250,6 +250,10 @@ TLS trust is also stored per instance:
 !!! warning "Pinning is the only verified TLS mode"
     There is no per-instance CA-validation mode. `off` does not verify the certificate, even when the endpoint uses HTTPS. `pinned` on an HTTP endpoint has no certificate to check, so pair it with `listen_https: true`. Update the stored fingerprint when the instance certificate rotates or control-plane calls to that instance will fail.
 
+### Enrollment: an alternative to setting `credential` by hand
+
+An instance registered through the web UI, the API, or declared through the environment (`method="manual"`) can instead be **enrolled**: an operator issues a single-use, time-limited code with `POST /instances/{hostname}/enroll` (shown once — optional `ttl_seconds`, default 900s, capped at 3600s), and the instance redeems it itself at boot with `POST /instances/enroll` (body `{hostname, code}`) — the one endpoint in this router with no auth guard, since it runs before the instance has any credential to authenticate with; its protection is the code's own single use, TTL and SHA-512-at-rest hash, plus the shared rate limiter and the API's IP whitelist. From that point on the instance stores and answers only to its own minted credential — the operator never has to see or set it. An enrolled credential is rotated or revoked with `POST /instances/{hostname}/rotate`/`revoke`, and a revoked instance is refused at the same dial funnel every control-plane call passes through. An instance that loses its persisted credential *file* after enrolling refuses to start rather than falling back to the global `API_TOKEN` it had already renounced — recreating it with no data volume at all is outside that guard's reach, since the marker that would trip it is lost together with the credential. Enrollment and an explicitly-set `credential` are independent: use whichever suits how the instance is provisioned.
+
 ## Rate limiting
 
 Enabled by default with two strings: `API_RATE_LIMIT` (global, default `100r/m`) and `API_RATE_LIMIT_AUTH` (default `10r/m` or `off`). Rates accept NGINX-style notation (`3r/s`, `40r/m`, `200r/h`) or verbose forms (`100/minute`, `200 per 30 minutes`). Configure via:
@@ -401,6 +405,9 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `POST /instances`: register an instance (hostname/port/server_name/method).
   - `GET/PATCH/DELETE /instances/{hostname}`: inspect, update mutable fields, or delete API-managed instances.
   - `DELETE /instances`: bulk delete API-managed instances; non-API entries are skipped.
+  - `PUT /instances/bulk`: bulk-reconcile instances by `method` (used by autoconf). Refuses `method="ui"` or `method="manual"` — either would delete-and-recreate every enrolled row of that kind, wiping its minted credential.
+  - Enrollment: `POST /instances/{hostname}/enroll` (needs `instances_enroll`) issues a single-use, time-limited enrollment code shown once, with an optional `ttl_seconds` override. `POST /instances/enroll` — body `{hostname, code}` — is the one route in this router with no `Depends(guard)`: the booting instance calls it itself to redeem the code and receive its credential; its protection is the code's own single use, TTL and hash, plus the shared rate limiter and the IP whitelist. From then on the instance refuses the global `API_TOKEN` and answers only to its own stored credential. `POST /instances/{hostname}/rotate` and `POST /instances/{hostname}/revoke` (need `instances_rotate`) rotate or revoke a live credential — rotation is two-phase and answers `502` rather than force through an instance it cannot reach, and a revoked instance is refused at every dial from then on.
+  - `PATCH /instances/{hostname}/status`: set an instance's `up`/`down`/`failover` status directly (used by the scheduler's own healthcheck loop).
   - Health/actions: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
   - `GET /instances/{hostname}/health` forwards what the instance says about itself — `ok`, `loading` or `reloading` — where `ping` only answers "reachable". An instance that restarted stays in `loading` until it receives a configuration, and in that state its timer-driven plugins are disabled, so the scheduler uses this to decide whether to re-push. Both routes need the `instances_read` permission.
 - **Global settings**
@@ -413,6 +420,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `PATCH /services/{service}`: rename, update variables, toggle draft.
   - `DELETE /services/{service}`: remove service and derived config keys.
   - `POST /services/{service}/convert?convert_to=online|draft`: switch draft/online quickly.
+  - The reserved `default-server` service is returned by `GET /services` flagged `reserved: true` — **only when `MULTISITE=yes`**; with `MULTISITE=no` the row does not exist and is not listed, and the default server behaves exactly as it did in 1.6. It is the block that answers requests matching no configured service — an unknown hostname, a raw IP address — exposed as a service so its certificate, TLS settings, response headers and error pages can be read and written like any other. It is permanent: `POST /services` with that name, `DELETE /services/default-server`, a `PATCH` that renames it (or renames another service onto it), a `PATCH` that drafts it and `POST /services/default-server/convert?convert_to=draft` all answer `403` with one sentence saying why. `PATCH /services/default-server` with `variables` is the supported way to configure it, and it is never counted against the PRO service quota. Two `variables` keys are refused there with `400`: `SERVER_TYPE`, at any value including the stored one, because the reserved id never gets a `server{}` block of either kind for it to switch — a read-modify-write client must strip it from the payload it echoes back; and a `DEFAULT_SERVER_STREAM_PORTS_SSL` entry that `DEFAULT_SERVER_STREAM_PORTS` does not contain.
 - **Custom configs**
   - `GET /configs`: list snippets (default service `global`); `with_data=true` embeds printable content.
   - `POST /configs`, `POST /configs/upload`: create snippets via JSON or file upload.
@@ -420,7 +428,6 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: update or move API-managed snippets.
   - `DELETE /configs` or `DELETE /configs/{service}/{type}/{name}`: remove API-managed snippets; template-managed entries are skipped.
   - Supported types: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/plugin hooks.
-  - The reserved `default-server` service is returned by `GET /services` flagged `reserved: true` — **only when `MULTISITE=yes`**; with `MULTISITE=no` the row does not exist and is not listed, and the default server behaves exactly as it did in 1.6. It is the block that answers requests matching no configured service — an unknown hostname, a raw IP address — exposed as a service so its certificate, TLS settings, response headers and error pages can be read and written like any other. It is permanent: `POST /services` with that name, `DELETE /services/default-server`, a `PATCH` that renames it (or renames another service onto it), a `PATCH` that drafts it and `POST /services/default-server/convert?convert_to=draft` all answer `403` with one sentence saying why. `PATCH /services/default-server` with `variables` is the supported way to configure it, and it is never counted against the PRO service quota. Two `variables` keys are refused there with `400`: `SERVER_TYPE`, at any value including the stored one, because the reserved id never gets a `server{}` block of either kind for it to switch — a read-modify-write client must strip it from the payload it echoes back; and a `DEFAULT_SERVER_STREAM_PORTS_SSL` entry that `DEFAULT_SERVER_STREAM_PORTS` does not contain.
 - **Bans**
   - `GET /bans`: list the active bans from the database (the durable list). **Changed in 1.7** — this used to aggregate the instances' in-memory bans, which under-reports after a restart.
   - `GET /bans/instances`: the previous behaviour, kept as its own endpoint — what each instance is enforcing right now.
@@ -437,6 +444,47 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 - **Jobs**
   - `GET /jobs`: list jobs, schedules, and cache summaries.
   - `POST /jobs/run`: mark plugins as changed to trigger associated jobs.
+- **Web cache**
+  - `GET /web-cache/status`, `GET /web-cache/metrics`: per-service reverse-proxy cache status and metrics.
+  - `POST /web-cache/purge`: purge one URL, or the whole cache for a service.
+- **System**
+  - `GET /system/readonly`: whether the database is currently in a read-only/failover state.
+  - `POST /system/checked-changes`: acknowledge processed change-tracking flags.
+- **Users** (web UI accounts, not API callers)
+  - `GET/POST /users`, `GET/PATCH /users/{username}`: account management.
+  - `GET/DELETE /users/{username}/sessions`, `POST /users/{username}/login`: session listing/revocation and login.
+  - `POST /users/{username}/recovery-codes/refresh|use`: TOTP recovery codes.
+  - `GET/POST /users/{username}/webauthn-credentials`, `GET /users/webauthn-credentials/{id}`, `PATCH/DELETE /users/{username}/webauthn-credentials/{id}`: passkey/WebAuthn credentials.
+  - `GET/PATCH /users/{username}/preferences/{key}`, `POST /users/{username}/access`, `GET /users/{username}/permissions`: per-user KV preferences and ACL introspection.
+- **Templates**
+  - `GET /templates`, `GET /templates/{id}`: list/fetch a reusable service template.
+  - `POST /templates`, `PATCH /templates/{id}`, `DELETE /templates/{id}`: create, update, or remove one.
+- **Resource groups**
+  - `GET /resource_groups`, `GET /resource_groups/{id}`, `GET /resource_groups/{id}/references`: list/fetch a reusable typed resource-list alias and see what still references it before deleting it.
+  - `POST /resource_groups`, `PATCH /resource_groups/{id}`, `DELETE /resource_groups/{id}`, `POST /resource_groups/{id}/clone`: manage a group.
+- **Metadata**
+  - `GET /metadata`, `PATCH /metadata`: PRO license state and scheduler-wide flags. Cannot be used to overwrite the certificate/credential encryption keyring.
+- **Certificates**
+  - `GET /certificates`, `GET /certificates/sources`, `GET /certificates/{id}`, `GET /certificates/{id}/download`: the centralized certificate inventory and the plugin-declared sources feeding it.
+  - `PATCH /certificates/{id}`, `POST /certificates/{id}/revoke`, `DELETE /certificates/{id}`: manage a certificate's lifecycle.
+  - `POST /certificates/{id}/attachments`, `DELETE /certificates/{id}/attachments/{service}`: attach a certificate to a service, or detach it.
+- **Redirects** / **Upstreams** — reusable, attachable resources with the same shape
+  - `GET/POST /redirects`, `GET/PATCH/DELETE /redirects/{id}`, `POST/DELETE /redirects/{id}/attachments[/{service}]`: HTTP redirect rules attachable to several services at once.
+  - `GET/POST /upstreams`, `GET/PATCH/DELETE /upstreams/{id}`, `POST/DELETE /upstreams/{id}/attachments[/{service}]`: upstream pools (HTTP, gRPC, or stream) attachable to a reverse-proxy path, or to a whole stream service.
+- **Metrics**
+  - `GET /metrics/timings`: per-plugin, per-phase timing aggregate across instances (`METRICS_COLLECT_TIMINGS`).
+  - `GET /metrics/requests`, `GET /metrics/requests/timeseries`, `GET /metrics/requests/top-offenders`, `GET /metrics/requests/top-rules`: the persisted Reports data behind the web UI's Reports dashboard, filterable by `protocol` (`http`, `tcp`, `udp`) among other facets.
+  - `GET /metrics/threatmap`: near-real-time blocked-traffic feed behind the personal Threatmap page.
+- **Certificate sources** (plugin-shipped)
+  - `GET /bunkernet/effectiveness`, `GET /bunkernet/stats`: BunkerNet community threat-intelligence effectiveness and usage stats.
+  - `POST /customcert/certificates/upload`: register an operator-provided certificate in the inventory.
+  - `POST /letsencrypt/certificates`, `POST /letsencrypt/certificates/renew-due`, `GET /letsencrypt/certificates/orphans`: issue, renew due certificates in bulk, and list orphaned ones.
+  - `POST /selfsigned/certificates`, `POST /selfsigned/certificates/renew-due`, `POST /selfsigned/certificates/{certificate_id}/renew`: issue, bulk-renew due certificates, or renew one by id.
+- **Workflows** (plugin-shipped, mounted at `/workflows`)
+  - `GET /workflows`, `POST /workflows`, `GET/PATCH/DELETE /workflows/{id}`, `POST /workflows/{id}/clone`: the security-workflow engine's conditional rule chains.
+  - `GET/PUT /workflows/{id}/definition`: read or replace a workflow's compiled rule definition.
+  - `POST /workflows/validate`, `POST /workflows/{id}/test`: validate a definition, or dry-run it against a sample request before saving.
+  - `POST /workflows/{id}/attachments`, `DELETE /workflows/{id}/attachments/{service}`: attach a workflow to a service, or detach it.
 
 ## Operational behaviour
 

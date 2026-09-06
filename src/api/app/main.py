@@ -273,9 +273,15 @@ tags_metadata = [
     {"name": "core", "description": "Health probes and global utility endpoints"},
     {"name": "auth", "description": "Authentication and Biscuit issuance"},
     {"name": "bans", "description": "Operations related to ban management"},
-    {"name": "instances", "description": "Operations related to instance management"},
+    {
+        "name": "instances",
+        "description": "Instance management, including single-use enrollment codes and per-instance credential rotation/revocation",
+    },
     {"name": "global_settings", "description": "Operations related to global settings"},
-    {"name": "services", "description": "Operations related to service management"},
+    {
+        "name": "services",
+        "description": "Service management, including the reserved `default-server` pseudo-service (multisite only)",
+    },
     {"name": "configs", "description": "Operations related to custom NGINX configs"},
     {"name": "plugins", "description": "Operations related to plugin management"},
     {"name": "cache", "description": "Operations related to job cache files"},
@@ -284,6 +290,22 @@ tags_metadata = [
         "description": "Reverse-proxy cache status, metrics, and purge operations",
     },
     {"name": "jobs", "description": "Operations related to scheduler jobs"},
+    {
+        "name": "redirects",
+        "description": "Reusable HTTP redirect rules, attachable to several services at once",
+    },
+    {
+        "name": "upstreams",
+        "description": "Reusable upstream pools (HTTP, gRPC, and stream), attachable to several services at once",
+    },
+    {
+        "name": "metrics",
+        "description": "Persisted request metrics: blocked-request reports and timeseries",
+    },
+    {
+        "name": "workflows",
+        "description": "Security-workflow engine: conditional rule chains evaluated in the access phase, ahead of antibot",
+    },
     {
         "name": "system",
         "description": "System-level operations (readonly status, change tracking)",
@@ -304,6 +326,22 @@ tags_metadata = [
     {
         "name": "certificates",
         "description": "Centralized certificate inventory with provider-owned lifecycle extensions",
+    },
+    {
+        "name": "bunkernet",
+        "description": "BunkerNet community threat-intelligence network: effectiveness and stats",
+    },
+    {
+        "name": "customcert",
+        "description": "Certificate source: upload an operator-provided certificate into the inventory",
+    },
+    {
+        "name": "letsencrypt",
+        "description": "Certificate source: Let's Encrypt issuance, renewal, and orphan cleanup",
+    },
+    {
+        "name": "selfsigned",
+        "description": "Certificate source: self-signed issuance and renewal",
     },
 ]
 
