@@ -130,6 +130,6 @@ certbot and certbot-dns-multi are direct dependencies here because the worker ru
 | `DATABASE_URI`                                      | (empty)                    | Without it, job-run persistence is skipped                                                                 |
 | `DATABASE_POOL_SIZE` / `DATABASE_POOL_MAX_OVERFLOW` | `5`                        | Defaulted at child init if unset                                                                           |
 | `DISABLE_CONFIGURATION_TESTING`                     | `no`                       | `yes` makes the reload broadcast use `?test=no`                                                            |
-| `LOG_LEVEL`                                         | `info`                     | Passed to `celery worker --loglevel`                                                                       |
+| `LOG_LEVEL`                                         | `notice`                   | Mapped by `celery-loglevel.sh` from NGINX's vocabulary, then passed to `celery worker --loglevel`          |
 | `LOG_SYSLOG_TAG`                                    | `bw-worker`                | Exported by `entrypoint.sh`                                                                                |
 | `SWARM_MODE` / `KUBERNETES_MODE` / `AUTOCONF_MODE`  | `no`                       | Selects the value written to `/usr/share/bunkerweb/INTEGRATION`                                            |

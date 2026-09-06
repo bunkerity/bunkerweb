@@ -83,7 +83,7 @@ function start() {
     # this stays in the foreground as the service's main process.
     log "SYSTEMCTL" "ℹ️ " "Executing worker ..."
     if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m celery -A worker.app worker \
-        --loglevel="${LOG_LEVEL}" \
+        --loglevel="$(/usr/share/bunkerweb/worker/celery-loglevel.sh "${LOG_LEVEL}")" \
         --concurrency="${WORKER_CONCURRENCY}" \
         --pool=prefork \
         --max-tasks-per-child=1 \

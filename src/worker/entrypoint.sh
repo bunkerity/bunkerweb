@@ -33,7 +33,7 @@ for i in $(seq 1 30); do
 done
 
 exec celery -A worker.app worker \
-	--loglevel="${LOG_LEVEL:-info}" \
+	--loglevel="$(/usr/share/bunkerweb/worker/celery-loglevel.sh "${LOG_LEVEL:-info}")" \
 	--concurrency="${WORKER_CONCURRENCY:-2}" \
 	--pool=prefork \
 	--max-tasks-per-child=1 \

@@ -2647,6 +2647,11 @@ These are standard NGINX logs, configured via **the `bunkerweb` service only**. 
 - `ERROR_LOG`: Destination for error logs (default: `/var/log/bunkerweb/error.log`). Accepts file path, `stderr`, `syslog:server=host[:port][,param=value]`, or shared buffer `memory:size`. See [NGINX error_log documentation](https://nginx.org/en/docs/ngx_core_module.html#error_log) for details.
 - `LOG_LEVEL`: Verbosity of error logs (default: `notice`).
 
+`LOG_LEVEL` also sets the verbosity of the background job worker (Celery). Since Celery only
+accepts `debug`/`info`/`warning`/`error`/`critical`/`fatal`, BunkerWeb's NGINX-style values are
+mapped automatically before being passed to it (`emerg`/`alert`/`crit` → `critical`, `warn` →
+`warning`, `notice` → `info`); no action needed on your part.
+
 These settings accept standard NGINX values, including file paths, `stderr`, `syslog:server=...` (see [NGINX syslog documentation](https://nginx.org/en/docs/syslog.html)), or shared memory buffers. They support multiple destinations via numbered suffixes (see the [multiple settings convention](features.md#multiple-settings)). Other services (Scheduler, UI, Autoconf, etc.) rely solely on `LOG_TYPES`/`LOG_FILE_PATH`/`LOG_SYSLOG_*`.
 
 **Example with multiple access/error logs (bunkerweb only, numbered suffixes):**
