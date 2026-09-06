@@ -1,6 +1,8 @@
 services:
   crowdsec:
-    image: crowdsecurity/crowdsec:v1.7.7@sha256:6ca53ad26196ca59ddd4fa692a586b73d8fcde085046163b9ca2f04887dca563
+    # 1.8.0 is the floor for the bot-detection scenario in tests/core/crowdsec.yml: the
+    # `challenge` remediation does not exist before it, so no collection can produce one.
+    image: crowdsecurity/crowdsec:v1.8.0@sha256:99eb4df235527e978595ef5ebb30182831686dc875521de67ef39b7659a86897
     container_name: crowdsec
     ports:
       # Not 8888: since 1.7 every stack carries bw-api, which publishes 127.0.0.1:8888 for the

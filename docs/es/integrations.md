@@ -1525,6 +1525,32 @@ docker run -d \
 
 ---
 
+#### Detección de bots (CrowdSec 1.8+)
+
+CrowdSec 1.8 puede responder a una petición sospechosa con un **desafío** en lugar de un baneo: una página que toma la huella del navegador y le hace resolver una prueba de trabajo. BunkerWeb sirve esa página exactamente como CrowdSec la produjo, sobre la URI original y sin llegar a tu aplicación. Está desactivada por defecto; actívala con la colección que lleve el umbral que quieras:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+`crowdsecurity/appsec-bot-challenge` rechaza a partir de una puntuación de 75; `…-strict` a partir de 45 y `…-permissive` a partir de 100 son alternativas, no capas. El entrypoint instala la colección y añade las configuraciones AppSec que trae a `/etc/crowdsec/acquis.d/appsec.yaml`, de modo que no hace falta nada más. Confirma los rechazos con `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection`.
+
+!!! warning "Dos requisitos antes de activarla"
+    - **Los clientes desafiados necesitan JavaScript y cookies.** Los consumidores de API, las sondas de monitorización y las herramientas de línea de comandos no pueden resolver el desafío y seguirán siendo desafiados; exclúyelos del lado de CrowdSec usando las configuraciones de exclusión que trae el paquete.
+    - **El host necesita memoria ejecutable.** El desafío se ofusca mediante un runtime WebAssembly que CrowdSec solo ejecuta en modo compilador, así que el *host* necesita SSE4.1 en amd64 y un núcleo que permita convertir en ejecutable una zona de memoria escribible. En un host endurecido con W^X, o bajo una política restrictiva de seccomp o SELinux, CrowdSec registra `failed to create wasm runtime in compiler mode` al arrancar y la detección de bots queda desactivada.
+
+    Consulta la [documentación de la función CrowdSec](features.md#crowdsec) para la descripción completa.
+
+---
+
 #### Deshabilitar Analizadores Específicos
 
 Si quieres mantener la configuración predeterminada pero deshabilitar explícitamente uno o más analizadores, proporciona una lista separada por espacios a través de `CROWDSEC_DISABLE_PARSERS`:
@@ -3394,6 +3420,10 @@ To add a new application protected by BunkerWeb:
 
 En lugar de usar el chart de Helm, también puedes usar las plantillas YAML dentro de la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) del repositorio de GitHub. Ten en cuenta que recomendamos encarecidamente usar el chart de Helm en su lugar.
 
+!!! warning "DNS_RESOLVERS debe nombrar el Service DNS del clúster"
+
+    Dale a `DNS_RESOLVERS` el Service DNS del clúster, cuya ClusterIP es estable durante toda la vida del Service, y nunca una IP de pod. nginx resuelve ese valor una sola vez, cuando analiza su configuración, y reutiliza la dirección obtenida hasta la siguiente recarga: cualquier cosa ligada a pods solo funciona hasta que esos pods se mueven, y un reinicio progresivo de CoreDNS deja entonces todas las resoluciones agotando su tiempo de espera. En un clúster estándar ese Service es `kube-dns.kube-system.svc.cluster.local`, incluso cuando CoreDNS es la implementación que hay detrás.
+
 ### Recursos de Ingress
 
 Una vez que la pila de BunkerWeb para Kubernetes esté configurada y operativa con éxito (consulta los registros de autoconfiguración para obtener información detallada), puedes proceder a desplegar aplicaciones web dentro del clúster y declarar tu recurso de Ingress.
@@ -3420,10 +3450,6 @@ spec:
   # TLS es opcional, también puedes usar Let's Encrypt integrado, por ejemplo
   # tls:
   #   - hosts:
-!!! warning "DNS_RESOLVERS debe nombrar el Service DNS del clúster"
-
-    Dale a `DNS_RESOLVERS` el Service DNS del clúster, cuya ClusterIP es estable durante toda la vida del Service, y nunca una IP de pod. nginx resuelve ese valor una sola vez, cuando analiza su configuración, y reutiliza la dirección obtenida hasta la siguiente recarga: cualquier cosa ligada a pods solo funciona hasta que esos pods se mueven, y un reinicio progresivo de CoreDNS deja entonces todas las resoluciones agotando su tiempo de espera. En un clúster estándar ese Service es `kube-dns.kube-system.svc.cluster.local`, incluso cuando CoreDNS es la implementación que hay detrás.
-
   #       - www.example.com
   #     secretName: secret-example-tls
   rules:

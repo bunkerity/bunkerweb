@@ -1531,6 +1531,32 @@ docker run -d \
 
 ---
 
+#### Détection de bots (CrowdSec 1.8+)
+
+CrowdSec 1.8 peut répondre à une requête suspecte par un **défi** plutôt que par un bannissement : une page qui prend l’empreinte du navigateur et lui fait résoudre une preuve de travail. BunkerWeb sert cette page exactement telle que CrowdSec l’a produite, sur l’URI d’origine, sans atteindre votre application. Elle est désactivée par défaut ; activez-la avec la collection portant le seuil souhaité :
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+`crowdsecurity/appsec-bot-challenge` rejette à partir d’un score de 75 ; `…-strict` à partir de 45 et `…-permissive` à partir de 100 sont des alternatives, pas des couches. Le point d’entrée installe la collection et ajoute les configurations AppSec qu’elle fournit à `/etc/crowdsec/acquis.d/appsec.yaml`, rien d’autre n’est nécessaire. Confirmez les rejets avec `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection`.
+
+!!! warning "Deux prérequis avant de l’activer"
+    - **Les clients défiés ont besoin de JavaScript et des cookies.** Les consommateurs d’API, les sondes de supervision et les outils en ligne de commande ne peuvent pas résoudre le défi et seront défiés en boucle ; excluez-les côté CrowdSec à l’aide des configurations d’exclusion fournies par le lot.
+    - **L’hôte a besoin de mémoire exécutable.** Le défi est obfusqué par un runtime WebAssembly que CrowdSec n’exécute qu’en mode compilateur : l’*hôte* a donc besoin de SSE4.1 sur amd64 et d’un noyau autorisant une zone mémoire inscriptible à devenir exécutable. Sur un hôte durci en W^X, ou sous une politique seccomp ou SELinux restrictive, CrowdSec journalise `failed to create wasm runtime in compiler mode` au démarrage et la détection de bots reste inactive.
+
+    Voir la [documentation de la fonctionnalité CrowdSec](features.md#crowdsec) pour la description complète.
+
+---
+
 #### Désactiver des analyseurs spécifiques
 
 Si vous souhaitez conserver la configuration par défaut tout en désactivant explicitement un ou plusieurs analyseurs, fournissez une liste séparée par des espaces via `CROWDSEC_DISABLE_PARSERS` :
@@ -3366,6 +3392,10 @@ Pour ajouter une nouvelle application protégée par BunkerWeb :
 
 Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le [dossier misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.
 
+!!! warning "DNS_RESOLVERS doit désigner le Service DNS du cluster"
+
+    Donnez à `DNS_RESOLVERS` le Service DNS du cluster, dont la ClusterIP reste stable pendant toute la vie du Service, et jamais une IP de pod. nginx résout cette valeur une seule fois, au moment où il analyse sa configuration, et réutilise l'adresse obtenue jusqu'au rechargement suivant : ce qui pointe vers des pods ne fonctionne donc que jusqu'à leur déplacement, et un redémarrage progressif de CoreDNS laisse alors toutes les résolutions en échec. Sur un cluster standard, ce Service est `kube-dns.kube-system.svc.cluster.local`, y compris lorsque CoreDNS est l'implémentation qui se trouve derrière.
+
 ### Ressources d'entrée
 
 Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et opérationnelle (reportez-vous aux journaux autoconf pour plus d'informations), vous pouvez procéder au déploiement d'applications Web au sein du cluster et déclarer votre ressource d'entrée.
@@ -3392,10 +3422,6 @@ spec:
   # TLS is optional, you can also use builtin Let's Encrypt for example
   # tls:
   #   - hosts:
-!!! warning "DNS_RESOLVERS doit désigner le Service DNS du cluster"
-
-    Donnez à `DNS_RESOLVERS` le Service DNS du cluster, dont la ClusterIP reste stable pendant toute la vie du Service, et jamais une IP de pod. nginx résout cette valeur une seule fois, au moment où il analyse sa configuration, et réutilise l'adresse obtenue jusqu'au rechargement suivant : ce qui pointe vers des pods ne fonctionne donc que jusqu'à leur déplacement, et un redémarrage progressif de CoreDNS laisse alors toutes les résolutions en échec. Sur un cluster standard, ce Service est `kube-dns.kube-system.svc.cluster.local`, y compris lorsque CoreDNS est l'implémentation qui se trouve derrière.
-
   #       - www.example.com
   #     secretName: secret-example-tls
   rules:

@@ -56,12 +56,15 @@ Las siguientes secciones desarrollan cada paso.
     CrowdSec también proporciona un [Componente de Seguridad de Aplicaciones](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) que se puede usar para proteger su aplicación frente a ataques. Si desea utilizarlo, debe crear otro archivo de adquisición para el Componente AppSec:
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
       type: appsec
     listen_addr: 0.0.0.0:7422
     source: appsec
     ```
+
+    `appsec_configs` (plural) es una lista y añade, de modo que las configuraciones AppSec adicionales amplían `appsec-default` en lugar de reemplazarlo. El singular `appsec_config` admite un solo nombre y no puede combinarse con la clave plural: use la forma plural si piensa habilitar la detección de bots.
 
     **Syslog**
 
@@ -241,7 +244,8 @@ Las siguientes secciones desarrollan cada paso.
     Si desea usar el Componente AppSec, debe crear otro archivo de adquisición para él ubicado en `/etc/crowdsec/acquis.d/appsec.yaml`:
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
         type: appsec
     listen_addr: 127.0.0.1:7422
@@ -301,6 +305,9 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 | `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
 | `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
 
+!!! info "Cómo compara `CROWDSEC_EXCLUDE_LOCATION`"
+    Cada entrada separada por comas excluye la propia URI **y todo lo que cuelgue de ella**: `/health` omite `/health` y `/health/live`, pero no `/healthcheck` — siempre hace falta un separador antes del resto de la ruta. La exclusión es total: una petición excluida no llega ni a la Local API ni al Componente AppSec, así que no excluya una ruta que aún quiera inspeccionar. En particular, nunca excluya `/crowdsec-internal`: la detección de bots sirve desde ahí los recursos de su desafío y excluirlo lo desactiva de forma silenciosa.
+
 #### Ajustes del Componente de Seguridad de Aplicaciones
 
 | Ajuste                            | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                      |
@@ -316,6 +323,102 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
 !!! info "Sobre los Modos de Operación"
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
     - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
+
+### Detección de bots (CrowdSec 1.8+)
+
+CrowdSec 1.8 añade la detección de bots al Componente AppSec. En lugar de banear directamente a un cliente sospechoso, el Componente AppSec puede responder con un **desafío**: una página autocontenida que toma la huella del navegador y le hace resolver una prueba de trabajo, cuyo resultado puntúa después el propio CrowdSec. BunkerWeb sirve esa página exactamente como CrowdSec la produjo — mismo estado, mismas cabeceras, misma cookie, sobre la URI original — y nunca reenvía la petición a su aplicación. Un cliente que falla sigue siendo denegado por la página de baneo propia de BunkerWeb, así que la experiencia de bloqueo no cambia.
+
+La detección de bots **no está activada por defecto**: el bouncer retransmite un desafío en cuanto el motor emite uno, pero el motor solo lo emite una vez que usted instala la colección y carga su configuración.
+
+**Activarla en un motor CrowdSec independiente**
+
+```shell
+cscli collections install crowdsecurity/appsec-bot-challenge
+```
+
+Después añada al archivo de adquisición de AppSec las configuraciones que ha instalado, junto a `appsec-default`:
+
+```yaml
+appsec_configs:
+  - crowdsecurity/appsec-default
+  - crowdsecurity/appsec-bot-*
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec
+```
+
+Reinicie CrowdSec y confirme los rechazos con `cscli alerts list --kind bot-detection`.
+
+Tres paquetes listos para usar fijan el umbral de rechazo: `crowdsecurity/appsec-bot-challenge` rechaza a partir de una puntuación de 75, `crowdsecurity/appsec-bot-challenge-strict` a partir de 45 y `crowdsecurity/appsec-bot-challenge-permissive` a partir de 100. Instale el que quiera: son alternativas, no capas.
+
+**Activarla en la imagen All-In-One**
+
+Defina `CROWDSEC_EXTRA_COLLECTIONS` en el contenedor y reinícielo; el entrypoint instala la colección y añade sus configuraciones al archivo de adquisición de AppSec por usted:
+
+```shell
+docker run -d --name bunkerweb-aio \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+!!! warning "Los clientes desafiados necesitan JavaScript y cookies"
+    La página del desafío ejecuta un script y guarda su resultado en una cookie. Cualquier cliente legítimo que no tenga ambas cosas — consumidores de API, sondas de monitorización, lectores de feeds, la mayoría de herramientas de línea de comandos — no puede resolverlo y seguirá siendo desafiado. Exclúyalos o póngalos en lista de permitidos **del lado de CrowdSec** (el paquete incluye exclusiones para buscadores, monitorización, feeds, ficheros estáticos y rutas de API), no con `CROWDSEC_EXCLUDE_LOCATION`, que desactiva toda comprobación de CrowdSec para esa ruta y no solo el desafío.
+
+!!! warning "El host de CrowdSec necesita memoria ejecutable"
+    El desafío se ofusca en el servidor mediante un runtime WebAssembly que CrowdSec solo ejecuta en modo compilador: no hay alternativa interpretada. Por eso el **host donde corre CrowdSec** necesita SSE4.1 en amd64 (arm64 no tiene ese requisito) y un núcleo que permita convertir en ejecutable una zona de memoria escribible. En un host endurecido con W^X, o bajo una política restrictiva de seccomp o SELinux, CrowdSec registra `failed to create wasm runtime in compiler mode` o `the kernel likely denied an executable memory mapping` al arrancar y la detección de bots queda desactivada. Es un requisito del host del motor, no de los navegadores de sus visitantes.
+
+!!! tip "Conserve la Content-Security-Policy de la página del desafío"
+    CrowdSec siempre adjunta una Content-Security-Policy a la página del desafío, y la página la necesita para ejecutarse. BunkerWeb la conserva porque `Content-Security-Policy` figura en el valor por defecto de `KEEP_UPSTREAM_HEADERS`. Dos ajustes evitan esa lista y romperían el desafío: un `CUSTOM_HEADER` que defina usted mismo `Content-Security-Policy`, e incluirlo en `REMOVE_HEADERS`. Si usa alguno de los dos, la instancia registra un aviso al arrancar indicando el ajuste.
+
+**Leer el veredicto de CrowdSec en la página de Informes**
+
+Cada remediación de CrowdSec se registra como un informe, y el informe ahora nombra el veredicto en lugar de limitarse a decir `crowdsec`. La página **Informes** lo lee como una frase — *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)* — y el detalle del informe conserva debajo los campos en bruto: `source` (`appsec` o `lapi`), `action` (`ban`, `captcha` o `challenge`), `http_status` (el estado que la remediación *declaró*, que no siempre es el servido: un baneo de LAPI no lleva ninguno y un baneo de AppSec declara 403 mientras BunkerWeb responde con `DENY_HTTP_STATUS`), además de `scenario`, `origin` y `duration` cuando la decisión viene de la API local.
+
+Un desafío servido responde con un 200 y no con un código de bloqueo, y el filtro de informes conserva las filas 4xx, `detect` y de flujo: solo por su estado, el desafío se descartaría. Ahora el filtro conserva una remediación de CrowdSec por su **motivo**, sea cual sea el estado con el que terminó, así que el desafío sí se muestra. Con `SECURITY_MODE=detect` no se sirve nada y el veredicto nombra la remediación que *se habría* aplicado, invisible de otro modo: las líneas de alerta del propio bouncer solo se emiten en las rutas que generan una respuesta.
+
+!!! info "El escenario solo aparece en una decisión reciente"
+    Una decisión de la API local lleva su escenario únicamente en una consulta en vivo. Una vez que la remediación está en caché, la caché guarda la remediación y nada más, de modo que las siguientes peticiones del mismo cliente informan de la acción sin escenario. Los veredictos de AppSec nunca llevan uno: no proceden de una decisión.
+
+### Remediación captcha (renderizada por el antibot de BunkerWeb)
+
+Una decisión `captcha` de CrowdSec significa *demuestra que eres humano*, no *vete*. BunkerWeb la responde con su **propio desafío antibot** en lugar de la página captcha de CrowdSec: una sola apariencia para todos los desafíos que sirve su sitio, ningún segundo juego de claves captcha que gestionar, y los proveedores que CrowdSec no ofrece — `javascript`, `cookie`, `mcaptcha`, `capjs` — quedan disponibles también para una decisión de CrowdSec.
+
+| Ajuste                      | Predeterminado | Contexto  | Múltiple | Descripción                                                                                                                          |
+| --------------------------- | -------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_CAPTCHA_PROVIDER` | `captcha`      | multisite | no       | **Desafío captcha:** Qué desafío antibot mostrar cuando CrowdSec pide un captcha. Póngalo en `no` para ignorar las decisiones captcha. |
+
+Acepta los mismos valores que `USE_ANTIBOT`: `cookie`, `javascript`, `captcha`, `recaptcha`, `hcaptcha`, `turnstile`, `mcaptcha`, `capjs`. Los de terceros leen sus claves de los propios ajustes `ANTIBOT_*` del antibot, así que no hay nada que configurar dos veces.
+
+!!! warning "El antibot debe estar activado en el servicio"
+    La página de desafío solo existe en un servicio cuyo `USE_ANTIBOT` esté puesto en algo distinto de `no` (o que tenga una regla de desafío de workflow). En un servicio sin ello, una decisión `captcha` se **banea** en lugar de desafiarse, y la instancia registra una línea que nombra ambos ajustes. `USE_ANTIBOT: "cookie"` es la forma más barata de activarlo: un visitante corriente pasa en un solo viaje de ida y vuelta, mientras que a un cliente marcado por CrowdSec se le muestra el desafío de `CROWDSEC_CAPTCHA_PROVIDER`.
+
+!!! warning "Esto cambia el comportamiento al actualizar"
+    Hasta ahora BunkerWeb solo reaccionaba a las decisiones `ban`, de modo que una decisión `captcha` de su Local API nunca se recuperaba y no tenía ningún efecto. Ahora se recupera, se cachea y se respeta, y renderiza el desafío descrito arriba. Para conservar el comportamiento anterior, ponga `CROWDSEC_CAPTCHA_PROVIDER: "no"`: las decisiones captcha se ignoran entonces exactamente como antes. Tenga en cuenta que el filtro ampliado es `BOUNCING_ON_TYPE=all` y no un par `ban`+`captcha` — el bouncer solo acepta un valor —, así que una decisión de **cualquier otro** tipo que emitan sus perfiles de CrowdSec también se respeta ahora y, al ser desconocida para el bouncer, se aplica como un baneo. Y la exclusión solo restaura el comportamiento anterior **por completo si todos los servicios que comparten la misma Local API de CrowdSec la ponen**: la caché de decisiones se particiona por Local API, no por servicio (`cache_partition.lua`), así que un servicio hermano que se quede con el valor por defecto cachea la decisión captcha y el servicio que se excluye la lee y banea con ella.
+
+!!! tip "`cookie` no prueba nada aquí"
+    El proveedor `cookie` se resuelve solo, sin preguntar nada al visitante. Es un valor barato y razonable para `USE_ANTIBOT`, pero como `CROWDSEC_CAPTCHA_PROVIDER` cuesta dos redirecciones y concede un pase de toda la sesión ante una decisión que significa *demuestra que eres humano*. Prefiera `captcha`, `javascript` o `capjs`.
+
+!!! info "CrowdSec nunca se entera de que el captcha fue resuelto"
+    El desafío se resuelve contra BunkerWeb, no contra el motor, así que `cscli metrics` no cuenta ningún captcha, `CAPTCHA_EXPIRATION` no se aplica y otro bouncer sobre la misma Local API seguirá desafiando al mismo cliente. Quien guarda la respuesta es la sesión BunkerWeb del visitante: una vez resuelto, ese navegador no vuelve a ser desafiado durante toda la vida de su sesión — incluso si entre tanto llega una **nueva** decisión captcha para la misma dirección. Cualquier cliente sin esa sesión (otro navegador, otro dispositivo, un almacén de cookies vaciado) es desafiado con normalidad.
+
+### Delegar el veredicto a un flujo de trabajo de seguridad
+
+Un veredicto de CrowdSec puede ser respondido por sus propios **flujos de trabajo de seguridad** en lugar de por la remediación de CrowdSec: una regla con una condición *veredicto de CrowdSec* puede desafiar, redirigir o bloquear una petición marcada según sus propios términos.
+
+| Ajuste                        | Predeterminado | Contexto  | Múltiple | Descripción                                                                                                                     |
+| ----------------------------- | -------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_DEFER_TO_WORKFLOWS` | `no`           | multisite | no       | **Dejar decidir a los flujos de seguridad:** entregar el veredicto a los flujos asociados a este servicio en lugar de aplicarlo aquí. |
+
+La condición lee dos hechos: la **fuente** del veredicto (`appsec` o `lapi`) y la **remediación** solicitada por CrowdSec (`ban` o `captcha`; un `challenge` lo sirve CrowdSec antes de que se ejecuten los workflows, por lo que no se ofrece). Una petición que CrowdSec no juzgó deja la condición indecisa, lo que nunca coincide; una petición que CrowdSec juzgó y no tuvo nada en contra la hace falsa.
+
+!!! warning "Por defecto no se abre nada"
+    Con `no` —el valor predeterminado— CrowdSec aplica su veredicto él mismo, exactamente como antes. Con `yes`, el veredicto se aplica sin cambios cuando ninguna regla coincide, y la instancia registra una línea que nombra ambos ajustes si el servicio no tiene ningún flujo asociado.
+
+!!! info "Tres respuestas siguen viniendo de BunkerWeb mientras el veredicto espera"
+    El preflight CORS (`204`), `/robots.txt` y `/security.txt` los genera BunkerWeb antes de que se ejecuten los flujos, así que un cliente marcado todavía puede recibir esos tres. Ninguno llega a su aplicación, y toda petición que sí lo haría pasa antes por la escalera de flujos.
 
 ### Configuraciones de Ejemplo
 

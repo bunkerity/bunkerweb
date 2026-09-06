@@ -1537,6 +1537,32 @@ docker run -d \
 
 ---
 
+#### Bot Detection (CrowdSec 1.8+)
+
+CrowdSec 1.8 can answer a suspicious request with a **challenge** instead of a ban: a page that fingerprints the browser and makes it solve a proof of work. BunkerWeb serves that page exactly as CrowdSec produced it, on the original URI, without reaching your application. It is off by default; opt in with the collection that carries the threshold you want:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+`crowdsecurity/appsec-bot-challenge` rejects at a score of 75; `…-strict` at 45 and `…-permissive` at 100 are alternatives, not layers. The entrypoint installs the collection and adds the AppSec configurations it ships to `/etc/crowdsec/acquis.d/appsec.yaml`, so nothing else is required. Confirm rejections with `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection`.
+
+!!! warning "Two requirements before you enable it"
+    - **Challenged clients need JavaScript and cookies.** API consumers, monitoring probes and command-line tools cannot solve the challenge and will keep being challenged; exclude them on the CrowdSec side using the exclusion configurations the bundle ships.
+    - **The host needs an executable memory mapping.** The challenge is obfuscated by a WebAssembly runtime CrowdSec only runs in compiler mode, so the *host* needs SSE4.1 on amd64 and a kernel that lets a writable mapping become executable. On a W^X-hardened host, or under a restrictive seccomp or SELinux policy, CrowdSec logs `failed to create wasm runtime in compiler mode` at startup and bot detection stays off.
+
+    See the [CrowdSec feature documentation](features.md#crowdsec) for the full description.
+
+---
+
 #### Disable Specific Parsers
 
 If you want to keep the default setup but explicitly disable one or more parsers, provide a space-separated list via `CROWDSEC_DISABLE_PARSERS`:

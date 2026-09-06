@@ -1,0 +1,16 @@
+# Acquisition file for the bot-detection (challenge) scenario only.
+#
+# `crowdsecurity/appsec-bot-*` may only be listed while the collection that provides those
+# appsec-configs is installed: crowdsec refuses to configure the AppSec datasource when an entry --
+# glob or literal -- resolves to no installed appsec-config (pkg/acquisition/modules/appsec/
+# config.go, resolveAppsecConfigEntries), which would red every other case in this spec. The
+# scenario therefore copies this file over tests/misc/conf/appsec.yaml in the same step that adds
+# crowdsecurity/appsec-bot-challenge to COLLECTIONS, and copies appsec-default-only.yaml back
+# afterwards.
+appsec_configs:
+  - crowdsecurity/appsec-default
+  - crowdsecurity/appsec-bot-*
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec

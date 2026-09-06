@@ -1525,6 +1525,32 @@ docker run -d \
 
 ---
 
+#### 机器人检测（CrowdSec 1.8+）
+
+CrowdSec 1.8 可以用**质询**而不是封禁来回应可疑请求：一个对浏览器进行指纹识别并要求其完成工作量证明的页面。BunkerWeb 会在原始 URI 上原样提供 CrowdSec 生成的该页面，并且不会到达您的应用。它默认关闭；请通过带有所需阈值的集合来启用：
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+`crowdsecurity/appsec-bot-challenge` 在评分达到 75 时拒绝；`…-strict` 为 45，`…-permissive` 为 100，它们是可选项而不是叠加层。入口脚本会安装该集合，并把它自带的 AppSec 配置加入 `/etc/crowdsec/acquis.d/appsec.yaml`，无需其他操作。用 `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection` 确认拒绝记录。
+
+!!! warning "启用前的两个前提条件"
+    - **被质询的客户端需要 JavaScript 和 Cookie。** API 调用方、监控探针和命令行工具无法完成质询，并会被反复质询；请使用该捆绑包自带的排除配置在 CrowdSec 一侧排除它们。
+    - **主机需要可执行内存。** 质询由一个 WebAssembly 运行时进行混淆，而 CrowdSec 只以编译器模式运行它，因此*主机*在 amd64 上需要 SSE4.1，并且内核必须允许把可写映射转为可执行。在启用 W^X 加固的主机上，或在严格的 seccomp、SELinux 策略下，CrowdSec 会在启动时记录 `failed to create wasm runtime in compiler mode`，机器人检测将保持关闭。
+
+    完整说明请参阅 [CrowdSec 功能文档](features.md#crowdsec)。
+
+---
+
 #### 禁用特定解析器
 
 如果您想保留默认设置但明确禁用一个或多个解析器，请通过 `CROWDSEC_DISABLE_PARSERS` 提供一个以空格分隔的列表：
@@ -3390,6 +3416,10 @@ To add a new application protected by BunkerWeb:
 
 除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
 
+!!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
+
+    请将 `DNS_RESOLVERS` 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 `kube-dns.kube-system.svc.cluster.local`，即使其背后的实现是 CoreDNS 也是如此。
+
 ### Ingress 资源
 
 一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。
@@ -3416,10 +3446,6 @@ spec:
   # TLS 是可选的，您也可以使用内置的 Let's Encrypt 等
   # tls:
   #   - hosts:
-!!! warning "DNS_RESOLVERS 必须填写集群的 DNS Service"
-
-    请将 `DNS_RESOLVERS` 设为集群的 DNS Service，其 ClusterIP 在该 Service 的整个生命周期内保持不变，切勿填写 Pod IP。nginx 只会在解析自身配置时解析该值一次，并一直沿用当时得到的地址，直到下一次重载：因此任何与 Pod 绑定的地址只在这些 Pod 迁移之前有效，此后 CoreDNS 的滚动重启会让所有解析都超时。在标准集群上，该 Service 为 `kube-dns.kube-system.svc.cluster.local`，即使其背后的实现是 CoreDNS 也是如此。
-
   #       - www.example.com
   #     secretName: secret-example-tls
   rules:

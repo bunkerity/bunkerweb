@@ -1524,6 +1524,32 @@ docker run -d \
 
 ---
 
+#### Bot-Erkennung (CrowdSec 1.8+)
+
+CrowdSec 1.8 kann auf eine verdächtige Anfrage statt mit einer Sperre mit einer **Challenge** antworten: einer Seite, die den Browser mit einem Fingerabdruck versieht und ihn einen Proof of Work lösen lässt. BunkerWeb liefert diese Seite exakt so aus, wie CrowdSec sie erzeugt hat, auf der ursprünglichen URI, ohne Ihre Anwendung zu erreichen. Sie ist standardmäßig deaktiviert; aktivieren Sie sie über die Sammlung mit der gewünschten Schwelle:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+`crowdsecurity/appsec-bot-challenge` lehnt ab einem Score von 75 ab; `…-strict` ab 45 und `…-permissive` ab 100 sind Alternativen, keine Ebenen. Das Entrypoint-Skript installiert die Sammlung und trägt die mitgelieferten AppSec-Konfigurationen in `/etc/crowdsec/acquis.d/appsec.yaml` ein, mehr ist nicht nötig. Prüfen Sie Ablehnungen mit `docker exec -it bunkerweb-aio cscli alerts list --kind bot-detection`.
+
+!!! warning "Zwei Voraussetzungen vor der Aktivierung"
+    - **Herausgeforderte Clients brauchen JavaScript und Cookies.** API-Konsumenten, Monitoring-Sonden und Kommandozeilenwerkzeuge können die Challenge nicht lösen und werden immer wieder herausgefordert; schließen Sie sie auf CrowdSec-Seite über die mitgelieferten Ausschlusskonfigurationen aus.
+    - **Der Host braucht ausführbaren Speicher.** Die Challenge wird von einer WebAssembly-Laufzeit verschleiert, die CrowdSec ausschließlich im Compiler-Modus betreibt; der *Host* benötigt daher SSE4.1 auf amd64 und einen Kernel, der eine beschreibbare Speicherzuordnung ausführbar machen lässt. Auf einem mit W^X gehärteten Host oder unter einer restriktiven seccomp- oder SELinux-Richtlinie protokolliert CrowdSec beim Start `failed to create wasm runtime in compiler mode`, und die Bot-Erkennung bleibt aus.
+
+    Die vollständige Beschreibung finden Sie in der [CrowdSec-Funktionsdokumentation](features.md#crowdsec).
+
+---
+
 #### Deaktivieren bestimmter Parser
 
 Wenn Sie die Standardeinrichtung beibehalten, aber einen oder mehrere Parser explizit deaktivieren möchten, geben Sie eine durch Leerzeichen getrennte Liste über `CROWDSEC_DISABLE_PARSERS` an:
@@ -3393,6 +3419,10 @@ To add a new application protected by BunkerWeb:
 
 Anstatt das Helm-Chart zu verwenden, können Sie auch die YAML-Vorlagen im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations) des GitHub-Repositorys verwenden. Bitte beachten Sie, dass wir dringend empfehlen, stattdessen das Helm-Chart zu verwenden.
 
+!!! warning "DNS_RESOLVERS muss den DNS-Service des Clusters benennen"
+
+    Geben Sie `DNS_RESOLVERS` den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service `kube-dns.kube-system.svc.cluster.local`, auch wenn CoreDNS die Implementierung dahinter ist.
+
 ### Ingress-Ressourcen
 
 Sobald der BunkerWeb-Kubernetes-Stack erfolgreich eingerichtet und betriebsbereit ist (weitere Informationen finden Sie in den Autoconf-Protokollen), können Sie mit der Bereitstellung von Webanwendungen im Cluster fortfahren und Ihre Ingress-Ressource deklarieren.
@@ -3419,10 +3449,6 @@ spec:
   # TLS ist optional, Sie können beispielsweise auch das integrierte Let's Encrypt verwenden
   # tls:
   #   - hosts:
-!!! warning "DNS_RESOLVERS muss den DNS-Service des Clusters benennen"
-
-    Geben Sie `DNS_RESOLVERS` den DNS-Service des Clusters an, dessen ClusterIP für die Lebensdauer des Service stabil bleibt, und niemals eine Pod-IP. nginx löst diesen Wert genau einmal auf, beim Parsen seiner Konfiguration, und verwendet die erhaltene Adresse bis zum nächsten Reload weiter: Etwas Pod-Bezogenes funktioniert also nur so lange, bis diese Pods umziehen, und ein rollierender Neustart von CoreDNS lässt danach jede Auflösung in einen Timeout laufen. Auf einem Standard-Cluster ist dieser Service `kube-dns.kube-system.svc.cluster.local`, auch wenn CoreDNS die Implementierung dahinter ist.
-
   #       - www.example.com
   #     secretName: secret-example-tls
   rules:

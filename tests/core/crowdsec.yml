@@ -109,6 +109,314 @@ actions:
     delay: 30
     retries: 2
 
+  # --- CrowdSec 1.8 bot detection (challenge remediation) ------------------------------------
+  # The challenge is opt-in: the engine only issues one once crowdsecurity/appsec-bot-challenge is
+  # installed AND its appsec-configs are listed in appsec_configs. Both halves are switched on
+  # here and switched back off afterwards, because with them on EVERY request to the service is
+  # challenged -- which is exactly what the pre-existing cases above must not see.
+  enable_appsec_bot_challenge:
+    type: script
+    # Only swaps the acquisition file. The collection and the CrowdSec restart come with the next
+    # action: the harness recreates the CrowdSec container when `crowdsec_config` changes
+    # (generate.py -> restart_crowdsec -> start.sh `compose down` + `up -d`), and that recreation
+    # is what re-reads this bind-mounted file.
+    script:
+      - "cp"
+      - "tests/core/crowdsec/fixtures/appsec-bot-challenge.yaml"
+      - "tests/misc/conf/appsec.yaml"
+    # The stream cases above leave a ban decision for the test IP in the CrowdSec database and in
+    # the bouncer's shared dict; a ban would win over the challenge and this scenario would assert
+    # nothing. Only `down -v` clears both -- same reason blocked_live carries this flag.
+    full_clean: true
+  challenged_by_appsec:
+    type: script
+    # Asserted here rather than with a `status` action because the point is the BODY: a 200 alone
+    # is what an unprotected origin returns. "CrowdSec Challenge" is the title of the page the
+    # AppSec Component generates, so the origin cannot produce it, and the Content-Security-Policy
+    # is the one CrowdSec attaches to that page (KEEP_UPSTREAM_HEADERS is what preserves it).
+    # The fpscanner asset is checked too: the challenge page loads it from the same internal path
+    # through the same bouncer, and a challenge whose script never loads cannot be solved.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from http.client import HTTPConnection
+
+        UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+
+        def get(path):
+            connection = HTTPConnection("127.0.0.1", timeout=10)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": UA, "Accept": "text/html"})
+                response = connection.getresponse()
+                return response.status, dict(response.getheaders()), response.read().decode("utf-8", "replace")
+            finally:
+                connection.close()
+
+        status, headers, body = get("/")
+        assert status == 200, f"challenge status: {status}"
+        assert "CrowdSec Challenge" in body, f"not the challenge page: {body[:200]!r}"
+        # A bare "is there a CSP header" would be vacuous: the headers plugin ships one on every
+        # response. `worker-src` appears only in CrowdSec's DefaultChallengeCSP, never in
+        # BunkerWeb's default, so this asserts that CrowdSec's own policy survived.
+        csp = headers.get("Content-Security-Policy", "")
+        assert "worker-src" in csp, f"challenge CSP replaced or stripped: {csp!r}"
+
+        status, headers, body = get("/crowdsec-internal/challenge/fpscanner.js")
+        assert status == 200, f"fpscanner status: {status}"
+        assert "javascript" in headers.get("Content-Type", ""), f"fpscanner type: {headers.get('Content-Type')!r}"
+    config:
+      # The spec-wide 100 ms is five times tighter than the product default and this is the one
+      # action that needs the engine to GENERATE a page, not just judge a request. On timeout
+      # bouncer.lua takes the "Fallback because of err" path, APPSEC_FAILURE_ACTION is
+      # passthrough, the origin answers 200 and the assertion fails as if the relay were broken.
+      CROWDSEC_APPSEC_PROCESS_TIMEOUT: "1000"
+    crowdsec_config:
+      COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb crowdsecurity/appsec-bot-challenge"
+    # `restart_stack` stays at its default `true` on purpose. The CrowdSec container is only
+    # recreated inside the restart path (start.sh when full_clean, utils.sh restart_stack()
+    # otherwise), and those flags are read from the PREVIOUS action (tests/core.py:252-253 writes
+    # them after the assertion, run.sh:262-268 reads them at the top of the next iteration). What
+    # this action's `true` actually governs is therefore the restart before the NEXT one -- which
+    # is why disable_appsec_bot_challenge below has to keep the collection installed.
+    # The delay covers the collection install and the WASM challenge runtime build that follow it.
+    delay: 20
+    retries: 2
+  disable_appsec_bot_challenge:
+    type: script
+    # Restore the shipped acquisition file, so the ban non-regression below -- and any spec that
+    # runs after this one on the same checkout -- sees the default configuration again.
+    script:
+      - "cp"
+      - "tests/core/crowdsec/fixtures/appsec-default-only.yaml"
+      - "tests/misc/conf/appsec.yaml"
+    # Load-bearing, and NOT a copy-paste of the action above. The restart that precedes THIS
+    # action is governed by the previous action's flags, and it happens before this script runs:
+    # at that moment tests/misc/conf/appsec.yaml still lists `crowdsecurity/appsec-bot-*`. Drop
+    # the collection here and CrowdSec comes up with a glob that matches nothing installed --
+    # `no installed appsec-config matches pattern` is fatal (pkg/acquisition/modules/appsec/
+    # config.go), the container exits, wait.sh times out and every remaining action in this
+    # category dies with it. Keeping the collection one action longer costs nothing: the
+    # full_clean below wipes it anyway.
+    crowdsec_config:
+      COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb crowdsecurity/appsec-bot-challenge"
+    full_clean: true
+  admin_interface_probe_after_challenge:
+    type: script
+    # Same six-path provocation as the live case. Re-run after the challenge scenario because the
+    # `challenge` arm of the remediation guard is new: a `ban` still has to end on BunkerWeb's own
+    # 403 page and not on a relayed body.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+        assert len(set(paths)) == len(paths)
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
+    # Back to the spec's baseline collections. The recreation that applies this -- and the
+    # restored acquisition file -- is the one the previous action's `full_clean` triggers, before
+    # this script runs.
+    crowdsec_config:
+      COLLECTIONS: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules bunkerity/bunkerweb"
+    # Mirrors admin_interface_probe above: this flag governs the restart between the provocation
+    # and the assertion that follows it, and a restart there would re-arm timers and lose the
+    # calibration the `delay: 5, retries: 1` budget on banned_after_challenge is sized for.
+    restart_stack: false
+  banned_after_challenge:
+    type: status
+    url: "http://www.example.com"
+    status: 403
+    # Same asynchronous decision as blocked_live, same budget. No `full_clean` here: the flag
+    # governs the restart before the NEXT action and this is the last one, so setting it would
+    # only suggest a meaning it does not have.
+    delay: 5
+    retries: 1
+
+  captcha_decision_replaces_the_ban:
+    type: script
+    # No hub scenario emits a `captcha` decision and the AppSec route would need a custom
+    # appsec-rule shipped into the engine, so the decision is added by hand. The IP is read back
+    # from the ban `admin_interface_probe_after_challenge` just produced: that is the only way to
+    # learn the address BunkerWeb actually sees, which differs per integration (the published
+    # port's gateway on Docker, the bridge on Linux) and per Docker network allocation.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        import json
+        from subprocess import run
+
+        def cscli(*args):
+            return run(["docker", "exec", "crowdsec", "cscli", *args], capture_output=True, text=True, check=True).stdout
+
+        def decisions():
+            alerts = json.loads(cscli("decisions", "list", "-o", "json") or "null") or []
+            return [d for alert in alerts for d in (alert.get("decisions") or [])]
+
+        addresses = {d["value"] for d in decisions() if d.get("scope") == "Ip"}
+        # Exactly one, and not `addresses[0]`: `cscli decisions list` has no defined order, so a
+        # leftover decision on another address would be picked at random and the assertion below
+        # would red for a reason that has nothing to do with this feature.
+        assert len(addresses) == 1, f"expected one banned address to reuse, got {addresses}"
+        ip = addresses.pop()
+        # Delete first: a `ban` and a `captcha` on the same IP would both be cached and the
+        # bouncer honours the ban, so the arm would assert nothing.
+        cscli("decisions", "delete", "--ip", ip)
+        cscli("decisions", "add", "--ip", ip, "--type", "captcha", "--duration", "15m")
+        types = {d.get("type") for d in decisions() if d.get("value") == ip}
+        assert types == {"captcha"}, f"expected exactly one captcha decision for {ip}, got {types}"
+        print(f"captcha decision added for {ip}")
+    config: &captcha_arm_config
+      # `cookie` and not `no`: the antibot's challenge location is only rendered for a service
+      # that has USE_ANTIBOT set or a workflow challenge rule
+      # (core/antibot/confs/server-http/antibot.conf), and CROWDSEC_CAPTCHA_PROVIDER does not
+      # render it -- crowdsec.lua refuses to delegate on a service with the antibot off. `cookie`
+      # is the cheapest provider that renders it and it resolves transparently in one round trip,
+      # so it is also what makes the assertion below discriminating: an ordinary visitor reaches
+      # the origin, and only the IP CrowdSec flagged is shown the image captcha.
+      USE_ANTIBOT: "cookie"
+      CROWDSEC_CAPTCHA_PROVIDER: "captcha"
+    restart_stack: false
+  captcha_is_challenged_by_the_antibot_not_banned:
+    type: script
+    config: *captcha_arm_config
+    # Two assertions in one client, and both matter. NOT 403: before this feature a `captcha`
+    # decision was rewritten into FALLBACK_REMEDIATION and the visitor was banned outright --
+    # widening BOUNCING_ON_TYPE without the delegation would make that *worse*, not better. And
+    # the page served must be CROWDSEC_CAPTCHA_PROVIDER's, not the service's own `cookie`
+    # challenge, which is what proves the flag CrowdSec sets actually overrode USE_ANTIBOT.
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from http.cookiejar import CookieJar
+        from urllib.error import HTTPError
+        from urllib.request import HTTPCookieProcessor, Request, build_opener
+
+        opener = build_opener(HTTPCookieProcessor(CookieJar()))
+        request = Request("http://127.0.0.1/", headers={"Host": "www.example.com", "User-Agent": "LegitOne", "Accept": "text/html"})
+        try:
+            response = opener.open(request, timeout=10)
+        except HTTPError as error:
+            # A 403 here has two very different causes and they must not be confused: either the
+            # delegation is broken, or this action's USE_ANTIBOT never reached the instance and
+            # crowdsec.lua took its documented refusal path. Check the instance's config before
+            # reading this as a product bug.
+            raise AssertionError(
+                f"{error.code} instead of a challenge -- if it is 403, check that USE_ANTIBOT "
+                "was applied to www.example.com before this action ran (crowdsec.lua refuses to "
+                "delegate on a service with the antibot off, and logs one line saying so)"
+            ) from error
+        body = response.read().decode("utf-8", "replace")
+        assert response.status == 200, f"captcha remediation did not render: {response.status}"
+        assert "/challenge" in response.geturl(), f"not on the antibot challenge uri: {response.geturl()}"
+        # The image captcha page, and not the transparent `cookie` provider USE_ANTIBOT asks for.
+        assert 'alt="Captcha Image"' in body, f"not the captcha provider's page: {body[:300]!r}"
+        print("captcha remediation rendered by the BunkerWeb antibot")
+
+        from subprocess import run
+
+        run(["docker", "exec", "crowdsec", "cscli", "decisions", "delete", "--all"], check=True)
+    # The decision outlives this spec's containers (it is in the cs-data volume, which only a
+    # full_clean drops), so it is removed here rather than left for the next category to trip on.
+    # No `full_clean` flag: this is the last action, where the flag governs a restart that never
+    # happens -- same reason banned_after_challenge leaves it out.
+    delay: 5
+    retries: 2
+
+  # Lane CS-C2 marker: the deferral arm below is appended, nothing above it is touched.
+  #
+  # CROWDSEC_DEFER_TO_WORKFLOWS makes crowdsec:access() hand its verdict to the security
+  # workflows attached to the service instead of applying it itself, so a workflow rule reading
+  # the verdict can answer on the operator's terms. Docker only: the three steps drive the API
+  # on 127.0.0.1:8888, which is how tests/core/workflows.yml already creates a policy, and the
+  # Linux and Autoconf arms of this file publish no such port.
+  create_the_workflow_that_answers_a_crowdsec_ban:
+    integrations: ["Docker"]
+    type: status
+    url: "http://127.0.0.1:8888/workflows"
+    method: POST
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    headers:
+      Content-Type: "application/json"
+    body: '{"name":"e2e-answer-the-crowdsec-ban","description":"Redirect what CrowdSec wanted banned","definition":{"schema_version":1,"rules":[{"id":"answer-ban","name":"Answer the ban","condition":{"op":"crowdsec","field":"remediation","values":["ban"]},"action":{"type":"redirect","url":"https://example.com/flagged","status":302}}]},"service_ids":["www.example.com"]}'
+    status: 201
+    # Attaching a workflow only flags the workflows plugin's own config_changed; the scheduler's
+    # poll loop pushes it. Nothing for restart_stack to wait on, same as tests/core/workflows.yml.
+    restart_stack: false
+
+  regenerate_a_ban_decision_for_the_deferral_arm:
+    integrations: ["Docker"]
+    # The action above this block deletes every decision, so the ban this arm needs has to be
+    # earned again -- same probe, same three-event overflow, same scenario.
+    type: script
+    script:
+      - "python3"
+      - "-c"
+      - |
+        from concurrent.futures import ThreadPoolExecutor
+        from http.client import HTTPConnection
+
+        paths = ("/admin", "/manager", "/phpmyadmin", "/pma", "/wp-admin", "/wp-login")
+
+        def probe(path):
+            connection = HTTPConnection("127.0.0.1", timeout=5)
+            try:
+                connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
+                response = connection.getresponse()
+                assert response.status in (403, 404), f"{path}: {response.status}"
+                response.read()
+            finally:
+                connection.close()
+
+        with ThreadPoolExecutor(max_workers=len(paths)) as executor:
+            list(executor.map(probe, paths))
+    restart_stack: false
+
+  the_workflow_answers_instead_of_crowdsec:
+    integrations: ["Docker"]
+    config:
+      CROWDSEC_DEFER_TO_WORKFLOWS: "yes"
+    type: status
+    url: "http://www.example.com"
+    # 302, not the deny status: the rule matched the `ban` remediation and its redirect action
+    # owns the outcome. The deny is what the client would have received a moment ago.
+    status: 302
+    delay: 10
+    retries: 3
+
+  without_the_setting_crowdsec_denies_as_before:
+    integrations: ["Docker"]
+    config:
+      # Removed, not set to "no": the non-regression has to prove the DEFAULT behaviour, which is
+      # the absence of the key, not a value chosen by this spec.
+      CROWDSEC_DEFER_TO_WORKFLOWS: null
+    type: status
+    url: "http://www.example.com"
+    # The workflow is still attached and its rule still matches; CrowdSec simply never hands the
+    # verdict over, so the deny lands before the workflow engine is reached at all. The decision
+    # earned above outlives this restart -- it lives in CrowdSec, not in the bouncer cache.
+    status: 403
+    delay: 10
+    retries: 3
+
 config:
   USE_MODSECURITY: "no"
   USE_BAD_BEHAVIOR: "no"
@@ -149,3 +457,9 @@ Linux:
   config:
     # Follows the host port published in tests/misc/docker/crowdsec.yml.
     CROWDSEC_API: "http://crowdsec:8889"
+
+# The API credentials the three deferral steps authenticate with. Inert for every other arm in
+# this file: nothing else here talks to the API.
+api:
+  API_USERNAME: "admin"
+  API_PASSWORD: "P@ssw0rd"
