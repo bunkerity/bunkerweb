@@ -31,7 +31,7 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import _write_atomic  # type: ignore
+from jobs import _write_atomic, note_deferral  # type: ignore
 
 try:
     from letsencrypt_consistency import le_cache_write_lock  # type: ignore
@@ -554,7 +554,9 @@ try:
             # has them marked down, so this run has nowhere to push *yet*. Leave the flags set
             # and let a later run apply them -- the scheduler re-dispatches when an instance
             # comes back up (healthcheck_job) and again on the APPLY_RETRY_INTERVAL re-arm.
-            LOGGER.warning(f"All {len(registered_instances)} registered BunkerWeb instance(s) are down; leaving the changes pending for a later run")
+            reason = f"All {len(registered_instances)} registered BunkerWeb instance(s) are down; leaving the changes pending for a later run"
+            LOGGER.warning(reason)
+            note_deferral(reason)
             sys_exit(0)
 
         LOGGER.warning("No BunkerWeb instances registered; nothing to push")

@@ -28,6 +28,10 @@
                             ("Jobs", "navigation.jobs", none)]) }}
     {% set interval_icons = {'once': 'bx-revision', 'day': 'bx-calendar-event', 'week': 'bx-calendar-week'} %}
     {% set interval_variants = {'once': 'secondary', 'day': 'primary', 'week': 'warning'} %}
+    {# Mirrors src/common/utils/jobs.py:JOB_DEFERRAL_PREFIX. A run stored success=True with an
+       error carrying this prefix left its change flags pending on purpose (e.g. push-configs:
+       every instance down) -- neither a crash nor a plain no-op, so it gets its own status. #}
+    {% set JOB_DEFERRAL_PREFIX = 'deferred: ' %}
     {% set stats = namespace(reload=0, async=0, failed=0) %}
     {% for job, job_data in jobs.items() %}
         {% if job_data['reload'] %}{% set stats.reload = stats.reload + 1 %}{% endif %}
@@ -122,12 +126,18 @@
                         </td>
                         <td class="text-center">
                             {% if job_data['history'] %}
-                                {% if job_data['history'][0]['success'] %}
-                                    {# The trailing hidden icon isn't part of the visual pill -- static/js/pages/jobs.js's
-                                       searchPanes filter for this column matches on the raw cell HTML containing
-                                       "bx-check"/"bx-x" (jobs.js:365-372), which the old badge(icon=...) markup provided
-                                       and components/status.html's pill has no slot for. Kept so that filter keeps
-                                       working without touching jobs.js (not owned by this pass). #}
+                                {% set last_run = job_data['history'][0] %}
+                                {# The trailing hidden icon isn't part of the visual pill -- static/js/pages/jobs.js's
+                                   searchPanes filter for this column matches on the raw cell HTML containing
+                                   "bx-check"/"bx-x"/"bx-time" (jobs.js:362-386), which the old badge(icon=...) markup
+                                   provided and components/status.html's pill has no slot for. Kept so that filter keeps
+                                   working without touching jobs.js (not owned by this pass). #}
+                                {% if last_run['success'] and last_run['error'] and last_run['error'].startswith(JOB_DEFERRAL_PREFIX) %}
+                                    {# PO ruling 2026-09-02: the pill/filter stay short ("Deferred"); the full sentence
+                                       plus the specific reason (instance count) that the tooltip already carried moves
+                                       here, via status.deferred_tooltip. #}
+                                    {{ status(type="deferred", label="Deferred", i18n_key="status.deferred", variant="warning", tooltip=_("status.deferred_tooltip", reason=last_run['error'][JOB_DEFERRAL_PREFIX|length:]), data_value="deferred") }}<i class="bx bx-time d-none" aria-hidden="true"></i>
+                                {% elif last_run['success'] %}
                                     {{ status(type="success") }}<i class="bx bx-check d-none" aria-hidden="true"></i>
                                 {% else %}
                                     {{ status(type="failed") }}<i class="bx bx-x d-none" aria-hidden="true"></i>
@@ -175,7 +185,15 @@
                                                     style="flex: 1 1 0">{{ history['end_date'] }}</li>
                                                 <li class="list-group-item align-items-center text-center{% if loop.index == 1 and job_data['history']|length > 1 %} rounded-0{% endif %}"
                                                     style="flex: 1 1 0">
-                                                    <i class="bx bx-{% if history['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                                                    {% if history['success'] and history['error'] and history['error'].startswith(JOB_DEFERRAL_PREFIX) %}
+                                                        {# No tooltip here: this list is cloned by jobs.js before it's shown
+                                                           (jQuery .clone() without withDataAndEvents), and Bootstrap's
+                                                           tooltip instance is bound to the original node, not the clone --
+                                                           the icon+color distinction still renders on the clone either way. #}
+                                                        <i class="bx bx-time text-warning"></i>
+                                                    {% else %}
+                                                        <i class="bx bx-{% if history['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
+                                                    {% endif %}
                                                 </li>
                                             </ul>
                                         {% endfor %}

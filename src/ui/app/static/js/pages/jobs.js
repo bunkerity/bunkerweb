@@ -378,6 +378,13 @@ $(document).ready(function () {
                 )}</span>`,
                 value: (rowData) => rowData[7].includes("bx-check"),
               },
+              {
+                label: `<i class=\"bx bx-xs bx-time text-warning\"></i>&nbsp;<span data-i18n="status.deferred">${t(
+                  "status.deferred",
+                  "Deferred",
+                )}</span>`,
+                value: (rowData) => rowData[7].includes("bx-time"),
+              },
             ],
             combiner: "or",
             orderable: false,

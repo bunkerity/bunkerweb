@@ -32,6 +32,7 @@ from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
 from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
+from jobs import JOB_DEFERRAL_PREFIX  # type: ignore
 from resource_group_resolver import kind_for_key as resource_kind_for_setting  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
@@ -60,8 +61,8 @@ from app.utils import (
     handle_stop,
     human_readable_number,
     is_editable_method,
-    is_plugin_active,
     is_enrollable_method,
+    is_plugin_active,
     is_session_revoked,
     is_ui_api_method,
     stop,
@@ -879,8 +880,8 @@ with app.app_context():
         is_plugin_active=is_plugin_active,
         is_plugin_active_for_service=is_plugin_active_for_service,
         is_ui_api_method=is_ui_api_method,
-        can_delete_service=can_delete_service,
         is_enrollable_method=is_enrollable_method,
+        can_delete_service=can_delete_service,
         resource_kind_for_setting=resource_kind_for_setting,
     )
 
@@ -1389,10 +1390,14 @@ def before_request():
 
         if not request.path.startswith("/loading") and current_user.is_authenticated:
             last_push_configs_failed = False
+            last_push_configs_deferred = False
             if changes_ongoing:
                 try:
                     last_push_configs_run = API_CLIENT.get_last_job_run("push-configs")
-                    last_push_configs_failed = last_push_configs_run is not None and last_push_configs_run.get("success") is False
+                    if last_push_configs_run is not None:
+                        last_push_configs_failed = last_push_configs_run.get("success") is False
+                        run_error = last_push_configs_run.get("error")
+                        last_push_configs_deferred = bool(last_push_configs_run.get("success") and run_error and run_error.startswith(JOB_DEFERRAL_PREFIX))
                 except (ApiClientError, ApiUnavailableError):
                     LOGGER.warning("Failed to fetch the last push-configs run from API in before_request.")
 
@@ -1400,6 +1405,12 @@ def before_request():
                 message = translated("flash.last_configuration_change_failed") or "Your last configuration change could not be applied."
                 details = translated("flash.check_jobs_for_details") or "Check the Jobs page for details."
                 flash(f"{message} <a class='alert-link' href='{url_for('jobs.jobs_page')}'>{details}</a>", "error", save=False)
+            elif changes_ongoing and last_push_configs_deferred:
+                # Success=True with a deferred: -prefixed error (src/common/utils/jobs.py) -- the config is pending, not
+                # broken, so this is a distinct "warning" flash rather than the "error" one above (PO ruling 2026-09-02).
+                message = translated("flash.configuration_pending_instance") or "Configuration not applied yet — waiting for an instance to come up."
+                details = translated("flash.check_jobs_for_details") or "Check the Jobs page for details."
+                flash(f"{message} <a class='alert-link' href='{url_for('jobs.jobs_page')}'>{details}</a>", "warning", save=False)
             elif not changes_ongoing and metadata.get("failover", False):
                 flask_flash(
                     "<p class='p-0 m-0 fst-italic'>The last changes could not be applied because it creates a configuration error on NGINX, please check BunkerWeb's logs for more information. The configuration fell back to the last working one.</p>",

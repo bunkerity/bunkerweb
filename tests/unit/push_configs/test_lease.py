@@ -32,6 +32,7 @@ def _load_definitions():
     stubs["Database"].Database = Mock()
     stubs["logger"].setup_logger = Mock(return_value=Mock())
     stubs["jobs"]._write_atomic = Mock()
+    stubs["jobs"].note_deferral = Mock()
     stubs["letsencrypt_consistency"].le_cache_write_lock = Mock()
 
     module = ModuleType("bw_push_configs")

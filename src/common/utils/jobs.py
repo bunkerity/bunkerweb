@@ -165,6 +165,43 @@ def request_requeue(delay_seconds: int, reason: str, logger: Logger) -> None:
     _PENDING_REQUEUE.append({"delay": max(1, int(delay_seconds)), "reason": reason})
 
 
+# Why a job that exited 0 left its change flags raised instead of applying them (e.g.
+# push-configs finding every registered instance down) -- waiting for the worker to record it
+# against the run. Same constraint as `_PENDING_ACKS`/`_PENDING_REQUEUE` above: the job cannot see
+# its own `Jobs_runs` row, that is written by `execute_job` after the job process has already
+# exited, so the reason has to cross through this module instead.
+_PENDING_DEFERRAL_REASON: List[str] = []
+
+# Marks a `Jobs_runs.error` value as a deferral reason rather than a failure reason. A deferred
+# run is recorded `success=True` -- nothing broke, the flags are still raised for the next
+# dispatch to retry -- so a plain "error is set" check cannot tell it apart from a real failure,
+# and a successful run otherwise never sets `error` at all. The UI switches on this prefix to
+# render the distinct "waiting for an instance" state instead of either.
+JOB_DEFERRAL_PREFIX = "deferred: "
+
+
+def note_deferral(reason: str) -> None:
+    """Record why a run that is about to exit 0 left its change flags pending instead of applying them.
+
+    Call this right before the job exits, on the branch where a precondition -- not an error --
+    stopped it from doing the work it was dispatched for. The caller keeps logging its own
+    message; this only hands the same reason to the worker so the run row can say more than
+    "succeeded, changed nothing".
+    """
+    _PENDING_DEFERRAL_REASON.append(reason)
+
+
+def drain_deferral_reason() -> Optional[str]:
+    """Take the deferral reason the job that just ran recorded, if any. Worker side.
+
+    Always drained, even when the job failed, so a reason left by a job that then raised cannot
+    leak into whatever the same worker child runs next.
+    """
+    reason = _PENDING_DEFERRAL_REASON[-1] if _PENDING_DEFERRAL_REASON else None
+    _PENDING_DEFERRAL_REASON.clear()
+    return reason
+
+
 def _write_atomic(target: Path, data: bytes) -> None:
     """Write data to target atomically to avoid partial files."""
     target.parent.mkdir(parents=True, exist_ok=True)

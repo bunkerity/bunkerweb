@@ -179,9 +179,11 @@ def _delivery_attempt(task_id: str, broker_url: str, logger) -> int:
 # the set grew. /usr/share/bunkerweb/utils is on PYTHONPATH in all three worker targets.
 from job_queues import queue_for  # type: ignore # noqa: E402
 from jobs import (  # type: ignore # noqa: E402
+    JOB_DEFERRAL_PREFIX,
     JOB_REQUEUE_COUNT_ENV,
     MAX_JOB_REQUEUES,
     RELOAD_ACK_PENDING_KEY as ACK_PENDING_KEY,
+    drain_deferral_reason,
     drain_pending_acks,
     drain_requeue_request,
 )
@@ -431,6 +433,9 @@ def execute_job(self, job_data: dict) -> dict:
     # all three sources (a non-zero SystemExit, an exception, the executor's own refusals), so it
     # is where the message is assembled for Jobs_runs.error.
     error: Optional[str] = None
+    # What the job deferred instead of doing, if anything -- drained in `finally` below, folded
+    # into `error` (prefixed) only once we know the run is otherwise a success.
+    deferral_reason: Optional[str] = None
 
     try:
         os.environ.clear()
@@ -469,6 +474,12 @@ def execute_job(self, job_data: dict) -> dict:
         error = f"Job crashed: {exc}"
         logger.error(f"[{run_id}] Job {plugin}/{name} crashed: {exc}")
     finally:
+        # First, before anything below that could itself raise (e.g. `_requeue_if_asked`'s
+        # unguarded `int(job_data.get("requeue_count") or 0)`): a reason left by a job that then
+        # crashed must not attach itself to a later, unrelated run in this same worker child, and
+        # that guarantee only holds unconditionally if nothing between here and the drain can skip
+        # it.
+        deferral_reason = drain_deferral_reason()
         os.environ.clear()
         os.environ.update(saved_env)
         # After the restore: the job ran without CELERY_BROKER_URL in its environment, and this
@@ -485,6 +496,11 @@ def execute_job(self, job_data: dict) -> dict:
     # logged is the only description of that failure there is.
     if not success and error is None:
         error = executor.last_error
+    elif success and deferral_reason:
+        # Not a failure: the flags are still raised on purpose, waiting for a precondition (e.g.
+        # push-configs: every instance down). Prefixed so the UI can tell this apart from a plain
+        # success (error is None) and from a real failure (success is False).
+        error = f"{JOB_DEFERRAL_PREFIX}{deferral_reason}"
 
     if db:
         try:
