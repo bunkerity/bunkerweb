@@ -8,6 +8,7 @@ local captcha = require "crowdsec.lib.captcha"
 local flag = require "crowdsec.lib.flag"
 local utils = require "crowdsec.lib.utils"
 local ban = require "crowdsec.lib.ban"
+local challenge = require "crowdsec.lib.challenge"
 local url = require "crowdsec.lib.url"
 -- BunkerWeb local modification: pull MAX_HEADERS from BW config so
 -- ngx.req.get_headers() does not silently truncate at 100 when operators raise it.
@@ -439,7 +440,10 @@ local function live_query(ip)
       ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
     end
     ngx.log(ngx.DEBUG, "Adding '" .. key .. "' in cache for '" .. runtime.conf["CACHE_EXPIRATION"] .. "' seconds")
-    return false, decision.type, nil
+    -- BunkerWeb local modification: the decoded decision travels back with the remediation so
+    -- Allow() can name the scenario in the reason recorded on the report. Live queries only:
+    -- the cache stores a remediation id and nothing else, so a cache hit has no scenario to give.
+    return false, decision.type, nil, decision
   else
     return true, nil, nil
   end
@@ -542,8 +546,8 @@ function csmod.allowIp(ip)
 
   -- if live mode, query lapi
   if runtime.conf["MODE"] == "live" then
-    local ok, remediation, err = live_query(ip)
-    return ok, remediation, err
+    local ok, remediation, err, decision = live_query(ip)
+    return ok, remediation, err, decision
   end
   return true, nil, nil
 end
@@ -597,7 +601,7 @@ function csmod.AppSecCheck(ip)
 
   if err ~= nil then
     ngx.log(ngx.ERR, "Fallback because of err: " .. err)
-    return ok, remediation, status_code, err
+    return ok, remediation, status_code, nil, err
   end
 
   if res.status == 200 then
@@ -606,7 +610,13 @@ function csmod.AppSecCheck(ip)
   elseif res.status == 403 then
     ok = false
     ngx.log(ngx.DEBUG, "Appsec body response: " .. res.body)
-    local response = cjson.decode(res.body)
+    -- Guarded: an unparsable 403 body used to raise out of AppSecCheck, through Allow, into
+    -- helpers.lua's pcall -- which logs an ERR and serves the request UNCHECKED.
+    local decoded, response = pcall(cjson.decode, res.body)
+    if not decoded then
+      ngx.log(ngx.ERR, "Unparsable AppSec response body, falling back: " .. tostring(response))
+      return false, runtime.conf["FALLBACK_REMEDIATION"], ngx.HTTP_FORBIDDEN, nil, nil
+    end
     remediation = response.action
     if response.http_status ~= nil then
       ngx.log(ngx.DEBUG, "Got status code from APPSEC: " .. response.http_status)
@@ -614,17 +624,48 @@ function csmod.AppSecCheck(ip)
     else
       status_code = ngx.HTTP_FORBIDDEN
     end
+    if remediation == "challenge" then
+      -- CrowdSec 1.8 bot detection: the 403 carries the page to serve back on the
+      -- original URI. user_body_content / user_headers / user_cookies are omitempty,
+      -- so any of them can be missing -- Allow() decides what a missing body means.
+      return ok, remediation, status_code, {
+        body = response.user_body_content,
+        headers = response.user_headers,
+        cookies = response.user_cookies,
+      }, nil
+    end
   elseif res.status == 401 then
     ngx.log(ngx.ERR, "Unauthenticated request to APPSEC")
   else
     ngx.log(ngx.ERR, "Bad request to APPSEC (" .. res.status .. "): " .. res.body)
   end
 
-  return ok, remediation, status_code, err
+  return ok, remediation, status_code, nil, err
 
 end
 
-function csmod.Allow(ip)
+-- @param ip string: the client address to judge
+-- @param no_render boolean: report the remediation, never write a response body. Two callers
+--   need this: crowdsec:api()'s /crowdsec/ping connectivity probe, which would otherwise get a
+--   challenge or captcha page spliced into its JSON answer, and SECURITY_MODE=detect, where a
+--   rendered challenge would replace the origin's response and silently turn "detect" into
+--   "block" -- the dispatcher can suppress a deny STATUS, but not a body already written.
+-- @param antibot_provider string|nil: BunkerWeb's own antibot challenge provider to use for a
+--   `captcha` remediation (CROWDSEC_CAPTCHA_PROVIDER, resolved per service by crowdsec:access()).
+--   When set, a `captcha` is neither rendered here nor downgraded to FALLBACK_REMEDIATION: it is
+--   handed back to the caller, which flags the request for the antibot plugin. nil or "no" keeps
+--   the upstream behaviour.
+-- @return boolean ok, string msg, boolean banned, boolean served, table verdict,
+--   string antibot_provider
+--   `served` means the response (AppSec challenge page, or captcha template) has already
+--   been written and the caller must end the access phase with ngx.OK, not a deny status.
+--   `verdict` describes the remediation for the report/ban reason -- `source` (lapi|appsec),
+--   `action` (ban|captcha|challenge), `http_status`, and on a live LAPI decision `scenario`,
+--   `origin` and `duration`. nil when nothing was remediated.
+--   `antibot_provider` is echoed back on -- and only on -- a delegated `captcha`. It is the one
+--   unambiguous signal of that path: every other return leaves it nil, so the caller never has to
+--   infer "delegated" from a combination of the other four.
+function csmod.Allow(ip, no_render, antibot_provider)
   if runtime.conf["ENABLED"] == "false" then
     return true, "disabled"
   end
@@ -635,6 +676,7 @@ function csmod.Allow(ip)
 
   local remediationSource = flag.BOUNCER_SOURCE
   local ret_code = nil
+  local appsec_response = nil
 
   if utils.table_len(runtime.conf["EXCLUDE_LOCATION"]) > 0 then
     for k, v in pairs(runtime.conf["EXCLUDE_LOCATION"]) do
@@ -647,19 +689,34 @@ function csmod.Allow(ip)
         uri_to_check = uri_to_check .. "/"
       end
       if utils.starts_with(ngx.var.uri, uri_to_check) then
+        -- BunkerWeb local modification: this arm logged and fell through, so every
+        -- CROWDSEC_EXCLUDE_LOCATION entry only ever matched the exact URI and the
+        -- documented prefix form silently bounced anyway. Upstream v1.0.18 exits here
+        -- (lib/crowdsec.lua, ngx.exit(ngx.DECLINED)); this fork returns instead because
+        -- the BunkerWeb plugin dispatcher owns the exit.
         ngx.log(ngx.ERR,  "whitelisted location: " .. uri_to_check)
+        return true, "whitelisted " .. uri_to_check
       end
     end
   end
 
-  local ok, remediation, err = csmod.allowIp(ip)
+  local ok, remediation, err, decision = csmod.allowIp(ip)
   if err ~= nil then
     ngx.log(ngx.ERR, "[Crowdsec] bouncer error: " .. err)
   end
 
-  -- if the ip is now allowed, try to delete its captcha state in cache
+  -- if the ip is now allowed, try to delete its captcha state in cache.
+  -- Only a state created for a LAPI decision is dropped here: an AppSec captcha does not
+  -- depend on the IP having a decision, so deleting it would destroy the pending verification
+  -- (or the validated grace period) on every single request and make the captcha impossible to
+  -- solve -- which also made the :748 loop fix below inert for the AppSec source. Second half
+  -- of upstream v1.0.18's captcha/AppSec loop fix (lib/crowdsec.lua).
   if ok == true then
-    runtime.cache:delete("captcha_" .. ip)
+    local _, cached_flags = runtime.cache:get("captcha_" .. ip)
+    local cached_source = flag.GetFlags(cached_flags)
+    if cached_source ~= flag.APPSEC_SOURCE then
+      runtime.cache:delete("captcha_" .. ip)
+    end
   end
 
   -- check with appSec if the remediation component doesn't have decisions for the IP
@@ -667,31 +724,77 @@ function csmod.Allow(ip)
   -- that user configured the remediation component to always check on the appSec (even if there is a decision for the IP)
   if ok == true or runtime.conf["ALWAYS_SEND_TO_APPSEC"] == true then
     if runtime.conf["APPSEC_ENABLED"] == true and ngx.var.no_appsec ~= "1" then
-      local appsecOk, appsecRemediation, status_code, err = csmod.AppSecCheck(ip)
-      if err ~= nil then
-        ngx.log(ngx.ERR, "AppSec check: " .. err)
+      local appsecOk, appsecRemediation, status_code, appsec_resp, appsec_err = csmod.AppSecCheck(ip)
+      if appsec_err ~= nil then
+        ngx.log(ngx.ERR, "AppSec check: " .. appsec_err)
       end
       if appsecOk == false then
         ok = false
         remediationSource = flag.APPSEC_SOURCE
         remediation = appsecRemediation
         ret_code = status_code
+        appsec_response = appsec_resp
       end
     end
   end
 
   local captcha_ok = runtime.cache:get("captcha_ok")
 
+  -- BunkerWeb local modification: a `captcha` remediation is rendered by BunkerWeb's own antibot
+  -- plugin, never by the vendored CrowdSec captcha template -- BunkerWeb exposes no SITE_KEY /
+  -- SECRET_KEY, so captcha.New() fails at init and `captcha_ok` is false on every request. Without
+  -- this arm the block below rewrites every `captcha` decision into FALLBACK_REMEDIATION (`ban` in
+  -- the shipped template) before anything downstream can see it, and the delegation could never
+  -- happen at all.
+  local delegate_captcha = antibot_provider ~= nil and antibot_provider ~= "" and antibot_provider ~= "no"
+
   if runtime.fallback ~= "" then
     -- if we can't use captcha, fallback
-    if remediation == "captcha" and captcha_ok == false then
+    -- BunkerWeb local modification: `not captcha_ok` and not upstream's `captcha_ok == false`.
+    -- `captcha_ok` comes back nil, not false, whenever the key is absent from the shared dict (an
+    -- eviction, a worker that started before init wrote it), and nil ~= false: the fallback then
+    -- did not fire, the captcha block below was skipped because nil is falsy, no arm inside
+    -- `if not ok` matched, and the request fell out to `return true, "allow"` -- served, on a
+    -- decision that asked for a captcha. Reachable only through AppSec until now; widening
+    -- BOUNCING_ON_TYPE to `all` routes every LAPI captcha decision through here.
+    if remediation == "captcha" and not captcha_ok and not delegate_captcha then
       remediation = runtime.fallback
     end
 
     -- if remediation is not supported, fallback
-    if remediation ~= "captcha" and remediation ~= "ban" then
+    if remediation ~= "captcha" and remediation ~= "ban" and remediation ~= "challenge" then
       remediation = runtime.fallback
     end
+  end
+
+  -- BunkerWeb local modification: what was decided, in the shape crowdsec:access() records as
+  -- the report/ban reason. Built here, after the fallback block settled `remediation`, and kept
+  -- in step by the one arm below that rewrites it. Only on a remediation: the allow path is the
+  -- hot path and must not allocate. The LAPI fields exist on a live query only -- a cache hit
+  -- stores a remediation id and nothing else -- and never for an AppSec verdict, whose
+  -- remediation did not come from a decision at all.
+  local verdict
+  if not ok then
+    verdict = {
+      source = remediationSource == flag.APPSEC_SOURCE and "appsec" or "lapi",
+      action = remediation,
+      http_status = ret_code,
+    }
+    if decision ~= nil and remediationSource ~= flag.APPSEC_SOURCE then
+      verdict.scenario = decision.scenario
+      verdict.origin = decision.origin
+      verdict.duration = decision.duration
+    end
+  end
+
+  -- Before the captcha validation block on purpose: that block ends on ngx.redirect(), which
+  -- writes a response just as much as a rendered page does.
+  if no_render and not ok then
+    return true,
+      "not rendered, remediation was '" .. tostring(remediation) .. "'",
+      remediation ~= "allow",
+      nil,
+      verdict
   end
 
   if captcha_ok then -- if captcha can be use (configuration is valid)
@@ -735,17 +838,59 @@ function csmod.Allow(ip)
     end
   end
   if not ok then
+      -- BunkerWeb local modification: hand a `captcha` remediation to BunkerWeb's antibot rather
+      -- than render CrowdSec's own template. First arm on purpose -- `captcha_ok` is false here, so
+      -- without it the request falls past the captcha arm below and out of `if not ok` into
+      -- `return true, "allow"`: a fail-open on the exact decision this feature exists for.
+      -- Nothing is written and nothing is denied: crowdsec:access() flags the request and lets the
+      -- plugin chain continue, and the antibot plugin renders the challenge later in the same
+      -- access phase (it runs after crowdsec, core/order.json).
+      if delegate_captcha and remediation == "captcha" then
+        ngx.log(
+          ngx.ALERT,
+          "[Crowdsec] challenged '"
+            .. ip
+            .. "' with the BunkerWeb antibot ('"
+            .. antibot_provider
+            .. "') for a 'captcha' remediation (by "
+            .. flag.Flags[remediationSource]
+            .. ")"
+        )
+        return true, "captcha delegated to the BunkerWeb antibot", false, false, verdict, antibot_provider
+      end
+      if remediation == "challenge" then
+        -- CrowdSec 1.8 bot detection. The page is served exactly as CrowdSec sent it, on the
+        -- original URI, with its own status and Set-Cookie, and the origin is never reached.
+        if appsec_response ~= nil and type(appsec_response.body) == "string" and appsec_response.body ~= "" then
+          ngx.log(ngx.ALERT, "[Crowdsec] challenged '" .. ip .. "' with 'appsec challenge' (by " .. flag.Flags[remediationSource] .. ")")
+          challenge.apply(ret_code, appsec_response.body, appsec_response.headers, appsec_response.cookies)
+          return true, "challenged", false, true, verdict
+        end
+        -- Never fail open on a malformed envelope: an empty body would be served as a blank
+        -- page with the origin skipped, which looks like a broken site and hides the cause.
+        -- `ban` and not runtime.fallback: `captcha` is also a valid FALLBACK_REMEDIATION
+        -- (lib/config.lua) and, with captcha_ok false as it always is here, it would fall
+        -- through every arm below to `return true, "allow"` -- a fail-open in the branch whose
+        -- whole point is that there is none.
+        ngx.log(ngx.ERR, "[Crowdsec] 'appsec challenge' for '" .. ip .. "' carried no challenge body, falling back to 'ban'")
+        remediation = "ban"
+        verdict.action = remediation
+      end
       if remediation == "ban" then
         ngx.log(ngx.ALERT, "[Crowdsec] denied '" .. ip .. "' with '"..remediation.."' (by " .. flag.Flags[remediationSource] .. ")")
         -- ban.apply(ret_code)
-        return true, "denied", true
+        return true, "denied", true, nil, verdict
       end
       -- if the remediation is a captcha and captcha is well configured
       if remediation == "captcha" and captcha_ok and ngx.var.uri ~= "/favicon.ico" then
           local previous_uri, flags = runtime.cache:get("captcha_"..ip)
           local source, state_id, err = flag.GetFlags(flags)
           -- we check if the IP is already in cache for captcha and not yet validated
-          if previous_uri == nil or state_id ~= flag.VALIDATED_STATE or remediationSource == flag.APPSEC_SOURCE then
+          -- A captcha solved for a LAPI decision grants no free pass on the AppSec (and the
+          -- other way round), so a validated state only counts for the source that asked for
+          -- it. The previous `remediationSource == flag.APPSEC_SOURCE` re-served the captcha
+          -- on every single AppSec request: an infinite loop, fixed upstream in v1.0.18.
+          if previous_uri == nil or state_id ~= flag.VALIDATED_STATE or source ~= remediationSource then
               ngx.header.content_type = "text/html"
               ngx.header.cache_control = "no-cache"
               ngx.say(csmod.GetCaptchaTemplate())
@@ -767,7 +912,11 @@ function csmod.Allow(ip)
                 ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
               end
               ngx.log(ngx.ALERT, "[Crowdsec] denied '" .. ip .. "' with '"..remediation.."'")
-              return
+              -- Upstream returns nothing here; in this fork crowdsec:access() reads the first
+              -- return value and concatenates the second into an error message, so a bare
+              -- return raised "attempt to concatenate a nil value" under helpers.lua's pcall
+              -- and the request was then served UNCHECKED. Report the captcha page instead.
+              return true, "CrowdSec captcha served", false, true, verdict
           end
       end
   end
