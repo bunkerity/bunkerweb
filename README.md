@@ -12,6 +12,7 @@
 	<br />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?branch=dev&label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?branch=staging&label=CI%2FCD%20staging" />
+	<a href="https://github.com/bunkerity/bunkerweb/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/release.yml?label=CI%2FCD%20release" alt="Release workflow status" /></a>
 	<br />
 	<a href="https://www.bestpractices.dev/projects/8001">
 		<img src="https://www.bestpractices.dev/projects/8001/badge">

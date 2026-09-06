@@ -3,9 +3,14 @@ name: Push on GitHub (REUSABLE)
 permissions:
   contents: write
   discussions: write
+  actions: read
 
 on:
   workflow_call:
+    outputs:
+      manifest_sha256:
+        description: Manifest hash accepted by the create-only release claim
+        value: ${{ jobs.build.outputs.manifest_sha256 }}
     inputs:
       VERSION:
         required: true
@@ -13,16 +18,34 @@ on:
       PRERELEASE:
         required: true
         type: boolean
+      MANIFEST_SHA256:
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build:
+    name: Publish GitHub release
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      manifest_sha256: ${{ steps.claim.outputs.manifest_sha256 }}
     steps:
       # Checkout
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Download release manifest
+        if: inputs.VERSION != 'testing'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - name: Verify release manifest
+        if: inputs.VERSION != 'testing'
+        env:
+          MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
+        run: python3 .github/scripts/release_artifacts.py verify
       # Pin the install script default to the testing channel before checksum/upload,
       # so a script downloaded from the Testing release defaults to the testing version
       # instead of the hardcoded stable one. Must run BEFORE the checksum step.
@@ -117,12 +140,17 @@ jobs:
           echo "DECODED_CHANGELOG<<EOF" >> $GITHUB_ENV
           echo "$content" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-      # Create release
-      - name: Create release
+      - name: Claim draft and upload candidate assets
+        id: claim
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          body: |
+        run: |
+          python3 .github/scripts/release_claim.py
+          echo "manifest_sha256=$MANIFEST_SHA256" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
+          PRERELEASE: ${{ inputs.PRERELEASE && 'true' || 'false' }}
+          RELEASE_BODY: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags :
@@ -138,15 +166,6 @@ jobs:
 
             Changelog :
             ${{ env.DECODED_CHANGELOG }}
-          draft: true
-          prerelease: ${{ inputs.PRERELEASE }}
-          name: v${{ steps.sanitize.outputs.version }}
-          tag_name: v${{ steps.sanitize.outputs.version }}
-          discussion_category_name: Announcements
-          files: |
-            BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
-            misc/install-bunkerweb.sh
-            misc/install-bunkerweb.sh.sha256
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'

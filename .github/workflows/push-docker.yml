@@ -1,4 +1,4 @@
-name: Push image (REUSABLE)
+name: Promote tested image (REUSABLE)
 
 permissions:
   contents: read
@@ -13,22 +13,13 @@ on:
       TAGS:
         required: true
         type: string
-      CACHE_FROM:
-        required: true
-        type: string
-      DOCKERFILE:
+      MANIFEST_SHA256:
         required: true
         type: string
     secrets:
       DOCKER_USERNAME:
         required: true
       DOCKER_TOKEN:
-        required: true
-      ARM_SSH_KEY:
-        required: true
-      ARM_SSH_CONFIG:
-        required: true
-      ARM_SSH_IP:
         required: true
       GITLAB_REGISTRY_USER:
         required: true
@@ -40,12 +31,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
-      # Prepare
-      - name: Check out repository code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }} # pin every job in a run to one commit
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - name: Verify candidate manifest
+        env:
+          MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
+        run: python3 .github/scripts/release_artifacts.py verify
       - name: Login to Docker Hub
         uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
@@ -63,61 +59,11 @@ jobs:
           registry: registry.gitlab.com
           username: ${{ secrets.GITLAB_REGISTRY_USER }}
           password: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
-      - name: Setup SSH for ARM node
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
-          chmod 600 ~/.ssh/id_rsa_arm
-          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
-          # Enhanced keepalive and timeout settings for long-running builds
-          cat >> ~/.ssh/config << 'EOF'
-          ServerAliveInterval 15
-          ServerAliveCountMax 20
-          TCPKeepAlive yes
-          ConnectTimeout 30
-          ConnectionAttempts 3
-          ControlMaster auto
-          ControlPath ~/.ssh/control-%C
-          ControlPersist 1h
-          StrictHostKeyChecking no
-          EOF
+      - name: Install registry copy tool
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y skopeo
+      - name: Promote exact tested indexes and attestations
         env:
-          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-          SSH_IP: ${{ secrets.ARM_SSH_IP }}
-          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-      - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
-        with:
-          endpoint: ssh://root@arm
-          platforms: linux/arm64,linux/arm/v7
-          buildkitd-flags: --debug
-      # Sanitize tags (replace ~ with - for valid Docker/GHCR tag names)
-      - name: Sanitize tags
-        id: sanitize
-        run: |
-          TAGS="${{ inputs.TAGS }}"
-          echo "tags=${TAGS//\~/-}" >> "$GITHUB_OUTPUT"
-      # Compute metadata
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        with:
-          images: bunkerity/${{ inputs.IMAGE }}
-      # Build and push
-      - name: Build and push
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
-        with:
-          context: .
-          file: ${{ inputs.DOCKERFILE }}
-          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
-          push: true
-          tags: ${{ steps.sanitize.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: |
-            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
-            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
-            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
-            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
-          outputs: type=registry,oci-mediatypes=true,compression=zstd
-          provenance: true
-          sbom: true
+          IMAGE: ${{ inputs.IMAGE }}
+          TAGS: ${{ inputs.TAGS }}
+          MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
+        run: python3 .github/scripts/release_artifacts.py promote --image "$IMAGE" --tags "$TAGS"
