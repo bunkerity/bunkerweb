@@ -190,7 +190,7 @@ class Config:
         "instances_changed",
     )
 
-    def have_to_wait(self) -> str:
+    def have_to_wait(self, include_pending: bool = True) -> str:
         """What autoconf is still waiting for, or an empty string when it may proceed.
 
         A reason rather than a bare bool: every caller only tests truthiness, and the one that
@@ -200,13 +200,22 @@ class Config:
         that message is what sent two separate CI investigations after an API that was answering
         one second earlier in the same log. The Kubernetes failure dump shows twenty identical
         lines of it and no way to tell which of the three is live.
+
+        `include_pending=False` drops the third cause, for callers that only *read* the cluster.
+        Blocking a read on the scheduler's apply flags is what deadlocked the Kubernetes upgrade
+        arm of CI run 33528164796: the database still held the pre-upgrade pod (`10-244-0-10`,
+        gone, "No route to host") while the live one was `10.244.0.20`, so push-configs could only
+        ever push to the dead address and the flags it would have cleared stayed raised -- which
+        in turn kept `Controller.wait` from reaching the `get_instances()` call that would have
+        replaced the dead address. The first two causes still hold a read back: without the API,
+        or before the database is initialised, there is nothing to read.
         """
         metadata = self._api.get_metadata()
         if isinstance(metadata, str):
             return f"the API to answer ({metadata})"
         if not metadata.get("is_initialized"):
             return "the database to be initialized"
-        pending = self._pending_changes(metadata)
+        pending = self._pending_changes(metadata) if include_pending else []
         if pending:
             return f"the scheduler to finish applying ({', '.join(pending)})"
         return ""

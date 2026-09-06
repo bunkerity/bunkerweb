@@ -50,11 +50,28 @@ class Controller(Config):
     def wait(self, wait_time: int) -> list:
         all_ready = False
         while not all_ready:
-            reason = self.have_to_wait()
+            # `include_pending=False`: this loop only discovers instances, and gating a *read* on
+            # the scheduler's apply flags is a deadlock rather than a safety property. On an
+            # upgrade the database still names the pre-upgrade instance, which no longer answers,
+            # so push-configs cannot land and the flags it would clear stay raised -- and waiting
+            # on them here is exactly what stops `get_instances()` below from replacing the dead
+            # address that keeps push-configs failing. Nothing is written before that gate: the
+            # first write is `initial_apply()` -> `Config.apply()`, which opens with its own
+            # `wait_applying()` on the same flags, unchanged.
+            #
+            # ponytail: that leaves the upgrade case bounded rather than solved. `wait_applying`
+            # blocks on flags only this apply can clear, so it exits via its 240s give-up
+            # ("proceeding anyway") -- recovery is ~240s, not immediate, and it rests on a
+            # deliberately non-fatal timeout. Making that timeout fatal would restore the
+            # permanent deadlock. The real fix, if 240s ever proves too slow: let the *first*
+            # apply skip the pending gate for the instance write specifically, since that write
+            # is what unblocks the flags everything else is waiting on.
+            reason = self.have_to_wait(include_pending=False)
             if reason:
-                # The reason, not "the API": this loop blocks on the scheduler's change flags far
-                # more often than on an unreachable API, and printing the API either way is what
-                # made a stuck first apply look like an API outage in every Kubernetes dump.
+                # The reason, not "the API": only two causes can reach this line now, and one of
+                # them (an uninitialised database) is not an API outage. Printing "the API" for
+                # both is what made a stuck first apply look like an API outage in every
+                # Kubernetes dump.
                 self._logger.info(f"Waiting for {reason}, retrying in {wait_time}s ...")
                 sleep(wait_time)
                 continue
