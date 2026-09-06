@@ -2,6 +2,10 @@
 
 ## Upgrade von 1.6.X
 
+### Wiederholungsschutz der Zwei-Faktor-Authentifizierung
+
+Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für Zwei-Faktor-Codes wird jetzt in der gemeinsamen Datenbank gespeichert und gilt nur für Replikate, die diese Version ausführen. Während der Migration kann ein bereits angezeigter Authentifizierungscode bis zu 33 Sekunden lang abgelehnt werden; verwenden Sie danach einen neueren Code. Halten Sie die vorhandenen TOTP-Verschlüsselungsschlüssel für jedes UI-Replikat verfügbar, wie unter [Fehlerbehebung der Web-UI](troubleshooting.md#web-ui) beschrieben. Der Wiederholungszähler ersetzt diese Schlüssel nicht. Solange die Datenbank schreibgeschützt ist, werden Codes ohne Wiederholungsschutz akzeptiert, bis sie wieder beschreibbar ist.
+
 ### Vorgehensweise
 
 === "Docker"
@@ -46,7 +50,7 @@
 
             1. Erkennung
                 * Liest den Installationstyp (full, manager, worker, scheduler, ui, api) aus der `.env` zurück, sodass Sie Ihre Topologie nie erneut angeben müssen.
-                * Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der `.env`. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben.
+                * Übernimmt Geheimnisse, Host-Ports, Worker-Liste und Compose-Projektnamen aus der `.env`. Ein Upgrade kann so weder das Datenbankpasswort rotieren noch gespeicherte 2FA-Geheimnisse ungültig machen oder Ihre veröffentlichten Ports verschieben. Wird ein Schlüssel mehrfach gesetzt, gilt die letzte Zuweisung; ein optionales `export` wird akzeptiert, und explizite Kommandozeilenwerte haben weiterhin Vorrang. Anführungszeichen, Variablenersetzung, Escapes und andere nicht unterstützte dotenv-Syntax werden abgewiesen, bevor die Datei neu geschrieben wird; verwenden Sie für solche Dateien den manuellen Upgrade-Weg.
                 * Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (`latest`, `testing`) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.
             2. Upgrade-Entscheidung
                 * Gleiche Version läuft bereits: Der Status wird ausgegeben und das Skript beendet sich.
@@ -59,11 +63,12 @@
                 * Entfällt bei `worker`-, `ui`- und `api`-Stacks, die keine eigene Datenbank besitzen.
             4. Dateiaktualisierung
                 * Die `.env` wird mit dem neuen Image-Tag neu geschrieben; von Hand ergänzte Einträge werden übernommen.
-                * Die `docker-compose.yml` wird nur neu erzeugt, wenn sie noch dem entspricht, was das Skript geschrieben hat — lokale Änderungen bleiben also erhalten. Mit `--overwrite-compose` wird sie trotzdem neu erzeugt. Eine Kopie `.bak.<Zeitstempel>` wird in beiden Fällen angelegt.
+                * Die `docker-compose.yml` wird nur neu erzeugt, wenn sie noch dem entspricht, was das Skript geschrieben hat — lokale Änderungen bleiben also erhalten. Mit `--overwrite-compose` wird eine reguläre Datei trotzdem neu erzeugt. Symbolisch verlinkte Compose-Dateien bleiben immer erhalten. Eine Kopie `.bak.<Zeitstempel>` wird in beiden Fällen angelegt.
             5. Anwenden und Überprüfen
                 * `docker compose pull`, danach `docker compose up -d` — nur Container mit geändertem Image werden neu erstellt, die Ausfallzeit ist also kürzer als bei einem vollständigen `down`/`up`.
-                * Schlägt der Pull fehl, wird nichts neu erstellt, der vorherige Tag in der `.env` wiederhergestellt und der laufende Stack bleibt unberührt.
-                * Anschließend liest das Skript die Version erneut aus dem Container und prüft, ob der Scheduler in eine Neustartschleife geraten ist — so zeigt sich eine fehlgeschlagene Datenbankmigration.
+                * Schlägt ein Schritt vor der Neuerstellung fehl, werden sowohl die vorherige `.env` als auch die `docker-compose.yml` wiederhergestellt. Sobald die Neuerstellung begonnen hat, setzt das Skript die Binaries nicht automatisch zurück, weil sich das Datenbankschema bereits geändert haben kann.
+                * Anschließend prüft das Skript die erwarteten Image-IDs, den Gesundheitszustand der Container und Änderungen der Neustartzähler. Es verlangt zwei gesunde Beobachtungen im Abstand von mindestens zehn Sekunden, bevor es Erfolg meldet; frühere Neustarts eines weiterverwendeten Containers lassen ein Upgrade für sich allein nicht fehlschlagen.
+                * Werden die Dienste innerhalb der Wartezeit nicht als gesund bestätigt, läuft der Stack weiter, nichts wird zurückgesetzt, und das Skript beendet sich mit Status 2, statt ein fehlgeschlagenes Upgrade zu melden; mit `--docker-wait-timeout N` geben Sie einem langsamen ersten Start mehr Zeit.
 
         * **Nützliche Optionen**:
 
@@ -77,6 +82,7 @@
             | `--overwrite-compose`   | `docker-compose.yml` auch dann neu erzeugen, wenn sie lokal bearbeitet wurde                      |
             | `--force-type-change`   | Topologiewechsel des Stacks zulassen (destruktiv)                                                 |
             | `--no-pull`             | Images vor dem Neuerstellen nicht herunterladen                                                   |
+            | `--docker-wait-timeout N` | Wartezeit in Sekunden, bis der Stack gesund ist (Standard: 600)                                |
             | `-y, --yes`             | Unbeaufsichtigter Lauf; per Pipe gestartete Aufrufe ohne diese Option brechen mit einem Fehler ab |
 
     === "Manuell"

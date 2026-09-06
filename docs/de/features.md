@@ -1769,6 +1769,9 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 - Zugriff auf die BunkerWeb-Zugriffsprotokolle (`/var/log/bunkerweb/access.log` standardmäßig), damit der CrowdSec-Agent Anfragen analysieren kann.
 - Zugriff auf `cscli` auf dem CrowdSec-Host, um den BunkerWeb-Bouncer-Schlüssel zu registrieren.
 
+!!! warning "Expliziter Start im All-in-One-Container"
+    Der integrierte CrowdSec-Agent startet nur, wenn der All-in-One-Container die Umgebungsvariable `USE_CROWDSEC=yes` ohne Dienstpräfix und eine lokale `CROWDSEC_API` erhält (Standard: `http://127.0.0.1:8000`). Die Aktivierung für einen einzelnen Dienst startet den integrierten Agenten nicht. Für eine externe Local API müssen Sie den Agenten separat starten und konfigurieren.
+
 ### Integrationsablauf
 
 1. CrowdSec so vorbereiten, dass der Agent die BunkerWeb-Protokolle einliest.
@@ -3672,7 +3675,9 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg. Unter Redis-`maxmemory`-Druck werden neue Berichte pro Worker gepuffert und synchronisiert, sobald Speicher frei wird, sodass Berichte über blockierte Anfragen nicht verloren gehen, während Redis voll ist.
+    Wenn BunkerWeb [Redis](#redis) verwendet, synchronisiert das Metrics-Plugin Berichte über blockierte Anfragen automatisch mit Redis. Bei Erreichen von `maxmemory` bleiben abgelehnte Berichte für einen erneuten Versuch im begrenzten Worker-Puffer. Ein voller Puffer, LRU-Verdrängung oder Redis-Datenverlust kann dennoch zum Verlust von Berichten führen. Unvollständige Filterzähler werden aus der gespeicherten Anfrageliste neu aufgebaut. Gespeicherte Berichte mit fehlerhaften Daten (unbrauchbarer Zeitstempel oder Bezeichner) werden aus der Berichtstabelle und deren Summen ausgeschlossen.
+
+    Zählerstände werden vor der Synchronisierung bei Bedarf aus Redis geladen, auch nach einer Verdrängung aus dem lokalen LRU-Cache. Inaktive Redis-Zähler bleiben bis zum Ablauf von `METRICS_REDIS_TTL` erhalten; `0` bewahrt sie absichtlich unbefristet auf. Überwachen Sie daher den Redis-Speicher bei Metriken mit vielen unterschiedlichen Schlüsseln.
 
 !!! warning "Leistungsüberlegungen"
     Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.

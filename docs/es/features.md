@@ -1796,6 +1796,9 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 - Acceso a los registros de acceso de BunkerWeb (`/var/log/bunkerweb/access.log` de forma predeterminada) para que el agente de CrowdSec pueda analizar las solicitudes.
 - Acceso a `cscli` en el host de CrowdSec para registrar la clave del bouncer de BunkerWeb.
 
+!!! warning "Inicio explícito en el contenedor todo en uno"
+    El agente CrowdSec integrado solo se inicia si el contenedor todo en uno recibe la variable de entorno sin prefijo `USE_CROWDSEC=yes` y una `CROWDSEC_API` local (por defecto, `http://127.0.0.1:8000`). Activar CrowdSec solo para un servicio no inicia el agente integrado. Para una API local externa, inicie y configure el agente por separado.
+
 ### Flujo de integración
 
 1. Preparar el agente de CrowdSec para ingerir los registros de BunkerWeb.
@@ -3724,7 +3727,9 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
     El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Se admiten valores brutos en bytes y sufijos `k`/`m`. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
 
 !!! info "Integración con Redis"
-    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb. Bajo presión de `maxmemory` en Redis, los nuevos informes se almacenan en búfer por trabajador y se sincronizan en cuanto se libera memoria, de modo que los informes de solicitudes bloqueadas no se pierden mientras Redis está lleno.
+    Cuando BunkerWeb utiliza [Redis](#redis), el complemento de métricas sincroniza automáticamente los informes de solicitudes bloqueadas. Al alcanzar `maxmemory`, los informes rechazados permanecen en el búfer limitado del trabajador para volver a intentarlo. El desbordamiento del búfer, la expulsión LRU o la pérdida de datos de Redis pueden eliminar informes. Los recuentos de filtros incompletos se reconstruyen a partir de la lista de solicitudes conservadas. Los informes almacenados con datos no válidos (marca de tiempo o identificador inutilizable) se excluyen de la tabla de informes y de sus totales.
+
+    Los totales de los contadores se recuperan de Redis cuando se necesitan, antes de sincronizarlos, incluso tras su expulsión de la caché LRU local. Los contadores Redis inactivos se conservan hasta que vence `METRICS_REDIS_TTL`; `0` los conserva indefinidamente de forma intencionada. Supervise la memoria de Redis si utiliza métricas con muchas claves distintas.
 
 !!! warning "Consideraciones de Rendimiento"
     Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.

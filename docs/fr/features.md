@@ -1729,6 +1729,9 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 - L’accès aux journaux d’accès de BunkerWeb (`/var/log/bunkerweb/access.log` par défaut) pour que l’agent CrowdSec puisse analyser les requêtes.
 - L’accès à `cscli` sur l’hôte CrowdSec afin d’enregistrer la clé du bouncer BunkerWeb.
 
+!!! warning "Démarrage explicite en tout-en-un"
+    L’agent CrowdSec intégré démarre uniquement si le conteneur tout-en-un reçoit la variable d’environnement sans préfixe `USE_CROWDSEC=yes` et une `CROWDSEC_API` locale (`http://127.0.0.1:8000` par défaut). Activer CrowdSec uniquement pour un service ne démarre pas l’agent intégré. Avec une API locale externe, démarrez et configurez l’agent séparément.
+
 ### Parcours d’intégration
 
 1. Préparer l’agent CrowdSec pour ingérer les journaux BunkerWeb.
@@ -3624,7 +3627,9 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     Le paramètre `METRICS_MEMORY_SIZE` doit être ajusté selon votre volume de trafic et le nombre d'instances. Les valeurs brutes en octets et les suffixes `k`/`m` sont pris en charge. Pour les sites à fort trafic, envisagez d'augmenter cette valeur afin de garantir la capture de toutes les métriques sans perte de données.
 
 !!! info "Intégration Redis"
-    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb. Sous pression `maxmemory` de Redis, les nouveaux rapports sont mis en mémoire tampon par worker et synchronisés dès que de la mémoire se libère, de sorte que les rapports de requêtes bloquées ne sont pas perdus tant que Redis est plein.
+    Lorsque BunkerWeb utilise [Redis](#redis), le plugin Metrics y synchronise automatiquement les rapports de requêtes bloquées. Lorsque Redis atteint `maxmemory`, les rapports refusés restent dans le tampon limité du worker pour une nouvelle tentative. Un débordement du tampon, une éviction LRU ou une perte de données Redis peut toutefois supprimer des rapports. Les compteurs de filtres incomplets sont reconstruits à partir de la liste des requêtes conservées. Les rapports stockés dont les données sont invalides (horodatage ou identifiant inutilisable) sont exclus du tableau des rapports et de ses totaux.
+
+    Les totaux des compteurs sont récupérés dans Redis au besoin avant leur synchronisation, y compris après une éviction du cache LRU local. Les compteurs Redis inactifs restent stockés jusqu'à expiration de `METRICS_REDIS_TTL` ; `0` les conserve volontairement sans limite de durée. Surveillez donc la mémoire Redis si vos métriques comportent beaucoup de clés distinctes.
 
 !!! warning "Considérations de performance"
     Définir des valeurs très élevées pour `METRICS_MAX_BLOCKED_REQUESTS` ou `METRICS_MAX_BLOCKED_REQUESTS_REDIS` peut augmenter l'utilisation de la mémoire. Surveillez les ressources système et ajustez ces valeurs selon vos besoins réels et les ressources disponibles.

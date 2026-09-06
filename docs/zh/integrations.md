@@ -1460,6 +1460,7 @@ docker run -d \
   bunkerity/bunkerweb-all-in-one:1.6.15-rc1
 ```
 
+* **内置的 CrowdSec 代理仅在**容器设置了无前缀的环境变量 `USE_CROWDSEC=yes` 且 `CROWDSEC_API` 指向本地时才会启动。仅为单个服务启用 CrowdSec（`www.example.com_USE_CROWDSEC=yes`）不会启动它。
 *   当 `USE_CROWDSEC=yes` 时，入口点将：
 
     1.  **注册**并**启动**本地 CrowdSec 代理（通过 `cscli`）。

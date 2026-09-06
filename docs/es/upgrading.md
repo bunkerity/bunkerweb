@@ -2,6 +2,10 @@
 
 ## Actualización desde 1.6.X
 
+### Protección contra la reutilización de códigos de dos factores
+
+Actualice todas las réplicas de la interfaz web a la vez: la protección contra la reutilización de los códigos de dos factores ahora se guarda en la base de datos compartida y solo cubre las réplicas que ejecutan esta versión. Durante la migración, un código de autenticación ya mostrado puede rechazarse durante un máximo de 33 segundos; use un código más reciente después de ese intervalo. Mantenga las claves de cifrado TOTP existentes disponibles para cada réplica de la interfaz, como se describe en [Solución de problemas de la interfaz web](troubleshooting.md#web-ui). El contador de reutilización no sustituye a esas claves. Mientras la base de datos esté en modo de solo lectura, los códigos se aceptan sin protección contra la reutilización hasta que vuelva a admitir escrituras.
+
 ### Procedimiento
 
 === "Docker"
@@ -45,7 +49,7 @@
 
             1. Detección
                 * Lee el tipo de instalación (full, manager, worker, scheduler, ui, api) desde el `.env`, así que nunca tienes que volver a indicar tu topología.
-                * Recupera los secretos, los puertos del host, la lista de workers y el nombre de proyecto de Compose desde el `.env`, de modo que una actualización no puede rotar la contraseña de la base de datos, invalidar los secretos 2FA almacenados ni mover tus puertos publicados.
+                * Recupera los secretos, los puertos del host, la lista de workers y el nombre de proyecto de Compose desde el `.env`, de modo que una actualización no puede rotar la contraseña de la base de datos, invalidar los secretos 2FA almacenados ni mover tus puertos publicados. Cuando una clave se repite se usa la última asignación; se acepta un prefijo `export` opcional y los valores explícitos de la línea de comandos siguen teniendo prioridad. Las comillas, la interpolación, los escapes y cualquier otra sintaxis dotenv no admitida se rechazan antes de reescribir el archivo; usa la vía de actualización manual para esos archivos.
                 * Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (`latest`, `testing`) como una actualización anterior interrumpida.
             2. Decisión de actualización
                 * Ya se ejecuta la misma versión: muestra el estado del stack y termina.
@@ -58,11 +62,12 @@
                 * Se omite en los stacks `worker`, `ui` y `api`, que no tienen base de datos propia.
             4. Actualización de archivos
                 * El `.env` se reescribe con la nueva etiqueta de imagen; se conserva cualquier entrada que hayas añadido a mano.
-                * El `docker-compose.yml` solo se regenera si sigue coincidiendo con lo que produjo el script, así que tus ediciones locales sobreviven. Usa `--overwrite-compose` para regenerarlo de todos modos. En ambos casos se guarda una copia `.bak.<marca de tiempo>`.
+                * El `docker-compose.yml` solo se regenera si sigue coincidiendo con lo que produjo el script, así que tus ediciones locales sobreviven. Usa `--overwrite-compose` para regenerar un archivo normal de todos modos. Los archivos Compose enlazados simbólicamente se conservan siempre. En ambos casos se guarda una copia `.bak.<marca de tiempo>`.
             5. Aplicación y verificación
                 * `docker compose pull` y después `docker compose up -d`: solo se recrean los contenedores cuya imagen ha cambiado, por lo que la interrupción es menor que con un ciclo completo de `down`/`up`.
-                * Si la descarga falla no se recrea nada, se restaura la etiqueta anterior en el `.env` y el stack en ejecución queda intacto.
-                * Después, el script vuelve a leer la versión del contenedor y comprueba que el scheduler no haya entrado en un bucle de reinicios, que es como se manifiesta un fallo de migración de la base de datos.
+                * Si un paso falla antes de la recreación, se restauran tanto el `.env` anterior como el `docker-compose.yml`. Una vez iniciada la recreación, el script no revierte los binarios automáticamente porque el esquema de la base de datos puede haber cambiado ya.
+                * Después, el script comprueba los ID de imagen esperados, la salud de los contenedores y los cambios en los contadores de reinicio. Exige dos observaciones saludables separadas al menos diez segundos antes de informar del éxito; los reinicios históricos de un contenedor reutilizado no hacen fallar por sí solos una actualización.
+                * Si los servicios no se confirman saludables dentro del tiempo de espera, el stack se deja en ejecución, no se revierte nada y el script termina con el estado 2 en lugar de informar de una actualización fallida; da más margen a un primer arranque lento con `--docker-wait-timeout N`.
 
         * **Opciones útiles**:
 
@@ -76,6 +81,7 @@
             | `--overwrite-compose`   | Regenerar `docker-compose.yml` aunque se haya editado localmente                        |
             | `--force-type-change`   | Permitir que el stack cambie de topología (destructivo)                                 |
             | `--no-pull`             | No descargar las imágenes antes de recrear el stack                                     |
+            | `--docker-wait-timeout N` | Segundos de espera hasta que el stack esté saludable (por defecto: 600)               |
             | `-y, --yes`             | Ejecución desatendida; sin esta opción, las invocaciones por tubería terminan con error |
 
     === "Manual"
