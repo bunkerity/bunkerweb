@@ -31,6 +31,8 @@ Four engines are supported: SQLite (WAL mode), MariaDB, MySQL and PostgreSQL, al
 - **Suffix settings**: a setting declaring `"multiple": "group-name"` in `plugin.json` accepts `SETTING_1`, `SETTING_2`, …, with the regex applied per value.
 - **File-backed settings**: when a value is a file, the filename is stored separately from the value so updates stay atomic.
 - **Custom configs** are stored as `LargeBinary` with checksum tracking and an `is_draft` flag for multi-step UI flows. The type enum lives in `model.py` and includes `default_server_http` but **no** `default_server_stream`.
+- **Reserved rows are data, not schema.** The `default-server` pseudo-service (`bw_services`) is seeded idempotently at API startup with the existing `wizard` method value — no new enum member, no migration — but only when `MULTISITE=yes`; the seed stands down otherwise, so most of the shipped `misc/integrations/*.yml` files (which don't set `MULTISITE`) never get the row. Look for the seeding call in `db_methods/services.py` and the shared id in `src/common/utils/default_server.py`, not in `model.py`.
+- **Instance enrollment** (`bw_instances`): `enroll_code_state` (`"none"`/`"pending"`) tracks only the join-code lifecycle; whether a credential exists is read from `credential_ciphertext` being non-null, and whether it was revoked from `credential_revoked_at`. Three independent facts, three column groups, on purpose — an earlier single `enrollment_state` column let a burned code demote a live credential. `enroll_token_hash` is a SHA-512 digest; the plaintext code is returned once by `db_methods/instances.py` and never stored.
 
 ## The Location-Claim Guard (`db_methods/locations.py`)
 

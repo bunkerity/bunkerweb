@@ -82,6 +82,7 @@ Global settings live here; per-plugin settings live in each `plugin.json`. Entry
 - **`logger.py`** — `BWLogger` over stderr, file and syslog (UDP/TCP), configured by `LOG_LEVEL`, `LOG_FILE_PATH`, `LOG_SYSLOG_ADDRESS`, `LOG_SYSLOG_TAG`, with SQLAlchemy-specific level control.
 - **`job_queues.py`** — `HEAVY_JOBS` and `queue_for()`: the single source of truth for Celery queue routing, imported by both the API dispatch side and the worker.
 - **`location_claims.py`** — the render-time half of the per-service location namespace guard; its mutation-time mirror is `db/db_methods/locations.py`. Both compare _rendered_ locations, and normalizing only one produces a false refusal.
+- **`default_server.py`** — the reserved `default-server` pseudo-service: its id, its curated plugin subset and its stream-port election, all in one place so the string `"default-server"` is written down once. Read by `Templator`, `db_methods/services.py`/`config_save.py`, `service_classification.py`, and both the API and UI service routers. It exists only under `MULTISITE=yes`; the id-only predicate (`is_default_server`) and the id-and-method one (`is_reserved_default_server`) answer different questions and are not interchangeable — see `src/api/AGENTS.md`.
 
 ## API Client (`api/`)
 
