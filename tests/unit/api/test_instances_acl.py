@@ -44,3 +44,15 @@ def test_health_is_read_only_for_other_methods():
     resolve = _load_instances_resolver()
     # Only GET/OPTIONS take the read shortcut; a POST to the same path must not inherit it.
     assert resolve("/instances/bw/health", "POST") == ("instances", "instances_create")
+
+
+def test_credential_lifecycle_has_its_own_verbs():
+    """Minting or revoking a credential must not ride on ``instances_update``: an operator allowed
+    to rename an instance is not thereby allowed to hand out its identity."""
+    resolve = _load_instances_resolver()
+    assert resolve("/instances/bw/enroll", "POST") == ("instances", "instances_enroll")
+    assert resolve("/instances/bw/rotate", "POST") == ("instances", "instances_rotate")
+    assert resolve("/instances/bw/revoke", "POST") == ("instances", "instances_rotate")
+    # The unauthenticated redemption route never reaches the resolver, but if it ever did it must
+    # not resolve to something an ordinary token could hold.
+    assert resolve("/instances/enroll", "POST") == ("instances", "instances_create")

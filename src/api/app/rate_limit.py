@@ -534,13 +534,20 @@ def _match_rule(method: str, path: str) -> Optional[str]:
     return None
 
 
+# Unauthenticated POST endpoints that hand out a credential on success. /instances/enroll is one
+# by construction (it is what a booting instance calls before it has any credential), so it gets
+# the same tight default as /auth instead of the 100/min base limit -- a join code must not be
+# brute-forceable at API_RATE_LIMIT speed.
+_AUTH_DEFAULT_PATHS = ("/auth", "/instances/enroll")
+
+
 def _auth_default_limit(method: str, path: str) -> Optional[str]:
     if _normalize_method(method) != "POST":
         return None
     if _auth_limit is None:
         return None
     for candidate in _path_variants(path):
-        if candidate.rstrip("/") == "/auth":
+        if candidate.rstrip("/") in _AUTH_DEFAULT_PATHS:
             return _auth_limit
     return None
 

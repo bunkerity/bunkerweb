@@ -52,6 +52,7 @@ class API:
         *,
         tls_mode: str = "off",
         tls_fingerprint: Optional[str] = None,
+        revoked: bool = False,
     ):
         try:
             scheme, hostname, port = parse_host(endpoint)
@@ -68,6 +69,11 @@ class API:
         # Per-instance TLS trust: "off" (unverified, legacy) or "pinned" (SHA-256)
         self.__tls_mode = tls_mode or "off"
         self.__tls_fingerprint = tls_fingerprint
+        # A revoked enrollment is refused here rather than at the ~18 call sites that build an API:
+        # request() is the single funnel both the scheduler and the Celery worker's push path go
+        # through, and refusing at construction would only push the caller back onto the global
+        # token -- which is exactly what revocation has to prevent.
+        self.__revoked = revoked
         self.__logger = getLogger("API")
 
     @property
@@ -86,6 +92,10 @@ class API:
         files=None,
         timeout=(5, 10),
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
+        if self.__revoked:
+            self.__logger.error(f"Refusing to contact {self.__endpoint}{url}: this instance's enrollment is revoked")
+            return False, "instance enrollment revoked", None, None
+
         kwargs = {}
         if isinstance(data, dict):
             kwargs["json"] = data
@@ -207,12 +217,20 @@ class API:
             https_port=instance.get("https_port"),
         )
         host = instance.get("server_name") or getenv("API_SERVER_NAME", "bwapi")
+        # The dedicated `credential_revoked` flag, not the derived `enrollment_state` string: a code
+        # issued on a revoked row derives to "pending" (it always did), so reading the string here
+        # lifted the revocation the moment an admin started the re-enrollment -- and with the
+        # credential columns already cleared, the dial silently resumed on the global API_TOKEN.
+        revoked = bool(instance.get("credential_revoked"))
+        # `""` and not `None`: __init__ falls back to getenv("API_TOKEN") on None, so a revoked row
+        # would quietly pick the global token back up if request()'s guard were ever removed.
         return cls(
             endpoint,
             host=host,
-            token=instance.get("credential") or token,
+            token="" if revoked else (instance.get("credential") or token),
             tls_mode=instance.get("tls_mode", "off"),
             tls_fingerprint=instance.get("tls_fingerprint"),
+            revoked=revoked,
         )
 
     @classmethod

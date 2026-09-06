@@ -103,7 +103,12 @@ def _resolve_instances(path_normalized: str, method_u: str) -> tuple[Optional[st
     - GET    /instances/{hostname}/ping|health   -> instances_read
     - POST   /instances/reload | legacy /reload  -> instances_execute
     - POST   /instances/stop   | legacy /stop    -> instances_execute
+    - POST   /instances/{hostname}/enroll        -> instances_enroll
+    - POST   /instances/{hostname}/rotate|revoke -> instances_rotate
     Fallback: instances_<verb> based on method.
+
+    Note: POST /instances/enroll (the instance-side redemption) carries no guard at all -- it is
+    the only endpoint reachable before a credential exists -- so it never reaches this resolver.
     """
     rtype = "instances"
     p = path_normalized
@@ -122,6 +127,12 @@ def _resolve_instances(path_normalized: str, method_u: str) -> tuple[Optional[st
         # Support per-instance reload/stop: /instances/{hostname}/reload|stop
         if len(parts) == 3 and parts[0] == "instances" and parts[2] in {"reload", "stop"}:
             return rtype, "instances_execute"
+        # Credential lifecycle: /instances/{hostname}/enroll|rotate|revoke
+        if len(parts) == 3 and parts[0] == "instances":
+            if parts[2] == "enroll":
+                return rtype, "instances_enroll"
+            if parts[2] in {"rotate", "revoke"}:
+                return rtype, "instances_rotate"
     verb = PERM_VERB_BY_METHOD.get(method_u)
     if verb:
         return rtype, f"instances_{verb}"

@@ -69,6 +69,30 @@ class TestBulkMethodValidator:
             schemas.SaveConfigRequest(config={}, method="api")
 
 
+class TestInstanceBulkMethodValidator:
+    """`PUT /instances/bulk` is a DELETE-by-method plus a re-INSERT from the environment.
+
+    "ui" stays allowed for the *config* save (the UI really does save global settings under that
+    method) but must not reach the instance reconcile: a bulk call carrying it would delete every
+    control-plane-owned row, and an enrolled row's credential has no environment to come back from.
+    """
+
+    @pytest.mark.parametrize("method", ("autoconf", "scheduler", "wizard"))
+    def test_the_methods_that_actually_reconcile_are_allowed(self, method):
+        assert schemas.BulkUpdateInstancesRequest(instances=[], method=method).method == method
+
+    def test_ui_is_refused_for_instances_but_still_fine_for_a_config_save(self):
+        with pytest.raises(ValidationError):
+            schemas.BulkUpdateInstancesRequest(instances=[], method="ui")
+        assert schemas.SaveConfigRequest(config={}, method="ui").method == "ui"
+        # `manual` joined `"ui"` here when environment-declared instances became enrollable: the
+        # bulk route is a DELETE-by-method, so a call omitting an enrolled manual row would drop the
+        # credential the control plane minted for it. A config save under `manual` is still fine.
+        with pytest.raises(ValidationError):
+            schemas.BulkUpdateInstancesRequest(instances=[], method="manual")
+        assert schemas.SaveConfigRequest(config={}, method="manual").method == "manual"
+
+
 class TestPatternsAndAliases:
     def test_instance_status_ok(self):
         assert schemas.InstanceStatusRequest(status="up").status == "up"

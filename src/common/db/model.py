@@ -468,11 +468,30 @@ class Instances(Base):
     credential_nonce: Mapped[Optional[bytes]] = mapped_column(LargeBinary(12), nullable=True)
     credential_key_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     credential_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Set when an admin revokes the credential, cleared by the next successful redemption.
+    # Sticky on purpose: the revocation NULLs the credential columns above, so without this the
+    # row is indistinguishable from "never enrolled" and the dial falls back to the global
+    # API_TOKEN the instance is supposed to have stopped accepting.
+    credential_revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     # Per-instance TLS trust for control-plane dials: "off" keeps today's behavior
     # (unverified + silent HTTP fallback); "pinned" requires the presented leaf's
     # SHA-256 to equal tls_fingerprint and disables the HTTPS→HTTP downgrade.
     tls_mode: Mapped[str] = mapped_column(INSTANCE_TLS_MODE_ENUM, nullable=False, default="off", server_default="off")
     tls_fingerprint: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    # Secure enrollment (non-autoconf rows only): an admin issues a single-use join code, the
+    # booting instance redeems it once and receives its own credential. This column tracks the
+    # CODE and nothing else — "none"/"pending" — while whether a credential exists is read from
+    # `credential_ciphertext` and whether it was revoked from `credential_revoked_at`. One column
+    # carrying both facts is what let a burned code demote a live credential. A plain String like
+    # `protocol` above rather than a named enum, so a future state is not an ALTER TYPE on four
+    # engines; the value set is closed by construction -- `db_methods/instances.py` is the only
+    # writer and every write is one of the two literals.
+    enroll_code_state: Mapped[str] = mapped_column(String(16), nullable=False, default="none", server_default="none")
+    # SHA-512 hex digest of the join code; the code itself is returned once and never stored.
+    enroll_token_hash: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    enroll_token_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Failed redemptions against the current code; the code is burned when it reaches the cap.
+    enroll_failures: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
 
 class Bw_cli_commands(Base):
@@ -788,6 +807,10 @@ class Metadata(Base):
     last_instances_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     certificates_changed: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     last_certificates_change: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    # One-shot marker for `cleanup_template_polluted_global_values`: NULL means the sweep has
+    # never completed a pass, a timestamp means it has and must not run again. A datetime rather
+    # than a boolean — same single column, no server_default, and it answers "when" for support.
+    template_values_cleaned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     reload_ui_plugins: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     force_pro_update: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     failover: Mapped[Optional[bool]] = mapped_column(Boolean, default=None, nullable=True)
@@ -807,10 +830,6 @@ class Metadata(Base):
 
 THEMES_ENUM = Enum("light", "dark", name="themes_enum")
 
-    # One-shot marker for `cleanup_template_polluted_global_values`: NULL means the sweep has
-    # never completed a pass, a timestamp means it has and must not run again. A datetime rather
-    # than a boolean — same single column, no server_default, and it answers "when" for support.
-    template_values_cleaned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
 class JSONText(TypeDecorator):
     """
@@ -997,6 +1016,10 @@ API_PERMISSION_ENUM = Enum(
     "instances_update",
     "instances_delete",
     "instances_execute",
+    # Credential lifecycle, deliberately separate from instances_update: minting or revoking an
+    # instance's credential is not the same privilege as renaming it.
+    "instances_enroll",
+    "instances_rotate",
     # Global config permissions
     "global_config_read",
     "global_config_update",

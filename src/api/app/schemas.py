@@ -181,6 +181,25 @@ class InstancesDeleteRequest(BaseModel):
     instances: List[str]
 
 
+class InstanceEnrollRequest(BaseModel):
+    ttl_seconds: Optional[int] = Field(None, ge=1, le=3600, description="Lifetime of the issued join code in seconds (default 900, hard cap 3600)")
+
+
+class InstanceEnrollRedeemRequest(BaseModel):
+    """Payload of the one unauthenticated endpoint: a booting instance redeeming its join code."""
+
+    hostname: str = Field(..., min_length=1, max_length=256)
+    # Bounded so an unauthenticated caller cannot make the server hash an arbitrarily large body.
+    code: str = Field(..., min_length=1, max_length=512)
+
+    @field_validator("hostname")
+    @classmethod
+    def validate_hostname(cls, value: str) -> str:
+        if "@" in value:
+            raise ValueError("hostname must not contain '@'")
+        return value
+
+
 class InstanceUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, description="Friendly name for the instance")
     port: Optional[int] = Field(None, description="API HTTP port")
@@ -697,6 +716,21 @@ class ValidateSettingRequest(BaseModel):
 
 
 _ALLOWED_BULK_METHODS = {"autoconf", "scheduler", "manual", "ui", "wizard"}
+# Narrower still for the *instances* bulk reconcile, which is a DELETE-by-method followed by a
+# re-INSERT from the payload: a call carrying a method whose rows can be enrolled deletes every
+# enrolled row the payload omits, credential included. `"manual"` joined `"ui"` here on 2026-09-02,
+# when environment-declared instances became enrollable: the rebuild `save_config.py` drives now
+# carries a minted credential across (`db_methods/instances.py`), but only because it sends
+# the whole roster again from the environment, which an API caller has no way to reproduce.
+# Nothing in-tree passes either -- autoconf sends "autoconf" and `save_config.py` calls
+# `db.update_instances()` directly, not this route -- so this closes a door, not a workflow.
+_ALLOWED_INSTANCE_BULK_METHODS = _ALLOWED_BULK_METHODS - {"ui", "manual"}
+
+
+def _validate_instance_bulk_method(v: str) -> str:
+    if v not in _ALLOWED_INSTANCE_BULK_METHODS:
+        raise ValueError(f"Method '{v}' is not allowed for bulk instance operations. Allowed: {', '.join(sorted(_ALLOWED_INSTANCE_BULK_METHODS))}")
+    return v
 
 
 def _validate_bulk_method(v: str) -> str:
@@ -729,7 +763,7 @@ class BulkUpdateInstancesRequest(BaseModel):
     @field_validator("method")
     @classmethod
     def _validate_method(cls, v: str) -> str:
-        return _validate_bulk_method(v)
+        return _validate_instance_bulk_method(v)
 
 
 class BulkSaveCustomConfigsRequest(BaseModel):

@@ -1,13 +1,27 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from secrets import token_urlsafe
 from typing import Optional, List
 
+from API import API  # type: ignore
 from common_utils import parse_host  # type: ignore
+
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
-from ..schemas import BulkUpdateInstancesRequest, InstanceCreateRequest, InstancesDeleteRequest, InstanceStatusRequest, InstanceUpdateRequest
+from ..schemas import (
+    BulkUpdateInstancesRequest,
+    InstanceCreateRequest,
+    InstanceEnrollRedeemRequest,
+    InstanceEnrollRequest,
+    InstancesDeleteRequest,
+    InstanceStatusRequest,
+    InstanceUpdateRequest,
+)
 from ..config import api_config
 from ..utils import get_db, LOGGER
+
+# Shared libs
+from db_methods.instances import ENROLLABLE_METHODS, ENROLLMENT_REJECTED  # type: ignore
 
 # Shared libs
 
@@ -16,6 +30,9 @@ router = APIRouter(prefix="/instances", tags=["instances"])
 UI_API_METHODS = {"ui", "api"}
 # Keep aligned with common/core/jobs/jobs/push-configs.py.
 RELOAD_TIMEOUT = (5, 30)
+# A rotation hands the new credential to the instance before the database keeps it; a short
+# timeout is right because the alternative to failing is a divided pair of credentials.
+ROTATE_TIMEOUT = (5, 10)
 
 
 # ---------- Instance actions broadcasted to all instances ----------
@@ -57,6 +74,183 @@ def bulk_update_instances(req: BulkUpdateInstancesRequest) -> JSONResponse:
         code = 400 if "read-only" in err else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
     return JSONResponse(status_code=200, content={"status": "success"})
+
+
+# ---------- Secure enrollment ----------
+# Declared before the /{hostname}/... group so the literal "enroll" segment can never be read as a
+# hostname. This is the ONLY route in the service without Depends(guard): it is what a booting
+# instance calls before it has any credential to authenticate with. Its protection is the join
+# code itself (single use, SHA-512 at rest, short TTL), the shared rate limiter, and the API's own
+# IP whitelist.
+@router.post("/enroll")
+def redeem_enrollment(req: InstanceEnrollRedeemRequest) -> JSONResponse:
+    """Redeem a one-time enrollment code and receive this instance's credential.
+
+    The credential is returned here and never again. Every rejection answers 401 with the same
+    message on purpose: an unauthenticated caller must not be able to tell an unknown hostname
+    from a wrong code from an expired one.
+    """
+    credential, err = get_db().redeem_enrollment_code(req.hostname, req.code)
+    if err:
+        if credential is None and err != ENROLLMENT_REJECTED:
+            # Operational failure (read-only database, no keyring), not a rejected code.
+            LOGGER.error(f"POST /instances/enroll failed for {req.hostname}: {err}")
+            return JSONResponse(status_code=503, content={"status": "error", "message": err})
+        return JSONResponse(status_code=401, content={"status": "error", "message": err})
+    return JSONResponse(status_code=200, content={"status": "success", "hostname": req.hostname, "credential": credential})
+
+
+@router.post("/{hostname}/enroll", dependencies=[Depends(guard)])
+def issue_enrollment(hostname: str, req: Optional[InstanceEnrollRequest] = None) -> JSONResponse:
+    """Issue a single-use enrollment code for an instance. The code is shown once.
+
+    Args:
+        hostname: The hostname of the instance to enroll
+        req: Optional TTL override for the issued code
+    """
+    code, err = get_db().issue_enrollment_code(hostname, req.ttl_seconds if req else None)
+    if err:
+        if "does not exist" in err:
+            return JSONResponse(status_code=404, content={"status": "error", "message": err})
+        if "read-only" in err:
+            return JSONResponse(status_code=400, content={"status": "error", "message": err})
+        if "sourced from its environment" in err:
+            return JSONResponse(status_code=409, content={"status": "error", "message": err})
+        return JSONResponse(status_code=500, content={"status": "error", "message": err})
+    return JSONResponse(status_code=200, content={"status": "success", "hostname": hostname, "code": code})
+
+
+@router.post("/{hostname}/rotate", dependencies=[Depends(guard)])
+def rotate_credential(hostname: str, api=Depends(get_api_for_hostname)) -> JSONResponse:
+    """Rotate an enrolled instance's credential.
+
+    Two phases, and the database moves last: the new credential is handed to the instance over the
+    channel the OLD one still authenticates, and only stored here once the instance confirmed.
+
+    A rotation the instance *refused* is a clean 502 with nothing changed anywhere -- it answered,
+    so it never renamed its credential file. A rotation whose *answer was lost* is different: the
+    instance may already have committed, so that path (and a failed database write) puts the old
+    credential back -- authenticating with the NEW one, because an instance that committed is
+    precisely one that stopped accepting the old. When the rollback fails too, the two sides really
+    are divided and the instance has to be re-enrolled (new code plus a restart); the log says so
+    rather than leaving it to be discovered by a failing push days later.
+
+    Args:
+        hostname: The hostname of the instance whose credential to rotate
+    """
+    db = get_db()
+    instance = db.get_instance(hostname, with_credential=True)
+    if not instance:
+        return JSONResponse(status_code=404, content={"status": "error", "message": f"Instance {hostname} not found"})
+    # `ENROLLABLE_METHODS`, not the local `UI_API_METHODS`: the two answer different questions --
+    # one is "can the control plane delete this row", the other "can it own a credential on it" --
+    # and they stopped being the same set on 2026-09-02, when `manual` became enrollable and stayed
+    # undeletable. Importing the DB's definition keeps this guard and `issue`/`revoke`'s own
+    # refusals from drifting apart silently.
+    # Permission before state, and the same 409 the DB layer returns for issue/revoke. An autoconf row
+    # can legitimately hold a credential (`env["API_TOKEN"]` via the reconcile), so it reads
+    # "enrolled" -- but rotating it hands the instance a credential its orchestrator will never
+    # re-source, the next reconcile puts the env token back in the database, and the control plane is
+    # locked out of a healthy instance with no recovery from the UI. Enrollment is a
+    # control-plane-owned concept; the state string is not the permission.
+    # `manual` rows left this paragraph on 2026-09-02, but only PARTLY: the `save_config.py` rebuild
+    # now updates a still-declared row in place instead of re-creating it, so it no longer drops a
+    # minted credential by itself. It does still let a declared `BUNKERWEB_INSTANCE_API_TOKEN_<n>`
+    # win over one -- see `_reconcile_credential_columns` in `db_methods/instances.py`, which logs
+    # exactly this. So rotating a `manual` row that declares its own token in the environment has
+    # the autoconf failure mode above: the next config save puts the declared token back and the
+    # control plane is locked out until the operator drops the variable. Not refused here, because
+    # the database cannot tell a declared token from a minted one -- nothing records which produced
+    # `credential_ciphertext`. That is a MISSING FACT, not a missing column: `enroll_code_state` is a
+    # plain `String(16)` whose value set is closed by construction (`model.py`), so a third value
+    # would cost no migration. It is not free either -- it would fold credential provenance back
+    # into the code-lifecycle column L-A4 deliberately split apart -- so it stays a decision, taken
+    # by the PO, not a schema constraint (report-L-A3.md §6 Q1).
+    if instance.get("method") not in ENROLLABLE_METHODS:
+        return JSONResponse(
+            status_code=409,
+            content={
+                "status": "error",
+                "message": (
+                    f"Instance {hostname} is sourced from its environment (method: {instance.get('method')}); "
+                    "enrollment only applies to control-plane-owned instances"
+                ),
+            },
+        )
+    if instance.get("enrollment_state") != "enrolled":
+        return JSONResponse(
+            status_code=409,
+            content={"status": "error", "message": f"Instance {hostname} is not enrolled; issue an enrollment code instead"},
+        )
+
+    previous_credential = instance.get("credential")
+    new_credential = token_urlsafe(48)
+
+    def _roll_back(reason: str) -> None:
+        """Put the old credential back, authenticating with the NEW one.
+
+        Reusing the `api` dependency here would be a no-op dressed up as a recovery: it carries
+        the old credential, and an instance that committed has stopped accepting it.
+        """
+        if not previous_credential:
+            return
+        try:
+            rollback_api = API.from_instance(instance | {"credential": new_credential})
+            sent_back, _, rollback_status, _ = rollback_api.request("POST", "/credential", data={"credential": previous_credential}, timeout=ROTATE_TIMEOUT)
+        except BaseException as exc:
+            # This already runs inside a failure path: raising here would replace a 502/500 that
+            # names the real problem with an opaque unhandled exception.
+            LOGGER.critical(f"Rotation of {hostname} failed ({reason}) and the rollback itself raised: {exc}")
+            return
+        if sent_back and rollback_status == 200:
+            LOGGER.error(f"Rotation of {hostname} failed ({reason}) and was rolled back on the instance")
+            return
+        LOGGER.critical(
+            f"Rotation of {hostname} failed ({reason}) AND the rollback failed: the instance may hold a credential this "
+            "database does not have. Issue a new enrollment code and restart it."
+        )
+
+    sent, err, status, _ = api.request("POST", "/credential", data={"credential": new_credential}, timeout=ROTATE_TIMEOUT)
+    if not sent or status != 200:
+        # The two cases ARE distinguishable, and treating them alike emitted a CRITICAL telling the
+        # operator to re-enroll after an ordinary refusal. `API.request()` returns sent=True only
+        # once it has an answer, so sent=True with a non-200 means the instance answered and never
+        # renamed its credential file: nothing was written, nothing to undo. A lost answer
+        # (sent=False) is the one case where the instance may have committed.
+        if not sent:
+            _roll_back(err or "no answer")
+        return JSONResponse(
+            status_code=502,
+            content={"status": "error", "message": f"Instance {hostname} did not accept the new credential: {err or f'HTTP {status}'}"},
+        )
+
+    cred_err = db.set_instance_credential(hostname, new_credential)
+    if cred_err:
+        # The instance took the new credential and the database kept the old one: without this
+        # rollback the control plane would have just locked itself out of a healthy instance.
+        _roll_back(f"database write: {cred_err}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": cred_err})
+
+    return JSONResponse(status_code=200, content={"status": "success", "hostname": hostname})
+
+
+@router.post("/{hostname}/revoke", dependencies=[Depends(guard)])
+def revoke_enrollment(hostname: str) -> JSONResponse:
+    """Revoke an instance's credential. Pushes to it are refused afterwards.
+
+    Args:
+        hostname: The hostname of the instance to revoke
+    """
+    db = get_db()
+    if not db.get_instance(hostname):
+        return JSONResponse(status_code=404, content={"status": "error", "message": f"Instance {hostname} not found"})
+    err = db.revoke_instance_enrollment(hostname)
+    if err:
+        if "sourced from its environment" in err:
+            return JSONResponse(status_code=409, content={"status": "error", "message": err})
+        code = 400 if ("does not exist" in err or "read-only" in err) else 500
+        return JSONResponse(status_code=code, content={"status": "error", "message": err})
+    return JSONResponse(status_code=200, content={"status": "success", "hostname": hostname, "enrollment_state": "revoked"})
 
 
 # ---------- Instance actions for a single instance ----------
