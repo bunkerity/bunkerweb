@@ -7,6 +7,11 @@ on:
     branches: [staging, fix-cve]
   workflow_dispatch:
 
+# Staging and release reuse the same domains, runner labels and cloud resources.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   # Build Docker images
   build-containers:
@@ -361,6 +366,7 @@ jobs:
     permissions:
       contents: write
       discussions: write
+      actions: read
     uses: ./.github/workflows/push-github.yml
     with:
       VERSION: testing

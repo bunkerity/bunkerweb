@@ -27,11 +27,16 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 - Zugriff auf die BunkerWeb-Zugriffsprotokolle (`/var/log/bunkerweb/access.log` standardmäßig), damit der CrowdSec-Agent Anfragen analysieren kann.
 - Zugriff auf `cscli` auf dem CrowdSec-Host, um den BunkerWeb-Bouncer-Schlüssel zu registrieren.
 
+!!! warning "Expliziter Start im All-in-One-Container"
+    Der integrierte CrowdSec-Agent startet nur, wenn der All-in-One-Container die Umgebungsvariable `USE_CROWDSEC=yes` ohne Dienstpräfix und eine lokale `CROWDSEC_API` erhält (Standard: `http://127.0.0.1:8000`). Die Aktivierung für einen einzelnen Dienst startet den integrierten Agenten nicht. Für eine externe Local API müssen Sie den Agenten separat starten und konfigurieren.
+
 ### Integrationsablauf
 
 1. CrowdSec so vorbereiten, dass der Agent die BunkerWeb-Protokolle einliest.
 2. BunkerWeb konfigurieren, damit die CrowdSec Local API abgefragt wird.
 3. Den Link über die API `/crowdsec/ping` oder die CrowdSec-Kachel im Admin-UI validieren.
+
+    Diese Prüfung sendet eine authentifizierte Leseanfrage an jede konfigurierte Local API. Eine nicht erreichbare API, abgelehnte Zugangsdaten, eine ungültige Antwort oder ein nicht geladener Bouncer führen zum Fehlschlag. Bei reinen AppSec-Diensten wird das Laden der Konfiguration bestätigt; die AppSec-Verbindung und -Inspektion werden nicht geprüft.
 
 Die folgenden Abschnitte führen diese Schritte im Detail durch.
 

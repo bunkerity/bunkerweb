@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
+from contextlib import ExitStack
+from gzip import GzipFile
 from io import BytesIO
 from mimetypes import guess_type
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from re import MULTILINE, compile as re_compile
-from subprocess import CalledProcessError, run
+from subprocess import run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
 from typing import Dict, Optional, Set, Tuple
 from uuid import uuid4
+from tempfile import mkdtemp
 from json import dumps, loads
 from shutil import copy, copytree, rmtree
 from tarfile import TarError, open as tar_open
@@ -34,7 +37,8 @@ from magic import Magic
 from requests import get, head
 from requests.exceptions import ConnectionError, Timeout
 
-from common_utils import safe_tar_extractall, safe_zip_extractall  # type: ignore
+from common_utils import bytes_hash, safe_tar_extractall, safe_zip_extractall  # type: ignore
+from cache_restore import StagedDirectory  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -42,8 +46,8 @@ PLUGIN_NAME_RX = re_compile(r"^# Plugin name: (?P<name>.+)$", MULTILINE)
 PLUGIN_VERSION_RX = re_compile(r"^# Plugin version: (?P<version>.+)$", MULTILINE)
 
 CRS_PLUGINS_DIR = Path(sep, "var", "cache", "bunkerweb", "modsecurity", "crs", "plugins")
-NEW_PLUGINS_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-new-plugins")
-TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "crs-plugins")
+TMP_DIR = None
+PUBLICATION = ExitStack()
 PATCH_SCRIPT = Path(sep, "usr", "share", "bunkerweb", "core", "modsecurity", "misc", "patch.sh")
 LOGGER = getLogger("MODSECURITY.DOWNLOAD.CRS_PLUGINS")
 status = 0
@@ -114,16 +118,21 @@ def request_with_retry(request_fn, *args, max_retries: int = 3, **kwargs):
     raise last_exc or RuntimeError("request_with_retry: max_retries <= 0")  # pragma: no cover -- defensive, unreachable at max_retries=3
 
 
-# Raised by any plugin this run could not resolve, download or unpack. The final swap is
-# destructive (`rmtree(CRS_PLUGINS_DIR)`), and the rendered configuration is the *intersection* of
-# `crs-plugins.json` and what sits in that directory, so swapping after a partial run silently
-# drops the failed plugin's rules from the WAF. A stale rule set for one run beats a missing one,
-# so any failure keeps the previous set and reports an error instead.
-#
-# Emptiness is deliberately NOT the signal: a run can resolve every URL and still download none of
-# them, and conversely a plugin the operator removed or mistyped is a registry miss, not a failure,
-# and must be allowed to disappear.
+# Every configured plugin must succeed before either cache row or live file is published.
 plugin_failures = False
+
+
+def pinned_mtime(info):
+    """Drop the staging directory's fresh mtimes and modes so an unchanged plugin set hashes the same.
+
+    The modes drift too: the scheduler chmods the live tree to 0740/0640 after every batch, and the
+    next run copies those modes into the staging directory, so an unpinned archive of an unchanged
+    plugin set hashes differently and the job reports a change it did not make. Pinning them also
+    removes the umask sensitivity of a fresh install.
+    """
+    info.mtime = 0
+    info.mode = 0o755 if info.isdir() else 0o644
+    return info
 
 
 def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
@@ -175,7 +184,7 @@ def get_download_url(repo_url, version=None) -> Tuple[bool, str]:
 try:
     if not PATCH_SCRIPT.is_file():
         LOGGER.error(f"Patch script not found: {PATCH_SCRIPT}")
-        sys_exit(1)
+        sys_exit(2)
 
     # * Check if we're using a version of the Core Rule Set (CRS) compatible with plugins
     use_right_crs_version = False
@@ -215,14 +224,16 @@ try:
     if not use_modsecurity_crs_plugins:
         LOGGER.info("Core Rule Set (CRS) plugins are disabled, skipping download...")
         sys_exit(0)
-    elif not services_plugins:
-        LOGGER.info("No Core Rule Set (CRS) plugins found, skipping download...")
-        sys_exit(0)
     elif not use_right_crs_version:
         LOGGER.warning("No service is using a compatible Core Rule Set (CRS) version with the plugins (4), skipping download...")
         sys_exit(0)
 
     JOB = Job(LOGGER, __file__)
+    if not JOB.restore_ok:
+        raise RuntimeError("Cannot update CRS plugins after an unsuccessful cache restore")
+    staged = PUBLICATION.enter_context(StagedDirectory(CRS_PLUGINS_DIR, JOB.job_path / "crs-plugins.json"))
+    NEW_PLUGINS_DIR = staged.path
+    TMP_DIR = Path(mkdtemp(prefix="crs-plugins-", dir=Path(sep, "var", "tmp", "bunkerweb")))
 
     downloaded_plugins: Dict[str, Set[str]] = {}
     service_plugins: Dict[str, Set[str]] = {service: set() for service in services}
@@ -261,7 +272,7 @@ try:
                     )
                     if resp.status_code != 200:
                         LOGGER.error(f"Got status code {resp.status_code}, raising an exception...")
-                        sys_exit(1)
+                        sys_exit(2)
 
                     # Write content to BytesIO
                     for chunk in resp.iter_content(chunk_size=8192):
@@ -274,7 +285,7 @@ try:
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while downloading the registry:\n{e}")
-                    sys_exit(1)
+                    sys_exit(2)
 
                 # Extract table lines (lines starting with "|")
                 table_lines = [line for line in content.read().decode().splitlines() if line.startswith("|")]
@@ -299,12 +310,12 @@ try:
 
             cached, err = JOB.cache_file("plugin_registry.json", dumps(plugin_registry, indent=2).encode())
             if not cached:
-                LOGGER.error(f"Error while caching plugin registry data: {err}")
+                raise RuntimeError(f"Error while caching plugin registry data: {err}")
 
         # LOGGER.debug(f"Plugin registry:\n{plugin_registry}")
 
         download_url_cache = {}
-        for service, plugins in services_plugins.items():
+        for plugins in services_plugins.values():
             for plugin in plugins.copy():
                 if plugin.startswith(("http://", "https://")):
                     continue
@@ -319,17 +330,14 @@ try:
                 plugin_name = plugin_split[0].lower()
 
                 if plugin_name not in plugin_registry:
-                    LOGGER.error(f"Plugin {plugin_name} not found in the registry, ignoring...")
-                    continue
+                    raise ValueError(f"Plugin {plugin_name} not found in the registry")
 
                 plugin_data = plugin_registry[plugin_name]
 
                 if "repository" not in plugin_data:
-                    LOGGER.error(f"Plugin {plugin_name} is missing a Repository URL in the registry, ignoring...")
-                    continue
+                    raise ValueError(f"Plugin {plugin_name} is missing a Repository URL in the registry")
                 elif "private" in plugin_data.get("status", ""):
-                    LOGGER.error(f"Plugin {plugin_name} is private, ignoring...")
-                    continue
+                    raise ValueError(f"Plugin {plugin_name} is private")
 
                 # Build cache key using plugin name and version (or 'latest' if not provided)
                 cache_key = f"{plugin_name}:{plugin_version}" if plugin_version else f"{plugin_name}:latest"
@@ -355,8 +363,7 @@ try:
                         status = 2
                         continue
                     if not success:
-                        LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}): {url}")
-                        continue
+                        raise ValueError(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}): {url}")
                     if plugin_data.get("status", "") != "tested":
                         LOGGER.warning(
                             f'Plugin {plugin_name} is marked as "{plugin_data["status"]}", be cautious when using it as there is no guarantee it will work'
@@ -375,8 +382,7 @@ try:
                     status = 2
                     continue
                 if not success:
-                    LOGGER.error(f"Failed to get the download URL for plugin {plugin_name}: {url}")
-                    continue
+                    raise ValueError(f"Failed to get the download URL for plugin {plugin_name}: {url}")
                 if plugin_data.get("status", "") != "tested":
                     LOGGER.warning(
                         f'Plugin {plugin_name} is marked as "{plugin_data["status"]}", be cautious when using it as there is no guarantee it will work'
@@ -385,8 +391,6 @@ try:
                 LOGGER.debug(f"Plugin {plugin_name} corresponds to URL {url}")
                 plugins.add(url)
                 download_url_cache[cache_key] = url
-
-                service_plugins[service] = plugins
 
         LOGGER.debug(f"Service plugins:\n{service_plugins}")
 
@@ -402,6 +406,7 @@ try:
                 continue
 
             downloaded_plugins[crs_plugin] = set()
+            archive_plugins = set()
 
             with BytesIO() as content:
                 try:
@@ -494,11 +499,13 @@ try:
             plugin_id = ""
 
             # Check if the plugins are valid, if they are already installed and if they need to be updated
-            for plugin_config in list(temp_dir.rglob("**/*-config.conf")):
+            plugin_configs = list(temp_dir.rglob("*-config.conf"))
+            if not plugin_configs:
+                raise ValueError(f"No plugin configuration found in {crs_plugin}")
+            for plugin_config in plugin_configs:
                 try:
                     if plugin_config.is_dir():
-                        LOGGER.debug(f"CRS plugin {plugin_config} is a directory, skipping...")
-                        continue
+                        raise ValueError(f"CRS plugin configuration {plugin_config} is a directory")
                     plugin_config_content = plugin_config.read_text()
 
                     # Check if the plugin has a name
@@ -512,9 +519,15 @@ try:
                     # Check if the plugin has a version
                     plugin_version_match = PLUGIN_VERSION_RX.search(plugin_config_content)
                     if not plugin_version_match:
-                        LOGGER.warning(f"CRS plugin {plugin_name} is missing a version, skipping...")
-                        continue
-                    plugin_version = plugin_version_match.group("version")
+                        raise ValueError(f"CRS plugin {plugin_name} is missing a version")
+                    plugin_version = plugin_version_match.group("version").strip()
+                    plugin_name = plugin_name.strip()
+                    if (
+                        not plugin_name
+                        or not plugin_version
+                        or any(part in (".", "..") or "/" in part or "\\" in part for part in (plugin_name, plugin_version))
+                    ):
+                        raise ValueError("Invalid CRS plugin name or version")
 
                     LOGGER.debug(f"Checking plugin {plugin_name} (version: {plugin_version})...")
 
@@ -522,7 +535,7 @@ try:
 
                     if NEW_PLUGINS_DIR.joinpath(plugin_id).is_dir():
                         LOGGER.debug(f"CRS plugin {plugin_name} (version: {plugin_version}) has already been extracted earlier, skipping...")
-                        installed_plugins.add(plugin_id)
+                        archive_plugins.add(plugin_id)
                         continue
                     elif CRS_PLUGINS_DIR.joinpath(plugin_id, plugin_config.name).is_file():
                         LOGGER.info(f"CRS plugin {plugin_name} (version: {plugin_version}) is already installed, we don't need to install it")
@@ -530,71 +543,74 @@ try:
                         # below, so a later failure can abandon the staging directory and leave the
                         # previously installed set exactly as it was.
                         copytree(CRS_PLUGINS_DIR.joinpath(plugin_id), NEW_PLUGINS_DIR.joinpath(plugin_id))
-                        installed_plugins.add(plugin_id)
+                        archive_plugins.add(plugin_id)
                         continue
 
                     NEW_PLUGINS_DIR.joinpath(plugin_id).mkdir(parents=True, exist_ok=True)
                     for plugin_file in plugin_config.parent.glob("*"):
                         if plugin_file.is_dir():
-                            copytree(plugin_file, NEW_PLUGINS_DIR.joinpath(plugin_id))
+                            copytree(plugin_file, NEW_PLUGINS_DIR.joinpath(plugin_id, plugin_file.name))
                             continue
                         copy(plugin_file, NEW_PLUGINS_DIR.joinpath(plugin_id))
 
                     LOGGER.info(f"CRS plugin {plugin_name} (version: {plugin_version}) has been installed")
-                    installed_plugins.add(plugin_id)
+                    # Each newly installed plugin must be patched, including archives
+                    # containing several plugin configurations.
+                    run(
+                        [PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()],
+                        check=True,
+                        env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                    )
+                    archive_plugins.add(plugin_id)
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while checking plugin {plugin_config} :\n{e}")
+                    plugin_failures = True
                     status = 2
                     continue
 
-            # * Patch the rules so we can extract the rule IDs when matching
-            try:
-                LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
-                result = run(
-                    [PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()],
-                    check=True,
-                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
-                )
-            except CalledProcessError as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")
-                sys_exit(1)
-
-            LOGGER.info(f"Successfully patched Core Rule Set (CRS) plugin {plugin_name}.")
-
-            downloaded_plugins[crs_plugin] = installed_plugins.copy()
+            downloaded_plugins[crs_plugin] = archive_plugins
+            installed_plugins.update(archive_plugins)
 
         service_plugins[service].update(installed_plugins)
 
     if plugin_failures:
-        # At least one plugin could not be resolved, downloaded or unpacked (see the retry/skip
-        # handling above). The swap below is destructive and the render is the intersection of
-        # `crs-plugins.json` and CRS_PLUGINS_DIR, so going through with it would silently drop the
-        # failed plugin's rules from the WAF. Leave both exactly as the last complete run left them
-        # and report a failure; the next run retries from scratch.
-        LOGGER.error("At least one Core Rule Set (CRS) plugin could not be installed, keeping the previously cached plugin set...")
-        CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
-    else:
-        rmtree(CRS_PLUGINS_DIR, ignore_errors=True)
-        if NEW_PLUGINS_DIR.is_dir():
-            copytree(NEW_PLUGINS_DIR, CRS_PLUGINS_DIR)
-        else:
-            CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
+        raise RuntimeError("At least one CRS plugin failed; keeping the previously cached plugin set")
 
-        cached, err = JOB.cache_file("crs-plugins.json", dumps({service: list(plugins) for service, plugins in service_plugins.items()}, indent=2).encode())
-        if not cached:
-            LOGGER.error(f"Failed to cache crs-plugins.json :\n{err}")
-            status = 2
+    manifest = dumps({service: sorted(plugins) for service, plugins in service_plugins.items()}, indent=2).encode()
+    content = BytesIO()
+    with GzipFile(filename="", fileobj=content, mode="wb", compresslevel=9, mtime=0) as gz:
+        with tar_open(fileobj=gz, mode="w") as tar:
+            # The staging directory is recreated on every run, so its mtimes are always new. Pin
+            # them (the gzip header is already pinned above) or an unchanged plugin set produces a
+            # different archive every day, and the comparison below can never say "unchanged".
+            tar.add(NEW_PLUGINS_DIR, arcname=".", filter=pinned_mtime)
+    archive = content.getvalue()
+    entries = [
+        {"job_name": JOB.job_name, "service_id": "", "file_name": name, "data": data, "checksum": bytes_hash(data)}
+        for name, data in (("crs-plugins.json", manifest), (f"folder:{CRS_PLUGINS_DIR.as_posix()}.tgz", archive))
+    ]
+    # Publication is authoritative (an emptied selection still clears the live set), but only a
+    # real change is worth a full render, a /confs push and an NGINX reload. Without this a default
+    # install -- plugins enabled, none selected -- reported "changed" every single day.
+    changed = False
+    for entry in entries:
+        published = JOB.db.get_job_cache_file(JOB.job_name, entry["file_name"], service_id="", with_info=True, with_data=False)
+        if not isinstance(published, dict) or published.get("checksum") != entry["checksum"]:
+            changed = True
+    staged.publish(manifest)
+    err = JOB.db.upsert_job_caches(entries)
+    if err:
+        raise RuntimeError(f"Error saving CRS plugin cache transaction: {err}")
+    try:
+        staged.commit()
+    except Exception as e:
+        # Files and database already contain the new generation. Keep exit 1 so
+        # the scheduler publishes it; startup recovery can retry artifact cleanup.
+        LOGGER.warning(f"CRS plugins committed, but publication cleanup failed: {e}")
+    LOGGER.info("Successfully saved Core Rule Set (CRS) plugins data to db cache.")
 
-        cached, err = JOB.cache_dir(CRS_PLUGINS_DIR)
-        if not cached:
-            LOGGER.error(f"Error while saving Core Rule Set (CRS) plugins data to db cache: {err}")
-            status = 2
-        else:
-            LOGGER.info("Successfully saved Core Rule Set (CRS) plugins data to db cache.")
-
-    if status == 0:
+    if status == 0 and changed:
         status = 1
 except SystemExit as e:
     status = e.code
@@ -603,7 +619,8 @@ except BaseException as e:
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running download-crs-plugins.py :\n{e}")
 
-rmtree(TMP_DIR, ignore_errors=True)
-rmtree(NEW_PLUGINS_DIR, ignore_errors=True)
+PUBLICATION.close()
+if TMP_DIR is not None:
+    rmtree(TMP_DIR, ignore_errors=True)
 
 sys_exit(status)

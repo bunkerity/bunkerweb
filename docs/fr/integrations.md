@@ -1467,6 +1467,7 @@ docker run -d \
   bunkerity/bunkerweb-all-in-one:1.6.15-rc1
 ```
 
+* L'**agent CrowdSec embarqué ne démarre que** si le conteneur possède la variable d'environnement sans préfixe `USE_CROWDSEC=yes` et une `CROWDSEC_API` locale. Activer CrowdSec pour un seul service (`www.example.com_USE_CROWDSEC=yes`) ne le démarre pas.
 * Lorsque `USE_CROWDSEC=yes`, le point d'entrée :
 
     1. **Inscrivez-vous** et **démarrez** l'agent CrowdSec local (via `cscli`).

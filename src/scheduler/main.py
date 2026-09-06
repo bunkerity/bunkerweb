@@ -17,7 +17,7 @@ from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
-from tarfile import TarFile, open as tar_open
+from tarfile import open as tar_open
 from threading import Event, Lock
 from time import monotonic, sleep
 from traceback import format_exc
@@ -37,6 +37,16 @@ from logger import getLogger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
 from jobs import Job, _write_atomic  # type: ignore
+from cache_restore import (  # type: ignore
+    cache_tree,
+    checked_cache_path,
+    checked_folder_target,
+    is_preserved,
+    recover_directory,
+    restore_directory,
+    restore_mtls_cache,
+    transaction_markers,
+)
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller, folder_push_timeout  # type: ignore
@@ -515,6 +525,50 @@ def generate_caches() -> Set[str]:
     plugin_dirs: Set[Path] = set()
     ignored_dirs = set()
     failed_restores: Set[str] = set()
+    failed_plugins: Set[Path] = set()
+
+    mtls_plugin_path = Path(sep, "var", "cache", "bunkerweb", "mtls")
+    try:
+        # Fetch both members in one DB snapshot; per-row reads can mix generations.
+        mtls_rows = (
+            SCHEDULER.db.get_jobs_cache_files(plugin_id="mtls", job_name="client-cert")
+            if any(row["plugin_id"] == "mtls" and row["job_name"] == "client-cert" for row in job_cache_files)
+            else []
+        )
+        ignored_dirs.update(restore_mtls_cache(mtls_plugin_path, mtls_rows))
+    except Exception as e:
+        LOGGER.error(f"Error restoring mTLS cache pairs: {e}")
+        failed_plugins.add(mtls_plugin_path)
+        failed_restores.add("mtls/client-cert")
+
+    # The first CRS publication can be interrupted before its first DB row exists.
+    # Recover this declared transaction target without sweeping unknown cache roots.
+    crs_plugin_path = Path(sep, "var", "cache", "bunkerweb", "modsecurity")
+    crs_archive_name = f"folder:{crs_plugin_path / 'crs/plugins'}.tgz"
+    crs_rows = {row["file_name"]: row for row in job_cache_files if row["plugin_id"] == "modsecurity" and row["job_name"] == "download-crs-plugins"}
+    try:
+        recover_directory(crs_plugin_path / "crs/plugins")
+        if ("crs-plugins.json" in crs_rows) != (crs_archive_name in crs_rows):
+            raise ValueError("Incomplete CRS plugin cache pair; keeping the existing directory and manifest")
+    except Exception as e:
+        LOGGER.error(f"Error recovering CRS plugin publication: {e}")
+        failed_plugins.add(crs_plugin_path)
+        failed_restores.add("modsecurity/download-crs-plugins")
+
+    # A directory journal may include its companion manifest. Recover before any
+    # row is restored, regardless of database row ordering.
+    for row in job_cache_files:
+        if not row["file_name"].endswith(".tgz"):
+            continue
+        job_path = Path(sep, "var", "cache", "bunkerweb", row["plugin_id"])
+        target = job_path.joinpath(row["service_id"] or "", row["file_name"]).parent
+        try:
+            if row["file_name"].startswith("folder:"):
+                target = checked_folder_target(row["file_name"])
+            recover_directory(target)
+        except Exception as e:
+            LOGGER.error(f"Error recovering cache directory {target}: {e}")
+            failed_plugins.add(job_path)
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
@@ -522,67 +576,43 @@ def generate_caches() -> Set[str]:
         cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
         plugin_cache_files.add(cache_path)
         failure_id = f"{job_cache_file['plugin_id']}/{job_cache_file['job_name']}"
+        if job_path in failed_plugins:
+            failed_restores.add(failure_id)
+            continue
+        if failure_id == "mtls/client-cert" and job_cache_file["file_name"] in ("ca.pem", "crl.pem"):
+            continue
+        if failure_id == "modsecurity/download-crs-plugins" and job_cache_file["file_name"] == "crs-plugins.json":
+            continue
 
         try:
-            # Fetch binary data for this single file to keep memory usage bounded
-            data = SCHEDULER.db.get_job_cache_file(job_cache_file["job_name"], job_cache_file["file_name"], service_id=job_cache_file["service_id"] or "")
-            if data is None:
-                LOGGER.warning(f"Cache file {job_cache_file['file_name']} not found in database, skipping")
-                continue
-
+            extract_path = None
             if job_cache_file["file_name"].endswith(".tgz"):
                 extract_path = cache_path.parent
                 if job_cache_file["file_name"].startswith("folder:"):
-                    extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                ignored_dirs.add(extract_path.as_posix())
-                # Stage extraction in a sibling directory so a failed extract does not
-                # leave an empty target on disk (which would then be re-cached as empty
-                # state by downstream jobs — the root of the Let's Encrypt data-loss
-                # cascade). On success we swap atomically via rename; on failure we
-                # drop the staging dir and leave the previous cache untouched.
-                staging_path = extract_path.with_name(f".{extract_path.name}.staging")
-                # Reject symlinks at the staging path: rmtree refuses to follow them,
-                # but a subsequent mkdir(exist_ok=True) + extractall() would happily
-                # write into the symlink target. Unlink unconditionally with
-                # missing_ok=True so a check-then-act race window between is_symlink()
-                # and unlink() cannot let an attacker swap in a symlink we already
-                # decided to leave alone — if it's a symlink we drop it, if it's a
-                # regular file we drop it too, and if it doesn't exist we move on.
-                # Real directories are handled by rmtree() on the next line.
-                with suppress(IsADirectoryError, PermissionError):
-                    staging_path.unlink(missing_ok=True)
-                rmtree(staging_path, ignore_errors=True)
-                staging_path.mkdir(parents=True, exist_ok=True)
-                try:
-                    with tar_open(fileobj=BytesIO(data), mode="r:gz") as tar:
-                        assert isinstance(tar, TarFile)
-                        # tar_filter="auto" preserves symlinks when the archive contains
-                        # them (e.g. Let's Encrypt live/* → archive/*) while still
-                        # applying the stricter "data" filter to link-free archives.
-                        safe_tar_extractall(tar, staging_path, tar_filter="auto")
-                except Exception as e:
-                    LOGGER.error(
-                        f"Error extracting tar file for job '{job_cache_file['job_name']}' "
-                        f"(plugin '{job_cache_file['plugin_id']}', file '{job_cache_file['file_name']}'): {e}"
-                    )
-                    rmtree(staging_path, ignore_errors=True)
-                    failed_restores.add(failure_id)
-                    continue
+                    extract_path = checked_folder_target(job_cache_file["file_name"])
+                ignored_dirs.add(extract_path)
+                ignored_dirs.update(transaction_markers(extract_path))
+                recover_directory(extract_path)
+            # Fetch binary data for this single file to keep memory usage bounded
+            data = SCHEDULER.db.get_job_cache_file(job_cache_file["job_name"], job_cache_file["file_name"], service_id=job_cache_file["service_id"] or "")
+            if data is None:
+                raise ValueError(f"Cache file {job_cache_file['file_name']} not found in database")
 
-                rmtree(extract_path, ignore_errors=True)
-                try:
-                    staging_path.rename(extract_path)
-                except OSError as e:
-                    LOGGER.error(f"Error swapping staged cache into place for job '{job_cache_file['job_name']}' (plugin '{job_cache_file['plugin_id']}'): {e}")
-                    rmtree(staging_path, ignore_errors=True)
-                    failed_restores.add(failure_id)
-                    continue
+            if extract_path is not None:
+                if failure_id == "modsecurity/download-crs-plugins" and job_cache_file["file_name"] == crs_archive_name:
+                    manifest_data = SCHEDULER.db.get_job_cache_file("download-crs-plugins", "crs-plugins.json", service_id="")
+                    if manifest_data is None:
+                        raise ValueError("CRS plugin manifest not found in database")
+                    restore_directory(extract_path, data, crs_plugin_path / "crs-plugins.json", manifest_data)
+                else:
+                    restore_directory(extract_path, data)
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
-            _write_atomic(cache_path, data)
+            checked_path = checked_cache_path(job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"])
+            _write_atomic(checked_path, data)
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
-            if cache_path.stat().st_mode & 0o777 != desired_perms:
-                cache_path.chmod(desired_perms)
+            if checked_path.stat().st_mode & 0o777 != desired_perms:
+                checked_path.chmod(desired_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(
@@ -590,12 +620,13 @@ def generate_caches() -> Set[str]:
                 f"for job '{job_cache_file['job_name']}' (plugin '{job_cache_file['plugin_id']}') :\n{e}"
             )
             failed_restores.add(failure_id)
+            failed_plugins.add(job_path)
 
     for plugin_path in plugin_dirs:
-        if not plugin_path.is_dir():
+        if plugin_path in failed_plugins or not plugin_path.is_dir():
             continue
-        for resource_path in list(plugin_path.rglob("*")):
-            if resource_path.as_posix().startswith(tuple(ignored_dirs)):
+        for resource_path in sorted(cache_tree(plugin_path), key=lambda path: len(path.parts), reverse=True):
+            if is_preserved(resource_path, ignored_dirs):
                 continue
 
             LOGGER.debug(f"Checking if {resource_path} should be removed")
@@ -658,6 +689,37 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
 
     copy(NGINX_VARIABLES_PATH.as_posix(), NGINX_TMP_VARIABLES_PATH.as_posix())
     return True
+
+
+def _render_holding_applying_changes() -> bool:
+    """Render inside the APPLYING_CHANGES window, and leave the event alone when it is already held."""
+    held = not APPLYING_CHANGES.is_set()
+    if held:
+        APPLYING_CHANGES.set()
+    try:
+        return generate_configs()
+    finally:
+        if held:
+            APPLYING_CHANGES.clear()
+
+
+def generate_configs_for_jobs() -> bool:
+    """Render for JobScheduler.run_pending(), which runs on this same main-loop thread.
+
+    healthcheck_job skips its push while APPLYING_CHANGES is set, so the render has to hold the
+    event, but handle_stop runs on this very thread: holding it here would leave nobody to clear
+    it and every SIGTERM landing in the window would wait the full 30 s and then _exit(0) over
+    the same half-written /etc/nginx. A worker thread clears it while the main frame is suspended
+    in the signal handler, so handle_stop waits for the render it is meant to wait for.
+
+    backup_failover copytrees /etc/nginx on that same pool; the main loop waits for it before
+    every other render and so does this one, or the failover snapshot mixes two generations.
+    """
+    while BACKING_UP_FAILOVER.is_set():
+        LOGGER.warning("Waiting for the failover backup to finish ...")
+        sleep(1)
+
+    return SCHEDULER_TASKS_EXECUTOR.submit(_render_holding_applying_changes).result()
 
 
 def pre_push_configuration(env: Dict[str, Any], first_start: bool) -> Tuple[bool, bool]:
@@ -1012,7 +1074,11 @@ if __name__ == "__main__":
         if tmp_variables_path.is_file():
             dotenv_env = parse_env_file(tmp_variables_path)
 
-        SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+        SCHEDULER = JobScheduler(
+            LOGGER,
+            db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))),
+            generate_configs=generate_configs_for_jobs,
+        )  # type: ignore
 
         JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
@@ -1320,6 +1386,13 @@ if __name__ == "__main__":
                                     f"generate_caches() failed to restore: {', '.join(sorted(failed_restores))}. "
                                     "Affected plugins will run with stale or empty on-disk cache."
                                 )
+                # The once-jobs only record what they changed; this iteration publishes it below.
+                # Taking the flags here keeps the render/push/reload to exactly one per applied
+                # change instead of letting the first run_pending() rediscover and repeat it.
+                _, jobs_need_generation = SCHEDULER.consume_pending_publication()
+                if jobs_need_generation:
+                    CONFIG_NEED_GENERATION = True
+
                 healthcheck_job_run = False
                 # Jobs may have created files needed by config templates (e.g. api-server-cert.pem),
                 # so undo the flag the push above cleared and let the normal path render again. Keyed

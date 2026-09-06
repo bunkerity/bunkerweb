@@ -2,6 +2,10 @@
 
 ## Mise à niveau à partir de la version 1.6.X
 
+### Protection anti-rejeu de l'authentification à deux facteurs
+
+Mettez à niveau toutes les répliques de l'interface web en même temps : la protection anti-rejeu des codes à deux facteurs est désormais stockée dans la base de données partagée et ne couvre que les répliques qui exécutent cette version. Pendant la migration, un code d'authentification déjà affiché peut être refusé pendant 33 secondes au plus ; utilisez un code plus récent après ce délai. Conservez les clés de chiffrement TOTP existantes à disposition de chaque réplique de l'interface, comme décrit dans [Dépannage de l'interface web](troubleshooting.md#web-ui). Le compteur anti-rejeu ne remplace pas ces clés. Tant que la base de données est en lecture seule, les codes sont acceptés sans protection anti-rejeu jusqu'à ce qu'elle redevienne accessible en écriture.
+
 ### Procédure
 
 === "Docker"
@@ -45,7 +49,7 @@
 
             1. Détection
                 * Relit le type d'installation (full, manager, worker, scheduler, ui, api) depuis le `.env`, vous n'avez donc jamais à redéclarer votre topologie.
-                * Récupère les secrets, les ports de l'hôte, la liste des workers et le nom de projet Compose depuis le `.env` : une mise à niveau ne peut donc ni changer le mot de passe de la base, ni invalider les secrets 2FA enregistrés, ni déplacer vos ports publiés.
+                * Récupère les secrets, les ports de l'hôte, la liste des workers et le nom de projet Compose depuis le `.env` : une mise à niveau ne peut donc ni changer le mot de passe de la base, ni invalider les secrets 2FA enregistrés, ni déplacer vos ports publiés. Lorsqu'une clé est répétée, la dernière affectation l'emporte ; un préfixe `export` facultatif est accepté et les valeurs explicites de la ligne de commande restent prioritaires. Les guillemets, l'interpolation, les échappements et toute autre syntaxe dotenv non prise en charge sont rejetés avant la réécriture du fichier ; utilisez la procédure manuelle pour ces fichiers.
                 * Lit la version réellement en cours d'exécution depuis le conteneur plutôt que de se fier au tag de l'image : un tag flottant (`latest`, `testing`) comme une mise à niveau précédente interrompue sont ainsi correctement détectés.
             2. Décision de mise à niveau
                 * Même version déjà en cours : l'état de la pile est affiché et le script s'arrête.
@@ -58,11 +62,12 @@
                 * Ignorée pour les piles `worker`, `ui` et `api`, qui n'ont pas de base de données.
             4. Mise à jour des fichiers
                 * Le `.env` est réécrit avec le nouveau tag d'image ; toute entrée que vous avez ajoutée à la main est conservée.
-                * Le `docker-compose.yml` n'est régénéré que s'il correspond encore à ce que le script avait produit : vos modifications locales survivent donc. Utilisez `--overwrite-compose` pour le régénérer malgré tout. Une copie `.bak.<horodatage>` est conservée dans les deux cas.
+                * Le `docker-compose.yml` n'est régénéré que s'il correspond encore à ce que le script avait produit : vos modifications locales survivent donc. Utilisez `--overwrite-compose` pour régénérer malgré tout un fichier ordinaire. Les fichiers Compose en lien symbolique sont toujours préservés. Une copie `.bak.<horodatage>` est conservée dans les deux cas.
             5. Application et vérification
                 * `docker compose pull`, puis `docker compose up -d` : seuls les conteneurs dont l'image a changé sont recréés, l'interruption est donc plus courte qu'avec un cycle `down`/`up` complet.
-                * Si le téléchargement échoue, rien n'est recréé, le tag précédent est restauré dans le `.env` et la pile en cours reste intacte.
-                * Ensuite, le script relit la version depuis le conteneur et vérifie que le planificateur n'est pas entré dans une boucle de redémarrage, signe d'un échec de migration de la base de données.
+                * Si une étape échoue avant la recréation, le `.env` précédent et le `docker-compose.yml` sont tous deux restaurés. Une fois la recréation commencée, le script ne rétablit pas automatiquement les binaires, car le schéma de la base de données peut déjà avoir changé.
+                * Ensuite, le script vérifie les identifiants d'image attendus, l'état de santé des conteneurs et l'évolution des compteurs de redémarrage. Il exige deux observations saines espacées d'au moins dix secondes avant d'annoncer un succès ; les redémarrages passés d'un conteneur réutilisé ne font pas échouer à eux seuls une mise à niveau.
+                * Si les services ne sont pas confirmés sains dans le délai d'attente, la pile reste en marche, rien n'est annulé et le script se termine avec le statut 2 au lieu de signaler une mise à niveau échouée ; accordez plus de temps à un premier démarrage lent avec `--docker-wait-timeout N`.
 
         * **Options utiles**:
 
@@ -76,6 +81,7 @@
             | `--overwrite-compose`   | Régénérer `docker-compose.yml` même s'il a été modifié localement                                 |
             | `--force-type-change`   | Autoriser le changement de topologie de la pile (destructif)                                      |
             | `--no-pull`             | Ne pas télécharger les images avant de recréer la pile                                            |
+            | `--docker-wait-timeout N` | Secondes d'attente avant que la pile soit saine (par défaut : 600)                              |
             | `-y, --yes`             | Exécution sans surveillance ; sans cette option, les appels via un tube s'arrêtent sur une erreur |
 
     === "Manuel"

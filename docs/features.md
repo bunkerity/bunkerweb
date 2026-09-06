@@ -1802,6 +1802,9 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 - Access to BunkerWeb access logs (`/var/log/bunkerweb/access.log` by default) so the CrowdSec agent can analyse requests.
 - `cscli` access on the CrowdSec host to register the BunkerWeb bouncer key.
 
+!!! warning "All-in-one startup is explicit"
+    The embedded CrowdSec agent starts only when the all-in-one container has the unprefixed environment variable `USE_CROWDSEC=yes` and a local `CROWDSEC_API` (the default is `http://127.0.0.1:8000`). Enabling CrowdSec only for an individual service does not start the embedded agent. For an external Local API, start and configure that agent separately.
+
 ### Integration workflow
 
 1. Prepare the CrowdSec agent so it ingests BunkerWeb logs.
@@ -3742,7 +3745,9 @@ For example, `/metrics/requests` returns information about blocked requests.
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. Raw byte values and `k`/`m` suffixes are supported. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
 
 !!! info "Redis Integration"
-    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin will automatically synchronize blocked request data to the Redis server. This provides a centralized view of security events across multiple BunkerWeb instances. Under Redis `maxmemory` pressure, new reports are buffered per-worker and synced once memory frees, so blocked-request reports are not lost while Redis is full.
+    When BunkerWeb is configured to use [Redis](#redis), the metrics plugin automatically synchronizes blocked request data to the Redis server. Under `maxmemory` pressure, rejected reports remain in the bounded worker buffer for retry. Buffer overflow, LRU eviction, or Redis data loss can still discard reports. Incomplete filter counts are rebuilt from the retained request list. Stored reports with malformed data (an unusable timestamp or identifier) are excluded from the reports table and from its totals.
+
+    Counter totals are restored lazily from Redis before synchronization, including after local LRU eviction. Dormant Redis counters remain until `METRICS_REDIS_TTL` expires; `0` intentionally retains them indefinitely, so monitor Redis memory when using high-cardinality metrics.
 
 !!! warning "Performance Considerations"
     Setting very high values for `METRICS_MAX_BLOCKED_REQUESTS` or `METRICS_MAX_BLOCKED_REQUESTS_REDIS` can increase memory usage. Monitor your system resources and adjust these values according to your actual needs and available resources.

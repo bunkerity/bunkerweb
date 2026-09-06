@@ -13,6 +13,16 @@ on:
       RUNS_ON:
         required: true
         type: string
+      MANIFEST_SHA256:
+        description: Required digest of the release manifest; empty keeps ordinary staging behavior
+        required: false
+        type: string
+        default: ""
+      PLATFORM:
+        description: Restrict the release Linux package tests to one platform; empty tests every candidate package
+        required: false
+        type: string
+        default: ""
     secrets:
       # Every secret below is consumed behind an `inputs.TYPE` condition, so none
       # is required on every call.
@@ -34,12 +44,34 @@ on:
 jobs:
   tests:
     runs-on: ${{ fromJSON(inputs.RUNS_ON) }}
+    # 360 is GitHub's per-job ceiling. The release path calls this job once per Linux package
+    # platform: the native amd64 half runs in roughly 70 minutes, the arm64 half runs through QEMU
+    # in its own job and has not been measured yet, so each half gets the full ceiling.
+    timeout-minutes: 360
+    env:
+      MANIFEST_SHA256: ${{ inputs.MANIFEST_SHA256 }}
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Refuse release tests without candidates
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+        run: test "$REF_TYPE" != tag || test -n "$MANIFEST_SHA256"
+      - name: Download candidate manifest
+        if: inputs.MANIFEST_SHA256 != ''
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - name: Download final candidate packages
+        if: inputs.MANIFEST_SHA256 != '' && inputs.TYPE == 'linux'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: package-*
+          path: candidate-packages
       - name: Login to ghcr
         uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
@@ -47,11 +79,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing local/bunkerweb-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+        if: inputs.MANIFEST_SHA256 == '' && (contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true)
       - run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing local/scheduler-tests:latest
-        if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
+        if: inputs.MANIFEST_SHA256 == '' && (contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true)
       - run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing local/autoconf-tests:latest
-        if: contains(fromJSON('["autoconf"]'), inputs.TYPE)
+        if: inputs.MANIFEST_SHA256 == '' && (contains(fromJSON('["autoconf"]'), inputs.TYPE))
       - name: Install test dependencies
         run: PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - name: Install Terraform
@@ -87,50 +119,68 @@ jobs:
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
       - name: Pull BW linux debian Bookworm test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/debian-bookworm-tests:testing && docker tag ghcr.io/bunkerity/debian-bookworm-tests:testing local/debian-bookworm:latest
       - name: Pull BW linux debian Trixie test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/debian-trixie-tests:testing && docker tag ghcr.io/bunkerity/debian-trixie-tests:testing local/debian-trixie:latest
       - name: Pull BW linux fedora 43 test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/fedora-43-tests:testing && docker tag ghcr.io/bunkerity/fedora-43-tests:testing local/fedora-43:latest
       - name: Pull BW linux fedora 44 test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/fedora-44-tests:testing && docker tag ghcr.io/bunkerity/fedora-44-tests:testing local/fedora-44:latest
       - name: Pull BW linux rhel-8 test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/rhel-8-tests:testing && docker tag ghcr.io/bunkerity/rhel-8-tests:testing local/rhel-8:latest
       - name: Pull BW linux rhel-9 test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/rhel-9-tests:testing && docker tag ghcr.io/bunkerity/rhel-9-tests:testing local/rhel-9:latest
       - name: Pull BW linux rhel-10 test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/rhel-10-tests:testing && docker tag ghcr.io/bunkerity/rhel-10-tests:testing local/rhel-10:latest
       - name: Pull BW linux ubuntu noble test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/ubuntu-noble-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-noble-tests:testing local/ubuntu-noble:latest
       - name: Pull BW linux ubuntu jammy test image
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: docker pull ghcr.io/bunkerity/ubuntu-jammy-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-jammy-tests:testing local/ubuntu-jammy:latest
+      - name: Prepare exact candidates
+        if: inputs.MANIFEST_SHA256 != ''
+        env:
+          TYPE: ${{ inputs.TYPE }}
+        run: python3 .github/scripts/release_artifacts.py prepare-tests --type "$TYPE" --directory candidate-packages
+      - name: Enable ARM package tests
+        if: inputs.MANIFEST_SHA256 != '' && inputs.TYPE == 'linux'
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - name: Test exact candidate artifacts
+        if: inputs.MANIFEST_SHA256 != ''
+        env:
+          TYPE: ${{ inputs.TYPE }}
+          RELEASE_TEST_PLATFORM: ${{ inputs.PLATFORM }}
+          TEST_DOMAINS: ${{ inputs.TYPE == 'docker' && secrets.TEST_DOMAINS_DOCKER || inputs.TYPE == 'autoconf' && secrets.TEST_DOMAINS_AUTOCONF || inputs.TYPE == 'k8s' && secrets.TEST_DOMAINS_KUBERNETES || secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+          KUBECONFIG: "/tmp/k8s/kubeconfig"
+          PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+        run: python3 .github/scripts/release_integration.py "$TYPE"
       # Do tests
       - name: Run tests
-        if: inputs.TYPE == 'docker'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'docker')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_DOCKER }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
-        if: inputs.TYPE == 'autoconf'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'autoconf')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "${{ inputs.TYPE }}"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run tests
-        if: inputs.TYPE == 'k8s'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'k8s')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "kubernetes"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
@@ -139,61 +189,61 @@ jobs:
           PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
           IMAGE_TAG: "testing"
       - name: Run Linux ubuntu tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux debian Bookworm tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-bookworm"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux debian Trixie tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-trixie"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora 43 tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-43"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux fedora 44 tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "fedora-44"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux rhel-8 tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-8"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux rhel-9 tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-9"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux rhel-10 tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-10"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux ubuntu-noble tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-noble"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
       - name: Run Linux ubuntu-jammy tests
-        if: inputs.TYPE == 'linux'
+        if: inputs.MANIFEST_SHA256 == '' && (inputs.TYPE == 'linux')
         run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "ubuntu-jammy"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}

@@ -21,3 +21,11 @@ The preferred way to report bugs and asking for features is using [issues](https
 ## Code contribution
 
 The preferred way to contribute code is using [pull requests](https://github.com/bunkerity/bunkerweb/pulls). Before creating a pull request, please check if your code is related to an opened issue. If that's not the case, you should first create an issue so we can discuss about it. This procedure is here to avoid wasting your time in case the PR will be rejected. For minor changes (e.g. : typo, quick fix, ...), opening an issue might be facultative. **Don't forget to edit the documentations when needed !**
+
+## Release validation
+
+The [release workflow](workflows/release.yml) builds candidate images and Linux packages once, records their source revision and digests/checksums in `release-manifest.json`, and tests those artifacts before publication. Publishing copies the tested images without rebuilding them and verifies the package bytes. The manifest and its checksum accompany the draft release.
+
+Release and staging runs share a queue because they use the same test infrastructure. Every required integration and platform startup check must succeed before the protected `release` environment can approve publication. That environment must retain required reviewers and keep "Prevent self-review" enabled; the workflow checks both before building and before publishing and fails closed when either is missing. A local unit or syntax check is not evidence that this release matrix has passed.
+
+Candidate images use unique transport tags in the existing test-image repositories. Their registry and Actions artifacts follow existing retention policies; do not remove them while a release run or retry still needs them. Retrying tests or publication can reuse a candidate from the same run. Rebuilding only part of a failed candidate produces mixed receipts and is rejected; rerun the complete build set before publication. That applies only while no release exists for the tag: once the draft release has been created it is bound to the artifacts of the attempt that created it, so recover a failed publication with "Re-run failed jobs" only. "Re-run all jobs" rebuilds the artifacts and is refused because the tag is already claimed.

@@ -27,11 +27,16 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 - L’accès aux journaux d’accès de BunkerWeb (`/var/log/bunkerweb/access.log` par défaut) pour que l’agent CrowdSec puisse analyser les requêtes.
 - L’accès à `cscli` sur l’hôte CrowdSec afin d’enregistrer la clé du bouncer BunkerWeb.
 
+!!! warning "Démarrage explicite en tout-en-un"
+    L’agent CrowdSec intégré démarre uniquement si le conteneur tout-en-un reçoit la variable d’environnement sans préfixe `USE_CROWDSEC=yes` et une `CROWDSEC_API` locale (`http://127.0.0.1:8000` par défaut). Activer CrowdSec uniquement pour un service ne démarre pas l’agent intégré. Avec une API locale externe, démarrez et configurez l’agent séparément.
+
 ### Parcours d’intégration
 
 1. Préparer l’agent CrowdSec pour ingérer les journaux BunkerWeb.
 2. Configurer BunkerWeb pour interroger l’API locale CrowdSec.
 3. Valider le lien via l’API `/crowdsec/ping` ou la carte CrowdSec dans l’interface d’administration.
+
+    Ce contrôle effectue une requête de lecture authentifiée auprès de chaque API locale configurée. Il échoue si une API est inaccessible, refuse la clé, renvoie une réponse invalide ou si le bouncer d’un service n’a pas pu être chargé. Pour les services utilisant uniquement AppSec, il confirme le chargement de la configuration ; il ne teste ni la connexion ni l’inspection AppSec.
 
 Les sections suivantes détaillent chacune de ces étapes.
 

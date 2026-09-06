@@ -3,6 +3,7 @@ local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local ssl = require "ngx.ssl"
 local utils = require "bunkerweb.utils"
+local is_http_challenge = require("bunkerweb.acme").is_http_challenge
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -527,10 +528,7 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
-	if
-		self.variables["LETS_ENCRYPT_PASSTHROUGH"] == "no"
-		and sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/"
-	then
+	if is_http_challenge(self.ctx) then
 		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", OK)
 	end

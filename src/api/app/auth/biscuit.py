@@ -153,7 +153,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
 
     Permissions are named with singular prefix (service_*), resource_type is plural "services".
     Special endpoints:
-    - POST   /services/convert -> service_convert
+    - POST   /services/{id}/convert -> service_convert
     - GET    /services/export  -> service_export
     CRUD:
     - GET    /services or /services/{id} -> service_read
@@ -166,7 +166,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
     parts = [seg for seg in p.split("/") if seg]
 
     # Special actions
-    if p == "/services/convert" and method_u == "POST":
+    if len(parts) == 3 and parts[0] == "services" and parts[2] == "convert" and method_u == "POST":
         return rtype, "service_convert"
     if p == "/services/export" and method_u in {"GET", "OPTIONS"}:
         return rtype, "service_export"
@@ -396,7 +396,7 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_settings", "global-settings"}:
         return None
     # Skip services action endpoints when extracting ID
-    if parts[0] == "services" and len(parts) >= 2 and parts[1] in {"convert", "export"}:
+    if parts[0] == "services" and len(parts) == 2 and parts[1] in {"convert", "export"}:
         return None
     # Skip upload pseudo-id segments for configs/plugins
     if parts[0] in {"configs", "plugins"} and len(parts) >= 2 and parts[1] == "upload":

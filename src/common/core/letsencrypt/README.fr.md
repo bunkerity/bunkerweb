@@ -64,6 +64,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Nombre maximal de sauvegardes de logs Certbot :** Nombre de sauvegardes rotatives de `letsencrypt.log` que Certbot conserve par job. La valeur par défaut de Certbot, `1000`, s'accumule vite ; `50` est une limite raisonnable. Définissez `0` pour ne conserver que le log actif.                                        |
 
 !!! info "Information et comportement"
+    - Le traitement local de `/.well-known/acme-challenge/` n’est actif que si `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` et `LETS_ENCRYPT_PASSTHROUGH=no`. Les exceptions à la redirection HTTPS et aux contrôles d’accès exigent aussi que le jeton demandé existe sous forme de fichier lisible et non vide. La suppression du jeton rétablit immédiatement les contrôles habituels. Les autres services appliquent leurs règles habituelles de routage et d’accès à ce chemin.
     - Le paramètre `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci.
     - Si aucun paramètre `LETS_ENCRYPT_DNS_PROPAGATION` n'est fourni, le temps de propagation par défaut du fournisseur est utilisé.
     - L'automatisation complète de Let's Encrypt avec le défi `http` fonctionne en mode stream tant que vous ouvrez le port `80/tcp` depuis l'extérieur. Utilisez le paramètre `LISTEN_STREAM_PORT_SSL` pour choisir votre port d'écoute SSL/TLS.
@@ -85,6 +86,8 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 
 !!! warning "Certificats wildcard"
     Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous devez mettre le paramètre `USE_LETS_ENCRYPT_WILDCARD` à `yes` et configurer correctement les identifiants de votre fournisseur DNS.
+
+    Un wildcard ne couvre qu’un niveau : `*.example.com` ne couvre pas `a.b.example.com`. Les groupes qui ne peuvent pas couvrir tous les noms configurés sont refusés et le service concerné est signalé comme mal configuré. Répartissez ces noms dans des services distincts. Les groupes valides restent traités ; si aucun certificat ne peut être émis, le job échoue. Les certificats émis pour les autres groupes demandent toujours un rechargement.
 
 !!! warning "Limites de débit"
     Let's Encrypt impose des limites de débit sur l'émission de certificats. Lors du test de configurations, utilisez l'environnement de staging en mettant `USE_LETS_ENCRYPT_STAGING` à `yes` pour éviter d'atteindre les limites de production. Les certificats de staging ne sont pas reconnus par les navigateurs mais sont utiles pour valider votre configuration.

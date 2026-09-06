@@ -15,7 +15,7 @@ from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error a
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -3576,7 +3576,7 @@ class Database:
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or inherited.get("USE_TEMPLATE") or "",
+                    "template": service.template if service.template is not None else inherited.get("USE_TEMPLATE") or "",
                     "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                 }
             )
@@ -3692,39 +3692,49 @@ class Database:
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
-        job_name = job_name or argv[0].replace(".py", "")
-        service_id = service_id or None
-        with self._db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
+        return self.upsert_job_caches(
+            [{"job_name": job_name or argv[0].replace(".py", ""), "service_id": service_id, "file_name": file_name, "data": data, "checksum": checksum}]
+        )
 
-            cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+    def upsert_job_caches(self, entries: List[Dict[str, Any]], *, deletions: Sequence[Dict[str, Any]] = ()) -> str:
+        """Save and delete cache files in one transaction, or roll back the whole set."""
+        if not entries and not deletions:
+            return ""
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
 
-            if not cache:
-                session.add(
-                    Jobs_cache(
-                        job_name=job_name,
-                        service_id=service_id,
-                        file_name=file_name,
-                        data=data,
-                        last_update=datetime.now().astimezone(),
-                        checksum=checksum,
-                    )
-                )
-            else:
-                if checksum is None or cache.checksum != checksum:
-                    cache.data = data
+        # A caller malformed against this contract is not a database outage: check the keys here so
+        # the two are distinguishable, and keep the redaction below for driver errors only.
+        for entry in entries:
+            missing = {"job_name", "service_id", "file_name", "data", "checksum"}.difference(entry)
+            if missing:
+                return f"Malformed job cache entry, missing {', '.join(sorted(missing))}"
+        for entry in deletions:
+            missing = {"job_name", "service_id", "file_name"}.difference(entry)
+            if missing:
+                return f"Malformed job cache deletion, missing {', '.join(sorted(missing))}"
+
+        try:
+            with self._db_session() as session:
+                for entry in entries:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    cache = session.query(Jobs_cache).filter_by(**key).first()
+                    if cache is None:
+                        cache = Jobs_cache(**key, data=entry["data"], checksum=entry["checksum"])
+                        session.add(cache)
+                    elif entry["checksum"] is None or cache.checksum != entry["checksum"]:
+                        cache.data = entry["data"]
+                        cache.checksum = entry["checksum"]
+                    # Unchanged data still refreshes the expiry window.
                     cache.last_update = datetime.now().astimezone()
-                    cache.checksum = checksum
-                else:
-                    # Data unchanged — refresh timestamp to reset expiry window
-                    cache.last_update = datetime.now().astimezone()
-
-            try:
+                for entry in deletions:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    session.query(Jobs_cache).filter_by(**key).delete(synchronize_session=False)
                 session.commit()
-            except BaseException as e:
-                return str(e)
-
+        except Exception as e:
+            # Driver exceptions can embed the cache payload or connection credentials.
+            self.logger.error(f"Failed to save job caches ({type(e).__name__})")
+            return "An error occurred while saving job caches"
         return ""
 
     def update_external_plugins(
@@ -5977,6 +5987,27 @@ class Database:
                 return f"An error occurred while deleting template {template_id}.\n{e}"
 
         return ""
+
+    def use_ui_user_totp(self, username: str, totp_secret: str, counter: int) -> bool:
+        """Consume a counter once, across replicas, only for the user's current secret."""
+        if self.readonly or not totp_secret or type(counter) is not int or counter < 0:
+            return False
+        try:
+            with self._db_session() as session:
+                updated = (
+                    session.query(Users)
+                    .filter(
+                        Users.username == username,
+                        Users.totp_secret == totp_secret,
+                        (Users.totp_last_counter.is_(None)) | (Users.totp_last_counter < counter),
+                    )
+                    .update({Users.totp_last_counter: counter}, synchronize_session=False)
+                )
+                session.commit()
+                return updated == 1
+        except Exception as e:
+            self.logger.error(f"Failed to consume TOTP counter ({type(e).__name__})")
+            return False
 
     def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
         """Get ui users."""

@@ -13,13 +13,8 @@
 
 local cache_partition = {}
 
-local byte = string.byte
-local format = string.format
-
--- Kept below 2^32 so the hash stays representable as an exact double in Lua 5.1
--- (mantissa is 53 bits) and as a 64-bit integer in Lua 5.3+, with no risk of
--- overflow or precision loss in the accumulator below.
-local HASH_MOD = 4294967291
+local sha256 = require "resty.sha256"
+local to_hex = require("resty.string").to_hex
 
 -- The Local API a rendered configuration targets. Matched line by line, anchored, so
 -- APPSEC_URL is never mistaken for it. Returns "" when the configuration has none.
@@ -40,20 +35,26 @@ function cache_partition.normalize(api_url)
 	return (api_url:gsub("/+$", ""))
 end
 
--- Plain djb2, pure arithmetic (no bitwise operators) so it behaves identically
--- across Lua 5.1, 5.3+ and LuaJIT.
 function cache_partition.hash(str)
-	local h = 5381
-	for i = 1, #str do
-		h = (h * 33 + byte(str, i)) % HASH_MOD
-	end
-	return h
+	local hash = assert(sha256:new())
+	assert(hash:update(str))
+	return to_hex(assert(hash:final()))
 end
 
 -- The cache key prefix for one Local API URL, independent of every other API
 -- configured elsewhere in the fleet.
 function cache_partition.prefix_for(api_url)
-	return format("%08x|", cache_partition.hash(cache_partition.normalize(api_url)))
+	-- Never trust legacy 32-bit namespaces after a reload. Old decisions expire
+	-- naturally; a dict-wide flush would disrupt other workers and endpoints.
+	return "v2|" .. cache_partition.hash(cache_partition.normalize(api_url)) .. "|"
+end
+
+function cache_partition.challenge_prefix(scope, content, captcha_template)
+	-- Length framing prevents ambiguous concatenation; configuration changes
+	-- invalidate challenges when a provider, key or policy changes.
+	return "captcha-v2|"
+		.. cache_partition.hash(#scope .. ":" .. scope .. #content .. ":" .. content .. (captcha_template or ""))
+		.. "|"
 end
 
 -- Map of Local API -> cache key prefix, plus how many distinct Local APIs were seen.
@@ -67,12 +68,21 @@ end
 function cache_partition.prefixes(api_urls)
 	local prefixes = {}
 	local distinct = {}
+	local owners = {}
 	local count = 0
 	for _, api_url in ipairs(api_urls) do
-		if api_url ~= "" and not distinct[api_url] then
-			distinct[api_url] = true
-			count = count + 1
-			prefixes[api_url] = cache_partition.prefix_for(api_url)
+		if api_url ~= "" and not prefixes[api_url] then
+			local normalized = cache_partition.normalize(api_url)
+			local prefix = cache_partition.prefix_for(normalized)
+			if owners[prefix] and owners[prefix] ~= normalized then
+				return nil, "CrowdSec cache namespace collision"
+			end
+			owners[prefix] = normalized
+			if not distinct[normalized] then
+				distinct[normalized] = true
+				count = count + 1
+			end
+			prefixes[api_url] = prefix
 		end
 	end
 	return prefixes, count

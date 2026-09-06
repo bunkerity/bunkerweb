@@ -27,6 +27,8 @@ Follow these steps to deploy mutual TLS with confidence:
 5. **Forward results (optional):** Keep `MTLS_FORWARD_CLIENT_HEADERS` at `yes` when upstream services should inspect the presented certificate.
 6. **Maintain revocation data:** If you publish a CRL, set `MTLS_CRL` (or `MTLS_CRL_DATA`) so BunkerWeb can deny revoked certificates.
 
+The Scheduler validates the whole candidate CA bundle and every CRL before replacing either cached file. A CRL is refused when it cannot be parsed, or when its issuer is part of the bundle and the signature does not verify against it; a CRL signed by a CA that is absent from the bundle is published with a warning, because NGINX builds the chain from the intermediates the client presents. An unreadable, malformed or mismatched replacement keeps the previous CA/CRL pair and logs an error. Rotate the CA and its CRL together, and correct invalid sources promptly, especially before a CRL expires. Clearing both `MTLS_CRL` and `MTLS_CRL_DATA` deliberately removes revocation checking. Removing the CA configuration, disabling mTLS, or deleting the service removes its cached material; while `USE_MTLS` stays `yes` with any mode other than `optional_no_ca`, `ssl_verify_client` then applies against a built-in placeholder CA, so every client gets a 400 with `on` and every client presenting a certificate gets a 400 with `optional`, until a CA is configured again. Effective removals request a reload.
+
 ### Configuration Settings
 
 | Setting                        | Default | Context   | Multiple | Description                                                                                                                                            |

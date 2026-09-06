@@ -2,6 +2,10 @@
 
 ## Upgrade from 1.6.X
 
+### Two-factor authentication replay protection
+
+Upgrade every Web UI replica together: replay protection for two-factor codes is now stored in the shared database and only covers replicas running this version. During the migration, an already displayed authentication code may be rejected for up to 33 seconds; use a newer code after that interval. Keep the existing TOTP encryption keys available to every UI replica, as described in [Web UI troubleshooting](troubleshooting.md#web-ui). The replay counter does not replace those keys. While the database is read-only, codes are accepted without replay protection until it becomes writable again.
+
 ### Procedure
 
 === "Docker"
@@ -44,7 +48,7 @@
 
             1. Detection
                 * Reads the install type (full, manager, worker, scheduler, ui, api) back from `.env`, so you never have to restate your topology.
-                * Recovers the secrets, host ports, worker list and Compose project name from `.env`, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports.
+                * Recovers the secrets, host ports, worker list and Compose project name from `.env`, so an upgrade cannot rotate the database password, invalidate stored 2FA secrets, or move your published ports; when a key is repeated the last assignment wins. Optional `export` prefixes are accepted, and explicit command-line values still take precedence. Quoting, interpolation, escaping, and other unsupported dotenv syntax are rejected before the file is rewritten; use the manual upgrade path for those files.
                 * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`) and an interrupted previous upgrade are both detected correctly.
             2. Upgrade decision
                 * Same version already running: prints the stack status and exits.
@@ -57,11 +61,12 @@
                 * Skipped for `worker`, `ui` and `api` stacks, which own no database.
             4. File updates
                 * `.env` is rewritten with the new image tag; any entry you added by hand is carried over.
-                * `docker-compose.yml` is regenerated only when it still matches what the script produced, so local edits survive. Pass `--overwrite-compose` to regenerate it anyway. A `.bak.<timestamp>` copy is kept either way.
+                * `docker-compose.yml` is regenerated only when it still matches what the script produced, so local edits survive. Pass `--overwrite-compose` to regenerate a regular file anyway. Symlinked Compose files are always preserved. A `.bak.<timestamp>` copy is kept either way.
             5. Apply and verify
                 * `docker compose pull`, then `docker compose up -d` — only the containers whose image changed are recreated, so downtime is shorter than a full `down`/`up` cycle.
-                * If the pull fails nothing is recreated, the previous tag is restored in `.env`, and the running stack is left untouched.
-                * Afterwards the script re-reads the version from the container and checks that the scheduler did not enter a restart loop, which is how a failed database migration shows up.
+                * If a step fails before recreation, both the previous `.env` and `docker-compose.yml` are restored. Once recreation starts, the script does not automatically roll back binaries because the database schema may already have changed.
+                * Afterwards the script checks the expected image IDs, container health, and changes to restart counters. It requires two healthy observations at least ten seconds apart before reporting success; historical restarts of a reused container do not by themselves fail an upgrade.
+                * When the services are not confirmed healthy within the wait timeout, the stack is left running, nothing is rolled back, and the script exits with status 2 instead of reporting a failed upgrade; give a slow first start more room with `--docker-wait-timeout N`.
 
         * **Useful flags**:
 
@@ -75,6 +80,7 @@
             | `--overwrite-compose`   | Regenerate `docker-compose.yml` even if it was edited locally         |
             | `--force-type-change`   | Allow the stack to change topology (destructive)                      |
             | `--no-pull`             | Do not pull images before recreating the stack                        |
+            | `--docker-wait-timeout N` | Seconds to wait for the stack to become healthy (default: 600)      |
             | `-y, --yes`             | Unattended run; piped invocations without it exit with an error       |
 
     === "Manual"
