@@ -465,7 +465,7 @@ function blacklist:is_ignored(rule)
 
 	if kinds.ua and self.ctx.bw.http_user_agent then
 		for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-			if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+			if regex_match(self.ctx.bw.http_user_agent, ignore_ua, nil, "BLACKLIST_IGNORE_USER_AGENT(_URLS)") then
 				return true, "ignore UA " .. ignore_ua
 			end
 		end
@@ -473,7 +473,7 @@ function blacklist:is_ignored(rule)
 
 	if kinds.uri and self.ctx.bw.uri then
 		for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-			if regex_match(self.ctx.bw.uri, ignore_uri) then
+			if regex_match(self.ctx.bw.uri, ignore_uri, nil, "BLACKLIST_IGNORE_URI(_URLS)") then
 				return true, "ignore URI " .. ignore_uri
 			end
 		end
@@ -639,7 +639,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in ignore list
 	local ignore = false
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if regex_match(self.ctx.bw.uri, ignore_uri) then
+		if regex_match(self.ctx.bw.uri, ignore_uri, nil, "BLACKLIST_IGNORE_URI(_URLS)") then
 			ignore = true
 			break
 		end
@@ -647,7 +647,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in blacklist
 	if not ignore then
 		for _, uri in ipairs(self.lists["URI"]) do
-			if regex_match(self.ctx.bw.uri, uri) then
+			if regex_match(self.ctx.bw.uri, uri, nil, "BLACKLIST_URI(_URLS)") then
 				return true, "URI " .. uri
 			end
 		end
@@ -660,7 +660,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in ignore list
 	local ignore = false
 	for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ignore_ua, nil, "BLACKLIST_IGNORE_USER_AGENT(_URLS)") then
 			ignore = true
 			break
 		end
@@ -668,7 +668,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in blacklist
 	if not ignore then
 		for _, ua in ipairs(self.lists["USER_AGENT"]) do
-			if regex_match(self.ctx.bw.http_user_agent, ua) then
+			if regex_match(self.ctx.bw.http_user_agent, ua, nil, "BLACKLIST_USER_AGENT(_URLS)") then
 				return true, "UA " .. ua
 			end
 		end
