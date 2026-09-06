@@ -135,12 +135,36 @@ end
 -- Does a buffered record belong in Reports? Mirrors _report_clause() in
 -- db_methods/metrics.py, which filters the same records again once persisted -- keep the two
 -- in step.
--- HTTP: blocked (4xx) or merely detected. A stream record is a report by construction, since
--- log() only ever buffers one when a plugin set a reason, and NGINX session statuses do not
--- live in the 4xx range. Records written before `protocol` existed are HTTP.
+-- HTTP: blocked (4xx), merely detected, or answered by the plugin itself (above). A stream
+-- record is a report by construction, since log() only ever buffers one when a plugin set a
+-- reason, and NGINX session statuses do not live in the 4xx range. Records written before
+-- `protocol` existed are HTTP.
 local function is_report(request)
 	local protocol = request.protocol
 	if protocol and protocol ~= "http" then
+		return true
+	end
+	-- A reason whose recorded status is the *remediation's* own rather than a block code: the
+	-- plugin answered the request itself, or bounced the client somewhere else, and the origin
+	-- was never reached. Three of them today:
+	--   crowdsec  -- the 1.8 AppSec bot-detection challenge page, served with the status AppSec
+	--                chose (a 200).
+	--   workflows -- the redirect action, which exits through ngx_redirect() with a 3xx.
+	--   antibot   -- the challenge page, served on ngx.OK and rendered by the content phase.
+	-- The 4xx arm below would drop all three on the floor: recorded with a reason, shown nowhere.
+	-- Tested on the reason and not on a widened status range on purpose: a range that admitted 2xx
+	-- and 3xx would drag in every ordinary-looking row a future plugin records for some other
+	-- purpose. Written inline, not as a module-level allowlist table, because the unit harness
+	-- lifts is_report() out of the module and runs it standalone -- an upvalue here is a nil index
+	-- there; string.lower is a global there and a table field here, so it is safe either way.
+	-- Mirrored in Python by _SELF_SERVED_REASONS (db_methods/metrics.py), which lowercases too:
+	-- the comparison is case-sensitive on PostgreSQL and not on MariaDB's default collation, so
+	-- normalising is the only way the two halves answer the same question everywhere.
+	-- type() and not a truthiness test: is_report() is fed records decoded straight out of the
+	-- shared dict, and string.lower() on a table raises -- which would abort the whole Reports
+	-- listing, not just drop one row. The pre-widening form compared with == and could not raise.
+	local reason = type(request.reason) == "string" and string.lower(request.reason)
+	if reason == "crowdsec" or reason == "workflows" or reason == "antibot" then
 		return true
 	end
 	return (request.status and request.status >= 400 and request.status < 500) or request.security_mode == "detect"

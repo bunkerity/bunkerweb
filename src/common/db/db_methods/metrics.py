@@ -233,13 +233,41 @@ def _build_baseline_row(request_id: str, record: Dict[str, Any], instance_hostna
     )
 
 
-def _report_clause():
-    """A row is a report when it was blocked (4xx) or merely detected (any status).
+# Reasons whose recorded status is the *remediation's* own rather than a block code, because the
+# plugin answered the request itself -- or bounced the client somewhere else -- and the origin was
+# never reached. CrowdSec 1.8 serves its AppSec bot-detection challenge page with a 200, a
+# ``workflows`` redirect action exits with a 3xx, and antibot serves its challenge page on
+# ``ngx.OK``; without this arm all three are stored with a reason and shown nowhere. Keyed on the
+# reason and not on a widened status range on purpose: a range that admitted 2xx and 3xx would drag
+# in every ordinary-looking row a future plugin records for some other purpose. Mirrored in Lua by
+# the reason arm inside ``is_report()`` (``src/common/core/metrics/metrics.lua``), which spells the
+# same reasons inline rather than in a table -- the Lua unit harness lifts that function out of the
+# module, where an upvalue would be nil.
+#
+# Compared lowercased on both sides: ``reason`` is a plain ``String`` column, so ``IN`` is
+# case-sensitive on PostgreSQL and case-insensitive under MariaDB's default collation. Every
+# producer writes ``self.id``, which is lowercase, so this changes no verdict today -- it stops the
+# two engines from disagreeing the day one does not. ``reason`` *is* indexed
+# (``model.py``: ``index=True``) and ``lower()`` is not sargable against that index -- but this arm
+# sits inside an ``or_()`` that already contains ``Requests.protocol != "http"``, so the clause was
+# never index-driven to begin with and nothing is lost.
+_SELF_SERVED_REASONS = ("crowdsec", "workflows", "antibot")
 
-    Stream rows are reports by construction — Lua only buffers one when a plugin set a reason, and
-    an NGINX session status is not an HTTP code, so the 4xx test does not apply to it. Before this
-    arm existed, the stream path had to pin every deny to 403 to survive the filter. Mirrored in
-    Lua by ``is_report()`` (``src/common/core/metrics/metrics.lua``)."""
+
+def _blocking_clause():
+    """A row where the request was actually stopped, or would have been outside ``detect``.
+
+    This is the report filter exactly as it stood before a self-served remediation could be a
+    report — blocked (4xx), merely detected (any status), or a stream session (a report by
+    construction: Lua only buffers one when a plugin set a reason, and an NGINX session status is
+    not an HTTP code, so the 4xx test does not apply. Before this arm existed the stream path had
+    to pin every deny to 403 to survive the filter).
+
+    Kept as its own predicate because the two questions came apart. "Show me this row" and "this
+    row is evidence someone attacked me" used to have one answer; a served challenge and a workflow
+    redirect are rows the operator asked to *see* and that nobody was blocked by. The analytical
+    views (top offenders, threat map, the overview timeseries) ask the second question and must use
+    this one — a visitor shown a captcha is not an offender."""
     return or_(
         and_(Requests.status >= 400, Requests.status < 500),
         Requests.security_mode == "detect",
@@ -247,9 +275,23 @@ def _report_clause():
     )
 
 
-def _filter_conditions(search: str = "", filters: Optional[Dict[str, List[str]]] = None) -> list:
-    """WHERE clauses selecting reports, narrowed by free-text ``search`` and faceted ``filters``."""
-    conditions = [_report_clause()]
+def _report_clause():
+    """A row is a report when it was blocked or detected (``_blocking_clause``) **or** when a
+    plugin answered the request itself (``_SELF_SERVED_REASONS``, any status).
+
+    Mirrored in Lua by ``is_report()`` (``src/common/core/metrics/metrics.lua``)."""
+    return or_(
+        _blocking_clause(),
+        func.lower(Requests.reason).in_(_SELF_SERVED_REASONS),
+    )
+
+
+def _filter_conditions(search: str = "", filters: Optional[Dict[str, List[str]]] = None, *, blocking_only: bool = False) -> list:
+    """WHERE clauses selecting reports, narrowed by free-text ``search`` and faceted ``filters``.
+
+    ``blocking_only`` narrows to rows something was actually stopped by (``_blocking_clause``), for
+    the views that count attacks rather than list events."""
+    conditions = [_blocking_clause() if blocking_only else _report_clause()]
     if search:
         like = f"%{search}%"
         clauses = [col.ilike(like) for col in _SEARCH_COLUMNS]
@@ -433,7 +475,7 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         """
         start_dt = _safe_epoch_to_datetime(start, "start")
         end_dt = _safe_epoch_to_datetime(end, "end")
-        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
+        conditions = _filter_conditions("", filters, blocking_only=True) + [Requests.date >= start_dt, Requests.date < end_dt]
 
         def _facet(session, column) -> List[Dict[str, Any]]:
             rows = session.execute(select(column, func.count()).where(*conditions).group_by(column)).all()
@@ -493,8 +535,8 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         end_dt = _safe_epoch_to_datetime(end, "end")
         prev_start_dt = _safe_epoch_to_datetime(start - window, "start")
 
-        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
-        prev_conditions = _filter_conditions("", filters) + [Requests.date >= prev_start_dt, Requests.date < start_dt]
+        conditions = _filter_conditions("", filters, blocking_only=True) + [Requests.date >= start_dt, Requests.date < end_dt]
+        prev_conditions = _filter_conditions("", filters, blocking_only=True) + [Requests.date >= prev_start_dt, Requests.date < start_dt]
 
         with self._db_session() as session:
             dates = session.scalars(select(Requests.date).where(*conditions)).all()
@@ -534,7 +576,7 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
         first/last-seen timestamps."""
         start_dt = _safe_epoch_to_datetime(start, "start")
         end_dt = _safe_epoch_to_datetime(end, "end")
-        conditions = _filter_conditions("", filters) + [Requests.date >= start_dt, Requests.date < end_dt]
+        conditions = _filter_conditions("", filters, blocking_only=True) + [Requests.date >= start_dt, Requests.date < end_dt]
 
         with self._db_session() as session:
             rows = session.execute(

@@ -28,6 +28,12 @@ from app.routes.utils import (
 bans = Blueprint("bans", __name__)
 
 
+# Reasons whose ``reason_data`` the Reason column turns into a sentence
+# (``static/js/components/security-reason.js``). Everything else is left with its bare reason
+# token, so shipping its payload would be bytes nothing reads on every table draw.
+_SENTENCE_REASONS = frozenset({"antibot", "crowdsec", "workflows"})
+
+
 # Column order shared between the table and exports — must stay in sync with bans.js
 _BAN_COLUMNS = (
     "date",  # 0
@@ -372,6 +378,14 @@ def bans_fetch():
         service = ban.get("service")
         # Normalize service to "_" for global bans or when service is None
         if ban.get("ban_scope") == "global" or service is None:
+            # The verdict the banning plugin recorded, passed through as the dict the DB returns.
+            # Not escaped here: the Reason column renders it through the shared
+            # `formatSecurityReason` helper, which escapes every value it interpolates exactly
+            # once — escaping it twice would print `&#39;` at the user.
+            # Sent only for the reasons that helper renders. It ignores every other one, and a
+            # badbehavior ban's reason_data is the whole per-IP increment list — shipping that on
+            # every draw, for up to 1000 rows a page, would be payload nothing reads.
+            "reason_data": (ban.get("reason_data") or {}) if str(ban.get("reason") or "").lower() in _SENTENCE_REASONS else {},
             service = "_"
         return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"  # noqa: E231
 

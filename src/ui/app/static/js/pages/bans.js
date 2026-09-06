@@ -1196,6 +1196,17 @@ $(document).ready(function () {
         {
           data: "reason",
           title: "<span data-i18n='table.header.reason'>Reason</span>",
+          // Same sentence as the Reports table when the ban carries a security verdict in
+          // `reason_data`; the plain reason token otherwise. Only `display` is replaced, so
+          // sorting and the search pane keep working on the token.
+          render: function (data, type, row) {
+            if (type !== "display") return data;
+            const sentence =
+              typeof window.formatSecurityReason === "function"
+                ? window.formatSecurityReason(data, row && row.reason_data)
+                : null;
+            return sentence || data;
+          },
         },
         {
           data: "scope",

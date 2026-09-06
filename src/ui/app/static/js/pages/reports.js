@@ -828,6 +828,18 @@ $(document).ready(function () {
         {
           data: "reason",
           title: "<span data-i18n='table.header.reason'>Reason</span>",
+          // A raw "crowdsec" says nothing about what actually happened -- blocked by a LAPI
+          // decision, challenged by AppSec's bot detection, or sent a captcha. When the row
+          // carries the verdict, show the sentence instead; sorting and the search pane keep
+          // working on the underlying token because only `display` is replaced.
+          render: function (data, type, row) {
+            if (type !== "display") return data;
+            const sentence =
+              typeof window.formatSecurityReason === "function"
+                ? window.formatSecurityReason(data, row && row.data)
+                : null;
+            return sentence || data;
+          },
         },
         {
           data: "server_name",
@@ -1345,6 +1357,22 @@ $(document).ready(function () {
         `;
       }
       return formatBadBehaviorData(filteredBadBehaviorEntries);
+    }
+
+    // The CrowdSec verdict leads with the sentence, then the raw fields underneath: an operator
+    // still wants the origin and the decision duration, but nobody should have to read
+    // {"source":"appsec","action":"challenge"} to learn that a bot check was served.
+    const crowdsecSentence =
+      typeof window.formatSecurityReason === "function"
+        ? window.formatSecurityReason(reason, data)
+        : null;
+    if (crowdsecSentence) {
+      return (
+        '<div class="alert alert-info mb-3">' +
+        crowdsecSentence +
+        "</div>" +
+        formatGenericData(data)
+      );
     }
 
     const hasSecurityFields =
