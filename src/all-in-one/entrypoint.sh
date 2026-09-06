@@ -441,6 +441,59 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 			install_or_upgrade_collection "$collection"
 		done
 		log "ENTRYPOINT" "✅" "[CROWDSEC] Extra collections processed."
+
+		# CrowdSec 1.8 bot detection: installing crowdsecurity/appsec-bot-challenge is not enough,
+		# the appsec-configs it ships (scoring engine, threshold, good-bot and path exclusions) also
+		# have to be listed in appsec_configs. The image cannot ship that entry unconditionally:
+		# crowdsec refuses to start the AppSec datasource when an appsec_configs entry -- glob or
+		# literal -- resolves to no installed config, which would break AppSec for everyone who did
+		# not opt in. So the entry is added here, only once an opted-in collection actually provided
+		# one. The glob is the form CrowdSec's own documentation uses and picks up every
+		# appsec-bot-* config the chosen bundle installed.
+		APPSEC_ACQUIS="/etc/crowdsec/acquis.d/appsec.yaml"
+		if [ -f "${APPSEC_ACQUIS}" ] && ! grep -qF "crowdsecurity/appsec-bot-*" "${APPSEC_ACQUIS}" &&
+			cscli appsec-configs list -o raw 2>/dev/null | grep -q "^crowdsecurity/appsec-bot-"; then
+			sed -i '/^  - crowdsecurity\/appsec-default$/a\  - crowdsecurity/appsec-bot-*' "${APPSEC_ACQUIS}"
+			# `sed -i` exits 0 whether or not the address matched, and /etc/crowdsec survives a
+			# restart, so an operator who hand-edited or bind-mounted this file would otherwise get
+			# a green "enabled" line with no bot detection and nothing to grep for.
+			if grep -qF "crowdsecurity/appsec-bot-*" "${APPSEC_ACQUIS}"; then
+				log "ENTRYPOINT" "✅" "[CROWDSEC] Bot detection enabled: added crowdsecurity/appsec-bot-* to appsec_configs."
+
+				# Without a configured master_secret, the challenge runtime generates an
+				# ephemeral one on every start and invalidates every outstanding challenge
+				# cookie on a restart (CrowdSec's own startup warning: "no master secret
+				# configured for the WAF challenge runtime"). Derive a stable one, the same
+				# idea as the bouncer key above, but persisted under /var/lib/bunkerweb (this
+				# secret belongs to a locally-authored appsec-config, not to CrowdSec's own
+				# state under /var/lib/crowdsec) so it survives a container recreation, not
+				# just a restart. /etc/crowdsec does not: it resets to the image's baked-in
+				# copy on a fresh container, which is why the config file below is rewritten
+				# unconditionally here instead of being guarded like the acquisition line.
+				MASTER_SECRET_FILE="/var/lib/bunkerweb/crowdsec-appsec-master-secret"
+				if [ ! -s "${MASTER_SECRET_FILE}" ]; then
+					openssl rand -hex 32 >"${MASTER_SECRET_FILE}"
+					chmod 600 "${MASTER_SECRET_FILE}"
+				fi
+
+				# A local (non-hub) appsec-config carrying only the challenge secret.
+				# appsec_configs entries merge -- non-null fields of the last one win -- so
+				# this never touches crowdsecurity/appsec-default or any hub-managed file
+				# that `cscli hub update` would overwrite.
+				cat >/etc/crowdsec/appsec-configs/appsec-challenge-secret.yaml <<EOF
+name: bunkerweb/appsec-challenge-secret
+challenge:
+  master_secret: "$(cat "${MASTER_SECRET_FILE}")"
+EOF
+
+				if ! grep -qF "bunkerweb/appsec-challenge-secret" "${APPSEC_ACQUIS}"; then
+					sed -i '/^  - crowdsecurity\/appsec-bot-\*$/a\  - bunkerweb/appsec-challenge-secret' "${APPSEC_ACQUIS}"
+				fi
+				log "ENTRYPOINT" "✅" "[CROWDSEC] Configured a stable master_secret for the challenge runtime."
+			else
+				log "ENTRYPOINT" "⚠️" "[CROWDSEC] Bot detection collection installed but ${APPSEC_ACQUIS} has no '  - crowdsecurity/appsec-default' line to anchor to; add '  - crowdsecurity/appsec-bot-*' to its appsec_configs list yourself or bot detection stays off."
+			fi
+		fi
 	fi
 
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Configuring bouncer..."

@@ -1,4 +1,12 @@
-appsec_config: crowdsecurity/appsec-default
+# appsec_configs (plural) is a list and appends: crowdsecurity/appsec-default stays in force and
+# further entries extend it. The singular appsec_config takes one name only, and is mutually
+# exclusive with this key, so an operator opting into bot detection through
+# CROWDSEC_EXTRA_COLLECTIONS had no way to add its appsec-config.
+# Nothing but appsec-default is listed here on purpose: crowdsec errors out when an entry -- glob
+# or literal -- resolves to no installed appsec-config, so naming the bot-detection config
+# unconditionally would break AppSec for every deployment that did not opt in.
+appsec_configs:
+  - crowdsecurity/appsec-default
 labels:
   type: appsec
 listen_addr: 127.0.0.1:7422
