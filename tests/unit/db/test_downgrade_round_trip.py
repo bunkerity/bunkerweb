@@ -18,9 +18,9 @@ that says "these rows are gone" is a specification of what an operator gives up,
 if a future change makes a restore leave 1.7 debris behind instead.
 
 Not a duplicate of `test_upgrade_schema_parity.py`. That file asks whether an upgraded database
-matches a fresh one; this one asks whether an upgraded database can be put back. It reuses that
-file's baseline machinery on purpose -- `_baseline_metadata`, `_revision_for`, `_product_uri`,
-`_wipe` and `BASELINE_TAG` are imported from it rather than copied, so the two tests can never
+matches a fresh one; this one asks whether an upgraded database can be put back. It reuses the same
+baseline machinery on purpose -- `baseline_metadata`, `revision_for`, `product_uri` and `wipe`
+come from `db/alembic_baseline.py` rather than being copied, so the two tests can never
 disagree about what "the schema 1.6.13 shipped" or "the revision the product stamps" means. Two
 copies of that would drift the first time the baseline tag moves.
 
@@ -54,17 +54,16 @@ from sqlalchemy import create_engine, inspect, select, text
 
 from model import Base  # type: ignore
 
-# The baseline is defined once, in the parity test, and imported rather than restated -- see the
-# module docstring. pytest's default `prepend` import mode puts this file's own directory on
-# `sys.path` at collection, so the sibling resolves whether the suite, the directory or this single
-# file was named on the command line.
-from test_upgrade_schema_parity import (  # noqa: E402
+# The baseline is defined once, in `db/alembic_baseline.py`, and imported rather than restated -- see
+# the module docstring. `tests/unit` is on `sys.path` from conftest, so `db.` resolves whether the
+# suite, the directory or this single file was named on the command line.
+from db.alembic_baseline import (  # noqa: E402
     ALEMBIC,
     BASELINE_VERSION,
-    _baseline_metadata,
-    _product_uri,
-    _revision_for,
-    _wipe,
+    baseline_metadata,
+    product_uri,
+    revision_for,
+    wipe,
 )
 
 # `backup_database` picks its dump binary from the URI's drivername and `restore_database` its
@@ -420,7 +419,7 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
     Returns plain data, never a live connection: the assertions run long after the fixture, and on
     PostgreSQL/MariaDB they run against a database the *next* parametrization has already wiped.
     """
-    # Order matters, and it is the whole difference between "absent" and "broken". `_product_uri`
+    # Order matters, and it is the whole difference between "absent" and "broken". `product_uri`
     # skips an engine that is unconfigured or unreachable -- a legitimate absence, and the treatment
     # the rest of the suite already gives it. Only once it has returned do we know the engine IS
     # there, and an engine that is there with no client binary is a broken environment, so it FAILS.
@@ -428,7 +427,7 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
     # `tests/unit/` that shells out to a database client, so nothing else goes red first to warn
     # anyone, and a runner image that drops one would leave the matrix green and the downgrade
     # promise unproven.
-    uri = _product_uri(db_engine, tmp_path)
+    uri = product_uri(db_engine, tmp_path)
     if not _clients_present(db_engine):
         return {
             "fail": f"{db_engine} is reachable but none of its client binaries are installed "
@@ -438,7 +437,7 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
 
     import backup  # noqa: E402 -- on sys.path via the fixture below
 
-    baseline = _baseline_metadata()
+    baseline = baseline_metadata()
     baseline_tables = sorted(baseline.tables)
 
     # Same three moves as `test_upgrade_schema_parity`, for the same reasons: `DATABASE_URI` is what
@@ -450,7 +449,7 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
     monkeypatch.chdir(ALEMBIC)
     config = Config("alembic.ini")
     config.set_main_option("version_locations", f"{db_engine}_versions")
-    baseline_revision = _revision_for(BASELINE_VERSION, db_engine)
+    baseline_revision = revision_for(BASELINE_VERSION, db_engine)
 
     # Everything from here to the final capture runs inside a `try` whose `finally` wipes, and that
     # is not tidiness -- it is the difference between this test failing and this test taking every
@@ -466,13 +465,13 @@ def _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch):
     try:
         return _round_trip_body(db_engine, uri, tmp_path, backup, baseline, baseline_tables, config, baseline_revision, quiet_logger)
     finally:
-        _wipe(uri)
+        wipe(uri)
 
 
 def _round_trip_body(db_engine, uri, tmp_path, backup, baseline, baseline_tables, config, baseline_revision, quiet_logger):
     """Steps 1-5 of the operator path. Split out only so the wipe above can be a plain `finally`."""
     # --- 1. the schema 1.6.13 shipped, with rows in it ---------------------------------------
-    _wipe(uri)
+    wipe(uri)
     with _engine(uri) as engine:
         baseline.create_all(engine)
         _seed_baseline(engine, baseline)
@@ -624,7 +623,7 @@ def round_trip(db_engine, tmp_path, quiet_logger, _clean_env, monkeypatch):
         _ROUND_TRIPS[db_engine] = _run_round_trip(db_engine, tmp_path, quiet_logger, monkeypatch)
     result = _ROUND_TRIPS[db_engine]
     if result["fail"]:
-        # An engine that is unconfigured or unreachable never gets here: `_product_uri` raises
+        # An engine that is unconfigured or unreachable never gets here: `product_uri` raises
         # `Skipped` from inside the round trip, which is the suite's existing treatment for one that
         # is simply absent. Reaching this line means it was present and unusable.
         pytest.fail(result["fail"])
@@ -768,7 +767,7 @@ def test_the_alembic_revision_goes_back_with_the_data(round_trip, db_engine):
     fails that with "Can't locate revision", and an empty `alembic_version` is no better -- the
     stamp is a no-op and 1.6's own migrations replay over a schema that already has them.
     """
-    expected = _revision_for(BASELINE_VERSION, db_engine)
+    expected = revision_for(BASELINE_VERSION, db_engine)
 
     assert (
         round_trip["restored_revision"] == expected

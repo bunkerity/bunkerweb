@@ -1,19 +1,17 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, inspect
 
-# The baseline is defined once, in the parity test, and imported rather than restated. pytest's
-# default `prepend` import mode puts this file's own directory on `sys.path` at collection, so the
-# sibling resolves whether the suite, the directory or this single file was named.
-from test_upgrade_schema_parity import BASELINE_VERSION, _baseline_metadata, _revision_for
+# The baseline is defined once, in `db/alembic_baseline.py`, and imported rather than restated. A
+# test module is not an API; this used to import it out of `test_upgrade_schema_parity`. `tests/unit`
+# is on `sys.path` from conftest, so `db.` resolves whether the suite, the directory or this single
+# file was named.
+from db.alembic_baseline import ALEMBIC, BASELINE_VERSION, baseline_metadata, revision_for
 
-ROOT = Path(__file__).resolve().parents[3]
-ALEMBIC = ROOT / "src" / "common" / "db" / "alembic"
 FIXED_DT = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 HEADS = {
     "sqlite": "c1af042488a9",
@@ -44,14 +42,14 @@ def test_sqlite_upgrade_creates_resource_tables(tmp_path, monkeypatch):
     """
     uri = f"sqlite:///{tmp_path / 'migration.sqlite3'}"
     engine = create_engine(uri)
-    _baseline_metadata().create_all(engine)
+    baseline_metadata().create_all(engine)
     engine.dispose()
 
     monkeypatch.setenv("DATABASE_URI", uri)
     monkeypatch.chdir(ALEMBIC)
     config = Config("alembic.ini")
     config.set_main_option("version_locations", "sqlite_versions")
-    command.stamp(config, _revision_for(BASELINE_VERSION, "sqlite"))
+    command.stamp(config, revision_for(BASELINE_VERSION, "sqlite"))
     command.upgrade(config, "head")
 
     engine = create_engine(uri)
@@ -73,7 +71,7 @@ def test_the_user_preferences_table_is_renamed_and_not_recreated(tmp_path, monke
     """
     uri = f"sqlite:///{tmp_path / 'rename.sqlite3'}"
     engine = create_engine(uri)
-    baseline = _baseline_metadata()
+    baseline = baseline_metadata()
     baseline.create_all(engine)
     with engine.begin() as conn:
         conn.execute(
@@ -87,7 +85,7 @@ def test_the_user_preferences_table_is_renamed_and_not_recreated(tmp_path, monke
     monkeypatch.chdir(ALEMBIC)
     config = Config("alembic.ini")
     config.set_main_option("version_locations", "sqlite_versions")
-    command.stamp(config, _revision_for(BASELINE_VERSION, "sqlite"))
+    command.stamp(config, revision_for(BASELINE_VERSION, "sqlite"))
     command.upgrade(config, "head")
 
     engine = create_engine(uri)

@@ -563,7 +563,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     # A FK CYCLE needs no special handling here, which was measured rather than assumed: with two
     # mutually-referencing InnoDB tables on MariaDB, `drop_all` emits `ALTER TABLE ... DROP FOREIGN
     # KEY` for the cyclic constraints before the DROPs and succeeds with the checks left ON. Wrapping
-    # this in `SET FOREIGN_KEY_CHECKS = 0` -- which `test_upgrade_schema_parity._wipe` does -- was
+    # this in `SET FOREIGN_KEY_CHECKS = 0` -- which `tests/unit/db/alembic_baseline.wipe` does -- was
     # tried and removed: it made no difference to the outcome and only added a dialect branch.
     leftovers = MetaData()
     leftovers.reflect(bind=db.sql_engine)

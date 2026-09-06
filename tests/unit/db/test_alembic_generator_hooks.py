@@ -24,6 +24,7 @@ which only exists inside an alembic invocation. `_load_env_namespace` execs the 
 import sys
 from importlib import import_module
 from pathlib import Path
+from contextlib import contextmanager
 from types import ModuleType, SimpleNamespace
 
 import pytest
@@ -319,6 +320,45 @@ class TestPostgresqlEnums:
 
         assert not [op for op in ops if "settings_types_enum" in op.sqltext and "ADD VALUE" in op.sqltext]
 
+    def test_an_enum_reached_through_alter_column_is_created_too(self, env):
+        """The trap `_render_item` sets and `_named_enums` used not to spring.
+
+        Widening a plain `String` column into an `Enum` -- the shape the next model change of that
+        kind generates -- comes out as an `alter_column` carrying the enum in `modify_type`, nowhere
+        `_named_enums` used to look. `_render_item` stamps `create_type=False` on it anyway, because
+        it stamps it on every PostgreSQL enum it renders, so the revision would name a type nothing
+        creates and die on `type "widget_kind_enum" does not exist` at the operator.
+        """
+        alter = AlterColumnOp("bw_plugins", "kind", modify_type=sa.Enum("plain", "fancy", name="widget_kind_enum"), existing_nullable=False)
+        upgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[alter])])
+
+        ops = env["_postgresql_enum_ops"](_FakePostgresContext([]), upgrade)
+
+        assert any("CREATE TYPE widget_kind_enum AS ENUM ('plain', 'fancy')" in op.sqltext for op in ops)
+
+    def test_the_renderer_and_the_creator_agree_about_an_altered_type(self, env):
+        """The two halves of the same invariant, asserted together: whatever `_render_item` renders
+        with `create_type=False` is what `_postgresql_enum_ops` has to create separately. Testing
+        either alone lets them drift back apart."""
+        enum = sa.Enum("plain", "fancy", name="widget_kind_enum")
+        upgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[AlterColumnOp("bw_plugins", "kind", modify_type=enum, existing_nullable=False)])])
+
+        rendered = env["_render_item"]("type", enum, _postgres_autogen_context(env))
+        created = [op.sqltext for op in env["_postgresql_enum_ops"](_FakePostgresContext([]), upgrade) if "widget_kind_enum" in op.sqltext]
+
+        assert "create_type=False" in rendered, "the renderer tells create_table not to make the type"
+        assert created, "so something else has to make it"
+
+    def test_a_type_reached_only_through_existing_type_is_not_recreated(self, env):
+        """`existing_type` is what autogenerate reflected off the column, so the type is already
+        there. Reading it would also resurrect a type on a path that just dropped it."""
+        alter = AlterColumnOp("bw_plugins", "kind", existing_type=sa.Enum("plain", name="widget_kind_enum"), modify_nullable=True)
+        upgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[alter])])
+
+        ops = env["_postgresql_enum_ops"](_FakePostgresContext([]), upgrade)
+
+        assert not [op for op in ops if "widget_kind_enum" in op.sqltext]
+
     def test_a_type_absent_from_the_database_gets_no_add_value(self, env):
         """It does not exist yet, so the `DO` block creates it with every label; an `ALTER TYPE` on
         it would run before the type is there."""
@@ -383,6 +423,62 @@ class TestServerDefaults:
         """A table or column being dropped has no model entry to converge on; guessing would turn a
         missing key into a DROP DEFAULT on something that is going away anyway."""
         upgrade = UpgradeOps(ops=[AlterColumnOp("bw_gone", "method", existing_type=sa.String(16), existing_server_default=sa.text("'manual'"))])
+
+        env["_drop_server_defaults_the_model_does_not_declare"](upgrade)
+
+        assert upgrade.ops[0].modify_server_default is False
+
+    def test_a_postgresql_serial_sequence_default_is_never_dropped(self, env):
+        """`bw_template_steps.id` is an Integer primary key the model declares with no
+        `server_default` (the composite PK makes `autoincrement` False), so the sweep reads it as
+        undeclared drift. On a PostgreSQL database where an earlier revision created it SERIAL, the
+        reflected default is `nextval('..._id_seq'::regclass)` -- dropping that leaves a NOT NULL
+        column with no generator and the next INSERT that omits the id fails."""
+        upgrade = UpgradeOps(
+            ops=[
+                AlterColumnOp(
+                    "bw_template_steps",
+                    "id",
+                    existing_type=sa.Integer(),
+                    existing_nullable=False,
+                    existing_server_default=sa.text("nextval('bw_template_steps_id_seq'::regclass)"),
+                )
+            ]
+        )
+
+        env["_drop_server_defaults_the_model_does_not_declare"](upgrade)
+
+        assert upgrade.ops[0].modify_server_default is False, "the sequence is the dialect's doing, not drift a revision wrote"
+
+    def test_the_sequence_is_recognised_through_a_defaultclause_wrapper(self, env):
+        """Autogenerate hands the reflected default over as a `DefaultClause` on some paths and the
+        bare `TextClause` on others. `str()` on a `DefaultClause` renders the object, so a substring
+        test against it would match nothing and the guard would silently not fire."""
+        wrapped = sa.schema.DefaultClause(sa.text("nextval('bw_template_steps_id_seq'::regclass)"))
+        upgrade = UpgradeOps(
+            ops=[AlterColumnOp("bw_template_steps", "id", existing_type=sa.Integer(), existing_nullable=False, existing_server_default=wrapped)]
+        )
+
+        env["_drop_server_defaults_the_model_does_not_declare"](upgrade)
+
+        assert upgrade.ops[0].modify_server_default is False
+
+    def test_an_identity_column_never_reaches_the_guard_at_all(self, env):
+        """Anti-vacuity in the other direction: every other integer PK uses `Identity(start=1)`, and
+        SQLAlchemy assigns the `Identity` object to `column.server_default` -- so `declared[...]` is
+        not None and the sweep skips those columns before the sequence guard is consulted. The guard
+        exists for the columns Identity does not cover, of which `bw_template_steps.id` is one."""
+        upgrade = UpgradeOps(
+            ops=[
+                AlterColumnOp(
+                    "bw_jobs_runs",
+                    "id",
+                    existing_type=sa.Integer(),
+                    existing_nullable=False,
+                    existing_server_default=sa.text("nextval('bw_jobs_runs_id_seq'::regclass)"),
+                )
+            ]
+        )
 
         env["_drop_server_defaults_the_model_does_not_declare"](upgrade)
 
@@ -488,6 +584,67 @@ def _sqlite_context(with_default=True):
     return SimpleNamespace(bind=connection)
 
 
+@contextmanager
+def _listing(env, pairs):
+    """`_UNDECLARED_SERVER_DEFAULTS` temporarily replaced. It is a frozenset, so this rebinds the
+    name in `env.py`'s namespace -- which is what the hooks read, `env` being their globals."""
+    saved = env["_UNDECLARED_SERVER_DEFAULTS"]
+    env["_UNDECLARED_SERVER_DEFAULTS"] = frozenset(pairs)
+    try:
+        yield
+    finally:
+        env["_UNDECLARED_SERVER_DEFAULTS"] = saved
+
+
+def _context_with_defaults(**columns):
+    """A SQLite database carrying one table, `bw_ui_users`, with the given `column: DEFAULT <sql>`.
+
+    Separate from `_sqlite_context` so the two `method` columns keep their own fixture: the tests
+    above assert the exact set of tables touched, and widening their database would widen that.
+    """
+    declared = ", ".join(f"{name} VARCHAR(64) NOT NULL DEFAULT {default}" for name, default in columns.items())
+    engine = sa.create_engine("sqlite://")
+    connection = engine.connect()
+    connection.exec_driver_sql(f"CREATE TABLE bw_ui_users (username VARCHAR(256) PRIMARY KEY, {declared})")
+    return SimpleNamespace(bind=connection)
+
+
+def _postgres_autogen_context(env):
+    """A PostgreSQL autogenerate context, which is the only dialect `_render_item` rewrites enums on."""
+    return AutogenContext(
+        MigrationContext.configure(dialect_name="postgresql"),
+        opts={"render_item": env["_render_item"], "sqlalchemy_module_prefix": "sa.", "alembic_module_prefix": "op.", "user_module_prefix": None},
+    )
+
+
+def _reused_alter_column():
+    """The op autogenerate emits for a listed column, which this pass reuses rather than duplicating.
+
+    A widened enum on SQLite produces exactly this: the type changed, so there is an `alter_column`,
+    and `existing_server_default` is the default reflected off the live column.
+    """
+    return AlterColumnOp(
+        "bw_plugins",
+        "method",
+        existing_type=sa.Enum("ui", "manual", name="methods_enum"),
+        existing_nullable=False,
+        existing_server_default=sa.text("'manual'"),
+    )
+
+
+def _mysql_shaped_context():
+    """`_sqlite_context`'s database presenting MySQL's dialect to the gate.
+
+    A real MySQL server is not available to the unit suite, so the schema stays SQLite -- reflection
+    still answers off a real connection through `bind` -- and only `dialect`, which is what
+    `_the_reverse_op_restates_the_whole_column` reads, says `mysql`. That is the same shape alembic
+    hands the hook: `MigrationContext` carries both.
+    """
+    context = _sqlite_context()
+    context.dialect = SimpleNamespace(name="mysql")
+    return context
+
+
 def _batch_autogen_context(env):
     """A SQLite autogenerate context with batch rendering on, the way `env.py` configures it."""
     return AutogenContext(
@@ -565,36 +722,52 @@ class TestServerDefaultsAutogenerateMissed:
         assert [op.table_name for op in upgrade.ops] == ["bw_ui_users"], "only the column the model still leaves undeclared"
 
     def test_an_op_autogenerate_did_produce_is_reused_rather_than_duplicated(self, env):
-        """MySQL and MariaDB: the pass before this one already dropped the default on the op
-        autogenerate emitted. Emitting a second `alter_column` for the same column would be a
-        redundant table rebuild on SQLite and a contradictory pair of statements everywhere."""
-        existing = AlterColumnOp(
-            "bw_plugins",
-            "method",
-            existing_type=sa.Enum("ui", "manual", name="methods_enum"),
-            existing_nullable=False,
-            existing_server_default=sa.text("'manual'"),
-        )
+        """The pass before this one already dropped the default on the op autogenerate emitted.
+        Emitting a second `alter_column` for the same column would be a redundant table rebuild on
+        SQLite and a contradictory pair of statements everywhere."""
+        existing = _reused_alter_column()
         upgrade, downgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[existing])]), DowngradeOps(ops=[])
 
         env["_drop_undeclared_server_defaults_autogenerate_missed"](_sqlite_context(), upgrade, downgrade)
 
         assert [op.table_name for op in upgrade.ops] == ["bw_plugins", "bw_ui_users"], "bw_plugins got no second container"
         assert existing.modify_server_default is None
-        assert [op.table_name for op in downgrade.ops] == ["bw_ui_users"], "the reused op carries its own downgrade"
 
-    def test_a_stale_map_fails_the_generation(self, env):
-        """A renamed or dropped column must not turn into a silently skipped convergence: the map is
+    def test_the_reused_op_gets_an_explicit_downgrade_off_mysql(self, env):
+        """The half that was missing. On MySQL/MariaDB the reverse of the op autogenerate emitted is
+        a `MODIFY` restating the whole column definition, so the default comes back on its own. On
+        SQLite it is a batch rebuild reflecting the *already-converged* table and on PostgreSQL a
+        bare `ALTER COLUMN ... TYPE`; neither puts the default back, so skipping the explicit
+        downgrade there converts a converged default into a lost one.
+
+        Reachable as soon as a label is added to `methods_enum`, `themes_enum`, `plugin_types_enum`
+        or `pro_status_enum`: on SQLite that renders as a VARCHAR-length `alter_column` on a listed
+        column, which is exactly this shape.
+        """
+        existing = _reused_alter_column()
+        upgrade, downgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[existing])]), DowngradeOps(ops=[])
+
+        env["_drop_undeclared_server_defaults_autogenerate_missed"](_sqlite_context(), upgrade, downgrade)
+
+        restored = {alter.column_name: str(alter.modify_server_default.arg) for op in downgrade.ops if op.table_name == "bw_plugins" for alter in op.ops}
+        assert restored == {"method": "'manual'"}
+
+    def test_the_reused_op_keeps_its_own_downgrade_on_mysql(self, env):
+        """The other side of the same gate: there the reverse op restates the default itself, so a
+        second restore would be a redundant whole-table rewrite."""
+        existing = _reused_alter_column()
+        upgrade, downgrade = UpgradeOps(ops=[ModifyTableOps("bw_plugins", ops=[existing])]), DowngradeOps(ops=[])
+
+        env["_drop_undeclared_server_defaults_autogenerate_missed"](_mysql_shaped_context(), upgrade, downgrade)
+
+        assert [op.table_name for op in downgrade.ops] == ["bw_ui_users"], "bw_plugins got no second restore"
+
+    def test_a_stale_list_fails_the_generation(self, env):
+        """A renamed or dropped column must not turn into a silently skipped convergence: the list is
         knowledge that cannot be re-derived, so it fails loudly when it stops matching the model."""
-        saved = dict(env["_UNDECLARED_SERVER_DEFAULTS"])
-        env["_UNDECLARED_SERVER_DEFAULTS"].clear()
-        env["_UNDECLARED_SERVER_DEFAULTS"][("bw_plugins", "gone")] = "'manual'"
-        try:
+        with _listing(env, {("bw_plugins", "gone")}):
             with pytest.raises(KeyError, match="gone"):
                 env["_drop_undeclared_server_defaults_autogenerate_missed"](_sqlite_context(), UpgradeOps(ops=[]), DowngradeOps(ops=[]))
-        finally:
-            env["_UNDECLARED_SERVER_DEFAULTS"].clear()
-            env["_UNDECLARED_SERVER_DEFAULTS"].update(saved)
 
     def test_offline_generation_emits_nothing(self, env):
         """No connection means no way to know whether the default is still there, and guessing would
@@ -663,3 +836,68 @@ class TestServerDefaultsAutogenerateMissed:
         assert "batch_alter_table" not in rendered
         assert "create_type=False" in rendered
         assert "server_default=None" in rendered
+
+
+class TestTheUndeclaredServerDefaultClass:
+    """`_UNDECLARED_SERVER_DEFAULTS` after the wave-12 survey: 35 pairs, not the original two.
+
+    `test_upgrade_schema_parity` cannot reach this class at all -- it builds its "upgraded" side from
+    `model.py` at the v1.6.13 tag, so a default only an older revision ever wrote is missing from
+    both of its sides and the comparison passes while the drift is real. The list came out of
+    `.cache/results-2026-09-02-wave12/survey-server-defaults-L-G.py` instead, which folds every
+    revision's `upgrade()` in chain order. These tests hold the properties that survey depends on.
+    """
+
+    def test_it_converges_more_than_the_two_method_columns(self, env):
+        """`bw_ui_users` alone carries five more: `admin`, `theme`, `language`, `creation_date` and
+        `update_date` (`sqlite_versions/1e1fc017a424`, `sqlite_versions/4e98a08c5902`)."""
+        context = _context_with_defaults(admin="'0'", theme="'light'", language="'en'", creation_date="CURRENT_TIMESTAMP", update_date="CURRENT_TIMESTAMP")
+        upgrade, downgrade = UpgradeOps(ops=[]), DowngradeOps(ops=[])
+
+        env["_drop_undeclared_server_defaults_autogenerate_missed"](context, upgrade, downgrade)
+
+        (container,) = upgrade.ops
+        assert container.table_name == "bw_ui_users", "one batch block for the table, not five"
+        assert {alter.column_name for alter in container.ops} == {"admin", "theme", "language", "creation_date", "update_date"}
+
+    def test_the_downgrade_restores_what_the_database_really_had(self, env):
+        """Not one literal per pair: `sa.false()` compiles to `0` on MySQL and `false` on
+        PostgreSQL, where `SET DEFAULT 0` on a boolean column is a type error, and
+        `bw_templates.creation_date` is `CURRENT_TIMESTAMP` on MySQL against
+        `timezone('utc', now())` on PostgreSQL. The reflected text is the only per-engine-correct
+        source, so the downgrade of each column has to differ from the others."""
+        context = _context_with_defaults(theme="'light'", creation_date="CURRENT_TIMESTAMP")
+        upgrade, downgrade = UpgradeOps(ops=[]), DowngradeOps(ops=[])
+
+        env["_drop_undeclared_server_defaults_autogenerate_missed"](context, upgrade, downgrade)
+
+        restored = {alter.column_name: str(alter.modify_server_default.arg) for container in downgrade.ops for alter in container.ops}
+        assert restored == {"theme": "'light'", "creation_date": "CURRENT_TIMESTAMP"}
+
+    def test_the_emitted_order_does_not_depend_on_set_iteration(self, env):
+        """The list is a `frozenset`. Iterating it unsorted would order the ops by hash, and two
+        regenerations of the same schema would produce two textually different revisions."""
+        context = _context_with_defaults(admin="'0'", theme="'light'", language="'en'", creation_date="CURRENT_TIMESTAMP", update_date="CURRENT_TIMESTAMP")
+        upgrade = UpgradeOps(ops=[])
+
+        env["_drop_undeclared_server_defaults_autogenerate_missed"](context, upgrade, DowngradeOps(ops=[]))
+
+        emitted = [alter.column_name for container in upgrade.ops for alter in container.ops]
+        assert emitted == sorted(emitted)
+
+    def test_every_listed_pair_is_a_column_the_model_still_declares(self, env):
+        """The generation fails loudly on a stale pair, which is right but late -- it needs a
+        database and a `create.sh` run to be seen. This says the same thing from a bare import."""
+        tables = env["target_metadata"].tables
+        missing = [pair for pair in sorted(env["_UNDECLARED_SERVER_DEFAULTS"]) if pair[0] not in tables or pair[1] not in tables[pair[0]].columns]
+
+        assert not missing, f"pairs no longer in model.py: {missing}"
+
+    def test_no_listed_pair_declares_a_server_default_in_the_model(self, env):
+        """Anti-vacuity. A pair the model gives a `server_default` is one an upgraded database is
+        supposed to keep, so it does not belong here -- the run-time guard would skip it and the
+        entry would be dead weight that reads as coverage."""
+        tables = env["target_metadata"].tables
+        declared = [pair for pair in sorted(env["_UNDECLARED_SERVER_DEFAULTS"]) if tables[pair[0]].columns[pair[1]].server_default is not None]
+
+        assert not declared, f"the model declares a default for these, so they converge on their own: {declared}"

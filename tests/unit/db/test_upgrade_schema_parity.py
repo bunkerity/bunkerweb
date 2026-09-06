@@ -42,92 +42,13 @@ nullability halves of this become measurable. Run them with
 that is unconfigured or unreachable skips rather than silently passing.
 """
 
-from pathlib import Path
-from subprocess import run
-from types import ModuleType
-
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import MetaData, create_engine, inspect, text
+from sqlalchemy import create_engine, inspect, text
 
-from fixtures.db_factory import resolve_uri
-from fixtures.engines import _with_driver
+from db.alembic_baseline import ALEMBIC, BASELINE_VERSION, baseline_metadata, product_uri, revision_for, wipe
 from model import Base  # type: ignore
-
-ROOT = Path(__file__).resolve().parents[3]
-ALEMBIC = ROOT / "src" / "common" / "db" / "alembic"
-
-# The last stable 1.6 release, and the one the 1.7 head chains off. Hardcoded on purpose: deriving
-# "the newest 1.6 tag" would quietly change what this test upgrades *from* the day a 1.6.15 lands,
-# which is the opposite of what a regression test should do. The revision to stamp is not hardcoded
-# — it is derived below exactly as the product derives it, so the two cannot drift apart.
-BASELINE_TAG = "v1.6.13"
-BASELINE_VERSION = BASELINE_TAG.lstrip("v")
-
-
-def _baseline_metadata():
-    """`model.py` as it was at the baseline tag, loaded under its own `Base`.
-
-    Read out of git rather than reconstructed: the point is to start from a schema some release
-    really shipped, and any hand-written approximation of it would be the same mistake as
-    `create_all`-ing the current model, just less obvious.
-    """
-    source = run(["git", "show", f"{BASELINE_TAG}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
-    module = ModuleType(f"bw_model_{BASELINE_VERSION.replace('.', '_')}")
-    exec(compile(source, f"<{BASELINE_TAG}:src/common/db/model.py>", "exec"), module.__dict__)  # noqa: S102
-    return module.Base.metadata
-
-
-def _revision_for(version, dialect):
-    """The revision the product would stamp for a database recorded at `version`.
-
-    `entrypoint.sh:107-110` finds it by filename — `*_upgrade_to_version_<version with _ for .>.py`
-    — so this reads it the same way instead of naming a hash that would go stale silently.
-    """
-    normalised = version.replace(".", "_").replace("-", "_").replace("~", "_")
-    matches = sorted((ALEMBIC / f"{dialect}_versions").glob(f"*_upgrade_to_version_{normalised}.py"))
-    assert len(matches) == 1, f"expected one migration for {version} in {dialect}_versions, found {[m.name for m in matches]}"
-    return matches[0].name.split("_", 1)[0]
-
-
-def _product_uri(db_engine, tmp_path):
-    """The URI the product would hand alembic, driver and all.
-
-    `scheduler/entrypoint.sh:83-99` writes `db.database_uri` — the string *after*
-    `Database.py:184-196` injected `+psycopg`/`+pymysql` — and re-exports that as `DATABASE_URI`
-    before alembic runs. The operator's bare `postgresql://` or `mariadb://` never reaches alembic,
-    which matters: SQLAlchemy defaults those to psycopg2 and MySQLdb, neither of which BunkerWeb
-    ships. `_with_driver` is the same mapping, already mirrored for the fixtures.
-    """
-    return _with_driver(resolve_uri(db_engine, tmp_path)).render_as_string(hide_password=False)
-
-
-def _wipe(uri):
-    """Drop everything, not just what the current model declares.
-
-    `fixtures.engines.reset_schema` uses `Base.metadata.drop_all`, which leaves behind anything the
-    1.7 model does not name — `alembic_version` above all, whose leftover row would silently make
-    the next `stamp` a no-op. PostgreSQL additionally needs its ENUM *types* gone, and those are not
-    tables; `DROP SCHEMA public CASCADE` is the only wipe that takes both.
-    """
-    engine = create_engine(uri)
-    try:
-        with engine.begin() as conn:
-            if engine.dialect.name == "postgresql":
-                conn.execute(text("DROP SCHEMA public CASCADE"))
-                conn.execute(text("CREATE SCHEMA public"))
-            elif engine.dialect.name in ("mysql", "mariadb"):
-                conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
-                for (table,) in conn.execute(text("SHOW TABLES")).fetchall():
-                    conn.execute(text(f"DROP TABLE IF EXISTS `{table}`"))
-                conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
-            else:
-                leftovers = MetaData()
-                leftovers.reflect(bind=conn)
-                leftovers.drop_all(bind=conn)
-    finally:
-        engine.dispose()
 
 
 def _index_shape(index):
@@ -211,13 +132,13 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
     Sequential rather than two fixtures because PostgreSQL and MariaDB are one shared database — the
     two phases cannot coexist, so the first is described before the second wipes it.
     """
-    uri = _product_uri(db_engine, tmp_path)
+    uri = product_uri(db_engine, tmp_path)
     monkeypatch.setenv("DATABASE_URI", uri)
     monkeypatch.chdir(ALEMBIC)
 
-    _wipe(uri)
+    wipe(uri)
     engine = create_engine(uri)
-    _baseline_metadata().create_all(engine)
+    baseline_metadata().create_all(engine)
     engine.dispose()
 
     # Set exactly as `entrypoint.sh:105` seds it into alembic.ini before invoking alembic, and for
@@ -228,7 +149,7 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
     # baseline revision.
     config = Config("alembic.ini")
     config.set_main_option("version_locations", f"{db_engine}_versions")
-    command.stamp(config, _revision_for(BASELINE_VERSION, db_engine))
+    command.stamp(config, revision_for(BASELINE_VERSION, db_engine))
     command.upgrade(config, "head")
 
     engine = create_engine(uri)
@@ -236,7 +157,7 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
     upgraded = _describe(engine)
     engine.dispose()
 
-    _wipe(uri)
+    wipe(uri)
     engine = create_engine(uri)
     Base.metadata.create_all(engine)
     fresh = _describe(engine)
@@ -248,7 +169,7 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
 def test_the_baseline_really_is_older_than_the_model(upgraded_and_fresh):
     """Anti-vacuity. If the baseline schema ever stops differing from the current one — a tag bump,
     a `git show` that silently returned the working tree — every assertion below passes for free."""
-    baseline = _baseline_metadata()
+    baseline = baseline_metadata()
 
     assert set(Base.metadata.tables) - set(baseline.tables), "the baseline declares every table the model does; it is not an older schema"
 
@@ -472,7 +393,7 @@ def test_no_engine_directory_has_two_migrations_for_the_same_version():
 
     It takes `*_upgrade_to_version_<version>.py` and pipes the result through `awk -F_ '{print $1}'`,
     so two files matching one version give it a two-line REVISION and `alembic stamp` fails on a
-    database that is otherwise perfectly upgradable. `_revision_for` above asserts this for the one
+    database that is otherwise perfectly upgradable. `revision_for` asserts this for the one
     version it is asked about; nothing asserted it for the set, which is what porting dev's
     revisions into these directories puts at risk -- a version that exists on both branches under
     two different revision ids leaves two files behind and breaks the upgrade for that version only.
