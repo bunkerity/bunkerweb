@@ -192,6 +192,57 @@
             "type": "block",
             "status": 429
           }
+        },
+        {
+          "id": "cs-appsec-ban",
+          "counter": "wf-main/cs-appsec-ban",
+          "condition": {
+            "op": "all",
+            "nodes": [
+              {
+                "op": "crowdsec",
+                "field": "source",
+                "values": ["appsec"]
+              },
+              {
+                "op": "crowdsec",
+                "field": "remediation",
+                "values": ["ban"]
+              }
+            ]
+          },
+          "threshold": null,
+          "action": {
+            "type": "challenge",
+            "provider": "javascript"
+          }
+        },
+        {
+          "id": "cs-not-lapi",
+          "counter": "wf-main/cs-not-lapi",
+          "condition": {
+            "op": "all",
+            "nodes": [
+              {
+                "op": "uri",
+                "match": "exact",
+                "value": "/cs-probe"
+              },
+              {
+                "op": "not",
+                "node": {
+                  "op": "crowdsec",
+                  "field": "source",
+                  "values": ["lapi"]
+                }
+              }
+            ]
+          },
+          "threshold": null,
+          "action": {
+            "type": "block",
+            "status": 429
+          }
         }
       ]
     }
@@ -365,6 +416,49 @@
         "request_method": "GET",
         "country": "DE",
         "asn_ok": false
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "an AppSec ban satisfies both CrowdSec leaves of the all-of",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/cs",
+        "crowdsec_ok": true,
+        "crowdsec_source": "appsec",
+        "crowdsec_remediation": "ban"
+      },
+      "request_number": 1,
+      "expect": "match wf-main cs-appsec-ban challenge"
+    },
+    {
+      "name": "a LAPI ban leaves the appsec leaf false and settles the NOT false too",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/cs-probe",
+        "crowdsec_ok": true,
+        "crowdsec_source": "lapi",
+        "crowdsec_remediation": "ban"
+      },
+      "request_number": 1,
+      "expect": "no match"
+    },
+    {
+      "name": "CrowdSec answered and remediated nothing: the leaf is FALSE, so NOT it is true",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/cs-probe",
+        "crowdsec_ok": true
+      },
+      "request_number": 1,
+      "expect": "match wf-main cs-not-lapi block"
+    },
+    {
+      "name": "CrowdSec never judged the request: UNKNOWN survives the NOT and nothing matches",
+      "bw": {
+        "remote_addr": "198.51.100.4",
+        "uri": "/cs-probe"
       },
       "request_number": 1,
       "expect": "no match"

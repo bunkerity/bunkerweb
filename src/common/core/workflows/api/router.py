@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 
 from app.utils import get_db  # type: ignore
 from workflow_eval import assumptions, evaluate, prepare_ladder, request_from_input  # type: ignore
-from workflow_schema import summarize_rule  # type: ignore
+from workflow_schema import service_setting, summarize_rule, uses_crowdsec  # type: ignore
 
 from .schemas import (
     WorkflowAttachmentRequest,
@@ -56,6 +56,52 @@ def list_workflows(
     )
 
 
+def _crowdsec_warnings(definition, service_ids, workflow_id: str = "") -> list:
+    """Non-blocking notices for a draft that reads a CrowdSec verdict on a service without CrowdSec.
+
+    Mirrors the compiler's warning so the operator meets it in the editor, at save time, instead
+    of in the scheduler log after a push. Nothing is refused: the leaf evaluates UNKNOWN there,
+    which can never make a rule match. The lookup is skipped entirely for the overwhelming
+    majority of drafts, which hold no CrowdSec condition at all, and asks the database for the
+    single setting it needs.
+    """
+    if not uses_crowdsec(definition):
+        return []
+    if not service_ids:
+        # The editor validates a draft of ONE workflow and does not send its attachments, so
+        # they are resolved here rather than making every caller carry them. One row, and only
+        # for the rare draft that reads a CrowdSec verdict at all.
+        details = get_db().get_workflow_details(workflow_id) if workflow_id else None
+        service_ids = (details or {}).get("services") or []
+    if not service_ids:
+        return []
+    config = get_db().get_config(methods=False, with_drafts=True, filtered_settings=("USE_CROWDSEC", "CROWDSEC_DEFER_TO_WORKFLOWS"))
+    # Only a `ban` leaf: a `captcha` reaches the workflows through the antibot-delegation arm
+    # (crowdsec.lua) whatever CROWDSEC_DEFER_TO_WORKFLOWS says, while a ban ends the access phase
+    # in CrowdSec unless the service defers. Mirrors the compiler's second warning.
+    bans = uses_crowdsec(definition, field="remediation", value="ban")
+    warnings = []
+    for service_id in service_ids:
+        if service_setting(config, service_id, "USE_CROWDSEC") != "yes":
+            warnings.append(
+                {
+                    "code": "crowdsec_disabled",
+                    "service": service_id,
+                    "message": f"This workflow reads a CrowdSec verdict, but USE_CROWDSEC is not yes on {service_id}: those conditions can never match there.",
+                }
+            )
+        elif bans and service_setting(config, service_id, "CROWDSEC_DEFER_TO_WORKFLOWS") != "yes":
+            warnings.append(
+                {
+                    "code": "crowdsec_defer_disabled",
+                    "service": service_id,
+                    "message": f"This workflow matches a CrowdSec ban, but CROWDSEC_DEFER_TO_WORKFLOWS is not yes on {service_id}: "
+                    "CrowdSec applies the ban itself before the workflows run, so those conditions can never match there.",
+                }
+            )
+    return warnings
+
+
 @router.post("/validate")
 def validate_workflow(payload: WorkflowValidateRequest) -> JSONResponse:
     """Validate a draft without saving it — what the editor calls on every change.
@@ -75,6 +121,7 @@ def validate_workflow(payload: WorkflowValidateRequest) -> JSONResponse:
             "valid": True,
             "definition": canonical,
             "summaries": [{"id": rule["id"], "summary": summarize_rule(rule)} for rule in canonical["rules"]],
+            "warnings": _crowdsec_warnings(canonical, payload.service_ids, payload.workflow_id),
         },
     )
 

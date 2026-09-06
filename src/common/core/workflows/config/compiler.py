@@ -33,6 +33,8 @@ from workflow_schema import (  # type: ignore
     canonical_json,
     collect_group_refs,
     rule_stats,
+    service_setting,
+    uses_crowdsec,
     validate_definition,
 )
 
@@ -46,14 +48,6 @@ def _group_index(db) -> Dict[str, Dict[str, List[str]]]:
             by_kind.setdefault(entry["kind"], []).append(entry["value"])
         index[group_id] = by_kind
     return index
-
-
-def _service_setting(config: Dict[str, Any], server: str, setting: str) -> str:
-    """Per-service value with the global fallback multisite settings inherit."""
-    value = config.get(f"{server}_{setting}")
-    if value is None:
-        value = config.get(setting)
-    return str(value or "").strip()
 
 
 def compile_config(db, config: Dict[str, Any], logger) -> Dict[str, Any]:
@@ -92,13 +86,34 @@ def compile_config(db, config: Dict[str, Any], logger) -> Dict[str, Any]:
             for key, value in rule_stats(definition).items():
                 totals[key] += value
 
+            if uses_crowdsec(definition) and service_setting(config, server, "USE_CROWDSEC") != "yes":
+                # A warning, not a raise, unlike the challenge-provider check below: a challenge
+                # rule whose provider cannot render breaks the RESPONSE, while a CrowdSec leaf on
+                # a service without CrowdSec merely evaluates UNKNOWN, which can never make a rule
+                # match. Aborting the whole config push for it would be the harsher bug. The same
+                # sentence is returned by /workflows/validate so the operator sees it in the
+                # editor rather than only in the scheduler log.
+                logger.warning(f"Workflow “{name}” reads a CrowdSec verdict on {server}, but USE_CROWDSEC is not yes there: those conditions can never match")
+            elif uses_crowdsec(definition, field="remediation", value="ban") and service_setting(config, server, "CROWDSEC_DEFER_TO_WORKFLOWS") != "yes":
+                # The likelier dead rule, and the one nothing else reports: CrowdSec IS enabled,
+                # but it still applies a ban itself and the dispatcher ends the access phase
+                # there, so the workflows never run for the request the leaf describes. Only
+                # `ban` — a `captcha` reaches the workflows through the antibot-delegation arm
+                # (crowdsec.lua), which returns no status, whatever this setting says. `elif`:
+                # a service without CrowdSec at all is already covered by the sentence above,
+                # and two warnings for one cause is noise.
+                logger.warning(
+                    f"Workflow “{name}” matches a CrowdSec ban on {server}, but CROWDSEC_DEFER_TO_WORKFLOWS is not yes there: "
+                    "CrowdSec applies the ban itself before the workflows run, so those conditions can never match"
+                )
+
             for rule in rules:
                 action = rule["action"]
                 if action["type"] != "challenge":
                     continue
                 challenged.add(server)
                 for setting in PROVIDER_REQUIREMENTS.get(action["provider"], ()):
-                    if not _service_setting(config, server, setting):
+                    if not service_setting(config, server, setting):
                         raise ValueError(f"Workflow “{name}” challenges {server} with {action['provider']}, but {setting} is not configured for that service")
 
             if workflow_id not in compiled:

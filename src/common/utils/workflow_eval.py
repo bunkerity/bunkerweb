@@ -28,6 +28,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import regex  # type: ignore
 
+from workflow_schema import CROWDSEC_VALUES  # type: ignore
+
 # Same encoding as eval.lua:9 — kept numeric so the parity corpus can compare them directly.
 F, T, U = 0, 1, 2
 NAMES = {F: "F", T: "T", U: "U"}
@@ -123,6 +125,17 @@ def _leaf(node: Dict[str, Any], request: Dict[str, Any]) -> int:
         if request.get("asn_number") is None:
             return F
         return T if request["asn_number"] in (node.get("values") or []) else F
+    if op == "crowdsec":
+        # Same three-valued split as country/asn, one step earlier: crowdsec_ok says the bouncer
+        # answered at all. It did not (plugin off, no bouncer for the service, an error) ->
+        # UNKNOWN; it answered and remediated nothing -> FALSE, because "CrowdSec had nothing
+        # against this request" is a fact, not an absence of one. workflows.lua agrees.
+        if not request.get("crowdsec_ok"):
+            return U
+        value = request.get("crowdsec_source") if node.get("field") == "source" else request.get("crowdsec_remediation")
+        if not value:
+            return F
+        return T if value in (node.get("values") or []) else F
     # An unusable group reference and an unknown op both land here. Never matching is the only
     # safe reading of "I cannot evaluate this"; workflows.lua:180-195 agrees.
     return U
@@ -359,6 +372,21 @@ def request_from_input(raw: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], O
                 return None, "The ASN must be a number"
             asn_ok = True
 
+    crowdsec = raw.get("crowdsec") or "unavailable"
+    if crowdsec not in ("unavailable", "allowed", "remediated"):
+        return None, "Unknown CrowdSec state"
+    crowdsec_source = str(raw.get("crowdsec_source") or "").strip().lower()
+    crowdsec_remediation = str(raw.get("crowdsec_remediation") or "").strip().lower()
+    if crowdsec == "remediated":
+        if crowdsec_source not in CROWDSEC_VALUES["source"]:
+            return None, "A remediated request needs a CrowdSec source"
+        if crowdsec_remediation not in CROWDSEC_VALUES["remediation"]:
+            return None, "A remediated request needs a CrowdSec remediation"
+    else:
+        # Both leaves read the same crowdsec_ok flag, so an "allowed" request must carry no
+        # remediation at all rather than a stale one left in the form.
+        crowdsec_source, crowdsec_remediation = "", ""
+
     # Not `or 1`: 0 is falsy, so an explicit 0 would silently become 1 instead of being
     # refused — and 0 is exactly the off-by-one an operator reaches for first.
     raw_number = raw.get("request_number")
@@ -379,6 +407,9 @@ def request_from_input(raw: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], O
             "asn_number": asn_number,
             "asn_ok": asn_ok,
             "request_number": request_number,
+            "crowdsec_ok": crowdsec != "unavailable",
+            "crowdsec_source": crowdsec_source,
+            "crowdsec_remediation": crowdsec_remediation,
             "whitelisted": bool(raw.get("whitelisted")),
         },
         None,

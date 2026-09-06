@@ -181,6 +181,86 @@ def test_validate_returns_a_summary_per_rule(monkeypatch):
     assert body["summaries"] == [{"id": "r1", "summary": "If country is FR, then block"}]
 
 
+def _crowdsec_rule():
+    return {
+        "id": "r1",
+        "name": "answer the CrowdSec ban",
+        "enabled": True,
+        "condition": {"op": "crowdsec", "field": "remediation", "values": ["ban"]},
+        "action": {"type": "block"},
+        "threshold": None,
+    }
+
+
+def test_a_crowdsec_draft_warns_about_a_service_without_crowdsec(monkeypatch):
+    """A notice, never a refusal: the leaf answers UNKNOWN there, so the rule simply never
+    fires — but the operator has to learn that in the editor, not from the scheduler log."""
+    db = Mock()
+    definition = {"schema_version": 1, "rules": [_crowdsec_rule()]}
+    db.validate_workflow_definition.return_value = (definition, [])
+    db.get_config.return_value = {
+        "a.example.com_USE_CROWDSEC": "no",
+        "b.example.com_USE_CROWDSEC": "yes",
+        "b.example.com_CROWDSEC_DEFER_TO_WORKFLOWS": "yes",
+    }
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition=definition, service_ids=["a.example.com", "b.example.com"]))
+
+    body = _json(response)
+    assert body["valid"] is True
+    assert [warning["service"] for warning in body["warnings"]] == ["a.example.com"]
+    assert body["warnings"][0]["code"] == "crowdsec_disabled"
+    assert db.get_config.call_args.kwargs["filtered_settings"] == ("USE_CROWDSEC", "CROWDSEC_DEFER_TO_WORKFLOWS")
+
+
+def test_a_ban_draft_warns_about_a_service_that_does_not_defer(monkeypatch):
+    """The editor has to say it too: CrowdSec is on, the leaf is answered, and the rule still
+    cannot fire because CrowdSec applies the ban before the workflows run."""
+    db = Mock()
+    definition = {"schema_version": 1, "rules": [_crowdsec_rule()]}
+    db.validate_workflow_definition.return_value = (definition, [])
+    db.get_config.return_value = {"USE_CROWDSEC": "yes"}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    body = _json(ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition=definition, service_ids=["a.example.com"])))
+
+    assert [warning["code"] for warning in body["warnings"]] == ["crowdsec_defer_disabled"]
+    assert "CROWDSEC_DEFER_TO_WORKFLOWS" in body["warnings"][0]["message"]
+
+    # A captcha leaf reaches the workflows through the antibot delegation whatever the setting
+    # says, so it must not be warned about.
+    captcha = {"schema_version": 1, "rules": [dict(_crowdsec_rule(), condition={"op": "crowdsec", "field": "remediation", "values": ["captcha"]})]}
+    db.validate_workflow_definition.return_value = (captcha, [])
+    assert _json(ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition=captcha, service_ids=["a.example.com"])))["warnings"] == []
+
+
+def test_the_editor_gets_the_warning_without_sending_its_attachments(monkeypatch):
+    db = Mock()
+    definition = {"schema_version": 1, "rules": [_crowdsec_rule()]}
+    db.validate_workflow_definition.return_value = (definition, [])
+    db.get_workflow_details.return_value = {"services": ["a.example.com"]}
+    db.get_config.return_value = {"USE_CROWDSEC": "no"}
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition=definition, workflow_id="wf-1"))
+
+    assert [warning["service"] for warning in _json(response)["warnings"]] == ["a.example.com"]
+    db.get_workflow_details.assert_called_once_with("wf-1")
+
+
+def test_a_draft_without_a_crowdsec_leaf_asks_the_database_nothing(monkeypatch):
+    db = Mock()
+    db.validate_workflow_definition.return_value = ({"schema_version": 1, "rules": [_rule()]}, [])
+    monkeypatch.setattr(ROUTER, "get_db", lambda: db)
+
+    response = ROUTER.validate_workflow(SCHEMAS.WorkflowValidateRequest(definition={"schema_version": 1, "rules": [_rule()]}, service_ids=["a.example.com"]))
+
+    assert _json(response)["warnings"] == []
+    db.get_config.assert_not_called()
+    db.get_workflow_details.assert_not_called()
+
+
 def test_a_budget_overflow_is_reported_as_a_field_error(monkeypatch):
     db = Mock()
     # The db layer emits the anchored triplet now, so the router no longer builds one by hand.

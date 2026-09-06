@@ -110,6 +110,35 @@ local function method_predicate(values)
 	end
 end
 
+-- The CrowdSec verdict of THIS request, published by crowdsec:access() -- which runs earlier in
+-- the access phase (core/order.json) -- into ctx.bw. Three-valued the same way country and asn
+-- are: `crowdsec_ok` is the "the bouncer answered" flag, so a service without CrowdSec, a
+-- service whose bouncer failed to load and a request CrowdSec never saw are UNKNOWN, while a
+-- request CrowdSec answered and had nothing against is a FACT and therefore FALSE.
+--
+-- The field is read through an explicit if: `field == "source" and bw.crowdsec_source or
+-- bw.crowdsec_remediation` looks equivalent and is not -- a nil source falls through to the
+-- remediation and the leaf answers about the wrong fact.
+local function crowdsec_predicate(node)
+	local set = set_of(node.values)
+	local field = node.field
+	return function(bw)
+		if not bw.crowdsec_ok then
+			return U
+		end
+		local value
+		if field == "source" then
+			value = bw.crowdsec_source
+		else
+			value = bw.crowdsec_remediation
+		end
+		if not value then
+			return F
+		end
+		return set[value] and T or F
+	end
+end
+
 -- Every builder is called as ``builder(values, logger)``; the two that cannot fail simply
 -- ignore the second argument.
 local KIND_PREDICATES = {
@@ -177,6 +206,9 @@ local function compile_node(node, groups, state)
 	end
 	if op == "method" then
 		return { f = method_predicate(node.values) }
+	end
+	if op == "crowdsec" then
+		return { f = crowdsec_predicate(node) }
 	end
 	if op == "group" then
 		local group = groups[node.group_id]
@@ -318,11 +350,65 @@ function workflows:apply(workflow, rule)
 	return self:ret(true, "workflow rule " .. rule.id .. " blocks", action.status or get_deny_status(), nil, data)
 end
 
+-- Does this instance hold a policy for that service? Read by crowdsec:access() before it hands
+-- its deny over to this plugin : a deferral nobody would enforce is a fail-open, so CrowdSec
+-- only defers when the enforcer is actually there.
+--
+-- rawset, not a plain assignment : middleclass turns `Class.name = f` into an INSTANCE method
+-- (middleclass.lua:112) and answers `Class.name` from `Class.static` (:109), so
+-- `workflows.attached` would read nil. rawset keeps it an ordinary function on the module
+-- table, which is also what a middleclass stub in a unit harness sees.
+rawset(workflows, "attached", function(server_name)
+	return PLAN.services[server_name] ~= nil
+end)
+
+-- Enforce a CrowdSec verdict this plugin was handed instead of CrowdSec applying it itself
+-- (CROWDSEC_DEFER_TO_WORKFLOWS). Called on the two exits of access() that ran no action and can
+-- still deny: no workflow attached, and no rule matched. A rule that DID match owns the outcome --
+-- that is the whole point of the setting -- so apply() returns before this. The whitelist exit
+-- returns without calling it, which is outcome-identical: the guard below drops a deferral for a
+-- whitelisted client anyway.
+--
+-- The reason ends up recorded as "workflows" by the dispatcher (access-lua.conf:164 calls
+-- set_reason with the plugin id for any deny status, and a plugin cannot override that), so the
+-- report data is the bouncer's verdict ITSELF, byte for byte what crowdsec:access() passes on
+-- its own deny arm. That is what makes the row readable : security-reason.js renders a payload
+-- carrying `source` + `action` with the CrowdSec sentence, so a deferred ban reads
+-- "CrowdSec AppSec: request blocked (scenario: ...)" exactly like the non-deferred one instead
+-- of a bare `workflows` token.
+function workflows:enforce_deferred(msg)
+	local deferred = self.ctx.bw.crowdsec_deferred
+	-- The global whitelist keeps priority over every policy, as it does for the other access
+	-- plugins. Defensive for one: whitelist:access() ends the phase with OK (whitelist.lua:258,
+	-- :277), so a whitelisted client never reaches crowdsec either.
+	if not deferred or is_whitelisted(self.ctx) then
+		return self:ret(true, msg)
+	end
+	return self:ret(
+		true,
+		"no workflow rule overrode the CrowdSec verdict, applying it (" .. msg .. ")",
+		deferred.status,
+		nil,
+		deferred.verdict
+	)
+end
+
 function workflows:access()
+	-- The mark crowdsec:defer_verdict() reads before handing its deny over. It answers "has the
+	-- engine already run for this request?", which attached() cannot : PLUGINS_ORDER_ACCESS
+	-- (src/common/settings.json, multisite) is inserted AHEAD of core/order.json by
+	-- helpers.lua:183-191, so `<service>_PLUGINS_ORDER_ACCESS=workflows` runs this plugin BEFORE
+	-- crowdsec -- and a verdict deferred to a plugin that already ran is enforced by nobody : the
+	-- ban would reach the origin. Set on entry, before every return below, so the refusal also
+	-- covers any future path that leaves access() early.
+	self.ctx.bw.workflows_ran = true
 	local order = PLAN.services[self.ctx.bw.server_name]
 	if not order then
-		-- The common case at scale : one hash lookup on a module upvalue, then out.
-		return self:ret(true, "no workflow attached to this service")
+		-- The common case at scale : one hash lookup on a module upvalue, then out. Never a
+		-- deferral either -- crowdsec only defers to a service this instance holds a plan for
+		-- (workflows.attached) -- but the enforcement goes through the same door anyway, so a
+		-- future caller cannot invent a path that skips it.
+		return self:enforce_deferred("no workflow attached to this service")
 	end
 	-- The global whitelist keeps priority over every policy, as it does for the other
 	-- access plugins.
@@ -363,7 +449,7 @@ function workflows:access()
 		end
 	end
 
-	return self:ret(true, "no rule matched")
+	return self:enforce_deferred("no rule matched")
 end
 
 return workflows

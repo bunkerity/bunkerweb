@@ -36,7 +36,7 @@ MAX_ARTEFACT_BYTES = 1048576
 MAX_RULE_NAME_LENGTH = 128
 
 COMBINATOR_OPS = ("all", "any", "not")
-LEAF_OPS = ("ip", "country", "asn", "method", "uri", "group")
+LEAF_OPS = ("ip", "country", "asn", "method", "uri", "group", "crowdsec")
 URI_MATCHES = ("exact", "prefix", "regex")
 # The subset of RESOURCE_KINDS_ENUM a group leaf may reference. Narrower than the enum on
 # purpose: these three are plain set membership on a fact the request context already
@@ -46,6 +46,36 @@ URI_MATCHES = ("exact", "prefix", "regex")
 # failing to evaluate them at runtime would make a rule silently stop matching, which is the
 # one failure mode a policy engine must never have.
 GROUP_KINDS = ("ip", "country", "asn")
+
+# What a CrowdSec verdict leaf may read. Deliberately the two facts the runtime ALWAYS has
+# once the bouncer answered, and nothing else:
+#
+# * the AppSec rule id and its collection are not knowable — the AppSec 403 body carries only
+#   ``action`` and ``http_status`` (``core/crowdsec/lib/bouncer.lua``), the matched rule goes
+#   to the Local API as an alert and never comes back to the bouncer;
+# * the Local API ``scenario`` exists only on a **live** decision, never on a cache hit, so a
+#   scenario leaf would match the first request of a ban and none of the following ones — a
+#   rule that silently stops matching, the one failure mode a policy engine must not have.
+#
+# Both are 1.8 material and would need a different data path, not a wider enum here.
+CROWDSEC_FIELDS = ("source", "remediation")
+CROWDSEC_VALUES = {
+    # Where the verdict came from, and what CrowdSec asked BunkerWeb to do about it. Same
+    # vocabulary as the ``verdict`` envelope the bouncer returns, minus what the workflow phase
+    # can never see:
+    #
+    # * ``challenge`` — the bouncer renders it itself (``lib/bouncer.lua``, ``served``), and
+    #   ``crowdsec:access()`` then ends the access phase with ``ngx.OK`` before the workflows
+    #   run; an empty challenge body is rewritten to ``ban`` before the verdict is published.
+    #   A leaf reading it could therefore never match, which is the same "rule that silently
+    #   stops matching" this comment rejects ``scenario`` for.
+    #
+    # ``captcha`` stays: the antibot-delegation arm (``crowdsec.lua``,
+    # ``CROWDSEC_CAPTCHA_PROVIDER`` + ``USE_ANTIBOT``) returns no status, so that request does
+    # reach the workflows with ``captcha`` published.
+    "source": ("appsec", "lapi"),
+    "remediation": ("ban", "captcha"),
+}
 
 ACTION_TYPES = ("block", "redirect", "challenge")
 # The Antibot modes a workflow may request. Source of truth is the USE_ANTIBOT regex in
@@ -214,6 +244,28 @@ def _validate_uri_leaf(node: Dict[str, Any], path: str, ctx: _Ctx) -> Optional[D
     return {"op": "uri", "match": match, "value": value}
 
 
+def _validate_crowdsec_leaf(node: Dict[str, Any], path: str, ctx: _Ctx) -> Optional[Dict[str, Any]]:
+    field = str(node.get("field") or "").strip()
+    if field not in CROWDSEC_FIELDS:
+        ctx.fail(f"{path}.field", "crowdsec_field_invalid", f"A CrowdSec predicate must read one of {', '.join(CROWDSEC_FIELDS)}")
+        return None
+    allowed = CROWDSEC_VALUES[field]
+    raw = node.get("values")
+    if not isinstance(raw, list) or not raw:
+        ctx.fail(path, "values_required", f"A CrowdSec {field} predicate needs at least one value")
+        return None
+    values = []
+    for index, value in enumerate(raw):
+        candidate = str(value).strip().lower()
+        if candidate not in allowed:
+            # Closed enum, never a free string: an unknown value would compile into a leaf that
+            # can never match, which reads as "my rule is off" long after the typo.
+            ctx.fail(f"{path}.values[{index}]", "crowdsec_value_invalid", f"{value!r} is not a CrowdSec {field} ({', '.join(allowed)})")
+            continue
+        values.append(candidate)
+    return {"op": "crowdsec", "field": field, "values": _sorted_unique(values)} if values else None
+
+
 def _validate_group_leaf(node: Dict[str, Any], path: str, ctx: _Ctx) -> Optional[Dict[str, Any]]:
     group_id = str(node.get("group_id") or "").strip()
     kind = str(node.get("kind") or "").strip()
@@ -243,6 +295,7 @@ _LEAF_VALIDATORS = {
     "method": _validate_method_leaf,
     "uri": _validate_uri_leaf,
     "group": _validate_group_leaf,
+    "crowdsec": _validate_crowdsec_leaf,
 }
 
 
@@ -461,6 +514,66 @@ def collect_group_refs(definition: Dict[str, Any]) -> Set[Tuple[str, str]]:
     return refs
 
 
+def service_setting(config: Dict[str, Any], server: str, setting: str) -> str:
+    """A service's value for a multisite setting, with the global fallback it inherits.
+
+    One copy for both callers of the CrowdSec warnings — the compiler reads a scheduler config,
+    the API reads ``get_config()`` — because two copies of an inheritance rule drift, and this
+    one decides whether a warning fires at all.
+    """
+    value = config.get(f"{server}_{setting}")
+    if value is None:
+        value = config.get(setting)
+    return str(value or "").strip()
+
+
+def uses_crowdsec(definition: Dict[str, Any], *, field: str = "", value: str = "") -> bool:
+    """Whether any enabled rule reads a CrowdSec verdict — optionally a precise one.
+
+    The compiler and the API both need it to warn about a rule that can never fire: a leaf on a
+    service where the CrowdSec plugin is off evaluates UNKNOWN forever, and a leaf reading a
+    ``ban`` remediation on a service that does not defer to the workflows never sees one, since
+    CrowdSec applies that ban itself and the access phase ends there.
+
+    ``field`` and ``value`` narrow the question to leaves on that field, holding that value, and
+    only where the rule reads them POSITIVELY — a leaf at odd negation depth answers False,
+    because negating it makes it match the requests the leaf does NOT describe (parity note in
+    the walk below). Both empty asks about any CrowdSec leaf at all, negated or not.
+    """
+
+    def matches(node: Dict[str, Any]) -> bool:
+        if field and node.get("field") != field:
+            return False
+        return not value or value in (node.get("values") or [])
+
+    def walk(node: Any, negated: bool = False) -> bool:
+        if not isinstance(node, dict):
+            return False
+        op = node.get("op")
+        if op in ("all", "any"):
+            return any(walk(child, negated) for child in node.get("nodes") or [])
+        if op == "not":
+            return walk(node.get("node"), not negated)
+        # A negated leaf is TRUE exactly when the leaf is FALSE (the runtime negates F into T,
+        # `eval.lua`), so a NARROWED question must not claim it: `NOT (remediation is ban)`
+        # matches every request CrowdSec answered without banning, deferral or no deferral, and
+        # warning about it would push the operator to switch the deferral on — surrendering
+        # CrowdSec's immediate enforcement — to silence a rule that was never dead. What decides
+        # is the PARITY of the nesting, not the first `not`: the editor serialises a "None of"
+        # group as `not(any(...))`, so `not(not(leaf))` is authorable and is a plain leaf again.
+        # The un-narrowed question is unaffected (the trailing guard is always True then): a
+        # CrowdSec leaf on a service without CrowdSec is UNKNOWN, which negates to UNKNOWN, so
+        # that rule really cannot fire however deeply it is negated.
+        return op == "crowdsec" and matches(node) and not (negated and (field or value))
+
+    for rule in definition.get("rules") or []:
+        if not rule.get("enabled", True):
+            continue
+        if walk(rule.get("condition")):
+            return True
+    return False
+
+
 def rule_stats(definition: Dict[str, Any], *, enabled_only: bool = True) -> Dict[str, int]:
     """Counts the compiler aggregates per service to enforce the runtime budgets."""
     stats = {"rules": 0, "predicates": 0, "pcre": 0}
@@ -501,7 +614,7 @@ def _summarize_node(node: Dict[str, Any]) -> str:
     if op == "group":
         return f"{node['kind'].replace('_', ' ')} is in group {node['group_id']}"
     values = node.get("values") or []
-    label = {"ip": "IP", "country": "country", "asn": "ASN", "method": "method"}[str(op)]
+    label = f"CrowdSec {node['field']}" if op == "crowdsec" else {"ip": "IP", "country": "country", "asn": "ASN", "method": "method"}[str(op)]
     rendered = ", ".join(str(value) for value in values)
     return f"{label} is {rendered}" if len(values) == 1 else f"{label} is one of {rendered}"
 

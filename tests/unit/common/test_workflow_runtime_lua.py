@@ -165,6 +165,74 @@ check("ip outside group", access({ uri = "/admin" }).msg, "no rule matched")
 check("no asn is false not unknown", access({ uri = "/asn", asn_number = ABSENT }).msg, "workflow rule r-not-asn blocks")
 check("asn present", access({ uri = "/asn" }).msg, "no rule matched")
 
+-- ---- the CrowdSec verdict leaf ---------------------------------------------------
+-- Three states, and the middle one is the whole point: CrowdSec never judged this request
+-- (UNKNOWN, cannot match), CrowdSec judged it and remediated nothing (FALSE), CrowdSec
+-- remediated it (set membership).
+check("crowdsec never ran", access({ uri = "/cs" }).msg, "no rule matched")
+check("crowdsec ran and allowed", access({ uri = "/cs", crowdsec_ok = true }).msg, "no rule matched")
+check(
+    "appsec verdict",
+    access({ uri = "/cs", crowdsec_ok = true, crowdsec_source = "appsec", crowdsec_remediation = "ban" }).msg,
+    "workflow rule r-crowdsec blocks"
+)
+check(
+    "lapi verdict is not appsec",
+    access({ uri = "/cs", crowdsec_ok = true, crowdsec_source = "lapi", crowdsec_remediation = "ban" }).msg,
+    "no rule matched"
+)
+check(
+    "remediation set membership",
+    access({ uri = "/cs2", crowdsec_ok = true, crowdsec_source = "lapi", crowdsec_remediation = "captcha" }).msg,
+    "workflow rule r-crowdsec-remediation blocks"
+)
+check(
+    "a remediation outside the set",
+    access({ uri = "/cs2", crowdsec_ok = true, crowdsec_source = "lapi", crowdsec_remediation = "challenge" }).msg,
+    "no rule matched"
+)
+-- The source field must be read as the SOURCE: `field == "source" and bw.crowdsec_source or
+-- bw.crowdsec_remediation` would fall through to the remediation whenever the source is nil.
+check(
+    "a missing source does not fall through to the remediation",
+    access({ uri = "/cs", crowdsec_ok = true, crowdsec_remediation = "appsec" }).msg,
+    "no rule matched"
+)
+
+-- ---- a deferred CrowdSec verdict --------------------------------------------------
+-- CROWDSEC_DEFER_TO_WORKFLOWS: crowdsec:access() hands its deny over instead of applying it,
+-- and NOTHING else in the chain will apply it, so every exit of access() has to.
+local VERDICT = { source = "appsec", action = "ban", scenario = "crowdsecurity/http-probing" }
+local DEFERRED = { status = 403, verdict = VERDICT }
+local unmatched = access({ uri = "/nothing-matches", crowdsec_deferred = DEFERRED })
+assert(unmatched.status == 403, "a deferred verdict must be applied when no rule matched, got " .. tostring(unmatched.status))
+-- The bouncer verdict itself, untouched : the dispatcher stamps the row with the plugin id
+-- ("workflows"), so the payload is the only thing left to say WHAT was applied, and
+-- security-reason.js renders `source` + `action` with the CrowdSec sentence.
+assert(unmatched.data == VERDICT, "the deferred deny must report the bouncer verdict itself")
+check("the deferred message names the override that did not happen", unmatched.msg, "no workflow rule overrode")
+
+local overridden = access({ uri = "/challenge-me", crowdsec_deferred = DEFERRED })
+assert(overridden.status == nil, "a matching rule owns the outcome, the deferred deny must not fire")
+assert(overridden.ctx.bw.workflow_antibot_provider == "hcaptcha", "the rule's own action must run")
+
+local whitelisted_deferred = access({ uri = "/nothing-matches", crowdsec_deferred = DEFERRED, whitelisted = true })
+assert(whitelisted_deferred.status == nil, "the global whitelist keeps priority over a deferred verdict")
+
+local unattached_deferred = access({ server_name = "other.example.com", crowdsec_deferred = DEFERRED })
+assert(unattached_deferred.status == 403, "the enforcement must survive the unattached-service exit too")
+-- The mark crowdsec:defer_verdict() refuses on. Asserted on the EARLIEST exit of access(), the
+-- one that returns before anything else: a mark set later would leave the reordered case
+-- (PLUGINS_ORDER_ACCESS putting workflows first) deferring to a plugin that already ran.
+assert(unattached_deferred.ctx.bw.workflows_ran == true, "access() must mark the ctx before every return")
+
+local no_deferral = access({ uri = "/nothing-matches" })
+assert(no_deferral.status == nil, "without a deferral nothing is enforced here")
+
+-- What crowdsec:defer_verdict() calls before handing anything over.
+assert(workflows.attached("app.example.com") == true, "attached() must see a service with a plan")
+assert(workflows.attached("other.example.com") == false, "attached() must refuse a service without one")
+
 check("regex", access({ uri = "/re/x" }).msg, "workflow rule r-regex blocks")
 check("broken regex never matches", access({ uri = "/anything" }).msg, "no rule matched")
 
@@ -251,6 +319,14 @@ ARTEFACT = """{
               condition = { op = "uri", match = "regex", value = "((" } },
             { id = "r-broken-ip", counter = "wf-1/r-broken-ip", threshold = NULL, action = { type = "block" },
               condition = { op = "ip", values = { "not-an-ip" } } },
+            { id = "r-crowdsec", counter = "wf-1/r-crowdsec", threshold = NULL, action = { type = "block" },
+              condition = { op = "all", nodes = {
+                  { op = "uri", match = "exact", value = "/cs" },
+                  { op = "crowdsec", field = "source", values = { "appsec" } } } } },
+            { id = "r-crowdsec-remediation", counter = "wf-1/r-crowdsec-remediation", threshold = NULL, action = { type = "block" },
+              condition = { op = "all", nodes = {
+                  { op = "uri", match = "exact", value = "/cs2" },
+                  { op = "crowdsec", field = "remediation", values = { "ban", "captcha" } } } } },
             { id = "r-redirect", counter = "wf-1/r-redirect", threshold = NULL,
               action = { type = "redirect", url = "https://example.com/moved", status = 302 },
               condition = { op = "uri", match = "exact", value = "/go" } },

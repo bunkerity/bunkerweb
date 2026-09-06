@@ -292,3 +292,43 @@ def test_the_request_number_starts_at_one():
     assert error and "starts at 1" in error
     request, error = request_from_input({"uri": "/", "geo": "local"})
     assert error is None and request["request_number"] == 1
+
+
+def test_the_crowdsec_leaf_separates_never_judged_from_nothing_to_say():
+    leaf = {"op": "crowdsec", "field": "remediation", "values": ["ban"]}
+    # CrowdSec never judged this request: UNKNOWN, so the rule cannot match and cannot be
+    # negated into a match either.
+    assert _run_with(leaf, _req()) == U
+    # CrowdSec judged it and remediated nothing: a FACT, so FALSE.
+    assert _run_with(leaf, _req(crowdsec_ok=True)) == F
+    assert _run_with(leaf, _req(crowdsec_ok=True, crowdsec_remediation="ban")) == T
+    assert _run_with(leaf, _req(crowdsec_ok=True, crowdsec_remediation="captcha")) == F
+
+    source = {"op": "crowdsec", "field": "source", "values": ["appsec"]}
+    assert _run_with(source, _req(crowdsec_ok=True, crowdsec_source="appsec", crowdsec_remediation="ban")) == T
+    assert _run_with(source, _req(crowdsec_ok=True, crowdsec_source="lapi", crowdsec_remediation="ban")) == F
+    # The source field must not fall through to the remediation when the source is missing.
+    assert _run_with(source, _req(crowdsec_ok=True, crowdsec_remediation="appsec")) == F
+
+
+def test_the_tester_maps_the_three_crowdsec_states():
+    absent, error = request_from_input({"uri": "/", "geo": "unavailable"})
+    assert error is None and absent["crowdsec_ok"] is False
+
+    allowed, error = request_from_input({"uri": "/", "geo": "unavailable", "crowdsec": "allowed"})
+    assert error is None and allowed["crowdsec_ok"] is True and allowed["crowdsec_remediation"] == ""
+
+    remediated, error = request_from_input(
+        {"uri": "/", "geo": "unavailable", "crowdsec": "remediated", "crowdsec_source": "AppSec", "crowdsec_remediation": "Ban"}
+    )
+    assert error is None and remediated["crowdsec_source"] == "appsec" and remediated["crowdsec_remediation"] == "ban"
+
+    # A remediation left behind in the form must not survive a switch back to "allowed":
+    # both leaves read the same flag and would answer about a verdict that does not exist.
+    stale, error = request_from_input({"uri": "/", "geo": "unavailable", "crowdsec": "allowed", "crowdsec_remediation": "ban"})
+    assert error is None and stale["crowdsec_remediation"] == ""
+
+    _, error = request_from_input({"uri": "/", "geo": "unavailable", "crowdsec": "remediated", "crowdsec_source": "appsec"})
+    assert error == "A remediated request needs a CrowdSec remediation"
+    _, error = request_from_input({"uri": "/", "geo": "unavailable", "crowdsec": "banned"})
+    assert error == "Unknown CrowdSec state"

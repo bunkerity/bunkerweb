@@ -21,8 +21,14 @@ from workflow_schema import canonical_json  # type: ignore  # noqa: E402
 
 
 class _Logger:
+    def __init__(self):
+        self.warnings = []
+
     def info(self, *_args, **_kwargs):
         pass
+
+    def warning(self, message, *_args, **_kwargs):
+        self.warnings.append(str(message))
 
     def error(self, *_args, **_kwargs):
         pass
@@ -186,3 +192,66 @@ def test_nothing_attached_still_produces_an_artefact():
     result = compile_config(FakeDB({}), _config(), _Logger())
     assert result["data"]["services"] == {} and result["data"]["workflows"] == {}
     assert result["variables"] == {"app.example.com_WORKFLOWS_HAS_CHALLENGE": "no"}
+
+
+def _crowdsec_rule():
+    return _rule(condition={"op": "crowdsec", "field": "remediation", "values": ["ban"]}, action={"type": "block"}, threshold=None)
+
+
+def test_a_crowdsec_leaf_on_a_service_without_crowdsec_warns_and_still_compiles():
+    """Warn, never raise. The leaf answers UNKNOWN there, which can only make the rule NOT
+    match — the opposite of the challenge-provider case below it, where the rule would break
+    the response itself, and where aborting the whole config push is the lesser evil."""
+    logger = _Logger()
+    result = compile_config(FakeDB(_attached(_definition(_crowdsec_rule()))), _config(), logger)
+
+    assert result["data"]["services"] == {"app.example.com": ["wf-7c3e"]}
+    assert result["data"]["workflows"]["wf-7c3e"]["rules"][0]["condition"] == {"op": "crowdsec", "field": "remediation", "values": ["ban"]}
+    assert len(logger.warnings) == 1
+    assert "app.example.com" in logger.warnings[0] and "USE_CROWDSEC" in logger.warnings[0]
+
+
+DEFERRING = {"app.example.com_USE_CROWDSEC": "yes", "app.example.com_CROWDSEC_DEFER_TO_WORKFLOWS": "yes"}
+
+
+def test_no_warning_when_crowdsec_is_enabled_and_defers_on_that_service():
+    logger = _Logger()
+    compile_config(FakeDB(_attached(_definition(_crowdsec_rule()))), _config(**DEFERRING), logger)
+    assert logger.warnings == []
+
+    # The global value is what a service without its own inherits, exactly as the runtime reads it.
+    inherited = _Logger()
+    compile_config(FakeDB(_attached(_definition(_crowdsec_rule()))), _config(USE_CROWDSEC="yes", CROWDSEC_DEFER_TO_WORKFLOWS="yes"), inherited)
+    assert inherited.warnings == []
+
+
+def test_a_ban_leaf_on_a_service_that_does_not_defer_warns_too():
+    """The rule that can never fire while nothing reports it: CrowdSec IS enabled, so the leaf is
+    answered — but CrowdSec applies the ban itself and the access phase ends there, so the
+    workflows never run for the request this rule describes."""
+    logger = _Logger()
+    compile_config(FakeDB(_attached(_definition(_crowdsec_rule()))), _config(**{"app.example.com_USE_CROWDSEC": "yes"}), logger)
+    assert len(logger.warnings) == 1
+    assert "CROWDSEC_DEFER_TO_WORKFLOWS" in logger.warnings[0] and "app.example.com" in logger.warnings[0]
+
+    # One cause, one warning: a service without CrowdSec at all is covered by the sentence above
+    # it, and saying both would send the operator after the wrong setting first.
+    both = _Logger()
+    compile_config(FakeDB(_attached(_definition(_crowdsec_rule()))), _config(), both)
+    assert len(both.warnings) == 1 and "USE_CROWDSEC" in both.warnings[0]
+
+
+def test_a_captcha_leaf_on_a_service_that_does_not_defer_never_warns():
+    """`captcha` reaches the workflows without the deferral: the antibot-delegation arm of
+    crowdsec:access() returns no status, so the chain keeps walking. Warning about it would be
+    the false positive that teaches operators to ignore the true one."""
+    captcha = _rule(condition={"op": "crowdsec", "field": "remediation", "values": ["captcha"]}, action={"type": "block"}, threshold=None)
+    logger = _Logger()
+    compile_config(FakeDB(_attached(_definition(captcha))), _config(**{"app.example.com_USE_CROWDSEC": "yes"}), logger)
+    assert logger.warnings == []
+
+
+def test_a_rule_without_a_crowdsec_leaf_never_warns():
+    logger = _Logger()
+    compile_config(FakeDB(_attached(_definition(_rule()))), _config(), logger)
+    assert logger.warnings == []

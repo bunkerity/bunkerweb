@@ -11,12 +11,14 @@ from pathlib import Path
 
 from workflow_schema import (  # type: ignore
     CHALLENGE_PROVIDERS,
+    CROWDSEC_VALUES,
     MAX_RULES_PER_WORKFLOW,
     MAX_TREE_DEPTH,
     canonical_json,
     collect_group_refs,
     rule_stats,
     summarize_rule,
+    uses_crowdsec,
     validate_definition,
 )
 
@@ -258,3 +260,75 @@ def test_challenge_providers_match_the_antibot_plugin():
     """Anti-drift: the providers a workflow may request are USE_ANTIBOT's, minus "no"."""
     settings = json.loads(ROOT.joinpath("src", "common", "core", "antibot", "plugin.json").read_text())["settings"]["USE_ANTIBOT"]
     assert set(CHALLENGE_PROVIDERS) == set(settings["select"]) - {"no"}
+
+
+def test_a_crowdsec_leaf_is_a_closed_vocabulary_per_field():
+    definition, errors = _validate([_rule(condition={"op": "crowdsec", "field": "remediation", "values": ["CAPTCHA", "ban", "ban"]})])
+    assert errors == []
+    # Normalised, sorted and deduped like every other value list, so the artefact hash is stable.
+    assert definition["rules"][0]["condition"] == {"op": "crowdsec", "field": "remediation", "values": ["ban", "captcha"]}
+
+    # A remediation is not a source: the vocabularies do not cross.
+    codes, errors = _errors([_rule(condition={"op": "crowdsec", "field": "source", "values": ["ban"]})])
+    assert codes == {"crowdsec_value_invalid"}
+    assert errors[0]["path"] == "rules[0].condition.values[0]"
+
+    codes, _ = _errors([_rule(condition={"op": "crowdsec", "field": "scenario", "values": ["x"]})])
+    assert codes == {"crowdsec_field_invalid"}
+
+    codes, _ = _errors([_rule(condition={"op": "crowdsec", "field": "source", "values": []})])
+    assert codes == {"values_required"}
+
+
+def test_the_crowdsec_vocabularies_are_the_ones_the_runtime_can_answer():
+    # The AppSec rule id and the LAPI scenario are deliberately absent: the bouncer never
+    # receives the first, and only sees the second on the request that created the decision.
+    assert set(CROWDSEC_VALUES) == {"source", "remediation"}
+    assert CROWDSEC_VALUES["source"] == ("appsec", "lapi")
+    # `challenge` is absent for the same reason: CrowdSec renders it itself and ends the access
+    # phase before the workflows run, so a leaf reading it could never match.
+    assert CROWDSEC_VALUES["remediation"] == ("ban", "captcha")
+
+
+def test_a_crowdsec_leaf_reads_as_english_and_is_found_by_uses_crowdsec():
+    rule = _validate([_rule(condition={"op": "crowdsec", "field": "source", "values": ["appsec"]})])[0]["rules"][0]
+    assert summarize_rule(rule) == "If CrowdSec source is appsec, then block"
+
+    nested = {
+        "schema_version": 1,
+        "rules": [
+            _rule(condition={"op": "all", "nodes": [{"op": "country", "values": ["FR"]}, {"op": "crowdsec", "field": "remediation", "values": ["ban"]}]})
+        ],
+    }
+    assert uses_crowdsec(nested) is True
+    assert uses_crowdsec({"schema_version": 1, "rules": [_rule()]}) is False
+    # A disabled rule is not shipped, so it cannot be the reason for a warning either.
+    assert uses_crowdsec({"schema_version": 1, "rules": [_rule(condition={"op": "crowdsec", "field": "source", "values": ["lapi"]}, enabled=False)]}) is False
+
+
+def test_the_narrowed_question_is_not_answered_by_a_negated_leaf():
+    """`uses_crowdsec(field=, value=)` decides whether the "this rule can never match" warning
+    fires, so it must answer about the leaf AS EVALUATED. A negated leaf inverts it: `NOT
+    (remediation is ban)` is TRUE for every request CrowdSec answered without banning (`eval.lua`
+    negates F into T), deferral or no deferral — warning about it would send the operator to
+    switch CROWDSEC_DEFER_TO_WORKFLOWS on to silence a rule that was never dead."""
+
+    def definition(condition):
+        return {"schema_version": 1, "rules": [_rule(condition=condition)]}
+
+    ban = {"op": "crowdsec", "field": "remediation", "values": ["ban"]}
+    assert uses_crowdsec(definition(ban), field="remediation", value="ban") is True
+    assert uses_crowdsec(definition({"op": "not", "node": ban}), field="remediation", value="ban") is False
+    # The un-narrowed question still descends: a negated CrowdSec leaf on a service without
+    # CrowdSec is UNKNOWN, negates to UNKNOWN, and is worth the first warning.
+    assert uses_crowdsec(definition({"op": "not", "node": ban})) is True
+    # And the narrowing itself still discriminates.
+    assert uses_crowdsec(definition(ban), field="source") is False
+    assert uses_crowdsec(definition(ban), field="remediation", value="captcha") is False
+    # Parity, not the first `not`: the editor serialises a "None of" group as `not(any(...))`, so a
+    # group inside a group is a DOUBLE negation — semantically the bare leaf again, and dead
+    # without the deferral exactly as the bare leaf is.
+    assert uses_crowdsec(definition({"op": "not", "node": {"op": "not", "node": ban}}), field="remediation", value="ban") is True
+    # And a negated SIBLING must not hide the leaf next to it: this rule needs the ban leaf TRUE.
+    unrelated_not = {"op": "all", "nodes": [ban, {"op": "not", "node": {"op": "country", "values": ["FR"]}}]}
+    assert uses_crowdsec(definition(unrelated_not), field="remediation", value="ban") is True

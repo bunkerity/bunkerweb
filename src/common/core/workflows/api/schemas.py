@@ -59,6 +59,13 @@ class WorkflowTestRequestFacts(BaseModel):
     # The runtime's own counter: what ratelimit.incr returns, INCLUDING this request. Named
     # so the inclusive/exclusive question never has to be asked.
     request_number: int = Field(1, ge=1, le=100000)
+    # CrowdSec is asked in the same three states GeoIP is, and for the same reason: "CrowdSec
+    # never judged this request" and "CrowdSec judged it and had nothing against it" are
+    # different facts, and a rule reading the verdict answers UNKNOWN on the first and FALSE on
+    # the second. The default is the state of a service without CrowdSec.
+    crowdsec: str = Field("unavailable", description="unavailable | allowed | remediated")
+    crowdsec_source: str = Field("", max_length=16, description="appsec | lapi, on a remediated request")
+    crowdsec_remediation: str = Field("", max_length=16, description="ban | captcha, on a remediated request")
     whitelisted: bool = False
 
 
