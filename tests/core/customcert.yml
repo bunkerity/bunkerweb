@@ -78,6 +78,140 @@ actions:
       CUSTOM_SSL_CERT_DATA: "${CUSTOM_SSL_CERT_DATA}"
       CUSTOM_SSL_KEY_DATA: "${CUSTOM_SSL_KEY_DATA}"
 
+  # --- default server certificate override (DEFAULT_SERVER_SSL_CERT / _KEY, option (a)) ---
+  #
+  # Two fixture certificates, from `tests/scripts/before/customcert.sh`:
+  #   * CN=www.example.com (SAN www.example.com) -- the configured service's own. Handing THAT to
+  #     the default server is exactly what the coalescence guard refuses: a certificate the default
+  #     server may show for an unknown SNI must not also be usable for a service that never asked
+  #     for it.
+  #   * CN=unknown.test (SAN unknown.test) -- covers no configured service, so it is accepted.
+  #
+  # The internal leaf the refusal falls back to is the one `generate_default_server_cert`
+  # (`src/common/helpers/utils.sh`) writes at boot; its subject and lifetime are the ones
+  # `tests/core/ssl.yml:default_server_ssl` already pins.
+  #
+  # `restart_stack: false` means the NEXT action's config is never applied
+  # (`tests/models/action.py`), so an action carrying a `config:` is always preceded by one that
+  # restarts. Do not reorder these without re-checking that.
+  default_server_override_refused_unknown_sni:
+    type: ssl
+    url: "https://localhost"
+    verify_ssl: false
+    ssl_expiration: 3650
+    ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
+    All-in-one:
+      url: "https://localhost/setup"
+    config:
+      DEFAULT_SERVER_SSL_CERT_DATA: "${CUSTOM_SSL_CERT_DATA}"
+      DEFAULT_SERVER_SSL_KEY_DATA: "${CUSTOM_SSL_KEY_DATA}"
+  # No SNI at all: Python omits the extension for an IP literal. Every certificate provider returns
+  # early without a SNI, which is the path the override exists for -- and the refused certificate
+  # must not appear on it either.
+  default_server_override_refused_without_sni:
+    type: ssl
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "https://127.0.0.1"
+    verify_ssl: false
+    ssl_expiration: 3650
+    ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
+  # The accepted path: a certificate covering no configured service IS served for an unknown SNI,
+  # in place of the internal self-signed leaf.
+  default_server_override_is_served_for_an_unknown_sni:
+    type: ssl
+    url: "https://localhost"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=unknown.test/"
+    All-in-one:
+      url: "https://localhost/setup"
+    config:
+      DEFAULT_SERVER_SSL_CERT_DATA: "${DEFAULT_SERVER_SSL_CERT_DATA}"
+      DEFAULT_SERVER_SSL_KEY_DATA: "${DEFAULT_SERVER_SSL_KEY_DATA}"
+    restart_stack: false
+  # Known SNI, with that same override live: the service keeps its own certificate. The override
+  # phase runs only inside the default server and only after every SNI-indexed provider declined,
+  # so a configured service can never be displaced by it.
+  default_server_override_does_not_displace_the_service:
+    type: ssl
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+  # Strict SNI closes the connection in ssl_client_hello_by_lua_block, which runs BEFORE any
+  # certificate can be chosen (`confs/default-server-http.conf`), so the override is inert by
+  # construction -- there is no handshake left to serve a certificate into.
+  default_server_override_is_inert_under_strict_sni:
+    type: ssl
+    integrations:
+      - "Linux"
+      - "Docker"
+      - "Autoconf"
+    url: "https://localhost"
+    verify_ssl: false
+    success: false
+    config:
+      DEFAULT_SERVER_SSL_CERT_DATA: "${DEFAULT_SERVER_SSL_CERT_DATA}"
+      DEFAULT_SERVER_SSL_KEY_DATA: "${DEFAULT_SERVER_SSL_KEY_DATA}"
+      DISABLE_DEFAULT_SERVER_STRICT_SNI: "yes"
+
+  # ---------------------------------------------------------------------------------------------
+  # The reserved `default-server` pseudo-service (conception option (b)). It is what the override
+  # above is stored against once the API has seeded it, so it belongs in this file rather than in a
+  # spec of its own. Docker only, same reason as the inventory actions: the assertions dial the
+  # control-plane API on loopback:8888.
+  the_reserved_default_server_is_seeded_and_flagged:
+    # Seeding happens in the API's own startup, on every boot and idempotently -- never in a
+    # migration -- so a stack that has come up at all must already have the row. `"reserved":true`
+    # is what tells a client to pin it and offer no delete; a row present but unflagged would look
+    # to the UI like a service somebody created called "default-server".
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/services"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"id":"default-server"'
+    restart_stack: false
+  the_reserved_default_server_is_flagged_reserved:
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/services"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"reserved":true'
+    restart_stack: false
+  deleting_the_reserved_default_server_is_refused:
+    # 403 and, per the PO's "user friendly" ruling, a message that says WHAT it is rather than just
+    # refusing. If this ever answers 200 the deployment loses its configurable default server
+    # silently: the block falls back to the global-only rendering with every stored setting still
+    # in the database and none of it applied.
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/services/default-server"
+    method: DELETE
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: "match no configured service"
+    restart_stack: false
+  the_reserved_default_server_survives_the_refused_delete:
+    type: string
+    integrations:
+      - "Docker"
+    url: "http://127.0.0.1:8888/services"
+    auth:
+      - "admin"
+      - "P@ssw0rd"
+    string: '"id":"default-server"'
+
 config:
   USE_CUSTOM_SSL: "yes"
   CUSTOM_SSL_CERT: "/tmp/output/certificate.pem"

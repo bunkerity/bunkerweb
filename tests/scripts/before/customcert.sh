@@ -46,3 +46,22 @@ export CUSTOM_SSL_CERT_DATA
 
 CUSTOM_SSL_KEY_DATA=$(base64 < /tmp/output/privatekey.key)
 export CUSTOM_SSL_KEY_DATA
+
+# A SECOND certificate, for the default server (DEFAULT_SERVER_SSL_CERT_DATA / _KEY_DATA). It must
+# cover NO configured service hostname: the certificate above is CN=www.example.com, which is the
+# service this spec configures, and the custom-cert job refuses a default-server certificate whose
+# SANs or CN cover a configured service (a client could open the connection with an unknown SNI,
+# be handed it, then reuse that connection for the service). CN=unknown.test is the accepted shape.
+echo "🔏 Generating the default server certificate for unknown.test ..."
+bash -c "openssl req -nodes -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -keyout /tmp/output/default-server.key -out /tmp/output/default-server.pem -days 365 -subj /CN=unknown.test/ -addext subjectAltName=DNS:unknown.test"
+# shellcheck disable=SC2181
+if [ $? -ne 0 ] ; then
+    echo "🔏 Failed to generate the default server certificate ❌"
+    return 1
+fi
+
+DEFAULT_SERVER_SSL_CERT_DATA=$(base64 < /tmp/output/default-server.pem)
+export DEFAULT_SERVER_SSL_CERT_DATA
+
+DEFAULT_SERVER_SSL_KEY_DATA=$(base64 < /tmp/output/default-server.key)
+export DEFAULT_SERVER_SSL_KEY_DATA

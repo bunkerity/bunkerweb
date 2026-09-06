@@ -235,6 +235,43 @@ function customcert:init()
 		return self:ret(false, "error while caching custom wildcard certificates : " .. err)
 	end
 
+	-- The default server's own certificate (DEFAULT_SERVER_SSL_CERT/_KEY), loaded whether or not any
+	-- service enabled USE_CUSTOM_SSL -- the two features are independent. Absent files are the
+	-- normal case (no override configured), so a read failure is not an error here.
+	--
+	-- TWO locations, reserved id first: the job caches under `default-server/` once the reserved
+	-- pseudo-service row exists, and at the ROOT of the plugin cache when it does not (a database
+	-- that has not been seeded yet, and the one reload of an upgrade where the root copy is still
+	-- the live one). The root path is the pre-(b) location and is kept for exactly that reason.
+	local default_check, default_files = read_files({
+		"/var/cache/bunkerweb/customcert/default-server/default-server-cert.pem",
+		"/var/cache/bunkerweb/customcert/default-server/default-server-key.pem",
+	})
+	if not default_check then
+		default_check, default_files = read_files({
+			"/var/cache/bunkerweb/customcert/default-server-cert.pem",
+			"/var/cache/bunkerweb/customcert/default-server-key.pem",
+		})
+	end
+	if default_check then
+		local default_cert, default_err = parse_pem_cert(default_files[1])
+		if not default_cert then
+			self.logger:log(ERR, "error while parsing the default server certificate : " .. default_err)
+		else
+			local default_key
+			default_key, default_err = parse_pem_priv_key(default_files[2])
+			if not default_key then
+				self.logger:log(ERR, "error while parsing the default server private key : " .. default_err)
+			else
+				ok, err =
+					self.internalstore:set("plugin_customcert_default_server", { default_cert, default_key }, nil, true)
+				if not ok then
+					return self:ret(false, "error while caching the default server certificate : " .. err)
+				end
+			end
+		end
+	end
+
 	return self:ret(ret_ok, ret_err)
 end
 
@@ -287,6 +324,22 @@ function customcert:ssl_certificate()
 		end
 	end
 	return self:ret(true, "custom certificate is not used")
+end
+
+-- Dedicated phase, rendered ONLY into the default server block and reached only after every
+-- ssl_certificate provider declined the SNI (confs/partials/ssl-certificate-by-lua.conf). Two
+-- consequences, and both are the point: a certificate a service legitimately owns always wins,
+-- and no service block can ever run this method -- which is why the override could not simply be
+-- another ssl_certificate provider.
+function customcert:ssl_certificate_default()
+	local data, err = self.internalstore:get("plugin_customcert_default_server", true)
+	if not data then
+		if err ~= "not found" then
+			return self:ret(false, "can't get the default server certificate : " .. err)
+		end
+		return self:ret(true, "no default server certificate override is configured")
+	end
+	return self:ret(true, "default server certificate/key data found", data)
 end
 
 function customcert:load_data(data, server_name, wildcard_certificates)

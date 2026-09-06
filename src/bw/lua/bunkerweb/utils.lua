@@ -1666,6 +1666,7 @@ utils.get_phases = function()
 		"content",
 		"ssl_client_hello_default",
 		"ssl_certificate",
+		"ssl_certificate_default",
 		"header",
 		"log",
 		"preread",

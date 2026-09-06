@@ -13,13 +13,19 @@ What is asserted is the intent, not the current text:
   * the static `ssl_certificate` stays on the default server -- when no plugin resolves anything
     the runner returns without calling `set_cert` and NGINX falls back to it. Removing it as
     "superseded" would leave the default server with no certificate at all;
-  * the partial is never rendered as a configuration file of its own.
+  * the partial is never rendered as a configuration file of its own;
+  * the body carries exactly one Jinja flag and exactly one template sets it. The default server
+    later gained its own `ssl_certificate_default` phase, and NGINX accepts a single
+    `ssl_certificate_by_lua_block` per server, so the extra phase had to be rendered into this
+    shared body conditionally. That is the drift risk this file existed to prevent, so the "no
+    Jinja at all" rule became a stricter one rather than being dropped.
 
 The byte-identity of the extraction itself was proven separately, by rendering both templates
 across 13824 variable combinations before and after and diffing: 0 differences on
 `server-http/ssl-certificate-lua.conf`. See `.cache/results-2026-08-20/lane-b-certificates.md`.
 """
 
+import re
 import subprocess
 from pathlib import Path
 from shutil import which
@@ -71,8 +77,11 @@ def test_the_phase_runner_is_rendered(template):
     certificate it happens to have, for every name, with no error anywhere."""
     got = render(template)
     assert "ssl_certificate_by_lua_block {" in got
-    # Not just the opening directive: the include has to bring the body with it.
-    assert 'call_plugin(plugin_obj, "ssl_certificate")' in got
+    # Not just the opening directive: the include has to bring the body with it. The runner became
+    # a function of the phase name when the default server gained `ssl_certificate_default`, so the
+    # phase is named at the invocation and the call site is generic.
+    assert "call_plugin(plugin_obj, phase)" in got
+    assert 'run_certificate_phase("ssl_certificate")' in got
     assert "set_priv_key(ret.status[2])" in got
 
 
@@ -110,10 +119,14 @@ def test_the_partial_is_not_a_configuration_file_of_its_own():
 
 
 @pytest.mark.skipif(which("lua") is None and which("luajit") is None, reason="no stand-alone lua/luajit on PATH")
-def test_the_extracted_block_is_valid_lua(tmp_path):
+@pytest.mark.parametrize("default_server_phase", (False, True))
+def test_the_extracted_block_is_valid_lua(tmp_path, default_server_phase):
     """It is Lua inside an NGINX directive, so nothing else in the tree would catch a syntax error
-    until an instance failed to start."""
-    body = PARTIAL.read_text(encoding="utf-8").split("ssl_certificate_by_lua_block {\n", 1)[1].rstrip()
+    until an instance failed to start. Both flag states, because the default server renders one
+    phase call more than a service block and a syntax error in either half reaches only that
+    caller."""
+    rendered = render("partials/ssl-certificate-by-lua.conf", default_server_certificate_phase=default_server_phase)
+    body = rendered.split("ssl_certificate_by_lua_block {\n", 1)[1].rstrip()
     assert body.endswith("}")
     script = tmp_path / "block.lua"
     script.write_text(body[:-1], encoding="utf-8")
@@ -122,10 +135,31 @@ def test_the_extracted_block_is_valid_lua(tmp_path):
     assert result.returncode == 0, result.stderr
 
 
-def test_the_partial_carries_no_jinja():
-    """It is included into two different contexts. A conditional in here would silently mean two
-    different things depending on which caller's variables were in scope."""
-    text = PARTIAL.read_text(encoding="utf-8")
-    body = text.split("-#}\n", 1)[1]
-    for marker in ("{%", "{{"):
-        assert marker not in body, f"{marker} in the shared runner body"
+JINJA_FLAG = "default_server_certificate_phase"
+
+
+def test_the_partial_carries_exactly_one_jinja_flag():
+    """It is included into two different contexts, so a conditional in here means two different
+    things depending on which caller's variables are in scope -- which is why this used to assert
+    NO Jinja at all. Exactly one flag is allowed now, because NGINX accepts a single
+    `ssl_certificate_by_lua_block` per server ("is duplicate",
+    `src/deps/src/lua-nginx-module/src/ngx_http_lua_ssl_certby.c`) and the default server's
+    `ssl_certificate_default` phase has nowhere else to live. Anything past that one flag is the
+    drift this test exists to catch."""
+    body = PARTIAL.read_text(encoding="utf-8").split("-#}\n", 1)[1]
+    assert re.findall(r"\{%.*?%\}", body, re.S) == [
+        f"{{% if {JINJA_FLAG} is defined and {JINJA_FLAG} %}}",
+        "{% else %}",
+        "{% endif %}",
+    ]
+    assert "{{" not in body, "an interpolation in the shared runner body"
+
+
+def test_only_the_default_server_sets_the_flag():
+    """The flag is the whole of what keeps `ssl_certificate_default` out of a service block. A
+    second template setting it would hand a real service the default server's certificate as a
+    fallback -- the implementation trap the conception names."""
+    setters = sorted(
+        path.relative_to(ROOT).as_posix() for path in (ROOT / "src").rglob("*.conf") if f"set {JINJA_FLAG}" in path.read_text(encoding="utf-8", errors="ignore")
+    )
+    assert setters == ["src/common/confs/default-server-http.conf"], setters

@@ -2446,6 +2446,30 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 | `CUSTOM_SSL_CERT_DATA`     |         | multisite | no       | **Certificate Data:** Your certificate encoded in base64 format or as plaintext PEM.                                          |
 | `CUSTOM_SSL_KEY_DATA`      |         | multisite | no       | **Private Key Data:** Your private key encoded in base64 format or as plaintext PEM.                                          |
 
+### Default server certificate
+
+The **default server** is the block that answers requests matching no configured service: an unknown SNI, a connection to a raw IP address, a `Host` nobody serves. The only certificate it could present used to be the internal self-signed one BunkerWeb generates at startup — which is why a browser reaching an unknown hostname on your instance sees a name-mismatch warning.
+
+These four global settings replace it. Leave them empty to keep the internal certificate. Its other settings — TLS, headers, error pages — are edited on the reserved `default-server` service, see [Configuring the Default Server](#miscellaneous).
+
+| Setting                        | Default | Context | Multiple | Description                                                                                                                       |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_SERVER_SSL_CERT`      |         | global  | no       | **Default Server Certificate Path:** Full path to the certificate or bundle served for requests matching no configured service.  |
+| `DEFAULT_SERVER_SSL_KEY`       |         | global  | no       | **Default Server Key Path:** Full path to the matching private key.                                                              |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |         | global  | no       | **Default Server Certificate Data:** The same certificate as base64 or plaintext PEM. Used only when the path setting is empty.  |
+| `DEFAULT_SERVER_SSL_KEY_DATA`  |         | global  | no       | **Default Server Key Data:** The same private key as base64 or plaintext PEM. Used only when the path setting is empty.          |
+
+The override is consulted **last**, and only inside the default server: a service that resolves its own certificate — through the certificate inventory, `USE_CUSTOM_SSL`, Let's Encrypt or the self-signed provider — always keeps it.
+
+!!! warning "A certificate covering one of your services is refused"
+    The default server answers *any* hostname. If its certificate also covered `www.example.com`, a client could open a connection with an unknown SNI, be handed that certificate, and then reuse the same connection for `Host: www.example.com` — a certificate that service never authorized, now usable for it (HTTP/2 connection coalescing). The `custom-cert` job therefore refuses a certificate whose SANs or Common Name cover any hostname of any configured service, wildcards included, and logs the hostname it refused it for. Use a certificate that covers no configured service hostname, or attach it to the service with `USE_CUSTOM_SSL` instead.
+
+!!! info "A refusal never withdraws what is already served"
+    Invalid material, a mismatched pair and a covered hostname all fail the job loudly and leave the previously served certificate in place, rather than dropping the default server to nothing. Expiry only warns, for the same reason. Clearing both settings removes the override and brings the internal certificate back.
+
+!!! tip "Inert when strict SNI is on"
+    With `DISABLE_DEFAULT_SERVER_STRICT_SNI` set to `yes`, an unknown SNI is closed during the TLS handshake, before any certificate is chosen — so the override is never reached. Keep it off if you want unknown hostnames to be answered with your own certificate.
+
 !!! warning "Security Considerations"
     When using custom certificates, ensure your private key is properly secured and has appropriate permissions. The files must be readable by the BunkerWeb scheduler.
 

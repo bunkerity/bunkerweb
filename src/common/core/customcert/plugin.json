@@ -61,6 +61,44 @@
       "regex": "^.*$",
       "type": "file",
       "accept": ".pem,.key,.txt"
+    },
+    "DEFAULT_SERVER_SSL_CERT": {
+      "context": "global",
+      "default": "",
+      "help": "Full path of the certificate or bundle file served by the DEFAULT SERVER - the block that answers requests matching no configured service (unknown SNI, raw IP access). Leave empty to keep the internal self-signed certificate. It must be readable by the WORKER, which is where the custom-cert job runs. A certificate that also covers a hostname of a configured service is refused, because the default server would then be able to answer for that service.",
+      "id": "default-server-ssl-cert",
+      "label": "Default server certificate path",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    },
+    "DEFAULT_SERVER_SSL_KEY": {
+      "context": "global",
+      "default": "",
+      "help": "Full path of the private key of the DEFAULT SERVER certificate - the block that answers requests matching no configured service (unknown SNI, raw IP access). Leave empty to keep the internal self-signed certificate. It must be readable by the WORKER, which is where the custom-cert job runs. Under Docker Swarm, mount it as a Swarm SECRET, never as a config.",
+      "id": "default-server-ssl-key",
+      "label": "Default server key path",
+      "regex": "^(/[\\w. \\-]+)*/?$",
+      "type": "text"
+    },
+    "DEFAULT_SERVER_SSL_CERT_DATA": {
+      "context": "global",
+      "default": "",
+      "help": "Certificate data of the DEFAULT SERVER, encoded in base64 or plaintext PEM format. Used only when DEFAULT_SERVER_SSL_CERT is empty. Leave both empty to keep the internal self-signed certificate.",
+      "id": "default-server-ssl-cert-data",
+      "label": "Default server certificate data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.crt,.cer,.txt"
+    },
+    "DEFAULT_SERVER_SSL_KEY_DATA": {
+      "context": "global",
+      "default": "",
+      "help": "Key data of the DEFAULT SERVER certificate, encoded in base64 or plaintext PEM format. Used only when DEFAULT_SERVER_SSL_KEY is empty. Leave both empty to keep the internal self-signed certificate.",
+      "id": "default-server-ssl-key-data",
+      "label": "Default server key data (base64/plaintext)",
+      "regex": "^.*$",
+      "type": "file",
+      "accept": ".pem,.key,.txt"
     }
   },
   "jobs": [
