@@ -20,7 +20,10 @@ import re
 from pathlib import Path
 
 import pytest
+from importlib import import_module
 from jinja2 import ChainableUndefined, Environment, FileSystemLoader
+
+from Templator import Templator  # type: ignore  (src/common/gen is on the path, see conftest.py)
 
 ROOT = Path(__file__).resolve().parents[3]
 CONFS = ROOT / "src" / "common" / "confs"
@@ -55,10 +58,15 @@ def render(**settings) -> str:
     # `all` is not a setting -- Templator passes the whole config dict under that name and the
     # template iterates it (`{% for k, v in all.items() %}`), so an Undefined there kills the render
     # before it reaches the strip.
-    # Templator injects seven callables; `http.conf` uses exactly one of them, and none of them
-    # gates the strip. Measured rather than assumed -- and notably `import(` is absent, so this
-    # template never reaches the render host's filesystem.
+    # Templator injects seven callables; `http.conf` uses three of them, and none of them gates the
+    # strip. Measured rather than assumed.
     env.globals["normalize_memory_size"] = lambda value: str(value)
+    # `import(` is no longer absent: `http.conf` drops the reserved `default-server` id from its
+    # roster loops and reads it out of `utils/default_server.py` through the same global Templator
+    # injects (`gen/Templator.py:484,487`). The real callables, for the reason the sibling file
+    # states: a stub would let this env render a roster the product never renders.
+    env.globals["import"] = import_module
+    env.globals["has_variable"] = Templator.has_variable
     return env.get_template("http.conf").render({"all": dict(settings), **settings})
 
 

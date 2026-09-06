@@ -77,7 +77,13 @@ function plugin:initialize(id, ctx)
 	self.multiples = {}
 	local value
 	for k, v in pairs(metadata.settings) do
-		value, err = get_variable(k, v.context == "multisite" and self.is_request)
+		-- `self.ctx` is what lets a runner decide WHICH service's settings a plugin resolves.
+		-- Without it `get_variable` falls back to `ngx.var.server_name` (`utils.lua:243`), which is
+		-- the literal `_` inside the default server block -- so the reserved `default-server`
+		-- pseudo-service's settings would never be found. No-op everywhere else: `ctx.bw.server_name`
+		-- is assigned from `var.server_name` (`helpers.lua:344`), so in a service block the two are
+		-- the same string, and in non-request phases `self.ctx` is nil and the fallback is unchanged.
+		value, err = get_variable(k, v.context == "multisite" and self.is_request, self.ctx)
 		if value == nil then
 			-- A setting declared on disk but absent from the generated config means the
 			-- database is out of sync, not that this request failed. Plugins treat a nil

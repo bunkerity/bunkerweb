@@ -2,11 +2,21 @@
     {% set re = import("re") %}
     {% set hosts = [] %}
     {% if MULTISITE == "no" %}
-        {% for host in SERVER_NAME.split() %}
+        {# Same filter as the multisite branch below, and needed for the same reason: the reserved
+           `default-server` id is not a host and must never reach a generated `Host` exclusion
+           regex. Multisite-only feature, so on this branch the id can only arrive from a config
+           that predates the guards or from an environment variable -- both of which reach here. #}
+        {# ... but never down to NOTHING: `Templator` KEEPS the id in a single-site `SERVER_NAME`
+           when it is the ONLY name, because it is then the operator's own service (the reserved
+           row is multisite-only, and `config_read` keeps a non-`wizard` row on purpose). Filtering
+           it here anyway would empty `hosts` and drop the whole exclusion below, so the challenge
+           page of the one host this deployment serves would meet the CRS rules it must skip. #}
+        {% set kept = SERVER_NAME.split() | reject("equalto", import("default_server").DEFAULT_SERVER_ID) | list %}
+        {% for host in kept or SERVER_NAME.split() %}
             {% set _ = hosts.append(re.escape(host.lower())) %}
         {% endfor %}
     {% else %}
-        {% for server_name in SERVER_NAME.split() %}
+        {% for server_name in SERVER_NAME.split() | reject("equalto", import("default_server").DEFAULT_SERVER_ID) %}
             {% if all[server_name + "_USE_ANTIBOT"] != "no" or all[server_name + "_WORKFLOWS_HAS_CHALLENGE"] == "yes" %}
                 {% for host in all[server_name + "_SERVER_NAME"].split() %}
                     {% set _ = hosts.append(re.escape(host.lower())) %}

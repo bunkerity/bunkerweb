@@ -31,6 +31,9 @@ from pathlib import Path
 from shutil import which
 
 import pytest
+from importlib import import_module
+
+from Templator import Templator  # type: ignore  (src/common/gen is on the path, see conftest.py)
 from jinja2 import Environment, FileSystemLoader
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -55,6 +58,14 @@ DEFAULTS = {
     "DENY_HTTP_STATUS": "444",
     "all": {"HTTP_PORT": "8080", "HTTPS_PORT": "8443"},
     "resolve_ssl_ecdh_curve": lambda value: value,
+    # The SAME callable Templator injects (`gen/Templator.py:487`), not a stub: `default-server-http.conf`
+    # reads the reserved id and the curated plugin subset out of `utils/default_server.py` through it,
+    # and a lookalike that returned a hand-typed list would render an allowlist this file invented.
+    "import": import_module,
+    # Same rule, second callable: `default-server-http.conf` includes the ui plugin's fragment,
+    # which asks `has_variable(all, "USE_UI", "yes")` whether the bootstrap UI belongs in the
+    # default server.
+    "has_variable": Templator.has_variable,
 }
 
 

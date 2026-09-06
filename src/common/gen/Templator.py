@@ -27,6 +27,12 @@ if deps_path not in sys_path:
 from common_utils import effective_cpu_count  # type: ignore
 from logger import getLogger  # type: ignore
 from common_utils import get_integration  # type: ignore
+from default_server import (  # type: ignore
+    DEFAULT_SERVER_ID,
+    DEFAULT_SERVER_STREAM_TLS_SETTINGS,
+    blocked_stream_ports,
+    default_server_stream_listeners,
+)
 from ports import (  # type: ignore
     HTTPS_PORT_SETTING,
     HTTP_PORT_SETTING,
@@ -375,6 +381,54 @@ class Templator:
         self._full_config = full_config
         self._custom_undefined = create_custom_undefined_class(default_config)
 
+        # The reserved pseudo-service is MULTISITE-ONLY (PO ruling 2026-09-06), and single-site is
+        # not merely a mode where the id is unused: it renders ONE block from the WHOLE SERVER_NAME
+        # string (`_render_server` keeps `self._config`, so `server_name {{ SERVER_NAME }};` prints
+        # it verbatim), which would hand the operator's single service a hostname nobody asked for
+        # and put the id in every roster a template builds from SERVER_NAME. `config_read` already
+        # keeps it out of the roster it builds; this is the guard for the environment-variable path
+        # (`gen/main.py --variables` -> `Configurator`) and for a Templator built by hand.
+        #
+        # In __init__ rather than in `render()` because the stream-port election below reads
+        # `_service_configs()`, which keys on the same string.
+        #
+        # Multisite is untouched: the id belongs in SERVER_NAME there (the stream-port election
+        # reads it back) and the templates that iterate the roster filter it themselves. The general
+        # caller-independent strip is wave 13, lane TS-1.
+        #
+        # The strip NEVER empties SERVER_NAME. Under MULTISITE=no the reserved pseudo-service does
+        # not exist -- the seeding stands down and `config_read` strips the row from the roster ONLY
+        # when its method is the reserved one -- so a `default-server` that reaches here as the ONLY
+        # name can only be an operator's own service, and dropping it renders zero server blocks:
+        # the deployment serves nothing at all, with one log line as the only signal. That path is
+        # not hypothetical, it is the ordinary scheduler one (`push-configs.py` -> `gen/main.py`
+        # with no `--variables` -> `db.get_non_default_settings()`), which is exactly the reader
+        # `config_read` was made method-aware for. Keeping the name is strictly better than an
+        # outage: the id is only reserved as a service id, and nothing else in a single-site render
+        # gives it a second meaning.
+        if config.get("MULTISITE", "no") != "yes":
+            declared = str(config.get("SERVER_NAME", "")).split()
+            names = [server for server in declared if server != DEFAULT_SERVER_ID]
+            if names and len(names) != len(declared):
+                # Never silently: dropping a name changes which hostnames are served. Not reachable
+                # through a shipped integration (both `gen/main.py --variables` call sites hand it a
+                # SERVER_NAME they built themselves), but a hand-invoked generator deserves to be
+                # told rather than to wonder where a hostname went.
+                logger.warning(
+                    f"{DEFAULT_SERVER_ID!r} is the reserved default server and is a MULTISITE-only feature: dropped it from "
+                    f"SERVER_NAME because MULTISITE is not 'yes'. Rendering: {' '.join(names)}"
+                )
+                for target_config in (self._config, self._full_config):
+                    if "SERVER_NAME" in target_config:
+                        target_config["SERVER_NAME"] = " ".join(names)
+            elif declared and not names:
+                logger.warning(
+                    f"{DEFAULT_SERVER_ID!r} is the only server name of this single-site deployment, so it is KEPT and served as "
+                    "usual: the reserved default server is a MULTISITE-only feature, it does not exist here, and dropping the "
+                    "only name would render no server block at all -- the site would answer nothing. Please rename that service: "
+                    f"{DEFAULT_SERVER_ID!r} has been a reserved service name since 1.7 and will collide if you switch MULTISITE on."
+                )
+
         if config.get("MULTISITE", "no") == "yes":
             server_names = config.get("SERVER_NAME", "www.example.com").strip().split()
             self._server_prefixes = frozenset(f"{s}_" for s in server_names)
@@ -460,6 +514,45 @@ class Templator:
         self._all_http_ports = union_ports(self._full_config, service_configs, HTTP_PORT_SETTING)
         self._all_https_ports = union_ports(self._full_config, service_configs, HTTPS_PORT_SETTING)
 
+        # The stream default server (PO ruling 6). Elected HERE for the same reason as
+        # STREAM_REUSEPORT_PORTS above: `stream.conf` only ever sees the reserved service's own
+        # settings, and deciding which of its ports may carry a `default_server` needs every
+        # service's stream ports at once. A port a service declares is dropped and logged --
+        # without SNI the default server would WIN on that addr:port and steal its traffic.
+        # A GLOBAL DEFAULT_SERVER_STREAM_PORTS reaches this too, by ordinary multisite inheritance;
+        # `blocked_stream_ports` is what keeps that from being dangerous as well as surprising.
+        #
+        # Gated on MULTISITE because the stream default server is part of the multisite-only
+        # feature, and this is the accurate guard rather than a consequence of the SERVER_NAME strip
+        # above: single-site keys `_service_configs()` on the whole SERVER_NAME string, so a
+        # deployment whose only name IS the reserved id (kept, see __init__) would hand the election
+        # the WHOLE global configuration as if it were the reserved service's own -- and a global
+        # DEFAULT_SERVER_STREAM_PORTS would open listeners the ruling says cannot exist here.
+        if self._config.get("MULTISITE", "no") == "yes":
+            (
+                self._default_server_stream_ports,
+                self._default_server_stream_ssl_ports,
+                default_server_stream_refused,
+                default_server_stream_orphan_ssl,
+            ) = default_server_stream_listeners(service_configs, blocked_stream_ports(self._full_config, service_configs))
+        else:
+            self._default_server_stream_ports, self._default_server_stream_ssl_ports = [], []
+            default_server_stream_refused, default_server_stream_orphan_ssl = {}, []
+        for port, owner in default_server_stream_refused.items():
+            logger.warning(
+                f"Default server stream port {port} is dropped: service {owner} already listens on it. "
+                "Without SNI the default server would win on that address:port and answer instead of the service."
+            )
+        # The generation-time half of the subset rule both save surfaces enforce. A pair that got
+        # here another way (env file, autoconf label, direct write) is not refusable any more --
+        # the config is already stored -- so the TLS switch is dropped and the reason is said out
+        # loud, because the operator's mental model is "that port is TLS" and it silently is not.
+        for port in default_server_stream_orphan_ssl:
+            logger.warning(
+                f"Default server stream SSL port {port} is dropped: it is not in DEFAULT_SERVER_STREAM_PORTS, "
+                "and the default server has no listener there to serve over TLS."
+            )
+
         self._report_port_issues(service_configs)
 
         self._base_template_vars = {
@@ -482,13 +575,20 @@ class Templator:
         _ssl_ecdh_curve_resolution_logged = False
         if self._uses_auto_ssl_ecdh_curve():
             resolve_ssl_ecdh_curve("auto")
+
         self._render_global()
+        # Already stripped of the reserved id in __init__ when this is not multisite -- EXCEPT when
+        # it is the only name there, which __init__ deliberately keeps rather than render no block.
         server_name = self._config.get("SERVER_NAME", "www.example.com").strip()
         # an empty SERVER_NAME renders no server at all, like multisite already does, instead of an
         # empty server_name directive that NGINX refuses
         servers = [server_name] if server_name else []
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = server_name.split()
+            # The reserved pseudo-service renders into the default server block (_render_global
+            # above), never into a server block of its own -- http.conf and stream.conf drop it from
+            # their `map_servers` loops for the same reason, and rendering a sites directory nothing
+            # includes would only be dead output on every reload.
+            servers = [server for server in server_name.split() if server != DEFAULT_SERVER_ID]
 
         effective_cpus = effective_cpu_count()
         if len(servers) >= effective_cpus * 2:
@@ -794,10 +894,68 @@ class Templator:
         # Derived, never settings: set after update() so no configuration key can shadow them.
         template_vars["ALL_HTTP_PORTS"] = self._all_http_ports
         template_vars["ALL_HTTPS_PORTS"] = self._all_https_ports
+        # Derived the same way and for the same reason: `stream.conf` cannot compute these itself.
+        template_vars["DEFAULT_SERVER_STREAM_PORTS_RENDER"] = self._default_server_stream_ports
+        template_vars["DEFAULT_SERVER_STREAM_SSL_PORTS_RENDER"] = self._default_server_stream_ssl_ports
+
+        default_server_vars = self._default_server_template_vars(template_vars)
+        # `stream.conf` is an ordinary GLOBAL template, so it renders with `template_vars` and never
+        # sees the reserved service's own values -- but the TLS parameters its default block prints
+        # belong to the `ssl` plugin, which IS on the Default server page. Handed down derived, the
+        # way the port lists above are, so the two halves of one page's settings cannot diverge.
+        template_vars["DEFAULT_SERVER_TLS_RENDER"] = {
+            key: default_server_vars.get(key, template_vars.get(key, "")) for key in DEFAULT_SERVER_STREAM_TLS_SETTINGS
+        }
 
         for template in templates:
-            self._render_template(template, template_vars)
+            self._render_template(template, default_server_vars if self._is_default_server_template(template) else template_vars)
         logger.debug(f"Global rendering completed in {perf_counter() - global_start:.3f}s")
+
+    @staticmethod
+    def _is_default_server_template(template: str) -> bool:
+        """Templates that render INTO the default server block.
+
+        Two shapes, one block: the block itself (``default-server-http.conf``, a root template and
+        therefore in the ``global`` category) and the plugin fragments it includes
+        (``default-server-http/*.conf``).
+        """
+        return template == "default-server-http.conf" or template.startswith("default-server-http/")
+
+    def _default_server_template_vars(self, global_vars: Dict[str, Any]) -> Dict[str, Any]:
+        """The variables the default server block renders with.
+
+        The default server used to be rendered from the GLOBAL configuration alone, so it had no
+        certificate, error pages or headers of its own. It is now rendered from the reserved
+        ``default-server`` pseudo-service's configuration -- the same merge every service block gets
+        (:meth:`_get_server_config`), which is what makes its page in the UI mean anything.
+
+        Falls back to the caller's global variables, unchanged, whenever the reserved service is not
+        there: non-multisite, a database that predates the seeding, and every unit test that builds a
+        Templator by hand. That fallback is the pre-existing behaviour byte for byte.
+
+        The Jinja environment is the GLOBAL one, undefined class included: `create_custom_undefined_class`
+        resolves an undefined name to its DEFAULT, and a setting's default is global whatever the
+        context, so a per-service class would answer identically -- and `_render_template` keys its
+        environment cache on one literal string shared with the per-server renders, so building a
+        second class here would hand the wrong defaults to every service block.
+
+        ``all`` deliberately stays the FULL global configuration rather than the per-service merge:
+        ``has_variable(all, "USE_UI", "yes")`` (``core/ui/.../ui.conf:1``) scans every service's keys
+        to decide whether the bootstrap UI belongs in the default server, and a per-service ``all``
+        would only ever see the reserved row.
+        """
+        if self._config.get("MULTISITE", "no") != "yes" or DEFAULT_SERVER_ID not in self._server_specific_config:
+            return global_vars
+
+        config = self._get_server_config(DEFAULT_SERVER_ID, self._global_only_config, self._server_specific_config[DEFAULT_SERVER_ID])
+
+        template_vars = self._base_template_vars.copy()
+        template_vars["all"] = self._full_config
+        template_vars.update(config)
+        # Derived, never settings: set after update() so no configuration key can shadow them.
+        template_vars["ALL_HTTP_PORTS"] = self._all_http_ports
+        template_vars["ALL_HTTPS_PORTS"] = self._all_https_ports
+        return template_vars
 
     def _render_server_batch(self, servers: List[str]) -> None:
         """Render templates for a batch of servers.
