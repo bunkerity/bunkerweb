@@ -729,7 +729,17 @@ api.global.POST["^/confs$"] = function(self)
 		-- pushswap.clear() deletes the non-reserved entries by name; it is used instead of
 		-- `rm -rf <destination>/*` so that keeping the parked originals in .bw-trash does not
 		-- depend on the unstated fact that a shell glob skips dotfiles.
-		local cleared, clear_err = pushswap.clear(destination)
+		-- DEV-2b5 residual 8. pcall, for the same reason `pushswap.swap` above is wrapped: this is
+		-- the one post-lock call into that module that was bare, and it runs on the recovery path,
+		-- where the tree is already half applied. A raise here -- `list_entries` on a destination
+		-- whose popen returned nothing usable, a concatenation against a nil -- would unwind past
+		-- `fail()` and leak the key, and every push and reload on this instance would then answer
+		-- 503 for the rest of the 900 s TTL, on top of a configuration that is neither old nor new.
+		local ran_clear, cleared, clear_err = pcall(pushswap.clear, destination)
+		if not ran_clear then
+			-- pcall's second return is the error; `clear_err` never got one.
+			cleared, clear_err = false, "the clear raised: " .. tostring(cleared)
+		end
 		local restored = cleared and execute("cp -R " .. backup .. "/. " .. destination .. "/") == 0
 		if not restored then
 			logger:log(
@@ -745,7 +755,13 @@ api.global.POST["^/confs$"] = function(self)
 					.. " -- where the originals were kept is in the swap error: "
 					.. tostring(swap_err)
 			)
-			return fail("swap failed and the restore failed too : " .. tostring(swap_err))
+			return fail(
+				"swap failed and the restore failed too : "
+					.. tostring(swap_err)
+					.. " (restore: "
+					.. tostring(clear_err or "copy failed")
+					.. ")"
+			)
 		end
 		logger:log(
 			ERR,

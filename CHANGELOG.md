@@ -137,6 +137,7 @@
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 - [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.
 - [BUGFIX] `ui`: the reserved default server is no longer creatable from the wizard, counted as an online service, or offered as an attachment target.
+- [BUGFIX] `api`: a Lua error while restoring a failed configuration push no longer leaks the swap lock, which answered 503 for the next 15 minutes.
 - [BUGFIX] `api`: the swap lock is released only by the request that took it, so an expired holder can no longer drop its successor's fresh lock.
 - [BUGFIX] `api`: a full `internalstore` zone is reported as such instead of as a configuration swap in progress, a swap an operator could never find.
 - [BUGFIX] `api`: rescue directories left by a failed push are reaped after a week, instead of accumulating and being copied into every later backup.
