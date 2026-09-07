@@ -15,6 +15,26 @@ log() {
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
 }
 
+# The project scoping above is what stops this stack JOINING a live `tests/scripts/test.sh` run.
+# It does not stop the two colliding: both want 10.20.30.0/24 for bw-universe, and both publish
+# :80/:443 through their instance. Compose fails on the subnet, but only after pulling images and
+# only with "Pool overlaps with other one on this address space" -- which reads as a Docker problem
+# rather than as "another lane holds the harness". `tests/AGENTS.md` and the wave RULES both say
+# this script counts as harness use; this is the mechanism behind that sentence, because a rule
+# with no mechanism is a wish.
+#
+# Names, not the `bw-universe` network: the harness tears its networks down between categories but
+# the containers are what actually hold the ports. `--filter name=` is a substring match, hence the
+# anchors. `bunkerweb-linux` (`tests/linux/docker-compose.yml:7`) is in the list for the same reason
+# and is the worst of them: `network_mode: host`, so it holds :80/:443/:3306 on the host directly.
+harness_containers="$(docker ps --filter 'name=^/(bunkerweb|bunkerweb-linux|bw-scheduler|bw-api|bw-worker|bunkerweb-all-in-one)$' --format '{{.Names}}' 2>/dev/null || true)"
+if [ -n "$harness_containers" ]; then
+  log "Refusing to start: a BunkerWeb stack is already running and this script would collide with it"
+  log "  running: $(echo "$harness_containers" | tr '\n' ' ')"
+  log "  stop it first, or wait for the lane holding the test harness to finish"
+  exit 1
+fi
+
 # Version comparison function for regular, beta, and rc versions
 version_lt() {
   # For identical versions, compare the full strings
