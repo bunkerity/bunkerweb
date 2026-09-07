@@ -161,6 +161,21 @@ def upload_configs(
     return JSONResponse(status_code=status_code, content=content)
 
 
+# `save_custom_configs` answers with one overloaded string. Lines of this shape are accumulated
+# while the payload is written and returned AFTER the commit -- the write landed and the caller is
+# only being told that one referenced service does not exist. Anything else (a read-only database,
+# the empty-payload data-loss guard) means nothing was written at all. Port of the classification
+# dev `abb60b1ea` put in the scheduler: on 1.7 the scheduler reads this through HTTP, so the split
+# has to happen here, where the string still exists.
+_ADVISORY_PREFIX = "Service "
+_ADVISORY_SUFFIX = " not found, please check your config"
+
+
+def _is_advisory_only(err: str) -> bool:
+    lines = [line for line in err.splitlines() if line.strip()]
+    return bool(lines) and all(line.startswith(_ADVISORY_PREFIX) and line.endswith(_ADVISORY_SUFFIX) for line in lines)
+
+
 @router.put("/bulk", dependencies=[Depends(guard)])
 def bulk_save_custom_configs(req: BulkSaveCustomConfigsRequest) -> JSONResponse:
     """Bulk save custom configs for a given method.
@@ -170,8 +185,12 @@ def bulk_save_custom_configs(req: BulkSaveCustomConfigsRequest) -> JSONResponse:
     """
     db = get_db()
     if err := db.save_custom_configs(req.custom_configs, req.method, changed=req.changed, disable_cleanup=req.disable_cleanup):
-        code = 400 if "read-only" in err else 500
-        return JSONResponse(status_code=code, content={"status": "error", "message": err})
+        if _is_advisory_only(err):
+            # The rows are already committed; this is a report on the write, not a refusal of it.
+            return JSONResponse(status_code=200, content={"status": "success", "message": err})
+        # A refusal is a 4xx, never a 5xx: `base_api_client` discards the body of a 5xx, so a 500
+        # here reached the caller as the bare string "API returned 500" with the reason gone.
+        return JSONResponse(status_code=400, content={"status": "error", "message": err})
     return JSONResponse(status_code=200, content={"status": "success"})
 
 

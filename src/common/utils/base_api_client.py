@@ -40,6 +40,26 @@ def _cache_key(path: str, kwargs: dict):
     return (path, tuple(sorted((key, tuple(value) if isinstance(value, list) else value) for key, value in params.items())))
 
 
+def _error_detail(resp) -> str:
+    """The reason an error response states, or "" when it states none.
+
+    The API answers errors as `{"status": "error", "message": ...}`; FastAPI's own validation and
+    dependency failures answer `{"detail": ...}`. Both are read here so one shape does not silently
+    fall back to the raw body.
+    """
+    try:
+        body = resp.json()
+    except Exception:
+        return ""
+    if not isinstance(body, dict):
+        return ""
+    for key in ("message", "msg", "detail"):
+        value = body.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
+
 class ApiClientError(Exception):
     """API returned a 4xx error."""
 
@@ -165,14 +185,13 @@ class BaseApiClient:
         if resp.status_code >= 500:
             msg = resp.text[:500] if resp.text else f"HTTP {resp.status_code}"
             log(f"API returned {resp.status_code} ({method} {path}): {msg}")
-            raise ApiUnavailableError(f"API returned {resp.status_code}")
+            # Carry the reason when the body actually states one. The status alone is what a
+            # caller used to get, and "API returned 500" is not something an operator can act on
+            # -- it hid, among others, every message `PUT /configs/bulk` reported a write with.
+            raise ApiUnavailableError(f"API returned {resp.status_code}: {detail}" if (detail := _error_detail(resp)) else f"API returned {resp.status_code}")
 
         if resp.status_code >= 400:
-            try:
-                body = resp.json()
-                msg = body.get("message", body.get("msg", resp.text[:500]))
-            except Exception:
-                msg = resp.text[:500] if resp.text else f"HTTP {resp.status_code}"
+            msg = _error_detail(resp) or (resp.text[:500] if resp.text else f"HTTP {resp.status_code}")
             raise ApiClientError(msg, status_code=resp.status_code)
 
         # 204 No Content or empty body

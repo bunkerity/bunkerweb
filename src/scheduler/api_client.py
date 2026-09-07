@@ -123,9 +123,17 @@ class SchedulerApiClient(BaseApiClient):
         return configs
 
     def save_custom_configs(self, configs: list, method: str, changed: bool = False) -> str:
-        """Bulk save custom configs. Returns empty string on success."""
+        """Bulk save custom configs. Returns empty string when the write landed.
+
+        A non-empty return means the write was REFUSED and nothing was stored -- the caller must
+        not regenerate over what is still only on disk. The advisory the database reports *after
+        committing* ("Service <x> not found, please check your config") is not a refusal, so the
+        API answers it 200 and it is logged here rather than handed back as an error.
+        """
         try:
-            self._put("/configs/bulk", json={"custom_configs": configs, "method": method, "changed": changed})
+            payload = self._put("/configs/bulk", json={"custom_configs": configs, "method": method, "changed": changed})
+            if message := (payload or {}).get("message"):
+                self._logger.warning(f"Custom configs were saved with a warning: {message}")
             return ""
         except (ApiClientError, ApiUnavailableError) as e:
             return e.message
