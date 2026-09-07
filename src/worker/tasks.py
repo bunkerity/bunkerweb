@@ -190,6 +190,39 @@ from jobs import (  # type: ignore # noqa: E402
 
 RELOAD_LOCK_KEY = "bw:reload_pending"
 RELOAD_DIRTY_KEY = "bw:reload_dirty"
+# A push that is owed but was not delivered: no instance was reachable when a job asked for one, or
+# the push itself failed. Distinct from RELOAD_DIRTY_KEY, which only says "more files landed while
+# this reload was running" and is therefore only ever read by the holder of the reload lock -- with
+# nobody holding it, a dirty flag just expires and the material is dropped. This one carries across
+# jobs and across worker children (a child dies after every task), so it lives in the broker with no
+# expiry and is cleared only once a push and a reload have both succeeded -- and then only if it is
+# still the same debt. The value is a token minted by whoever raised it, never a bare flag: the
+# settle is SETTLE_OWED_IF_UNCHANGED below, so a debt another job raised while this push was
+# building its tar survives a push that cannot have carried it.
+#
+# Broker-global while /var/cache/bunkerweb is per-container, exactly like the pending-ack set: with
+# more than one worker replica and no shared cache volume, the replica that settles the debt pushes
+# its OWN tree and clears the marker anyway. See "Known limit" in src/worker/AGENTS.md -- the same
+# shared-cache requirement covers both.
+RELOAD_OWED_KEY = "bw:reload_owed"
+# How many carry attempts that debt has already cost, so a push that keeps failing cannot reload the
+# whole fleet on every job forever. `apis` stays truthy while a push fails -- a failed send_files
+# marks nobody down -- and `send_files` gzip-tars the WHOLE cache tree per attempt, so retrying at
+# full rate against one stuck instance (send_to_apis is all-or-nothing) pins the storm on the entire
+# fleet. Same shape, same numbers and same "this needs an operator" escalation as the scheduler's
+# LOADING_FAST_RETRIES / *_SLOW_RETRY_EVERY pair (scheduler/main.py:569-583, :639-646). The debt is
+# kept in the broker until a push settles it -- dropping it would be the silent loss this whole
+# change exists to close -- only retried slowly.
+#
+# One narrowing to know about: `_mark_reload_owed` resets this counter, so the slow window is only
+# guaranteed while the fleet stays reachable. A deployment that flaps -- some jobs finding no
+# instance at all, others finding one whose push then fails -- resets the count on every no-instance
+# job and can stay in the fast window indefinitely, never reaching the "this needs an operator"
+# escalation. That trade is deliberate: the common case by far is a cold boot, where inheriting a
+# stale count would delay the FIRST delivery by ~14 job runs.
+RELOAD_OWED_ATTEMPTS_KEY = "bw:reload_owed_attempts"
+RELOAD_OWED_FAST_RETRIES = 3
+RELOAD_OWED_SLOW_RETRY_EVERY = 20
 # Keep aligned with common/core/jobs/jobs/push-configs.py.
 RELOAD_TIMEOUT = (5, 30)
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
@@ -214,6 +247,17 @@ if redis.call('exists', KEYS[2]) == 1 then return 0 end
 redis.call('del', KEYS[1])
 return 1
 """
+# Settling the debt is a compare-and-delete for the same reason releasing the lock is a
+# compare-and-set. A job that found no instance while this push was building its tar wrote a debt
+# this tar cannot possibly carry; a blind `del` erases it, RELEASE_IF_CLEAN then sees a clean run,
+# and that job's material is dropped in silence -- the exact defect the marker exists to close, in a
+# narrower window.
+SETTLE_OWED_IF_UNCHANGED = """
+if redis.call('get', KEYS[1]) ~= ARGV[1] then return 0 end
+redis.call('del', KEYS[1])
+return 1
+"""
+
 
 
 def _publish_deferred_acks(broker_url: str, logger) -> None:
@@ -313,6 +357,68 @@ def _apply_deferred_acks(client, claimed, logger) -> None:
         logger.info(f"Acknowledged {entry.get('keys')} now that the push reached the instances")
 
 
+def _mark_reload_owed(broker_url: str, logger) -> None:
+    """Remember that the cache tree still has to be pushed, for the next run that can push it.
+
+    The value is a fresh token, not a flag, so that whoever settles the debt can tell it apart from
+    one raised afterwards (SETTLE_OWED_IF_UNCHANGED). Overwriting an existing token is deliberate:
+    the debt stands either way, and a token an in-flight push has already claimed must stop matching
+    -- that push cannot have carried what this job just wrote.
+
+    The attempt budget goes with it. It counts consecutive failures to *settle* a debt, and this
+    branch never attempted one, so a fresh debt must not inherit an older one's backoff and start
+    life in the slow window (~14 job runs of delay on a cold boot).
+    """
+    try:
+        client = _broker_client(broker_url)
+        client.set(RELOAD_OWED_KEY, uuid4().hex)
+        client.delete(RELOAD_OWED_ATTEMPTS_KEY)
+    except BaseException as exc:
+        # The warning above already told the operator; losing the marker only costs the recovery,
+        # and the job's own change flags (if it raised any) are still pending for the scheduler.
+        logger.error(f"Could not record that a cache push is still owed: {exc}")
+
+
+def _reload_is_owed(broker_url: str, logger) -> bool:
+    """Whether an earlier run's push never landed, so this run should carry it.
+
+    Counts the consultation before answering, so a debt that keeps failing to settle backs off
+    instead of reloading the fleet on every job: the first RELOAD_OWED_FAST_RETRIES carries cover the
+    ordinary cases (an instance that came up a moment ago, a transient refusal), and after that one
+    carry every RELOAD_OWED_SLOW_RETRY_EVERY consultations keeps a genuinely broken push -- a bad
+    custom config, one wedged instance in an otherwise healthy fleet -- from re-tarring and
+    re-shipping the whole cache tree twice a minute forever.
+
+    What it counts is *consultations*, not settlement attempts: a carry that then loses the reload
+    lock returns from `_request_reload_debounced` without pushing anything and has still spent a unit
+    of budget. On a busy fleet that costs latency on the recovery, never the debt itself -- the
+    marker stands until a push settles it.
+
+    Fails CLOSED on a broker error: a push we cannot prove is owed is not worth reloading the whole
+    fleet for, and the next run asks again.
+    """
+    try:
+        client = _broker_client(broker_url)
+        if not client.exists(RELOAD_OWED_KEY):
+            return False
+        attempts = int(client.incr(RELOAD_OWED_ATTEMPTS_KEY))  # type: ignore[arg-type]
+    except BaseException as exc:
+        logger.warning(f"Could not tell whether a cache push is owed: {exc}")
+        return False
+
+    if attempts <= RELOAD_OWED_FAST_RETRIES:
+        return True
+    if attempts % RELOAD_OWED_SLOW_RETRY_EVERY == 0:
+        logger.error(
+            f"A cache push has been owed for {attempts} job runs with an instance reachable the whole time. "
+            "The push or the reload is failing without marking any instance down -- a broken custom config or one "
+            "wedged instance would do this -- so retrying on every job would re-ship the whole cache tree each time; "
+            "carrying it once now, but this needs an operator."
+        )
+        return True
+    return False
+
+
 def _push_service_count(logger=None) -> int:
     """How many services the cache archive covers.
 
@@ -364,6 +470,9 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # this push carries them. Anything raised from here on earns another round.
             client.delete(RELOAD_DIRTY_KEY)
             claimed_acks = client.smembers(ACK_PENDING_KEY)
+            # Claimed with them, and for the same reason: this push carries what was owed when the
+            # tar was built, and nothing raised after it.
+            claimed_owed = client.get(RELOAD_OWED_KEY)
 
             # DEV-2b3 (port of dev 462c1e851): the archive is the whole cache tree, so its size
             # tracks the number of services -- a fleet with a hundred of them regularly needs more
@@ -380,6 +489,15 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # The material is on the instances and they have reloaded: now, and only now, is a
             # change that shipped with it genuinely applied.
             _apply_deferred_acks(client, claimed_acks, logger)
+            # Whatever was owed when this round started left with this push: it ships the whole
+            # tree, so one successful round settles every job whose own push was skipped or failed
+            # earlier. Compare-and-delete, never a blind one -- a debt raised after the tar was
+            # built belongs to material this push did not carry. The attempt budget is reset either
+            # way: it counts consecutive failures to settle, not lifetime ones, and a debt that
+            # outlived this round is a new debt entitled to its own fast window.
+            if claimed_owed is not None:
+                client.eval(SETTLE_OWED_IF_UNCHANGED, 1, RELOAD_OWED_KEY, claimed_owed)
+            client.delete(RELOAD_OWED_ATTEMPTS_KEY)
 
             released = bool(client.eval(RELEASE_IF_CLEAN, 2, RELOAD_LOCK_KEY, RELOAD_DIRTY_KEY))
             if released:
@@ -390,8 +508,20 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
         logger.warning(f"Still dirty after {MAX_RELOAD_ROUNDS} reload rounds, leaving it to the next job")
     finally:
         # The bound was hit, or the push raised. Either way the flag stays up, and the next job to
-        # finish takes the lock and carries whatever is still waiting.
+        # finish takes the lock and carries whatever is still waiting -- but "the next job" only
+        # used to mean a job that exits 1, so a failed push waited for the next *change* instead of
+        # the next run. The owed flag makes any later run carry it.
         if not released:
+            # Owed BEFORE the lock goes, not after: release first and another worker can take the
+            # lock, push, clear the debt, and then have this frame raise it again behind it -- one
+            # fleet reload nobody owed. A new token, so the next push settles this debt and not an
+            # older one it never carried.
+            try:
+                client.set(RELOAD_OWED_KEY, uuid4().hex)
+            except BaseException as exc:
+                # Every other broker write here says so when it fails; this one was the last silent
+                # path left in a change whose whole subject is silent paths.
+                logger.error(f"Could not record that a cache push is still owed after a failed reload: {exc}")
             client.delete(RELOAD_LOCK_KEY)
 
 
@@ -447,7 +577,6 @@ def execute_job(self, job_data: dict) -> dict:
         }
 
     executor = JobExecutor(logger)
-    apis = _get_apis(logger)
 
     logger.info(f"[{run_id}] Starting job {plugin}/{name}" + (f" (delivery {attempt})" if attempt > 1 else ""))
 
@@ -525,6 +654,43 @@ def execute_job(self, job_data: dict) -> dict:
     end = datetime.now().astimezone()
     duration = (end - start).total_seconds()
 
+    # Resolved here rather than before the run: a job takes seconds to minutes, and an instance
+    # that registers while it runs can carry this very push. Asking beforehand answered for a
+    # fleet that no longer exists -- on a cold boot, one that did not exist yet. Guarded because it
+    # now runs after the work: a raise here used to cost a dispatch that had done nothing, and would
+    # now cost the run row and re-run a job that already ran.
+    resolution_failed = False
+    try:
+        apis = _get_apis(logger)
+    except BaseException as exc:
+        logger.error(f"[{run_id}] Could not resolve the BunkerWeb instances to reload: {exc}")
+        apis = None
+        resolution_failed = True
+
+    if ret == 1 and not apis:
+        # The job wrote its output and asked for it to be shipped, and there is nobody to ship it
+        # to. Left silent (which it was), the cache stays on the worker, the instances keep serving
+        # the previous configuration, and the run records as a plain success -- the operator has
+        # nothing to grep for. Say it, record it as a deferral, and remember the push is owed so the
+        # next run that does have an instance carries it.
+        #
+        # "Nobody to ship it to" and "the resolution itself broke" are different operator problems,
+        # so they do not get the same words. Note how narrow the second one is: a database that
+        # *refuses* never reaches it -- `_get_apis` swallows that inside its own try, falls through
+        # to BUNKERWEB_INSTANCES and returns None, so a refusing DB is still reported as an empty
+        # fleet (deliberate: from here the two are indistinguishable, and the operator's next step
+        # is the same). `resolution_failed` means `_get_apis` itself raised: a failed
+        # `from API import API`, a malformed instance row `API.from_instance()` chokes on, an
+        # `ApiCaller()` that will not construct.
+        said, recorded = (
+            ("the BunkerWeb instances could not be resolved", "could not resolve any reachable instance")
+            if resolution_failed
+            else ("no BunkerWeb instance is reachable yet", "no reachable instance yet")
+        )
+        logger.warning(f"[{run_id}] Job {plugin}/{name} requested a reload but {said}; deferring its cache push to the next job that completes with one")
+        _mark_reload_owed(broker_url, logger)
+        deferral_reason = "; ".join(filter(None, (deferral_reason, f"{recorded} -- reload deferred")))
+
     # The executor returns a bare 2 for a job it could not even load or import; the reason it
     # logged is the only description of that failure there is.
     if not success and error is None:
@@ -545,9 +711,14 @@ def execute_job(self, job_data: dict) -> dict:
     else:
         logger.warning(f"[{run_id}] Worker database is not initialized, skipping job run persistence")
 
-    if ret == 1 and apis:
+    # `or _reload_is_owed(...)`: the push ships the whole /var/cache/bunkerweb tree, so any run
+    # with a reachable instance can settle what an earlier one could not deliver -- it does not have
+    # to be a run that changed something itself.
+    if apis and (ret == 1 or _reload_is_owed(broker_url, logger)):
         try:
-            logger.info(f"[{run_id}] Job {plugin}/{name} requested reload")
+            logger.info(
+                f"[{run_id}] Job {plugin}/{name} requested reload" if ret == 1 else f"[{run_id}] Carrying a cache push an earlier job could not deliver"
+            )
             _request_reload_debounced(apis, broker_url, logger)
         except Exception as exc:
             logger.error(f"[{run_id}] Cache/reload failed: {exc}")

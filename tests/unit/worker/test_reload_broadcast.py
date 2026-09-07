@@ -26,6 +26,13 @@ class _LockRedis:
         self.keys = dict(held or {})
         self.sets = {"bw:reload_pending_acks": set(pending_acks or ())}
         self.expirations = []
+        # Every TTL the fake was actually asked for, whichever way it was asked. `set(..., ex=)` used
+        # to be accepted and thrown away, which made "this key must never expire" unfalsifiable: the
+        # assertion read `expirations`, a list only `expire()` appends to, so the mutant that ships
+        # the key with a TTL left the test green. Kept apart from `expirations` because that list's
+        # exact contents are asserted elsewhere. Sticky on purpose -- a later `set` without `ex`
+        # does not clear it, where real SET drops the TTL; that can only ever cause a false RED.
+        self.ttls = {}
         self.ops = []
 
     def smembers(self, key):
@@ -47,29 +54,55 @@ class _LockRedis:
         self.sets.setdefault(key, set()).update(members)
         return len(members)
 
+    def get(self, key):
+        self.ops.append(("get", key))
+        return self.keys.get(key)
+
     def set(self, key, value, nx=False, ex=None):
         self.ops.append(("set", key))
         if nx and key in self.keys:
             return None
         self.keys[key] = value
+        if ex is not None:
+            self.ttls[key] = ex
         return True
 
     def delete(self, key):
         self.ops.append(("delete", key))
         return 1 if self.keys.pop(key, None) is not None else 0
 
+    def exists(self, key):
+        self.ops.append(("exists", key))
+        return 1 if key in self.keys else 0
+
+    def incr(self, key):
+        self.ops.append(("incr", key))
+        self.keys[key] = int(self.keys.get(key, 0)) + 1
+        return self.keys[key]
+
     def expire(self, key, ttl):
         self.expirations.append((key, ttl))
+        self.ttls[key] = ttl
 
-    def eval(self, _script, _numkeys, lock, dirty):
+    def eval(self, script, _numkeys, key, arg):
         """redis-py's EVAL -- Lua run by the Redis server, not Python's builtin.
 
-        Stands in for RELEASE_IF_CLEAN: release only while nothing is flagged.
+        Stands in for both scripts `tasks.py` ships: RELEASE_IF_CLEAN (release the lock only while
+        nothing is flagged) and SETTLE_OWED_IF_UNCHANGED (delete the debt only while it is still the
+        token this round claimed).
         """
-        self.ops.append(("eval", lock))
-        if dirty in self.keys:
+        self.ops.append(("eval", key))
+        if script == TASKS.SETTLE_OWED_IF_UNCHANGED:
+            if self.keys.get(key) != arg:
+                return 0
+            # `pop`, not `del`: Redis's DEL on a missing key is a no-op, and raising KeyError here
+            # would pin callers for a failure mode production does not have.
+            self.keys.pop(key, None)
+            return 1
+        assert script == TASKS.RELEASE_IF_CLEAN, "the fake models exactly two scripts; a third would be silently mis-run"
+        if arg in self.keys:
             return 0
-        self.keys.pop(lock, None)
+        self.keys.pop(key, None)
         return 1
 
 

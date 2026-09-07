@@ -384,6 +384,11 @@ class TestFailureReason:
     def test_a_job_that_signalled_a_change_is_not_a_failure(self, stub_runtime, monkeypatch):
         """Exit 1 is "something changed", the success path -- it must not be recorded as a cause."""
         stub_runtime.run = Mock(side_effect=SystemExit(1))
+        # With an instance to ship to, the change is delivered and there is nothing to say about
+        # the run. The fixture's instance-less default is now a deferral in its own right -- see
+        # test_coldboot_reload_deferral.py -- which is a different assertion than this one.
+        monkeypatch.setattr(TASKS, "_get_apis", lambda *_args: Mock())
+        monkeypatch.setattr(TASKS, "_request_reload_debounced", Mock())
 
         call = self._record(monkeypatch)
 

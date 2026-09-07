@@ -105,6 +105,7 @@
 - [BUGFIX] `autoconf`: on Kubernetes, an upgrade that replaced the instance's pod could leave the fleet deadlocked indefinitely instead of just slow to converge — the controller derives an instance's identity from its pod's FQDN, so the new pod is a *different* instance to the database than the one the pending configuration change was queued against; discovery, which would register the new pod and let the push retarget it, was itself gated on that same change finishing first. Instance discovery no longer waits on the scheduler's own apply flags.
 - [FEATURE] `jobs`/`ui`: when `push-configs` deliberately defers because every registered instance is unreachable — waiting for one to come back, not a failure — the Jobs page now shows a distinct "Deferred" status (with the reason in its tooltip) instead of looking identical to an ordinary run that changed nothing, and the dashboard flashes a non-alarming warning banner linking to the Jobs page instead of staying silent while a change sits unapplied.
 - [BUGFIX] `db`: fix a session leak in `save_config`: the multisite global-settings pass parked a lock and a pooled connection in the API process.
+- [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 
 ## v1.6.14~rc1 - 2026/07/??
 
