@@ -463,12 +463,18 @@ def _push_service_count(logger=None) -> int:
     from the env alone left exactly the deployments this timeout is for on the flat floor. Same
     shape as `core/pro/jobs/download-pro-plugins.py`: database first, env second.
     """
-    with suppress(BaseException):
+    try:
         services = get_worker_db().get_services(with_drafts=True)
         if services:
             return len(services)
+        reason = "no service is registered"
+    # NOT `BaseException`: this ran on a worker being shut down, and swallowing the
+    # KeyboardInterrupt/SystemExit that carries the shutdown turned Ctrl-C into a silent
+    # fall-through to the env floor instead of stopping the task.
+    except Exception as e:
+        reason = f"the database could not be read ({e})"
     if logger is not None:
-        logger.debug("Sizing the cache push from SERVER_NAME: no service could be read from the database")
+        logger.debug(f"Sizing the cache push from SERVER_NAME: {reason}")
     return len(os.getenv("SERVER_NAME", "").split())
 
 

@@ -9,6 +9,7 @@ split-container worker has no `SERVER_NAME` of its own, so an env-only count lef
 deployments this budget is for on the floor.
 """
 
+import pytest
 from unittest.mock import Mock, patch
 
 from test_delivery_guarantees import LOGGER, TASKS
@@ -37,6 +38,19 @@ def test_a_database_failure_is_not_a_push_failure(monkeypatch):
 
     with patch.object(TASKS, "get_worker_db", side_effect=RuntimeError("database is locked")):
         assert TASKS._push_service_count(LOGGER) == 0
+
+
+@pytest.mark.parametrize("stopping", [KeyboardInterrupt, SystemExit])
+def test_the_signal_that_stops_the_worker_is_not_swallowed_as_a_database_failure(monkeypatch, stopping):
+    """DEV-2b4 Q3, dev fold-in: this fallback caught `BaseException`, so a worker being shut down
+    mid-sizing had its `KeyboardInterrupt`/`SystemExit` eaten here and carried on with the env
+    floor instead of stopping. The database failure above must still be caught -- both halves, or
+    narrowing this to `Exception` looks the same as deleting the guard."""
+    monkeypatch.delenv("SERVER_NAME", raising=False)
+
+    with patch.object(TASKS, "get_worker_db", side_effect=stopping()):
+        with pytest.raises(stopping):
+            TASKS._push_service_count(LOGGER)
 
 
 def test_the_budget_the_worker_asks_for_grows_with_the_fleet(monkeypatch):
