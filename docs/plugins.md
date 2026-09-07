@@ -151,11 +151,6 @@ The first step is to install the plugin by placing its files inside the correspo
 
 === "Swarm"
 
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
     When using the [Swarm integration](integrations.md#swarm), plugins must be placed in the volume mounted on `/data/plugins` in the scheduler container.
 
     !!! info "Swarm volume"

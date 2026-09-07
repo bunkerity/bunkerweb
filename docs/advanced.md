@@ -167,11 +167,6 @@ You will find more settings about real IP in the [features section](features.md#
 
     === "Swarm"
 
-        !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
         You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services:
 
         ```yaml
@@ -340,11 +335,6 @@ You will find more settings about real IP in the [features section](features.md#
         ```
 
     === "Swarm"
-
-        !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-            **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
         You will need to add the settings to the environment variables of both the BunkerWeb and scheduler services.
 
@@ -1407,11 +1397,6 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Swarm"
 
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
     When using the [Swarm integration](integrations.md#swarm), custom configurations are managed using [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.
@@ -1904,11 +1889,6 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ```
 
 === "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
 
@@ -2419,11 +2399,6 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```
 
 === "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     !!! info "Multisite mode enabled"
         The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
@@ -3107,11 +3082,6 @@ The commonly used variables are:
     ```
 
 === "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     Add the variables to the scheduler service:
 
