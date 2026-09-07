@@ -106,16 +106,16 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.15-rc1
+                            image: bunkerity/bunkerweb:1.6.15-rc2
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.15-rc1
+                            image: bunkerity/bunkerweb-ui:1.6.15-rc2
                             ...
                     ```
 
@@ -171,7 +171,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
             4. **Laden Sie das neue Image herunter**:
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                 ```
 
             5. **Erstellen Sie den Container neu** mit denselben Optionen und verwenden Sie dasselbe `/data`-Volume, dieselben Ports und dieselben Umgebungsvariablen wie zuvor:
@@ -182,7 +182,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                 ```
 
         === "Docker Compose"
@@ -191,7 +191,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                         ...
                 ```
 
@@ -310,20 +310,20 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
             Beispiele:
 
             ```bash
-            # Interaktiv auf 1.6.15~rc1 aktualisieren (fragt nach Sicherung)
-            sudo ./install-bunkerweb.sh --version 1.6.15~rc1
+            # Interaktiv auf 1.6.15~rc2 aktualisieren (fragt nach Sicherung)
+            sudo ./install-bunkerweb.sh --version 1.6.15~rc2
 
             # Nicht-interaktives Upgrade mit automatischer Sicherung in ein benutzerdefiniertes Verzeichnis
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --backup-dir /var/backups/bw-2025-01 -y
 
             # Stilles unbeaufsichtigtes Upgrade (Protokolle unterdrückt) – verlässt sich auf die standardmäßige automatische Sicherung
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 -y -q
 
             # Einen Probelauf (Plan) durchführen, ohne Änderungen anzuwenden
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --dry-run
 
             # Upgrade unter Überspringen der automatischen Sicherung (NICHT empfohlen)
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --no-auto-backup -y
             ```
 
             !!! warning "Überspringen von Sicherungen"
@@ -403,7 +403,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -429,7 +429,7 @@ Aktualisieren Sie alle Web-UI-Replikate gemeinsam: Der Wiederholungsschutz für 
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc2
                         ```
 
                         Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -901,16 +901,16 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.15-rc1
+                        image: bunkerity/bunkerweb:1.6.15-rc2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.15-rc2
                         ...
                 ```
 
@@ -945,7 +945,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `apt upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
@@ -971,7 +971,7 @@ Wir haben eine **Namespace**-Funktion zu den Autoconf-Integrationen hinzugefügt
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc2
                     ```
 
                     Um zu verhindern, dass das BunkerWeb-Paket bei der Ausführung von `dnf upgrade` aktualisiert wird, können Sie den folgenden Befehl verwenden:
