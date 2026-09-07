@@ -2,6 +2,7 @@
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from json import dumps, loads
+from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_, delete, func, or_, select
@@ -609,7 +610,7 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
                 "asn_number": entry["asn_number"],
                 "asn_org": entry["asn_org"],
                 "blocks": entry["blocks"],
-                "top_reason": max(entry["reasons"].items(), key=lambda kv: kv[1])[0],
+                "top_reason": max(entry["reasons"].items(), key=itemgetter(1))[0],
                 # _to_datetime() re-applies UTC when the driver drops tzinfo on read-back (see the
                 # module docstring note on _row_to_dict's "date" field / get_metrics_timeseries above) —
                 # a bare .timestamp() on a naive datetime would silently apply the host's local timezone.
@@ -618,7 +619,7 @@ class DatabaseMetricsMixin(DatabaseMixinBase):
             }
             for entry in by_ip.values()
         ]
-        offenders.sort(key=lambda o: o["blocks"], reverse=True)
+        offenders.sort(key=itemgetter("blocks"), reverse=True)
         return offenders[:limit]
 
     @retry_on_transient_db_errors

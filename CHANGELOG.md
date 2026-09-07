@@ -107,6 +107,7 @@
 - [BUGFIX] `db`: fix a session leak in `save_config`: the multisite global-settings pass parked a lock and a pooled connection in the API process.
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 - [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.
+- [BUGFIX] `ui`: the reserved default server is no longer creatable from the wizard, counted as an online service, or offered as an attachment target.
 
 ## v1.6.14~rc1 - 2026/07/??
 
