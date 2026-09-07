@@ -79,7 +79,7 @@ def test_existing_env_ports_and_api_url_are_reused(tmp_path):
         BUNKERWEB_INSTANCES_INPUT=""; DOCKER_LOADED_WHITELIST=""
         DOCKER_PROJECT_NAME=""; DOCKER_INSTALLED_TAG=""; _BW_RECORDED_COMPOSE_SHA256=""
 
-        {_extract("_docker_load_existing_env", "_docker_default_ports")}
+        {_extract("_docker_env_last_assignments", "_docker_load_existing_env", "_docker_default_ports")}
 
         _docker_load_existing_env
         _docker_default_ports

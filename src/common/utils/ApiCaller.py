@@ -20,12 +20,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from API import API  # type: ignore
 from logger import getLogger
 
-# Ceiling for the body-write budget a folder push derives from its read budget. The read budget is
-# deliberately uncapped when a caller raises the floor, but the write budget is added to it on the
-# wire, so an uncapped body budget multiplies the worst case a caller can be blocked for. A caller
-# that knows better passes its own.
-WRITE_TIMEOUT_CAP = 120
-
 # An instance serialises its push swaps and reloads on one lock and answers 503 while it is held, so
 # a 503 means healthy but busy, not broken. Two reloads reaching the same instance at once is normal
 # (the worker's debounced round, plus a job that asks for a reload), and a config test on a CRS-heavy
@@ -152,8 +146,7 @@ class ApiCaller:
         component stays short so a host that never answers still fails fast.
         """
         if write_timeout is None:
-            read_timeout = timeout[1] if isinstance(timeout, (tuple, list)) else timeout
-            write_timeout = min(WRITE_TIMEOUT_CAP, read_timeout)
+            write_timeout = timeout[1] if isinstance(timeout, (tuple, list)) else timeout
 
         with BytesIO() as tgz:
             with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
