@@ -40,6 +40,20 @@ report "no type drift" without that meaning anything; PostgreSQL and MariaDB are
 nullability halves of this become measurable. Run them with
 `--db-engines sqlite,postgresql,mariadb` and the two URIs from `tests/unit/README.md`; an engine
 that is unconfigured or unreachable skips rather than silently passing.
+
+**One exception, and it is the product's, not the test's: the `v1.5.0-beta` full-chain start cannot
+run on PostgreSQL** (`START_ENGINES`, which carries the mechanism and the revision line numbers).
+There it does not red, it deadlocks with itself and hangs for ever. The skip is explicit and says so;
+it is never a silent engine skip.
+
+That start DOES run on MariaDB, and has to: **the MariaDB chain produces drift the SQLite chain does
+not**, so a run without it would report a clean upgrade that is not clean. `KNOWN_LEGACY_DRIFT`
+records three of them — `bw_ui_users` loses its primary key outright, `bw_settings` keeps the
+two-column one the 1.5.0-beta model declared, and `bw_template_custom_configs.step_id` stays
+nullable. None of the three is reachable on SQLite, whose chain rebuilds those tables instead of
+altering them in place. Every fix is a migration and the Alembic tree is frozen for 1.7, so they are
+recorded with per-shape anti-rot assertions that red the day 1.8 closes any one of them — never
+skipped, never widened, never silently tolerated.
 """
 
 import pytest
@@ -47,7 +61,7 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
 
-from db.alembic_baseline import ALEMBIC, BASELINE_VERSION, baseline_metadata, product_uri, revision_for, wipe
+from db.alembic_baseline import ALEMBIC, BASELINE_TAG, BASELINE_VERSION, LEGACY_TAG, baseline_metadata, product_uri, revision_for, wipe
 from model import Base  # type: ignore
 
 
@@ -125,20 +139,96 @@ def _describe(engine):
     }
 
 
+# Two starting points, and they are not the same test. The 1.6.13 one is what an operator upgrading
+# from the last stable 1.6 really runs, and it is cheap -- one stamp, then the handful of revisions
+# above it. It is also the one L-G measured as GREEN while 33 columns of server-default drift were
+# present (`report-L-G.md` follow-up 6): its starting schema was tagged `model.py`, a shape that
+# never carried those defaults, so nothing on either side could disagree about them.
+#
+# The 1.5.0-beta one is the answer to that. It creates the schema the oldest supported release
+# really shipped and then runs the WHOLE chain -- all 78 revisions, root included, no stamp -- so
+# every column, default, index and constraint on the upgraded side is one a migration actually
+# produced rather than one `create_all` handed it for free. It is the shape that would have caught
+# that class in the first place, which is why it is here rather than in a comment.
+STARTING_POINTS = {
+    # tag -> the version to stamp before upgrading, or None to run the chain from its root.
+    BASELINE_TAG: BASELINE_VERSION,
+    LEGACY_TAG: None,
+}
+
+# The engines each start may run on. The 1.6.13 one runs everywhere. The 1.5.0-beta one runs
+# everywhere EXCEPT PostgreSQL, where it cannot be run at all: it does not fail, it HANGS FOR EVER.
+# `alembic/env.py:803-804` wraps the whole chain in ONE transaction, so by 1.6.0 that transaction
+# holds `AccessExclusiveLock` on `bw_jobs` (`postgresql_versions/0b08c406d820:176`), and
+# `postgresql_versions/8c096ca1beb8:22-38` then opens a SECOND connection to run
+# `ALTER TABLE bw_jobs DROP CONSTRAINT` on that same table. The second waits for a lock the first
+# will not release until `upgrade()` returns, and `upgrade()` cannot return until the second
+# finishes -- a self-deadlock the server cannot detect, because the holder is waiting on its client
+# socket rather than on a lock, so there is no cycle in the lock graph. Measured: the upgrade sat on
+# `pg_blocking_pids` for as long as it was left running, with both backends on `bw_jobs`.
+#
+# `bw_jobs` is not even the only way in. `8c096ca1beb8:68` runs `UPDATE bw_metadata SET version …
+# WHERE id = 1` on that same second connection, and every revision from 1.6.0-rc2 to 1.6.0
+# (`b56eb8d8dbf2:50`, `c975711f7afa:24`, `7939f7165327:24`, `f85e36780e55:24`) updates that one row
+# inside the outer transaction -- so a chain that touches `bw_jobs` nowhere still deadlocks on a
+# single row. Only a database already stamped at `f85e36780e55` (1.6.0) escapes both.
+#
+# MariaDB runs, and it is the engine that pays for this variant: it is the only one that reports the
+# three drifts recorded in KNOWN_LEGACY_DRIFT below, because its chain alters those tables in place
+# where the SQLite chain rebuilds them.
+START_ENGINES = {LEGACY_TAG: ("sqlite", "mariadb")}
+
+
+@pytest.fixture(params=sorted(STARTING_POINTS), ids=lambda tag: f"from-{tag}")
+def baseline_start(request):
+    """The release an upgraded database starts from, and how the product would enter the chain."""
+    return request.param, STARTING_POINTS[request.param]
+
+
+# `(engine, tag)` -> the two descriptions, built once per session.
+#
+# The fixture below has to be function-scoped -- `tmp_path` and `monkeypatch` are -- so without this
+# every one of the ten comparisons rebuilt the whole thing from scratch. That was already ten
+# upgrades per engine before this file was parametrised; with the 1.5.0-beta start added it becomes
+# ten more, and each of those runs all 78 revisions rather than stamping past 60 of them. Measured
+# on this workstation the SQLite run of this whole file is 4.75s with the memo, against 53s without
+# it (re-measured 2026-09-07; an earlier 8.65s and an independent 12.63s were taken on the same host
+# under different load, so treat the order of magnitude as the claim, not the digits). The
+# three-engine run that once "completed 3 of ~60 tests in fourteen minutes" was killed undiagnosed;
+# it is CONSISTENT with the PostgreSQL deadlock described at START_ENGINES, but that was never
+# confirmed, and the memo is a real speedup either way.
+#
+# Safe to share: both values are plain nested dicts of reflected names, built and never mutated
+# afterwards, and every test below only reads them. What must NOT be cached is the database itself —
+# and it is not: the entry is stored only after both descriptions are taken, so a later test never
+# depends on the state the shared PostgreSQL/MariaDB database happens to be in.
+_DESCRIPTIONS: dict = {}
+
+
 @pytest.fixture
-def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
+def upgraded_and_fresh(db_engine, tmp_path, monkeypatch, baseline_start):
     """The same engine described twice: upgraded from the baseline, then built fresh from the model.
 
     Sequential rather than two fixtures because PostgreSQL and MariaDB are one shared database — the
     two phases cannot coexist, so the first is described before the second wipes it.
     """
+    tag, stamp_version = baseline_start
+    allowed = START_ENGINES.get(tag)
+    if allowed is not None and db_engine not in allowed:
+        pytest.skip(
+            f"the {tag} full-chain start cannot run on {db_engine} — it self-deadlocks and hangs there rather than failing "
+            f"(alembic runs the whole chain in one transaction; 8c096ca1beb8 then opens a SECOND connection onto rows that "
+            f"transaction already holds). It runs on {'/'.join(allowed)}. Mechanism: see START_ENGINES in this file."
+        )
+    if (db_engine, tag) in _DESCRIPTIONS:
+        return _DESCRIPTIONS[(db_engine, tag)]
     uri = product_uri(db_engine, tmp_path)
     monkeypatch.setenv("DATABASE_URI", uri)
     monkeypatch.chdir(ALEMBIC)
 
     wipe(uri)
     engine = create_engine(uri)
-    baseline_metadata().create_all(engine)
+    baseline_metadata(tag).create_all(engine)
     engine.dispose()
 
     # Set exactly as `entrypoint.sh:105` seds it into alembic.ini before invoking alembic, and for
@@ -149,7 +239,12 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
     # baseline revision.
     config = Config("alembic.ini")
     config.set_main_option("version_locations", f"{db_engine}_versions")
-    command.stamp(config, revision_for(BASELINE_VERSION, db_engine))
+    # No stamp for the 1.5.0-beta start, deliberately: an empty `alembic_version` is what makes
+    # alembic run from the root, and the root revision has real work to do on that schema
+    # (`bw_plugins.order` is dropped there). Stamping it would skip the only revision the older
+    # baseline exists to exercise.
+    if stamp_version is not None:
+        command.stamp(config, revision_for(stamp_version, db_engine))
     command.upgrade(config, "head")
 
     engine = create_engine(uri)
@@ -163,15 +258,21 @@ def upgraded_and_fresh(db_engine, tmp_path, monkeypatch):
     fresh = _describe(engine)
     engine.dispose()
 
+    _DESCRIPTIONS[(db_engine, tag)] = (upgraded, fresh)
     return upgraded, fresh
 
 
-def test_the_baseline_really_is_older_than_the_model(upgraded_and_fresh):
+@pytest.mark.parametrize("tag", sorted(STARTING_POINTS))
+def test_the_baseline_really_is_older_than_the_model(tag):
     """Anti-vacuity. If the baseline schema ever stops differing from the current one — a tag bump,
-    a `git show` that silently returned the working tree — every assertion below passes for free."""
-    baseline = baseline_metadata()
+    a `git show` that silently returned the working tree — every assertion below passes for free.
 
-    assert set(Base.metadata.tables) - set(baseline.tables), "the baseline declares every table the model does; it is not an older schema"
+    Takes no engine and no fixture: it is a property of the two `model.py` revisions, so paying for
+    a database (and a 78-revision upgrade) to assert it would only make it slower.
+    """
+    baseline = baseline_metadata(tag)
+
+    assert set(Base.metadata.tables) - set(baseline.tables), f"the {tag} baseline declares every table the model does; it is not an older schema"
 
 
 def test_every_table_the_model_declares_survives_the_upgrade(upgraded_and_fresh):
@@ -222,12 +323,19 @@ def test_column_types_match_between_an_upgraded_and_a_fresh_database(upgraded_an
     assert not drift, "columns whose type differs between an upgraded and a fresh database:\n  " + "\n  ".join(drift)
 
 
-def test_column_nullability_matches_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh):
+def test_column_nullability_matches_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh, baseline_start, db_engine):
     """A column that is NOT NULL on a fresh install and nullable on an upgraded one lets rows exist
-    that the model says cannot, and the constraint only bites the operator who reinstalls."""
-    upgraded, fresh = upgraded_and_fresh
+    that the model says cannot, and the constraint only bites the operator who reinstalls.
 
-    drift = []
+    One of the two reasons the 1.5.0-beta start runs on MariaDB and not on SQLite alone:
+    `bw_template_custom_configs.step_id` is recorded drift there (`KNOWN_LEGACY_DRIFT`) and does not
+    exist on SQLite at all, whose chain rebuilds that table instead of altering it in place. SQLite
+    reflects nullability perfectly well — it is the migration path that differs, not the reflection.
+    """
+    upgraded, fresh = upgraded_and_fresh
+    tag, _ = baseline_start
+
+    observed = {}
     for table, fresh_columns in sorted(fresh["columns"].items()):
         upgraded_columns = upgraded["columns"].get(table, {})
         for column, (_, fresh_nullable) in sorted(fresh_columns.items()):
@@ -235,7 +343,14 @@ def test_column_nullability_matches_between_an_upgraded_and_a_fresh_database(upg
                 continue
             upgraded_nullable = upgraded_columns[column][1]
             if upgraded_nullable != fresh_nullable:
-                drift.append(f"{table}.{column}: upgraded nullable={upgraded_nullable} fresh nullable={fresh_nullable}")
+                observed.setdefault(table, set()).add((column, upgraded_nullable, fresh_nullable))
+
+    residual = _forgive(observed, _recorded(db_engine, tag, "nullability"), "nullability", db_engine)
+    drift = [
+        f"{table}.{column}: upgraded nullable={upgraded_nullable} fresh nullable={fresh_nullable}"
+        for table, columns in sorted(residual.items())
+        for column, upgraded_nullable, fresh_nullable in sorted(columns)
+    ]
 
     assert not drift, "columns whose nullability differs between an upgraded and a fresh database:\n  " + "\n  ".join(drift)
 
@@ -246,20 +361,26 @@ def _shared_tables(upgraded, fresh, dimension):
     return [table for table in sorted(fresh[dimension]) if table in upgraded[dimension]]
 
 
-def _compare_sets(upgraded, fresh, dimension, render):
+def _compare_sets(upgraded, fresh, dimension, render, db_engine=None, tag=None):
     """Per-table set difference in both directions.
 
     `missing` is the defect `create_all(checkfirst=True)` produces — the model declares it, the
     upgraded database never got it. `extra` is the opposite and usually a leftover the migrations
     built and the model later dropped; it is reported separately rather than merged, because the two
     need different fixes.
+
+    Only EXTRA passes through `KNOWN_LEGACY_DRIFT`, and a MISSING never does: a column, index or
+    constraint the model declares and an upgraded database never got is the defect this whole file
+    exists for, and nothing here may wave one through.
     """
-    missing, extra = [], []
+    missing, observed = [], {}
     for table in _shared_tables(upgraded, fresh, dimension):
         for item in sorted(fresh[dimension][table] - upgraded[dimension][table]):
             missing.append(f"{table}: {render(item)}")
-        for item in sorted(upgraded[dimension][table] - fresh[dimension][table]):
-            extra.append(f"{table}: {render(item)}")
+        observed[table] = upgraded[dimension][table] - fresh[dimension][table]
+
+    residual = _forgive(observed, _recorded(db_engine, tag, dimension), dimension, db_engine)
+    extra = [f"{table}: {render(item)}" for table, shapes in residual.items() for item in sorted(shapes)]
     return missing, extra
 
 
@@ -270,7 +391,7 @@ def _report(missing, extra, what):
     return "\n" + "\n".join(lines)
 
 
-def test_indexes_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh):
+def test_indexes_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh, baseline_start, db_engine):
     """`create_all(checkfirst=True)` skips an existing table, and it skips that table's indexes with
     it. An index added to the model against an existing table therefore only ever exists on a fresh
     install; the upgraded one keeps doing sequential scans and nothing fails, it is just slower on
@@ -287,25 +408,131 @@ def test_indexes_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fre
     outright would trade real coverage for tidiness.
     """
     upgraded, fresh = upgraded_and_fresh
+    tag, _ = baseline_start
 
     assert sum(len(shapes) for shapes in fresh["indexes"].values()), "no indexes reflected on a fresh install; this comparison would pass vacuously"
 
-    missing, extra = _compare_sets(upgraded, fresh, "indexes", lambda i: f"columns={list(i[0])} unique={i[1]}")
+    missing, extra = _compare_sets(upgraded, fresh, "indexes", lambda i: f"columns={list(i[0])} unique={i[1]}", db_engine, tag)
 
     assert not (missing or extra), _report(missing, extra, "indexes")
 
 
-def test_unique_constraints_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh):
+# What an upgrade from the 1.5.0-beta chain really leaves behind, and the ONLY drift this file
+# forgives. One entry per `(engine, table)` root cause, because that is the unit the drift comes in:
+# MariaDB has no constraint object of its own, so a single lost primary key surfaces at once as a
+# primary-key difference, an extra unique constraint AND an extra index. Splitting that into three
+# unrelated exemptions would hide the fact that they are one bug.
+#
+# Every entry spells out its EXACT shapes per dimension. No wildcard, no dimension-wide forgiveness,
+# no "this table is exempt": a shape not listed here is still a failure, in every dimension, on every
+# engine. `_forgive` asserts both halves of that on every run -- see its docstring.
+#
+# Engine-keyed because the same schema history materialises differently per dialect, and a record
+# calibrated on one engine asserts something false on the next:
+#
+#   sqlite / bw_jobs                        the 1.5.0-beta model declared
+#                                           `UniqueConstraint("name", "plugin_id")`, the current
+#                                           model does not, and the sqlite chain never drops it.
+#                                           INERT: `bw_jobs.name` is the primary key on both sides,
+#                                           so a pair this rejects is one the primary key already
+#                                           rejected. Absent on MariaDB, whose 1.5.6 revision DROPS
+#                                           the key in `upgrade()` (`18e9d2191dcc:60`; the
+#                                           `create_index` at `:82` is in `downgrade()`, which
+#                                           starts at `:76`), and not reachable on PostgreSQL.
+#   mariadb / bw_ui_users                   the upgrade LOSES THE PRIMARY KEY. `bfa7869e34c3` drops
+#                                           the old `id` PK column and passes `primary_key=True` to
+#                                           `batch_op.alter_column`, which alembic swallows into
+#                                           `**kw` on a non-recreating MySQL batch, so `username`
+#                                           ends up a bare UNIQUE KEY. The sqlite chain rebuilds the
+#                                           table properly, which is why only MariaDB shows it.
+#   mariadb / bw_settings                   a DIFFERENT class, despite looking alike: nothing in the
+#                                           MariaDB `upgrade()` path narrows this key at all. The
+#                                           1.5.0-beta model declared `PrimaryKeyConstraint("id",
+#                                           "name")` + `UniqueConstraint("id")`, the current model
+#                                           declares `id` alone, and the only PK operations on this
+#                                           table anywhere in the MariaDB chain are in
+#                                           `bfa7869e34c3`'s `downgrade()` (`:391-398`, past the
+#                                           `def downgrade` at `:284`). A missing migration, not a
+#                                           mis-emitted one.
+#   mariadb / bw_template_custom_configs    `step_id` stays nullable where the model says NOT NULL.
+#                                           Invisible on SQLite because that chain rebuilds the
+#                                           table rather than altering it -- not because SQLite
+#                                           cannot reflect nullability, which it does exactly.
+#
+# All four are deferred to 1.8: every fix is a migration and the Alembic tree is FROZEN for 1.7. The
+# anti-rot assertions below are what make that deferral safe: the day 1.8 fixes any listed shape, the
+# record stops matching, this file REDS naming the shape, and whoever fixed it deletes the entry. A
+# forgiveness with no such trigger would just be coverage quietly switched off.
+#
+# Two of these forgive a constraint the MODEL DECLARES and an upgraded database never gets -- the
+# `bw_ui_users` primary key and the `step_id` NOT NULL. That is normally the exact defect this file
+# exists to catch, and they are here only because no 1.7-legal change can fix them; they are the
+# reason the anti-rot above is an assertion rather than a comment.
+KNOWN_LEGACY_DRIFT = {
+    # 1.8: drop the residual UNIQUE(name, plugin_id) from bw_jobs -- one migration per dialect.
+    ("sqlite", "bw_jobs"): {"unique": {("name", "plugin_id")}},
+    # 1.8: give an upgraded MariaDB bw_ui_users its PRIMARY KEY(username) back.
+    ("mariadb", "bw_ui_users"): {
+        "indexes": {(("username",), True)},
+        "unique": {("username",)},
+        "primary_keys": {((), ("username",))},
+    },
+    # 1.8: narrow the upgraded MariaDB bw_settings key from (id, name) to (id), as the model declares.
+    ("mariadb", "bw_settings"): {
+        "indexes": {(("id",), True)},
+        "unique": {("id",)},
+        "primary_keys": {(("id", "name"), ("id",))},
+    },
+    # 1.8: re-apply NOT NULL to bw_template_custom_configs.step_id on an upgraded MariaDB.
+    ("mariadb", "bw_template_custom_configs"): {"nullability": {("step_id", True, False)}},
+}
+
+
+def _recorded(db_engine, tag, dimension):
+    """`{table: {shape, ...}}` recorded for this engine and this starting point, in this dimension.
+
+    Empty for any start but the 1.5.0-beta one: the 1.6.13 start begins from a tagged model that had
+    already been through these migrations, so it produces none of this drift and forgiving anything
+    there would be a hole rather than a record.
+    """
+    if tag != LEGACY_TAG:
+        return {}
+    return {table: record[dimension] for (engine, table), record in KNOWN_LEGACY_DRIFT.items() if engine == db_engine and dimension in record}
+
+
+def _forgive(observed, recorded, dimension, db_engine):
+    """`observed` (`{table: {shape, ...}}`) minus EXACTLY the recorded shapes, asserting the record.
+
+    Two properties, and the exemption is only safe while both hold:
+
+    * **The record is still true.** Every recorded shape must still be observed. The day a 1.8
+      migration fixes one, this reds and names it, and whoever fixed it deletes the entry — which is
+      the only thing that stops a deferred fix from turning into permanently disabled coverage.
+    * **Nothing else rides along.** The residual for a recorded table is its drift minus the listed
+      shapes, never the whole table: new drift on `bw_ui_users` still fails, exactly like new drift
+      on any other table.
+    """
+    stale = {table: sorted(shapes - observed.get(table, frozenset())) for table, shapes in recorded.items()}
+    stale = {table: gone for table, gone in stale.items() if gone}
+    assert not stale, (
+        f"recorded 1.5.0-beta {dimension} drift is GONE from {db_engine}: {stale}. A migration fixed it — "
+        f"delete those shapes from KNOWN_LEGACY_DRIFT and close the matching 1.8 note."
+    )
+    return {table: shapes - recorded.get(table, frozenset()) for table, shapes in observed.items()}
+
+
+def test_unique_constraints_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh, baseline_start, db_engine):
     """The correctness half of the index check. A UNIQUE the model declares and an upgraded database
     never gets means that database will happily accept duplicate rows a fresh install rejects — and
     the divergence is invisible until someone tries to add the constraint later and finds they
     cannot, because the duplicates are already there.
     """
     upgraded, fresh = upgraded_and_fresh
+    tag, _ = baseline_start
 
     assert sum(len(c) for c in fresh["unique"].values()), "no unique constraints reflected on a fresh install; this comparison would pass vacuously"
 
-    missing, extra = _compare_sets(upgraded, fresh, "unique", lambda u: f"unique{list(u)}")
+    missing, extra = _compare_sets(upgraded, fresh, "unique", lambda u: f"unique{list(u)}", db_engine, tag)
 
     assert not (missing or extra), _report(missing, extra, "unique constraints")
 
@@ -346,17 +573,26 @@ def test_server_defaults_match_between_an_upgraded_and_a_fresh_database(upgraded
     assert not drift, "columns whose server default differs between an upgraded and a fresh database:\n  " + "\n  ".join(drift)
 
 
-def test_primary_keys_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh):
+def test_primary_keys_match_between_an_upgraded_and_a_fresh_database(upgraded_and_fresh, baseline_start, db_engine):
     """Primary key shape, composite keys included. Cheap to reach from the same reflection, and a
-    key whose column order or membership differs is a different table however similar it looks."""
+    key whose column order or membership differs is a different table however similar it looks.
+
+    This is the comparison that catches the worst of the recorded 1.5.x drift: on MariaDB an upgraded
+    `bw_ui_users` has NO primary key at all (`KNOWN_LEGACY_DRIFT`), which no column, type or index
+    check would have reported.
+    """
     upgraded, fresh = upgraded_and_fresh
+    tag, _ = baseline_start
 
     assert any(fresh["primary_keys"].values()), "no primary keys reflected on a fresh install; this comparison would pass vacuously"
 
-    drift = []
-    for table in _shared_tables(upgraded, fresh, "primary_keys"):
-        if upgraded["primary_keys"][table] != fresh["primary_keys"][table]:
-            drift.append(f"{table}: upgraded={list(upgraded['primary_keys'][table])} fresh={list(fresh['primary_keys'][table])}")
+    observed = {
+        table: {(upgraded["primary_keys"][table], fresh["primary_keys"][table])}
+        for table in _shared_tables(upgraded, fresh, "primary_keys")
+        if upgraded["primary_keys"][table] != fresh["primary_keys"][table]
+    }
+    residual = _forgive(observed, _recorded(db_engine, tag, "primary_keys"), "primary_keys", db_engine)
+    drift = [f"{table}: upgraded={list(u)} fresh={list(f)}" for table, pairs in sorted(residual.items()) for u, f in sorted(pairs)]
 
     assert not drift, "tables whose primary key differs between an upgraded and a fresh database:\n  " + "\n  ".join(drift)
 
