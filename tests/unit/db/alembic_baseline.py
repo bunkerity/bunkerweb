@@ -7,6 +7,7 @@ collection order load it twice under two names, and it only resolved at all beca
 starting point, so the starting point lives here and neither owns the other.
 """
 
+import re
 from pathlib import Path
 from subprocess import run
 from types import ModuleType
@@ -26,18 +27,52 @@ ALEMBIC = ROOT / "src" / "common" / "db" / "alembic"
 BASELINE_TAG = "v1.6.13"
 BASELINE_VERSION = BASELINE_TAG.lstrip("v")
 
+# The OTHER starting point, and the older one: the release the whole migration chain roots at.
+# `sqlite_versions/8bb3be426524_upgrade_to_version_1_5_0.py` has `down_revision = None` and its
+# `upgrade()` drops a column from an existing `bw_plugins`, so the chain does not build the schema
+# — it expects a database some 1.5.0-beta install already created, which is exactly what
+# `misc/migration/create.sh` boots a 1.5.0-beta scheduler to produce. A parity run from here is the
+# one that executes all 78 revisions instead of stamping past 60 of them. L-G follow-up 6.
+LEGACY_TAG = "v1.5.0-beta"
 
-def baseline_metadata():
-    """`model.py` as it was at the baseline tag, loaded under its own `Base`.
+
+def baseline_metadata(tag=None):
+    """`model.py` as it was at `tag` (the 1.6.13 baseline by default), loaded under its own `Base`.
 
     Read out of git rather than reconstructed: the point is to start from a schema some release
     really shipped, and any hand-written approximation of it would be the same mistake as
     `create_all`-ing the current model, just less obvious.
     """
-    source = run(["git", "show", f"{BASELINE_TAG}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
-    module = ModuleType(f"bw_model_{BASELINE_VERSION.replace('.', '_')}")
-    exec(compile(source, f"<{BASELINE_TAG}:src/common/db/model.py>", "exec"), module.__dict__)  # noqa: S102
+    tag = tag or BASELINE_TAG
+    source = run(["git", "show", f"{tag}:src/common/db/model.py"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    module = ModuleType(f"bw_model_{tag.lstrip('v').replace('.', '_').replace('-', '_')}")
+    exec(compile(source, f"<{tag}:src/common/db/model.py>", "exec"), module.__dict__)  # noqa: S102
     return module.Base.metadata
+
+
+def columns_added_since_baseline():
+    """`{table: [column, ...]}` -- what 1.7 adds to a table the baseline release already had.
+
+    DERIVED from the two schemas, never restated: a hand-written copy of this map is exactly what
+    goes stale when a head regeneration adds a column, and it goes stale silently.
+    `bw_ui_users.totp_last_counter` is the one that proved it -- it was added by the wave-13
+    regeneration and no hand-maintained list moved with it.
+
+    These are the columns a downgrade has to remove from a table that otherwise survives, which is
+    both what the manifest's `data_loss_detail.columns` declares and what a restore from a baseline
+    dump must leave behind.
+    """
+    from model import Base  # noqa: PLC0415 - conftest puts src/common/db on the path
+
+    baseline = baseline_metadata().tables
+    added = {}
+    for name, table in Base.metadata.tables.items():
+        if name not in baseline:
+            continue
+        new_columns = {column.name for column in table.columns} - {column.name for column in baseline[name].columns}
+        if new_columns:
+            added[name] = sorted(new_columns)
+    return added
 
 
 def revision_for(version, dialect):
@@ -50,6 +85,50 @@ def revision_for(version, dialect):
     matches = sorted((ALEMBIC / f"{dialect}_versions").glob(f"*_upgrade_to_version_{normalised}.py"))
     assert len(matches) == 1, f"expected one migration for {version} in {dialect}_versions, found {[m.name for m in matches]}"
     return matches[0].name.split("_", 1)[0]
+
+
+# Alembic's own template writes `revision: str = "abc123"`, and `black` keeps the double quotes --
+# but a head that has not been through the formatter yet, which is exactly what
+# `misc/migration/create.sh` emits, carries single ones. A pattern that only accepts double quotes
+# does not report a bad head, it reports NO head: the revision drops out of the chain entirely and
+# every guard anchored to it fails as "the manifest drifted" while the manifest is fine. Both quote
+# styles are accepted here, and in the `down_revision` strip below.
+_REVISION_RX = re.compile(r"""^revision: str = ["'](.+?)["']""", re.M)
+_DOWN_REVISION_RX = re.compile(r"^down_revision: Union\[str, None\] = (.+?)$", re.M)
+
+
+def chain(dialect, versions_dir=None):
+    """`{revision: (down_revision, path)}` for one dialect's migration directory.
+
+    Read out of the files rather than through alembic's `ScriptDirectory` on purpose: the guards
+    that use this have to be able to see a head that alembic itself would refuse to load, and
+    `version_locations` would need the whole config machinery to point at one dialect.
+    """
+    found = {}
+    for path in sorted((versions_dir or ALEMBIC / f"{dialect}_versions").glob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        revision = _REVISION_RX.search(text)
+        if not revision:
+            continue
+        down = _DOWN_REVISION_RX.search(text)
+        found[revision.group(1)] = (down.group(1).strip().strip("\"'") if down else None, path)
+    return found
+
+
+def walk_back(dialect, head, stop=None):
+    """The revisions from `head` down to `stop` (inclusive), newest first.
+
+    Stops at `stop`, at the root, or after 200 hops -- a chain that loops is a corrupt directory,
+    not a reason to hang the suite.
+    """
+    links = chain(dialect)
+    seen, cursor = [], head
+    while cursor and cursor in links and len(seen) < 200:
+        seen.append(cursor)
+        if cursor == stop:
+            break
+        cursor = links[cursor][0]
+    return seen
 
 
 def product_uri(db_engine, tmp_path):
