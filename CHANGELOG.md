@@ -147,6 +147,7 @@
 - [BUGFIX] `db`: an empty custom-config payload refused to prevent data loss now says so, instead of reporting the refused write as a success.
 - [BUGFIX] `ui`: a custom config that names a service which does not exist is flashed as a warning instead of as a save error.
 - [BUGFIX] `worker`: sizing a cache push no longer swallows the shutdown signal that stops the worker.
+- [BUGFIX] `scheduler`: a refused custom-config write no longer triggers the regeneration that deleted the operator's on-disk custom configs.
 
 ## v1.6.14~rc1 - 2026/07/??
 

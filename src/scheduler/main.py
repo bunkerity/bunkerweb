@@ -883,7 +883,7 @@ if __name__ == "__main__":
                 return False
             return True
 
-        def check_configs_changes(*, generate: bool = True) -> bool:
+        def check_configs_changes(*, generate: bool = True) -> Optional[bool]:
             # Checking if any custom config has been created by the user
             assert API_CLIENT is not None, "API_CLIENT is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
@@ -918,12 +918,41 @@ if __name__ == "__main__":
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
             if changes:
+                refused = ""
                 try:
                     err = API_CLIENT.save_custom_configs(custom_configs, "manual")
                     if err:
                         LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
+                        refused = err
                 except BaseException as e:
                     LOGGER.error(f"Error while saving custom configs to database: {e}")
+                    # An exception whose str() is empty must not read as "nothing was refused":
+                    # falling through would regenerate over the edit and delete it.
+                    refused = str(e) or type(e).__name__
+
+                # `generate_custom_configs` unlinks EVERY file under CUSTOM_CONFIGS_PATH/*/* before
+                # rewriting from the database, so regenerating after a refused write does not merely
+                # fail to apply the operator's edit -- it deletes the only copy of it and puts the
+                # stale database one back.
+                #
+                # Port of dev `abb60b1ea`, which returns None here rather than the `changes` flag,
+                # and that matters: the SIGHUP rescan below calls this with `generate=False` and
+                # reads a truthy return as "set CONFIGS_NEED_GENERATION", which regenerates through
+                # the very same unlink a few lines later. Handing back `changes` would leave the
+                # guard a no-op on the one runtime path a manual edit travels.
+                #
+                # Keyed on the refusal MESSAGE and NOT on `API_CLIENT.readonly`: `base_api_client.py`
+                # caches readonly=True when the API is merely unreachable, so dev's own condition
+                # would disarm this guard in exactly the case it is needed. Anchored at the start of
+                # the string, because a commit failure behind an advisory returns
+                # `Service <name> not found ...\n<reason>` and <name> is operator-chosen -- an
+                # unanchored `"read-only" in refused` is disarmed by a service called `read-only.x`.
+                #
+                # A genuinely read-only database is exempt: nothing can ever be stored there, so the
+                # folder has to keep being materialized from the database. Only the boot-time call
+                # is affected, the rescan caller below is already gated on `not API_CLIENT.readonly`.
+                if refused and not refused.startswith("The database is read-only"):
+                    return None
 
             if generate:
                 generate_custom_configs(API_CLIENT.get_custom_configs())
