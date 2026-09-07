@@ -438,6 +438,10 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
 
         Vous pouvez créer un service brouillon pour enregistrer vos progrès et y revenir plus tard. Il suffit de cliquer sur le bouton `🌐 En Ligne` pour basculer le service en mode brouillon.
 
+    !!! info "L'entrée fixe `Default server`"
+
+        Avec `MULTISITE=yes`, la première ligne de la liste n'est pas l'un de vos services : c'est le **Default server** réservé, qui répond aux requêtes ne correspondant à aucun service configuré. Ouvrez-le pour définir le certificat, le TLS, les en-têtes et les pages d'erreur qu'il utilise. Il n'offre ni suppression, ni clonage, ni brouillon — voir [Configurer le Default Server](features.md#miscellaneous). Avec `MULTISITE=no`, cette ligne n'existe pas et la liste commence par vos propres services.
+
     === "Mode facile"
 
         Dans ce mode, vous pouvez choisir parmi les modèles disponibles et remplir les champs obligatoires.

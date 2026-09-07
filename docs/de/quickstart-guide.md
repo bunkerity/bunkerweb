@@ -437,6 +437,10 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
 
         Sie können einen Entwurfsdienst erstellen, um Ihren Fortschritt zu speichern und später darauf zurückzukommen. Klicken Sie einfach auf die Schaltfläche `🌐 Online`, um den Dienst in den Entwurfsmodus zu schalten.
 
+    !!! info "Der fest verankerte Eintrag `Default server`"
+
+        Mit `MULTISITE=yes` ist die erste Zeile der Liste keiner Ihrer Dienste: Es ist der reservierte **Default server**, der Anfragen beantwortet, die zu keinem konfigurierten Dienst passen. Öffnen Sie ihn, um Zertifikat, TLS, Header und Fehlerseiten festzulegen, die er verwendet. Er bietet weder Löschen noch Klonen noch Entwurf — siehe [Den Default Server konfigurieren](features.md#miscellaneous). Mit `MULTISITE=no` existiert diese Zeile nicht, und die Liste beginnt mit Ihren eigenen Diensten.
+
     === "Einfacher Modus"
 
         In diesem Modus können Sie aus den verfügbaren Vorlagen wählen und die erforderlichen Felder ausfüllen.

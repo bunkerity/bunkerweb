@@ -437,6 +437,10 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
 
         Puedes crear un servicio en borrador para guardar tu progreso y volver a él más tarde. Simplemente haz clic en el botón `🌐 En línea` para cambiar el servicio al modo borrador.
 
+    !!! info "La entrada fija `Default server`"
+
+        Con `MULTISITE=yes`, la primera fila de la lista no es uno de tus servicios: es el reservado **Default server**, que responde a las solicitudes que no coinciden con ningún servicio configurado. Ábrelo para establecer el certificado, TLS, cabeceras y páginas de error que utiliza. No ofrece eliminar, clonar ni borrador — consulta [Configurar el Default Server](features.md#miscellaneous). Con `MULTISITE=no` esta fila no existe, y la lista comienza con tus propios servicios.
+
     === "Modo fácil"
 
         En este modo, puedes elegir entre las plantillas disponibles y rellenar los campos obligatorios.
