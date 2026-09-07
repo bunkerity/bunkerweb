@@ -141,6 +141,7 @@
 - [SECURITY] `ui`: the admin panel's Permissions-Policy is resynced with Chromium — 14 features added, the retired `battery` dropped.
 - [BUGFIX] `api`: a custom-config write that landed with a warning is a 200 carrying that warning, not a 500 whose body was thrown away.
 - [BUGFIX] `db`: an empty custom-config payload refused to prevent data loss now says so, instead of reporting the refused write as a success.
+- [BUGFIX] `ui`: a custom config that names a service which does not exist is flashed as a warning instead of as a save error.
 
 ## v1.6.14~rc1 - 2026/07/??
 

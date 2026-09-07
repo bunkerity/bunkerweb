@@ -1456,11 +1456,16 @@ def update_service(
                     cfg_copy["data"] = cfg_copy["data"].decode("utf-8", errors="replace")
                 serializable_configs.append(cfg_copy)
             try:
-                API_CLIENT.bulk_save_configs(
+                saved = API_CLIENT.bulk_save_configs(
                     serializable_configs,
                     override_method,
                     changed=service != "new" and (was_draft != is_draft or not is_draft),
                 )
+                # The configs ARE saved; the API only answers with a message when it has something
+                # to report about them (a referenced service that does not exist). Swallowing it
+                # left the operator with a green "saved" and a config that matches nothing.
+                if message := (saved or {}).get("message"):
+                    DATA["TO_FLASH"].append({"content": message, "type": "warning"})
             except Exception as e:
                 DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {e}", "type": "error"})
 
