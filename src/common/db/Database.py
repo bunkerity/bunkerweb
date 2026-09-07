@@ -6,7 +6,7 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import Match, compile as re_compile
+from re import IGNORECASE, Match, compile as re_compile
 from sys import path as sys_path
 from typing import Any, Dict, Optional, Tuple
 from time import sleep
@@ -66,28 +66,63 @@ from sqlalchemy.pool import QueuePool
 
 # Greedy to the last "@" of the authority so an unencoded "@" inside the password is
 # covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
-# drag the host into the mask.
-DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+# drag the host into the mask. The username class is SQLAlchemy's own, "@" and whitespace
+# included: this pass also runs on RAW text, where the username is not percent-encoded, and a
+# username the class rejects makes the whole match fail and leaves the password in the log.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^\s/?#]*@")
+
+# The same span SQLAlchemy's own parser uses: a username that stops at the first ":" and a password
+# that stops at the first "@". Both classes are its classes character for character, so every DSN it
+# parses is one this matches. Narrowing either of them, by whitespace or by anything else, is a DSN
+# that parses, fails the round trip, then matches nothing and reaches the log in cleartext. Only
+# used once make_url has confirmed there is a password, so the wide classes cannot drag a host into
+# the mask the way they would on arbitrary text.
+DB_URI_AUTHORITY_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^@]*@")
+
+# Several drivers take the credential in the query string instead of the authority
+# (`?password=`, `?sslpassword=`, `?token=`), where render_as_string(hide_password=True) leaves
+# it untouched. Matched on the parameter NAME so a driver-specific spelling is covered too, and
+# the value is cut at the next separator so the rest of the DSN survives the mask.
+DB_URI_QUERY_SECRET_RX = re_compile(r"([?&][^=&\s]*(?:password|passwd|pwd|secret|token|api[-_]?key)[^=&\s]*=)[^&#\s]*", IGNORECASE)
 
 
 def mask_db_uri(db_string: str) -> str:
-    """Return a database URI with its password replaced, safe to log.
+    """Return a database URI, or any text that may embed one, safe to log.
 
     Callers reach this on malformed input, which make_url() either rejects outright
-    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    or, worse, parses wrongly, so the regexes have to be able to stand on their own.
     """
     if not db_string:
         return db_string
     masked = db_string
     with suppress(BaseException):
-        masked = make_url(db_string).render_as_string(hide_password=True)
+        url = make_url(db_string)
+        # make_url anchors at the start and its query group stops at the first newline, so a
+        # string that merely BEGINS with a URI parses, and rendering it back would drop whatever
+        # followed. Only let it rewrite a string it reproduces exactly; anything else keeps its
+        # own text and is masked by regex.
+        if url.render_as_string(hide_password=False) == db_string:
+            masked = url.render_as_string(hide_password=True)
+        elif url.password:
+            # A password carrying "/", "?" or "#" does not survive the round trip
+            # (render_as_string percent-encodes it) and is outside DB_URI_PASSWORD_RX's class as
+            # well, so without this neither masker fires and the credential reaches the log
+            # verbatim. `openssl rand -base64` produces "/" routinely. Matched by span rather than
+            # by the value of url.password, which is percent-DECODED and so does not occur in the
+            # text being masked whenever the operator escaped a delimiter.
+            masked = DB_URI_AUTHORITY_PASSWORD_RX.sub(r"\1***@", masked, count=1)
     # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
     # the part before it for the password and hides that, leaving the rest to reach the log.
-    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    masked = DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    # Third: several drivers carry the credential in the query string, which neither pass above
+    # touches.
+    return DB_URI_QUERY_SECRET_RX.sub(r"\1***", masked)
 
 
-# Same span as the mask above, captured instead of replaced.
-DB_URI_SECRET_RX = re_compile(r"://[^:/?#\[\]@]*:([^\s/?#]*)@")
+# Same span as the mask above, captured instead of replaced. The username class is SQLAlchemy's
+# own, "@" and whitespace included: a username this class rejects makes the whole match fail and
+# leaves the driver's echo of the password unscrubbed.
+DB_URI_SECRET_RX = re_compile(r"://[^:/]*:([^\s/?#]*)@")
 
 
 def scrub_db_secret(text: str, db_string: str) -> str:

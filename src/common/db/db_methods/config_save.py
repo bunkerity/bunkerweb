@@ -423,6 +423,17 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             config = {k: v for k, v in config.items() if k not in truncated_pem_keys}
             explicit_keys = {k for k in explicit_keys if k not in truncated_pem_keys} if explicit_keys else explicit_keys
 
+        # The passes below pop as they go (DATABASE_URI, then every `<service>_IS_DRAFT` marker),
+        # so they drain whatever dict they are handed. Two things went wrong with that: the
+        # conflict retry replayed the drained dict and published services the caller had marked as
+        # drafts, and a caller that keeps its payload (autoconf hands over its long-lived config)
+        # saw it come back short and read the difference as a configuration change on the next
+        # pass. Drain a copy and leave the caller's dict, which is also what the retry replays.
+        # Shallow on purpose: this carries every setting of every service, and only its own keys
+        # are ever removed, never a value mutated in place.
+        retry_config = config
+        config = config.copy()
+
         ctx = _SaveConfigContext(
             config=config,
             db_config=db_config,
@@ -720,7 +731,7 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
             # session in another.
             self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
             return self.save_config(
-                config,
+                retry_config,
                 method,
                 changed,
                 file_names,

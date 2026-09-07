@@ -110,3 +110,53 @@ class TestScrubDbSecret:
         text = "connection to server at 'db' failed"
 
         assert scrub_db_secret(text, "postgresql://bunkerweb@db:5432/bunkerweb") == text
+
+
+class TestMaskDbUriCredentialShapes:
+    """Port of dev `dfa3273eb`: three shapes the original pair could not mask."""
+
+    def test_a_password_containing_a_slash_is_masked(self):
+        """`openssl rand -base64` produces "/" routinely. Such a password is percent-encoded by
+        `render_as_string`, so the rendered string differs from the input and the round-trip guard
+        falls through to the authority regex — whose class must be wide enough to hold it."""
+        masked = mask_db_uri("postgresql://bunkerweb:ab/cd?ef@db:5432/bunkerweb")
+
+        assert "ab/cd" not in masked, f"the password survived masking: {masked}"
+        assert "db:5432" in masked, f"masking ate the host: {masked}"
+
+    def test_a_password_in_the_query_string_is_masked(self):
+        """`?password=` is where several drivers take the credential, and
+        `render_as_string(hide_password=True)` leaves it untouched."""
+        masked = mask_db_uri("mariadb+pymysql://bunkerweb@db:3306/bunkerweb?password=hunter2&charset=utf8mb4")
+
+        assert "hunter2" not in masked, f"the query-string credential survived: {masked}"
+        assert "charset=utf8mb4" in masked, f"masking ate the rest of the query: {masked}"
+
+    @pytest.mark.parametrize("param", ("password", "sslpassword", "PWD", "api_key", "token"))
+    def test_every_credential_parameter_spelling_is_masked(self, param):
+        masked = mask_db_uri(f"postgresql://bunkerweb@db/bunkerweb?{param}=s3cret")
+
+        assert "s3cret" not in masked, f"{param} survived: {masked}"
+
+    def test_an_ordinary_query_parameter_is_left_alone(self):
+        uri = "postgresql://bunkerweb@db/bunkerweb?sslmode=require&connect_timeout=5"
+
+        assert mask_db_uri(uri) == uri
+
+    def test_a_username_holding_an_at_sign_still_gets_its_password_masked(self):
+        """The username class is SQLAlchemy's own on purpose: a narrower one makes the whole match
+        fail on a DSN that parses, and the password then reaches the log in cleartext."""
+        masked = mask_db_uri("postgresql://user@corp:hunter2@db:5432/bunkerweb")
+
+        assert "hunter2" not in masked, f"the password survived: {masked}"
+
+
+def test_a_username_holding_an_at_sign_still_scrubs_the_drivers_echo():
+    """`scrub_db_secret` extracts the secret with the same authority span as the mask. A username
+    class narrower than SQLAlchemy's (Azure hands out `user@server` logins) makes the extraction
+    match nothing, and the driver's echo of the password then reaches the log untouched."""
+    uri = "postgresql://bunkerweb@corp:hunter2@db:5432/bunkerweb"
+
+    scrubbed = scrub_db_secret("FATAL: password authentication failed, tried hunter2", uri)
+
+    assert "hunter2" not in scrubbed, f"the echoed password survived: {scrubbed}"
