@@ -127,3 +127,62 @@ class TestHasVariableInheritsTheGlobalValue:
         assert out.strip() == "ok"
 
 
+class TestTheWhitelistIsOnlyConsultedWhereItIsEnabled:
+    def test_a_service_with_the_whitelist_off_does_not_lift_a_ban(self):
+        """The port. The lists exist for every service; only the switch says whether they apply."""
+        out = run("""
+            VARIABLES = {
+                global = { MULTISITE = "yes", SERVER_NAME = "a.example.com", USE_WHITELIST = "no" },
+                ["a.example.com"] = { USE_WHITELIST = "no" },
+            }
+            LISTS = { plugin_whitelist_lists_a_example_com = nil, ["plugin_whitelist_lists_a.example.com"] = { IP = { "1.2.3.4" } } }
+            local ok, info = utils.is_ip_whitelisted("1.2.3.4", "a.example.com")
+            assert(ok == false, "a disabled whitelist must not whitelist, got " .. tostring(ok) .. " / " .. tostring(info))
+            print("ok")
+            """)
+        assert out.strip() == "ok"
+
+    def test_the_same_service_with_the_whitelist_on_does_whitelist(self):
+        """Anti-vacuity for the test above: same list, same ip, switch flipped."""
+        out = run("""
+            VARIABLES = {
+                global = { MULTISITE = "yes", SERVER_NAME = "a.example.com", USE_WHITELIST = "no" },
+                ["a.example.com"] = { USE_WHITELIST = "yes" },
+            }
+            LISTS = { ["plugin_whitelist_lists_a.example.com"] = { IP = { "1.2.3.4" } } }
+            local ok, info = utils.is_ip_whitelisted("1.2.3.4", "a.example.com")
+            assert(ok == true, "an enabled whitelist must whitelist its own entry")
+            assert(info == "ip", info)
+            print("ok")
+            """)
+        assert out.strip() == "ok"
+
+    def test_a_service_inherits_the_global_switch(self):
+        out = run("""
+            VARIABLES = {
+                global = { MULTISITE = "yes", SERVER_NAME = "a.example.com", USE_WHITELIST = "yes" },
+                ["a.example.com"] = {},
+            }
+            LISTS = { ["plugin_whitelist_lists_a.example.com"] = { IP = { "1.2.3.4" } } }
+            assert(utils.is_ip_whitelisted("1.2.3.4", "a.example.com") == true, "the global switch must reach the service")
+            print("ok")
+            """)
+        assert out.strip() == "ok"
+
+    def test_the_global_list_is_gated_too(self):
+        """The last-resort global list ran unconditionally, so it whitelisted with the plugin off."""
+        out = run("""
+            VARIABLES = { global = { MULTISITE = "no", SERVER_NAME = "", USE_WHITELIST = "no", WHITELIST_IP = "9.9.9.9" } }
+            local ok = utils.is_ip_whitelisted("9.9.9.9", "")
+            assert(ok == false, "the global list must not apply while whitelisting is off globally")
+            print("ok")
+            """)
+        assert out.strip() == "ok"
+
+    def test_the_global_list_still_applies_when_it_is_enabled(self):
+        out = run("""
+            VARIABLES = { global = { MULTISITE = "no", SERVER_NAME = "", USE_WHITELIST = "yes", WHITELIST_IP = "9.9.9.9" } }
+            assert(utils.is_ip_whitelisted("9.9.9.9", "") == true, "an enabled global list must still whitelist")
+            print("ok")
+            """)
+        assert out.strip() == "ok"
