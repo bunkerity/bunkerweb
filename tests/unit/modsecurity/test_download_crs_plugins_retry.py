@@ -142,7 +142,7 @@ class TestShouldKeepPreviousCache:
 
         assert ns["should_keep_previous_cache"]({"svc": set()}, crs_dir) is False
 
-    def test_something_installed_this_run_always_proceeds(self, ns, tmp_path):
+    def test_something_installed_this_run_proceeds_when_nothing_failed(self, ns, tmp_path):
         crs_dir = tmp_path / "crs"
         crs_dir.mkdir()
         (crs_dir / "old-plugin").mkdir()
@@ -161,3 +161,77 @@ class TestShouldKeepPreviousCache:
         (crs_dir / "old-plugin").mkdir()
 
         assert ns["should_keep_previous_cache"]({"a": set(), "b": {"plugin-1.0"}}, crs_dir) is False
+
+
+class TestAPartialRunKeepsThePreviousPluginSet:
+    """A run where SOME plugins installed and at least one failed must publish nothing.
+
+    Ported with dev ``a92cc3187``. ``should_keep_previous_cache`` alone cannot see this case, and
+    said so in its own docstring: ``service_plugins[service] = plugins`` aliases the resolved URL
+    set in as soon as a LOOKUP succeeds, so ``any(service_plugins.values())`` is already True
+    before a single byte is downloaded. Measured on the pre-fix file: with plugin-a's download
+    failed and plugin-b's succeeded, the swap went ahead, CRS_PLUGINS_DIR ended up holding only
+    plugin-b, the incomplete set was written to the job cache, and the job exited 1 (success).
+    The rendered conf is the intersection of crs-plugins.json and that directory, so plugin-a's
+    rules silently left the WAF and the next run's fingerprint matched -- no retry, ever.
+    """
+
+    @pytest.fixture
+    def swap(self, ns, tmp_path):
+        """`swap_and_cache_plugins` wired to tmp dirs. It starts with `rmtree(CRS_PLUGINS_DIR)`
+        against the real /var/cache path, so it is never called without this redirection."""
+        previous = tmp_path / "crs"
+        staging = tmp_path / "new"
+        for plugin_id in ("plugin-a-1.0", "plugin-b-1.0"):
+            (previous / plugin_id).mkdir(parents=True)
+            (previous / plugin_id / "plugin.conf").write_text("SecRule previous\n")
+        (staging / "plugin-b-1.0").mkdir(parents=True)  # only plugin-b came down this run
+        (staging / "plugin-b-1.0" / "plugin.conf").write_text("SecRule fresh\n")
+
+        job = MagicMock()
+        job.cache_hash.return_value = b""
+        job.cache_file.return_value = (True, "")
+        job.cache_dir.return_value = (True, "")
+
+        ns["CRS_PLUGINS_DIR"] = previous
+        ns["NEW_PLUGINS_DIR"] = staging
+        ns["JOB"] = job
+        ns["status"] = 0
+        return ns, previous, job
+
+    def test_a_failure_leaves_the_previous_set_and_the_job_cache_untouched(self, swap):
+        ns, previous, job = swap
+
+        render_changed = ns["swap_and_cache_plugins"]({"svc": {"https://example.invalid/b.zip"}}, True)
+
+        assert sorted(p.name for p in previous.iterdir()) == ["plugin-a-1.0", "plugin-b-1.0"]
+        assert (previous / "plugin-a-1.0" / "plugin.conf").read_text() == "SecRule previous\n"
+        assert (previous / "plugin-b-1.0" / "plugin.conf").read_text() == "SecRule previous\n", "the staged copy was published anyway"
+        job.cache_file.assert_not_called()
+        job.cache_dir.assert_not_called()
+        assert ns["status"] == 2, "a partial run must report a failure, not a success"
+        assert render_changed is False, "no re-render for a set that was never published"
+
+    def test_a_clean_run_still_publishes(self, swap):
+        """The guard must not be a blanket refusal: without a failure the swap still happens."""
+        ns, previous, job = swap
+
+        render_changed = ns["swap_and_cache_plugins"]({"svc": {"https://example.invalid/b.zip"}}, False)
+
+        assert sorted(p.name for p in previous.iterdir()) == ["plugin-b-1.0"]
+        assert (previous / "plugin-b-1.0" / "plugin.conf").read_text() == "SecRule fresh\n"
+        job.cache_file.assert_called_once()
+        job.cache_dir.assert_called_once()
+        assert ns["status"] == 0
+        assert render_changed is True
+
+    def test_the_flag_alone_decides_regardless_of_what_resolved(self, ns, tmp_path):
+        """`plugin_failures` is unconditional: it does not need a previous set to protect.
+
+        On a first run there is nothing cached, so the emptiness half of the predicate is False;
+        publishing an incomplete set as though it were complete is still the worse outcome.
+        """
+        crs_dir = tmp_path / "crs"  # never created -- cold start, nothing to keep
+
+        assert ns["should_keep_previous_cache"]({"svc": {"plugin-1.0"}}, crs_dir, True) is True
+        assert ns["should_keep_previous_cache"]({"svc": {"plugin-1.0"}}, crs_dir, False) is False

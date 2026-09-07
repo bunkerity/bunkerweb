@@ -14,7 +14,7 @@ from traceback import format_exc
 from typing import Dict, Optional, Set, Tuple
 from uuid import uuid4
 from json import dumps, loads
-from shutil import copy, copytree, move, rmtree
+from shutil import copy, copytree, rmtree
 from tarfile import TarError, open as tar_open
 from zipfile import BadZipFile, ZipFile
 
@@ -120,11 +120,31 @@ def request_with_retry(request_fn, *args, max_retries: int = 4, **kwargs):
     raise last_exc or RuntimeError("request_with_retry: max_retries <= 0")  # pragma: no cover -- defensive, unreachable at max_retries=4
 
 
-def should_keep_previous_cache(service_plugins: Dict[str, Set[str]], crs_plugins_dir: Path) -> bool:
-    """True when ``service_plugins`` ended up with NOTHING for ANY service but a previous run's
-    plugin set is still on disk -- the signal to skip the destructive CRS_PLUGINS_DIR swap and
-    the job-cache write below, so this run cannot replace a working, previously-cached plugin set
-    with an empty one.
+# Set by any plugin this run could not resolve, download or unpack. The final swap is destructive
+# (`rmtree(CRS_PLUGINS_DIR)`) and the rendered configuration is the INTERSECTION of
+# `crs-plugins.json` and what sits in that directory, so swapping after a PARTIAL run silently
+# drops the failed plugin's rules from the WAF. A stale rule set for one run beats a missing one.
+#
+# Emptiness is deliberately NOT the signal (that is `should_keep_previous_cache`'s job, and it only
+# ever fires when NOTHING resolved): a run can resolve every URL and still download none of them,
+# and conversely a plugin the operator removed or mistyped is a registry miss, not a failure, and
+# must be allowed to disappear.
+plugin_failures = False
+
+
+def should_keep_previous_cache(service_plugins: Dict[str, Set[str]], crs_plugins_dir: Path, plugin_failures: bool = False) -> bool:
+    """True when this run must NOT publish its plugin set, for either of two reasons.
+
+    ``plugin_failures`` -- at least one plugin could not be resolved, downloaded or unpacked. The
+    swap is destructive and the render is the intersection of ``crs-plugins.json`` and
+    CRS_PLUGINS_DIR, so publishing a partial set silently drops the failed plugin's rules from the
+    WAF. Unconditional, deliberately: on a first run there is nothing to keep, but publishing an
+    incomplete set as if it were complete is still the worse outcome, and the caller reports a
+    failure so the next run retries from scratch.
+
+    Or ``service_plugins`` ended up with NOTHING for ANY service while a previous run's plugin set
+    is still on disk -- so this run cannot replace a working, previously-cached plugin set with an
+    empty one.
 
     Covers the brief's own CI-red scenario: a registry/version LOOKUP failing for every
     configured plugin, so `service_plugins` never gets touched at all and stays every-value-empty
@@ -135,14 +155,18 @@ def should_keep_previous_cache(service_plugins: Dict[str, Set[str]], crs_plugins
     the moment a lookup succeeds -- so `any(service_plugins.values())` is already True from that
     alone, before a single byte is downloaded. A lookup-success-then-every-download-fails run
     therefore still wipes CRS_PLUGINS_DIR. Out of scope for this bugfix (the brief's failure mode
-    is the lookup, not the download), recorded here rather than silently claimed as covered.
+    is the lookup, not the download) when this docstring was written -- ``plugin_failures``, ported
+    from dev ``a92cc3187``, is what covers it now.
     """
+    if plugin_failures:
+        return True
+
     any_installed_this_run = any(service_plugins.values())
     had_existing_plugins = crs_plugins_dir.is_dir() and any(crs_plugins_dir.iterdir())
     return not any_installed_this_run and had_existing_plugins
 
 
-def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]]) -> bool:
+def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]], plugin_failures: bool = False) -> bool:
     """Publish this run's downloaded plugin set (or keep the previous one, see
     ``should_keep_previous_cache``) and push it to the job cache. Returns ``render_changed``.
 
@@ -153,12 +177,15 @@ def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]]) -> bool:
     """
     global status
 
-    if should_keep_previous_cache(service_plugins, CRS_PLUGINS_DIR):
-        # Every plugin failed to resolve or download this run (see the retry/skip handling
-        # above) -- wiping CRS_PLUGINS_DIR now would replace a working, previously-cached plugin
-        # set with nothing, which is worse than leaving it stale for one run. Keep it as-is and
-        # report a failure instead of silently shipping an empty set.
-        LOGGER.error("No Core Rule Set (CRS) plugin could be resolved or downloaded this run, keeping the previously cached plugin set...")
+    if should_keep_previous_cache(service_plugins, CRS_PLUGINS_DIR, plugin_failures):
+        # Some or every plugin failed to resolve, download or unpack this run (see the retry/skip
+        # handling above) -- wiping CRS_PLUGINS_DIR now would replace a working, previously-cached
+        # plugin set with a partial one (or with nothing), which is worse than leaving it stale for
+        # one run. Keep it as-is and report a failure; the next run retries from scratch.
+        if plugin_failures:
+            LOGGER.error("At least one Core Rule Set (CRS) plugin could not be installed, keeping the previously cached plugin set...")
+        else:
+            LOGGER.error("No Core Rule Set (CRS) plugin could be resolved or downloaded this run, keeping the previously cached plugin set...")
         status = 2
         return False
 
@@ -174,7 +201,7 @@ def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]]) -> bool:
     plugins_json = dumps({service: sorted(plugins) for service, plugins in service_plugins.items()}, indent=2).encode()
 
     # This mapping is the render input: an already-installed plugin id keeps its extracted directory
-    # untouched (the `move()` above), so the plugin files can only change when an id does, and an id
+    # untouched (the `copytree()` below), so the plugin files can only change when an id does, and an id
     # carries its version. Read the previous fingerprint BEFORE cache_file overwrites it.
     render_changed = bytes_hash(plugins_json) != JOB.cache_hash("crs-plugins.json")
 
@@ -430,16 +457,18 @@ try:
                         # Retries in get_download_url/request_with_retry are exhausted -- a real
                         # infra failure, not a registry data problem. Skip this ONE plugin rather
                         # than letting it (an uncaught exception used to) crash the whole job and
-                        # discard every other service/plugin's work; whatever this plugin already
-                        # had on disk stays untouched (see the final-swap guard below). Deliberately
-                        # NOT `status = 2`: every OTHER plugin that resolves fine in the same run
-                        # still needs `status == 1` to reach the swap and flag modsecurity for a
-                        # re-render (see swap_and_cache_plugins) -- poisoning status here would ship
-                        # those plugins to disk and the DB cache but never reference them in the
-                        # rendered conf, and never retry, since the next run's fingerprint would
-                        # then match. should_keep_previous_cache already owns the "nothing at all
-                        # resolved" failure signal.
+                        # discard every other service/plugin's work.
+                        #
+                        # `plugin_failures` is why `status = 2` is safe here now (it was not before
+                        # the port of dev a92cc3187, and this comment used to argue against it):
+                        # the flag makes the final swap keep the PREVIOUS plugin set untouched, so
+                        # a failure status describes what is on disk instead of contradicting it.
+                        # Without it, status = 2 shipped the other plugins to disk and the DB cache
+                        # but never referenced them in the rendered conf, and never retried, since
+                        # the next run's fingerprint then matched.
                         LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}) after retries: {e}")
+                        plugin_failures = True
+                        status = 2
                         continue
                     if not success:
                         LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} (version: {plugin_version}): {url}")
@@ -457,9 +486,10 @@ try:
                 try:
                     success, url = get_download_url(plugin_data["repository"])
                 except RuntimeError as e:
-                    # See the identical comment on the version-pinned branch above: no `status = 2`
-                    # here either, for the same reason.
+                    # See the comment on the version-pinned branch above; same reasoning here.
                     LOGGER.error(f"Failed to get the download URL for plugin {plugin_name} after retries: {e}")
+                    plugin_failures = True
+                    status = 2
                     continue
                 if not success:
                     LOGGER.error(f"Failed to get the download URL for plugin {plugin_name}: {url}")
@@ -496,6 +526,8 @@ try:
                     resp = request_with_retry(get, crs_plugin, headers={"User-Agent": "BunkerWeb"}, stream=True, timeout=8)
                     if resp.status_code != 200:
                         LOGGER.warning(f"Got status code {resp.status_code}, skipping download of plugin(s) with URL {crs_plugin}...")
+                        plugin_failures = True
+                        status = 2
                         continue
 
                     # Write content to BytesIO
@@ -507,6 +539,8 @@ try:
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while downloading plugin(s) with URL {crs_plugin} :\n{e}")
+                    plugin_failures = True
+                    status = 2
                     continue
 
                 # Extract it to tmp folder
@@ -534,6 +568,8 @@ try:
                         except BadZipFile as e:
                             LOGGER.debug(format_exc())
                             LOGGER.error(f"Invalid ZIP file: {e}")
+                            plugin_failures = True
+                            status = 2
                             continue
 
                     # Handle TAR files (all compression types)
@@ -554,15 +590,21 @@ try:
                         except TarError as e:
                             LOGGER.debug(format_exc())
                             LOGGER.error(f"Invalid TAR file: {e}")
+                            plugin_failures = True
+                            status = 2
                             continue
 
                     else:
                         LOGGER.error(f"Unknown file type for {crs_plugin}, either ZIP or TAR is supported, skipping...")
+                        plugin_failures = True
+                        status = 2
                         continue
 
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while decompressing plugin(s) from {crs_plugin}:\n{e}")
+                    plugin_failures = True
+                    status = 2
                     continue
 
             plugin_name = ""
@@ -601,7 +643,11 @@ try:
                         continue
                     elif CRS_PLUGINS_DIR.joinpath(plugin_id, plugin_config.name).is_file():
                         LOGGER.info(f"CRS plugin {plugin_name} (version: {plugin_version}) is already installed, we don't need to install it")
-                        move(CRS_PLUGINS_DIR.joinpath(plugin_id), NEW_PLUGINS_DIR.joinpath(plugin_id))
+                        # copytree, not move: CRS_PLUGINS_DIR has to stay COMPLETE until the swap,
+                        # or the `plugin_failures` guard keeps a set this loop has already
+                        # half-emptied -- "keep the previous plugin set" would then still lose every
+                        # plugin that was reused before the failure.
+                        copytree(CRS_PLUGINS_DIR.joinpath(plugin_id), NEW_PLUGINS_DIR.joinpath(plugin_id))
                         installed_plugins.add(plugin_id)
                         continue
 
@@ -639,7 +685,7 @@ try:
 
         service_plugins[service].update(installed_plugins)
 
-    render_changed = swap_and_cache_plugins(service_plugins)
+    render_changed = swap_and_cache_plugins(service_plugins, plugin_failures)
 
     if status == 0:
         status = 1
