@@ -309,6 +309,40 @@ Die Seite **Jobs** kann neben den gewöhnlichen grünen Erfolgs- und roten Fehle
 
 Die erste Verzögerung nach einem erfolgreichen Lauf löst zudem ein schließbares Warnbanner am oberen Rand jeder Seite aus, getrennt vom bestehenden (und schwerwiegenderen) „Push fehlgeschlagen"-Banner, damit eine Flotte, die lediglich auf den Neustart einer Instanz wartet, nicht als defekt erscheint.
 
+## Geführte Einführung
+
+Eine neue Installation öffnet über das Raketensymbol in der oberen Leiste eine **Erste Schritte**-Schublade. Sie listet auf, was noch zu tun ist, hakt jeden Punkt eigenständig ab und verschwindet, sobald alles erledigt ist – oder sobald Sie sie schließen.
+
+Es wird nichts darüber gespeichert, was Sie *gesehen* haben: Jeder Punkt wird bei jedem Öffnen der Schublade neu aus der laufenden Konfiguration abgeleitet. Registrieren Sie einen Dienst über die API oder ein Docker-Label, ist der passende Punkt beim nächsten Blick bereits abgehakt. Umgekehrt kehrt der Punkt zurück, wenn Sie Ihren letzten Dienst löschen.
+
+Was Ihnen gezeigt wird, hängt von Ihrer Rolle ab:
+
+| Rolle | Was die Einführung bietet |
+| --- | --- |
+| Admin | Installation, erster Dienst, HTTPS, erste blockierte Anfrage, MFA, plus optionale Workflow- und PRO-Punkte |
+| Writer | Dasselbe, ohne den Admin-exklusiven PRO-Punkt |
+| Reader | Orientierung statt Aufgaben: wo Dashboard, Reports, Bans und Logs zu finden sind und wie man sie liest |
+
+Reader erhalten beim ersten Besuch auf jeder dieser vier Seiten einen kurzen Hinweis; das Bestätigen mit **Verstanden** hakt den passenden Punkt ab. Jeder Punkt, der auf eine Stelle in der Oberfläche verweist, trägt zudem eine Schaltfläche **Zeig's mir**, die sie in der Navigation hervorhebt.
+
+Optionale Punkte – ein Security-Workflow, PRO – halten den Zähler nie zurück: Eine Community-Installation erreicht „alles erledigt" auch ohne sie.
+
+!!! info "Versehentlich geschlossen?"
+    **Profil → Geführte Einführung → Einführung neu starten** holt die Schublade zurück. Bei einer schreibgeschützten Datenbank ist die Schaltfläche deaktiviert, da nichts gespeichert werden könnte.
+
+## Neuerungen nach einem Upgrade
+
+Nach einem Upgrade zeigt die erste geöffnete Seite eine Zusammenfassung dessen, was sich zwischen der zuletzt genutzten und der jetzt laufenden Version geändert hat. Sie wird aus der im Image mitgelieferten `CHANGELOG.md` erzeugt – nichts wird aus dem Internet geladen, sodass eine Installation ohne Internetzugang dieselbe Zusammenfassung zeigt wie eine verbundene.
+
+Die Zusammenfassung ist pro Benutzer und pro Version: Sie zu schließen markiert diese Version nur für Ihr Konto als gesehen. Sie bleibt vollständig unter **/whats-new** verfügbar, erreichbar über einen Klick auf die Versionsnummer am unteren Rand der Seitenleiste – das Schließen der Zusammenfassung verliert nichts.
+
+Zwei Verhaltensweisen sind wissenswert:
+
+- **Ein Konto, das noch nie eine Zusammenfassung gesehen hat, wird stillschweigend als aktuell markiert.** Das Aktivieren dieser Funktion begrüßt bestehende Benutzer nicht mit der gesamten Historie; Sie sehen Zusammenfassungen erst ab Ihrem nächsten Upgrade.
+- **Downgrades zeigen nichts.** Läuft ein älterer Build als der zuletzt erfasste, wird keine Zusammenfassung angezeigt, statt Releases anzukündigen, die die laufende Binärdatei nicht enthält.
+
+Bei einer schreibgeschützten Datenbank kann nichts gespeichert werden, sodass die Zusammenfassung bei der nächsten Anmeldung erneut erscheint.
+
 ## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO Gratistest"

@@ -309,6 +309,40 @@ La página **Jobs** puede mostrar un tercer resultado de ejecución además de l
 
 El primer diferimiento tras una ejecución exitosa también genera un banner de advertencia descartable en la parte superior de cada página, distinto del banner existente (y más grave) de "push fallido", para que una flota que simplemente espera a que una instancia reinicie no parezca averiada.
 
+## Recorrido guiado
+
+Una instalación nueva abre un panel **Primeros pasos** desde el icono del cohete en la barra superior. Enumera lo que queda por hacer, marca cada elemento por su cuenta y desaparece en cuanto todo está listo, o en cuanto lo cierras.
+
+No se guarda nada sobre lo que has *visto*: cada elemento se vuelve a calcular a partir de la configuración en ejecución cada vez que abres el panel. Registra un servicio desde la API o desde una etiqueta de Docker, y la próxima vez que mires el elemento correspondiente ya estará marcado. A la inversa, eliminar tu último servicio hace que su elemento vuelva a aparecer.
+
+Lo que se te muestra depende de tu rol:
+
+| Rol | Qué ofrece el recorrido |
+| --- | --- |
+| Admin | Instalación, primer servicio, HTTPS, primera solicitud bloqueada, MFA, más los elementos opcionales de workflow y PRO |
+| Writer | Lo mismo, sin el elemento PRO exclusivo de admin |
+| Reader | Orientación en vez de tareas: dónde están el dashboard, los reports, los bans y los logs, y cómo leerlos |
+
+Los Reader reciben una breve pista en cada una de esas cuatro páginas la primera vez que las visitan; confirmarla con **Entendido** es lo que marca el elemento correspondiente. Cualquier elemento que señale un lugar de la interfaz incluye además un botón **Muéstramelo** que lo resalta en la navegación.
+
+Los elementos opcionales — un workflow de seguridad, PRO — nunca retienen el contador: una instalación Community llega a "todo hecho" sin ellos.
+
+!!! info "¿Lo cerraste sin querer?"
+    **Perfil → Recorrido guiado → Reiniciar recorrido** trae de vuelta el panel. En una base de datos de solo lectura el botón está deshabilitado, ya que no se podría guardar nada.
+
+## Novedades tras una actualización
+
+Tras una actualización, la primera página que abres muestra un resumen de lo que cambió entre la versión que usabas antes y la que se ejecuta ahora. Se construye a partir del `CHANGELOG.md` incluido en la imagen — nada se descarga de internet, así que una instalación aislada muestra el mismo resumen que una conectada.
+
+El resumen es por usuario y por versión: cerrarlo marca esa versión como vista solo para tu cuenta. Todo sigue disponible en **/whats-new**, accesible haciendo clic en el número de versión al pie de la barra lateral — cerrar el resumen no pierde nada.
+
+Dos comportamientos que conviene conocer:
+
+- **Una cuenta que nunca ha visto un resumen se marca como al día en silencio.** Activar esta función no recibe a los usuarios existentes con todo el historial; empiezas a ver resúmenes a partir de tu próxima actualización.
+- **Los downgrades no muestran nada.** Ejecutar una build más antigua que la registrada no muestra ningún resumen, en vez de anunciar releases que el binario en ejecución no contiene.
+
+En una base de datos de solo lectura no se puede guardar nada, así que el resumen vuelve a aparecer en el siguiente inicio de sesión.
+
 ## Actualizar a PRO {#upgrade-to-pro}
 
 !!! tip "Prueba gratis de BunkerWeb PRO"

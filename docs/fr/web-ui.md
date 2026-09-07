@@ -309,6 +309,40 @@ La page **Jobs** peut afficher un troisième résultat d'exécution en plus des 
 
 Le premier différé suivant une exécution réussie déclenche aussi une bannière d'avertissement masquable en haut de chaque page, distincte de la bannière existante (et plus grave) « push échoué », afin qu'une flotte simplement en attente qu'une instance redémarre ne paraisse pas cassée.
 
+## Parcours guidé
+
+Une nouvelle installation ouvre un tiroir **Premiers pas** depuis l'icône fusée dans la barre supérieure. Il liste ce qu'il reste à faire, coche chaque élément de lui-même, et disparaît une fois tout terminé — ou dès que vous le fermez.
+
+Rien n'est enregistré sur ce que vous avez *vu* : chaque élément est recalculé à partir de la configuration en cours à chaque ouverture du tiroir. Enregistrez un service depuis l'API, ou depuis un label Docker, et l'élément correspondant est déjà coché la prochaine fois que vous regardez. À l'inverse, supprimer votre dernier service fait réapparaître son élément.
+
+Ce qui vous est montré dépend de votre rôle :
+
+| Rôle | Ce que propose le parcours |
+| --- | --- |
+| Admin | Installation, premier service, HTTPS, première requête bloquée, MFA, plus les éléments optionnels workflow et PRO |
+| Writer | Le même, sans l'élément PRO réservé aux admins |
+| Reader | Une orientation plutôt que des tâches : où se trouvent le dashboard, les reports, les bans et les logs, et comment les lire |
+
+Les Reader reçoivent une brève indication sur chacune de ces quatre pages lors de leur première visite ; l'accepter avec **Compris** coche l'élément correspondant. Tout élément pointant vers un endroit de l'interface porte aussi un bouton **Montre-moi** qui le met en évidence dans la navigation.
+
+Les éléments optionnels — un workflow de sécurité, PRO — ne retiennent jamais le compteur : une installation Community atteint « tout est fait » sans eux.
+
+!!! info "Fermé par accident ?"
+    **Profil → Parcours guidé → Redémarrer le parcours** ramène le tiroir. Sur une base de données en lecture seule, le bouton est désactivé, puisque rien ne pourrait être enregistré.
+
+## Nouveautés après une mise à niveau
+
+Après une mise à niveau, la première page ouverte affiche un récapitulatif de ce qui a changé entre la version précédemment utilisée et celle en cours d'exécution. Il est construit à partir du `CHANGELOG.md` livré dans l'image — rien n'est récupéré depuis internet, donc une installation en air-gap affiche le même récapitulatif qu'une installation connectée.
+
+Le récapitulatif est propre à chaque utilisateur et à chaque version : le fermer marque cette version comme vue uniquement pour votre compte. Tout reste disponible sur **/whats-new**, accessible en cliquant sur le numéro de version en bas de la barre latérale — fermer le récapitulatif ne fait rien perdre.
+
+Deux comportements à connaître :
+
+- **Un compte qui n'a jamais vu de récapitulatif est marqué à jour silencieusement.** Activer cette fonctionnalité n'accueille pas les utilisateurs existants avec tout l'historique ; vous commencez à voir des récapitulatifs à partir de votre prochaine mise à niveau.
+- **Les rétrogradations n'affichent rien.** Exécuter une build plus ancienne que celle enregistrée n'affiche aucun récapitulatif, plutôt que d'annoncer des versions que le binaire en cours d'exécution ne contient pas.
+
+Sur une base de données en lecture seule, rien ne peut être enregistré, donc le récapitulatif réapparaît à la prochaine connexion.
+
 ## Mise à niveau vers PRO {#upgrade-to-pro}
 
 !!! tip "Essai gratuit BunkerWeb PRO"
