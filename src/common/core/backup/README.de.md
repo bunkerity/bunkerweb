@@ -57,6 +57,63 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
 
     Ein Backup kann nur in die Datenbank-Engine zurückgespielt werden, aus der es stammt — die Engine ist Teil des Dateinamens (`backup-mariadb-…`), und eine Wiederherstellung in eine andere wird abgelehnt, bevor irgendetwas angefasst wird. Wenn Sie zwischen Engines migriert sind, bleiben beide Backup-Sätze im Verzeichnis: `restore` ohne Argument nimmt die neueste Datei jeder beliebigen Engine, geben Sie den Pfad also ausdrücklich an, um ein älteres Backup Ihrer aktuellen Engine wiederherzustellen.
 
+### Kontrolliertes Downgrade
+
+Auf eine ältere BunkerWeb-Version zurückzugehen ist **nicht** die Umkehrung eines Upgrades. Manche
+1.7-Tabellen haben in 1.6.x keinen Platz, und auf einigen Datenbank-Engines lässt sich die Migration
+überhaupt nicht rückwärts abspielen. Drei Befehle machen die Entscheidung überprüfbar, und nur der
+letzte verändert etwas:
+
+```bash
+# 1. Kann diese Installation zurück? Nur lesend: kein Schema, keine Daten, keine Datenbank wird
+#    angelegt.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Die Schreibzugriffe stilllegen. Im Vordergrund: hält, bis Sie mit Strg-C abbrechen.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. In einer zweiten Shell, während Schritt 2 hält: erst der Bericht, dann die Ausführung.
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+Ob ein Versionspaar an Ort und Stelle heruntergestuft werden kann, wird aus einem mit der Version
+ausgelieferten **Kompatibilitätsmanifest** gelesen (`downgrade-manifest.json`, überschreibbar mit
+`DOWNGRADE_MANIFEST`); es wird nie aus der Versionsnummer erraten. Für 1.7.0 zurück auf 1.6.14
+verzeichnet das Manifest, aus gemessenen Migrationsläufen auf echten Datenbanken:
+
+| Engine | Downgrade an Ort und Stelle | Warum |
+| ------ | --------------------------- | ----- |
+| SQLite | ✅ getestet | Das Schema kommt exakt so zurück, wie 1.6.14 es deklariert, ohne eine einzige Basiszeile zu verlieren. |
+| PostgreSQL | ✅ getestet | Ebenso, plus zwei ungenutzte Enum-Typen, die zurückbleiben und die 1.6.14 nie ansieht. |
+| MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1265 und 1553) und hinterlässt ein hybrides Schema. |
+| MySQL | ❌ aus Backup wiederherstellen | Fehler 1265 wurde auch hier gemessen; der zweite Blocker ist aus MariaDB abgeleitet, nicht auf MySQL gemessen. |
+
+!!! danger "Ein Downgrade an Ort und Stelle vernichtet 1.7-eigene Daten"
+    Alle zentral gespeicherten Zertifikate, alle anhängbaren Ressourcen (Weiterleitungen,
+    Upstream-Pools, Workflows, Ressourcengruppen), sämtliche Request-Metriken und die Threat Map,
+    alle registrierten Passkeys sowie alle gespeicherten Instanz-Zugangsdaten — eingeschriebene
+    Instanzen müssen danach neu registriert werden. Bans sind die einzige Ausnahme: der Job
+    `sync-bans` lernt sie neu, verloren geht nur ihre Restlaufzeit. Der Preflight zählt die
+    Tabellen, die er zählen kann — einschließlich der Ressourcengruppen, die Sie selbst angelegt
+    haben, aber nicht der von BunkerWeb mitgelieferten — und verweigert, solange eine davon noch
+    etwas enthält. Was er nicht zählen kann, liest er unmittelbar vor der Bestätigung vor: die
+    Spalten, die aus überlebenden Tabellen entfernt werden, und die Daten, die ausgenommen sind,
+    weil sie nie leer sind (Request-Metriken, UI-Einstellungen). Lesen Sie diese Liste; dafür
+    verweigert nichts an Ihrer Stelle.
+
+!!! tip "Jeder Fehlschlag hinterlässt einen startfähigen Zustand"
+    `downgrade --execute` verweigert den Dienst, solange nicht für dasselbe Ziel eine Stilllegung aktiv
+    ist, der selbst erneut ausgeführte Preflight sauber zurückkommt und das Manifest das Paar als
+    getestet markiert. Dieser erneut ausgeführte Preflight liest die primäre Datenbank — die, die er
+    gleich migriert — auch wenn `DATABASE_URI_READONLY` auf ein Read-only-Replikat zeigt; ein
+    hinterherhinkendes Replikat kann also nicht für Zeilen antworten, die das Downgrade zerstören würde.
+    Danach legt es unmittelbar vor der Migration sein eigenes Backup an und spielt es zurück, falls
+    etwas schiefgeht — ein fehlgeschlagenes Downgrade bringt Sie also an den Ausgangspunkt zurück statt
+    auf ein halb migriertes Schema. Im seltenen Fall, dass die Wiederherstellung selbst nicht
+    durchkommt, hält es an und meldet `manual_recovery_required` — mit dem Namen der Sicherungsdatei und
+    dem genauen `bwcli plugin backup restore`-Befehl für die Handarbeit.
+
 ### Beispielkonfigurationen
 
 === "Tägliche Backups mit Aufbewahrung von 7 Dateien"

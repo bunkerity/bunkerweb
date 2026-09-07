@@ -57,6 +57,63 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 
     Una copia de seguridad solo puede restaurarse en el mismo motor de base de datos del que se tomó — el motor forma parte del nombre del archivo (`backup-mariadb-…`), y una restauración en otro distinto se rechaza antes de tocar nada. Si migró entre motores, ambos conjuntos de copias permanecen en el directorio: `restore` sin argumento toma el archivo más reciente de cualquier motor, así que indique la ruta explícitamente para restaurar una copia más antigua de su motor actual.
 
+### Regresión controlada
+
+Volver a una versión anterior de BunkerWeb **no** es lo inverso de una actualización. Algunas tablas
+de 1.7 no tienen dónde ir en 1.6.x, y en algunos motores de base de datos la migración no puede
+reproducirse hacia atrás. Tres comandos hacen que la decisión sea verificable, y solo el último
+modifica algo:
+
+```bash
+# 1. ¿Puede esta instalación volver atrás? Solo lectura: ningún esquema, ningún dato, ninguna base
+#    de datos creada.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Congelar las escrituras. En primer plano: mantiene el bloqueo hasta que pulses Ctrl-C.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. En otra terminal, mientras el paso 2 mantiene el bloqueo: primero el informe, luego la
+#    ejecución.
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+Si un par de versiones puede regresar en el sitio se lee de un **manifiesto de compatibilidad**
+distribuido con la versión (`downgrade-manifest.json`, sustituible con `DOWNGRADE_MANIFEST`); nunca
+se deduce del número de versión. Para 1.7.0 hacia 1.6.14 el manifiesto registra, a partir de
+ejecuciones de migración medidas sobre bases de datos reales:
+
+| Motor | Regresión en el sitio | Por qué |
+| ----- | --------------------- | ------- |
+| SQLite | ✅ probado | El esquema vuelve exactamente al que declara 1.6.14, sin perder ninguna fila de base. |
+| PostgreSQL | ✅ probado | Igual, más dos tipos enum sin usar que quedan atrás y que 1.6.14 nunca consulta. |
+| MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a medio camino (errores 1265 y 1553) y deja un esquema híbrido. |
+| MySQL | ❌ restaurar desde copia de seguridad | El error 1265 también se midió aquí; el segundo bloqueo se infiere de MariaDB, no se midió en MySQL. |
+
+!!! danger "Una regresión en el sitio destruye los datos propios de 1.7"
+    Todos los certificados almacenados de forma centralizada, todos los recursos adjuntables
+    (redirecciones, pools de upstreams, flujos de trabajo, grupos de recursos), todas las métricas de
+    peticiones y el mapa de amenazas, todas las passkeys registradas, y todas las credenciales de
+    instancia almacenadas — las instancias inscritas tendrán que volver a inscribirse después. Los
+    baneos son la única excepción: el job `sync-bans` los reaprende y solo se pierde su duración
+    restante. El preflight cuenta las tablas que sabe contar — incluidos los grupos de recursos que
+    hayas creado tú, pero no los que trae BunkerWeb — y rechaza mientras alguna de ellas contenga
+    algo. Lo que no puede contar lo enumera justo antes de la confirmación: las columnas eliminadas
+    de tablas que sobreviven, y los datos excluidos por no estar nunca vacíos (métricas de
+    peticiones, preferencias de la UI). Lee esa lista: para eso nada rechaza en tu lugar.
+
+!!! tip "Cada fallo deja algo que puede arrancar"
+    `downgrade --execute` rechaza mientras no haya un bloqueo activo para ese mismo destino, el
+    preflight que él mismo vuelve a ejecutar no esté limpio, y el manifiesto no marque el par como
+    probado. Esa reejecución lee la base de datos primaria — la que está a punto de migrar — incluso
+    cuando `DATABASE_URI_READONLY` apunta a una réplica de solo lectura, de modo que una réplica
+    retrasada no puede responder por las filas que la regresión destruiría. Después toma su propia copia
+    de seguridad justo antes de migrar, y la restaura si algo sale mal — así una regresión fallida te
+    devuelve al punto de partida en lugar de dejarte sobre un esquema a medio migrar. En el caso raro de
+    que la propia restauración no llegue a completarse, se detiene e informa `manual_recovery_required`,
+    indicando el archivo de copia de seguridad y el comando `bwcli plugin backup restore` exacto para
+    terminar a mano.
+
 ### Configuraciones de ejemplo
 
 === "Copias de seguridad diarias con retención de 7 archivos"

@@ -57,6 +57,58 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
     A backup can only be restored into the same database engine it was taken from — the engine is part of the file name (`backup-mariadb-…`), and a restore into a different one is refused before anything is touched. If you migrated between engines, both sets of backups stay in the directory: `restore` without an argument takes the most recent file of any engine, so pass the path explicitly to restore an older backup of your current one.
 
+### Controlled Downgrade
+
+Going back to an older BunkerWeb release is **not** the reverse of an upgrade. Some 1.7 tables have
+nowhere to go in 1.6.x, and on some database engines the migration cannot be replayed backwards at
+all. Three commands make that decidable instead of a gamble, and only the last of them changes
+anything:
+
+```bash
+# 1. Can this installation go back? Read-only: no schema, no data, no database is created.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Hold the writers still. Foreground: it keeps holding until you stop it with Ctrl-C.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. In another shell, while step 2 is holding: report what would happen, then do it.
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+Whether a version pair can be downgraded in place is read from a **compatibility manifest** shipped
+with the release (`downgrade-manifest.json`, overridable with `DOWNGRADE_MANIFEST`); it is never
+guessed from the version number. For 1.7.0 back to 1.6.14 the manifest records, from measured
+upgrade/downgrade runs on real databases:
+
+| Engine | Downgrade in place | Why |
+| ------ | ------------------ | --- |
+| SQLite | ✅ tested | The schema comes back exactly as 1.6.14 declares it, with no baseline row lost. |
+| PostgreSQL | ✅ tested | Same, plus two unused enum types left behind that 1.6.14 never looks at. |
+| MariaDB | ❌ restore from backup | The migration aborts partway (errors 1265 and 1553) and leaves a hybrid schema. |
+| MySQL | ❌ restore from backup | Error 1265 measured here too; the second blocker is inferred from MariaDB, not measured on MySQL. |
+
+!!! danger "An in-place downgrade destroys 1.7-only data"
+    Every centrally stored certificate, every attachable resource (redirects, upstream pools,
+    workflows, resource groups), all request metrics and the threat map, every registered passkey,
+    and every stored instance credential — enrolled instances have to be re-registered afterwards.
+    Bans are the one exception: the `sync-bans` job relearns them, losing only their remaining
+    durations. The preflight counts the tables it can count — including resource groups you built
+    yourself, but not the ones BunkerWeb ships — and refuses while any of them still holds
+    something. What it cannot count it reads out instead, right before the confirmation prompt:
+    the columns dropped from tables that survive, and the data excluded because it is never empty
+    (request metrics, UI preferences). Read that list; nothing refuses on your behalf for it.
+
+!!! tip "Every failure leaves something startable"
+    `downgrade --execute` refuses unless a quiescence hold is in place for that same target, the
+    preflight it re-runs itself comes back clean, and the manifest marks the pair as tested. That re-run
+    reads the primary — the database it is about to migrate — even when `DATABASE_URI_READONLY` points at a
+    read-only replica, so a replica that lags cannot answer for rows the downgrade would destroy. It then
+    takes its own backup immediately before migrating, and restores it if anything goes wrong — so a
+    failed downgrade puts you back where you started rather than on a half-migrated schema. In the rare
+    case where the rollback itself cannot land, it stops and reports `manual_recovery_required`, naming
+    the backup file and the exact `bwcli plugin backup restore` command to finish by hand.
+
 ### Example Configurations
 
 === "Daily Backups with 7-File Retention"

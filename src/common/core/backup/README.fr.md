@@ -57,6 +57,63 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 
     Une sauvegarde ne peut être restaurée que dans le moteur de base de données depuis lequel elle a été prise — le moteur fait partie du nom de fichier (`backup-mariadb-…`), et une restauration vers un autre moteur est refusée avant que quoi que ce soit ne soit touché. Si vous avez migré d'un moteur à un autre, les deux jeux de sauvegardes restent dans le répertoire : `restore` sans argument prend le fichier le plus récent, quel que soit son moteur, donc indiquez le chemin explicitement pour restaurer une sauvegarde plus ancienne de votre moteur actuel.
 
+### Retour arrière contrôlé
+
+Revenir à une version antérieure de BunkerWeb n'est **pas** l'inverse d'une mise à niveau. Certaines
+tables 1.7 n'ont nulle part où aller en 1.6.x, et sur certains moteurs de base de données la
+migration ne peut pas être rejouée à l'envers. Trois commandes rendent la décision vérifiable, et
+seule la dernière modifie quoi que ce soit :
+
+```bash
+# 1. Cette installation peut-elle revenir en arrière ? Lecture seule : aucun schéma, aucune donnée,
+#    aucune base créée.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Geler les écritures. Au premier plan : le gel dure jusqu'à ce que vous fassiez Ctrl-C.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. Dans un autre shell, pendant que l'étape 2 tient : d'abord le rapport, puis l'exécution.
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+La possibilité de rétrograder un couple de versions sur place est lue dans un **manifeste de
+compatibilité** livré avec la version (`downgrade-manifest.json`, surchargeable via
+`DOWNGRADE_MANIFEST`) ; elle n'est jamais déduite du numéro de version. Pour 1.7.0 vers 1.6.14, le
+manifeste enregistre, d'après des exécutions de migration mesurées sur de vraies bases :
+
+| Moteur | Retour en place | Pourquoi |
+| ------ | --------------- | -------- |
+| SQLite | ✅ testé | Le schéma revient exactement à celui que déclare 1.6.14, sans perdre une seule ligne de base. |
+| PostgreSQL | ✅ testé | Idem, plus deux types enum inutilisés laissés en place, que 1.6.14 ne regarde jamais. |
+| MariaDB | ❌ restauration depuis une sauvegarde | La migration s'interrompt en cours de route (erreurs 1265 et 1553) et laisse un schéma hybride. |
+| MySQL | ❌ restauration depuis une sauvegarde | L'erreur 1265 y a été mesurée aussi ; le second blocage est déduit de MariaDB, pas mesuré sur MySQL. |
+
+!!! danger "Un retour en place détruit les données propres à 1.7"
+    Tous les certificats stockés de façon centralisée, toutes les ressources attachables
+    (redirections, pools d'upstreams, workflows, groupes de ressources), toutes les métriques de
+    requêtes et la carte des menaces, toutes les passkeys enregistrées, et tous les identifiants
+    d'instance stockés — les instances enrôlées devront être ré-enrôlées ensuite. Les bans sont la
+    seule exception : le job `sync-bans` les réapprend, seule leur durée restante est perdue. Le
+    preflight compte les tables qu'il sait compter — y compris les groupes de ressources que vous
+    avez créés vous-même, mais pas ceux livrés par BunkerWeb — et refuse tant que l'une d'elles
+    contient quelque chose. Ce qu'il ne peut pas compter, il l'énonce juste avant la confirmation :
+    les colonnes supprimées de tables qui survivent, et les données exclues parce qu'elles ne sont
+    jamais vides (métriques de requêtes, préférences d'UI). Lisez cette liste : rien ne refuse à
+    votre place pour ces données-là.
+
+!!! tip "Chaque échec laisse un état démarrable"
+    `downgrade --execute` refuse tant qu'un gel n'est pas en place pour cette même cible, que le
+    preflight qu'il relance lui-même n'est pas au vert, et que le manifeste ne marque pas le couple
+    comme testé. Ce preflight relancé interroge la base primaire — celle qu'il s'apprête à migrer — même
+    lorsque `DATABASE_URI_READONLY` désigne un réplica en lecture seule : un réplica en retard ne peut
+    donc pas répondre à la place des lignes que le retour détruirait. Il prend ensuite sa propre
+    sauvegarde juste avant de migrer, et la restaure si quoi que ce soit échoue — un retour raté vous
+    ramène donc à votre point de départ plutôt que sur un schéma à moitié migré. Dans le cas rare où la
+    restauration elle-même n'aboutit pas, il s'arrête et signale `manual_recovery_required`, en nommant
+    le fichier de sauvegarde et la commande `bwcli plugin backup restore` exacte pour terminer à la
+    main.
+
 ### Exemples de configuration
 
 === "Sauvegardes quotidiennes avec rétention de 7 fichiers"
