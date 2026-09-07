@@ -139,6 +139,7 @@
 - [BUGFIX] `ui`: the reserved default server is no longer creatable from the wizard, counted as an online service, or offered as an attachment target.
 - [BUGFIX] `ui`: a CSRF failure with no admin yet is sent to the setup wizard with the reason shown, instead of to a login page that only bounces back.
 - [SECURITY] `ui`: the admin panel's Permissions-Policy is resynced with Chromium — 14 features added, the retired `battery` dropped.
+- [BUGFIX] `db`: an empty custom-config payload refused to prevent data loss now says so, instead of reporting the refused write as a success.
 
 ## v1.6.14~rc1 - 2026/07/??
 

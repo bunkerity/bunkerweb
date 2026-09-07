@@ -46,9 +46,29 @@ class TestSaveCustomConfigs:
 
     def test_empty_ui_payload_is_data_loss_guarded(self, cdb):
         cdb.save_custom_configs([{"type": "http", "name": "x", "data": "# a", "method": "ui"}], "ui")
-        # An empty ui payload must NOT wipe existing ui-owned rows.
-        assert cdb.save_custom_configs([], "ui") == ""
+        # An empty ui payload must NOT wipe existing ui-owned rows...
+        refusal = cdb.save_custom_configs([], "ui")
         assert len(cdb.get_custom_configs()) == 1
+
+        # ...and it must SAY it refused. This used to return "", which every caller reads as
+        # success: `PUT /configs/bulk` answered 200, the UI flashed "successfully saved" and
+        # `save_config.py` recorded a "custom_configs" change -- for a write it had just refused.
+        assert refusal, "a refused write reported itself as a successful one"
+        assert "ui" in refusal and "empty" in refusal
+        assert "1" in refusal, "the operator is not told how many rows the refusal protected"
+
+    def test_an_empty_payload_with_nothing_to_lose_is_still_a_success(self, cdb):
+        """The guard only fires when there ARE rows to wipe; an empty database is a no-op, not a
+        refusal, or every first boot would report one."""
+        assert cdb.save_custom_configs([], "ui") == ""
+
+    def test_a_method_the_guard_does_not_cover_is_untouched(self, cdb):
+        """Only ui/api/manual carry this guard -- autoconf's empty payload IS a real "wipe them
+        all", because autoconf resends its whole discovered set on every reconcile."""
+        cdb.save_custom_configs([{"type": "http", "name": "x", "data": "# a", "method": "autoconf"}], "autoconf")
+
+        assert cdb.save_custom_configs([], "autoconf") == ""
+        assert cdb.get_custom_configs() == []
 
 
 class TestUpsertCustomConfig:

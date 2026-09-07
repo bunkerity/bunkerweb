@@ -71,7 +71,14 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                             f"unreadable custom configs folder for the manual method). Aborting "
                             f"save_custom_configs to prevent data loss."
                         )
-                        return message
+                        # NOT `return message`: `message` is still empty here, and an empty return
+                        # is what every caller reads as SUCCESS -- the API answered 200, the UI
+                        # flashed "successfully saved" and the scheduler regenerated over the
+                        # operator's on-disk edit, all for a write that was refused.
+                        return (
+                            f"Refusing to save custom configs: the {method} payload is empty while {existing_count} "
+                            f"{method} custom config(s) exist. Nothing was changed."
+                        )
                 # Delete all the old config
                 session.execute(delete(Custom_configs).where(Custom_configs.method == method))
 
