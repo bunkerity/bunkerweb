@@ -746,7 +746,7 @@ function cleanup_stack () {
 
     if [ "$integration" != "Kubernetes" ] ; then
         containers=$(docker ps -a --format "{{.Names}}")
-        if echo "$containers" | grep -q "redis-sentinel-1" ; then
+        if echo "$containers" | grep -qx "redis-sentinel-1" ; then
             docker compose -f tests/misc/docker/sentinel.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -755,7 +755,7 @@ function cleanup_stack () {
             fi
         fi
 
-        if echo "$containers" | grep -q "redis-master" ; then
+        if echo "$containers" | grep -qx "redis-master" ; then
             docker compose -f tests/misc/docker/redis-master.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -764,7 +764,7 @@ function cleanup_stack () {
             fi
         fi
 
-        if echo "$containers" | grep -q "valkey" ; then
+        if echo "$containers" | grep -qx "valkey" ; then
             docker compose -f tests/misc/docker/valkey.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -773,7 +773,7 @@ function cleanup_stack () {
             fi
         fi
 
-        if echo "$containers" | grep -q "valkey-sentinel-1" ; then
+        if echo "$containers" | grep -qx "valkey-sentinel-1" ; then
             docker compose -f tests/misc/docker/valkey-sentinel.yml down -v
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -939,7 +939,7 @@ function cleanup_stack () {
             fi
 
             containers=$(docker ps -a --format "{{.Names}}")
-            if echo "$containers" | grep -q "syslog" ; then
+            if echo "$containers" | grep -qx "syslog" ; then
                 docker compose -f tests/misc/docker/syslog.yml down -v
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
@@ -948,7 +948,7 @@ function cleanup_stack () {
                 fi
             fi
 
-            if echo "$containers" | grep -q "crowdsec" ; then
+            if echo "$containers" | grep -qx "crowdsec" ; then
                 docker compose -f tests/misc/docker/crowdsec.yml down -v
                 # shellcheck disable=SC2181
                 if [ $? -ne 0 ] ; then
@@ -1117,7 +1117,7 @@ function cleanup_stack () {
         fi
 
         containers=$(docker ps -a --format "{{.Names}}")
-        if echo "$containers" | grep -q "syslog" ; then
+        if echo "$containers" | grep -qx "syslog" ; then
             docker compose -f tests/misc/docker/syslog.yml exec syslog truncate -s 0 /var/log/bunkerweb/bunkerweb.log
         fi
 
@@ -1723,11 +1723,11 @@ function restart_stack () {
         fi
 
         containers=$(docker ps -a --format "{{.Names}}")
-        if echo "$containers" | grep -q "syslog" ; then
+        if echo "$containers" | grep -qx "syslog" ; then
             docker compose -f tests/misc/docker/syslog.yml exec syslog truncate -s 0 /var/log/bunkerweb/bunkerweb.log
         fi
 
-        if echo "$containers" | grep -q "crowdsec" ; then
+        if echo "$containers" | grep -qx "crowdsec" ; then
             docker compose -f tests/misc/docker/crowdsec.yml down
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
@@ -2463,47 +2463,47 @@ function log_stack () {
         fi
     else
         containers=$(docker ps -a --format "{{.Names}}")
-        if echo "$containers" | grep -q "bw-db" ; then
+        if echo "$containers" | grep -qx "bw-db" ; then
             log "UTILS" "ℹ️ " "🐳 Showing database logs ..."
             docker logs bw-db
         fi
 
-        if echo "$containers" | grep -q "custom-api" ; then
+        if echo "$containers" | grep -qx "custom-api" ; then
             log "UTILS" "ℹ️ " "🔧 Showing custom-api logs ..."
             docker logs custom-api
         fi
 
-        if echo "$containers" | grep -q "php-fpm" ; then
+        if echo "$containers" | grep -qx "php-fpm" ; then
             log "UTILS" "ℹ️ " "🐘 Showing php-fpm logs ..."
             docker logs php-fpm
         fi
 
-        # if echo "$containers" | grep -q "dnsmasq" ; then
+        # if echo "$containers" | grep -qx "dnsmasq" ; then
         #     log "UTILS" "ℹ️ " "🤿 Showing dnsmasq logs ..."
         #     docker logs dnsmasq
         # fi
 
-        if echo "$containers" | grep -q "redis-master" ; then
+        if echo "$containers" | grep -qx "redis-master" ; then
             log "UTILS" "ℹ️ " "🐳 Showing redis-master logs ..."
             docker logs redis-master
         fi
 
-        if echo "$containers" | grep -q "valkey" ; then
+        if echo "$containers" | grep -qx "valkey" ; then
             log "UTILS" "ℹ️ " "🐳 Showing valkey logs ..."
             docker logs valkey
         fi
 
-        if echo "$containers" | grep -q "redis-sentinel-1" ; then
+        if echo "$containers" | grep -qx "redis-sentinel-1" ; then
             log "UTILS" "ℹ️ " "🐳 Showing sentinel logs ..."
             docker compose -f tests/misc/docker/sentinel.yml logs
         fi
 
-        if echo "$containers" | grep -q "valkey-sentinel-1" ; then
+        if echo "$containers" | grep -qx "valkey-sentinel-1" ; then
             log "UTILS" "ℹ️ " "🐳 Showing valkey-sentinel logs ..."
             docker compose -f tests/misc/docker/valkey-sentinel.yml logs
         fi
 
-        if echo "$containers" | grep -q "crowdsec" ; then
+        if echo "$containers" | grep -qx "crowdsec" ; then
             log "UTILS" "ℹ️ " "🦙 Showing CrowdSec logs ..."
             docker compose -f tests/misc/docker/crowdsec.yml logs
         fi
