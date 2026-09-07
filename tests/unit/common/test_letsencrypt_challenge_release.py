@@ -68,7 +68,17 @@ io.open = function(path, mode)
     OPENED[#OPENED + 1] = path
     if mode == nil or mode == "r" then
         if FILES[path] == nil then return nil, "no such file or directory" end
-        return { close = function() end, read = function() return FILES[path] end }
+        -- Faithful to file:read(n): a bounded read returns nil at EOF, which is what an empty
+        -- token file yields and what access() uses to tell a real token from a stale placeholder.
+        return {
+            close = function() end,
+            read = function(_, count)
+                local content = FILES[path]
+                if count == nil or count == "*a" or count == "*all" then return content end
+                if content == "" then return nil end
+                return content:sub(1, count)
+            end,
+        }
     end
     local buffer = {}
     return {
@@ -209,4 +219,16 @@ def test_an_empty_token_is_rejected():
         local r = access("{PREFIX}", armed())
         assert(r.status == nil, "status " .. tostring(r.status))
         assert(#OPENED == 0, "the empty token was opened: " .. tostring(OPENED[1]))
+        """)
+
+
+def test_an_empty_token_file_does_not_arm_the_bypass():
+    """Port of dev 0af49ac8b (folded here, 1.7 has no ``acme.lua``): ``io.open`` alone succeeds on
+    a directory, an unreadable file and an empty placeholder, none of which can ever satisfy a
+    validation -- so presence is not enough, the file has to hold something."""
+    _run(f"""
+        challenge_api("POST", {{ token = "tok3n", validation = "" }})
+        local r = access("{PREFIX}tok3n", armed())
+        assert(r.status == nil, "an empty challenge file armed the bypass, status " .. tostring(r.status))
+        assert(r.ret == true, "the request must carry on through the access chain, not be refused")
         """)

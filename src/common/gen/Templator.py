@@ -558,6 +558,7 @@ class Templator:
         self._base_template_vars = {
             "is_custom_conf": Templator.is_custom_conf,
             "has_variable": Templator.has_variable,
+            "has_service_with": Templator.has_service_with,
             "random": Templator.random,
             "read_lines": Templator.read_lines,
             "import": import_module,
@@ -1082,6 +1083,30 @@ class Templator:
                 if all_vars.get(f"{server_name}_{variable}") == value:
                     return True
         return False
+
+    @staticmethod
+    def has_service_with(all_vars: Dict[str, Any], conditions: Dict[str, Any]) -> bool:
+        """Check if at least one service matches every condition at once.
+
+        `has_variable` answers each setting independently over the whole fleet, so ANDing several of
+        its calls mixes services: one service can satisfy a condition another one fails. A fleet-wide
+        template that needs the conditions to hold together has to evaluate them service by service.
+
+        Args:
+            all_vars (Dict[str, Any]): Configuration variables.
+            conditions (Dict[str, Any]): Setting names mapped to the value each one must have.
+
+        Returns:
+            bool: True if one service, or the global config in single-site mode, matches them all.
+                A multisite fleet with no service yet yields False: the global values never stand in
+                for a missing service here, unlike `has_variable`.
+        """
+        if all_vars.get("MULTISITE", "no") != "yes":
+            return all(all_vars.get(setting) == value for setting, value in conditions.items())
+        return any(
+            all(all_vars.get(f"{server_name}_{setting}", all_vars.get(setting)) == value for setting, value in conditions.items())
+            for server_name in all_vars.get("SERVER_NAME", "").strip().split()
+        )
 
     @staticmethod
     def random(nb: int, characters: str = ascii_letters + digits) -> str:

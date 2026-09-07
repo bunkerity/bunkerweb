@@ -30,7 +30,7 @@ Au-delà des paramètres par service ci-dessous, une redirection peut être enre
 
 | Paramètre                 | Défaut | Contexte  | Multiple | Description                                                         |
 | ------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`    | multisite | oui      | Chemin source à rediriger. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. |
+| `REDIRECT_FROM`           | `/`    | multisite | oui      | Chemin source à rediriger. Une valeur commençant par `^` ou se terminant par `$` est traitée comme un emplacement défini par une expression régulière. Vous pouvez éventuellement préfixer avec `~`, `~*`, `=` ou `^~` suivi d'une espace pour définir explicitement le modificateur d'emplacement nginx ; aucune espace, `;`, `{` ou `}` n'est autorisé ailleurs dans la valeur. |
 | `REDIRECT_TO`             |        | multisite | oui      | URL de destination. Laisser vide pour désactiver.                   |
 | `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | oui      | Conserver le chemin d'origine en l'ajoutant à l'URL de destination. |
 | `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code HTTP : `301`, `302`, `303`, `307` ou `308`.                    |

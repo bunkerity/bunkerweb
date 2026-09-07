@@ -8,10 +8,10 @@
     "REDIRECT_FROM": {
       "context": "multisite",
       "default": "/",
-      "help": "Path to redirect from. A value starting with ^ or ending with $ is treated as a regex location.",
+      "help": "Path to redirect from. A value starting with ^ or ending with $ is treated as a regex location. Optionally prefix with ~, ~*, = or ^~ followed by one space to set the nginx location modifier explicitly; no spaces, ;, { or } are allowed elsewhere in the value.",
       "id": "redirect-from",
       "label": "Redirect from",
-      "regex": "^.+",
+      "regex": "^(?!(?:~\\*|~|\\^~|=)$)(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "redirect"
     },

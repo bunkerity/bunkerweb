@@ -51,6 +51,24 @@ def cfg(**settings):
 # ---------------------------------------------------------------------------------------------
 
 
+# NGINX strips the quotes at tokenization, so `location "/"` and `location /` are the SAME
+# location URI and NGINX still refuses the pair with "duplicate location". The templates quote
+# the operand (port of dev 0af49ac8b) so a value carrying `"`, `#` or a backslash cannot end the
+# directive early; the quotes are directive syntax, not part of the URI, which is why the claim
+# registry keeps claiming the unquoted value. Every render-vs-claim assertion therefore compares
+# claim keys, never raw text: comparing raw text makes a quoted emitter and an unquoted one look
+# like they no longer collide when NGINX still sees a duplicate.
+def location_claim_key(location_line: str) -> str:
+    """The `rendered_location` claim key that a rendered `location ... {` line corresponds to."""
+    body = location_line[len("location ") : -len(" {")]  # noqa: E203
+    if not body.endswith('"'):
+        return body  # an emitter that does not quote its operand (php.conf's fixed `location /`)
+    opening = body.index('"')
+    modifier = body[:opening].strip()
+    operand = body[opening + 1 : -1].replace('\\"', '"').replace("\\\\", "\\")  # noqa: E203
+    return f"{modifier} {operand}" if modifier else operand
+
+
 def test_php_is_registered_with_both_triggers_and_no_path_setting():
     assert LOCATION_FAMILIES["PHP"] == (("REMOTE_PHP", "LOCAL_PHP"), None)
     assert "REMOTE_PHP" in LOCATION_TRIGGERS and "LOCAL_PHP" in LOCATION_TRIGGERS
@@ -284,7 +302,7 @@ def test_every_emitter_renders_the_location_the_registry_claims_for_it(template,
     php.conf also emits `location ~ \\.php$`, which nothing else can collide with; only the
     unqualified one is the shared claim.
     """
-    assert f"location {FIXED_LOCATION} {{" in _default_locations(template, trigger)
+    assert FIXED_LOCATION in [location_claim_key(line) for line in _default_locations(template, trigger)]
 
 
 @pytest.mark.parametrize(
@@ -307,5 +325,5 @@ def test_the_refused_pairs_are_the_ones_nginx_would_see_twice():
     """
     for first, second in ((EMITTERS[0], EMITTERS[3]), (EMITTERS[0], EMITTERS[2]), (EMITTERS[1], EMITTERS[3])):
         emitted = _default_locations(*first) + _default_locations(*second)
-        assert emitted.count(f"location {FIXED_LOCATION} {{") == 2, f"{first[0]} + {second[0]} no longer collide"
+        assert [location_claim_key(line) for line in emitted].count(FIXED_LOCATION) == 2, f"{first[0]} + {second[0]} no longer collide"
         assert inline_family_conflict(cfg(**{**first[1], **second[1]}), SERVER, PREFIXES) != ""

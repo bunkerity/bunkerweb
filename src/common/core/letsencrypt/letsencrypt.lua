@@ -576,7 +576,14 @@ function letsencrypt:access()
 	if not file then
 		return self:ret(true, "no challenge pending for this token")
 	end
+	-- A bounded read rejects directories, unreadable files and empty/stale token placeholders:
+	-- open() alone succeeds on all three, and each one would arm the exemption for a token that
+	-- can never satisfy a validation.
+	local byte = file:read(1)
 	file:close()
+	if byte == nil or byte == "" then
+		return self:ret(true, "empty or unreadable challenge file")
+	end
 	self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 	return self:ret(true, "visit from LE", OK)
 end

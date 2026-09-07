@@ -35,15 +35,17 @@ TEMPLATE = ROOT / "src" / "common" / "core" / "reverseproxy" / "confs" / "server
 
 # (REVERSE_PROXY_URL, the location line NGINX must receive, may X-Forwarded-Prefix be sent?)
 URLS = [
-    ("/", "location / {", True),
-    ("/api/", "location /api/ {", True),
-    ("^/api/v[0-9]+", "location ~ ^/api/v[0-9]+ {", False),
-    ("/health$", "location ~ /health$ {", False),
-    ("^/api/v[0-9]+$", "location ~ ^/api/v[0-9]+$ {", False),
-    ("~ ^/api", "location ~ ^/api {", False),
-    ("~* \\.php$", "location ~* \\.php$ {", False),
-    ("= /exact", "location = /exact {", False),
-    ("^~ /static", "location ^~ /static {", False),
+    ("/", 'location "/" {', True),
+    ("/api/", 'location "/api/" {', True),
+    ("^/api/v[0-9]+", 'location ~ "^/api/v[0-9]+" {', False),
+    ("/health$", 'location ~ "/health$" {', False),
+    ("^/api/v[0-9]+$", 'location ~ "^/api/v[0-9]+$" {', False),
+    ("~ ^/api", 'location ~ "^/api" {', False),
+    # The template escapes the backslash for NGINX: inside a quoted operand `\\` is one literal
+    # backslash, so the regex NGINX compiles is still `\.php$`.
+    ("~* \\.php$", 'location ~* "\\\\.php$" {', False),
+    ("= /exact", 'location = "/exact" {', False),
+    ("^~ /static", 'location ^~ "/static" {', False),
 ]
 
 
@@ -55,6 +57,21 @@ URLS = [
 # shape, FAMILIES when another plugin starts rendering a `location`. Neither growth is a defect.
 MINIMUM_URLS = 9
 MINIMUM_FAMILIES = 3
+
+
+# NGINX strips the quotes at tokenization, so `location "/"` and `location /` are the same URI and
+# NGINX still refuses the pair. The templates quote the operand (port of dev 0af49ac8b) so a value
+# carrying `"`, `#` or a backslash cannot end the directive early; the quotes are directive syntax,
+# not part of the URI, which is why `rendered_location` keeps claiming the unquoted value.
+def _claim_key(location_line: str) -> str:
+    """The `rendered_location` claim key a rendered `location ... {` line corresponds to."""
+    body = location_line[len("location ") : -len(" {")]  # noqa: E203
+    if not body.endswith('"'):
+        return body
+    opening = body.index('"')
+    modifier = body[:opening].strip()
+    operand = body[opening + 1 : -1].replace('\\"', '"').replace("\\\\", "\\")  # noqa: E203
+    return f"{modifier} {operand}" if modifier else operand
 
 
 def test_the_source_lists_have_not_emptied_out():
@@ -140,6 +157,24 @@ FAMILIES = [
 ]
 
 
+def _render_family_raw(template: str, config: dict) -> str:
+    environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, keep_trailing_newline=True)
+    environment.globals["import"] = import_module
+    return environment.from_string((ROOT / "src" / "common" / "core" / template).read_text(encoding="utf-8")).render(
+        USE_REVERSE_PROXY="yes",
+        USE_GRPC="yes",
+        SERVER_NAME="www.example.com",
+        REVERSE_PROXY_CUSTOM_HOST="",
+        GRPC_CUSTOM_HOST="",
+        GRPC_SSL_SNI="no",
+        USE_MODSECURITY="no",
+        USE_MTLS="no",
+        USE_PROXY_CACHE="no",
+        USE_UI="no",
+        all=config,
+    )
+
+
 def _render_family(template: str, path_setting: str, trigger: dict, value: str) -> list:
     environment = jinja2.Environment(undefined=jinja2.ChainableUndefined, keep_trailing_newline=True)
     environment.globals["import"] = import_module
@@ -180,7 +215,7 @@ def test_an_explicit_modifier_is_never_double_prefixed():
     for url in ("~ ^/api", "~* \\.php$", "= /exact", "^~ /static"):
         rendered = _render_url(url)
 
-        assert f"location ~ {url} {{" not in rendered, f"{url!r} got a second modifier"
+        assert f'location ~ "{url}" {{' not in rendered, f"{url!r} got a second modifier"
 
 
 def test_the_template_still_reads_the_url_from_the_suffixed_setting():
@@ -198,13 +233,13 @@ def test_the_template_still_reads_the_url_from_the_suffixed_setting():
         if line.startswith("location ")
     ]
 
-    assert locations == ["location /first {", "location ~ ^/second {"]
+    assert locations == ['location "/first" {', 'location ~ "^/second" {']
 
 
 @pytest.mark.parametrize(("url", "expected", "_prefix_ok"), URLS)
 def test_the_claim_key_is_the_location_nginx_receives(url, expected, _prefix_ok):
     """What a service claims must be what NGINX sees, or the conflict check misses a duplicate."""
-    assert rendered_location("REVERSE_PROXY_URL", url) == expected[len("location ") : -len(" {")]  # noqa: E203
+    assert rendered_location("REVERSE_PROXY_URL", url) == _claim_key(expected)
 
 
 def test_two_spellings_of_one_regex_location_are_a_single_claim():
@@ -242,4 +277,141 @@ def test_every_template_agrees_with_the_claim_helper(template, path_setting, tri
     """
     locations = _render_family(template, path_setting, trigger, value)
 
-    assert locations == [f"location {rendered_location(path_setting, value)} {{"]
+    assert [_claim_key(line) for line in locations] == [rendered_location(path_setting, value)]
+    # _claim_key passes an UNQUOTED line straight through (php.conf renders one), so the claim
+    # comparison above cannot tell a quoted emitter from an unquoted one. Without this line a
+    # template that drops the quoting ships unpinned: only reverse-proxy.conf is covered by
+    # test_the_operand_is_quoted_and_escaped, and grpc.conf and redirect.conf are rendered
+    # nowhere else in the suite.
+    assert all(line.endswith('" {') for line in locations), f"{template} stopped quoting its operand: {locations}"
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        # A bare `#` starts a comment and a bare `"` ends the operand: unquoted, either one
+        # truncates the directive and NGINX either refuses the file or serves a location nobody
+        # asked for. The value regex allows both (only whitespace, `;`, `{` and `}` are refused),
+        # so quoting is what makes them safe.
+        ('/a"b', 'location "/a\\"b" {'),
+        ("/a#b", 'location "/a#b" {'),
+        ("/a\\b", 'location "/a\\\\b" {'),
+        ("~ ^/a#b", 'location ~ "^/a#b" {'),
+    ],
+)
+def test_the_operand_is_quoted_and_escaped(url, expected):
+    """Port of dev 0af49ac8b: the operand is quoted, and `"`/`\\` inside it are escaped."""
+    locations = [line for line in _render_url(url).splitlines() if line.startswith("location ")]
+
+    assert locations == [expected]
+    # ...and the claim registry still claims the value itself, so the two guards keep agreeing.
+    assert _claim_key(expected) == rendered_location("REVERSE_PROXY_URL", url)
+
+
+MODIFIERS = ("~", "~*", "=", "^~")
+
+
+def _expected_location(value: str) -> str:
+    """The `location` line the three templates must all render for `value`.
+
+    Derived from the rule rather than copied from a template, so it cannot drift with the thing
+    it checks: explicit modifier wins, an anchored path is implicitly `~`, the operand is quoted
+    and its backslashes and quotes escaped for NGINX's own string syntax.
+    """
+    # The rule stated in words, not the template's expression: ANY whitespace run separates the
+    # modifier from the operand, and the operand is then whatever is left, VERBATIM. Deliberately
+    # not `rendered_location`'s rule -- that one collapses every whitespace run, including inside
+    # the operand, which is a claim-side normalisation and not what NGINX receives.
+    parts = value.split(None, 1)
+    head = parts[0] if parts else ""
+    if head in MODIFIERS:
+        modifier, operand = head, (parts[1] if len(parts) > 1 else "")
+    else:
+        modifier = "~" if value.startswith("^") or value.endswith("$") else ""
+        operand = value
+    quoted = operand.replace("\\", "\\\\").replace('"', '\\"')
+    return f'location {modifier} "{quoted}" {{' if modifier else f'location "{quoted}" {{'
+
+
+@pytest.mark.parametrize(("template", "path_setting", "trigger"), FAMILIES)
+# "~  ^/api" and "~\t^/a" are the whitespace-divergence cases: `rendered_location` splits on ANY
+# whitespace and collapses the separator, so the template has to do the same or the two mirrors
+# claim different locations for one value (Criticos round 2).
+@pytest.mark.parametrize("url", ['/a"b', "/a#b", "/a\\b", "~ ^/a#b", "^/api", "/", "~  ^/api", "~\t^/a"])
+def test_all_three_templates_quote_and_escape_alike(template, path_setting, trigger, url):
+    """The same escaping in every emitter: one template left unquoted is one injection site left.
+
+    `test_the_operand_is_quoted_and_escaped` covers reverse-proxy.conf only, and `_claim_key`
+    passes an unquoted line straight through, so without this grpc.conf and redirect.conf could
+    drop the quoting with the whole suite still green.
+    """
+    locations = _render_family(template, path_setting, trigger, url)
+
+    assert locations == [_expected_location(url)]
+    assert _claim_key(locations[0]) == rendered_location(path_setting, url)
+
+
+@pytest.mark.parametrize(("template", "path_setting", "trigger"), FAMILIES)
+@pytest.mark.parametrize("url", ["", "~", "~*", "=", "^~"])
+def test_an_empty_operand_renders_no_location_at_all(template, path_setting, trigger, url):
+    """Quoting turned a loud `[emerg]` into a silent catch-all, so the render has to refuse it.
+
+    Before the operand was quoted, an empty value rendered ``location  {`` and NGINX refused the
+    whole configuration with *invalid number of arguments*. Quoted, ``location "" {`` is a valid
+    PREFIX location matching every URI, which on these three templates means proxying (or
+    redirecting) the entire service. The plugin.json regex refuses these values, but it is a
+    write-time guard: a stored setting is never re-validated at render and ``IGNORE_REGEX_CHECK``
+    turns it off wholesale, so the render must not fail open on its own.
+    """
+    assert _render_family(template, path_setting, trigger, url) == []
+
+
+@pytest.mark.parametrize(("template", "path_setting", "trigger"), FAMILIES)
+@pytest.mark.parametrize(
+    ("first", "second", "expected"),
+    [
+        ("", "/second", ['location "/second" {']),
+        ("/first", "", ['location "/first" {']),
+        ("/first", "^/second", ['location "/first" {', 'location ~ "^/second" {']),
+        ("", "", []),
+    ],
+)
+def test_one_empty_rule_does_not_swallow_its_siblings(template, path_setting, trigger, first, second, expected):
+    """The empty-operand guard wraps a long block; a misplaced `{% endif %}` would eat the loop.
+
+    Skipping the rule with no path must skip exactly that rule: the other suffixed rules on the
+    same service still render, and the braces still balance (an unbalanced block is an `[emerg]`
+    that no location-level assertion would notice).
+    """
+    trigger_setting, trigger_value = next(iter(trigger.items()))
+    config = {
+        trigger_setting: trigger_value,
+        path_setting: first,
+        f"{trigger_setting}_2": trigger_value,
+        f"{path_setting}_2": second,
+    }
+    rendered = _render_family_raw(template, config)
+
+    assert [line for line in rendered.splitlines() if line.startswith("location ")] == expected
+    assert rendered.count("{") == rendered.count("}") == len(expected), "the location block's braces no longer balance"
+
+
+@pytest.mark.parametrize(("template", "path_setting", "trigger"), FAMILIES)
+@pytest.mark.parametrize(("url", "operand"), [("~ ^/a  b", "^/a  b"), ("~\t^/a\tb", "^/a\tb"), ("~  ^/a b", "^/a b")])
+def test_only_the_modifier_separator_is_collapsed(template, path_setting, trigger, url, operand):
+    """The operand is whatever follows the modifier, VERBATIM -- `split(None, 1)`, not `split()`.
+
+    Splitting the whole value and taking `parts[1]` looks identical on every value with at most
+    two whitespace-separated tokens, which is every value the rest of this module feeds a
+    template. It silently truncates the operand at its first inner whitespace otherwise: measured,
+    `~ ^/a  b` rendered `location ~ "^/a" {`, dropping user data with no error anywhere. That
+    mutation survived the entire suite before this test existed (Criticos round 3, item 3).
+
+    The claim key is NOT asserted here, unlike `test_all_three_templates_quote_and_escape_alike`.
+    `location_claims.rendered_location()` collapses EVERY whitespace run, so for these values it
+    answers the collapsed form while NGINX receives the verbatim one -- a known, deliberately
+    unfixed divergence recorded as a PO note (`location_claims.py` is the mutation-time guard's
+    mirror too, shared with `db_methods/locations.py` and pinned by `tests/unit/db/test_redirects.py`).
+    It is false-refusal-only, and the operand regex refuses the whole class at write time.
+    """
+    assert _render_family(template, path_setting, trigger, url) == [f'location ~ "{operand}" {{']
