@@ -44,6 +44,7 @@ the round trip continues with whatever rows did land, so the restore assertions 
 import sys
 from contextlib import contextmanager
 from datetime import datetime, timezone
+from json import loads
 from pathlib import Path
 from shutil import which
 
@@ -61,6 +62,7 @@ from db.alembic_baseline import (  # noqa: E402
     ALEMBIC,
     BASELINE_VERSION,
     baseline_metadata,
+    columns_added_since_baseline,
     product_uri,
     revision_for,
     wipe,
@@ -123,12 +125,14 @@ SEVENTEEN_ONLY_TABLES = (
 # Columns 1.7 added to tables that already existed in 1.6.13. A restore replays a dump written by
 # the 1.6.13 schema, so these have to be gone afterwards -- if one survived, the restored database
 # would be neither shape and the old code's INSERTs would hit a NOT NULL column it never heard of.
-SEVENTEEN_ONLY_COLUMNS = {
-    "bw_instances": ("credential_ciphertext", "credential_key_id", "credential_nonce", "credential_updated_at", "tls_fingerprint", "tls_mode"),
-    "bw_metadata": ("certificate_keyring", "certificate_keyring_active", "certificates_changed", "last_certificates_change"),
-    "bw_plugins": ("enabled", "icon"),
-    "bw_settings": ("case_insensitive",),
-}
+#
+# DERIVED, not listed. The hand-written version of this map named 13 of the 21 columns 1.7 actually
+# adds: the six instance-enrolment columns, `bw_metadata.template_values_cleaned_at`,
+# `bw_jobs_runs.error` and `bw_ui_users.totp_last_counter` all landed after it was written and none
+# of them moved it. A stale list here does not fail -- it just stops looking, which is the one
+# failure mode a loss specification cannot afford. `columns_added_since_baseline()` is the same
+# derivation `test_alembic_reversibility.py` compares the shipped manifest against.
+SEVENTEEN_ONLY_COLUMNS = columns_added_since_baseline()
 
 
 @contextmanager
@@ -781,3 +785,100 @@ def test_the_old_code_can_query_the_restored_database(round_trip):
     assert not failures, "queries the 1.6.13 code issues that fail on the restored database:\n  " + "\n  ".join(
         f"{k}: {v}" for k, v in sorted(failures.items())
     )
+
+
+# ── The other rollback path: `alembic downgrade`, actually executed ────────────────────────────
+#
+# Everything above is the operator's *documented* rollback -- restore a pre-upgrade dump. It never
+# calls `alembic downgrade`. That path does exist in the repository -- `downgrade.py:973` is the
+# product's own executor, and `test_alembic_reversibility.py` exercises it on SQLite in-process --
+# but until this test **no engine other than SQLite ever ran a head's `downgrade()`**, which is where
+# the interesting failures live. `bwcli plugin backup downgrade --execute` takes that path whenever
+# the manifest says `in_place_tested`, so a `downgrade()` that errors is an operator watching their
+# in-place rollback abort halfway.
+
+# The fingerprint of the known MySQL-family head defect, worded as the servers word it. Alembic
+# autogenerate emits the textbook teardown -- drop a table's indexes, then the table -- and MariaDB
+# and MySQL refuse to drop an index that still backs a foreign key. The `drop_table` on the next line
+# would have taken the index with it anyway, so the `drop_index` calls are both redundant and fatal.
+# Matched on the text rather than on the engine name so the day the generator stops emitting them
+# this test goes green by itself instead of starting to XPASS.
+MANIFEST = loads((Path(__file__).resolve().parents[3] / "src" / "common" / "core" / "backup" / "downgrade-manifest.json").read_text(encoding="utf-8"))
+
+DOWNGRADE_DEFECT_MARKERS = (
+    "needed in a foreign key constraint",  # MariaDB / MySQL 1553
+    "Cannot drop index",
+)
+
+
+def _surviving_columns(uri, tables):
+    engine = create_engine(uri)
+    try:
+        inspector = inspect(engine)
+        present = set(inspector.get_table_names())
+        return {table: {column["name"] for column in inspector.get_columns(table)} for table in tables if table in present}
+    finally:
+        engine.dispose()
+
+
+def test_the_head_downgrade_really_runs_and_removes_the_1_7_columns(db_engine, tmp_path, _clean_env, monkeypatch):
+    """1.6.13 baseline -> upgrade to head -> `alembic downgrade` to the revision the manifest names.
+
+    No client binary is involved -- this is alembic against the database, not a dump -- so it runs
+    on every configured engine, including ones the restore round trip above has to skip.
+    """
+    row = next(r for r in MANIFEST["releases"] if r["engine"] == db_engine)
+    expected = SEVENTEEN_ONLY_COLUMNS
+
+    uri = product_uri(db_engine, tmp_path)
+    baseline = baseline_metadata()
+
+    monkeypatch.setenv("DATABASE_URI", uri)
+    monkeypatch.chdir(ALEMBIC)
+    config = Config("alembic.ini")
+    config.set_main_option("version_locations", f"{db_engine}_versions")
+
+    # Same `finally: wipe(uri)` discipline as `_run_round_trip`, and it has to cover the SAME
+    # statements: PostgreSQL and MariaDB are ONE database for the whole run, so a `create_all` that
+    # raises halfway leaves a partial 1.6.13 schema behind -- `bw_ui_user_columns_preferences` holds
+    # an FK to `bw_ui_users` that `Base.metadata.drop_all` cannot resolve, so every later test taking
+    # the `db` fixture then errors in setup, in whatever lane pytest-randomly scheduled next (the
+    # failure `_run_round_trip` documents at length above). The leading wipe is inside the guard for
+    # that reason, and it is needed for its own: whatever the previous test left -- a full 1.7 schema,
+    # from the `db` fixture -- is still there, and `create_all` defaults to `checkfirst=True`, so it
+    # does NOT complain. It silently skips all 43 leftover tables, adds the one 1.6-only table back,
+    # and the run then dies further down in `command.upgrade` re-adding columns that already exist --
+    # a failure two steps away from its cause. Measured: 43 tables in, no exception, 44 tables out.
+    try:
+        wipe(uri)
+        engine = create_engine(uri)
+        try:
+            baseline.create_all(engine)
+        finally:
+            engine.dispose()
+
+        command.stamp(config, revision_for(BASELINE_VERSION, db_engine))
+        command.upgrade(config, "head")
+
+        upgraded = _surviving_columns(uri, expected)
+        missing = sorted(f"{table}.{column}" for table, columns in expected.items() for column in columns if column not in upgraded.get(table, ()))
+        assert not missing, f"the upgrade did not add the 1.7 columns, so removing them proves nothing: {missing}"
+
+        try:
+            command.downgrade(config, row["alembic"]["to_revision"])
+        except Exception as error:  # noqa: BLE001 -- the message is the finding
+            first = str(error).splitlines()[0]
+            if all(marker in str(error) for marker in DOWNGRADE_DEFECT_MARKERS):
+                pytest.xfail(
+                    f"the {db_engine} head's downgrade() drops an index that still backs a foreign key, which MySQL-family "
+                    f"servers refuse; the drop_table on the next line would have removed it anyway. Pre-existing (the op is "
+                    f"byte-identical in the pre-regeneration head) and a generator fix, not a head edit -- 1.8 note. {first}"
+                )
+            raise
+
+        left = sorted(
+            f"{table}.{column}" for table, columns in _surviving_columns(uri, expected).items() for column in columns if column in expected.get(table, ())
+        )
+        assert not left, f"the {db_engine} downgrade left 1.7 columns on tables {row['to']} still has: {left}"
+    finally:
+        wipe(uri)
