@@ -686,6 +686,39 @@ api.global.POST["^/confs$"] = function(self)
 
 	execute("rm -rf " .. backup)
 	remove(tmp)
+
+	-- DEV-2b5 residual 2. Reap the rescue directories a stuck rollback left behind, and ONLY here:
+	-- on every failure path a rescue may be the tree's only copy of an entry, and the push that just
+	-- failed is the one that may have created it. A success is the one moment the destination is
+	-- known good.
+	--
+	-- UNDER THE LOCK, and that is not tidiness. The next push opens with
+	-- `cp -R <destination>/. <backup>/`, which descends into every `.bw-rescue.*`; a reaper running
+	-- after the release deletes a directory that copy is walking, `cp` exits non-zero on the vanished
+	-- entry, and the backup guard above turns that into "cannot create the pre-swap backup, refusing
+	-- to push" -- a 500 that `push-configs.py` reads as a failed push and answers with a failover
+	-- restore over a fleet that is fine. The added lock time is one directory listing, next to the
+	-- `rm -rf` of the whole backup two lines up.
+	--
+	-- pcall because housekeeping must not turn a push that landed into a 500, and -- here, before
+	-- the release -- because a raise would otherwise leak the key: the failure mode residual 8 is
+	-- about.
+	local swept, reaped = pcall(pushswap.reap_rescues, destination)
+	if not swept then
+		logger:log(ERR, "the rescue sweep raised: " .. tostring(reaped))
+	elseif reaped > 0 then
+		-- A rescue can be the only surviving copy of an entry, so its removal is not silent.
+		logger:log(
+			NOTICE,
+			"removed "
+				.. reaped
+				.. " rescue directories older than "
+				.. pushswap.RESCUE_MAX_AGE
+				.. "s from "
+				.. destination
+		)
+	end
+
 	internalstore:delete(SWAP_LOCK_KEY)
 
 	-- The configuration tree itself has landed, so a restart that was waiting for one is served.

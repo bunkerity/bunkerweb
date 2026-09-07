@@ -93,6 +93,47 @@ function pushswap.clear(destination)
 	return true
 end
 
+-- DEV-2b5 residual 2. Reap the rescue directories a stuck rollback left behind.
+--
+-- A rescue is the LAST copy of an entry the ordered undo could not put back, so nothing may drop
+-- one while an operator might still want it -- but until now nothing dropped one at all, and
+-- `api.lua` opens every push with `cp -R <destination>/. <backup>/`, so each accumulated rescue is
+-- copied into every later backup, growing what every push has to copy before it may start.
+--
+-- Scope, so the placement is not read as more than it is: `api.lua` calls this after a SUCCESSFUL
+-- push only, which bounds accumulation on a healthy instance. It does NOT rescue an instance that
+-- is already failing its pushes -- there the sweep never runs, and the rescue-to-backup
+-- amplification keeps compounding. Breaking that spiral means sweeping before the backup copy
+-- instead, which is a recovery-path decision (it would delete the last copy of an entry on an
+-- instance nobody has finished repairing) and is carried as an open question, not decided here.
+--
+-- The age comes from the NAME, not from stat(2): `swap()` stamps the name at the moment the rescue
+-- is created, while an mtime is whatever last touched the tree -- an operator copying a file out of
+-- a rescue would push their own rescue back out of reach for another full window. A name whose
+-- stamp does not parse is never reaped: an unreadable age is not evidence of an old directory.
+pushswap.RESCUE_MAX_AGE = 7 * 24 * 3600
+
+-- Returns the number of rescues removed. `now` is injectable so a test does not have to wait a week
+-- or fake the clock the module captured at load time.
+function pushswap.reap_rescues(destination, now)
+	now = now or os.time()
+	local prefix = pushswap.RESERVED_PREFIX .. "rescue."
+	local removed = 0
+	for _, name in ipairs(list_entries(destination)) do
+		if name:sub(1, #prefix) == prefix then
+			-- `.bw-rescue.<epoch>` and the `.bw-rescue.<epoch>.<n>` collision form both start with
+			-- the stamp, so one anchored match reads either.
+			local stamp = tonumber(name:sub(#prefix + 1):match("^%d+") or "")
+			if stamp and now - stamp > pushswap.RESCUE_MAX_AGE then
+				if run("rm -rf " .. quote(destination .. "/" .. name)) then
+					removed = removed + 1
+				end
+			end
+		end
+	end
+	return removed
+end
+
 -- Replace the top-level entries of destination with those of staging.
 --
 -- Returns: true                       on success
