@@ -35,6 +35,7 @@ from API import API  # noqa: E402
 
 VARIABLES_ENV = ("/", "etc", "nginx", "variables.env")
 BW_VARIABLES_ENV = ("/", "etc", "bunkerweb", "variables.env")
+SCHEDULER_ENV = ("/", "etc", "bunkerweb", "scheduler.env")
 DB_DIR = ("/", "usr", "share", "bunkerweb", "db")
 
 
@@ -63,7 +64,7 @@ def _fake_path_factory(files: dict, dirs: set):
     return FakePath
 
 
-def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None, bw_variables=None, metadata=None):
+def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None, bw_variables=None, scheduler_variables=None, metadata=None):
     """Drive the real CLI.__init__ with the filesystem, Redis and terminal stubbed out."""
     monkeypatch.delenv("API_TOKEN", raising=False)
     monkeypatch.delenv("API_SERVER_NAME", raising=False)
@@ -74,12 +75,17 @@ def _build_cli(monkeypatch, *, variables: str, instances=None, api_url=None, bw_
     files = {VARIABLES_ENV: variables} if variables is not None else {}
     if bw_variables is not None:
         files[BW_VARIABLES_ENV] = bw_variables
+    if scheduler_variables is not None:
+        files[SCHEDULER_ENV] = scheduler_variables
     dirs = {DB_DIR} if instances is not None else set()
     fake_path = _fake_path_factory(files, dirs)
     monkeypatch.setattr(CLI_MODULE, "Path", fake_path)
-    # `VARIABLES_PATHS` is built at import time with the real `Path`, so patching the name alone
-    # leaves `CLI.__init__` reading the host's own files.
-    monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", (fake_path(*VARIABLES_ENV), fake_path(*BW_VARIABLES_ENV)))
+    # The path tuples are built at import time with the real `Path`, so patching the names alone
+    # leaves `CLI.__init__` reading the host's own files. Patch them the way the product splits
+    # them: the operator's files first (later wins), the generated render only filling gaps.
+    monkeypatch.setattr(CLI_MODULE, "OPERATOR_VARIABLES_PATHS", (fake_path(*BW_VARIABLES_ENV), fake_path(*SCHEDULER_ENV)))
+    monkeypatch.setattr(CLI_MODULE, "GENERATED_VARIABLES_PATHS", (fake_path(*VARIABLES_ENV),))
+    monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", (fake_path(*BW_VARIABLES_ENV), fake_path(*SCHEDULER_ENV), fake_path(*VARIABLES_ENV)))
     monkeypatch.setattr(CLI_MODULE, "handle_docker_secrets", lambda: {})
     monkeypatch.setattr(CLI_MODULE, "get_redis_client", lambda **kwargs: None)
     monkeypatch.setattr(CLI_MODULE, "get_terminal_size", lambda: Mock(columns=80))
@@ -213,14 +219,38 @@ class TestWhereDatabaseUriComesFrom:
         )
         assert _tokens(cli) == ["from-etc-bunkerweb"]
 
-    def test_the_generated_file_wins_where_both_declare_the_key(self, monkeypatch):
-        """First path listed wins: the rendered configuration is the more specific one."""
+    def test_the_operators_file_wins_where_both_declare_the_key(self, monkeypatch):
+        """The operator's file beats the generated render (dev `d97f69835`, then `25e6cfc97`).
+
+        This assertion used to read the other way round -- it was written against a fixture that
+        listed the generated file first, which is not the order the product ships.
+        """
         cli = _build_cli(
             monkeypatch,
             variables="API_TOKEN=from-etc-nginx\n",
             bw_variables="API_TOKEN=from-etc-bunkerweb\n",
         )
-        assert _tokens(cli) == ["from-etc-nginx"]
+        assert _tokens(cli) == ["from-etc-bunkerweb"]
+
+    def test_scheduler_env_wins_over_variables_env(self, monkeypatch):
+        """`bunkerweb-scheduler.sh` exports variables.env then scheduler.env, later wins."""
+        cli = _build_cli(
+            monkeypatch,
+            variables=None,
+            bw_variables="API_TOKEN=from-variables-env\n",
+            scheduler_variables="API_TOKEN=from-scheduler-env\n",
+        )
+        assert _tokens(cli) == ["from-scheduler-env"]
+
+    def test_a_scheduler_only_install_is_read_at_all(self, monkeypatch):
+        """A Scheduler Only install writes DATABASE_URI/API_TOKEN to scheduler.env and nowhere
+        else: dropping that file left bwcli on a different database than the scheduler."""
+        cli = _build_cli(
+            monkeypatch,
+            variables=None,
+            scheduler_variables="API_TOKEN=only-in-scheduler-env\n",
+        )
+        assert _tokens(cli) == ["only-in-scheduler-env"]
 
     def test_an_empty_value_does_not_shadow_the_other_file(self, monkeypatch):
         """`variables.env` is written for every key, so the generated file carries `KEY=` for a

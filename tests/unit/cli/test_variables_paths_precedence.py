@@ -6,8 +6,9 @@ defaults for every setting ``start.sh`` does not whitelist, ``DATABASE_URI`` amo
 before ``/etc/bunkerweb/variables.env`` made that default win, so a fresh boot (or any instance that
 has not re-rendered yet) sent ``bwcli`` at the default SQLite path instead of the operator's real
 database. ``CLI.__init__`` keeps first-write-wins (``if not self.__variables.get(key)``), so the fix
-is entirely in ``VARIABLES_PATHS``'s order — this test reads that order from the real module rather
-than assuming it, so a regression that swaps the tuple back flips the assertion, not just the fixture.
+is entirely in the order of ``OPERATOR_VARIABLES_PATHS`` / ``GENERATED_VARIABLES_PATHS`` — this test
+reads those from the real module rather than assuming them, so a regression that swaps them back
+flips the assertion, not just the fixture.
 """
 
 import sys
@@ -58,17 +59,21 @@ def test_the_operators_file_wins_over_the_loading_renders_default(monkeypatch):
     monkeypatch.delenv("BWCLI_API_URL", raising=False)
 
     # Capture the real, currently-shipped order before Path gets patched.
-    real_order = [p.parts for p in CLI_MODULE.VARIABLES_PATHS]
+    real_operator = [p.parts for p in CLI_MODULE.OPERATOR_VARIABLES_PATHS]
+    real_generated = [p.parts for p in CLI_MODULE.GENERATED_VARIABLES_PATHS]
+    real_order = real_operator + real_generated
 
     files = {}
     for parts in real_order:
-        if parts[-2] == "bunkerweb":
-            files[parts] = "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3\n"
-        else:
+        if parts in real_generated:
             files[parts] = "DATABASE_URI=sqlite:////var/tmp/loading-default.sqlite3\n"
+        else:
+            files[parts] = "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3\n"
 
     fake_path = _fake_path_factory(files, dirs=set())
     monkeypatch.setattr(CLI_MODULE, "Path", fake_path)
+    monkeypatch.setattr(CLI_MODULE, "OPERATOR_VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_operator))
+    monkeypatch.setattr(CLI_MODULE, "GENERATED_VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_generated))
     monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", tuple(fake_path(*parts) for parts in real_order))
     monkeypatch.setattr(CLI_MODULE, "handle_docker_secrets", lambda: {})
     monkeypatch.setattr(CLI_MODULE, "get_redis_client", lambda **kwargs: None)
@@ -100,3 +105,19 @@ def test_the_operators_file_wins_over_the_loading_renders_default(monkeypatch):
     assert captured["sqlalchemy_string"] == "sqlite:////var/lib/bunkerweb/db.sqlite3", (
         "bwcli must prefer /etc/bunkerweb/variables.env's DATABASE_URI over the loading render's " f"default, got {captured['sqlalchemy_string']!r}"
     )
+
+
+def test_the_shipped_paths_are_the_ones_the_scheduler_unit_exports():
+    """The merge logic above runs on substituted paths, so the shipped tuples get their own check.
+
+    ``bunkerweb-scheduler.sh`` exports ``/etc/bunkerweb/variables.env`` then
+    ``/etc/bunkerweb/scheduler.env``; a Scheduler Only install writes DATABASE_URI to the second
+    file and nowhere else, so bwcli has to read both, in that order (port of dev ``25e6cfc97``).
+    """
+    operator = [p.as_posix() for p in CLI_MODULE.OPERATOR_VARIABLES_PATHS]
+    generated = [p.as_posix() for p in CLI_MODULE.GENERATED_VARIABLES_PATHS]
+    assert operator == ["/etc/bunkerweb/variables.env", "/etc/bunkerweb/scheduler.env"]
+    assert generated == ["/etc/nginx/variables.env"]
+    # The generated render never counts as an operator file, whatever else moves.
+    assert "/etc/nginx/variables.env" not in operator
+    assert [p.as_posix() for p in CLI_MODULE.VARIABLES_PATHS] == operator + generated

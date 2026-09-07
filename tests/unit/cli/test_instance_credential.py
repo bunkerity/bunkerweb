@@ -89,7 +89,9 @@ def _build_cli(monkeypatch, credential_file):
 
     fake_path = _fake_variables_path_factory()
     monkeypatch.setattr(CLI_MODULE, "Path", fake_path)
-    monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", (fake_path(*VARIABLES_ENV), fake_path(*BW_VARIABLES_ENV)))
+    monkeypatch.setattr(CLI_MODULE, "OPERATOR_VARIABLES_PATHS", (fake_path(*BW_VARIABLES_ENV),))
+    monkeypatch.setattr(CLI_MODULE, "GENERATED_VARIABLES_PATHS", (fake_path(*VARIABLES_ENV),))
+    monkeypatch.setattr(CLI_MODULE, "VARIABLES_PATHS", (fake_path(*BW_VARIABLES_ENV), fake_path(*VARIABLES_ENV)))
     monkeypatch.setattr(CLI_MODULE, "INSTANCE_CREDENTIAL_FILE", credential_file)
     monkeypatch.setattr(CLI_MODULE, "handle_docker_secrets", lambda: {})
     monkeypatch.setattr(CLI_MODULE, "get_redis_client", lambda **kwargs: None)
