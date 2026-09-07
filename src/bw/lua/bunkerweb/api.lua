@@ -119,17 +119,73 @@ local call_plugin = helpers.call_plugin
 -- would otherwise both proceed, which is the race this closes. `safe_add` rather than `add` for
 -- the reason `datastore:set` uses `safe_set` -- a lock is not worth evicting an unexpired entry
 -- from the zone for. The TTL stays the backstop for a worker killed mid-swap.
+-- DEV-2b5 residual 9. The value written here used to be `tostring(ngx.now())` and was never read
+-- back, so every release deleted the key whoever held it. After a TTL expiry mid-swap -- the case
+-- the TTL exists for -- worker A's late release drops worker B's FRESH lock and re-opens the exact
+-- concurrent-swap window this key closes, with both workers believing they hold it. The value has
+-- to identify THIS acquisition: worker pid plus a per-worker counter plus the clock, the same shape
+-- the upload's temporary name uses, and unique even for two acquisitions inside one clock tick.
+local swap_lock_seq = 0
+local function new_swap_token()
+	swap_lock_seq = swap_lock_seq + 1
+	return tostring(ngx.worker.pid()) .. ":" .. tostring(swap_lock_seq) .. ":" .. tostring(ngx.now())
+end
+
+-- Returns: token           the key is ours -- hand it to release_swap_lock(), never delete blind
+--          nil, "held"     another swap held the key for the whole wait: the caller answers 503
+--          nil, "memory", err  the zone could not hold the key at all (see below)
 local function take_swap_lock(wait)
 	local deadline = ngx.now() + wait
 	while true do
-		if shared.internalstore:safe_add(SWAP_LOCK_KEY, tostring(ngx.now()), SWAP_LOCK_TTL) then
-			return true
+		local token = new_swap_token()
+		local ok, err = shared.internalstore:safe_add(SWAP_LOCK_KEY, token, SWAP_LOCK_TTL)
+		if ok then
+			return token
+		end
+		-- DEV-2b5 residual 10. `safe_add` refuses for two unrelated reasons and both used to be
+		-- reported as "a configuration swap is in progress". A saturated internalstore zone then
+		-- sends an operator hunting a swap that does not exist -- and unlike a real one it never
+		-- ends, because no swap is running that could finish and free the key. "exists" is the
+		-- contended case; anything else ("no memory") is the zone, and waiting on it is pointless.
+		if err ~= "exists" then
+			return nil, "memory", err
 		end
 		if ngx.now() >= deadline then
-			return false
+			return nil, "held"
 		end
 		ngx.sleep(0.1)
 	end
+end
+
+-- Release the key only while it is still the one we took.
+--
+-- `ngx.shared.DICT` has no compare-and-delete, so this is a get, a compare and a delete, and one
+-- half of that window cannot be closed: if the key still reads as OURS and our TTL expires before
+-- the delete lands, a successor's `safe_add` can slip in and we drop their key. That residue is
+-- microseconds wide and reachable only in the TTL-expiry-mid-swap case, where the unconditional
+-- delete it replaces was open for the successor's WHOLE swap -- minutes, on the copy fallback this
+-- 900 s TTL was sized for. Closing it completely needs a second key taken with `safe_add`, i.e. a
+-- lock on the lock with its own leak and its own TTL, and that is a worse trade than the residue.
+--
+-- The OTHER half is closed here, and it is the reachable one. A miss means our TTL has ALREADY
+-- expired and nobody has taken the key since; deleting an absent key is a no-op, so that delete can
+-- only ever do harm -- a successor's `safe_add` landing between this get and it would be dropped,
+-- which is precisely the outcome this function exists to prevent. Return instead.
+local function release_swap_lock(token)
+	local current = internalstore:get(SWAP_LOCK_KEY)
+	if not current then
+		logger:log(ERR, "the swap lock expired while this request held it : nothing to release")
+		return false
+	end
+	if current ~= token then
+		logger:log(
+			ERR,
+			"the swap lock expired while this request held it and another swap has taken it since : leaving it alone"
+		)
+		return false
+	end
+	internalstore:delete(SWAP_LOCK_KEY)
+	return true
 end
 
 local function file_exists(path)
@@ -505,7 +561,15 @@ api.global.POST["^/reload"] = function(self)
 	-- underneath -- the exact overlap this wait exists to prevent, on a systematic schedule.
 	-- Waiting is still deliberate: answering 503 immediately would make the caller treat the push
 	-- as failed and roll it back.
-	if not take_swap_lock(SWAP_WAIT_TIMEOUT) then
+	local token, lock_err, add_err = take_swap_lock(SWAP_WAIT_TIMEOUT)
+	if not token then
+		-- DEV-2b5 residual 10. A full zone is not a busy instance: say so, at ERR, with the reason
+		-- the dict gave. The status stays 503 -- `ApiCaller`'s busy retry keys on the status, and
+		-- retrying is right either way -- but the operator gets the zone, not a phantom swap.
+		if lock_err == "memory" then
+			logger:log(ERR, "the internalstore zone cannot hold the swap lock (" .. tostring(add_err) .. ")")
+			return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "cannot take the swap lock: " .. tostring(add_err))
+		end
 		logger:log(
 			ERR,
 			"a configuration swap is still in progress after " .. SWAP_WAIT_TIMEOUT .. "s, refusing to reload"
@@ -516,7 +580,7 @@ api.global.POST["^/reload"] = function(self)
 	-- pcall so an error inside the section still releases the key: leaving it held costs every
 	-- later push and reload until the TTL expires, which is now 15 minutes.
 	local ran, status, level, message = pcall(reload_locked, test_arg)
-	internalstore:delete(SWAP_LOCK_KEY)
+	release_swap_lock(token)
 	if not ran then
 		logger:log(ERR, "the reload raised: " .. tostring(status))
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
@@ -603,8 +667,14 @@ api.global.POST["^/confs$"] = function(self)
 	-- The upload above never touches the destination. Releasing between a failed swap and the
 	-- restore would open a reload window onto a half-undone tree. The TTL is the backstop for a
 	-- worker that dies mid-swap : without it a lost unlock would block every reload for good.
-	if not take_swap_lock(PUSH_LOCK_WAIT) then
+	local token, lock_err, add_err = take_swap_lock(PUSH_LOCK_WAIT)
+	if not token then
 		remove(tmp)
+		-- DEV-2b5 residual 10, same distinction as POST /reload above.
+		if lock_err == "memory" then
+			logger:log(ERR, "the internalstore zone cannot hold the swap lock (" .. tostring(add_err) .. ")")
+			return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "cannot take the swap lock: " .. tostring(add_err))
+		end
 		logger:log(ERR, "another configuration swap is in progress, refusing to push to " .. destination)
 		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "another configuration swap is in progress")
 	end
@@ -612,7 +682,7 @@ api.global.POST["^/confs$"] = function(self)
 	local function fail(message)
 		execute("rm -rf " .. staging .. " " .. backup)
 		remove(tmp)
-		internalstore:delete(SWAP_LOCK_KEY)
+		release_swap_lock(token)
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", message)
 	end
 
@@ -719,7 +789,7 @@ api.global.POST["^/confs$"] = function(self)
 		)
 	end
 
-	internalstore:delete(SWAP_LOCK_KEY)
+	release_swap_lock(token)
 
 	-- The configuration tree itself has landed, so a restart that was waiting for one is served.
 	-- Only /confs clears it: /cache, /data, /plugins and friends reuse this handler but carry
