@@ -258,6 +258,41 @@ redis.call('del', KEYS[1])
 return 1
 """
 
+# The `deferred:` reasons a successful push answers on behalf of the job that recorded them, and the
+# only ones it may clear. Mirrors the two `recorded` strings in `execute_job`'s no-instance branch
+# below -- pinned against drift by tests/unit/worker/test_coldboot_reload_deferral.py, because a
+# reworded reason there would not error here, it would just stop clearing and leave the pill up.
+#
+# Deliberately narrow, and therefore partial: a job that ALSO deferred for its own precondition
+# records "deferred: every instance down; no reachable instance yet -- reload deferred", which
+# starts with neither, so its pill stands. That is the safe direction -- the push carried its
+# files, but "every instance down" is a statement about its own work, not about a delivery.
+RELOAD_DEFERRAL_PREFIXES = (
+    f"{JOB_DEFERRAL_PREFIX}no reachable instance yet",
+    f"{JOB_DEFERRAL_PREFIX}could not resolve any reachable instance",
+)
+
+
+def _clear_settled_deferral_pills(before: datetime, logger) -> None:
+    """Tell the run rows of the jobs this push just delivered for that they are no longer waiting.
+
+    The debt is fleet-global and the marker is per-job: the jobs that recorded "no reachable
+    instance yet" have now had their output shipped by this push, and an `every: once` job never
+    runs again to say so itself, so the UI's "Deferred" pill would stay yellow forever.
+
+    Best effort on purpose. A failure here costs a misleading pill, never a delivery, and the round
+    it runs in has already pushed and reloaded -- raising from here would report the whole reload as
+    failed and re-raise the debt for material that is already on the instances.
+    """
+    try:
+        db = get_worker_db()
+        if not db:
+            return
+        err = db.clear_deferred_job_runs(*RELOAD_DEFERRAL_PREFIXES, before=before)
+        if err:
+            logger.warning(f"Could not clear the deferral marker on the job runs this push settled: {err}")
+    except BaseException as exc:
+        logger.warning(f"Could not clear the deferral marker on the job runs this push settled: {exc}")
 
 
 def _publish_deferred_acks(broker_url: str, logger) -> None:
@@ -473,6 +508,9 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # Claimed with them, and for the same reason: this push carries what was owed when the
             # tar was built, and nothing raised after it.
             claimed_owed = client.get(RELOAD_OWED_KEY)
+            # Read before the tar is built, for the same reason `claimed_owed` is: it is the cutoff
+            # that says which run rows this push can honestly speak for.
+            round_start = datetime.now().astimezone()
 
             # DEV-2b3 (port of dev 462c1e851): the archive is the whole cache tree, so its size
             # tracks the number of services -- a fleet with a hundred of them regularly needs more
@@ -497,6 +535,16 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             # outlived this round is a new debt entitled to its own fast window.
             if claimed_owed is not None:
                 client.eval(SETTLE_OWED_IF_UNCHANGED, 1, RELOAD_OWED_KEY, claimed_owed)
+                # Only when a debt was actually outstanding, and for cost rather than correctness:
+                # with nothing owed nothing deferred, so the LIKE scan over bw_jobs_runs would find
+                # nothing on every reload round of an untroubled deployment. The price of the gate
+                # is that a debt the broker loses (eviction, a Redis restart) leaves those pills up
+                # for good -- `_mark_reload_owed` runs before the run row is written, so the row can
+                # outlive the key it was recorded against.
+                #
+                # Not gated on the compare-and-set above: whether a NEWER debt survived this push
+                # says nothing about the rows `round_start` already vouches for.
+                _clear_settled_deferral_pills(round_start, logger)
             client.delete(RELOAD_OWED_ATTEMPTS_KEY)
 
             released = bool(client.eval(RELEASE_IF_CLEAN, 2, RELOAD_LOCK_KEY, RELOAD_DIRTY_KEY))

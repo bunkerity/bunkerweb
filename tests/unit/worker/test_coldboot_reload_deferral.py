@@ -375,3 +375,119 @@ class TestTheReloadPathSettlesTheDebt:
         assert client.keys.get(TASKS.RELOAD_OWED_KEY)
 
 
+class TestTheDeferralPillClearsWhenThePushLands:
+    """The debt is fleet-global, the pill is per-job.
+
+    `jobs.html` renders "Deferred" from `last_run['error']`. When run B carries the push run A could
+    not deliver, A's row still says "no reachable instance yet -- reload deferred" and nothing ever
+    overwrites it: A is `every: once` (`crowdsec-conf`, `certbot-new`) and `JobScheduler.setup()`
+    does not schedule it again. Material delivered, pill yellow forever.
+
+    The rule the clear has to respect is the one the whole ack chain rests on -- a marker may only
+    clear once the material it speaks for has REACHED the instances -- so most of what is asserted
+    here is when it must NOT fire.
+    """
+
+    def _carry(self, client, apis=None, db=None):
+        apis = apis or _apis()
+        with _with_redis(client), patch.object(TASKS, "_broker_client", return_value=client):
+            with patch.object(TASKS, "get_worker_db", return_value=db):
+                TASKS._request_reload_debounced(apis, BROKER, LOGGER)
+        return apis
+
+    def test_a_carried_push_clears_the_pill_of_the_job_it_delivered_for(self):
+        db = Mock(clear_deferred_job_runs=Mock(return_value=""))
+
+        self._carry(_LockRedis({TASKS.RELOAD_OWED_KEY: "1"}), db=db)
+
+        call = db.clear_deferred_job_runs.call_args
+        assert call.args == TASKS.RELOAD_DEFERRAL_PREFIXES
+        assert isinstance(call.kwargs["before"], datetime)
+
+    def test_nothing_owed_clears_nothing(self):
+        """Anti-vacuity, and the load-bearing half of it: with no debt outstanding nothing deferred,
+        and a debt the broker LOST is one whose material may genuinely never have shipped -- there
+        the stale pill is the truth and clearing it is the lie."""
+        db = Mock(clear_deferred_job_runs=Mock(return_value=""))
+
+        self._carry(_LockRedis(), db=db)
+
+        db.clear_deferred_job_runs.assert_not_called()
+
+    def test_a_failed_push_leaves_the_pill_up(self):
+        """Nothing reached the instances, so nothing is delivered and the row is still true."""
+        db = Mock(clear_deferred_job_runs=Mock(return_value=""))
+        apis = _apis()
+        apis.send_files = Mock(return_value=False)
+
+        with pytest.raises(RuntimeError):
+            self._carry(_LockRedis({TASKS.RELOAD_OWED_KEY: "1"}), apis=apis, db=db)
+
+        db.clear_deferred_job_runs.assert_not_called()
+
+    def test_a_failed_reload_leaves_the_pill_up_too(self):
+        """The files are on the instances but nothing is serving them yet -- the ack chain counts a
+        reload, not a transfer (`_apply_deferred_acks` sits behind the same two gates)."""
+        db = Mock(clear_deferred_job_runs=Mock(return_value=""))
+        apis = _apis()
+        apis.send_to_apis = Mock(return_value=(False, {}))
+
+        with pytest.raises(RuntimeError):
+            self._carry(_LockRedis({TASKS.RELOAD_OWED_KEY: "1"}), apis=apis, db=db)
+
+        db.clear_deferred_job_runs.assert_not_called()
+
+    def test_the_cutoff_is_read_before_the_tar_is_built(self):
+        """A job that defers while this push is building its tar wrote files the push cannot carry.
+        Its row is younger than the cutoff, so it keeps its pill -- the same reasoning that makes
+        settling the debt a compare-and-delete, applied to the marker instead of the key."""
+        db = Mock(clear_deferred_job_runs=Mock(return_value=""))
+        seen = []
+        apis = _apis()
+        apis.send_files = Mock(side_effect=lambda *_a, **_kw: seen.append(datetime.now().astimezone()) or True)  # DEV-2b3
+
+        self._carry(_LockRedis({TASKS.RELOAD_OWED_KEY: "1"}), apis=apis, db=db)
+
+        assert db.clear_deferred_job_runs.call_args.kwargs["before"] <= seen[0]
+
+    def test_a_database_that_refuses_costs_the_pill_and_not_the_push(self):
+        """The push and the reload have already succeeded when this runs. Raising from here would
+        report the whole round as failed and re-raise a debt for material already on the instances,
+        so the failure is logged and swallowed -- but it IS logged."""
+        db = Mock(clear_deferred_job_runs=Mock(side_effect=RuntimeError("db is gone")))
+        client = _LockRedis({TASKS.RELOAD_OWED_KEY: "1"})
+        LOGGER.warning.reset_mock()
+
+        self._carry(client, db=db)
+
+        assert "deferral marker" in " ".join(str(c.args[0]) for c in LOGGER.warning.call_args_list)
+        assert TASKS.RELOAD_OWED_KEY not in client.keys, "the debt this push carried is still settled"
+        assert TASKS.RELOAD_LOCK_KEY not in client.keys, "the lock still goes, or nothing reloads again"
+
+    def test_a_worker_without_a_database_carries_on(self):
+        """`get_worker_db()` returns None on a worker started without DATABASE_URI."""
+        client = _LockRedis({TASKS.RELOAD_OWED_KEY: "1"})
+
+        self._carry(client, db=None)
+
+        assert TASKS.RELOAD_OWED_KEY not in client.keys
+
+    def test_the_prefixes_are_the_reasons_execute_job_actually_records(self, runtime, monkeypatch):
+        """Drift pin. The prefixes are literals in one place and the reasons are literals in
+        another; rewording a reason would not error, it would just stop clearing and leave the pill
+        up forever, which is the exact defect this change closes.
+        """
+        recorded = [runtime.run(ret=1).kwargs["error"]]
+
+        # Not through `runtime.run`: it re-patches `_get_apis` itself, so a patch set here would be
+        # overwritten and both reasons would come out identical -- half of this pin, silently.
+        monkeypatch.setattr(TASKS, "_get_apis", Mock(side_effect=RuntimeError("db is gone")))
+        monkeypatch.setattr(TASKS, "_request_reload_debounced", Mock())
+        TASKS.JobExecutor.return_value.run = Mock(return_value=1)
+        with _with_redis(runtime.client):
+            TASKS.execute_job(_Self(), dict(JOB))
+        recorded.append(TASKS.get_worker_db().add_job_run.call_args.kwargs["error"])
+
+        assert len(set(recorded)) == len(TASKS.RELOAD_DEFERRAL_PREFIXES), recorded
+        for reason in recorded:
+            assert reason.startswith(TASKS.RELOAD_DEFERRAL_PREFIXES), reason
