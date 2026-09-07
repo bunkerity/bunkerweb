@@ -12,14 +12,24 @@ breaks everywhere. The other three engines are measured out of suite -- see
 `.cache/results-2026-09-06-wave13/dgad-probe-*.json` and `report-DG-AD.md` §1.
 """
 
+import ast
 from json import loads
 from pathlib import Path
 
+import pytest
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
 
-from db.alembic_baseline import ALEMBIC, BASELINE_VERSION, baseline_metadata, revision_for
+from db.alembic_baseline import (
+    ALEMBIC,
+    BASELINE_VERSION,
+    baseline_metadata,
+    chain,
+    columns_added_since_baseline,
+    revision_for,
+    walk_back,
+)
 
 
 def model_metadata():
@@ -31,7 +41,9 @@ def model_metadata():
 
 
 MANIFEST = loads((Path(__file__).resolve().parents[3] / "src" / "common" / "core" / "backup" / "downgrade-manifest.json").read_text(encoding="utf-8"))
-SQLITE_ROW = next(row for row in MANIFEST["releases"] if row["engine"] == "sqlite")
+ROWS = MANIFEST["releases"]
+SQLITE_ROW = next(row for row in ROWS if row["engine"] == "sqlite")
+MANIFEST_COLUMNS = {table: sorted(names) for table, names in MANIFEST["data_loss_detail"]["columns"].items()}
 
 # Dropped by the 1.7 head's downgrade(); `bw_ui_user_preferences` is renamed rather than dropped,
 # so it is in the set that must be gone either way. DERIVED, never restated: a hand-maintained copy
@@ -42,19 +54,69 @@ TABLES_ADDED_BY_1_7 = set(model_metadata().tables) - set(baseline_metadata().tab
 # The same derivation one level down: what 1.7 adds to a table 1.6.14 already had. Those columns are
 # what `downgrade()` drops from a table that otherwise survives, which is the loss the manifest has to
 # spell out to the operator -- `bw_ui_users.totp_last_counter` was added by a head regeneration and the
-# hand-written map did not move with it.
-def _columns_added_by_1_7():
-    baseline = baseline_metadata().tables
-    added = {}
-    for name, table in model_metadata().tables.items():
-        if name in baseline:
-            new_columns = {column.name for column in table.columns} - {column.name for column in baseline[name].columns}
-            if new_columns:
-                added[name] = sorted(new_columns)
-    return added
+# hand-written map did not move with it. It lives in `alembic_baseline` because
+# `test_downgrade_round_trip.py` needs the same map for the restore path and a second copy of it
+# would be the very drift this derivation exists to prevent.
+COLUMNS_ADDED_BY_1_7 = columns_added_since_baseline()
 
 
-COLUMNS_ADDED_BY_1_7 = _columns_added_by_1_7()
+# ── The head-anchored half: what `downgrade()` itself says it drops ────────────────────────────
+#
+# `COLUMNS_ADDED_BY_1_7` above is anchored to the MODEL, which is sound only while
+# `test_upgrade_schema_parity` is green and is blind to one engine's head diverging from the other
+# three -- the manifest says "dropped by the downgrade on every engine" and the model cannot see
+# "every engine" at all. So the artifact is read too: each head's own `downgrade()` body, parsed,
+# and compared to the same manifest map. Two independent anchors, one shipped claim.
+
+
+def _attr(func):
+    return func.attr if isinstance(func, ast.Attribute) else None
+
+
+def _receiver(func):
+    return func.value.id if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name) else None
+
+
+def _literal(node):
+    return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+
+
+def _walk(node, table, columns, dropped):
+    """`table` is the `batch_alter_table` a `batch_op.*` call is bound to, threaded down the tree."""
+    if isinstance(node, ast.With):
+        for item in node.items:
+            call = item.context_expr
+            if isinstance(call, ast.Call) and _attr(call.func) == "batch_alter_table" and call.args:
+                table = _literal(call.args[0]) or table
+    if isinstance(node, ast.Call):
+        name, args = _attr(node.func), [_literal(arg) for arg in node.args]
+        if name == "drop_table" and args and args[0]:
+            dropped.add(args[0])
+        elif name == "drop_column":
+            # `op.drop_column("tbl", "col")` names its table; `batch_op.drop_column("col")` inherits it.
+            if _receiver(node.func) == "op" and len(args) >= 2 and args[0] and args[1]:
+                columns.setdefault(args[0], set()).add(args[1])
+            elif args and args[0] and table:
+                columns.setdefault(table, set()).add(args[0])
+    for child in ast.iter_child_nodes(node):
+        _walk(child, table, columns, dropped)
+
+
+def head_column_drops(engine):
+    """`{table: [column, ...]}` the head's `downgrade()` drops from tables it does NOT drop whole.
+
+    A column on a table that is dropped wholesale is not a per-column loss -- the operator loses the
+    table, which `data_loss_detail.tables` classifies -- so those are subtracted, exactly as
+    `downgrade.py`'s renderer words it ("that otherwise survive").
+    """
+    row = next(row for row in ROWS if row["engine"] == engine)
+    path = chain(engine)[row["alembic"]["from_revision"]][1]
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    body = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "downgrade")
+
+    columns, dropped = {}, set()
+    _walk(body, None, columns, dropped)
+    return {table: sorted(names) for table, names in columns.items() if table not in dropped}
 
 
 def _placeholder(column):
@@ -129,6 +191,28 @@ def test_the_downgrade_removes_every_table_1_7_added(tmp_path, monkeypatch):
     assert not left, f"the downgrade left 1.7 tables behind: {sorted(left)}"
 
 
+def test_the_downgrade_removes_every_column_1_7_added(tmp_path, monkeypatch):
+    """The columns half, executed rather than declared.
+
+    Both guards above read files -- the model, the baseline, the head's AST. This one runs the
+    migration and looks at the database that comes out, which is the only check that can catch a
+    `drop_column` that alembic emits and the engine quietly does not apply.
+    """
+    uri = _round_trip(tmp_path, monkeypatch)
+    engine = create_engine(uri)
+    try:
+        inspector = inspect(engine)
+        left = sorted(
+            f"{table}.{column}"
+            for table, columns in COLUMNS_ADDED_BY_1_7.items()
+            for column in columns
+            if column in {existing["name"] for existing in inspector.get_columns(table)}
+        )
+    finally:
+        engine.dispose()
+    assert not left, f"the downgrade left 1.7 columns on tables 1.6.14 still has: {left}"
+
+
 def test_the_downgrade_records_the_version_it_landed_on(tmp_path, monkeypatch):
     """`bw_metadata.version` is what the scheduler entrypoint stamps from on the next boot, so a
     downgrade that moves the schema and not the recorded version is the half-finished state the
@@ -170,5 +254,57 @@ def test_the_manifest_classifies_every_table_1_7_adds():
     assert not TABLES_ADDED_BY_1_7 - classified, f"1.7 adds tables the manifest never classifies: {sorted(TABLES_ADDED_BY_1_7 - classified)}"
     assert not classified - TABLES_ADDED_BY_1_7, f"the manifest classifies tables 1.7 does not add: {sorted(classified - TABLES_ADDED_BY_1_7)}"
 
-    columns = {table: sorted(names) for table, names in MANIFEST["data_loss_detail"]["columns"].items()}
-    assert columns == COLUMNS_ADDED_BY_1_7, f"the manifest's per-column loss map is not what 1.7 adds to surviving tables: {columns} != {COLUMNS_ADDED_BY_1_7}"
+    assert (
+        MANIFEST_COLUMNS == COLUMNS_ADDED_BY_1_7
+    ), f"the manifest's per-column loss map is not what 1.7 adds to surviving tables: {MANIFEST_COLUMNS} != {COLUMNS_ADDED_BY_1_7}"
+
+
+@pytest.mark.parametrize("engine", sorted({row["engine"] for row in ROWS}))
+def test_every_head_really_drops_the_columns_the_manifest_declares(engine):
+    """The head-anchored guard, on all four engines, not just the one the round trip runs.
+
+    `columns_why` claims the drop happens "on every engine". The model-anchored assertion above
+    cannot check that -- there is one model and four heads -- and it is only sound while
+    `test_upgrade_schema_parity` is green. This reads the artifact the claim is about: the head's own
+    `downgrade()` body. The two disagree exactly when a head is hand-edited, when one engine's head
+    diverges, or when model and migrations drift; all three are silent today.
+    """
+    assert head_column_drops(engine) == MANIFEST_COLUMNS, f"{engine}: the head's downgrade() does not drop what the manifest declares"
+
+
+def test_the_head_walk_finds_something_to_walk():
+    """Anti-vacuity: an AST walk that resolves nothing compares {} to {} and passes for free."""
+    for engine in sorted({row["engine"] for row in ROWS}):
+        drops = head_column_drops(engine)
+        expected = sum(len(names) for names in MANIFEST_COLUMNS.values())
+        assert sum(len(names) for names in drops.values()) == expected, f"{engine}: expected {expected} resolved column drops, found {drops}"
+
+
+def test_the_baseline_tag_and_the_manifest_target_describe_the_same_schema():
+    """`alembic_baseline` starts from 1.6.13; the manifest downgrades to 1.6.14. Every assertion in
+    this file and in `test_downgrade_round_trip.py` treats those as one schema, and they are -- but
+    only because every migration between them is a version bump with no schema op in it. That is a
+    property of today's chain, not a law, so it is asserted rather than assumed: the day a 1.6.x
+    migration adds a column, this fails and names the file instead of letting a round trip land on a
+    schema neither release ever shipped.
+    """
+    for engine in sorted({row["engine"] for row in ROWS}):
+        row = next(r for r in ROWS if r["engine"] == engine)
+        links = chain(engine)
+        baseline_revision = revision_for(BASELINE_VERSION, engine)
+        between = walk_back(engine, row["alembic"]["to_revision"], stop=baseline_revision)
+        # `walk_back` runs to the root when `stop` is never reached, so a length check would pass for
+        # a 1.6.13 that is not an ancestor at all. The last element IS the stop, or the walk missed it.
+        assert (
+            between[-1] == baseline_revision
+        ), f"{engine}: the {BASELINE_VERSION} revision is not an ancestor of the manifest target {row['alembic']['to_revision']}"
+
+        for revision in between[:-1]:  # [-1] is the 1.6.13 revision itself, which defines the baseline
+            path = links[revision][1]
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call) or _receiver(node.func) not in ("op", "batch_op"):
+                    continue
+                assert _attr(node.func) == "execute", f"{path.name} calls op.{_attr(node.func)}(): 1.6.13 and {row['to']} are no longer the same schema"
+                statement = (_literal(node.args[0]) or "").upper() if node.args else ""
+                assert statement.startswith("UPDATE BW_METADATA"), f"{path.name} executes {statement[:60]!r}, which is not a version bump"
