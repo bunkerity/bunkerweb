@@ -15,6 +15,16 @@ integrations:
   # pointed at the distro fpm's own socket (per-distro path, php8.3-fpm.sock on noble) with a
   # pool drop-in -- the php-singlesite www.conf pattern. Until one of those lands and runs
   # green, this arm stays off.
+  #
+  # ONE MORE THING whoever enrolls it has to handle, new in wave 14 and not visible from here:
+  # `examples/wordpress/setup-linux.sh` opens with `systemctl enable --now mariadb`, and
+  # `tests/scripts/build.sh` now does `systemctl disable --now mariadb` inside `bunkerweb-linux`
+  # for the opposite reason -- that container is `network_mode: host`, so the distro server binds
+  # 0.0.0.0:3306 on the RUNNER and `tests/misc/docker/mariadb.yml` can then never publish its own
+  # ("address already in use" -> "Up failed for mariadb", push-13 CI job 101699390338). The two run
+  # in that order, so enrolling this arm re-opens the port collision T-1 closed. Whichever option
+  # above is taken, the example's database must not be the host-network distro server on :3306:
+  # option (a) -- the helper taught mysqli plus a TCP path -- is the one that does not fight it.
 
 actions:
   string_check:

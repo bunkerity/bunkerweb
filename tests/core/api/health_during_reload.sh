@@ -40,10 +40,13 @@ case "$before" in
 *) fail "instance was not settled (msg:ok) before the reload, got: $before" ;;
 esac
 
-# A dedicated 60s timeout, not the polls' 5s: the worst non-pathological reload path (SWAP_WAIT
-# 30s lock + two `nginx -t` + confirm_reload's 2s) is ~6s, but sharing the polls' -m 5 turned any
-# slower box into a `curl: (28)` in the response file and a false "the reload did not itself
-# succeed" red.
+# A dedicated 60s timeout, not the polls' 5s: the worst non-pathological reload path is the
+# instance-side swap wait (`SWAP_WAIT_TIMEOUT = 10` in src/bw/lua/bunkerweb/api.lua -- this comment
+# said 30 s, which the constant has not been for some time) plus two `nginx -t` and confirm_reload's
+# 2 s, so ~15 s at the absolute worst and a couple of seconds in practice. Sharing the polls' -m 5
+# turned any slower box into a `curl: (28)` in the response file and a false "the reload did not
+# itself succeed" red; 60 s keeps that headroom without pinning the budget to a constant that lives
+# in another file.
 curl_api 60 -X POST "$api/reload" >"$reload_response_file" 2>&1 &
 reload_pid=$!
 
