@@ -62,7 +62,13 @@ class SchedulerApiClient(BaseApiClient):
     def reload_instances(self, test: bool = True) -> bool:
         """Reload all instances. Returns True on success."""
         try:
-            # The API fan-out allows 30s for the instance verdict; leave room to return it.
+            # A busy instance is now retried instead of failed: two rounds of SWAP_WAIT_TIMEOUT (10s,
+            # api.lua) + BUSY_RETRY_DELAY (2s, ApiCaller.py) = 24s, then a third attempt spending its
+            # RELOAD_TIMEOUT read budget (30s, api/app/routers/instances.py) if it is not busy again --
+            # ~54s worst case, not the ~35s this budget assumed (all three busy ends at 34s and 502s
+            # instead). 35s is short for that, but this call has no caller anywhere in the tree today
+            # (request_reload is itself uncalled) and a timeout here just maps to False, so it is a
+            # latent gap, not a live one.
             self._post("/instances/reload", params={"test": str(test).lower()}, timeout=(5, 35))
             return True
         except (ApiClientError, ApiUnavailableError):
