@@ -83,6 +83,67 @@
     systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
     ```
 
+!!! warning "Swarm: `NAMESPACES` now filters custom configs too"
+
+    Before 1.7, `NAMESPACES` filtered the Swarm controller's event path and its service discovery
+    but **not** its config discovery: a global `docker config` object was collected by every
+    autoconf on the daemon, whatever namespace it belonged to. 1.7 applies the filter to configs as
+    well, which is what the Docker integration has always done. If you set `NAMESPACES` and your
+    config objects carry no `bunkerweb.NAMESPACE` label, those configs **stop being applied after
+    the upgrade, with no error** — a custom snippet that carried an allow/deny block simply
+    disappears from the generated configuration.
+
+    Label every config object you expect to be applied. Swarm configs are immutable — `docker
+    config` has no `update` verb — so each one must be recreated under a new name and re-pointed
+    with `docker service update --config-rm/--config-add`. Find the objects this affects before you
+    upgrade with:
+
+    ```bash
+    docker config ls -q | xargs -r docker config inspect --format '{{.Spec.Name}} {{.Spec.Labels}}'
+    ```
+
+!!! info "Docker Swarm is supported again in 1.7"
+
+    The Swarm integration was marked deprecated in 1.6 and is supported again in 1.7. The stack
+    published for 1.6 does **not** boot on 1.7: it carries no `bw-api` and no `bw-worker`, so
+    `bw-autoconf` waits forever for an API that is never started and no background job ever runs.
+    Redeploy from the [1.7 reference stack](integrations.md#swarm) rather than editing the old one,
+    and note the three new requirements it carries: a `bw-state=true` node label for the services
+    that own volumes, `mode: global` on the `bunkerweb` service, and `mode: host` port publishing.
+
+### Rolling back to 1.6.14
+
+A rollback is not the reverse of an upgrade. Two paths exist, and BunkerWeb tells you which one applies to your installation rather than letting you guess.
+
+**Restore from backup** works everywhere and is the supported path. It replays a backup taken *before* the upgrade over an emptied database, so everything written since the upgrade is lost. See [Rollback](#rollback) below for the manual procedure per database engine.
+
+**In-place downgrade** is offered only for version/engine pairs that have been measured lossless, and only back to the immediately preceding release. For 1.7.0 that means 1.6.14, on **SQLite and PostgreSQL only**. On MariaDB and MySQL the 1.7 migration cannot be replayed backwards — it aborts partway and leaves a schema that is neither version — so those installations must restore from a backup.
+
+Three commands, in this order:
+
+```bash
+# 1. Can this installation go back? Read-only: it creates no database and writes nothing.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Hold the writers still. Stays in the foreground until you press Ctrl-C.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. In a second shell, while step 2 is still holding:
+bwcli plugin backup downgrade 1.6.14            # reports; changes nothing
+bwcli plugin backup downgrade 1.6.14 --execute  # asks for confirmation, then migrates
+```
+
+Step 3 refuses unless the hold from step 2 is in place for that same version, the preflight it re-runs itself comes back clean, and the compatibility manifest marks the pair as tested. It then takes its own backup immediately before migrating and restores it if anything goes wrong.
+
+Before starting, stop or firewall anything that writes to the API directly. The hold makes the API *report* the fleet read-only, which is what the scheduler, autoconf and the UI act on; it does not block a write made straight to the API by a token holder.
+
+!!! danger "What an in-place downgrade destroys"
+    Every centrally stored certificate, every attachable resource (redirects, upstream pools, workflows, resource groups), all request metrics and the threat map, every registered passkey, and every stored instance credential — enrolled instances must be re-registered against the global `API_TOKEN` afterwards. Per-user UI preferences survive but lose their meaning: 1.6.14 reads them all as per-table column layouts. Bans are the one soft loss: the `sync-bans` job relearns them from the instances, losing only their remaining durations.
+
+    The preflight counts what your installation actually holds and refuses an in-place downgrade while anything irreplaceable is still there, so the answer you get is about your data rather than about the release in the abstract.
+
+**Outside the database.** Job caches and PRO plugins are rebuilt on the next run. Custom configs, `www` content, Let's Encrypt state and backup archives are unchanged between the two versions. External plugins that need a 1.7 API are unusable on 1.6.14 and must be removed or downgraded too.
+
 ### Procedure
 
 === "Docker"
@@ -129,7 +190,7 @@
                 * Reads the version actually running from the container rather than trusting the image tag, so a floating tag (`latest`, `testing`) and an interrupted previous upgrade are both detected correctly.
             2. Upgrade decision
                 * Same version already running: prints the stack status and exits.
-                * Older target version: **refuses**. BunkerWeb has no downgrade migration, so the scheduler would fail to start and restart in a loop. See [Rollback](#rollback) for the supported way back.
+                * Older target version: **refuses**. The installer has no downgrade automation of its own, and starting the scheduler against an older package with an already-migrated database fails and restarts in a loop. See [Rolling back to 1.6.14](#rolling-back-to-1614) to bring the database back first, then re-run the installer at the older version.
                 * Otherwise: asks for confirmation (or proceeds directly with `-y`).
             3. Pre-upgrade backup
                 * Runs `bwcli plugin backup save` inside the scheduler container and copies the archive to the host.
