@@ -167,7 +167,12 @@ class DatabaseCustomConfigsMixin(DatabaseMixinBase):
                 session.add_all(to_put)
                 session.commit()
             except BaseException as e:
-                return f"{f'{message}{endl}' if message else ''}{e}"
+                # `str(e)` is empty on some driver exceptions, and an EMPTY return is SUCCESS to
+                # every caller -- including `check_configs_changes`, whose regeneration guard then
+                # deletes the operator's on-disk custom configs over a commit that never landed.
+                # Fall back to the exception class name so a failed commit can never read as one.
+                reason = str(e) or type(e).__name__
+                return f"{f'{message}{endl}' if message else ''}{reason}"
 
         return message
 

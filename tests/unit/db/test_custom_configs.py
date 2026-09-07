@@ -1,5 +1,7 @@
 """DatabaseCustomConfigsMixin — global/per-service NGINX config snippets."""
 
+from unittest.mock import Mock
+
 import pytest
 
 from fixtures.seed import add_service_setting, seed_minimal, seed_multisite
@@ -333,3 +335,38 @@ class TestGetCustomConfigsMultiTemplateMerge:
         cfg = db.get_custom_config("server_http", "onlybase", service_id="app1.example.com")
         assert cfg["data"] == b"# base-only"
         assert cfg["template"] == "base"
+
+
+class TestAFailedCommitNeverReadsAsALandedWrite:
+    """The return value of ``save_custom_configs`` is the only thing every caller has to tell a
+    landed write from a refused one, and an EMPTY return is success to all of them. Since lane
+    DEV-3b it also gates ``check_configs_changes``' regeneration, which unlinks the operator's
+    on-disk custom configs -- so a commit failure that stringifies to ``""`` would delete the very
+    edit it failed to store. There is no exception whose text can be trusted to be non-empty."""
+
+    class _SilentDriverError(Exception):
+        """``str()`` is ``""`` — the shape a bare DBAPI error takes when it carries no text."""
+
+    def test_a_commit_failure_with_no_text_still_reports_a_failure(self, cdb, monkeypatch):
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError()))
+
+        err = cdb.save_custom_configs([{"type": "http", "name": "n", "data": "# x", "method": "manual"}], "manual")
+
+        assert err, "a failed commit reported itself as a successful write"
+        assert err == "_SilentDriverError"
+
+    def test_a_commit_failure_behind_an_advisory_is_not_left_looking_like_one(self, cdb, monkeypatch):
+        """``PUT /configs/bulk`` answers 200 when every line of the message is an advisory. A
+        trailing empty exception used to leave exactly that: the advisory plus a blank line."""
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError()))
+
+        err = cdb.save_custom_configs([{"value": "# x", "exploded": ("nosuch.example.com", "server_http", "n")}], "manual")
+
+        assert err.splitlines() == ["Service nosuch.example.com not found, please check your config", "_SilentDriverError"]
+
+    def test_a_commit_failure_that_does_have_text_is_unchanged(self, cdb, monkeypatch):
+        monkeypatch.setattr(cdb._session_factory, "commit", Mock(side_effect=self._SilentDriverError("disk is full")))
+
+        err = cdb.save_custom_configs([{"type": "http", "name": "n", "data": "# x", "method": "manual"}], "manual")
+
+        assert err == "disk is full"

@@ -148,6 +148,7 @@
 - [BUGFIX] `ui`: a custom config that names a service which does not exist is flashed as a warning instead of as a save error.
 - [BUGFIX] `worker`: sizing a cache push no longer swallows the shutdown signal that stops the worker.
 - [BUGFIX] `scheduler`: a refused custom-config write no longer triggers the regeneration that deleted the operator's on-disk custom configs.
+- [BUGFIX] `db`: a custom-config commit that fails without an error message is reported as a failure instead of as a successful write.
 
 ## v1.6.14~rc1 - 2026/07/??
 
