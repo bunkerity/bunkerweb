@@ -114,10 +114,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends libssh2-1t64 &&
 #   util-linux family 2.41-5 -> 2.41.5-0+deb13u1, still shipped vulnerable by nginx:1.30.4:
 #     CVE-2025-14104 CVE-2026-13595 CVE-2026-27456 CVE-2026-53612 CVE-2026-53613 CVE-2026-53614 CVE-2026-53615
 #   image codecs inherited from the same base: CVE-2026-56208 (libaom3),
-#     CVE-2024-38949 (libde265-0), CVE-2025-68431 (libheif1 + its dav1d/libde265 plugins),
+#     CVE-2024-38949, CVE-2026-33164, CVE-2026-33165 (libde265-0) 1.0.15-1+deb13u1 -> 1.0.15-1+deb13u2,
+#     CVE-2025-68431 (libheif1 + its dav1d/libde265 plugins),
 #     libexpat1 CVE-2026-72522 2.8.2-1~deb13u1 -> 2.8.3-1~deb13u1 (the pre-refresh digest
 #     carried 2.7.1-2 / CVE-2025-59375; refreshing the base moved it to the newer pair)
-RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 login mount util-linux libaom3 libde265-0 libexpat1 libheif1 libheif-plugin-dav1d libheif-plugin-libde265 && rm -rf /var/lib/apt/lists/* # CVE-2026-33164 CVE-2026-33165
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
