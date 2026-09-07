@@ -61,11 +61,6 @@ Hier erfahren Sie, wie Sie je nach Integration auf die Protokolle zugreifen kön
 
 === "Swarm"
 
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
-
     !!! tip "Dienste auflisten"
         Um die Dienste aufzulisten, können Sie den folgenden Befehl verwenden:
         ```shell
@@ -136,11 +131,6 @@ Sie können eine IP manuell entsperren, was bei Tests nützlich ist, damit Sie d
     ```
 
 === "Swarm"
-
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
     Sie können den Befehl `docker exec` verwenden (ersetzen Sie `bw-scheduler` durch den Namen Ihres Dienstes):
     ```shell

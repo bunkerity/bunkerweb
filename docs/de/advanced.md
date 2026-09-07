@@ -167,11 +167,6 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
     === "Swarm"
 
-        !!! warning "Veraltet"
-            Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-            **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
-
         Sie müssen die Einstellungen zu den Umgebungsvariablen sowohl der BunkerWeb- als auch der Scheduler-Dienste hinzufügen:
 
         ```yaml
@@ -340,11 +335,6 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
         ```
 
     === "Swarm"
-
-        !!! warning "Veraltet"
-            Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-            **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
         Sie müssen die Einstellungen zu den Umgebungsvariablen sowohl der BunkerWeb- als auch der Scheduler-Dienste hinzufügen.
 
@@ -1406,11 +1396,6 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
 === "Swarm"
 
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
-
     Bei Verwendung der [Swarm-Integration](integrations.md#swarm) werden benutzerdefinierte Konfigurationen über [Docker Configs](https://docs.docker.com/engine/swarm/configs/) verwaltet.
 
     Um es einfach zu halten, müssen Sie die Config nicht einmal an einen Dienst anhängen: Der Autoconf-Dienst lauscht auf Config-Ereignisse und aktualisiert die benutzerdefinierten Konfigurationen bei Bedarf.
@@ -1888,11 +1873,6 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```
 
 === "Swarm"
-
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
     Bevor Sie den [Swarm-Integrations](integrations.md#swarm)-Stack auf Ihrer Maschine ausführen, müssen Sie die Ports bearbeiten:
 
@@ -2403,11 +2383,6 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```
 
 === "Swarm"
-
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
     !!! info "Multisite-Modus aktiviert"
         Die [Swarm-Integration](integrations.md#docker-autoconf) impliziert die Verwendung des Multisite-Modus: Das Schützen einer PHP-Anwendung ist dasselbe wie das Schützen mehrerer.
@@ -3086,11 +3061,6 @@ Die üblichen Variablen sind:
     ```
 
 === "Swarm"
-
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
     Fügen Sie die Variablen dem Scheduler-Service hinzu:
 

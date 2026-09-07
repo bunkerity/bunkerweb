@@ -61,11 +61,6 @@ Aquí te mostramos cómo puedes acceder a los registros, dependiendo de tu integ
 
 === "Swarm"
 
-    !!! warning "Obsoleto"
-        La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
-
     !!! tip "Listar servicios"
         Para listar los servicios, puedes usar el siguiente comando:
         ```shell
@@ -136,11 +131,6 @@ Puedes desbloquear manualmente una IP, lo cual es útil al realizar pruebas para
     ```
 
 === "Swarm"
-
-    !!! warning "Obsoleto"
-        La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
 
     Puedes usar el comando `docker exec` (reemplaza `bw-scheduler` con el nombre de tu servicio):
     ```shell

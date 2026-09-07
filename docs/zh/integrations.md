@@ -2590,6 +2590,8 @@ services:
       - "bunkerweb.INSTANCE=yes" # 自动配置服务识别 BunkerWeb 实例的强制性标签
     environment:
       <<: *bw-env
+    volumes:
+      - bw-instance-data:/data
     restart: "unless-stopped"
     networks:
       - bw-universe
@@ -2654,6 +2656,7 @@ services:
 volumes:
   bw-data:
   bw-storage:
+  bw-instance-data:
 
 networks:
   bw-universe:
@@ -4359,9 +4362,6 @@ kubectl delete ingress <old-ingress> -n <namespace>
   <figcaption>Docker Swarm 集成</figcaption>
 </figure>
 
-!!! warning "已弃用"
-    Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](#kubernetes)。
-
 !!! tip "PRO 支持"
     **如果您需要 Swarm 支持**，请通过 [contact@bunkerity.com](mailto:contact@bunkerity.com) 或[联系表单](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)与我们联系。
 
@@ -4383,130 +4383,211 @@ kubectl delete ingress <old-ingress> -n <namespace>
 
     集群数据库后端的设置超出了本文档的范围。
 
-这是您可以使用 `docker stack deploy` 部署的堆栈样板：
+这是保存在仓库 [`misc/integrations/swarm.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/swarm.mariadb.yml) 中的技术栈样板，并像其他每个参考技术栈一样接受测试套件的扫描验证。请使用 `docker stack deploy -c swarm.mariadb.yml bunkerweb` 部署它，**而不是** `docker compose up`：stack deploy 会静默忽略 `container_name`、`depends_on`、`links`、`profiles` 以及顶层的 `restart:` 键，因此下面的内容里都不会出现它们——启动顺序来自每个组件自身的就绪循环，再加上 `deploy.restart_policy`。MySQL、PostgreSQL 和 Oracle 版本就在它旁边（`swarm.mysql.yml`、`swarm.postgres.yml`、`swarm.oracle.yml`），每个文件都有一个 `.ui.yml` 姊妹文件，用于添加内嵌的 web UI。
+
+在部署之前，请先给将承载有状态服务的节点打上一次标签：
+
+```shell
+docker node update --label-add bw-state=true <node>
+```
 
 ```yaml
-x-bw-env: &bw-env
-  # 我们使用一个锚点来避免在两个服务中重复相同的设置
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
   SWARM_MODE: "yes"
-  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    # `mode: global` is REQUIRED, not a recommendation. The autoconf controller registers each
+    # instance under the task's DNS name `<service>.<NodeID>.<TaskID>`, which only resolves for a
+    # global service; a replicated one produces `<service>.<slot>.<TaskID>` and the control plane
+    # can never reach it. SwarmController refuses a non-global INSTANCE service and says so.
+    deploy:
+      mode: global
+      # Service labels, not container labels: the controller reads `Spec.Labels` off the SERVICE.
+      # A `labels:` block at service level would set CONTAINER labels, which it never looks at --
+      # the stack would come up perfectly and the instance would simply never be discovered.
+      labels:
+        - "bunkerweb.INSTANCE=yes"
+      restart_policy:
+        condition: any
     ports:
-      - published: 80
-        target: 8080
-        mode: host
+      # `mode: host`, not the default routing mesh. The mesh source-NATs every connection, so
+      # BunkerWeb would see the ingress network's address instead of the client's and every
+      # IP-based decision it makes -- whitelist, blacklist, country, rate limit, bans -- would be
+      # taken against the wrong address. `mode: host` on a global service publishes on each node
+      # directly and preserves the real client IP.
+      - target: 8080
+        published: 80
         protocol: tcp
-      - published: 443
-        target: 8443
         mode: host
+      - target: 8443
+        published: 443
         protocol: tcp
-      - published: 443
-        target: 8443
         mode: host
-        protocol: udp # QUIC
     environment:
-      <<: *bw-env
-    restart: "unless-stopped"
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     networks:
       - bw-universe
       - bw-services
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - "node.role == worker"
-      labels:
-        - "bunkerweb.INSTANCE=yes" # autoconf 服务识别 BunkerWeb 实例的强制性标签
-
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-    environment:
-      <<: *bw-env
-      BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
-      SERVER_NAME: "" # 服务器名称将由服务标签填充
-      MULTISITE: "yes" # autoconf 的强制性设置
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-      USE_REDIS: "yes"
-      REDIS_HOST: "bw-redis"
-    volumes:
-      - bw-storage:/data # 用于持久化缓存和备份等其他数据
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-      - bw-db
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
 
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    deploy:
+      # The controller talks to the Swarm API, which only a manager serves.
+      placement:
+        constraints:
+          - "node.role == manager"
+      restart_policy:
+        condition: any
     environment:
-      SWARM_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-      DOCKER_HOST: "tcp://bw-docker:2375" # Docker 套接字
-    restart: "unless-stopped"
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
     networks:
       - bw-universe
       - bw-docker
       - bw-db
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
 
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
-    environment:
-      CONFIGS: "1"
-      CONTAINERS: "1"
-      SERVICES: "1"
-      SWARM: "1"
-      TASKS: "1"
-      LOG_LEVEL: "warning"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    restart: "unless-stopped"
-    networks:
-      - bw-docker
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
     deploy:
       placement:
         constraints:
-          - "node.role == manager"
+          - "node.labels.bw-state == true" # owns bw-storage; see the header
+      restart_policy:
+        condition: any
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    deploy:
+      restart_policy:
+        condition: any
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true" # owns bw-worker-storage; see the header
+      restart_policy:
+        condition: any
+    volumes:
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds nothing but
+      # a scratch tree the worker rebuilds from the database.
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued jobs on the
+    # floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs. AOF, not RDB
+    # ("--save" stays empty) -- a 60s RDB loss window on a job queue means silently dropped work.
+    # This is a DIFFERENT server from any Redis/Valkey used as the WAF datastore (which runs
+    # volatile-lru): one is a durable queue, the other a cache, and 1.7 separated the two roles.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true" # the AOF is a LOCAL volume; see the header
+      restart_policy:
+        condition: any
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - bw-universe
 
   bw-db:
     image: mariadb:11
-    # 我们设置了最大允许的数据包大小以避免大查询的问题
     command: --max-allowed-packet=67108864
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.bw-state == true" # owns bw-data; see the header
+      restart_policy:
+        condition: any
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"
       MYSQL_USER: "bunkerweb"
-      MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
       - bw-data:/var/lib/mysql
-    restart: "unless-stopped"
     networks:
       - bw-db
-    deploy:
-      placement:
-        constraints:
-          - "node.role == worker"
 
-  bw-redis:
-    image: redis:8-alpine
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
     deploy:
+      # The Swarm API is only served by a manager, and the socket has to be a manager's socket.
       placement:
         constraints:
-          - "node.role == worker"
+          - "node.role == manager"
+      restart_policy:
+        condition: any
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Wider than the Docker-autoconf proxy on purpose: the Swarm controller lists and inspects
+      # SERVICES and CONFIGS and reads their events, and resolves TASKS to build instance
+      # hostnames. CONTAINERS stays off -- it never looks at one.
+      SERVICES: "1"
+      TASKS: "1"
+      NODES: "1"
+      CONFIGS: "1"
+      EVENTS: "1"
+      SWARM: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
 
 volumes:
+  bw-jobs-broker-data:
+  bw-worker-storage:
   bw-data:
   bw-storage:
 
@@ -4514,8 +4595,11 @@ networks:
   bw-universe:
     name: bw-universe
     driver: overlay
+    # attachable so `docker run --network bw-universe` can reach the control plane for a one-off
+    # diagnostic; a stack-only network refuses a plain container.
     attachable: true
     ipam:
+      driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
@@ -4531,6 +4615,12 @@ networks:
     driver: overlay
     attachable: true
 ```
+
+
+上面的 `node.labels.bw-state == true` 约束会把每个拥有具名卷的服务（`bw-db`、`bw-scheduler`、`bw-worker`、`bw-jobs-broker`）钉在被打标签的那个节点上——Swarm 中的具名卷是本地于某个节点的，因此若不加这个钉选约束就重新调度这些服务之一，它会悄无声息地在空状态下启动；对任务代理（jobs broker）来说，这意味着所有排队中的任务都会丢失，且不会在任何地方留下日志。这是用故障转移能力换取持久性：如果被钉选的节点挂了，这些服务不会在别处重新启动。高可用的替代方案是在这四个卷上使用共享卷驱动（NFS、CephFS、云端块存储驱动），届时即可移除这些约束——这是一项本文档并未假定具备的基础设施前提条件，因此单节点的 CI 关卡无法演练该路径，它也就未被自动化测试验证过。
+
+!!! danger "1.7 之前发布的技术栈无法在 1.7 上启动"
+    从旧版本复制来的技术栈没有 `bw-api`、没有 `API_URL`/`API_TOKEN`，也没有 `bw-worker`/`CELERY_BROKER_URL`：`bw-autoconf` 会因此无限期地等待一个永远不会启动的 API，并且没有任何后台任务（证书续期、CRS 更新、封禁同步等）会被执行。请从上面的参考文件重新部署，而不是修补旧的文件。
 
 !!! info "Swarm 强制设置"
     请注意，在使用 Swarm 集成时，`SWARM_MODE: "yes"` 环境变量是强制性的。

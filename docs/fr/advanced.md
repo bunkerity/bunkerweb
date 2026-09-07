@@ -167,11 +167,6 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
     === "Swarm"
 
-        !!! warning "Obsolète"
-            L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-            **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
-
         Vous devrez ajouter ces paramètres aux variables d'environnement des services BunkerWeb et scheduler :
 
         ```yaml
@@ -340,11 +335,6 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
         ```
 
     === "Swarm"
-
-        !!! warning "Obsolète"
-            L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-            **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
 
         Vous devrez ajouter ces paramètres aux variables d'environnement des services BunkerWeb et scheduler :
 
@@ -1405,11 +1395,6 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
 === "Swarm"
 
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
-
     Lorsque vous utilisez l'[Swarm integration](integrations.md#swarm), les configurations personnalisées sont gérées à l'aide des [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     Pour simplifier, vous n'avez même pas besoin d'attacher le Config à un service : le service d'autoconf écoute les événements Config et mettra à jour les configurations personnalisées lorsque nécessaire.
@@ -1887,11 +1872,6 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```
 
 === "Swarm"
-
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
 
     Avant d'exécuter la pile de l'intégration [Swarm](integrations.md#swarm) sur votre machine, vous devrez modifier les ports :
 
@@ -2402,11 +2382,6 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```
 
 === "Swarm"
-
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
 
     !!! info "Mode multisite activé"
         L'intégration [Swarm](integrations.md#docker-autoconf) implique l'utilisation du mode multisite : protéger une application PHP équivaut à protéger plusieurs applications.
@@ -3085,11 +3060,6 @@ Les variables couramment utilisées sont :
     ```
 
 === "Swarm"
-
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
 
     Ajoutez les variables au service scheduler :
 

@@ -61,11 +61,6 @@ Voici comment vous pouvez accéder aux logs, en fonction de votre intégration :
 
 === "Swarm"
 
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
-
     !!! tip "Lister les services"
         Pour lister les services, vous pouvez utiliser la commande suivante :
         ```shell
@@ -136,11 +131,6 @@ Vous pouvez débannir manuellement une IP, ce qui est utile lors de la réalisat
     ```
 
 === "Swarm"
-
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
 
     Vous pouvez utiliser la commande `docker exec` (remplacez `bw-scheduler` par le nom de votre service) :
     ```shell

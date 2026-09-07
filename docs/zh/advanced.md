@@ -167,11 +167,6 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
     === "Swarm"
 
-        !!! warning "已弃用"
-            Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-            **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
-
         您需要将设置添加到 BunkerWeb 和调度程序服务的环境变量中：
 
         ```yaml
@@ -340,11 +335,6 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
         ```
 
     === "Swarm"
-
-        !!! warning "已弃用"
-            Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-            **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
 
         您需要将设置添加到 BunkerWeb 和调度程序服务的环境变量中。
 
@@ -1404,11 +1394,6 @@ systemctl status systemd-resolved
 
 === "Swarm"
 
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
-
     当使用 [Swarm 集成](integrations.md#swarm)时，自定义配置是使用 [Docker Configs](https://docs.docker.com/engine/swarm/configs/) 管理的。
 
     为了简单起见，您甚至不需要将配置附加到服务上：autoconf 服务正在监听配置事件，并会在需要时更新自定义配置。
@@ -1886,11 +1871,6 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```
 
 === "Swarm"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
 
     在您的机器上运行 [Swarm 集成](integrations.md#swarm)堆栈之前，您需要编辑端口：
 
@@ -2401,11 +2381,6 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```
 
 === "Swarm"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
 
     !!! info "已启用多站点模式"
         [Swarm 集成](integrations.md#docker-autoconf)意味着使用多站点模式：保护一个 PHP 应用程序与保护多个应用程序相同。
@@ -3083,11 +3058,6 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
     ```
 
 === "Swarm"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息请参阅 [Swarm 集成文档](integrations.md#swarm)。**
 
     将变量添加到 scheduler 服务：
 

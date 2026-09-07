@@ -167,11 +167,6 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
     === "Swarm"
 
-        !!! warning "Obsoleto"
-            La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-            **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
-
         Necesitarás agregar la configuración a las variables de entorno de los servicios de BunkerWeb y del programador:
 
         ```yaml
@@ -340,11 +335,6 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
         ```
 
     === "Swarm"
-
-        !!! warning "Obsoleto"
-            La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-            **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
 
         Necesitarás agregar la configuración a las variables de entorno de los servicios de BunkerWeb y del programador.
 
@@ -1406,11 +1396,6 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
 
 === "Swarm"
 
-    !!! warning "Obsoleto"
-        La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
-
     Cuando se utiliza la [integración de Swarm](integrations.md#swarm), las configuraciones personalizadas se gestionan mediante [Docker Configs](https://docs.docker.com/engine/swarm/configs/).
 
     Para mantenerlo simple, ni siquiera necesitas adjuntar la Configuración a un servicio: el servicio de autoconfiguración está escuchando los eventos de Configuración y actualizará las configuraciones personalizadas cuando sea necesario.
@@ -1888,11 +1873,6 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
     ```
 
 === "Swarm"
-
-    !!! warning "Obsoleto"
-        La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Puedes encontrar más información en la [documentación de la integración de Swarm](integrations.md#swarm).**
 
     Antes de ejecutar el stack de [integración de Swarm](integrations.md#swarm) en tu máquina, necesitarás editar los puertos:
 
@@ -2403,11 +2383,6 @@ Se pueden usar las siguientes configuraciones:
     ```
 
 === "Swarm"
-
-    !!! warning "Obsoleto"
-        La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la [integración de Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Se puede encontrar más información en la [documentación de integración de Swarm](integrations.md#swarm).**
 
     !!! info "Modo multisitio habilitado"
         La integración [Swarm](integrations.md#docker-autoconf) implica el uso del modo multisitio: proteger una aplicación PHP es lo mismo que proteger varias.
@@ -3086,11 +3061,6 @@ Las variables habituales son:
     ```
 
 === "Swarm"
-
-    !!! warning "Obsoleto"
-        La integración Swarm está obsoleta y se eliminará en una versión futura. Considera usar la [integración Kubernetes](integrations.md#kubernetes) en su lugar.
-
-        **Más información en la [documentación de la integración Swarm](integrations.md#swarm).**
 
     Añade las variables al servicio scheduler:
 

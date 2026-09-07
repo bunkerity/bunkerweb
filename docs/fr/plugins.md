@@ -136,11 +136,6 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 === "Swarm"
 
-    !!! warning "Obsolète"
-        L'intégration Swarm est obsolète et sera supprimée dans une future version. Veuillez envisager d'utiliser l'[intégration Kubernetes](integrations.md#kubernetes) à la place.
-
-        **Plus d'informations sont disponibles dans la [documentation de l'intégration Swarm](integrations.md#swarm).**
-
     Lors de l'utilisation de l'[intégration Swarm](integrations.md#swarm), les plugins doivent être placés dans le volume monté sur `/data/plugins` dans le conteneur du planificateur.
 
     !!! info "Volume Swarm"
@@ -370,6 +365,9 @@ Chaque emploi comporte les champs suivants :
 | `name`  |     oui     | corde | Nom de l'emploi.                                                                                                                                             |
 | `file`  |     oui     | corde | Nom du fichier à l'intérieur du dossier jobs.                                                                                                                |
 | `every` |     oui     | corde | Fréquence de planification des tâches : `minute`, `hour`, `day` `week` , ou `once` (pas de fréquence, une seule fois avant de (ré)générer la configuration). |
+| `reload` | non | bool | Indique si un changement issu de ce job doit déclencher un reload des instances BunkerWeb. Par défaut `false`. |
+| `async` | non | bool | Indique si le job peut s'exécuter sur la file de workers `heavy` plutôt que de bloquer la file par défaut. Par défaut `false`. |
+| `regenerate` | non | bool | Indique si un changement issu de ce job nécessite que la configuration NGINX soit **rendue à nouveau**, et pas seulement livrée. Par défaut `false`. |
 
 ### Commandes CLI
 
@@ -568,6 +566,13 @@ end
 ### Emplois
 
 BunkerWeb utilise un planificateur de tâches interne pour des tâches périodiques telles que le renouvellement des certificats avec certbot, le téléchargement de listes noires, le téléchargement de fichiers MMDB, ... Vous pouvez ajouter des tâches de votre choix en les plaçant dans un sous-dossier nommé **tâches** et en les répertoriant dans le  fichier de métadonnées **plugin.json**. N'oubliez pas d'ajouter les permissions d'exécution pour tout le monde afin d'éviter tout problème lorsqu'un utilisateur clone et installe votre plugin.
+
+Le code de sortie d'un job est un protocole : `sys.exit(1)` signifie « quelque chose a changé », ce qui livre le répertoire de cache du job (`/var/cache/bunkerweb/<plugin_id>/`) aux instances et leur demande de recharger. `sys.exit(0)` signifie que le job a réussi et n'a rien changé ; tout autre code est un échec. Retourner une valeur au lieu de faire exit ne fait rien — les valeurs de retour sont ignorées et enregistrées comme `0`.
+
+Livrer le cache suffit tant que les instances lisent vos fichiers à l'**exécution**. Si l'un de vos templates `confs/` *lit* ce que le job a écrit — en insérant une liste téléchargée, ou en sondant un certificat en cache avec `is_file()` — alors cela ne suffit pas : la configuration que les instances rechargent est celle qui a été rendue avant l'exécution de votre job, et elle ne mentionne pas le nouveau contenu. Déclarez `"regenerate": true` sur ce job et BunkerWeb rend à nouveau la configuration, la livre et recharge. Cela coûte un rendu complet plus une dispatch supplémentaire des jobs de votre plugin, ne l'activez donc que lorsqu'un template lit réellement le cache, et assurez-vous que le job sorte avec `0` quand il n'a rien de nouveau à écrire.
+
+!!! warning "Les clés inconnues sont refusées"
+    Les entrées de job acceptent `name`, `file`, `every`, `reload`, `async` et `regenerate`, et rien d'autre. Une clé mal orthographiée (`"regenrate"`) fait échouer la validation de tout le plugin et le fait ignorer, la clé fautive étant nommée dans les journaux — délibérément, pour qu'une faute de frappe ne puisse pas désactiver silencieusement un indicateur.
 
 ### Page du plugin
 

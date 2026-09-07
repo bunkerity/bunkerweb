@@ -61,11 +61,6 @@
 
 === "Swarm"
 
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
-
     !!! tip "列出服务"
         要列出服务，您可以使用以下命令：
         ```shell
@@ -136,11 +131,6 @@
     ```
 
 === "Swarm"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
 
     您可以使用 `docker exec` 命令（将 `bw-scheduler` 替换为您的服务名称）：
     ```shell
