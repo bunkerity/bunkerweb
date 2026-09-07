@@ -22,8 +22,11 @@ from common_utils import bytes_hash, create_plugin_tar_gz, plugin_icon_content_t
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
 # `\Z`, not `$`: this one guards a PATH-supplied `plugin_id` on four endpoints, so a trailing
-# newline is attacker-influenced input reaching a filesystem path, not a form typo.
-_PLUGIN_ID_RX = re_compile(r"^[\w.-]{4,64}\Z")
+# newline is attacker-influenced input reaching a filesystem path, not a form typo. The ".bw-"
+# prefix is the instance-side swap's own bookkeeping namespace (`pushswap.RESERVED_PREFIX`): an
+# entry carrying it is exempt from the stale-entry sweep, so a plugin named that way survives its
+# own deletion.
+_PLUGIN_ID_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 _RECOGNIZED_TYPES = {"all", "external", "ui", "pro"}
 
 TMP_UI_ROOT = Path(sep, "var", "tmp", "bunkerweb", "ui")

@@ -58,8 +58,12 @@ def get_api_db(*, log: bool = True) -> APIDatabase:
 
 
 # `\Z`, not `$`: `$` also matches before a trailing newline, so `"plugin\n"` would pass and
-# become a directory name. Same defect as the config-name regexes.
-PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}\Z")
+# become a directory name. Same defect as the config-name regexes. The ".bw-" prefix is the
+# instance-side swap's own bookkeeping namespace (`pushswap.RESERVED_PREFIX`): an entry carrying it
+# is exempt from the stale-entry sweep, so a plugin named that way survives its own deletion. Kept
+# identical to the two live gates (`app/routers/plugins.py`, `src/ui/app/utils.py`) — this copy has
+# no importer today and is the one the next author would start from.
+PLUGIN_NAME_RX = re_compile(r"^(?!\.bw-)[\w.-]{4,64}\Z")
 
 BISCUIT_PUBLIC_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_public_key")
 BISCUIT_PRIVATE_KEY_FILE = LIB_DIR.joinpath(".api_biscuit_private_key")
