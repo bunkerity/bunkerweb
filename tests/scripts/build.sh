@@ -206,6 +206,19 @@ if [ "$integration" == "Linux" ] ; then
   if ! $IS_FREEBSD ; then
     docker exec -u 0 bunkerweb-linux systemctl disable --now systemd-resolved
     docker exec -u 0 bunkerweb-linux sh -c 'echo "nameserver 127.0.0.1" | tee /etc/resolv.conf'
+
+    # The deb images install `mariadb-server` for the client tools that go with `php-mysql`, and
+    # the Debian/Ubuntu postinst ENABLES the server with it -- "Created symlink
+    # /etc/systemd/system/multi-user.target.wants/mariadb.service" in the image build log. The
+    # `rm -f /lib/systemd/system/multi-user.target.wants/*` near the top of every Dockerfile runs
+    # BEFORE that install, so it does not cover it. This container is `network_mode: host`
+    # (tests/linux/docker-compose.yml), so that server binds 0.0.0.0:3306 on the runner itself and
+    # `tests/misc/docker/mariadb.yml` can never publish its own: "failed to bind host port for
+    # 0.0.0.0:3306:10.10.10.254:3306/tcp: address already in use", twice, then "Up failed for
+    # mariadb" -- push-13 CI job 101699390338 (Linux db), and the same class in the wave-12 triage.
+    # The distro server is never the database under test on any arm, so stop it before the harness
+    # needs the port. Tolerant: the rpm images do not enable it, and some do not ship the unit.
+    docker exec -u 0 bunkerweb-linux systemctl disable --now mariadb > /dev/null 2>&1 || true
   fi
 
   sed_in_place 's/10.20.30.[0-9][0-9]*/127.0.0.1/g' tests/misc/conf/dnsmasq.hosts
