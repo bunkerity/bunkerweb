@@ -360,16 +360,21 @@ STREAM 支持 :x:
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                           |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                          |
-| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                      |
-| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                              |
+| 设置                            | 默认值   | 上下文       | 多个  | 描述                                                                 |
+| ----------------------------- | ----- | --------- | --- | ------------------------------------------------------------------ |
+| `ANTIBOT_IGNORE_URI`          |       | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_IP`           |       | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                         |
+| `ANTIBOT_IGNORE_RDNS`         |       | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                            |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes` | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                   |
+| `ANTIBOT_IGNORE_ASN`          |       | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                |
+| `ANTIBOT_IGNORE_USER_AGENT`   |       | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                            |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |       | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。  |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |       | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                     |
+| `ANTIBOT_IGNORE_COUNTRY`      |       | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                |
+| `ANTIBOT_ONLY_COUNTRY`        |       | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。            |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! note "国家设置的行为"
       - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。
@@ -1144,6 +1149,19 @@ STREAM 支持 :warning:
     | `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
 
+=== "请求头"
+    **功能说明：** 根据指定请求头拦截请求，或反过来豁免请求；按名称匹配，并可选地用 PCRE 正则匹配其值。忽略规则优先于任何黑名单命中，包括缓存的判定结果。
+
+    | 设置                              | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ------------------------------- | --- | --------- | --- | --------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |     | multisite | 是   | **请求头名称：** 使请求加入黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_HEADER_VALUE`        |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过黑名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
+
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
 
@@ -1694,11 +1712,16 @@ STREAM 支持 :white_check_mark:
 
 ### 配置设置
 
-| 设置                 | 默认值 | 上下文    | 多个 | 描述                                                                                                                              |
-| -------------------- | ------ | --------- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY`  |        | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                                        |
-| `BLACKLIST_COUNTRY`  |        | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                                      |
-| `COUNTRY_IGNORE_URI` |        | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
+| 设置                            | 默认值 | 上下文       | 多个  | 描述                                                                            |
+| ----------------------------- | --- | --------- | --- | ----------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |     | multisite | 否   | **国家/地区白名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。只允许这些国家/地区。                         |
+| `BLACKLIST_COUNTRY`           |     | multisite | 否   | **国家/地区黑名单：** 以空格分隔的国家/地区代码和/或分组 token 列表。这些国家/地区将被阻止。                        |
+| `COUNTRY_IGNORE_URI`          |     | multisite | 否   | **忽略的 URI：** 以空格分隔的 PCRE 正则表达式列表，匹配的 URI 将跳过国家/地区检查。规则同时匹配路径和带查询字符串的完整请求 URI。 |
+| `COUNTRY_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过国家检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                    |
+| `COUNTRY_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 ### 支持的国家/地区分组
 
@@ -2408,10 +2431,15 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 
 **忽略列表**
 
-| 设置                   | 默认值 | 上下文    | 多个 | 描述                                                                          |
-| ---------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``     | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                         |
-| `DNSBL_IGNORE_IP_URLS` | ``     | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。 |
+| 设置                          | 默认值 | 上下文       | 多个  | 描述                                                              |
+| --------------------------- | --- | --------- | --- | --------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`           | ``  | multisite | 是   | 以空格分隔的 IP/CIDR，用于跳过 DNSBL 检查（白名单）。                              |
+| `DNSBL_IGNORE_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求绕过 DNSBL 检查的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+| `DNSBL_IGNORE_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                  |
+| `DNSBL_IGNORE_IP_URLS`      | ``  | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。       |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! tip "选择 DNSBL 服务器"
     选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：
@@ -2654,6 +2682,17 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     | ------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |        | multisite | 否   | **URI 灰名单：** 要列入灰名单的 URI 模式（PCRE 正则表达式）列表，以空格分隔。 |
     | `GREYLIST_URI_URLS` |        | multisite | 否   | **URI 灰名单 URL：** 包含要列入灰名单的 URI 模式的 URL 列表，以空格分隔。     |
+
+=== "请求头"
+    **功能说明：** 将携带指定请求头的请求列入灰名单，按名称匹配，并可选地用 PCRE 正则匹配其值。
+
+    | 设置                      | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ----------------------- | --- | --------- | --- | --------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求加入灰名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `GREYLIST_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。使用 `http://user:pass@url` 格式支持基本身份验证。
@@ -6123,26 +6162,26 @@ STREAM 支持 :x:
 
 Enable SSO authentication for the BunkerWeb web interface by reading headers set by upstream authentication proxies (Authentik, Authelia, Keycloak, Traefik Forward Auth, etc.)
 
-| 参数                              | 默认值              | 上下文 | 可重复 | 描述                                                                                                                                        |
-| --------------------------------- | ------------------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_UI_SSO`                      | `no`                | global | 否     | Enable or disable UI Single Sign-On authentication for the web interface                                                                    |
-| `UI_SSO_PROVIDER`                 | `custom`            | global | 否     | Select your SSO provider to auto-configure headers and group parsing. Use 'Custom' for manual header configuration.                         |
-| `UI_SSO_HEADER_USERNAME`          | `X-User`            | global | 否     | HTTP header containing the authenticated username                                                                                           |
-| `UI_SSO_HEADER_EMAIL`             | `X-Email`           | global | 否     | HTTP header containing the user's email address                                                                                             |
-| `UI_SSO_HEADER_GROUPS`            | `X-Groups`          | global | 否     | HTTP header containing the user's groups (comma or space separated)                                                                         |
-| `UI_SSO_HEADER_NAME`              | `X-Name`            | global | 否     | HTTP header containing the user's display name                                                                                              |
-| `UI_SSO_TRUSTED_IPS`              | `127.0.0.1,::1`     | global | 否     | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers                                            |
-| `UI_SSO_AUTO_CREATE_USERS`        | `yes`               | global | 否     | Automatically create new users when they authenticate via SSO for the first time                                                            |
-| `UI_SSO_DEFAULT_ROLE`             | `reader`            | global | 否     | Default role assigned to new SSO users when no group mapping matches                                                                        |
-| `UI_SSO_GROUP_ADMIN`              |                     | global | 否     | Group name that grants admin role (highest priority)                                                                                        |
-| `UI_SSO_GROUP_WRITER`             |                     | global | 否     | Group name that grants writer role                                                                                                          |
-| `UI_SSO_GROUP_READER`             |                     | global | 否     | Group name that grants reader role                                                                                                          |
-| `UI_SSO_FALLBACK_TO_LOGIN`        | `yes`               | global | 否     | Allow users to fall back to normal login when SSO headers are not present                                                                   |
-| `UI_SSO_UPDATE_USER_ON_LOGIN`     | `yes`               | global | 否     | Update user information (email) from SSO headers on each login                                                                              |
-| `UI_SSO_SYNC_ROLES`               | `no`                | global | 否     | Synchronize user roles from SSO group mappings on each login when the groups header is present and at least one group mapping is configured |
-| `UI_SSO_SYNC_ROLES_PROTECT_ADMIN` | `yes`               | global | 否     | Prevent SSO role sync from downgrading users who currently have the admin role                                                              |
-| `UI_SSO_ACCOUNT_LINKING`          | `username_or_email` | global | 否     | How to match incoming SSO users to local accounts                                                                                           |
-| `UI_SSO_LOGOUT_REDIRECT_URL`      |                     | global | 否     | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                                                                  |
+| 参数                                | 默认值                 | 上下文    | 可重复 | 描述                                                                                                                                          |
+| --------------------------------- | ------------------- | ------ | --- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_UI_SSO`                      | `no`                | global | 否   | Enable or disable UI Single Sign-On authentication for the web interface                                                                    |
+| `UI_SSO_PROVIDER`                 | `custom`            | global | 否   | Select your SSO provider to auto-configure headers and group parsing. Use 'Custom' for manual header configuration.                         |
+| `UI_SSO_HEADER_USERNAME`          | `X-User`            | global | 否   | HTTP header containing the authenticated username                                                                                           |
+| `UI_SSO_HEADER_EMAIL`             | `X-Email`           | global | 否   | HTTP header containing the user's email address                                                                                             |
+| `UI_SSO_HEADER_GROUPS`            | `X-Groups`          | global | 否   | HTTP header containing the user's groups (comma or space separated)                                                                         |
+| `UI_SSO_HEADER_NAME`              | `X-Name`            | global | 否   | HTTP header containing the user's display name                                                                                              |
+| `UI_SSO_TRUSTED_IPS`              | `127.0.0.1,::1`     | global | 否   | Comma-separated list of trusted IP addresses or CIDR ranges that are allowed to send SSO headers                                            |
+| `UI_SSO_AUTO_CREATE_USERS`        | `yes`               | global | 否   | Automatically create new users when they authenticate via SSO for the first time                                                            |
+| `UI_SSO_DEFAULT_ROLE`             | `reader`            | global | 否   | Default role assigned to new SSO users when no group mapping matches                                                                        |
+| `UI_SSO_GROUP_ADMIN`              |                     | global | 否   | Group name that grants admin role (highest priority)                                                                                        |
+| `UI_SSO_GROUP_WRITER`             |                     | global | 否   | Group name that grants writer role                                                                                                          |
+| `UI_SSO_GROUP_READER`             |                     | global | 否   | Group name that grants reader role                                                                                                          |
+| `UI_SSO_FALLBACK_TO_LOGIN`        | `yes`               | global | 否   | Allow users to fall back to normal login when SSO headers are not present                                                                   |
+| `UI_SSO_UPDATE_USER_ON_LOGIN`     | `yes`               | global | 否   | Update user information (email) from SSO headers on each login                                                                              |
+| `UI_SSO_SYNC_ROLES`               | `no`                | global | 否   | Synchronize user roles from SSO group mappings on each login when the groups header is present and at least one group mapping is configured |
+| `UI_SSO_SYNC_ROLES_PROTECT_ADMIN` | `yes`               | global | 否   | Prevent SSO role sync from downgrading users who currently have the admin role                                                              |
+| `UI_SSO_ACCOUNT_LINKING`          | `username_or_email` | global | 否   | How to match incoming SSO users to local accounts                                                                                           |
+| `UI_SSO_LOGOUT_REDIRECT_URL`      |                     | global | 否   | URL to redirect users to after logout (e.g., SSO provider logout endpoint)                                                                  |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -6247,6 +6286,17 @@ STREAM 支持 :warning:
     | `WHITELIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 白名单检查的 URI 模式列表。                 |
     | `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
+
+=== "请求头"
+    **功能说明：** 将携带指定请求头的请求列入白名单，按名称匹配，并可选地用 PCRE 正则匹配其值。适用于能够发送共享密钥的可信探针或网关。
+
+    | 设置                       | 默认值 | 上下文       | 多选  | 描述                                                        |
+    | ------------------------ | --- | --------- | --- | --------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |     | multisite | 是   | **请求头名称：** 使请求加入白名单的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。 |
+    | `WHITELIST_HEADER_VALUE` |     | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。            |
+
+    !!! warning "请求头规则是共享密钥"
+        任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。 它也不会解除已有的封禁：被封禁的 IP 在白名单执行之前就已被拒绝。
 
 !!! info "URL 格式支持"
     所有 `*_URLS` 设置都支持 HTTP/HTTPS URL 以及使用 `file:///` 前缀的本地文件路径。支持使用 `http://user:pass@url` 格式进行基本身份验证。

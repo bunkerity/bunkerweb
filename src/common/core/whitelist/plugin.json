@@ -68,6 +68,26 @@
       "regex": "^( *(.*) *)*$",
       "type": "multivalue"
     },
+    "WHITELIST_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that adds the request to the whitelist. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "whitelist-header-name",
+      "label": "Whitelisted header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "whitelist-header"
+    },
+    "WHITELIST_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to add the request to the whitelist. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "whitelist-header-value",
+      "label": "Whitelisted header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "whitelist-header"
+    },
     "WHITELIST_IP_URLS": {
       "context": "multisite",
       "default": "",

@@ -15,6 +15,9 @@ local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local get_variable = utils.get_variable
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
@@ -59,6 +62,8 @@ function greylist:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		local header_rules = self.internalstore:get("plugin_greylist_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
 	end
 end
 
@@ -138,6 +143,14 @@ function greylist:init()
 			["URI"] = {},
 		}
 	end
+	local header_rules, header_err = get_header_rules("GREYLIST_HEADER")
+	if not header_rules then
+		return self:ret(false, header_err)
+	end
+	local header_ok, header_store_err = self.internalstore:set("plugin_greylist_header_rules", header_rules, nil, true)
+	if not header_ok then
+		return self:ret(false, header_store_err)
+	end
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -145,6 +158,12 @@ function greylist:access()
 	-- Check if access is needed
 	if not self:is_needed() then
 		return self:ret(true, "access not needed")
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "GREYLIST_HEADER_VALUE")
+	if matched_header then
+		return self:ret(true, "header " .. matched_header .. " is in greylist")
 	end
 	-- Check the caches
 	local checks = {
