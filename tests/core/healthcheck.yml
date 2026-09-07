@@ -1,0 +1,59 @@
+# The scheduler's instance healthcheck, on a stack that actually runs it.
+#
+# `tests/utils/config.yml:18` pins HEALTHCHECK_INTERVAL to 3600 for every other spec, on purpose:
+# a 30 s pass dispatches push-configs on its own and would move the timing under every unrelated
+# assertion in the catalogue. The cost is that `healthcheck_job` -- the down -> up recovery push,
+# the loading/needs_config re-push, and the pending-changes re-dispatch wave 12's L-H added -- had
+# ZERO integration coverage on any arm (report-L-H.md, PO question 1). This spec is the answer the
+# PO gave: one dedicated arm at 30 s, not a global change.
+#
+# Docker only, and deliberately. The arm has to stop and start the instance container by name from
+# the runner, which is a per-integration operation (systemctl on Linux, a controller on
+# Autoconf/Swarm, kubectl on Kubernetes), and the code under test is the scheduler's, which is the
+# same process everywhere. One arm proves the loop runs; six would only prove the stop command.
+integrations:
+  - "Docker"
+
+actions:
+  # 1/3. Take the instance away. No assertion here -- the healthcheck has not run yet.
+  # `restart_stack: false` throughout: run.sh only waits for a healthy stack when it restarts one,
+  # so a deliberately-stopped container does not deadlock the runner (tests/scripts/run.sh:195-222).
+  stop_the_instance:
+    type: script
+    script: ["docker", "stop", "bunkerweb"]
+    result: "bunkerweb"
+    restart_stack: false
+  # 2/3. Two healthcheck passes later the scheduler must have noticed. The delay runs BEFORE the
+  # action (tests/core.py:81,106), so this one waits out the passes, brings the instance back, and
+  # then asserts what the scheduler logged while it was gone. 75 s is 2.5 intervals: one pass can
+  # land immediately after the stop and see it still up.
+  #
+  # The message embeds the interval, which is what rules out the harness-wide 3600 of
+  # `tests/utils/config.yml:18`: that would render "in 3600 seconds" and never match. It does NOT
+  # pin this spec's `config:` override specifically -- 30 is also the product default
+  # (`src/scheduler/main.py:109`, `getenv("HEALTHCHECK_INTERVAL", "30")`), so the string reads the
+  # same if the key never arrived. Both roads run the 30 s the delays below are sized for, so the
+  # assertion proves "a pass ran at 30 s and saw the instance down", not "the config: key landed".
+  healthcheck_sees_the_instance_go_down:
+    type: script
+    delay: 75
+    script: ["docker", "start", "bunkerweb"]
+    result: "bunkerweb"
+    restart_stack: false
+    log_from: "scheduler"
+    log: "is not reachable, healthcheck will be retried in 30 seconds"
+  # 3/3. And the recovery edge: `previous_status in ("down", "failover")` is the branch that sets
+  # `recovered` and re-dispatches push-configs (src/scheduler/main.py:619-621). 75 s again covers
+  # the container's own boot before it answers /health plus the pass that observes it.
+  # `script: ["true"]` because the assertion IS the log -- there is nothing left to do to the stack.
+  healthcheck_re_pushes_when_the_instance_comes_back:
+    type: script
+    delay: 75
+    script: ["true"]
+    restart_stack: false
+    log_from: "scheduler"
+    log: "up; will trigger push-configs to re-sync it"
+    full_clean: true
+
+config:
+  HEALTHCHECK_INTERVAL: "30"
