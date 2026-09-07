@@ -1,8 +1,8 @@
 """Upgrade to version 1.7.0~beta
 
-Revision ID: 81ecf3d749d4
+Revision ID: 24143b5ba8e0
 Revises: 447a2b82a6c7
-Create Date: 2026-09-03 09:02:57.884205
+Create Date: 2026-09-06 22:59:59.112257
 
 """
 
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import mysql
 import model
 
 # revision identifiers, used by Alembic.
-revision: str = "81ecf3d749d4"
+revision: str = "24143b5ba8e0"
 down_revision: Union[str, None] = "447a2b82a6c7"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -396,6 +396,9 @@ def upgrade() -> None:
             existing_nullable=False,
         )
 
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
+
     with op.batch_alter_table("bw_global_values", schema=None) as batch_op:
         batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=None, existing_nullable=True)
         batch_op.alter_column(
@@ -558,6 +561,9 @@ def downgrade() -> None:
 
     with op.batch_alter_table("bw_global_values", schema=None) as batch_op:
         batch_op.alter_column("suffix", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=True)
+
+    with op.batch_alter_table("bw_ui_users", schema=None) as batch_op:
+        batch_op.drop_column("totp_last_counter")
 
     with op.batch_alter_table("bw_template_custom_configs", schema=None) as batch_op:
         batch_op.alter_column(

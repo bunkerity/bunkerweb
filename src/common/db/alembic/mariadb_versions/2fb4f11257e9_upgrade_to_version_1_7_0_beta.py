@@ -1,8 +1,8 @@
 """Upgrade to version 1.7.0~beta
 
-Revision ID: fdea53656bf5
-Revises: 82bf69b29509
-Create Date: 2026-09-03 09:04:57.307912
+Revision ID: 2fb4f11257e9
+Revises: 581b304b1118
+Create Date: 2026-09-06 23:00:45.287549
 
 """
 
@@ -14,8 +14,8 @@ from sqlalchemy.dialects import mysql
 import model
 
 # revision identifiers, used by Alembic.
-revision: str = "fdea53656bf5"
-down_revision: Union[str, None] = "82bf69b29509"
+revision: str = "2fb4f11257e9"
+down_revision: Union[str, None] = "581b304b1118"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -436,6 +436,7 @@ def upgrade() -> None:
         ),
         existing_nullable=False,
     )
+    op.add_column("bw_ui_users", sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
     op.alter_column(
         "bw_ui_users",
         "method",
@@ -485,16 +486,16 @@ def downgrade() -> None:
     # Revert the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.15~rc1' WHERE id = 1")
     op.alter_column(
-        "bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+        "bw_ui_users", "update_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
     )
     op.alter_column(
         "bw_ui_users", "theme", existing_type=sa.Enum("light", "dark", name="themes_enum"), server_default=sa.text("'light'"), existing_nullable=False
     )
     op.alter_column("bw_ui_users", "language", existing_type=sa.String(length=2), server_default=sa.text("'en'"), existing_nullable=False)
     op.alter_column(
-        "bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+        "bw_ui_users", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
     )
-    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+    op.alter_column("bw_ui_users", "admin", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
     op.alter_column(
         "bw_templates",
         "method",
@@ -503,12 +504,12 @@ def downgrade() -> None:
         existing_nullable=False,
     )
     op.alter_column(
-        "bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+        "bw_templates", "last_update", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
     )
     op.alter_column(
-        "bw_templates", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), existing_nullable=False
+        "bw_templates", "creation_date", existing_type=sa.DateTime(timezone=True), server_default=sa.text("current_timestamp()"), existing_nullable=False
     )
-    op.alter_column("bw_services", "is_draft", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
+    op.alter_column("bw_services", "is_draft", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
     op.alter_column(
         "bw_plugins",
         "type",
@@ -523,14 +524,14 @@ def downgrade() -> None:
         server_default=sa.text("'invalid'"),
         existing_nullable=False,
     )
-    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=True)
-    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=sa.text("'0'"), existing_nullable=False)
-    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=sa.text("'5443'"), existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "pro_overlapped", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "non_draft_services", existing_type=sa.Integer(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_metadata", "is_pro", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_jobs_runs", "success", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=True)
+    op.alter_column("bw_jobs", "run_async", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_instances", "listen_https", existing_type=sa.Boolean(), server_default=sa.text("0"), existing_nullable=False)
+    op.alter_column("bw_instances", "https_port", existing_type=sa.Integer(), server_default=sa.text("5443"), existing_nullable=False)
     op.alter_column(
         "bw_ui_users",
         "method",
@@ -539,6 +540,7 @@ def downgrade() -> None:
         existing_nullable=False,
         existing_server_default=sa.text("'manual'"),
     )
+    op.drop_column("bw_ui_users", "totp_last_counter")
     op.alter_column(
         "bw_template_custom_configs",
         "type",
