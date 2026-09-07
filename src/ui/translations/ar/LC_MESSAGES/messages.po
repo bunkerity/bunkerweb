@@ -235,6 +235,45 @@ msgstr "النطاق المحدد"
 msgid "bans.chart.timeseries.title"
 msgstr "الحظورات النشطة لكل فترة"
 
+msgid "bans.flash.ban_failed"
+msgstr "تعذر حظر %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "تم حظر %(ip)s بنجاح."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "مدة حظر مخصصة غير صالحة لـ %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "تاريخ انتهاء حظر مخصص غير صالح لـ %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "مدة حظر غير صالحة: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "عنوان IP غير صالح: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "تاريخ انتهاء الحظر المخصص مفقود لـ %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "تعذر جلب عمليات الحظر من Redis، راجع السجلات لمزيد من المعلومات."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "البلاغات التي تم تخطيها لأن عميلها خضع للتحدي أو أُعيد توجيهه بدلاً من حظره: %(count)s."
+
+msgid "bans.flash.unban_failed"
+msgstr "تعذر رفع الحظر عن %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "تم رفع الحظر عن %(ip)s بنجاح."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "تعذر تحديث مدة الحظر لـ %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "تم تحديث مدة الحظر لـ %(ip)s بنجاح."
+
 msgid "bans.stats.card.by_reason"
 msgstr "عمليات الحظر حسب السبب"
 

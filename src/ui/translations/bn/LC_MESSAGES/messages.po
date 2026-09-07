@@ -235,6 +235,45 @@ msgstr "নির্বাচিত পরিসর"
 msgid "bans.chart.timeseries.title"
 msgstr "প্রতি ইন্টারভালে সক্রিয় নিষেধাজ্ঞা"
 
+msgid "bans.flash.ban_failed"
+msgstr "%(ip)s নিষিদ্ধ করা যায়নি: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s সফলভাবে নিষিদ্ধ করা হয়েছে।"
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s এর জন্য অবৈধ কাস্টম নিষেধাজ্ঞার মেয়াদ"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s এর জন্য অবৈধ কাস্টম নিষেধাজ্ঞার সমাপ্তি তারিখ"
+
+msgid "bans.flash.invalid_duration"
+msgstr "অবৈধ নিষেধাজ্ঞার মেয়াদ: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "অবৈধ IP ঠিকানা: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "%(ip)s এর জন্য কাস্টম নিষেধাজ্ঞার সমাপ্তি তারিখ অনুপস্থিত"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Redis থেকে নিষেধাজ্ঞা আনা যায়নি, আরও তথ্যের জন্য লগ দেখুন।"
+
+msgid "bans.flash.skipped_challenged"
+msgstr "%(count)s টি প্রতিবেদন বাদ দেওয়া হয়েছে যাদের ক্লায়েন্টকে ব্লক না করে চ্যালেঞ্জ বা রিডাইরেক্ট করা হয়েছে।"
+
+msgid "bans.flash.unban_failed"
+msgstr "%(ip)s এর নিষেধাজ্ঞা তোলা যায়নি: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s এর নিষেধাজ্ঞা সফলভাবে তোলা হয়েছে।"
+
+msgid "bans.flash.update_duration_failed"
+msgstr "%(ip)s এর নিষেধাজ্ঞার মেয়াদ হালনাগাদ করা যায়নি: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "%(ip)s এর নিষেধাজ্ঞার মেয়াদ সফলভাবে হালনাগাদ করা হয়েছে।"
+
 msgid "bans.stats.card.by_reason"
 msgstr "কারণ অনুযায়ী ব্লক"
 

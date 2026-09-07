@@ -235,6 +235,45 @@ msgstr "Rentang yang dipilih"
 msgid "bans.chart.timeseries.title"
 msgstr "Larangan aktif per interval"
 
+msgid "bans.flash.ban_failed"
+msgstr "Gagal memblokir %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s berhasil diblokir."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Durasi blokir khusus tidak valid untuk %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Tanggal akhir blokir khusus tidak valid untuk %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Durasi blokir tidak valid: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Alamat IP tidak valid: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Tanggal akhir blokir khusus tidak ada untuk %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Gagal mengambil daftar blokir dari Redis, lihat log untuk informasi lebih lanjut."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Melewati %(count)s laporan yang kliennya ditantang atau dialihkan alih-alih diblokir."
+
+msgid "bans.flash.unban_failed"
+msgstr "Gagal membuka blokir %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "Blokir %(ip)s berhasil dibuka."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Gagal memperbarui durasi blokir untuk %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Durasi blokir untuk %(ip)s berhasil diperbarui."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Larangan berdasarkan alasan"
 

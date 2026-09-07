@@ -235,6 +235,45 @@ msgstr "所选范围"
 msgid "bans.chart.timeseries.title"
 msgstr "每区间的活跃封禁"
 
+msgid "bans.flash.ban_failed"
+msgstr "封禁 %(ip)s 失败：%(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "已成功封禁 %(ip)s。"
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s 的自定义封禁时长无效"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s 的自定义封禁结束日期无效"
+
+msgid "bans.flash.invalid_duration"
+msgstr "无效的封禁时长：%(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "无效的 IP 地址：%(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "缺少 %(ip)s 的自定义封禁结束日期"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "无法从 Redis 获取封禁记录，详情请查看日志。"
+
+msgid "bans.flash.skipped_challenged"
+msgstr "已跳过 %(count)s 条报告，其客户端被质询或重定向而非被拦截。"
+
+msgid "bans.flash.unban_failed"
+msgstr "解封 %(ip)s 失败：%(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "已成功解封 %(ip)s。"
+
+msgid "bans.flash.update_duration_failed"
+msgstr "更新 %(ip)s 的封禁时长失败：%(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "已成功更新 %(ip)s 的封禁时长。"
+
 msgid "bans.stats.card.by_reason"
 msgstr "按原因统计封禁"
 

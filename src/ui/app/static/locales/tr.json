@@ -111,6 +111,21 @@
         "expiring_caption": "Otomatik dönüşümlü",
         "permanent": "Kalıcı yasaklar"
       }
+    },
+    "flash": {
+      "ban_failed": "{{ip}} yasaklanamadı: {{error}}",
+      "ban_success": "{{ip}} başarıyla yasaklandı.",
+      "invalid_custom_duration": "{{ip}} için geçersiz özel yasak süresi",
+      "invalid_custom_end_date": "{{ip}} için geçersiz özel yasak bitiş tarihi",
+      "invalid_duration": "Geçersiz yasak süresi: {{duration}}",
+      "invalid_ip": "Geçersiz IP adresi: {{ip}}",
+      "missing_custom_end_date": "{{ip}} için özel yasak bitiş tarihi eksik",
+      "redis_fetch_failed": "Yasaklar Redis'ten alınamadı, daha fazla bilgi için günlüklere bakın.",
+      "skipped_challenged": "İstemcisi engellenmek yerine doğrulamaya tabi tutulan veya yönlendirilen {{count}} rapor atlandı.",
+      "unban_failed": "{{ip}} yasağı kaldırılamadı: {{error}}",
+      "unban_success": "{{ip}} yasağı başarıyla kaldırıldı.",
+      "update_duration_failed": "{{ip}} için yasak süresi güncellenemedi: {{error}}",
+      "update_duration_success": "{{ip}} için yasak süresi başarıyla güncellendi."
     }
   },
   "breadcrumb": {

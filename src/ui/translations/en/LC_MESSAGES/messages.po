@@ -235,6 +235,45 @@ msgstr "Selected range"
 msgid "bans.chart.timeseries.title"
 msgstr "Active bans per interval"
 
+msgid "bans.flash.ban_failed"
+msgstr "Failed to ban %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "Banned %(ip)s successfully."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Invalid custom ban duration for %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Invalid custom ban end date for %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Invalid ban duration: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Invalid IP address: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Missing custom ban end date for %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Failed to fetch bans from Redis, see logs for more information."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Reports skipped because their client was challenged or redirected rather than blocked: %(count)s."
+
+msgid "bans.flash.unban_failed"
+msgstr "Failed to unban %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "Unbanned %(ip)s successfully."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Failed to update ban duration for %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Updated ban duration for %(ip)s successfully."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Bans by reason"
 

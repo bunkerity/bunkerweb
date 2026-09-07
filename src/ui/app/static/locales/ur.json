@@ -111,6 +111,21 @@
         "expiring_caption": "خودکار تبدیلی",
         "permanent": "مستقل پابندیاں"
       }
+    },
+    "flash": {
+      "ban_failed": "{{ip}} پر پابندی لگانے میں ناکامی: {{error}}",
+      "ban_success": "{{ip}} پر کامیابی سے پابندی لگا دی گئی۔",
+      "invalid_custom_duration": "{{ip}} کے لیے پابندی کی غلط حسبِ ضرورت مدت",
+      "invalid_custom_end_date": "{{ip}} کے لیے پابندی کی غلط حسبِ ضرورت اختتامی تاریخ",
+      "invalid_duration": "پابندی کی غلط مدت: {{duration}}",
+      "invalid_ip": "غلط IP پتہ: {{ip}}",
+      "missing_custom_end_date": "{{ip}} کے لیے پابندی کی حسبِ ضرورت اختتامی تاریخ موجود نہیں",
+      "redis_fetch_failed": "Redis سے پابندیاں حاصل کرنے میں ناکامی، مزید معلومات کے لیے لاگز دیکھیں۔",
+      "skipped_challenged": "نظر انداز کی گئی رپورٹیں جن کے کلائنٹ کو بلاک کرنے کے بجائے چیلنج یا ری ڈائریکٹ کیا گیا: {{count}}۔",
+      "unban_failed": "{{ip}} سے پابندی ہٹانے میں ناکامی: {{error}}",
+      "unban_success": "{{ip}} سے کامیابی سے پابندی ہٹا دی گئی۔",
+      "update_duration_failed": "{{ip}} کے لیے پابندی کی مدت اپ ڈیٹ کرنے میں ناکامی: {{error}}",
+      "update_duration_success": "{{ip}} کے لیے پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی۔"
     }
   },
   "breadcrumb": {

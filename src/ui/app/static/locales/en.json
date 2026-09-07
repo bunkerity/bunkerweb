@@ -111,6 +111,21 @@
         "expiring_caption": "Auto-rotating",
         "permanent": "Permanent bans"
       }
+    },
+    "flash": {
+      "ban_failed": "Failed to ban {{ip}}: {{error}}",
+      "ban_success": "Banned {{ip}} successfully.",
+      "invalid_custom_duration": "Invalid custom ban duration for {{ip}}",
+      "invalid_custom_end_date": "Invalid custom ban end date for {{ip}}",
+      "invalid_duration": "Invalid ban duration: {{duration}}",
+      "invalid_ip": "Invalid IP address: {{ip}}",
+      "missing_custom_end_date": "Missing custom ban end date for {{ip}}",
+      "redis_fetch_failed": "Failed to fetch bans from Redis, see logs for more information.",
+      "skipped_challenged": "Reports skipped because their client was challenged or redirected rather than blocked: {{count}}.",
+      "unban_failed": "Failed to unban {{ip}}: {{error}}",
+      "unban_success": "Unbanned {{ip}} successfully.",
+      "update_duration_failed": "Failed to update ban duration for {{ip}}: {{error}}",
+      "update_duration_success": "Updated ban duration for {{ip}} successfully."
     }
   },
   "breadcrumb": {

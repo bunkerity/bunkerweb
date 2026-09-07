@@ -235,6 +235,45 @@ msgstr "منتخب حد"
 msgid "bans.chart.timeseries.title"
 msgstr "ہر وقفے میں فعال پابندیاں"
 
+msgid "bans.flash.ban_failed"
+msgstr "%(ip)s پر پابندی لگانے میں ناکامی: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s پر کامیابی سے پابندی لگا دی گئی۔"
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s کے لیے پابندی کی غلط حسبِ ضرورت مدت"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s کے لیے پابندی کی غلط حسبِ ضرورت اختتامی تاریخ"
+
+msgid "bans.flash.invalid_duration"
+msgstr "پابندی کی غلط مدت: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "غلط IP پتہ: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "%(ip)s کے لیے پابندی کی حسبِ ضرورت اختتامی تاریخ موجود نہیں"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Redis سے پابندیاں حاصل کرنے میں ناکامی، مزید معلومات کے لیے لاگز دیکھیں۔"
+
+msgid "bans.flash.skipped_challenged"
+msgstr "نظر انداز کی گئی رپورٹیں جن کے کلائنٹ کو بلاک کرنے کے بجائے چیلنج یا ری ڈائریکٹ کیا گیا: %(count)s۔"
+
+msgid "bans.flash.unban_failed"
+msgstr "%(ip)s سے پابندی ہٹانے میں ناکامی: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s سے کامیابی سے پابندی ہٹا دی گئی۔"
+
+msgid "bans.flash.update_duration_failed"
+msgstr "%(ip)s کے لیے پابندی کی مدت اپ ڈیٹ کرنے میں ناکامی: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "%(ip)s کے لیے پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی۔"
+
 msgid "bans.stats.card.by_reason"
 msgstr "وجہ کے لحاظ سے پابندیاں"
 

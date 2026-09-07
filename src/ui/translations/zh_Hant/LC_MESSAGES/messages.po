@@ -235,6 +235,45 @@ msgstr "選取的範圍"
 msgid "bans.chart.timeseries.title"
 msgstr "每區間啟用中的封鎖"
 
+msgid "bans.flash.ban_failed"
+msgstr "封鎖 %(ip)s 失敗：%(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "已成功封鎖 %(ip)s。"
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s 的自訂封鎖時長無效"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s 的自訂封鎖結束日期無效"
+
+msgid "bans.flash.invalid_duration"
+msgstr "無效的封鎖時長：%(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "無效的 IP 位址：%(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "缺少 %(ip)s 的自訂封鎖結束日期"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "無法從 Redis 取得封鎖紀錄，詳情請查看日誌。"
+
+msgid "bans.flash.skipped_challenged"
+msgstr "已略過 %(count)s 筆報告，其用戶端遭到質詢或重新導向而非封鎖。"
+
+msgid "bans.flash.unban_failed"
+msgstr "解除封鎖 %(ip)s 失敗：%(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "已成功解除封鎖 %(ip)s。"
+
+msgid "bans.flash.update_duration_failed"
+msgstr "更新 %(ip)s 的封鎖時長失敗：%(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "已成功更新 %(ip)s 的封鎖時長。"
+
 msgid "bans.stats.card.by_reason"
 msgstr "依原因統計封鎖"
 

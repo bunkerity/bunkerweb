@@ -111,6 +111,21 @@
         "expiring_caption": "Rotasi otomatis",
         "permanent": "Larangan permanen"
       }
+    },
+    "flash": {
+      "ban_failed": "Gagal memblokir {{ip}}: {{error}}",
+      "ban_success": "{{ip}} berhasil diblokir.",
+      "invalid_custom_duration": "Durasi blokir khusus tidak valid untuk {{ip}}",
+      "invalid_custom_end_date": "Tanggal akhir blokir khusus tidak valid untuk {{ip}}",
+      "invalid_duration": "Durasi blokir tidak valid: {{duration}}",
+      "invalid_ip": "Alamat IP tidak valid: {{ip}}",
+      "missing_custom_end_date": "Tanggal akhir blokir khusus tidak ada untuk {{ip}}",
+      "redis_fetch_failed": "Gagal mengambil daftar blokir dari Redis, lihat log untuk informasi lebih lanjut.",
+      "skipped_challenged": "Melewati {{count}} laporan yang kliennya ditantang atau dialihkan alih-alih diblokir.",
+      "unban_failed": "Gagal membuka blokir {{ip}}: {{error}}",
+      "unban_success": "Blokir {{ip}} berhasil dibuka.",
+      "update_duration_failed": "Gagal memperbarui durasi blokir untuk {{ip}}: {{error}}",
+      "update_duration_success": "Durasi blokir untuk {{ip}} berhasil diperbarui."
     }
   },
   "breadcrumb": {

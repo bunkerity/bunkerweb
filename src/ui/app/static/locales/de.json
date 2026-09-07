@@ -111,6 +111,21 @@
         "expiring_caption": "Automatisch wechselnd",
         "permanent": "Dauerhafte Sperren"
       }
+    },
+    "flash": {
+      "ban_failed": "{{ip}} konnte nicht gesperrt werden: {{error}}",
+      "ban_success": "{{ip}} erfolgreich gesperrt.",
+      "invalid_custom_duration": "Ungültige benutzerdefinierte Sperrdauer für {{ip}}",
+      "invalid_custom_end_date": "Ungültiges benutzerdefiniertes Sperrenddatum für {{ip}}",
+      "invalid_duration": "Ungültige Sperrdauer: {{duration}}",
+      "invalid_ip": "Ungültige IP-Adresse: {{ip}}",
+      "missing_custom_end_date": "Fehlendes benutzerdefiniertes Sperrenddatum für {{ip}}",
+      "redis_fetch_failed": "Bans konnten nicht aus Redis geladen werden, weitere Informationen finden Sie in den Protokollen.",
+      "skipped_challenged": "Übersprungene Meldungen, deren Client geprüft oder umgeleitet statt blockiert wurde: {{count}}.",
+      "unban_failed": "Sperre für {{ip}} konnte nicht aufgehoben werden: {{error}}",
+      "unban_success": "Sperre für {{ip}} erfolgreich aufgehoben.",
+      "update_duration_failed": "Sperrdauer für {{ip}} konnte nicht aktualisiert werden: {{error}}",
+      "update_duration_success": "Sperrdauer für {{ip}} erfolgreich aktualisiert."
     }
   },
   "breadcrumb": {

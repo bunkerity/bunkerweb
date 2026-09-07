@@ -235,6 +235,45 @@ msgstr "Ausgewählter Zeitraum"
 msgid "bans.chart.timeseries.title"
 msgstr "Aktive Sperren pro Intervall"
 
+msgid "bans.flash.ban_failed"
+msgstr "%(ip)s konnte nicht gesperrt werden: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s erfolgreich gesperrt."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Ungültige benutzerdefinierte Sperrdauer für %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Ungültiges benutzerdefiniertes Sperrenddatum für %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Ungültige Sperrdauer: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Ungültige IP-Adresse: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Fehlendes benutzerdefiniertes Sperrenddatum für %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Bans konnten nicht aus Redis geladen werden, weitere Informationen finden Sie in den Protokollen."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Übersprungene Meldungen, deren Client geprüft oder umgeleitet statt blockiert wurde: %(count)s."
+
+msgid "bans.flash.unban_failed"
+msgstr "Sperre für %(ip)s konnte nicht aufgehoben werden: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "Sperre für %(ip)s erfolgreich aufgehoben."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Sperrdauer für %(ip)s konnte nicht aktualisiert werden: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Sperrdauer für %(ip)s erfolgreich aktualisiert."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Sperren nach Grund"
 

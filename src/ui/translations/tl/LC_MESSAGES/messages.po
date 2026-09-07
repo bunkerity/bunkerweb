@@ -235,6 +235,45 @@ msgstr "Napiling saklaw"
 msgid "bans.chart.timeseries.title"
 msgstr "Mga aktibong ban kada interval"
 
+msgid "bans.flash.ban_failed"
+msgstr "Nabigong i-ban ang %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "Matagumpay na na-ban ang %(ip)s."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Hindi wastong pasadyang tagal ng ban para sa %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Hindi wastong pasadyang petsa ng pagtatapos ng ban para sa %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Hindi wastong tagal ng ban: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Hindi wastong IP address: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Kulang ang pasadyang petsa ng pagtatapos ng ban para sa %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Nabigong kunin ang mga ban mula sa Redis, tingnan ang mga log para sa karagdagang impormasyon."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Nilaktawan ang %(count)s ulat na ang kliyente ay hinamon o na-redirect sa halip na hinarang."
+
+msgid "bans.flash.unban_failed"
+msgstr "Nabigong i-unban ang %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "Matagumpay na na-unban ang %(ip)s."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Nabigong i-update ang tagal ng ban para sa %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Matagumpay na na-update ang tagal ng ban para sa %(ip)s."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Mga ban ayon sa dahilan"
 

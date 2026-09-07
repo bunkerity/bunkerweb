@@ -111,6 +111,21 @@
         "expiring_caption": "自動輪替",
         "permanent": "永久封鎖"
       }
+    },
+    "flash": {
+      "ban_failed": "封鎖 {{ip}} 失敗：{{error}}",
+      "ban_success": "已成功封鎖 {{ip}}。",
+      "invalid_custom_duration": "{{ip}} 的自訂封鎖時長無效",
+      "invalid_custom_end_date": "{{ip}} 的自訂封鎖結束日期無效",
+      "invalid_duration": "無效的封鎖時長：{{duration}}",
+      "invalid_ip": "無效的 IP 位址：{{ip}}",
+      "missing_custom_end_date": "缺少 {{ip}} 的自訂封鎖結束日期",
+      "redis_fetch_failed": "無法從 Redis 取得封鎖紀錄，詳情請查看日誌。",
+      "skipped_challenged": "已略過 {{count}} 筆報告，其用戶端遭到質詢或重新導向而非封鎖。",
+      "unban_failed": "解除封鎖 {{ip}} 失敗：{{error}}",
+      "unban_success": "已成功解除封鎖 {{ip}}。",
+      "update_duration_failed": "更新 {{ip}} 的封鎖時長失敗：{{error}}",
+      "update_duration_success": "已成功更新 {{ip}} 的封鎖時長。"
     }
   },
   "breadcrumb": {

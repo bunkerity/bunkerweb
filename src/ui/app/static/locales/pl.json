@@ -111,6 +111,21 @@
         "expiring_caption": "Automatyczna rotacja",
         "permanent": "Stałe blokady"
       }
+    },
+    "flash": {
+      "ban_failed": "Nie udało się zablokować {{ip}}: {{error}}",
+      "ban_success": "Pomyślnie zablokowano {{ip}}.",
+      "invalid_custom_duration": "Nieprawidłowy własny czas blokady dla {{ip}}",
+      "invalid_custom_end_date": "Nieprawidłowa własna data zakończenia blokady dla {{ip}}",
+      "invalid_duration": "Nieprawidłowy czas blokady: {{duration}}",
+      "invalid_ip": "Nieprawidłowy adres IP: {{ip}}",
+      "missing_custom_end_date": "Brak własnej daty zakończenia blokady dla {{ip}}",
+      "redis_fetch_failed": "Nie udało się pobrać blokad z Redis, więcej informacji znajdziesz w logach.",
+      "skipped_challenged": "Pominięto {{count}} zgłoszenie/zgłoszeń, których klient został zweryfikowany lub przekierowany zamiast zablokowany.",
+      "unban_failed": "Nie udało się odblokować {{ip}}: {{error}}",
+      "unban_success": "Pomyślnie odblokowano {{ip}}.",
+      "update_duration_failed": "Nie udało się zaktualizować czasu blokady dla {{ip}}: {{error}}",
+      "update_duration_success": "Pomyślnie zaktualizowano czas blokady dla {{ip}}."
     }
   },
   "breadcrumb": {

@@ -111,6 +111,21 @@
         "expiring_caption": "자동 순환",
         "permanent": "영구 차단"
       }
+    },
+    "flash": {
+      "ban_failed": "{{ip}} 차단에 실패했습니다: {{error}}",
+      "ban_success": "{{ip}}을(를) 차단했습니다.",
+      "invalid_custom_duration": "{{ip}}의 사용자 지정 차단 기간이 잘못되었습니다",
+      "invalid_custom_end_date": "{{ip}}의 사용자 지정 차단 종료일이 잘못되었습니다",
+      "invalid_duration": "잘못된 차단 기간: {{duration}}",
+      "invalid_ip": "잘못된 IP 주소: {{ip}}",
+      "missing_custom_end_date": "{{ip}}의 사용자 지정 차단 종료일이 없습니다",
+      "redis_fetch_failed": "Redis에서 차단 목록을 가져오지 못했습니다. 자세한 내용은 로그를 확인하세요.",
+      "skipped_challenged": "클라이언트가 차단되지 않고 검증 또는 리디렉션된 보고서 {{count}}건을 건너뛰었습니다.",
+      "unban_failed": "{{ip}} 차단 해제에 실패했습니다: {{error}}",
+      "unban_success": "{{ip}}의 차단을 해제했습니다.",
+      "update_duration_failed": "{{ip}}의 차단 기간 업데이트에 실패했습니다: {{error}}",
+      "update_duration_success": "{{ip}}의 차단 기간을 업데이트했습니다."
     }
   },
   "breadcrumb": {

@@ -235,6 +235,45 @@ msgstr "Plage sélectionnée"
 msgid "bans.chart.timeseries.title"
 msgstr "Bannissements actifs par intervalle"
 
+msgid "bans.flash.ban_failed"
+msgstr "Échec du bannissement de %(ip)s : %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s banni avec succès."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Durée de bannissement personnalisée invalide pour %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Date de fin de bannissement personnalisée invalide pour %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Durée de bannissement invalide : %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Adresse IP invalide : %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Date de fin de bannissement personnalisée manquante pour %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Échec de la récupération des bannissements depuis Redis, consultez les journaux pour plus d'informations."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Signalements ignorés, leur client ayant été soumis à un défi ou redirigé plutôt que bloqué : %(count)s."
+
+msgid "bans.flash.unban_failed"
+msgstr "Échec du débannissement de %(ip)s : %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s débanni avec succès."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Échec de la mise à jour de la durée de bannissement pour %(ip)s : %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Durée de bannissement mise à jour pour %(ip)s avec succès."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Bannissements par motif"
 

@@ -111,6 +111,21 @@
         "expiring_caption": "Rotation automatique",
         "permanent": "Bannissements permanents"
       }
+    },
+    "flash": {
+      "ban_failed": "Échec du bannissement de {{ip}} : {{error}}",
+      "ban_success": "{{ip}} banni avec succès.",
+      "invalid_custom_duration": "Durée de bannissement personnalisée invalide pour {{ip}}",
+      "invalid_custom_end_date": "Date de fin de bannissement personnalisée invalide pour {{ip}}",
+      "invalid_duration": "Durée de bannissement invalide : {{duration}}",
+      "invalid_ip": "Adresse IP invalide : {{ip}}",
+      "missing_custom_end_date": "Date de fin de bannissement personnalisée manquante pour {{ip}}",
+      "redis_fetch_failed": "Échec de la récupération des bannissements depuis Redis, consultez les journaux pour plus d'informations.",
+      "skipped_challenged": "Signalements ignorés, leur client ayant été soumis à un défi ou redirigé plutôt que bloqué : {{count}}.",
+      "unban_failed": "Échec du débannissement de {{ip}} : {{error}}",
+      "unban_success": "{{ip}} débanni avec succès.",
+      "update_duration_failed": "Échec de la mise à jour de la durée de bannissement pour {{ip}} : {{error}}",
+      "update_duration_success": "Durée de bannissement mise à jour pour {{ip}} avec succès."
     }
   },
   "breadcrumb": {

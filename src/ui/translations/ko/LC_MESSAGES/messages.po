@@ -235,6 +235,45 @@ msgstr "선택한 기간"
 msgid "bans.chart.timeseries.title"
 msgstr "구간별 활성 차단"
 
+msgid "bans.flash.ban_failed"
+msgstr "%(ip)s 차단에 실패했습니다: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s을(를) 차단했습니다."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s의 사용자 지정 차단 기간이 잘못되었습니다"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s의 사용자 지정 차단 종료일이 잘못되었습니다"
+
+msgid "bans.flash.invalid_duration"
+msgstr "잘못된 차단 기간: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "잘못된 IP 주소: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "%(ip)s의 사용자 지정 차단 종료일이 없습니다"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Redis에서 차단 목록을 가져오지 못했습니다. 자세한 내용은 로그를 확인하세요."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "클라이언트가 차단되지 않고 검증 또는 리디렉션된 보고서 %(count)s건을 건너뛰었습니다."
+
+msgid "bans.flash.unban_failed"
+msgstr "%(ip)s 차단 해제에 실패했습니다: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s의 차단을 해제했습니다."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "%(ip)s의 차단 기간 업데이트에 실패했습니다: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "%(ip)s의 차단 기간을 업데이트했습니다."
+
 msgid "bans.stats.card.by_reason"
 msgstr "사유별 차단"
 

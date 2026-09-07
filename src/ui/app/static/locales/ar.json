@@ -111,6 +111,21 @@
         "expiring_caption": "تدوير تلقائي",
         "permanent": "عمليات الحظر الدائمة"
       }
+    },
+    "flash": {
+      "ban_failed": "تعذر حظر {{ip}}: {{error}}",
+      "ban_success": "تم حظر {{ip}} بنجاح.",
+      "invalid_custom_duration": "مدة حظر مخصصة غير صالحة لـ {{ip}}",
+      "invalid_custom_end_date": "تاريخ انتهاء حظر مخصص غير صالح لـ {{ip}}",
+      "invalid_duration": "مدة حظر غير صالحة: {{duration}}",
+      "invalid_ip": "عنوان IP غير صالح: {{ip}}",
+      "missing_custom_end_date": "تاريخ انتهاء الحظر المخصص مفقود لـ {{ip}}",
+      "redis_fetch_failed": "تعذر جلب عمليات الحظر من Redis، راجع السجلات لمزيد من المعلومات.",
+      "skipped_challenged": "البلاغات التي تم تخطيها لأن عميلها خضع للتحدي أو أُعيد توجيهه بدلاً من حظره: {{count}}.",
+      "unban_failed": "تعذر رفع الحظر عن {{ip}}: {{error}}",
+      "unban_success": "تم رفع الحظر عن {{ip}} بنجاح.",
+      "update_duration_failed": "تعذر تحديث مدة الحظر لـ {{ip}}: {{error}}",
+      "update_duration_success": "تم تحديث مدة الحظر لـ {{ip}} بنجاح."
     }
   },
   "breadcrumb": {

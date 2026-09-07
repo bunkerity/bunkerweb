@@ -235,6 +235,45 @@ msgstr "Seçilen aralık"
 msgid "bans.chart.timeseries.title"
 msgstr "Aralık başına aktif yasaklamalar"
 
+msgid "bans.flash.ban_failed"
+msgstr "%(ip)s yasaklanamadı: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s başarıyla yasaklandı."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "%(ip)s için geçersiz özel yasak süresi"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "%(ip)s için geçersiz özel yasak bitiş tarihi"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Geçersiz yasak süresi: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Geçersiz IP adresi: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "%(ip)s için özel yasak bitiş tarihi eksik"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Yasaklar Redis'ten alınamadı, daha fazla bilgi için günlüklere bakın."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "İstemcisi engellenmek yerine doğrulamaya tabi tutulan veya yönlendirilen %(count)s rapor atlandı."
+
+msgid "bans.flash.unban_failed"
+msgstr "%(ip)s yasağı kaldırılamadı: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s yasağı başarıyla kaldırıldı."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "%(ip)s için yasak süresi güncellenemedi: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "%(ip)s için yasak süresi başarıyla güncellendi."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Nedene göre yasaklar"
 

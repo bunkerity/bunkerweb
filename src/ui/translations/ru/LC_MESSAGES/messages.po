@@ -235,6 +235,45 @@ msgstr "Выбранный диапазон"
 msgid "bans.chart.timeseries.title"
 msgstr "Активные блокировки по интервалам"
 
+msgid "bans.flash.ban_failed"
+msgstr "Не удалось заблокировать %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "%(ip)s успешно заблокирован."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Неверный пользовательский срок блокировки для %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Неверная пользовательская дата окончания блокировки для %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Неверный срок блокировки: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Неверный IP-адрес: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Отсутствует пользовательская дата окончания блокировки для %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Не удалось получить блокировки из Redis, подробности см. в журналах."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Пропущено отчётов: %(count)s — их клиент прошёл проверку или был перенаправлен, а не заблокирован."
+
+msgid "bans.flash.unban_failed"
+msgstr "Не удалось разблокировать %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "%(ip)s успешно разблокирован."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Не удалось обновить срок блокировки для %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Срок блокировки для %(ip)s успешно обновлён."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Блокировки по причине"
 

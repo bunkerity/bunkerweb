@@ -235,6 +235,45 @@ msgstr "Wybrany zakres"
 msgid "bans.chart.timeseries.title"
 msgstr "Aktywne blokady w danym przedziale"
 
+msgid "bans.flash.ban_failed"
+msgstr "Nie udało się zablokować %(ip)s: %(error)s"
+
+msgid "bans.flash.ban_success"
+msgstr "Pomyślnie zablokowano %(ip)s."
+
+msgid "bans.flash.invalid_custom_duration"
+msgstr "Nieprawidłowy własny czas blokady dla %(ip)s"
+
+msgid "bans.flash.invalid_custom_end_date"
+msgstr "Nieprawidłowa własna data zakończenia blokady dla %(ip)s"
+
+msgid "bans.flash.invalid_duration"
+msgstr "Nieprawidłowy czas blokady: %(duration)s"
+
+msgid "bans.flash.invalid_ip"
+msgstr "Nieprawidłowy adres IP: %(ip)s"
+
+msgid "bans.flash.missing_custom_end_date"
+msgstr "Brak własnej daty zakończenia blokady dla %(ip)s"
+
+msgid "bans.flash.redis_fetch_failed"
+msgstr "Nie udało się pobrać blokad z Redis, więcej informacji znajdziesz w logach."
+
+msgid "bans.flash.skipped_challenged"
+msgstr "Pominięto %(count)s zgłoszenie/zgłoszeń, których klient został zweryfikowany lub przekierowany zamiast zablokowany."
+
+msgid "bans.flash.unban_failed"
+msgstr "Nie udało się odblokować %(ip)s: %(error)s"
+
+msgid "bans.flash.unban_success"
+msgstr "Pomyślnie odblokowano %(ip)s."
+
+msgid "bans.flash.update_duration_failed"
+msgstr "Nie udało się zaktualizować czasu blokady dla %(ip)s: %(error)s"
+
+msgid "bans.flash.update_duration_success"
+msgstr "Pomyślnie zaktualizowano czas blokady dla %(ip)s."
+
 msgid "bans.stats.card.by_reason"
 msgstr "Blokady według przyczyny"
 
