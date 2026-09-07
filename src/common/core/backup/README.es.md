@@ -90,6 +90,11 @@ ejecuciones de migración medidas sobre bases de datos reales:
 | MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a medio camino (errores 1265 y 1553) y deja un esquema híbrido. |
 | MySQL | ❌ restaurar desde copia de seguridad | El error 1265 también se midió aquí; el segundo bloqueo se infiere de MariaDB, no se midió en MySQL. |
 
+Una instalación 1.7 recién creada no tiene ninguna revisión de Alembic sellada — solo una actualización la
+sella — así que allí el preflight informa ⚠️ *No Alembic revision is stamped*. Es un aviso, no un rechazo:
+la regresión en el sitio necesita el sello para saber qué migraciones se ejecutaron, la restauración desde
+una copia de seguridad no, y sigue disponible.
+
 !!! danger "Una regresión en el sitio destruye los datos propios de 1.7"
     Todos los certificados almacenados de forma centralizada, todos los recursos adjuntables
     (redirecciones, pools de upstreams, flujos de trabajo, grupos de recursos), todas las métricas de

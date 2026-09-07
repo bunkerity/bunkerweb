@@ -315,6 +315,43 @@ class TestCollectorsAgainstARealDatabase:
         assert read_metadata_version(db) is None
         assert read_alembic_revision(db) is None
 
+    def test_a_fresh_install_can_still_roll_back_by_restore(self, db):
+        """A fresh 1.7 install never stamps alembic, and that must stay a ⚠️, not a ❌.
+
+        `entrypoint.sh` stamps only when it MIGRATES; a database created from the model is fully
+        initialised and carries an empty `alembic_version`. The CI all-in-one backup log shows
+        exactly this shape -- "No Alembic revision is stamped: where the schema actually stands
+        cannot be proven", verdict ⚠️. Degrading is right: without a stamp the in-place path cannot
+        pick a revision to downgrade to. Refusing would be wrong, and would take the operator's
+        supported rollback -- restore from a backup -- away from every fresh install there is.
+
+        The two halves are asserted together on a real database rather than as two unit checks,
+        because that is where the regression would live: `read_alembic_revision` returning None is
+        harmless until `check_versions` decides what None means.
+        """
+        from sqlalchemy import text as sql_text  # noqa: PLC0415 - local to this test
+
+        from model import Metadata  # noqa: PLC0415 - conftest puts src/common/db on the path
+
+        installed = "1.7.0~beta"
+        with db._db_session() as session:
+            # The shape is BUILT, not hoped for. PostgreSQL and MariaDB are one shared database for
+            # the whole session and a migration test earlier in the run can leave `alembic_version`
+            # behind, which would turn this into a flaky assertion about the previous test rather
+            # than a statement about a fresh install.
+            session.execute(sql_text("DROP TABLE IF EXISTS alembic_version"))
+            session.query(Metadata).filter_by(id=1).delete()
+            session.add(Metadata(id=1, version=installed, is_initialized=True, first_config_saved=False, scheduler_first_start=False))
+            session.commit()
+
+        assert read_metadata_version(db) == installed, "the version was not recorded, so this is not the fresh-install shape"
+        assert read_alembic_revision(db) is None, "the unstamped shape could not be built, so nothing here is being measured"
+
+        check = check_versions(installed, read_metadata_version(db), read_alembic_revision(db), "1.6.14")
+        assert check.verdict != REFUSE, "a fresh install can no longer roll back at all: every unstamped installation is now refused"
+        assert check.verdict == RESTORE_ONLY
+        assert downgrade.VERDICT_MARK[check.verdict] == "⚠️"
+
     def test_the_1_7_only_tables_are_counted_and_empty(self, db):
         counts = count_irrepresentable(db)
         for table in downgrade.IRREPRESENTABLE_TABLES + ("bw_resources",):

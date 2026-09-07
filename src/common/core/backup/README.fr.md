@@ -89,6 +89,11 @@ manifeste enregistre, d'après des exécutions de migration mesurées sur de vra
 | MariaDB | ❌ restauration depuis une sauvegarde | La migration s'interrompt en cours de route (erreurs 1265 et 1553) et laisse un schéma hybride. |
 | MySQL | ❌ restauration depuis une sauvegarde | L'erreur 1265 y a été mesurée aussi ; le second blocage est déduit de MariaDB, pas mesuré sur MySQL. |
 
+Une installation 1.7 neuve n'a aucune révision Alembic estampillée — seule une mise à niveau en pose une —
+et le préflight y affiche donc ⚠️ *No Alembic revision is stamped*. C'est un avertissement, pas un refus :
+le retour en place a besoin de l'estampille pour savoir quelles migrations ont tourné, la restauration
+depuis une sauvegarde non, et elle reste disponible.
+
 !!! danger "Un retour en place détruit les données propres à 1.7"
     Tous les certificats stockés de façon centralisée, toutes les ressources attachables
     (redirections, pools d'upstreams, workflows, groupes de ressources), toutes les métriques de

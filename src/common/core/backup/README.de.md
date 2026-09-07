@@ -89,6 +89,11 @@ verzeichnet das Manifest, aus gemessenen Migrationsläufen auf echten Datenbanke
 | MariaDB | ❌ aus Backup wiederherstellen | Die Migration bricht mittendrin ab (Fehler 1265 und 1553) und hinterlässt ein hybrides Schema. |
 | MySQL | ❌ aus Backup wiederherstellen | Fehler 1265 wurde auch hier gemessen; der zweite Blocker ist aus MariaDB abgeleitet, nicht auf MySQL gemessen. |
 
+Eine frisch installierte 1.7 hat keine gestempelte Alembic-Revision — nur ein Upgrade setzt einen Stempel —,
+und der Preflight meldet dort deshalb ⚠️ *No Alembic revision is stamped*. Das ist eine Warnung, keine
+Ablehnung: Das Downgrade an Ort und Stelle braucht den Stempel, um zu wissen, welche Migrationen gelaufen
+sind, die Wiederherstellung aus einem Backup nicht — und sie bleibt verfügbar.
+
 !!! danger "Ein Downgrade an Ort und Stelle vernichtet 1.7-eigene Daten"
     Alle zentral gespeicherten Zertifikate, alle anhängbaren Ressourcen (Weiterleitungen,
     Upstream-Pools, Workflows, Ressourcengruppen), sämtliche Request-Metriken und die Threat Map,

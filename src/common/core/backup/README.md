@@ -88,6 +88,11 @@ upgrade/downgrade runs on real databases:
 | MariaDB | ❌ restore from backup | The migration aborts partway (errors 1265 and 1553) and leaves a hybrid schema. |
 | MySQL | ❌ restore from backup | Error 1265 measured here too; the second blocker is inferred from MariaDB, not measured on MySQL. |
 
+A freshly installed 1.7 has no Alembic revision stamped — only an upgrade stamps one — so on such an
+installation the preflight reports ⚠️ *No Alembic revision is stamped*. That is a warning, not a refusal:
+the in-place path needs the stamp to know which migrations ran, restoring from a backup does not, and it
+stays available.
+
 !!! danger "An in-place downgrade destroys 1.7-only data"
     Every centrally stored certificate, every attachable resource (redirects, upstream pools,
     workflows, resource groups), all request metrics and the threat map, every registered passkey,
