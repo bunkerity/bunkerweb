@@ -144,6 +144,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).                                                                                    |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).                                                                                  |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).                                                                                |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global  | Nein     | **Sessions-Widerrufs-Speichergröße:** Größe des Speichers für widerrufene Cookie-Session-Kennungen (z. B. `8192`, `16k`, `16m`). |
 
 === "Protokollierungseinstellungen"
 
@@ -611,6 +612,12 @@ Beispiele:
 
     Weitere Optionen finden Sie in den [Allgemeinen Parametern](#allgemeine-parameter).
 
+### Herausforderungen auf der Reports-Seite
+
+Jede von Antibot ausgelieferte Challenge-Seite wird als Report erfasst und erscheint in der Spalte **Grund** der Reports-Seite als *Antibot-Challenge (Captcha) ausgeliefert*, zusammen mit dem verwendeten Provider. BunkerWeb beantwortet eine Challenge selbst mit einem 200 statt die Anfrage an Ihre Anwendung weiterzuleiten, daher wird der Report anhand seines Grundes behalten und nicht anhand seines Status — der Reports-Filter behält sonst nur Blocks (4xx), Detections und geblockte Stream-Sessions.
+
+Antibot fordert jeden nicht identifizierten Besucher eines geschützten Dienstes heraus, nicht nur verdächtige Besucher, daher entsteht ein Report pro ausgelieferter Challenge — ein weit höheres Volumen als bei einem Blacklist-Treffer oder einer CrowdSec-Entscheidung. Die Einstellung, die zuerst voll wird, ist `METRICS_MAX_BLOCKED_REQUESTS` — der In-Memory-Puffer pro Worker, standardmäßig `1k` (`METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, bei Verwendung von Redis). Ist er voll, werden die ältesten Einträge zuerst verdrängt, wodurch echte geblockte Anfragen zugunsten von Challenges verworfen werden — erhöhen Sie ihn daher zuerst; dimensionieren Sie dann `METRICS_RETENTION_DAYS` und `METRICS_RETENTION_MAX_ROWS` für die gespeicherte Historie, oder setzen Sie `METRICS_PERSIST_TO_DB=no`, wenn Sie diese Historie gar nicht speichern möchten. Die analytischen Tabs der Reports-Seite bleiben unberührt: Eine ausgelieferte Challenge erscheint im Ereignisprotokoll, wird aber nie als Block gezählt und taucht daher weder unter **Top-Angreifer** noch auf der Threat Map auf.
+
 ### Konfigurationsbeispiele
 
 === "Cookie-Herausforderung"
@@ -873,6 +880,37 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
     Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.
 
     Ein Backup kann nur in die Datenbank-Engine zurückgespielt werden, aus der es stammt — die Engine ist Teil des Dateinamens (`backup-mariadb-…`), und eine Wiederherstellung in eine andere wird abgelehnt, bevor irgendetwas angefasst wird. Wenn Sie zwischen Engines migriert sind, bleiben beide Backup-Sätze im Verzeichnis: `restore` ohne Argument nimmt die neueste Datei jeder beliebigen Engine, geben Sie den Pfad also ausdrücklich an, um ein älteres Backup Ihrer aktuellen Engine wiederherzustellen.
+
+### Kontrollierter Downgrade
+
+Zu einer älteren BunkerWeb-Version zurückzukehren ist **nicht** die Umkehrung eines Upgrades. Manche 1.7-Tabellen haben in 1.6.x keine Entsprechung, und bei manchen Datenbank-Engines lässt sich die Migration überhaupt nicht rückwärts abspielen. Drei Befehle machen das entscheidbar statt zum Glücksspiel, und nur der letzte davon ändert etwas:
+
+```bash
+# 1. Kann diese Installation zurück? Nur lesend: kein Schema, keine Daten, keine Datenbank wird angelegt.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Die Schreiber anhalten. Im Vordergrund: hält an, bis Sie mit Strg-C stoppen.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. In einer anderen Shell, während Schritt 2 hält: melden, was passieren würde, dann tun.
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+Ob ein Versionspaar in-place herabgestuft werden kann, wird aus einem mit dem Release ausgelieferten **Kompatibilitäts-Manifest** gelesen (`downgrade-manifest.json`, überschreibbar mit `DOWNGRADE_MANIFEST`); es wird nie aus der Versionsnummer geraten. Für 1.7.0 zurück auf 1.6.14 vermerkt das Manifest, aus gemessenen Upgrade-/Downgrade-Läufen auf echten Datenbanken:
+
+| Engine | Downgrade in-place | Warum |
+| ------ | ------------------ | --- |
+| SQLite | ✅ getestet | Das Schema kommt exakt so zurück, wie 1.6.14 es deklariert, ohne verlorene Baseline-Zeile. |
+| PostgreSQL | ✅ getestet | Ebenso, plus zwei ungenutzte Enum-Typen, die zurückbleiben und die 1.6.14 nie anschaut. |
+| MariaDB | ❌ Wiederherstellung aus Backup | Die Migration bricht auf halbem Weg ab (Fehler 1265 und 1553) und hinterlässt ein Hybrid-Schema. |
+| MySQL | ❌ Wiederherstellung aus Backup | Fehler 1265 wurde auch hier gemessen; der zweite Blocker ist von MariaDB abgeleitet, nicht auf MySQL gemessen. |
+
+!!! danger "Ein In-place-Downgrade zerstört 1.7-exklusive Daten"
+    Jedes zentral gespeicherte Zertifikat, jede anhängbare Ressource (Redirects, Upstream-Pools, Workflows, Ressourcengruppen), alle Request-Metriken und die Threat Map, jeder registrierte Passkey und jede gespeicherte Instanz-Anmeldeinformation — registrierte Instanzen müssen anschließend neu registriert werden. Bans sind die einzige Ausnahme: Der `sync-bans`-Job lernt sie neu, wobei nur ihre verbleibende Dauer verloren geht. Das Preflight zählt die Tabellen, die es zählen kann — einschließlich selbst angelegter Ressourcengruppen, aber nicht der von BunkerWeb mitgelieferten — und verweigert, solange eine davon noch etwas enthält. Was es nicht zählen kann, liest es stattdessen aus, direkt vor der Bestätigungsabfrage: die Spalten, die aus überlebenden Tabellen entfernt werden, und die Daten, die ausgeschlossen werden, weil sie nie leer sind (Request-Metriken, UI-Einstellungen). Lesen Sie diese Liste; nichts verweigert stellvertretend für Sie.
+
+!!! tip "Jeder Fehlschlag hinterlässt etwas Startbares"
+    `downgrade --execute` verweigert, solange kein Quiescence-Hold für dasselbe Ziel besteht, das selbst erneut ausgeführte Preflight nicht sauber zurückkommt und das Manifest das Paar nicht als getestet markiert. Dieser erneute Lauf liest die Primärdatenbank — die, die gerade migriert werden soll — selbst wenn `DATABASE_URI_READONLY` auf eine Nur-Lese-Replik zeigt, damit eine nachhinkende Replik nicht für Zeilen bürgen kann, die der Downgrade zerstören würde. Anschließend erstellt es unmittelbar vor der Migration ein eigenes Backup und stellt es wieder her, falls etwas schiefgeht — ein fehlgeschlagener Downgrade bringt Sie also dorthin zurück, wo Sie gestartet sind, statt auf ein halb migriertes Schema. Kann im seltenen Fall das Rollback selbst nicht landen, stoppt es und meldet `manual_recovery_required`, wobei es die Backup-Datei und den genauen `bwcli plugin backup restore`-Befehl zum manuellen Abschluss nennt.
 
 ### Beispielkonfigurationen
 
@@ -1908,12 +1946,15 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     CrowdSec bietet auch eine [Anwendungssicherheitskomponente](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs), die zum Schutz Ihrer Anwendung vor Angriffen verwendet werden kann. Wenn Sie diese verwenden möchten, müssen Sie eine weitere Akquisitionsdatei für die AppSec-Komponente erstellen:
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
       type: appsec
     listen_addr: 0.0.0.0:7422
     source: appsec
     ```
+
+    `appsec_configs` (Plural) ist eine Liste und wird angehängt, daher erweitern zusätzliche AppSec-Konfigurationen `appsec-default`, statt es zu ersetzen. Der singuläre Schlüssel `appsec_config` nimmt genau einen Namen und kann nicht mit dem pluralen Schlüssel kombiniert werden — verwenden Sie die Plural-Form, wenn Sie [Bot-Erkennung](#bot-erkennung-crowdsec-18) aktivieren möchten.
 
     **Syslog**
 
@@ -2096,7 +2137,8 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
     Wenn Sie die AppSec-Komponente verwenden möchten, müssen Sie eine weitere Akquisitionsdatei dafür erstellen, die sich unter `/etc/crowdsec/acquis.d/appsec.yaml` befindet:
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
         type: appsec
     listen_addr: 127.0.0.1:7422
@@ -2143,33 +2185,151 @@ Die folgenden Abschnitte führen diese Schritte im Detail durch.
 
 Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens `USE_CROWDSEC`, `CROWDSEC_API` und `CROWDSEC_API_KEY` mit einem gültigen per `cscli bouncers add` erzeugten Schlüssel werden benötigt.
 
+Jede Einstellung ist `multisite`, sodass ein ohne Präfix gesetzter Wert für alle Dienste gilt und ein mit einem Servernamen versehener Wert ihn nur für diesen Dienst überschreibt.
+
 | Parameter                   | Standardwert           | Kontext   | Mehrfach | Beschreibung                                                                                                                             |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **CrowdSec aktivieren:** Auf `yes` setzen, um den CrowdSec-Bouncer zu aktivieren.                                                        |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes.                                                                     |
-| `CROWDSEC_API_KEY`          |                        | global    | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
-| `CROWDSEC_MODE`             | `live`                 | global    | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.                                |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.                                                  |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **CrowdSec API URL:** Die Adresse des lokalen CrowdSec API-Dienstes. Leer lassen, um Entscheidungsabfragen zu deaktivieren.              |
+| `CROWDSEC_API_KEY`          |                        | multisite | no       | **CrowdSec API-Schlüssel:** Der API-Schlüssel zur Authentifizierung bei der CrowdSec-API, erhalten mit `cscli bouncers add`.             |
+| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Betriebsmodus:** Entweder `live` (fragt die API für jede Anfrage ab) oder `stream` (cacht alle Entscheidungen periodisch).             |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Interner Traffic:** Auf `yes` setzen, um den internen Traffic anhand der CrowdSec-Entscheidungen zu überprüfen.                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Anfrage-Timeout:** Timeout in Millisekunden für HTTP-Anfragen an die lokale CrowdSec-API im Live-Modus.                                |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Ausgeschlossene Orte:** Kommagetrennte Liste von Orten (URIs), die von CrowdSec-Prüfungen ausgeschlossen werden sollen.                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Cache-Ablauf:** Die Cache-Ablaufzeit in Sekunden für IP-Entscheidungen im Live-Modus.                                                  |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Update-Frequenz:** Wie oft (in Sekunden) neue/abgelaufene Entscheidungen von der CrowdSec-API im Stream-Modus abgerufen werden sollen. |
+
+!!! info "Wie `CROWDSEC_EXCLUDE_LOCATION` matcht"
+    Jeder durch Komma getrennte Eintrag schließt die URI selbst **und alles darunter** aus: `/health` überspringt `/health` und `/health/live`, aber nicht `/healthcheck` — vor dem Rest des Pfads ist immer ein Trennzeichen erforderlich. Der Ausschluss ist vollständig: Eine ausgeschlossene Anfrage erreicht weder die Local API noch die AppSec-Komponente, schließen Sie also keinen Pfad aus, den Sie noch geprüft haben möchten. Schließen Sie insbesondere niemals `/crowdsec-internal` aus: Die [Bot-Erkennung](#bot-erkennung-crowdsec-18) liefert ihre Challenge-Assets von dort, und ein Ausschluss deaktiviert die Challenge stillschweigend.
 
 #### Parameter der Anwendungssicherheitskomponente
 
 | Parameter                         | Standardwert  | Kontext | Mehrfach | Beschreibung                                                                                                                         |
 | --------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_APPSEC_URL`             |               | global  | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global  | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global  | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.                                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global  | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.                                   |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global  | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.                   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global  | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global  | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | no       | **AppSec URL:** Die URL der CrowdSec-Anwendungssicherheitskomponente. Leer lassen, um AppSec zu deaktivieren.                        |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | no       | **Aktion bei Fehler:** Aktion, die ausgeführt werden soll, wenn AppSec einen Fehler zurückgibt. Kann `passthrough` oder `deny` sein. |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | no       | **Verbindungs-Timeout:** Das Timeout in Millisekunden für die Verbindung zur AppSec-Komponente.                                      |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | no       | **Sende-Timeout:** Das Timeout in Millisekunden für das Senden von Daten an die AppSec-Komponente.                                   |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | no       | **Verarbeitungs-Timeout:** Das Timeout in Millisekunden für die Verarbeitung der Anfrage in der AppSec-Komponente.                   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | no       | **Immer senden:** Auf `yes` setzen, um Anfragen immer an AppSec zu senden, auch wenn eine Entscheidung auf IP-Ebene vorliegt.        |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | no       | **SSL-Verifizierung:** Auf `yes` setzen, um das SSL-Zertifikat der AppSec-Komponente zu überprüfen.                                  |
 
 !!! info "Über die Betriebsmodi"
     - Der **Live-Modus** fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz.
     - Der **Stream-Modus** lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.
+
+#### Endpunkte pro Dienst
+
+Da die Endpunkte `multisite` sind, können Dienste auf derselben Instanz unterschiedliche CrowdSec-Komponenten verwenden, oder auch nur einige davon. Die beiden Funktionen sind unabhängig voneinander:
+
+- **Entscheidungsabfragen** sind aktiv, wenn `CROWDSEC_API` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die Local API vollständig zu überspringen.
+- **AppSec-Inspektion** ist aktiv, wenn `CROWDSEC_APPSEC_URL` gesetzt ist. Setzen Sie es für einen Dienst auf eine leere Zeichenkette, um die tiefgehende Anfrageprüfung zu überspringen.
+
+Ein Dienst mit `USE_CROWDSEC` auf `yes` und beiden leeren URLs prüft nichts, und die Instanz protokolliert, dass kein Endpunkt definiert ist.
+
+!!! warning "Ein Entscheidungs-Cache pro Instanz"
+    Zwischengespeicherte Entscheidungen leben in einer einzigen gemeinsamen Speicherzone für die gesamte Instanz, geschlüsselt nach der Local API, von der sie stammen. Dienste, die auf dieselbe `CROWDSEC_API` zeigen, verwenden gegenseitig ihre zwischengespeicherten Entscheidungen wieder — das hält die Abfrage günstig. Dienste, die auf unterschiedliche Local APIs zeigen, sehen die Entscheidungen des jeweils anderen nie. Die Dimensionierung dieser Zone gilt instanzweit, sodass sich eine Flotte mit vielen unterschiedlichen Local APIs und großen Entscheidungslisten ein Budget teilt.
+
+!!! info "Bouncer-Schlüssel pro Local API"
+    `CROWDSEC_API_KEY` wird pro Dienst aufgelöst wie jede andere Einstellung auch. Wenn Dienste unterschiedliche Local APIs ansprechen, geben Sie jedem den mit `cscli bouncers add` auf seinem eigenen CrowdSec-Host registrierten Schlüssel, sonst werden die Abfragen als nicht authentifiziert abgelehnt.
+
+### Bot-Erkennung (CrowdSec 1.8+)
+
+CrowdSec 1.8 fügt der AppSec-Komponente Bot-Erkennung hinzu. Statt einen verdächtigen Client sofort zu bannen, kann die AppSec-Komponente mit einer **Challenge** antworten: einer in sich geschlossenen Seite, die den Browser fingerprinted und ihn einen Proof of Work lösen lässt, dessen Ergebnis dann auf CrowdSec-Seite bewertet wird. BunkerWeb liefert diese Seite genau so aus, wie CrowdSec sie erzeugt hat — gleicher Status, gleiche Header, gleiches Cookie, auf der ursprünglichen URI — und leitet die Anfrage nie an Ihre Anwendung weiter. Ein Client, der scheitert, wird weiterhin durch BunkerWebs eigene Ban-Seite abgewiesen, sodass sich am Blocking-Erlebnis nichts ändert.
+
+Bot-Erkennung ist **standardmäßig nicht aktiviert**: Der Bouncer leitet eine Challenge weiter, sobald die Engine eine ausstellt, aber die Engine stellt erst dann eine aus, wenn Sie die Collection installiert und ihre Konfiguration geladen haben.
+
+**Aktivierung auf einer eigenständigen CrowdSec-Engine**
+
+```shell
+cscli collections install crowdsecurity/appsec-bot-challenge
+```
+
+Fügen Sie dann die installierten Konfigurationen der AppSec-Akquisitionsdatei hinzu, neben `appsec-default`:
+
+```yaml
+appsec_configs:
+  - crowdsecurity/appsec-default
+  - crowdsecurity/appsec-bot-*
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec
+```
+
+Starten Sie CrowdSec neu und bestätigen Sie die Ablehnungen dann mit `cscli alerts list --kind bot-detection`.
+
+Drei fertige Bundles setzen die Ablehnungsschwelle: `crowdsecurity/appsec-bot-challenge` lehnt ab bei einem Score von 75, `crowdsecurity/appsec-bot-challenge-strict` bei 45 und `crowdsecurity/appsec-bot-challenge-permissive` bei 100. Installieren Sie das gewünschte — sie sind Alternativen, keine Schichten.
+
+**Aktivierung auf dem All-In-One-Image**
+
+Setzen Sie `CROWDSEC_EXTRA_COLLECTIONS` am Container und starten Sie ihn neu; der Entrypoint installiert die Collection und fügt ihre Konfigurationen der AppSec-Akquisitionsdatei für Sie hinzu:
+
+```shell
+docker run -d --name bunkerweb-aio \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+Der Entrypoint leitet außerdem beim ersten Aktivieren der Bot-Erkennung ein stabiles `master_secret` für die Challenge-Laufzeit ab und persistiert es unter `/var/lib/bunkerweb` (demselben Volume, in dem das All-In-One-Image auch alles andere aufbewahrt). Ohne dieses erzeugt CrowdSec bei jedem Neustart ein neues und macht damit jedes ausstehende Challenge-Cookie ungültig; geben Sie dem Container ein persistentes Volume für `/data`, damit das Secret — und die übrige Identität der Instanz — eine Neuerstellung übersteht.
+
+!!! warning "Herausgeforderte Clients brauchen JavaScript und Cookies"
+    Die Challenge-Seite führt ein Skript aus und speichert dessen Ergebnis in einem Cookie. Jeder legitime Client, der beides nicht hat — API-Konsumenten, Monitoring-Probes, Feed-Reader, die meisten Kommandozeilen-Tools — kann sie nicht lösen und wird immer weiter herausgefordert. Schließen Sie diese **auf der CrowdSec-Seite** aus oder erlauben Sie sie dort (das Bundle liefert Ausschlüsse für Suchmaschinen, Monitoring, Feeds, statische Dateien und API-Pfade), nicht über `CROWDSEC_EXCLUDE_LOCATION`, das jede CrowdSec-Prüfung für diesen Pfad abschaltet statt nur die Challenge.
+
+!!! warning "Der CrowdSec-Host benötigt eine ausführbare Speicher-Zuordnung"
+    Die Challenge wird serverseitig durch eine WebAssembly-Laufzeit verschleiert, die CrowdSec nur im Compiler-Modus ausführt — es gibt keinen Interpreter-Fallback. Der **Host, auf dem CrowdSec läuft**, benötigt daher SSE4.1 auf amd64 (arm64 hat keine solche Anforderung) sowie einen Kernel, der es erlaubt, eine beschreibbare Zuordnung ausführbar zu machen. Ein mit W^X gehärteter Host oder eine restriktive Seccomp- oder SELinux-Richtlinie lässt CrowdSec beim Start `failed to create wasm runtime in compiler mode` oder `the kernel likely denied an executable memory mapping` protokollieren, und die Bot-Erkennung bleibt aus. Dies ist eine Anforderung an den Host der Engine, nicht an die Browser Ihrer Besucher.
+
+!!! tip "Behalten Sie die Content-Security-Policy der Challenge-Seite bei"
+    CrowdSec hängt der Challenge-Seite immer eine Content-Security-Policy an, und die Seite benötigt sie, um zu funktionieren. BunkerWeb behält sie bei, weil `Content-Security-Policy` im Standard-`KEEP_UPSTREAM_HEADERS` enthalten ist. Zwei Einstellungen umgehen diese Liste und würden die Challenge zerstören: ein `CUSTOM_HEADER`, das selbst `Content-Security-Policy` setzt, und die Auflistung in `REMOVE_HEADERS`. Verwenden Sie eine der beiden, protokolliert die Instanz beim Start eine Warnung, die die betreffende Einstellung nennt.
+
+**CrowdSecs Verdict auf der Reports-Seite lesen**
+
+Jede CrowdSec-Remediation wird als Report erfasst, und der Report benennt jetzt das Verdict, statt nur `crowdsec` zu sagen. Die **Reports**-Seite liest es als Satz — *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)* — und die Report-Details behalten die Rohfelder darunter: `source` (`appsec` oder `lapi`), `action` (`ban`, `captcha` oder `challenge`), `http_status` (der Status, den die Remediation *deklariert* hat, was nicht immer der ausgelieferte ist — ein LAPI-Ban trägt keinen, und ein AppSec-Ban deklariert 403, während BunkerWeb mit `DENY_HTTP_STATUS` antwortet), plus `scenario`, `origin` und `duration`, wenn die Entscheidung von der Local API stammt.
+
+Eine ausgelieferte Challenge antwortet mit einem 200 statt einem Block-Code, und der Report-Filter behält 4xx-, `detect`- und Stream-Zeilen — allein anhand ihres Status würde die Challenge also verworfen. Der Filter behält eine CrowdSec-Remediation nun stattdessen anhand ihres **Grunds**, unabhängig davon, mit welchem Status sie endete, sodass die Challenge angezeigt wird. Unter `SECURITY_MODE=detect` wird nichts ausgeliefert, und das Verdict benennt die Remediation, die *angewendet worden wäre* — sonst unsichtbar, da die eigenen Alert-Zeilen des Bouncers nur bei Pfaden auslösen, die eine Antwort rendern.
+
+!!! info "Das Szenario ist nur bei einer frischen Entscheidung vorhanden"
+    Eine Local-API-Entscheidung trägt ihr Szenario nur bei einer Live-Abfrage. Sobald die Remediation zwischengespeichert ist, speichert der Cache die Remediation und nichts weiter, sodass die folgenden Anfragen desselben Clients die Aktion ohne Szenario melden. AppSec-Verdicts tragen nie eines: Sie stammen überhaupt nicht aus einer Entscheidung.
+
+### Captcha-Remediation (gerendert durch BunkerWebs Antibot)
+
+Eine CrowdSec-`captcha`-Entscheidung bedeutet *beweise, dass du ein Mensch bist*, nicht *verschwinde*. BunkerWeb beantwortet sie mit seiner **eigenen Antibot-Challenge** statt mit CrowdSecs Captcha-Seite: ein einheitliches Look-and-Feel für jede Challenge, die Ihre Site ausliefert, kein zweiter Satz Captcha-Schlüssel zu verwalten, und die Provider, die CrowdSec nicht anbietet — `javascript`, `cookie`, `mcaptcha`, `capjs` — werden auch für eine CrowdSec-Entscheidung verfügbar.
+
+| Einstellung                 | Standard  | Kontext   | Mehrfach | Beschreibung                                                                                                                        |
+| --------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_CAPTCHA_PROVIDER` | `captcha` | multisite | no       | **Captcha-Challenge:** Welche Antibot-Challenge angezeigt wird, wenn CrowdSec ein Captcha verlangt. Auf `no` setzen, um Captcha-Entscheidungen zu ignorieren. |
+
+Sie nimmt dieselben Werte wie `USE_ANTIBOT`: `cookie`, `javascript`, `captcha`, `recaptcha`, `hcaptcha`, `turnstile`, `mcaptcha`, `capjs`. Die Drittanbieter lesen ihre Schlüssel aus den eigenen `ANTIBOT_*`-Einstellungen des Antibots, es gibt also nichts doppelt zu konfigurieren.
+
+!!! warning "Der Antibot muss auf dem Dienst aktiviert sein"
+    Die Challenge-Seite existiert nur bei einem Dienst, dessen `USE_ANTIBOT` auf etwas anderes als `no` gesetzt ist (oder der eine Workflow-Challenge-Regel hat). Bei einem Dienst ohne diese wird eine `captcha`-Entscheidung **gebannt** statt herausgefordert, und die Instanz protokolliert eine Zeile, die beide Einstellungen nennt. `USE_ANTIBOT: "cookie"` ist der günstigste Weg, es einzuschalten: Ein gewöhnlicher Besucher wird in einem Roundtrip durchgelassen, während einem von CrowdSec markierten Client stattdessen die `CROWDSEC_CAPTCHA_PROVIDER`-Challenge gezeigt wird.
+
+!!! warning "Dies ändert das Verhalten beim Upgrade"
+    Bisher reagierte BunkerWeb nur auf `ban`-Entscheidungen, eine `captcha`-Entscheidung Ihrer Local API wurde also nie abgerufen und hatte überhaupt keine Wirkung. Sie wird jetzt abgerufen, zwischengespeichert und befolgt und rendert die oben beschriebene Challenge. Um das bisherige Verhalten beizubehalten, setzen Sie `CROWDSEC_CAPTCHA_PROVIDER: "no"`: Captcha-Entscheidungen werden dann exakt wie zuvor ignoriert. Beachten Sie, dass der erweiterte Filter `BOUNCING_ON_TYPE=all` ist und kein Paar aus `ban`+`captcha` — der Bouncer akzeptiert nur einen Wert — sodass jede Entscheidung eines **anderen** Typs, den Ihre CrowdSec-Profile ausgeben, nun ebenfalls befolgt und, da dem Bouncer unbekannt, als Ban angewendet wird. Und das Opt-out stellt das bisherige Verhalten nur **vollständig wieder her, wenn jeder Dienst, der dieselbe CrowdSec Local API teilt, es ebenfalls setzt**: Der Entscheidungs-Cache ist pro Local API partitioniert, nicht pro Dienst (`cache_partition.lua`), sodass ein Nachbardienst, der auf dem Standard belassen wird, die Captcha-Entscheidung zwischenspeichert und der aussteigende Dienst sie zurückliest und darauf bannt.
+
+!!! tip "`cookie` beweist hier nichts"
+    Der `cookie`-Provider löst sich selbst auf, ohne den Besucher irgendetwas zu fragen. Er ist ein guter günstiger Wert für `USE_ANTIBOT`, kostet aber als `CROWDSEC_CAPTCHA_PROVIDER` zwei Redirects und gewährt einen sitzungslangen Pass auf eine Entscheidung, die *beweise, dass du ein Mensch bist* bedeutet. Bevorzugen Sie `captcha`, `javascript` oder `capjs`.
+
+!!! info "CrowdSec erfährt nie, dass das Captcha gelöst wurde"
+    Die Challenge wird gegen BunkerWeb gelöst, nicht gegen die Engine, daher zählt `cscli metrics` kein Captcha, `CAPTCHA_EXPIRATION` gilt nicht, und ein anderer Bouncer auf derselben Local API fordert denselben Client weiterhin heraus. Was die Antwort festhält, ist die BunkerWeb-Session des Besuchers: Einmal gelöst, wird dieser Browser für die Lebensdauer seiner Session nicht erneut herausgefordert — auch dann nicht, wenn in der Zwischenzeit eine **neue** Captcha-Entscheidung für dieselbe Adresse eintrifft. Jeder Client ohne diese Session (ein anderer Browser, ein anderes Gerät, ein geleertes Cookie-Jar) wird normal herausgefordert.
+
+### Verdict an einen Security-Workflow übergeben
+
+Ein CrowdSec-Verdict kann von Ihren eigenen **Security-Workflows** beantwortet werden statt von CrowdSecs eigener Remediation: Eine Regel mit einer *CrowdSec-Verdict*-Bedingung kann eine markierte Anfrage nach Ihren Regeln herausfordern, umleiten oder blockieren.
+
+| Einstellung                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                    |
+| ------------------------------ | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_DEFER_TO_WORKFLOWS` | `no`    | multisite | no       | **Security-Workflows entscheiden lassen:** Das Verdict an die diesem Dienst angehängten Workflows übergeben, statt es hier anzuwenden. |
+
+Die Bedingung liest zwei Fakten: die **Quelle** des Verdicts (`appsec` oder `lapi`) und die **Remediation**, um die CrowdSec gebeten hat (`ban` oder `captcha`; eine `challenge` wird von CrowdSec selbst ausgeliefert, bevor die Workflows laufen, sie wird also nicht angeboten). Eine Anfrage, die CrowdSec nicht beurteilt hat, lässt die Bedingung unentschieden, was nie zutrifft; eine Anfrage, die CrowdSec beurteilt und nichts dagegen hatte, macht sie falsch.
+
+!!! warning "Standardmäßig wird nichts geöffnet"
+    Mit `no` — dem Standard — wendet CrowdSec sein Verdict selbst an, genau wie bisher. Mit `yes` wird das Verdict unverändert angewendet, wann immer keine Workflow-Regel zutraf, und die Instanz protokolliert eine Zeile mit beiden Einstellungsnamen, wenn der Dienst überhaupt keinen Workflow angehängt hat.
+
+!!! info "Drei Antworten kommen weiterhin von BunkerWeb, während das Verdict wartet"
+    Der CORS-Preflight (`204`), `/robots.txt` und `/security.txt` werden von BunkerWeb generiert, bevor die Workflows laufen, ein markierter Client kann diese drei also weiterhin erhalten. Keine davon erreicht Ihre Anwendung, und jede Anfrage, die das würde, wird zuerst von der Workflow-Leiter geprüft.
 
 ### Konfigurationsbeispiele
 
@@ -2203,9 +2363,42 @@ Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Konfiguration pro Dienst"
+
+    AppSec auf jedem öffentlichen Dienst, Entscheidungsabfragen auf einer Teilmenge, und ein Dienst komplett ausgelassen. Die Werte ohne Präfix sind die flottenweite Baseline, und jeder Dienst überschreibt nur das, was abweicht:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Baseline für jeden Dienst
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Keine Entscheidungsabfrage, es sei denn, ein Dienst verlangt es
+    CROWDSEC_API_KEY: ""
+
+    # app1 fügt zusätzlich zu AppSec die Local-API-Entscheidungsabfrage hinzu
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 behält nur AppSec, erbt die leere CROWDSEC_API-Baseline
+
+    # intranet wird überhaupt nicht geprüft
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Ein Dienst kann auch auf einen völlig anderen CrowdSec-Host zeigen, mit eigenem Bouncer-Schlüssel:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Schritt&nbsp;3 – Integration validieren
 
 - Suchen Sie in den Scheduler-Protokollen nach den Einträgen `CrowdSec configuration successfully generated` und `CrowdSec bouncer denied request`, um zu überprüfen, dass das Plugin aktiv ist.
+- In den Logs der BunkerWeb-Instanz meldet die Init-Phase, wie viele Bouncer gebaut wurden und wie viele Dienste sie abdecken. Dienste mit identischer Konfiguration teilen sich einen Bouncer, daher unterscheiden sich die beiden Zahlen, wenn eine Flotte mehrere unterschiedliche Endpunkte verwendet.
 - Überwachen Sie auf CrowdSec-Seite `cscli metrics show` oder die CrowdSec-Konsole, um sicherzugehen, dass BunkerWeb-Entscheidungen wie erwartet erscheinen.
 - Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.
 
@@ -4288,6 +4481,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | nein     | **Regel-Engine:** Steuern Sie, ob Regeln erzwungen werden. Optionen: `On`, `DetectionOnly` oder `Off`.                                                                          |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | nein     | **Audit-Engine:** Steuern Sie, wie die Audit-Protokollierung funktioniert. Optionen: `On`, `Off` oder `RelevantOnly`.                                                           |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | nein     | **Audit-Protokoll-Teile:** Welche Teile von Anfragen/Antworten in Audit-Protokolle aufgenommen werden sollen.                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | nein | **Audit-Log-Pfad:** Pfad der Datei, in die ModSecurity Audit-Einträge schreibt. Muss eine reguläre Datei sein: Der Serial-Audit-Writer sperrt sie, was eine Pipe oder ein Stream nicht unterstützen kann. |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | nein     | **Anforderungskörper-Limit (keine Dateien):** Maximale Größe für Anforderungskörper ohne Datei-Uploads. Akzeptiert einfache Bytes oder menschenlesbare Suffixe (`k`, `m`, `g`). |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | nein     | **CRS-Plugins aktivieren:** Aktivieren Sie zusätzliche Plugin-Regelsätze für das Core Rule Set.                                                                                 |
 | `MODSECURITY_CRS_PLUGINS`             |                | multisite | nein     | **CRS-Plugin-Liste:** Leerzeichengetrennte Liste von Plugins zum Herunterladen und Installieren (`plugin-name[/tag]` oder URL).                                                 |
@@ -5161,6 +5355,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                                                                                                        |
 | `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                                                                                                             |
 | `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                                                                                                      |
+| `REDIS_SSL_CA`            |            | global  | nein     | **Redis/Valkey SSL-CA-Bundle:** Pfad zu einem PEM-CA-Bundle zur Verifizierung des Server-Zertifikats (private CA). Wird von den Python-Clients vertraut und, über das generierte Trust-Bundle, auch vom Request-Pfad — siehe Hinweis unten. |
 | `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                                                                                                   |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                                                                                                    |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                                                                                                      |
@@ -5170,6 +5365,16 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                                                                                                     |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird.                                                     |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.                                                                                           |
+
+!!! info "Private CA: Wie `REDIS_SSL_CA` vertraut wird"
+    Mit `REDIS_SSL_VERIFY: "yes"` (dem Standard) verwendet die Verifizierung den System-/certifi-Trust-Store, der niemals eine private CA enthält — ein vollkommen gültiges Zertifikat scheitert trotzdem an `CERTIFICATE_VERIFY_FAILED`, und der einzige Ausweg war bisher, die Verifizierung für alle Konsumenten auf einmal abzuschalten. `REDIS_SSL_CA` benennt stattdessen ein zu vertrauendes PEM-CA-Bundle. Es erreicht beide Hälften des Produkts, auf zwei unterschiedlichen Wegen:
+
+    - **Python-Clients — der Pfad wird an den Client übergeben.** Die Celery-Broker-URL (Worker und API), die Jobs (`push-configs`, `sync-bans`), der API-Rate-Limiter, `bwcli` und die Web-UI. Die Broker-URL und der API-Rate-Limiter tragen die CA nur, solange die Verifizierung aktiv ist: Mit `REDIS_SSL_VERIFY: "no"` wird nichts verifiziert, also wird keine CA gesendet.
+    - **Der NGINX-Lua-Request-Pfad (`clusterstore.lua`, verwendet bei `USE_REDIS: "yes"`) — die CA wird an das Trust-Bundle angehängt.** Ein OpenResty-Cosocket hat keinen Trust-Store pro Verbindung; es verifiziert gegen die eine globale `lua_ssl_trusted_certificate`-Datei. Der Konfigurationsgenerator hängt Ihre CA daher an das mitgelieferte Root-Bundle an und lässt diese Direktive auf das Ergebnis zeigen, das mit der Konfiguration an jede Instanz geht. Angehängt, nie ersetzt: Antibot, BunkerNet und CrowdSec verifizieren ihr eigenes HTTPS gegen denselben Store und vertrauen weiterhin allem, was sie zuvor vertraut haben.
+
+    **Wo die Datei existieren muss.** Sie wird dort gelesen, wo die Konfiguration erzeugt wird (der Worker), und von jedem Python-Client im eigenen Dateisystem — mounten Sie sie also unter demselben Pfad in Scheduler, Worker, API und UI. BunkerWeb-Instanzen benötigen nichts gemountet — sie erhalten das kombinierte Bundle. Ein `REDIS_SSL_CA`, das fehlt, nicht lesbar oder kein gültiges PEM-Bundle ist, **lässt die Konfigurationserzeugung absichtlich fehlschlagen**: Zeigt `lua_ssl_trusted_certificate` auf eine ungültige Datei, weigert sich NGINX zu starten, sodass nichts ausgeliefert wird und die Flotte die bereits vorhandene Konfiguration weiter bedient.
+
+    Eine explizit gesetzte `CELERY_BROKER_URL` gewinnt weiterhin gegenüber der abgeleiteten: Setzen Sie `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem` selbst hinein, wenn Sie sie von Hand konfigurieren.
 
 !!! tip "Hochverfügbarkeit"
     Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
@@ -5211,6 +5416,8 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
     REDIS_PASSWORD: "your-strong-password"
     REDIS_SSL: "yes"
     REDIS_SSL_VERIFY: "yes"
+    # Nur für ein von einer privaten CA signiertes Zertifikat; bei einer öffentlich vertrauenswürdigen weglassen
+    REDIS_SSL_CA: "/etc/bunkerweb/redis-ca.pem"
     ```
 
 === "Redis Sentinel"
@@ -5880,6 +6087,64 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 
 Weitere Informationen finden Sie in der [robots.txt-Dokumentation](https://www.robotstxt.org/robotstxt.html).
 
+## Sicherheits-Workflows
+
+STREAM-Unterstützung :x:
+
+Das Workflows-Plugin fügt die Policy-Schicht zwischen einzelnen Einstellungen und den Lua-Schutzmaßnahmen hinzu: wiederverwendbare, geordnete Regeln, die Sie an Dienste anhängen, jede paart einen Bedingungsbaum mit einer Aktion.
+
+Eine Regel beantwortet eine Frage, die einzelne Einstellungen für sich genommen nicht ausdrücken können:
+
+> **Wenn** die Anfrage aus Frankreich kommt **und** `/login` als Ziel hat **und** sie 10 Anfragen pro Minute überschreitet, **dann** zeige eine hCaptcha-Challenge.
+
+Workflows **orchestrieren** die bestehenden Schutzmaßnahmen, statt sie zu ersetzen. Eine `challenge`-Aktion übergibt die Anfrage an Antibot; ein Rate-Schwellenwert nutzt denselben Zähler wie Limit. Jede bereits vorhandene Einstellung funktioniert weiterhin.
+
+### Wie eine Regel ausgewertet wird
+
+Für jeden Dienst werden dessen angehängte Workflows in der Reihenfolge der Anhängung ausgewertet, und die Regeln innerhalb jedes Workflows in der von Ihnen festgelegten Reihenfolge. **Die erste Regel, die tatsächlich zutrifft, gewinnt** und führt ihre einzelne Aktion aus; nichts danach wird noch ausgewertet.
+
+Eine Bedingung ist ein Baum aus `ALL`/`ANY`/`NOT`-Knoten über:
+
+| Bedingung | Trifft zu auf |
+|---|---|
+| IP / CIDR | die effektive Client-IP, nach Real-IP-Auflösung |
+| Land | das aus der GeoIP-Datenbank aufgelöste ISO-Land |
+| ASN | die autonome Systemnummer der Client-IP |
+| URI | den normalisierten Pfad — exakt, Präfix oder regulärer Ausdruck |
+| HTTP-Methode | die Anfragemethode |
+| Ressourcengruppe | eine anderswo gepflegte IP-, Land- oder ASN-Gruppe, referenziert per ID |
+| CrowdSec-Verdict | was CrowdSec über die Anfrage entschieden hat — ihre Quelle (`appsec` oder `lapi`) und die angeforderte Remediation (`ban` oder `captcha`) |
+
+Bedingungen sind **dreiwertig**. Ein Prädikat ist wahr, falsch oder *unbekannt*, wenn das benötigte Faktum nicht verfügbar ist — etwa eine fehlende GeoIP-Datenbank. Eine Regel trifft nur zu, wenn ihr Baum zu wahr auswertet, sodass eine defekte Datenbank eine Regel stoppen lässt, statt sie versehentlich zutreffen zu lassen.
+
+Eine **CrowdSec-Verdict**-Bedingung ist unentschieden bei einem Dienst, den CrowdSec nicht beurteilt hat, und falsch bei einer Anfrage, die CrowdSec beurteilt und nichts dagegen hatte — zwei unterschiedliche Fakten, und keiner davon trifft zu. Damit ein Workflow *anstelle von* CrowdSec antwortet statt danach, setzen Sie `CROWDSEC_DEFER_TO_WORKFLOWS` am Dienst auf `yes`: CrowdSec übergibt dann sein Verdict, statt es anzuwenden, und es wird unverändert angewendet, wann immer keine Regel zutraf.
+
+### Rate-Schwellenwerte sind ein Tor, keine Aktion
+
+Eine Regel kann einen Schwellenwert tragen. Das bedeutet nicht "dann Rate-Limiting": Er entscheidet **ob die Regel überhaupt zutrifft**. Unterhalb des Schwellenwerts verliert die Regel, und die Auswertung geht mit der nächsten Regel weiter.
+
+Das ist es, was es Ihnen erlaubt, "über 10 Anfragen pro Minute mit 429 antworten, sonst eine Challenge zeigen" als zwei geordnete Regeln mit denselben Bedingungen auszudrücken — die erste mit dem Schwellenwert und einem Block, die zweite ohne.
+
+Der Zähler ist auf Dienst + Regel + Client-IP skopiert, sodass er nie mit den `LIMIT_REQ_*`-Zählern interferiert.
+
+### Aktionen
+
+* **challenge** — zeigt einen bestimmten Antibot-Provider (`captcha`, `hcaptcha`, `turnstile`, …). Funktioniert auch bei einem Dienst, bei dem `USE_ANTIBOT` auf `no` steht, und überschreibt Antibots eigene Ignorierlisten: Die gewünschten Ausschlüsse gehören in die Bedingungen der Regel. Der Dienst muss die Zugangsdaten dieses Providers bereits besitzen.
+* **block** — antwortet mit dem Deny-Status der Instanz, oder `429` bei einer Regel, deren Zweck das Deckeln einer Rate ist.
+* **redirect** — schickt den Client mit 301/302/303/307/308 an eine feste URL.
+
+### Detect-Modus
+
+`SECURITY_MODE=detect` führt dieselben Bäume, in derselben Reihenfolge, mit denselben Rate-Zählern aus — setzt aber nichts durch. Die Aktion, die *durchgeführt worden wäre*, wird in den Reports erfasst, sodass eine Policy an echtem Traffic gemessen werden kann, bevor sie eingeschaltet wird.
+
+### Verhalten bei Fehlern
+
+Eine Instanz, die die kompilierte Policy noch nicht erhalten hat — erster Start, oder ein Push, der nie ankam — protokolliert einen Fehler und bedient Traffic unter ihren gewöhnlichen Schutzmaßnahmen. Umgekehrt wird eine Policy, die die Steuerungsebene nicht kompilieren kann, überhaupt nie verteilt: Der Push wird verworfen, und jede Instanz behält die Policy, die sie bereits hatte. Das Löschen einer Ressourcengruppe, auf die eine Regel verweist, wird verweigert, solange diese Regel existiert.
+
+### Workflows verwalten
+
+Alles geschieht über die Seite **Workflows** der Web-UI oder über die `/workflows`-API-Endpunkte. Regeln werden zentral gespeichert und zu einem einzigen Artefakt kompiliert, das mit dem üblichen Konfigurations-Push an jede Instanz verteilt wird.
+
 ## Security.txt
 
 STREAM-Unterstützung :white_check_mark:
@@ -6096,6 +6361,13 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
     1. Setzen Sie `USE_REDIS` auf `yes` und konfigurieren Sie Ihre Redis-Verbindung
     2. Stellen Sie sicher, dass alle Instanzen genau denselben `SESSIONS_SECRET` und `SESSIONS_NAME` verwenden
     3. Dies stellt sicher, dass Benutzer ihre Sitzung beibehalten, unabhängig davon, welche BunkerWeb-Instanz ihre Anfragen bearbeitet
+
+!!! info "Sitzungswiderruf"
+    Ohne Redis leben Sitzungsdaten im Cookie selbst, daher hat das Zerstören einer Sitzung sie bisher nur aus dem Browser entfernt, während das signierte Cookie bis zu seinem Timeout gültig blieb. BunkerWeb führt im gemeinsamen Speicher eine Sperrliste zerstörter Sitzungs-IDs, sodass ein zerstörtes Cookie beim nächsten Vorlegen abgelehnt wird.
+
+    - Gilt nur, wenn Sitzungsdaten im Cookie gespeichert sind. Mit `USE_REDIS` auf `yes` liegen Sitzungsdaten serverseitig, und das Zerstören einer Sitzung entfernt sie bereits.
+    - Die Sperrliste ist lokal auf jede BunkerWeb-Instanz beschränkt. Verwenden Sie Redis, um Sitzungen clusterweit zu widerrufen.
+    - Dimensionieren Sie sie mit `SESSIONS_REVOCATION_MEMORY_SIZE`. Wird der Speicher voll oder nicht verfügbar, gilt die Sitzung als gültig, und eine Warnung wird protokolliert.
 
 ### Beispielkonfigurationen
 

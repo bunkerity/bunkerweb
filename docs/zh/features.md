@@ -146,6 +146,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。                                                          |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。                                                      |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。                                                              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否 | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小（例如 `8192`、`16k`、`16m`）。 |
 
 === "日志设置"
 
@@ -612,6 +613,12 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
     有关其他配置选项，请参阅[通用设置](#通用设置)。
 
+### Reports 页面中的挑战
+
+Antibot 提供的每个挑战页面都会记录为一条报表，在 Reports 页面的**原因**列中显示为 *Antibot challenge (captcha) served*，并附带所使用的提供方。BunkerWeb 会自己以 200 响应挑战，而不是把请求转发给您的应用，因此该报表依据其携带的原因而不是状态被保留——Reports 过滤器原本只保留拦截（4xx）、检测和被拦截的流会话。
+
+Antibot 会向受保护服务的每个未识别访客发起挑战，而不仅是它怀疑的访客，因此每次挑战都会产生一条报表——数量远高于黑名单命中或 CrowdSec 决策。最先填满的设置是 `METRICS_MAX_BLOCKED_REQUESTS`——按 worker 划分的内存缓冲区，默认 `1k`（使用 Redis 时为 `METRICS_MAX_BLOCKED_REQUESTS_REDIS`，`10k`）。缓冲区一旦填满，会先淘汰最旧的条目，从而为挑战腾出空间并丢弃真正的拦截记录，因此请先调大它；然后为存储的历史记录调整 `METRICS_RETENTION_DAYS` 和 `METRICS_RETENTION_MAX_ROWS` 的大小，或者如果完全不想保留该历史记录，可设置 `METRICS_PERSIST_TO_DB=no`。Reports 页面的分析标签页不受影响：已提供的挑战会列在事件日志中，但从不计为拦截，因此不会出现在**主要攻击者**或威胁地图上。
+
 ### 示例配置
 
 === "Cookie 挑战"
@@ -888,6 +895,37 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。
 
     备份只能恢复到它所来自的同一种数据库引擎——引擎名是文件名的一部分（`backup-mariadb-…`），恢复到其他引擎会在改动任何内容之前被拒绝。如果您在引擎之间做过迁移，两套备份都会留在该目录中：不带参数的 `restore` 会取任意引擎中最新的那个文件，因此请显式给出路径，才能恢复当前引擎的某个较旧备份。
+
+### 受控降级
+
+回退到较旧的 BunkerWeb 版本**并不是**升级的逆操作。某些 1.7 的表在 1.6.x 中无处安放，而在某些数据库引擎上，迁移根本无法反向重放。三条命令让这变得可判定而不是一场赌博，只有最后一条会真正改变任何东西：
+
+```bash
+# 1. 这套安装能回退吗？只读：不创建任何 schema、数据或数据库。
+bwcli plugin backup preflight 1.6.14
+
+# 2. 让写入方静止下来。前台运行：会一直保持，直到您用 Ctrl-C 停止。
+bwcli plugin backup quiesce 1.6.14
+
+# 3. 在另一个 shell 中，趁第 2 步仍在保持期间：先报告将会发生什么，再执行。
+bwcli plugin backup downgrade 1.6.14
+bwcli plugin backup downgrade 1.6.14 --execute
+```
+
+某个版本对是否可以原地降级，读取自版本自带的**兼容性清单**（`downgrade-manifest.json`，可用 `DOWNGRADE_MANIFEST` 覆盖）；这从不靠版本号猜测。对于从 1.7.0 回退到 1.6.14，该清单根据在真实数据库上实测的升级/降级运行记录：
+
+| 引擎 | 原地降级 | 原因 |
+| ------ | ------------------ | --- |
+| SQLite | ✅ 已测试 | schema 完全按 1.6.14 声明的样子恢复，不丢失任何基线行。 |
+| PostgreSQL | ✅ 已测试 | 同上，另外会残留两个未使用的枚举类型，1.6.14 从不查看它们。 |
+| MariaDB | ❌ 需从备份恢复 | 迁移在中途中止（错误 1265 和 1553），留下一个混合 schema。 |
+| MySQL | ❌ 需从备份恢复 | 这里也实测到错误 1265；第二个阻塞项是从 MariaDB 推断的，未在 MySQL 上实测。 |
+
+!!! danger "原地降级会销毁仅存在于 1.7 的数据"
+    每个集中存储的证书、每个可挂接资源（重定向、上游池、工作流、资源组）、所有请求指标和威胁地图、每个已注册的通行密钥（passkey），以及每个已存储的实例凭据——已注册的实例事后都需要重新注册。封禁是唯一的例外：`sync-bans` 任务会重新学习它们，只会丢失其剩余时长。预检会统计它能统计到的表——包括您自己创建的资源组，但不包括 BunkerWeb 自带的——只要其中任何一个仍持有内容就会拒绝执行。它无法统计的内容会改为在确认提示前直接列出：从存活的表中删除的列，以及被排除的数据，因为这些数据从不为空（请求指标、UI 偏好设置）。请阅读该列表；没有什么会替您代为拒绝。
+
+!!! tip "任何失败都会留下可启动的状态"
+    除非同一目标已存在静止（quiescence）保持、它自行重新运行的预检结果干净，且清单将该版本对标记为已测试，否则 `downgrade --execute` 会拒绝执行。这次重新运行读取的是主库——即将被迁移的那个库——即便 `DATABASE_URI_READONLY` 指向只读副本也是如此，这样落后的副本就无法替代那些降级将会销毁的行作出答复。随后它会在迁移前立即创建自己的备份，并在出现任何问题时予以恢复——因此一次失败的降级会让您回到起点，而不是停在一个迁移到一半的 schema 上。在极少数回滚本身也无法完成的情况下，它会停止并报告 `manual_recovery_required`，并给出备份文件名和用于手动完成的确切 `bwcli plugin backup restore` 命令。
 
 ### 示例配置
 
@@ -1899,12 +1937,15 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CrowdSec 还提供了一个[应用程序安全组件](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs)，可用于保护您的应用程序免受攻击。如果您想使用它，必须为 AppSec 组件创建另一个采集文件：
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
       type: appsec
     listen_addr: 0.0.0.0:7422
     source: appsec
     ```
+
+    `appsec_configs`（复数）是一个列表，采用追加方式，因此额外的 AppSec 配置会在 `appsec-default` 基础上扩展，而不是替换它。单数键 `appsec_config` 只接受一个名称，不能与复数键组合使用——如果您计划启用[机器人检测](#机器人检测-crowdsec-18)，请使用复数形式。
 
     **Syslog**
 
@@ -2088,7 +2129,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     如果您想使用 AppSec 组件，您必须为其创建一个位于 `/etc/crowdsec/acquis.d/appsec.yaml` 的另一个采集文件：
 
     ```yaml
-    appsec_config: crowdsecurity/appsec-default
+    appsec_configs:
+      - crowdsecurity/appsec-default
     labels:
         type: appsec
     listen_addr: 127.0.0.1:7422
@@ -2136,33 +2178,151 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 和 `CROWDSEC_API_KEY`，并使用通过 `cscli bouncers add` 生成的有效密钥。
 
+每个设置都是 `multisite` 的，因此不带前缀设置的值适用于所有服务，而以服务器名称为前缀的值只会覆盖该服务自己的值。
+
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | 否   | **启用 CrowdSec：** 设置为 `yes` 以启用 CrowdSec 拦截器。                                             |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | global    | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。                                                 |
-| `CROWDSEC_API_KEY`          |                        | global    | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
-| `CROWDSEC_MODE`             | `live`                 | global    | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | global    | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | global    | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | global    | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | global    | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | global    | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | 否   | **CrowdSec API URL：** CrowdSec 本地 API 服务的地址。留空可禁用决策查询。                                                 |
+| `CROWDSEC_API_KEY`          |                        | multisite | 否   | **CrowdSec API 密钥：** 用于向 CrowdSec API 进行身份验证的 API 密钥，使用 `cscli bouncers add` 获取。 |
+| `CROWDSEC_MODE`             | `live`                 | multisite | 否   | **操作模式：** `live`（为每个请求查询 API）或 `stream`（定期缓存所有决策）。                          |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | 否   | **内部流量：** 设置为 `yes` 以根据 CrowdSec 决策检查内部流量。                                        |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | 否   | **请求超时：** 在实时模式下向 CrowdSec 本地 API 发出 HTTP 请求的超时时间（以毫秒为单位）。            |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | 否   | **排除的位置：** 从 CrowdSec 检查中排除的位置（URI）列表，以逗号分隔。                                |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | 否   | **缓存过期时间：** 在实时模式下，IP 决策的缓存过期时间（以秒为单位）。                                |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | 否   | **更新频率：** 在流模式下，从 CrowdSec API 拉取新的/过期的决策的频率（以秒为单位）。                  |
+
+!!! info "`CROWDSEC_EXCLUDE_LOCATION` 的匹配方式"
+    每个以逗号分隔的条目都会排除该 URI 本身**及其下方的所有内容**：`/health` 会跳过 `/health` 和 `/health/live`，但不会跳过 `/healthcheck`——路径其余部分前始终需要一个分隔符。排除是彻底的：被排除的请求既不会到达本地 API，也不会到达 AppSec 组件，因此请不要排除仍希望被检查的路径。尤其不要排除 `/crowdsec-internal`：[机器人检测](#机器人检测-crowdsec-18)的挑战资源正是从该路径提供的，排除它会悄悄禁用挑战。
 
 #### 应用程序安全组件设置
 
 | 设置                              | 默认值        | 上下文 | 多个 | 描述                                                                              |
 | --------------------------------- | ------------- | ------ | ---- | --------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |               | global | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | global | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | global | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | global | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | global | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
+| `CROWDSEC_APPSEC_URL`             |               | multisite | 否   | **AppSec URL：** CrowdSec 应用程序安全组件的 URL。留空以禁用 AppSec。             |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough` | multisite | 否   | **失败操作：** 当 AppSec 返回错误时要采取的操作。可以是 `passthrough` 或 `deny`。 |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`         | multisite | 否   | **连接超时：** 连接到 AppSec 组件的超时时间（以毫秒为单位）。                     |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`         | multisite | 否   | **发送超时：** 向 AppSec 组件发送数据的超时时间（以毫秒为单位）。                 |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`         | multisite | 否   | **处理超时：** 在 AppSec 组件中处理请求的超时时间（以毫秒为单位）。               |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | multisite | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | multisite | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
 !!! info "关于操作模式"
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
     - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
+
+#### 按服务划分的端点
+
+由于这些端点是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或者只使用其中一部分。这两项功能相互独立：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于启用状态。将其设为空字符串可让某个服务完全跳过本地 API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于启用状态。将其设为空字符串可让某个服务跳过深度请求检测。
+
+`USE_CROWDSEC` 设为 `yes` 且两个 URL 都为空的服务不会检查任何内容，实例会记录未定义任何端点的日志。
+
+!!! warning "每个实例只有一个决策缓存"
+    缓存的决策存放在整个实例共用的单一共享内存区中，以其来源的本地 API 为键。指向同一个 `CROWDSEC_API` 的服务会互相复用彼此缓存的决策，这正是查询保持廉价的原因。指向不同本地 API 的服务永远看不到彼此的决策。该内存区的大小是实例级别的，因此拥有多个不同本地 API 及大量决策列表的集群会共用同一份预算。
+
+!!! info "每个本地 API 一个 bouncer 密钥"
+    `CROWDSEC_API_KEY` 与其他任何设置一样按服务解析。当各服务指向不同的本地 API 时，请为每个服务提供在其各自 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过认证而被拒绝。
+
+### 机器人检测 (CrowdSec 1.8+)
+
+CrowdSec 1.8 为 AppSec 组件新增了机器人检测功能。AppSec 组件不再直接封禁可疑客户端，而是可以用**挑战**来应答：一个自包含的页面会对浏览器进行指纹识别，并让其求解一个工作量证明，随后在 CrowdSec 一侧对结果打分。BunkerWeb 会原样提供 CrowdSec 生成的那个页面——相同的状态码、相同的响应头、相同的 Cookie，位于原始 URI 上——并且从不把请求转发给您的应用。求解失败的客户端仍会被 BunkerWeb 自身的封禁页拒绝，因此拦截体验没有任何变化。
+
+机器人检测**默认未启用**：一旦引擎发出挑战，bouncer 就会转发它，但只有在您安装了相应 collection 并加载其配置之后，引擎才会发出挑战。
+
+**在独立的 CrowdSec 引擎上启用**
+
+```shell
+cscli collections install crowdsecurity/appsec-bot-challenge
+```
+
+然后把它安装的配置添加到 AppSec 采集文件中，紧挨着 `appsec-default`：
+
+```yaml
+appsec_configs:
+  - crowdsecurity/appsec-default
+  - crowdsecurity/appsec-bot-*
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec
+```
+
+重启 CrowdSec，然后用 `cscli alerts list --kind bot-detection` 确认拒绝记录。
+
+三个现成的套件设定了不同的拒绝阈值：`crowdsecurity/appsec-bot-challenge` 在分数达到 75 时拒绝，`crowdsecurity/appsec-bot-challenge-strict` 为 45，`crowdsecurity/appsec-bot-challenge-permissive` 为 100。安装您需要的那一个即可——它们是互斥的备选项，而不是可叠加的层。
+
+**在 All-In-One 镜像上启用**
+
+在容器上设置 `CROWDSEC_EXTRA_COLLECTIONS` 并重启；entrypoint 会为您安装该 collection，并将其配置添加到 AppSec 采集文件中：
+
+```shell
+docker run -d --name bunkerweb-aio \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_APPSEC_URL=http://127.0.0.1:7422 \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
+  bunkerity/bunkerweb-all-in-one:1.7.0-beta
+```
+
+首次启用机器人检测时，entrypoint 还会为挑战运行时派生一个稳定的 `master_secret`，并将其持久化保存在 `/var/lib/bunkerweb` 下（与 All-In-One 镜像保存其他所有内容的卷相同）。如果没有它，CrowdSec 会在每次重启时生成一个新的，使所有未完成的挑战 Cookie 失效；请为容器提供一个持久化的 `/data` 卷，让该密钥——以及实例身份的其余部分——能在重建后依然存在。
+
+!!! warning "被挑战的客户端需要 JavaScript 和 Cookie"
+    挑战页面会运行一段脚本，并把结果保存在 Cookie 中。任何两者都不具备的合法客户端——API 消费者、监控探针、订阅源读取器、大多数命令行工具——都无法求解，并会持续被挑战。请**在 CrowdSec 一侧**排除或将它们加入白名单（该套件自带针对搜索引擎、监控、订阅源、静态文件和 API 路径的排除规则），而不要使用 `CROWDSEC_EXCLUDE_LOCATION`——它会为该路径关闭全部 CrowdSec 检查，而不仅仅是挑战。
+
+!!! warning "运行 CrowdSec 的主机需要可执行内存映射"
+    挑战在服务端由一个 CrowdSec 仅以编译器模式运行的 WebAssembly 运行时进行混淆——不存在解释器回退方案。因此**运行 CrowdSec 的主机**在 amd64 上需要 SSE4.1（arm64 没有此要求），并需要一个允许把可写映射转为可执行的内核。启用了 W^X 加固、或采用限制性 seccomp 或 SELinux 策略的主机，会让 CrowdSec 在启动时记录 `failed to create wasm runtime in compiler mode` 或 `the kernel likely denied an executable memory mapping`，机器人检测也就无法启用。这是对引擎所在主机的要求，与访客的浏览器无关。
+
+!!! tip "保留挑战页面的 Content-Security-Policy"
+    CrowdSec 总会为挑战页面附加一个 Content-Security-Policy，页面需要它才能运行。BunkerWeb 会保留它，因为 `Content-Security-Policy` 位于默认的 `KEEP_UPSTREAM_HEADERS` 中。有两个设置会绕过该列表并破坏挑战：自行设置 `Content-Security-Policy` 的 `CUSTOM_HEADER`，以及在 `REMOVE_HEADERS` 中列出它。如果您使用了其中任何一个，实例会在启动时记录一条警告，点名该设置。
+
+**在 Reports 页面查看 CrowdSec 的裁定结果**
+
+每条 CrowdSec 处置都会记录为一条报表，如今报表会点明具体裁定，而不再只显示 `crowdsec`。**Reports** 页面会把它读作一句话——*CrowdSec AppSec: bot-detection challenge*、*CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)*——报表详情下方仍保留原始字段：`source`（`appsec` 或 `lapi`）、`action`（`ban`、`captcha` 或 `challenge`）、`http_status`（处置*声明*的状态码，并不总是实际下发的那个——LAPI 封禁不带任何状态码，AppSec 封禁声明为 403，而 BunkerWeb 实际以 `DENY_HTTP_STATUS` 应答），以及决策来自本地 API 时的 `scenario`、`origin` 和 `duration`。
+
+已下发的挑战以 200 应答，而不是拦截状态码，报表过滤器只保留 4xx、`detect` 和流会话的行——因此仅凭状态码挑战会被丢弃。过滤器现在改为依据 CrowdSec 处置的**原因**保留记录，无论其最终状态码是什么，因此挑战会被展示出来。在 `SECURITY_MODE=detect` 下不会实际下发任何内容，裁定会点明*本应*采取的处置——这在其他情况下是不可见的，因为 bouncer 自身的告警行只在渲染出响应的路径上触发。
+
+!!! info "scenario 只在新鲜决策中才有"
+    本地 API 决策只有在实时查询时才带有 scenario。一旦处置结果被缓存，缓存中只存储处置结果本身，不再有其他信息，因此同一客户端后续请求上报的 action 就不再带 scenario。AppSec 裁定从不带 scenario：它们根本不是来自某条决策。
+
+### 验证码处置（由 BunkerWeb 的 antibot 渲染）
+
+CrowdSec 的 `captcha` 决策意味着*证明你是人类*，而不是*走开*。BunkerWeb 用自己的 **antibot 挑战**来应答，而不是使用 CrowdSec 自带的验证码页面：您的网站提供的每一种挑战都保持统一的外观和体验，无需再管理第二套验证码密钥，而且 CrowdSec 不提供的那些方式——`javascript`、`cookie`、`mcaptcha`、`capjs`——现在也可用于 CrowdSec 决策了。
+
+| 设置                          | 默认值    | 上下文    | 多值 | 说明                                                                                                                        |
+| ----------------------------- | --------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_CAPTCHA_PROVIDER`   | `captcha` | multisite | 否   | **验证码挑战：** 当 CrowdSec 要求验证码时展示哪种 antibot 挑战。设为 `no` 可忽略验证码决策。 |
+
+它接受与 `USE_ANTIBOT` 相同的取值：`cookie`、`javascript`、`captcha`、`recaptcha`、`hcaptcha`、`turnstile`、`mcaptcha`、`capjs`。第三方方式会从 antibot 自身的 `ANTIBOT_*` 设置中读取密钥，因此无需重复配置。
+
+!!! warning "必须在该服务上启用 antibot"
+    挑战页面只存在于 `USE_ANTIBOT` 被设为非 `no` 的服务上（或者该服务拥有一条工作流挑战规则）。在未启用它的服务上，`captcha` 决策会被**封禁**而不是被挑战，实例会记录一行同时点名这两个设置的日志。`USE_ANTIBOT: "cookie"` 是启用它成本最低的方式：普通访客一次往返即可通过，而被 CrowdSec 标记的客户端则会看到 `CROWDSEC_CAPTCHA_PROVIDER` 所指定的挑战。
+
+!!! warning "这会改变升级后的行为"
+    此前 BunkerWeb 只对 `ban` 决策作出反应，因此来自您本地 API 的 `captcha` 决策从未被取用，也完全没有任何效果。现在它会被取用、缓存并被遵循，并渲染出上文所述的挑战。若要保留此前的行为，请设置 `CROWDSEC_CAPTCHA_PROVIDER: "no"`：此时验证码决策会被完全按之前的方式忽略。请注意，扩大后的过滤器是 `BOUNCING_ON_TYPE=all`，而不是 `ban`+`captcha` 这样的组合——bouncer 只接受一个取值——因此您 CrowdSec 配置文件发出的**任何其他**类型的决策现在也会被遵循，并且由于 bouncer 不认识它，会被当作封禁处理。而且这项选择退出**只有在共享同一个 CrowdSec 本地 API 的所有服务都设置了它时**才能完全恢复此前的行为：决策缓存是按本地 API 分区的，而不是按服务分区的（`cache_partition.lua`），因此一个仍保持默认值的兄弟服务会缓存该验证码决策，而选择退出的服务读回该缓存后仍会据此封禁。
+
+!!! tip "`cookie` 在这里证明不了什么"
+    `cookie` 方式会自行解析完成，不会向访客提出任何要求。作为 `USE_ANTIBOT` 的取值，它是一个廉价且不错的选择，但作为 `CROWDSEC_CAPTCHA_PROVIDER`，它要付出两次重定向的代价，却为一个意味着*证明你是人类*的决策授予了长达整个会话的通行证。请优先选择 `captcha`、`javascript` 或 `capjs`。
+
+!!! info "CrowdSec 永远不会知道验证码已被解出"
+    挑战是针对 BunkerWeb 求解的，而不是针对引擎本身，因此 `cscli metrics` 不会计入任何验证码，`CAPTCHA_EXPIRATION` 也不适用，同一本地 API 上的另一个 bouncer 仍会挑战同一客户端。真正保存这个答案的是访客的 BunkerWeb 会话：一旦求解成功，该浏览器在其会话生命周期内不会再被挑战——即使期间为同一地址下发了一条**新的**验证码决策也是如此。任何没有该会话的客户端（另一个浏览器、另一台设备、被清空的 Cookie）都会照常被挑战。
+
+### 把裁定权交给安全工作流
+
+CrowdSec 的裁定可以交由您自己的**安全工作流**来处理，而不是由 CrowdSec 自身的处置方式处理：一条带有 *CrowdSec 裁定* 条件的规则，可以按您自己的方式挑战、重定向或拦截被标记的请求。
+
+| 设置                             | 默认值 | 上下文    | 多值 | 说明                                                                                                                    |
+| --------------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `CROWDSEC_DEFER_TO_WORKFLOWS`     | `no`   | multisite | 否   | **让安全工作流决定：** 将裁定交给挂接在该服务上的工作流，而不是在此处直接应用。 |
+
+该条件读取两项事实：裁定的**来源**（`appsec` 或 `lapi`），以及 CrowdSec 要求的**处置方式**（`ban` 或 `captcha`；`challenge` 由 CrowdSec 自身在工作流运行之前就已下发，因此不会作为选项提供）。CrowdSec 未作出判断的请求会让该条件处于未决状态，永远不会匹配；CrowdSec 作出判断且未发现问题的请求会让该条件为假。
+
+!!! warning "默认不会放行任何内容"
+    在默认值 `no` 下，CrowdSec 会像以往一样自行应用其裁定。设为 `yes` 后，只要没有任何工作流规则匹配，裁定就会原样被应用；当该服务根本没有挂接任何工作流时，实例会记录一行同时点名这两个设置的日志。
+
+!!! info "裁定等待期间，仍有三种应答来自 BunkerWeb"
+    CORS 预检（`204`）、`/robots.txt` 和 `/security.txt` 是由 BunkerWeb 在工作流运行之前生成的，因此被标记的客户端仍可以收到这三种应答。它们都不会到达您的应用，而任何本应到达应用的请求都会先经过工作流阶梯的检查。
 
 ### 示例配置
 
@@ -2196,9 +2356,42 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "按服务配置"
+
+    在每个公开服务上启用 AppSec，仅在部分服务上启用决策查询，并让一个服务完全不受检查。不带前缀的值是全集群通用的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某服务自行要求，否则不做决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之外额外开启本地 API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 只保留 AppSec，沿用空的 CROWDSEC_API 基线
+
+    # intranet 完全不被检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    某个服务也可以指向一台完全不同的 CrowdSec 主机，并拥有自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### 第&nbsp;3&nbsp;步 – 验证集成
 
 - 在调度器日志中查找 `CrowdSec configuration successfully generated` 和 `CrowdSec bouncer denied request` 条目，以确认插件处于活动状态。
+- 在 BunkerWeb 实例日志中，初始化阶段会报告构建了多少个 bouncer 以及它们覆盖了多少个服务。配置完全相同的服务会共用一个 bouncer，因此当集群使用多个不同端点时，这两个数字会不一致。
 - 在 CrowdSec 端监控 `cscli metrics show` 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。
 - 在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。
 
@@ -4308,6 +4501,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`           | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly` | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
 | `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`    | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否 | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会对其加锁，管道或流不支持这种方式。 |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`       | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
 | `USE_MODSECURITY_CRS_PLUGINS`         | `yes`          | multisite | 否   | **启用 CRS 插件：** 为核心规则集启用其他插件规则集。                                                                                        |
 | `MODSECURITY_CRS_PLUGINS`             |                | multisite | 否   | **CRS 插件列表：** 要下载和安装的插件的空格分隔列表（`plugin-name[/tag]` 或 URL）。                                                         |
@@ -5185,6 +5379,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_DATABASE`          | `0`        | global | 否   | **Redis/Valkey 数据库：** 在 Redis/Valkey 服务器上使用的数据库编号 (0-15)。                                                              |
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。                                                            |
 | `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。                                                         |
+| `REDIS_SSL_CA`            |            | global | 否   | **Redis/Valkey SSL CA 证书包：** 用于验证服务器证书的 PEM 格式 CA 证书包路径（私有 CA）。Python 客户端会信任它，并通过生成的信任包，被请求路径信任——参见下方说明。 |
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。                                                              |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。                                                              |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                                                                               |
@@ -5194,6 +5389,16 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                                                                                |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。                                                            |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                                                                                  |
+
+!!! info "私有 CA：`REDIS_SSL_CA` 如何被信任"
+    在 `REDIS_SSL_VERIFY: "yes"`（默认值）下，验证使用系统/certifi 信任库，其中从不包含私有 CA——一个完全有效的证书仍然会因 `CERTIFICATE_VERIFY_FAILED` 而失败，此前唯一的解决办法是一次性为所有使用方关闭验证。`REDIS_SSL_CA` 改为指定一个要信任的 PEM CA 证书包。它通过两条不同的路径，同时覆盖产品的两个部分：
+
+    - **Python 客户端——路径会被传给客户端。** Celery broker URL（worker 和 API）、各个任务（`push-configs`、`sync-bans`）、API 限流器、`bwcli` 以及 web UI。broker URL 和 API 限流器只有在启用验证时才携带该 CA：当 `REDIS_SSL_VERIFY: "no"` 时不做任何验证，因此不会发送任何 CA。
+    - **NGINX Lua 请求路径（`clusterstore.lua`，在 `USE_REDIS: "yes"` 时使用）——该 CA 会被追加进信任包。** OpenResty 的 cosocket 没有按连接区分的信任库；它只针对单一的全局 `lua_ssl_trusted_certificate` 文件进行验证。因此配置生成器会把您的 CA 追加到内置的根证书包末尾，并让该指令指向合并后的结果，随配置一同分发给每个实例。是追加，而不是替换：antibot、BunkerNet 和 CrowdSec 会针对同一个信任库验证各自的 HTTPS，并继续信任它们此前信任的一切。
+
+    **该文件必须存在的位置。** 它会在生成配置的地方（worker）被读取，也会被每个 Python 客户端在各自的文件系统中读取，因此请在 scheduler、worker、API 和 UI 中把它挂载到相同路径。BunkerWeb 实例无需挂载任何内容——它们接收的是合并后的证书包。如果 `REDIS_SSL_CA` 缺失、不可读，或不是有效的 PEM 证书包，会**故意导致配置生成失败**：`lua_ssl_trusted_certificate` 指向一个损坏的文件会让 NGINX 拒绝启动，因此不会推送任何内容，集群会继续提供它已有的配置。
+
+    显式设置的 `CELERY_BROKER_URL` 仍然优先于自动推导出的那个：如果您手动设置它，请自行在其中加入 `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem`。
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
     对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
@@ -5236,6 +5441,8 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     REDIS_PASSWORD: "your-strong-password"
     REDIS_SSL: "yes"
     REDIS_SSL_VERIFY: "yes"
+    # 仅适用于由私有 CA 签发的证书；若使用公共可信证书则省略该项
+    REDIS_SSL_CA: "/etc/bunkerweb/redis-ca.pem"
     ```
 
 === "Redis Sentinel 配置"
@@ -5905,6 +6112,64 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 
 更多信息，请参阅 [robots.txt 文档](https://www.robotstxt.org/robotstxt.html)。
 
+## 安全工作流
+
+STREAM 支持 :x:
+
+Workflows 插件在单个设置和 Lua 保护机制之间增加了一层策略：您把可复用、有序的规则挂接到服务上，每条规则将一棵条件树与一个动作配对。
+
+一条规则回答了单个设置本身无法表达的问题：
+
+> **如果**请求来自法国，**并且**目标是 `/login`，**并且**超过每分钟 10 次请求，**那么**展示 hCaptcha 挑战。
+
+Workflows **编排**现有的保护机制，而不是取代它们。`challenge` 动作会把请求交给 Antibot；速率阈值使用与 Limit 相同的计数器。您已有的每一个设置都照常生效。
+
+### 规则如何被评估
+
+对每个服务而言，其挂接的工作流会按挂接顺序被评估，每个工作流内部的规则则按您排列的顺序被评估。**第一条实际匹配的规则获胜**并执行其唯一的动作；它之后的规则不再被评估。
+
+条件是由 `ALL` / `ANY` / `NOT` 节点构成的树，可作用于：
+
+| 条件 | 匹配依据 |
+|---|---|
+| IP / CIDR | 经过 Real-IP 解析后的有效客户端 IP |
+| 国家 | 从 GeoIP 数据库解析出的 ISO 国家代码 |
+| ASN | 客户端 IP 所属的自治系统编号 |
+| URI | 规范化后的路径——精确匹配、前缀匹配或正则表达式 |
+| HTTP 方法 | 请求方法 |
+| 资源组 | 您在别处维护的 IP、国家或 ASN 组，通过 id 引用 |
+| CrowdSec 裁定 | CrowdSec 对该请求作出的判定——其来源（`appsec` 或 `lapi`）以及请求的处置方式（`ban` 或 `captcha`） |
+
+条件是**三值**的。当所需的事实不可用时（例如缺失 GeoIP 数据库），谓词的取值为真、假，或*未知*。只有当整棵条件树求值为真时规则才匹配，因此损坏的数据库会让规则停止匹配，而不是意外开始匹配。
+
+**CrowdSec 裁定**条件在 CrowdSec 未对某服务作出判断时处于未决状态，在 CrowdSec 已作出判断且没有发现问题的请求上则为假——这是两个不同的事实，二者都不算匹配。若希望工作流*取代* CrowdSec 而不是在其之后再作应答，请在该服务上将 `CROWDSEC_DEFER_TO_WORKFLOWS` 设为 `yes`：此时 CrowdSec 会交出其裁定而不是直接应用，并且只要没有任何规则匹配，该裁定就会被原样应用。
+
+### 速率阈值是一道闸门，而不是一个动作
+
+一条规则可以携带一个阈值。这并不是"那么就限速"：它决定的是**该规则是否匹配**。低于阈值时该规则不匹配，评估会继续进行下一条规则。
+
+正因如此，您可以用两条条件相同、有先后顺序的规则来表达"超过每分钟 10 次请求时应答 429，否则展示挑战"——第一条带阈值和拦截动作，第二条不带阈值。
+
+该计数器的作用域是服务 + 规则 + 客户端 IP，因此它永远不会与 `LIMIT_REQ_*` 的计数器互相干扰。
+
+### 动作
+
+* **challenge**——展示某个特定的 Antibot 提供方（`captcha`、`hcaptcha`、`turnstile` 等）。即使在 `USE_ANTIBOT` 为 `no` 的服务上也能生效，并且会覆盖 Antibot 自身的忽略列表：您想要的排除项应写在规则的条件里。该服务必须已经持有该提供方所需的凭据。
+* **block**——以实例的拒绝状态码应答，若规则的目的是限制速率，则应答 `429`。
+* **redirect**——以 301/302/303/307/308 将客户端发送到一个固定 URL。
+
+### 检测模式
+
+`SECURITY_MODE=detect` 会以相同的树、相同的顺序、相同的速率计数器运行——但不会强制执行任何动作。*本应*采取的动作会被记录在报表中，因此可以在真实流量上评估某条策略，再决定是否真正启用它。
+
+### 失败时的行为
+
+尚未收到已编译策略的实例——例如首次启动，或某次推送始终未到达——会记录一条错误日志，并在其常规保护下继续提供服务。反过来，控制面无法编译的策略永远不会被分发：该次推送会被放弃，每个实例都保留其已有的策略。只要某条规则仍然存在，删除该规则所引用的资源组就会被拒绝。
+
+### 管理工作流
+
+一切操作都在 web UI 的 **Workflows** 页面完成，或通过 `/workflows` API 端点完成。规则集中存储，并被编译为一个统一的产物，随常规配置推送分发到每个实例。
+
 ## Security.txt
 
 STREAM 支持 :white_check_mark:
@@ -6129,6 +6394,13 @@ STREAM 支持 :white_check_mark:
     1. 将 `USE_REDIS` 设置为 `yes` 并配置您的 Redis 连接
     2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`
     3. 这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话
+
+!!! info "会话吊销"
+    在没有 Redis 的情况下，会话数据存放在 Cookie 本身中，因此销毁会话此前只会把它从浏览器中清除，而已签名的 Cookie 仍会保持有效直到超时。BunkerWeb 会在共享内存中维护一份已销毁会话标识符的拒绝列表，因此被销毁的 Cookie 在下次出示时会被拒绝。
+
+    - 仅当会话数据存储在 Cookie 中时才适用。当 `USE_REDIS` 设为 `yes` 时，会话数据存放在服务端，销毁会话时已经会将其移除。
+    - 该拒绝列表仅限于每个 BunkerWeb 实例本地有效。要在整个集群范围内吊销会话，请使用 Redis。
+    - 使用 `SESSIONS_REVOCATION_MEMORY_SIZE` 调整其大小。如果该存储已满或不可用，会话会被视为有效，并记录一条警告。
 
 ### 配置示例
 
