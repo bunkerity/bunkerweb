@@ -74,10 +74,17 @@ local function bouncer()
   }
 end
 
--- Two scopes, as a multisite fleet has them: access() must pick the namespace of the service
--- being served, not the singlesite fallback. One bouncer per scope, because two services sharing
--- a rendered configuration share a bouncer but never a challenge namespace.
-bouncers = { global = bouncer(), ["www.example.com"] = bouncer() }
+-- Two scopes by default, as a multisite fleet has them: access() must pick the namespace of the
+-- service being served, not the singlesite fallback. One bouncer per scope, because two services
+-- sharing a rendered configuration share a bouncer but never a challenge namespace.
+--
+-- Built from a list rather than written out, because ONE case needs the table empty: init() marks
+-- every scope failed (`bouncers, challenge_prefixes, failed_scopes = {}, {}, {}` at crowdsec.lua:194,
+-- and each per-service failure leaves its scope out of the table), and then access() has no bouncer
+-- to run. That is the fail-open branch, and it was covered by nothing anywhere until this file grew
+-- TestTheFailOpenBranch below.
+bouncers = {}
+for _, scope in ipairs(BOUNCER_SCOPES) do bouncers[scope] = bouncer() end
 
 local crowdsec = {}
 %(access)s
@@ -99,6 +106,7 @@ local self = {
 }
 
 local answer = crowdsec.access(self)
+print("RET=" .. tostring(answer.ret))
 print("STATUS=" .. tostring(answer.status))
 print("MSG=" .. tostring(answer.msg))
 print("FLAG=" .. tostring(self.ctx.bw.workflow_antibot_provider))
@@ -144,6 +152,7 @@ def run(
     source: str | None = None,
     defer: bool = False,
     server_name: str = "www.example.com",
+    bouncer_scopes: tuple = ("global", "www.example.com"),
 ):
     variables = {"USE_CROWDSEC": "yes"}
     if captcha_provider is not None:
@@ -162,6 +171,7 @@ def run(
             "ALLOW_ARGS = {}",
             f"DEFER = {to_lua(defer)}",
             f"SERVER_NAME = {to_lua(server_name)}",
+            "BOUNCER_SCOPES = {" + ", ".join(to_lua(scope) for scope in bouncer_scopes) + "}",
         ]
     )
     script = preamble + "\n" + HARNESS % {"deny": DENY_STATUS, "access": _method("access", source)}
@@ -369,3 +379,49 @@ class TestTheChallengeNamespaceFollowsTheService:
         assert mutated != method, "the scope selection no longer reads as expected -- update this mutation"
         out = run(captcha_provider="captcha", source=SOURCE.replace(method, mutated))
         assert field(out, "PASSED_PREFIX") == "captcha-v2|deadbeef|"
+
+
+class TestTheFailOpenBranch:
+    """`if not bouncer then` -- what a service with no bouncer at all does (crowdsec.lua:285-302).
+
+    This is the branch every init failure lands on: `init()` empties `bouncers` outright when the
+    APIs disagree (:194) and leaves a scope out of it whenever `new_bouncer()` or `bouncer.init()`
+    failed for that service (:207-218). The plugin then serves the request UNCHECKED rather than
+    take the service down -- a deliberate choice, and the one that makes the ERR line load-bearing:
+    the init channel drops NOTICE lines during `init_by_lua` (memory `bw-errorlog-drops-init-lines`),
+    so without this line a fleet running with CrowdSec inert leaves no trace anywhere. That is not a
+    hypothetical: it is how the plugin managed to be inert for a whole run without anyone noticing.
+
+    Reported by DEV-2's Criticos round 2 as covered by nothing (`report-DEV-2.md`, "A blind spot
+    round 2 recorded, which this lane did not close": `grep -rn "no_bouncer" tests/unit/common`
+    returned zero hits). Reached here through the shipped code with an empty `bouncers`, NOT through
+    a mutant -- `test_looking_the_bouncer_up_by_server_name_serves_the_fleet_unchecked` above already
+    lands on this branch, but only under its own mutation and it asserts nothing the branch promises.
+    """
+
+    def test_the_request_is_allowed_through(self):
+        """Fail OPEN. Returning false here would take every service with a broken bouncer down."""
+        out = run(bouncer_scopes=())
+        assert field(out, "RET") == "true"
+        assert field(out, "STATUS") == "nil"
+        assert field(out, "MSG") == "no CrowdSec bouncer loaded for this service"
+
+    def test_the_bouncer_is_never_called(self):
+        """The point of the branch: there is nothing to call. A regression that fell through to
+        `bouncer.Allow` would raise on a nil value under helpers.lua's pcall, and the dispatcher
+        serves the request unchecked on that too -- with a different, much less legible line."""
+        out = run(bouncer_scopes=())
+        assert field(out, "PASSED_PROVIDER") == "nil"
+        assert field(out, "PASSED_PREFIX") == "nil"
+
+    def test_it_says_so_on_every_request_naming_the_service(self):
+        """One throttled ERR, the service name in the MESSAGE and not in the throttle key -- the key
+        is kept for the life of the worker, so a per-service key grows without bound."""
+        out = run(bouncer_scopes=(), server_name="shop.example.com")
+        assert logs(out) == ["ERR no_bouncer no CrowdSec bouncer loaded for service shop.example.com, request served UNCHECKED (see the init logs for why)"]
+
+    def test_nothing_is_published_for_the_workflow_engine(self):
+        """`crowdsec_ok` is how a workflow leaf tells "CrowdSec judged and found nothing" from
+        "CrowdSec never judged". This branch is the second one, so it must leave all three unset --
+        publishing here would let a workflow read an ALLOW that no bouncer ever produced."""
+        assert field(run(bouncer_scopes=()), "PUBLISHED") == "nil|nil|nil"
