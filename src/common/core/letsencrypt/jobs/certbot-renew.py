@@ -59,6 +59,13 @@ LOGGER = getLogger("LETS-ENCRYPT.RENEW")
 
 LOGGER_CERTBOT = getLogger("LETS-ENCRYPT.RENEW.CERTBOT")
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+# DEV-2b6. Read budget for the reload this job triggers itself. It has to OUTLIVE the
+# instance-side swap wait (`SWAP_WAIT_TIMEOUT` in src/bw/lua/bunkerweb/api.lua): an instance
+# busy applying a configuration answers 503 there, and ApiCaller only retries a 503 it
+# actually receives -- send_to_apis' own 10 s default expires at the same moment the
+# refusal is written, turning a retryable busy into an unretryable timeout. Same value as
+# every other /reload caller (src/worker/tasks.py and friends).
+RELOAD_TIMEOUT = (5, 30)
 status = 0
 
 try:
@@ -253,7 +260,9 @@ try:
                                 LOGGER.error("Failed to push renewed Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")
                             else:
                                 test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
-                                sent = api_caller.send_to_apis("POST", f"/reload?test={test}")[0]
+                                # DEV-2b6. Explicit budget: send_to_apis' 10 s default is exactly the instance-side
+                                # swap wait, so the busy 503 would race the deadline. See RELOAD_TIMEOUT above.
+                                sent = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]
                                 if not sent:
                                     LOGGER.error(
                                         "Renewed LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"

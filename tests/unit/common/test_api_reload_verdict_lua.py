@@ -134,7 +134,9 @@ def test_non_root_permission_warnings_are_still_not_a_failure():
 def test_the_shipped_handler_actually_acts_on_the_verdict():
     """The functions above are only worth testing while POST /reload still fails on them."""
     src = API_LUA.read_text(encoding="utf-8")
-    handler = re.search(r'^api\.global\.POST\["\^/reload"\] = function\(self\).*?^end$', src, re.M | re.S)
+    # DEV-2b5: the body moved into `reload_locked` when POST /reload was made to TAKE the swap
+    # lock instead of polling it (Criticos REQUIRED 1); the handler is now the lock wrapper.
+    handler = re.search(r"^local function reload_locked\(test_arg\).*?^end$", src, re.M | re.S)
     assert handler, "the POST /reload handler is gone from api.lua"
     body = handler.group(0)
     assert "confirm_reload()" in body, "POST /reload no longer confirms the reload it signalled"
@@ -147,7 +149,9 @@ def test_the_reloading_marker_is_created_before_the_signal():
     outlives its remover and /health answers "reloading" forever -- the api;health red of run
     33106855238. Order in the handler source is the contract: marker, then HUP, then confirm."""
     src = API_LUA.read_text(encoding="utf-8")
-    handler = re.search(r'^api\.global\.POST\["\^/reload"\] = function\(self\).*?^end$', src, re.M | re.S)
+    # DEV-2b5: the body moved into `reload_locked` when POST /reload was made to TAKE the swap
+    # lock instead of polling it (Criticos REQUIRED 1); the handler is now the lock wrapper.
+    handler = re.search(r"^local function reload_locked\(test_arg\).*?^end$", src, re.M | re.S)
     assert handler, "the POST /reload handler is gone from api.lua"
     body = handler.group(0)
     marker = body.find('open("/var/tmp/bunkerweb_reloading", "w")')

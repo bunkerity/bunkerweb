@@ -253,11 +253,8 @@ if __name__ == "__main__":
         # raises: nothing is written and the previous push stays live on every instance.
         config, full_config = run_config_extensions(db, config, full_config, LOGGER)
 
-        # Remove old files. iterdir(), not glob("*"), which skips dotfiles: the instance's
-        # ".bw-applied" push marker used to survive here, so a restart regenerated the whole
-        # directory as the loading configuration while still claiming the last pushed digest
-        # was applied. The scheduler then re-sent that identical configuration, the digest
-        # matched, the push was skipped, and the instance stayed on the loading config.
+        # Remove old files. iterdir(), not glob("*"), so dotfiles go too: a regenerated output
+        # directory must not keep an entry of the previous render that a glob cannot see.
         LOGGER.info("Removing old files ...")
         for file in Path(args.output).iterdir():
             if file.is_symlink() or file.is_file():

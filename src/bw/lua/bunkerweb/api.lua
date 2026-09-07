@@ -46,8 +46,40 @@ local HTTP_SERVICE_UNAVAILABLE = ngx.HTTP_SERVICE_UNAVAILABLE
 -- `rm -rf dest/* && cp -R staging/. dest/`, so a reload landing in the middle of it makes NGINX
 -- read a half-written tree.
 local SWAP_LOCK_KEY = "api_swap_in_progress"
-local SWAP_LOCK_TTL = 120
-local SWAP_WAIT_TIMEOUT = 30
+-- The TTL is the backstop for a worker killed mid-swap, and since a push now TAKES this key it is
+-- also the ceiling on how long exclusivity lasts: the critical section is a `cp -R` of the whole
+-- destination, a `tar xzf` and a rename sequence, and on the first push after a container start a
+-- copy of whatever overlayfs refuses to rename out of the image layer. A `/var/cache/bunkerweb`
+-- carrying the GeoIP databases, the CRS and the blocklists outruns two minutes, and an expiry
+-- reached MID-SWAP is not a stale key: the next push extracts into the running swap's staging
+-- directory and its cleanup deletes that push's backup. No caller measures the swap, so this is a
+-- ceiling and not a derivation -- dev picked 900 for the same reason. Overshooting costs
+-- availability only after a worker was actually killed holding it: pushes and reloads answer 503
+-- while the instance keeps serving the configuration it already has.
+local SWAP_LOCK_TTL = 900
+-- DEV-2b6. How long POST /reload queues for the swap key before it answers 503. It has to stay well
+-- UNDER the read budget of whoever called it, because a refusal is only useful if the caller is
+-- still listening for it. Every caller that declares one declares `RELOAD_TIMEOUT = (5, 30)`
+-- (`src/worker/tasks.py`, `src/api/app/routers/instances.py`, `src/ui/app/models/instance.py`,
+-- `src/common/core/jobs/jobs/push-configs.py`, and both `letsencrypt` certbot jobs, which used to
+-- pass no timeout at all and inherit `send_to_apis`' 10 s default -- exactly this wait, i.e. no
+-- margin). A caller that declares none inherits that default, so it is the floor to respect, not
+-- the 30 s the constants above happen to say. `tests/unit/common/test_api_lock_wait_budgets.py`
+-- holds both sides together.
+-- Waiting the full 30 s did not buy patience: the sleep loop plus the ERR log overshoot the
+-- client's 30 s read budget every time, so the caller saw a ReadTimeout with no status,
+-- ApiCaller's busy retry never fired (it keys on the 503) and push-configs treated a busy
+-- instance as a failed reload and restored a failover snapshot over a healthy fleet. At 10 s the
+-- 503 lands with 20 s to spare and is retried three times two seconds apart, which is 34 s of real
+-- patience instead of one 30 s wait that ends in a timeout. Now that a reload TAKES the key rather
+-- than polling it, two reloads contend with each other as well, which is the normal case
+-- (`ApiCaller.py`: the worker's debounced round plus a job asking for a reload).
+local SWAP_WAIT_TIMEOUT = 10
+-- How long POST /confs queues behind a swap already in progress before it answers 503. Same value as
+-- the reload wait and for the same reason: the 503 has to arrive inside the caller's read budget,
+-- and the scheduler retries a 503 three times two seconds apart (ApiCaller BUSY_ATTEMPTS), so a
+-- loser is not reported as a failed push.
+local PUSH_LOCK_WAIT = 10
 -- How long POST /reload waits for proof that NGINX adopted the new cycle before it stops
 -- believing the signal and asks `nginx -t` instead. A refusal is immediate (the [emerg] is
 -- logged in the same second as the SIGHUP), so this only ever expires on a slow success.
@@ -76,6 +108,29 @@ local match = string.match
 local require_plugin = helpers.require_plugin
 local new_plugin = helpers.new_plugin
 local call_plugin = helpers.call_plugin
+
+-- DEV-2b5. Port of dev 32a2985ab: a push must take the swap lock too, not just set it. Two pushes to the
+-- same destination were never excluded from each other -- the lock only ever made /reload wait --
+-- so a scheduler retrying a push while the first attempt was still running, or a second scheduler
+-- and the UI reaching the same instance, ran two rename sequences over one tree and left it
+-- neither the old one nor the new one.
+--
+-- `safe_add` on the shared dict, never get-then-set: two workers that both find the key free
+-- would otherwise both proceed, which is the race this closes. `safe_add` rather than `add` for
+-- the reason `datastore:set` uses `safe_set` -- a lock is not worth evicting an unexpired entry
+-- from the zone for. The TTL stays the backstop for a worker killed mid-swap.
+local function take_swap_lock(wait)
+	local deadline = ngx.now() + wait
+	while true do
+		if shared.internalstore:safe_add(SWAP_LOCK_KEY, tostring(ngx.now()), SWAP_LOCK_TTL) then
+			return true
+		end
+		if ngx.now() >= deadline then
+			return false
+		end
+		ngx.sleep(0.1)
+	end
+end
 
 local function file_exists(path)
 	local file = open(path, "r")
@@ -379,35 +434,16 @@ api.global.GET["^/health$"] = function(self)
 	return self:response(HTTP_OK, "success", "ok")
 end
 
-api.global.POST["^/reload"] = function(self)
-	-- Never reload on top of a half-replaced configuration. A push writes the tree file by file,
-	-- so a reload that overlaps it either fails its own `nginx -t` or, worse, succeeds and runs
-	-- init_by_lua against a truncated variables.env : the plugins then keep whatever rules they
-	-- could build from that partial read until something reloads them again, which is how a
-	-- service kept serving traffic with its rate limit silently absent. Waiting is deliberate --
-	-- answering 503 instead would make the caller treat the push as failed and roll it back.
-	local swap_deadline = ngx.now() + SWAP_WAIT_TIMEOUT
-	while internalstore:get(SWAP_LOCK_KEY) do
-		if ngx.now() >= swap_deadline then
-			logger:log(
-				ERR,
-				"a configuration swap is still in progress after " .. SWAP_WAIT_TIMEOUT .. "s, refusing to reload"
-			)
-			return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "a configuration swap is still in progress")
-		end
-		ngx.sleep(0.1)
-	end
-
-	-- Get test argument
-	local args = ngx.req.get_uri_args()
-	local test_arg = args.test or "yes"
-
+-- The body returns the response triple instead of sending it, so the wrapper below has ONE place
+-- to release the swap lock whichever way the reload ends (dev 32a2985ab's `reload_locked` split,
+-- on this tree's primitive).
+local function reload_locked(test_arg)
 	if test_arg ~= "no" then
 		-- Check Nginx configuration
 		logger:log(NOTICE, "Checking Nginx configuration")
 		local ok, result = test_nginx_conf()
 		if not ok then
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result)
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed: " .. result
 		end
 		logger:log(NOTICE, "Nginx configuration is valid")
 	end
@@ -436,7 +472,7 @@ api.global.POST["^/reload"] = function(self)
 			rc = execute("sudo -n /usr/sbin/service bunkerweb reload >/dev/null 2>&1")
 		end
 		if rc ~= 0 and rc ~= true then
-			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+			return HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err
 		end
 	end
 
@@ -444,11 +480,48 @@ api.global.POST["^/reload"] = function(self)
 	local reloaded, detail = confirm_reload()
 	if not reloaded then
 		logger:log(ERR, "Nginx refused the reload and is still serving the previous configuration : " .. detail)
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload refused by nginx: " .. detail)
+		return HTTP_INTERNAL_SERVER_ERROR, "error", "reload refused by nginx: " .. detail
 	end
 	logger:log(NOTICE, "Nginx reloaded (" .. detail .. ")")
 
-	return self:response(HTTP_OK, "success", "reload successful")
+	return HTTP_OK, "success", "reload successful"
+end
+
+api.global.POST["^/reload"] = function(self)
+	-- Get test argument
+	local args = ngx.req.get_uri_args()
+	local test_arg = args.test or "yes"
+
+	-- Never reload on top of a half-replaced configuration. A push writes the tree file by file,
+	-- so a reload that overlaps it either fails its own `nginx -t` or, worse, succeeds and runs
+	-- init_by_lua against a truncated variables.env : the plugins then keep whatever rules they
+	-- could build from that partial read until something reloads them again, which is how a
+	-- service kept serving traffic with its rate limit silently absent.
+	--
+	-- TAKE the key, do not merely wait for it to look free. Waiting and then proceeding unlocked
+	-- was survivable only while a second push BARGED IN with `set` and kept the key continuously
+	-- present; now that a push queues on the same key at the same cadence, a reload that polls a
+	-- just-released key first would proceed while the queued push acquires it and starts renaming
+	-- underneath -- the exact overlap this wait exists to prevent, on a systematic schedule.
+	-- Waiting is still deliberate: answering 503 immediately would make the caller treat the push
+	-- as failed and roll it back.
+	if not take_swap_lock(SWAP_WAIT_TIMEOUT) then
+		logger:log(
+			ERR,
+			"a configuration swap is still in progress after " .. SWAP_WAIT_TIMEOUT .. "s, refusing to reload"
+		)
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "a configuration swap is still in progress")
+	end
+
+	-- pcall so an error inside the section still releases the key: leaving it held costs every
+	-- later push and reload until the TTL expires, which is now 15 minutes.
+	local ran, status, level, message = pcall(reload_locked, test_arg)
+	internalstore:delete(SWAP_LOCK_KEY)
+	if not ran then
+		logger:log(ERR, "the reload raised: " .. tostring(status))
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "reload failed: " .. tostring(status))
+	end
+	return self:response(status, level, message)
 end
 
 api.global.POST["^/stop$"] = function(self)
@@ -461,7 +534,19 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. ".tar.gz"
+	-- The upload runs BEFORE the swap lock is taken, so the archive name is the one thing here
+	-- that concurrency reaches. Built from the URI alone it is shared by every push to that URI,
+	-- and two of them then write into one file: the scheduler retries a push while the first
+	-- attempt may still be uploading, and a second scheduler or the UI reaches the same instance
+	-- on its own. Worker pid plus connection number is unique for as long as the file exists.
+	-- (Staging and backup are created under the lock below, so they keep their fixed names.)
+	local tmp = "/var/tmp/bunkerweb/api_"
+		.. self.ctx.bw.uri:sub(2)
+		.. "."
+		.. tostring(ngx.worker.pid())
+		.. "."
+		.. tostring(ngx.var.connection)
+		.. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. self.ctx.bw.uri:sub(2)
 	if self.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
@@ -489,7 +574,11 @@ api.global.POST["^/confs$"] = function(self)
 		-- luacheck: ignore 421
 		local typ, res, err = form:read()
 		if not typ then
+			-- A body that stops mid-upload leaves a partial archive under a name only this
+			-- request uses, so nothing later truncates or reuses it: it has to go now, or every
+			-- aborted push adds one file to the directory NGINX also writes its client bodies to.
 			file:close()
+			remove(tmp)
 			return self:response(HTTP_BAD_REQUEST, "error", err)
 		end
 		if typ == "eof" then
@@ -514,7 +603,11 @@ api.global.POST["^/confs$"] = function(self)
 	-- The upload above never touches the destination. Releasing between a failed swap and the
 	-- restore would open a reload window onto a half-undone tree. The TTL is the backstop for a
 	-- worker that dies mid-swap : without it a lost unlock would block every reload for good.
-	internalstore:set(SWAP_LOCK_KEY, tostring(ngx.now()), SWAP_LOCK_TTL)
+	if not take_swap_lock(PUSH_LOCK_WAIT) then
+		remove(tmp)
+		logger:log(ERR, "another configuration swap is in progress, refusing to push to " .. destination)
+		return self:response(HTTP_SERVICE_UNAVAILABLE, "error", "another configuration swap is in progress")
+	end
 
 	local function fail(message)
 		execute("rm -rf " .. staging .. " " .. backup)
@@ -546,7 +639,13 @@ api.global.POST["^/confs$"] = function(self)
 		return fail("cannot extract archive")
 	end
 
-	local swapped, swap_err, rollback_incomplete = pushswap.swap(destination, staging)
+	-- pcall so an error inside the swap still reaches `fail()`, which releases the key: with a
+	-- 15-minute TTL, leaking it would answer 503 to every push and reload on this instance for the
+	-- rest of that window.
+	local ran, swapped, swap_err, rollback_incomplete = pcall(pushswap.swap, destination, staging)
+	if not ran then
+		return fail("the swap raised: " .. tostring(swapped))
+	end
 	if not swapped then
 		if not rollback_incomplete then
 			-- The ordered undo put the tree back to its pre-swap state. Restoring on top of that
@@ -569,11 +668,12 @@ api.global.POST["^/confs$"] = function(self)
 					.. destination
 					.. " : "
 					.. tostring(clear_err or "copy failed")
-					.. " -- originals are parked in "
-					.. destination
-					.. "/"
-					.. pushswap.RESERVED_PREFIX
-					.. "trash"
+					-- NOT ".bw-trash": an incomplete rollback renames the whole trash aside to
+					-- .bw-rescue.<epoch> (pushswap row 19) and names that path in its own error,
+					-- per entry, including the degraded case where the rename itself failed. This
+					-- line used to send the operator to a directory that no longer exists.
+					.. " -- where the originals were kept is in the swap error: "
+					.. tostring(swap_err)
 			)
 			return fail("swap failed and the restore failed too : " .. tostring(swap_err))
 		end

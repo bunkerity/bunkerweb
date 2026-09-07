@@ -194,21 +194,29 @@ function pushswap.swap(destination, staging)
 
 	local incoming = {}
 	for _, name in ipairs(list_entries(staging)) do
-		incoming[name] = true
-		local target = destination .. "/" .. name
-		if existing[name] then
-			local parked = trash .. "/" .. name
-			local ok, err = move_entry(target, parked)
-			if not ok then
-				return abort("cannot park " .. name .. ": " .. tostring(err))
+		-- DEV-2b5. Port of dev 32a2985ab: the reserved prefix is this module's own bookkeeping and never
+		-- travels. Where the archived source and the destination are the same path -- Linux and
+		-- all-in-one -- a kept rescue copy, or a staging directory left by a worker killed
+		-- mid-push, comes back inside the next archive. Placing it would re-create an entry the
+		-- stale-entry sweep below is REQUIRED to skip, so it would accumulate one copy of the
+		-- tree per incident and never be cleared.
+		if not is_reserved(name) then
+			incoming[name] = true
+			local target = destination .. "/" .. name
+			if existing[name] then
+				local parked = trash .. "/" .. name
+				local ok, err = move_entry(target, parked)
+				if not ok then
+					return abort("cannot park " .. name .. ": " .. tostring(err))
+				end
+				undo[#undo + 1] = { from = parked, to = target, target = target }
 			end
-			undo[#undo + 1] = { from = parked, to = target, target = target }
+			local ok, err = move_entry(staging .. "/" .. name, target)
+			if not ok then
+				return abort("cannot place " .. name .. ": " .. tostring(err))
+			end
+			undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 		end
-		local ok, err = move_entry(staging .. "/" .. name, target)
-		if not ok then
-			return abort("cannot place " .. name .. ": " .. tostring(err))
-		end
-		undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 	end
 
 	for name in pairs(existing) do

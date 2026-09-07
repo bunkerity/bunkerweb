@@ -4,6 +4,7 @@ from secrets import token_urlsafe
 from typing import Optional, List
 
 from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 from common_utils import parse_host  # type: ignore
 
 from ..auth.guard import guard
@@ -294,8 +295,12 @@ def reload_one(hostname: str, test: bool = True, api=Depends(get_api_for_hostnam
         test: If True, validate the configuration before applying it (default: True)
     """
     test_arg = "yes" if test else "no"
-    sent, _err, status, _resp = api.request("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
-    ok = bool(sent and status == 200)
+    # DEV-2b6. Through ApiCaller and not the raw client: an instance answers 503 while a
+    # configuration swap holds its lock, and only ApiCaller's BUSY_ATTEMPTS retry turns that into a
+    # wait rather than a 502. The fleet endpoint above already goes through it; this one did not, so
+    # a reload issued during a routine cache push reported a healthy instance as failed. `ret` is
+    # True only when the call was sent AND answered 200, which is what this returned before.
+    ok, _ = ApiCaller([api]).send_to_apis("POST", f"/reload?test={test_arg}", timeout=RELOAD_TIMEOUT)
     return JSONResponse(status_code=200 if ok else 502, content={"status": "success" if ok else "error"})
 
 
