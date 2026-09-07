@@ -348,6 +348,18 @@ actions:
   # Linux and Autoconf arms of this file publish no such port.
   create_the_workflow_that_answers_a_crowdsec_ban:
     integrations: ["Docker"]
+    config: &deferral_arm_config
+      # Set HERE and re-stated below, not on the assertion that needs it, because the first two
+      # steps of this arm carry `restart_stack: false` and that flag governs the restart before the
+      # NEXT action (tests/core.py:252-253 writes it, tests/scripts/run.sh:186/262-268 reads it).
+      # The third step keeps the default `true`, and that default is load-bearing: it is the
+      # restart that applies `without_the_setting_crowdsec_denies_as_before`'s removal of the key.
+      # A config declared on `the_workflow_answers_instead_of_crowdsec` is therefore written to
+      # variables.env and never applied: the whole arm ran with the setting off, defer_verdict()
+      # (crowdsec.lua:445) returned false on its first line and the assertion read 403 for a
+      # feature it never exercised. The restart that precedes THIS action is the last one before
+      # the arm, so this is where the setting has to be. Same shape as `captcha_arm_config` above.
+      CROWDSEC_DEFER_TO_WORKFLOWS: "yes"
     type: status
     url: "http://127.0.0.1:8888/workflows"
     method: POST
@@ -364,6 +376,7 @@ actions:
 
   regenerate_a_ban_decision_for_the_deferral_arm:
     integrations: ["Docker"]
+    config: *deferral_arm_config
     # The action above this block deletes every decision, so the ban this arm needs has to be
     # earned again -- same probe, same three-event overflow, same scenario.
     type: script
@@ -381,7 +394,11 @@ actions:
             try:
                 connection.request("GET", path, headers={"Host": "www.example.com", "User-Agent": "LegitOne"})
                 response = connection.getresponse()
-                assert response.status in (403, 404), f"{path}: {response.status}"
+                # 302 as well, unlike the identical probes above: this one runs with the deferral
+                # already on, so once the decision lands AND the workflow has reached the instance
+                # the ban is answered by the workflow's redirect rather than by CrowdSec. Both are
+                # a protected answer; a 200 (the origin) still fails, which is what this asserts.
+                assert response.status in (302, 403, 404), f"{path}: {response.status}"
                 response.read()
             finally:
                 connection.close()
@@ -392,8 +409,7 @@ actions:
 
   the_workflow_answers_instead_of_crowdsec:
     integrations: ["Docker"]
-    config:
-      CROWDSEC_DEFER_TO_WORKFLOWS: "yes"
+    config: *deferral_arm_config
     type: status
     url: "http://www.example.com"
     # 302, not the deny status: the rule matched the `ban` remediation and its redirect action
