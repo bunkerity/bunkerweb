@@ -277,7 +277,7 @@ List of supported Linux distros:
 - Fedora 44
 - RHEL, CentOS, Rocky Linux and AlmaLinux 8, 9 and 10
 
-You will find more information in the [Linux section](https://docs.bunkerweb.io/latest/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
+You will find more information in the [Linux section](https://docs.bunkerweb.io/1.6.15~rc1/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 
 ## Docker
 
