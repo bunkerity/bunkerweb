@@ -325,6 +325,17 @@ class Config:
             if key in variables:
                 variables[key] = value
 
+            # variables.env is line-oriented: a value carrying its own newline declares a second
+            # setting when the file is read back. `file` settings hold PEM data and are exempt; a
+            # trailing newline stays valid (a Kubernetes ConfigMap block scalar always leaves one).
+            # `reject_value`, not `pop`: a refused edit reverts to the stored value here.
+            if plugins_settings[setting].get("type") != "file":
+                stripped_value = value.rstrip("\r\n")
+                if "\n" in stripped_value or "\r" in stripped_value:
+                    report_error(f"Value of {key} contains a newline.")
+                    reject_value(key)
+                    continue
+
             # Validate the variable's value against the regex pattern.
             # `value_for_validation` strips the `@group` tokens of a resource-list setting first,
             # exactly like Configurator.__check_var and db config_read.check_setting do: a list
