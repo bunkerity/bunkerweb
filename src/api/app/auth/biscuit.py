@@ -143,16 +143,22 @@ def _resolve_global_settings(method_u: str) -> tuple[Optional[str], Optional[str
     """Resolve global_settings endpoints to fine-grained permissions.
 
     Supported endpoints:
-    - GET              /global_settings       -> global_settings_read
-    - POST|PUT|PATCH   /global_settings       -> global_settings_update
-    Also accepts hyphenated path prefix (global-settings) but canonicalizes rtype to global_settings.
+    - GET              /global_settings       -> global_config_read
+    - POST|PUT|PATCH   /global_settings       -> global_config_update
+    Also accepts the hyphenated path prefix (global-settings) and /global_config as an alias; all
+    of them resolve to resource type global_config.
+
+    The vocabulary is global_config_*, not global_settings_*: API_RESOURCE_ENUM and
+    API_PERMISSION_ENUM only ever accepted global_config / global_config_read / global_config_update,
+    so a grant row holding any other spelling cannot exist and every non-admin user was refused
+    (admins pass on the admin(true) policy, which is why this went unnoticed).
     """
-    rtype = "global_settings"
+    rtype = "global_config"
     verb = PERM_VERB_BY_METHOD.get(method_u)
     if verb == "read":
-        return rtype, "global_settings_read"
+        return rtype, "global_config_read"
     if verb in {"create", "update"}:
-        return rtype, "global_settings_update"
+        return rtype, "global_config_update"
     # For DELETE or other methods, no fine-grained permission mapping
     return rtype, None
 
@@ -485,7 +491,7 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Instances special cases
     if first in {"instances", "reload", "stop"}:
         return _resolve_instances(p, method_u)
-    # Global settings special cases (canonicalize hyphenated version)
+    # Global settings endpoint and canonical resource-name alias
     if first in {"global_settings", "global_config"}:
         return _resolve_global_settings(method_u)
     # Services special cases
