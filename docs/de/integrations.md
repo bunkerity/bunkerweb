@@ -1915,9 +1915,7 @@ Um die Kommunikation zwischen dem Scheduler und der BunkerWeb-API zu sichern, **
 x-bw-api-env: &bw-api-env
   # Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Container zu vermeiden
   API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-  API_TOKEN: "" # Optionaler API-Token
-  # Optionaler API-Token für authentifizierten API-Zugriff
-  API_TOKEN: ""
+  API_TOKEN: "" # Optionaler API-Token für authentifizierten API-Zugriff
 
 services:
   bunkerweb:

@@ -1916,9 +1916,7 @@ Para asegurar la comunicación entre el programador y la API de BunkerWeb, **aut
 x-bw-api-env: &bw-api-env
   # Usamos un ancla para evitar repetir las mismas configuraciones en ambos contenedores
   API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-  API_TOKEN: "" # Token de API opcional
-  # Token de API opcional para acceso autenticado a la API
-  API_TOKEN: ""
+  API_TOKEN: "" # Token de API opcional para acceso autenticado a la API
 
 services:
   bunkerweb:

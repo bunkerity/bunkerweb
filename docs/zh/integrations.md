@@ -1915,9 +1915,7 @@ UI 容器同样遵循 `TZ`，用于本地化日志和计划任务（例如 UI �
 x-bw-api-env: &bw-api-env
   # 我们使用一个锚点来避免在两个容器中重复相同的设置
   API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-  API_TOKEN: "" # 可选的 API 令牌
-  # 可选的 API 令牌，用于经过身份验证的 API 访问
-  API_TOKEN: ""
+  API_TOKEN: "" # 可选的 API 令牌，用于经过身份验证的 API 访问
 
 services:
   bunkerweb:

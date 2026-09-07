@@ -1924,9 +1924,7 @@ Pour sécuriser la communication entre le Scheduler et l'API BunkerWeb, **autori
 x-bw-api-env: &bw-api-env
   # We use an anchor to avoid repeating the same settings for both containers
   API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-  API_TOKEN: "" # Jeton API optionnel
-  # Jeton API optionnel pour l'accès authentifié à l'API
-  API_TOKEN: ""
+  API_TOKEN: "" # Jeton API optionnel pour l'accès authentifié à l'API
 
 services:
   bunkerweb:
