@@ -5,6 +5,100 @@
 
 ## Actualización desde 1.6.X
 
+### Cambios importantes
+
+*Esta lista solo recoge por ahora los puntos nuevos de 1.7. Otros cambios importantes de esta versión (por ejemplo, `REDIS_SSL_VERIFY`, la separación del broker de jobs, o el worker de Celery que no se habilitaba en todas partes) están documentados de momento solo en la versión en inglés de esta página.*
+
+!!! warning "Swarm: `NAMESPACES` ahora también filtra las configuraciones personalizadas"
+
+    Antes de 1.7, `NAMESPACES` filtraba la ruta de eventos del controlador de Swarm y su
+    descubrimiento de servicios, pero **no** el descubrimiento de configuraciones: un objeto
+    `docker config` global era recogido por cada autoconf del daemon, sin importar el namespace al
+    que perteneciera. 1.7 aplica el filtro también a las configuraciones, que es lo que la
+    integración de Docker ha hecho siempre. Si estableces `NAMESPACES` y tus objetos de
+    configuración no llevan la etiqueta `bunkerweb.NAMESPACE`, esas configuraciones **dejan de
+    aplicarse tras la actualización, sin ningún error** — un snippet personalizado con un bloque de
+    permitir/denegar simplemente desaparece de la configuración generada.
+
+    Etiqueta cada objeto de configuración que esperas que se aplique. Las configuraciones de Swarm
+    son inmutables — `docker config` no tiene verbo `update` — así que cada una debe recrearse con
+    un nuevo nombre y volver a asignarse con `docker service update --config-rm/--config-add`.
+    Encuentra los objetos afectados antes de actualizar con:
+
+    ```bash
+    docker config ls -q | xargs -r docker config inspect --format '{{.Spec.Name}} {{.Spec.Labels}}'
+    ```
+
+!!! info "Docker Swarm vuelve a estar soportado en 1.7"
+
+    La integración de Swarm se marcó como obsoleta en 1.6 y vuelve a estar soportada en 1.7. El
+    stack publicado para 1.6 **no** arranca en 1.7: no lleva `bw-api` ni `bw-worker`, así que
+    `bw-autoconf` espera indefinidamente una API que nunca se inicia y ningún job en segundo plano
+    llega a ejecutarse. Vuelve a desplegar desde el [stack de referencia de 1.7](integrations.md#swarm)
+    en lugar de editar el antiguo, y ten en cuenta los tres nuevos requisitos: una etiqueta de nodo
+    `bw-state=true` para los servicios propietarios de volúmenes, `mode: global` en el servicio
+    `bunkerweb`, y publicación de puertos con `mode: host`.
+
+### Reversión a 1.6.14 {#rolling-back-to-1614}
+
+Una reversión no es lo contrario de una actualización. Existen dos vías, y BunkerWeb te indica
+cuál se aplica a tu instalación en lugar de dejarte adivinar.
+
+**Restaurar desde una copia de seguridad** funciona siempre y es la vía admitida. Reproduce una
+copia de seguridad tomada *antes* de la actualización sobre una base de datos vaciada, así que se
+pierde todo lo escrito desde la actualización. Consulta [Reversión](#rollback) más abajo para el
+procedimiento manual por motor de base de datos.
+
+**La reversión sin restauración** solo se ofrece para las combinaciones de versión/motor que se
+han medido como no destructivas, y solo hasta la versión inmediatamente anterior. Para 1.7.0 eso
+significa 1.6.14, solo en **SQLite y PostgreSQL**. En MariaDB y MySQL la migración de 1.7 no se
+puede reproducir hacia atrás — se interrumpe a mitad de camino y deja un esquema que no
+corresponde a ninguna de las dos versiones — así que esas instalaciones deben restaurarse desde
+una copia de seguridad.
+
+Tres comandos, en este orden:
+
+```bash
+# 1. ¿Puede esta instalación revertirse? Solo lectura: no crea ninguna base de datos ni escribe nada.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Detén los escritores. Permanece en primer plano hasta que pulses Ctrl-C.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. En una segunda shell, mientras el paso 2 sigue reteniendo:
+bwcli plugin backup downgrade 1.6.14            # informa; no cambia nada
+bwcli plugin backup downgrade 1.6.14 --execute  # pide confirmación y luego migra
+```
+
+El paso 3 se rechaza a menos que la retención del paso 2 siga activa para esa misma versión, el
+preflight que vuelve a ejecutar por su cuenta salga limpio, y el manifiesto de compatibilidad
+marque la combinación como probada. Después toma su propia copia de seguridad justo antes de
+migrar y la restaura si algo sale mal.
+
+Antes de empezar, detén o bloquea con firewall todo lo que escriba directamente en la API. La
+retención hace que la API *informe* a la flota de que es de solo lectura, que es lo que el
+scheduler, el autoconf y la interfaz respetan; no bloquea una escritura hecha directamente a la
+API por quien posea un token.
+
+!!! danger "Lo que destruye una reversión sin restauración"
+    Todos los certificados almacenados de forma centralizada, todos los recursos adjuntables
+    (redirecciones, pools de upstream, workflows, grupos de recursos), todas las métricas de
+    peticiones y el mapa de amenazas, todas las passkeys registradas y toda credencial de instancia
+    almacenada — las instancias inscritas deberán volver a registrarse contra el `API_TOKEN` global
+    después. Las preferencias de interfaz por usuario sobreviven pero pierden su significado:
+    1.6.14 las lee todas como disposiciones de columnas por tabla. Los bans son la única pérdida
+    leve: el job `sync-bans` los reaprende de las instancias, perdiendo solo su duración restante.
+
+    El preflight cuenta lo que tu instalación realmente contiene y rechaza una reversión sin
+    restauración mientras quede algo irremplazable, así que la respuesta que obtienes trata sobre
+    tus datos, no sobre la versión en abstracto.
+
+**Fuera de la base de datos.** Las cachés de jobs y los plugins PRO se reconstruyen en la
+siguiente ejecución. Las configuraciones personalizadas, el contenido de `www`, el estado de Let's
+Encrypt y los archivos de copia de seguridad no cambian entre ambas versiones. Los plugins
+externos que necesitan una API de 1.7 no funcionan en 1.6.14 y deben eliminarse o revertirse
+también.
+
 ### Procedimiento
 
 === "Docker"
@@ -52,7 +146,7 @@
                 * Lee la versión que realmente se está ejecutando desde el contenedor en lugar de fiarse de la etiqueta de imagen, así se detectan correctamente tanto una etiqueta móvil (`latest`, `testing`) como una actualización anterior interrumpida.
             2. Decisión de actualización
                 * Ya se ejecuta la misma versión: muestra el estado del stack y termina.
-                * Versión de destino más antigua: **se rechaza**. BunkerWeb no tiene migración de reversión, por lo que el scheduler no arrancaría y entraría en un bucle de reinicios. Consulta [Reversión](#rollback) para la vía admitida.
+                * Versión de destino más antigua: **se rechaza**. El instalador no tiene automatización de reversión propia, y arrancar el scheduler contra un paquete más antiguo con una base de datos ya migrada falla y entra en un bucle de reinicios. Consulta [Reversión a 1.6.14](#rolling-back-to-1614) para restaurar antes la base de datos, y luego vuelve a ejecutar el instalador en la versión anterior.
                 * En cualquier otro caso: pide confirmación (o continúa directamente con `-y`).
             3. Copia de seguridad previa
                 * Ejecuta `bwcli plugin backup save` dentro del contenedor del scheduler y copia el archivo al host.
@@ -460,7 +554,7 @@
             ```
 
         4. **Verifica la base de datos**: Verifica que la actualización de la base de datos fue exitosa revisando los datos y las configuraciones en el nuevo contenedor de la base de datos.
-### Reversión
+### Reversión {#rollback}
 
 !!! failure "En caso de problemas"
 

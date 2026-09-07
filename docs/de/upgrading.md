@@ -5,6 +5,98 @@
 
 ## Upgrade von 1.6.X
 
+### Wichtige Änderungen
+
+*Diese Liste enthält bisher nur die für 1.7 neu hinzugekommenen Punkte. Weitere Breaking Changes dieser Version (z. B. `REDIS_SSL_VERIFY`, der getrennte Job-Broker, der nicht überall aktivierte Celery-Worker) sind derzeit nur in der englischen Fassung dieser Seite dokumentiert.*
+
+!!! warning "Swarm: `NAMESPACES` filtert jetzt auch Custom Configs"
+
+    Vor 1.7 filterte `NAMESPACES` den Ereignispfad und die Service-Erkennung des Swarm-Controllers,
+    aber **nicht** die Config-Erkennung: Ein globales `docker config`-Objekt wurde von jedem
+    Autoconf auf dem Daemon erfasst, unabhängig vom Namespace. 1.7 wendet den Filter nun auch auf
+    Configs an, was der Docker-Integration schon immer entsprach. Wenn Sie `NAMESPACES` setzen und
+    Ihre Config-Objekte kein `bunkerweb.NAMESPACE`-Label tragen, werden diese Configs **nach dem
+    Upgrade nicht mehr angewendet, ohne Fehlermeldung** — ein Custom-Snippet mit einem
+    Allow-/Deny-Block verschwindet einfach aus der generierten Konfiguration.
+
+    Versehen Sie jedes Config-Objekt, das angewendet werden soll, mit einem Label. Swarm-Configs
+    sind unveränderlich — `docker config` kennt kein `update` — daher muss jedes unter einem neuen
+    Namen neu erstellt und mit `docker service update --config-rm/--config-add` neu zugewiesen
+    werden. Ermitteln Sie vor dem Upgrade die betroffenen Objekte mit:
+
+    ```bash
+    docker config ls -q | xargs -r docker config inspect --format '{{.Spec.Name}} {{.Spec.Labels}}'
+    ```
+
+!!! info "Docker Swarm wird in 1.7 wieder unterstützt"
+
+    Die Swarm-Integration wurde in 1.6 als veraltet markiert und wird in 1.7 wieder unterstützt.
+    Der für 1.6 veröffentlichte Stack startet unter 1.7 **nicht**: Er enthält weder `bw-api` noch
+    `bw-worker`, sodass `bw-autoconf` endlos auf eine nie gestartete API wartet und kein
+    Hintergrundjob jemals läuft. Setzen Sie den [1.7-Referenzstack](integrations.md#swarm) neu auf,
+    statt den alten zu bearbeiten, und beachten Sie die drei neuen Anforderungen: ein
+    `bw-state=true`-Node-Label für die Dienste, die Volumes besitzen, `mode: global` beim
+    `bunkerweb`-Dienst und `mode: host` bei der Portveröffentlichung.
+
+### Zurückstufung auf 1.6.14 {#rolling-back-to-1614}
+
+Eine Zurückstufung ist nicht die Umkehrung eines Upgrades. Es gibt zwei Wege, und BunkerWeb sagt
+Ihnen, welcher für Ihre Installation gilt, statt Sie raten zu lassen.
+
+**Wiederherstellung aus einer Sicherung** funktioniert überall und ist der unterstützte Weg. Sie
+spielt eine Sicherung, die *vor* dem Upgrade erstellt wurde, über eine geleerte Datenbank ein,
+sodass alles seit dem Upgrade Geschriebene verloren geht. Das manuelle Verfahren pro Datenbank
+finden Sie weiter unten unter [Rollback](#rollback).
+
+**Zurückstufung ohne Neuaufsetzen** wird nur für Versions-/Engine-Kombinationen angeboten, die
+nachweislich verlustfrei sind, und nur zur unmittelbar vorhergehenden Version. Für 1.7.0 bedeutet
+das 1.6.14, nur unter **SQLite und PostgreSQL**. Bei MariaDB und MySQL lässt sich die
+1.7-Migration nicht rückwärts abspielen — sie bricht mittendrin ab und hinterlässt ein Schema, das
+keiner der beiden Versionen entspricht — solche Installationen müssen aus einer Sicherung
+wiederhergestellt werden.
+
+Drei Befehle, in dieser Reihenfolge:
+
+```bash
+# 1. Kann diese Installation zurückgestuft werden? Nur lesend: legt keine Datenbank an, schreibt nichts.
+bwcli plugin backup preflight 1.6.14
+
+# 2. Schreiber anhalten. Bleibt im Vordergrund, bis Sie Strg-C drücken.
+bwcli plugin backup quiesce 1.6.14
+
+# 3. In einer zweiten Shell, während Schritt 2 noch hält:
+bwcli plugin backup downgrade 1.6.14            # Bericht; ändert nichts
+bwcli plugin backup downgrade 1.6.14 --execute  # fragt nach Bestätigung, migriert dann
+```
+
+Schritt 3 verweigert die Ausführung, sofern nicht das Anhalten aus Schritt 2 für dieselbe Version
+aktiv ist, der von ihm selbst erneut ausgeführte Preflight sauber durchläuft und das
+Kompatibilitäts-Manifest das Paar als getestet ausweist. Er erstellt dann sofort vor der Migration
+eine eigene Sicherung und stellt sie wieder her, falls etwas schiefgeht.
+
+Stoppen oder blockieren Sie vor dem Start alles, was direkt in die API schreibt. Das Anhalten
+lässt die API dem Rest der Flotte *melden*, sie sei schreibgeschützt — darauf reagieren Scheduler,
+Autoconf und die UI; ein Schreibzugriff direkt über die API mit einem gültigen Token wird dadurch
+nicht blockiert.
+
+!!! danger "Was eine Zurückstufung ohne Neuaufsetzen zerstört"
+    Jedes zentral gespeicherte Zertifikat, jede anhängbare Ressource (Redirects, Upstream-Pools,
+    Workflows, Ressourcengruppen), alle Anfragemetriken und die Bedrohungskarte, jeder
+    registrierte Passkey und jedes gespeicherte Instanz-Credential — enrollte Instanzen müssen
+    danach erneut gegen das globale `API_TOKEN` registriert werden. Benutzerspezifische
+    UI-Einstellungen bleiben erhalten, verlieren aber ihre Bedeutung: 1.6.14 liest sie alle als
+    Spaltenlayouts pro Tabelle. Bans sind der einzige weiche Verlust: Der `sync-bans`-Job lernt sie
+    von den Instanzen neu, nur ihre verbleibende Dauer geht verloren.
+
+    Der Preflight zählt, was Ihre Installation tatsächlich enthält, und verweigert eine
+    Zurückstufung ohne Neuaufsetzen, solange noch etwas Unersetzliches vorhanden ist — die Antwort
+    bezieht sich also auf Ihre Daten, nicht auf das Release im Abstrakten.
+
+**Außerhalb der Datenbank.** Job-Caches und PRO-Plugins werden beim nächsten Lauf neu aufgebaut.
+Custom Configs, `www`-Inhalte, Let's-Encrypt-Status und Backup-Archive bleiben zwischen den beiden
+Versionen unverändert. Externe Plugins, die eine 1.7-API benötigen, sind unter 1.6.14 unbrauchbar
+und müssen entfernt oder ebenfalls zurückgestuft werden.
+
 ### Vorgehensweise
 
 === "Docker"
@@ -53,7 +145,7 @@
                 * Liest die tatsächlich laufende Version aus dem Container statt dem Image-Tag zu vertrauen. So werden ein gleitender Tag (`latest`, `testing`) und ein zuvor abgebrochenes Upgrade zuverlässig erkannt.
             2. Upgrade-Entscheidung
                 * Gleiche Version läuft bereits: Der Status wird ausgegeben und das Skript beendet sich.
-                * Ältere Zielversion: **Abbruch**. BunkerWeb besitzt keine Downgrade-Migration; der Scheduler würde nicht starten und in einer Neustartschleife enden. Siehe [Rollback](#rollback) für den unterstützten Weg zurück.
+                * Ältere Zielversion: **Abbruch**. Das Installationsskript besitzt selbst keine Downgrade-Automatik, und ein Start des Schedulers gegen ein älteres Paket mit bereits migrierter Datenbank schlägt fehl und endet in einer Neustartschleife. Siehe [Zurückstufung auf 1.6.14](#rolling-back-to-1614), um zunächst die Datenbank zurückzuholen, und führen Sie das Installationsskript danach erneut mit der älteren Version aus.
                 * Sonst: Rückfrage zur Bestätigung (oder direkter Ablauf mit `-y`).
             3. Sicherung vor dem Upgrade
                 * Führt `bwcli plugin backup save` im Scheduler-Container aus und kopiert das Archiv auf den Host.
