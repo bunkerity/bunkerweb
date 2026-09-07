@@ -14,6 +14,7 @@ from flask_login import login_required
 
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT, BW_CONFIG, BW_INSTANCES_UTILS
+from app.i18n import translated
 from app.utils import LOGGER, RESERVED_SERVICE_NAMES, csv_safe, csv_writer, flash
 
 from app.routes.utils import (
@@ -349,7 +350,7 @@ def bans_fetch():
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Couldn't get bans from redis: {e}")
-        flash("Failed to fetch bans from Redis, see logs for more information.", "error")
+        flash(translated("bans.flash.redis_fetch_failed") or "Failed to fetch bans from Redis, see logs for more information.", "error")
         bans = []
 
     # DataTables parameters
@@ -755,7 +756,11 @@ def bans_ban():
             return handle_error("Invalid filtered ban source.", "bans", True)
         bans, skipped_challenges = _get_filtered_report_bans(request.form)
         if skipped_challenges:
-            flash(f"Skipped {skipped_challenges} report(s) whose client was challenged or redirected rather than blocked.", "info")
+            flash(
+                translated("bans.flash.skipped_challenged", count=skipped_challenges)
+                or f"Skipped {skipped_challenges} report(s) whose client was challenged or redirected rather than blocked.",
+                "info",
+            )
     elif selection_mode == "explicit":
         raw_bans = request.form.get("bans", "")
         if not raw_bans:
@@ -787,7 +792,7 @@ def bans_ban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(ip)}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=escape(ip)) or f"Invalid IP address: {escape(ip)}", "error")
             continue
 
         # Check for permanent ban
@@ -806,10 +811,10 @@ def bans_ban():
         resp = _api_ban(ip, ban_end, reason, service, ban_scope)
         if resp:
             LOGGER.error(f"Failed to ban {ip}: {resp}")
-            flash(f"Failed to ban {ip}: {resp}", "error")
+            flash(translated("bans.flash.ban_failed", ip=ip, error=resp) or f"Failed to ban {ip}: {resp}", "error")
         else:
             LOGGER.info(f"Banned {ip}")
-            flash(f"Banned {ip} successfully.", "success")
+            flash(translated("bans.flash.ban_success", ip=ip) or f"Banned {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Banning {len(bans)} IP{'s' if len(bans) > 1 else ''}"))
 
@@ -861,7 +866,7 @@ def bans_unban():
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(str(ip))}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=escape(str(ip))) or f"Invalid IP address: {escape(str(ip))}", "error")
             continue
 
         # Normalize Web UI and default services to global scope
@@ -873,10 +878,10 @@ def bans_unban():
         resp = _api_unban(ip, service, ban_scope)
         if resp:
             LOGGER.error(f"Failed to unban {ip}: {resp}")
-            flash(f"Failed to unban {ip}: {resp}", "error")
+            flash(translated("bans.flash.unban_failed", ip=ip, error=resp) or f"Failed to unban {ip}: {resp}", "error")
         else:
             LOGGER.info(f"Unbanned {ip}")
-            flash(f"Unbanned {ip} successfully.", "success")
+            flash(translated("bans.flash.unban_success", ip=ip) or f"Unbanned {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}"))
 
@@ -939,14 +944,14 @@ def bans_update_duration():
         service = update.get("service", "")
 
         if duration not in ("permanent", "1h", "24h", "1w", "custom"):
-            flash(f"Invalid ban duration: {escape(str(duration))}", "error")
+            flash(translated("bans.flash.invalid_duration", duration=escape(str(duration))) or f"Invalid ban duration: {escape(str(duration))}", "error")
             continue
 
         # Validate IP address
         try:
             validate_ip_address(ip)
         except ValueError:
-            flash(f"Invalid IP address: {escape(ip)}", "error")
+            flash(translated("bans.flash.invalid_ip", ip=escape(ip)) or f"Invalid IP address: {escape(ip)}", "error")
             continue
 
         # Calculate new expiration time based on duration
@@ -964,7 +969,7 @@ def bans_update_duration():
                 try:
                     new_exp = max(0, int(custom_exp))
                 except (TypeError, ValueError):
-                    flash(f"Invalid custom ban duration for {escape(ip)}", "error")
+                    flash(translated("bans.flash.invalid_custom_duration", ip=escape(ip)) or f"Invalid custom ban duration for {escape(ip)}", "error")
                     continue
             else:
                 custom_end_date = update.get("end_date")
@@ -975,10 +980,10 @@ def bans_update_duration():
                             end_dt = end_dt.replace(tzinfo=datetime.now().astimezone().tzinfo)
                         new_exp = max(0, int(end_dt.timestamp() - time()))
                     except (TypeError, ValueError):
-                        flash(f"Invalid custom ban end date for {escape(ip)}", "error")
+                        flash(translated("bans.flash.invalid_custom_end_date", ip=escape(ip)) or f"Invalid custom ban end date for {escape(ip)}", "error")
                         continue
                 else:
-                    flash(f"Missing custom ban end date for {escape(ip)}", "error")
+                    flash(translated("bans.flash.missing_custom_end_date", ip=escape(ip)) or f"Missing custom ban end date for {escape(ip)}", "error")
                     continue
 
         # Validate service name for service-specific bans
@@ -997,9 +1002,9 @@ def bans_update_duration():
         ban_resp = _api_ban(ip, new_exp, original_reason, service, ban_scope)
         if ban_resp:
             LOGGER.error(f"Failed to update ban duration for {ip}: {ban_resp}")
-            flash(f"Failed to update ban duration for {ip}: {ban_resp}", "error")
+            flash(translated("bans.flash.update_duration_failed", ip=ip, error=ban_resp) or f"Failed to update ban duration for {ip}: {ban_resp}", "error")
         else:
             LOGGER.info(f"Updated ban duration for {ip}")
-            flash(f"Updated ban duration for {ip} successfully.", "success")
+            flash(translated("bans.flash.update_duration_success", ip=ip) or f"Updated ban duration for {ip} successfully.", "success")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Updating duration for {len(updates)} ban{'s' if len(updates) > 1 else ''}"))
