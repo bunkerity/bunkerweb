@@ -65,7 +65,7 @@
     "DEFAULT_SERVER_SSL_CERT": {
       "context": "global",
       "default": "",
-      "help": "Full path of the certificate or bundle file served by the DEFAULT SERVER - the block that answers requests matching no configured service (unknown SNI, raw IP access). Leave empty to keep the internal self-signed certificate. It must be readable by the WORKER, which is where the custom-cert job runs. A certificate that also covers a hostname of a configured service is refused, because the default server would then be able to answer for that service.",
+      "help": "Full path of the certificate or bundle file served by the DEFAULT SERVER - the block that answers requests matching no configured service. Leave empty to keep the internal self-signed certificate. It must be readable by the WORKER, which is where the custom-cert job runs. A certificate that also covers a hostname of a configured service is refused, because the default server would then be able to answer for that service. Served only if MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes.",
       "id": "default-server-ssl-cert",
       "label": "Default server certificate path",
       "regex": "^(/[\\w. \\-]+)*/?$",
@@ -83,7 +83,7 @@
     "DEFAULT_SERVER_SSL_CERT_DATA": {
       "context": "global",
       "default": "",
-      "help": "Certificate data of the DEFAULT SERVER, encoded in base64 or plaintext PEM format. Used only when DEFAULT_SERVER_SSL_CERT is empty. Leave both empty to keep the internal self-signed certificate.",
+      "help": "Certificate data of the DEFAULT SERVER, encoded in base64 or plaintext PEM format. Used only when DEFAULT_SERVER_SSL_CERT is empty. Leave both empty to keep the internal self-signed certificate. Served only if MULTISITE=yes or DISABLE_DEFAULT_SERVER=yes.",
       "id": "default-server-ssl-cert-data",
       "label": "Default server certificate data (base64/plaintext)",
       "regex": "^.*$",

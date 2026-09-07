@@ -43,9 +43,9 @@ These four global settings replace it. Leave them empty to keep the internal cer
 
 | Setting                        | Default | Context | Multiple | Description                                                                                                                       |
 | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `DEFAULT_SERVER_SSL_CERT`      |         | global  | no       | **Default Server Certificate Path:** Full path to the certificate or bundle served for requests matching no configured service.  |
+| `DEFAULT_SERVER_SSL_CERT`      |         | global  | no       | **Default Server Certificate Path:** Full path to the certificate or bundle served for requests matching no configured service. Served only where a default server block exists: multisite mode (`MULTISITE=yes`), or `DISABLE_DEFAULT_SERVER=yes` in single-site. |
 | `DEFAULT_SERVER_SSL_KEY`       |         | global  | no       | **Default Server Key Path:** Full path to the matching private key.                                                              |
-| `DEFAULT_SERVER_SSL_CERT_DATA` |         | global  | no       | **Default Server Certificate Data:** The same certificate as base64 or plaintext PEM. Used only when the path setting is empty.  |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |         | global  | no       | **Default Server Certificate Data:** The same certificate as base64 or plaintext PEM. Used only when the path setting is empty. Served only where a default server block exists: multisite mode (`MULTISITE=yes`), or `DISABLE_DEFAULT_SERVER=yes` in single-site. |
 | `DEFAULT_SERVER_SSL_KEY_DATA`  |         | global  | no       | **Default Server Key Data:** The same private key as base64 or plaintext PEM. Used only when the path setting is empty.          |
 
 The override is consulted **last**, and only inside the default server: a service that resolves its own certificate — through the certificate inventory, `USE_CUSTOM_SSL`, Let's Encrypt or the self-signed provider — always keeps it.

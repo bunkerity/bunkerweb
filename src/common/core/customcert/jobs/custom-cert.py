@@ -231,15 +231,31 @@ def process_default_server(configured_hostnames: Set[str], service_id: str = "")
     cert_data = getenv("DEFAULT_SERVER_SSL_CERT_DATA", "")
     key_data = getenv("DEFAULT_SERVER_SSL_KEY_DATA", "")
 
+    # Whether this deployment renders a default server block AT ALL. `http.conf` includes
+    # `default-server-http.conf` only under `MULTISITE=yes`, `DISABLE_DEFAULT_SERVER=yes` or the
+    # transient `IS_LOADING=yes` -- so on a plain single-site deployment the one configured service's
+    # own block IS NGINX's implicit default, and `ssl_certificate_default` (the phase this override
+    # feeds) has no block to run in. The material is still cached: `DISABLE_DEFAULT_SERVER=yes` is a
+    # real single-site configuration that serves it, and the operator can flip either switch without
+    # re-supplying the certificate. What must not happen is reporting a success nobody can observe.
+    servable = "yes" in (getenv("MULTISITE", "no"), getenv("DISABLE_DEFAULT_SERVER", "no"))
+
     if not any((cert_file_path, key_file_path, cert_data, key_data)):
         # Not configured, or just cleared: drop the cache so the internal certificate comes back.
         if not JOB.cache_hash(DEFAULT_SERVER_CERT_CACHE, service_id=service_id) and not JOB.cache_hash(DEFAULT_SERVER_KEY_CACHE, service_id=service_id):
             return 0
         JOB.del_cache(DEFAULT_SERVER_CERT_CACHE, service_id=service_id)
         JOB.del_cache(DEFAULT_SERVER_KEY_CACHE, service_id=service_id)
+        # Same rule as the "applied" message below : where no default server block is rendered, the
+        # internal leaf is not what comes back -- the configured service's own block answers, with
+        # its own certificate. Saying otherwise names a control the operator does not have.
         LOGGER.info(
             "The default server certificate override was removed : requests that match no configured service "
             "(unknown SNI, raw IP access) are served the internal self-signed certificate again."
+            if servable
+            else "The default server certificate override was removed. It was never served on this single-site "
+            "deployment anyway : no default server block is rendered here, so the configured service answers the "
+            "requests that match no service, with its own certificate."
         )
         return 1
 
@@ -330,9 +346,18 @@ def process_default_server(configured_hostnames: Set[str], service_id: str = "")
         LOGGER.info("No change in the default server certificate.")
         return 0
 
+    subject = parsed["common_name"] or ", ".join(sorted(certificate_names)) or "the supplied material"
+    if not servable:
+        LOGGER.warning(
+            f"The default server certificate override for {subject} was stored but CANNOT be served : this single-site deployment "
+            "renders no default server block, so the configured service answers the requests that match no service itself. Set "
+            "DISABLE_DEFAULT_SERVER=yes to render the default server block, or run in multisite mode (MULTISITE=yes)."
+        )
+        return 1
+
     LOGGER.info(
         f"The default server certificate override was applied : requests that match no configured service (unknown SNI, raw IP access) "
-        f"are now served the certificate for {parsed['common_name'] or ', '.join(sorted(certificate_names)) or 'the supplied material'}."
+        f"are now served the certificate for {subject}."
     )
     return 1
 
