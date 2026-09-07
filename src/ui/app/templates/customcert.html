@@ -1,0 +1,564 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">Custom Certificates</h1>
+            <p class="text-muted">Overview of all custom SSL certificates configured for your services</p>
+        </div>
+    </div>
+
+
+    {% if certs %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-bold">Service Name</th>
+                                    <th class="fw-bold">Certificate CN</th>
+                                    <th class="fw-bold">Alternative Names</th>
+                                    <th class="fw-bold">Issuer</th>
+                                    <th class="fw-bold">Key Type</th>
+                                    <th class="fw-bold">Validation</th>
+                                    <th class="fw-bold">Expires In</th>
+                                    <th class="fw-bold">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cert in certs %}
+                                    <tr>
+                                        <!-- Service Name -->
+                                        <td>
+                                            <span class="badge badge-accessible-blue">{{ cert.service_name }}</span>
+                                            {% if cert.is_draft is defined and cert.is_draft %}
+                                                <span class="badge badge-accessible-orange ms-2">Draft</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Certificate CN -->
+                                        <td>
+                                            {% if cert.cn %}
+                                                <code>{{ cert.cn }}</code>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Alternative Names (Dropdown) -->
+                                        <td>
+                                            {% if cert.sans %}
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        {{ [cert.sans|length, 8]|min }} Alt Name{{ 's' if [cert.sans|length, 8]|min != 1 else '' }}{% if cert.sans|length > 8 %} (+{{ cert.sans|length - 8 }}){% endif %}
+                                                    </button>
+                                                    <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                                                        {% for san in cert.sans[:8] %}
+                                                            <li><span class="dropdown-item" style="cursor: default;">{{ san }}</span></li>
+                                                        {% endfor %}
+                                                        {% if cert.sans|length > 8 %}
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><span class="dropdown-item text-muted" style="cursor: default;">... and {{ cert.sans|length - 8 }} more</span></li>
+                                                        {% endif %}
+                                                    </ul>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Issuer -->
+                                        <td>
+                                            {% if cert.issuer %}
+                                                <small class="text-muted">
+                                                    {% set issuer_parts = cert.issuer.split(',') %}
+                                                    {% for part in issuer_parts[:2] %}
+                                                        {{ part.strip() }}<br>
+                                                    {% endfor %}
+                                                </small>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Key Type & Size -->
+                                        <td>
+                                            {% if cert.key_info %}
+                                                <code class="small">{{ cert.key_info }}</code>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Validation -->
+                                        <td>
+                                            {% if cert.error %}
+                                                <span class="badge badge-accessible-purple">Error</span>
+                                                <small class="d-block text-danger mt-1">{{ cert.error }}</small>
+                                            {% else %}
+                                                <div class="d-flex flex-column gap-2">
+                                                    <!-- Certificate Name Validation -->
+                                                    {% if cert.cert_validation is defined %}
+                                                        {% if cert.cert_validation.valid == true %}
+                                                            <span class="badge badge-accessible-teal" title="Certificate CN/SANs match service domain names">
+                                                                <i class="bx bx-check"></i> Domain Match
+                                                            </span>
+                                                        {% elif cert.cert_validation.valid == false %}
+                                                            <span class="badge badge-accessible-purple" title="Certificate does not cover all service domains">
+                                                                <i class="bx bx-x"></i> Domain Mismatch
+                                                            </span>
+                                                            {% if cert.cert_validation.warnings %}
+                                                                <small class="d-block text-danger mt-1">{{ cert.cert_validation.warnings[0] }}</small>
+                                                            {% endif %}
+                                                        {% elif cert.cert_validation.valid == null %}
+                                                            <span class="badge badge-accessible-gray">? Validation Error</span>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    <!-- Server Auth Check -->
+                                                    {% if cert.server_auth_enabled is defined %}
+                                                        {% if cert.server_auth_enabled %}
+                                                            <span class="badge badge-accessible-teal"><i class="bx bx-check"></i> ServerAuth</span>
+                                                        {% else %}
+                                                            <span class="badge badge-accessible-purple" title="Certificate does not have ServerAuth enabled in Extended Key Usage">
+                                                                <i class="bx bx-x"></i> No ServerAuth
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    <!-- Not Yet Valid Check -->
+                                                    {% if cert.not_yet_valid is defined and cert.not_yet_valid %}
+                                                        <span class="badge badge-accessible-orange" title="Certificate is not yet valid">
+                                                            <i class="bx bx-time"></i> Not Yet Valid (in {{ "%.1f"|format(cert.not_yet_valid_days) }} days)
+                                                        </span>
+                                                    {% endif %}
+
+                                                    <!-- OCSP Info -->
+                                                    {% if cert.ocsp_urls is defined and cert.ocsp_urls %}
+                                                        <span class="badge badge-accessible-blue" title="OCSP Stapling enabled">
+                                                            <i class="bx bx-link"></i> OCSP
+                                                        </span>
+                                                    {% endif %}
+
+                                                    <!-- Expiration Status -->
+                                                    {% if cert.valid %}
+                                                        {% if cert.ttl_days > 30 %}
+                                                            <span class="badge badge-accessible-teal">✓ Valid</span>
+                                                        {% elif cert.ttl_days > 7 %}
+                                                            <span class="badge badge-accessible-orange">Expiring Soon</span>
+                                                        {% else %}
+                                                            <span class="badge badge-accessible-purple">Expiring</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge badge-accessible-purple">Expired</span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- TTL -->
+                                        <td>
+                                            {% if cert.error %}
+                                                <span class="text-danger">—</span>
+                                            {% elif cert.ttl_days is defined %}
+                                                {% if cert.ttl_days > 0 %}
+                                                    <strong>{{ "%.1f"|format(cert.ttl_days) }} days</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ cert.expires_at[:10] }}</small>
+                                                {% else %}
+                                                    <strong class="text-danger">Expired</strong>
+                                                    <br>
+                                                    <small class="text-danger">{{ cert.expires_at[:10] }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Details Button -->
+                                        <td>
+                                            {% if not cert.error %}
+                                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#certModal{{ loop.index }}" title="View full certificate details">
+                                                    <i class="bx bx-show"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Certificate Details Modals -->
+                {% for cert in certs %}
+                    {% if not cert.error %}
+                        <div class="modal fade" id="certModal{{ loop.index }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Certificate Details - {{ cert.service_name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-muted">Common Name (CN)</h6>
+                                                <code>{{ cert.cn or '—' }}</code>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-muted">Key Type & Size</h6>
+                                                <code>{{ cert.key_info or '—' }}</code>
+                                            </div>
+                                        </div>
+
+                                        <!-- Validity Period -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-muted">Valid From</h6>
+                                                <small>{{ cert.not_before[:10] if cert.not_before else '—' }}</small>
+                                                {% if cert.not_yet_valid %}
+                                                    <br>
+                                                    <span class="badge badge-accessible-orange mt-2">Not yet valid (in {{ "%.1f"|format(cert.not_yet_valid_days) }} days)</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold text-muted">Expires On</h6>
+                                                <small>{{ cert.expires_at[:10] if cert.expires_at else '—' }}</small>
+                                                <br>
+                                                {% if cert.valid %}
+                                                    <span class="badge badge-accessible-teal mt-2">Valid ({{ "%.1f"|format(cert.ttl_days) }} days)</span>
+                                                {% else %}
+                                                    <span class="badge badge-accessible-purple mt-2">Expired</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Issuer -->
+                                        <div class="mb-4">
+                                            <h6 class="fw-bold text-muted">Issuer</h6>
+                                            <small class="text-muted">{{ cert.issuer or '—' }}</small>
+                                        </div>
+
+                                        <!-- Alternative Names (SANs) -->
+                                        <div class="mb-4">
+                                            <h6 class="fw-bold text-muted">Subject Alternative Names (SANs)</h6>
+                                            {% if cert.sans %}
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    {% for san in cert.sans[:8] %}
+                                                        <span class="badge badge-accessible-blue">{{ san }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% if cert.sans|length > 8 %}
+                                                    <small class="d-block text-muted mt-2">... and {{ cert.sans|length - 8 }} more SAN{{ 's' if cert.sans|length - 8 != 1 else '' }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <small class="text-muted">—</small>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Domain Name Validation -->
+                                        {% if cert.cert_validation %}
+                                            <div class="mb-4">
+                                                <h6 class="fw-bold text-muted">Domain Validation</h6>
+                                                {% if cert.cert_validation.valid == true %}
+                                                    <span class="badge badge-accessible-teal"><i class="bx bx-check"></i> Certificate covers all service domains</span>
+                                                {% elif cert.cert_validation.valid == false %}
+                                                    <span class="badge badge-accessible-purple"><i class="bx bx-x"></i> Certificate does NOT cover all service domains</span>
+                                                    {% if cert.cert_validation.uncovered_domains %}
+                                                        <div class="mt-2">
+                                                            <small class="text-muted">Missing coverage for:</small>
+                                                            <ul class="list-unstyled ms-3 mt-1">
+                                                                {% for domain in cert.cert_validation.uncovered_domains %}
+                                                                    <li><small class="text-danger">{{ domain }}</small></li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if cert.cert_validation.warnings %}
+                                                        <div class="mt-2">
+                                                            {% for warning in cert.cert_validation.warnings %}
+                                                                <small class="d-block text-danger">{{ warning }}</small>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                {% elif cert.cert_validation.valid == null %}
+                                                    <span class="badge badge-accessible-gray">Validation Error</span>
+                                                    {% if cert.cert_validation.warnings %}
+                                                        <small class="d-block text-muted mt-2">{{ cert.cert_validation.warnings[0] }}</small>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Validation Status -->
+                                        <div class="mb-4">
+                                            <h6 class="fw-bold text-muted">Extended Key Usage (EKU)</h6>
+                                            {% if cert.server_auth_enabled is defined %}
+                                                {% if cert.server_auth_enabled %}
+                                                    <span class="badge badge-accessible-teal"><i class="bx bx-check"></i> Server Authentication Enabled</span>
+                                                {% else %}
+                                                    <span class="badge badge-accessible-purple"><i class="bx bx-x"></i> Server Authentication NOT Enabled</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <small class="text-muted">—</small>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- OCSP URLs -->
+                                        <div class="mb-4">
+                                            <h6 class="fw-bold text-muted">OCSP Responder URLs</h6>
+                                            {% if cert.ocsp_urls %}
+                                                <ul class="list-unstyled">
+                                                    {% for url in cert.ocsp_urls %}
+                                                        <li class="mb-2">
+                                                            <small class="text-break">
+                                                                <code>{{ url }}</code>
+                                                            </small>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% else %}
+                                                <small class="text-muted">No OCSP URLs configured</small>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Certificate File Path -->
+                                        <div class="mb-4">
+                                            <h6 class="fw-bold text-muted">Certificate File Path</h6>
+                                            <small class="text-break text-muted">{{ cert.cert_file or '—' }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <strong>No custom certificates found</strong>
+                    <p class="mb-0">No services have custom SSL certificates configured. To use custom certificates:</p>
+                    <ol class="mb-0 mt-2">
+                        <li>Enable <strong>USE_CUSTOM_SSL</strong> for a service</li>
+                        <li>Upload or configure the certificate and key</li>
+                        <li>The custom certificate will appear here</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Info Cards -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">About Custom Certificates</h5>
+                    <p class="card-text text-muted small">Custom certificates allow you to use your own SSL/TLS certificates instead of Let's Encrypt. Each service can have its own certificate, and they are stored securely in the cache directory.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Certificate Status & Validation</h5>
+                    <p class="card-text text-muted small">
+                        <span class="badge badge-accessible-teal">✓ Valid</span> - Certificate is valid and not expiring soon (>30 days)<br>
+                        <span class="badge badge-accessible-orange">Expiring Soon</span> - Certificate expires within 7-30 days<br>
+                        <span class="badge badge-accessible-purple">Expiring</span> - Certificate expires within 7 days<br>
+                        <span class="badge badge-accessible-purple">Expired</span> - Certificate has already expired<br>
+                        <span class="badge badge-accessible-teal">ServerAuth</span> - Server authentication enabled in Extended Key Usage<br>
+                        <span class="badge badge-accessible-blue">OCSP</span> - OCSP responder URL configured for certificate validation<br>
+                        <span class="badge badge-accessible-orange">Not Yet Valid</span> - Certificate is not yet valid (future effective date)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Colorblind-safe and dark-mode-friendly badge colors */
+    .badge-accessible-blue {
+        background-color: #0173B2;
+        color: #ffffff;
+        border: 1px solid #0d47a1;
+    }
+    .badge-accessible-blue:hover {
+        background-color: #0d47a1;
+    }
+
+    .badge-accessible-orange {
+        background-color: #DE8F05;
+        color: #ffffff;
+        border: 1px solid #b86f00;
+    }
+    .badge-accessible-orange:hover {
+        background-color: #b86f00;
+    }
+
+    .badge-accessible-purple {
+        background-color: #7030A0;
+        color: #ffffff;
+        border: 1px solid #4a1a5c;
+    }
+    .badge-accessible-purple:hover {
+        background-color: #4a1a5c;
+    }
+
+    .badge-accessible-teal {
+        background-color: #029386;
+        color: #ffffff;
+        border: 1px solid #006659;
+    }
+    .badge-accessible-teal:hover {
+        background-color: #006659;
+    }
+
+    .badge-accessible-gray {
+        background-color: #555555;
+        color: #ffffff;
+        border: 1px solid #333333;
+    }
+    .badge-accessible-gray:hover {
+        background-color: #333333;
+    }
+
+    /* Dark mode adjustments */
+    @media (prefers-color-scheme: dark) {
+        code {
+            background-color: #3a3a3a;
+            color: #ffffff;
+            border-color: #555555;
+        }
+
+        .badge-accessible-blue {
+            background-color: #4a9eff;
+            color: #000000;
+            border: 1px solid #0173B2;
+        }
+        .badge-accessible-blue:hover {
+            background-color: #2d85ff;
+        }
+
+        .badge-accessible-orange {
+            background-color: #ffb347;
+            color: #000000;
+            border: 1px solid #DE8F05;
+        }
+        .badge-accessible-orange:hover {
+            background-color: #ff9900;
+        }
+
+        .badge-accessible-purple {
+            background-color: #b893d3;
+            color: #000000;
+            border: 1px solid #7030A0;
+        }
+        .badge-accessible-purple:hover {
+            background-color: #a070bb;
+        }
+
+        .badge-accessible-teal {
+            background-color: #5fc9c4;
+            color: #000000;
+            border: 1px solid #029386;
+        }
+        .badge-accessible-teal:hover {
+            background-color: #3db5ad;
+        }
+
+        .badge-accessible-gray {
+            background-color: #aaaaaa;
+            color: #000000;
+            border: 1px solid #555555;
+        }
+        .badge-accessible-gray:hover {
+            background-color: #888888;
+        }
+    }
+
+    .table-responsive {
+        border-radius: 0.25rem;
+    }
+
+    /* Table improvements */
+    .table {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .table thead th {
+        background-color: #f0f0f0;
+        color: #1a1a1a;
+        font-weight: 600;
+        border-bottom: 2px solid #d0d0d0;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.75rem !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    code {
+        background-color: #f5f5f5;
+        color: #1a1a1a;
+        padding: 0.35rem 0.55rem;
+        border-radius: 0.3rem;
+        font-size: 0.9rem;
+        border: 1px solid #d0d0d0;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    /* Badge styling */
+    .badge {
+        padding: 0.35rem 0.65rem;
+        font-weight: 500;
+        border-radius: 0.25rem;
+        border: 1px solid transparent;
+    }
+
+    /* Table improvements for dark mode */
+    @media (prefers-color-scheme: dark) {
+        .table {
+            color: #ffffff;
+            border-color: #444444;
+        }
+
+        .table thead th {
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border-bottom-color: #555555;
+        }
+
+        .table tbody tr:hover {
+            background-color: #3a3a3a;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #3a3a3a;
+        }
+
+        td, th {
+            border-color: #444444;
+        }
+    }
+</style>
+{% endblock %}
