@@ -247,15 +247,14 @@ class BaseApiClient:
             # policy, so a retried 502/503/504 escapes here too unless `RetryError` is caught.
             raise ApiUnavailableError(f"Cannot reach API at {self.base_url}: {e}") from e
 
+        # Same reporting as `_request`: `_error_detail` reads the API's `message` and FastAPI's own
+        # `msg`/`detail`, where this path used to read `message` alone and drop the body of a 5xx
+        # entirely -- so a refused plugin upload or a failed export reached the operator as the bare
+        # "API returned 500" with the reason gone.
         if resp.status_code >= 500:
-            raise ApiUnavailableError(f"API returned {resp.status_code}")
+            raise ApiUnavailableError(f"API returned {resp.status_code}: {detail}" if (detail := _error_detail(resp)) else f"API returned {resp.status_code}")
         if resp.status_code >= 400:
-            try:
-                body = resp.json()
-                msg = body.get("message", resp.text[:500])
-            except Exception:
-                msg = resp.text[:500]
-            raise ApiClientError(msg, status_code=resp.status_code)
+            raise ApiClientError(_error_detail(resp) or (resp.text[:500] if resp.text else f"HTTP {resp.status_code}"), status_code=resp.status_code)
 
         return resp
 
