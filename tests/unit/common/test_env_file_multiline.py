@@ -160,3 +160,80 @@ def test_comments_and_blank_lines_are_still_skipped(tmp_path):
     parsed = parse_env_file(path)
     assert sorted(parsed) == ["CUSTOM_SSL_CERT_DATA", "SERVER_NAME"]
     assert parsed["CUSTOM_SSL_CERT_DATA"] == CERT
+
+
+def test_a_urlsafe_base64_continuation_line_is_not_dropped():
+    """#3835 again (port of dev `41f487146` + the fold-in addendum's owed fix).
+
+    Two halves, and only the SECOND block below isolates the alphabet: a continuation line with no
+    `KEY=` shape is now kept by the escape clause whatever its alphabet, so the first block passes
+    under either regex (it is here as the shape an operator actually writes). The padded last chunk
+    in the second block IS declaration-shaped, so it reaches the shape check and pins the urlsafe
+    alphabet on its own. The escape clause itself is pinned by
+    `test_a_continuation_line_that_could_never_be_a_declaration_is_kept`.
+    """
+    wrapped = "AAAA-BBBB_CCCC\nDDDD-EEEE_FFFF"
+    folded = parse_env_lines(
+        "\n".join([f"CUSTOM_SSL_CERT_DATA={wrapped}", "USE_ANTIBOT=captcha"]).splitlines(),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == wrapped
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+    # A urlsafe LAST chunk is declaration-shaped (its `==` padding splits into a valid key name),
+    # so it is the shape check itself, not the escape above, that has to accept the alphabet.
+    padded = "AAAA\nDDD-EEE_FF=="
+    folded = parse_env_lines(
+        "\n".join([f"CUSTOM_SSL_CERT_DATA={padded}", "USE_ANTIBOT=captcha"]).splitlines(),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == padded
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+
+def test_a_bare_declaration_off_the_base64_boundary_ends_the_value():
+    """A `NAME=` line with no payload can only be a declaration unless it lands the folded value
+    on a multiple of four -- where a base64 pad has to fall. Off that boundary it declares, so an
+    empty foreign variable after a `file` setting is kept instead of corrupting the certificate."""
+    folded = parse_env_lines(
+        ["CUSTOM_SSL_CERT_DATA=AAAA", "TZ=", "USE_ANTIBOT=captcha"],
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == "AAAA"
+    assert folded["TZ"] == ""
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+
+def test_the_last_chunk_of_a_wrapped_payload_still_folds():
+    """The other side of the same rule, and the documented ceiling: a padded last chunk lands the
+    payload on the boundary, so it is folded -- which also folds the one bare declaration in four
+    whose own name lands there (here `CCC=`: 8 payload chars + a 4-char chunk = 12, a multiple of
+    four). Keeping a wrapped value whole is the rarer-trigger choice."""
+    folded = parse_env_lines(
+        ["CUSTOM_SSL_CERT_DATA=AAAABBBB", "CCC=", "USE_ANTIBOT=captcha"],
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == "AAAABBBB\nCCC="
+    assert "CCC" not in folded
+    assert folded["USE_ANTIBOT"] == "captcha"
+
+
+def test_a_continuation_line_that_could_never_be_a_declaration_is_kept():
+    """The shape check has one job: disambiguate a line that COULD be read as a declaration.
+
+    A chunk with no `KEY=` shape cannot end a value, so requiring the base64 shape of it only ever
+    drops payload. `variables.env` writers wrap on whitespace as well as on newlines, so a chunk
+    that carries an inner space fails `B64_LINE_RX` while still being pure payload.
+    """
+    wrapped = "QUFB QkJD\nQ0ND RERF"
+    folded = parse_env_lines(
+        "\n".join([f"CUSTOM_SSL_CERT_DATA={wrapped}", "USE_ANTIBOT=captcha"]).splitlines(),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA"}),
+        make_key_predicate({"CUSTOM_SSL_CERT_DATA", "USE_ANTIBOT"}),
+    )
+    assert folded["CUSTOM_SSL_CERT_DATA"] == wrapped
+    assert folded["USE_ANTIBOT"] == "captcha"
