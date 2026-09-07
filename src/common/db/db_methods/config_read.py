@@ -473,16 +473,24 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
         services = config["SERVER_NAME"]["value"].split()
         services_set = set(services)  # O(1) lookup for service prefix matching
 
+        if service:
+            # DEV-2b4: strip the prefix in ONE pass. Stripping inside the loop below popped every key and
+            # re-inserted the stripped one, so an un-prefixed key sitting LATER in the same snapshot
+            # popped the value that had just been renamed onto it and dropped it on the `continue`.
+            # A globally declared template writes exactly such keys -- the overlay above inserts
+            # `REVERSE_PROXY_URL_1` (a suffixed member the base Settings query never seeds) after
+            # `get_non_default_settings` has already inserted `{service}_REVERSE_PROXY_URL_1` -- so
+            # every setting the service had set for itself disappeared from its own configuration,
+            # and the re-materialisation block below then answered with the template's default: the
+            # opposite of what the generator renders. `key[len(prefix):]` also replaces `replace()`,
+            # which stripped the prefix everywhere it occurred, not just at the front.
+            prefix = f"{service}_"
+            config = {key[len(prefix) :]: data for key, data in config.items() if key.startswith(prefix)}  # noqa: E203
+
         # Process config items - use list(items()) which is more memory efficient than copy().items()
         # for large dicts since it creates a list of tuples, not a full dict copy
         for key, data in list(config.items()):
-            new_value = None
-            if service:
-                data = config.pop(key)
-                if not key.startswith(f"{service}_"):
-                    continue
-                key = key.replace(f"{service}_", "")
-                new_value = data
+            new_value = data if service else None
 
             if not methods:
                 new_value = data["value"]
@@ -575,9 +583,9 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                             # and `filtered_settings` -- the one thing that makes it skip one --
                             # narrows the base query at `:294` too, so the setting would not reach
                             # `multiple_groups` either). But the `service=` route reaches it: the
-                            # loop above POPS every key and re-adds only the `{service}_`-prefixed
-                            # ones, so a member the GLOBAL overlay wrote is gone from `config` by
-                            # the time this block runs, and this block re-materialises it.
+                            # comprehension above keeps ONLY the `{service}_`-prefixed keys, so a
+                            # member the GLOBAL overlay wrote is gone from `config` by the time this
+                            # block runs, and this block re-materialises it.
                             # Pinned by test_config_read.py.
                             #
                             # For the record, a pre-existing shape this does not change: under

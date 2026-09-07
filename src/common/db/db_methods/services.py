@@ -76,6 +76,17 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                 declared = session.execute(select(Settings.default).where(Settings.id == HTTPS_PORT_SETTING)).scalar()
                 global_ports = [declared] if declared else []
 
+            # DEV-2b4: a service with no row of its own INHERITS the global value, and for
+            # USE_TEMPLATE that template is in force at render time (`get_config` materialises
+            # `{service}_USE_TEMPLATE` for every service). Reporting the missing row as "no template"
+            # -- or as SECURITY_MODE "block" while the fleet default is "detect" -- told the operator
+            # the opposite of what the generator does. One query for the whole call, not per service.
+            inherited = dict(
+                session.execute(
+                    select(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE")))
+                ).all()
+            )
+
         for service in db_services:
             # The port an absolute link to this service must carry, or "" to carry none. Empty for
             # every service that listens where the fleet does -- which is every service on a
@@ -90,8 +101,8 @@ class DatabaseServicesMixin(DatabaseMixinBase):
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or "",
-                    "security_mode": service.security_mode or "block",
+                    "template": service.template or inherited.get("USE_TEMPLATE") or "",
+                    "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                     "server_type": service.server_type or "http",
                     "link_port": link_port,
                 }

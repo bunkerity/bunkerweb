@@ -7,7 +7,7 @@ from ports import HTTP_PORT_SETTING  # type: ignore
 
 from ..auth.guard import guard
 from ..http01 import http01_refusals_for
-from ..utils import LOGGER, get_db
+from ..utils import LOGGER, get_db, reportable_config
 from ..schemas import GlobalSettingsUpdate, ValidateSettingRequest, SaveConfigRequest
 
 config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
@@ -83,11 +83,17 @@ def read_global_settings(
             filtered_settings=fs,
         )
     else:
-        conf = db.get_non_default_settings(
-            global_only=global_only,
+        # `get_config(methods=True)` then reduce, NOT `get_non_default_settings`: the latter reports
+        # stored rows only, so a value a TEMPLATE supplies never appeared even though the generator
+        # renders it. See `reportable_config`.
+        conf = reportable_config(
+            db.get_config(
+                global_only=global_only,
+                methods=True,
+                with_drafts=with_drafts,
+                filtered_settings=fs,
+            ),
             methods=methods,
-            with_drafts=with_drafts,
-            filtered_settings=fs,
         )
     return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 

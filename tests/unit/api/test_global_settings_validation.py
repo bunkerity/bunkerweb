@@ -13,6 +13,8 @@ from types import ModuleType
 from unittest.mock import Mock, patch
 
 import pytest
+
+from fixtures.api_utils import load_api_utils
 import schemas  # type: ignore
 from Database import Database  # type: ignore
 
@@ -58,6 +60,9 @@ def _load_router():
     names["bw_global_settings.auth.guard"].guard = object()
     names["bw_global_settings.utils"].get_db = Mock()
     names["bw_global_settings.utils"].LOGGER = Mock()
+    # The REAL helper, not a Mock: it is pure, and the read endpoints' output is now its
+    # output (dev fold-in row 45). See `fixtures/api_utils.py`.
+    names["bw_global_settings.utils"].reportable_config = load_api_utils().reportable_config
     # `http01.py` is loaded for real, not stubbed: it holds the shared refusal core both routers
     # now import, and a stub of it would make every assertion below assert the stub.
     http01_spec = importlib.util.spec_from_file_location("bw_global_settings.http01", ROOT / "src" / "api" / "app" / "http01.py")

@@ -139,6 +139,11 @@ class TestTheNonDefaultViewOnlyReportsRealDeclarations:
         config = db.get_config(methods=True, with_drafts=True)
         assert config["app1.example.com_HTTP_PORT"]["value"] == "8080"
         assert config["app1.example.com_HTTP_PORT_1"]["value"] == "8081"
+        # DEV-2b5: the copy IS the global entry, not a clone -- `config.setdefault(f"{service_id}_{key}", value)`.
+        # `src/api/app/utils.py`'s reportable reduction tells an inherited port list from a declared one by the
+        # `global` flag that identity leaves behind, so "cleaning up" these copies to `global: False` would silently
+        # make that guard inert and report every service as having declared the whole fleet's port list again.
+        assert config["app1.example.com_HTTP_PORT"] is config["HTTP_PORT"]
 
 
 class TestThePortListComesBackInSuffixOrder:

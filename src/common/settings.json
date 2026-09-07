@@ -440,7 +440,7 @@
   "USE_TEMPLATE": {
     "context": "multisite",
     "default": "",
-    "help": "Config templates to apply, separated with spaces, that will override the default values of specific settings. Templates apply in order and a later one overrides an earlier one.",
+    "help": "Config templates to apply, separated with spaces, that will override the default values of specific settings. Templates apply in order and a later one overrides an earlier one; a value set on the service overrides the template.",
     "id": "use-template",
     "label": "Use template",
     "regex": "^.*$",

@@ -18,7 +18,7 @@ from ports import collect_ports  # type: ignore
 
 from ..auth.guard import guard
 from ..http01 import http01_refusals_for
-from ..utils import get_db
+from ..utils import get_db, reportable_config, LOGGER  # DEV-2b4: reportable_config
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
 
 router = APIRouter(prefix="/services", tags=["services"])
@@ -93,7 +93,11 @@ def get_service(service: str, full: bool = False, methods: bool = True, with_dra
         conf = db.get_config(methods=methods, with_drafts=with_drafts, service=service)
         return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
-    conf = db.get_non_default_settings(methods=methods, with_drafts=with_drafts, service=service)
+    # DEV-2b4: `get_config(methods=True)` then reduce, NOT `get_non_default_settings`: the latter reports
+    # stored rows only, so a service whose template supplies a value was answered with the global
+    # value the generator was about to discard. See `reportable_config`.
+    # DEV-2b5: `service=` so the reduction can tell an inherited port list from a declared one.
+    conf = reportable_config(db.get_config(methods=True, with_drafts=with_drafts, service=service), methods=methods, service=service)
     return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
 
