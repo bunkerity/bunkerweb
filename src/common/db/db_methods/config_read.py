@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from copy import deepcopy
+from itertools import chain
 from re import DOTALL, error as RegexError, escape, search
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -532,7 +533,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 # reusing the overlay's `template_settings_map` above: that one is narrowed by
                 # `filtered_settings`, while this block legitimately re-materialises SIBLING
                 # members of a group that the filter never asked for.
-                referenced_layers = {layer for layers in window_layers.values() for layer in layers}
+                referenced_layers = set(chain.from_iterable(window_layers.values()))
                 layer_defaults = {}
                 if referenced_layers:
                     for row in session.execute(
@@ -570,7 +571,7 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                             # as an outgoing template value and drop it on a template change.
                             #
                             # This resolution is LIVE, not defensive. The overlay above usually
-                            # pre-empts it (it has already written every member a layer declares,
+                            # preempts it (it has already written every member a layer declares,
                             # and `filtered_settings` -- the one thing that makes it skip one --
                             # narrows the base query at `:294` too, so the setting would not reach
                             # `multiple_groups` either). But the `service=` route reaches it: the

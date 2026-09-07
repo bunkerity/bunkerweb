@@ -191,9 +191,13 @@ def _reserved_default_server(service: str) -> bool:
     must keep its rename and its delete: those two are the only way back from a site `http.conf`
     already dropped from its roster by name.
 
-    Fails CLOSED when the API cannot answer. The one caller is the rename refusal, and the failure
-    it prevents -- the default server silently forked into a second, billable service -- is not
-    something to trade for a save going through during an API hiccup.
+    Fails CLOSED when the API cannot answer -- the failure that direction prevents (the default
+    server silently forked into a second, billable service, or a refusal quietly not applying) is
+    not something to trade for a save going through during an API hiccup. Three callers today, each
+    paying a `GET /services` round-trip: the settings-page save (the rename refusal only --
+    SERVER_TYPE and the stream-port refusal are id-only, see the save handler's own comment on why),
+    the settings-page render (curated shelf / no attachable-resources band) and the plugin page
+    (curated-subset refusal).
     """
     if not is_default_server(service):
         return False
@@ -210,30 +214,28 @@ def _service_rows(services_list) -> List[Dict[str, Any]]:
     the wire is a few hundred bytes instead of the ~5 KB of near-identical HTML the template used
     to emit — which is the whole point of moving the table server-side.
     """
-    rows = []
-    for service in services_list:
-        rows.append(
-            {
-                "name": service["id"],
-                "type": "draft" if service.get("is_draft") else "online",
-                "method": service.get("method") or "",
-                "security_mode": service.get("security_mode") or "block",
-                "template": service.get("template") or "",
-                "creation_date": _local_iso(service.get("creation_date")),
-                "last_update": _local_iso(service.get("last_update")),
-                "deletable": can_delete_service(service),
-                # Pins the row and swaps its name for the "Default server" label + explainer in
-                # services.js. A boolean rather than a name comparison in the client, so the
-                # reserved id stays a server-side fact. Id AND method: a service an operator created
-                # under the reserved name is an ordinary row that must stay deletable and renamable,
-                # so it must not be pinned and relabelled as the default server.
-                "reserved": is_reserved_default_server(service),
-                # Only when this service moved off the fleet's HTTPS listener; empty otherwise, so
-                # a deployment that does not use per-service ports adds nothing to the row.
-                "link_port": service.get("link_port") or "",
-            }
-        )
-    return rows
+    return [
+        {
+            "name": service["id"],
+            "type": "draft" if service.get("is_draft") else "online",
+            "method": service.get("method") or "",
+            "security_mode": service.get("security_mode") or "block",
+            "template": service.get("template") or "",
+            "creation_date": _local_iso(service.get("creation_date")),
+            "last_update": _local_iso(service.get("last_update")),
+            "deletable": can_delete_service(service),
+            # Pins the row and swaps its name for the "Default server" label + explainer in
+            # services.js. A boolean rather than a name comparison in the client, so the
+            # reserved id stays a server-side fact. Id AND method: a service an operator created
+            # under the reserved name is an ordinary row that must stay deletable and renamable,
+            # so it must not be pinned and relabelled as the default server.
+            "reserved": is_reserved_default_server(service),
+            # Only when this service moved off the fleet's HTTPS listener; empty otherwise, so
+            # a deployment that does not use per-service ports adds nothing to the row.
+            "link_port": service.get("link_port") or "",
+        }
+        for service in services_list
+    ]
 
 
 def _matches_date_bucket(value, selected) -> bool:
@@ -317,17 +319,15 @@ def _service_pane_options(rows, filtered):
         template["count"] += 1 if selected else 0
 
     def date_pane(field):
-        options = []
-        for name, _ in _DATE_BUCKETS + (("older_30d", 0),):
-            options.append(
-                {
-                    "label": f'<span data-i18n="searchpane.{name}">{name}</span>',
-                    "value": name,
-                    "total": sum(1 for row in rows if _matches_date_bucket(row.get(field), (name,))),
-                    "count": sum(1 for row in filtered if _matches_date_bucket(row.get(field), (name,))),
-                }
-            )
-        return options
+        return [
+            {
+                "label": f'<span data-i18n="searchpane.{name}">{name}</span>',
+                "value": name,
+                "total": sum(1 for row in rows if _matches_date_bucket(row.get(field), (name,))),
+                "count": sum(1 for row in filtered if _matches_date_bucket(row.get(field), (name,))),
+            }
+            for name, _ in _DATE_BUCKETS + (("older_30d", 0),)
+        ]
 
     labels = {
         "type": {
@@ -433,22 +433,20 @@ def _services_export_rows() -> List[Dict[str, Any]]:
 
     filtered = _filter_and_sort_services(rows, search_value, parse_search_panes_dict(request.args), order_column_index, order_direction)
 
-    exported = []
-    for row in filtered:
-        exported.append(
-            {
-                "name": row["name"],
-                "type": row["type"],
-                "method": row["method"],
-                "security_mode": row["security_mode"],
-                # The table renders an empty template as a "No template" badge; a blank cell in a
-                # spreadsheet reads as missing data rather than as a deliberate state.
-                "template": row["template"] or "none",
-                "creation_date": _export_timestamp(row.get("creation_date")),
-                "last_update": _export_timestamp(row.get("last_update")),
-            }
-        )
-    return exported
+    return [
+        {
+            "name": row["name"],
+            "type": row["type"],
+            "method": row["method"],
+            "security_mode": row["security_mode"],
+            # The table renders an empty template as a "No template" badge; a blank cell in a
+            # spreadsheet reads as missing data rather than as a deliberate state.
+            "template": row["template"] or "none",
+            "creation_date": _export_timestamp(row.get("creation_date")),
+            "last_update": _export_timestamp(row.get("last_update")),
+        }
+        for row in filtered
+    ]
 
 
 def _export_timestamp(value) -> str:
@@ -1612,6 +1610,17 @@ def services_service_page(service: str):
         if service == "new" and is_default_server(posted_name):
             return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
 
+        # Id ONLY here, on purpose -- mirrors the API's own PATCH gate (api/app/routers/services.py,
+        # the `is_default_server(target)` block below its rename handling). Inertness is decided by
+        # the id at RENDER time, whatever the row's method: `http.conf`/`stream.conf` drop the id
+        # from the roster by name (`reject("equalto", default_server_id)`), and
+        # `default_server_stream_listeners` (default_server.py) reads the reserved service's stream
+        # config keyed on `service_configs[DEFAULT_SERVER_ID]` -- also by id. A stored SERVER_TYPE or
+        # a stream port on THIS id is therefore stored-and-inert (or opens the catch-all listener
+        # unexpectedly) whether the row is the seeded reserved one or an operator's own pre-1.7
+        # service that merely took the name -- so both are refused the same way. Only rename/delete/
+        # draft are method-aware: those are about WHO may recover the row, not about what the render
+        # path does with it.
         if is_default_server(service):
             # Refused, not ignored: the reserved id never reaches either roster loop, so a stored
             # SERVER_TYPE would show on the page and switch nothing.
@@ -1624,6 +1633,9 @@ def services_service_page(service: str):
             # `default-server*` key and appends the payload under the new name. `save_config` keeps
             # the reserved row regardless, so the result is not a rename at all: the default server
             # is FORKED into a second, billable service while the operator believes they moved it.
+            # Method-aware (unlike the two refusals above): an operator's own pre-1.7 row keeps its
+            # rename, since it is a real service and the only way back from a roster `http.conf`
+            # already dropped it from by name.
             if posted_name and posted_name != service and _reserved_default_server(service):
                 return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "services")
             try:

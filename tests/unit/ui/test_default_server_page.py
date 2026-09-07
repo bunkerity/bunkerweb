@@ -280,6 +280,7 @@ class TestTheOtherTwoWritePaths:
         api = Mock()
         api.readonly = False
         api.get_service.return_value = {}
+        api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
         bw_config.get_plugins.return_value = {}
@@ -303,14 +304,22 @@ class TestTheOtherTwoWritePaths:
         assert response.status_code == 302
 
     @staticmethod
-    def _page_save(route_app, monkeypatch, data):
+    def _page_save(route_app, monkeypatch, data, method="wizard"):
         """The page's POST branch, with the collaborators the two tests above stub by hand.
+
+        `method` picks which row answers `api.get_services` for the reserved id -- `"wizard"` is
+        the real seeded reserved row, anything else is an operator's own pre-1.7 service that
+        merely took the name. The SERVER_TYPE/stream-port refusals below are id-only (they mirror
+        `api/app/routers/services.py`'s own `is_default_server(target)` gate and the id-keyed
+        render path), so both methods must be refused the same way -- unlike the rename check,
+        which is method-aware.
 
         Returns the executor mock: `submit` called means the save went through, not called means a
         refusal short-circuited it."""
         api = Mock()
         api.readonly = False
         api.get_service.return_value = {}
+        api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": method, "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
         bw_config.get_plugins.return_value = {}
@@ -346,11 +355,22 @@ class TestTheOtherTwoWritePaths:
         executor = self._page_save(route_app, monkeypatch, {"SERVER_TYPE": "stream"})
         assert executor.submit.called is False, "SERVER_TYPE was stored on the reserved row"
 
+    def test_an_operator_owned_row_of_that_name_is_still_refused_server_type(self, route_app, monkeypatch):
+        """RES-1 / Criticos round 2: id-only on purpose, not method-aware. `http.conf`/`stream.conf`
+        drop the id from the roster by NAME whatever the row's method (`reject("equalto",
+        default_server_id)`), so SERVER_TYPE is stored-and-inert on an operator's pre-1.7
+        `default-server` row exactly as it is on the real reserved one. Mirrors the API's own
+        `is_default_server(target)` gate (api/app/routers/services.py) -- only rename/delete/draft
+        are method-aware, this refusal is not."""
+        executor = self._page_save(route_app, monkeypatch, {"SERVER_TYPE": "stream"}, method="ui")
+        assert executor.submit.called is False, "SERVER_TYPE was stored on an operator-owned default-server row"
+
     def test_a_free_stream_port_still_saves(self, route_app, monkeypatch):
         """The other half: the mirror must refuse a collision, not the feature."""
         api = Mock()
         api.readonly = False
         api.get_service.return_value = {}
+        api.get_services.return_value = [{"id": DEFAULT_SERVER_ID, "method": "wizard", "is_draft": False}]
         api.get_metadata.return_value = {"is_pro": False}
         bw_config = Mock()
         bw_config.get_plugins.return_value = {}
