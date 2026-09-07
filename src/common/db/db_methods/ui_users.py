@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime, timedelta
+from time import time
 from typing import List, Optional, Union
 
 from model import (  # type: ignore
@@ -248,6 +249,11 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
             user.email = email
             user.password = password.decode("utf-8")
             user.totp_secret = totp_secret
+            if totp_changed:
+                # The caller verified the enrolment code before storing the secret, so every code
+                # valid at this moment is spent; starting the counter there keeps that code from
+                # replaying as a login for the rest of its window (the next one is a period away).
+                user.totp_last_counter = int((time() + 3) // 30) if totp_secret else None
             user.method = method
             user.theme = theme
             user.language = language
@@ -265,6 +271,36 @@ class DatabaseUIUsersMixin(DatabaseMixinBase):
                 self._delete_ui_user_recovery_codes(username)
 
         return ""
+
+    def use_ui_user_totp(self, username: str, totp_secret: str, counter: int) -> bool:
+        """Consume a TOTP counter once, across every UI worker and replica.
+
+        The whole replay defence is that this UPDATE only matches a row whose stored counter is
+        still older than the one being spent, so of two requests carrying the same code exactly
+        one updates a row -- the second matches nothing and is refused. The secret is part of the
+        filter: a counter minted against a secret that has since been rotated must not consume
+        anything on the new one.
+        """
+        if self.readonly or not totp_secret or type(counter) is not int or counter < 0:
+            return False
+        try:
+            with self._db_session() as session:
+                updated = session.execute(
+                    update(Users)
+                    .where(
+                        Users.username == username,
+                        Users.totp_secret == totp_secret,
+                        (Users.totp_last_counter.is_(None)) | (Users.totp_last_counter < counter),
+                    )
+                    .values(totp_last_counter=counter)
+                    .execution_options(synchronize_session=False)
+                ).rowcount
+                session.commit()
+                return updated == 1
+        except BaseException as e:
+            # Driver exceptions can embed the connection credentials.
+            self.logger.error(f"Failed to consume the TOTP counter ({type(e).__name__})")
+            return False
 
     def mark_ui_user_login(self, username: str, date: datetime, ip: str, user_agent: str) -> Union[str, int]:
         """Mark ui user login."""

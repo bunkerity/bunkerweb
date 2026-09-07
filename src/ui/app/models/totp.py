@@ -1,18 +1,16 @@
 from base64 import b64encode
-from contextlib import contextmanager, suppress
 from io import BytesIO
 from json import loads as json_loads
-import fcntl
-import os
 from bcrypt import checkpw
-from typing import Iterator, List, Optional
+from typing import List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
 from passlib.pwd import genword
 from qrcode import make
 from qrcode.image.pil import PilImage
 
 from app.models.models import UiUsers
-from app.dependencies import DATA
+from app.api_client import ApiClientError, ApiUnavailableError
+from app.dependencies import API_CLIENT
 from app.utils import LIB_DIR, LOGGER, stop
 
 # Try to load the new .totp_encryption_keys.json file first, fallback to .totp_secrets.json for backward compatibility
@@ -62,44 +60,58 @@ class Totp:
             if checkpw(code.encode("utf-8")[:72], encrypted_code.encode("utf-8")):
                 return user.list_recovery_codes.pop(i)
 
+    def match_totp(self, token: str, totp_secret: str) -> Optional[TotpMatch]:
+        """Validate a token without consuming it; enrolment persists the match with its secret."""
+        if not totp_secret:
+            return None
+        try:
+            return self._totp.verify(token, totp_secret, window=3)
+        except (MalformedTokenError, TokenError):
+            return None
+        except (ValueError, TypeError) as e:
+            # A wrong code is routine; an unreadable stored secret is not, and the user only sees "invalid token".
+            LOGGER.error(f"Stored TOTP secret is unusable ({type(e).__name__}), the code cannot be checked")
+            return None
+
     def verify_totp(self, token: str, *, totp_secret: Optional[str] = None, user: Optional[UiUsers] = None) -> bool:
-        """Verifies token for specific user."""
+        """Verify a token, consuming it atomically when authenticating an existing user."""
         if not totp_secret and not user:
             raise ValueError("Either totp_secret or user must be provided")
-        elif not totp_secret:
-            totp_secret = user.totp_secret
+        totp_secret = totp_secret or user.totp_secret
 
-        if not user:
-            try:
-                self._totp.verify(token, totp_secret, window=3)
-                return True
-            except (MalformedTokenError, TokenError):
-                return False
+        match = self.match_totp(token, totp_secret)
+        if match is None:
+            return False
 
-        # Read last_counter, verify against it, and persist the new counter as one atomic
-        # section: gunicorn runs multiple worker processes, each with its own in-memory lock,
-        # so without a cross-process lock two workers can both read the same last_counter and
-        # both accept the same code before either write lands.
-        with self._replay_counter_lock():
-            try:
-                tmatch = self._totp.verify(token, totp_secret, window=3, last_counter=self.get_last_counter(user))
-            except (MalformedTokenError, TokenError):
-                return False
-            self.set_last_counter(user, tmatch)
+        # An explicit secret that is not the stored one is an enrolment: there is no counter to
+        # consume yet, the caller persists the match together with the secret.
+        if not user or totp_secret != user.totp_secret:
             return True
 
-    @contextmanager
-    def _replay_counter_lock(self) -> Iterator[None]:
-        """Serialize TOTP replay-counter verify-then-write across gunicorn worker processes."""
-        lock_path = LIB_DIR.joinpath(".totp_last_counter.lock")
-        fd = os.open(lock_path.as_posix(), os.O_CREAT | os.O_RDWR, 0o600)
+        # The counter lives in the database, not in this worker: gunicorn runs several worker
+        # processes and the UI can run several replicas, and a per-process counter lets the same
+        # six digits be replayed on a neighbour.
         try:
-            fcntl.flock(fd, fcntl.LOCK_EX)
-            yield
-        finally:
-            with suppress(OSError):
-                fcntl.flock(fd, fcntl.LOCK_UN)
-            os.close(fd)
+            result = API_CLIENT.use_totp_counter(user.get_id(), totp_secret, match.counter)
+        except (ApiClientError, ApiUnavailableError) as e:
+            # An unreachable API is not a read-only database: refuse, rather than hand every
+            # captured code a free window for as long as the outage lasts.
+            LOGGER.error(f"Couldn't consume the TOTP code: {e.message}")
+            return False
+
+        if result.get("consumed"):
+            return True
+
+        # The refusal is a replay unless the database says it cannot write at all. That verdict has
+        # to come from the same answer: `API_CLIENT.readonly` is a 5-second cache that reports True
+        # whenever its own probe fails, so consulting it here would reopen the outage hole above.
+        if not result.get("readonly"):
+            return False
+
+        # The database is the only replay store; in read-only fallback mode keep the login
+        # available and accept the code without consuming its counter.
+        LOGGER.warning("Database is read-only, TOTP code accepted without replay protection")
+        return True
 
     def get_totp_uri(self, username: str, totp_secret: str) -> str:
         """Generate provisioning url for use with the qrcode scanner built into the app"""
@@ -121,21 +133,6 @@ class Totp:
             image_as_str = b64encode(virtual_file.getvalue()).decode("ascii")
 
         return f"data:image/png;base64,{image_as_str}"
-
-    def get_last_counter(self, user: UiUsers) -> Optional[int]:
-        """Fetch stored last_counter from cache."""
-        DATA.load_from_file()
-        return DATA.get("totp_last_counter", {}).get(user.get_id())
-
-    def set_last_counter(self, user: UiUsers, tmatch: TotpMatch) -> None:
-        """Cache last_counter."""
-        DATA.load_from_file()
-        # set_nested persists to disk; a plain nested assignment would only touch this worker's
-        # in-memory copy, and the very next load_from_file() would copy the stale mapping back
-        # over it -- so the counter never reached the replay check that reads it. keep_max is
-        # defense in depth: callers holding _replay_counter_lock() already guarantee this can't
-        # regress, but the flag keeps that true even if something calls this directly.
-        DATA.set_nested(["totp_last_counter", user.get_id()], tmatch.counter, keep_max=True)
 
 
 totp = Totp()

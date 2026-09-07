@@ -47,6 +47,11 @@ class RecoveryCodeUseRequest(BaseModel):
     hashed_code: str
 
 
+class TotpUseRequest(BaseModel):
+    totp_secret: str
+    counter: int
+
+
 class RecoveryCodesRefreshRequest(BaseModel):
     codes: List[str]
 
@@ -91,7 +96,7 @@ def _error(message: str, default: int = 400) -> JSONResponse:
 
 def _serialize_webauthn_credential(credential: dict) -> dict:
     """JSON-safe copy of a credential dict (datetimes -> ISO strings)."""
-    data = dict(credential)
+    data = {**credential}
     for key in ("creation_date", "last_used"):
         if data.get(key) is not None:
             data[key] = data[key].isoformat()
@@ -242,9 +247,36 @@ def use_recovery_code(username: str, req: RecoveryCodeUseRequest) -> JSONRespons
     """Validate and consume a recovery code."""
     ret = get_db().use_ui_user_recovery_code(username, req.hashed_code)
     if ret:
-        code = 400 if "Invalid" in ret or "doesn't exist" in ret else 500
+        # A read-only database is a 409, not a 5xx: the caller has to tell "nothing can be written
+        # right now" apart from "the API is down", and `ApiUnavailableError` covers both 5xx and an
+        # unreachable API. The UI keeps a valid recovery code usable on the first, never the second.
+        # `_error()` above maps read-only to 409 too, but its other rules differ from this route's
+        # (a missing user is a 404 there, a 400 here) -- do not collapse the two without checking
+        # what `src/ui/app/routes/totp.py` reads back from each status.
+        if "read-only" in ret:
+            code = 409
+        elif "Invalid" in ret or "doesn't exist" in ret:
+            code = 400
+        else:
+            code = 500
         return JSONResponse(status_code=code, content={"status": "error", "message": ret})
     return JSONResponse(status_code=200, content={"status": "success"})
+
+
+@router.post("/{username}/totp/use", dependencies=[Depends(guard)])
+def use_totp_counter(username: str, req: TotpUseRequest) -> JSONResponse:
+    """Consume a TOTP counter once, so the same code cannot be replayed on another UI worker.
+
+    A refusal is not an error: it is the replay defence firing, and the caller distinguishes it
+    from an outage by the 200 plus ``consumed: false``.
+    """
+    db = get_db()
+    consumed = db.use_ui_user_totp(username, req.totp_secret, req.counter)
+    # `readonly` rides along deliberately. A refusal means either "already spent" or "nothing can be
+    # written at all", and only the database knows which; asking a second endpoint would race its own
+    # answer, and the UI's `readonly` probe reports True whenever the API itself is unreachable —
+    # which would turn an outage into a free replay window.
+    return JSONResponse(status_code=200, content={"status": "success", "consumed": consumed, "readonly": db.readonly})
 
 
 # ── WebAuthn credentials ───────────────────────────────────────────

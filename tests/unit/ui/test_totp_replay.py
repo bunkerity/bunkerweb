@@ -1,26 +1,19 @@
 """A TOTP code that has been used must never be accepted a second time.
 
-`Totp.verify_totp` asks passlib to reject a token whose counter is not newer than the last one
-accepted (`last_counter=`), which is the whole of the replay defence. The counter it hands over
-comes from `get_last_counter`, and the counter it stores comes from `set_last_counter` — and
-`set_last_counter` used to assign into the nested dict *inside* `DATA`:
+The replay defence is a counter: passlib refuses a token whose counter is not newer than the last
+one accepted, so the counter has to be spent exactly once and the store has to be shared. It used
+to be a JSON file under `/var/tmp/bunkerweb`, read and written by whichever gunicorn worker took
+the request -- so two workers could both read the same last counter and both accept the same six
+digits before either write landed, and a restart that rewrote the file dropped it altogether.
 
-    DATA["totp_last_counter"][user.get_id()] = tmatch.counter
+It now lives in the database, behind `POST /users/{username}/totp/use`, whose UPDATE only matches
+a row whose stored counter is still older than the one being spent. What is pinned here is the
+property -- a used code is refused -- plus the two seams that give it its lifetime: the UI asks
+the API rather than a local file, and a refusal is told apart from an outage.
 
-`UIData` persists on `__setitem__`, so the top-level `DATA["totp_last_counter"] = {}` line above
-it wrote an **empty** mapping to disk and the counter itself never left memory. `get_last_counter`
-opens with `DATA.load_from_file()`, which copies that empty mapping back over the in-memory one —
-so every lookup returned `None`, passlib was told "nothing used yet", and the same six digits kept
-working for the rest of the window. Not only across gunicorn workers or a restart: in the same
-process, on the very next call.
-
-What is pinned here is the property — a used code is refused — plus the mechanism that gives it
-its lifetime: the counter is on **disk**, so a second worker and a restarted one both see it.
-
-passlib and qrcode are not in the unit-test venv, so the factory is a stand-in that implements
-the one contract this code depends on: `verify(...)` raises `UsedTokenError` (a `TokenError`)
-when the token's counter is not newer than `last_counter`. Everything else — `UIData`, and the
-`Totp` methods under test — is the real thing.
+passlib and qrcode are not in the unit-test venv, so the factory is a stand-in that implements the
+one contract this code depends on: `verify(...)` returns a match carrying the token's counter.
+`FakeApiClient` implements the other one: the conditional UPDATE, as a dict.
 """
 
 import importlib.util
@@ -35,26 +28,40 @@ import pytest
 _UI_ROOT = Path(__file__).resolve().parents[3] / "src" / "ui"
 MODEL_PATH = _UI_ROOT / "app" / "models" / "totp.py"
 
-from app.models.ui_data import UIData  # noqa: E402 — `src/ui` is on sys.path via conftest
-
 
 class TokenError(Exception):
     """Stands in for `passlib.exc.TokenError`."""
-
-
-class UsedTokenError(TokenError):
-    """Stands in for `passlib.exc.UsedTokenError`, which passlib raises on replay."""
 
 
 class MalformedTokenError(TokenError):
     """Stands in for `passlib.exc.MalformedTokenError`."""
 
 
+class ApiClientError(Exception):
+    """Stands in for `app.api_client.ApiClientError`."""
+
+    def __init__(self, message="boom"):
+        super().__init__(message)
+        self.message = message
+
+
+class ApiUnavailableError(Exception):
+    """Stands in for `app.api_client.ApiUnavailableError` — a *sibling* of `ApiClientError`.
+
+    Not a subclass, because the real ones are not (`base_api_client.py`): `src/ui/app/routes/totp.py`
+    catches them in that order and would read an outage as a 4xx if this shape were copied forward.
+    """
+
+    def __init__(self, message="API unavailable"):
+        super().__init__(message)
+        self.message = message
+
+
 class FakeTotpFactory:
     """passlib's `TOTP.verify` reduced to its counter contract.
 
-    A token is its own counter here ("42" -> counter 42), so a test can replay one by
-    submitting the same string twice, exactly as an attacker replays six digits.
+    A token is its own counter here ("42" -> counter 42), so a test can replay one by submitting
+    the same string twice, exactly as an attacker replays six digits.
     """
 
     def verify(self, token, secret, *, window=None, last_counter=None):
@@ -62,10 +69,40 @@ class FakeTotpFactory:
             counter = int(token)
         except ValueError:
             raise MalformedTokenError(token)
-        # passlib: "token has already been used, or is older than the last one accepted"
-        if last_counter is not None and counter <= last_counter:
-            raise UsedTokenError(token)
         return SimpleNamespace(counter=counter)
+
+
+class FakeApiClient:
+    """`POST /users/{u}/totp/use` as the API implements it: spend the counter, or refuse.
+
+    `readonly` rides in the response because only the database knows whether a refusal means
+    "already spent" or "nothing can be written", and the client's own `readonly` property is a
+    5-second cache that answers **True whenever its probe fails** -- so reading it after a failed
+    consume turns an API outage into a free replay window. Reading it is a defect, so it is a
+    property here that fails the test loudly instead of a value that quietly papers over one.
+    """
+
+    def __init__(self):
+        self.counters = {}
+        self.readonly_db = False
+        self.raises = None
+        self.calls = []
+
+    @property
+    def readonly(self):
+        raise AssertionError("verify_totp must not consult the client's cached readonly probe")
+
+    def use_totp_counter(self, username, totp_secret, counter):
+        self.calls.append((username, totp_secret, counter))
+        if self.raises:
+            raise self.raises
+        if self.readonly_db:
+            return {"status": "success", "consumed": False, "readonly": True}
+        stored = self.counters.get((username, totp_secret))
+        if stored is not None and counter <= stored:
+            return {"status": "success", "consumed": False, "readonly": False}
+        self.counters[(username, totp_secret)] = counter
+        return {"status": "success", "consumed": True, "readonly": False}
 
 
 def _stub(name, **attributes):
@@ -77,27 +114,16 @@ def _stub(name, **attributes):
     return module
 
 
-@pytest.fixture
-def totp_model(tmp_path):
-    """`app/models/totp.py` executed against a real, file-backed `UIData`.
-
-    The encryption-keys file is real too: the module refuses to import without one.
-    """
-    lib_dir = tmp_path / "lib"
-    lib_dir.mkdir()
-    (lib_dir / ".totp_encryption_keys.json").write_text(json.dumps({"1": "0" * 32}), encoding="utf-8")
-
-    data_file = tmp_path / "ui_data.json"
-    data = UIData(data_file)
-
-    factory = FakeTotpFactory()
+def _load(lib_dir, api_client, logger, suffix=""):
+    """`app/models/totp.py` executed against the given API client, as one gunicorn worker."""
     stubs = {
-        "app.dependencies": _stub("app.dependencies", DATA=data),
-        "app.utils": _stub("app.utils", LIB_DIR=lib_dir, LOGGER=Mock(), stop=Mock()),
+        "app.api_client": _stub("app.api_client", ApiClientError=ApiClientError, ApiUnavailableError=ApiUnavailableError),
+        "app.dependencies": _stub("app.dependencies", API_CLIENT=api_client),
+        "app.utils": _stub("app.utils", LIB_DIR=lib_dir, LOGGER=logger, stop=Mock()),
         "passlib": _stub("passlib"),
         "passlib.totp": _stub(
             "passlib.totp",
-            TOTP=SimpleNamespace(using=lambda **kwargs: factory),
+            TOTP=SimpleNamespace(using=lambda **kwargs: FakeTotpFactory()),
             MalformedTokenError=MalformedTokenError,
             TokenError=TokenError,
             TotpMatch=SimpleNamespace,
@@ -107,13 +133,32 @@ def totp_model(tmp_path):
         "qrcode.image": _stub("qrcode.image"),
         "qrcode.image.pil": _stub("qrcode.image.pil", PilImage=Mock()),
     }
-
-    module_name = "app.models._totp_replay_test"
+    module_name = f"app.models._totp_replay_test{suffix}"
     spec = importlib.util.spec_from_file_location(module_name, MODEL_PATH)
     module = importlib.util.module_from_spec(spec)
     with patch.dict(sys.modules, {**stubs, module_name: module}):
         spec.loader.exec_module(module)
-        yield SimpleNamespace(totp=module.totp, data=data, data_file=data_file, user=SimpleNamespace(get_id=lambda: "alice", totp_secret="SECRET"))
+    return module
+
+
+@pytest.fixture
+def totp_model(tmp_path):
+    """One worker: the real `Totp`, a fake API, and the real encryption-keys file it needs."""
+    lib_dir = tmp_path / "lib"
+    lib_dir.mkdir()
+    (lib_dir / ".totp_encryption_keys.json").write_text(json.dumps({"1": "0" * 32}), encoding="utf-8")
+
+    api_client = FakeApiClient()
+    logger = Mock()
+    module = _load(lib_dir, api_client, logger)
+    return SimpleNamespace(
+        totp=module.totp,
+        api_client=api_client,
+        logger=logger,
+        lib_dir=lib_dir,
+        user=SimpleNamespace(get_id=lambda: "alice", totp_secret="SECRET"),
+        load=lambda suffix: _load(lib_dir, api_client, logger, suffix),
+    )
 
 
 def test_a_used_code_is_refused_the_second_time(totp_model):
@@ -129,16 +174,15 @@ def test_an_older_code_is_refused_too(totp_model):
     assert totp_model.totp.verify_totp("43", user=totp_model.user) is True
 
 
-def test_the_counter_reaches_disk(totp_model):
-    """In-memory only would still let a second gunicorn worker — or a restart — accept the code."""
+def test_a_second_worker_refuses_the_code_the_first_one_spent(totp_model):
+    """The point of moving the counter out of the process: another worker sees it too.
+
+    A separate import of the module is a separate gunicorn worker -- separate module globals,
+    separate `Totp` instance -- sharing only what the two really share, the database.
+    """
+    second_worker = totp_model.load("_worker2")
     assert totp_model.totp.verify_totp("42", user=totp_model.user) is True
-
-    on_disk = json.loads(totp_model.data_file.read_text(encoding="utf-8"))
-    assert on_disk.get("totp_last_counter", {}).get("alice") == 42
-
-    # A different process reading the same file is what a second worker really is.
-    fresh = UIData(totp_model.data_file)
-    assert fresh["totp_last_counter"]["alice"] == 42
+    assert second_worker.totp.verify_totp("42", user=totp_model.user) is False
 
 
 def test_counters_are_per_user(totp_model):
@@ -149,7 +193,79 @@ def test_counters_are_per_user(totp_model):
     assert totp_model.totp.verify_totp("42", user=other) is False
 
 
+def test_enrolment_verifies_without_consuming_anything(totp_model):
+    """Enrolment checks a candidate secret the user does not have stored yet.
+
+    There is no counter to spend against a secret that is not the user's, and asking the database
+    to spend one would refuse the enrolment: the caller stores the secret, which seeds the counter.
+    """
+    assert totp_model.totp.verify_totp("42", totp_secret="CANDIDATE", user=totp_model.user) is True
+    assert totp_model.api_client.calls == []
+
+
 def test_enrolment_verifies_without_a_user(totp_model):
-    """`user` is optional in the signature: enrolment checks a candidate secret before there is
-    anything to store a counter against. Reading `user.get_id()` there is an AttributeError."""
+    """`user` is optional in the signature: setup checks a candidate before any user row exists."""
     assert totp_model.totp.verify_totp("42", totp_secret="CANDIDATE") is True
+    assert totp_model.api_client.calls == []
+
+
+def test_a_malformed_token_is_refused_without_a_call(totp_model):
+    assert totp_model.totp.verify_totp("not-a-code", user=totp_model.user) is False
+    assert totp_model.api_client.calls == []
+
+
+def test_neither_secret_nor_user_is_a_programming_error(totp_model):
+    with pytest.raises(ValueError):
+        totp_model.totp.verify_totp("42")
+
+
+def test_a_read_only_database_keeps_the_login_available(totp_model):
+    """The counter store is the database; when it cannot be written, refusing every code would
+    lock every 2FA user out. The code is accepted, unconsumed, and the warning says so.
+
+    The verdict comes from the API's own answer, so it is still one request per attempt -- the code
+    is not waved through without asking."""
+    totp_model.api_client.readonly_db = True
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is True
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is True
+    assert len(totp_model.api_client.calls) == 2
+    assert totp_model.logger.warning.called
+
+
+def test_an_unreachable_api_refuses_rather_than_letting_the_code_through(totp_model):
+    """An outage is not a read-only database: it must not become a free replay window.
+
+    This is the shape the `readonly` property guards. The real client answers True to `readonly`
+    whenever its probe fails, so a version of `verify_totp` that gates on it -- before or after the
+    consume -- reads an outage as "the database is read-only" and accepts every replayed code."""
+    totp_model.api_client.raises = ApiUnavailableError("api down")
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is False
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is False
+    assert totp_model.logger.error.called
+
+
+def test_a_4xx_from_the_endpoint_refuses_too(totp_model):
+    """A malformed or rejected request is not permission to log in."""
+    totp_model.api_client.raises = ApiClientError("bad request")
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is False
+    assert totp_model.logger.error.called
+
+
+def test_a_replay_stays_refused_while_the_database_is_writable(totp_model):
+    """The refusal path that is *not* read-only: `consumed` false, `readonly` false, code refused.
+
+    Pinned separately because it is the branch a read-only fallback is most likely to swallow."""
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is True
+    assert totp_model.totp.verify_totp("42", user=totp_model.user) is False
+    assert totp_model.logger.warning.called is False
+
+
+def test_match_totp_reports_an_unusable_stored_secret(totp_model):
+    """A wrong code is routine; a secret that cannot be parsed is an operator problem."""
+
+    def explode(token, secret, *, window=None, last_counter=None):
+        raise ValueError("bad secret")
+
+    totp_model.totp._totp.verify = explode
+    assert totp_model.totp.match_totp("42", "SECRET") is None
+    assert totp_model.logger.error.called

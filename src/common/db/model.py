@@ -874,6 +874,10 @@ class Users(Base):
 
     # 2FA
     totp_secret: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    # The last TOTP counter this user consumed. The replay defence lives here rather than in a
+    # UI-local file: gunicorn runs several worker processes and the UI can run several replicas,
+    # and a per-process counter lets the same code be replayed on a neighbour.
+    totp_last_counter: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
 
     creation_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     update_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

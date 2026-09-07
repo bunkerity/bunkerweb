@@ -43,11 +43,23 @@ def totp_page():
             recovery_code = TOTP.verify_recovery_code(request.form["totp_token"], user=current_user)
             if not recovery_code:
                 return handle_error("The token is invalid.", "totp")
-            flash(f"You've used one of your recovery codes. You have {len(current_user.list_recovery_codes)} left.")
+            # The database is the only store that can spend a code. Try to spend it first, and read
+            # the refusal: 409 is the API saying the database is read-only, and a valid recovery code
+            # then keeps the login available without being consumed, exactly like a TOTP code
+            # (`app/models/totp.py`), instead of locking every 2FA user out. Anything else -- an
+            # unreachable API included, which `ApiUnavailableError` also covers -- is refused, so an
+            # outage cannot become a window where recovery codes survive their own use.
             try:
                 API_CLIENT.use_recovery_code(current_user.get_id(), recovery_code)
-            except (ApiClientError, ApiUnavailableError):
+            except ApiClientError as e:
+                if e.status_code != 409:
+                    return handle_error("An error occurred while using the recovery code.", "totp")
+                LOGGER.warning("Database is read-only, recovery code accepted without being consumed")
+                flash("The database is read-only, the recovery code you used stays valid.", "warning")
+            except ApiUnavailableError:
                 return handle_error("An error occurred while using the recovery code.", "totp")
+            else:
+                flash(f"You've used one of your recovery codes. You have {len(current_user.list_recovery_codes)} left.")
 
         session["mfa_validated"] = True
         try:

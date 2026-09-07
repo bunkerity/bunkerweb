@@ -551,6 +551,10 @@ class ApiClient(BaseApiClient):
     def use_recovery_code(self, username, hashed_code):
         return self._post(f"/users/{username}/recovery-codes/use", json={"hashed_code": hashed_code})
 
+    def use_totp_counter(self, username, totp_secret, counter) -> dict:
+        """Spend a TOTP counter. `consumed` False means already used, or the database is `readonly`."""
+        return self._post(f"/users/{username}/totp/use", json={"totp_secret": totp_secret, "counter": counter})
+
     # ── WebAuthn credentials ────────────────────────────────────────────
 
     def get_user_webauthn_credentials(self, username):

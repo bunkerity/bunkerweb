@@ -33,34 +33,3 @@ class UIData(dict):
     def update(self, *args, **kwargs):
         super().update(*args, **kwargs)
         self.write_to_file()
-
-    def set_nested(self, keys, value, keep_max: bool = False):
-        """
-        Safely update nested dictionary entries and persist to disk.
-
-        Args:
-            keys (list): List of keys forming the path to the value
-            value: Value to set at the specified path
-            keep_max (bool): If True, skip the write when the existing value is already >= value
-                (e.g. a replay-counter write racing an already-newer one loses instead of regressing it)
-        """
-        if not keys:
-            return
-
-        # Navigate to the parent dictionary
-        target = self
-        for key in keys[:-1]:
-            if key not in target:
-                target[key] = {}
-            target = target[key]
-
-        if keep_max:
-            current = target.get(keys[-1])
-            if isinstance(current, (int, float)) and current >= value:
-                return
-
-        # Set the value in the final level
-        target[keys[-1]] = value
-
-        # Ensure changes are written to disk
-        self.write_to_file()
