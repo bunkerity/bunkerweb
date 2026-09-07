@@ -20,9 +20,11 @@ collection entirely depending on which one wins the race. A uniquely-named sibli
 such landmine.
 
 Caution for the next test author: `should_keep_previous_cache` is a pure predicate, safe to call
-freely. `swap_and_cache_plugins` is NOT -- it starts with `rmtree(CRS_PLUGINS_DIR)` against the
-real `/var/cache/bunkerweb/modsecurity/crs/plugins`. Nothing in this package calls it; don't,
-without monkeypatching `CRS_PLUGINS_DIR`/`NEW_PLUGINS_DIR`/`JOB` in the returned namespace first.
+freely. `swap_and_cache_plugins` is NOT -- it publishes over
+`/var/cache/bunkerweb/modsecurity/crs/plugins` (staged and renamed since dev `63a7f6a4d`, but still
+against the real path, and `StagedDirectory` refuses a target that is not absolute). Call it only
+with `CRS_PLUGINS_DIR`/`NEW_PLUGINS_DIR`/`JOB` monkeypatched in the returned namespace, as
+`test_download_crs_plugins_retry.py` and `test_crs_publication_transaction.py` both do.
 """
 
 import sys

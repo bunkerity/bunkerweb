@@ -7,19 +7,28 @@ from json import dumps as json_dumps
 from inspect import currentframe, getframeinfo
 from io import BytesIO
 from logging import Logger
-from os import getenv, replace
+from os import getenv
 from os.path import sep
 from pathlib import Path
 from shutil import rmtree
-from tarfile import TarFile, open as tar_open
+from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
-from tempfile import NamedTemporaryFile
 from time import time
-from stat import S_IMODE
 
-from common_utils import bytes_hash, file_hash, safe_tar_extractall
+from common_utils import bytes_hash, file_hash
+from cache_restore import (  # type: ignore
+    ATOMIC_TMP_SUFFIX,
+    cache_tree,
+    checked_cache_path,
+    checked_folder_target,
+    is_preserved,
+    recover_directory,
+    restore_directory,
+    transaction_markers,
+    write_atomic as _write_atomic,
+)
 
 LOCK = Lock()
 EXPIRE_TIME = {
@@ -30,11 +39,8 @@ EXPIRE_TIME = {
 }
 
 
-# `_write_atomic` drops its scratch file next to the target, where `Job.restore_cache`'s stale-file
-# sweep also runs. The sweep deletes anything it does not recognise, so the temporary needs a marker
-# it can match on: a leading dot is not enough, because `.key` files are genuine cache entries that
-# get pushed to instances.
-ATOMIC_TMP_SUFFIX = ".bw-tmp"
+# `ATOMIC_TMP_SUFFIX` moved to `cache_restore` with the writer itself (dev 63a7f6a4d) and is
+# re-exported here: `jobs` is what every job script and test imports.
 # How long a temporary may exist before the sweep treats it as an orphan of a killed process rather
 # than someone else's write in progress. A leaked temporary is not harmless: the cache is shipped to
 # instances as a tar of this directory, so it would travel with it.
@@ -202,42 +208,6 @@ def drain_deferral_reason() -> Optional[str]:
     return reason
 
 
-def _write_atomic(target: Path, data: bytes) -> None:
-    """Write data to target atomically to avoid partial files."""
-    target.parent.mkdir(parents=True, exist_ok=True)
-    existing_mode = None
-    try:
-        existing_mode = target.stat().st_mode
-    except FileNotFoundError:
-        existing_mode = None
-
-    attempt = 0
-    last_exc: Optional[BaseException] = None
-    while attempt < 3:
-        attempt += 1
-        with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", suffix=ATOMIC_TMP_SUFFIX, delete=False) as tmp:
-            tmp.write(data)
-            tmp.flush()
-            tmp_path = Path(tmp.name)
-
-        if existing_mode is not None:
-            tmp_path.chmod(S_IMODE(existing_mode))
-
-        try:
-            replace(tmp_path, target)
-            return
-        except FileNotFoundError as exc:
-            last_exc = exc
-            tmp_path.unlink(missing_ok=True)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            continue
-        except Exception:
-            tmp_path.unlink(missing_ok=True)
-            raise
-
-    raise last_exc or FileNotFoundError(f"Failed to write atomically to {target}")
-
-
 class Job:
     def __init__(self, logger: Logger, job_path: Optional[Union[str, Path]] = None, db=None, *, deprecated: bool = False):
         """Initialize Job class."""
@@ -306,45 +276,71 @@ class Job:
         plugin_cache_files = set()
         ignored_dirs = set()
 
+        crs_manifest = None
+        crs_archive_name = f"folder:{self.job_path / 'crs/plugins'}.tgz"
+
+        if self.job_path.name == "modsecurity" and job_name == "download-crs-plugins":
+            try:
+                with LOCK:
+                    recover_directory(self.job_path / "crs/plugins")
+            except Exception as e:
+                self.logger.error(f"Error recovering CRS plugin publication: {e}")
+                return False
+            crs_rows = {row["file_name"]: row for row in job_cache_files if row["job_name"] == job_name}
+            # The rendered ModSecurity configuration is the intersection of the manifest and the
+            # directory, so half a pair renders a plugin set that never existed.
+            if ("crs-plugins.json" in crs_rows) != (crs_archive_name in crs_rows):
+                self.logger.error("Incomplete CRS plugin cache pair; keeping the existing directory and manifest")
+                return False
+            crs_manifest = crs_rows.get("crs-plugins.json")
+
+        # Recover all pending swaps before restoring a companion file from the DB.
+        for row in job_cache_files:
+            if row["job_name"] != job_name or not row["file_name"].endswith(".tgz"):
+                continue
+            target = self.job_path.joinpath(row["service_id"] or "", row["file_name"]).parent
+            try:
+                if row["file_name"].startswith("folder:"):
+                    target = checked_folder_target(row["file_name"])
+                with LOCK:
+                    recover_directory(target)
+            except Exception as e:
+                self.logger.error(f"Error recovering cache directory {target}: {e}")
+                return False
+
         for job_cache_file in job_cache_files:
             cache_path = self.job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
             plugin_cache_files.add(cache_path)
+            # Published by the archive's own transaction below, not on its own: a manifest written
+            # here and a directory that then rolls back leave the two out of step.
+            if crs_manifest is not None and job_cache_file is crs_manifest:
+                continue
 
             try:
                 if job_cache_file["file_name"].endswith(".tgz"):
                     extract_path = cache_path.parent
                     if job_cache_file["file_name"].startswith("folder:"):
-                        extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
+                        extract_path = checked_folder_target(job_cache_file["file_name"])
                     if job_cache_file["job_name"] != job_name:
-                        ignored_dirs.add(extract_path.as_posix())
+                        ignored_dirs.add(extract_path)
+                        ignored_dirs.update(transaction_markers(extract_path))
                         continue
                     with LOCK:
-                        rmtree(extract_path, ignore_errors=True)
-                        extract_path.mkdir(parents=True, exist_ok=True)
-                        with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                            assert isinstance(tar, TarFile)
-                            try:
-                                # tar_filter="auto" preserves symlinks when the archive contains
-                                # them (e.g. Let's Encrypt live/* → archive/*) while still
-                                # applying the stricter "data" filter to link-free archives.
-                                safe_tar_extractall(tar, extract_path, tar_filter="auto")
-                                ignored_dirs.add(extract_path.as_posix())
-                                self.logger.debug(f"Restored cache directory {extract_path}")
-                            except Exception as e:
-                                # NOTE: rmtree() above already wiped extract_path before we got
-                                # here. Callers MUST check self.restore_ok before re-caching
-                                # from disk, otherwise they will overwrite the good DB row with
-                                # the empty post-rmtree state.
-                                self.logger.error(
-                                    f"Error extracting tar file for job '{job_cache_file['job_name']}' "
-                                    f"(plugin '{self.job_path.name}', file '{job_cache_file['file_name']}'): {e}"
-                                )
-                                ret = False
+                        # Staged, then renamed into place: an extraction that fails -- or a process
+                        # killed mid-restore -- leaves the previous directory untouched instead of
+                        # the empty post-rmtree state this code used to publish.
+                        if crs_manifest is not None and job_cache_file["file_name"] == crs_archive_name:
+                            restore_directory(extract_path, job_cache_file["data"], self.job_path / "crs-plugins.json", crs_manifest["data"])
+                        else:
+                            restore_directory(extract_path, job_cache_file["data"])
+                        ignored_dirs.add(extract_path)
+                        ignored_dirs.update(transaction_markers(extract_path))
+                        self.logger.debug(f"Restored cache directory {extract_path}")
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
-                _write_atomic(cache_path, job_cache_file["data"])
-                ignored_dirs.add(cache_path.parent.as_posix())
+                _write_atomic(checked_cache_path(self.job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"]), job_cache_file["data"])
+                ignored_dirs.add(cache_path.parent)
                 self.logger.debug(
                     "Restored cache file " + ((job_cache_file["service_id"] + "/") if job_cache_file["service_id"] else "") + job_cache_file["file_name"]
                 )
@@ -367,11 +363,14 @@ class Job:
             # test, so the expression differs and the outcome does not.)
             if not job_cache_files and self.job_path.is_dir() and any(self.job_path.iterdir()):
                 self.logger.warning(f"No cache row for plugin '{self.job_path.name}'; keeping the files already in {self.job_path} instead of clearing them.")
-            elif not manual and self.job_path.is_dir():
+            elif ret and not manual and self.job_path.is_dir():
+                # `ret` gates the sweep: a row that failed to restore left the disk holding the
+                # previous generation, and sweeping it against a cache set that row is missing
+                # from would delete exactly the material the failure preserved.
                 # Deepest first: unlink stale non-cached files, then drop only now-empty dirs —
                 # never rmtree the job_path root (its children are freshly restored cache dirs).
-                for file in sorted(self.job_path.rglob("*"), key=lambda p: len(p.parts), reverse=True):
-                    if file.as_posix().startswith(tuple(ignored_dirs)):
+                for file in sorted(cache_tree(self.job_path), key=lambda p: len(p.parts), reverse=True):
+                    if is_preserved(file, ignored_dirs):
                         continue
 
                     # Another job's in-flight atomic write lives here and is not in
@@ -397,10 +396,10 @@ class Job:
                         continue
 
                     self.logger.debug(f"Checking if {file} should be removed")
-                    if file.is_file() and file not in plugin_cache_files:
+                    if (file.is_symlink() or file.is_file()) and file not in plugin_cache_files:
                         self.logger.debug(f"Removing non-cached file {file}")
                         file.unlink(missing_ok=True)
-                    elif file.is_dir() and file != self.job_path and not any(file.iterdir()):
+                    elif not file.is_symlink() and file.is_dir() and file != self.job_path and not any(file.iterdir()):
                         self.logger.debug(f"Removing empty directory {file}")
                         rmtree(file, ignore_errors=True)
 
@@ -413,7 +412,11 @@ class Job:
         if isinstance(name, Path):
             name = str(name)
 
-        cache_path = self.job_path.joinpath(service_id, name)
+        try:
+            cache_path = checked_cache_path(self.job_path, service_id, name)
+        except ValueError as error:
+            self.logger.error(f"Refusing to read cache entry {name!r}: {error}")
+            return None
         ret_data = {}
         if cache_path.is_file():
             if with_data and not with_info:
@@ -462,6 +465,11 @@ class Job:
 
         ret, err = True, "success"
         cache_path = self.job_path.joinpath(service_id, name)
+        if not name.startswith("folder:"):
+            try:
+                cache_path = checked_cache_path(self.job_path, service_id, name)
+            except ValueError as error:
+                return False, str(error)
 
         if isinstance(file_cache, bytes):
             content = file_cache
@@ -482,7 +490,7 @@ class Job:
             if err:
                 ret = False
 
-            if ret and isinstance(file_cache, Path) and delete_file and file_cache != cache_path:
+            if ret and isinstance(file_cache, Path) and delete_file and file_cache.resolve() != cache_path:
                 file_cache.unlink(missing_ok=True)
         except:
             return False, f"exception :\n{format_exc()}"
@@ -515,7 +523,10 @@ class Job:
         ret, err = True, "success"
         job_name = job_name or self.job_name
         job_path = self.job_path.joinpath(service_id)
-        cache_path = job_path.joinpath(name)
+        try:
+            cache_path = checked_cache_path(self.job_path, service_id, name)
+        except ValueError as error:
+            return False, str(error)
 
         if cache_path.is_file():
             cache_path.unlink(missing_ok=True)
@@ -524,7 +535,11 @@ class Job:
             rmtree(job_path, ignore_errors=True)
 
         try:
-            self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
+            err = self.db.delete_job_cache(name, job_name=job_name, service_id=service_id)  # type: ignore
+            if err:
+                # The local file is already gone; reporting success here left the caller believing
+                # the row went with it.
+                return False, err
         except:
             return False, f"exception :\n{format_exc()}"
         return ret, err
@@ -534,7 +549,11 @@ class Job:
         if isinstance(name, Path):
             name = str(name)
 
-        cache_path = self.job_path.joinpath(service_id, name)
+        try:
+            cache_path = checked_cache_path(self.job_path, service_id, name)
+        except ValueError as error:
+            self.logger.error(f"Refusing to hash cache entry {name!r}: {error}")
+            return None
         if cache_path.is_file():
             return file_hash(cache_path)
 

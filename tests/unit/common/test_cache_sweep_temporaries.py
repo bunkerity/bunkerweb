@@ -42,9 +42,7 @@ def job(tmp_path):
     # `restore_cache` adds every restored file's PARENT to the ignore list. That would be job_path,
     # so the sweep would skip the whole directory. Measured, not guessed: with `service_id: ""`
     # both tests below fail.
-    instance.db.get_jobs_cache_files.return_value = [
-        {"service_id": "shared", "file_name": "asn.mmdb", "job_name": "geoip-asn", "data": b"payload"}
-    ]
+    instance.db.get_jobs_cache_files.return_value = [{"service_id": "shared", "file_name": "asn.mmdb", "job_name": "geoip-asn", "data": b"payload"}]
     return instance
 
 
@@ -57,16 +55,18 @@ def test_write_atomic_marks_its_temporary(tmp_path):
     staged = []
 
     # os.replace is what moves the temporary into place; capture the directory just before it does.
-    import jobs as jobs_module
+    # The writer itself moved to `cache_restore` with dev 63a7f6a4d; `jobs._write_atomic` is that
+    # function, so the spy goes where `replace` is now looked up.
+    import cache_restore as cache_restore_module
 
-    original_replace = jobs_module.replace
+    original_replace = cache_restore_module.replace
 
     def _spy(src, dst):
         staged.append(Path(src).name)
         return original_replace(src, dst)
 
     monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(jobs_module, "replace", _spy)
+    monkeypatch.setattr(cache_restore_module, "replace", _spy)
     try:
         _write_atomic(target, b"payload")
     finally:

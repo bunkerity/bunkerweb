@@ -35,6 +35,7 @@ from requests import get, head
 from requests.exceptions import ConnectionError, Timeout
 
 from common_utils import bytes_hash, safe_tar_extractall, safe_zip_extractall  # type: ignore
+from cache_restore import StagedDirectory  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -189,11 +190,16 @@ def swap_and_cache_plugins(service_plugins: Dict[str, Set[str]], plugin_failures
         status = 2
         return False
 
-    rmtree(CRS_PLUGINS_DIR, ignore_errors=True)
-    if NEW_PLUGINS_DIR.is_dir():
-        copytree(NEW_PLUGINS_DIR, CRS_PLUGINS_DIR)
-    else:
-        CRS_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
+    # Staged, then renamed into place (port of dev 63a7f6a4d). `rmtree` + `copytree` published
+    # through the live directory: a copy interrupted anywhere in between left ModSecurity with a
+    # partial plugin set -- and the rendered configuration is the intersection of that directory
+    # and crs-plugins.json, so the missing plugins simply stopped being enforced. The journal the
+    # publication leaves behind is what `Job.restore_cache` rolls back on the next start.
+    with StagedDirectory(CRS_PLUGINS_DIR) as staged:
+        if NEW_PLUGINS_DIR.is_dir():
+            copytree(NEW_PLUGINS_DIR, staged.path, dirs_exist_ok=True)
+        staged.publish()
+        staged.commit()
 
     # sorted(), not list(): the template emits one include per entry in the order this mapping gives,
     # so an unordered set would reshuffle the CRS plugin includes on every run and make the change

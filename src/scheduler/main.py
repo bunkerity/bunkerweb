@@ -35,6 +35,15 @@ from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, c
 from env_file import parse_env_file  # type: ignore
 from logger import getLogger  # type: ignore
 from jobs import _write_atomic  # type: ignore
+from cache_restore import (  # type: ignore
+    cache_tree,
+    checked_cache_path,
+    checked_folder_target,
+    is_preserved,
+    recover_directory,
+    restore_directory,
+    transaction_markers,
+)
 from api_client import SchedulerApiClient
 
 from JobScheduler import JobScheduler
@@ -445,6 +454,40 @@ def generate_caches():
     plugin_cache_files = set()
     plugin_dirs: Set[Path] = set()
     ignored_dirs = set()
+    # A plugin whose restore failed keeps whatever the previous generation left on disk, so it is
+    # excluded from the sweep below: sweeping it against a cache set the failed row is missing from
+    # would delete exactly the material the failure preserved.
+    failed_plugins: Set[Path] = set()
+
+    # The first CRS publication can be interrupted before its first DB row exists. Recover that
+    # declared transaction target before any row is restored, whatever order the rows arrive in.
+    crs_plugin_path = Path(sep, "var", "cache", "bunkerweb", "modsecurity")
+    crs_archive_name = f"folder:{crs_plugin_path / 'crs/plugins'}.tgz"
+    crs_rows = {row["file_name"]: row for row in job_cache_files if row["plugin_id"] == "modsecurity" and row["job_name"] == "download-crs-plugins"}
+    try:
+        recover_directory(crs_plugin_path / "crs/plugins")
+        # The rendered configuration is the intersection of the manifest and the directory, so half
+        # a pair renders a plugin set nobody produced.
+        if ("crs-plugins.json" in crs_rows) != (crs_archive_name in crs_rows):
+            raise ValueError("Incomplete CRS plugin cache pair; keeping the existing directory and manifest")
+    except BaseException as e:
+        LOGGER.error(f"Error recovering CRS plugin publication: {e}")
+        failed_plugins.add(crs_plugin_path)
+
+    # A directory journal may include its companion manifest. Recover before any row is restored,
+    # regardless of database row ordering.
+    for row in job_cache_files:
+        if not row["file_name"].endswith(".tgz"):
+            continue
+        job_path = Path(sep, "var", "cache", "bunkerweb", row["plugin_id"])
+        target = job_path.joinpath(row["service_id"] or "", row["file_name"]).parent
+        try:
+            if row["file_name"].startswith("folder:"):
+                target = checked_folder_target(row["file_name"])
+            recover_directory(target)
+        except BaseException as e:
+            LOGGER.error(f"Error recovering cache directory {target}: {e}")
+            failed_plugins.add(job_path)
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
@@ -452,38 +495,51 @@ def generate_caches():
         cache_path = job_path.joinpath(job_cache_file["service_id"] or "", job_cache_file["file_name"])
         plugin_cache_files.add(cache_path)
 
+        if job_path in failed_plugins:
+            continue
+        if job_path == crs_plugin_path and job_cache_file["file_name"] == "crs-plugins.json":
+            # Published by the archive's own transaction below, never on its own.
+            continue
+
         try:
             if job_cache_file["file_name"].endswith(".tgz"):
                 extract_path = cache_path.parent
                 if job_cache_file["file_name"].startswith("folder:"):
-                    extract_path = Path(job_cache_file["file_name"].split("folder:", 1)[1].rsplit(".tgz", 1)[0])
-                ignored_dirs.add(extract_path.as_posix())
-                rmtree(extract_path, ignore_errors=True)
-                extract_path.mkdir(parents=True, exist_ok=True)
-                with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
-                    try:
-                        tar.extractall(extract_path, filter="fully_trusted")
-                    except TypeError:
-                        tar.extractall(extract_path)
+                    extract_path = checked_folder_target(job_cache_file["file_name"])
+                ignored_dirs.add(extract_path)
+                ignored_dirs.update(transaction_markers(extract_path))
+                # Staged, then renamed into place: the rmtree-then-extract this replaces published
+                # an EMPTY directory whenever the extraction failed or the process was killed
+                # between the two, and `filter="fully_trusted"` extracted whatever the archive
+                # claimed. `restore_directory` pre-validates every member (CVE-2025-4517).
+                if job_path == crs_plugin_path and job_cache_file["file_name"] == crs_archive_name:
+                    manifest = crs_rows.get("crs-plugins.json")
+                    if manifest is None:
+                        raise ValueError("CRS plugin manifest not found in database")
+                    restore_directory(extract_path, job_cache_file["data"], crs_plugin_path / "crs-plugins.json", manifest["data"])
+                else:
+                    restore_directory(extract_path, job_cache_file["data"])
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
-            _write_atomic(cache_path, job_cache_file["data"])
+            checked_path = checked_cache_path(job_path, job_cache_file["service_id"] or "", job_cache_file["file_name"])
+            _write_atomic(checked_path, job_cache_file["data"])
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
-            if cache_path.stat().st_mode & 0o777 != desired_perms:
-                cache_path.chmod(desired_perms)
+            if checked_path.stat().st_mode & 0o777 != desired_perms:
+                checked_path.chmod(desired_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
         except BaseException as e:
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+            failed_plugins.add(job_path)
 
     for plugin_path in plugin_dirs:
-        if not plugin_path.is_dir():
+        if plugin_path in failed_plugins or not plugin_path.is_dir():
             continue
-        for resource_path in list(plugin_path.rglob("*")):
-            if resource_path.as_posix().startswith(tuple(ignored_dirs)):
+        for resource_path in sorted(cache_tree(plugin_path), key=lambda path: len(path.parts), reverse=True):
+            if is_preserved(resource_path, ignored_dirs):
                 continue
 
             LOGGER.debug(f"Checking if {resource_path} should be removed")
-            if resource_path not in plugin_cache_files and resource_path.is_file():
+            if resource_path not in plugin_cache_files and (resource_path.is_symlink() or resource_path.is_file()):
                 LOGGER.debug(f"Removing non-cached file {resource_path}")
                 resource_path.unlink(missing_ok=True)
                 if resource_path.parent.is_dir() and not list(resource_path.parent.iterdir()):
@@ -492,9 +548,13 @@ def generate_caches():
                     if resource_path.parent == plugin_path:
                         break
                 continue
-            elif resource_path.is_dir() and not list(resource_path.iterdir()):
+            elif not resource_path.is_symlink() and resource_path.is_dir() and not list(resource_path.iterdir()):
                 LOGGER.debug(f"Removing empty directory {resource_path}")
                 rmtree(resource_path, ignore_errors=True)
+                continue
+            elif resource_path.is_symlink():
+                # A cached symlink (Let's Encrypt live/* -> archive/*) is a cache entry, not a
+                # permission target: chmod would follow it onto the file it points at.
                 continue
 
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
