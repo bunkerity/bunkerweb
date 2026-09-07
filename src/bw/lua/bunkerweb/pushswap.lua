@@ -122,22 +122,61 @@ function pushswap.swap(destination, staging)
 		for i = #undo, 1, -1 do
 			local ok = move_entry(undo[i].from, undo[i].to)
 			if not ok then
-				stuck[#stuck + 1] = undo[i].to
+				stuck[#stuck + 1] = undo[i]
 			end
 		end
 		-- DELIBERATE DIVERGENCE FROM origin/dev -- do not "reconcile" this back.
-		-- dev removes the trash unconditionally here. A stuck entry is one whose OLD copy is
+		-- dev removed the trash unconditionally here. A stuck entry is one whose OLD copy is
 		-- still parked in the trash, so that unconditional `rm -rf` destroys the last remaining
-		-- copy of it : dev's mechanism has no recovery from its own partial failure. Keep the
+		-- copy of it : that mechanism had no recovery from its own partial failure. Keep the
 		-- trash whenever anything is stuck, so the parked originals survive for the caller's
 		-- last-resort restore and for manual recovery after it.
 		if #stuck == 0 then
 			execute("rm -rf " .. quote(trash))
+			return nil
 		end
-		if #stuck > 0 then
-			return "rollback incomplete, left in place: " .. table.concat(stuck, ", ")
+		-- Port of dev a0a2bb427 on top of that divergence: keeping the trash is not enough on its
+		-- own. Trash is a FIXED name, and the next swap opens by removing it -- so the copy this
+		-- branch just preserved is destroyed by the very next push, and the message meanwhile
+		-- names the destination path, which is exactly where the entry is NOT. Move the whole
+		-- trash aside under a name no later swap touches, and say where it went.
+		--
+		-- A bare rename, not move_entry: both names are children of the destination, so rename(2)
+		-- cannot report EXDEV here, and move_entry's copy fallback would only ever fire on the
+		-- disk-full case this rescue exists for, where it leaves half a copy and reports it as the
+		-- whole one. os.time has second resolution, so the name takes a counter until one is free
+		-- and two failures inside the same second cannot land on each other. The reserved prefix
+		-- keeps the rescue out of the stale-entry sweep and out of every include glob.
+		local kept = trash
+		local base = destination .. "/" .. pushswap.RESERVED_PREFIX .. "rescue." .. tostring(os.time())
+		for i = 0, 9 do
+			local candidate = i == 0 and base or (base .. "." .. i)
+			if not run("test -e " .. quote(candidate)) then
+				if rename(trash, candidate) then
+					kept = candidate
+				end
+				break
+			end
 		end
-		return nil
+		local left = {}
+		for _, item in ipairs(stuck) do
+			-- The entry an operator has to repair is the destination one either way: a park that
+			-- could not be restored left the old copy in the parked tree, a placement that could
+			-- not be undone left the new entry live in the destination.
+			local source = item.from
+			if kept ~= trash and source:sub(1, #trash + 1) == trash .. "/" then
+				source = kept .. source:sub(#trash + 1)
+			end
+			-- Say which it is. When the rename failed, or ten candidates were already taken
+			-- inside one second, `kept` is still the trash -- a path the NEXT push removes.
+			-- Reporting that as "kept" is the pre-fix message with a new wording.
+			if kept == trash then
+				left[#left + 1] = item.target .. " (copy still in " .. source .. ", WILL BE REMOVED by the next push)"
+			else
+				left[#left + 1] = item.target .. " (copy kept at " .. source .. ")"
+			end
+		end
+		return "rollback incomplete, left in place: " .. table.concat(left, ", ")
 	end
 
 	-- DELIBERATE DIVERGENCE FROM origin/dev -- do not "reconcile" this back.
@@ -163,13 +202,13 @@ function pushswap.swap(destination, staging)
 			if not ok then
 				return abort("cannot park " .. name .. ": " .. tostring(err))
 			end
-			undo[#undo + 1] = { from = parked, to = target }
+			undo[#undo + 1] = { from = parked, to = target, target = target }
 		end
 		local ok, err = move_entry(staging .. "/" .. name, target)
 		if not ok then
 			return abort("cannot place " .. name .. ": " .. tostring(err))
 		end
-		undo[#undo + 1] = { from = target, to = staging .. "/" .. name }
+		undo[#undo + 1] = { from = target, to = staging .. "/" .. name, target = target }
 	end
 
 	for name in pairs(existing) do
@@ -179,7 +218,7 @@ function pushswap.swap(destination, staging)
 			if not ok then
 				return abort("cannot sweep " .. name .. ": " .. tostring(err))
 			end
-			undo[#undo + 1] = { from = parked, to = destination .. "/" .. name }
+			undo[#undo + 1] = { from = parked, to = destination .. "/" .. name, target = destination .. "/" .. name }
 		end
 	end
 
