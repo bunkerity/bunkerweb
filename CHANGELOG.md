@@ -118,6 +118,20 @@
 - [BUGFIX] `modsecurity`: a CRS plugin that fails to download or unpack keeps the previously installed plugin set instead of publishing a partial one.
 - [BREAKING] stricter location/audit-log regexes: a refused value reverts to the default, `/` for locations, moving the rule to the site root.
 - [BUGFIX] `crowdsec`: challenge state is namespaced per service, so a captcha solved on one service no longer validates on another.
+- [BUGFIX] `linux`: `variables.env` values are assigned without eval, so a value can no longer run a command as root.
+- [BUGFIX] `ui`: the temporary boot page no longer echoes the startup error file to unauthenticated clients.
+- [BUGFIX] `api`: the Biscuit authorizer uses the `global_config` permission names, so non-admins are no longer refused on `/global_settings`.
+- [BUGFIX] `api`: the HTTPS to HTTP retry keeps the whole instance hostname instead of stripping its leading characters.
+- [BUGFIX] `config`: a wrapped base64 value and a bare declaration in a variables file no longer corrupt each other.
+- [BUGFIX] `config`: a value with an embedded newline is refused: `SERVER_NAME` stops the scheduler, the others revert to their default.
+- [BUGFIX] `cli`: `bwcli` reads `DATABASE_URI` from `scheduler.env` like the scheduler, so a Scheduler Only install uses the right database.
+- [BUGFIX] `api`/`ui`: a plugin id in the push swap's reserved `.bw-` namespace is refused, so it can no longer survive its own deletion.
+- [BUGFIX] `db`: `save_config` no longer empties the dict it was given, and more credential shapes are masked in the logs.
+- [BUGFIX] `installer`: a same-core Docker downgrade (1.6.15 to 1.6.15-rc1) is refused, and the upgrade backup reads `DATABASE_URI` last-wins.
+- [BUGFIX] `autoconf`: each Kubernetes watch has its own health marker, and a cluster path that is not a valid `REVERSE_PROXY_URL` is skipped.
+- [BUGFIX] `ui`: the TOTP replay counter lives in the database, so a used code can no longer be replayed on another UI worker or replica.
+- [BUGFIX] `ui`: a TOTP or recovery code is accepted unconsumed when the database is read-only, instead of locking every 2FA user out.
+- [BUGFIX] `api`: `POST /services/{id}/convert` resolves to the `service_convert` permission instead of `service_create`.
 - [BUGFIX] `db`: fix a session leak in `save_config`: the multisite global-settings pass parked a lock and a pooled connection in the API process.
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 - [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.
