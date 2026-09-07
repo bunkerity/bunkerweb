@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Default statuses to check
-DEFAULT_STATUSES=("ok" "reloading")
-
 # Parse optional argument for specific status
 SPECIFIC_STATUS=""
 if [ $# -gt 0 ]; then
@@ -20,13 +17,14 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -n "$SPECIFIC_STATUS" ]; then
-	if [ "$check" != "$SPECIFIC_STATUS" ]; then
-		exit 1
-	fi
-else
-	if [[ ! " ${DEFAULT_STATUSES[*]} " =~ $check ]]; then
-		exit 1
-	fi
+	[ "$check" = "$SPECIFIC_STATUS" ] || exit 1
+	exit 0
 fi
 
-exit 0
+# An instance that is loading is still serving, so flipping it to unhealthy there pulls it
+# out of the k8s endpoints for a state it leaves on its own. Matched exactly : a substring
+# test accepted anything the status list happened to contain.
+case "$check" in
+	ok | loading) exit 0 ;;
+	*) exit 1 ;;
+esac

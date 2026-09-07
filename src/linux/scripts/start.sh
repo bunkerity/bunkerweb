@@ -244,7 +244,9 @@ function start() {
     while [ $count -lt 10 ] ; do
         check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
         # shellcheck disable=SC2181
-        if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
+        # The temp config carries IS_LOADING=yes, so the endpoint answers "loading" here :
+        # either state means nginx is up and answering.
+        if [ $? -eq 0 ] && [[ "$check" =~ ^(ok|loading)$ ]] ; then
             break
         fi
         count=$((count + 1))
