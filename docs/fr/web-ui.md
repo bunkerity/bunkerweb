@@ -289,6 +289,26 @@ log { source(s_net); destination(d_dyna_file); };
 - Gestion des utilisateurs UI, rôles, sessions et TOTP avec codes de récupération.
 - Mise à niveau vers BunkerWeb PRO et visualisation du statut de licence via la page dédiée.
 
+### Enrôlement des instances
+
+Une instance affichée sur la page **Instances** peut recevoir son propre identifiant de plan de contrôle au lieu de partager l'`API_TOKEN` global. Le bouton clé de la ligne (ou le menu d'historique) émet un code d'enrôlement à usage unique, affiché une seule fois, que l'instance échange au démarrage via `INSTANCE_ENROLLMENT_CODE` ; elle ne répond ensuite plus qu'à l'identifiant émis pour elle par le plan de contrôle. Le mécanisme complet, y compris les points d'API et la distinction `manual` / `autoconf`, se trouve dans la [référence API](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
+
+L'enrôlement fonctionne pour une ligne créée depuis l'UI ou l'API, et pour une ligne déclarée via l'environnement (`BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`) — la forme par défaut d'un déploiement Docker ou Linux. Il ne fonctionne **pas** pour une ligne découverte par autoconf : cette ligne est réobtenue depuis un orchestrateur actif à chaque réconciliation, ce qui replacerait le token de l'environnement au-dessus d'un identifiant émis ; les boutons d'enrôlement, de rotation et de révocation y sont donc désactivés.
+
+Une instance qui déclare son propre `BUNKERWEB_INSTANCE_API_TOKEN_<n>` affiche la même puce **Enrôlée** qu'une instance enrôlée via un code, car la page lit « possède un identifiant par instance » et un token déclaré est stocké comme tel. Les boutons n'y sont pas dangereux, mais quasiment sans effet : le prochain enregistrement de la configuration du scheduler réobtient le token déclaré, ce qui écrase un identifiant émis et lève une révocation dans tous les cas. Choisissez l'un ou l'autre pour une instance donnée — l'enrôler, ou lui déclarer un token, pas les deux.
+
+!!! warning "Donnez à l'instance un volume persistant"
+    L'identifiant vit sous `/var/lib/bunkerweb`, que l'image Docker lie symboliquement à `/data`. Un conteneur recréé **sans** volume pour `/data` perd l'identifiant et le marqueur qui détecterait sinon la perte : il revient comme une instance neuve, non enrôlée, alors que le plan de contrôle la croit toujours enrôlée, et chaque envoi de configuration vers elle est refusé sans rien expliquer. Avec un volume monté, l'instance détecte elle-même la perte et **refuse de démarrer**, en nommant la cause et le correctif. Les paquets Linux persistent déjà `/var/lib/bunkerweb`, ce n'est donc une mise en garde que pour les conteneurs — voir les fichiers compose du [guide de démarrage rapide](quickstart-guide.md) et sous `misc/integrations/`, qui en montent tous un.
+
+!!! note "Une ligne `manual` ne peut toujours pas être supprimée d'ici"
+    Enrôler, faire pivoter ou révoquer une ligne déclarée dans l'environnement fonctionne depuis cette page, mais pas la supprimer — le prochain enregistrement de la configuration la recrée à partir de `BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`. Retirez plutôt le nom d'hôte de l'environnement, ce qui supprime aussi son enrôlement.
+
+### Exécutions de jobs différées
+
+La page **Jobs** peut afficher un troisième résultat d'exécution en plus des puces habituelles vert Succès et rouge Échec : **Différé — en attente qu'une instance démarre**, dans la couleur d'avertissement, avec une icône d'horloge. Cela apparaît quand un job — le cas courant est `push-configs` constatant qu'aucune instance enregistrée n'est joignable — s'arrête délibérément sans rien appliquer, plutôt que d'échouer : rien n'a été envoyé, mais rien n'est cassé non plus, et le changement en attente est retenté automatiquement dès qu'une instance répond à nouveau. Survolez la puce pour connaître la raison précise ; le libellé court est aussi ce sur quoi le filtre de statut de la page se base.
+
+Le premier différé suivant une exécution réussie déclenche aussi une bannière d'avertissement masquable en haut de chaque page, distincte de la bannière existante (et plus grave) « push échoué », afin qu'une flotte simplement en attente qu'une instance redémarre ne paraisse pas cassée.
+
 ## Mise à niveau vers PRO {#upgrade-to-pro}
 
 !!! tip "Essai gratuit BunkerWeb PRO"

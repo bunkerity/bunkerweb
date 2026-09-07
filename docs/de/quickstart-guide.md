@@ -100,6 +100,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
           - "443:8443/udp" # Für QUIC / HTTP3-Unterstützung
         environment:
           <<: *bw-env # Wir verwenden den Anker, um die Wiederholung derselben Einstellungen für alle Dienste zu vermeiden
+        volumes:
+          - bw-instance-data:/data # Wird benötigt, um nach der Registrierung dieser Instanz eine verlorene Anmeldeinformation zu erkennen, siehe „Instanzen“ in der Web-UI-Dokumentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -167,6 +169,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
       bw-storage:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:
@@ -336,155 +339,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
 
 === "Swarm"
 
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
-
-    Hier ist die vollständige Docker-Compose-Stack-Datei, die Sie verwenden können; bitte beachten Sie, dass wir später den Webdienst mit dem `bw-services`-Netzwerk verbinden werden:
-
-    ```yaml
-    x-ui-env: &bw-ui-env
-      # Wir verankern die Umgebungsvariablen, um Duplikate zu vermeiden
-      SWARM_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
-        ports:
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: udp # Für QUIC / HTTP3-Unterstützung
-        environment:
-          SWARM_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
-        deploy:
-          mode: global
-          placement:
-            constraints:
-              - "node.role == worker"
-          labels:
-            - "bunkerweb.INSTANCE=yes"
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          BUNKERWEB_INSTANCES: ""
-          SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-          MULTISITE: "yes"
-          USE_REDIS: "yes"
-          REDIS_HOST: "bw-redis"
-          UI_HOST: "http://bw-ui:7000" # Ändern Sie dies bei Bedarf
-        volumes:
-          - bw-storage:/data # Dies wird verwendet, um den Cache und andere Daten wie die Backups zu persistieren
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          CONFIGS: "1"
-          CONTAINERS: "1"
-          SERVICES: "1"
-          SWARM: "1"
-          TASKS: "1"
-          LOG_LEVEL: "warning"
-        networks:
-          - bw-docker
-        deploy:
-          placement:
-            constraints:
-              - "node.role == manager"
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Denken Sie daran, einen stärkeren geheimen Schlüssel festzulegen (siehe Abschnitt Voraussetzungen)
-        volumes:
-          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-db:
-        image: mariadb:11
-        # Wir setzen die maximal zulässige Paketgröße, um Probleme mit großen Abfragen zu vermeiden
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: "unless-stopped"
-        networks:
-          - bw-db
-
-      bw-redis:
-        image: redis:8-alpine
-        networks:
-          - bw-universe
-
-    volumes:
-      bw-data:
-      bw-storage:
-      bw-ui-data:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        driver: overlay
-        attachable: true
-        ipam:
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-        driver: overlay
-        attachable: true
-      bw-docker:
-        name: bw-docker
-        driver: overlay
-        attachable: true
-      bw-db:
-        name: bw-db
-        driver: overlay
-        attachable: true
-    ```
+    Docker Swarm wird in 1.7 wieder unterstützt. Der Referenzstack – mit den API-, Worker- und Job-Broker-Diensten, die ein Swarm-Deployment benötigt, sowie den Node-Labeling-, `mode: global`- und `mode: host`-Anforderungen, die nur Swarm hat – befindet sich im [Swarm-Integrationsabschnitt](integrations.md#swarm), nicht hier: Er passt nicht in den kurzen Rahmen dieser Schnellstartseite, und ihn an zwei Stellen zu duplizieren würde beide auseinanderdriften lassen. Deployen Sie ihn mit `docker stack deploy`, nicht mit `docker compose up`.
 
 ## Den Einrichtungsassistenten abschließen {#complete-the-setup-wizard}
 
@@ -841,11 +696,6 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
     ```
 
 === "Swarm-Labels"
-
-    !!! warning "Veraltet"
-        Die Swarm-Integration ist veraltet und wird in einer zukünftigen Version entfernt. Bitte erwägen Sie stattdessen die Verwendung der [Kubernetes-Integration](integrations.md#kubernetes).
-
-        **Weitere Informationen finden Sie in der [Swarm-Integrationsdokumentation](integrations.md#swarm).**
 
     Wir gehen davon aus, dass Sie die [Grundlegende Einrichtung](#__tabbed_1_5) befolgt haben und dass der Swarm-Stack auf Ihrem Cluster läuft und mit einem Netzwerk namens `bw-services` verbunden ist, sodass Sie Ihre bestehende Anwendung verbinden und BunkerWeb mit Labels konfigurieren können:
 

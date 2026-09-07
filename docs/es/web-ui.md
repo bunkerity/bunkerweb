@@ -289,6 +289,26 @@ log { source(s_net); destination(d_dyna_file); };
 - Gestionar usuarios de UI, roles, sesiones y TOTP con códigos de recuperación.
 - Actualizar a BunkerWeb PRO y ver estado de licencia en la página dedicada.
 
+### Registro de instancias
+
+Una instancia mostrada en la página **Instancias** puede recibir su propia credencial del plano de control en lugar de compartir el `API_TOKEN` global. El botón de llave de la fila (o el menú de historial) emite un código de registro de un solo uso, mostrado una vez, que la instancia canjea al arrancar mediante `INSTANCE_ENROLLMENT_CODE`; a partir de entonces solo responde a la credencial que el plano de control acuñó para ella. La mecánica completa, incluidos los endpoints de la API y la diferencia entre `manual` y `autoconf`, está en la [referencia de la API](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
+
+El registro funciona para una fila creada desde la UI o la API, y para una fila declarada mediante el entorno (`BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`) — la forma predeterminada de un despliegue Docker o Linux. **No** funciona para una fila descubierta por autoconf: esa fila se vuelve a obtener de un orquestador activo en cada reconciliación, lo que devolvería el token del entorno por encima de una credencial acuñada, así que los botones de registrar, rotar y revocar están deshabilitados en ella.
+
+Una instancia que declara su propio `BUNKERWEB_INSTANCE_API_TOKEN_<n>` muestra el mismo chip **Registrada** que una registrada mediante código, porque la página interpreta "tiene una credencial por instancia" y un token declarado se almacena como tal. Los botones no son peligrosos ahí, pero son casi inútiles: el siguiente guardado de configuración del scheduler vuelve a tomar el token declarado, lo que sobrescribe una credencial acuñada y levanta una revocación de todas formas. Elija una u otra opción para una instancia dada — regístrela o declare un token para ella, no ambas cosas.
+
+!!! warning "Dele a la instancia un volumen persistente"
+    La credencial vive en `/var/lib/bunkerweb`, que la imagen Docker enlaza simbólicamente a `/data`. Un contenedor recreado **sin** volumen para `/data` pierde la credencial y el marcador que de otro modo detectaría la pérdida: vuelve como una instancia nueva, no registrada, mientras el plano de control sigue creyendo que está registrada, y cada envío de configuración hacia ella se rechaza sin explicar por qué. Con un volumen montado, la instancia detecta la pérdida por sí misma y **se niega a arrancar**, indicando la causa y la solución. Los paquetes Linux ya persisten `/var/lib/bunkerweb`, así que esto es una salvedad exclusiva de contenedores — ver los archivos compose en la [guía de inicio rápido](quickstart-guide.md) y en `misc/integrations/`, que montan todos uno.
+
+!!! note "Una fila `manual` sigue sin poder eliminarse desde aquí"
+    Registrar, rotar o revocar una fila declarada en el entorno funciona desde esta página, pero eliminarla no — el siguiente guardado de configuración la vuelve a crear a partir de `BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`. En su lugar, quite el hostname del entorno, lo que también elimina su registro.
+
+### Ejecuciones de jobs diferidas
+
+La página **Jobs** puede mostrar un tercer resultado de ejecución además de los habituales pills verde de Éxito y rojo de Fallo: **Diferido — esperando a que una instancia esté disponible**, en el color de advertencia, con un icono de reloj. Aparece cuando un job — el caso habitual es `push-configs` al encontrar inalcanzable a toda instancia registrada — se detiene deliberadamente sin aplicar nada, en lugar de fallar: no se envió nada, pero tampoco hay ningún error, y el cambio pendiente se reintenta automáticamente en cuanto una instancia vuelve a responder. Pase el cursor sobre el pill para ver el motivo concreto; la etiqueta corta es también lo que coincide con el filtro de estado de la página.
+
+El primer diferimiento tras una ejecución exitosa también genera un banner de advertencia descartable en la parte superior de cada página, distinto del banner existente (y más grave) de "push fallido", para que una flota que simplemente espera a que una instancia reinicie no parezca averiada.
+
 ## Actualizar a PRO {#upgrade-to-pro}
 
 !!! tip "Prueba gratis de BunkerWeb PRO"

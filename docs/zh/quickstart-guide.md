@@ -100,6 +100,8 @@
           - "443:8443/udp" # 用于 QUIC / HTTP3 支持
         environment:
           <<: *bw-env # 我们使用锚点来避免为所有服务重复相同的设置
+        volumes:
+          - bw-instance-data:/data # 用于在此实例注册后检测凭据丢失，参见 Web UI 文档中的“实例”
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -167,6 +169,7 @@
       bw-storage:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:
@@ -336,155 +339,7 @@
 
 === "Swarm"
 
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
-
-    这是您可以使用的完整 docker compose 堆栈文件；请注意，我们稍后会将 Web 服务连接到 `bw-services` 网络：
-
-    ```yaml
-    x-ui-env: &bw-ui-env
-      # 我们锚定环境变量以避免重复
-      SWARM_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.7.0-beta
-        ports:
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: tcp
-          - published: 443
-            target: 8443
-            mode: host
-            protocol: udp # 用于 QUIC / HTTP3 支持
-        environment:
-          SWARM_MODE: "yes"
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-services
-        deploy:
-          mode: global
-          placement:
-            constraints:
-              - "node.role == worker"
-          labels:
-            - "bunkerweb.INSTANCE=yes"
-
-      bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          BUNKERWEB_INSTANCES: ""
-          SERVER_NAME: ""
-          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
-          MULTISITE: "yes"
-          USE_REDIS: "yes"
-          REDIS_HOST: "bw-redis"
-          UI_HOST: "http://bw-ui:7000" # 如果需要，请更改它
-        volumes:
-          - bw-storage:/data # 用于持久化缓存和备份等其他数据
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          DOCKER_HOST: "tcp://bw-docker:2375"
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-docker
-          - bw-db
-
-      bw-docker:
-        image: tecnativa/docker-socket-proxy:nightly
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro
-        environment:
-          CONFIGS: "1"
-          CONTAINERS: "1"
-          SERVICES: "1"
-          SWARM: "1"
-          TASKS: "1"
-          LOG_LEVEL: "warning"
-        networks:
-          - bw-docker
-        deploy:
-          placement:
-            constraints:
-              - "node.role == manager"
-
-      bw-ui:
-        image: bunkerity/bunkerweb-ui:1.7.0-beta
-        environment:
-          <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
-        volumes:
-          - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
-        restart: "unless-stopped"
-        networks:
-          - bw-universe
-          - bw-db
-
-      bw-db:
-        image: mariadb:11
-        # 我们设置了最大允许的数据包大小以避免大查询的问题
-        command: --max-allowed-packet=67108864
-        environment:
-          MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-          MYSQL_DATABASE: "db"
-          MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
-        volumes:
-          - bw-data:/var/lib/mysql
-        restart: "unless-stopped"
-        networks:
-          - bw-db
-
-      bw-redis:
-        image: redis:8-alpine
-        networks:
-          - bw-universe
-
-    volumes:
-      bw-data:
-      bw-storage:
-      bw-ui-data:
-
-    networks:
-      bw-universe:
-        name: bw-universe
-        driver: overlay
-        attachable: true
-        ipam:
-          config:
-            - subnet: 10.20.30.0/24
-      bw-services:
-        name: bw-services
-        driver: overlay
-        attachable: true
-      bw-docker:
-        name: bw-docker
-        driver: overlay
-        attachable: true
-      bw-db:
-        name: bw-db
-        driver: overlay
-        attachable: true
-    ```
+    Docker Swarm 在 1.7 中重新获得支持。参考技术栈——包含 Swarm 部署所需的 API、Worker 和任务代理服务，以及仅 Swarm 才有的节点标签、`mode: global` 和 `mode: host` 要求——位于 [Swarm 集成小节](integrations.md#swarm)，而不在此处：它不适合本页简短的快速入门篇幅，若在两处重复维护会导致内容逐渐脱节。请使用 `docker stack deploy` 部署它，而不是 `docker compose up`。
 
 ## 完成设置向导 {#complete-the-setup-wizard}
 
@@ -842,11 +697,6 @@
     ```
 
 === "Swarm 标签"
-
-    !!! warning "已弃用"
-        Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 [Kubernetes 集成](integrations.md#kubernetes)。
-
-        **更多信息可以在 [Swarm 集成文档](integrations.md#swarm)中找到。**
 
     我们假设您已经按照[基本设置](#__tabbed_1_5)进行了操作，并且 Swarm 堆栈正在您的集群上运行，并连接到一个名为 `bw-services` 的网络，以便您可以连接您现有的应用程序并使用标签配置 BunkerWeb：
 

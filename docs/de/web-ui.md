@@ -289,6 +289,26 @@ log { source(s_net); destination(d_dyna_file); };
 - UI-User, Rollen, Sessions und TOTP samt Recovery-Codes verwalten.
 - Upgrade auf BunkerWeb PRO und Lizenzstatus in der dedizierten Seite einsehen.
 
+### Instanzregistrierung
+
+Eine auf der Seite **Instanzen** angezeigte Instanz kann anstelle des gemeinsam genutzten globalen `API_TOKEN` ihre eigene Anmeldeinformation der Steuerungsebene erhalten. Über die Schlüssel-Schaltfläche der Zeile (oder das Verlaufsmenü) wird ein einmal verwendbarer Registrierungscode ausgestellt, der nur einmal angezeigt wird; die Instanz löst ihn beim Start mit `INSTANCE_ENROLLMENT_CODE` ein. Danach reagiert sie nur noch auf die von der Steuerungsebene für sie ausgestellte Anmeldeinformation. Die vollständige Funktionsweise, einschließlich der API-Endpunkte und der Unterscheidung zwischen `manual` und `autoconf`, steht in der [API-Referenz](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
+
+Die Registrierung funktioniert für eine über die UI oder die API erstellte Zeile sowie für eine über die Umgebung deklarierte Zeile (`BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`) – die Standardform eines Docker- oder Linux-Deployments. Sie funktioniert **nicht** für eine von Autoconf entdeckte Zeile: Diese wird bei jedem Reconcile erneut von einem laufenden Orchestrator bezogen, was das Token der Umgebung wieder über eine ausgestellte Anmeldeinformation legen würde – deshalb sind die Schaltflächen zum Registrieren, Rotieren und Widerrufen dort deaktiviert.
+
+Eine Instanz, die ihr eigenes `BUNKERWEB_INSTANCE_API_TOKEN_<n>` deklariert, zeigt denselben Chip **Registriert** wie eine über einen Code registrierte, da die Seite „hat eine instanzspezifische Anmeldeinformation" liest und ein deklariertes Token als eine solche gespeichert wird. Die Schaltflächen sind dort nicht gefährlich, aber nahezu wirkungslos: Das nächste Speichern der Scheduler-Konfiguration bezieht das deklarierte Token erneut, überschreibt dabei eine ausgestellte Anmeldeinformation und hebt in jedem Fall einen Widerruf auf. Entscheiden Sie sich für eine Instanz für das eine oder das andere – registrieren oder ein Token deklarieren, nicht beides.
+
+!!! warning "Der Instanz ein persistentes Volume geben"
+    Die Anmeldeinformation liegt unter `/var/lib/bunkerweb`, was das Docker-Image nach `/data` verlinkt. Ein Container, der ohne Volume für `/data` neu erstellt wird, verliert die Anmeldeinformation und die Markierung, die den Verlust sonst erkennen würde: Er kommt als frische, nicht registrierte Instanz zurück, während die Steuerungsebene sie weiterhin für registriert hält, und jeder Konfigurations-Push an ihn wird abgelehnt, ohne dass der Grund erkennbar ist. Mit eingebundenem Volume erkennt die Instanz den Verlust selbst und **verweigert den Start**, wobei sie Ursache und Abhilfe benennt. Linux-Pakete persistieren `/var/lib/bunkerweb` bereits, daher betrifft dies nur Container – siehe die Compose-Dateien im [Schnellstart-Leitfaden](quickstart-guide.md) und unter `misc/integrations/`, die alle eines einbinden.
+
+!!! note "Eine `manual`-Zeile lässt sich hier weiterhin nicht löschen"
+    Registrieren, Rotieren oder Widerrufen einer in der Umgebung deklarierten Zeile funktioniert auf dieser Seite, das Löschen jedoch nicht – das nächste Konfigurations-Speichern erstellt sie erneut aus `BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`. Entfernen Sie stattdessen den Hostnamen aus der Umgebung, wodurch auch die Registrierung entfällt.
+
+### Verzögerte Job-Läufe
+
+Die Seite **Jobs** kann neben den gewöhnlichen grünen Erfolgs- und roten Fehler-Pills ein drittes Laufergebnis anzeigen: **Verzögert – wartet auf eine startende Instanz**, in der Warnfarbe, mit einem Uhr-Symbol. Es erscheint, wenn ein Job – häufigster Fall ist `push-configs`, wenn keine registrierte Instanz erreichbar ist – bewusst stoppt, ohne etwas anzuwenden, statt fehlzuschlagen: Es wurde nichts gepusht, aber es ist auch nichts falsch, und die ausstehende Änderung wird automatisch erneut versucht, sobald eine Instanz wieder antwortet. Bewegen Sie den Mauszeiger über die Pill für den genauen Grund; das kurze Label ist auch das, worauf der Statusfilter der Seite abgleicht.
+
+Die erste Verzögerung nach einem erfolgreichen Lauf löst zudem ein schließbares Warnbanner am oberen Rand jeder Seite aus, getrennt vom bestehenden (und schwerwiegenderen) „Push fehlgeschlagen"-Banner, damit eine Flotte, die lediglich auf den Neustart einer Instanz wartet, nicht als defekt erscheint.
+
 ## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO Gratistest"
