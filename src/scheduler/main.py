@@ -168,12 +168,17 @@ def build_cmd_env() -> Dict[str, str]:
     cmd_env = {
         "PATH": getenv("PATH", ""),
         "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
         "LOG_LEVEL": getenv("LOG_LEVEL", ""),
         "DATABASE_URI": getenv("DATABASE_URI", ""),
     }
 
-    for key in ("TZ", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "DATABASE_LOG_LEVEL"):
+    # DEV-2b4: forwarded only when SET. An empty CUSTOM_LOG_LEVEL is not "unset" to the child, it is
+    # an override that hides LOG_LEVEL and drops the child back to INFO -- so the scheduler running
+    # at DEBUG got a config saver logging at INFO and lost exactly the lines it was raised for.
+    # SCHEDULER_LOG_TO_FILE has to travel too: `logger.py` derives LOG_FILE_PATH from it, so a
+    # file-logging child with no explicit path fell back to stderr, which on Linux means journald
+    # while the scheduler's own log file keeps only the one-line "failed" summary.
+    for key in ("TZ", "CUSTOM_LOG_LEVEL", "LOG_TYPES", "LOG_FILE_PATH", "LOG_SYSLOG_ADDRESS", "LOG_SYSLOG_TAG", "SCHEDULER_LOG_TO_FILE", "DATABASE_LOG_LEVEL"):
         value = getenv(key)
         if value:
             cmd_env[key] = value
@@ -557,9 +562,14 @@ def generate_caches():
                 # permission target: chmod would follow it onto the file it points at.
                 continue
 
-            desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
-            if resource_path.stat().st_mode & 0o777 != desired_perms:
-                resource_path.chmod(desired_perms)
+            # DEV-2b4: directories ONLY. Everything reaching here that is not a directory is a
+            # RETAINED cache file (the first branch already unlinked the non-cached ones), and it was
+            # restored 0640 a few lines up -- chmod-ing it 0750 handed every cached credential,
+            # certificate key and job payload the execute bit back on every sweep.
+            if resource_path.is_dir():
+                desired_perms = S_IRUSR | S_IWUSR | S_IRGRP | S_IXUSR | S_IXGRP  # 0o750
+                if resource_path.stat().st_mode & 0o777 != desired_perms:
+                    resource_path.chmod(desired_perms)
 
 
 def healthcheck_job():
