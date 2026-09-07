@@ -904,8 +904,18 @@ class Templator:
         # sees the reserved service's own values -- but the TLS parameters its default block prints
         # belong to the `ssl` plugin, which IS on the Default server page. Handed down derived, the
         # way the port lists above are, so the two halves of one page's settings cannot diverge.
+        # The last fallback is the SETTING DEFAULT, never `""`. The scheduler renders from
+        # `get_non_default_settings()` (`jobs/push-configs.py`), so a TLS parameter left at its
+        # default is in neither dict above -- which is every deployment that has not opened the
+        # Default server page. `""` there is not a weak default, it is a syntax error: the stream
+        # block prints `ssl_protocols ;`, nginx refuses the whole configuration with
+        # `[emerg] invalid number of arguments`, push-configs exits 2 and the fleet keeps the
+        # configuration it had. `self._default_config` is the same dict
+        # `create_custom_undefined_class` resolves an undefined name from, so this block and
+        # `default-server-http.conf` -- which reaches these names as Jinja undefineds -- answer with
+        # the same value instead of diverging on exactly the deployments that configured nothing.
         template_vars["DEFAULT_SERVER_TLS_RENDER"] = {
-            key: default_server_vars.get(key, template_vars.get(key, "")) for key in DEFAULT_SERVER_STREAM_TLS_SETTINGS
+            key: default_server_vars.get(key, template_vars.get(key, self._default_config.get(key, ""))) for key in DEFAULT_SERVER_STREAM_TLS_SETTINGS
         }
 
         for template in templates:

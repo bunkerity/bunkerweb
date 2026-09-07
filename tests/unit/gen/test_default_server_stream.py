@@ -318,3 +318,65 @@ class TestTheRender:
         addr:port is what the whole design avoids."""
         rendered = _render(render_tree, **{f"{DEFAULT_SERVER_ID}_{SETTING}": "9999"})
         assert f"include /etc/nginx/{DEFAULT_SERVER_ID}/server-stream.conf;" not in rendered
+
+
+@pytest.mark.slow
+class TestTheTlsParametersResolveWithoutStoredValues:
+    """The scheduler renders from `get_non_default_settings()`, so a setting left at its default is
+    in NO dict this block can read -- and `DEFAULT_SERVER_TLS_RENDER` used to fall back to `""`.
+
+    `stream.conf` then carried `ssl_protocols ;`, which is not a weak default, it is a syntax error:
+    the reload is refused with `nginx: [emerg] invalid number of arguments in "ssl_protocols"
+    directive`, push-configs exits 2 and the whole deployment keeps the previous configuration.
+    Found on a real stack by `tests/core/misc.yml:default_server_stream_ssl_port_completes_a_handshake`
+    (`ci1-harness-docker-misc.log`, 2026-09-06) the first time a stream SSL default port was ever
+    exercised end to end.
+
+    The class above always sets `default-server_SSL_PROTOCOLS` explicitly and renders through the
+    ENVIRONMENT path (`render_tree`), where `Configurator.get_config` materialises every setting; both
+    are why it stayed green. This one declares no TLS setting at all, which is what every deployment
+    that never opened the Default server page looks like.
+    """
+
+    STREAM_TLS_DEFAULTS = {
+        "SSL_PROTOCOLS": "TLSv1.2 TLSv1.3",
+        "SSL_CIPHERS_LEVEL": "modern",
+        "SSL_CIPHERS_CUSTOM": "",
+        "SSL_ECDH_CURVE": "auto",
+    }
+
+    @pytest.fixture
+    def block(self, render_db_tree):
+        tree = render_db_tree({}, {SERVICE: {}, DEFAULT_SERVER_ID: {SETTING: "9999", SSL_SETTING: "9999"}})
+        return next(block for block in _blocks(_stream(tree)) if "default_server" in block)
+
+    def test_the_defaults_are_declared_where_this_test_says_they_are(self):
+        """The expectations above are the shipped defaults, not a copy that can drift."""
+        settings = json.loads((ROOT / "src" / "common" / "core" / "ssl" / "plugin.json").read_text())["settings"]
+        assert {key: settings[key]["default"] for key in self.STREAM_TLS_DEFAULTS} == self.STREAM_TLS_DEFAULTS
+
+    def test_no_tls_directive_is_rendered_without_an_argument(self, block):
+        """The failure exactly as nginx sees it, for every `ssl_*` directive at once."""
+        empty = [
+            line.strip()
+            for line in block.splitlines()
+            if line.strip().rstrip(";").rstrip() in {"ssl_protocols", "ssl_ciphers", "ssl_ecdh_curve", "ssl_dhparam"}
+        ]
+        assert empty == []
+
+    def test_ssl_protocols_falls_back_to_the_setting_default(self, block):
+        assert f"ssl_protocols {self.STREAM_TLS_DEFAULTS['SSL_PROTOCOLS']};" in block
+
+    def test_the_other_three_resolve_to_their_defaults_too(self, block):
+        # SSL_CIPHERS_LEVEL=modern with TLSv1.2 in the list: the modern branch of the cipher chain,
+        # which is neither the `old` nor the `intermediate` list and is NOT reached at all when the
+        # level resolves empty. SSL_CIPHERS_CUSTOM is empty BY DEFAULT, so the custom line must stay
+        # absent -- that one is the control that keeps this test from asserting "anything non-empty".
+        assert "ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:" in block
+        assert "@SECLEVEL=0" not in block
+        assert "DHE-RSA-CHACHA20-POLY1305;" not in block
+        # SSL_ECDH_CURVE=auto is resolved by the Templator, never printed verbatim.
+        ecdh = next(line.strip() for line in block.splitlines() if line.strip().startswith("ssl_ecdh_curve"))
+        assert ecdh not in ("ssl_ecdh_curve;", "ssl_ecdh_curve ;", "ssl_ecdh_curve auto;")
+        # TLSv1.2 is in the resolved list, so the dhparam file the TLSv1.2 branch needs is there.
+        assert "ssl_dhparam /etc/nginx/dhparam;" in block
