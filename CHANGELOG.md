@@ -137,6 +137,8 @@
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 - [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.
 - [BUGFIX] `ui`: the reserved default server is no longer creatable from the wizard, counted as an online service, or offered as an attachment target.
+- [BUGFIX] `ui`: a CSRF failure with no admin yet is sent to the setup wizard with the reason shown, instead of to a login page that only bounces back.
+- [SECURITY] `ui`: the admin panel's Permissions-Policy is resynced with Chromium — 14 features added, the retired `battery` dropped.
 
 ## v1.6.14~rc1 - 2026/07/??
 

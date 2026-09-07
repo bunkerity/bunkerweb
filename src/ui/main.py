@@ -1048,14 +1048,21 @@ def handle_csrf_error(_):
     except (AssertionError, RuntimeError):
         user_id = "unknown"
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
-    try:
-        if not current_user:
-            return redirect(url_for("setup.setup_page"), 303)
-    except (AssertionError, RuntimeError):
-        return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
-    if request.method == "POST":
+
+    try:
+        admin_exists = bool(API_CLIENT.get_admin_user())
+    except (ApiClientError, ApiUnavailableError):
+        # Cannot tell. Fall through to the login page: `login_page` re-asks and forwards to
+        # /setup itself when there really is no admin, so the worst case is one extra hop.
+        admin_exists = True
+
+    if not admin_exists:
+        # No admin exists yet (e.g. mid-setup-wizard): there is no usable login page for this
+        # reason to land on, so hand it to /setup directly instead.
+        response.headers["Location"] = url_for("setup.setup_page", reason="session_expired")
+    elif request.method == "POST":
         # A submitted form dies here rather than at the login check, because the CSRF token lives
         # in the session that just went away. logout_page() clears the session and the response
         # tells the browser to drop its cookies, so a flash would not survive: the reason has to
@@ -1671,8 +1678,11 @@ def set_security_headers(response):
     #                          browser's own UI gates every ceremony.
     # None of them grants access to data, hardware or the user's environment; all are reversible by
     # putting `fullscreen=()` / `screen-wake-lock=()` / `publickey-credentials-*=()` back.
+    #
+    # The directive *inventory* tracks the PERMISSIONS_POLICY default in
+    # src/common/core/headers/plugin.json; only those four values differ from it, on purpose.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(self), publickey-credentials-get=(self), rewriter=(), screen-wake-lock=(self), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(self), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(self), publickey-credentials-get=(self), rewriter=(), screen-wake-lock=(self), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # Out of search indexes. robots.txt stops a crawler fetching the page; it does not stop the URL

@@ -22,6 +22,14 @@ from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
 setup = Blueprint("setup", __name__)
 
+# Reasons the app can redirect here with, mapped to the i18n key the page renders. Looked up,
+# never echoed: whatever is in the query string must not reach the page. `session_expired` reuses
+# the login catalog entry on purpose -- the sentence is the same one, and a second key would have
+# to be translated in all 20 locales to say exactly what `login.notice_session_expired` says.
+SETUP_NOTICES = {
+    "session_expired": "login.notice_session_expired",
+}
+
 
 @setup.route("/setup", methods=["GET", "POST"])
 def setup_page():
@@ -321,8 +329,11 @@ def setup_page():
     if not server_name:
         server_name = "www.example.com"
 
+    notice = SETUP_NOTICES.get(request.args.get("reason", ""))
+
     return render_template(
         "setup.html",
+        notice=notice,
         plugins_settings=BW_CONFIG.get_plugins_settings(),
         server_name=server_name,
         ui_user=admin_user,

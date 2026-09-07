@@ -115,7 +115,9 @@ def login_page():
         admin_user = None
 
     if not admin_user:
-        return redirect(url_for("setup.setup_page"))
+        # Looked up, never echoed: whatever is in the query string must not reach the page.
+        reason = request.args.get("reason", "")
+        return redirect(url_for("setup.setup_page", reason=reason) if reason in LOGIN_NOTICES else url_for("setup.setup_page"))
     elif current_user.is_authenticated:  # type: ignore
         return redirect(url_for("home.home_page"))
 

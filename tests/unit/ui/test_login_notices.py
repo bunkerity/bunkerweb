@@ -23,6 +23,7 @@ import pytest
 from flask import Flask, get_flashed_messages, session
 from flask_login import LoginManager
 
+from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGIN_NOTICES
 
 from conftest import english
@@ -83,6 +84,9 @@ def app(routes):
     manager.user_loader(lambda user_id: None)
     application.register_blueprint(login.login)
     application.register_blueprint(logout.logout)
+    # `login_page` redirects here when no admin exists yet; the wizard blueprint itself pulls in
+    # `default_server` and the whole dependency container, and nothing below renders it.
+    application.add_url_rule("/setup", endpoint="setup.setup_page", view_func=lambda: "")
     return application
 
 
@@ -294,14 +298,35 @@ def test_the_csrf_handler_reports_a_discarded_post_and_stays_quiet_on_a_get():
     body = ast.unparse(guarded[0])
     assert "reason='session_expired'" in body
     assert "login.login_page" in body
-    # And nowhere else in the handler.
-    assert ast.unparse(handler).count("session_expired") == 1
+    # Exactly two producers, and the other one is the /setup branch below -- nothing else in the
+    # handler may claim a change was discarded.
+    unparsed = ast.unparse(handler)
+    assert unparsed.count("session_expired") == 2
+    assert unparsed.count("setup.setup_page") == 1
 
 
 # --------------------------------------------------------------------------------------
 # Every producer, not the three that existed the day this was written
 # --------------------------------------------------------------------------------------
-REASON_TARGETS = ("login.login_page", "logout.logout_page")
+def _dict_literal(relative, name):
+    """Read a module-level dict off the source. `app/routes/setup.py` imports `default_server` and
+    `app.dependencies`, so importing it here to reach one constant would need the whole stub set
+    the `routes` fixture builds -- and these scanner tests take no fixture on purpose."""
+    tree = _source(relative)
+    node = next(n for n in ast.walk(tree) if isinstance(n, ast.Assign) and any(getattr(t, "id", None) == name for t in n.targets))
+    return ast.literal_eval(node.value)
+
+
+# `/setup` joined `/login` as a reason target when the CSRF handler stopped dropping a mid-wizard
+# session on a login page that only redirects back (dev 05d350256): each target has its own
+# whitelist, and a reason is only "known" against the one it is actually sent to.
+SETUP_NOTICES = _dict_literal("app/routes/setup.py", "SETUP_NOTICES")
+NOTICES_BY_TARGET = {
+    "login.login_page": LOGIN_NOTICES,
+    "logout.logout_page": LOGIN_NOTICES,
+    "setup.setup_page": SETUP_NOTICES,
+}
+REASON_TARGETS = tuple(NOTICES_BY_TARGET)
 
 # Files whose reason is computed rather than written out. Each entry states WHY the expression
 # cannot be resolved statically, and each is a file this guard has read. Adding a file here is a
@@ -310,6 +335,9 @@ UNRESOLVABLE_ALLOWLIST = {
     # `**({"reason": reason} if reason in LOGIN_NOTICES else {})` -- the whitelist IS the check,
     # and `test_logout_drops_an_unknown_reason_rather_than_reflecting_it` exercises it end to end.
     "app/routes/logout.py",
+    # `url_for("setup.setup_page", reason=reason) if reason in LOGIN_NOTICES else ...` -- same
+    # shape, same whitelist, exercised by `test_the_login_page_forwards_only_a_known_reason_to_setup`.
+    "app/routes/login.py",
 }
 
 
@@ -334,7 +362,7 @@ def _reason_producers(tree, relative):
         for keyword in node.keywords:
             if keyword.arg == "reason":
                 if isinstance(keyword.value, ast.Constant) and isinstance(keyword.value.value, str):
-                    literals.append(keyword.value.value)
+                    literals.append((target.value, keyword.value.value))
                 else:
                     unresolved.append((relative, ast.unparse(keyword.value)))
             elif keyword.arg is None and "reason" in ast.unparse(keyword.value):
@@ -347,7 +375,7 @@ def _scan_ui_sources():
     for path in sorted(UI.rglob("*.py")):
         relative = path.relative_to(UI).as_posix()
         found, unknown = _reason_producers(ast.parse(path.read_text(encoding="utf-8")), relative)
-        literals.extend((relative, reason) for reason in found)
+        literals.extend((relative, target, reason) for target, reason in found)
         unresolved.extend(unknown)
     return literals, unresolved
 
@@ -359,8 +387,8 @@ def test_every_reason_any_caller_sends_is_a_key_the_login_page_knows():
     inventing a reason of its own, which is the realistic way this breaks."""
     literals, _ = _scan_ui_sources()
 
-    unknown = [(where, reason) for where, reason in literals if reason not in LOGIN_NOTICES]
-    assert not unknown, f"these callers send a reason the login page cannot render: {unknown}"
+    unknown = [(where, target, reason) for where, target, reason in literals if reason not in NOTICES_BY_TARGET[target]]
+    assert not unknown, f"these callers send a reason their target cannot render: {unknown}"
     # Floor, not equality: growth here is collaboration -- a new producer SHOULD widen this, and
     # the assertion above is what keeps the new one honest.
     assert len(literals) >= 3, f"reason producers disappeared -- only {len(literals)} left: {literals}"
@@ -391,3 +419,186 @@ def test_the_conservative_branch_actually_catches_an_unfamiliar_producer():
     assert literals == [], "a computed reason was read as a literal"
     assert unresolved and unresolved[0][0] == "app/routes/invented.py", "an unresolvable producer was skipped instead of reported"
     assert unresolved[0][0] not in UNRESOLVABLE_ALLOWLIST, "the synthetic file must not be exempt, or this proves nothing"
+
+
+# --------------------------------------------------------------------------------------
+# The fourth producer: a CSRF failure with no admin yet (dev 05d350256)
+# --------------------------------------------------------------------------------------
+# Before this, `handle_csrf_error` sent an unauthenticated caller to /setup with no reason at all,
+# and a caller it could not classify to /login -- which, with no admin in the database, redirects
+# straight back to /setup. Either way the user landed mid-wizard with nothing said. The branch
+# below is the only place that can tell the two apart, because it is the only one that asks.
+def _csrf_handler(admin_user, *, raises=None, method="POST"):
+    """`handle_csrf_error` lifted out and run for real, `test_security_headers_emitted.py`'s
+    pattern. Booting main.py boots the whole UI; the handler is self-contained apart from the
+    names stubbed here, and an edit that adds another free name raises NameError rather than
+    quietly testing less."""
+    fn = next(node for node in ast.walk(_source("main.py")) if isinstance(node, ast.FunctionDef) and node.name == "handle_csrf_error")
+    fn.decorator_list = []
+
+    client = Mock()
+    client.get_admin_user.side_effect = raises
+    if raises is None:
+        client.get_admin_user.return_value = admin_user
+
+    from flask import Response
+
+    namespace = {
+        "LOGGER": Mock(),
+        "format_exc": lambda: "",
+        "current_user": SimpleNamespace(get_id=lambda: "admin"),
+        "request": SimpleNamespace(method=method, path="/services"),
+        "logout_page": lambda: Response("ok", 200, {"Location": "/login"}),
+        "API_CLIENT": client,
+        "ApiClientError": ApiClientError,
+        "ApiUnavailableError": ApiUnavailableError,
+        "url_for": lambda endpoint, **kwargs: "/" + endpoint.split(".")[0] + ("?" + "&".join(f"{k}={v}" for k, v in kwargs.items()) if kwargs else ""),
+    }
+    exec(compile(ast.unparse(fn), "main.py", "exec"), namespace)  # noqa: S102
+    return namespace["handle_csrf_error"](None)
+
+
+@pytest.mark.parametrize("method", ["POST", "GET"])
+def test_a_csrf_failure_with_no_admin_yet_is_handed_to_setup_with_the_reason(method):
+    """Mid-wizard there is no login page for this notice to land on, so /setup renders it.
+
+    `main.py:802` sets `WTF_CSRF_METHODS = ("POST",)`, so only the POST arm can fire in production
+    today. The GET arm is kept deliberately and labelled here rather than deleted: this branch is
+    the one that must NOT depend on the verb -- widening WTF_CSRF_METHODS, or reaching the handler
+    from anywhere else, must not turn a mid-wizard CSRF failure back into a silent bounce.
+    """
+    response = _csrf_handler(None, method=method)
+
+    assert response.status_code == 303
+    assert response.headers["Location"] == "/setup?reason=session_expired"
+
+
+def test_a_csrf_failure_with_an_admin_still_goes_to_the_login_page():
+    response = _csrf_handler({"username": "admin"})
+
+    assert response.headers["Location"] == "/login?reason=session_expired"
+
+
+def test_a_csrf_get_with_an_admin_still_claims_nothing_was_discarded():
+    """Unreachable today for the same `WTF_CSRF_METHODS` reason, and asserted anyway because the
+    POST guard is what makes it true -- `test_the_csrf_handler_reports_a_discarded_post_and_stays_
+    quiet_on_a_get` pins that guard in the source, and this is what it buys."""
+    response = _csrf_handler({"username": "admin"}, method="GET")
+
+    assert "reason" not in response.headers["Location"]
+
+
+@pytest.mark.parametrize("error", [ApiClientError("boom"), ApiUnavailableError("boom")])
+def test_an_unreachable_api_does_not_divert_the_user_to_the_wizard(error):
+    """Fail-closed the other way: /setup is reachable without a session, so guessing "no admin"
+    off an API outage would hand an unauthenticated caller the install wizard. `login_page` asks
+    the same question again and forwards to /setup itself when the answer really is "none"."""
+    response = _csrf_handler(None, raises=error)
+
+    assert response.headers["Location"] == "/login?reason=session_expired"
+
+
+# --------------------------------------------------------------------------------------
+# /setup's own whitelist, and the banner it renders
+# --------------------------------------------------------------------------------------
+def test_every_setup_notice_is_a_key_the_english_catalog_actually_has():
+    assert SETUP_NOTICES, "no notices declared"
+    for reason, key in SETUP_NOTICES.items():
+        assert " " not in key and key.islower(), f"{reason}: an English sentence would be English in all 18 locales"
+        assert english(key) != key, f"{key} is not in the catalog"
+
+
+def test_the_setup_page_renders_the_translated_notice():
+    from test_auth_shell import _render as render_auth_page
+
+    key = SETUP_NOTICES["session_expired"]
+    html = render_auth_page("setup.html", notice=key)
+
+    assert english(key) in html
+    assert key not in html, "the raw message key reached the page"
+    # The wizard renders six other alerts of its own, so the banner is identified by its class.
+    assert html.count('class="alert alert-warning" role="alert"') == 1
+
+
+def test_the_setup_page_renders_no_banner_without_a_notice():
+    from test_auth_shell import _render as render_auth_page
+
+    assert 'class="alert alert-warning" role="alert"' not in render_auth_page("setup.html")
+
+
+def test_the_login_page_forwards_only_a_known_reason_to_setup(app, routes):
+    """`app/routes/login.py` is in UNRESOLVABLE_ALLOWLIST because the whitelist IS the check.
+    This is the end-to-end exercise that entry claims."""
+    login, _ = routes
+
+    for reason, expected in (
+        ("session_expired", "/setup?reason=session_expired"),
+        ("password_changed", "/setup?reason=password_changed"),
+        ("nope", "/setup"),
+        ("<script>alert(1)</script>", "/setup"),
+        ("", "/setup"),
+    ):
+        with app.test_request_context("/login", query_string={"reason": reason}):
+            login.API_CLIENT.get_admin_user.return_value = None
+            response = login.login_page()
+
+        assert response.headers["Location"] == expected, f"reason={reason!r}"
+
+
+@pytest.fixture(scope="module")
+def setup_route():
+    """`routes/setup.py` loaded with the container-only dependencies stubbed,
+    `test_setup_reserved_default_server.py`'s loader."""
+    dependencies = ModuleType("app.dependencies")
+    dependencies.API_CLIENT = Mock()
+    dependencies.BW_CONFIG = Mock()
+    dependencies.DATA = Mock()
+    qrcode = ModuleType("qrcode")
+    qrcode_main = ModuleType("qrcode.main")
+    qrcode_main.QRCode = Mock()
+    qrcode.main = qrcode_main
+
+    module_name = "app.routes._setup_notices_test"
+    spec = importlib.util.spec_from_file_location(module_name, UI / "app" / "routes" / "setup.py")
+    module = importlib.util.module_from_spec(spec)
+    stubs = {"app.dependencies": dependencies, "qrcode": qrcode, "qrcode.main": qrcode_main, module_name: module}
+    with patch.dict(sys.modules, stubs):
+        spec.loader.exec_module(module)
+        yield module
+
+
+def _setup_context(module, reason):
+    """A GET on the wizard with no admin and no service yet -- the state this notice is for."""
+    captured = {}
+
+    def fake_render(template, **context):
+        captured.update(context)
+        return ""
+
+    application = Flask("bw_ui_setup_notice_test")
+    application.secret_key = "test"
+    manager = LoginManager()
+    manager.init_app(application)
+    manager.user_loader(lambda user_id: None)
+    application.register_blueprint(module.setup)
+
+    module.API_CLIENT.get_admin_user.return_value = None
+    module.BW_CONFIG.get_config.return_value = {"SERVER_NAME": ""}
+    with application.test_request_context("/setup", query_string={"reason": reason}):
+        with patch.object(module, "render_template", fake_render):
+            module.setup_page()
+    return captured
+
+
+def test_the_setup_route_actually_puts_the_notice_into_the_template_context(setup_route):
+    """RULE 12, and this file's own mutant D: every marker above survives `notice=None`."""
+    captured = _setup_context(setup_route, "session_expired")
+
+    assert captured.get("notice") == SETUP_NOTICES["session_expired"]
+
+
+@pytest.mark.parametrize("reason", ["", "nope", "login.notice_session_expired", "<script>alert(1)</script>"])
+def test_an_unknown_reason_reaches_the_setup_page_as_nothing_at_all(setup_route, reason):
+    captured = _setup_context(setup_route, reason)
+
+    assert captured.get("notice") is None
