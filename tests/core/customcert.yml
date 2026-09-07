@@ -265,6 +265,60 @@ actions:
       - "P@ssw0rd"
     string: '"id":"default-server"'
 
+  # ---------------------------------------------------------------------------------------------
+  # The single-site half of DS-B5 hunk 5, which shipped with its two consequences stated and
+  # deliberately untested (`report-DS-B5.md` §2, "Neither is covered by a test"). The rule is that
+  # `custom-cert.py` and `Templator.__init__` have to agree on WHICH name the single rendered block
+  # is, because that name is the cache directory `customcert.lua` reads
+  # (`/var/cache/bunkerweb/customcert/<first token of the rendered SERVER_NAME>/cert.pem`). A
+  # disagreement is silent: the job reports success, the cache is written, nothing reads it, and the
+  # instance quietly serves the self-signed fallback instead of the operator's certificate.
+  #
+  # Docker and Linux only -- they are the single-site arms. On a multisite arm `default-server` is
+  # the reserved pseudo-service and neither case below exists.
+  #
+  # Both actions assert `ssl_subject`, not a status code: a regression here does not break the
+  # handshake, it changes whose certificate ends the handshake.
+  single_site_alias_caches_under_the_name_the_templator_rendered:
+    # `SERVER_NAME: "default-server www.example.com"`. The Templator strips the reserved id because
+    # something else remains, so the block is `server_name www.example.com` and the Lua reads
+    # `customcert/www.example.com/`. The job has to strip it too. Mutation M7 -- the flat
+    # `all_domains = kept if multisite else all_domains` gate, which is the shape this lane's own
+    # round 1 shipped -- keeps `default-server` first here, caches under `customcert/default-server/`
+    # and leaves this dialling a self-signed certificate.
+    type: ssl
+    integrations:
+      - "Docker"
+      - "Linux"
+    url: "https://www.example.com"
+    verify_ssl: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+    config:
+      SERVER_NAME: "default-server www.example.com"
+  single_site_only_name_is_still_served_its_certificate:
+    # `SERVER_NAME: "default-server"` and nothing else. Here the Templator KEEPS the name (hunk 1:
+    # strip the reserved id unless nothing else remains), so the job must keep it too. The blind
+    # strip -- mutation M6 -- empties `all_domains`, hits `No services found, exiting ...` before the
+    # per-service branch, caches nothing, and silently ignores a configured USE_CUSTOM_SSL.
+    #
+    # `raise_for_status: false`: the assertion is about which certificate ends the handshake, and
+    # this stack has one server block answering every Host, so whatever it replies with is not the
+    # subject of the test. The URL stays `www.example.com` (the name the runner can resolve) rather
+    # than the bare `default-server`, which `models/action.py:check_runner_host` rightly refuses.
+    type: ssl
+    integrations:
+      - "Docker"
+      - "Linux"
+    url: "https://www.example.com"
+    verify_ssl: false
+    raise_for_status: false
+    ssl_expiration: 365
+    ssl_subject: "/CN=www.example.com/"
+    config:
+      SERVER_NAME: "default-server"
+    full_clean: true
+
 config:
   USE_CUSTOM_SSL: "yes"
   CUSTOM_SSL_CERT: "/tmp/output/certificate.pem"
