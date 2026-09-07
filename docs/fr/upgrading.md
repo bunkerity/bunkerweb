@@ -7,7 +7,80 @@
 
 ### Changements majeurs
 
-*Cette liste ne reprend pour l'instant que les points nouveaux pour 1.7. D'autres changements majeurs de cette version (par exemple `REDIS_SSL_VERIFY`, la séparation du broker de jobs, ou le worker Celery qui n'était pas activé partout) ne sont documentés pour l'instant que dans la version anglaise de cette page.*
+!!! warning "`REDIS_SSL_VERIFY` vaut désormais `yes` par défaut"
+
+    Le client Redis/Valkey acceptait **n'importe quel** certificat lorsque `REDIS_SSL` était activé : la valeur par défaut documentée pour `REDIS_SSL_VERIFY` était `yes`, mais la valeur par défaut livrée était `no`, si bien que le TLS était négocié sans jamais vérifier le serveur. Le code correspond désormais à la documentation.
+
+    Cela ne vous concerne que si **toutes** ces conditions sont réunies : `REDIS_SSL: "yes"`, le serveur Redis ou Valkey présente un certificat auto-signé ou non fiable, et vous n'avez jamais défini `REDIS_SSL_VERIFY` explicitement. Dans ce cas, la connexion échoue après la mise à niveau.
+
+    Faites confiance à l'autorité de certification du serveur, ou rétablissez explicitement le comportement précédent :
+
+    ```yaml
+    REDIS_SSL_VERIFY: "no"
+    ```
+
+!!! warning "Le broker de jobs est désormais une instance distincte du datastore de la WAF"
+
+    BunkerWeb utilise Redis/Valkey pour deux tâches sans rapport, qui exigent des réglages contradictoires :
+
+    | Rôle | Réglage | Pourquoi |
+    |------|---------|-----|
+    | **Broker de jobs** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | Il détient les baux de correction qui empêchent deux workers de pousser des configurations en même temps. Ce sont des clés *avec* TTL, donc toute politique `volatile-*` peut les supprimer en plein vol. |
+    | **Datastore de la WAF** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | Il est volontairement plafonné, donc les compteurs transitoires sont évincés plutôt que les écritures refusées. |
+
+    `maxmemory-policy` est un réglage par serveur, jamais par base de données, donc une seule instance
+    ne peut assumer les deux rôles — pointer les deux rôles vers des numéros de base de données
+    différents sur le même serveur ne les sépare pas. Chaque stack livrée exécute désormais un
+    `bw-jobs-broker` dédié, et l'installeur Linux provisionne un service `bunkerweb-broker` sur
+    `127.0.0.1:6380`.
+
+    **Si vous mettez à niveau avec l'installeur, c'est géré pour vous.** Il provisionne le broker,
+    écrit `CELERY_BROKER_URL` dans `/etc/bunkerweb/variables.env` et laisse intact un Redis de la
+    distribution non modifié (sans `maxmemory` défini, rien n'est jamais évincé, donc il n'a jamais
+    été cassé).
+
+    **Si vous mettez à niveau avec `apt`/`dnf` classique et que vous avez défini un mot de passe Redis
+    à la main**, vous êtes concerné et les jobs en arrière-plan échouent déjà — silencieusement. Le
+    worker et l'API utilisent par défaut un `redis://127.0.0.1:6379/0` non authentifié, donc un
+    serveur protégé par mot de passe répond `NOAUTH` : `POST /jobs/dispatch` renvoie 502 et le worker
+    reste `active` sans rien consommer. Dans cet état, aucun renouvellement de certificat, aucune
+    actualisation de liste de blocage et aucune sauvegarde n'ont lieu. Vérifiez-le avec :
+
+    ```bash
+    journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
+    ```
+
+    Corrigez-le en donnant au broker ses propres identifiants dans `/etc/bunkerweb/variables.env` —
+    une seule écriture couvre les deux composants, car le worker et l'API lisent tous deux ce fichier
+    avant le leur :
+
+    ```bash
+    CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0
+    ```
+
+    ```bash
+    systemctl restart bunkerweb-worker bunkerweb-api
+    ```
+
+    Le TLS est pris en charge via le schéma `rediss://`. **Définissez `ssl_cert_reqs` explicitement**
+    — une URL `rediss://` nue négocie le TLS sans vérifier le certificat du serveur :
+
+    ```bash
+    CELERY_BROKER_URL=rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required
+    ```
+
+!!! warning "Le worker Celery n'était pas activé sur certaines installations"
+
+    `bunkerweb-worker` exécute chaque job envoyé par le scheduler. Sur les installations où
+    l'installeur différait le démarrage des services — `--redis`, une base de données externe,
+    CrowdSec, des résolveurs DNS personnalisés, et toute installation `--manager` — il n'était jamais
+    activé, si bien que la stack démarrait saine sans exécuter le moindre job en arrière-plan.
+    L'installeur l'active désormais aux côtés du scheduler sur ces chemins. Vérifiez après la mise à
+    niveau :
+
+    ```bash
+    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    ```
 
 !!! warning "Swarm : `NAMESPACES` filtre désormais aussi les configurations personnalisées"
 

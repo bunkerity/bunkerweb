@@ -7,7 +7,60 @@
 
 ### 重大变更
 
-*目前本节只翻译了 1.7 新增的条目。本版本的其他重大变更（例如 `REDIS_SSL_VERIFY` 默认值调整、job broker 拆分、部分安装未启用 Celery worker）目前仅在本页的英文版本中有文档说明。*
+!!! warning "`REDIS_SSL_VERIFY` 现在默认改为 `yes`"
+
+    启用 `REDIS_SSL` 时，Redis/Valkey 客户端此前会接受**任意**证书：`REDIS_SSL_VERIFY` 文档中记载的默认值是 `yes`，但实际出厂默认值是 `no`，因此 TLS 协商时从未真正验证服务器。代码现已与文档一致。
+
+    只有当以下条件**全部**满足时才会受到影响：`REDIS_SSL: "yes"`、Redis 或 Valkey 服务器提供的是自签名或其他不受信任的证书，并且你从未显式设置过 `REDIS_SSL_VERIFY`。在这种情况下，升级后连接会失败。
+
+    要么信任服务器的 CA，要么显式恢复之前的行为：
+
+    ```yaml
+    REDIS_SSL_VERIFY: "no"
+    ```
+
+!!! warning "job broker 现在与 WAF 数据存储是独立实例"
+
+    BunkerWeb 将 Redis/Valkey 用于两项互不相关的任务，二者所需配置相互矛盾：
+
+    | 角色 | 设置 | 原因 |
+    |------|---------|-----|
+    | **Job broker** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | 它持有阻止两个 worker 同时推送配置的正确性租约（correctness lease）。这些键*带有* TTL，因此任何 `volatile-*` 策略都可能在租约生效期间将其淘汰。 |
+    | **WAF 数据存储** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | 它被有意设置了上限，因此瞬时计数器会被淘汰，而不是拒绝写入。 |
+
+    `maxmemory-policy` 是按服务器而非按数据库设置的，因此一个实例无法同时满足两种角色——把两种角色指向同一服务器上不同的数据库编号并不能将它们分开。现在每个出厂 stack 都运行一个专用的 `bw-jobs-broker`，Linux 安装器也会在 `127.0.0.1:6380` 上配置一个 `bunkerweb-broker` 服务。
+
+    **如果你使用安装器升级，这一切都会自动处理。** 它会配置 broker，将 `CELERY_BROKER_URL` 写入 `/etc/bunkerweb/variables.env`，并且不会改动未修改过的发行版自带 Redis（由于未设置 `maxmemory`，它从不淘汰任何数据，因此此前从未出过问题）。
+
+    **如果你使用普通的 `apt`/`dnf` 升级，并且手动设置了 Redis 密码**，那么你会受到影响，后台任务已经在静默失败。worker 和 API 默认使用未认证的 `redis://127.0.0.1:6379/0`，因此设置了密码保护的服务器会返回 `NOAUTH`：`POST /jobs/dispatch` 返回 502，worker 保持 `active` 状态但不消费任何任务。在该状态下不会有证书续期、封禁列表刷新，也不会有备份。可通过以下命令检查：
+
+    ```bash
+    journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
+    ```
+
+    在 `/etc/bunkerweb/variables.env` 中为 broker 单独设置凭据即可修复——一次写入即可覆盖两个组件，因为 worker 和 API 都会先读取该文件，再读取各自的文件：
+
+    ```bash
+    CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0
+    ```
+
+    ```bash
+    systemctl restart bunkerweb-worker bunkerweb-api
+    ```
+
+    TLS 通过 `rediss://` scheme 提供支持。**请显式设置 `ssl_cert_reqs`**——裸 `rediss://` URL 会在不验证服务器证书的情况下协商 TLS：
+
+    ```bash
+    CELERY_BROKER_URL=rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required
+    ```
+
+!!! warning "部分安装未启用 Celery worker"
+
+    `bunkerweb-worker` 执行 scheduler 派发的每一个 job。在安装器推迟服务启动的安装场景中——`--redis`、外部数据库、CrowdSec、自定义 DNS 解析器，以及每种 `--manager` 安装——它从未被启用，因此整个 stack 健康启动却完全不运行任何后台任务。安装器现在会在这些路径上把它和 scheduler 一起启用。升级后请验证：
+
+    ```bash
+    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    ```
 
 !!! warning "Swarm：`NAMESPACES` 现在也会过滤自定义配置"
 

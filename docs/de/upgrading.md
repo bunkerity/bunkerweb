@@ -7,7 +7,77 @@
 
 ### Wichtige Änderungen
 
-*Diese Liste enthält bisher nur die für 1.7 neu hinzugekommenen Punkte. Weitere Breaking Changes dieser Version (z. B. `REDIS_SSL_VERIFY`, der getrennte Job-Broker, der nicht überall aktivierte Celery-Worker) sind derzeit nur in der englischen Fassung dieser Seite dokumentiert.*
+!!! warning "`REDIS_SSL_VERIFY` jetzt standardmäßig `yes`"
+
+    Der Redis/Valkey-Client akzeptierte bisher **jedes** Zertifikat, wenn `REDIS_SSL` aktiviert war: Der dokumentierte Standardwert für `REDIS_SSL_VERIFY` war `yes`, der ausgelieferte Standardwert jedoch `no`, sodass TLS ausgehandelt wurde, ohne den Server jemals zu verifizieren. Der Code entspricht jetzt der Dokumentation.
+
+    Dies betrifft Sie nur, wenn **alle** folgenden Bedingungen zutreffen: `REDIS_SSL: "yes"`, der Redis- oder Valkey-Server präsentiert ein selbstsigniertes oder anderweitig nicht vertrauenswürdiges Zertifikat, und Sie haben `REDIS_SSL_VERIFY` nie explizit gesetzt. In diesem Fall schlägt die Verbindung nach dem Upgrade fehl.
+
+    Vertrauen Sie entweder der CA des Servers, oder stellen Sie das vorherige Verhalten explizit wieder her:
+
+    ```yaml
+    REDIS_SSL_VERIFY: "no"
+    ```
+
+!!! warning "Der Job-Broker ist jetzt eine separate Instanz vom WAF-Datastore"
+
+    BunkerWeb verwendet Redis/Valkey für zwei voneinander unabhängige Aufgaben, die widersprüchliche Einstellungen benötigen:
+
+    | Rolle | Einstellung | Warum |
+    |------|---------|-----|
+    | **Job-Broker** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | Er hält die Correctness-Leases, die verhindern, dass zwei Worker gleichzeitig Configs pushen. Es sind Schlüssel *mit* TTL, sodass jede `volatile-*`-Policy sie mitten im Flug verwerfen kann. |
+    | **WAF-Datastore** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | Er ist absichtlich begrenzt, sodass flüchtige Zähler statt verweigerter Schreibvorgänge verworfen werden. |
+
+    `maxmemory-policy` ist eine Server-, nie eine Datenbank-Einstellung, daher kann eine Instanz nicht
+    beides — die beiden Rollen auf unterschiedliche Datenbanknummern desselben Servers zu legen, trennt sie nicht.
+    Jeder ausgelieferte Stack führt jetzt einen dedizierten `bw-jobs-broker`, und der Linux-Installer
+    stellt einen `bunkerweb-broker`-Dienst auf `127.0.0.1:6380` bereit.
+
+    **Wenn Sie mit dem Installer aufrüsten, wird dies für Sie erledigt.** Er stellt den Broker bereit,
+    schreibt `CELERY_BROKER_URL` in `/etc/bunkerweb/variables.env` und lässt ein unverändertes
+    Distro-Redis unangetastet (ohne gesetztes `maxmemory` wird nie etwas verworfen, es war also nie kaputt).
+
+    **Wenn Sie mit reinem `apt`/`dnf` aufrüsten und von Hand ein Redis-Passwort gesetzt haben**, sind Sie
+    betroffen, und Hintergrund-Jobs schlagen bereits fehl — stillschweigend. Worker und API greifen
+    standardmäßig auf ein unauthentifiziertes `redis://127.0.0.1:6379/0` zu, sodass ein passwortgeschützter
+    Server mit `NOAUTH` antwortet: `POST /jobs/dispatch` liefert 502, und der Worker bleibt `active`, ohne
+    etwas zu konsumieren. In diesem Zustand gibt es keine Zertifikatserneuerung, keine Sperrlisten-Aktualisierung
+    und kein Backup. Prüfen Sie darauf mit:
+
+    ```bash
+    journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
+    ```
+
+    Beheben Sie es, indem Sie dem Broker eigene Anmeldeinformationen in `/etc/bunkerweb/variables.env`
+    geben — ein Schreibvorgang deckt beide Komponenten ab, da Worker und API beide diese Datei vor
+    ihrer eigenen lesen:
+
+    ```bash
+    CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0
+    ```
+
+    ```bash
+    systemctl restart bunkerweb-worker bunkerweb-api
+    ```
+
+    TLS wird über das Schema `rediss://` unterstützt. **Setzen Sie `ssl_cert_reqs` explizit** — eine
+    bloße `rediss://`-URL handelt TLS aus, ohne das Zertifikat des Servers zu verifizieren:
+
+    ```bash
+    CELERY_BROKER_URL=rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required
+    ```
+
+!!! warning "Der Celery-Worker war bei manchen Installationen nicht aktiviert"
+
+    `bunkerweb-worker` führt jeden vom Scheduler versendeten Job aus. Bei Installationen, bei denen der
+    Installer den Dienststart verzögerte — `--redis`, eine externe Datenbank, CrowdSec, benutzerdefinierte
+    DNS-Resolver und jede `--manager`-Installation — wurde er nie aktiviert, sodass der Stack gesund
+    hochfuhr und überhaupt keine Hintergrund-Jobs ausführte. Der Installer aktiviert ihn jetzt auf diesen
+    Pfaden zusammen mit dem Scheduler. Prüfen Sie nach dem Upgrade:
+
+    ```bash
+    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    ```
 
 !!! warning "Swarm: `NAMESPACES` filtert jetzt auch Custom Configs"
 
