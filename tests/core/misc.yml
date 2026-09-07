@@ -114,39 +114,48 @@ actions:
   # `CUSTOM_HEADER` is a `headers` (curated) multisite setting scoped to the reserved id. If the
   # rebind is missing the plugin resolves against `ngx.var.server_name`, which is the literal `_`
   # inside this block, and the header simply never appears -- the failure this pins is silent.
+  #
+  # AUTOCONF ONLY. The reserved row is multisite-only (PO ruling 2026-09-06,
+  # `db_methods/services.py:seed_default_server_service`), and there is no default server BLOCK to
+  # render it into either: `confs/http.conf` includes `default-server-http.conf` only under
+  # `MULTISITE=yes`, `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. The Docker and Linux arms are
+  # single-site (`tests/utils/config.yml` sets one `SERVER_NAME` and no `MULTISITE`), so there
+  # `www.example.com`'s own block is NGINX's implicit default and every assertion below is answered
+  # by the service instead. Autoconf is the multisite arm these were green on all along; Kubernetes
+  # is multisite too but dials through an ingress, which is why it was never in this list.
   default_server_service_settings_apply:
     type: header
     integrations:
-      - "Linux"
-      - "Docker"
       - "Autoconf"
     url: "http://127.0.0.1"
     response_headers:
       X-Default-Server: "^reserved$"
     config:
       default-server_CUSTOM_HEADER: "X-Default-Server: reserved"
+    # `restart_stack` gates the NEXT action's config, not this one's (`tests/scripts/run.sh:186`
+    # reads the flag the PREVIOUS action left in redis at `:262`). It belongs here, not on the leak
+    # action below: the leak check has to run against THIS stack, the one where the header is
+    # configured. With the flag one action further down, the harness restarted in between with a
+    # config that no longer carried `default-server_CUSTOM_HEADER` and the leak assertion could not
+    # fail -- and the refused-plugin action after it never got its own `config:` applied either.
+    restart_stack: false
   # The other half: a curated setting scoped to the reserved service must NOT leak into a real
   # service's block. `default-server_*` keys are per-service like any other, so a service that
   # never asked for the header must not get it.
   default_server_service_settings_do_not_leak:
     type: header
     integrations:
-      - "Linux"
-      - "Docker"
       - "Autoconf"
     url: "http://www.example.com"
     response_headers:
       # `null` is the harness's "must not be present" (tests/models/header.py), not an empty match.
       X-Default-Server: null
-    restart_stack: false
   # A refused plugin is never rendered into the default block and never applies there. `redirect`
   # assumes a `Host` to route, so it is outside the curated subset: setting it on the reserved
   # service must leave the default server answering 200, not redirecting.
   default_server_refused_plugin_does_not_apply:
     type: status
     integrations:
-      - "Linux"
-      - "Docker"
       - "Autoconf"
     url: "http://127.0.0.1"
     status: 200
@@ -163,6 +172,13 @@ actions:
   # is `bunkerweb` there. `timeout 5` distinguishes the two failures that matter -- exit 124 is
   # "the port accepted and then hung", which is what a block missing its `return ""` handler would
   # do; a refused connection exits non-zero without reaching the echo.
+  #
+  # Docker only BY CONSTRUCTION -- the probe runs inside the container -- so restricting the arms to
+  # the multisite ones the way the three actions above are would delete the only arm these have.
+  # They flip the arm instead: `MULTISITE: "yes"` in an action's `config:` reaches
+  # `config["variables"]` like any other key (`tests/generate.py:380`), which is the same idiom
+  # `badbehavior.yml` already uses on this arm. `SERVER_NAME` stays `www.example.com`, so the stack
+  # is a one-service multisite deployment and the reserved row is seeded.
   default_server_stream_port_answers_and_closes:
     type: script
     integrations:
@@ -177,6 +193,7 @@ actions:
     config:
       default-server_CUSTOM_HEADER: null
       default-server_REDIRECT_TO: null
+      MULTISITE: "yes"
       default-server_DEFAULT_SERVER_STREAM_PORTS: "19999"
   # `DEFAULT_SERVER_STREAM_PORTS_SSL` is the TLS switch of those ports. Probed with `openssl
   # s_client` rather than a raw socket, because the observable difference IS the handshake: the
@@ -198,6 +215,7 @@ actions:
     config:
       default-server_CUSTOM_HEADER: null
       default-server_REDIRECT_TO: null
+      MULTISITE: "yes"
       default-server_DEFAULT_SERVER_STREAM_PORTS: "19998"
       default-server_DEFAULT_SERVER_STREAM_PORTS_SSL: "19998"
   # TODO: make open_file_cache tests

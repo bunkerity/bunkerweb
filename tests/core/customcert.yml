@@ -106,8 +106,15 @@ actions:
       DEFAULT_SERVER_SSL_CERT_DATA: "${CUSTOM_SSL_CERT_DATA}"
       DEFAULT_SERVER_SSL_KEY_DATA: "${CUSTOM_SSL_KEY_DATA}"
   # No SNI at all: Python omits the extension for an IP literal. Every certificate provider returns
-  # early without a SNI, which is the path the override exists for -- and the refused certificate
-  # must not appear on it either.
+  # early without a SNI, which is the path the override exists for.
+  #
+  # NOT a refusal assertion, despite the name (Criticos round 2, C2): this action carries no
+  # `config:`, and its predecessor leaves `restart_stack` at its default true, so the stack is
+  # regenerated from the base config and NO `DEFAULT_SERVER_SSL_*` override is live by the time it
+  # runs -- measured in ci1-harness-docker-customcert.log ("Generating ... _refused_without_sni"
+  # 23:10:28, "Restarting current stack" 23:10:29). What it really pins is the no-SNI fallback to
+  # the internal leaf. Making it assert the refusal needs `restart_stack: false` on the action
+  # above, which is a behavioural spec change and a harness run: deliberately not done here.
   default_server_override_refused_without_sni:
     type: ssl
     integrations:
@@ -120,8 +127,21 @@ actions:
     ssl_subject: "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/"
   # The accepted path: a certificate covering no configured service IS served for an unknown SNI,
   # in place of the internal self-signed leaf.
+  #
+  # MULTISITE ARMS ONLY. `ssl_certificate_default` -- the phase that consults this override -- is
+  # appended by `confs/default-server-http.conf` and nowhere else, and `confs/http.conf` includes
+  # that file only under `MULTISITE=yes`, `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. The
+  # Docker and Linux arms are single-site, so `www.example.com`'s own block is NGINX's implicit
+  # default there and answers this handshake with the STATIC internal leaf
+  # (`confs/server-http/ssl-certificate-lua.conf`), which is why the two refusal actions above stay
+  # on every arm while this one cannot. Autoconf and Kubernetes set `MULTISITE=yes`
+  # (`tests/generate.py`), the all-in-one entrypoint defaults it to `yes`.
   default_server_override_is_served_for_an_unknown_sni:
     type: ssl
+    integrations:
+      - "Autoconf"
+      - "Kubernetes"
+      - "All-in-one"
     url: "https://localhost"
     verify_ssl: false
     ssl_expiration: 365
@@ -132,9 +152,18 @@ actions:
       DEFAULT_SERVER_SSL_CERT_DATA: "${DEFAULT_SERVER_SSL_CERT_DATA}"
       DEFAULT_SERVER_SSL_KEY_DATA: "${DEFAULT_SERVER_SSL_KEY_DATA}"
     restart_stack: false
-  # Known SNI, with that same override live: the service keeps its own certificate. The override
-  # phase runs only inside the default server and only after every SNI-indexed provider declined,
-  # so a configured service can never be displaced by it.
+  # Known SNI: the service keeps its own certificate. The override phase runs only inside the default
+  # server and only after every SNI-indexed provider declined, so a configured service can never be
+  # displaced by it.
+  #
+  # This runs on every arm, but it is not the same check on all of them. On Autoconf, Kubernetes and
+  # All-in-one the action above has `restart_stack: false`, so this one meets the SAME stack with the
+  # override live -- the displacement case. On Docker and Linux that action does not run at all now,
+  # the predecessor is `default_server_override_refused_without_sni` with the default
+  # `restart_stack: true`, and the stack is regenerated with no `DEFAULT_SERVER_SSL_*` at all: here
+  # this is the weaker "the service still serves its own certificate" check. Kept on those arms
+  # deliberately -- it is pre-1.7 behaviour and cheap -- but it is not evidence about the override
+  # there.
   default_server_override_does_not_displace_the_service:
     type: ssl
     url: "https://www.example.com"
@@ -144,11 +173,19 @@ actions:
   # Strict SNI closes the connection in ssl_client_hello_by_lua_block, which runs BEFORE any
   # certificate can be chosen (`confs/default-server-http.conf`), so the override is inert by
   # construction -- there is no handshake left to serve a certificate into.
+  #
+  # AUTOCONF ONLY, and for the same reason the accepted-override action above is: that lua block is
+  # in `default-server-http.conf` and nowhere else, so `DISABLE_DEFAULT_SERVER_STRICT_SNI` has
+  # nothing to run in on a single-site deployment and the handshake simply completes. The code path:
+  # `core/misc/misc.lua:ssl_client_hello_default` is called from `default-server-http.conf` and from
+  # no other template, and `confs/http.conf` includes that file only under `MULTISITE=yes`,
+  # `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. Measured too, on the Docker arm before this
+  # restriction: "SSL connection succeeded but was expected to fail" -- it had never been reached
+  # there before, because the accepted-override action ahead of it stopped the run first (that log
+  # was overwritten by the green re-run; the excerpt is quoted in `report-CI-1.md`).
   default_server_override_is_inert_under_strict_sni:
     type: ssl
     integrations:
-      - "Linux"
-      - "Docker"
       - "Autoconf"
     url: "https://localhost"
     verify_ssl: false
@@ -161,8 +198,15 @@ actions:
   # ---------------------------------------------------------------------------------------------
   # The reserved `default-server` pseudo-service (conception option (b)). It is what the override
   # above is stored against once the API has seeded it, so it belongs in this file rather than in a
-  # spec of its own. Docker only, same reason as the inventory actions: the assertions dial the
-  # control-plane API on loopback:8888.
+  # spec of its own.
+  #
+  # AUTOCONF ONLY, and for two reasons at once. The row is multisite-only (PO ruling 2026-09-06):
+  # `seed_default_server_service` skips it once the scheduler has completed a pass with
+  # `MULTISITE != yes`, and `GET /services` hides it anyway (`api/app/routers/services.py`), so on
+  # the single-site Docker and Linux arms all four assertions below would fail on a row that is
+  # correctly absent. Autoconf is a multisite arm AND runs the same
+  # `tests/docker/docker-compose.api.yml` the Docker arm does, publishing the control-plane API on
+  # the same 127.0.0.1:8888 these dial -- Kubernetes does not, which is why it is not in the list.
   the_reserved_default_server_is_seeded_and_flagged:
     # Seeding happens in the API's own startup, on every boot and idempotently -- never in a
     # migration -- so a stack that has come up at all must already have the row. `"reserved":true`
@@ -170,7 +214,7 @@ actions:
     # to the UI like a service somebody created called "default-server".
     type: string
     integrations:
-      - "Docker"
+      - "Autoconf"
     url: "http://127.0.0.1:8888/services"
     auth:
       - "admin"
@@ -180,7 +224,7 @@ actions:
   the_reserved_default_server_is_flagged_reserved:
     type: string
     integrations:
-      - "Docker"
+      - "Autoconf"
     url: "http://127.0.0.1:8888/services"
     auth:
       - "admin"
@@ -188,15 +232,24 @@ actions:
     string: '"reserved":true'
     restart_stack: false
   deleting_the_reserved_default_server_is_refused:
-    # 403 and, per the PO's "user friendly" ruling, a message that says WHAT it is rather than just
-    # refusing. If this ever answers 200 the deployment loses its configurable default server
-    # silently: the block falls back to the global-only rendering with every stored setting still
-    # in the database and none of it applied.
+    # The refusal message, which per the PO's "user friendly" ruling says WHAT the reserved service
+    # is rather than just refusing. `raise_for_status: false` is required for any non-2xx here
+    # (tests/core_handlers/http_string_handler.py:18); that handler checks no status code at all,
+    # so what is pinned is the BODY -- a 200 delete-success body cannot contain this string, which
+    # is what keeps the assertion meaningful. If the delete ever succeeds the deployment loses its
+    # configurable default server silently: the block falls back to the global-only rendering with
+    # every stored setting still in the database and none of it applied.
     type: string
     integrations:
-      - "Docker"
+      - "Autoconf"
     url: "http://127.0.0.1:8888/services/default-server"
     method: DELETE
+    # The refusal IS the assertion, so the 403 must not be raised before the body is read
+    # (`tests/core_handlers/http_string_handler.py:18`). Measured, not guessed: this action had never
+    # run anywhere -- it was Docker-only, Docker is single-site, and the action ahead of it stopped
+    # the run -- and its first execution, on Autoconf, died on
+    # `httpx.HTTPStatusError: Client error '403 Forbidden'` with the message never inspected.
+    raise_for_status: false
     auth:
       - "admin"
       - "P@ssw0rd"
@@ -205,7 +258,7 @@ actions:
   the_reserved_default_server_survives_the_refused_delete:
     type: string
     integrations:
-      - "Docker"
+      - "Autoconf"
     url: "http://127.0.0.1:8888/services"
     auth:
       - "admin"
