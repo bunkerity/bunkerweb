@@ -3,6 +3,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from heapq import heappush, heapreplace
 from json import dumps as json_dumps, loads
+from math import isfinite
 from operator import itemgetter
 from os import getenv
 from threading import Lock
@@ -349,42 +350,26 @@ class InstancesUtils:
             if cursor == 0:
                 break
 
-    def _get_redis_top_ip_counts_from_facets(self, redis_client, *, limit: int = 10) -> tuple[list[tuple[str, int]], int]:
-        """Read top blocked IPs and unique IP count from Redis request facets.
+    @staticmethod
+    def _decode_redis_report(raw) -> Optional[dict]:
+        """Decode one raw report, rejecting what the aggregates cannot use.
 
-        Uses HSCAN + heap top-k to keep memory bounded even with large facet maps.
+        An unhashable id makes the caller's de-duplication set raise, and a NaN or infinite date
+        compares False against every window bound, so both used to reach the aggregates and either
+        crash the page or land the report in a window it does not belong to.
         """
-        if limit < 0:
-            limit = 0
-
-        top_heap: list[tuple[int, str]] = []
-        unique_ips = 0
-
         try:
-            for raw_ip, raw_count in self._iter_redis_hash(redis_client, "requests:facet:ip"):
-                ip = self._decode_redis_text(raw_ip).strip() or "unknown"
-                try:
-                    count = int(self._decode_redis_text(raw_count))
-                except Exception:
-                    continue
-                if count <= 0:
-                    continue
-
-                unique_ips += 1
-
-                if limit == 0:
-                    continue
-
-                item = (count, ip)
-                if len(top_heap) < limit:
-                    heappush(top_heap, item)
-                elif item > top_heap[0]:
-                    heapreplace(top_heap, item)
-        except Exception:
-            return [], 0
-
-        top_items = sorted(((ip, count) for count, ip in top_heap), key=lambda item: (-item[1], item[0]))
-        return top_items, unique_ips
+            report = loads(raw)
+            if not isinstance(report, dict):
+                return None
+            report_id = report.get("id")
+            if report_id is not None and not isinstance(report_id, (str, int, float)):
+                return None
+            if not isfinite(float(report.get("date", 0) or 0)):
+                return None
+            return report
+        except (ValueError, TypeError, OverflowError):
+            return None
 
     def _get_redis_pane_counts_from_facets(self, redis_client, pane_fields: List[str]) -> Optional[dict[str, dict[str, dict[str, int]]]]:
         pane_counts: dict[str, dict[str, dict[str, int]]] = {field: {} for field in pane_fields}
@@ -938,7 +923,7 @@ class InstancesUtils:
         reverse = order_dir == "desc"
 
         if order_column == "date":
-            return sorted(reports, key=lambda x: float(x.get("date", 0)), reverse=reverse)
+            return sorted(reports, key=lambda x: float(x.get("date", 0) or 0), reverse=reverse)
         return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
 
     def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25):
@@ -984,11 +969,8 @@ class InstancesUtils:
                     stop = True
                     break
                 for report_raw in chunk:
-                    try:
-                        report = loads(report_raw)
-                    except Exception:
-                        continue
-                    if isinstance(report, dict):
+                    report = self._decode_redis_report(report_raw)
+                    if report is not None:
                         yield report
                 if len(chunk) < chunk_size:
                     stop = True
@@ -1153,8 +1135,6 @@ class InstancesUtils:
         blocked_ip_counts: dict[str, int] = {}
         request_statuses: dict[int, int] = {}
         blocked_unique_ips = 0
-        top_ips_from_facets: list[tuple[str, int]] = []
-        use_facet_ip_counts = False
 
         current_date = datetime.now().astimezone()
         cutoff_timestamp = (current_date - timedelta(hours=hours)).timestamp()
@@ -1166,9 +1146,10 @@ class InstancesUtils:
             # Fallback: fetch requests from instance API when Redis is unavailable
             requests_iter = self._iter_instance_api_requests()
         else:
-            top_ips_from_facets, blocked_unique_ips = self._get_redis_top_ip_counts_from_facets(redis_client, limit=top_ips_limit)
-            use_facet_ip_counts = blocked_unique_ips > 0
-
+            # The IP facets count the WHOLE retained list, while every other aggregate below is
+            # windowed to `hours`: reading them here made the "top blocked IPs" and "unique IPs"
+            # tiles answer for a different period than the timeline, the countries and the status
+            # cards next to them. They are counted in the same pass as everything else now.
             max_redis_requests = self._get_max_blocked_requests_redis()
             if max_redis_requests == 0:
                 return {
@@ -1184,7 +1165,16 @@ class InstancesUtils:
             scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
             requests_iter = self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx)
 
+        seen_ids: set = set()
         for request in requests_iter:
+            # The retained list holds the same report twice whenever a sync round overlaps a push,
+            # and every tile below counts it twice.
+            report_id = request.get("id")
+            if report_id is not None:
+                if report_id in seen_ids:
+                    continue
+                seen_ids.add(report_id)
+
             request_date = request.get("date", 0)
             if not isinstance(request_date, (int, float)):
                 try:
@@ -1192,8 +1182,10 @@ class InstancesUtils:
                 except (ValueError, TypeError):
                     continue
 
-            # Skip requests older than cutoff
-            if request_date < cutoff_timestamp:
+            # Apply the same selected window to every dashboard aggregate. A date in the future
+            # (a skewed instance clock) belongs to no bucket, so it inflated the country and status
+            # tiles while the timeline ignored it.
+            if not isfinite(request_date) or request_date < cutoff_timestamp or request_date > current_date.timestamp():
                 continue
 
             country = request.get("country", "unknown")
@@ -1213,12 +1205,11 @@ class InstancesUtils:
                     request_countries[country] = {"blocked": 0}
                 request_countries[country]["blocked"] += 1
 
-                if not use_facet_ip_counts:
-                    ip = request.get("ip")
-                    if ip is None or ip == "":
-                        ip = "unknown"
-                    ip_str = str(ip)
-                    blocked_ip_counts[ip_str] = blocked_ip_counts.get(ip_str, 0) + 1
+                ip = request.get("ip")
+                if ip is None or ip == "":
+                    ip = "unknown"
+                ip_str = str(ip)
+                blocked_ip_counts[ip_str] = blocked_ip_counts.get(ip_str, 0) + 1
 
                 # Add to time bucket
                 with suppress(ValueError, OSError):
@@ -1227,14 +1218,11 @@ class InstancesUtils:
                     if bucket in time_buckets:
                         time_buckets[bucket] += 1
 
-        if use_facet_ip_counts:
-            top_blocked_ips = {ip: {"blocked": count} for ip, count in top_ips_from_facets}
-        else:
-            sorted_ips = sorted(blocked_ip_counts.items(), key=lambda item: (-item[1], item[0]))
-            if top_ips_limit > 0:
-                sorted_ips = sorted_ips[:top_ips_limit]
-            top_blocked_ips = {ip: {"blocked": count} for ip, count in sorted_ips}
-            blocked_unique_ips = len(blocked_ip_counts)
+        sorted_ips = sorted(blocked_ip_counts.items(), key=lambda item: (-item[1], item[0]))
+        if top_ips_limit > 0:
+            sorted_ips = sorted_ips[:top_ips_limit]
+        top_blocked_ips = {ip: {"blocked": count} for ip, count in sorted_ips}
+        blocked_unique_ips = len(blocked_ip_counts)
         blocked_total = sum(time_buckets.values())
 
         # Defensive fallback: if timeline has blocked data but statuses are empty,
