@@ -8,10 +8,11 @@ away from the migration chain sends `alembic downgrade` at a revision that is no
 """
 
 import json
-import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
+from re import MULTILINE
+from re import search as re_search
 
 import pytest
 
@@ -21,6 +22,7 @@ if str(_BACKUP) not in sys.path:
     sys.path.insert(0, str(_BACKUP))
 
 import downgrade  # noqa: E402
+from db.alembic_baseline import chain as _chain, walk_back  # noqa: E402
 from downgrade import (  # noqa: E402
     IN_PLACE,
     RESTORE_ONLY,
@@ -33,7 +35,6 @@ from downgrade import (  # noqa: E402
 )  # noqa: E402
 
 MANIFEST_FILE = _BACKUP / "downgrade-manifest.json"
-ALEMBIC_DIR = _REPO_ROOT / "src" / "common" / "db" / "alembic"
 SUPPORTED_ENGINES = ("sqlite", "postgresql", "mariadb", "mysql")
 NOW = datetime(2026, 9, 6, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -45,18 +46,6 @@ ROWS = MANIFEST["releases"]
 # `plugin_id IS NULL`). Restating a set is how it drifts, so
 # `test_the_counted_set_is_the_one_the_preflight_really_produces` asserts this against the function.
 _COUNTED = set(downgrade.IRREPRESENTABLE_TABLES) | {"bw_resources", "bw_resource_groups"}
-
-
-def _chain(engine):
-    """{revision: (down_revision, filename)} for one engine's migration directory."""
-    out = {}
-    for path in (ALEMBIC_DIR / f"{engine}_versions").glob("*.py"):
-        text = path.read_text(encoding="utf-8")
-        rev = re.search(r'^revision: str = "(.+?)"', text, re.M)
-        down = re.search(r"^down_revision: Union\[str, None\] = (.+?)$", text, re.M)
-        if rev:
-            out[rev.group(1)] = (down.group(1).strip().strip('"') if down else None, path.name)
-    return out
 
 
 class TestItShips:
@@ -136,8 +125,8 @@ class TestItTracksTheProduct:
         head, target = row["alembic"]["from_revision"], row["alembic"]["to_revision"]
         assert head in chain, f"{row['engine']}: from_revision {head} is not in the migration chain"
         assert target in chain, f"{row['engine']}: to_revision {target} is not in the migration chain"
-        assert chain[head][1].endswith("_upgrade_to_version_1_7_0_beta.py")
-        assert chain[target][1].endswith(f"_upgrade_to_version_{row['to'].replace('.', '_')}.py")
+        assert chain[head][1].name.endswith("_upgrade_to_version_1_7_0_beta.py")
+        assert chain[target][1].name.endswith(f"_upgrade_to_version_{row['to'].replace('.', '_')}.py")
 
     @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
     def test_from_revision_is_the_head_of_its_chain(self, row):
@@ -146,13 +135,62 @@ class TestItTracksTheProduct:
         assert row["alembic"]["from_revision"] not in children, f"{row['engine']}: from_revision is no longer the head, the manifest describes an older release"
 
     @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
+    def test_the_manifest_is_not_older_than_the_head_it_describes(self, row):
+        """`generated_at` is the date the measurement was taken. A head regenerated after it means
+        the manifest describes an artifact that no longer exists.
+
+        Compared against the head's own `Create Date:` docstring line, not against file mtimes: a
+        checkout sets every mtime to the moment it ran, so an mtime comparison would be green on the
+        developer's machine and meaningless in CI. `Create Date` is content -- alembic writes it,
+        git tracks it, and a regeneration always moves it.
+
+        Day granularity, because that is all `generated_at` carries. A head regenerated later on the
+        same day as the manifest is not caught here; it is caught by
+        `test_alembic_reversibility.py::test_every_head_really_drops_the_columns_the_manifest_declares`,
+        which compares the head's `downgrade()` body to the manifest instead of trusting a date.
+        """
+        head = _chain(row["engine"])[row["alembic"]["from_revision"]][1]
+        created = re_search(r"^Create Date: (\d{4}-\d{2}-\d{2})", head.read_text(encoding="utf-8"), MULTILINE)
+        assert created, f"{head.name} has no Create Date line, so the manifest's age cannot be checked against it"
+
+        generated = date.fromisoformat(MANIFEST["generated_at"][:10])
+        assert generated >= date.fromisoformat(created.group(1)), (
+            f"the manifest was measured on {generated} and {head.name} was regenerated on {created.group(1)}: "
+            "it describes a head that no longer exists -- re-measure it"
+        )
+
+    @pytest.mark.parametrize("row", ROWS, ids=lambda r: r["engine"])
     def test_the_target_is_reachable_by_walking_back_from_the_head(self, row):
-        chain = _chain(row["engine"])
-        seen, cursor = [], row["alembic"]["from_revision"]
-        while cursor and cursor in chain and len(seen) < 200:
-            seen.append(cursor)
-            cursor = chain[cursor][0]
+        seen = walk_back(row["engine"], row["alembic"]["from_revision"])
         assert row["alembic"]["to_revision"] in seen, f"{row['engine']}: to_revision is not an ancestor of the head"
+
+
+class TestTheChainIsReadAtAll:
+    """Every guard above is anchored to `chain()`, and a revision it cannot parse is not reported
+    as a bad revision -- it is reported as no revision at all. That failure mode is not theoretical:
+    `misc/migration/create.sh` emits a head before `black` has run on it, and alembic's own template
+    writes single quotes. Eight guards then fail as "the manifest drifted" while the manifest is
+    fine and the head is fine."""
+
+    def test_a_head_that_has_not_been_through_black_yet_is_still_in_the_chain(self, tmp_path):
+        (tmp_path / "abc123_upgrade_to_version_9_9_9.py").write_text(
+            "revision: str = 'abc123'\ndown_revision: Union[str, None] = 'def456'\n",
+            encoding="utf-8",
+        )
+        assert _chain("sqlite", versions_dir=tmp_path) == {"abc123": ("def456", tmp_path / "abc123_upgrade_to_version_9_9_9.py")}
+
+    def test_the_formatted_form_is_read_the_same_way(self, tmp_path):
+        (tmp_path / "abc123_upgrade_to_version_9_9_9.py").write_text(
+            'revision: str = "abc123"\ndown_revision: Union[str, None] = "def456"\n',
+            encoding="utf-8",
+        )
+        assert _chain("sqlite", versions_dir=tmp_path)["abc123"][0] == "def456"
+
+    def test_the_shipped_directories_are_not_empty(self):
+        """Anti-vacuity for the two above: they prove the parser reads a file, this proves the
+        parser is pointed at the real directories the guards walk."""
+        for engine in SUPPORTED_ENGINES:
+            assert len(_chain(engine)) > 50, f"{engine}: the migration chain came back near-empty, so every guard anchored to it is vacuous"
 
 
 class TestOperatorBuiltResourceGroups:
