@@ -581,7 +581,11 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
 
                     self._sc_collect_multisite_data(session, ctx)
 
-                    # Use ThreadPoolExecutor to process services in parallel
+                    # Use ThreadPoolExecutor to process services in parallel. Only the per-service
+                    # pass goes in there: it takes its inputs from `ctx`, which
+                    # `_sc_collect_multisite_data` filled above, and touches no database at all.
+                    # It is not side-effect free -- it writes the shared `db_ids` dict from the pool
+                    # threads (see `_sc_process_service`) -- but that is a plain dict, not a session.
                     with ThreadPoolExecutor() as executor:
                         futures = [
                             executor.submit(
@@ -594,37 +598,40 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
                             for service_name, service_config in service_configs.items()
                         ]
 
-                        # Process global settings in another thread or the main thread
-                        futures.append(
-                            executor.submit(
-                                self._sc_process_global_settings,
-                                session,
-                                ctx,
-                                global_config,
-                            )
-                        )
+                        # Global settings stay in THIS thread while the services run. `session` is
+                        # the `scoped_session` registry, so touching it from a pool thread hands
+                        # that thread a *different* Session: it opened a transaction on
+                        # `bw_global_values` that nothing ever closed -- `_db_session`'s `finally`
+                        # only removes the calling thread's -- and the pool thread was left
+                        # `idle in transaction` holding the lock until the connection was recycled,
+                        # blocking every later DDL on that table (the unit matrix deadlocked on
+                        # `DROP TABLE bw_global_values`, and a long-lived scheduler/API process
+                        # holds the same lock in production). Sessions are not thread-safe anyway.
+                        results = [self._sc_process_global_settings(session, ctx, global_config)]
 
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                (
-                                    ret_to_put,
-                                    ret_to_update,
-                                    ret_to_delete,
-                                    ret_changed_plugins,
-                                    ret_changed_services,
-                                    ret_service_template_change,
-                                ) = future.result()
-                                to_put.extend(ret_to_put)
-                                to_update.extend(ret_to_update)
-                                to_delete.extend(ret_to_delete)
-                                changed_plugins.update(ret_changed_plugins)
-                                if not changed_services:
-                                    changed_services = ret_changed_services
-                                if not service_template_change:
-                                    service_template_change = ret_service_template_change
+                                results.append(future.result())
                             except Exception as e:
                                 self.logger.error(f"Thread raised an exception: {e}")
+
+                    for (
+                        ret_to_put,
+                        ret_to_update,
+                        ret_to_delete,
+                        ret_changed_plugins,
+                        ret_changed_services,
+                        ret_service_template_change,
+                    ) in results:
+                        to_put.extend(ret_to_put)
+                        to_update.extend(ret_to_update)
+                        to_delete.extend(ret_to_delete)
+                        changed_plugins.update(ret_changed_plugins)
+                        if not changed_services:
+                            changed_services = ret_changed_services
+                        if not service_template_change:
+                            service_template_change = ret_service_template_change
 
                 else:
                     ret_changed_services, ret_service_template_change = self._sc_apply_non_multisite_config(
@@ -1565,11 +1572,15 @@ class DatabaseConfigSaveMixin(DatabaseMixinBase):
         )
 
     def _sc_process_global_settings(self, session, ctx: _SaveConfigContext, global_config: Dict[str, str]):
-        """save_config worker (runs in a ThreadPoolExecutor thread): multisite global settings pass.
+        """save_config worker (runs in the CALLING thread): multisite global settings pass.
 
         Verbatim body of the original nested ``process_global_settings`` closure, with the
         captured variables read from ``ctx`` and the *same* scoped session passed in
         explicitly (the closure used to capture it). Returns the same 6-tuple.
+
+        Do not submit this to the executor: ``session`` is the ``scoped_session`` registry and a
+        pool thread would get a Session of its own that nobody removes, left ``idle in
+        transaction`` on ``bw_global_values``. See the call site in ``save_config``.
         """
         local_to_put = []
         local_to_update = []
