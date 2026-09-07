@@ -30,6 +30,9 @@ local synced_redis_keys = {}
 -- A worker-local latch cannot be evicted along with metric data.
 local restored_shm = false
 local prefilled_redis = false
+-- Stripping the TTL is a one-shot migration: in persist mode nothing re-adds one, since
+-- every writer uses bare SET/RPUSH/HINCRBY. Later cycles would be pure round trips.
+local persisted_redis = false
 -- A SCAN/MGET the Redis ACL denies never succeeds: give up after this many ticks
 -- instead of spending one wasted round trip per worker every cycle forever.
 local MAX_PREFILL_ATTEMPTS = 12
@@ -417,19 +420,35 @@ local function prefill_counters(self, wid)
 	return true
 end
 
+-- METRICS_REDIS_TTL=0 is documented as keeping the keys permanent. Only refreshing the
+-- TTL when it is set leaves a key that already carries one expiring for another full
+-- period, and under volatile-lru it stays evictable for exactly that long, which is how
+-- an operator who set 0 to pin the reports list still loses it. PERSIST makes the
+-- documented behaviour true on an instance that ran with a TTL before.
 local function refresh_request_ttls(self, ttl, wid)
-	if not ttl or ttl <= 0 then
-		return
+	local persist = ttl <= 0
+	if persist then
+		if persisted_redis then
+			return
+		end
+		persisted_redis = true
 	end
-	self.clusterstore:call("expire", "requests", ttl)
+	local function touch(key)
+		if persist then
+			self.clusterstore:call("persist", key)
+		else
+			self.clusterstore:call("expire", key, ttl)
+		end
+	end
+	touch("requests")
 	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		self.clusterstore:call("expire", "requests:facet:" .. field, ttl)
+		touch("requests:facet:" .. field)
 	end
-	self.clusterstore:call("expire", "requests:facets:initialized", ttl)
+	touch("requests:facets:initialized")
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" then
-				self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
+				touch("metrics:" .. key .. ":" .. wid)
 			end
 		end
 	end
@@ -667,7 +686,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"]) or 0
+	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
 	local redis_connected = false
 	if self.use_redis then
 		self.redis_ok, err = self.clusterstore:connect()
@@ -881,7 +900,7 @@ function metrics:timer()
 			reap_evicted_redis_keys(self, wid, live_keys)
 		end
 	end
-	if redis_connected and ttl > 0 then
+	if redis_connected and ttl then
 		refresh_request_ttls(self, ttl, wid)
 	end
 	-- Always attempt cleanup when Redis was used, even if connection dropped mid-cycle.
