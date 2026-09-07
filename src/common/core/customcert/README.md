@@ -37,9 +37,9 @@ Follow these steps to configure and use the Custom SSL certificate feature:
 
 ### Default server certificate
 
-The **default server** is the block that answers requests matching no configured service: an unknown SNI, a connection to a raw IP address, a `Host` nobody serves. It is not a service and has no settings of its own, so until now the only certificate it could present was the internal self-signed one BunkerWeb generates at startup — which is why a browser reaching an unknown hostname on your instance sees a name-mismatch warning.
+The **default server** is the block that answers requests matching no configured service: an unknown SNI, a connection to a raw IP address, a `Host` nobody serves. The only certificate it could present used to be the internal self-signed one BunkerWeb generates at startup — which is why a browser reaching an unknown hostname on your instance sees a name-mismatch warning.
 
-These four global settings replace it. Leave them empty to keep the internal certificate.
+These four global settings replace it. Leave them empty to keep the internal certificate. Its other settings — TLS, headers, error pages — are edited on the reserved `default-server` service, see [Configuring the Default Server](#miscellaneous).
 
 | Setting                        | Default | Context | Multiple | Description                                                                                                                       |
 | ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
