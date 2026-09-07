@@ -106,6 +106,7 @@
 - [FEATURE] `jobs`/`ui`: when `push-configs` deliberately defers because every registered instance is unreachable — waiting for one to come back, not a failure — the Jobs page now shows a distinct "Deferred" status (with the reason in its tooltip) instead of looking identical to an ordinary run that changed nothing, and the dashboard flashes a non-alarming warning banner linking to the Jobs page instead of staying silent while a change sits unapplied.
 - [BUGFIX] `db`: fix a session leak in `save_config`: the multisite global-settings pass parked a lock and a pooled connection in the API process.
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
+- [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.
 
 ## v1.6.14~rc1 - 2026/07/??
 

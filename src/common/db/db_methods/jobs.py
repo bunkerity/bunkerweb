@@ -4,7 +4,7 @@ from datetime import datetime
 from sys import argv
 from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, or_, select, update
 
 from model import Jobs, Jobs_cache, Jobs_runs  # type: ignore
 
@@ -32,6 +32,48 @@ class DatabaseJobsMixin(DatabaseMixinBase):
 
             session.add(
                 Jobs_runs(job_name=job_name, success=success, start_date=start_date, end_date=end_date or datetime.now().astimezone(), error=error or None)
+            )
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+        return ""
+
+    def clear_deferred_job_runs(self, *reason_prefixes: str, before: datetime) -> str:
+        """Drop a ``deferred:`` marker that a later push has since made false.
+
+        The debt a deferred job leaves behind is fleet-global (one broker key for the whole fleet);
+        the marker that renders the UI's "Deferred" pill is per-job, and lives on the run row. So a
+        run that carries an earlier job's push settles the debt for everyone and leaves that job
+        reading "reload deferred" for the life of the scheduler -- an ``every: once`` job
+        (``crowdsec-conf``, ``certbot-new``) never runs again to overwrite its own row.
+
+        ``reason_prefixes`` is the caller's promise about what its push actually answered, so a job
+        that deferred on its own precondition (``push-configs``: every instance down) keeps its
+        pill: its reason does not start with one of them. ``before`` is the same guard the caller's
+        own compare-and-set is -- a run that recorded its deferral while the tar was being built
+        wrote files that push did not carry, and clearing its marker would claim a delivery that
+        has not happened. Only rows that ended at or before ``before`` are touched.
+        """
+        if not reason_prefixes:
+            return ""
+
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            session.execute(
+                update(Jobs_runs)
+                .where(
+                    Jobs_runs.success.is_(True),
+                    Jobs_runs.end_date <= before,
+                    # autoescape: a reason string is prose, and an unescaped `_` in one would silently
+                    # widen the LIKE into a wildcard match on a neighbouring reason.
+                    or_(*(Jobs_runs.error.startswith(prefix, autoescape=True) for prefix in reason_prefixes)),
+                )
+                .values({Jobs_runs.error: None}),
+                execution_options={"synchronize_session": False},
             )
 
             try:
