@@ -35,6 +35,30 @@ Siga estos pasos para configurar y usar la función de certificado SSL personali
 | `CUSTOM_SSL_CERT_DATA`     |                   | multisite | no       | **Datos del Certificado:** Su certificado codificado en formato base64 o como texto plano PEM.                                   |
 | `CUSTOM_SSL_KEY_DATA`      |                   | multisite | no       | **Datos de la Clave Privada:** Su clave privada codificada en formato base64 o como texto plano PEM.                             |
 
+### Certificado del servidor predeterminado
+
+El **servidor predeterminado** es el bloque que responde a las solicitudes que no coinciden con ningún servicio configurado: un SNI desconocido, una conexión a una dirección IP en bruto, un `Host` que nadie sirve. El único certificado que podía presentar era el autofirmado interno que BunkerWeb genera al arrancar — por eso un navegador que llega a un hostname desconocido en tu instancia ve una advertencia de nombre no coincidente.
+
+Estos cuatro ajustes globales lo sustituyen. Déjalos vacíos para conservar el certificado interno. Sus demás ajustes — TLS, cabeceras, páginas de error — se editan en el servicio reservado `default-server`, ver [Configuración del Servidor Predeterminado](#miscellaneous).
+
+| Ajuste                          | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                       |
+| ------------------------------ | ------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_SERVER_SSL_CERT`      |         | global  | no       | **Ruta del Certificado del Servidor Predeterminado:** Ruta completa al certificado o paquete servido para solicitudes que no coinciden con ningún servicio configurado. Solo se sirve donde existe un bloque de servidor predeterminado: modo multisitio (`MULTISITE=yes`), o `DISABLE_DEFAULT_SERVER=yes` en modo de sitio único. |
+| `DEFAULT_SERVER_SSL_KEY`       |         | global  | no       | **Ruta de la Clave del Servidor Predeterminado:** Ruta completa a la clave privada correspondiente.                                                              |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |         | global  | no       | **Datos del Certificado del Servidor Predeterminado:** El mismo certificado en base64 o texto plano PEM. Se usa solo cuando el ajuste de ruta está vacío. Solo se sirve donde existe un bloque de servidor predeterminado: modo multisitio (`MULTISITE=yes`), o `DISABLE_DEFAULT_SERVER=yes` en modo de sitio único. |
+| `DEFAULT_SERVER_SSL_KEY_DATA`  |         | global  | no       | **Datos de la Clave del Servidor Predeterminado:** La misma clave privada en base64 o texto plano PEM. Se usa solo cuando el ajuste de ruta está vacío.          |
+
+La anulación se consulta **en último lugar**, y solo dentro del servidor predeterminado: un servicio que resuelve su propio certificado — a través del inventario de certificados, `USE_CUSTOM_SSL`, Let's Encrypt o el proveedor autofirmado — siempre lo conserva.
+
+!!! warning "Se rechaza un certificado que cubra alguno de tus servicios"
+    El servidor predeterminado responde a *cualquier* hostname. Si su certificado también cubriera `www.example.com`, un cliente podría abrir una conexión con un SNI desconocido, recibir ese certificado, y luego reutilizar la misma conexión para `Host: www.example.com` — un certificado que ese servicio nunca autorizó, ahora utilizable para él (coalescencia de conexiones HTTP/2). Por eso el job `custom-cert` rechaza un certificado cuyos SAN o Common Name cubran algún hostname de cualquier servicio configurado, comodines incluidos, y registra el hostname por el que lo rechazó. Usa un certificado que no cubra ningún hostname de servicio configurado, o adjúntalo al servicio con `USE_CUSTOM_SSL` en su lugar.
+
+!!! info "Un rechazo nunca retira lo que ya se está sirviendo"
+    Un material inválido, un par que no coincide y un hostname cubierto hacen fallar el job de forma explícita y dejan en su sitio el certificado servido previamente, en vez de dejar al servidor predeterminado sin nada. La caducidad solo avisa, por la misma razón. Vaciar ambos ajustes elimina la anulación y restaura el certificado interno.
+
+!!! tip "Inerte cuando el SNI estricto está activo"
+    Con `DISABLE_DEFAULT_SERVER_STRICT_SNI` en `yes`, un SNI desconocido se cierra durante el handshake TLS, antes de elegir ningún certificado — así que la anulación nunca se alcanza. Déjalo desactivado si quieres que los hostnames desconocidos se respondan con tu propio certificado.
+
 !!! warning "Consideraciones de Seguridad"
     Cuando use certificados personalizados, asegúrese de que su clave privada esté debidamente protegida y tenga los permisos adecuados. Los archivos deben ser legibles por el programador de BunkerWeb.
 

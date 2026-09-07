@@ -33,6 +33,30 @@ Comment ça marche :
 | `CUSTOM_SSL_CERT_DATA`     |        | multisite | non      | Données du certificat (base64 ou PEM en clair).               |
 | `CUSTOM_SSL_KEY_DATA`      |        | multisite | non      | Données de la clé privée (base64 ou PEM en clair).            |
 
+### Certificat du serveur par défaut
+
+Le **serveur par défaut** est le bloc qui répond aux requêtes ne correspondant à aucun service configuré : un SNI inconnu, une connexion à une adresse IP brute, un `Host` que personne ne sert. Le seul certificat qu'il pouvait présenter était l'auto-signé interne généré par BunkerWeb au démarrage — c'est pourquoi un navigateur atteignant un nom d'hôte inconnu sur votre instance voit un avertissement de non-correspondance de nom.
+
+Ces quatre réglages globaux le remplacent. Laissez-les vides pour conserver le certificat interne. Ses autres réglages — TLS, en-têtes, pages d'erreur — se modifient sur le service réservé `default-server`, voir [Configuration du serveur par défaut](#miscellaneous).
+
+| Paramètre                      | Défaut | Contexte | Multiple | Description                                                                                                                          |
+| :------------------------------ | :----- | :------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEFAULT_SERVER_SSL_CERT`      |        | global   | non      | Chemin complet vers le certificat (ou bundle) servi pour les requêtes ne correspondant à aucun service configuré. Servi uniquement là où existe un bloc de serveur par défaut : mode multisite (`MULTISITE=yes`), ou `DISABLE_DEFAULT_SERVER=yes` en mono-site. |
+| `DEFAULT_SERVER_SSL_KEY`       |        | global   | non      | Chemin complet vers la clé privée correspondante.                                                                                    |
+| `DEFAULT_SERVER_SSL_CERT_DATA` |        | global   | non      | Le même certificat en base64 ou PEM en clair. Utilisé uniquement quand le réglage de chemin est vide. Servi uniquement là où existe un bloc de serveur par défaut : mode multisite (`MULTISITE=yes`), ou `DISABLE_DEFAULT_SERVER=yes` en mono-site. |
+| `DEFAULT_SERVER_SSL_KEY_DATA`  |        | global   | non      | La même clé privée en base64 ou PEM en clair. Utilisée uniquement quand le réglage de chemin est vide.                              |
+
+La surcharge est consultée **en dernier**, et uniquement à l'intérieur du serveur par défaut : un service qui résout son propre certificat — via l'inventaire des certificats, `USE_CUSTOM_SSL`, Let's Encrypt ou le fournisseur auto-signé — le conserve toujours.
+
+!!! warning "Un certificat couvrant l'un de vos services est refusé"
+    Le serveur par défaut répond à *n'importe quel* nom d'hôte. Si son certificat couvrait aussi `www.example.com`, un client pourrait ouvrir une connexion avec un SNI inconnu, recevoir ce certificat, puis réutiliser la même connexion pour `Host: www.example.com` — un certificat que ce service n'a jamais autorisé, désormais utilisable pour lui (coalescence de connexions HTTP/2). Le job `custom-cert` refuse donc un certificat dont les SAN ou le Common Name couvrent un nom d'hôte d'un service configuré, jokers inclus, et journalise le nom d'hôte pour lequel il l'a refusé. Utilisez un certificat ne couvrant aucun nom d'hôte de service configuré, ou attachez-le au service via `USE_CUSTOM_SSL` à la place.
+
+!!! info "Un refus ne retire jamais ce qui est déjà servi"
+    Un matériel invalide, une paire non concordante et un nom d'hôte couvert font tous échouer le job bruyamment et laissent en place le certificat précédemment servi, plutôt que de laisser le serveur par défaut sans rien. L'expiration ne fait qu'avertir, pour la même raison. Vider les deux réglages retire la surcharge et restaure le certificat interne.
+
+!!! tip "Sans effet quand le SNI strict est actif"
+    Avec `DISABLE_DEFAULT_SERVER_STRICT_SNI` à `yes`, un SNI inconnu est fermé pendant la négociation TLS, avant même le choix d'un certificat — la surcharge n'est donc jamais atteinte. Laissez-le désactivé si vous voulez que les noms d'hôte inconnus reçoivent votre propre certificat.
+
 !!! warning "Sécurité"
     Protégez la clé privée (droits adaptés, lisible par le scheduler BunkerWeb uniquement).
 
