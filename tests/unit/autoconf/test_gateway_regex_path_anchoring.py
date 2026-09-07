@@ -24,7 +24,6 @@ cannot prove anything ever produces the `^`. Two halves of one behaviour, and on
 
 import sys
 from pathlib import Path
-from types import ModuleType
 from unittest.mock import Mock
 
 import pytest
@@ -57,6 +56,8 @@ def _controller():
     """
     controller = object.__new__(_GATEWAY.GatewayController)
     controller._logger = Mock()
+    # `Config.__init__` always sets this; `_to_services` reads it to validate cluster paths.
+    controller._settings = {}
     controller._domain_name = "cluster.local"
     controller._reverse_proxy_suffix_start = 1
     controller._get_gateway_annotations = lambda svc: {}

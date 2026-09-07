@@ -112,15 +112,22 @@ class TestWatchFailureIsLoud:
                     list(controller._get_stream_with_retries("pod", Mock(), retries=2))
 
     def test_the_health_marker_is_dropped_when_the_watch_gives_up(self, tmp_path):
+        """The marker is per watch_type since dev `dbd98e87a`: a watch stuck retrying must not be
+        hidden behind a sibling watch that is still streaming and keeps the shared file alive."""
         marker = tmp_path / "autoconf.healthy"
         marker.write_text("ok")
         controller = _bare_controller(marker)
+        pod_marker = controller._watch_healthy_path("pod")
+        pod_marker.write_text("ok")
+        sibling = controller._watch_healthy_path("ingress")
+        sibling.write_text("ok")
         with patch.object(MODULE.watch, "Watch") as watcher:
             watcher.return_value.stream.side_effect = ApiException(status=401, reason="Unauthorized")
             with patch.object(MODULE, "sleep"):
                 with pytest.raises(RuntimeError):
                     list(controller._get_stream_with_retries("pod", Mock(), retries=1))
-        assert not marker.exists(), "the orchestrator's liveness probe still reads this controller as healthy"
+        assert not pod_marker.exists(), "the orchestrator's liveness probe still reads this watch as healthy"
+        assert sibling.exists(), "a failing watch must not drop a healthy sibling's marker"
 
     def test_rejected_credentials_are_named_in_the_log(self, tmp_path):
         controller = _bare_controller(tmp_path / "autoconf.healthy")
@@ -135,13 +142,60 @@ class TestWatchFailureIsLoud:
     def test_a_streaming_watch_restores_the_marker(self, tmp_path):
         marker = tmp_path / "autoconf.healthy"
         controller = _bare_controller(marker)
-        assert not marker.exists()
-        controller._mark_healthy()
-        assert marker.read_text() == "ok"
+        pod_marker = controller._watch_healthy_path("pod")
+        assert not pod_marker.exists()
+        controller._mark_healthy("pod")
+        assert pod_marker.read_text() == "ok"
 
     def test_marking_healthy_twice_does_not_re_log(self, tmp_path):
         marker = tmp_path / "autoconf.healthy"
         controller = _bare_controller(marker)
-        controller._mark_healthy()
-        controller._mark_healthy()
+        controller._mark_healthy("pod")
+        controller._mark_healthy("pod")
         assert controller._logger.info.call_count == 1, "_mark_healthy runs on every event; it must be quiet once healthy"
+
+    def test_every_expected_watch_is_seeded_healthy_and_published(self, tmp_path):
+        """A watch for a resource kind with zero objects never receives an event, so the markers
+        are SEEDED at start: absence must mean "this watch exhausted its retries", nothing else.
+        The `.expected` list is what tells the healthcheck which markers to require."""
+        marker = tmp_path / "autoconf.healthy"
+        controller = _bare_controller(marker)
+        controller._write_expected_watch_types(["pod", "ingress", "gateway.networking.k8s.io/v1/httproute"])
+        expected = marker.with_name(f"{marker.name}.expected")
+        listed = expected.read_text().split()
+        assert listed == sorted(listed), "the list is written sorted so a restart does not churn it"
+        assert set(listed) == {"pod", "ingress", "gateway_networking_k8s_io_v1_httproute"}
+        for watch_type in listed:
+            assert marker.with_name(f"{marker.name}.{watch_type}").read_text() == "ok"
+
+    def test_a_watch_type_with_path_characters_cannot_escape_the_marker_directory(self, tmp_path):
+        """watch_type reaches a filename: an API group is `a.b.c/v1/kind`, and `..` in it would
+        otherwise walk out of /var/tmp/bunkerweb."""
+        controller = _bare_controller(tmp_path / "autoconf.healthy")
+        path = controller._watch_healthy_path("../../etc/passwd")
+        assert path.parent == tmp_path
+        assert path.name == "autoconf.healthy.______etc_passwd"
+
+    def test_an_established_connection_that_closes_cleanly_is_not_a_failure(self, tmp_path):
+        """The API server closes an idle watch on its own timeout. Counting that as an attempt
+        exhausted the retry budget of a healthy but quiet watch (dev `dbd98e87a`)."""
+        controller = _bare_controller(tmp_path / "autoconf.healthy")
+        clock = {"now": 1000.0}
+        closes = {"count": 0}
+
+        def _stream(*args, **kwargs):
+            closes["count"] += 1
+            if closes["count"] > 3:
+                raise ApiException(status=500, reason="boom")
+            clock["now"] += MODULE.WATCH_ESTABLISHED_SECONDS + 1
+            return iter(())
+
+        with patch.object(MODULE.watch, "Watch") as watcher:
+            watcher.return_value.stream.side_effect = _stream
+            with patch.object(MODULE, "sleep"), patch.object(MODULE, "time", lambda: clock["now"]):
+                with pytest.raises(RuntimeError):
+                    list(controller._get_stream_with_retries("pod", Mock(), retries=2))
+
+        # 3 long-lived closes reset the budget every time; only the raising attempts count.
+        assert closes["count"] == 5, f"the retry budget was not reset by an established close ({closes['count']} streams)"
+        assert controller._watch_healthy_path("pod").exists() is False, "the final give-up still drops the marker"
