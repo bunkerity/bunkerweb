@@ -3,6 +3,8 @@ from time import time
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
+from default_server import is_reserved_default_server  # type: ignore
+
 from app.dependencies import API_CLIENT, BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
@@ -24,6 +26,11 @@ def pro_page():
     online_services = 0
     draft_services = 0
     for service in API_CLIENT.get_services(with_drafts=True):
+        # The reserved default server answers requests matching no configured service -- it is
+        # not a service an operator manages or is billed for, so it counts in neither figure
+        # (the reserved row is never a draft, so without this it fell into online_services).
+        if is_reserved_default_server(service):
+            continue
         if service["is_draft"]:
             draft_services += 1
             continue
