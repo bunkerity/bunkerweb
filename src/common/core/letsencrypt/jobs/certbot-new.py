@@ -105,6 +105,13 @@ PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 ACME_SERVER_TYPES = ("letsencrypt", "zerossl")
 DNS_PROPAGATION_DEFAULT = "default"
 CERTBOT_TIMEOUT = 900  # 15 minutes max for a single certbot invocation
+# DEV-2b6. Read budget for the reload this job triggers itself. It has to OUTLIVE the
+# instance-side swap wait (`SWAP_WAIT_TIMEOUT` in src/bw/lua/bunkerweb/api.lua): an instance
+# busy applying a configuration answers 503 there, and ApiCaller only retries a 503 it
+# actually receives -- send_to_apis' own 10 s default expires at the same moment the
+# refusal is written, turning a retryable busy into an unretryable timeout. Same value as
+# every other /reload caller (src/worker/tasks.py and friends).
+RELOAD_TIMEOUT = (5, 30)
 
 # Set from certbot_new(), which can run in a thread pool, so the recovery below the generation loop
 # knows a purge happened without threading a return value back through the executor.
@@ -543,7 +550,7 @@ def build_service_config(service: str) -> Tuple[List[str], Dict[str, Union[str, 
     }
 
 
-def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
+def extract_wildcard_groups(domains: List[str], service: str) -> Dict[str, List[str]]:
     cleaned_labels: List[List[str]] = []
 
     for domain in domains:
@@ -564,7 +571,7 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
 
     groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
-        for base in _determine_wildcard_bases(labels_list):
+        for base in _determine_wildcard_bases(labels_list, service):
             base = base.strip(".")
             if not base:
                 continue
@@ -606,7 +613,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
 
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
-        wildcard_groups = extract_wildcard_groups(list(unique_names))
+        wildcard_groups = extract_wildcard_groups(list(unique_names), service)
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
         for base, names in wildcard_groups.items():
@@ -621,7 +628,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     return entries
 
 
-def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+def _determine_wildcard_bases(labels_list: List[List[str]], service: str) -> Set[str]:
     if not labels_list:
         return set()
 
@@ -642,7 +649,25 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
             break
 
     if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
-        return {".".join(common_suffix)}
+        base = ".".join(common_suffix)
+        # A wildcard matches exactly one label, so *.base plus base cover names of at most
+        # len(common_suffix) + 1 labels. Anything deeper would be dropped from the certificate
+        # while still being served, so refuse the whole group instead of issuing one that omits it.
+        uncovered = sorted(".".join(labels) for labels in labels_list if len(labels) > len(common_suffix) + 1)
+        if uncovered:
+            covered = sorted(".".join(labels) for labels in labels_list if len(labels) <= len(common_suffix) + 1)
+            LOGGER.error(
+                f"[Service: {service}] Wildcard group *.{base} cannot cover {', '.join(uncovered)} alongside "
+                f"{', '.join(covered)} "
+                "(a wildcard matches a single label); skipping this group, nothing is issued for any of those "
+                "names until they are split into separate services."
+            )
+            # dev 0af49ac8b threads a `rejected_services` set from here into its
+            # `misconfigured_services` report. 1.7 has no `misconfigured` flag and no
+            # `list_misconfigured` reporter (see the note in build_base_config), so the refusal
+            # signals through this error plus the empty group, exactly like the unissuable case.
+            return set()
+        return {base}
 
     bases: Set[str] = set()
     for labels in labels_list:
@@ -1359,7 +1384,9 @@ try:
                                     LOGGER.error("Failed to push Let's Encrypt cache to one or more instances; leaving worker reload path as fallback")
                                 else:
                                     test = "no" if getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
-                                    sent = api_caller.send_to_apis("POST", f"/reload?test={test}")[0]
+                                    # DEV-2b6. Explicit budget: send_to_apis' 10 s default is exactly the instance-side
+                                    # swap wait, so the busy 503 would race the deadline. See RELOAD_TIMEOUT above.
+                                    sent = api_caller.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]
                                     if not sent:
                                         LOGGER.error(
                                             "LE cache pushed but reload request failed on at least one instance; leaving worker reload path as fallback"
