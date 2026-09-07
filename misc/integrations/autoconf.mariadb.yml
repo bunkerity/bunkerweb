@@ -17,6 +17,8 @@ services:
     environment:
       <<: *env
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    volumes:
+      - bw-instance-data:/data
     networks:
       - bw-universe
       - bw-services
@@ -142,6 +144,7 @@ volumes:
   bw-worker-storage:
   bw-data:
   bw-storage:
+  bw-instance-data:
 
 networks:
   bw-universe:

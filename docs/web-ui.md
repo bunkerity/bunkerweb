@@ -383,6 +383,20 @@ The services list always shows one pinned entry at the top labelled **Default se
 
 Open it to configure the certificate it presents, its TLS settings, response headers, error pages and whitelist. Only those apply: reverse proxy, gRPC, redirects, sessions, antibot, mTLS, CORS and HTTP basic auth are not offered on its page, because the block has no hostname to route and no service identity to bind to. It offers no delete, clone or convert action either — it is permanent, and it is never counted against the PRO service quota.
 
+### Instance enrollment
+
+An instance shown on the **Instances** page can be given its own control-plane credential instead of sharing the global `API_TOKEN`. The row's key button (or the history menu) issues a single-use enrollment code, shown once, that the instance redeems at boot with `INSTANCE_ENROLLMENT_CODE`; from then on it answers only to the credential the control plane minted for it. Full mechanics, including the API endpoints and the `manual` vs `autoconf` split, are in the [API reference](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
+
+Enrollment works for a row created through the UI or the API, and for a row declared through the environment (`BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`) — the default shape of a Docker or Linux deployment. It does **not** work for a row discovered by autoconf: that row is re-sourced from a live orchestrator on every reconcile, which would put the environment's token back over a minted credential, so the enroll, rotate and revoke buttons are disabled on it.
+
+An instance that declares its own `BUNKERWEB_INSTANCE_API_TOKEN_<n>` shows the same **Enrolled** chip as one enrolled from a code, because the page reads "has a per-instance credential" and a declared token is stored as one. The buttons are not dangerous there, but they are close to no-ops: the next scheduler configuration save re-sources the declared token, which overwrites a minted credential and lifts a revocation either way. Pick one or the other for a given instance — enroll it, or declare a token for it, not both.
+
+!!! warning "Give the instance a persistent volume"
+    The credential lives under `/var/lib/bunkerweb`, which the Docker image symlinks to `/data`. A container recreated with **no** volume for `/data` loses the credential and the marker that would otherwise detect the loss: it comes back as a fresh, unenrolled instance while the control plane still believes it is enrolled, and every configuration push to it is refused with nothing to explain why. With a volume mounted, the instance detects the loss itself and **refuses to start**, naming the cause and the fix instead. Linux packages persist `/var/lib/bunkerweb` already, so this is a container-only caveat — see the compose files in the [quickstart guide](quickstart-guide.md) and under `misc/integrations/`, which all mount one.
+
+!!! note "A `manual` row still can't be deleted from here"
+    Enrolling, rotating or revoking a row declared in the environment works from this page, but deleting it does not — the next configuration save re-creates it from `BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`. Remove the hostname from the environment instead, which also drops its enrollment.
+
 ### Resource groups
 
 Open **Configure → Resource groups** to maintain reusable lists of IP addresses or CIDRs, countries, ASNs, reverse-DNS suffixes, user-agent patterns, and URI patterns. Each entry has one type and can carry a comment. You can clone groups, export them as JSON, and inspect every reference before changing one.
@@ -409,6 +423,12 @@ A report covers every request a plugin blocked (a 4xx), every request it merely 
 Where a plugin records what it decided, the **Reason** column shows it as a sentence instead of a bare plugin name: *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: …)*, *Antibot challenge (captcha) served* or *Security workflow api-shield: redirect* rather than just `crowdsec`, `antibot` or `workflows`, and the incident details keep the raw fields underneath. Sorting and the Reason filter still work on the underlying value, so a saved filter does not change meaning.
 
 `METRICS_PERSIST_TO_DB=yes` is the default and gives the event log a durable, centrally queryable source. `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` bound that history. When persistence is disabled, reports remain in instance memory or Redis and can expire sooner. If the Metrics API is unavailable, the UI falls back to the legacy instance/Redis query for the event log; the analytical dashboard tabs show an empty state until metrics are available again.
+
+### Deferred job runs
+
+The **Jobs** page can show a third run outcome besides the ordinary green Success and red Failed pills: **Deferred — waiting for an instance to come up**, in the warning color, with a clock icon. It appears when a job — `push-configs` finding every registered instance unreachable is the common case — deliberately stops without applying anything, rather than failing: nothing was pushed, but nothing is wrong either, and the pending change is retried automatically once an instance answers again. Hover the pill for the specific reason; the short label is what the page's status filter matches on too.
+
+The first deferral after a successful run also raises a dismissible warning banner at the top of every page, distinct from the existing (and more serious) "push failed" banner, so a fleet that is merely waiting for an instance to restart does not read as broken.
 
 ## Guided walkthrough
 

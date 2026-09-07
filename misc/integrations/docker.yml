@@ -20,6 +20,8 @@ services:
       - "bunkerweb.INSTANCE=yes"
     environment:
       <<: *env
+    volumes:
+      - bw-instance-data:/data
     networks:
       - bw-universe
       - bw-services
@@ -103,6 +105,7 @@ services:
 volumes:
   bw-jobs-broker-data:
   bw-storage:
+  bw-instance-data:
 
 networks:
   bw-universe:

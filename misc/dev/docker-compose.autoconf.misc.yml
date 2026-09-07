@@ -30,6 +30,8 @@ services:
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       REDIS_DATABASE: "1"
+    volumes:
+      - bw-instance-data:/data
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -249,6 +251,7 @@ volumes:
   bw-storage:
   bw-worker-storage:
   redis-data:
+  bw-instance-data:
 
 networks:
   bw-universe:

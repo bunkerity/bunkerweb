@@ -30,6 +30,8 @@ services:
       REDIS_HOST: "bw-jobs-broker"
       REDIS_PORT: "6379"
       REDIS_DATABASE: "1"
+    volumes:
+      - bw-instance-data:/data
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -245,6 +247,7 @@ volumes:
   bw-storage:
   bw-worker-storage:
   bw-logs:
+  bw-instance-data:
   bw-ui-data:
 
 networks:

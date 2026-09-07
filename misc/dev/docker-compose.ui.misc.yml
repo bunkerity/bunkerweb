@@ -24,6 +24,8 @@ services:
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
       USE_REDIS: "yes"
       REDIS_HOST: "redis"
+    volumes:
+      - bw-instance-data:/data
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -264,6 +266,7 @@ volumes:
   bw-storage:
   bw-worker-storage:
   bw-logs:
+  bw-instance-data:
   redis-data:
   bw-ui-data:
 

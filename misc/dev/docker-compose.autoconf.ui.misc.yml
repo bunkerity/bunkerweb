@@ -30,6 +30,8 @@ services:
       USE_REDIS: "yes"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
+    volumes:
+      - bw-instance-data:/data
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -318,6 +320,7 @@ volumes:
   bw-storage:
   bw-worker-storage:
   bw-logs:
+  bw-instance-data:
   redis-data:
   bw-ui-data:
 
