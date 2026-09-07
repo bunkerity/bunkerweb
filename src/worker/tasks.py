@@ -340,7 +340,7 @@ def _requeue_if_asked(job_data: dict, logger) -> None:
         logger.error(f"Job {name} asked to be deferred more than {MAX_JOB_REQUEUES} times; refusing to re-dispatch it again")
         return
 
-    payload = dict(job_data)
+    payload = job_data.copy()
     payload["requeue_count"] = count
     payload["run_id"] = str(uuid4())
     try:

@@ -8,7 +8,7 @@ from shutil import rmtree
 from ssl import PROTOCOL_TLS_CLIENT, SSLContext, SSLError
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",))]:
     if deps_path not in sys_path:
@@ -35,7 +35,7 @@ LUA_TRUSTED_CA_SOURCE = Path(sep, "usr", "share", "bunkerweb", "misc", "root-ca.
 LUA_TRUSTED_CA_BUNDLE = "lua-trusted-ca.pem"
 
 
-def write_lua_trusted_ca_bundle(redis_ssl_ca: str, output_path: Path) -> None:
+def write_lua_trusted_ca_bundle(redis_ssl_ca: Optional[str], output_path: Path) -> None:
     """Append the operator's Redis/Valkey CA onto the trust store the Lua request path uses.
 
     `clusterstore.lua` reaches Redis through an OpenResty cosocket, and a cosocket has no
