@@ -46,7 +46,44 @@
     | `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`   | global | no   | **严格 SNI：** 当设置为 `yes` 时，要求 HTTPS 连接使用 SNI，并拒绝没有有效 SNI 的连接。 |
 
     !!! warning "SNI 强制执行"
-        启用严格的 SNI 验证可提供更强的安全性，但如果 BunkerWeb 位于一个转发 HTTPS 请求但未保留 SNI 信息的反向代理之后，可能会导致问题。在生产环境中启用之前请进行彻底测试。
+        启用严格的 SNI 验证可提供更强的安全性，但如果 BunkerWeb 位于一个转发 HTTPS 请求但未保留 SNI 信息的反向代理之后，可能会导致问题。在生产环境中启用之前请进行彻底测试。`DISABLE_DEFAULT_SERVER_STRICT_SNI` 只有在存在默认服务器时才能生效（`MULTISITE=yes`，或单站点下的 `DISABLE_DEFAULT_SERVER=yes`）——在纯单站点模式下它会静默失效，因为你自己服务的 server 块本身就已经是 NGINX 的默认块。
+
+=== "配置 Default Server"
+
+    **Default Server 是一个可以编辑的服务**
+
+    响应不匹配任何已配置服务的请求的那个 block——未知的主机名、裸 IP 地址、没有服务处理的 `Host`——被暴露为一个**名为 `default-server` 的保留服务**。它固定显示在 Web 界面服务列表的顶部，`GET /services` 返回时会标记 `reserved: true`。
+
+    !!! warning "仅限多站点"
+        这是一个**多站点功能**：本页的全部内容仅在 `MULTISITE` 为 `yes` 时生效。按服务的设置只有在多站点模式下才会被实例化并在运行时解析，因此当 `MULTISITE=no` 时，该保留服务是失效且不可见的——保留行不会出现在 `GET /services` 中，不会显示在 Web 界面中，也不会出现在 `SERVER_NAME` 里——你自己恰好使用该名字的服务是另一回事，参见本段末尾的升级说明——下面描述的三个阶段执行器也不会被渲染。Default Server 的行为与 1.7 之前完全一致，全局 `DEFAULT_SERVER_SSL_*` 证书覆盖会被存储，但只在存在默认服务器 block 的地方生效：`MULTISITE=no` 时意味着 `DISABLE_DEFAULT_SERVER=yes`，否则你唯一服务的 block 就是 NGINX 的默认 block，会用自己的证书响应未匹配的请求（job 会为此记录一条警告）。在已有的单站点部署上，该行根本不会被创建；在全新安装中，它可能在 `MULTISITE` 首次被写入之前就已创建，此时它只是静静地存在于数据库中，不做任何事。设置 `MULTISITE=yes` 后，保留服务会在下一次配置保存时出现，无需重启。如果你已经有一个名为 `default-server` 的服务，它**不会**被接管：系统会记录一条指名该服务的错误，并且——与保留服务不同——它仍然可以被重命名和删除，以便你将其移开。在 `MULTISITE=no` 下，它也会继续像你的任何其他服务一样被正常服务：名称保留在 `SERVER_NAME` 中，其 `server{}` block 会被渲染，并在每次生成时给出警告，提示你在开启 `MULTISITE` 之前重命名它。
+
+    它是一条真实的服务记录，因此其证书、TLS 设置、响应头、错误页面和白名单都像其他任何服务一样被存储和编辑。它同时是永久性的：无法被创建、重命名、转为草稿或删除，永远不计入 PRO 服务配额，autoconf 部署移除其最后一个 ingress 时也不会移除它。
+
+    它的页面上只提供在没有主机名的情况下仍然有意义的设置：证书提供方、TLS、`errors`、`headers`、`whitelist` 以及杂项设置。反向代理、gRPC、重定向、会话、antibot、mTLS、CORS 和 HTTP 基本认证则不提供——没有可路由的 `Host`，也没有可绑定的服务身份，因此这些设置即便保存了也永远不会生效。
+
+    这些设置是真正生效的：Default Server 会执行该精选子集的 `set`、`access` 和 `header` 阶段，这是它此前从未做过的。为了让部署升级不改变其兜底 block 的响应内容，保留服务在创建时会**预设**为 `AUTO_REDIRECT_HTTP_TO_HTTPS=no`、`REDIRECT_HTTP_TO_HTTPS=no` 和 `USE_WHITELIST=no`——在其页面上可见，也可由你修改。仅在创建时如此：已存在的记录永远不会被重写。在**全新**安装中，该行可能在设置表尚未填充之前就被创建，此时它不带任何预设值，兜底行为遵循你的全局设置；而在需要保留既有行为的升级场景中，则始终会预设。
+
+    有一个行为是刻意新增的：`ALLOWED_METHODS` 现在也适用于此处，因此对你未服务的主机名发起的、方法不在 `GET|POST|HEAD|QUERY` 范围内的请求会收到 `405` 而不是默认页面。封禁会在 Default Server 上生效，响应头也会在此处发出——这正是使其可配置的意义所在。
+
+    !!! info "证书存放位置"
+        Default Server 展示的证书由 [自定义 SSL 证书](#custom-ssl-certificate) 插件的四个**全局** `DEFAULT_SERVER_SSL_*` 设置决定，而不是按服务单独设置。Default Server 页面会直接链接到这些设置。
+
+    **Stream（TCP）兜底**
+
+    在 `stream` 中，纯 TCP 没有 SNI，UDP 则完全没有，因此 NGINX 仅按 `address:port` 选择 block：如果默认服务器占用了某个服务正在监听的端口，它会在那里胜出并响应该服务的流量。因此 Stream 的 Default Server 是可选启用的，并拥有自己独立的端口。
+
+    | 设置                        | 默认值 | 上下文    | 多选 | 描述                                                                                                                                                             |
+    | ------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `DEFAULT_SERVER_STREAM_PORTS`  |         | multisite | 是      | **Default Server Stream 端口：** Default Server 接受的、不匹配任何已配置服务的 stream（TCP）连接端口。为空则禁用，这是默认值。 |
+    | `DEFAULT_SERVER_STREAM_PORTS_SSL` |      | multisite | 是      | **Default Server Stream 端口（TLS）：** 其中哪些端口以 TLS 提供服务。必须是 `DEFAULT_SERVER_STREAM_PORTS` 的子集；为空表示仅使用纯 TCP。               |
+
+    在保留服务上设置它，例如 `default-server_DEFAULT_SERVER_STREAM_PORTS=9000`（还有 `_1`、`_2`……可设置更多端口）。它和其他任何多站点设置一样，因此**全局**设置它也会作用到 Default Server 并在那里开启监听——如果这不是你想要的，请将其限定到 `default-server`。
+
+    在保留服务上保存这些端口时——无论是通过其 Web 界面页面，还是通过 `PATCH /services/default-server`——有三类端口会被**拒绝**，每一类都会指明已占用它的对象：某个 stream 服务正在监听的端口（没有 SNI 时 Default Server 会响应该服务的流量）、部署中任何位置的 HTTP 或 HTTPS 监听器占用的端口，以及 BunkerWeb 自身绑定的端口（健康检查服务器、内部 API，以及 all-in-one 镜像上的 Web 界面和 API 服务）。中间那一类不是偏好问题：`http{}` 和 `stream{}` 各自打开自己的 socket，因此两者使用同一端口会导致 NGINX 拒绝启动——默认的 `HTTP_PORT` 即 `8080` 正是这种情况。
+
+    如果改为**全局**写入，同样的值会被接受——全局设置页面并不是保留服务的保存路径——并在生成时解析：冲突的端口会从 Default Server 的 block 中移除，并记录原因。当某个 stream 服务在你保存之后*才*声明同一端口时，也会发生同样的处理。无论哪种情况，真正的服务始终保留其端口。
+
+    同时列在 `DEFAULT_SERVER_STREAM_PORTS_SSL` 中的端口会以 `ssl` 方式提供服务，并展示 `DEFAULT_SERVER_SSL_*` 证书。该列表是上述端口的 TLS 开关，而不是第二组监听器：其中若包含 `DEFAULT_SERVER_STREAM_PORTS` 未包含的端口，保存时会被拒绝，若通过其他途径进入数据库，也会被丢弃并记录日志。每个连接都会被响应后关闭；Stream 的 Default Server 从不做代理转发。
 
 === "拒绝 HTTP 状态"
 
