@@ -461,10 +461,16 @@ if ARGS.integration not in ("Linux", "All-in-one"):
     # different file than the scheduler wrote.
     config["api"].setdefault("DATABASE_URI", config["variables"]["DATABASE_URI"])
 
-    if ARGS.integration == "Kubernetes":
-        # The worker deployment reads bw-secret (built from `variables`), so the broker
-        # URL has to travel there too. BunkerWeb itself ignores the extra key.
-        config["variables"]["CELERY_BROKER_URL"] = jobs_broker_url
+    # On Kubernetes the worker deployment reads bw-secret (built from `variables`), so the broker
+    # URL has to travel there for the worker to exist at all. Everywhere else it is the SCHEDULER
+    # container that needs it: `bwcli` runs there (tests/utils/__init__.py:94) and the backup
+    # plugin's `quiesce` / `downgrade --execute` ask the broker who holds the downgrade hold. With
+    # the key absent they fall back to `downgrade.py`'s DEFAULT_BROKER_URL -- the literal
+    # redis://127.0.0.1:6379/0 -- and there is no broker inside that container, so every
+    # broker-dependent path answered "the job broker could not be asked" and was untestable
+    # (report-DG-AD.md §4.4, PO question 5). BunkerWeb and autoconf read the same file and ignore
+    # the extra key, which is what the Kubernetes arm has been proving since it started setting it.
+    config["variables"]["CELERY_BROKER_URL"] = jobs_broker_url
     # The worker runs the jobs the API queues: same database, same broker, and the same API
     # token — it pushes each job's cache to the instances itself, and a tokenless push is
     # refused with a 444 the worker only reports in a log that never leaves the child process.

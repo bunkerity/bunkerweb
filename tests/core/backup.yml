@@ -48,11 +48,6 @@ actions:
     result: "The manifest marks"
     not_result: "No manifest entry"
     restart_stack: false
-  # `quiesce --status` is NOT asserted here: the integration stack never sets CELERY_BROKER_URL on
-  # bw-scheduler (misc/dev/docker-compose.ui.api.yml does, tests/docker/*.yml does not), so bwcli
-  # falls back to redis://127.0.0.1:6379/0 and there is no broker in that container. Every
-  # broker-dependent path of `quiesce` and of `downgrade --execute` is therefore untestable here
-  # until the harness supplies the URL. See report-DG-AD.md §4.4.
   # The refusal half of the contract: without --execute the command reports success for a go and
   # for a restore_only answer, and FAILURE for `refuse` (bwcli/downgrade_execute.py:64, PO-4
   # option (b)), so a pipeline gating on it cannot sail past a half-finished migration. Asserting
@@ -76,6 +71,48 @@ actions:
     command: "plugin backup downgrade 9.9.9"
     exit_code: 1
     result: "this is an upgrade, not a downgrade"
+    restart_stack: false
+    integrations:
+      - "Docker"
+      - "Autoconf"
+      - "Linux"
+      - "All-in-one"
+  # ── The broker-dependent half (DG-AD Q9, closed in wave 14) ────────────────────────────────
+  # `tests/generate.py` now writes CELERY_BROKER_URL into variables.env for every arm that has a
+  # bw-jobs-broker, the way misc/dev/docker-compose.ui.api.yml does, so bwcli inside the scheduler
+  # reaches the real broker instead of falling back to downgrade.py's DEFAULT_BROKER_URL
+  # (redis://127.0.0.1:6379/0, nothing listening in that container). Both actions below RED with
+  # "Error while executing backup quiesce command" / "The job broker could not be asked" if that
+  # key ever goes missing again -- which is exactly what makes them worth running.
+  #
+  # Linux and All-in-one keep their own arrangement and are covered by the same two actions: the
+  # Linux package writes CELERY_BROKER_URL into /etc/bunkerweb/variables.env (which CLI.py merges
+  # into the plugin's environment, src/common/cli/CLI.py:761-763), and the All-in-one runs its
+  # embedded Redis on the 127.0.0.1:6379 the fallback names.
+  quiesce_status_reaches_the_broker:
+    type: bwcli
+    command: "plugin backup quiesce --status"
+    # Reporting no hold is the point: the answer can only come from a broker that was actually
+    # reachable -- `hold_status` does a bare GET on the hold key (downgrade.py:704-706) and a dead
+    # broker raises, which quiesce.py:158-159 turns into "Error while executing ...", exit 1.
+    result: "No downgrade hold is in place"
+    not_result: "Error while executing backup quiesce command"
+    restart_stack: false
+  # The mutating command, refused at its FIRST gate -- and that gate is the broker one
+  # (downgrade.py:1076-1087), so this asserts the same reachability from the other side. Nothing is
+  # touched: `execute_downgrade` returns before the preflight, before the safety backup and before
+  # any migration. `--yes` is required or the refusal would come from the earlier terminal check
+  # instead and would prove nothing about the broker.
+  #
+  # exit_code 1, not 3: EXECUTE_EXIT_CODES[REFUSED] is 3 and bwcli collapses every non-zero code to
+  # 1 (see downgrade_refuses_an_upgrade above). Kubernetes is out for the same reason it is out
+  # there -- tests/utils/k8s.py's exec stream carries no exit status.
+  downgrade_execute_asks_the_broker_for_the_hold:
+    type: bwcli
+    command: "plugin backup downgrade 1.6.14 --execute --yes"
+    exit_code: 1
+    result: "No downgrade hold is in place"
+    not_result: "The job broker could not be asked"
     restart_stack: false
     integrations:
       - "Docker"
