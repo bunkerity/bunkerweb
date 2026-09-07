@@ -1121,21 +1121,6 @@ function cleanup_stack () {
             docker compose -f tests/misc/docker/syslog.yml exec syslog truncate -s 0 /var/log/bunkerweb/bunkerweb.log
         fi
 
-        if echo "$containers" | grep -q "crowdsec" ; then
-            docker compose -f tests/misc/docker/crowdsec.yml down -v
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "🦙 Failed to stop CrowdSec"
-                return 1
-            fi
-
-            redis_cli set restart_crowdsec 1
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "💽 Failed to set restart_crowdsec key in redis server"
-                return 1
-            fi
-        fi
     elif [ "$integration" == "All-in-one" ] ; then
         docker compose -f tests/docker/docker-compose.all-in-one.yml down -v
         # shellcheck disable=SC2181
@@ -1390,6 +1375,39 @@ function cleanup_stack () {
                 log "UTILS" "❌" "🐳 Failed to remove the bw-storage volume"
                 return 1
             fi
+        fi
+    fi
+
+    # Outside the integration chain on purpose, and it used to sit inside its Docker/Autoconf
+    # branch. CrowdSec is a helper compose every arm of tests/core/crowdsec.yml shares, its ban
+    # decisions live in the `cs-data` volume, and only `down -v` drops them -- the Linux branch
+    # stops systemd units and wipes /var/lib/bunkerweb, which touches none of that. So a mid-run
+    # `full_clean` cleared CrowdSec on Docker and not on Linux: `challenged_by_appsec` inherited
+    # the ban the stream arm had just earned for the test IP, a ban wins over a challenge, and the
+    # arm reported "challenge status: 403" on every attempt (run 34054359264, Linux). The spec
+    # says as much where it sets the flag -- "Only `down -v` clears both".
+    # `restart_crowdsec` is what makes start.sh bring the container back (start.sh:741).
+    # `grep -qx`, not `grep -q`, for the reason spelled out on the bw-db removal below: the name
+    # has to match the WHOLE line. `container_name: crowdsec` is exact, while any other project's
+    # container carrying `crowdsec` in its name otherwise satisfies this guard -- and the compose
+    # call under it then fails, because generate.py unlinks /tmp/crowdsec.env on every action and
+    # the compose file declares it `required: true`. That failure returns 1 out of cleanup_stack,
+    # which run.sh:83-85 calls before the first spec of every Linux category -- the arm this block
+    # was just widened to reach.
+    containers=$(docker ps -a --format "{{.Names}}")
+    if echo "$containers" | grep -qx "crowdsec" ; then
+        docker compose -f tests/misc/docker/crowdsec.yml down -v
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "🦙 Failed to stop CrowdSec"
+            return 1
+        fi
+
+        redis_cli set restart_crowdsec 1
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            log "UTILS" "❌" "💽 Failed to set restart_crowdsec key in redis server"
+            return 1
         fi
     fi
 
