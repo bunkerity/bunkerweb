@@ -54,6 +54,13 @@ jobs:
             exit 1
           fi
 
+          # Guard 1b - src/VERSION matching the tag is not enough on its own. A
+          # release build never runs update-version.sh (container-build.yml gates
+          # it on testing/dev), so the tree's own literals are what ships. Bumping
+          # src/VERSION by hand leaves the Dockerfile LABELs, the installer default
+          # and pyproject behind, and Guard 1 passes anyway.
+          bash misc/check-version-consistency.sh
+
           # Guard 2 - annotated tags only. A lightweight tag records no tagger,
           # so nothing links the release to a human, and there is no tag object
           # to carry a signature.
