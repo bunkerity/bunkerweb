@@ -28,6 +28,32 @@ actions:
     result: "Found 5 backups"
     config:
       BACKUP_ROTATION: "5"
+  # ── Controlled downgrade (lot A manifest + lot D --execute) ────────────────────────────────
+  # Report mode only: nothing here mutates, and nothing here needs a quiescence hold. What only a
+  # real image can prove is that the manifest lot A ships is actually FOUND at runtime -- if it
+  # were missing from the image, `downgrade` would print "No manifest entry" and every pair would
+  # silently fall back to restore_only forever.
+  downgrade_reports_without_mutating:
+    type: bwcli
+    command: "plugin backup downgrade 1.6.14"
+    result: "Nothing was changed"
+    not_result: "Pre-downgrade backup taken"
+    restart_stack: false
+  downgrade_finds_the_shipped_manifest:
+    type: bwcli
+    command: "plugin backup downgrade 1.6.14"
+    # "The manifest marks" is printed only when a row for this exact (from, to, engine) was found,
+    # and it is the same phrase on both branches, so it does not pin the engine. Matching bare
+    # "manifest" would have matched the check-name column and asserted nothing.
+    result: "The manifest marks"
+    not_result: "No manifest entry"
+    restart_stack: false
+  # `quiesce --status` is NOT asserted here: the integration stack never sets CELERY_BROKER_URL on
+  # bw-scheduler (misc/dev/docker-compose.ui.api.yml does, tests/docker/*.yml does not), so bwcli
+  # falls back to redis://127.0.0.1:6379/0 and there is no broker in that container. Every
+  # broker-dependent path of `quiesce` and of `downgrade --execute` is therefore untestable here
+  # until the harness supplies the URL. See report-DG-AD.md §4.4.
+
   restore_1:
     type: database
     query: "UPDATE bw_metadata SET integration = 'Unknown'"
