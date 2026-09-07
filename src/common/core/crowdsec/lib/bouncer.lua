@@ -44,8 +44,10 @@ local REMEDIATION_API_KEY_HEADER = 'x-api-key'
 -- distinct per-service configuration, and they all share the single crowdsec_cache
 -- shared dict. When those configurations target different Local APIs the caller
 -- passes a short prefix so decisions, stream bookkeeping and captcha state cannot
--- bleed between them. Deployments with a single Local API pass nothing and keep
--- upstream's exact keys, so the request path pays no extra concatenation.
+-- bleed between them. Since the prefix became a hash of the Local API URL (port of dev
+-- eda5fa2fb) EVERY deployment is prefixed, single-Local-API ones included: the prefix no
+-- longer depends on how many endpoints there are, which is exactly what stopped adding an
+-- endpoint from reshuffling the namespaces of all the others.
 local function namespaced_cache(dict, prefix)
   return {
     get = function(_, key) return dict:get(prefix .. key) end,
