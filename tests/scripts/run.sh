@@ -96,6 +96,15 @@ if [ $? -ne 0 ] ; then
     exit 1
 fi
 
+# The loop below iterates whatever is in that list, so an empty one used to fall straight through
+# to test.sh's "All tests passed" -- a run that executed nothing reported as green. Every path
+# that fills the list (parse.py, and build.sh's own lpush for a `category;action` argument) is
+# supposed to have failed loudly first; if one did not, this is the last place that can tell.
+if [ -z "$tests" ] ; then
+    log "RUN" "❌" "✂ No test to run for \"$category\" on $integration — zero tests is a failure, not a pass"
+    exit 1
+fi
+
 run_before=false
 
 for test in $tests ; do

@@ -168,23 +168,35 @@ else:
 
 LOGGER.debug(f"Tests: {tests}")
 
-if tests:
-    LOGGER.info("📝 Writing tests files")
+# Zero parsed tests is a failure, never a pass. `build.sh` only checks this script's exit code and
+# `run.sh` iterates whatever landed in redis, so an empty result used to walk all the way to
+# "All tests passed" with nothing executed -- a spec whose every action is filtered out by
+# `integrations:`, a category name that does not exist, a `--type` with no spec at all.
+if not tests:
+    scope = f"{ARGS.type}"
+    if ARGS.category:
+        scope += f" / category {ARGS.category}"
+    if ARGS.integration:
+        scope += f" / integration {ARGS.integration}"
+    LOGGER.error(f"✂ No test parsed for {scope}: zero tests is a filter or spec failure, not a pass")
+    exit(1)
 
-    if not ARGS.category:
-        tmp_path = Path(sep, "tmp", "tests")
-        tmp_path.mkdir(parents=True, exist_ok=True)
+LOGGER.info("📝 Writing tests files")
 
-        for integration in integrations:
-            tmp_path.joinpath(f"{integration}_tests.json").write_text(dumps([test for test in tests if test.startswith(f"{integration};")]))
-    else:
-        from redis import Redis
+if not ARGS.category:
+    tmp_path = Path(sep, "tmp", "tests")
+    tmp_path.mkdir(parents=True, exist_ok=True)
 
-        redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0)
+    for integration in integrations:
+        tmp_path.joinpath(f"{integration}_tests.json").write_text(dumps([test for test in tests if test.startswith(f"{integration};")]))
+else:
+    from redis import Redis
 
-        resp = redis_client.ping()
-        if not resp:
-            LOGGER.error("Redis server is not running")
-            exit(1)
+    redis_client = Redis(host="localhost", port=int(getenv("TESTS_REDIS_PORT", "6390")), db=0)
 
-        redis_client.rpush("tests", *tests)
+    resp = redis_client.ping()
+    if not resp:
+        LOGGER.error("Redis server is not running")
+        exit(1)
+
+    redis_client.rpush("tests", *tests)
