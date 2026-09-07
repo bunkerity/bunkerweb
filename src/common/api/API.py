@@ -9,6 +9,8 @@ from requests import Session, request
 from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError
 from urllib3 import disable_warnings  # new
+from urllib3.connection import HTTPConnection, HTTPSConnection
+from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from urllib3.exceptions import InsecureRequestWarning  # new
 
 from common_utils import parse_host  # type: ignore
@@ -20,18 +22,96 @@ if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", 
         disable_warnings(InsecureRequestWarning)
 
 
-class _FingerprintAdapter(HTTPAdapter):
-    """requests adapter that pins the peer certificate by its SHA-256 fingerprint
-    (urllib3 assert_fingerprint), so a self-signed instance cert is trusted by
-    fingerprint rather than by CA chain."""
+class _BodyWriteTimeout(TimeoutError):
+    """Raised where the write budget is armed, and nowhere else.
 
-    def __init__(self, fingerprint: Optional[str], **kwargs):
+    A socket timeout on its own does not say which phase ran out: a connect timeout and a proxy
+    connect failure both carry one in their chain, and both arrive as the same ConnectionError the
+    body write does. Excluding those by class is a list that has to grow every time requests adds a
+    subclass, so the write phase marks its own timeout instead and the marker is what is looked for.
+    """
+
+
+def _carries_write_timeout(exc: Optional[BaseException], depth: int = 4) -> bool:
+    """Whether the body write's own timeout marker is somewhere inside exc.
+
+    urllib3 turns it into a ProtocolError and requests turns that into a ConnectionError, both by
+    nesting the original in args, so the class of the exception that arrives says nothing.
+    """
+    if exc is None or depth < 0:
+        return False
+    if isinstance(exc, _BodyWriteTimeout):
+        return True
+    if _carries_write_timeout(exc.__cause__, depth - 1) or _carries_write_timeout(exc.__context__, depth - 1):
+        return True
+    return any(isinstance(arg, BaseException) and _carries_write_timeout(arg, depth - 1) for arg in getattr(exc, "args", ()))
+
+
+def _connection_class(base, write_timeout: float):
+    """A connection that gives the body write its own deadline.
+
+    urllib3 hands the socket the connect budget and only swaps in the read budget once the whole
+    request has been written, so a peer that accepts the connection and then stops reading blocks
+    an upload for as long as connecting is allowed to take. That is not a bound anyone chose for a
+    large folder push.
+
+    The deadline has to be the connection's own timeout, not a value written straight onto the
+    socket: the top of HTTPConnection.request re-arms the socket from self.timeout whenever the
+    socket already exists, and over HTTPS it always does, because the pool forces the connect in
+    _validate_conn. So the connection is established first, under the untouched connect budget, and
+    only the write runs on the write budget. The pool resets the connection to the read budget for
+    the response.
+    """
+
+    class _Connection(base):
+        def request(self, *args, **kwargs):
+            # Establishing the connection is not the body write and keeps the connect budget.
+            if self.is_closed:
+                self.connect()
+            saved, self.timeout = self.timeout, write_timeout
+            try:
+                return super().request(*args, **kwargs)
+            except TimeoutError as e:
+                # The connection is already established and the response is read later, so the only
+                # socket timeout this call can raise belongs to the body write. Marking it here is
+                # what lets the caller tell it apart after requests has rewrapped it.
+                raise _BodyWriteTimeout(*e.args) from e
+            finally:
+                self.timeout = saved
+
+    return _Connection
+
+
+class _InstanceAdapter(HTTPAdapter):
+    """requests adapter for one instance dial. Two independent halves, either of them optional:
+
+    - it pins the peer certificate by its SHA-256 fingerprint (urllib3 assert_fingerprint), so a
+      self-signed instance cert is trusted by fingerprint rather than by CA chain;
+    - it gives the body write its own deadline (see _connection_class).
+
+    One class rather than two, because init_poolmanager is all either half overrides and they do
+    not collide -- and a PINNED instance receiving a folder push needs both at once, on the same
+    scheme, which two adapters cannot do: the second mount replaces the first.
+    """
+
+    def __init__(self, fingerprint: Optional[str] = None, write_timeout: Optional[float] = None, **kwargs):
+        # init_poolmanager runs from HTTPAdapter.__init__, so both values have to exist first.
         self._assert_fingerprint = fingerprint
+        self._write_timeout = write_timeout
         super().__init__(**kwargs)
 
     def init_poolmanager(self, *args, **kwargs):
-        kwargs["assert_fingerprint"] = self._assert_fingerprint
+        if self._assert_fingerprint is not None:
+            kwargs["assert_fingerprint"] = self._assert_fingerprint
         super().init_poolmanager(*args, **kwargs)
+        if self._write_timeout is None:
+            return
+        # PoolManager holds the shared module-level mapping by reference, so this rebinds the
+        # attribute and never mutates the dict every other PoolManager in the process reads.
+        self.poolmanager.pool_classes_by_scheme = {
+            "http": type("_HTTPPool", (HTTPConnectionPool,), {"ConnectionCls": _connection_class(HTTPConnection, self._write_timeout)}),
+            "https": type("_HTTPSPool", (HTTPSConnectionPool,), {"ConnectionCls": _connection_class(HTTPSConnection, self._write_timeout)}),
+        }
 
 
 class API:
@@ -91,6 +171,7 @@ class API:
         data: Optional[Union[dict, bytes]] = None,
         files=None,
         timeout=(5, 10),
+        write_timeout: Optional[float] = None,
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
         if self.__revoked:
             self.__logger.error(f"Refusing to contact {self.__endpoint}{url}: this instance's enrollment is revoked")
@@ -117,12 +198,23 @@ class API:
             return False, "TLS pinning requires a fingerprint", None, None
 
         full_url = f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}"
+        # DEV-2b5: every caller unpacks a four-tuple -- ApiCaller.send_to_apis does it inside a
+        # thread-pool task -- so no path out of here may raise. Building the sender, the cleartext
+        # retry and the JSON decode now sit inside the SAME boundary: the retry used to run inside
+        # `except ConnectionError`, where its own failure escaped the sibling `except Exception`,
+        # and resp.json() used to sit after the try, so an HTML 502 from a proxy took the caller
+        # down instead of being reported as a failed push.
+        session = None
         try:
-            if pinned:
-                # Trust the self-signed instance cert by SHA-256 fingerprint, not CA chain.
-                resp = self.__pinned_session().request(method, full_url, timeout=timeout, headers=deepcopy(headers), verify=False, **deepcopy(kwargs))
-            else:
-                resp = request(
+            # timeout bounds the connect and the read; write_timeout bounds the body write, which
+            # neither of them covers. With neither a pin nor a write budget the sender stays the
+            # plain module-level call, so nothing about the request changes.
+            if pinned or write_timeout is not None:
+                session = self.__session(pinned, write_timeout)
+            send = session.request if session is not None else request
+
+            try:
+                resp = send(
                     method,
                     full_url,
                     timeout=timeout,
@@ -130,12 +222,23 @@ class API:
                     verify=False,  # TODO: per-instance CA verification (tls_mode "verify") is a Tier B follow-up
                     **deepcopy(kwargs),
                 )
-        except ConnectionError as e:
-            scheme = urlsplit(self.__endpoint).scheme
-            # Pinned instances must never be silently downgraded to plaintext HTTP.
-            if scheme == "https" and not pinned:
+            except ConnectionError as e:
+                # A body write that ran out its own budget is not a TLS problem, whatever the
+                # scheme. Retrying it in cleartext spends the budget a second time and re-uploads
+                # the whole archive, so the caller's write bound would silently be twice what it
+                # asked for. Only the write phase's own marker counts: a connect timeout and a
+                # proxy failure never reached the body and still carry a socket timeout in their
+                # chain, so anything weaker reports every unreachable instance as a write that ran
+                # out. Checked before the scheme, so a plain-HTTP instance gets the true reason too.
+                if write_timeout is not None and _carries_write_timeout(e):
+                    return False, f"Write timed out: {e}", None, None
+                # An instance that comes up before its certificate is in place stays reachable over
+                # the same port in plain HTTP; the retry is deliberate. Pinned instances must never
+                # be silently downgraded to plaintext HTTP.
+                if urlsplit(self.__endpoint).scheme != "https" or pinned:
+                    return False, f"Connection error: {e}", None, None
                 self.__logger.warning(f"SSL connection error when contacting {self.__endpoint}{url}, trying HTTP: {e}")
-                resp = request(
+                resp = send(
                     method,
                     # replace(..., 1) strips the scheme prefix. lstrip takes a character SET, so it
                     # also ate any leading hostname character in {h, t, p, s, :, /}: an IP endpoint
@@ -148,17 +251,28 @@ class API:
                     **deepcopy(kwargs),
                 )
                 self.__logger.debug(f"Response after retrying with HTTP: status={resp.status_code}, reason={resp.reason}, text={resp.text}")
-            else:
-                return False, f"Connection error: {e}", None, None
+
+            return True, "ok", resp.status_code, resp.json()
         except Exception as e:
             return False, f"Request failed: {e}", None, None
+        finally:
+            if session is not None:
+                # The pinned session was never closed before: one connection pool leaked per dial.
+                # Suppressed because this is the one statement left that could still raise out of a
+                # function whose whole contract is that it never does (socket teardown can raise).
+                with suppress(Exception):
+                    session.close()
 
-        return True, "ok", resp.status_code, resp.json()
-
-    def __pinned_session(self) -> Session:
-        """A requests Session that pins the peer cert by SHA-256 for HTTPS dials."""
+    def __session(self, pinned: bool, write_timeout: Optional[float]) -> Session:
+        """A requests Session for one dial: the peer cert pinned by SHA-256 when the instance asks
+        for it, the body write bounded when the caller asks for it, either or both."""
         session = Session()
-        session.mount("https://", _FingerprintAdapter(self.__tls_fingerprint))
+        # Trust the self-signed instance cert by SHA-256 fingerprint, not CA chain.
+        session.mount("https://", _InstanceAdapter(self.__tls_fingerprint if pinned else None, write_timeout))
+        if write_timeout is not None:
+            # A plain-HTTP endpoint and the cleartext retry both go through the http:// mount, and
+            # the write budget has to cover them too. No fingerprint there: pinning is TLS-only.
+            session.mount("http://", _InstanceAdapter(None, write_timeout))
         return session
 
     # ------------------ Builders ------------------
