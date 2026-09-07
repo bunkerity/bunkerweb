@@ -67,6 +67,7 @@
     "save": "save.py",
     "restore": "restore.py",
     "preflight": "preflight.py",
-    "quiesce": "quiesce.py"
+    "quiesce": "quiesce.py",
+    "downgrade": "downgrade_execute.py"
   }
 }

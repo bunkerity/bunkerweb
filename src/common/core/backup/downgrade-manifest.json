@@ -1,0 +1,245 @@
+{
+  "$comment": [
+    "Compatibility manifest for the controlled downgrade (see the controlled-downgrade conception, lot A).",
+    "The CLI READS this file and never infers compatibility from a version number, so a release that is",
+    "not described here can only ever be told to restore from a backup -- which is the safe direction.",
+    "",
+    "'from' is matched against /usr/share/bunkerweb/VERSION verbatim. BUMP IT WITH src/VERSION: a stale",
+    "'from' makes every pair unmatched and pins the product to restore_only. tests/unit/backup/",
+    "test_downgrade_manifest.py fails when the two disagree, so the bump cannot be forgotten silently.",
+    "",
+    "MEASURED, per engine, by an executed upgrade+downgrade with sentinel data: `mode`, `data_loss`,",
+    "every `fingerprint` field, and each `restore_only` reason except where it says otherwise. A real",
+    "1.6.14 schema was built, seeded, upgraded to the 1.7 head, seeded again with 1.7-only rows and then",
+    "downgraded back. See .cache/results-2026-09-06-wave13/report-DG-AD.md and dgad-probe-*.json.",
+    "",
+    "DERIVED, not measured: the `artifacts` map. It comes from reading the tree (src/common/helpers/data.sh",
+    "is byte-identical between v1.6.14 and 1.7, so the /data layout cannot have moved) and from what each",
+    "job regenerates, not from a downgrade run. Treat those values as a documented expectation."
+  ],
+  "schema_version": 1,
+  "generated_at": "2026-09-06",
+  "releases": [
+    {
+      "from": "1.7.0~beta",
+      "to": "1.6.14",
+      "engine": "sqlite",
+      "mode": "in_place_tested",
+      "data_loss": "conditional",
+      "required_backup": true,
+      "plugin_api_target": "1.6.14",
+      "alembic": {
+        "from_revision": "24143b5ba8e0",
+        "to_revision": "a526ccfe44b4"
+      },
+      "artifacts": {
+        "data_layout": "compatible",
+        "custom_configs": "compatible",
+        "www": "compatible",
+        "letsencrypt_state": "compatible",
+        "backups": "compatible",
+        "job_caches": "rebuild",
+        "pro_plugins": "rebuild",
+        "external_plugins": "conditional",
+        "instance_credential_file": "rebuild"
+      },
+      "fingerprint": {
+        "method": "1.6.14 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.14",
+        "baseline_tables": 29,
+        "baseline_rows_before_upgrade": 28,
+        "baseline_rows_after_downgrade": 29,
+        "baseline_rows_preserved": true,
+        "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
+        "one_seven_tables_before_downgrade": 15,
+        "one_seven_tables_after_downgrade": 0,
+        "schema_matches_target_model": true,
+        "alembic_version_after": "a526ccfe44b4",
+        "bw_metadata_version_after": "1.6.14",
+        "target_model_select_failures": 1,
+        "target_model_select_failures_detail": "bw_ui_user_columns_preferences raised JSONDecodeError. An artifact of the probe's own sentinel, which wrote a non-JSON string into bw_ui_user_preferences.value before the downgrade renamed the table; real 1.7 preference values are JSON documents. The renamed-back rows still reach 1.6.14 as the wrong KIND of preference -- see the note below."
+      },
+      "notes": [
+        "Every table and column the 1.6.14 model declares is present after the downgrade, with no extras.",
+        "Non-column user preferences (theme_mode, whats_new, onboarding, walkthrough) reappear in 1.6.14 as bogus per-table column layouts: the downgrade renames bw_ui_user_preferences to bw_ui_user_columns_preferences wholesale instead of filtering the column-layout keys. Expected to be cosmetic rather than a crash, because every writer in src/ui/app/routes/ stores a JSON document -- but that is read off the callers, NOT measured: the probe's own sentinel was not JSON and did raise JSONDecodeError through the 1.6.14 model."
+      ]
+    },
+    {
+      "from": "1.7.0~beta",
+      "to": "1.6.14",
+      "engine": "postgresql",
+      "mode": "in_place_tested",
+      "data_loss": "conditional",
+      "required_backup": true,
+      "plugin_api_target": "1.6.14",
+      "alembic": {
+        "from_revision": "404a6ed42a31",
+        "to_revision": "827a0053a73e"
+      },
+      "artifacts": {
+        "data_layout": "compatible",
+        "custom_configs": "compatible",
+        "www": "compatible",
+        "letsencrypt_state": "compatible",
+        "backups": "compatible",
+        "job_caches": "rebuild",
+        "pro_plugins": "rebuild",
+        "external_plugins": "conditional",
+        "instance_credential_file": "rebuild",
+        "enum_types": "rebuild"
+      },
+      "fingerprint": {
+        "method": "1.6.14 create_all -> stamp -> sentinel rows -> alembic upgrade head -> 1.7-only sentinel rows -> alembic downgrade to 1.6.14",
+        "baseline_tables": 29,
+        "baseline_rows_before_upgrade": 28,
+        "baseline_rows_after_downgrade": 29,
+        "baseline_rows_preserved": true,
+        "baseline_row_delta_explained": "+1: bw_ui_user_preferences is renamed back into bw_ui_user_columns_preferences rather than dropped",
+        "one_seven_tables_before_downgrade": 15,
+        "one_seven_tables_after_downgrade": 0,
+        "schema_matches_target_model": true,
+        "alembic_version_after": "827a0053a73e",
+        "bw_metadata_version_after": "1.6.14",
+        "target_model_select_failures": 1,
+        "target_model_select_failures_detail": "Same as the sqlite row: bw_ui_user_columns_preferences raised JSONDecodeError on the probe's own non-JSON sentinel value, not on data the product writes."
+      },
+      "notes": [
+        "Two enum TYPES the 1.7 upgrade creates are not dropped by the downgrade (instance_tls_mode_enum, resource_kinds_enum), and the values added to api_resource_enum and settings_types_enum cannot be removed at all -- PostgreSQL has no ALTER TYPE ... DROP VALUE. Measured harmless: 1.6.14 never references them, the one SELECT failure the probe recorded is its own non-JSON sentinel (see target_model_select_failures_detail) and not these types, and a later re-upgrade is idempotent (CREATE TYPE ... EXCEPTION WHEN duplicate_object, ADD VALUE IF NOT EXISTS).",
+        "Those leftover values are also what SAVES PostgreSQL where MariaDB/MySQL fail: bw_ui_users.method keeps 'api' as a legal label instead of having the enum narrowed under it."
+      ]
+    },
+    {
+      "from": "1.7.0~beta",
+      "to": "1.6.14",
+      "engine": "mariadb",
+      "mode": "restore_only",
+      "data_loss": "certain",
+      "required_backup": true,
+      "plugin_api_target": "1.6.14",
+      "alembic": {
+        "from_revision": "2fb4f11257e9",
+        "to_revision": "31d990845df6"
+      },
+      "artifacts": {
+        "data_layout": "compatible",
+        "custom_configs": "compatible",
+        "www": "compatible",
+        "letsencrypt_state": "compatible",
+        "backups": "compatible",
+        "job_caches": "rebuild",
+        "pro_plugins": "rebuild",
+        "external_plugins": "conditional",
+        "instance_credential_file": "rebuild"
+      },
+      "reason": "The 1.7 head's downgrade() does not run to completion on MariaDB. Two independent blockers. (1) Data-dependent, MEASURED here (dgad-probe-mariadb.json): ALTER TABLE bw_ui_users MODIFY method ENUM('ui','scheduler','autoconf','manual','wizard') fails with error 1265 'Data truncated for column method' on any row holding 'api', a value 1.7 added and the API sets. (2) Structural and data-independent, NOT reached by this lane's probe -- it aborts on (1) first -- and taken from lane LR-v's verification (report-LR.md 6.2, downgrade-exec-LR.log, which ran with no sentinel data and therefore got past (1)): DROP INDEX ix_bw_resource_group_usages_plugin_id fails with error 1553, 'needed in a foreign key constraint', on an index drop_table makes redundant. Both are byte-identical in the previous 1.7 beta heads and are never executed by product code. Worse than a plain refusal: the failure is partial. The first statement of downgrade() commits the bw_metadata version bump under MariaDB's non-transactional DDL, so a failed attempt leaves bw_metadata.version at 1.6.15~rc1 while alembic_version still names the 1.7 head and the schema is a hybrid -- a state the preflight refuses and the scheduler entrypoint cannot recover from. Restore from backup is the only path.",
+      "fingerprint": {
+        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "downgrade_completed": false,
+        "state_after_failure": {
+          "alembic_version": "2fb4f11257e9",
+          "bw_metadata_version": "1.6.15~rc1",
+          "tables_left_from_1_7": 15,
+          "tables_missing_for_1_6_14": ["bw_ui_user_columns_preferences"]
+        }
+      }
+    },
+    {
+      "from": "1.7.0~beta",
+      "to": "1.6.14",
+      "engine": "mysql",
+      "mode": "restore_only",
+      "data_loss": "certain",
+      "required_backup": true,
+      "plugin_api_target": "1.6.14",
+      "alembic": {
+        "from_revision": "c9428fb15be0",
+        "to_revision": "85241481d5a4"
+      },
+      "artifacts": {
+        "data_layout": "compatible",
+        "custom_configs": "compatible",
+        "www": "compatible",
+        "letsencrypt_state": "compatible",
+        "backups": "compatible",
+        "job_caches": "rebuild",
+        "pro_plugins": "rebuild",
+        "external_plugins": "conditional",
+        "instance_credential_file": "rebuild"
+      },
+      "reason": "The 1.7 head's downgrade() does not run to completion on MySQL 8 either. Blocker (1) was MEASURED separately here on a real MySQL 8 (dgad-probe-mysql.json): ALTER TABLE bw_ui_users MODIFY method ENUM(...) fails with error 1265 on a row holding 'api'. Blocker (2), the error-1553 index drop, is INFERRED for MySQL rather than measured: the probe aborts on (1) first, and lane LR-v's run covered MariaDB only. The two heads are byte-identical on that op, so it is expected to fail identically -- but nothing has executed it on MySQL. Either blocker alone is enough for restore_only. The version bump in bw_metadata has already committed when it aborts, so the database is left claiming 1.6.15~rc1 on a hybrid schema. Restore from backup is the only path.",
+      "fingerprint": {
+        "method": "same probe as sqlite/postgresql; the downgrade aborted mid-way",
+        "downgrade_completed": false,
+        "state_after_failure": {
+          "alembic_version": "c9428fb15be0",
+          "bw_metadata_version": "1.6.15~rc1",
+          "tables_left_from_1_7": 15,
+          "tables_missing_for_1_6_14": ["bw_ui_user_columns_preferences"]
+        }
+      }
+    }
+  ],
+  "data_loss_detail": {
+    "$comment": "Applies to every in_place_tested pair above. 'certain' = the rows are destroyed and cannot be recreated; 'conditional' = destroyed but regenerable, with a stated cost. The preflight counts the live rows and compares them against this map.",
+    "tables": {
+      "bw_bans": "conditional",
+      "bw_certificates": "certain",
+      "bw_metrics_baseline": "certain",
+      "bw_metrics_requests": "certain",
+      "bw_redirects": "certain",
+      "bw_resource_attachments": "certain",
+      "bw_resource_group_entries": "certain",
+      "bw_resource_group_usages": "certain",
+      "bw_resource_groups": "certain",
+      "bw_resources": "certain",
+      "bw_ui_user_preferences": "conditional",
+      "bw_ui_user_webauthn_credentials": "certain",
+      "bw_upstream_servers": "certain",
+      "bw_upstreams": "certain",
+      "bw_workflows": "certain"
+    },
+    "why": {
+      "bw_bans": "regenerable by the sync-bans job, which relearns from the instances' shared dicts and Redis; ban durations and tombstones are lost",
+      "bw_ui_user_preferences": "renamed back into bw_ui_user_columns_preferences rather than dropped, so the rows survive; only their meaning is lost (every key becomes a per-table column layout)",
+      "bw_ui_user_webauthn_credentials": "every registered passkey; a passkey-only user must fall back to password + TOTP",
+      "bw_certificates": "every centrally stored certificate and private key",
+      "bw_metrics_requests": "all request metrics and the threat map history",
+      "bw_resources": "every attachable resource, and by foreign key the redirects, upstream pools, workflows and resource groups keyed on it"
+    },
+    "columns": {
+      "bw_instances": [
+        "credential_ciphertext",
+        "credential_key_id",
+        "credential_nonce",
+        "credential_revoked_at",
+        "credential_updated_at",
+        "enroll_code_state",
+        "enroll_failures",
+        "enroll_token_expires_at",
+        "enroll_token_hash",
+        "tls_fingerprint",
+        "tls_mode"
+      ],
+      "bw_jobs_runs": ["error"],
+      "bw_metadata": [
+        "certificate_keyring",
+        "certificate_keyring_active",
+        "certificates_changed",
+        "last_certificates_change",
+        "template_values_cleaned_at"
+      ],
+      "bw_plugins": ["enabled", "icon"],
+      "bw_settings": ["case_insensitive"],
+      "bw_ui_users": ["totp_last_counter"]
+    },
+    "columns_why": "Dropped by the downgrade on every engine. The bw_instances credential and enrolment columns matter most: every enrolled instance has to be re-registered against the global API_TOKEN after a rollback.",
+    "not_counted_by_the_preflight": {
+      "bw_metrics_baseline": "observability, not configuration, and always non-empty -- counting it would pin every installation to restore_only forever",
+      "bw_metrics_requests": "same",
+      "bw_ui_user_preferences": "every UI user has rows here (theme, dismissed notices, onboarding progress, what's-new stamps, column layouts), so counting it would pin every installation to restore_only. Not destroyed outright: the downgrade renames the table back to bw_ui_user_columns_preferences, so the rows survive and only their meaning is lost",
+      "bw_resource_attachments": "covered transitively: every row keys on bw_resources, which IS counted, so this table is empty whenever that one is",
+      "bw_resource_group_entries": "covered transitively: an entry keys on a group, and the operator-built groups ARE counted (bw_resource_groups WHERE plugin_id IS NULL). A seeded group cannot be given operator entries either -- update_resource_group refuses when method is not editable -- so what is left here is re-seeded by the next upgrade",
+      "bw_resource_group_usages": "a usage row is the index of which plugin consumes which group; it is rebuilt from the settings that reference the group, and those settings are 1.6.x rows the downgrade keeps. Not empty when a seeded group is in use, which is why it is not counted",
+      "bw_upstream_servers": "covered transitively: every row keys on bw_upstreams, which IS counted"
+    }
+  }
+}

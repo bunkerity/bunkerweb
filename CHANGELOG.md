@@ -132,6 +132,7 @@
 - [BUGFIX] `ui`: the TOTP replay counter lives in the database, so a used code can no longer be replayed on another UI worker or replica.
 - [BUGFIX] `ui`: a TOTP or recovery code is accepted unconsumed when the database is read-only, instead of locking every 2FA user out.
 - [BUGFIX] `api`: `POST /services/{id}/convert` resolves to the `service_convert` permission instead of `service_create`.
+- [FEATURE] `backup`: controlled downgrade — a per-release reversibility manifest and `bwcli plugin backup downgrade <version> --execute`.
 - [BUGFIX] `db`: fix a session leak in `save_config`: the multisite global-settings pass parked a lock and a pooled connection in the API process.
 - [BUGFIX] `worker`: a job's cache push and reload were dropped in silence when no instance was reachable; the next job that has one now carries it.
 - [BUGFIX] Jobs page: a job's "Deferred" badge now clears once a later run delivers the cache push it was waiting on.

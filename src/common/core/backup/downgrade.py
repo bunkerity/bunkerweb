@@ -13,7 +13,10 @@ Two halves, deliberately kept apart:
   (``SET NX`` -- a second attempt refuses instead of interleaving) and reversible (the holder
   deletes it, and a holder that dies lets it expire).
 
-Nothing here performs a downgrade. Lot D builds that.
+* :func:`execute_downgrade` is the one thing here that mutates. It runs only for a pair the
+  manifest marks ``in_place_tested``, only while a quiescence hold is held, only after the
+  read-only preflight it re-runs itself has come back clean -- and it takes its own backup
+  immediately before mutating so that any failure has somewhere to fall back to.
 """
 
 from contextlib import suppress
@@ -108,7 +111,12 @@ def is_downgrade(installed: str, target: str) -> bool:
 # and never infers compatibility from the version number, so its absence is not a soft warning:
 # with no row for this (from, to, engine) there is nothing proving an in-place downgrade is
 # lossless, and the verdict can be no better than restore_only.
-MANIFEST_PATH = Path(getenv("DOWNGRADE_MANIFEST", join(sep, "usr", "share", "bunkerweb", "downgrade-manifest.json")))
+# Lot C reserved `/usr/share/bunkerweb/downgrade-manifest.json` while the file did not exist yet
+# (its PO-7 asked lot A to confirm the home). Lot A ships it next to this module instead, so it
+# travels with the plugin -- every image and package already copies `core/backup/` wholesale and
+# no Dockerfile, fpm recipe or entrypoint had to learn a new path. `DOWNGRADE_MANIFEST` still
+# overrides it, which is how the tests and an operator experiment point somewhere else.
+MANIFEST_PATH = Path(getenv("DOWNGRADE_MANIFEST") or Path(__file__).resolve().parent.joinpath("downgrade-manifest.json"))
 
 
 def load_manifest(path: Path = MANIFEST_PATH) -> Optional[dict]:
@@ -133,6 +141,50 @@ def manifest_row(manifest: Optional[dict], installed: str, target: str, engine: 
         if row.get("from") == installed and row.get("to") == target and row.get("engine") == engine:
             return row
     return None
+
+
+def silent_losses(manifest: Optional[dict]) -> List[str]:
+    """What an in-place downgrade destroys that no check counts, in the operator's words.
+
+    Two kinds, and both are invisible to `check_irrepresentable` by construction: columns dropped
+    from tables that survive (a table's row count does not move when it loses a column), and the
+    tables the manifest deliberately excludes from the count because they are never empty. An
+    installation with enrolled instances and no bans passes every check and still loses every
+    stored instance credential, so this has to be said out loud rather than left in the manifest.
+    """
+    detail = (manifest or {}).get("data_loss_detail") or {}
+    lines: List[str] = []
+
+    columns = detail.get("columns")
+    if isinstance(columns, dict) and columns:
+        total = sum(len(v) for v in columns.values() if isinstance(v, list))
+        lines.append(f"{total} column(s) dropped from {len(columns)} table(s) that otherwise survive: " + ", ".join(sorted(columns)))
+        why = detail.get("columns_why")
+        if isinstance(why, str) and why:
+            lines.append(why)
+
+    uncounted = detail.get("not_counted_by_the_preflight")
+    if isinstance(uncounted, dict) and uncounted:
+        lines.append("Destroyed but deliberately not counted above: " + ", ".join(f"{name} ({reason})" for name, reason in sorted(uncounted.items())))
+
+    return lines
+
+
+def loss_classes(manifest: Optional[dict]) -> Dict[str, str]:
+    """`{table: "certain"|"conditional"}` -- what each 1.7-only table costs on an in-place downgrade.
+
+    Declared once at the top level rather than per row because it is a property of the schema
+    delta, not of the engine. An empty map is the honest answer when there is no manifest, and
+    it is what makes :func:`check_irrepresentable` keep its pre-manifest behaviour.
+    """
+    detail = (manifest or {}).get("data_loss_detail") or {}
+    tables = detail.get("tables")
+    return {k: v for k, v in tables.items() if isinstance(k, str) and isinstance(v, str)} if isinstance(tables, dict) else {}
+
+
+def target_revision(row: Optional[dict]) -> str:
+    """The Alembic revision an in-place downgrade for this pair has to land on."""
+    return ((row or {}).get("alembic") or {}).get("to_revision") or ""
 
 
 # ── Checks (pure: facts in, verdict out) ────────────────────────────────────────────────────
@@ -242,17 +294,32 @@ def check_backup(newest: Optional[Tuple[str, datetime]], now: datetime, max_age_
     return Check("backup", IN_PLACE, f"Newest backup {name}, {age_hours:.1f} h old (restorability not verified: that would need a restore)", data)
 
 
-def check_irrepresentable(counts: Dict[str, Optional[int]]) -> Check:
-    """1.7 data an older schema has nowhere to put."""
-    data = {"counts": counts}
+def check_irrepresentable(counts: Dict[str, Optional[int]], classes: Optional[Dict[str, str]] = None) -> Check:
+    """1.7 data an older schema has nowhere to put, weighed against the manifest's classification.
+
+    Without a manifest every populated table is a refusal to go in place -- there is nothing
+    saying the loss is acceptable, so it is not assumed to be. With one, a table the manifest
+    calls `conditional` is reported and survived rather than treated as a blocker: that is the
+    whole point of PO-3's "the preflight compares live counts against the manifest's data_loss
+    classification", and without it a single ban would pin every installation to restore_only.
+    A table the manifest does not classify is treated as `certain`, which is the safe default.
+    """
+    classes = classes or {}
+    data = {"counts": counts, "classes": {name: classes.get(name, "certain") for name in counts}}
     unknown = sorted(name for name, count in counts.items() if count is None)
     populated = {name: count for name, count in counts.items() if count}
 
-    if populated:
-        summary = ", ".join(f"{name}={count}" for name, count in sorted(populated.items()))
+    certain = {name: count for name, count in populated.items() if classes.get(name, "certain") != "conditional"}
+    conditional = {name: count for name, count in populated.items() if classes.get(name) == "conditional"}
+
+    if certain:
+        summary = ", ".join(f"{name}={count}" for name, count in sorted(certain.items()))
         return Check("irrepresentable_data", RESTORE_ONLY, f"Data the target version cannot represent: {summary}", data)
     if unknown:
         return Check("irrepresentable_data", RESTORE_ONLY, f"Could not count {', '.join(unknown)}: what would be lost is unknown", data)
+    if conditional:
+        summary = ", ".join(f"{name}={count}" for name, count in sorted(conditional.items()))
+        return Check("irrepresentable_data", IN_PLACE, f"Regenerable 1.7 data WILL be destroyed: {summary}", data)
 
     return Check("irrepresentable_data", IN_PLACE, "No 1.7-only rows found", data)
 
@@ -328,7 +395,13 @@ def _human(size: Optional[int]) -> str:
 # 1.7 tables an older schema has nowhere to put. Data, not code, so lot A/D can extend the set
 # without touching the check. Names are module constants and never come from input: they are
 # interpolated into SQL because a table name cannot be a bind parameter.
-IRREPRESENTABLE_TABLES = ("bw_upstreams", "bw_redirects", "bw_workflows", "bw_bans")
+# `bw_certificates` and `bw_ui_user_webauthn_credentials` were added by lot A: an in-place
+# downgrade destroys every centrally stored certificate and every registered passkey, and neither
+# was being counted, so neither reached the operator before the mutation. Metrics are deliberately
+# NOT here -- they are observability rather than configuration and are never empty, so counting
+# them would pin every installation to restore_only forever (`not_counted_by_the_preflight` in
+# the manifest records that as a decision rather than an oversight).
+IRREPRESENTABLE_TABLES = ("bw_upstreams", "bw_redirects", "bw_workflows", "bw_bans", "bw_certificates", "bw_ui_user_webauthn_credentials")
 # `bw_resources` also holds certificates, which 1.6.x does have somewhere to put, so it is
 # counted per type rather than wholesale.
 IRREPRESENTABLE_RESOURCE_TYPES = ("redirect", "upstream", "workflow")
@@ -439,9 +512,19 @@ def count_irrepresentable(db) -> Dict[str, Optional[int]]:
                 counts["bw_resources"] = int(row)
             else:
                 counts["bw_resources"] = 0
+            if inspector.has_table("bw_resource_groups"):
+                # 17 core groups ship as seeds, so a wholesale count would pin every installation
+                # to `restore_only` forever. `plugin_id` is the product's own discriminator between
+                # a seeded group and a hand-built one (`db_methods/initialization.py`'s
+                # `managed_rg_ids`, and the seeder always sets it), and only the operator paths --
+                # the API and UI routers -- can leave it NULL. So this counts what a downgrade
+                # really destroys and nothing the next upgrade re-seeds.
+                counts["bw_resource_groups"] = int(conn.execute(sa.text("SELECT COUNT(*) FROM bw_resource_groups WHERE plugin_id IS NULL")).scalar_one())
+            else:
+                counts["bw_resource_groups"] = 0
     except BaseException as e:
         LOGGER.debug(f"Could not count the 1.7-only rows: {e}")
-        for table in IRREPRESENTABLE_TABLES + ("bw_resources",):
+        for table in IRREPRESENTABLE_TABLES + ("bw_resources", "bw_resource_groups"):
             counts.setdefault(table, None)
     return counts
 
@@ -732,16 +815,18 @@ def with_recommended_driver(uri: str) -> str:
     return uri
 
 
-def open_read_only(uri: str = "", readonly_uri: str = "") -> ReadOnlyConnection:
+def open_read_only(uri: str = "", readonly_uri: str = "", prefer_replica: bool = True) -> ReadOnlyConnection:
     """Open the configured database for reading.
 
     A read-only replica wins when one is configured: it is the correct target for a question
-    about the database, and it cannot be written to even by accident.
+    about the database, and it cannot be written to even by accident. `prefer_replica=False`
+    pins the connection to the primary instead, which is what a gate in front of a mutation has
+    to read -- see `execute_downgrade`.
 
     Raises `FileNotFoundError` for a SQLite database that does not exist rather than creating it
     -- "there is no database" is an answer the preflight must report, not a file it must make.
     """
-    readonly_uri = with_recommended_driver(readonly_uri or getenv("DATABASE_URI_READONLY", "").strip())
+    readonly_uri = with_recommended_driver(readonly_uri or (getenv("DATABASE_URI_READONLY", "").strip() if prefer_replica else ""))
     # `bwcli` hands the plugin an already-resolved DATABASE_URI (CLI.py sets it from the
     # Database it built), so this default is only ever reached by a direct invocation.
     uri = with_recommended_driver(uri or getenv("DATABASE_URI", "").strip() or readonly_uri or SQLITE_DEFAULT_URI)
@@ -807,7 +892,7 @@ def _preflight(target: str, db, backup_dir: Path, now: datetime, client) -> dict
         check_manifest(manifest_row(manifest, installed, target, engine), installed, target, engine),
         check_disk(database_size(db, engine), free_space(backup_dir), backup_dir.as_posix()),
         check_backup(newest, now),
-        check_irrepresentable(count_irrepresentable(db)),
+        check_irrepresentable(count_irrepresentable(db), loss_classes(manifest)),
         check_plugins(scan_plugins(target)),
         check_writers(broker_state(client=client)),
     ]
@@ -818,6 +903,8 @@ def _preflight(target: str, db, backup_dir: Path, now: datetime, client) -> dict
         "engine": engine,
         "generated_at": now.isoformat(),
         "verdict": worst(checks),
+        "manifest_row": manifest_row(manifest, installed, target, engine),
+        "silent_losses": silent_losses(manifest),
         "checks": [{"name": c.name, "verdict": c.verdict, "detail": c.detail, "data": c.data} for c in checks],
     }
 
@@ -842,6 +929,11 @@ def render_report(result: dict) -> str:
     width = max((len(check["name"]) for check in result["checks"]), default=0)
     for check in result["checks"]:
         lines.append(f"  {VERDICT_MARK.get(check['verdict'], '?')} {check['name']:<{width}}  {check['detail']}")
+    # Not under a refusal: "destroyed all the same" is a statement about a downgrade that is going
+    # to happen, and a refused one is not.
+    if result.get("silent_losses") and result.get("verdict") != REFUSE:
+        lines.extend(("", "  Not counted by any check above, and destroyed all the same:"))
+        lines.extend(f"    - {line}" for line in result["silent_losses"])
     lines.extend(("", f"VERDICT: {result['verdict']} -- {VERDICT_MEANING.get(result['verdict'], '')}", ""))
     return "\n".join(lines)
 
@@ -849,3 +941,319 @@ def render_report(result: dict) -> str:
 # Exit codes, so a script can branch on the verdict. The bwcli wrapper collapses every
 # non-zero code to "failed", which is the right signal for the two verdicts that are not a go.
 EXIT_CODES = {IN_PLACE: 0, RESTORE_ONLY: 2, REFUSE: 3}
+
+
+# ── Lot D: the in-place downgrade itself ────────────────────────────────────────────────────
+
+# Where the migration scripts live in an installed image or package. `src/scheduler/entrypoint.sh`
+# hard-codes the same path.
+ALEMBIC_DIR = Path(getenv("BWCLI_ALEMBIC_DIR") or join(sep, "usr", "share", "bunkerweb", "db", "alembic"))
+
+# End states, in the order of how much is left for a human to do.
+DOWNGRADED = "downgraded"
+RESTORED = "restored_to_pre_downgrade"
+MANUAL = "manual_recovery_required"
+REFUSED = "refused"
+
+# alembic.ini ships with `version_locations = versions`, and env.py's own `set_main_option` lands
+# after ScriptDirectory is already built -- which is why `src/scheduler/entrypoint.sh:105` sed-patches
+# the ini before running alembic. bwcli cannot do that: the image copies /usr/share/bunkerweb with
+# mode 550 and bwcli does not run as root. Building the Config in memory reaches the same
+# configuration and writes nothing. A subprocess, so that importing `model` and the whole migration
+# chain cannot leave anything behind in the bwcli process, and so a hard abort is an exit code.
+_ALEMBIC_DRIVER = """
+import sys
+from alembic import command
+from alembic.config import Config
+
+alembic_dir, engine, revision = sys.argv[1:4]
+cfg = Config(alembic_dir + "/alembic.ini")
+cfg.set_main_option("script_location", alembic_dir)
+cfg.set_main_option("version_locations", alembic_dir + "/" + engine + "_versions")
+command.downgrade(cfg, revision)
+"""
+
+
+def run_alembic_downgrade(engine: str, uri: str, revision: str, alembic_dir: Optional[Path] = None, timeout: float = 1800.0) -> Tuple[int, str]:
+    """`alembic downgrade <revision>`, the way the scheduler entrypoint runs alembic. Never raises."""
+    from os import environ  # noqa: PLC0415 - only this function needs the whole environment
+    from subprocess import run as run_process  # noqa: PLC0415 - not needed by the read-only half
+    from sys import executable  # noqa: PLC0415 - same
+
+    directory = Path(alembic_dir or ALEMBIC_DIR)
+    env = environ.copy()
+    env["DATABASE_URI"] = uri
+    # env.py does `from model import Base`, and model.py lives in the directory holding `alembic/`.
+    # The scheduler image happens to put it on PYTHONPATH already; saying so here rather than
+    # inheriting it means this works from any process that can reach the migration scripts.
+    env["PYTHONPATH"] = ":".join(p for p in (directory.parent.as_posix(), env.get("PYTHONPATH", "")) if p)
+    try:
+        proc = run_process(
+            [executable, "-c", _ALEMBIC_DRIVER, directory.as_posix(), engine, revision],
+            cwd=directory.as_posix(),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except BaseException as e:
+        return 1, scrub_db_secret(f"{type(e).__name__}: {e}", uri)
+    return proc.returncode, scrub_db_secret((proc.stdout or "") + (proc.stderr or ""), uri)
+
+
+def table_counts(db, tables) -> Dict[str, Optional[int]]:
+    """Row count per table. `None` means the table is not there; "unreadable" that it would not answer.
+
+    This is the live half of PO-3's fingerprint: taken before the mutation and again after it, so
+    "nothing was lost" is a measurement in the operator's own database rather than a claim
+    inherited from the manifest.
+    """
+    counts: Dict[str, Optional[int]] = {}
+    present = set()
+    with suppress(BaseException):
+        present = set(sa.inspect(db.sql_engine).get_table_names())
+    # The connect is under the same suppress as the inspection, and for the same reason: this is a
+    # cosmetic measurement taken once before the migration and once after it has already committed
+    # and been verified. A connection that cannot be opened here has to cost the operator the
+    # fingerprint, never the report -- an exception escaping the post-migration call would land at
+    # the CLI as a bare error with no `end_state` at all, for a downgrade that in fact succeeded,
+    # and the natural response to that is to restore the backup and undo it.
+    with suppress(BaseException), db.sql_engine.connect() as conn:
+        for name in sorted(tables):
+            if name not in present:
+                counts[name] = None
+                continue
+            try:
+                counts[name] = int(conn.execute(sa.text(f"SELECT COUNT(*) FROM {name}")).scalar() or 0)  # noqa: S608 - module constant, never input
+            except BaseException:
+                counts[name] = "unreadable"  # type: ignore[assignment]
+    return counts
+
+
+def _step(result: dict, name: str, ok: bool, detail: str, **extra) -> bool:
+    result["steps"].append({"step": name, "ok": ok, "detail": detail} | extra)
+    if not ok:
+        LOGGER.error(detail)
+    else:
+        LOGGER.info(detail)
+    return ok
+
+
+def execute_downgrade(
+    target: str,
+    client=None,
+    confirmed: bool = False,
+    db=None,
+    alembic_dir: Optional[Path] = None,
+    backup_dir: Optional[Path] = None,
+    now: Optional[datetime] = None,
+) -> dict:
+    """Take this installation back to `target` in place. The only mutating entry point here.
+
+    Everything before the `alembic downgrade` call is a gate, and every gate refuses rather than
+    warns. In order: the operator confirmed; a quiescence hold is held *for this target*; the
+    read-only preflight -- re-run here rather than trusted from an earlier shell -- returns
+    `in_place_possible`; the manifest marks this exact (from, to, engine) `in_place_tested` and
+    names the revision to land on. Then, and only then, a backup is taken of the database as it
+    stands, and the migration runs.
+
+    Any failure after that point restores that backup. The contract the conception asks for is
+    that every outcome leaves a startable installation, so the result always carries an
+    `end_state`: `downgraded`, `restored_to_pre_downgrade`, or -- if even the restore failed --
+    `manual_recovery_required`, with the backup file named so a human can finish by hand.
+    """
+    from backup import BACKUP_DIR, backup_database, restore_database  # noqa: PLC0415 - sibling module, see preflight()
+
+    now = now or datetime.now().astimezone()
+    result: dict = {"target": target, "generated_at": now.isoformat(), "end_state": REFUSED, "steps": [], "safety_backup": None}
+
+    if not confirmed:
+        _step(result, "confirmation", False, "Refusing to downgrade without an explicit confirmation")
+        return result
+
+    # 1. the hold. `quiesce` is a separate, foreground command on purpose: this one refuses to run
+    #    unless that one is already holding the writers still, for this same target.
+    try:
+        client = client if client is not None else broker_client()
+        held = hold_status(client)
+    except BaseException as e:
+        # `broker_client()` is inside the try on purpose: it imports redis, which is not a
+        # scheduler dependency, and `from_url` parses. Either can raise, and a gate that raises
+        # instead of refusing is a gate that reports "error" where it means "no".
+        _step(result, "hold", False, f"The job broker could not be asked who holds the downgrade hold: {e}")
+        return result
+    if not held:
+        _step(result, "hold", False, f"No downgrade hold is in place: run `bwcli plugin backup quiesce {target}` in another shell first")
+        return result
+    if (held.get("target") or "") != target:
+        _step(
+            result, "hold", False, f"The downgrade hold in place is for {held.get('target')!r}, not {target!r}: refusing to downgrade under someone else's hold"
+        )
+        return result
+    _step(result, "hold", True, f"Downgrade hold held for {target} since {held.get('started_at')}")
+
+    # 2. the preflight, re-run here. An operator may have run it an hour ago, or not at all.
+    #
+    #    On the PRIMARY, explicitly. Left to itself `preflight()` opens `open_read_only()`, which
+    #    prefers `DATABASE_URI_READONLY` -- the right target for a question about the database, and
+    #    the wrong one for the gate in front of a migration that writes the primary. A replica that
+    #    lags, or has stopped replicating, answers "no 1.7-only rows" for rows that are on the
+    #    primary and that the downgrade is about to destroy, and nothing afterwards notices: the
+    #    run ends `downgraded`, exit 0. The check has to read the database the mutation will write.
+    #    The same connection decides `check_manifest`'s engine, so a primary/replica engine
+    #    mismatch stops gating this on the wrong engine's manifest row too.
+    primary = None
+    try:
+        primary = open_read_only(uri=getattr(db, "database_uri", "") or getenv("DATABASE_URI", "").strip(), prefer_replica=False)
+        report = preflight(target, db=primary, client=client, now=now)
+    except BaseException as e:
+        # It raises on a database it cannot even open -- a missing SQLite file, for one, which it
+        # refuses to create. "I could not tell" has to come out as a refusal, not a traceback.
+        _step(result, "preflight", False, f"The preflight could not run, so nothing about this downgrade is proven: {e}")
+        return result
+    finally:
+        if primary is not None:
+            primary.close()
+    result["preflight"] = report
+    if report["verdict"] != IN_PLACE:
+        _step(result, "preflight", False, f"The preflight says {report['verdict']}, not {IN_PLACE}:\n{render_report(report)}")
+        return result
+    _step(result, "preflight", True, f"The preflight says {IN_PLACE} for {report['installed']} -> {target} on {report['engine']}")
+
+    # 3. the manifest, asserted again rather than inherited. check_manifest already refused
+    #    anything but `in_place_tested`, and this says so a second time next to the mutation --
+    #    the brief makes it the hard gate, and a gate that only exists three functions away is
+    #    one refactor from not existing.
+    row = report.get("manifest_row") or {}
+    revision = target_revision(row)
+    if row.get("mode") != "in_place_tested":
+        _step(
+            result,
+            "manifest",
+            False,
+            f"The manifest does not mark {report['installed']} -> {target} on {report['engine']} as in_place_tested: {row.get('reason') or row.get('mode') or 'no entry'}",
+        )
+        return result
+    if not revision:
+        _step(result, "manifest", False, "The manifest marks this pair in_place_tested but names no alembic.to_revision to land on")
+        return result
+    _step(result, "manifest", True, f"The manifest marks this pair in_place_tested; landing on Alembic revision {revision}", revision=revision)
+
+    # 4. the backup this operation falls back to. Taken NOW, under the hold, with the database
+    #    still fully 1.7 -- an older backup would restore a state that predates whatever happened
+    #    since, and the preflight cannot tell whether the newest one predates the upgrade.
+    backup_dir = backup_dir or BACKUP_DIR
+    try:
+        db, safety_backup = backup_database(now, db=db, backup_dir=backup_dir)
+    except BaseException as e:
+        _step(result, "backup", False, f"Could not take the pre-downgrade backup, refusing to mutate anything: {e}")
+        return result
+    result["safety_backup"] = getattr(safety_backup, "as_posix", lambda: str(safety_backup))()
+    _step(result, "backup", True, f"Pre-downgrade backup taken: {result['safety_backup']}")
+
+    engine = engine_name(db.database_uri)
+    # Where the database stands right now. This is what "the fallback worked" is measured against
+    # further down -- `restore_database` finishes with a `checked_changes` call that is 1.7 code
+    # running against a freshly-restored schema (lot B §3), so "it raised" and "it did not restore"
+    # are genuinely different things and only the second one is a manual-recovery situation.
+    stamp_before = read_alembic_revision(db)
+    version_before = read_metadata_version(db)
+    baseline = sorted(loss_classes(load_manifest())) or list(IRREPRESENTABLE_TABLES)
+    before = table_counts(db, set(baseline) | {"bw_metadata", "bw_plugins", "bw_services", "bw_settings", "bw_custom_configs", "bw_instances"})
+    result["fingerprint_before"] = before
+
+    # 5. the mutation.
+    code, log = run_alembic_downgrade(engine, db.database_uri, revision, alembic_dir=alembic_dir)
+    result["alembic_log"] = log[-4000:]
+    failure = "" if code == 0 else f"`alembic downgrade {revision}` failed with exit code {code}"
+
+    # 6. and the proof that it landed where it said it would. A downgrade that reports success and
+    #    leaves the stamp or the recorded version somewhere else is the half-finished state the
+    #    preflight refuses to start from, so it is treated exactly like an outright failure.
+    if not failure:
+        with suppress(BaseException):
+            stamped = read_alembic_revision(db)
+            recorded = read_metadata_version(db)
+            result["alembic_version_after"] = stamped
+            result["bw_metadata_version_after"] = recorded
+            if stamped != revision:
+                failure = f"The downgrade reported success but the database is stamped {stamped!r}, not {revision!r}"
+            elif recorded != target:
+                failure = f"The downgrade reported success but bw_metadata records {recorded!r}, not {target!r}"
+
+    if failure:
+        _step(result, "downgrade", False, f"{failure}\n{log[-2000:]}")
+        raised = ""
+        try:
+            restore_database(Path(result["safety_backup"]), db)
+        except BaseException as e:
+            raised = f"{type(e).__name__}: {e}"
+
+        # Asked, not assumed -- and asked with two questions, not one.
+        #
+        # The stamp alone is not enough. On MariaDB/MySQL the measured partial failure leaves
+        # `alembic_version` at the 1.7 head (unchanged) while `bw_metadata.version` has already
+        # committed to `1.6.15~rc1` under non-transactional DDL, so a stamp-only comparison calls
+        # that hybrid schema "restored" before any restore has run. `bw_metadata.version` is the
+        # discriminator, so both have to come back.
+        #
+        # And both reads have to have SUCCEEDED. `read_alembic_revision` swallows its errors and
+        # answers None, so on a database the restore emptied, `None == None` would report success
+        # for a database that no longer has the table to read.
+        landed = False
+        with suppress(BaseException):
+            stamp_after, version_after = read_alembic_revision(db), read_metadata_version(db)
+            landed = bool(stamp_before) and stamp_after == stamp_before and version_after == version_before
+        if not landed:
+            result["end_state"] = MANUAL
+            _step(
+                result,
+                "fallback",
+                False,
+                f"The fallback restore did not put the database back{f' ({raised})' if raised else ''}. It is half-downgraded and this cannot be fixed from here. "
+                f"Restore {result['safety_backup']} by hand -- `bwcli plugin backup restore {result['safety_backup']}` -- before starting anything.",
+            )
+            return result
+        result["end_state"] = RESTORED
+        if raised:
+            LOGGER.warning(f"The restore reported an error but the database is back at {stamp_before} / {version_before}: {raised}")
+        _step(
+            result,
+            "fallback",
+            True,
+            f"Restored {result['safety_backup']}: the installation is back where it started, still on {report['installed']}. "
+            "Start the 1.7 images again; then use the restore path (a backup taken before the upgrade) if you still need to go back.",
+        )
+        return result
+
+    # `end_state` first: the migration is done and verified by this point, so the outcome is
+    # already decided and the fingerprint below is only a measurement of it.
+    result["end_state"] = DOWNGRADED
+    result["fingerprint_after"] = table_counts(db, before.keys())
+    _step(
+        result,
+        "downgrade",
+        True,
+        f"Downgraded to {target} (Alembic {revision}). Release the quiescence hold, then start the {target} images or packages.",
+    )
+    return result
+
+
+def render_execute_report(result: dict) -> str:
+    """The operator-facing summary of an execution attempt. No secrets: the log is scrubbed."""
+    lines = ["", f"Downgrade to {result['target']} -- {result['end_state']}", ""]
+    for step in result["steps"]:
+        lines.append(f"  {'✅' if step['ok'] else '❌'} {step['step']:<13}  {step['detail']}")
+    if result.get("safety_backup"):
+        lines.append(f"\n  Pre-downgrade backup: {result['safety_backup']}")
+    before, after = result.get("fingerprint_before"), result.get("fingerprint_after")
+    if before and after:
+        drift = {name: (before[name], after.get(name)) for name in before if before[name] != after.get(name)}
+        lines.append(
+            f"  Row fingerprint: {len(before)} tables measured, {len(drift)} changed{': ' + ', '.join(f'{k} {v[0]}->{v[1]}' for k, v in sorted(drift.items())) if drift else ''}"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+EXECUTE_EXIT_CODES = {DOWNGRADED: 0, RESTORED: 2, REFUSED: 3, MANUAL: 4}
