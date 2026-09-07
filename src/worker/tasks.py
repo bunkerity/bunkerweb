@@ -194,7 +194,14 @@ RELOAD_DIRTY_KEY = "bw:reload_dirty"
 RELOAD_TIMEOUT = (5, 30)
 # Long enough to cover a push plus a reload with configuration testing on a slow instance. The
 # holder deletes the key when it is done, so this only matters when a worker dies mid-reload.
-RELOAD_LOCK_TTL = 60
+# DEV-2b3 (port of dev 462c1e851): the push read budget is no longer flat -- `folder_push_timeout`
+# grants up to 120 s on a large fleet, so 60 s could expire while the holder was still uploading.
+# A second child would then take the lock and push concurrently, which is exactly the contention
+# this lock exists to prevent. 300 covers connect + 120 s push + connect + 30 s reload with room to
+# spare. It does NOT cover the worst case once dev `7a6bf2c70`/`32a2985ab` (rows 20/22) land and the
+# 503 retry becomes reachable (3 attempts x 125 s); closing that wants the holder to renew the key
+# each round rather than a larger constant -- see report-DEV-2b3.md, PO question 4.
+RELOAD_LOCK_TTL = 300
 # A job that finishes while the holder is pushing gets picked up by the next round. Bounded so a
 # steady stream of jobs cannot pin one worker child in here forever -- whatever is left dirty is
 # carried by the next job's reload.
@@ -306,6 +313,24 @@ def _apply_deferred_acks(client, claimed, logger) -> None:
         logger.info(f"Acknowledged {entry.get('keys')} now that the push reached the instances")
 
 
+def _push_service_count(logger=None) -> int:
+    """How many services the cache archive covers.
+
+    DEV-2b3: the environment is the FALLBACK, not the source. A split-container worker has no
+    SERVER_NAME of its own (`misc/dev/docker-compose.ui.api.yml` sets it on `bw-scheduler` only),
+    and an all-in-one whose services come from the UI or autoconf exports it empty, so counting
+    from the env alone left exactly the deployments this timeout is for on the flat floor. Same
+    shape as `core/pro/jobs/download-pro-plugins.py`: database first, env second.
+    """
+    with suppress(BaseException):
+        services = get_worker_db().get_services(with_drafts=True)
+        if services:
+            return len(services)
+    if logger is not None:
+        logger.debug("Sizing the cache push from SERVER_NAME: no service could be read from the database")
+    return len(os.getenv("SERVER_NAME", "").split())
+
+
 def _request_reload_debounced(apis, broker_url: str, logger) -> None:
     """Push the cache tree to every instance and reload them, one reload at a time.
 
@@ -317,6 +342,8 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
     inside the window -- a downloaded blocklist or a fresh certificate that never reached the
     instances, with the job recorded as a success.
     """
+    from ApiCaller import folder_push_timeout  # type: ignore  # DEV-2b3 (deps are on sys.path by now, like every other import here)
+
     client = _broker_client(broker_url)
     test = "no" if os.getenv("DISABLE_CONFIGURATION_TESTING", "no").lower() == "yes" else "yes"
 
@@ -338,7 +365,13 @@ def _request_reload_debounced(apis, broker_url: str, logger) -> None:
             client.delete(RELOAD_DIRTY_KEY)
             claimed_acks = client.smembers(ACK_PENDING_KEY)
 
-            if not apis.send_files("/var/cache/bunkerweb", "/cache"):
+            # DEV-2b3 (port of dev 462c1e851): the archive is the whole cache tree, so its size
+            # tracks the number of services -- a fleet with a hundred of them regularly needs more
+            # than the flat 30s read budget this used to take, and the push failed on the timeout
+            # with every file already built. The floor stays at that same 30s, so a small install
+            # behaves exactly as before. `send_files` derives the body-write budget from the read
+            # one; it reaches the socket only once `API.request` accepts it (dev 7a6bf2c70).
+            if not apis.send_files("/var/cache/bunkerweb", "/cache", timeout=folder_push_timeout(30, _push_service_count(logger))):
                 raise RuntimeError("Failed to send /var/cache/bunkerweb to BunkerWeb instances")
 
             if not apis.send_to_apis("POST", f"/reload?test={test}", timeout=RELOAD_TIMEOUT)[0]:

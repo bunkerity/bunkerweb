@@ -108,7 +108,9 @@ def test_the_holder_pushes_the_cache_then_reloads():
     with _with_redis(client):
         TASKS._request_reload_debounced(apis, BROKER, LOGGER)
 
-    apis.send_files.assert_called_once_with("/var/cache/bunkerweb", "/cache")
+    # DEV-2b3 (port of dev 462c1e851): the read budget is derived from the service count now,
+    # and lands on the previous flat 30s for a single service.
+    apis.send_files.assert_called_once_with("/var/cache/bunkerweb", "/cache", timeout=(5, 30))
     apis.send_to_apis.assert_called_once_with("POST", "/reload?test=yes", timeout=(5, 30))
     # Held for the next job to take, not left behind to block it for a minute.
     assert TASKS.RELOAD_LOCK_KEY not in client.keys
@@ -156,7 +158,7 @@ def test_a_job_that_finishes_during_the_push_earns_another_round():
     apis = _apis()
     flagged = []
 
-    def push(*_args):
+    def push(*_args, **_kwargs):  # DEV-2b3: send_files now carries a timeout
         if not flagged:
             flagged.append(True)
             client.set(TASKS.RELOAD_DIRTY_KEY, "1")
