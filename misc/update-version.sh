@@ -72,6 +72,16 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/beforeInstall.sh
 # db (the default version moved from Database.py to the metadata mixin when Database.py was split into db_methods/)
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/db_methods/metadata.py
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
+# controlled downgrade: the manifest is keyed on src/VERSION and the CLI matches `from` verbatim,
+# so a stamped build that leaves it behind ships a manifest it can never match itself -- "No
+# manifest entry for 1.7-dev -> 1.6.14 on sqlite", every pair unclassified, the in-place path
+# silently gone. Same for the upgrade spec's version pin, which asserts against the artifact built
+# from this stamp. Note what does NOT catch a regression here: tests/unit/backup/
+# test_downgrade_manifest.py compares the manifest to src/VERSION on the checked-in tree, where
+# both read the same thing whether or not this line exists. The net is the integration spec
+# tests/core/backup.yml::downgrade_finds_the_shipped_manifest, which runs inside a stamped image.
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/backup/downgrade-manifest.json
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" tests/core/upgrade.yml
 # github
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml
 # pyproject

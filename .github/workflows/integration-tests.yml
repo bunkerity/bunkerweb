@@ -104,6 +104,28 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # The `*-tests:<RELEASE>` images pulled below were stamped by container-build.yml
+      # ("Replace VERSION*", :63-70) and the Linux packages by linux-build.yml, so the
+      # /usr/share/bunkerweb/VERSION inside every artifact under test is NOT this checkout's
+      # src/VERSION. Anything that compares the two therefore disagrees with the artifact it is
+      # testing: `tests/core/upgrade.yml`'s `verify_1_7_sqlite` read `1.7-dev` out of bw_metadata
+      # while asserting `1.7.0~beta`, and `bwcli plugin backup downgrade` printed "No manifest
+      # entry for 1.7-dev -> 1.6.14". Stamp the checkout exactly the way the artifact was stamped.
+      #
+      # There are TWO sources of truth and they do not agree, so this mirrors only the rows where
+      # they do: container-build.yml:62-70 maps testing/dev -> itself, 1.5 -> dev, 1.7 -> 1.7-dev;
+      # linux-build.yml:44-52 maps testing/dev/ui -> itself, 1.5 -> 1.5-dev, 1.7 -> 1.7-dev. `1.5`
+      # never reaches this workflow. `ui` does (ui.yml spawns a Docker arm and a Linux arm), and
+      # only linux-build.yml stamps it, to the literal "ui" -- so stamping here would break the
+      # Docker ui arm, whose images are not stamped at all, and not stamping leaves the Linux ui
+      # arm's checkout at 1.7.0~beta against a .deb stamped "ui". Latent today:
+      # no ui spec asserts a version. Reconciling the two build workflows is the real fix.
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
+      - name: Replace VERSION 1.7
+        if: inputs.RELEASE == '1.7'
+        run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh 1.7-dev
       - name: Set up Python 3.13
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
