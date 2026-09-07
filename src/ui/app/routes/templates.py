@@ -9,6 +9,7 @@ from flask_login import current_user, login_required
 from requests.exceptions import RequestException
 
 from common_utils import split_templates  # type: ignore
+from default_server import is_reserved_default_server  # type: ignore
 
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
@@ -249,6 +250,11 @@ def _compute_template_usage(templates_index: Dict[str, Dict[str, Any]]) -> Dict[
         return usage
 
     for service in services or []:
+        # The reserved default server is not a service an operator manages or picks a template
+        # for -- excluded from the count for the same reason it is never offered as an attachment
+        # target elsewhere (DS-B4 handoff item 4 / criticos-DS-B optional 8).
+        if is_reserved_default_server(service):
+            continue
         # USE_TEMPLATE is an ORDERED LIST, so `template` may name several layers. Counting the
         # raw value would match no template at all and report 0 uses for every multi-template
         # service -- a wrong number, which is worse than no chip.

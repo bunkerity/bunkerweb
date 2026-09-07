@@ -98,6 +98,26 @@ def test_page_loads_rules_and_services(route_app, monkeypatch):
     assert context["status_codes"] == ("301", "302", "303", "307", "308")
 
 
+def test_page_never_offers_the_reserved_default_server_as_an_attachment_target(route_app, monkeypatch):
+    """DS-B4 handoff item 4 / RES-1 item 6f: the reserved default server has nothing to redirect
+    FROM, so it must never appear in the picker -- but an operator's own pre-1.7 row named
+    ``default-server`` (a different method) is an ordinary service and must stay."""
+    module, client, _, app = route_app
+    client.get_redirects.return_value = {"redirects": [], "total": 0}
+    client.get_services.return_value = [
+        {"id": "svc", "method": "ui"},
+        {"id": "default-server", "method": "wizard"},
+        {"id": "default-server", "method": "ui"},
+    ]
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/redirects"):
+        module.redirects_page.__wrapped__()
+
+    assert render.call_args.kwargs["services"] == [{"id": "svc", "method": "ui"}, {"id": "default-server", "method": "ui"}]
+
+
 def test_page_survives_an_api_failure(route_app, monkeypatch):
     module, client, flash, app = route_app
     client.get_redirects.side_effect = ApiClientError("boom", status_code=502)

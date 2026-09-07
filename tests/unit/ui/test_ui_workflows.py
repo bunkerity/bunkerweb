@@ -290,6 +290,26 @@ def test_the_editor_page_is_reachable_from_the_menu_and_the_locale():
         assert key in locale["workflows"]
 
 
+def test_page_never_offers_the_reserved_default_server_as_an_attachment_target(route_app, monkeypatch):
+    """DS-B4 handoff item 4 / RES-1 item 6f: the reserved default server is not a service an
+    operator manages, so it is never offered as a workflow assignment target -- but an
+    operator's own pre-1.7 row named ``default-server`` (a different method) stays."""
+    module, client, _, app = route_app
+    client.get_workflows.return_value = {"workflows": [], "total": 0}
+    client.get_services.return_value = [
+        {"id": "svc", "method": "ui"},
+        {"id": "default-server", "method": "wizard"},
+        {"id": "default-server", "method": "ui"},
+    ]
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/workflows"):
+        module.workflows_page.__wrapped__()
+
+    assert render.call_args.kwargs["services"] == [{"id": "svc", "method": "ui"}, {"id": "default-server", "method": "ui"}]
+
+
 def test_workflow_list_exposes_the_identity_editor_and_resolves_its_ctas():
     template = (ROOT / "src" / "ui" / "app" / "templates" / "workflows.html").read_text(encoding="utf-8")
     script = (ROOT / "src" / "ui" / "app" / "static" / "js" / "pages" / "workflows.js").read_text(encoding="utf-8")

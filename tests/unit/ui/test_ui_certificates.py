@@ -265,6 +265,27 @@ def test_page_exposes_read_only_letsencrypt_orphan_details(route_app, monkeypatc
     assert rendered_certificate["orphan_state"] == orphan
 
 
+def test_page_never_offers_the_reserved_default_server_as_an_attachment_target(route_app, monkeypatch):
+    """DS-B4 handoff item 4 / RES-1 item 6f: the reserved default server has no hostname to attach
+    a certificate to, so it is never offered as an assignment target -- but an operator's own
+    pre-1.7 row named ``default-server`` (a different method) is an ordinary service and stays."""
+    module, client, app = route_app
+    client.get_certificates.return_value = {"certificates": [], "total": 0}
+    client.get_services.return_value = [
+        {"id": "svc", "method": "ui"},
+        {"id": "default-server", "method": "wizard"},
+        {"id": "default-server", "method": "ui"},
+    ]
+    client.get_letsencrypt_orphans.return_value = []
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/certificates"):
+        module.certificates_page.__wrapped__()
+
+    assert render.call_args.kwargs["services"] == [{"id": "svc", "method": "ui"}, {"id": "default-server", "method": "ui"}]
+
+
 def test_update_changes_name_and_description_only(route_app, monkeypatch):
     module, client, app = route_app
     monkeypatch.setattr(module, "flash", Mock())

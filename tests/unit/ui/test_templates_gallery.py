@@ -355,6 +355,24 @@ def test_compute_template_usage_counts_matching_services_only(templates_route):
     assert usage == {"tpl-a": 2, "tpl-b": 0}
 
 
+def test_compute_template_usage_excludes_the_reserved_default_server(templates_route):
+    """DS-B4 handoff item 4 / RES-1 item 6f: the reserved default server is not a service an
+    operator picks a template for -- excluded from the "N svc" chip count. An operator's own
+    pre-1.7 row named ``default-server`` (a different method) is an ordinary service and
+    still counts."""
+    module, client, _bw_config = templates_route
+    client.reset_mock(return_value=True, side_effect=True)
+    client.get_services.return_value = [
+        {"id": "svc", "method": "ui", "template": "tpl-a"},
+        {"id": "default-server", "method": "wizard", "template": "tpl-a"},
+        {"id": "default-server", "method": "ui", "template": "tpl-a"},
+    ]
+
+    usage = module._compute_template_usage({"tpl-a": {}})
+
+    assert usage == {"tpl-a": 2}
+
+
 def test_compute_template_usage_falls_back_to_zero_on_api_error(templates_route):
     module, client, _bw_config = templates_route
     client.reset_mock(return_value=True, side_effect=True)

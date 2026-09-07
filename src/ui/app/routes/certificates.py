@@ -7,6 +7,8 @@ from flask_login import login_required
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
+from default_server import is_reserved_default_server  # type: ignore
+
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
 from app.utils import flash
@@ -62,7 +64,13 @@ def certificates_page():
         certificate_rows, total = [], 0
 
     try:
-        services = API_CLIENT.get_services(with_drafts=True)
+        # A picker filter, not a guard -- the API has no reserved-id refusal on a certificate
+        # attachment, so this only stops the operator from offering it in the first place (DS-B4
+        # handoff item 4 / criticos-DS-B optional 8). Defensible anyway: certificate selection
+        # (certificates.lua:ssl_certificate()) keys on the TLS handshake's own client-controlled
+        # SNI, which is never the reserved id for any real client, so an attachment made on it
+        # despite this filter would still never be selected in practice.
+        services = [service for service in API_CLIENT.get_services(with_drafts=True) if not is_reserved_default_server(service)]
     except (ApiClientError, ApiUnavailableError) as exc:
         flash(f"Could not fetch services for certificate assignments: {exc.message}", "error")
         services = []

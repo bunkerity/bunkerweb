@@ -118,6 +118,26 @@ def test_page_loads_pools_and_services(route_app, monkeypatch):
     assert context["protocols"] == ("http", "grpc", "stream")
 
 
+def test_page_never_offers_the_reserved_default_server_as_an_attachment_target(route_app, monkeypatch):
+    """DS-B4 handoff item 4 / RES-1 item 6f: the reserved default server has no `Host` to route an
+    upstream pool to. An operator's own pre-1.7 row named ``default-server`` (different method)
+    is an ordinary service and must stay in the picker."""
+    module, client, _, app = route_app
+    client.get_upstreams.return_value = {"upstreams": [], "total": 0}
+    client.get_services.return_value = [
+        {"id": "svc", "method": "ui"},
+        {"id": "default-server", "method": "wizard"},
+        {"id": "default-server", "method": "ui"},
+    ]
+    render = Mock(return_value="rendered")
+    monkeypatch.setattr(module, "render_template", render)
+
+    with app.test_request_context("/upstreams"):
+        module.upstreams_page.__wrapped__()
+
+    assert render.call_args.kwargs["services"] == [{"id": "svc", "method": "ui"}, {"id": "default-server", "method": "ui"}]
+
+
 def test_page_survives_an_api_failure(route_app, monkeypatch):
     module, client, flash, app = route_app
     client.get_upstreams.side_effect = ApiClientError("boom", status_code=502)

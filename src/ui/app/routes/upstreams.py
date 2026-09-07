@@ -1,6 +1,8 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
+from default_server import is_reserved_default_server  # type: ignore
+
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.dependencies import API_CLIENT
 from app.utils import flash
@@ -141,7 +143,9 @@ def upstreams_page():
         upstream_rows, total = [], 0
 
     try:
-        services = API_CLIENT.get_services(with_drafts=True)
+        # The reserved default server has no `Host` to route an upstream pool to -- never offered
+        # as an assignment target (DS-B4 handoff item 4 / criticos-DS-B optional 8).
+        services = [service for service in API_CLIENT.get_services(with_drafts=True) if not is_reserved_default_server(service)]
     except (ApiClientError, ApiUnavailableError) as exc:
         flash(f"Could not fetch services for upstream assignments: {exc.message}", "error")
         services = []
