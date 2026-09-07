@@ -328,6 +328,21 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
     - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
 
+#### 按服务的端点
+
+由于这些端点都是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或者只使用其中一部分。这两项功能是相互独立的：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于启用状态。将其设置为空字符串可让某个服务完全跳过 Local API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于启用状态。将其设置为空字符串可让某个服务跳过深度请求检测。
+
+如果某服务的 `USE_CROWDSEC` 为 `yes`，但两个 URL 都为空，则该服务不会做任何检查，并且实例会记录日志说明两个端点均未定义。
+
+!!! warning "每个实例只有一个决策缓存"
+    缓存的决策存放在整个实例共用的单一共享内存区域中，按其来源的 Local API 建立索引。指向同一个 `CROWDSEC_API` 的服务会复用彼此缓存的决策，这也是查询能保持低成本的原因。指向不同 Local API 的服务永远不会看到彼此的决策。该内存区域的大小是按实例设置的，因此拥有多个不同 Local API 且决策列表较大的集群会共用同一份预算。
+
+!!! info "每个 Local API 各自的 bouncer 密钥"
+    `CROWDSEC_API_KEY` 会像其他任何设置一样按服务解析。当各服务指向不同的 Local API 时，请为每个服务提供在其对应 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过身份验证而被拒绝。
+
 ### 机器人检测（CrowdSec 1.8+）
 
 CrowdSec 1.8 为 AppSec 组件加入了机器人检测。AppSec 组件不再直接封禁可疑客户端，而是可以返回一个**质询**：一个自包含的页面，对浏览器进行指纹识别并要求其完成工作量证明，随后由 CrowdSec 端对结果评分。BunkerWeb 会原样提供该页面——状态码、响应头、Cookie 均与 CrowdSec 生成的完全一致，且仍位于原始 URI 上——并且绝不会把该请求转发给您的应用。未通过的客户端仍由 BunkerWeb 自己的封禁页面拒绝，因此封禁体验没有任何变化。
@@ -454,6 +469,38 @@ CrowdSec 的裁决可以由你自己的**安全工作流**来回应，而不是�
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "按服务配置"
+
+    每个公开服务都启用 AppSec，只有部分服务启用决策查询，还有一个服务完全不检查。无前缀的值是整个集群共用的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某服务自行要求，否则不进行决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之外额外启用 Local API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 只保留 AppSec，沿用空的 CROWDSEC_API 基线
+
+    # intranet 完全不检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    某个服务也可以完全指向另一个 CrowdSec 主机，并使用它自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### 第&nbsp;3&nbsp;步 – 验证集成

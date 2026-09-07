@@ -110,7 +110,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     Le paramètre `METRICS_MEMORY_SIZE` doit être ajusté selon votre volume de trafic et le nombre d'instances. Les valeurs brutes en octets et les suffixes `k`/`m` sont pris en charge. Pour les sites à fort trafic, envisagez d'augmenter cette valeur afin de garantir la capture de toutes les métriques sans perte de données.
 
 !!! info "Intégration Redis"
-    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb.
+    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb. Sous pression `maxmemory` de Redis, les nouveaux rapports sont mis en mémoire tampon par worker et synchronisés dès que de la mémoire se libère, de sorte que les rapports de requêtes bloquées ne sont pas perdus tant que Redis est plein.
 
 !!! warning "Considérations de performance"
     Définir des valeurs très élevées pour `METRICS_MAX_BLOCKED_REQUESTS` ou `METRICS_MAX_BLOCKED_REQUESTS_REDIS` peut augmenter l'utilisation de la mémoire. Surveillez les ressources système et ajustez ces valeurs selon vos besoins réels et les ressources disponibles.

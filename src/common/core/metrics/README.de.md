@@ -110,7 +110,7 @@ Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zu
     Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Rohwerte in Byte sowie die Suffixe `k`/`m` werden unterstützt. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
+    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg. Unter Redis-`maxmemory`-Druck werden neue Berichte pro Worker gepuffert und synchronisiert, sobald Speicher frei wird, sodass Berichte über blockierte Anfragen nicht verloren gehen, während Redis voll ist.
 
 !!! warning "Leistungsüberlegungen"
     Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.

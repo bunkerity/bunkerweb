@@ -328,6 +328,21 @@ Appliquez les variables d’environnement suivantes (ou leurs équivalents via l
     - Le **mode Live** interroge l'API CrowdSec pour chaque requête entrante, offrant une protection en temps réel au prix d'une latence plus élevée.
     - Le **mode Stream** télécharge périodiquement toutes les décisions de l'API CrowdSec et les met en cache localement, réduisant la latence avec un léger retard dans l'application des nouvelles décisions.
 
+#### Points de terminaison par service
+
+Comme les points de terminaison sont `multisite`, des services sur la même instance peuvent utiliser des composants CrowdSec différents, ou seulement certains d'entre eux. Les deux fonctionnalités sont indépendantes :
+
+- Les **recherches de décisions** sont actives quand `CROWDSEC_API` est défini. Mettez-le à une chaîne vide pour qu'un service ignore entièrement la Local API.
+- L'**inspection AppSec** est active quand `CROWDSEC_APPSEC_URL` est défini. Mettez-le à une chaîne vide pour qu'un service ignore l'inspection approfondie des requêtes.
+
+Un service avec `USE_CROWDSEC` à `yes` et les deux URL vides ne vérifie rien, et l'instance journalise qu'aucun des deux points de terminaison n'est défini.
+
+!!! warning "Un seul cache de décisions par instance"
+    Les décisions mises en cache vivent dans une unique zone de mémoire partagée pour toute l'instance, indexée par la Local API dont elles proviennent. Les services pointant vers la même `CROWDSEC_API` réutilisent les décisions mises en cache les uns des autres, ce qui garde la recherche peu coûteuse. Les services pointant vers des Local API différentes ne voient jamais les décisions les uns des autres. Le dimensionnement de cette zone se fait à l'échelle de l'instance, donc une flotte avec de nombreuses Local API distinctes et de grandes listes de décisions partage un seul budget.
+
+!!! info "Une clé de bouncer par Local API"
+    `CROWDSEC_API_KEY` est résolue par service comme tout autre paramètre. Quand des services ciblent des Local API différentes, donnez à chacun la clé enregistrée avec `cscli bouncers add` sur son propre hôte CrowdSec, sinon les recherches sont rejetées comme non authentifiées.
+
 ### Détection de bots (CrowdSec 1.8+)
 
 CrowdSec 1.8 ajoute la détection de bots au composant AppSec. Plutôt que de bannir directement un client suspect, le composant AppSec peut répondre par un **défi** : une page autonome qui prend l’empreinte du navigateur et lui fait résoudre une preuve de travail, dont le résultat est ensuite noté côté CrowdSec. BunkerWeb sert cette page exactement telle que CrowdSec l’a produite — même statut, mêmes en-têtes, même cookie, sur l’URI d’origine — et ne transmet jamais la requête à votre application. Un client qui échoue reste refusé par la page de bannissement propre à BunkerWeb : l’expérience de blocage ne change donc pas.
@@ -454,6 +469,38 @@ La condition lit deux faits : la **source** du verdict (`appsec` ou `lapi`) et l
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Configuration par service"
+
+    AppSec sur chaque service public, recherches de décisions sur un sous-ensemble seulement, et un service entièrement exclu. Les valeurs sans préfixe forment la base commune à toute la flotte, et chaque service ne surcharge que ce qui diffère :
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Base pour chaque service
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Pas de recherche de décision sauf si un service la demande
+    CROWDSEC_API_KEY: ""
+
+    # app1 ajoute la recherche de décision via la Local API en plus d'AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 ne garde qu'AppSec, en héritant de la base CROWDSEC_API vide
+
+    # intranet n'est pas vérifié du tout
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un service peut aussi pointer vers un hôte CrowdSec complètement différent, avec sa propre clé de bouncer :
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Étape&nbsp;3 – Valider l’intégration
