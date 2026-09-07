@@ -5401,6 +5401,7 @@ STREAM 支持 :warning:
     | `REVERSE_PROXY_INCLUDES`          |        | multisite | 是   | **附加配置：** 在 location 块中包含额外的配置。                                                                                                       |
     | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`  | multisite | 是   | **传递请求体：** 启用或禁用传递请求体。                                                                                                               |
     | `REVERSE_PROXY_MODSECURITY`       | `yes`  | multisite | 是   | **ModSecurity（按 location）：** 设置为 `no` 可在此 location 中生成 `modsecurity off;`，从而在大文件上传端点上绕过 WAF 以避免 OOM（请参阅下方说明）。 |
+    | `REVERSE_PROXY_MAX_CLIENT_SIZE`   |        | multisite | 是   | **最大请求体大小（按 location）：** 此 location 的最大请求体大小（`0` 表示不限制）。为空时使用服务的 `MAX_CLIENT_SIZE`。                           |
 
     !!! warning "安全注意事项"
         包含自定义配置片段时请小心，因为如果配置不当，它们可能会覆盖 BunkerWeb 的安全设置或引入漏洞。
@@ -5409,6 +5410,9 @@ STREAM 支持 :warning:
         ModSecurity 会将完整请求体缓冲到内存中，并且无法为数 GB 的上传设置上限，这可能导致 worker OOM。如果**（并且仅当）**某个反向代理 URL *专门* 用于文件上传（例如专用的 `/upload` 端点），请在该 URL 上设置 `REVERSE_PROXY_MODSECURITY_N: "no"`。不要在混合用途的 URL 上禁用它：否则该 location 提供的所有内容都会失去 WAF 覆盖。
 
         为了在绕过 ModSecurity 后仍保护上传内容，请将其与文件扫描插件配合使用，例如 [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) 或 [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal)，它们检查上传文件本身，而不是原始请求体。
+
+    !!! tip "按 URL 的请求体大小"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` 仅限制单个 URL 的请求体，因此专用的上传端点可以接收大文件，而服务的其余部分仍保持更严格的 `MAX_CLIENT_SIZE`。它还会设置该 location 的 ModSecurity 请求体限制，并覆盖服务级取值以及显式设置的 `MODSECURITY_SEC_REQUEST_BODY_LIMIT`，因此上传不会被 WAF 拒绝，而其他每个 URL 都保留自己的限制。有两个限制不受影响：JSON、XML 和表单编码的请求体仍受 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 限制（默认 `131072`，超出返回 `400`），而 `0` 会关闭该 location 的 ModSecurity 限制，此时它会缓冲任意大小的请求体。ModSecurity 会在请求被转发前读取完整的请求体，因此请将该值设置为端点实际需要的大小。
 
 === "缓存配置"
 

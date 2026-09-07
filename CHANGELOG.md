@@ -3,6 +3,7 @@
 ## v1.6.15~rc2 - 2026/09/??
 
 - [FEATURE] `antibot`, `blacklist`, `whitelist`, `greylist`, `dnsbl`, `country`: match on a request header, name plus an optional PCRE regex on the value, as an ignore or list criterion. The value is a shared secret: it is stored as a password setting, never logged, and never cached.
+- [FEATURE] `reverseproxy`: `REVERSE_PROXY_MAX_CLIENT_SIZE` sets the body size, and the ModSecurity body limit, per URL.
 - [BUGFIX] `healthcheck`: `/healthz` answers `loading` while the instance is loading or reloading instead of always `ok`, and the container healthcheck matches the status exactly.
 - [SECURITY] `mtls`: no unverified clients before the CA bundle arrives; an invalid CA or CRL replacement keeps the last good material, a removal takes effect on reload.
 - [SECURITY] `crowdsec`: SHA-256 cache namespaces, `/crowdsec/ping` asks the Local API directly, per-service captcha settings that fail closed on provider errors.

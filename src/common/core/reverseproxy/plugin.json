@@ -300,6 +300,16 @@
       "type": "check",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Maximum body size for this reverse proxy location (0 for infinite). When empty, the service MAX_CLIENT_SIZE applies. A value also sets the ModSecurity request body limit for this location, overriding the service-wide one; it does not change MODSECURITY_REQ_BODY_NO_FILES_LIMIT.",
+      "id": "reverse-proxy-max-client-size",
+      "label": "Reverse proxy maximum body size",
+      "regex": "^$|^[0-9]+[kKmMgG]?$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
     "USE_PROXY_CACHE": {
       "context": "multisite",
       "default": "no",
