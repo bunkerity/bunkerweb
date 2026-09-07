@@ -353,12 +353,16 @@ class TestTheListingIsMultisiteOnly:
 
     def test_a_database_that_cannot_answer_keeps_the_row(self, db):
         """Fails OPEN. The only thing this gate does is hide the row, and hiding it takes the
-        operator's Default server page away -- so a hiccup must not."""
+        operator's Default server page away -- so a hiccup must not. RES-1 item 6c: the failure
+        is no longer swallowed silently, it is logged."""
         db.is_multisite.side_effect = RuntimeError("boom")
+        ROUTER.LOGGER.reset_mock()
 
         rows = {row["id"] for row in ROUTER.list_services().content["services"]}
 
         assert rows == {SERVICE, DEFAULT_SERVER_ID}
+        ROUTER.LOGGER.warning.assert_called_once()
+        assert "boom" in ROUTER.LOGGER.warning.call_args.args[0]
 
     def test_an_operators_own_service_of_that_name_is_never_hidden(self, db):
         """It is a real service. Hiding it would take the operator's own site out of their API."""

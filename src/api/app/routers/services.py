@@ -208,9 +208,11 @@ def _is_multisite() -> bool:
     row, and hiding it takes the operator's Default server page away. Showing it for a moment on a
     single-site deployment is the cheaper of the two mistakes.
     """
-    with suppress(Exception):
+    try:
         return get_db().is_multisite()
-    return True
+    except Exception as exc:
+        LOGGER.warning(f"Could not read MULTISITE, defaulting to multisite: {exc}")
+        return True
 
 
 def _is_reserved(service: str) -> bool:
