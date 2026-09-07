@@ -98,9 +98,10 @@ jobs:
             exit 1
           fi
 
-          # GitHub otherwise silently creates missing environments without protection.
+          # GitHub otherwise silently creates missing environments without protection. Self-review
+          # is accepted as long as every required reviewer is one of the release owners.
           gh api "repos/${GITHUB_REPOSITORY}/environments/release" |
-            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and .prevent_self_review == true and (.reviewers | length) > 0)' >/dev/null
+            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and (.reviewers | length) > 0 and all(.reviewers[]; .type == "User" and (.reviewer.login | IN("TheophileDiot", "fl0ppy-d1sk"))))' >/dev/null
 
           case "$TAG" in
             *-rc*)   CHANNEL=rc     ; PRERELEASE=true  ; HIDDEN=true  ;;
@@ -500,7 +501,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/${GITHUB_REPOSITORY}/environments/release" |
-            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and .prevent_self_review == true and (.reviewers | length) > 0)' >/dev/null
+            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and (.reviewers | length) > 0 and all(.reviewers[]; .type == "User" and (.reviewer.login | IN("TheophileDiot", "fl0ppy-d1sk"))))' >/dev/null
       - name: Recheck signed tag target before publication
         env:
           GH_TOKEN: ${{ github.token }}

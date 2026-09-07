@@ -246,6 +246,11 @@ gh() {
             changelog.write_text("## v1.6.15~rc2\nRelease fixes.\n")
             source = "a" * 40
             signed = {"verification": {"verified": True, "reason": "valid"}, "object": {"type": "commit", "sha": source}}
+
+            def reviewer(login):
+                return {"type": "User", "reviewer": {"login": login}}
+
+            OWNERS = [reviewer("TheophileDiot"), reviewer("fl0ppy-d1sk")]
             env = environ | {
                 "TAG": "v1.6.15-rc2",
                 "GITHUB_SHA": source,
@@ -257,7 +262,7 @@ gh() {
                 "RELEASE_STATUS": "ok",
                 "RELEASES_JSON": "[[]]",
                 "PROTECTION_JSON": dumps(
-                    {"name": "release", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": True, "reviewers": [{"id": 1}]}]}
+                    {"name": "release", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": False, "reviewers": OWNERS}]}
                 ),
             }
 
@@ -281,9 +286,23 @@ gh() {
                 {"RELEASE_STATUS": "403"},
                 {"PROTECTION_JSON": dumps({"name": "release", "protection_rules": []})},
                 {"PROTECTION_JSON": dumps({"name": "release", "protection_rules": [{"type": "required_reviewers", "reviewers": []}]})},
+                # Self-review is fine, a reviewer who is not a release owner is not: a stranger next to an owner, a team, an opaque id.
                 {
                     "PROTECTION_JSON": dumps(
-                        {"name": "release", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": False, "reviewers": [{"id": 1}]}]}
+                        {"name": "release", "protection_rules": [{"type": "required_reviewers", "reviewers": OWNERS + [reviewer("someone-else")]}]}
+                    )
+                },
+                {
+                    "PROTECTION_JSON": dumps(
+                        {
+                            "name": "release",
+                            "protection_rules": [{"type": "required_reviewers", "reviewers": [{"type": "Team", "reviewer": {"slug": "maintainers"}}]}],
+                        }
+                    )
+                },
+                {
+                    "PROTECTION_JSON": dumps(
+                        {"name": "release", "protection_rules": [{"type": "required_reviewers", "prevent_self_review": True, "reviewers": [{"id": 1}]}]}
                     )
                 },
             ]
