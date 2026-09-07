@@ -400,6 +400,7 @@ TLS 信任也按实例存储：
   - `DELETE /instances`: 批量删除 API 管理的实例；非 API 条目会被跳过。
   - 健康/操作：`GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`。
   - `GET /instances/{hostname}/health` 转发实例报告的状态：`ok`、`loading` 或 `reloading`；`ping` 只表示是否可达。实例重启后会保持 `loading`，直到收到配置；其定时插件在此状态下不会运行。Scheduler 据此决定是否重新推送。两个路由都需要 `instances_read`。
+  - 对繁忙实例的 reload 会被重试而不是直接报告失败，因此 `POST /instances/{hostname}/reload`（以及面向整个集群的 `POST /instances/reload`）的最坏情况延迟约为 54 秒，而不是固定锁读取所暗示的约 35 秒——超时时间较短的调用方可能会看到某次 reload 被报告为失败，而它实际上只是较慢。
 - **Global settings**
   - `GET /global_settings`: 默认只返回非默认值；加 `full=true` 查看全部，加 `methods=true` 包含来源。
   - `PATCH /global_settings`: upsert API 拥有的全局设置；只读键被拒绝。由其他来源拥有的设置（`scheduler`，即环境变量，以及 `autoconf`、`manual` 或 `wizard`）不能转交给 API：整个负载会以 `409` 拒绝，并列出每个键及其所有者。重复发送外部所有者键当前已有的值不会产生冲突。
