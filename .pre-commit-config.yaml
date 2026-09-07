@@ -33,6 +33,13 @@ repos:
         types: [text]
         files: \.(js|ts|jsx|tsx|css|less|html|json|markdown|md|yaml|yml)$
 
+      - id: plugin-help-length
+        name: Plugin setting help length (max 512 chars)
+        description: A setting help over 512 chars fails Configurator.__validate_plugin and silently drops the whole plugin at the next start.
+        entry: misc/check_plugin_help_length.py
+        language: script
+        files: plugin\.json$
+
   - repo: https://github.com/JohnnyMorganz/StyLua
     rev: a6433cd8ed974a1dd769d41a46b5008858e58e94 # frozen: v2.5.2
     hooks:
