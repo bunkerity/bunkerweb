@@ -22,6 +22,7 @@ local setmetatable = setmetatable
 local INDEX_KEY        = "lua-resty-ipc:index"
 local FORCIBLE_KEY     = "lua-resty-ipc:forcible"
 local POLL_SLEEP_RATIO = 2
+local MAX_HOLE_SCAN    = 1000
 
 
 local function marshall(worker_pid, channel, data)
@@ -221,7 +222,43 @@ function _M:poll(timeout)
         self.idx = idx
 
         if elapsed >= timeout then
-            return nil, "timeout"
+            -- This index is never going to arrive. broadcast() consumes an index at
+            -- incr() before it stores anything, so a hole is left both by an event the
+            -- shm evicted and by a set() that returned "no memory", and neither can be
+            -- filled afterwards. Retrying the same index costs the whole timeout on
+            -- every later call while self.idx advances by one, which no busy writer is
+            -- ever caught up with. Step over the hole to the next event the shm still
+            -- holds, so a lost event costs one skip rather than a permanent stall, and
+            -- events after the hole are still delivered.
+            local probe  = idx + 1
+            local budget = MAX_HOLE_SCAN
+
+            while probe <= shm_idx and budget > 0 do
+                if self.dict:get(probe) ~= nil then
+                    break
+                end
+
+                probe  = probe + 1
+                budget = budget - 1
+            end
+
+            if probe > shm_idx then
+                -- Nothing left to deliver: resume at the head with no backlog.
+                self.idx = shm_idx
+
+            else
+                -- Resume just before the next event the shm still holds. When the scan
+                -- ran out of budget instead of finding one, this resumes where it
+                -- stopped, so a hole longer than MAX_HOLE_SCAN costs one more poll per
+                -- chunk rather than the backlog that sits behind it.
+                self.idx = probe - 1
+            end
+
+            log(INFO, "no event data at index '", idx, "', skipped ",
+                      self.idx - idx + 1, " lost event(s), resuming at index '",
+                      self.idx + 1, "'")
+
+            return true
         end
 
         if err then
