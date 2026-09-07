@@ -759,6 +759,31 @@ def execute_job(self, job_data: dict) -> dict:
     else:
         logger.warning(f"[{run_id}] Worker database is not initialized, skipping job run persistence")
 
+    # Pushing the cache does not apply a change a TEMPLATE reads. The instances reload the
+    # configuration the Scheduler rendered *before* this job ran, and that render does not mention
+    # the material the job just wrote -- an inlined list, a certificate the template probes with
+    # `is_file()`. Raising the plugin's config-changed flag is what makes the Scheduler render
+    # again, ship that render and reload; the debounced push below still runs, and the two are
+    # independent on purpose (the render is owed even when no instance is reachable to push to).
+    #
+    # Declared per job in `plugin.json` (`"regenerate": true`), so an external or PRO plugin gets
+    # the same behaviour. 1.6 hardcoded the two core jobs it knew about in the scheduler and
+    # silently gave every other one a cache push with no re-render.
+    if ret == 1 and job_data.get("regenerate"):
+        if db:
+            try:
+                err = db.checked_changes(["config"], plugins_changes=[plugin], value=True)
+                if err:
+                    logger.error(f"[{run_id}] Could not request a configuration re-render for plugin {plugin}: {err}")
+                else:
+                    logger.info(f"[{run_id}] Job {plugin}/{name} changed material a template reads; requested a configuration re-render")
+            except Exception as exc:
+                logger.error(f"[{run_id}] Could not request a configuration re-render for plugin {plugin}: {exc}")
+        else:
+            # Same failure the run-persistence branch above reports, but worth its own line: the
+            # cache push will still happen and look like a success, while the render stays stale.
+            logger.error(f"[{run_id}] Worker database is not initialized; the configuration re-render owed by {plugin}/{name} was not requested")
+
     # `or _reload_is_owed(...)`: the push ships the whole /var/cache/bunkerweb tree, so any run
     # with a reachable instance can settle what an earlier one could not deliver -- it does not have
     # to be a run that changed something itself.

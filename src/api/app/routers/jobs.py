@@ -62,6 +62,7 @@ def dispatch_jobs(payload: DispatchJobsRequest) -> JSONResponse:
             "every": job.every,
             "reload": job.reload,
             "async": job.run_async,
+            "regenerate": job.regenerate,
             "run_id": run_id,
             "dispatch_time": datetime.now(timezone.utc).isoformat(),
         }

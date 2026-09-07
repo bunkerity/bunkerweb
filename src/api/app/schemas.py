@@ -809,6 +809,9 @@ class DispatchJobItem(BaseModel):
     every: str = Field(..., pattern="^(once|minute|hour|day|week)$")
     reload: bool = False
     run_async: bool = Field(False, alias="async")
+    # Whether a change from this job requires the NGINX configuration to be rendered again, not
+    # just pushed. Declared in the plugin's own plugin.json; see src/common/core/AGENTS.md.
+    regenerate: bool = False
 
     model_config = ConfigDict(populate_by_name=True)
 

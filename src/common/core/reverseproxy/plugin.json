@@ -491,7 +491,8 @@
       "file": "trusted-cert.py",
       "every": "day",
       "reload": true,
-      "async": true
+      "async": true,
+      "regenerate": true
     }
   ]
 }

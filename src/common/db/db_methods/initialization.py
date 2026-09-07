@@ -421,6 +421,10 @@ class DatabaseInitTablesMixin(DatabaseMixinBase):
                     job["file_name"] = job.pop("file")
                     job["reload"] = job.get("reload", False)
                     job["run_async"] = job.pop("async", False)
+                    # Manifest-only: `regenerate` is read from plugin.json by the Scheduler and the
+                    # Worker, never persisted, so it must not reach the Jobs model (no column, and an
+                    # unpopped key would also make every job diff as permanently changed below).
+                    job.pop("regenerate", None)
                     desired_jobs[(base_plugin["id"], job["name"])] = job
 
                 # COMMANDS

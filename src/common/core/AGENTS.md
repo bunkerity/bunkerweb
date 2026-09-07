@@ -34,7 +34,7 @@ Top level: `id`, `name`, `description`, `version`, `stream`, `settings`, optiona
 
 Each setting carries `context` (`global` or `multisite`), `default`, `help`, `id` (kebab-case), `label`, `regex`, `type` (`password|text|number|file|check|select|multiselect|multivalue`), and optionally `multiple` (the group name enabling `SETTING_1`, `SETTING_2`, … with the regex applied per value), `separator` and `select`.
 
-A job entry carries `name`, `file`, `every` (`once|minute|hour|day|week`), `reload` and `async`.
+A job entry carries `name`, `file`, `every` (`once|minute|hour|day|week`), `reload`, `async` and `regenerate`. Unknown keys are refused by `Configurator`, so a typo fails loudly instead of being ignored.
 
 ## Jobs
 
@@ -42,6 +42,8 @@ Jobs are dispatched by the Scheduler and executed by the Worker (`src/worker/`).
 
 - **The exit code is a protocol.** `sys.exit(1)` means "something changed" — it ships the job cache to the instances and requests a debounced reload. `sys.exit(0)` means success with no change. Anything else is a failure. A plain `return 1` from the module does nothing: return values are discarded and reported as `0`.
 - **Job names are globally unique across every plugin.** There is no namespacing. A name collision silently changes queue routing (heavy vs default) and shares the cache path.
+- **`regenerate` says the output is read at render time, not just shipped.** Exit code `1` pushes the cache and reloads, but the NGINX configuration the instances reload is the one the Scheduler rendered earlier. If a template _reads_ what the job wrote — inlines a downloaded list, probes a cached certificate with `is_file()` — that render is stale and the push changes nothing. Declaring `"regenerate": true` makes the Worker raise the plugin's config-changed flag on exit `1`, so the Scheduler renders again, ships the new configuration and reloads. The flag costs a full re-render plus one re-dispatch of that plugin's jobs, so set it only when a template actually reads the cache. The two core jobs that declare it are `realip/realip-download` and `reverseproxy/trusted-cert`. External and PRO plugins declare it the same way — there is no allowlist.
+- **A job needing a narrower condition than "exited 1" flags by hand instead.** The flag fires on every exit `1`. `modsecurity/download-crs-plugins` only wants a render when the CRS _plugin set_ changed, not on every download, so it calls `db.checked_changes(["config"], plugins_changes=[<plugin_id>], value=True)` itself under its own condition and does **not** declare the flag. Doing both is a double re-render.
 
 Write to the cache atomically (`Job._write_atomic` in `src/common/utils/jobs.py`) and commit the "already done" marker **last** — that is what makes a job safe to re-run, and delivery is at-least-once. Cache lives at `/var/cache/bunkerweb/<plugin_id>/`.
 

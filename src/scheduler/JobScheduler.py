@@ -140,8 +140,13 @@ class JobScheduler:
             every_valid = job["every"] in ("once", "minute", "hour", "day", "week")
             reload_valid = isinstance(job.get("reload", False), bool)
             async_valid = isinstance(job.get("async", False), bool)
+            # `regenerate` is what tells the worker that this job's output is read at RENDER time
+            # (a template that inlines a downloaded list, or probes a cached certificate) and not
+            # merely shipped. Optional and default False: a job that only writes material the
+            # instances read directly needs a cache push, not a re-render.
+            regenerate_valid = isinstance(job.get("regenerate", False), bool)
 
-            if not all((name_valid, file_valid, every_valid, reload_valid, async_valid)):
+            if not all((name_valid, file_valid, every_valid, reload_valid, async_valid, regenerate_valid)):
                 self.__logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
                 continue
 
@@ -173,6 +178,7 @@ class JobScheduler:
             "every": job["every"],
             "reload": job.get("reload", False),
             "async": job.get("async", False),
+            "regenerate": job.get("regenerate", False),
         }
 
     def dispatch_job(self, job: dict, plugin_id: str) -> Tuple[bool, list]:

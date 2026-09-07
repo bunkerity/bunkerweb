@@ -516,6 +516,9 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
                 job["file_name"] = job.pop("file")
                 job["reload"] = job.get("reload", False)
                 job["run_async"] = job.pop("async", False)
+                # Manifest-only, same as in initialization.py: the Scheduler and the Worker read
+                # `regenerate` from plugin.json; the Jobs model has no column for it.
+                job.pop("regenerate", None)
                 local_to_put.append(Jobs(plugin_id=plugin["id"], **job))
             else:
                 updates = {}
@@ -1009,6 +1012,9 @@ class DatabasePluginsUpdateMixin(DatabaseMixinBase):
             job["file_name"] = job.pop("file")
             job["reload"] = job.get("reload", False)
             job["run_async"] = job.pop("async", False)
+            # Manifest-only, same as in initialization.py: the Scheduler and the Worker read
+            # `regenerate` from plugin.json; the Jobs model has no column for it.
+            job.pop("regenerate", None)
             local_to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
         plugin_path = self._uep_resolve_plugin_dir(plugin["id"], _type)

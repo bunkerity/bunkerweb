@@ -518,11 +518,32 @@ def render_time_readers(plugin_id: str, core_dir=CORE) -> list:
 
 
 def asks_for_regeneration(plugin_dir: Path) -> bool:
-    """True if some job of this plugin calls ``checked_changes`` naming its own id.
+    """True if some job of this plugin asks for a configuration re-render, either way it can.
 
-    Generous on purpose: the id is looked for anywhere in the call rather than only inside the
-    ``plugins_changes`` keyword, so a job that spells the argument differently still counts.
+    Two ways, both legitimate:
+
+    * **Declared** — a job in ``plugin.json`` carries ``"regenerate": true``. The Worker raises the
+      plugin's config-changed flag on exit 1 (``src/worker/tasks.py``), so the job's own code says
+      nothing about it. This is the only way available to an external or PRO plugin author, who has
+      no reason to know the DB API exists.
+    * **Hand-rolled** — a job calls ``checked_changes`` naming its own id. Kept for a job whose
+      condition is NARROWER than "exited 1": ``modsecurity/download-crs-plugins`` exits 1 on every
+      successful run and only wants a render when the CRS plugin set actually changed, which the
+      flag cannot express. Such a job must not also declare the flag — that would render twice, and
+      ``tests/unit/scheduler/test_job_regenerate_flag.py`` pins that it never does.
+
+    The source scan is generous on purpose: the id is looked for anywhere in the call rather than
+    only inside the ``plugins_changes`` keyword, so a job that spells the argument differently
+    still counts.
     """
+    manifest = plugin_dir / "plugin.json"
+    if manifest.is_file():
+        try:
+            if any(job.get("regenerate") for job in json.loads(manifest.read_text(encoding="utf-8")).get("jobs", [])):
+                return True
+        except (ValueError, UnicodeDecodeError):
+            return True  # unparseable is not provably missing the flag; never accuse on a guess
+
     jobs_dir = plugin_dir / "jobs"
     if not jobs_dir.is_dir():
         return False
@@ -634,7 +655,17 @@ class TestRenderTimeDetectorBites:
             kept = [line for line in lines if "checked_changes" not in line]
             removed += len(lines) - len(kept)
             source_file.write_text("".join(kept), encoding="utf-8")
-        assert removed == 1, f"expected exactly one checked_changes call in {plugin_id}'s jobs, found {removed}"
+
+        # The declared `regenerate` flag is the OTHER way a job asks (see `asks_for_regeneration`),
+        # and it lives in the manifest, not in the job source -- so strip it too, or this stops
+        # being a mutation of the fix for a plugin that uses that form and silently passes.
+        manifest = dst / "plugin.json"
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        for job in data.get("jobs", []):
+            removed += 1 if job.pop("regenerate", None) else 0
+        manifest.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+        assert removed == 1, f"expected exactly one re-render request in {plugin_id}, found {removed}"
         assert [p for p, _ in plugins_whose_material_never_gets_rendered(core)] == [plugin_id]
 
 

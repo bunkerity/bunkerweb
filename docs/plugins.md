@@ -388,6 +388,9 @@ Each job has the following fields :
 | `name`  |    yes    | string | Name of the job.                                                                                                                        |
 | `file`  |    yes    | string | Name of the file inside the jobs folder.                                                                                                |
 | `every` |    yes    | string | Job scheduling frequency : `minute`, `hour`, `day`, `week` or `once` (no frequency, only once before (re)generating the configuration). |
+| `reload` |    no    |  bool  | Whether a change from this job should trigger a reload of the BunkerWeb instances. Defaults to `false`.                                 |
+| `async`  |    no    |  bool  | Whether the job may run on the `heavy` worker queue instead of blocking the default one. Defaults to `false`.                            |
+| `regenerate` |  no  |  bool  | Whether a change from this job requires the NGINX configuration to be **rendered again**, not just shipped. Defaults to `false`.        |
 
 ### CLI commands
 
@@ -586,6 +589,15 @@ end
 ### Jobs
 
 BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named **jobs** and listing them in the **plugin.json** metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.
+
+The exit code of a job is a protocol: `sys.exit(1)` means "something changed", which ships the job's cache directory (`/var/cache/bunkerweb/<plugin_id>/`) to the instances and asks them to reload. `sys.exit(0)` means the job succeeded and changed nothing; any other code is a failure. Returning a value instead of exiting does nothing — return values are discarded and recorded as `0`.
+
+Shipping the cache is enough as long as the instances read your files at **run time**. If one of your `confs/` templates *reads* what the job wrote — inlining a downloaded list, or probing a cached certificate with `is_file()` — then it is not enough: the configuration the instances reload is the one that was rendered before your job ran, and it does not mention the new material. Declare `"regenerate": true` on that job and BunkerWeb renders the configuration again, ships it and reloads. It costs a full render plus one extra dispatch of your plugin's jobs, so set it only when a template actually reads the cache, and make sure the job exits `0` when it has nothing new to write.
+
+The flag fires on **every** exit `1`. If your job wants a render on a narrower condition than that — it exits `1` to have new files shipped, but only some of those runs change what a template would emit — leave the flag off and ask for the render yourself, under your own condition: `JOB.db.checked_changes(["config"], plugins_changes=["<your plugin id>"], value=True)`. Do not do both; declaring the flag *and* calling it by hand renders twice. The shipped `modsecurity/download-crs-plugins` job is the worked example.
+
+!!! warning "Unknown keys are refused"
+    Job entries accept `name`, `file`, `every`, `reload`, `async` and `regenerate` and nothing else. A misspelled key (`"regenrate"`) makes the whole plugin fail validation and be ignored, with the offending key named in the logs — deliberately, so a typo cannot silently disable a flag.
 
 ### Plugin page
 

@@ -64,9 +64,10 @@ class TestBuildDispatchItem:
             "every": "hour",
             "reload": True,
             "async": False,
+            "regenerate": False,
         }
 
     def test_build_dispatch_item_defaults(self, js):
         job = {"name": "j", "file": "j.py", "path": "/p", "every": "once"}
         item = js._build_dispatch_item(job, "pl")
-        assert item["reload"] is False and item["async"] is False
+        assert item["reload"] is False and item["async"] is False and item["regenerate"] is False

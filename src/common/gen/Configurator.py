@@ -59,6 +59,10 @@ class Configurator:
         self.__mandatory_plugin_keys = frozenset(("id", "name", "description", "version", "stream", "settings"))
         self.__mandatory_setting_keys = frozenset(("context", "default", "help", "id", "label", "regex", "type"))
         self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
+        # Closed on purpose. A job key is only honoured if a reader knows it, so a typo like
+        # "regenrate" used to be accepted and silently ignored -- exactly the class of defect the
+        # `regenerate` flag exists to close. Adding a key here means adding a reader for it.
+        self.__allowed_job_keys = frozenset(("name", "file", "every", "reload", "async", "regenerate"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
         self.__valid_contexts = frozenset(("global", "multisite"))
         self.__valid_setting_types = frozenset(("password", "text", "number", "file", "check", "select", "multiselect", "multivalue", "size", "duration"))
@@ -625,6 +629,16 @@ class Configurator:
                 return (False, f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
             elif job.get("async", False) is not True and job.get("async", False) is not False:
                 return (False, f"Invalid async for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
+            elif job.get("regenerate", False) is not True and job.get("regenerate", False) is not False:
+                return (False, f"Invalid regenerate for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
+
+            unknown_keys = sorted(set(job.keys()) - self.__allowed_job_keys)
+            if unknown_keys:
+                return (
+                    False,
+                    f"Unknown key(s) {', '.join(unknown_keys)} for job {job['name']} in plugin {plugin['id']} "
+                    f"(Allowed: {', '.join(sorted(self.__allowed_job_keys))})",
+                )
 
         extensions = plugin.get("extensions")
         if extensions is not None:

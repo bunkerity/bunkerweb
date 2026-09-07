@@ -262,16 +262,12 @@ try:
             if not deleted:
                 LOGGER.warning(f"Couldn't delete url file {url_file} from cache : {err}")
 
-    # A new combined.list needs a RE-RENDER, not just a push. confs/*/real-ip.conf inlines the
+    # A new combined.list needs a RE-RENDER, not just a push -- confs/*/real-ip.conf inlines the
     # file with read_text() at render time, so the ranges only exist in nginx's configuration as
-    # literal `set_real_ip_from` lines baked in by the Templator. Exiting 1 buys this job a cache
-    # push and a reload (worker/tasks.py:426), and neither can apply its own output: reloading
-    # re-reads the *rendered* conf, which still carries the old ranges. Flagging the plugin makes
-    # the scheduler dispatch push-configs (main.py:1131 -> :944), which re-renders first.
-    if status == 1:
-        err = JOB.db.checked_changes(["config"], plugins_changes=["realip"], value=True)
-        if err:
-            LOGGER.error(f"Couldn't flag realip for regeneration, the new ranges will not be applied : {err}")
+    # literal `set_real_ip_from` lines baked in by the Templator. That is declared once, in
+    # plugin.json (`"regenerate": true` on this job), and the worker acts on it when this job
+    # exits 1. The hand-rolled database call that used to sit here did exactly that and nothing
+    # more. Do not add it back: declaring the flag AND flagging by hand is a double re-render.
 except SystemExit as e:
     status = e.code
 except BaseException as e:

@@ -227,13 +227,10 @@ try:
     # is_file() at render time (confs/server-http/reverse-proxy.conf:27 and :43, and the stream
     # twin at :15 and :32), so material that appears after the last render emits nothing at all:
     # the conf keeps `proxy_ssl_verify off;` and upstream verification silently never turns on.
-    # Exiting 1 buys this job a cache push and a reload (worker/tasks.py:426), and neither re-runs
-    # the gate -- reloading re-reads the *rendered* conf. Flagging the plugin makes the scheduler
-    # dispatch push-configs (main.py:1131 -> :944), which re-renders first.
-    if status == 1:
-        err = JOB.db.checked_changes(["config"], plugins_changes=["reverseproxy"], value=True)
-        if err:
-            LOGGER.error(f"Couldn't flag reverseproxy for regeneration, the upstream TLS material will not be applied : {err}")
+    # That is declared once, in plugin.json (`"regenerate": true` on this job), and the worker
+    # acts on it when this job exits 1. The hand-rolled database call that used to sit here did
+    # exactly that and nothing more. Do not add it back: declaring the flag AND flagging by hand
+    # is a double re-render.
 except SystemExit as e:
     status = e.code
 except BaseException as e:
