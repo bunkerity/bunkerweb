@@ -48,6 +48,10 @@ local REMEDIATION_API_KEY_HEADER = 'x-api-key'
 -- eda5fa2fb) EVERY deployment is prefixed, single-Local-API ones included: the prefix no
 -- longer depends on how many endpoints there are, which is exactly what stopped adding an
 -- endpoint from reshuffling the namespaces of all the others.
+-- Two prefixes exist since the port of dev c54c49e7e: decision and stream keys keep the
+-- Local API prefix bound to runtime.cache at init, while challenge state gets an explicit
+-- per-service prefix handed to Allow -- several services can share one Local API, and a
+-- captcha solved on one of them must not grant a pass on the next.
 local function namespaced_cache(dict, prefix)
   return {
     get = function(_, key) return dict:get(prefix .. key) end,
@@ -80,18 +84,17 @@ function csmod.init(configFile, userAgent, cachePrefix) -- BW local mod: cachePr
     ngx.log(ngx.ERR, "redirect location is set to '/' this will lead into infinite redirection")
   end
 
-  local captcha_ok = true
-  local err = captcha.New(runtime.conf["SITE_KEY"], runtime.conf["SECRET_KEY"], runtime.conf["CAPTCHA_TEMPLATE_PATH"], runtime.conf["CAPTCHA_PROVIDER"])
-  if err ~= nil then
-    -- ngx.log(ngx.ERR, "error loading captcha plugin: " .. err)
-    captcha_ok = false
-  end
-  local succ, err, forcible = runtime.cache:set("captcha_ok", captcha_ok)
-  if not succ then
-    ngx.log(ngx.ERR, "failed to add captcha state key in cache: "..err)
-  end
-  if forcible then
-    ngx.log(ngx.ERR, "Lua shared dict (crowdsec cache) is full, please increase dict size in config")
+  -- captcha.New returns an instance now (port of dev c54c49e7e), so the usable/unusable
+  -- answer is a field on this worker's runtime rather than a "captcha_ok" key in the shared
+  -- dict. That key was the bug the arm below used to work around: an eviction, or a worker
+  -- that started before init wrote it, read back nil instead of false.
+  local captcha_instance, captcha_err = captcha.New(runtime.conf["SITE_KEY"], runtime.conf["SECRET_KEY"], runtime.conf["CAPTCHA_TEMPLATE_PATH"], runtime.conf["CAPTCHA_PROVIDER"])
+  runtime.captcha = captcha_instance
+  -- BunkerWeb exposes no SITE_KEY/SECRET_KEY, so this is the normal state here and must not be
+  -- an error: a `captcha` remediation is delegated to BunkerWeb's antibot plugin instead (see
+  -- delegate_captcha in Allow). Only an operator who did configure a provider gets told.
+  if not captcha_instance and runtime.conf["CAPTCHA_PROVIDER"] ~= nil and runtime.conf["CAPTCHA_PROVIDER"] ~= "" then
+    ngx.log(ngx.ERR, "captcha configuration rejected, captcha remediations fall back to ban: " .. tostring(captcha_err))
   end
 
 
@@ -162,7 +165,8 @@ end
 
 
 function csmod.validateCaptcha(captcha_res, remote_ip)
-  return captcha.Validate(captcha_res, remote_ip)
+  if not runtime.captcha then return false, "captcha is not configured" end
+  return runtime.captcha.Validate(captcha_res, remote_ip)
 end
 
 
@@ -184,6 +188,26 @@ local function get_remediation_http_request(link)
   })
   httpc:close()
   return res, err
+end
+
+-- A direct authenticated read: no decision cache, stream timer, remediation or AppSec
+-- application request can turn an unavailable Local API into a healthy result. Replaces the
+-- Allow("127.0.0.1") the /crowdsec/ping handler used to make -- Allow now needs a per-service
+-- challenge namespace the health check has no business inventing, and a cached decision for
+-- 127.0.0.1 answered it without touching the Local API at all.
+function csmod.Health()
+  if not runtime.conf then return false, "CrowdSec configuration is not loaded" end
+  if runtime.conf["API_URL"] == "" then
+    return runtime.conf["APPSEC_ENABLED"], "No Local API configured; AppSec health is not checked", false
+  end
+  local res, err = get_remediation_http_request(runtime.conf["API_URL"] .. "/v1/decisions?ip=127.0.0.1")
+  if err or not res then return false, "Local API request failed" end
+  if res.status ~= 200 then return false, "Local API returned HTTP " .. tostring(res.status) end
+  local ok, decisions = pcall(cjson.decode, res.body)
+  if not ok or (decisions ~= cjson.null and (type(decisions) ~= "table" or not res.body:match("^%s*%["))) then
+    return false, "Invalid Local API response"
+  end
+  return true, nil, true
 end
 
 local function parse_duration(duration)
@@ -344,9 +368,9 @@ local function stream_query(premature)
   -- process deleted decisions
   if type(decisions.deleted) == "table" then
       for i, decision in pairs(decisions.deleted) do
-        if decision.type == "captcha" then
-          runtime.cache:delete("captcha_" .. decision.value)
-        end
+        -- Challenge state lives under a per-service prefix this timer does not know (it runs
+        -- for one Local API, which several services can share), so it is cleared on the IP's
+        -- next allowed request instead -- see the `ok == true` arm in Allow.
         local key = item_to_string(decision.value, decision.scope)
         runtime.cache:delete(key)
         ngx.log(ngx.DEBUG, "Deleting '" .. key .. "'")
@@ -476,11 +500,11 @@ local function get_body()
 end
 
 function csmod.GetCaptchaTemplate()
-  return captcha.GetTemplate()
+  return runtime.captcha and runtime.captcha.GetTemplate()
 end
 
 function csmod.GetCaptchaBackendKey()
-  return captcha.GetCaptchaBackendKey()
+  return runtime.captcha and runtime.captcha.GetCaptchaBackendKey()
 end
 
 function csmod.SetupStream()
@@ -667,7 +691,7 @@ end
 --   `antibot_provider` is echoed back on -- and only on -- a delegated `captcha`. It is the one
 --   unambiguous signal of that path: every other return leaves it nil, so the caller never has to
 --   infer "delegated" from a combination of the other four.
-function csmod.Allow(ip, no_render, antibot_provider)
+function csmod.Allow(ip, no_render, antibot_provider, challengePrefix)
   if runtime.conf["ENABLED"] == "false" then
     return true, "disabled"
   end
@@ -675,6 +699,15 @@ function csmod.Allow(ip, no_render, antibot_provider)
   if runtime.conf["ENABLE_INTERNAL"] == "false" and ngx.req.is_internal() then
     return true, "internal"
   end
+
+  -- crowdsec:init() fills challenge_prefixes for exactly the scopes it fills bouncers for, and
+  -- access() only reaches here with a bouncer, so this is an assertion rather than a live path.
+  -- Refusing beats guessing: an empty prefix would put every service's challenge state back in
+  -- one namespace, which is the bug this argument exists to close.
+  if not challengePrefix or challengePrefix == "" then
+    return false, "missing CrowdSec challenge namespace"
+  end
+  local challenge_cache = namespaced_cache(ngx.shared.crowdsec_cache, challengePrefix)
 
   local remediationSource = flag.BOUNCER_SOURCE
   local ret_code = nil
@@ -714,10 +747,10 @@ function csmod.Allow(ip, no_render, antibot_provider)
   -- solve -- which also made the :748 loop fix below inert for the AppSec source. Second half
   -- of upstream v1.0.18's captcha/AppSec loop fix (lib/crowdsec.lua).
   if ok == true then
-    local _, cached_flags = runtime.cache:get("captcha_" .. ip)
+    local _, cached_flags = challenge_cache:get("captcha_" .. ip)
     local cached_source = flag.GetFlags(cached_flags)
     if cached_source ~= flag.APPSEC_SOURCE then
-      runtime.cache:delete("captcha_" .. ip)
+      challenge_cache:delete("captcha_" .. ip)
     end
   end
 
@@ -740,33 +773,36 @@ function csmod.Allow(ip, no_render, antibot_provider)
     end
   end
 
-  local captcha_ok = runtime.cache:get("captcha_ok")
+  -- Port of dev c54c49e7e: this worker's captcha instance, not a "captcha_ok" shared-dict key.
+  -- The key came back nil rather than false whenever it had been evicted or the worker started
+  -- before init wrote it, and nil ~= false silently skipped the fallback below.
+  local captcha_ok = runtime.captcha ~= nil
 
   -- BunkerWeb local modification: a `captcha` remediation is rendered by BunkerWeb's own antibot
   -- plugin, never by the vendored CrowdSec captcha template -- BunkerWeb exposes no SITE_KEY /
-  -- SECRET_KEY, so captcha.New() fails at init and `captcha_ok` is false on every request. Without
-  -- this arm the block below rewrites every `captcha` decision into FALLBACK_REMEDIATION (`ban` in
-  -- the shipped template) before anything downstream can see it, and the delegation could never
-  -- happen at all.
+  -- SECRET_KEY, so captcha.New() returns nil at init and `captcha_ok` is false on every request.
+  -- Without this arm the block below rewrites every `captcha` decision into FALLBACK_REMEDIATION
+  -- (`ban` in the shipped template) before anything downstream can see it, and the delegation
+  -- could never happen at all.
   local delegate_captcha = antibot_provider ~= nil and antibot_provider ~= "" and antibot_provider ~= "no"
 
   if runtime.fallback ~= "" then
-    -- if we can't use captcha, fallback
-    -- BunkerWeb local modification: `not captcha_ok` and not upstream's `captcha_ok == false`.
-    -- `captcha_ok` comes back nil, not false, whenever the key is absent from the shared dict (an
-    -- eviction, a worker that started before init wrote it), and nil ~= false: the fallback then
-    -- did not fire, the captcha block below was skipped because nil is falsy, no arm inside
-    -- `if not ok` matched, and the request fell out to `return true, "allow"` -- served, on a
-    -- decision that asked for a captcha. Reachable only through AppSec until now; widening
-    -- BOUNCING_ON_TYPE to `all` routes every LAPI captcha decision through here.
-    if remediation == "captcha" and not captcha_ok and not delegate_captcha then
-      remediation = runtime.fallback
-    end
-
     -- if remediation is not supported, fallback
     if remediation ~= "captcha" and remediation ~= "ban" and remediation ~= "challenge" then
       remediation = runtime.fallback
     end
+  end
+
+  -- An unusable captcha must DENY, and outside the `runtime.fallback ~= ""` block on purpose
+  -- (port of dev c54c49e7e): the rewrite used to target runtime.fallback from inside it, so
+  -- FALLBACK_REMEDIATION=captcha left remediation == "captcha" with nothing able to render it --
+  -- no arm under `if not ok` matched and the request fell out to `return true, "allow"`, served
+  -- on a decision that asked for a captcha. `not delegate_captcha` is the BunkerWeb conjunct
+  -- kept from the previous shape: when CROWDSEC_CAPTCHA_PROVIDER names a provider, the antibot
+  -- plugin renders the challenge later in this same access phase, so "unusable here" is not
+  -- "unusable at all".
+  if remediation == "captcha" and not captcha_ok and not delegate_captcha then
+    remediation = "ban"
   end
 
   -- BunkerWeb local modification: what was decided, in the shape crowdsec:access() records as
@@ -801,7 +837,7 @@ function csmod.Allow(ip, no_render, antibot_provider)
 
   if captcha_ok then -- if captcha can be use (configuration is valid)
     -- we check if the IP need to validate its captcha before checking it against crowdsec local API
-    local previous_uri, flags = runtime.cache:get("captcha_"..ip)
+    local previous_uri, flags = challenge_cache:get("captcha_"..ip)
     local source, state_id, err = flag.GetFlags(flags)
     local body = get_body()
 
@@ -820,9 +856,9 @@ function csmod.Allow(ip, no_render, antibot_provider)
                 -- we will not propose a captcha until the 'CAPTCHA_EXPIRATION'.
                 -- But for the Application security component, we serve the captcha each time the user trigger it.
                 if source == flag.APPSEC_SOURCE then
-                  runtime.cache:delete("captcha_"..ip)
+                  challenge_cache:delete("captcha_"..ip)
                 else
-                  local succ, err, forcible = runtime.cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
+                  local succ, err, forcible = challenge_cache:set("captcha_"..ip, previous_uri, runtime.conf["CAPTCHA_EXPIRATION"], bit.bor(flag.VALIDATED_STATE, source) )
                   if not succ then
                     ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
                   end
@@ -885,7 +921,7 @@ function csmod.Allow(ip, no_render, antibot_provider)
       end
       -- if the remediation is a captcha and captcha is well configured
       if remediation == "captcha" and captcha_ok and ngx.var.uri ~= "/favicon.ico" then
-          local previous_uri, flags = runtime.cache:get("captcha_"..ip)
+          local previous_uri, flags = challenge_cache:get("captcha_"..ip)
           local source, state_id, err = flag.GetFlags(flags)
           -- we check if the IP is already in cache for captcha and not yet validated
           -- A captcha solved for a LAPI decision grants no free pass on the AppSec (and the
@@ -906,7 +942,7 @@ function csmod.Allow(ip, no_render, antibot_provider)
                   end
                 end
               end
-              local succ, err, forcible = runtime.cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
+              local succ, err, forcible = challenge_cache:set("captcha_"..ip, uri , 60, bit.bor(flag.VERIFY_STATE, remediationSource))
               if not succ then
                 ngx.log(ngx.ERR, "failed to add key about captcha for ip '" .. ip .. "' in cache: "..err)
               end

@@ -93,6 +93,7 @@ ngx.header = setmetatable({}, {
 
 -- module-level constants and helpers of bouncer.lua the spliced bodies close over
 DENY = "deny"
+REMEDIATION_API_KEY_HEADER = "x-api-key"
 APPSEC_API_KEY_HEADER = "x-crowdsec-appsec-api-key"
 APPSEC_IP_HEADER = "x-crowdsec-appsec-ip"
 APPSEC_HOST_HEADER = "x-crowdsec-appsec-host"
@@ -102,7 +103,14 @@ APPSEC_USER_AGENT_HEADER = "x-crowdsec-appsec-user-agent"
 
 bw_utils = { get_variable = function() return "100" end }
 bit = { bor = function(a, b) return a + b end }
-cjson = { decode = function() if APPSEC_JSON == nil then error("not json") end return APPSEC_JSON end }
+cjson = { null = setmetatable({}, { __tostring = function() return "null" end }) }
+-- `null` is what cjson hands back for a bare `null` body, and csmod.Health() compares against it:
+-- an authenticated Local API with no decision for 127.0.0.1 answers `null`, not `[]`.
+cjson.decode = function(body)
+  if body == "null" then return cjson.null end
+  if APPSEC_JSON == nil then error("not json") end
+  return APPSEC_JSON
+end
 
 flag = {
   BOUNCER_SOURCE = 1, APPSEC_SOURCE = 2,
@@ -137,6 +145,19 @@ runtime = {
   },
 }
 
+-- The raw shared dict Allow() namespaces challenge state into. ALIASED to runtime.cache here, which
+-- is a harness convenience and NOT an equivalence: in production runtime.cache is itself a
+-- namespaced view (the Local API prefix bound at init) over ngx.shared.crowdsec_cache, and this
+-- stub is the raw dict with no prefix of its own. The consequence to know about: a future
+-- namespaced_cache(runtime.cache, ...) -- double-prefixing -- is invisible here. It stays isolated
+-- in production, so the aliasing costs coverage of a benign shape, not of a leak.
+ngx.shared = { crowdsec_cache = runtime.cache }
+
+-- captcha.New() returns an instance now, or nil when no provider is configured -- which is every
+-- BunkerWeb deployment. Allow reads its presence only (`runtime.captcha ~= nil`); the rendering
+-- path goes through the csmod.GetCaptcha* stubs above.
+runtime.captcha = CAPTCHA_USABLE and { Validate = function() return false, nil end } or nil
+
 challenge = assert(loadfile(CHALLENGE_PATH))()
 
 csmod = {}
@@ -147,9 +168,11 @@ csmod.validateCaptcha = function() return false, nil end
 http = { new = function()
   return {
     set_timeouts = function() end,
+    set_timeout = function() end,
     close = function() end,
-    request_uri = function(_, _, opts)
+    request_uri = function(_, uri, opts)
       APPSEC_SENT = opts
+      SENT_URI = uri
       return APPSEC_HTTP_RESPONSE, APPSEC_HTTP_ERR
     end,
   }
@@ -158,6 +181,12 @@ end }
 --@@GET_BODY@@
 
 --@@APPSEC_CHECK@@
+
+--@@NAMESPACED_CACHE@@
+
+--@@GET_REMEDIATION@@
+
+--@@HEALTH@@
 
 --@@ALLOW@@
 
@@ -171,8 +200,14 @@ function dump()
       print("HEADER=" .. h[1] .. "=" .. tostring(h[2]))
     end
   end
+  local keys = {}
+  for key in pairs(CACHE) do keys[#keys + 1] = key end
+  table.sort(keys)
+  for _, key in ipairs(keys) do print("CACHE_KEY=" .. key) end
   for _, line in ipairs(LOGS) do print("LOG=" .. line) end
   print("ALLOWIP_CALLS=" .. tostring(ALLOWIP_CALLS))
+  print("SENT_URI=" .. tostring(SENT_URI))
+  print("SENT_API_KEY=" .. tostring(APPSEC_SENT and APPSEC_SENT.headers and APPSEC_SENT.headers["x-api-key"]))
   print("SENT_METHOD=" .. tostring(APPSEC_SENT and APPSEC_SENT.method or nil))
   print("SENT_BODY=" .. tostring(APPSEC_SENT and APPSEC_SENT.body or nil))
 end
@@ -194,6 +229,9 @@ DEFAULT_CONF = {
     "APPSEC_SEND_TIMEOUT": 100,
     "APPSEC_PROCESS_TIMEOUT": 500,
     "API_KEY": "key",
+    # csmod.Health() reads it; empty is the "AppSec only, no Local API" fleet, and the default here
+    # so that no test makes a Local API request it did not ask for.
+    "API_URL": "",
     "SSL_VERIFY": False,
     "CAPTCHA_EXPIRATION": 3600,
 }
@@ -206,6 +244,13 @@ CHALLENGE_JSON = {
     "user_headers": {"Content-Type": ["text/html"], "Content-Security-Policy": ["default-src 'self'"]},
     "user_cookies": ["cs_challenge=abc123; Path=/; HttpOnly"],
 }
+
+
+# The per-service challenge namespace crowdsec:init() computes and access() hands to Allow. Any
+# non-empty string does: what the harness exercises is that Allow refuses without one and that
+# every challenge key it reads and writes goes through it.
+CHALLENGE_PREFIX = "captcha-v2|service-a|"
+OTHER_SERVICE_PREFIX = "captcha-v2|service-b|"
 
 
 # `None` is a meaningful value for `appsec_json` (it makes the cjson stub raise), so the
@@ -239,23 +284,35 @@ def run(
     appsec_json: dict | None = _DEFAULT,
     appsec_status: int = 403,
     appsec_err: str | None = None,
+    http_body: str = "{}",
     allowip_ok: bool = True,
     allowip_remediation: str | None = None,
     cache: dict | None = None,
     request_body: str | None = None,
     antibot_provider: str | None = None,
     allowip_decision: dict | None = None,
+    challenge_prefix: str = CHALLENGE_PREFIX,
+    cache_prefix: str | None = None,
+    captcha_usable: bool = False,
 ):
     src = source if source is not None else SOURCE
     full_conf = dict(DEFAULT_CONF)
     full_conf.update(conf or {})
-    http_response = "nil" if appsec_err is not None else "{ status = " + str(appsec_status) + ", body = [==[{}]==] }"
+    # `challenge_cache` prefixes every key it touches, so a fixture seeding `captcha_1.2.3.4` is
+    # only found when it is seeded under the same prefix. The translation happens here rather than
+    # in each fixture so the tests keep reading in cache keys; `cache_prefix` is what lets a test
+    # seed one service's namespace and then call Allow with another's.
+    seed_prefix = challenge_prefix if cache_prefix is None else cache_prefix
+    seeded = {(seed_prefix + k if k.startswith("captcha_") else k): v for k, v in (cache or {}).items()}
+    http_response = "nil" if appsec_err is not None else "{ status = " + str(appsec_status) + ", body = " + to_lua(http_body) + " }"
 
     preamble = "\n".join(
         [
             f"URI = {to_lua(uri)}",
             f"CONF = {to_lua(full_conf)}",
-            f"CACHE_CONTENT = {to_lua(cache or {})}",
+            f"CACHE_CONTENT = {to_lua(seeded)}",
+            f"CHALLENGE_PREFIX = {to_lua(challenge_prefix)}",
+            f"CAPTCHA_USABLE = {to_lua(captcha_usable)}",
             f"CHALLENGE_PATH = {to_lua(str(CHALLENGE_LUA))}",
             f"APPSEC_JSON = {to_lua(CHALLENGE_JSON if appsec_json is _DEFAULT else appsec_json)}",
             f"APPSEC_HTTP_RESPONSE = {http_response}",
@@ -267,6 +324,7 @@ def run(
             f"ANTIBOT_PROVIDER = {to_lua(antibot_provider)}",
             "ALLOWIP_CALLS = 0",
             "APPSEC_SENT = nil",
+            "SENT_URI = nil",
         ]
     )
     script = (
@@ -274,6 +332,9 @@ def run(
         + "\n"
         + HARNESS.replace("--@@GET_BODY@@", real_local("get_body", src))
         .replace("--@@APPSEC_CHECK@@", real_csmod("AppSecCheck", src))
+        .replace("--@@NAMESPACED_CACHE@@", real_local("namespaced_cache", src))
+        .replace("--@@GET_REMEDIATION@@", real_local("get_remediation_http_request", src))
+        .replace("--@@HEALTH@@", real_csmod("Health", src))
         .replace("--@@ALLOW@@", real_csmod("Allow", src))
         .replace("--@@BODY@@", body)
     )
@@ -283,19 +344,19 @@ def run(
 
 
 ALLOW = """
-local ok, msg, banned, served = csmod.Allow("1.2.3.4")
+local ok, msg, banned, served = csmod.Allow("1.2.3.4", nil, nil, CHALLENGE_PREFIX)
 print("RET=" .. tostring(ok) .. "|" .. tostring(msg) .. "|" .. tostring(banned) .. "|" .. tostring(served))
 dump()
 """
 
 NO_RENDER = """
-local ok, msg, banned, served = csmod.Allow("1.2.3.4", true)
+local ok, msg, banned, served = csmod.Allow("1.2.3.4", true, nil, CHALLENGE_PREFIX)
 print("RET=" .. tostring(ok) .. "|" .. tostring(msg) .. "|" .. tostring(banned) .. "|" .. tostring(served))
 dump()
 """
 
 DELEGATE = """
-local ok, msg, banned, served, verdict, provider = csmod.Allow("1.2.3.4", nil, ANTIBOT_PROVIDER)
+local ok, msg, banned, served, verdict, provider = csmod.Allow("1.2.3.4", nil, ANTIBOT_PROVIDER, CHALLENGE_PREFIX)
 print("RET=" .. tostring(ok) .. "|" .. tostring(msg) .. "|" .. tostring(banned) .. "|" .. tostring(served))
 print("PROVIDER=" .. tostring(provider))
 print("VERDICT=" .. tostring(verdict and verdict.source) .. "|" .. tostring(verdict and verdict.action) ..
@@ -304,11 +365,17 @@ dump()
 """
 
 DELEGATE_NO_RENDER = """
-local ok, msg, banned, served, verdict, provider = csmod.Allow("1.2.3.4", true, ANTIBOT_PROVIDER)
+local ok, msg, banned, served, verdict, provider = csmod.Allow("1.2.3.4", true, ANTIBOT_PROVIDER, CHALLENGE_PREFIX)
 print("RET=" .. tostring(ok) .. "|" .. tostring(msg) .. "|" .. tostring(banned) .. "|" .. tostring(served))
 print("PROVIDER=" .. tostring(provider))
 print("VERDICT=" .. tostring(verdict and verdict.source) .. "|" .. tostring(verdict and verdict.action) ..
       "|" .. tostring(verdict and verdict.scenario))
+dump()
+"""
+
+HEALTH = """
+local ok, err, checked_lapi = csmod.Health()
+print("HEALTH=" .. tostring(ok) .. "|" .. tostring(err) .. "|" .. tostring(checked_lapi))
 dump()
 """
 
@@ -485,10 +552,14 @@ class TestCaptchaBranchNoLongerReturnsNil:
     fail-open mine: crowdsec:access() concatenated the nil message and raised under the pcall."""
 
     CONF = {"FALLBACK_REMEDIATION": "captcha"}
-    CACHE = {"captcha_ok": True}
+    # A CrowdSec captcha that CAN render: `captcha.New()` returned an instance, so
+    # `runtime.captcha ~= nil`. It is the configuration BunkerWeb never produces, which is exactly
+    # why the branch below is dead here -- and why it still has to be correct when it is reached.
+    USABLE = {"captcha_usable": True}
+    CACHE: dict = {}
 
     def test_the_captcha_page_is_reported_as_served(self):
-        out = run(ALLOW, conf=self.CONF, cache=self.CACHE, appsec_json={"action": "captcha", "http_status": 403})
+        out = run(ALLOW, conf=self.CONF, cache=self.CACHE, appsec_json={"action": "captcha", "http_status": 403}, **self.USABLE)
         assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
         assert field(out, "BODY") == "<captcha/>"
 
@@ -496,7 +567,7 @@ class TestCaptchaBranchNoLongerReturnsNil:
         """The infinite loop upstream fixed in v1.0.18: the state now counts per source."""
         cache = dict(self.CACHE)
         cache["captcha_1.2.3.4"] = ["/previous", 10]  # VALIDATED_STATE(8) | APPSEC_SOURCE(2)
-        out = run(ALLOW, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403})
+        out = run(ALLOW, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403}, **self.USABLE)
         assert field(out, "RET") == "true|allow|nil|nil"
         assert field(out, "BODY") == ""
 
@@ -509,31 +580,31 @@ class TestCaptchaBranchNoLongerReturnsNil:
         assert mutated != SOURCE, "the loop guard no longer reads as expected -- update this mutation"
         cache = dict(self.CACHE)
         cache["captcha_1.2.3.4"] = ["/previous", 10]
-        out = run(ALLOW, source=mutated, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403})
+        out = run(ALLOW, source=mutated, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403}, **self.USABLE)
         assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
 
     def test_the_appsec_state_survives_an_ip_with_no_lapi_decision(self):
         """Second half of the same upstream fix: wiping the state every request re-served the
         captcha forever no matter what the :748 condition said."""
         mutated = SOURCE.replace(
-            '    local _, cached_flags = runtime.cache:get("captcha_" .. ip)\n'
+            '    local _, cached_flags = challenge_cache:get("captcha_" .. ip)\n'
             "    local cached_source = flag.GetFlags(cached_flags)\n"
             "    if cached_source ~= flag.APPSEC_SOURCE then\n"
-            '      runtime.cache:delete("captcha_" .. ip)\n'
+            '      challenge_cache:delete("captcha_" .. ip)\n'
             "    end\n",
-            '    runtime.cache:delete("captcha_" .. ip)\n',
+            '    challenge_cache:delete("captcha_" .. ip)\n',
         )
         assert mutated != SOURCE, "the cache-delete guard no longer reads as expected -- update this mutation"
         cache = dict(self.CACHE)
         cache["captcha_1.2.3.4"] = ["/previous", 10]
-        out = run(ALLOW, source=mutated, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403})
+        out = run(ALLOW, source=mutated, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403}, **self.USABLE)
         assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
 
     def test_a_validated_lapi_captcha_does_not_excuse_an_appsec_one(self):
         """The other half of the same condition: a validated state only counts for its source."""
         cache = dict(self.CACHE)
         cache["captcha_1.2.3.4"] = ["/previous", 9]  # VALIDATED_STATE(8) | BOUNCER_SOURCE(1)
-        out = run(ALLOW, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403})
+        out = run(ALLOW, conf=self.CONF, cache=cache, appsec_json={"action": "captcha", "http_status": 403}, **self.USABLE)
         assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
 
 
@@ -559,7 +630,7 @@ class TestNoRenderNeverWritesABody:
         out = run(
             NO_RENDER,
             conf={"FALLBACK_REMEDIATION": "captcha"},
-            cache={"captcha_ok": True},
+            captcha_usable=True,
             appsec_json={"action": "captcha", "http_status": 403},
         )
         assert field(out, "BODY") == ""
@@ -595,17 +666,17 @@ CAPTCHA_JSON = {"action": "captcha", "http_status": 403}
 # A LAPI `captcha` decision. `csmod.allowIp` hands the decision back as its fourth value, which is
 # what puts the scenario into the verdict -- the only thing that tells an operator reading Reports
 # WHY the visitor was challenged.
-# `captcha_ok` is what `captcha.New()` wrote at init. It is FALSE in every BunkerWeb deployment --
-# there is no SITE_KEY / SECRET_KEY setting to give it -- and that is the whole reason upstream's
-# captcha branch is dead here. Spelled out in every case below because leaving it unset would test
-# a configuration BunkerWeb cannot produce.
-NO_CROWDSEC_CAPTCHA = {"captcha_ok": False}
+# `captcha.New()` returns nil in every BunkerWeb deployment -- there is no SITE_KEY / SECRET_KEY
+# setting to give it -- so `runtime.captcha` is nil and CrowdSec's own captcha branch is dead here.
+# That is the whole reason the delegation exists. Spelled out in every case below because leaving
+# it implicit would hide the configuration under test.
+NO_CROWDSEC_CAPTCHA = {"captcha_usable": False}
 
 LAPI_CAPTCHA = {
     "allowip_ok": False,
     "allowip_remediation": "captcha",
     "allowip_decision": {"scenario": "crowdsecurity/http-probing", "origin": "CAPI", "duration": "4h"},
-    "cache": NO_CROWDSEC_CAPTCHA,
+    **NO_CROWDSEC_CAPTCHA,
 }
 
 
@@ -631,7 +702,7 @@ class TestCaptchaIsDelegatedToTheBunkerWebAntibot:
         assert field(out, "VERDICT") == "lapi|captcha|crowdsecurity/http-probing"
 
     def test_an_appsec_captcha_verdict_is_delegated_too(self):
-        out = run(DELEGATE, antibot_provider="javascript", appsec_json=CAPTCHA_JSON, cache=NO_CROWDSEC_CAPTCHA)
+        out = run(DELEGATE, antibot_provider="javascript", appsec_json=CAPTCHA_JSON, **NO_CROWDSEC_CAPTCHA)
         assert field(out, "RET") == "true|captcha delegated to the BunkerWeb antibot|false|false"
         assert field(out, "PROVIDER") == "javascript"
         assert field(out, "VERDICT") == "appsec|captcha|nil"
@@ -653,14 +724,14 @@ class TestDelegationIsScopedToCaptcha:
             antibot_provider="captcha",
             allowip_ok=False,
             allowip_remediation="ban",
-            cache=NO_CROWDSEC_CAPTCHA,
+            **NO_CROWDSEC_CAPTCHA,
         )
         assert field(out, "RET") == "true|denied|true|nil"
         assert field(out, "PROVIDER") == "nil"
 
     def test_an_appsec_challenge_is_still_served_by_crowdsec(self):
         """CrowdSec 1.8 bot detection ships its own page (lane CS-A); only `captcha` has no page."""
-        out = run(DELEGATE, antibot_provider="captcha", cache=NO_CROWDSEC_CAPTCHA)
+        out = run(DELEGATE, antibot_provider="captcha", **NO_CROWDSEC_CAPTCHA)
         assert field(out, "RET") == "true|challenged|false|true"
         assert field(out, "PROVIDER") == "nil"
         assert field(out, "BODY") == CHALLENGE_BODY
@@ -670,7 +741,7 @@ class TestDelegationIsScopedToCaptcha:
             DELEGATE,
             antibot_provider="captcha",
             conf={"APPSEC_ENABLED": False},
-            cache=NO_CROWDSEC_CAPTCHA,
+            **NO_CROWDSEC_CAPTCHA,
         )
         assert field(out, "RET") == "true|allow|nil|nil"
         assert field(out, "PROVIDER") == "nil"
@@ -683,20 +754,25 @@ class TestDelegationIsScopedToCaptcha:
         assert field(out, "RET") == "true|denied|true|nil"
         assert field(out, "PROVIDER") == "nil"
 
-    def test_the_opt_out_bans_even_when_the_captcha_state_key_is_missing(self):
-        """`captcha_ok` is nil, not false, when the key is absent from the shared dict -- an
-        eviction, or a worker that started before init wrote it. Upstream compared it with
-        `== false`, so the fallback did not fire, every arm below missed and the request fell out
-        to `return true, "allow"`: **served**, on a decision that asked for a captcha. Only AppSec
-        could reach that before; `BOUNCING_ON_TYPE=all` routes every LAPI captcha decision into it.
+    def test_the_opt_out_bans_when_no_captcha_can_be_rendered(self):
+        """This used to be `captcha_ok is nil, not false, when the key is absent from the shared
+        dict` -- an eviction, or a worker that started before init wrote it. That whole class went
+        away with the key: `captcha_ok` is now `runtime.captcha ~= nil`, read off this worker's own
+        instance, so there is no third state left to compare wrongly. What still has to hold is the
+        invariant the nil-vs-false bug broke: a captcha nothing can render, with the delegation
+        opted out, is a deny -- never `return true, "allow"` on a decision that asked for one.
         """
-        missing = dict(LAPI_CAPTCHA, cache={})
-        out = run(DELEGATE, antibot_provider="no", **missing)
+        out = run(DELEGATE, antibot_provider="no", **LAPI_CAPTCHA)
         assert field(out, "RET") == "true|denied|true|nil", "fail-open: the visitor was served"
 
-    def test_the_delegation_is_unaffected_by_the_missing_state_key(self):
-        out = run(DELEGATE, antibot_provider="captcha", **dict(LAPI_CAPTCHA, cache={}))
+    def test_the_delegation_wins_over_crowdsecs_own_captcha_page(self):
+        """Both are possible here: a configured CrowdSec captcha AND a named antibot provider. The
+        delegation arm is first inside `if not ok` on purpose -- BunkerWeb's antibot owns the
+        challenge, and rendering CrowdSec's template as well would serve two of them."""
+        out = run(DELEGATE, antibot_provider="captcha", **dict(LAPI_CAPTCHA, captcha_usable=True))
+        assert field(out, "RET") == "true|captcha delegated to the BunkerWeb antibot|false|false"
         assert field(out, "PROVIDER") == "captcha"
+        assert field(out, "BODY") == "", "CrowdSec's own captcha template must not be served too"
 
 
 class TestDetectModeNeverChallenges:
@@ -736,3 +812,179 @@ class TestTheTwoGuardsAreWhatMakeItWork:
         assert "delegated to the BunkerWeb antibot" not in mutated
         out = run(DELEGATE, source=mutated, antibot_provider="captcha", **LAPI_CAPTCHA)
         assert field(out, "RET") == "true|allow|nil|nil"
+
+
+class TestChallengeStateIsPerService:
+    """A captcha solved on one service must not grant a pass on the next.
+
+    Several services can share one Local API, and therefore one decision cache, but each gets its
+    own challenge namespace -- `cache_partition.challenge_prefix(scope, content, template)`, handed
+    to Allow() by crowdsec:access(). Before the port of dev c54c49e7e every service wrote the one
+    `captcha_<ip>` key, so solving a captcha on the least protected service in the fleet excused the
+    visitor everywhere.
+    """
+
+    # The shipped FALLBACK_REMEDIATION (`ban`) on purpose: under `captcha` an unrenderable captcha
+    # used to fall out to `return true, "allow"`, so "allow" would be the same string the pre-port
+    # fail-open produced and these assertions would not tell the two apart.
+    CONF: dict = {}
+    # VALIDATED_STATE(8) | APPSEC_SOURCE(2): a captcha this service already accepted.
+    VALIDATED = {"captcha_1.2.3.4": ["/previous", 10]}
+
+    def test_a_captcha_solved_on_this_service_is_not_re_served(self):
+        out = run(ALLOW, conf=self.CONF, cache=self.VALIDATED, captcha_usable=True, appsec_json=CAPTCHA_JSON)
+        assert field(out, "RET") == "true|allow|nil|nil"
+
+    def test_the_same_captcha_solved_on_another_service_is(self):
+        """Same IP, same state, seeded under the neighbouring service's namespace."""
+        out = run(
+            ALLOW,
+            conf=self.CONF,
+            cache=self.VALIDATED,
+            cache_prefix=OTHER_SERVICE_PREFIX,
+            captcha_usable=True,
+            appsec_json=CAPTCHA_JSON,
+        )
+        assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
+
+    def test_the_namespace_is_what_separates_them(self):
+        """Mutation: drop the prefix from namespaced_cache and every service is back on the one
+        `captcha_<ip>` key -- the state seeded raw, the way the pre-port code wrote it, excuses a
+        service that never issued it."""
+        mutated = SOURCE.replace("return dict:get(prefix .. key)", "return dict:get(key)")
+        assert mutated != SOURCE, "namespaced_cache no longer reads as expected -- update this mutation"
+        out = run(
+            ALLOW,
+            source=mutated,
+            conf=self.CONF,
+            cache=self.VALIDATED,
+            cache_prefix="",
+            captcha_usable=True,
+            appsec_json=CAPTCHA_JSON,
+        )
+        assert field(out, "RET") == "true|allow|nil|nil", "the other service's captcha excused this one"
+
+    def test_the_state_is_written_under_the_namespace_too(self):
+        """Reading through the namespace is half of it. A captcha issued here writes a VERIFY_STATE
+        key, and a write that skipped the prefix would hand every other service a pass -- from the
+        service that issued the challenge, which is the direction that actually lets someone in."""
+        out = run(ALLOW, conf=self.CONF, captcha_usable=True, appsec_json=CAPTCHA_JSON)
+        assert field(out, "RET") == "true|CrowdSec captcha served|false|true"
+        assert fields(out, "CACHE_KEY") == [CHALLENGE_PREFIX + "captcha_1.2.3.4"]
+
+    def test_the_write_is_namespaced_by_the_same_helper(self):
+        """Mutation: prefix reads but not writes. Every service then reads its own namespace and
+        writes the shared key, so the first captcha issued anywhere unlocks the next service to
+        look."""
+        mutated = SOURCE.replace(
+            "      return dict:set(prefix .. key, value, exptime or 0, flags or 0)",
+            "      return dict:set(key, value, exptime or 0, flags or 0)",
+        )
+        assert mutated != SOURCE, "namespaced_cache no longer reads as expected -- update this mutation"
+        out = run(ALLOW, source=mutated, conf=self.CONF, captcha_usable=True, appsec_json=CAPTCHA_JSON)
+        assert fields(out, "CACHE_KEY") == ["captcha_1.2.3.4"], "written outside every namespace"
+
+    def test_allow_refuses_to_run_without_a_namespace(self):
+        """crowdsec:init() fills `challenge_prefixes` for exactly the scopes it fills `bouncers`
+        for, so this is an assertion, not a live path -- but an empty prefix would put every
+        service's challenge state back in one namespace, which is the bug the argument closes."""
+        body = ALLOW.replace("CHALLENGE_PREFIX", "nil")
+        assert field(run(body), "RET").startswith("false|missing CrowdSec challenge namespace|")
+        body = ALLOW.replace("CHALLENGE_PREFIX", '""')
+        assert field(run(body), "RET").startswith("false|missing CrowdSec challenge namespace|")
+
+
+class TestAnUnusableCaptchaDenies:
+    """`FALLBACK_REMEDIATION=captcha` on a deployment with no captcha provider.
+
+    The rewrite that turns an unrenderable captcha into something enforceable now sits OUTSIDE the
+    `runtime.fallback ~= ""` block and targets `ban`, not the fallback (port of dev c54c49e7e).
+    Inside it, and aimed at the fallback, it rewrote `captcha` to `captcha`: nothing under
+    `if not ok` matched and the request fell out to `return true, "allow"` -- served, on a decision
+    that asked for a captcha.
+    """
+
+    CONF = {"FALLBACK_REMEDIATION": "captcha"}
+
+    def test_a_lapi_captcha_is_banned_not_served(self):
+        out = run(DELEGATE, antibot_provider="no", conf=self.CONF, **LAPI_CAPTCHA)
+        assert field(out, "RET") == "true|denied|true|nil", "fail-open: the visitor was served"
+
+    def test_aiming_the_rewrite_back_at_the_fallback_serves_the_visitor(self):
+        """Mutation: the exact shape this port replaced."""
+        mutated = SOURCE.replace(
+            'if remediation == "captcha" and not captcha_ok and not delegate_captcha then\n    remediation = "ban"',
+            'if remediation == "captcha" and not captcha_ok and not delegate_captcha then\n    remediation = runtime.fallback',
+        )
+        assert mutated != SOURCE, "the rewrite no longer reads as expected -- update this mutation"
+        out = run(DELEGATE, source=mutated, antibot_provider="no", conf=self.CONF, **LAPI_CAPTCHA)
+        assert field(out, "RET") == "true|allow|nil|nil"
+
+    def test_the_delegation_still_exempts_it(self):
+        """`not delegate_captcha` is the BunkerWeb conjunct kept across the move: with a provider
+        named, the antibot renders the challenge later in this same access phase."""
+        out = run(DELEGATE, antibot_provider="captcha", conf=self.CONF, **LAPI_CAPTCHA)
+        assert field(out, "RET") == "true|captcha delegated to the BunkerWeb antibot|false|false"
+        assert field(out, "PROVIDER") == "captcha"
+
+
+class TestHealthChecksTheLocalApiDirectly:
+    """csmod.Health() replaced the `Allow("127.0.0.1", true)` the /crowdsec/ping handler made.
+
+    Allow() answers from the decision cache, so a Local API that had gone away still reported
+    healthy -- and it now needs a per-service challenge namespace a health endpoint has no business
+    inventing. The harness has a single HTTP stub, so `appsec_status` / `appsec_err` / `http_body`
+    are what the Local API answers here.
+    """
+
+    LAPI = {"API_URL": "http://127.0.0.1:8080"}
+
+    def test_an_authenticated_array_answer_is_healthy(self):
+        out = run(HEALTH, conf=self.LAPI, appsec_status=200, http_body="[]")
+        assert field(out, "HEALTH") == "true|nil|true"
+        assert field(out, "SENT_URI") == "http://127.0.0.1:8080/v1/decisions?ip=127.0.0.1"
+        assert field(out, "SENT_API_KEY") == "key", "an unauthenticated probe cannot tell 403 from healthy"
+
+    def test_a_null_answer_is_healthy_too(self):
+        """A Local API with no decision for 127.0.0.1 answers `null`, not `[]`."""
+        out = run(HEALTH, conf=self.LAPI, appsec_status=200, http_body="null")
+        assert field(out, "HEALTH") == "true|nil|true"
+
+    def test_a_non_200_is_not(self):
+        out = run(HEALTH, conf=self.LAPI, appsec_status=403, http_body="[]")
+        assert field(out, "HEALTH") == "false|Local API returned HTTP 403|nil"
+
+    def test_the_status_check_is_what_does_it(self):
+        """Mutation: accept any status and an unauthenticated 403 reports a healthy Local API."""
+        mutated = SOURCE.replace(
+            'if res.status ~= 200 then return false, "Local API returned HTTP " .. tostring(res.status) end',
+            "if false then return false end",
+        )
+        assert mutated != SOURCE, "the status check no longer reads as expected -- update this mutation"
+        out = run(HEALTH, source=mutated, conf=self.LAPI, appsec_status=403, http_body="[]")
+        assert field(out, "HEALTH") == "true|nil|true"
+
+    def test_a_transport_error_is_not(self):
+        out = run(HEALTH, conf=self.LAPI, appsec_err="connection refused")
+        assert field(out, "HEALTH") == "false|Local API request failed|nil"
+
+    def test_an_answer_that_is_not_a_decision_array_is_not(self):
+        """A 200 carrying an object is a proxy, a login page or an error envelope -- not a Local
+        API. Taking it for one is how an unreachable LAPI reported healthy in the first place."""
+        out = run(HEALTH, conf=self.LAPI, appsec_status=200, http_body='{"message": "access forbidden"}')
+        assert field(out, "HEALTH") == "false|Invalid Local API response|nil"
+
+    def test_an_unparsable_answer_is_not(self):
+        out = run(HEALTH, conf=self.LAPI, appsec_status=200, http_body="<html>", appsec_json=None)
+        assert field(out, "HEALTH") == "false|Invalid Local API response|nil"
+
+    def test_without_a_local_api_nothing_is_requested(self):
+        """The AppSec-only fleet: there is no Local API to check, and saying so beats inventing a
+        request against an empty URL."""
+        out = run(HEALTH)
+        assert field(out, "HEALTH") == "true|No Local API configured; AppSec health is not checked|false"
+        assert field(out, "SENT_URI") == "nil"
+
+    def test_without_a_local_api_or_appsec_it_is_unhealthy(self):
+        out = run(HEALTH, conf={"APPSEC_ENABLED": False})
+        assert field(out, "HEALTH").startswith("false|No Local API configured")

@@ -48,6 +48,9 @@ local LOGS = {}
 CAPTURED_REASON = nil
 
 -- module-level locals of crowdsec.lua that access() closes over
+-- challenge_prefixes: the per-service captcha namespace init() builds and access() hands to
+-- Allow (port of dev c54c49e7e). Keyed by scope, so the harness mirrors init()'s own shape.
+challenge_prefixes = { global = "captcha-v2|deadbeef|", ["www.example.com"] = "captcha-v2|feedface|" }
 WARN = "WARN"
 ERR = "ERR"
 OK = 0
@@ -57,21 +60,31 @@ local function get_variable(name) return VARIABLES[name] end
 local function set_reason(reason, data, ctx) CAPTURED_REASON = { reason = reason, data = data, ctx = ctx } end
 local function get_deny_status() return %(deny)d end
 
-bouncers = {
-  global = {
-    Allow = function(ip, no_render, antibot_provider)
-      ALLOW_ARGS = { ip = ip, no_render = no_render, antibot_provider = antibot_provider }
+local function bouncer()
+  return {
+    Allow = function(ip, no_render, antibot_provider, challenge_prefix)
+      ALLOW_ARGS = {
+        ip = ip,
+        no_render = no_render,
+        antibot_provider = antibot_provider,
+        challenge_prefix = challenge_prefix,
+      }
       return true, ALLOW_MSG, ALLOW_BANNED, ALLOW_SERVED, ALLOW_VERDICT, ALLOW_PROVIDER
     end,
-  },
-}
+  }
+end
+
+-- Two scopes, as a multisite fleet has them: access() must pick the namespace of the service
+-- being served, not the singlesite fallback. One bouncer per scope, because two services sharing
+-- a rendered configuration share a bouncer but never a challenge namespace.
+bouncers = { global = bouncer(), ["www.example.com"] = bouncer() }
 
 local crowdsec = {}
 %(access)s
 
 local self = {
   id = "crowdsec",
-  ctx = { bw = { server_name = "www.example.com", remote_addr = "1.2.3.4" } },
+  ctx = { bw = { server_name = SERVER_NAME, remote_addr = "1.2.3.4" } },
   variables = VARIABLES,
   is_needed = function() return true end,
   ret = function(_, ret, msg, status, redirect, data)
@@ -90,6 +103,7 @@ print("STATUS=" .. tostring(answer.status))
 print("MSG=" .. tostring(answer.msg))
 print("FLAG=" .. tostring(self.ctx.bw.workflow_antibot_provider))
 print("PASSED_PROVIDER=" .. tostring(ALLOW_ARGS.antibot_provider))
+print("PASSED_PREFIX=" .. tostring(ALLOW_ARGS.challenge_prefix))
 print("REASON=" .. tostring(CAPTURED_REASON and CAPTURED_REASON.reason))
 print("REASON_ACTION=" .. tostring(CAPTURED_REASON and CAPTURED_REASON.data.action))
 -- Read back from the returned ret.data, which is what the dispatcher stores as reason_data --
@@ -129,6 +143,7 @@ def run(
     security_mode: str = "block",
     source: str | None = None,
     defer: bool = False,
+    server_name: str = "www.example.com",
 ):
     variables = {"USE_CROWDSEC": "yes"}
     if captcha_provider is not None:
@@ -146,6 +161,7 @@ def run(
             f"ALLOW_PROVIDER = {to_lua(provider_returned)}",
             "ALLOW_ARGS = {}",
             f"DEFER = {to_lua(defer)}",
+            f"SERVER_NAME = {to_lua(server_name)}",
         ]
     )
     script = preamble + "\n" + HARNESS % {"deny": DENY_STATUS, "access": _method("access", source)}
@@ -293,3 +309,63 @@ class TestTheGuardIsWhatRefuses:
         out = run(use_antibot="no", source=SOURCE.replace(method, mutated))
         assert field(out, "FLAG") == "captcha"
         assert field(out, "STATUS") == "nil"
+
+
+class TestTheChallengeNamespaceFollowsTheService:
+    """`access()` hands `Allow` the namespace of the service being served.
+
+    `bouncers` and `challenge_prefixes` are keyed alike, and the port of dev `c54c49e7e` keeps the
+    *scope* rather than just the bouncer for exactly this reason: two services with a byte-identical
+    rendered configuration share one bouncer instance, so reading the namespace off the bouncer -- or
+    off the singlesite fallback -- would put them back in one challenge namespace, which is the bug
+    the argument exists to close.
+    """
+
+    def test_the_served_service_gets_its_own_namespace(self):
+        assert field(run(captcha_provider="captcha"), "PASSED_PREFIX") == "captcha-v2|feedface|"
+
+    def test_falling_back_to_the_singlesite_namespace_is_what_breaks_it(self):
+        """Mutation: read the namespace off the global scope. Every service in a multisite fleet
+        shares one challenge namespace again and a captcha solved on any of them passes everywhere."""
+        method = _method("access")
+        mutated = method.replace("challenge_prefixes[scope]", "challenge_prefixes[GLOBAL_SCOPE]")
+        assert mutated != method, "the namespace lookup no longer reads as expected -- update this mutation"
+        out = run(captcha_provider="captcha", source=SOURCE.replace(method, mutated))
+        assert field(out, "PASSED_PREFIX") == "captcha-v2|deadbeef|"
+
+    def test_a_service_without_its_own_bouncer_falls_back_to_the_singlesite_one(self):
+        """`MULTISITE=no` keys `bouncers` by `global` while `server_name` is the real host, so the
+        `… or GLOBAL_SCOPE` fallback is what every singlesite deployment runs on. Looking the bouncer
+        up by `server_name` instead of by the resolved scope makes `if not bouncer then` fire on
+        every request and the whole fleet is served UNCHECKED -- which is the regression the ERR line
+        at that branch was added to catch.
+
+        This case exists because the two-scope `bouncers` fixture above stopped exercising the
+        fallback at all (found by Criticos round 2)."""
+        out = run(captcha_provider="captcha", server_name="other.example.com")
+        assert field(out, "PASSED_PREFIX") == "captcha-v2|deadbeef|", "the singlesite namespace"
+        assert field(out, "STATUS") == "nil", "a bouncer was found: the request was not served unchecked"
+
+    def test_looking_the_bouncer_up_by_server_name_serves_the_fleet_unchecked(self):
+        """Mutation: index `bouncers` with the server name instead of the resolved scope. The scope
+        line stays byte-identical, so this is a behavioural kill, not an anchor trip."""
+        method = _method("access")
+        mutated = method.replace(
+            "local bouncer = bouncers[scope]",
+            "local bouncer = bouncers[self.ctx.bw.server_name]",
+        )
+        assert mutated != method, "the bouncer lookup no longer reads as expected -- update this mutation"
+        out = run(captcha_provider="captcha", server_name="other.example.com", source=SOURCE.replace(method, mutated))
+        assert field(out, "PASSED_PREFIX") == "nil", "no bouncer was found"
+
+    def test_the_scope_is_not_read_off_the_bouncer(self):
+        """Mutation: pick the scope the pre-port way -- the bouncer, with the singlesite fallback --
+        and a service that resolves to the global bouncer loses its own namespace."""
+        method = _method("access")
+        mutated = method.replace(
+            "local scope = bouncers[self.ctx.bw.server_name] and self.ctx.bw.server_name or GLOBAL_SCOPE",
+            "local scope = GLOBAL_SCOPE",
+        )
+        assert mutated != method, "the scope selection no longer reads as expected -- update this mutation"
+        out = run(captcha_provider="captcha", source=SOURCE.replace(method, mutated))
+        assert field(out, "PASSED_PREFIX") == "captcha-v2|deadbeef|"

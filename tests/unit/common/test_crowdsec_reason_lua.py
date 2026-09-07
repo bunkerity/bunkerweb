@@ -38,7 +38,7 @@ LAPI_DECISION = {
 }
 
 VERDICT_DUMP = """
-local ok, msg, banned, served, verdict = csmod.Allow("1.2.3.4", NO_RENDER_ARG)
+local ok, msg, banned, served, verdict = csmod.Allow("1.2.3.4", NO_RENDER_ARG, nil, CHALLENGE_PREFIX)
 print("RET=" .. tostring(ok) .. "|" .. tostring(banned) .. "|" .. tostring(served))
 if verdict == nil then
   print("VERDICT=nil")
@@ -129,8 +129,12 @@ class TestThePluginAttachesIt:
         """Matched on the destructuring alone, not on the whole call: lane CS-B added a sixth
         return value (`antibot_provider`) and stylua then wrapped the call onto its own line, so a
         literal that spans the `= bouncer.Allow(` boundary pins formatting rather than behaviour."""
-        assert "local ok, err, banned, served, verdict" in self._access()
-        assert "bouncer.Allow(self.ctx.bw.remote_addr" in self._access()
+        access = self._access()
+        assert "local ok, err, banned, served, verdict" in access
+        # Whitespace-tolerant: the port of dev c54c49e7e added a fourth argument (the per-service
+        # challenge namespace) and stylua then split the call over five lines, so a literal that
+        # spans the `Allow(` boundary would pin formatting rather than behaviour.
+        assert re.search(r"bouncer\.Allow\(\s*self\.ctx\.bw\.remote_addr", access)
 
     def test_the_served_branch_records_the_reason_itself(self):
         """ngx.OK is not one of the dispatcher's reason_statuses (access-lua.conf), so a served
@@ -153,11 +157,14 @@ class TestThePluginAttachesIt:
         assert "local set_reason = utils.set_reason" in source
 
 
-def test_the_api_probe_is_untouched():
-    """crowdsec:api()'s /crowdsec/ping probe reuses Allow() on the live request; it must keep
-    ignoring the extra return values rather than recording a reason for a connectivity test."""
+def test_the_api_probe_records_no_reason():
+    """crowdsec:api()'s /crowdsec/ping probe no longer goes through Allow() -- Health() is a direct
+    authenticated Local API read (port of dev c54c49e7e), because Allow() answered from the decision
+    cache and would need a per-service challenge namespace this endpoint has no business inventing.
+    What has to stay true either way: a connectivity probe records no security reason."""
     source = CROWDSEC_LUA.read_text(encoding="utf-8")
     api = re.search(r"^function crowdsec:api\(\).*?^end$", source, re.S | re.M)
     assert api
-    assert 'local ok, err = bouncer.Allow("127.0.0.1", true)' in api.group(0)
+    assert "bouncer.Health()" in api.group(0)
+    assert "bouncer.Allow(" not in api.group(0), "Allow() answers from cache: an unreachable LAPI would report healthy"
     assert "set_reason" not in api.group(0)
