@@ -12,6 +12,8 @@ from flask_login import current_user
 
 # from app.models.totp import totp as TOTP
 
+from default_server import DEFAULT_SERVER_RESERVED_MESSAGE, is_default_server  # type: ignore
+
 from app.dependencies import API_CLIENT, BW_CONFIG, DATA
 from app.api_client import ApiClientError, ApiUnavailableError
 from app.utils import LOGGER, MAX_PASSWORD_BYTES, USER_PASSWORD_RX, gen_password_hash, password_exceeds_bcrypt_limit, _sanitize_internal_next
@@ -204,6 +206,13 @@ def setup_page():
             flash("The admin user was created successfully")
 
         if not ui_reverse_proxy:
+            # Third create surface with no reserved-id refusal (routes/services.py and the API's
+            # POST /services both have one -- DS-B4 handoff item 1). The "already in use" check
+            # right below catches the collision only incidentally, and only once the reserved row
+            # is actually in the roster it reads (`db_config`), which single-site never has.
+            if is_default_server(request.form["server_name"]):
+                return handle_error(DEFAULT_SERVER_RESERVED_MESSAGE, "setup")
+
             server_names = db_config["SERVER_NAME"].split()
             if request.form["server_name"] in server_names:
                 return handle_error(f"The hostname {request.form['server_name']} is already in use.", "setup")
