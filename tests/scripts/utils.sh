@@ -39,6 +39,70 @@ function sed_in_place() {
 }
 
 # Robust docker pull function with exponential backoff
+# The four database engines share ONE Kubernetes deployment (`bunkerweb-db`), one service and --
+# the part that bites -- one PersistentVolumeClaim (`pvc-bunkerweb-db`). `kubectl apply` of the
+# next engine's manifest therefore swaps the image and reports `persistentvolumeclaim/
+# pvc-bunkerweb-db unchanged`: MySQL 9 boots on MariaDB's datadir and dies with "[MY-012224]
+# Tablespace flags are invalid in datafile: ./ibdata1 ... Plugin initialization aborted",
+# CrashLoopBackOff, and the arm times out 420 s later on "Kubernetes stack is not healthy" --
+# push-13 CI job 101691992249, the first run that ever got past the mariadb chain to reach mysql.
+# The Docker arm already destroys its volume when the engine changes (`ensure_database`, the
+# "bw-db image is ..., expected ..." branch); this is that guard for the Kubernetes arm.
+function k8s_ensure_db() {
+    local database="${1:-}"
+    local manifest="tests/misc/k8s/${database}.yml"
+
+    if [ ! -f "$manifest" ] ; then
+        log "UTILS" "❌" "☸️ No database manifest for ${database}"
+        return 1
+    fi
+
+    # Read the wanted image out of the manifest rather than keeping a second engine -> image table
+    # here: a copy is a thing that drifts, and the manifests are what `kubectl apply` will use.
+    local wanted current
+    wanted="$(awk '/^ *image: /{print $2; exit}' "$manifest")"
+    current="$(kubectl get deployment bunkerweb-db -n bunkerweb-db -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)"
+
+    # Compared on the tag. Here the two raw strings WOULD match -- `.spec…containers[0].image`
+    # returns exactly what was applied, digest and all -- but the Docker arm's `docker inspect
+    # .Config.Image` does not, so stripping keeps the two arms answering the same question and
+    # survives a manifest that is later re-pinned by tag.
+    if [ -n "$current" ] && [ -n "$wanted" ] && [ "${current%%@*}" != "${wanted%%@*}" ] ; then
+        log "UTILS" "⚠️" "☸️ The database runs ${current%%@*} and this action wants ${wanted%%@*}: recreating it and its volume ..."
+        if ! kubectl delete deployment bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true ; then
+            log "UTILS" "❌" "☸️ Failed to delete the database deployment before switching engine"
+            return 1
+        fi
+        # `pvc-protection` keeps the claim alive while a pod still mounts it, so the pods have to
+        # be gone first -- otherwise the delete below returns immediately and the claim survives
+        # in Terminating, and the apply that follows binds the very datadir this is destroying.
+        kubectl wait --for=delete pod -l app=bunkerweb-db -n bunkerweb-db --timeout=120s > /dev/null 2>&1
+        # `--timeout` on the delete too: without one it waits forever on a pod that will not go,
+        # turning a thirty-second red into a job-level timeout -- a strictly worse CI signal.
+        if ! kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
+            log "UTILS" "❌" "☸️ Failed to delete the database volume before switching engine"
+            return 1
+        fi
+    # A claim with no deployment is nobody's datadir. `current` is empty after a partial
+    # teardown, or when this function itself failed between its two deletes on an earlier action --
+    # and the branch above is then skipped, so the apply below would bind whatever engine's datadir
+    # the survivor holds: the original bug, silently. `cleanup_stack` deletes the whole namespace on
+    # the ordinary path, so this only ever fires on that failure path.
+    elif [ -z "$current" ] && kubectl get pvc pvc-bunkerweb-db -n bunkerweb-db > /dev/null 2>&1 ; then
+        log "UTILS" "⚠️" "☸️ A database volume survived with no deployment behind it: deleting it before applying $database ..."
+        if ! kubectl delete pvc pvc-bunkerweb-db -n bunkerweb-db --ignore-not-found --wait=true --timeout=120s ; then
+            log "UTILS" "❌" "☸️ Failed to delete the orphaned database volume"
+            return 1
+        fi
+    fi
+
+    log "UTILS" "ℹ️ " "☸️ Ensuring $database database is running ..."
+    if ! kubectl apply -f "$manifest" ; then
+        log "UTILS" "❌" "☸️ Apply failed for $database"
+        return 1
+    fi
+}
+
 function robust_docker_pull() {
     local compose_file="${1:-}"
     local component="${2:-}"
@@ -1512,13 +1576,7 @@ function restart_stack () {
 
     if [ "$database" != "sqlite" ] ; then
         if [ "$integration" == "Kubernetes" ] ; then
-            log "UTILS" "ℹ️ " "☸️ Ensuring $database database is running ..."
-            kubectl apply -f tests/misc/k8s/"$database".yml
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "UTILS" "❌" "☸️ Apply failed for $database"
-                return 1
-            fi
+            k8s_ensure_db "$database" || return 1
         else
             expected_image=""
             case "$database" in

@@ -48,15 +48,12 @@ fi
 
 if [ "$database" != "sqlite" ] ; then
     if [ "$integration" == "Kubernetes" ] ; then
-        db_pods=$(kubectl get pods -n bunkerweb-db -o jsonpath="{.items[*].metadata.name}")
-        if echo "$db_pods" | grep -vq "bunkerweb-db-" ; then
-            kubectl apply -f tests/misc/k8s/"$database".yml
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "START" "❌" "☸️ Apply failed for $database"
-                exit 1
-            fi
-        fi
+        # Was guarded by "no bunkerweb-db-* pod exists", which is exactly the case an engine
+        # switch is NOT: the previous engine's pod is there, so the apply was skipped and the
+        # deployment kept running the wrong image against the wrong datadir. `k8s_ensure_db`
+        # recreates the claim when the engine changed and applies unconditionally otherwise --
+        # `kubectl apply` over an identical manifest is a no-op, so the guard bought nothing.
+        k8s_ensure_db "$database" || exit 1
     else
         # Exact name, not a substring: any other container on the daemon carrying "bw-db" in
         # its name -- a compose project from another checkout, `ci-autoconf-race-bw-db-1` here --
