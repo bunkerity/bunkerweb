@@ -155,7 +155,7 @@ jobs:
         run: python3 .github/scripts/release_artifacts.py prepare-tests --type "$TYPE" --directory candidate-packages
       - name: Enable ARM package tests
         if: inputs.MANIFEST_SHA256 != '' && inputs.TYPE == 'linux'
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
       - name: Test exact candidate artifacts
         if: inputs.MANIFEST_SHA256 != ''
         env:
