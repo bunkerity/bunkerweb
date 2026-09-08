@@ -247,6 +247,12 @@ La confiance TLS est également stockée par instance :
 !!! warning "L’épinglage est le seul mode TLS vérifié"
     Il n’existe aucun mode de validation par CA propre à une instance. `off` ne vérifie pas le certificat, même avec un endpoint HTTPS. `pinned` sur un endpoint HTTP ne dispose d’aucun certificat à vérifier : associez-le à `listen_https: true`. Mettez à jour l’empreinte stockée lors de la rotation du certificat de l’instance, sinon les appels du plan de contrôle vers cette instance échoueront.
 
+### Enrôlement : une alternative à la définition manuelle de `credential` {#enrollment-an-alternative-to-setting-credential-by-hand}
+
+Une instance créée par l'interface Web, l'API ou l'environnement (`method="manual"`) peut être **enrôlée**. L'opérateur émet un code à usage unique et limité dans le temps via `POST /instances/{hostname}/enroll`. Le code n'est affiché qu'une fois ; `ttl_seconds` est facultatif, vaut 900 secondes par défaut et ne peut pas dépasser 3600 secondes. L'instance l'échange au démarrage via `POST /instances/enroll`, avec le corps `{hostname, code}`. Cette route n'a pas de garde d'authentification puisque l'instance ne possède pas encore d'identifiant : elle est protégée par l'usage unique, l'expiration et le hachage SHA-512 au repos du code, ainsi que par le limiteur de débit partagé et la liste blanche IP de l'API.
+
+L'instance conserve ensuite son identifiant propre et ne répond qu'à celui-ci, sans que l'opérateur ait à le voir ou à le définir. `POST /instances/{hostname}/rotate` et `/revoke` permettent sa rotation ou sa révocation ; toute connexion du plan de contrôle refuse une instance révoquée. Si l'instance perd son *fichier* d'identifiant, elle refuse de démarrer au lieu de reprendre l'`API_TOKEN` global. Une recréation sans volume de données échappe à cette protection, car le marqueur disparaît avec l'identifiant. L'enrôlement et un `credential` explicite sont deux mécanismes indépendants : choisissez selon votre méthode de provisionnement.
+
 ## Limitation de débit
 
 Activée par défaut avec deux chaînes : `API_RATE_LIMIT` (global, défaut `100r/m`) et `API_RATE_LIMIT_AUTH` (défaut `10r/m` ou `off`). Formats acceptés : notation style NGINX (`3r/s`, `40r/m`, `200r/h`) ou formes verbeuses (`100/minute`, `200 per 30 minutes`). Configurez via :
@@ -387,7 +393,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 | `MAX_REQUESTS`                  | Requêtes avant recyclage du worker Gunicorn (évite la fuite mémoire)           | Entier                                          | `1000`                                                    |
 | `CAPTURE_OUTPUT`                | Rediriger stdout/stderr Gunicorn vers les handlers configurés                  | `yes` ou `no`                                   | `no`                                                      |
 
-## Surface API (carte des capacités)
+## Surface API (carte des capacités) {#api-surface-capability-map}
 
 - **Core**
   - `GET /ping`, `GET /health` : vérifications de vivacité de l’API.
@@ -401,9 +407,15 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - Santé/actions : `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
   - `GET /instances/{hostname}/health` relaie l’état annoncé par l’instance : `ok`, `loading` ou `reloading`. `ping` indique seulement si elle est joignable. Après un redémarrage, une instance reste en `loading` jusqu’à la réception d’une configuration ; ses plugins temporisés sont désactivés dans cet état. Le Scheduler utilise cette information pour décider d’un nouvel envoi. Les deux routes exigent `instances_read`.
   - Un reload contre une instance occupée est retenté plutôt que signalé en échec, si bien que la latence dans le pire cas de `POST /instances/{hostname}/reload` (et du `POST /instances/reload` pour toute la flotte) est d’environ 54s, et non les ~35s que suggérerait un verrou à durée fixe — un appelant avec un timeout plus court peut voir un reload signalé en échec alors qu’il est seulement lent.
+  - `PUT /instances/bulk` : réconcilier les instances par `method` (autoconf). Refuse `method="ui"` et `method="manual"`, car supprimer puis recréer ces lignes effacerait les identifiants émis lors de l'enrôlement.
+  - Enrôlement : `POST /instances/{hostname}/enroll` (`instances_enroll`) émet un code à usage unique affiché une seule fois, avec `ttl_seconds` facultatif. `POST /instances/enroll`, corps `{hostname, code}`, est l'unique route de ce routeur sans `Depends(guard)` ; l'instance échange elle-même le code au démarrage. Usage unique, expiration, hachage, limiteur de débit et liste blanche IP protègent cet échange. L'instance refuse ensuite l'`API_TOKEN` global. `POST /instances/{hostname}/rotate` et `POST /instances/{hostname}/revoke` (`instances_rotate`) font pivoter ou révoquent l'identifiant. La rotation comporte deux phases et renvoie `502` si l'instance est injoignable ; toute connexion ultérieure refuse une instance révoquée.
+  - `PATCH /instances/{hostname}/status` : définir directement l'état `up`/`down`/`failover`, utilisé par les contrôles de santé du scheduler.
 - **Global settings**
   - `GET /global_settings` : par défaut uniquement les non-defaults ; ajoutez `full=true` pour tous les réglages, `methods=true` pour la provenance.
   - `PATCH /global_settings` : upsert des globals détenus par l’API ; les clés read-only sont rejetées. Un réglage détenu par une autre source (`scheduler`, c’est-à-dire une variable d’environnement, ainsi que `autoconf`, `manual` ou `wizard`) ne peut pas être repris : la requête entière est rejetée avec `409` et indique chaque clé et son propriétaire. Renvoyer la valeur déjà détenue par une clé externe ne crée pas de conflit.
+  - `GET /global_config`, `PATCH /global_config` : alias rétrocompatibles de `GET`/`PATCH /global_settings`.
+  - `POST /global_settings/validate` : valider un nom de paramètre et éventuellement sa valeur avec `is_valid_setting`, sans rien enregistrer.
+  - `PUT /global_settings/config` : remplacer l'environnement de configuration complet (autoconf et éditeur de configuration UI). Le corps représente tout l'état souhaité : toute clé omise dans le périmètre est supprimée. Une configuration empêchant le défi http-01 d'un service est refusée (`400`), sauf avec `method="autoconf"` : le conflit est alors journalisé et la configuration enregistrée pour ne pas bloquer le reste de la flotte.
 - **Services**
   - `GET /services` : lister les services (brouillons inclus par défaut).
   - `GET /services/{service}` : récupérer les non-defaults ou la config complète (`full=true`) ; `methods=true` inclut la provenance.
@@ -411,6 +423,7 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `PATCH /services/{service}` : renommer, mettre à jour les variables, basculer le draft.
   - `DELETE /services/{service}` : supprimer le service et les clés dérivées de config.
   - `POST /services/{service}/convert?convert_to=online|draft` : bascule rapide draft/online.
+  - Le service réservé `default-server` apparaît dans `GET /services` avec `reserved: true` **uniquement si `MULTISITE=yes`**. Avec `MULTISITE=no`, il n'existe pas et le serveur par défaut conserve le comportement 1.6. Il répond aux noms d'hôte inconnus ou aux accès par IP, avec son propre certificat, ses paramètres TLS, en-têtes et pages d'erreur. Il est permanent : le créer avec `POST /services`, le supprimer avec `DELETE /services/default-server`, le renommer (ou renommer un autre service ainsi), le passer en brouillon avec `PATCH` ou `POST /services/default-server/convert?convert_to=draft` renvoie `403` avec le motif. Configurez-le avec `PATCH /services/default-server` et `variables`. Il ne compte jamais dans le quota PRO. Deux clés sont refusées avec `400` : `SERVER_TYPE`, quelle que soit sa valeur, même inchangée, car ce service n'a pas de bloc `server{}` à convertir (retirez-la d'un corps relu puis renvoyé), et un port de `DEFAULT_SERVER_STREAM_PORTS_SSL` absent de `DEFAULT_SERVER_STREAM_PORTS`.
 - **Custom configs**
   - `GET /configs` : lister les snippets (service par défaut `global`) ; `with_data=true` intègre le contenu imprimable.
   - `POST /configs`, `POST /configs/upload` : créer des snippets via JSON ou upload de fichier.
@@ -418,15 +431,20 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
   - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload` : mettre à jour ou déplacer les snippets gérés par l’API.
   - `DELETE /configs` ou `DELETE /configs/{service}/{type}/{name}` : supprimer les snippets gérés par l’API ; ceux gérés par template sont ignorés.
   - Types supportés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks CRS/plugin.
+  - `PUT /configs/bulk` : remplacer toutes les configurations portant un même `method` (synchronisation autoconf). Un simple avertissement après enregistrement renvoie `200` ; un véritable refus renvoie `400`, jamais `500`, dont le client HTTP supprimerait le corps.
 - **Bans**
   - `GET /bans` : lister les bans actifs de la base de données, qui constitue la liste durable. **Changement en 1.7** : cette route agrégeait auparavant les bans en mémoire des instances, ce qui sous-estimait la liste après un redémarrage.
   - `GET /bans/instances` : conserver l’ancien comportement dans un endpoint distinct et montrer ce que chaque instance applique actuellement.
   - `POST /bans` ou `/bans/ban` : appliquer un ou plusieurs bans ; le payload peut être un objet, un tableau ou du JSON sérialisé. Le ban est stocké puis envoyé aux instances.
   - `POST /bans/unban` ou `DELETE /bans` : lever les bans globalement ou par service. Une révocation qui ne peut pas être stockée est refusée, car une instance qui ne l’a pas reçue pourrait réintroduire le ban dans la flotte.
+  - `GET /bans/timeseries?start=...&end=...&bucket=hour` : nombre de bannissements actifs par intervalle sur `[start, end)`. `bw_bans` conserve une ligne par `(ip, ban_scope, service_id)` et un nouveau bannissement réécrit `created_at` : il s'agit d'un comptage à un instant donné, pas d'un historique de créations ou d'événements.
 - **Plugins (UI)**
   - `GET /plugins` : lister les plugins ; `with_data=true` inclut les bytes packagés quand dispo.
   - `POST /plugins/upload` : installer des plugins UI depuis `.zip`, `.tar.gz`, `.tar.xz`.
   - `DELETE /plugins/{id}` : supprimer un plugin par ID.
+  - `PUT /plugins/external` : remplacer en masse les plugins externes/PRO (`delete_missing` supprime les absents), avec archives encodées en base64 dans le JSON.
+  - `GET /plugins/{id}/page` : archive `tar.gz` de la page UI du plugin ; `404` si absente.
+  - `GET /plugins/{id}/icon` : fichier d'icône pour un marqueur `@file/<name>` ; un nom d'asset statique, une classe boxicon ou une icône absente renvoie `404`. La réponse porte `Content-Security-Policy: default-src 'none'; sandbox`, `X-Content-Type-Options: nosniff` et un `Content-Disposition: inline` entre guillemets pour empêcher l'exécution de scripts SVG en navigation directe. Un fichier de plus de 512 Ko renvoie `413`.
 - **Cache (artefacts de jobs)**
   - `GET /cache` : lister les fichiers de cache avec filtres (`service`, `plugin`, `job_name`) ; `with_data=true` intègre le contenu imprimable.
   - `GET /cache/{service}/{plugin}/{job}/{file}` : récupérer/télécharger un fichier de cache spécifique (`download=true`).
@@ -434,6 +452,52 @@ Désactivez docs ou schéma en mettant leurs URLs à `off|disabled|none|false|0`
 - **Jobs**
   - `GET /jobs` : lister jobs, plannings et résumés de cache.
   - `POST /jobs/run` : marquer des plugins comme modifiés pour déclencher les jobs associés.
+
+  - `GET /jobs/{name}/last-run` : dernière exécution persistée d'un job.
+  - `POST /jobs/dispatch` : envoyer les jobs directement aux workers Celery, sans passer par le déclenchement du scheduler ; `503` si aucun broker n'est configuré. Le `run_id` de chaque job sert à corréler les journaux, dont il préfixe les lignes. Aucun endpoint ne permet de consulter son résultat : l'application n'utilise pas de backend de résultats Celery.
+  - `GET /jobs/queue` : état des files des workers Celery (`503` sans broker).
+- **Cache Web**
+  - `GET /web-cache/status`, `GET /web-cache/metrics` : état et métriques du cache reverse proxy par service.
+  - `POST /web-cache/purge` : purger une URL ou tout le cache d'un service.
+- **Système**
+  - `GET /system/readonly` : état lecture seule/bascule de la base.
+  - `POST /system/checked-changes` : acquitter les indicateurs de changement traités.
+- **Utilisateurs** (comptes UI, pas clients API)
+  - `GET/POST /users`, `GET/PATCH /users/{username}` : gérer les comptes.
+  - `GET/DELETE /users/{username}/sessions`, `POST /users/{username}/login` : lister/révoquer les sessions et se connecter.
+  - `POST /users/{username}/recovery-codes/refresh|use` : codes de récupération TOTP.
+  - `POST /users/{username}/totp/use` : consommer un compteur TOTP une seule fois pour empêcher le rejeu sur un autre worker UI. Un refus de rejeu se distingue d'une panne par une réponse `200` avec `consumed: false`.
+  - `GET/POST /users/{username}/webauthn-credentials`, `GET /users/webauthn-credentials/{id}`, `PATCH/DELETE /users/{username}/webauthn-credentials/{id}` : identifiants passkey/WebAuthn.
+  - `GET/PATCH /users/{username}/preferences/{key}`, `POST /users/{username}/access`, `GET /users/{username}/permissions` : préférences clé-valeur et introspection des droits.
+- **Modèles**
+  - `GET /templates`, `GET /templates/{id}` : lister/lire les modèles de service réutilisables.
+  - `POST /templates`, `PATCH /templates/{id}`, `DELETE /templates/{id}` : créer, modifier ou supprimer un modèle.
+- **Groupes de ressources**
+  - `GET /resource_groups`, `GET /resource_groups/{id}`, `GET /resource_groups/{id}/references` : lister/lire un alias de liste typée et inspecter ses références avant suppression.
+  - `POST /resource_groups`, `PATCH /resource_groups/{id}`, `DELETE /resource_groups/{id}`, `POST /resource_groups/{id}/clone` : gérer un groupe.
+- **Métadonnées**
+  - `GET /metadata`, `PATCH /metadata` : état de licence PRO et indicateurs du scheduler. Ne permet pas d'écraser le trousseau de chiffrement des certificats/identifiants.
+- **Certificats**
+  - `GET /certificates`, `GET /certificates/sources`, `GET /certificates/{id}`, `GET /certificates/{id}/download` : inventaire central et sources déclarées par les plugins.
+  - `PATCH /certificates/{id}`, `POST /certificates/{id}/revoke`, `DELETE /certificates/{id}` : cycle de vie d'un certificat.
+  - `POST /certificates/{id}/attachments`, `DELETE /certificates/{id}/attachments/{service}` : attacher/détacher un certificat à un service.
+- **Redirections** / **Upstreams**, ressources réutilisables et attachables
+  - `GET/POST /redirects`, `GET/PATCH/DELETE /redirects/{id}`, `POST/DELETE /redirects/{id}/attachments[/{service}]` : règles de redirection HTTP partagées entre services.
+  - `GET/POST /upstreams`, `GET/PATCH/DELETE /upstreams/{id}`, `POST/DELETE /upstreams/{id}/attachments[/{service}]` : pools HTTP, gRPC ou stream attachables à un chemin reverse proxy ou à un service stream entier.
+- **Métriques**
+  - `GET /metrics/timings` : durées agrégées par plugin et phase sur les instances (`METRICS_COLLECT_TIMINGS`).
+  - `GET /metrics/requests`, `GET /metrics/requests/timeseries`, `GET /metrics/requests/top-offenders`, `GET /metrics/requests/top-rules` : rapports persistés alimentant l'UI, filtrables notamment par `protocol` (`http`, `tcp`, `udp`).
+  - `GET /metrics/threatmap` : trafic bloqué en quasi temps réel pour la Threatmap personnelle.
+- **Sources de certificats** (fournies par les plugins)
+  - `GET /bunkernet/effectiveness`, `GET /bunkernet/stats` : efficacité et statistiques du renseignement communautaire BunkerNet.
+  - `POST /customcert/certificates/upload` : enregistrer un certificat fourni par l'opérateur.
+  - `POST /letsencrypt/certificates`, `POST /letsencrypt/certificates/renew-due`, `GET /letsencrypt/certificates/orphans` : émettre, renouveler les certificats arrivant à échéance et lister les orphelins.
+  - `POST /selfsigned/certificates`, `POST /selfsigned/certificates/renew-due`, `POST /selfsigned/certificates/{certificate_id}/renew` : émettre, renouveler en masse ou par identifiant.
+- **Workflows** (fournis par un plugin, sous `/workflows`)
+  - `GET /workflows`, `POST /workflows`, `GET/PATCH/DELETE /workflows/{id}`, `POST /workflows/{id}/clone` : chaînes de règles conditionnelles de sécurité.
+  - `GET/PUT /workflows/{id}/definition` : lire/remplacer la définition compilée d'un workflow.
+  - `POST /workflows/validate`, `POST /workflows/{id}/test` : valider ou simuler une définition sur une requête avant enregistrement.
+  - `POST /workflows/{id}/attachments`, `DELETE /workflows/{id}/attachments/{service}` : attacher/détacher un workflow.
 
 ## Comportement opérationnel
 

@@ -191,16 +191,24 @@ Elige el sabor que encaje con tu entorno.
 - `resource_id` suele ser el segundo componente del path (ej. `/services/{id}`); "*" da acceso global.
 - Inicializa usuarios no admin y permisos con `API_ACL_BOOTSTRAP_FILE` o un `/var/lib/bunkerweb/api_acl_bootstrap.json` montado. Cada usuario admite una `password` en texto plano o un `password_hash`/`password_bcrypt` pre-hasheado (ver el consejo a continuación).
 
-!!! danger "These write permissions are admin-equivalent"
-    Granting any of the following is equivalent to granting full administrative access. The content they write — custom configs, service variables (e.g. `REVERSE_PROXY_URL`), uploaded plugins, and global settings — is rendered **verbatim** into raw NGINX / OpenResty Lua configuration that runs on the BunkerWeb workers and scheduler. A token holding one of them can therefore execute arbitrary code as the BunkerWeb process user. The instance write scopes are admin-equivalent for a different reason: every call to a registered instance carries the `API_TOKEN` admin override, and the scheduler pushes the generated configuration and the cache (TLS private keys included) to every instance in the database, so registering a single endpoint collects all of it:
+!!! danger "Estos permisos de escritura equivalen a acceso de administrador"
+    Las configuraciones personalizadas, variables de servicio (como `REVERSE_PROXY_URL`), plugins
+    y ajustes globales se generan **literalmente** como configuración NGINX/OpenResty Lua que
+    ejecutan los workers y el scheduler. Un token con estos permisos puede ejecutar código como
+    el usuario del proceso BunkerWeb. Los permisos de escritura de instancias también equivalen
+    a administrador: cada llamada lleva el `API_TOKEN` administrativo y el scheduler envía a toda
+    instancia registrada la configuración y caché, incluidas claves privadas TLS. Registrar un
+    endpoint permite recibir todo ello:
 
     - `instances`: `instances_create`, `instances_update`
-    - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
+    - `configs`: `config_create`, `config_update`, `config_delete` (y `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
     - `global_config`: `global_config_update`
 
-    Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
+    **Nunca los concedas a alguien a quien no confiarías acceso de administrador.** Reserva
+    ámbitos de lectura (`*_read`, `service_export`, `cache_read`, …) para tokens limitados o de
+    automatización. Conceder estos permisos a un usuario no administrador registra una advertencia.
 
 !!! tip "Contraseñas de arranque pre-hasheadas"
     Reemplaza la `password` en texto plano de un usuario por un **hash bcrypt** mediante `password_hash` (o `password_bcrypt`) para que las credenciales nunca queden en el archivo como texto plano. El hash debe ser un hash bcrypt válido (`$2a$`/`$2b$`/`$2y$`) cuyo factor de coste sea al menos `10` (se recomienda `12`+). Un hash malformado o demasiado débil se **ignora**: el cargador recurre a la `password` en texto plano del usuario si existe; de lo contrario, un usuario nuevo recibe una contraseña aleatoria segura que no conocerás, y un usuario existente conserva la suya actual. Una `password` en texto plano se somete a una comprobación de robustez (8+ caracteres con mayúsculas/minúsculas/dígito/carácter especial). La variable de entorno `API_PASSWORD` del admin solo acepta texto plano — el pre-hasheo se aplica a estos usuarios de la ACL.
@@ -233,6 +241,11 @@ Elige el sabor que encaje con tu entorno.
     }
     ```
 
+!!! warning "El ejemplo anterior concede un permiso equivalente a administrador"
+    `config_update` permite ejecutar código; el usuario `ci` tiene poder de administrador para
+    escribir configuración. Emite ese token solo para automatizaciones de plena confianza. Para
+    solo lectura, quita `config_update` y conserva los ámbitos `*_read`.
+
 ## Credenciales por instancia y fijación TLS
 
 Cada registro de instancia puede sustituir el `API_TOKEN` global usado para las llamadas del plano de control. Define `credential` en `POST /instances` o `PATCH /instances/{hostname}`. La API lo almacena con el llavero AES-256-GCM compartido y nunca devuelve el texto en claro: `GET /instances` solo expone `credential_set` y `credential_updated_at`. La credencial por instancia tiene prioridad en el fan-out de la API, las acciones de los Workers, los envíos de configuración y caché, y el `API_TOKEN` escrito en la configuración generada para esa instancia. Envía un `credential` vacío en un PATCH para volver al token global.
@@ -246,6 +259,23 @@ La confianza TLS también se almacena por instancia:
 
 !!! warning "La fijación es el único modo TLS verificado"
     No existe un modo de validación por CA para cada instancia. `off` no verifica el certificado, incluso cuando el endpoint usa HTTPS. `pinned` sobre un endpoint HTTP no tiene certificado que comprobar, así que úsalo con `listen_https: true`. Actualiza la huella almacenada cuando rote el certificado de la instancia o fallarán las llamadas del plano de control a esa instancia.
+
+### Registro: alternativa a configurar `credential` manualmente {#enrollment-an-alternative-to-setting-credential-by-hand}
+
+Una instancia registrada desde la interfaz, la API o el entorno (`method="manual"`) puede obtener
+su credencial mediante un código de un solo uso. El operador emite el código con
+`POST /instances/{hostname}/enroll`: solo se muestra una vez; `ttl_seconds` es opcional, con valor
+predeterminado de 900 s y máximo de 3600 s. La instancia lo canjea al arrancar mediante
+`POST /instances/enroll` (cuerpo `{hostname, code}`). Es la única ruta de este router sin guardia
+de autenticación, porque todavía no existe una credencial: la protegen el uso único, el TTL, el
+hash SHA-512 almacenado, el limitador compartido y la lista de IP permitidas de la API. Desde ese
+momento la instancia guarda y acepta solo su propia credencial; el operador nunca necesita verla
+ni definirla. `POST /instances/{hostname}/rotate`/`revoke` la rotan o revocan; una instancia revocada
+se rechaza en el punto común de conexión de todas las llamadas del plano de control. Si pierde el
+*archivo* persistente de credencial tras registrarse, se niega a arrancar en lugar de volver al
+`API_TOKEN` global. Recrearla sin volumen de datos queda fuera de esa protección, porque también
+se pierde el marcador de registro. El registro y una `credential` explícita son independientes:
+usa lo que encaje con el aprovisionamiento de la instancia.
 
 ## Limitación de velocidad
 
@@ -387,7 +417,7 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
 | `MAX_REQUESTS`                  | Solicitudes antes de reciclar el worker Gunicorn (previene exceso de memoria) | Entero                                            | `1000`                                                    |
 | `CAPTURE_OUTPUT`                | Capturar stdout/stderr de Gunicorn hacia los handlers configurados            | `yes` o `no`                                      | `no`                                                      |
 
-## Superficie de la API (mapa de capacidades)
+## Superficie de la API (mapa de capacidades) {#api-surface-capability-map}
 
 - **Core**
   - `GET /ping`, `GET /health`: checks de vida de la propia API.
@@ -398,12 +428,18 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `POST /instances`: registra una instancia (hostname/port/server_name/method).
   - `GET/PATCH/DELETE /instances/{hostname}`: inspeccionar, actualizar campos mutables o borrar instancias gestionadas por la API.
   - `DELETE /instances`: borrar en masa instancias gestionadas por la API; las ajenas se omiten.
+  - `PUT /instances/bulk`: reconcilia instancias en bloque por `method` (autoconf). Rechaza `method="ui"` y `method="manual"`, que eliminarían y recrearían las filas registradas y borrarían sus credenciales.
+  - Registro: `POST /instances/{hostname}/enroll` requiere `instances_enroll` y emite un código de uso único y duración limitada, mostrado una vez, con `ttl_seconds` opcional. `POST /instances/enroll`, cuerpo `{hostname, code}`, es la única ruta sin `Depends(guard)`; la instancia lo canjea para recibir su credencial. La protegen el uso único, TTL y hash del código, además del limitador compartido y la lista de IP permitidas. Después solo acepta su credencial, nunca el `API_TOKEN` global. `POST /instances/{hostname}/rotate` y `POST /instances/{hostname}/revoke` requieren `instances_rotate`: la rotación tiene dos fases y responde `502` si la instancia no es accesible; las conexiones posteriores a una instancia revocada se rechazan.
+  - `PATCH /instances/{hostname}/status`: establece directamente el estado `up`/`down`/`failover` (usado por el bucle de salud del scheduler).
   - Salud/acciones: `GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`.
   - `GET /instances/{hostname}/health` transmite el estado de la instancia: `ok`, `loading` o `reloading`. `ping` solo responde si es accesible. Tras reiniciarse, una instancia permanece en `loading` hasta recibir una configuración; sus plugins temporizados están desactivados en ese estado. El Scheduler usa esta información para decidir si debe reenviar la configuración. Ambas rutas requieren `instances_read`.
   - Un reload contra una instancia ocupada se reintenta en lugar de reportarse como fallido, así que la latencia en el peor caso de `POST /instances/{hostname}/reload` (y del `POST /instances/reload` para toda la flota) es de ~54s, no los ~35s que sugeriría un lock de duración fija — un llamador con un timeout más corto puede ver uno reportado como fallido cuando solo es lento.
 - **Global settings**
   - `GET /global_settings`: por defecto solo no-defaults; añade `full=true` para todos los ajustes, `methods=true` para incluir procedencia.
   - `PATCH /global_settings`: upsert de globals propiedad de la API; las claves de solo lectura se rechazan. Un ajuste propiedad de otra fuente (`scheduler`, es decir, una variable de entorno, además de `autoconf`, `manual` o `wizard`) no puede transferirse a la API: se rechaza toda la carga con `409`, indicando cada clave y su propietario. Reenviar el valor que ya tiene una clave ajena no crea un conflicto.
+  - `GET /global_config`, `PATCH /global_config`: alias de `GET`/`PATCH /global_settings` por compatibilidad.
+  - `POST /global_settings/validate`: valida un nombre de ajuste y, opcionalmente, un valor con `is_valid_setting`, sin guardar nada.
+  - `PUT /global_settings/config`: sustituye el entorno completo de configuración (autoconf y el editor de configuración de la interfaz). El payload ES todo el estado deseado: se elimina cada clave dentro de su ámbito que no aparezca. Rechaza con `400` una configuración que deje sin ruta el desafío http-01 de un servicio, salvo con `method="autoconf"`, donde registra el conflicto y guarda igualmente para no dejar sin configurar al resto de la flota.
 - **Services**
   - `GET /services`: lista servicios (incluye borradores por defecto).
   - `GET /services/{service}`: obtiene no-defaults o config completa (`full=true`); `methods=true` incluye procedencia.
@@ -411,29 +447,81 @@ Desactiva docs o esquema poniendo sus URLs en `off|disabled|none|false|0`. Defin
   - `PATCH /services/{service}`: renombrar, actualizar variables, alternar draft.
   - `DELETE /services/{service}`: eliminar servicio y claves derivadas de config.
   - `POST /services/{service}/convert?convert_to=online|draft`: cambiar rápido entre draft/online.
+  - El servicio reservado `default-server` aparece en `GET /services` con `reserved: true` **solo con `MULTISITE=yes`**; con `MULTISITE=no` no existe esa fila y el servidor predeterminado se comporta como en 1.6. Responde a peticiones sin servicio coincidente (hostname desconocido o IP directa) y permite configurar su certificado, TLS, cabeceras y páginas de error. Es permanente: crearlo con `POST /services`, borrarlo con `DELETE /services/default-server`, renombrarlo o renombrar otro servicio hacia él, pasarlo a borrador por `PATCH` o con `POST /services/default-server/convert?convert_to=draft` devuelve `403` con la explicación. Configúralo con `PATCH /services/default-server` y `variables`; nunca cuenta para la cuota PRO. Dos claves de `variables` se rechazan con `400`: `SERVER_TYPE`, incluso si coincide con el almacenado (no tiene un bloque `server{}` de ningún tipo para cambiar; los clientes que leen y reenvían deben quitarla), y cualquier entrada de `DEFAULT_SERVER_STREAM_PORTS_SSL` ausente de `DEFAULT_SERVER_STREAM_PORTS`.
 - **Custom configs**
   - `GET /configs`: lista snippets (servicio por defecto `global`); `with_data=true` incrusta contenido imprimible.
   - `POST /configs`, `POST /configs/upload`: crea snippets vía JSON o subida de archivo.
   - `GET /configs/{service}/{type}/{name}`: obtiene snippet; `with_data=true` para el contenido.
   - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: actualizar o mover snippets gestionados por la API.
   - `DELETE /configs` o `DELETE /configs/{service}/{type}/{name}`: eliminar snippets gestionados por la API; los gestionados por plantillas se omiten.
+  - `PUT /configs/bulk`: sustituye todas las configuraciones personalizadas con una etiqueta `method` dada (sincronización de autoconf). Un aviso sin fallo real, con filas ya guardadas, responde `200`; un rechazo real responde `400`, nunca `500`, porque el cliente HTTP descarta el cuerpo de un `5xx`.
   - Tipos soportados: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, hooks de CRS/plug-in.
 - **Bans**
   - `GET /bans`: lista los bans activos de la base de datos (la lista duradera). **Cambio en 1.7**: antes agregaba los bans en memoria de las instancias, lo que omitía entradas después de un reinicio.
   - `GET /bans/instances`: conserva el comportamiento anterior en un endpoint propio y muestra lo que aplica cada instancia en ese momento.
+  - `GET /bans/timeseries?start=...&end=...&bucket=hour`: ocupación de bloqueos activos por intervalo en `[start, end)`. `bw_bans` conserva una fila por `(ip, ban_scope, service_id)` y volver a bloquear reescribe `created_at`: mide ocupación en el tiempo, no un historial de eventos o creaciones.
   - `POST /bans` o `/bans/ban`: aplica uno o varios bans; la carga puede ser un objeto, un array o JSON como string. El ban se guarda y después se envía a las instancias.
   - `POST /bans/unban` o `DELETE /bans`: elimina bans globalmente o por servicio. Se rechaza una revocación que no pueda guardarse, ya que una instancia que no la recibió podría volver a enseñar el ban a la flota.
 - **Plugins (UI)**
   - `GET /plugins`: lista plugins; `with_data=true` incluye los bytes del paquete cuando están disponibles.
   - `POST /plugins/upload`: instala plugins de UI desde `.zip`, `.tar.gz`, `.tar.xz`.
+  - `PUT /plugins/external`: sustituye en bloque plugins externos/PRO en la base de datos (`delete_missing` elimina los omitidos); los archivos viajan en base64 sobre JSON.
   - `DELETE /plugins/{id}`: elimina un plugin por ID.
+  - `GET /plugins/{id}/page`: datos de la página del plugin como `tar.gz`; `404` si no existe.
+  - `GET /plugins/{id}/icon`: archivo de icono del plugin; solo lo tiene un marcador `@file/<name>`. Un nombre de recurso estático, una clase boxicon o la ausencia de icono devuelve `404`. Se sirve con `Content-Security-Policy: default-src 'none'; sandbox`, `X-Content-Type-Options: nosniff` y `Content-Disposition: inline` entrecomillado para impedir que un SVG ejecute scripts al abrirse directamente. Los archivos mayores de 512 KB devuelven `413`.
 - **Cache (artefactos de jobs)**
   - `GET /cache`: lista archivos de caché con filtros (`service`, `plugin`, `job_name`); `with_data=true` incrusta contenido imprimible.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: obtiene/descarga un archivo de caché específico (`download=true`).
   - `DELETE /cache` o `DELETE /cache/{service}/{plugin}/{job}/{file}`: borra archivos de caché y notifica al scheduler.
 - **Jobs**
   - `GET /jobs`: lista jobs, horarios y resúmenes de caché.
+  - `GET /jobs/{name}/last-run`: última ejecución persistida de un job.
   - `POST /jobs/run`: marca plugins como cambiados para disparar los jobs asociados.
+
+  - `POST /jobs/dispatch`: envía jobs directamente a los workers Celery, sin pasar por el disparador del scheduler; devuelve `503` si no hay broker configurado. El `run_id` de cada job es un token de correlación que aparece al inicio de sus líneas de log, no un identificador consultable. No hay endpoint de resultados de los jobs enviados porque no se usa backend de resultados Celery.
+  - `GET /jobs/queue`: estado actual de las colas Celery (`503` sin broker).
+- **Caché web**
+  - `GET /web-cache/status`, `GET /web-cache/metrics`: estado y métricas de caché del proxy inverso por servicio.
+  - `POST /web-cache/purge`: purga una URL o toda la caché de un servicio.
+- **Sistema**
+  - `GET /system/readonly`: indica si la base de datos está en solo lectura/failover.
+  - `POST /system/checked-changes`: confirma indicadores de cambios procesados.
+- **Usuarios** (cuentas de la interfaz, no clientes de la API)
+  - `GET/POST /users`, `GET/PATCH /users/{username}`: gestión de cuentas.
+  - `GET/DELETE /users/{username}/sessions`, `POST /users/{username}/login`: listado/revocación de sesiones e inicio de sesión.
+  - `POST /users/{username}/recovery-codes/refresh|use`: códigos de recuperación TOTP.
+  - `POST /users/{username}/totp/use`: consume un contador TOTP una sola vez para impedir repetir el código en otro worker de interfaz. Un rechazo es la defensa contra repetición, no un error: se distingue de una caída mediante `consumed: false` en la respuesta `200`.
+  - `GET/POST /users/{username}/webauthn-credentials`, `GET /users/webauthn-credentials/{id}`, `PATCH/DELETE /users/{username}/webauthn-credentials/{id}`: credenciales passkey/WebAuthn.
+  - `GET/PATCH /users/{username}/preferences/{key}`, `POST /users/{username}/access`, `GET /users/{username}/permissions`: preferencias clave-valor por usuario e introspección de ACL.
+- **Plantillas**
+  - `GET /templates`, `GET /templates/{id}`: lista u obtiene una plantilla reutilizable.
+  - `POST /templates`, `PATCH /templates/{id}`, `DELETE /templates/{id}`: crea, modifica o elimina una plantilla.
+- **Grupos de recursos**
+  - `GET /resource_groups`, `GET /resource_groups/{id}`, `GET /resource_groups/{id}/references`: lista u obtiene un alias reutilizable de recursos tipados y consulta sus referencias antes de eliminarlo.
+  - `POST /resource_groups`, `PATCH /resource_groups/{id}`, `DELETE /resource_groups/{id}`, `POST /resource_groups/{id}/clone`: gestión de grupos.
+- **Metadatos**
+  - `GET /metadata`, `PATCH /metadata`: licencia PRO e indicadores del scheduler. No permite sobrescribir el anillo de claves de cifrado de certificados/credenciales.
+- **Certificados**
+  - `GET /certificates`, `GET /certificates/sources`, `GET /certificates/{id}`, `GET /certificates/{id}/download`: inventario central y fuentes declaradas por los plugins.
+  - `PATCH /certificates/{id}`, `POST /certificates/{id}/revoke`, `DELETE /certificates/{id}`: ciclo de vida del certificado.
+  - `POST /certificates/{id}/attachments`, `DELETE /certificates/{id}/attachments/{service}`: adjunta o separa un certificado de un servicio.
+- **Redirecciones** / **Upstreams** — recursos reutilizables y adjuntables
+  - `GET/POST /redirects`, `GET/PATCH/DELETE /redirects/{id}`, `POST/DELETE /redirects/{id}/attachments[/{service}]`: reglas de redirección HTTP adjuntables a varios servicios.
+  - `GET/POST /upstreams`, `GET/PATCH/DELETE /upstreams/{id}`, `POST/DELETE /upstreams/{id}/attachments[/{service}]`: pools HTTP, gRPC o stream, adjuntables a una ruta del proxy inverso o a un servicio stream completo.
+- **Métricas**
+  - `GET /metrics/timings`: tiempos agregados por plugin y fase entre instancias (`METRICS_COLLECT_TIMINGS`).
+  - `GET /metrics/requests`, `GET /metrics/requests/timeseries`, `GET /metrics/requests/top-offenders`, `GET /metrics/requests/top-rules`: datos persistidos del panel Reports, filtrables por `protocol` (`http`, `tcp`, `udp`) y otras facetas.
+  - `GET /metrics/threatmap`: flujo de tráfico bloqueado casi en tiempo real del mapa personal de amenazas.
+- **Fuentes de certificados** (aportadas por plugins)
+  - `GET /bunkernet/effectiveness`, `GET /bunkernet/stats`: eficacia y uso de la inteligencia comunitaria BunkerNet.
+  - `POST /customcert/certificates/upload`: registra un certificado aportado por el operador.
+  - `POST /letsencrypt/certificates`, `POST /letsencrypt/certificates/renew-due`, `GET /letsencrypt/certificates/orphans`: emisión, renovación en bloque de certificados próximos a vencer y listado de huérfanos.
+  - `POST /selfsigned/certificates`, `POST /selfsigned/certificates/renew-due`, `POST /selfsigned/certificates/{certificate_id}/renew`: emisión, renovación en bloque o renovación por ID.
+- **Workflows** (plugin montado en `/workflows`)
+  - `GET /workflows`, `POST /workflows`, `GET/PATCH/DELETE /workflows/{id}`, `POST /workflows/{id}/clone`: cadenas de reglas condicionales de seguridad.
+  - `GET/PUT /workflows/{id}/definition`: lee o sustituye la definición compilada de reglas.
+  - `POST /workflows/validate`, `POST /workflows/{id}/test`: valida una definición o la prueba con una petición de ejemplo antes de guardar.
+  - `POST /workflows/{id}/attachments`, `DELETE /workflows/{id}/attachments/{service}`: adjunta o separa un workflow de un servicio.
 
 ## Comportamiento operativo
 

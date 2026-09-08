@@ -247,6 +247,12 @@ TLS 信任也按实例存储：
 !!! warning "指纹固定是唯一会验证的 TLS 模式"
     当前没有按实例 CA 验证模式。即使端点使用 HTTPS，`off` 也不会验证证书。HTTP 端点在 `pinned` 模式下没有证书可供检查，因此必须同时设置 `listen_https: true`。实例证书轮换时请更新已保存的指纹，否则控制平面对该实例的调用会失败。
 
+### 注册：手动设置 `credential` 的替代方式 {#enrollment-an-alternative-to-setting-credential-by-hand}
+
+通过 UI、API 或环境（`method="manual"`）注册的实例可使用注册代码。操作员调用 `POST /instances/{hostname}/enroll` 签发有时限的一次性代码，仅显示一次；可选 `ttl_seconds` 默认为 900 秒，上限为 3600 秒。实例在启动时自行调用 `POST /instances/enroll`，请求体为 `{hostname, code}`，兑换凭据。此时实例尚无凭据，因此这是该路由器唯一没有认证守卫的端点；保护来自代码的一次性使用、TTL、静态 SHA-512 哈希，以及共享限流器和 API IP 白名单。之后实例保存并只接受新签发的凭据，操作员不必看到或手动设置它。
+
+`POST /instances/{hostname}/rotate` 和 `/revoke` 可轮换或撤销凭据；撤销状态由所有控制平面调用共用的连接入口检查。注册后若持久凭据文件丢失而注册标记仍在，实例会拒绝启动，不会回退到全局 `API_TOKEN`。完全没有数据卷地重建容器会同时丢失标记，因此不在此保护范围内。代码注册与显式 `credential` 独立，按实例部署方式选择即可。
+
 ## 速率限制
 
 默认启用两个字符串：`API_RATE_LIMIT`（全局，默认 `100r/m`）和 `API_RATE_LIMIT_AUTH`（默认 `10r/m` 或 `off`）。支持 NGINX 风格（`3r/s`、`40r/m`、`200r/h`）或冗长格式（`100/minute`、`200 per 30 minutes`）。通过以下方式配置：
@@ -387,7 +393,7 @@ TLS 信任也按实例存储：
 | `MAX_REQUESTS`                  | Worker 回收前的请求数（Gunicorn，防止内存膨胀）                         | 整数                                            | `1000`                                                            |
 | `CAPTURE_OUTPUT`                | 将 Gunicorn stdout/stderr 汇入配置的处理器                              | `yes` 或 `no`                                   | `no`                                                              |
 
-## API 面（能力映射）
+## API 面（能力映射） {#api-surface-capability-map}
 
 - **Core**
   - `GET /ping`, `GET /health`: API 自身存活检查。
@@ -401,9 +407,15 @@ TLS 信任也按实例存储：
   - 健康/操作：`GET /instances/ping`, `GET /instances/{hostname}/ping`, `GET /instances/{hostname}/health`, `POST /instances/reload?test=yes|no`, `POST /instances/{hostname}/reload`, `POST /instances/stop`, `POST /instances/{hostname}/stop`。
   - `GET /instances/{hostname}/health` 转发实例报告的状态：`ok`、`loading` 或 `reloading`；`ping` 只表示是否可达。实例重启后会保持 `loading`，直到收到配置；其定时插件在此状态下不会运行。Scheduler 据此决定是否重新推送。两个路由都需要 `instances_read`。
   - 对繁忙实例的 reload 会被重试而不是直接报告失败，因此 `POST /instances/{hostname}/reload`（以及面向整个集群的 `POST /instances/reload`）的最坏情况延迟约为 54 秒，而不是固定锁读取所暗示的约 35 秒——超时时间较短的调用方可能会看到某次 reload 被报告为失败，而它实际上只是较慢。
+  - `PUT /instances/bulk`：按 `method` 批量同步实例（autoconf 使用）。拒绝 `method="ui"` 或 `method="manual"`，避免删除重建已注册行并清除其凭据。
+  - 注册：`POST /instances/{hostname}/enroll`（需要 `instances_enroll`）签发只显示一次、有时限的注册代码，可用 `ttl_seconds` 覆盖时限。`POST /instances/enroll` 接受 `{hostname, code}`，由启动中的实例兑换凭据；这是本路由器唯一没有 `Depends(guard)` 的路由，由代码的一次性使用、TTL、哈希、共享限流和 IP 白名单保护。之后实例只接受自己的凭据。`POST /instances/{hostname}/rotate` 和 `POST /instances/{hostname}/revoke` 需要 `instances_rotate`；轮换分两阶段进行，实例不可达时返回 `502`，撤销后所有连接均被拒绝。
+  - `PATCH /instances/{hostname}/status`：直接设置 `up`/`down`/`failover`（调度器健康检查循环使用）。
 - **Global settings**
   - `GET /global_settings`: 默认只返回非默认值；加 `full=true` 查看全部，加 `methods=true` 包含来源。
   - `PATCH /global_settings`: upsert API 拥有的全局设置；只读键被拒绝。由其他来源拥有的设置（`scheduler`，即环境变量，以及 `autoconf`、`manual` 或 `wizard`）不能转交给 API：整个负载会以 `409` 拒绝，并列出每个键及其所有者。重复发送外部所有者键当前已有的值不会产生冲突。
+  - `GET /global_config`、`PATCH /global_config`：`GET`/`PATCH /global_settings` 的兼容别名。
+  - `POST /global_settings/validate`：用 `is_valid_setting` 验证设置名及可选候选值，不持久化任何内容。
+  - `PUT /global_settings/config`：一次替换完整配置环境（autoconf 和 UI 配置编辑器使用）。载荷代表完整期望状态，范围内未包含的键会被删除。会导致服务 http-01 验证不可达的配置返回 `400`；`method="autoconf"` 例外，记录冲突后仍保存，避免阻塞其余集群配置。
 - **Services**
   - `GET /services`: 列出服务（默认包含草稿）。
   - `GET /services/{service}`: 获取非默认或完整配置（`full=true`）；`methods=true` 包含来源。
@@ -411,6 +423,7 @@ TLS 信任也按实例存储：
   - `PATCH /services/{service}`: 重命名、更新变量、切换 draft。
   - `DELETE /services/{service}`: 删除服务及派生的配置键。
   - `POST /services/{service}/convert?convert_to=online|draft`: 快速切换 draft/online。
+  - 保留服务 `default-server` 仅在 `MULTISITE=yes` 时由 `GET /services` 返回，并标记 `reserved: true`；`MULTISITE=no` 时无此行，默认服务器与 1.6 相同。它处理不匹配任何服务的请求，并允许配置证书、TLS、响应头和错误页。创建同名服务、`DELETE /services/default-server`、改名（包括把另一服务改为此名）、设为草稿或调用 `POST /services/default-server/convert?convert_to=draft` 均返回 `403`。用 `PATCH /services/default-server` 的 `variables` 配置它；它不占 PRO 服务配额。两种变量返回 `400`：任何值的 `SERVER_TYPE`（包括已存值；读取后回写的客户端须移除该键，因为保留 ID 没有可切换的 `server{}` 块），以及未包含在 `DEFAULT_SERVER_STREAM_PORTS` 中的 `DEFAULT_SERVER_STREAM_PORTS_SSL` 端口。
 - **Custom configs**
   - `GET /configs`: 列出片段（默认服务 `global`）；`with_data=true` 内嵌可打印内容。
   - `POST /configs`, `POST /configs/upload`: 通过 JSON 或文件上传创建片段。
@@ -418,15 +431,20 @@ TLS 信任也按实例存储：
   - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: 更新或移动 API 管理的片段。
   - `DELETE /configs` 或 `DELETE /configs/{service}/{type}/{name}`: 删除 API 管理的片段；模板管理的会被跳过。
   - 支持类型：`http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`，以及 CRS/插件钩子。
+  - `PUT /configs/bulk`：一次替换带指定 `method` 的全部自定义配置（autoconf 同步使用）。仅建议性质的失败（行已提交，只有消息）仍返回 `200`；实际拒绝返回 `400`，不返回 `500`，因为调用方 HTTP 客户端会丢弃 `5xx` 响应体。
 - **Bans**
   - `GET /bans`: 从数据库列出活动封禁（持久列表）。**1.7 中已变更**：过去会汇总实例内存中的封禁，实例重启后可能少报。
   - `GET /bans/instances`: 在独立端点保留旧行为，显示每个实例当前实际执行的封禁。
   - `POST /bans` 或 `/bans/ban`: 应用一个或多个封禁；负载可为对象、数组或字符串化 JSON。封禁会先持久化，再发送给实例。
   - `POST /bans/unban` 或 `DELETE /bans`: 全局或按服务解除封禁。如果撤销无法持久化，API 会拒绝操作，因为未收到撤销的实例之后可能把该封禁重新带回集群。
+  - `GET /bans/timeseries?start=...&end=...&bucket=hour`：`[start, end)` 各区间的活动封禁占用数量。`bw_bans` 对每个 `(ip, ban_scope, service_id)` 只保留一行，再次封禁会改写 `created_at`；因此这是时点占用计数，不是事件或创建历史。
 - **Plugins（UI 插件）**
   - `GET /plugins`: 列出插件；`with_data=true` 包含可用的打包字节。
   - `POST /plugins/upload`: 从 `.zip`、`.tar.gz`、`.tar.xz` 安装 UI 插件。
   - `DELETE /plugins/{id}`: 按 ID 删除插件。
+  - `PUT /plugins/external`：批量替换数据库中的外部/PRO 插件，`delete_missing` 删除载荷未包含的插件；归档通过 JSON 以 base64 传输。
+  - `GET /plugins/{id}/page`：返回插件 UI 页面数据的 `tar.gz`，无页面则返回 `404`。
+  - `GET /plugins/{id}/icon`：返回插件附带图标；只有 `@file/<name>` 标记对应文件，静态资源名、boxicon 类或无图标均返回 `404`。响应带 `Content-Security-Policy: default-src 'none'; sandbox`、`X-Content-Type-Options: nosniff` 和加引号的 `Content-Disposition: inline`，防止直接打开 SVG 执行脚本；超过 512KB 返回 `413`。
 - **Cache（任务制品）**
   - `GET /cache`: 按筛选 (`service`, `plugin`, `job_name`) 列出缓存文件；`with_data=true` 内嵌可打印内容。
   - `GET /cache/{service}/{plugin}/{job}/{file}`: 获取/下载特定缓存文件（`download=true`）。
@@ -434,6 +452,52 @@ TLS 信任也按实例存储：
 - **Jobs**
   - `GET /jobs`: 列出作业、计划和缓存摘要。
   - `POST /jobs/run`: 将插件标记为已变更以触发关联作业。
+
+  - `GET /jobs/{name}/last-run`：任务最新的持久运行记录。
+  - `POST /jobs/dispatch`：直接派发到 Celery Worker，绕过调度器触发路径；未配置代理时返回 `503`。每个任务的 `run_id` 是日志关联标记，作为此次运行每行 Worker 日志的前缀，不是可轮询句柄。应用没有 Celery 结果后端，因此没有查询此派发结果的端点。
+  - `GET /jobs/queue`：Celery Worker 队列当前状态；未配置代理返回 `503`。
+- **Web 缓存**
+  - `GET /web-cache/status`、`GET /web-cache/metrics`：按服务查询反向代理缓存状态和指标。
+  - `POST /web-cache/purge`：清除单个 URL 或服务的全部缓存。
+- **系统**
+  - `GET /system/readonly`：数据库是否处于只读/故障转移状态。
+  - `POST /system/checked-changes`：确认变更跟踪标记已处理。
+- **用户**（Web UI 帐户，不是 API 调用方）
+  - `GET/POST /users`、`GET/PATCH /users/{username}`：帐户管理。
+  - `GET/DELETE /users/{username}/sessions`、`POST /users/{username}/login`：会话列出、撤销和登录。
+  - `POST /users/{username}/recovery-codes/refresh|use`：TOTP 恢复代码。
+  - `POST /users/{username}/totp/use`：一次性消费 TOTP 计数器，防止相同代码在另一个 UI Worker 重放。拒绝表示重放防御生效，不是故障；调用方通过 `200` 响应中的 `consumed: false` 区分。
+  - `GET/POST /users/{username}/webauthn-credentials`、`GET /users/webauthn-credentials/{id}`、`PATCH/DELETE /users/{username}/webauthn-credentials/{id}`：通行密钥/WebAuthn 凭据。
+  - `GET/PATCH /users/{username}/preferences/{key}`、`POST /users/{username}/access`、`GET /users/{username}/permissions`：用户 KV 偏好和 ACL 查询。
+- **模板**
+  - `GET /templates`、`GET /templates/{id}`：列出/读取可复用服务模板。
+  - `POST /templates`、`PATCH /templates/{id}`、`DELETE /templates/{id}`：创建、更新和删除模板。
+- **资源组**
+  - `GET /resource_groups`、`GET /resource_groups/{id}`、`GET /resource_groups/{id}/references`：列出/读取有类型的资源列表别名，并在删除前查看引用。
+  - `POST /resource_groups`、`PATCH /resource_groups/{id}`、`DELETE /resource_groups/{id}`、`POST /resource_groups/{id}/clone`：管理资源组。
+- **元数据**
+  - `GET /metadata`、`PATCH /metadata`：PRO 许可证状态和调度器全局标记，不能覆盖证书/凭据加密密钥环。
+- **证书**
+  - `GET /certificates`、`GET /certificates/sources`、`GET /certificates/{id}`、`GET /certificates/{id}/download`：集中证书清单及插件声明的来源。
+  - `PATCH /certificates/{id}`、`POST /certificates/{id}/revoke`、`DELETE /certificates/{id}`：管理证书生命周期。
+  - `POST /certificates/{id}/attachments`、`DELETE /certificates/{id}/attachments/{service}`：向服务附加或移除证书。
+- **重定向 / 上游池**（可复用、可附加资源）
+  - `GET/POST /redirects`、`GET/PATCH/DELETE /redirects/{id}`、`POST/DELETE /redirects/{id}/attachments[/{service}]`：可附加到多个服务的 HTTP 重定向规则。
+  - `GET/POST /upstreams`、`GET/PATCH/DELETE /upstreams/{id}`、`POST/DELETE /upstreams/{id}/attachments[/{service}]`：附加到反向代理路径或整个 stream 服务的 HTTP、gRPC、stream 上游池。
+- **指标**
+  - `GET /metrics/timings`：集群中按插件、阶段聚合的耗时（`METRICS_COLLECT_TIMINGS`）。
+  - `GET /metrics/requests`、`GET /metrics/requests/timeseries`、`GET /metrics/requests/top-offenders`、`GET /metrics/requests/top-rules`：UI 报告仪表盘的持久报告数据，可按 `protocol` (`http`、`tcp`、`udp`) 等筛选。
+  - `GET /metrics/threatmap`：个人威胁地图页面使用的近实时阻断流量数据。
+- **证书来源**（插件提供）
+  - `GET /bunkernet/effectiveness`、`GET /bunkernet/stats`：BunkerNet 社区威胁情报效果和使用统计。
+  - `POST /customcert/certificates/upload`：将操作员提供的证书加入清单。
+  - `POST /letsencrypt/certificates`、`POST /letsencrypt/certificates/renew-due`、`GET /letsencrypt/certificates/orphans`：签发、批量续期到期证书、列出孤立证书。
+  - `POST /selfsigned/certificates`、`POST /selfsigned/certificates/renew-due`、`POST /selfsigned/certificates/{certificate_id}/renew`：签发、批量续期或按 ID 续期自签名证书。
+- **工作流**（插件提供，挂载到 `/workflows`）
+  - `GET /workflows`、`POST /workflows`、`GET/PATCH/DELETE /workflows/{id}`、`POST /workflows/{id}/clone`：安全工作流条件规则链。
+  - `GET/PUT /workflows/{id}/definition`：读取或替换已编译规则定义。
+  - `POST /workflows/validate`、`POST /workflows/{id}/test`：验证定义，或保存前针对样例请求试运行。
+  - `POST /workflows/{id}/attachments`、`DELETE /workflows/{id}/attachments/{service}`：向服务附加或移除工作流。
 
 ## 运行行为
 

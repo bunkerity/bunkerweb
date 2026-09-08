@@ -414,6 +414,9 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 - **Global settings**
   - `GET /global_settings`: non-defaults by default; add `full=true` for all settings, `methods=true` to include provenance.
   - `PATCH /global_settings`: upsert API-owned globals; read-only keys are rejected. A setting owned by another source (`scheduler`, i.e. an environment variable, plus `autoconf`, `manual`, `wizard`) cannot be taken over: the whole payload is rejected with `409` naming each key and its owner, and nothing is written. Re-sending a value a foreign-owned key already holds is not a conflict.
+  - `GET /global_config`, `PATCH /global_config`: aliases of `GET`/`PATCH /global_settings`, kept for backward compatibility.
+  - `POST /global_settings/validate`: validate a setting name and, optionally, a candidate value against `is_valid_setting`, without persisting anything.
+  - `PUT /global_settings/config`: replace the complete config environment in one call (used by autoconf to persist its merged configuration; the UI's config editor uses it too). Unlike `PATCH`, the payload IS the whole desired state — any in-scope key it omits is deleted. Refuses (`400`) a configuration that would strand a service's http-01 challenge, except for `method="autoconf"`, where the conflict is logged and saved anyway rather than leaving the rest of the fleet unconfigured.
 - **Services**
   - `GET /services`: list services (include drafts by default).
   - `GET /services/{service}`: fetch non-defaults or full config (`full=true`); `methods=true` includes provenance.
@@ -428,23 +431,31 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET /configs/{service}/{type}/{name}`: fetch snippet; `with_data=true` for content.
   - `PATCH /configs/{service}/{type}/{name}`, `PATCH .../upload`: update or move API-managed snippets.
   - `DELETE /configs` or `DELETE /configs/{service}/{type}/{name}`: remove API-managed snippets; template-managed entries are skipped.
+  - `PUT /configs/bulk`: replace every custom config carrying a given `method` tag in one call (used by autoconf to sync its discovered configurations). An advisory-only failure (rows already committed, message-only) still answers `200`; a real refusal answers `400`, never `500` — the caller's HTTP client drops the body of a `5xx`.
   - Supported types: `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, CRS/plugin hooks.
 - **Bans**
   - `GET /bans`: list the active bans from the database (the durable list). **Changed in 1.7** — this used to aggregate the instances' in-memory bans, which under-reports after a restart.
   - `GET /bans/instances`: the previous behaviour, kept as its own endpoint — what each instance is enforcing right now.
+  - `GET /bans/timeseries?start=...&end=...&bucket=hour`: active-ban occupancy per interval over `[start, end)`. `bw_bans` keeps one row per `(ip, ban_scope, service_id)` and a re-ban rewrites `created_at`, so this is a point-in-time occupancy count, not an event/creation history.
   - `POST /bans` or `/bans/ban`: apply one or more bans; payload can be object, array, or stringified JSON. The ban is persisted, then sent to the instances.
   - `POST /bans/unban` or `DELETE /bans`: remove bans globally or per service. A revoke that cannot be persisted is refused, because an instance that missed it would otherwise re-teach the ban to the fleet.
 - **Plugins (UI plugins)**
   - `GET /plugins`: list plugins; `with_data=true` includes packaged bytes when available.
   - `POST /plugins/upload`: install UI plugins from `.zip`, `.tar.gz`, `.tar.xz`.
+  - `PUT /plugins/external`: bulk-replace external/PRO plugins in the database (`delete_missing` prunes what the payload omits); archive bytes travel base64-encoded over JSON.
   - `DELETE /plugins/{id}`: remove a plugin by ID.
+  - `GET /plugins/{id}/page`: the plugin's UI page data as a `tar.gz` blob, `404` if the plugin has none.
+  - `GET /plugins/{id}/icon`: the plugin's shipped icon file, if any (only an `@file/<name>` marker has one; a static-asset name, a boxicon class, or no icon at all answers `404`). Served with `Content-Security-Policy: default-src 'none'; sandbox`, `X-Content-Type-Options: nosniff` and a quoted `Content-Disposition: inline`, so an SVG icon cannot execute script if opened by direct navigation; files over 512KB answer `413`.
 - **Cache (job artefacts)**
   - `GET /cache`: list cache files with filters (`service`, `plugin`, `job_name`); `with_data=true` embeds printable content.
   - `GET /cache/{service}/{plugin}/{job}/{file}`: fetch/download a specific cache file (`download=true`).
   - `DELETE /cache` or `DELETE /cache/{service}/{plugin}/{job}/{file}`: delete cache files and notify scheduler.
 - **Jobs**
   - `GET /jobs`: list jobs, schedules, and cache summaries.
+  - `GET /jobs/{name}/last-run`: the newest persisted run for one job.
   - `POST /jobs/run`: mark plugins as changed to trigger associated jobs.
+  - `POST /jobs/dispatch`: dispatch jobs straight to the Celery workers, bypassing the scheduler's own trigger path; answers `503` if no broker is configured. The response's `run_id` per job is a log-correlation token (it prefixes every worker log line for that run) and not a pollable handle — there is deliberately no endpoint to fetch a dispatched job's result, since the app runs with no Celery result backend.
+  - `GET /jobs/queue`: current state of the Celery worker queues (`503` with no broker configured).
 - **Web cache**
   - `GET /web-cache/status`, `GET /web-cache/metrics`: per-service reverse-proxy cache status and metrics.
   - `POST /web-cache/purge`: purge one URL, or the whole cache for a service.
@@ -455,6 +466,7 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
   - `GET/POST /users`, `GET/PATCH /users/{username}`: account management.
   - `GET/DELETE /users/{username}/sessions`, `POST /users/{username}/login`: session listing/revocation and login.
   - `POST /users/{username}/recovery-codes/refresh|use`: TOTP recovery codes.
+  - `POST /users/{username}/totp/use`: consume a TOTP counter once so the same code cannot be replayed on another UI worker. A refusal is not an error — it is the replay defence firing — so the caller distinguishes it from an outage by the `200` response's `consumed: false`.
   - `GET/POST /users/{username}/webauthn-credentials`, `GET /users/webauthn-credentials/{id}`, `PATCH/DELETE /users/{username}/webauthn-credentials/{id}`: passkey/WebAuthn credentials.
   - `GET/PATCH /users/{username}/preferences/{key}`, `POST /users/{username}/access`, `GET /users/{username}/permissions`: per-user KV preferences and ACL introspection.
 - **Templates**
