@@ -1336,11 +1336,12 @@ volumes:
 
 - `SERVICE_UI=yes` (默认) - 启用 Web UI 服务
 - `SERVICE_SCHEDULER=yes` (默认) - 启用调度器服务
-- `SERVICE_API=no` (默认) - 启用 API 服务 (FastAPI 控制平面)
+- `SERVICE_WORKER` - 调度器启用时默认为 `yes`；可显式关闭本地任务 Worker，或在不运行调度器时单独运行 Worker
+- `SERVICE_API=no` (默认) - 禁用 API 服务 (FastAPI 控制平面)
 - `AUTOCONF_MODE=no` (默认) - 启用自动配置服务
 - `USE_REDIS=yes` (默认) - 启用内置的 [Redis](#redis-integration) 实例
 - `USE_CROWDSEC=no` (默认) - [CrowdSec](#crowdsec-integration) 集成默认禁用
-- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。
+- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`broker`, `redis`、`scheduler`、`worker`、`ui`、`nginx.access`、`nginx.error`、`modsec`。
 - **日志**：一体化镜像会将每个服务的 stdout 和 stderr 输出到容器日志。请使用 `docker logs bunkerweb-aio`（或您偏好的容器日志驱动）来查看和轮转日志；该镜像不会为其 Python 服务写入磁盘日志文件。
 
 ### API 集成
@@ -1418,6 +1419,14 @@ networks:
 
 > 请按照[快速入门指南](quickstart-guide.md#complete-the-setup-wizard)中的后续步骤设置 Web UI。
 
+### 任务代理 {#aio-job-broker}
+
+镜像设置 `CELERY_BROKER_URL=redis://127.0.0.1:6380/0`。启用本地 Worker 时，此默认值会启动容器内的专用 Redis 任务代理。它仅绑定回环地址，内存上限为 `256mb`，使用 `noeviction`，并通过 `/data/broker` 中的 AOF 文件持久化队列。升级时请保留 `/data` 卷；达到内存上限后会拒绝新写入，不会淘汰队列任务或配置推送租约。
+
+API、调度器、Worker、容器健康检查和通过 `docker exec` 启动的命令使用相同的镜像级 URL。使用外部代理时，请显式设置包含认证和 TLS 参数的 `CELERY_BROKER_URL`，内置代理将保持关闭。启用 Worker 时不允许空 URL；`SERVICE_WORKER=no` 也会关闭内置代理。
+
+`USE_REDIS` 和所有 `REDIS_*` 设置仅配置 WAF 数据存储，不会改变专用代理的地址或关闭它，即使 `REDIS_HOST` 指向外部 Redis 或 `REDIS_SSL=yes`。更新曾使用 WAF Redis 执行任务的现有 1.7 部署前，请阅读[切换旧 AIO 任务代理](upgrading.md#aio-broker-upgrade)。
+
 ### Redis 集成 {#redis-integration}
 
 BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。请注意：
@@ -1425,7 +1434,7 @@ BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化�
 - 只有在 `USE_REDIS=yes` **且** `REDIS_HOST` 保持默认值 (`127.0.0.1`/`localhost`) 时，内置 Redis 服务才会启动。
 - 它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。
 - 仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 `REDIS_HOST`，否则内置实例将不会启动。
-- 若要完全禁用 Redis，请设置 `USE_REDIS=no`。
+- 若要禁用 WAF 数据存储，请设置 `USE_REDIS=no`。本地 Worker 需要专用任务代理时，它仍会运行。
 - **配置优先级（重要）：** 内置 Redis 从 `/var/lib/bunkerweb/redis-runtime.conf` 启动，该文件在启动时通过复制 `/etc/redis.conf` 并**仅为配置文件未指定的指令**追加环境变量驱动的默认值生成。因此挂载的自定义 `/etc/redis.conf` 始终优先；下列环境变量仅用于填补缺失。
 - **内存调优：** 默认值遵循 [Redis 最佳实践](features.md#redis-best-practices)——`maxmemory 256mb` 与 `maxmemory-policy volatile-lru`。当配置文件未固定这些值时，可通过 `REDIS_MAXMEMORY` 和 `REDIS_MAXMEMORY_POLICY` 覆盖。
 - **持久化覆盖：** `REDIS_APPENDONLY=yes|no` 切换 AOF（默认 `yes`）；RDB 快照通过 `REDIS_SAVE` 以及可选的 `REDIS_SAVE_0`、`REDIS_SAVE_1`、…… 配置，每个变量提供一对 `save <秒> <变更>`（例如 `REDIS_SAVE_0="900 1"`、`REDIS_SAVE_1="300 10"`）。一旦设置其中任意一个，就会替换内置的 `900 1 / 300 10 / 60 10000` 默认集；空值会写出 `save ""`，禁用 RDB。当配置文件自身已声明 `save` 时忽略。
@@ -1573,7 +1582,7 @@ docker run -d \
 
 ---
 
-#### 禁用中央 API
+#### 禁用中央 API {#禁用中央-api}
 
 若要让 CrowdSec 完全在本地运行，不进行注册、也不与 CrowdSec 服务器通信，请将 `DISABLE_ONLINE_API` 设为 `true`：
 
@@ -1822,6 +1831,37 @@ volumes:
     sudo chmod -R 770 bw-data
     ```
 
+### bwcli 镜像
+
+专用镜像发布为 `bunkerity/bunkerweb-bwcli`：
+
+```shell
+docker pull bunkerity/bunkerweb-bwcli:1.7
+docker pull bunkerity/bunkerweb-bwcli:latest
+docker run --rm bunkerity/bunkerweb-bwcli:1.7 capabilities
+```
+
+从源码构建时，使用 `misc/dev` 中通过 profile 启用的示例：
+
+```shell
+cd misc/dev
+docker compose -f docker-compose.bwcli.yml --profile tools build bwcli
+docker compose -f docker-compose.bwcli.yml --profile tools run --rm bwcli capabilities
+```
+
+`bwcli capabilities` 检查配置的 API 是否可达，SQLite、MySQL、MariaDB、PostgreSQL 的 Python 驱动及导出/恢复客户端是否存在，以及备份路径是否是显式可写挂载。专用镜像也会在必需的备份挂载中持久保存恢复前的安全转储。
+
+| 变量 | 用途 | 默认值 |
+| ---- | ---- | ------ |
+| `BWCLI_API_URL` | 显式 API 主机名或 HTTP(S) 端点；仅取环境变量，防止数据库旧值覆盖实例发现 | 未设置 |
+| `BWCLI_TIMEOUT` | TCP 功能探测超时（秒） | `2` |
+| `BWCLI_OUTPUT` | 功能输出格式 | `table`（也接受 `json`） |
+| `BWCLI_RESTORE_SAFETY_DIRECTORY` | 恢复前安全转储目录 | 专用镜像中为 `/var/lib/bunkerweb/backups/restore-safety` |
+
+任何备份命令打开数据库前，镜像都要求 `/var/lib/bunkerweb/backups` 已挂载且可写。`bwcli plugin backup save` 接受长选项 `--directory PATH`；`-d` 仍是插件命令的调试标志。
+
+此镜像始终带有数据库模块，所以下述凭据说明不适用于它。在 **BunkerWeb 实例容器内部**执行 `docker exec <bw container> bwcli …` 时，容器没有本地数据库模块；若存在 `/var/lib/bunkerweb/instance-credential.json`（已注册实例），则使用实例自己的凭据认证，否则回退到全局 `API_TOKEN`。
+
 ### 调度器容器设置
 
 调度器是控制面的 worker，会读取设置、渲染配置并推送到 BunkerWeb 实例。配置在此集中，包含默认值和可接受值。
@@ -1843,7 +1883,6 @@ volumes:
 | `DISABLE_CONFIGURATION_TESTING` | 应用前跳过配置测试                                                                                                                                                                     | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_FAIL_SENDING_CONFIG`    | 即便部分实例未收到配置也继续                                                                                                                                                           | `yes` 或 `no`                           | `no`                          |
 | `IGNORE_REGEX_CHECK`            | 跳过设置的正则校验（与 autoconf 共享）                                                                                                                                                 | `yes` 或 `no`                           | `no`                          |
-| `SCHEDULER_MAX_WORKERS`         | 调度器作业执行器的最大工作线程数。每个运行线程可占用一个数据库连接，从而限制调度器侧的连接池压力。若解析值超过 `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`，启动时会输出警告。 | 正整数                                  | `min(8, max(2, cpu_count*2))` |
 | `TZ`                            | 调度器日志、类 cron 任务、备份和时间戳使用的时区                                                                                                                                       | TZ 数据库名（如 `UTC`、`Europe/Paris`） | unset（容器默认，通常为 UTC） |
 
 ##### 数据库
@@ -1899,12 +1938,17 @@ UI 容器同样遵循 `TZ`，用于本地化日志和计划任务（例如 UI �
 
 - BunkerWeb
 - 调度器
+- API
+- Worker
+- 任务代理
 - 您的服务
+
+Worker 和任务代理是 1.7 的新组件，1.6 已提供但未被参考堆栈使用的 API 现在也必不可少。调度器通过 API 将任务派发到代理，由 Worker 执行。缺少这三个组件时，堆栈可能显示健康，却完全不运行后台任务。
 
 出于深度防御的目的，我们强烈建议创建至少三个不同的 Docker 网络：
 
 - `bw-services`：用于 BunkerWeb 和您的 Web 服务
-- `bw-universe`：用于 BunkerWeb 和调度器
+- `bw-universe`：用于 BunkerWeb、调度器、API、Worker 和任务代理
 - `bw-db`：用于数据库（如果您正在使用）
 
 为了保护调度器和 BunkerWeb API 之间的通信，**请授权 API 调用**。使用 `API_WHITELIST_IP` 设置来指定允许的 IP 地址和子网。为了更强的保护，请在两个容器中设置 `API_TOKEN`；调度器将自动包含 `Authorization: Bearer <token>`。
@@ -1958,41 +2002,117 @@ networks:
 
 ### 完整的 compose 文件
 
+以下基础堆栈位于仓库的 [`misc/integrations/docker.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/docker.yml)，与其他参考堆栈一样由测试套件检查。它使用 SQLite；同目录还有 MariaDB、MySQL、PostgreSQL 和 Oracle 版本（`docker.mariadb.yml` 等），每个版本对应的 `.ui.yml` 文件包含 Web UI。
+
 ```yaml
-x-bw-api-env: &bw-api-env
-  # 我们使用一个锚点来避免在两个容器中重复相同的设置
-  API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+x-env: &env
+  # Spelled out even though it is the default everywhere else: the worker is the one component
+  # that reads an unset DATABASE_URI as "no database at all" (worker/app.py::init_worker_db)
+  # rather than falling back to this path. Left blank, its jobs record no run and, worse, see
+  # compiled defaults instead of the configuration below.
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
-    ports:
-      - "80:8080/tcp"
-      - "443:8443/tcp"
-      - "443:8443/udp" # QUIC
-    environment:
-      <<: *bw-api-env
     restart: "unless-stopped"
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      <<: *env
+    volumes:
+      - bw-instance-data:/data
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
-    environment:
-      <<: *bw-api-env
-      BUNKERWEB_INSTANCES: "bunkerweb" # 这个设置是强制性的，用来指定 BunkerWeb 实例
-      SERVER_NAME: "www.example.com"
     volumes:
-      - bw-storage:/data # 用于持久化缓存和备份等其他数据
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
+    volumes:
+      # 共享 DATABASE_URI 选择 SQLite，路径为
+      # /var/lib/bunkerweb/db.sqlite3 -> /data/lib/db.sqlite3. That file is the database, so the
+      # scheduler, the API and the worker all mount this one volume; they run as the same
+      # uid/gid (101) and SQLite is opened in WAL mode with a busy timeout. Point DATABASE_URI at
+      # a real server (see the docker.<engine>.yml stacks) before putting this under load.
+      - bw-storage:/data
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+    networks:
+      - bw-universe
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     restart: "unless-stopped"
     networks:
       - bw-universe
 
 volumes:
+  bw-jobs-broker-data:
   bw-storage:
+  bw-instance-data:
 
 networks:
   bw-universe:
@@ -2000,7 +2120,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 10.20.30.0/24 # 静态子网，以便只有授权的源可以访问 BunkerWeb API
+        - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
 ```
@@ -2035,7 +2155,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 - Fedora 43 和 44
 - Red Hat Enterprise Linux (RHEL)、CentOS、Rocky Linux 和 AlmaLinux 8, 9 和 10
 
-### 简易安装脚本
+### 简易安装脚本 {#easy-installation-script}
 
 为了简化安装体验，BunkerWeb 提供了一个简易安装脚本，可以自动处理整个设置过程，包括 NGINX 安装、仓库配置和服务设置。
 
@@ -2129,9 +2249,13 @@ sudo ./install-bunkerweb.sh
 | `--tui`                 | 强制使用 TUI（gum 或 whiptail）。若两者都无法安装则中止。       |
 | `--no-tui`              | 禁用所有 TUI 层级并使用纯文本提示。等同于 `BW_INSTALL_TUI=no`。 |
 | `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。                |
-| `-q, --quiet`           | 静默安装（抑制输出）。                                          |
+| `-q, --quiet`           | 静默安装（抑制输出，隐含 `--yes`）。                                          |
 | `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。                   |
 | `--no-api`              | 明确禁用 API 服务。                                             |
+| `--force-type-change` | 允许升级时 `--<type>` 与检测出的安装类型不同，仅用于有意的 HA 迁移。 |
+| `--server-ip IP` | 安装后 URL 中显示的 IP，覆盖自动检测，也可通过 `SERVER_IP_INPUT` 设置。 |
+| `--epel` | RHEL 系发行版缺少 `epel-release` 时安装它。 |
+| `--no-epel` | 不安装 `epel-release`。 |
 | `-h, --help`            | 显示包含所有可用选项的帮助信息。                                |
 | `--dry-run`             | 显示将要安装的内容，但不实际执行。                              |
 
@@ -2155,12 +2279,13 @@ sudo ./install-bunkerweb.sh
 | `--crowdsec-appsec` | 安装带有 AppSec 组件的 CrowdSec（包括 WAF 功能）。 |
 | `--redis`           | 本地安装并配置 Redis。                             |
 | `--no-redis`        | 跳过 Redis 集成。                                  |
+| `--redis-flavor FLAVOR` | 本地安装类型：`redis`（默认）或 `valkey`。 |
 
 **高级选项：**
 
 | 选项                        | 描述                                                             |
 | --------------------------- | ---------------------------------------------------------------- |
-| `--instances "IP1 IP2"`     | 以空格分隔的 BunkerWeb 实例列表（在管理器/调度器模式下为必需）。 |
+| `--instances "IP1 IP2"`     | 以空格分隔的 BunkerWeb 实例列表（安装时可选）。 |
 | `--manager-ip IPs`          | 管理器/调度器 IP 白名单（在非交互模式下的工作节点中为必需）。    |
 | `--dns-resolvers "IP1 IP2"` | 自定义 DNS 解析器 IP（用于完整、管理器或工作节点安装）。         |
 | `--api-https`               | 为内部 API 通信启用 HTTPS（默认：仅 HTTP）。                     |
@@ -2175,51 +2300,120 @@ sudo ./install-bunkerweb.sh
 | `--redis-no-ssl`            | 禁用 Redis 连接的 SSL/TLS。                                      |
 | `--redis-ssl-verify`        | 验证 Redis SSL 证书。                                            |
 | `--redis-no-ssl-verify`     | 不验证 Redis SSL 证书。                                          |
+| `--redis-bind IP` | 管理器本地 Redis/Valkey 绑定地址，默认提示为 `0.0.0.0`。 |
+| `--redis-no-password` | 绑定到回环之外时跳过自动生成的 `requirepass`。 |
+| `--redis-maxmemory MB` | 内存上限（MB），`0` 或 `unlimited` 保留发行版默认值。 |
+| `--redis-maxmemory-policy POLICY` | 本地 Redis/Valkey 淘汰策略，默认 `volatile-lru`。 |
+
+**数据库选项（仅 `--full` / `--manager`）：**
+
+| 选项 | 说明 |
+| ---- | ---- |
+| `--database ENGINE` | `mariadb` 或 `postgresql` 自动本地安装，`external` 使用现有远程库，`none` 使用 SQLite。 |
+| `--db-engine ENGINE` | 外部引擎：`mariadb`、`mysql`、`postgresql`；单独设置时隐含 `--database external`。 |
+| `--db-host HOST` | 外部数据库主机名或 IP。 |
+| `--db-port PORT` | 外部 TCP 端口：MariaDB/MySQL 默认 3306，PostgreSQL 默认 5432。 |
+| `--db-name NAME` | 数据库名，默认 `bw_db`。 |
+| `--db-user USER` | 数据库用户，默认 `bunkerweb`。 |
+| `--db-password PASS` | 外部数据库必需密码；至少 8 字符，不含引号、反斜杠或反引号。 |
+| `--db-ssl` | 外部数据库连接启用 SSL/TLS。 |
+| `--db-no-ssl` | 外部数据库连接禁用 SSL/TLS。 |
+| `--db-ssl-verify` | 验证外部数据库服务器证书。 |
+| `--db-no-ssl-verify` | 使用 SSL 但跳过证书验证。 |
+| `--db-skip-probe` | 不从本机探测外部数据库连接；适合本机未装客户端或数据库仅在调度器网段可达的情况。 |
+
+**Web UI 管理员（仅 `--full` / `--manager` / `--ui-only`）：**
+
+没有管理员标志时，交互安装器会询问是否创建 UI 管理员。向导关闭时默认为**是**（管理器始终关闭向导，其他模式可用 `--no-wizard`）；向导启用时默认为**否**，由首次启动向导收集凭据。向导启用时也可预建管理员，从而跳过向导的管理员步骤。
+
+| 选项 | 说明 |
+| ---- | ---- |
+| `--ui-admin-user NAME` | 预建此名称的首个 UI 管理员，跳过向导的管理员步骤。 |
+| `--ui-admin-password PASS` | 管理员密码；隐含创建管理员，用户名缺省为 `admin`。密码省略时自动生成；至少 8 字符，含大小写、数字和特殊字符。 |
+| `--no-ui-admin` | 完全跳过管理员创建提示；向导关闭时，UI 没有初始登录，须用其他方式配置凭据。 |
+| `--ui-https-selfsigned` | 仅管理器：生成自签名证书并在 UI 监听器启用 HTTPS。 |
+| `--no-ui-https-selfsigned` | 仅管理器：关闭 UI 自签名 HTTPS。 |
+
+!!! warning "外部数据库说明"
+    - 非交互模式下 `--database external` 需要 `--db-engine`、`--db-host`、`--db-password`；库名和用户名有默认值。
+    - 生产环境应配合使用 `--db-ssl` 和 `--db-ssl-verify`。`--db-no-ssl-verify` 接受未经验证的证书，无法抵御主动中间人攻击。
+    - 安装器构造 DSN 后探测连接。本机缺少 `mariadb`、`mysql` 或 `psql` 时警告并跳过；实际探测失败时，交互模式询问是否仍写入 DSN，非交互模式中止，除非设置 `--db-skip-probe`。
+    - 执行下列示例前，将 `YourStrongDbPassword` 和 `YourStrongUiPassw0rd!` 替换为密钥管理器中的值。
 
 **用法示例：**
 
 ```bash
-# 以交互模式运行（推荐给大多数用户）
+# Run in interactive mode (recommended for most users)
 sudo ./install-bunkerweb.sh
 
-# 使用默认设置进行非交互式安装（完整堆栈，启用向导）
+# Non-interactive installation with defaults (full stack, wizard enabled)
 sudo ./install-bunkerweb.sh --yes
 
-# 安装一个不带设置向导的工作节点
+# Install a Worker node interactively without the setup wizard
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
-# 安装一个特定版本
+# Install a specific version
 sudo ./install-bunkerweb.sh --version 1.7.0~beta
 
-# 带有远程工作实例的管理器设置（需要 instances）
+# Manager setup with remote worker instances (optional at install time)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
 
-# 具有内部 HTTPS API 通信的管理器
+# Manager with HTTPS internal API communication
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api-https
 
-# 具有自定义 DNS 解析器和内部 HTTPS API 的工作节点
+# Worker with custom DNS resolvers and HTTPS internal API
 sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-https
 
-# 带有 CrowdSec 和 AppSec 的完整安装
+# Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
 
-# 使用现有 Redis 服务器的完整安装
+# Manager installation with CrowdSec enabled from the CLI
+sudo ./install-bunkerweb.sh --manager --crowdsec
+
+# Full installation using an existing Redis server
 sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
 
-# 静默非交互式安装
+# Full installation against an existing external MariaDB
+sudo ./install-bunkerweb.sh --yes --no-wizard \
+    --database external --db-engine mariadb \
+    --db-host mariadb.example.com --db-port 3306 \
+    --db-name bw_db --db-user bunkerweb --db-password 'YourStrongDbPassword' \
+    --db-ssl --db-ssl-verify \
+    --ui-admin-user admin --ui-admin-password 'YourStrongUiPassw0rd!'
+
+# Full installation against an existing external PostgreSQL
+sudo ./install-bunkerweb.sh --yes --no-wizard \
+    --database external --db-engine postgresql \
+    --db-host pg.example.com --db-port 5432 \
+    --db-name bw_db --db-user bunkerweb --db-password 'YourStrongDbPassword' \
+    --ui-admin-user admin --ui-admin-password 'YourStrongUiPassw0rd!'
+
+# Pre-create the admin user on a full install (random password printed at the end)
+sudo ./install-bunkerweb.sh --no-wizard --ui-admin-user admin
+
+# Silent non-interactive installation
 sudo ./install-bunkerweb.sh --quiet --yes
 
-# 预览安装而不执行
+# Preview installation without executing
 sudo ./install-bunkerweb.sh --dry-run
 
-# 在简易安装期间启用 API（非交互式）
+# Enable the API during easy install (non-interactive)
 sudo ./install-bunkerweb.sh --yes --api
 
-# 错误：CrowdSec 不能用于工作节点安装
-# sudo ./install-bunkerweb.sh --worker --crowdsec  # 这将失败
+# Error: CrowdSec cannot be used with worker, scheduler-only, ui-only, or api-only installations
+# sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
 
-# 错误：在非交互模式下，管理器需要 instances
-# sudo ./install-bunkerweb.sh --manager --yes  # 如果没有 --instances，这将失败
+# Error: API service not available for worker installations
+# sudo ./install-bunkerweb.sh --worker --api  # This will fail
+
+# Manager non-interactive install without initial workers (the installer warns; add workers later)
+sudo ./install-bunkerweb.sh --manager --yes
+
+# Install API-only mode
+sudo ./install-bunkerweb.sh --api-only
+
+# Manager with API service enabled
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api
 ```
 
 !!! warning "关于选项兼容性的重要说明"
@@ -2291,9 +2485,29 @@ sudo ./install-bunkerweb.sh --yes --api
 
 **未启用设置向导：**
 
-1.  编辑 `/etc/bunkerweb/variables.env` 来手动配置 BunkerWeb
-2.  添加您的服务器设置和受保护的服务
-3.  重启调度器：`sudo systemctl restart bunkerweb-scheduler`
+按安装类型配置：
+
+- **完整堆栈**：编辑 `/etc/bunkerweb/variables.env`，然后 `sudo systemctl restart bunkerweb bunkerweb-scheduler`。
+- **管理器**：若安装时未配置数据库，为调度器和 UI 配置共享 `DATABASE_URI`。UI 默认监听 `127.0.0.1:7000`，可通过反向代理、SSH 隧道或修改 `LISTEN_ADDR` 有意开放访问。
+- **实例工作节点**：编辑 `/etc/bunkerweb/variables.env`，然后 `sudo systemctl restart bunkerweb`。
+- **仅调度器**：在 `/etc/bunkerweb/scheduler.env` 配置 `DATABASE_URI`，然后 `sudo systemctl restart bunkerweb-scheduler`。
+- **仅 UI**：在 `/etc/bunkerweb/ui.env` 配置 `DATABASE_URI`，然后 `sudo systemctl restart bunkerweb-ui`。
+- **仅 API**：在 `/etc/bunkerweb/api.env` 配置 `DATABASE_URI`，然后 `sudo systemctl restart bunkerweb-api`。
+
+!!! info "数据库配置"
+    独立管理器、调度器、UI 和 API 需要共享 `DATABASE_URI`。安装器为完整堆栈或管理器配置数据库时将其写入 `/etc/bunkerweb/variables.env`，否则请在服务环境文件手动设置。格式为 `mariadb+pymysql://user:password@host:port/database`（也可用 `postgresql://`、`mysql+pymysql://`、`sqlite:////path/to/db.sqlite`）。
+
+!!! info "任务代理配置"
+    从 1.7 起，调度器只派发任务，由 Celery `bunkerweb-worker` 执行，通过 Redis/Valkey 任务代理传递。代理不可达时，堆栈仍可能健康启动，却没有证书续期、封禁列表/GeoIP 刷新或备份。
+
+    安装脚本配置 `127.0.0.1:6380` 上的专用 `bunkerweb-broker`（配置文件 `/etc/bunkerweb/broker.conf`），并将 `CELERY_BROKER_URL` 写入 `/etc/bunkerweb/variables.env`；Worker 和 API 都先读取该文件，所以一次配置覆盖两者。`--no-broker` 可跳过，或用 `--broker-url redis://:password@host:6379/0` 指向已有代理。
+
+    从软件包安装时，`redis-server`/`valkey` 是强制依赖，安装后会启用。未配置的发行版 Redis 在 `127.0.0.1:6379` 可直接使用，默认 `CELERY_BROKER_URL` 指向它。有两种静默故障：
+
+    - **密码**：默认 URL 没有认证，设置 `requirepass` 会让派发以 `NOAUTH` 失败。设置 `CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0`。
+    - **与有限内存的 WAF 数据存储共用实例**：`volatile-*`/`allkeys-*` 可能提前淘汰代理中带 TTL 的正确性租约，造成重复推送。应使用独立代理和 `maxmemory-policy noeviction`。没有 `maxmemory` 的发行版 Redis 从不淘汰键，所以软件包默认配置安全。
+
+    网络代理使用 `rediss://` 时必须显式设置 `ssl_cert_reqs`；裸 `rediss://` 会使用 TLS 但不验证证书。示例：`rediss://:<password>@broker.example.com:6379/0?ssl_cert_reqs=required`。
 
 ### 使用软件包管理器安装
 
@@ -2571,87 +2785,153 @@ export SERVICE_UI=yes
 
 为了支持此功能，请使用一个专用的“真实”数据库后端（例如，MariaDB、MySQL 或 PostgreSQL）进行同步配置存储。通过集成 `bw-autoconf` 和合适的数据库后端，您为 BunkerWeb 中无缝的自动配置管理建立了基础设施。
 
+基础堆栈位于 [`misc/integrations/autoconf.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/autoconf.mariadb.yml)，与其他参考堆栈一样由测试套件检查。同目录提供 `autoconf.mysql.yml`、`autoconf.postgres.yml`、`autoconf.oracle.yml`，各自的 `.ui.yml` 文件添加 Web UI。
+
 ```yaml
-x-bw-env: &bw-env
-  # 我们使用一个锚点来避免在两个容器中重复相同的设置
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
   AUTOCONF_MODE: "yes"
-  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    restart: "unless-stopped"
     ports:
-      - "80:8080/tcp"
-      - "443:8443/tcp"
-      - "443:8443/udp" # QUIC
+      - 80:8080
+      - 443:8443
     labels:
-      - "bunkerweb.INSTANCE=yes" # 自动配置服务识别 BunkerWeb 实例的强制性标签
+      - "bunkerweb.INSTANCE=yes"
     environment:
-      <<: *bw-env
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     volumes:
       - bw-instance-data:/data
-    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-    environment:
-      <<: *bw-env
-      BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测
-      SERVER_NAME: "" # 服务器名称将由服务标签填充
-      MULTISITE: "yes" # 自动配置的强制性设置
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-    volumes:
-      - bw-storage:/data # 用于持久化缓存和备份等其他数据
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-      - bw-db
-
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
       - bw-docker
     environment:
-      AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
-      DOCKER_HOST: "tcp://bw-docker:2375" # Docker 套接字
-    restart: "unless-stopped"
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
     networks:
       - bw-universe
       - bw-docker
       - bw-db
 
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bunkerweb
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - bw-storage:/data
     environment:
-      CONTAINERS: "1"
-      LOG_LEVEL: "warning"
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     restart: "unless-stopped"
     networks:
-      - bw-docker
+      - bw-universe
 
   bw-db:
     image: mariadb:11
-    # 我们设置了最大允许的数据包大小以避免大查询的问题
+    restart: "unless-stopped"
     command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"
       MYSQL_USER: "bunkerweb"
-      MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
       - bw-data:/var/lib/mysql
-    restart: "unless-stopped"
     networks:
       - bw-db
 
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    restart: "unless-stopped"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
 volumes:
+  bw-jobs-broker-data:
+  bw-worker-storage:
   bw-data:
   bw-storage:
   bw-instance-data:
@@ -2869,7 +3149,11 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
       未设置时表示全局应用。
     - 删除该注解或删除 ConfigMap 会移除对应的自定义配置。
 
-为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
+为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf、调度器、API 和 Worker** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
+
+从 1.7 起，堆栈还需要 **API**、**Worker** 和**任务代理**：调度器不再自行执行任务，而是通过 API 派发到代理，由 Worker 执行。参考清单定义了 `bunkerweb-api`、`bunkerweb-worker` 和 `bunkerweb-jobs-broker` Deployment，以及对应的 `svc-bunkerweb-api` 和 `svc-bunkerweb-jobs-broker` Service（[`misc/integrations/k8s.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/k8s.mariadb.yml)）。缺少它们时，堆栈可能健康启动却没有证书续期、封禁列表刷新或备份。
+
+任务代理是独立于下述共享数据存储的 Redis/Valkey 实例，因此清单为其定义专用 `bunkerweb-jobs-broker` Deployment。代理必须使用 `noeviction`，避免丢弃队列任务；数据存储通常设置上限并允许淘汰。`maxmemory-policy` 按服务器而非数据库生效，单个服务器无法同时使用两种策略。
 
 鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见[此处](features.md#redis)。
 
@@ -2899,7 +3183,7 @@ autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/conce
 请确保自动配置服务有权访问 Kubernetes API。建议为此目的利用 [RBAC 授权](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)。
 
 !!! warning "Kubernetes API 的自定义 CA"
-    如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 `KUBERNETES_SSL_CA_CERT` 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 `KUBERNETES_SSL_VERIFY` 环境变量设置为 `no`（默认为 `yes`）来禁用证书验证。
+    如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 `KUBERNETES_SSL_CA_CERT` 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 `KUBERNETES_VERIFY_SSL` 环境变量设置为 `no`（默认为 `yes`）来禁用证书验证。
 
 此外，**在使用 Kubernetes 集成时，将 `KUBERNETES_MODE` 环境变量设置为 `yes` 至关重要**。此变量是正常运行所必需的。如果你使用 Gateway API，还需要设置 `KUBERNETES_GATEWAY_MODE=yes`。
 
@@ -3196,7 +3480,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.7.0-beta
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)

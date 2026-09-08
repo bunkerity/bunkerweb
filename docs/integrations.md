@@ -1290,11 +1290,12 @@ The All-In-One image comes with several built-in services, which can be controll
 
 - `SERVICE_UI=yes` (default) - Enables the web UI service
 - `SERVICE_SCHEDULER=yes` (default) - Enables the Scheduler service
+- `SERVICE_WORKER` - Defaults to `yes` when the Scheduler is enabled; set it explicitly to disable the local job worker or run it without the Scheduler
 - `SERVICE_API=no` (default) - Disables the API service (FastAPI control plane)
 - `AUTOCONF_MODE=no` (default) - Enables the autoconf service
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
-- `HIDE_SERVICE_LOGS=` (optional) - Comma-separated list of services to silence in container logs. Accepted values: `api`, `autoconf`, `bunkerweb`, `crowdsec`, `redis`, `scheduler`, `ui`, `nginx.access`, `nginx.error`, `modsec`.
+- `HIDE_SERVICE_LOGS=` (optional) - Comma-separated list of services to silence in container logs. Accepted values: `api`, `autoconf`, `bunkerweb`, `crowdsec`, `broker`, `redis`, `scheduler`, `worker`, `ui`, `nginx.access`, `nginx.error`, `modsec`.
 - **Logging**: The all-in-one image streams every service's stdout and stderr to the container output. Use `docker logs bunkerweb-aio` (or your preferred container logging driver) to view and rotate logs — the image does not write on-disk log files for its Python services.
 
 A named volume (or bind mount) is required to persist the SQLite database, cache, and backups stored under `/data` inside the container:
@@ -1430,6 +1431,14 @@ By default, the setup wizard is automagically launched when you run the AIO cont
 
 > Follow the next steps in the [Quickstart guide](quickstart-guide.md#complete-the-setup-wizard) to set up the Web UI.
 
+### Job broker {#aio-job-broker}
+
+The image sets `CELERY_BROKER_URL=redis://127.0.0.1:6380/0`. With the local Worker enabled, this default starts a dedicated Redis broker inside the container. It binds only to loopback, uses a `256mb` memory limit with `noeviction`, and persists its queue through AOF files in `/data/broker`. Keep the `/data` volume across upgrades. When the memory limit is reached, new writes fail instead of evicting queued jobs or configuration-push leases.
+
+The API, Scheduler, Worker, container healthcheck and commands started through `docker exec` use the same image-level URL. To use an external broker, explicitly set `CELERY_BROKER_URL` with its authentication and TLS parameters; the embedded broker then stays disabled. An empty URL is rejected when the Worker is enabled. With `SERVICE_WORKER=no`, the embedded broker is disabled too.
+
+`USE_REDIS` and every `REDIS_*` setting configure only the WAF datastore. They neither redirect nor disable the dedicated broker, including when `REDIS_HOST` names an external Redis or `REDIS_SSL=yes`. See [switching an older AIO broker](upgrading.md#aio-broker-upgrade) before updating an existing 1.7 deployment that used the WAF Redis for jobs.
+
 ### Redis Integration {#redis-integration}
 
 The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). Keep in mind:
@@ -1437,7 +1446,7 @@ The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persis
 - The embedded Redis service only starts when `USE_REDIS=yes` **and** `REDIS_HOST` is left at its default (`127.0.0.1`/`localhost`).
 - It listens on the container loopback interface, so it is available to processes inside the container but not from other containers or the host.
 - Override `REDIS_HOST` only when you have an external Redis/Valkey endpoint to connect to—doing so prevents the embedded instance from launching.
-- To disable Redis entirely, set `USE_REDIS=no`.
+- To disable the WAF datastore, set `USE_REDIS=no`. The dedicated job broker remains enabled while the local Worker needs it.
 - **Config precedence (important):** the embedded Redis is launched from `/var/lib/bunkerweb/redis-runtime.conf`, built at boot by copying `/etc/redis.conf` and appending env-driven defaults **only for directives the conf file is silent about**. A mounted custom `/etc/redis.conf` therefore always wins; the env vars below only fill the gaps.
 - **Memory tuning:** out-of-the-box defaults follow the [Redis Best Practices](features.md#redis-best-practices) — `maxmemory 256mb` and `maxmemory-policy volatile-lru`. Override via `REDIS_MAXMEMORY` and `REDIS_MAXMEMORY_POLICY` when the conf does not pin them.
 - **Persistence overrides:** `REDIS_APPENDONLY=yes|no` toggles AOF (default `yes`); RDB snapshots are configured with `REDIS_SAVE` plus optional `REDIS_SAVE_0`, `REDIS_SAVE_1`, … each providing one `save <seconds> <changes>` pair (e.g. `REDIS_SAVE_0="900 1"`, `REDIS_SAVE_1="300 10"`). Setting any of these env vars replaces the built-in `900 1 / 300 10 / 60 10000` default set; an empty value emits `save ""`, disabling RDB. Ignored when the conf already declares `save` itself.
@@ -1898,7 +1907,6 @@ The scheduler is the control-plane worker that reads settings, renders configs, 
 | `DISABLE_CONFIGURATION_TESTING` | Skip config tests before applying                                                                                                                                                                                                                                 | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Proceed even if some instances fail to receive a config                                                                                                                                                                                                           | `yes` or `no`                                  | `no`                                   |
 | `IGNORE_REGEX_CHECK`            | Skip regex validation for settings (shared with autoconf)                                                                                                                                                                                                         | `yes` or `no`                                  | `no`                                   |
-| `SCHEDULER_MAX_WORKERS`         | Max worker threads in the scheduler's job executor. Each running thread can hold one DB connection, so this caps scheduler-side DB-pool pressure. A startup warning is emitted if the resolved value exceeds `DATABASE_POOL_SIZE` + `DATABASE_POOL_MAX_OVERFLOW`. | Positive integer                               | `min(8, max(2, cpu_count*2))`          |
 | `TZ`                            | Time zone for scheduler logs, cron-like jobs, backups, and timestamps                                                                                                                                                                                             | TZ database name (e.g., `UTC`, `Europe/Paris`) | unset (container default, usually UTC) |
 
 ##### Database
@@ -1954,12 +1962,20 @@ The typical BunkerWeb stack when using Docker integration contains the following
 
 - BunkerWeb
 - Scheduler
+- API
+- Worker
+- Job broker
 - Your services
+
+The Worker and the job broker are new in 1.7, and the API — which shipped in 1.6 but ran in no
+reference stack — is now required: the Scheduler dispatches its jobs through the API onto the
+broker instead of running them itself, and the Worker executes them. A stack without the three
+comes up healthy and runs no background job at all.
 
 For defense-in-depth purposes, we strongly recommend creating at least three different Docker networks:
 
 - `bw-services`: for BunkerWeb and your web services
-- `bw-universe`: for BunkerWeb and the scheduler
+- `bw-universe`: for BunkerWeb, the scheduler, the API, the worker and the job broker
 - `bw-db`: for the database (if you are using one)
 
 To secure communication between the scheduler and the BunkerWeb API, **authorize API calls**. Use the `API_WHITELIST_IP` setting to specify allowed IP addresses and subnets. For stronger protection, set `API_TOKEN` in both containers; the scheduler will automatically include `Authorization: Bearer <token>`.
@@ -2013,41 +2029,117 @@ networks:
 
 ### Full compose file
 
+Here is the stack boilerplate, kept in the repository at [`misc/integrations/docker.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/docker.yml) and swept by the test suite like every other reference stack. It uses SQLite; MariaDB, MySQL, PostgreSQL and Oracle variants live next to it (`docker.mariadb.yml` and siblings), and a `.ui.yml` sibling of each adds the embedded web UI.
+
 ```yaml
-x-bw-api-env: &bw-api-env
-  # We use an anchor to avoid repeating the same settings for both containers
-  API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+x-env: &env
+  # Spelled out even though it is the default everywhere else: the worker is the one component
+  # that reads an unset DATABASE_URI as "no database at all" (worker/app.py::init_worker_db)
+  # rather than falling back to this path. Left blank, its jobs record no run and, worse, see
+  # compiled defaults instead of the configuration below.
+  DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
-    ports:
-      - "80:8080/tcp"
-      - "443:8443/tcp"
-      - "443:8443/udp" # QUIC
-    environment:
-      <<: *bw-api-env
     restart: "unless-stopped"
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    environment:
+      <<: *env
+    volumes:
+      - bw-instance-data:/data
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
-    environment:
-      <<: *bw-api-env
-      BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
-      SERVER_NAME: "www.example.com"
     volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like backups
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com"
+    networks:
+      - bw-universe
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
+    volumes:
+      # The shared DATABASE_URI selects SQLite at
+      # /var/lib/bunkerweb/db.sqlite3 -> /data/lib/db.sqlite3. That file is the database, so the
+      # scheduler, the API and the worker all mount this one volume; they run as the same
+      # uid/gid (101) and SQLite is opened in WAL mode with a busy timeout. Point DATABASE_URI at
+      # a real server (see the docker.<engine>.yml stacks) before putting this under load.
+      - bw-storage:/data
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+    networks:
+      - bw-universe
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     restart: "unless-stopped"
     networks:
       - bw-universe
 
 volumes:
+  bw-jobs-broker-data:
   bw-storage:
+  bw-instance-data:
 
 networks:
   bw-universe:
@@ -2055,7 +2147,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 10.20.30.0/24 # Static subnet so only authorized sources can access the BunkerWeb API
+        - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
 ```
@@ -2755,74 +2847,128 @@ To enable automated configuration updates, include an additional container calle
 
 To support this functionality, use a dedicated "real" database backend (e.g., MariaDB, MySQL, or PostgreSQL) for synchronized configuration storage. By integrating `bw-autoconf` and a suitable database backend, you establish the infrastructure for seamless automated configuration management in BunkerWeb.
 
+Here is the stack boilerplate, kept in the repository at [`misc/integrations/autoconf.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/autoconf.mariadb.yml) and swept by the test suite like every other reference stack. MySQL, PostgreSQL and Oracle variants live next to it (`autoconf.mysql.yml`, `autoconf.postgres.yml`, `autoconf.oracle.yml`), and a `.ui.yml` sibling of each adds the embedded web UI.
+
 ```yaml
-x-bw-env: &bw-env
-  # We use an anchor to avoid repeating the same settings for both containers
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
   AUTOCONF_MODE: "yes"
-  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+  API_URL: "http://bw-api:8888"
+  API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+  CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
 
 services:
   bunkerweb:
     image: bunkerity/bunkerweb:1.7.0-beta
+    restart: "unless-stopped"
     ports:
-      - "80:8080/tcp"
-      - "443:8443/tcp"
-      - "443:8443/udp" # QUIC
+      - 80:8080
+      - 443:8443
     labels:
-      - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
+      - "bunkerweb.INSTANCE=yes"
     environment:
-      <<: *bw-env
+      <<: *env
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
     volumes:
       - bw-instance-data:/data
-    restart: "unless-stopped"
     networks:
       - bw-universe
       - bw-services
 
-  bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-    environment:
-      <<: *bw-env
-      BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
-      SERVER_NAME: "" # The server name will be filled with services labels
-      MULTISITE: "yes" # Mandatory setting for autoconf
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
-    volumes:
-      - bw-storage:/data # This is used to persist the cache and other data like backups
-    restart: "unless-stopped"
-    networks:
-      - bw-universe
-      - bw-db
-
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.7.0-beta
+    restart: "unless-stopped"
     depends_on:
       - bunkerweb
       - bw-docker
     environment:
-      AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
-      DOCKER_HOST: "tcp://bw-docker:2375" # The Docker socket
-    restart: "unless-stopped"
+      <<: *env
+      DOCKER_HOST: "tcp://bw-docker:2375"
     networks:
       - bw-universe
       - bw-docker
       - bw-db
 
-  bw-docker:
-    image: tecnativa/docker-socket-proxy:nightly
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bunkerweb
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - bw-storage:/data
     environment:
-      CONTAINERS: "1"
-      LOG_LEVEL: "warning"
+      <<: *env
+      BUNKERWEB_INSTANCES: ""
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.7.0-beta
+    restart: "unless-stopped"
+    environment:
+      <<: *env
+      API_USERNAME: "changeme"
+      API_PASSWORD: "Ch@ngeme1234"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-worker:
+    image: bunkerity/bunkerweb-worker:1.7.0-beta
+    restart: "unless-stopped"
+    depends_on:
+      - bw-api
+      - bw-jobs-broker
+    volumes:
+      # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+      # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+      # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+      # the database IS a file under /data.
+      - bw-worker-storage:/data
+    environment:
+      <<: *env
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-jobs-broker:
+    image: valkey/valkey:8-alpine
+    # noeviction on purpose: a broker that evicts under memory pressure drops queued
+    # jobs on the floor, and nothing upstream would notice.
+    # appendonly on purpose: a broker restart must not vaporise queued jobs.
+    # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+    # means silently dropped work, which is what the at-least-once acks exist to stop.
+    command:
+      [
+        "valkey-server",
+        "--save",
+        "",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    volumes:
+      - bw-jobs-broker-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     restart: "unless-stopped"
     networks:
-      - bw-docker
+      - bw-universe
 
   bw-db:
     image: mariadb:11
-    # We set the max allowed packet size to avoid issues with large queries
+    restart: "unless-stopped"
     command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
@@ -2831,11 +2977,23 @@ services:
       MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
     volumes:
       - bw-data:/var/lib/mysql
-    restart: "unless-stopped"
     networks:
       - bw-db
 
+  bw-docker:
+    image: tecnativa/docker-socket-proxy:nightly
+    restart: "unless-stopped"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+      LOG_LEVEL: "warning"
+    networks:
+      - bw-docker
+
 volumes:
+  bw-jobs-broker-data:
+  bw-worker-storage:
   bw-data:
   bw-storage:
   bw-instance-data:
@@ -3054,7 +3212,22 @@ and also monitors other Kubernetes objects, such as [ConfigMap](https://kubernet
 
 For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**,
 which ensures that a pod is created on all nodes,
-while the **autoconf and scheduler** are defined as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
+while the **autoconf, scheduler, API and worker** are defined as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
+
+Since 1.7 the stack also carries an **API**, a **Worker** and a **job broker**: the scheduler no
+longer executes jobs itself, it dispatches them through the API onto the broker and the worker
+executes them. The reference manifests declare them as the `bunkerweb-api`, `bunkerweb-worker` and
+`bunkerweb-jobs-broker` Deployments, with the matching `svc-bunkerweb-api` and
+`svc-bunkerweb-jobs-broker` Services
+([`misc/integrations/k8s.mariadb.yml`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations/k8s.mariadb.yml)).
+A stack without them comes up healthy and runs no background job at all — no certificate renewal, no
+blocklist refresh, no backup.
+
+The job broker is a **separate** Redis/Valkey instance from the shared data store below, and the
+reference manifest declares it as its own `bunkerweb-jobs-broker` Deployment for that reason: a
+broker must be configured `noeviction` so queued jobs are never dropped, while a data store is
+normally capped and left free to evict. `maxmemory-policy` is per-server and never per-database, so
+a single server cannot carry both settings.
 
 Given the presence of multiple BunkerWeb instances,
 it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service.
@@ -3095,7 +3268,7 @@ Please ensure that the autoconf services have access to the Kubernetes API.
 It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
 
 !!! warning "Custom CA for Kubernetes API"
-    If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).
+    If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_VERIFY_SSL` environment variable of the ingress controller to `no` (default is `yes`).
 
 Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality. If you are using the Gateway API, also set `KUBERNETES_GATEWAY_MODE=yes`.
 
@@ -3392,7 +3565,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.5
+          image: bunkerity/bunkerweb:1.7.0-beta
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)

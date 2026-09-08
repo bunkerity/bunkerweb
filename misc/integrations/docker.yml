@@ -44,7 +44,7 @@ services:
     image: bunkerity/bunkerweb-api:1.7.0-beta
     restart: "unless-stopped"
     volumes:
-      # No DATABASE_URI anywhere in this stack, so every component falls back to SQLite at
+      # The shared DATABASE_URI selects SQLite at
       # /var/lib/bunkerweb/db.sqlite3 -> /data/lib/db.sqlite3. That file is the database, so the
       # scheduler, the API and the worker all mount this one volume; they run as the same
       # uid/gid (101) and SQLite is opened in WAL mode with a busy timeout. Point DATABASE_URI at
