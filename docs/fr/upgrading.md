@@ -5,7 +5,7 @@
 
 ## Mise à niveau à partir de la version 1.6.X
 
-### Changements majeurs
+### Changements majeurs {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` vaut désormais `yes` par défaut"
 
@@ -26,13 +26,13 @@
     | Rôle | Réglage | Pourquoi |
     |------|---------|-----|
     | **Broker de jobs** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | Il détient les baux de correction qui empêchent deux workers de pousser des configurations en même temps. Ce sont des clés *avec* TTL, donc toute politique `volatile-*` peut les supprimer en plein vol. |
-    | **Datastore de la WAF** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | Il est volontairement plafonné, donc les compteurs transitoires sont évincés plutôt que les écritures refusées. |
+    | **Datastore du WAF** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` *(recommandé)* | Plafonnez sa mémoire et autorisez l’éviction : perdre des compteurs transitoires coûte moins que refuser les écritures. Un Redis sans plafond ne fait aucune éviction et convient aussi ; le broker ne doit toutefois pas utiliser une politique d’éviction. |
 
     `maxmemory-policy` est un réglage par serveur, jamais par base de données, donc une seule instance
     ne peut assumer les deux rôles — pointer les deux rôles vers des numéros de base de données
-    différents sur le même serveur ne les sépare pas. Chaque stack livrée exécute désormais un
-    `bw-jobs-broker` dédié, et l'installeur Linux provisionne un service `bunkerweb-broker` sur
-    `127.0.0.1:6380`.
+    différents sur le même serveur ne les sépare pas. Les stacks multiconteneurs exécutent un
+    `bw-jobs-broker` dédié ; l'image AIO supervise un broker séparé sur sa boucle locale au port
+    `6380`, et l'installeur Linux peut provisionner `bunkerweb-broker` à partir du port `6380`.
 
     **Si vous mettez à niveau avec l'installeur, c'est géré pour vous.** Il provisionne le broker,
     écrit `CELERY_BROKER_URL` dans `/etc/bunkerweb/variables.env` et laisse intact un Redis de la
@@ -50,7 +50,14 @@
     journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
     ```
 
-    Corrigez-le en donnant au broker ses propres identifiants dans `/etc/bunkerweb/variables.env` —
+    **Vérifiez qu'il s'agit d'un broker de jobs dédié, sans éviction, avant de corriger l'authentification.**
+    Si le port `6379` dessert un stockage WAF avec éviction, provisionnez un broker séparé avec
+    l'[installeur Linux](integrations.md#script-dinstallation-facile) ou configurez-le vous-même avec
+    `maxmemory-policy noeviction`. Utilisez son adresse et son port réels. L'exemple sur `6379`
+    ci-dessous concerne uniquement un Redis de distribution dédié aux jobs : ajouter un mot de
+    passe à un stockage avec éviction ne le transforme pas en broker sûr.
+
+    Donnez ensuite au broker ses propres identifiants dans `/etc/bunkerweb/variables.env` —
     une seule écriture couvre les deux composants, car le worker et l'API lisent tous deux ce fichier
     avant le leur :
 
@@ -79,8 +86,60 @@
     niveau :
 
     ```bash
-    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
     ```
+
+Si le Worker est absent ou inactif, consultez [Les jobs ne s'exécutent jamais](troubleshooting.md#background-jobs), également applicable aux conteneurs.
+
+!!! warning "Docker, autoconf et Kubernetes nécessitent trois composants supplémentaires"
+
+    Une stack 1.6 contient `bunkerweb` et `bw-scheduler`. En 1.7, ajoutez l'**API**, le **Worker** et le **broker de jobs** : `bw-api`, `bw-worker`, `bw-jobs-broker` dans Compose ; `bunkerweb-api`, `bunkerweb-worker`, `bunkerweb-jobs-broker` dans Kubernetes. Le Worker exécute les jobs auparavant lancés dans le Scheduler. Chaque composant BunkerWeb reçoit `API_URL`, `API_TOKEN`, `CELERY_BROKER_URL`, et l'instance reçoit un volume `bw-instance-data` monté sur `/data`.
+
+    Changer uniquement les tags laisse une stack saine qui n'exécute **aucun job** : ni renouvellement de certificat, ni actualisation des listes, ni sauvegarde. Redéployez depuis les références [Docker](integrations.md#docker), [autoconf](integrations.md#docker-autoconf), [Kubernetes](integrations.md#kubernetes) ou [Swarm](integrations.md#swarm), disponibles dans [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations), avec une variante par moteur de base de données.
+
+    **L'image All-In-One contient déjà ces composants** : elle supervise API et Worker dans le même conteneur, avec un Redis dédié aux jobs. Remplacez simplement le conteneur en conservant `/data`.
+
+!!! warning "PostgreSQL : passer d'abord par 1.6.x si la base précède 1.6.0"
+
+    Une base **PostgreSQL** créée ou migrée pour la dernière fois avant 1.6.0 ne peut pas passer directement à 1.7. La chaîne de migrations s'exécute dans une transaction unique, mais la révision vers 1.6.1 ouvre une deuxième connexion pour supprimer une contrainte sur une table verrouillée par la première. La seconde attend un verrou libéré seulement à la fin de la migration, qui attend elle-même cette connexion. Le détecteur d'interblocage PostgreSQL ne le voit pas : le détenteur attend une socket cliente, pas un verrou. Sans délai ni erreur, le Scheduler ne termine jamais son démarrage.
+
+    Cela concerne les installations n'ayant jamais exécuté une version 1.6.x. Lisez la révision avec :
+
+    ```bash
+    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
+    ```
+
+    `f85e36780e55` est la révision 1.6.0 ; les révisions antérieures dans la chaîne sont concernées. Installez d'abord 1.6.14 et laissez le Scheduler terminer la migration avant 1.7. SQLite, MariaDB et MySQL ne sont pas concernés : seule la révision PostgreSQL ouvre cette deuxième connexion.
+
+!!! danger "Les espaces, `;`, `{` et `}` dans une location sont refusés, avec repli sur `/`"
+
+    `REVERSE_PROXY_URL`, `GRPC_URL` et `REDIRECT_FROM` acceptaient toute valeur en 1.6. Ils refusent désormais les caractères permettant de sortir du bloc `location`. Un préfixe `~ `, `~* `, `^~ ` ou `= ` reste accepté comme modificateur NGINX, avec cette seule espace autorisée. Tout autre blanc, même final, et tout `;`, `{` ou `}` est interdit.
+
+    Une valeur refusée ne bloque pas le rendu : BunkerWeb journalise un avertissement (`Ignoring variable REVERSE_PROXY_URL_1 : ...`) et conserve la valeur par défaut `/` commune aux trois paramètres. La règle se déplace donc à la racine du site. Le cas courant est un quantificateur regex tel que `^/v[0-9]{1,3}/`.
+
+    Recherchez ces valeurs avant la mise à niveau dans Compose, `variables.env`, les labels ou les annotations Kubernetes :
+
+    ```bash
+    grep -rInE '(REVERSE_PROXY_URL|GRPC_URL|REDIRECT_FROM)[A-Z_0-9]*[:=].*[;{}]' .
+    ```
+
+    Cette commande trouve `;`, `{` et `}`. Vérifiez visuellement les valeurs contenant des espaces : seule celle qui suit un modificateur initial `~`, `~*`, `^~` ou `=` est permise.
+
+    Cette recherche ne couvre pas les valeurs enregistrées en base par l'UI ou l'API. Elles ne sont revalidées ni au rendu ni lorsqu'un autre paramètre change : elles continuent donc de fonctionner après la mise à niveau **sans avertissement**. Ensuite :
+
+    - **Les corps JSON sont validés en entier.** `POST`/`PATCH /services` et `PATCH /global_settings` vérifient chaque clé envoyée, même inchangée. Renvoyer une valeur invalide lue en base entraîne `400` avec le nom de la clé. Ces routes attendent des clés non préfixées : `REVERSE_PROXY_URL_1`, pas `www.example.com_REVERSE_PROXY_URL_1`. Avec `MULTISITE=no`, ces paramètres sont globaux et passent par `PATCH /global_settings`.
+    - **Les enregistrements de configuration complète ignorent les valeurs inchangées**, après comparaison avec la base : pages services et paramètres globaux de l'UI, autoconf, réconciliation du Scheduler et `PUT /global_settings/config`. Ouvrir puis enregistrer une page service sans modifier ce champ ne révèle donc pas le problème. En revanche, autoconf et Configurator relisent entièrement les labels et `variables.env` : une valeur invalide provenant de ces sources est écartée et revient à la valeur par défaut, avec une ligne de journal.
+    - **Lorsque vous modifiez ce champ dans l'UI**, celle-ci rétablit sa valeur enregistrée, affiche `Variable <key> is not valid.`, sauvegarde les autres paramètres et annonce quand même un succès. Lisez les messages : un avertissement rouge peut accompagner la confirmation verte.
+
+    Inspectez donc manuellement `REVERSE_PROXY_URL`, `GRPC_URL` et `REDIRECT_FROM` sur les services gérés par l'UI.
+
+!!! warning "`GET /bans` lit désormais la base de données"
+
+    Les bannissements persistent en base en 1.7 et survivent aux redémarrages. `GET /bans` renvoie cette liste durable. L'ancien résultat, les bannissements actuellement appliqués dans la mémoire de chaque instance, est désormais disponible via `GET /bans/instances`. Une automatisation 1.6 utilisant `GET /bans` ne reçoit aucune erreur, mais le sens du résultat change : adaptez explicitement son endpoint.
+
+!!! info "`HTTP_PORT` et `HTTPS_PORT` deviennent des paramètres par service"
+
+    Leur contexte passe de `global` à `multisite` : `www.example.com_HTTPS_PORT=9443` est désormais accepté. Les configurations existantes gardent le même rendu : une valeur globale reste la valeur par défaut des services. Une liste déclarée sur un service **remplace** la liste globale pour ce service, sans s'y ajouter.
 
 !!! warning "Swarm : `NAMESPACES` filtre désormais aussi les configurations personnalisées"
 
@@ -112,6 +171,43 @@
     exigences qu'elle comporte : un label de nœud `bw-state=true` pour les services propriétaires
     de volumes, `mode: global` sur le service `bunkerweb`, et une publication des ports en
     `mode: host`.
+
+### Changer le broker d'un ancien AIO {#aio-broker-upgrade}
+
+Cette procédure concerne un **déploiement AIO 1.7 existant**, pas une installation 1.6, qui n'avait pas de file Celery. Les premières images 1.7 déduisaient le broker des paramètres `REDIS_*`. La valeur par défaut est désormais `redis://127.0.0.1:6380/0`, avec un Redis distinct en `noeviction` et une persistance AOF sous `/data/broker`. Le datastore du WAF conserve ses propres paramètres et fichiers.
+
+Un `CELERY_BROKER_URL` explicite est conservé. Si vous utilisiez `REDIS_HOST`, `REDIS_PASSWORD` ou les paramètres TLS Redis pour choisir le broker, ils ne concernent désormais que le WAF. Pour conserver un broker externe, définissez son URL complète avec identifiants et paramètres de vérification TLS. Une URL vide est refusée lorsque le Worker est activé.
+
+Avant de changer le broker d'un déploiement 1.7 en cours :
+
+1. Arrêtez les écritures directes vers l'API, y compris automatisations et opérateurs. Utilisez la [procédure de gel des sauvegardes](#rolling-back-to-1614) pour suspendre les envois du Scheduler, autoconf et les écritures UI, puis attendre la fin des jobs en file ou en cours et des acquittements de rechargement. Prenez seulement le gel, sans exécuter la rétrogradation. La version cible sert d'étiquette au gel, pas de demande de migration.
+2. Exécutez le gel contre l'**ancien** broker et l'ancienne API. Dans les anciennes images AIO, un nouveau shell n'hérite pas de l'URL exportée par l'entrypoint : fournissez-lui le véritable ancien `CELERY_BROKER_URL` et les identifiants API. Si l'API n'observe pas le gel ou si la vidange dépasse son délai, résolvez le problème avant de continuer.
+3. Maintenez le gel jusqu'à l'arrêt de l'ancien conteneur. Recréez-le avec le même volume `/data` et la nouvelle valeur par défaut ou l'URL externe explicite. Aucune clé de file n'est copiée entre brokers et les anciennes données Redis du WAF ne sont pas supprimées.
+4. Vérifiez la santé du conteneur et la réussite d'un job envoyé sur la page Jobs avant de reprendre les automatisations API. Un ancien gel sur un broker externe peut être libéré avec la commande de gel existante ou laissé expirer.
+
+Le nouveau broker démarre avant le Worker et s'arrête après lui. Son AOF survit aux redémarrages si `/data` est conservé ; cette persistance ne transfère pas les jobs laissés sur l'ancien broker.
+
+### Après la mise à niveau
+
+Ces changements ne bloquent pas la mise à niveau et n'exigent aucune action pour la terminer.
+
+!!! info "Un service réservé `default-server` apparaît en multisite"
+
+    Avec `MULTISITE=yes`, le serveur répondant aux noms d'hôte, IP ou en-têtes `Host` inconnus devient un service permanent. L'UI et `GET /services` l'affichent avec `reserved: true`. Il ne peut pas être supprimé, renommé ni passé en brouillon et ne compte jamais dans le quota PRO. Configurez son certificat, TLS, ses en-têtes et pages d'erreur : voir [API](api.md#api-surface-capability-map) et [interface Web](web-ui.md#the-default-server-entry).
+
+    Avec `MULTISITE=no`, aucune ligne n'est créée et le rendu reste celui de 1.6.
+
+!!! info "L'enrôlement des instances est disponible et facultatif"
+
+    Une instance peut échanger un code à usage unique et limité dans le temps contre son propre identifiant. Sans enrôlement, l'`API_TOKEN` global fonctionne comme en 1.6. Après enrôlement, l'instance n'accepte que son identifiant propre, sans repli. Une rétrogradation sur place détruit les identifiants stockés. Rétablissez l’utilisation de l’`API_TOKEN` partagé sur l’instance avant de revenir en arrière, ou réenregistrez-la après la rétrogradation. Voir [Enrôlement](web-ui.md#instance-enrollment) et [Instance enrôlée refusant de démarrer](troubleshooting.md#lost-instance-credential) : si son fichier d'identifiant disparaît mais son marqueur subsiste, elle refuse de démarrer jusqu'à réenrôlement.
+
+!!! info "Nouveautés à découvrir en 1.7"
+
+    - **Règles composites ET** : `BLACKLIST_RULE_1`, `GREYLIST_RULE_1`, `WHITELIST_RULE_1` et leurs suivantes exigent tous les termes (`country:FR AND NOT ua:GoodBot`).
+    - **Plugin GeoIP dédié** : les bases pays et ASN restent fournies par DB-IP Lite gratuitement. Les nouveautés sont l'abonnement MaxMind (`MAXMIND_LICENSE_KEY`, `MAXMIND_ACCOUNT_ID`), la base ville (`GEOIP_CITY`) et vos fichiers `.mmdb`. Voir [GeoIP](features.md#geoip).
+    - **`BACKUP_ROTATION_STRATEGY`** choisit quelles sauvegardes conserver. La valeur `hanoi` préserve des points plus anciens en espaçant les récents ; `fifo` conserve la sélection 1.6. `BACKUP_ROTATION` ne change pas.
+    - **Plusieurs modèles par service** : `USE_TEMPLATE` devient une liste ordonnée séparée par des espaces ; un modèle ultérieur remplace les valeurs d'un précédent.
+    - **UI traduite côté serveur**, avec sélecteur de langue : voir [Traductions](web-ui.md#traductions-i18n).
 
 ### Rétrogradation vers 1.6.14 {#rolling-back-to-1614}
 
@@ -265,22 +361,13 @@ aussi.
 
         2. **Mettre à niveau BunkerWeb** :
             - Mettez à niveau BunkerWeb vers la dernière version.
-                1. **Mettre à jour le fichier Docker Compose **: Mettez à jour le fichier Docker Compose pour utiliser la nouvelle version de l'image BunkerWeb.
-                    ```yaml
-                    services:
-                        bunkerweb:
-                            image: bunkerity/bunkerweb:1.7.0-beta
-                            ...
-                        bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-                            ...
-                        bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.7.0-beta
-                            ...
-                        bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.7.0-beta
-                            ...
-                    ```
+                1. **Mettre à jour le fichier Docker Compose** : changer les tags ne suffit pas depuis 1.6.
+                   Ajoutez `bw-api`, `bw-worker`, `bw-jobs-broker`, les variables `API_URL`,
+                   `API_TOKEN`, `CELERY_BROKER_URL` sur les composants, et le volume
+                   `bw-instance-data` sur `/data` de l'instance. Reconstruisez `docker-compose.yml`
+                   depuis la référence [Docker](integrations.md#docker) ou
+                   [autoconf](integrations.md#docker-autoconf) 1.7, en reportant vos paramètres,
+                   volumes et ports publiés ; voir les [changements majeurs](#breaking-changes).
 
                 2. **Redémarrer les conteneurs **: redémarrez les conteneurs pour appliquer les modifications.
                     ```bash
@@ -552,6 +639,8 @@ aussi.
                     sudo systemctl stop bunkerweb
                     sudo systemctl stop bunkerweb-ui
                     sudo systemctl stop bunkerweb-scheduler
+                    sudo systemctl stop bunkerweb-api
+                    sudo systemctl stop bunkerweb-worker
                     ```
 
                 2. **Mettre à jour BunkerWeb** :
@@ -611,8 +700,10 @@ aussi.
                 3. **Démarrez les services** :
                         ```bash
                         sudo systemctl start bunkerweb
-                        sudo systemctl start bunkerweb-ui
+                        sudo systemctl start bunkerweb-api
+                        sudo systemctl start bunkerweb-worker
                         sudo systemctl start bunkerweb-scheduler
+                        sudo systemctl start bunkerweb-ui
                         ```
                         Ou redémarrez le système :
                         ```bash
@@ -831,7 +922,7 @@ aussi.
     5. **Arrêtez les services**.
 
         ```bash
-        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler bunkerweb-api bunkerweb-worker
         ```
 
     6. **Restaurez la sauvegarde**.
@@ -874,7 +965,7 @@ aussi.
     7. **Démarrez les services**.
 
         ```bash
-        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl start bunkerweb bunkerweb-api bunkerweb-worker bunkerweb-scheduler bunkerweb-ui
         ```
 
     8. **Rétrograder BunkerWeb**.
@@ -1094,6 +1185,8 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 sudo systemctl stop bunkerweb
                 sudo systemctl stop bunkerweb-ui
                 sudo systemctl stop bunkerweb-scheduler
+                sudo systemctl stop bunkerweb-api
+                sudo systemctl stop bunkerweb-worker
                 ```
 
             4. **Mettre à jour BunkerWeb** :
@@ -1151,11 +1244,13 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                     Plus de détails dans la page [intégration Linux](integrations.md#__tabbed_1_3).
 
             5. **Démarrer les services** :
-                ```bash
-                sudo systemctl start bunkerweb
-                sudo systemctl start bunkerweb-ui
-                sudo systemctl start bunkerweb-scheduler
-                ```
+                    ```bash
+                    sudo systemctl start bunkerweb
+                    sudo systemctl start bunkerweb-api
+                    sudo systemctl start bunkerweb-worker
+                    sudo systemctl start bunkerweb-scheduler
+                    sudo systemctl start bunkerweb-ui
+                    ```
                 Ou redémarrez le système :
                 ```bash
                 sudo reboot
@@ -1306,7 +1401,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
     5. **Arrêtez les services**.
 
         ```bash
-        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler bunkerweb-api bunkerweb-worker
         ```
 
     6. **Restaurez la sauvegarde**.
@@ -1349,7 +1444,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
     7. **Démarrez les services**.
 
         ```bash
-        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl start bunkerweb bunkerweb-api bunkerweb-worker bunkerweb-scheduler bunkerweb-ui
         ```
 
     8. **Rétrograder BunkerWeb**.

@@ -5,7 +5,7 @@
 
 ## 从 1.6.X 升级
 
-### 重大变更
+### 重大变更 {#breaking-changes}
 
 !!! warning "`REDIS_SSL_VERIFY` 现在默认改为 `yes`"
 
@@ -26,9 +26,9 @@
     | 角色 | 设置 | 原因 |
     |------|---------|-----|
     | **Job broker** (`CELERY_BROKER_URL`) | `maxmemory-policy noeviction` | 它持有阻止两个 worker 同时推送配置的正确性租约（correctness lease）。这些键*带有* TTL，因此任何 `volatile-*` 策略都可能在租约生效期间将其淘汰。 |
-    | **WAF 数据存储** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru` | 它被有意设置了上限，因此瞬时计数器会被淘汰，而不是拒绝写入。 |
+    | **WAF 数据存储** (`USE_REDIS` / `REDIS_*`) | `maxmemory-policy volatile-lru`（推荐） | 设置内存上限并允许淘汰：丢失临时计数器比拒绝写入的代价更低。这不是强制要求；不设上限的 Redis 不会淘汰键，也可以使用。但数据存储通常这样配置，而任务代理不能如此。 |
 
-    `maxmemory-policy` 是按服务器而非按数据库设置的，因此一个实例无法同时满足两种角色——把两种角色指向同一服务器上不同的数据库编号并不能将它们分开。现在每个出厂 stack 都运行一个专用的 `bw-jobs-broker`，Linux 安装器也会在 `127.0.0.1:6380` 上配置一个 `bunkerweb-broker` 服务。
+    `maxmemory-policy` 是按服务器而非按数据库设置的，因此一个实例无法同时满足两种角色——把两种角色指向同一服务器上不同的数据库编号并不能将它们分开。多容器堆栈运行专用 `bw-jobs-broker`；AIO 镜像在回环端口 `6380` 上管理独立任务代理，Linux 安装器则可配置端口从 `6380` 起选择的 `bunkerweb-broker` 服务。
 
     **如果你使用安装器升级，这一切都会自动处理。** 它会配置 broker，将 `CELERY_BROKER_URL` 写入 `/etc/bunkerweb/variables.env`，并且不会改动未修改过的发行版自带 Redis（由于未设置 `maxmemory`，它从不淘汰任何数据，因此此前从未出过问题）。
 
@@ -38,7 +38,11 @@
     journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'
     ```
 
-    在 `/etc/bunkerweb/variables.env` 中为 broker 单独设置凭据即可修复——一次写入即可覆盖两个组件，因为 worker 和 API 都会先读取该文件，再读取各自的文件：
+    容器和 Linux 的进一步诊断见[后台任务始终不运行](troubleshooting.md#background-jobs)。
+
+    **修复认证前，先确认这是专用且不会淘汰键的任务代理。** 如果端口 `6379` 运行的是会淘汰键的 WAF 数据存储，请通过 [Linux 安装器](integrations.md#easy-installation-script) 配置独立任务代理，或自行配置使用 `maxmemory-policy noeviction` 的代理，并使用其实际地址和端口。下方的 `6379` 示例仅适用于专门执行任务的发行版 Redis；给会淘汰键的数据存储添加密码，并不能使它成为安全的任务代理。
+
+    然后在 `/etc/bunkerweb/variables.env` 中为任务代理配置自己的凭据——一次写入即可覆盖两个组件，因为 Worker 和 API 都会先读取该文件，再读取各自的文件：
 
     ```bash
     CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0
@@ -59,8 +63,58 @@
     `bunkerweb-worker` 执行 scheduler 派发的每一个 job。在安装器推迟服务启动的安装场景中——`--redis`、外部数据库、CrowdSec、自定义 DNS 解析器，以及每种 `--manager` 安装——它从未被启用，因此整个 stack 健康启动却完全不运行任何后台任务。安装器现在会在这些路径上把它和 scheduler 一起启用。升级后请验证：
 
     ```bash
-    systemctl is-enabled bunkerweb-worker && systemctl is-active bunkerweb-worker
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
     ```
+
+!!! warning "Docker、autoconf 和 Kubernetes 堆栈需要三个新组件"
+
+    1.6 堆栈包含 `bunkerweb` 和 `bw-scheduler`。1.7 还需要 **API**、**Worker** 和**任务代理**：Compose 堆栈中的 `bw-api`、`bw-worker`、`bw-jobs-broker`，或 Kubernetes 中的 `bunkerweb-api`、`bunkerweb-worker`、`bunkerweb-jobs-broker`。Worker 执行以前由调度器进程直接运行的所有任务，任务代理传递派发消息。每个 BunkerWeb 组件都获得 `API_URL`、`API_TOKEN` 和 `CELERY_BROKER_URL`，`bunkerweb` 实例还需要挂载到 `/data` 的 `bw-instance-data` 卷。
+
+    仅修改镜像标签会留下一个显示健康却**完全不运行后台任务**的堆栈：没有证书续期、封禁列表刷新或备份（[诊断方法](troubleshooting.md#background-jobs)）。请使用对应集成的 1.7 参考堆栈重新部署：[Docker](integrations.md#docker)、[Docker autoconf](integrations.md#docker-autoconf)、[Kubernetes](integrations.md#kubernetes) 或 [Swarm](integrations.md#swarm)。各数据库引擎的参考文件位于仓库的 [`misc/integrations`](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/misc/integrations)。
+
+    **All-In-One 镜像不受此影响**：它在单个容器内管理 API、Worker 和专用内嵌 Redis 任务代理。保留 `/data` 并替换容器即可完成升级，无需新增组件。
+
+!!! warning "PostgreSQL：早于 1.6.0 的数据库必须先升级到 1.6.x"
+
+    在 1.6.0 之前创建或最后迁移的 **PostgreSQL** 数据库不能直接升级到 1.7。整个迁移链在一个事务中运行，而升级到 1.6.1 的修订会打开第二个连接，在第一个连接已持有排他锁的表上删除约束。第二个连接等待迁移返回才会释放的锁，迁移又等待第二个连接完成。持锁方等待的是客户端套接字而不是锁，因此 PostgreSQL 的死锁检测器无法发现它。没有超时，也没有错误：调度器始终无法完成启动。
+
+    如果此安装从未运行过 1.6.x，就会受到影响。可读取版本标记：
+
+    ```bash
+    psql -d <database> -c 'SELECT version_num FROM alembic_version;'
+    ```
+
+    `f85e36780e55` 是 1.6.0 修订，迁移链中在它之前的版本均受影响。先安装 1.6.14，等待调度器启动并完成迁移，然后升级到 1.7。SQLite、MariaDB 和 MySQL 不受影响；仅 PostgreSQL 修订会打开第二个连接。
+
+!!! danger "含空白、`;`、`{` 或 `}` 的 location 值现在会被拒绝，并回退到 `/`"
+
+    `REVERSE_PROXY_URL`、`GRPC_URL` 和 `REDIRECT_FROM` 在 1.6 接受任意值，现在会拒绝可能让值逃出所生成 `location` 块的字符。开头的 `~ `、`~* `、`^~ ` 或 `= ` 仍可用作 NGINX location 修饰符，但其后的这一个空格是整个值中唯一允许的空白字符，尾部空格也不允许；`;`、`{`、`}` 一律不允许。
+
+    被拒绝的值不会让渲染失败。BunkerWeb 记录警告 (`Ignoring variable REVERSE_PROXY_URL_1 : ...`)，设置保留默认值；三者的默认值都是 `/`，因此规则会移到站点根路径，而不是您配置的路径。常见情况是带量词的正则 location，如 `^/v[0-9]{1,3}/`。
+
+    升级前，在 Compose 文件、`variables.env`、容器标签、Kubernetes 注解等设置来源中检查：
+
+    ```bash
+    grep -rInE '(REVERSE_PROXY_URL|GRPC_URL|REDIRECT_FROM)[A-Z_0-9]*[:=].*[;{}]' .
+    ```
+
+    此命令查找含 `;`、`{`、`}` 的值。含空格的值也会被拒绝，除非空格仅用于分隔开头的 `~`、`~*`、`^~`、`=` 与路径；这些值请人工检查。
+
+    此命令只检查文件。通过 Web UI 或 API 设置的值保存在数据库中，在渲染配置或保存无关设置时不会重新验证，因此升级后继续有效且**不会提示**。后续操作有三种不同表现：
+
+    - **JSON 设置载荷会整体验证。** `POST`/`PATCH /services` 和 `PATCH /global_settings` 检查发送的每个键，无论是否修改；读取后原样回写旧值也会返回 `400` 并指出键名。这些路由使用不带服务前缀的键：`REVERSE_PROXY_URL_1`，不是 `www.example.com_REVERSE_PROXY_URL_1`。`MULTISITE=no` 时三项设置是全局设置，适用 `PATCH /global_settings`。
+    - **保存完整配置时，会与数据库比较并跳过未变化的键**：包括 Web UI 服务和全局设置页、autoconf、调度器环境同步、`PUT /global_settings/config`。打开服务页再保存不会发现原有无效值。来自标签或 `variables.env` 的值不同：autoconf 和 Configurator 每次完整读取各自来源，非法值会被丢弃并记录日志，然后回退到默认值，因此上面的文件检查很重要。
+    - **UI 实际检查某字段时**（因为您修改了它），不会拒绝整次保存。它将此字段恢复到数据库原值，显示 `Variable <key> is not valid.`，保存其余设置，仍报告保存成功。请查看红色和绿色提示，而不只看操作结果。
+
+    这些行为都不会主动帮您找出旧值。请人工核查 UI 管理服务中的 `REVERSE_PROXY_URL`、`GRPC_URL` 和 `REDIRECT_FROM`。
+
+!!! warning "`GET /bans` 现在从数据库返回结果"
+
+    1.7 将封禁存储在数据库中，重启后仍然保留；控制平面的 `GET /bans` 返回此持久列表。以前返回的各实例当前共享内存中的实际封禁已原样移到 `GET /bans/instances`。1.6 自动化继续调用 `GET /bans` 不会报错，但结果含义已经变化，请明确调整调用端点。
+
+!!! info "`HTTP_PORT` 和 `HTTPS_PORT` 现在可按服务设置"
+
+    两者的上下文从 `global` 改为 `multisite`，因此现在接受 `www.example.com_HTTPS_PORT=9443`，而 1.6 会以 “context of ... isn't multisite” 拒绝。现有配置的渲染不变：全局值仍是每个服务的默认值。服务现在可以声明自己的列表，该列表会**替换**此服务继承的全局列表，而不是追加。
 
 !!! warning "Swarm：`NAMESPACES` 现在也会过滤自定义配置"
 
@@ -85,6 +139,43 @@
     后台任务运行。请从 [1.7 参考堆栈](integrations.md#swarm) 重新部署，而不是编辑旧的堆栈，并注意它
     携带的三项新要求：为拥有卷的服务打上 `bw-state=true` 节点标签、`bunkerweb` 服务使用
     `mode: global`，以及使用 `mode: host` 发布端口。
+
+### 切换旧 AIO 的任务代理 {#aio-broker-upgrade}
+
+本节适用于**现有 1.7 AIO 部署**；1.6 没有 Celery 任务队列。较早的 1.7 镜像从 `REDIS_*` 推导任务代理连接。默认值现在是 `redis://127.0.0.1:6380/0`，连接使用 `noeviction` 的独立 Redis，AOF 持久数据保存在 `/data/broker`。WAF 数据存储继续使用自己的设置和文件。
+
+显式设置的 `CELERY_BROKER_URL` 会被保留。以前用来选择任务代理的 `REDIS_HOST`、`REDIS_PASSWORD` 和 Redis TLS 设置现在仅影响 WAF 数据存储。要继续使用外部任务代理，请显式设置完整 `CELERY_BROKER_URL`，包括凭据和 TLS 验证参数。启用 Worker 时不允许空值。
+
+切换运行中 1.7 部署的任务代理前：
+
+1. 停止直接写入 API 的自动化和其他操作。使用现有[备份静默保持流程](#rolling-back-to-1614) 暂停调度器派发、autoconf 和 UI 写入，等待队列任务、执行中任务和待处理重载确认全部完成。只保持静默，不执行降级步骤；目标版本在这里只是保持操作的标签，不是迁移请求。
+2. 将静默保持命令连接到**旧**任务代理和 API。较早 AIO 镜像的新 shell 不继承入口脚本导出的 URL；请向该 shell 提供真实的旧 `CELERY_BROKER_URL` 和 API 凭据。如果 API 没有观察到保持状态，或排空超时，应先解决问题再切换。
+3. 在旧容器停止之前始终维持保持状态。用相同 `/data` 卷重新创建容器，采用新默认值或显式外部代理 URL。不会在代理之间复制队列键，也不会删除旧 WAF Redis 数据。
+4. 检查容器健康，并在任务页面确认派发的任务完成后再恢复 API 自动化。旧外部代理上的残留保持可通过现有静默保持命令释放，也可以等待其过期。
+
+新任务代理先于 Worker 启动、晚于 Worker 停止。保留 `/data` 可让 AOF 跨容器重启保留；持久化不会转移遗留在旧代理上的任务。
+
+### 升级后
+
+以下变化不会阻止升级，也不需要额外操作才能完成升级，但会影响 1.7 的使用。
+
+!!! info "多站点安装新增保留服务 `default-server`"
+
+    `MULTISITE=yes` 时，处理不匹配任何已配置服务的请求（未知主机名、裸 IP 地址、无人提供服务的 `Host`）的配置块现在成为永久保留服务。它出现在 UI 服务列表和 `GET /services` 中，并标记为 `reserved: true`；不能删除、改名或设为草稿，也不占用 PRO 服务配额。您可以为其配置证书、TLS、响应头和错误页面。参见 [API 参考](api.md#api-surface-capability-map) 和 [Web UI](web-ui.md#the-default-server-entry)。
+
+    `MULTISITE=no` 时不创建此行，默认服务器的渲染与 1.6 相同。
+
+!!! info "实例注册可选"
+
+    实例可兑换有时限的一次性代码，取得自己的控制平面凭据。未注册的实例继续使用全局 `API_TOKEN`，与 1.6 相同；注册后只接受自己的凭据，永不回退。原地降级会销毁存储的凭据。请在回滚前让实例恢复使用共享 `API_TOKEN`，或在回滚后重新注册。参见[实例注册](web-ui.md#instance-enrollment)。如果其他状态仍在而凭据文件丢失，已注册实例会拒绝启动，直到重新注册；详见[已注册实例拒绝启动](troubleshooting.md#lost-instance-credential)。
+
+!!! info "1.7 新功能"
+
+    - 三类访问列表均支持**复合 AND 规则**：`BLACKLIST_RULE_1`、`GREYLIST_RULE_1`、`WHITELIST_RULE_1` 等，只有每项条件都匹配才生效，如 `country:FR AND NOT ua:GoodBot`。
+    - **独立 GeoIP 插件**：默认仍使用免费 DB-IP Lite 国家和 ASN 数据库，无需配置。新增 MaxMind 订阅 (`MAXMIND_LICENSE_KEY`、`MAXMIND_ACCOUNT_ID`)、城市库 (`GEOIP_CITY`) 和自定义 `.mmdb` 选项。参见 [GeoIP](features.md#geoip)。
+    - **`BACKUP_ROTATION_STRATEGY`** 决定保留哪些备份，而非保留数量。默认 `hanoi` 通过减少近期恢复点来换取更早的恢复点；设为 `fifo` 可恢复 1.6 的选择方式。`BACKUP_ROTATION` 不变。
+    - **每个服务支持多个模板**：`USE_TEMPLATE` 是按空格分隔的有序列表，后面的模板覆盖前面的设置。
+    - **服务端翻译的 Web UI**，提供语言选择器。参见[翻译](web-ui.md#translations-i18n)。
 
 ### 回退到 1.6.14 {#rolling-back-to-1614}
 
@@ -224,22 +315,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
 
         2.  **升级 BunkerWeb**：
             -   将 BunkerWeb 升级到最新版本。
-                1.  **更新 Docker Compose 文件**：更新 Docker Compose 文件以使用新版本的 BunkerWeb 镜像。
-                    ```yaml
-                    services:
-                        bunkerweb:
-                            image: bunkerity/bunkerweb:1.7.0-beta
-                            ...
-                        bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.7.0-beta
-                            ...
-                        bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.7.0-beta
-                            ...
-                        bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.7.0-beta
-                            ...
-                    ```
+                1. **更新 Docker Compose 文件**：从 1.6 升级不能只更新标签。还需添加 `bw-api`、`bw-worker`、`bw-jobs-broker` 服务，在组件上配置 `API_URL`、`API_TOKEN` 和 `CELERY_BROKER_URL`，并为 `bunkerweb` 添加 `bw-instance-data` 卷。参见上面的[重大变更](#breaking-changes)。请基于 [Docker](integrations.md#docker) 或 [Docker autoconf](integrations.md#docker-autoconf) 的 1.7 参考堆栈重建 `docker-compose.yml`，迁移自己的设置、卷和发布端口。
 
                 2.  **重启容器**：重启容器以应用更改。
                     ```bash
@@ -511,6 +587,8 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                     sudo systemctl stop bunkerweb
                     sudo systemctl stop bunkerweb-ui
                     sudo systemctl stop bunkerweb-scheduler
+                    sudo systemctl stop bunkerweb-api
+                    sudo systemctl stop bunkerweb-worker
                     ```
 
                 2.  **更新 BunkerWeb**：
@@ -570,8 +648,10 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                 3.  **启动服务**：
                         ```bash
                         sudo systemctl start bunkerweb
-                        sudo systemctl start bunkerweb-ui
+                        sudo systemctl start bunkerweb-api
+                        sudo systemctl start bunkerweb-worker
                         sudo systemctl start bunkerweb-scheduler
+                        sudo systemctl start bunkerweb-ui
                         ```
                         或者重启系统：
                         ```bash
@@ -790,7 +870,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
     5.  **停止服务**。
 
         ```bash
-        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler bunkerweb-api bunkerweb-worker
         ```
 
     6.  **恢复备份**。
@@ -833,7 +913,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
     7.  **启动服务**。
 
         ```bash
-        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl start bunkerweb bunkerweb-api bunkerweb-worker bunkerweb-scheduler bunkerweb-ui
         ```
 
     8.  **降级 BunkerWeb**。
@@ -1053,6 +1133,8 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
                 sudo systemctl stop bunkerweb
                 sudo systemctl stop bunkerweb-ui
                 sudo systemctl stop bunkerweb-scheduler
+                sudo systemctl stop bunkerweb-api
+                sudo systemctl stop bunkerweb-worker
                 ```
 
             4.  **更新 BunkerWeb**：
@@ -1112,8 +1194,10 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
             5.  **启动服务**：
                     ```bash
                     sudo systemctl start bunkerweb
-                    sudo systemctl start bunkerweb-ui
+                    sudo systemctl start bunkerweb-api
+                    sudo systemctl start bunkerweb-worker
                     sudo systemctl start bunkerweb-scheduler
+                    sudo systemctl start bunkerweb-ui
                     ```
                     或者重启系统：
                     ```bash
@@ -1265,7 +1349,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
     5.  **停止服务**。
 
         ```bash
-        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler bunkerweb-api bunkerweb-worker
         ```
 
     6.  **恢复备份**。
@@ -1308,7 +1392,7 @@ Encrypt 状态以及备份归档在两个版本之间保持不变。需要 1.7 �
     7.  **启动服务**。
 
         ```bash
-        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl start bunkerweb bunkerweb-api bunkerweb-worker bunkerweb-scheduler bunkerweb-ui
         ```
 
     8.  **降级 BunkerWeb**。
