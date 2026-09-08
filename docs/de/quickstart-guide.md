@@ -84,15 +84,15 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
 
     ```yaml
     x-bw-env: &bw-env
-      # Wir verwenden einen Anker, um die Wiederholung derselben Einstellungen für beide Dienste zu vermeiden
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass Sie den richtigen IP-Bereich festlegen, damit der Scheduler die Konfiguration an die Instanz senden kann
-      # Optional: Legen Sie einen API-Token fest und spiegeln Sie ihn in beiden Containern
-      API_TOKEN: ""
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
+      # Ein Anker vermeidet die Wiederholung derselben Einstellungen für jeden Dienst
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Ein stärkeres Token setzen: Jede Komponente authentifiziert sich damit an der API
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Ein stärkeres Passwort für die Datenbank setzen
 
     services:
       bunkerweb:
-        # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
+        # This is the name that will be used to identify the instance in the Scheduler
         image: bunkerity/bunkerweb:1.7.0-beta
         ports:
           - "80:8080/tcp"
@@ -100,8 +100,9 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
           - "443:8443/udp" # Für QUIC / HTTP3-Unterstützung
         environment:
           <<: *bw-env # Wir verwenden den Anker, um die Wiederholung derselben Einstellungen für alle Dienste zu vermeiden
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass Sie den richtigen IP-Bereich festlegen, damit der Scheduler die Konfiguration an die Instanz senden kann
         volumes:
-          - bw-instance-data:/data # Wird benötigt, um nach der Registrierung dieser Instanz eine verlorene Anmeldeinformation zu erkennen, siehe „Instanzen“ in der Web-UI-Dokumentation
+          - bw-instance-data:/data # Erkennt verlorene Zugangsdaten nach der Instanzregistrierung; siehe Instanzen in der Web-UI-Dokumentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -112,6 +113,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass Sie den richtigen IP-Bereich festlegen, damit der Scheduler die Konfiguration an die Instanz senden kann
           SERVER_NAME: ""
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Ändern Sie dies bei Bedarf
@@ -123,6 +125,66 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
         networks:
           - bw-universe
           - bw-db
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Eigenes Volume: DATABASE_URI zeigt hier auf einen Datenbankserver; /data enthält
+          # nur temporäre Dateien, die der Worker aus der Datenbank neu erzeugt. Das Volume
+          # muss daher nicht mit dem Scheduler geteilt werden.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction ist nötig: Ein Broker, der bei Speicherdruck Schlüssel verdrängt, verliert
+        # wartende Jobs, ohne dass die sendenden Komponenten dies bemerken.
+        # appendonly ist nötig: Ein Broker-Neustart darf keine wartenden Jobs verlieren.
+        # AOF statt RDB ("--save" bleibt leer): Ein RDB-Verlustfenster von 60s würde
+        # Jobs unbemerkt verwerfen; genau das sollen die At-least-once-Bestätigungen verhindern.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.7.0-beta
@@ -137,13 +199,13 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
 
       bw-db:
         image: mariadb:11
-        # Wir setzen die maximal zulässige Paketgröße, um Probleme mit großen Abfragen zu vermeiden
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
+          MYSQL_PASSWORD: "changeme" # Ein stärkeres Passwort für die Datenbank setzen
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
@@ -167,6 +229,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
       bw-instance-data:
@@ -193,9 +257,12 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
 
     ```yaml
     x-ui-env: &bw-ui-env
-      # Wir verankern die Umgebungsvariablen, um Duplikate zu vermeiden
+      # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Ein stärkeres Token setzen: Jede Komponente authentifiziert sich damit an der API
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Ein stärkeres Passwort für die Datenbank setzen
 
     services:
       bunkerweb:
@@ -207,8 +274,10 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
         labels:
           - "bunkerweb.INSTANCE=yes" # Wir setzen das Instanz-Label, damit die Autoconf die Instanz erkennen kann
         environment:
-          AUTOCONF_MODE: "yes"
+          <<: *bw-ui-env
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+        volumes:
+          - bw-instance-data:/data # Erkennt verlorene Zugangsdaten nach der Instanzregistrierung; siehe Instanzen in der Web-UI-Dokumentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -245,6 +314,65 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
           - bw-docker
           - bw-db
 
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-ui-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Eigenes Volume: DATABASE_URI zeigt hier auf einen Datenbankserver; /data enthält
+          # nur temporäre Dateien, die der Worker aus der Datenbank neu erzeugt. Das Volume
+          # muss daher nicht mit dem Scheduler geteilt werden.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-ui-env
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction ist nötig: Ein Broker, der bei Speicherdruck Schlüssel verdrängt, verliert
+        # wartende Jobs, ohne dass die sendenden Komponenten dies bemerken.
+        # appendonly ist nötig: Ein Broker-Neustart darf keine wartenden Jobs verlieren.
+        # AOF statt RDB ("--save" bleibt leer): Ein RDB-Verlustfenster von 60s würde
+        # Jobs unbemerkt verwerfen; genau das sollen die At-least-once-Bestätigungen verhindern.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
@@ -269,13 +397,13 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
 
       bw-db:
         image: mariadb:11
-        # Wir setzen die maximal zulässige Paketgröße, um Probleme mit großen Abfragen zu vermeiden
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
+          MYSQL_PASSWORD: "changeme" # Ein stärkeres Passwort für die Datenbank setzen
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
@@ -299,8 +427,11 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/exam
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:

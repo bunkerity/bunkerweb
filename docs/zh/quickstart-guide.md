@@ -84,24 +84,25 @@
 
     ```yaml
     x-bw-env: &bw-env
-      # 我们使用一个锚点来避免在两个服务中重复相同的设置
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例
-      # 可选：设置一个 API 令牌并在两个容器中镜像它
-      API_TOKEN: ""
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      # We use an anchor to avoid repeating the same settings for every service
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
       bunkerweb:
-        # 这是将用于在调度器中识别实例的名称
+        # This is the name that will be used to identify the instance in the Scheduler
         image: bunkerity/bunkerweb:1.7.0-beta
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # 用于 QUIC / HTTP3 支持
+          - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
-          <<: *bw-env # 我们使用锚点来避免为所有服务重复相同的设置
+          <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
         volumes:
-          - bw-instance-data:/data # 用于在此实例注册后检测凭据丢失，参见 Web UI 文档中的“实例”
+          - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -111,18 +112,79 @@
         image: bunkerity/bunkerweb-scheduler:1.7.0-beta
         environment:
           <<: *bw-env
-          BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
           SERVER_NAME: ""
           MULTISITE: "yes"
-          UI_HOST: "http://bw-ui:7000" # 如果需要，请更改它
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
           USE_REDIS: "yes"
           REDIS_HOST: "redis"
         volumes:
-          - bw-storage:/data # 用于持久化缓存和备份等其他数据
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.7.0-beta
@@ -137,20 +199,20 @@
 
       bw-db:
         image: mariadb:11
-        # 我们设置了最大允许的数据包大小以避免大查询的问题
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
-      redis: # Redis 服务用于持久化报告/封禁/统计数据
+      redis: # Redis service for the persistence of reports/bans/stats
         image: redis:8-alpine
         command: >
           redis-server
@@ -167,6 +229,8 @@
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
       bw-instance-data:
@@ -177,7 +241,7 @@
         ipam:
           driver: default
           config:
-            - subnet: 10.20.30.0/24 # 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例
+            - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
       bw-services:
         name: bw-services
       bw-db:
@@ -193,9 +257,12 @@
 
     ```yaml
     x-ui-env: &bw-ui-env
-      # 我们锚定环境变量以避免重复
+      # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
       bunkerweb:
@@ -203,12 +270,14 @@
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # 用于 QUIC / HTTP3 支持
+          - "443:8443/udp" # For QUIC / HTTP3 support
         labels:
-          - "bunkerweb.INSTANCE=yes" # 我们设置实例标签以允许 autoconf 检测实例
+          - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
         environment:
-          AUTOCONF_MODE: "yes"
+          <<: *bw-ui-env
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+        volumes:
+          - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -222,11 +291,11 @@
           SERVER_NAME: ""
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
           MULTISITE: "yes"
-          UI_HOST: "http://bw-ui:7000" # 如果需要，请更改它
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
           USE_REDIS: "yes"
           REDIS_HOST: "redis"
         volumes:
-          - bw-storage:/data # 用于持久化缓存和备份等其他数据
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -245,6 +314,65 @@
           - bw-docker
           - bw-db
 
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-ui-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-ui-env
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
@@ -259,7 +387,7 @@
         image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # 记得设置一个更强的密钥（请参阅先决条件部分）
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
@@ -269,20 +397,20 @@
 
       bw-db:
         image: mariadb:11
-        # 我们设置了最大允许的数据包大小以避免大查询的问题
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
-      redis: # Redis 服务用于持久化报告/封禁/统计数据
+      redis: # Redis service for the persistence of reports/bans/stats
         image: redis:8-alpine
         command: >
           redis-server
@@ -299,8 +427,11 @@
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:

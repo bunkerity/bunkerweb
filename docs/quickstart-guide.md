@@ -84,10 +84,10 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
 
     ```yaml
     x-bw-env: &bw-env
-      # We use an anchor to avoid repeating the same settings for both services
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
-      # Optional: set an API token and mirror it in both containers
-      API_TOKEN: ""
+      # We use an anchor to avoid repeating the same settings for every service
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
@@ -100,6 +100,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
           - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
           <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
         volumes:
           - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
@@ -112,6 +113,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
           SERVER_NAME: ""
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
@@ -123,6 +125,66 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
         networks:
           - bw-universe
           - bw-db
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.7.0-beta
@@ -167,6 +229,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
       bw-instance-data:
@@ -195,6 +259,9 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
     x-ui-env: &bw-ui-env
       # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
@@ -207,8 +274,10 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
         labels:
           - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
         environment:
-          AUTOCONF_MODE: "yes"
+          <<: *bw-ui-env
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+        volumes:
+          - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -244,6 +313,65 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
           - bw-universe
           - bw-docker
           - bw-db
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-ui-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-ui-env
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
@@ -299,8 +427,11 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-bet
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:

@@ -50,13 +50,14 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     Usa el script de instalación fácil para configurar BunkerWeb en las distribuciones de Linux compatibles. Instala y configura automáticamente NGINX, añade el repositorio de BunkerWeb y configura los servicios necesarios.
 
     ```bash
-    ```bash
     # Download the script and its checksum
     curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh
     curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.7.0-beta/install-bunkerweb.sh.sha256
 
     # Verify the checksum
-    sha256sum -c install-bunkerweb.sh.sha256    # Si la comprobación es exitosa, ejecuta el script
+    sha256sum -c install-bunkerweb.sh.sha256
+
+    # Si la comprobación es exitosa, ejecuta el script
     chmod +x install-bunkerweb.sh
     sudo ./install-bunkerweb.sh
     ```
@@ -83,24 +84,25 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
     ```yaml
     x-bw-env: &bw-env
-      # Usamos un ancla para evitar repetir las mismas configuraciones para ambos servicios
-      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Asegúrate de establecer el rango de IP correcto para que el programador pueda enviar la configuración a la instancia
-      # Opcional: establece un token de API y refléjalo en ambos contenedores
-      API_TOKEN: ""
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
+      # We use an anchor to avoid repeating the same settings for every service
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
       bunkerweb:
-        # Este es el nombre que se usará para identificar la instancia en el Programador
+        # This is the name that will be used to identify the instance in the Scheduler
         image: bunkerity/bunkerweb:1.7.0-beta
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # Para soporte de QUIC / HTTP3
+          - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
-          <<: *bw-env # Usamos el ancla para evitar repetir las mismas configuraciones para todos los servicios
+          <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
         volumes:
-          - bw-instance-data:/data # Necesario para detectar una credencial perdida tras registrar esta instancia, ver Instancias en la documentación de la interfaz web
+          - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -110,18 +112,79 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-scheduler:1.7.0-beta
         environment:
           <<: *bw-env
-          BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre de instancia correcto
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+          API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
           SERVER_NAME: ""
           MULTISITE: "yes"
-          UI_HOST: "http://bw-ui:7000" # Cámbialo si es necesario
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
           USE_REDIS: "yes"
           REDIS_HOST: "redis"
         volumes:
-          - bw-storage:/data # Se usa para persistir la caché y otros datos como las copias de seguridad
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-db
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.7.0-beta
@@ -136,20 +199,20 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
       bw-db:
         image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
-      redis: # Servicio de Redis para la persistencia de informes/baneos/estadísticas
+      redis: # Redis service for the persistence of reports/bans/stats
         image: redis:8-alpine
         command: >
           redis-server
@@ -166,6 +229,8 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
       bw-instance-data:
@@ -176,7 +241,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         ipam:
           driver: default
           config:
-            - subnet: 10.20.30.0/24 # Asegúrate de establecer el rango de IP correcto para que el programador pueda enviar la configuración a la instancia
+            - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
       bw-services:
         name: bw-services
       bw-db:
@@ -192,9 +257,12 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
     ```yaml
     x-ui-env: &bw-ui-env
-      # Anclamos las variables de entorno para evitar la duplicación
+      # We anchor the environment variables to avoid duplication
       AUTOCONF_MODE: "yes"
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Remember to set a stronger token: every component authenticates to the API with it
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
       bunkerweb:
@@ -202,12 +270,14 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp" # Para soporte de QUIC / HTTP3
+          - "443:8443/udp" # For QUIC / HTTP3 support
         labels:
-          - "bunkerweb.INSTANCE=yes" # Establecemos la etiqueta de la instancia para permitir que la autoconfiguración detecte la instancia
+          - "bunkerweb.INSTANCE=yes" # We set the instance label to allow the autoconf to detect the instance
         environment:
-          AUTOCONF_MODE: "yes"
+          <<: *bw-ui-env
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+        volumes:
+          - bw-instance-data:/data # Needed to detect a lost credential after enrolling this instance, see Instances in the web UI documentation
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -221,11 +291,11 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           SERVER_NAME: ""
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
           MULTISITE: "yes"
-          UI_HOST: "http://bw-ui:7000" # Cámbialo si es necesario
+          UI_HOST: "http://bw-ui:7000" # Change it if needed
           USE_REDIS: "yes"
           REDIS_HOST: "redis"
         volumes:
-          - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -244,6 +314,65 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
           - bw-docker
           - bw-db
 
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *bw-ui-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's.
+          - bw-worker-storage:/data
+        environment:
+          <<: *bw-ui-env
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) -- a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
       bw-docker:
         image: tecnativa/docker-socket-proxy:nightly
         volumes:
@@ -258,7 +387,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *bw-ui-env
-          TOTP_ENCRYPTION_KEYS: "mysecret" # Recuerda establecer una clave secreta más segura (consulta la sección de Requisitos previos)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
@@ -268,20 +397,20 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
 
       bw-db:
         image: mariadb:11
-        # Establecemos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme" # Recuerda establecer una contraseña más segura para la base de datos
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
         networks:
           - bw-db
 
-      redis: # Servicio de Redis para la persistencia de informes/baneos/estadísticas
+      redis: # Redis service for the persistence of reports/bans/stats
         image: redis:8-alpine
         command: >
           redis-server
@@ -298,8 +427,11 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     volumes:
       bw-data:
       bw-storage:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       redis-data:
       bw-ui-data:
+      bw-instance-data:
 
     networks:
       bw-universe:
