@@ -13,6 +13,7 @@ from .configs import router as configs_router
 from .plugins import router as plugins_router
 from .cache import router as cache_router
 from .jobs import router as jobs_router
+from .crowdsec import router as crowdsec_router
 
 
 @router.get("/ping")
@@ -48,3 +49,4 @@ router.include_router(configs_router)
 router.include_router(plugins_router)
 router.include_router(cache_router)
 router.include_router(jobs_router)
+router.include_router(crowdsec_router)

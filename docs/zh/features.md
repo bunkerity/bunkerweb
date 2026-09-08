@@ -1836,6 +1836,41 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
 以下各节将依次说明这些步骤。
 
+### IP 调查与决策移除
+
+在 Web 界面中打开 **附加页面 → CrowdSec**，查看各个已配置的连接、受影响的服务、本地 API 连通性和决策同步状态。CrowdSec 插件状态卡片以及报告和封禁页面中的 **调查 IP** 操作都会打开同一页面。调查链接会预先填入 IP 地址。当多个服务或实例使用 CrowdSec 时，请选择相应连接。
+
+调查结果汇总当前 CrowdSec 决策、可用的 CrowdSec 告警、保留的 BunkerWeb 报告和 BunkerWeb 本地封禁。当前决策与报告中捕获的证据分开展示。新的 CrowdSec 报告会保留可用的决策 ID、来源、场景、目标、处置措施和到期时间，即使相关决策已到期或被移除。AppSec 拒绝与 AppSec 故障策略导致的拒绝使用不同的来源标识。历史证据遵循现有的报告保留设置；旧报告和已从缓存中逐出的可选元数据可能没有额外详情。告警查看功能仅展示有限的事件元数据，不暴露原始请求正文、Cookie 或认证标头。
+
+本地报告和服务专属封禁仅限于所选连接的服务范围；BunkerWeb 全局封禁也会包含在结果中。如果无法再从实例已加载的配置中确定该范围，调查将停止，以免返回其他服务的证据。当本地 API 不可用但连接配置仍已加载时，保留的报告依然可以访问。
+
+**CrowdSec 允许列表** 部分展示引擎的原生允许列表、条目、备注、到期时间，以及列表由本地还是 CrowdSec Console 管理。IP 调查会检查引擎当前的允许列表状态，并显示匹配原因。读取和检查允许列表需要下文所述的管理凭据。界面会区分检查不可用和 IP 不在允许列表中这两种情况。允许列表例外适用于整个 CrowdSec 引擎，不会移除 BunkerWeb 本地封禁。CrowdSec 1.8.0 通过 LAPI 提供读取和检查操作；修改原生允许列表则需要在其主机上使用 `cscli`，或通过独立的 Console 管理权限完成。
+
+现有的 `CROWDSEC_API_KEY` 是 **bouncer 密钥**，支持读取决策，但不能移除决策或查看告警。要启用这些操作，请在相应的 CrowdSec 引擎上注册专用机器，并配置以下两个可选的多站点设置：
+
+- `CROWDSEC_MANAGEMENT_LOGIN`：专用机器的登录名。
+- `CROWDSEC_MANAGEMENT_PASSWORD`：该机器的密码。
+
+按照 CrowdSec 的[本地 API 认证流程](https://doc.crowdsec.net/docs/local_api/authentication/)注册机器，并妥善保管凭据。任一设置为空时，管理功能均不可用。内置引擎和外部引擎使用相同配置：请求经由所选 BunkerWeb 实例发送，因此内置本地 API 可以继续仅监听 localhost。管理操作的 HTTPS 请求使用 BunkerWeb 的 TLS 信任配置验证服务器证书，与 AppSec 的验证设置相互独立。
+
+**移除 CrowdSec 决策** 与解除 BunkerWeb 封禁是不同的操作。在 Web 界面中移除决策需要具有写入权限的管理员、已配置的管理凭据、可写的界面数据库，以及对所选决策的确认。移除针对地址范围的决策会影响整个范围。在共享引擎上移除决策也会影响使用该决策的其他 bouncer。移除前会再次核对所选 ID、范围、目标和处置措施；其他决策和本地封禁会被保留。
+
+成功响应会确认决策已从本地 API 移除，并显示仍然匹配的决策。Bouncer 会在配置的流刷新或 live 模式缓存到期后获取变化；界面会将传播状态标记为待完成，而不会声称所有客户端都已获准访问。其他决策、本地封禁、新检测结果或 AppSec 规则仍可能阻止请求。移除结果会记录到日志中，同时包含已认证的操作者及所选连接和决策。
+
+公共 API 提供相同的操作：
+
+- `GET /crowdsec`：连接、同步状态和各实例的错误。
+- `GET /crowdsec/{connection_id}/decisions`：按 `ip`、`origin` 或 `scenario` 筛选；使用 `offset` 和 `limit` 分页（上限为 200）。
+- `GET /crowdsec/{connection_id}/ips/{ip}`：调查结果，最多包含 200 条决策、50 条告警和 50 份报告，并显示总数或上限，以及明确标记为不可用的部分。
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`：已过滤敏感数据的告警详情。
+- `GET /crowdsec/{connection_id}/allowlists`：原生允许列表，使用 `offset` 和 `limit` 分页；每个列表最多返回 200 个条目，同时显示完整的条目总数。
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`：当前是否匹配原生允许列表，以及匹配原因。
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`：在 JSON 请求体中包含所选的 `scope`、`value` 和 `decision_type`。
+
+请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
+
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
+
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"

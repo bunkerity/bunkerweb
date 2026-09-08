@@ -36,6 +36,9 @@
                id="csrf_token"
                name="csrf_token"
                value="{{ csrf_token() }}" />
+        <input type="hidden"
+               id="crowdsec-url"
+               value="{{ url_for('crowdsec') }}" />
         <p id="bans-waiting"
            class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
            data-i18n="status.loading_bans">Loading bans...</p>

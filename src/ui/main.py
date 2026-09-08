@@ -65,6 +65,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.crowdsec import crowdsec
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
@@ -88,6 +89,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     totp,
     home,
     logout,
@@ -735,7 +737,7 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:

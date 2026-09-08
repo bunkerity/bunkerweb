@@ -747,6 +747,9 @@ function api:do_api_call()
 							resp["status"] = "error"
 						end
 						resp["msg"] = ret.msg
+						if ret.data ~= nil then
+							resp["data"] = ret.data
+						end
 						return ret.status == HTTP_OK, resp["status"], ret.status, encode(resp)
 					end
 				end

@@ -1836,6 +1836,41 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 The detailed instructions below follow this sequence.
 
+### Investigation and decision removal
+
+Open **Extra Pages → CrowdSec** in the Web UI to inspect each configured connection, its affected service, Local API connectivity, and decision synchronization. The CrowdSec plugin status card and the **Investigate IP** actions in Reports and Bans open the same page. Investigation links prefill the address. Select the connection when several services or instances use CrowdSec.
+
+An investigation combines current CrowdSec decisions, available CrowdSec alerts, retained BunkerWeb reports, and local BunkerWeb bans. Current decisions and captured report evidence are displayed separately. New CrowdSec reports retain available decision IDs, origins, scenarios, targets, remediation, and expiry information after those decisions expire or are removed. AppSec rejections and denials caused by an AppSec failure policy have distinct sources. Historical evidence follows the existing report retention settings; old reports and evicted optional metadata may have no additional details. Alert inspection exposes bounded event metadata rather than raw request bodies, cookies, or authentication headers.
+
+Local reports and service-specific bans are restricted to the selected connection's service scope; global BunkerWeb bans are also included. If that scope can no longer be established from the instance's loaded configuration, investigation stops rather than returning other services' evidence. Retained reports remain accessible when the Local API is unavailable and the connection configuration is still loaded.
+
+The **CrowdSec allowlists** section displays native engine allowlists, their entries, comments, expiration dates, and whether they are managed locally or through the CrowdSec Console. IP investigations check the engine's current allowlist state and show its matching reason. Reading and checking allowlists requires the management credentials below. An unavailable check is shown separately from an IP that is not allowlisted. Allowlist exceptions apply to the whole CrowdSec engine; they do not remove local BunkerWeb bans. CrowdSec 1.8.0 exposes read/check operations through LAPI, while native allowlist writes require `cscli` on its host or separate Console management access.
+
+The existing `CROWDSEC_API_KEY` is a **bouncer key**: it supports reading decisions, but cannot remove them or inspect alerts. To enable those operations, register a dedicated machine on the relevant CrowdSec engine and configure both of these optional multisite settings:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: the dedicated machine's login.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: that machine's password.
+
+Register the machine using CrowdSec's [Local API authentication procedure](https://doc.crowdsec.net/docs/local_api/authentication/). Store the credentials privately. Leaving either setting empty keeps management unavailable. The same configuration applies to bundled and external engines: requests are sent through the selected BunkerWeb instance, so a bundled Local API can continue listening on localhost. Management HTTPS requests verify the server certificate using BunkerWeb's TLS trust configuration, independently of the AppSec verification setting.
+
+**Remove CrowdSec decision** is separate from BunkerWeb unban. Web UI removal requires an administrator with write access, configured management credentials, a writable UI database, and confirmation of the selected decision. Removing a range affects the entire range. Removing a decision on a shared engine also affects the other bouncers that consume it. The selected ID, scope, target, and remediation are checked again before removal; other decisions and local bans are preserved.
+
+A successful response confirms removal at the Local API and displays remaining matching decisions. Bouncers pick up the change through their configured stream refresh or live cache expiry; the UI reports propagation as pending rather than claiming every client is already allowed. Another decision, a local ban, a new detection, or an AppSec rule can still block a request. Removal outcomes are logged with the authenticated actor and selected connection/decision.
+
+The public API exposes the same operations:
+
+- `GET /crowdsec`: connections, synchronization state, and per-instance errors.
+- `GET /crowdsec/{connection_id}/decisions`: filter by `ip`, `origin`, or `scenario`; paginate with `offset` and `limit` (maximum 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: investigation, including up to 200 decisions, 50 alerts, and 50 reports, with totals or limits and explicit unavailable sections.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: sanitized alert details.
+- `GET /crowdsec/{connection_id}/allowlists`: native allowlists, with `offset` and `limit` pagination; up to 200 entries per list, with the full entry count shown.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: current native allowlist membership and matching reason.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: include the selected `scope`, `value`, and `decision_type` in the JSON body.
+
+Use the returned connection ID verbatim. It includes instance identity, so identical localhost URLs on different instances remain separate. API administrators can use these operations. Delegated API users need the independent `crowdsec_read` or `crowdsec_delete` permission under the existing `bans` resource, either for a returned connection ID or `*`. An ordinary `ban_delete` grant does not authorize CrowdSec removal. No database migration is required.
+
+The runtime retains individual decisions per target, so removing one cannot erase another ban on the same IP or range. Optional report metadata uses a separate 5 MiB cache and cannot evict enforcement entries. Stream refreshes use a nonblocking process lock in `/var/run/bunkerweb`, held until the update is published and released automatically if the worker exits.
+
 ### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
 
 Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.

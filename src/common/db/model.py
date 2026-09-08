@@ -533,6 +533,8 @@ API_PERMISSION_ENUM = Enum(
     "ban_read",
     "ban_update",
     "ban_delete",
+    "crowdsec_read",
+    "crowdsec_delete",
     # Job permissions
     "job_read",
     "job_run",
