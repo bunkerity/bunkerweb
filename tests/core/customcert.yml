@@ -296,25 +296,35 @@ actions:
     ssl_subject: "/CN=www.example.com/"
     config:
       SERVER_NAME: "default-server www.example.com"
-  single_site_only_name_is_still_served_its_certificate:
+  single_site_only_name_still_renders_and_loads_its_certificate:
     # `SERVER_NAME: "default-server"` and nothing else. Here the Templator KEEPS the name (hunk 1:
     # strip the reserved id unless nothing else remains), so the job must keep it too. The blind
     # strip -- mutation M6 -- empties `all_domains`, hits `No services found, exiting ...` before the
     # per-service branch, caches nothing, and silently ignores a configured USE_CUSTOM_SSL.
     #
-    # `raise_for_status: false`: the assertion is about which certificate ends the handshake, and
-    # this stack has one server block answering every Host, so whatever it replies with is not the
-    # subject of the test. The URL stays `www.example.com` (the name the runner can resolve) rather
-    # than the bare `default-server`, which `models/action.py:check_runner_host` rightly refuses.
-    type: ssl
+    # Not a `type: ssl` assertion (report-DS-B6.md §0): single-site never renders
+    # `default-server-http.conf` (`confs/http.conf` includes it only under
+    # MULTISITE/DISABLE_DEFAULT_SERVER/IS_LOADING=yes), so `ssl_certificate_default` never runs and
+    # the only SNI the runner can dial (`www.example.com`, per `models/action.py:check_runner_host`)
+    # is answered by the static internal leaf instead of the certificate loaded for `default-server`
+    # -- the handshake cannot tell this case apart from the one already pinned by the green
+    # `default_server_override_refused_unknown_sni` above. Dialling the name the deployment actually
+    # serves needs the bare `default-server` host resolvable by the runner, which is harness DNS
+    # work left for wave 15.
+    #
+    # Pinned on the instance log instead: `customcert:init()` must reach and log its success line
+    # for the `default-server` cache key, and must never hit the nil-concat error the blind strip in
+    # `config_read.py` used to cause on an empty `SERVER_NAME` (guarded in `customcert.lua` above
+    # `first_server`).
+    type: status
     integrations:
       - "Docker"
       - "Linux"
     url: "https://www.example.com"
     verify_ssl: false
-    raise_for_status: false
-    ssl_expiration: 365
-    ssl_subject: "/CN=www.example.com/"
+    status: 200
+    log: "customcert:init() call successful : success"
+    not_log: "attempt to concatenate a nil value"
     config:
       SERVER_NAME: "default-server"
     full_clean: true
