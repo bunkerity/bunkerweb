@@ -10,6 +10,18 @@ Au sein de votre infrastructure, BunkerWeb agit comme un proxy inverse devant vo
 
 L'utilisation de BunkerWeb de cette manière (architecture classique de proxy inverse) avec le déchargement TLS et les politiques de sécurité centralisées améliore les performances en réduisant la surcharge de chiffrement sur les serveurs backend tout en garantissant un contrôle d'accès cohérent, l'atténuation des menaces et l'application de la conformité dans tous les services.
 
+Un déploiement comprend cinq composants et leur base de données partagée :
+
+| Composant | Rôle |
+| --------- | ---- |
+| **BunkerWeb** (`bunkerweb`) | Instance NGINX qui termine TLS et sert le trafic. Une par nœud ; sa configuration lui est fournie par le Scheduler. |
+| **Scheduler** (`bw-scheduler`) | Gère les paramètres et configurations personnalisées, génère et distribue la configuration et décide quand lancer les jobs. Il les envoie via l'API sans les exécuter. |
+| **API** (`bw-api`) | Plan de contrôle utilisé par l'UI et vos automatisations pour lire et écrire ; l'UI n'accède jamais directement à la base. `bwcli` peut l'utiliser avec `BWCLI_API_URL`. Le Scheduler envoie ses jobs via `POST /jobs/dispatch` : une panne de l'API arrête aussi les jobs d'arrière-plan. |
+| **Worker** (`bw-worker`) | Exécute les jobs (renouvellement des certificats, téléchargement des listes, sauvegardes) et enregistre les résultats en base. |
+| **Broker de jobs** (`bw-jobs-broker`) | Redis/Valkey dédié transportant les jobs vers le Worker. Il est distinct du stockage facultatif `USE_REDIS` : le broker ne doit jamais évincer de clés, tandis que le stockage est généralement plafonné avec éviction. `maxmemory-policy` s'applique au serveur entier. L'image All-In-One exécute ce broker sur sa boucle locale, port `6380`, indépendamment du Redis du WAF. |
+
+Le Worker et le broker sont nouveaux en 1.7. L'API existait en 1.6, mais elle était facultative et absente des stacks de référence ; chaque stack 1.7 en utilise une. L'UI facultative (`bw-ui`) et le contrôleur `bw-autoconf` des intégrations [autoconf](integrations.md#docker-autoconf), [Kubernetes](integrations.md#kubernetes) et [Swarm](integrations.md#swarm) complètent ces composants.
+
 ## Intégrations
 
 Le premier concept est l'intégration de BunkerWeb dans l'environnement cible. Nous préférons utiliser le mot "intégration" au lieu de "installation" car l'un des objectifs de BunkerWeb est de s'intégrer de manière transparente dans les environnements existants.
@@ -193,7 +205,7 @@ Pour une coordination et une automatisation sans faille, BunkerWeb utilise un se
 
 - **Stockage des paramètres et des configurations personnalisées**: le planificateur est responsable du stockage de tous les paramètres et configurations personnalisées dans la base de données principale. Cela centralise les données de configuration, ce qui les rend facilement accessibles et gérables.
 
-- **Exécution de diverses tâches (travaux)**: le planificateur gère l'exécution de diverses tâches, appelées travaux. Ces tâches englobent une gamme d'activités, telles que la maintenance périodique, les mises à jour programmées ou toute autre tâche automatisée requise par BunkerWeb.
+- **Planification des tâches (jobs)** : le Scheduler décide quand lancer maintenance, mises à jour et renouvellements de listes ou certificats. Depuis 1.7, il transmet les jobs par l'**API** au **broker** ; un **Worker** les exécute et écrit leur résultat en base. Sans API, Worker ou broker, les jobs sont planifiés mais jamais exécutés, sans panne manifeste : voir [Les jobs ne s'exécutent jamais](troubleshooting.md#background-jobs).
 
 - **Génération de la configuration BunkerWeb**: Le planificateur génère une configuration qui est facilement comprise par BunkerWeb. Cette configuration est dérivée des paramètres stockés et des configurations personnalisées, ce qui garantit que l'ensemble du système fonctionne de manière cohérente.
 
@@ -201,7 +213,7 @@ Pour une coordination et une automatisation sans faille, BunkerWeb utilise un se
 
 En substance, le planificateur sert de cerveau à BunkerWeb, orchestrant diverses opérations et assurant le bon fonctionnement du système.
 
-Selon l'approche d'intégration, l'environnement d'exécution du planificateur peut différer. Dans les intégrations basées sur des conteneurs, le planificateur est exécuté dans son conteneur dédié, ce qui offre isolation et flexibilité. D'autre part, pour les intégrations basées sur Linux, le planificateur est autonome au sein du service bunkerweb, ce qui simplifie le processus de déploiement et de gestion.
+Le Scheduler s'exécute toujours dans un processus distinct : conteneur `bw-scheduler`, sauf dans l'[image All-In-One](integrations.md#all-in-one-aio-image) qui le supervise avec l'API et le Worker ; sous Linux, unité systemd `bunkerweb-scheduler` aux côtés de `bunkerweb`, `bunkerweb-api` et `bunkerweb-worker`.
 
 En utilisant le planificateur, BunkerWeb rationalise l'automatisation et la coordination des tâches essentielles, permettant un fonctionnement efficace et fiable de l'ensemble du système.
 
@@ -212,7 +224,7 @@ Si vous utilisez l'interface utilisateur Web, vous pouvez gérer les tâches du 
   <figcaption>Gérer les tâches à partir de l'interface utilisateur web</figcaption>
 </figure>
 
-**Vérification de l'état des instances**
+### Vérification de l'état des instances {#instances-health-check}
 
 Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.
 

@@ -10,6 +10,21 @@ Dentro de tu infraestructura, BunkerWeb actúa como un proxy inverso frente a tu
 
 Usar BunkerWeb de esta manera (arquitectura clásica de proxy inverso) con descarga de TLS y políticas de seguridad centralizadas mejora el rendimiento al reducir la sobrecarga de cifrado en los servidores backend, al tiempo que garantiza un control de acceso consistente, mitigación de amenazas y cumplimiento de normativas en todos los servicios.
 
+Un despliegue consta de cinco componentes y la base de datos que comparten:
+
+| Componente | Función |
+| ---------- | ------- |
+| **BunkerWeb** (`bunkerweb`) | Instancia NGINX que termina TLS y sirve tráfico. Una por nodo; recibe su configuración del Scheduler. |
+| **Scheduler** (`bw-scheduler`) | Gestiona los ajustes y configuraciones personalizadas, genera la configuración, la envía a las instancias y decide *cuándo* ejecutar cada job. Lo envía a través de la API en lugar de ejecutarlo. |
+| **API** (`bw-api`) | Plano de control. La interfaz y las automatizaciones leen y escriben a través de ella; la interfaz nunca accede directamente a la base de datos. `bwcli` puede usarla con `BWCLI_API_URL`. El Scheduler envía jobs mediante `POST /jobs/dispatch`: una API caída también detiene todos los jobs. |
+| **Worker** (`bw-worker`) | Ejecuta los jobs enviados — renovación de certificados, descarga de listas y backups — y guarda los resultados en la base de datos. |
+| **Broker de jobs** (`bw-jobs-broker`) | Redis/Valkey dedicado que transporta los jobs entre Scheduler y Worker. Está separado del almacén opcional `USE_REDIS`: el broker nunca debe expulsar claves, mientras que el almacén suele tener límite y permitir expulsiones; `maxmemory-policy` se aplica por servidor. La imagen All-In-One ejecuta su broker dedicado en el puerto loopback `6380` del contenedor, junto al Redis WAF configurado por separado. |
+
+El Worker y el broker son nuevos en 1.7. La API ya existía en 1.6, pero era opcional y ningún stack
+de referencia la incluía; todos los de 1.7 la incluyen. La interfaz opcional (`bw-ui`) y el
+controlador `bw-autoconf` de las integraciones [autoconf](integrations.md#docker-autoconf),
+[Kubernetes](integrations.md#kubernetes) y [Swarm](integrations.md#swarm) se ejecutan junto a ellos.
+
 ## Integraciones
 
 El primer concepto es la integración de BunkerWeb en el entorno de destino. Preferimos usar la palabra "integración" en lugar de "instalación" porque uno de los objetivos de BunkerWeb es integrarse sin problemas en los entornos existentes.
@@ -103,6 +118,15 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
   <figcaption>Aplicar una configuración a todos los servicios desde la interfaz de usuario web</figcaption>
 </figure>
 
+!!! info "El servicio reservado `default-server`"
+
+    Además de tus servicios, el modo multisitio incluye uno reservado llamado `default-server`.
+    Responde a peticiones que no coinciden con **ningún** servicio: hostname desconocido, IP directa
+    o `Host` no servido. Permite configurar certificado, TLS, cabeceras y páginas de error como
+    cualquier servicio. Aparece fijado arriba en la interfaz; no se puede crear, renombrar, pasar
+    a borrador ni eliminar, y nunca cuenta para la cuota PRO. Consulta
+    [Configuración del servidor predeterminado](features.md#miscellaneous).
+
 !!! info "Para saber más"
 
     Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.7.0-beta/examples) del repositorio.
@@ -193,7 +217,7 @@ Para una coordinación y automatización fluidas, BunkerWeb emplea un servicio e
 
 - **Almacenar configuraciones y configuraciones personalizadas**: El programador es responsable de almacenar todas las configuraciones y configuraciones personalizadas dentro de la base de datos de backend. Esto centraliza los datos de configuración, haciéndolos fácilmente accesibles y manejables.
 
-- **Ejecutar diversas tareas (trabajos)**: El programador se encarga de la ejecución de diversas tareas, conocidas como trabajos. Estos trabajos abarcan una gama de actividades, como el mantenimiento periódico, las actualizaciones programadas o cualquier otra tarea automatizada requerida por BunkerWeb.
+- **Programar tareas (jobs)**: El programador decide cuándo ejecutar cada job — mantenimiento, actualizaciones, listas de bloqueo y certificados — y lo envía. Desde 1.7 no lo ejecuta: lo envía mediante la **API** al **broker de jobs**, y un **Worker** lo recoge, ejecuta y guarda el resultado en la base de datos compartida. Si falta la API, el worker o el broker, los jobs se programan pero nunca se ejecutan sin un fallo evidente; consulta [Los jobs en segundo plano nunca se ejecutan](troubleshooting.md#background-jobs).
 
 - **Generar la configuración de BunkerWeb**: El programador genera una configuración que es fácilmente comprensible por BunkerWeb. Esta configuración se deriva de las configuraciones almacenadas y las configuraciones personalizadas, asegurando que todo el sistema funcione de manera cohesiva.
 
@@ -201,7 +225,7 @@ Para una coordinación y automatización fluidas, BunkerWeb emplea un servicio e
 
 En esencia, el programador sirve como el cerebro de BunkerWeb, orquestando diversas operaciones y asegurando el buen funcionamiento del sistema.
 
-Dependiendo del enfoque de integración, el entorno de ejecución del programador puede diferir. En las integraciones basadas en contenedores, el programador se ejecuta dentro de su contenedor dedicado, proporcionando aislamiento y flexibilidad. Por otro lado, para las integraciones basadas en Linux, el programador está autocontenido dentro del servicio bunkerweb, simplificando el proceso de implementación y gestión.
+El programador siempre se ejecuta en su propio proceso. En integraciones con contenedores es un contenedor dedicado (`bw-scheduler`), salvo en la [imagen All-In-One](integrations.md#all-in-one-aio-image), que lo supervisa junto a la API y el Worker dentro de un contenedor. En Linux es una unidad systemd dedicada, `bunkerweb-scheduler`, junto a `bunkerweb`, `bunkerweb-api` y `bunkerweb-worker`.
 
 Al emplear el programador, BunkerWeb agiliza la automatización y coordinación de tareas esenciales, permitiendo un funcionamiento eficiente y confiable de todo el sistema.
 

@@ -10,6 +10,22 @@ Innerhalb Ihrer Infrastruktur agiert BunkerWeb als Reverse-Proxy vor Ihren Webdi
 
 Die Verwendung von BunkerWeb auf diese Weise (klassische Reverse-Proxy-Architektur) mit TLS-Offloading und zentralisierten Sicherheitsrichtlinien verbessert die Leistung durch Reduzierung des Verschlüsselungsaufwands auf den Backend-Servern und gewährleistet gleichzeitig eine konsistente Zugriffskontrolle, Bedrohungsabwehr und Einhaltung von Vorschriften für alle Dienste.
 
+Eine Bereitstellung besteht aus fünf Komponenten sowie ihrer gemeinsamen Datenbank:
+
+| Komponente | Aufgabe |
+| ---------- | ------- |
+| **BunkerWeb** (`bunkerweb`) | Die NGINX-Instanz terminiert TLS und bedient den Datenverkehr. Pro Knoten gibt es eine Instanz; sie verwaltet keine eigene Konfiguration, sondern erhält sie vom Scheduler. |
+| **Scheduler** (`bw-scheduler`) | Verwaltet Einstellungen und benutzerdefinierte Konfigurationen, generiert die Konfiguration, überträgt sie an die Instanzen und bestimmt, *wann* jeder Job läuft. Er versendet den Job über die API, statt ihn selbst auszuführen. |
+| **API** (`bw-api`) | Die Control Plane: Web-UI und Automatisierungen lesen und schreiben über sie; die UI greift nie selbst auf die Datenbank zu. `bwcli` kann über `BWCLI_API_URL` auf sie zeigen. Auch Jobs laufen über sie: Der Scheduler nutzt `POST /jobs/dispatch`, sodass ein API-Ausfall sämtliche Hintergrundjobs stoppt. |
+| **Worker** (`bw-worker`) | Führt die vom Scheduler versendeten Jobs aus — Zertifikatserneuerung, Sperrlisten-Downloads, Backups — und schreibt Ergebnisse in die Datenbank zurück. |
+| **Job-Broker** (`bw-jobs-broker`) | Eine dedizierte Redis-/Valkey-Instanz überträgt Aufträge zwischen Scheduler und Worker. Sie ist vom optionalen Datastore `USE_REDIS` getrennt: Ein Broker darf nie Schlüssel verdrängen, ein Datastore ist üblicherweise begrenzt und darf dies. `maxmemory-policy` gilt pro Server. Das All-In-One-Image betreibt seinen dedizierten Broker auf dem Container-Loopback-Port `6380`, neben dem unabhängig konfigurierten WAF-Redis. |
+
+Worker und Job-Broker sind neu in 1.7. Die API gab es bereits in 1.6, dort war sie jedoch optional
+und in keinem Referenzstack enthalten; in 1.7 verwendet sie jeder Stack. Hinzu kommen die optionale
+Web-UI (`bw-ui`) und der Controller `bw-autoconf` der Integrationen
+[autoconf](integrations.md#docker-autoconf), [Kubernetes](integrations.md#kubernetes) und
+[Swarm](integrations.md#swarm).
+
 ## Integrationen
 
 Das erste Konzept ist die Integration von BunkerWeb in die Zielumgebung. Wir bevorzugen das Wort "Integration" anstelle von "Installation", da eines der Ziele von BunkerWeb darin besteht, sich nahtlos in bestehende Umgebungen zu integrieren.
@@ -193,7 +209,7 @@ Für eine nahtlose Koordination und Automatisierung verwendet BunkerWeb einen sp
 
 -   **Speichern von Einstellungen und benutzerdefinierten Konfigurationen**: Der Scheduler ist für das Speichern aller Einstellungen und benutzerdefinierten Konfigurationen in der Backend-Datenbank verantwortlich. Dies zentralisiert die Konfigurationsdaten und macht sie leicht zugänglich und verwaltbar.
 
--   **Ausführen verschiedener Aufgaben (Jobs)**: Der Scheduler übernimmt die Ausführung verschiedener Aufgaben, die als Jobs bezeichnet werden. Diese Jobs umfassen eine Reihe von Aktivitäten wie regelmäßige Wartung, geplante Updates oder andere von BunkerWeb benötigte automatisierte Aufgaben.
+-   **Planen von Aufgaben (Jobs)**: Der Scheduler bestimmt den Zeitpunkt für Wartung, Updates sowie Listen- und Zertifikatserneuerungen und versendet die Jobs. Seit 1.7 führt er sie nicht selbst aus: Er sendet sie über die **API** an den **Job-Broker**, wo ein **Worker** sie übernimmt, ausführt und das Ergebnis in die gemeinsame Datenbank schreibt. Fehlen API, Worker oder Broker, werden Jobs geplant, die nie laufen, ohne deutlichen Fehler. Siehe [Hintergrundjobs laufen nie](troubleshooting.md#background-jobs).
 
 -   **Generieren der BunkerWeb-Konfiguration**: Der Scheduler generiert eine Konfiguration, die von BunkerWeb leicht verstanden wird. Diese Konfiguration wird aus den gespeicherten Einstellungen und benutzerdefinierten Konfigurationen abgeleitet und gewährleistet, dass das gesamte System kohäsiv arbeitet.
 
@@ -201,7 +217,7 @@ Für eine nahtlose Koordination und Automatisierung verwendet BunkerWeb einen sp
 
 Im Wesentlichen dient der Scheduler als das Gehirn von BunkerWeb, das verschiedene Operationen orchestriert und das reibungslose Funktionieren des Systems gewährleistet.
 
-Je nach Integrationsansatz kann die Ausführungsumgebung des Schedulers unterschiedlich sein. Bei containerbasierten Integrationen wird der Scheduler in seinem eigenen dedizierten Container ausgeführt, was Isolation und Flexibilität bietet. Bei Linux-basierten Integrationen ist der Scheduler hingegen in den BunkerWeb-Dienst integriert, was die Bereitstellung und Verwaltung vereinfacht.
+Der Scheduler läuft immer als eigener Prozess. Bei containerbasierten Integrationen ist es ein dedizierter Container (`bw-scheduler`), außer beim [All-In-One-Image](integrations.md#all-in-one-aio-image), das ihn zusammen mit API und Worker in einem Container überwacht. Unter Linux ist er eine eigene systemd-Unit `bunkerweb-scheduler` neben `bunkerweb`, `bunkerweb-api` und `bunkerweb-worker`.
 
 Durch den Einsatz des Schedulers optimiert BunkerWeb die Automatisierung und Koordination wesentlicher Aufgaben und ermöglicht einen effizienten und zuverlässigen Betrieb des gesamten Systems.
 
@@ -263,8 +279,8 @@ Beispiel für eine benutzerdefinierte Vorlagendatei:
     "name": "Vorlagenname",
 	// optional
     "settings": {
-        "EINSTELLUNG_1": "Wert",
-        "EINSTELLUNG_2": "Wert"
+        "SETTING_1": "Wert",
+        "SETTING_2": "Wert"
     },
 	// optional
     "configs": [
@@ -278,7 +294,7 @@ Beispiel für eine benutzerdefinierte Vorlagendatei:
             "title": "Titel 1",
             "subtitle": "Untertitel 1",
             "settings": [
-                "EINSTELLUNG_1"
+                "SETTING_1"
             ],
             "configs": [
                 "modsec-crs/custom_rules.conf"
@@ -288,7 +304,7 @@ Beispiel für eine benutzerdefinierte Vorlagendatei:
             "title": "Titel 2",
             "subtitle": "Untertitel 2",
             "settings": [
-                "EINSTELLUNG_2"
+                "SETTING_2"
             ],
             "configs": [
                 "modsec/false_positives.conf"

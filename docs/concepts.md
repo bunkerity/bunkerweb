@@ -10,6 +10,22 @@ Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your w
 
 Using BunkerWeb in this way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.
 
+A deployment is made of five components, plus the database they share:
+
+| Component | What it does |
+| --------- | ------------ |
+| **BunkerWeb** (`bunkerweb`) | The NGINX instance that terminates TLS and serves traffic. One per node; it holds no configuration of its own and is told what to do by the Scheduler. |
+| **Scheduler** (`bw-scheduler`) | Owns the settings and custom configurations, generates the configuration, pushes it to the instances, and decides *when* each job should run. It dispatches the job through the API rather than running it. |
+| **API** (`bw-api`) | The control plane. The web UI and your own automation read and write through it — the UI never touches the database itself — and `bwcli` can be pointed at it with `BWCLI_API_URL`. It is also on the job path: the Scheduler dispatches through `POST /jobs/dispatch`, so an API that is down stops every background job too. |
+| **Worker** (`bw-worker`) | Executes the jobs the Scheduler dispatches — certificate renewal, blocklist downloads, backups — and writes their results back to the database. |
+| **Job broker** (`bw-jobs-broker`) | The dedicated Redis/Valkey instance carrying the dispatch between the Scheduler and the Worker. It is separate from the optional `USE_REDIS` data store: a broker must never evict, while a data store is normally capped and left free to evict, and `maxmemory-policy` is per-server. The All-In-One image runs its dedicated broker on container loopback port `6380`, alongside the independently configured WAF Redis. |
+
+The Worker and the job broker are new in 1.7. The API is not — it shipped in 1.6 — but it was
+optional there and no 1.6 reference stack ran one, whereas every 1.7 stack does. The optional web UI
+(`bw-ui`) and the `bw-autoconf` controller of the [autoconf](integrations.md#docker-autoconf),
+[Kubernetes](integrations.md#kubernetes) and [Swarm](integrations.md#swarm) integrations sit
+alongside them.
+
 ## Integrations
 
 The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of BunkerWeb's goals is to integrate seamlessly into existing environments.
@@ -197,7 +213,7 @@ For seamless coordination and automation, BunkerWeb employs a specialized servic
 
 - **Storing settings and custom configurations**: The scheduler is responsible for storing all the settings and custom configurations within the backend database. This centralizes the configuration data, making it easily accessible and manageable.
 
-- **Executing various tasks (jobs)**: The scheduler handles the execution of various tasks, referred to as jobs. These jobs encompass a range of activities, such as periodic maintenance, scheduled updates, or any other automated tasks required by BunkerWeb.
+- **Scheduling tasks (jobs)**: The scheduler decides when each job should run — periodic maintenance, scheduled updates, blocklist and certificate refreshes — and dispatches it. Since 1.7 it does not execute the job itself: it dispatches it through the **API** onto the **job broker**, and a **Worker** picks it up and runs it, writing the result back to the shared database. A stack whose API, worker or broker is missing therefore schedules jobs that never run, with nothing failing loudly; see [Background jobs never run](troubleshooting.md#background-jobs).
 
 - **Generating BunkerWeb configuration**: The scheduler generates a configuration that is readily understood by BunkerWeb. This configuration is derived from the stored settings and custom configurations, ensuring that the entire system operates cohesively.
 
@@ -205,7 +221,7 @@ For seamless coordination and automation, BunkerWeb employs a specialized servic
 
 In essence, the scheduler serves as the brain of BunkerWeb, orchestrating various operations and ensuring the smooth functioning of the system.
 
-Depending on the integration approach, the execution environment of the scheduler may differ. In container-based integrations, the scheduler is executed within its dedicated container, providing isolation and flexibility. On the other hand, for Linux-based integrations, the scheduler is self-contained within the bunkerweb service, simplifying the deployment and management process.
+The scheduler always runs as its own process. In container-based integrations it is a dedicated container (`bw-scheduler`) — except in the [All-In-One image](integrations.md#all-in-one-aio-image), which supervises it next to the API and the Worker inside one container; on Linux it is a dedicated systemd unit, `bunkerweb-scheduler`, alongside `bunkerweb`, `bunkerweb-api` and `bunkerweb-worker`.
 
 By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.
 
