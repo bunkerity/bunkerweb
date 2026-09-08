@@ -45,6 +45,7 @@
 - [BUILD] `release`: candidates are built once, tested as the exact artifacts and promoted by digest with a manifest; publication requires the `release` environment's reviewers to be the release owners.
 - [ALL-IN-ONE] Update the bundled CrowdSec to `v1.8.0`, fixing two datasource denial of service issues.
 - [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for correcting the ModSecurity audit log documentation. (#3890)
 
 ## v1.6.15~rc1 - 2026/08/31
 
