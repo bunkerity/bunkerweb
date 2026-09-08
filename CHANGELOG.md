@@ -151,6 +151,7 @@
 - [BUGFIX] `db`: a custom-config commit that fails without an error message is reported as a failure instead of as a successful write.
 - [BUGFIX] `api`: a failed plugin or export download carries the reason the API states, instead of the bare status with the body thrown away.
 - [BUGFIX] `installer`: a Docker upgrade is verified by image identity, health and stability, and .env is read last-wins as Compose reads it.
+- [BUGFIX] `services`: a single-site deployment named only `default-server` reached its instances with an empty `SERVER_NAME` and served nothing.
 
 ## v1.6.14~rc1 - 2026/07/??
 

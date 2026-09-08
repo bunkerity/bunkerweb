@@ -78,3 +78,62 @@ class TestASingleSiteServiceNamedLikeTheReservedId:
         `MULTISITE` verbatim and so cannot see that difference."""
         tree = render_db_tree({"MULTISITE": "yes"}, {SERVICE: {}, DEFAULT_SERVER_ID: {"DEFAULT_SERVER_STREAM_PORTS": "9001"}})
         assert "9001" in tree["stream.conf"] and "default_server" in tree["stream.conf"]
+
+
+class TestTheSeededReservedRowIsTheOnlySingleSiteName:
+    """The other half of the same rule, and the one the CI red came from (DS-B6).
+
+    The class above covers the row an OPERATOR owns (method ``scheduler``/``ui``), which
+    ``config_read`` keeps. This one covers the SEEDED row -- method ``wizard`` -- which
+    ``config_read`` strips, and which a single-site deployment can perfectly well be left holding:
+    the API's lifespan seeds it on a fresh install *before* ``MULTISITE`` is knowable
+    (``test_default_server_multisite_gate.py::test_a_fresh_install_seeds_before_multisite_is_knowable``),
+    so every fresh install has it, whatever it turns out to be.
+
+    On such a deployment ``SERVER_NAME=default-server`` leaves the reserved row as the ONLY roster
+    entry, and the strip emptied it: ``get_non_default_settings()["SERVER_NAME"] == ""``, which the
+    scheduler feeds straight to ``gen/main.py``. Zero server blocks, ``SERVER_NAME=`` in
+    ``variables.env``, and the instance answering nothing -- with ``customcert:init()`` raising
+    ``attempt to concatenate a nil value`` on the way past.
+    """
+
+    def test_the_roster_keeps_the_reserved_row_when_it_is_alone(self, db, render_db_tree):
+        assert db.seed_default_server_service() == ""
+        tree = render_db_tree({"MULTISITE": "no", "SERVER_NAME": DEFAULT_SERVER_ID}, {})
+
+        # The premise: this time the row IS the reserved one -- the row the strip exists for.
+        rows = {service["id"]: service["method"] for service in db.get_services(with_drafts=True)}
+        assert rows == {DEFAULT_SERVER_ID: DEFAULT_SERVER_METHOD}
+        # Both readers: `gen/main.py` takes `config` from the first and `full_config` from the second.
+        assert db.get_non_default_settings()["SERVER_NAME"] == DEFAULT_SERVER_ID
+        assert db.get_config()["SERVER_NAME"] == DEFAULT_SERVER_ID
+
+        server_conf = next(content for path, content in tree.items() if path.endswith("server.conf"))
+        assert f"server_name {DEFAULT_SERVER_ID};" in server_conf
+        assert f"SERVER_NAME={DEFAULT_SERVER_ID}\n" in tree["variables.env"]
+
+    def test_the_strip_still_fires_when_a_real_service_remains(self, db, render_db_tree):
+        """The control: keeping the id when it is alone must not turn the strip off. This is the
+        shape the sibling integration case drives (`SERVER_NAME: "default-server www.example.com"`),
+        reproduced with the rows that make it single-site AND multi-row -- a deployment that was
+        multisite once, which is the only way a single-site roster holds two rows at all."""
+        render_db_tree({"MULTISITE": "yes"}, {SERVICE: {}})
+        assert db.get_services(with_drafts=True)  # the multisite pass seeded the reserved row
+
+        tree = render_db_tree({"MULTISITE": "no", "SERVER_NAME": f"{DEFAULT_SERVER_ID} {SERVICE}"}, {SERVICE: {}})
+        rows = {service["id"]: service["method"] for service in db.get_services(with_drafts=True)}
+        assert rows == {DEFAULT_SERVER_ID: DEFAULT_SERVER_METHOD, SERVICE: "scheduler"}
+
+        assert db.get_non_default_settings()["SERVER_NAME"] == SERVICE
+        server_conf = next(content for path, content in tree.items() if path.endswith("server.conf"))
+        assert f"server_name {SERVICE};" in server_conf
+        assert f"SERVER_NAME={SERVICE}\n" in tree["variables.env"]
+
+    def test_a_multisite_roster_of_one_still_drops_it(self, db, render_db_tree):
+        """The keep is single-site only. In multisite the reserved row renders into the default
+        server block and never gets a `server{}` of its own, so a roster that holds nothing else
+        legitimately renders no service block -- keeping it there would render one."""
+        tree = render_db_tree({"MULTISITE": "yes"}, {})
+        rows = {service["id"]: service["method"] for service in db.get_services(with_drafts=True)}
+        assert rows == {DEFAULT_SERVER_ID: DEFAULT_SERVER_METHOD}
+        assert not [path for path in tree if path.endswith("server.conf")]

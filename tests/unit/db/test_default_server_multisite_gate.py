@@ -19,7 +19,7 @@ lifespan runs once per API boot.
 
 import pytest
 
-from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD  # type: ignore
+from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD, strip_default_server_unless_alone  # type: ignore
 from fixtures.seed import make_core_plugin, make_general_settings
 
 pytestmark = pytest.mark.slow
@@ -334,3 +334,88 @@ class TestTheRecoveryReachesTheDatabase:
 
         assert DEFAULT_SERVER_ID in _ids(foreign)
         assert "app1.example.com" in _ids(foreign)
+
+
+class TestTheStripNeverEmptiesTheRoster:
+    """DS-B6: the strip above must not be the thing that empties ``SERVER_NAME``.
+
+    ``TestTheGateIsThreeValued`` establishes why every FRESH install carries the seeded row
+    whatever it turns out to be -- the lifespan runs once, before MULTISITE is knowable, and
+    reading "absent" as single-site would skip the seeding on every fresh multisite install
+    permanently. The cost stated there ("a row that reaches nothing") holds only while the
+    deployment has a service of its own. It does not when the operator's single-site
+    ``SERVER_NAME`` IS ``default-server``: the roster then holds exactly one row, it is the seeded
+    one, and the strip left ``SERVER_NAME`` empty.
+
+    That empty string is not cosmetic. ``push-configs.py`` calls ``gen/main.py`` with no
+    ``--variables``, so ``get_non_default_settings()`` IS the config the scheduler renders from:
+    ``Templator.render`` iterated an empty roster and rendered no ``server{}`` block at all,
+    ``_write_config`` wrote ``SERVER_NAME=`` into ``variables.env``, and the instance answered
+    nothing -- with ``certificates:init()`` logging "no server name configured yet" and
+    ``customcert:init()`` aborting on "attempt to concatenate a nil value" behind it. Seen in CI on
+    the Linux arm of ``customcert / single_site_only_name_is_still_served_its_certificate``.
+
+    The rule is ``strip_default_server_unless_alone``: keep the reserved id when nothing else
+    remains, exactly as ``Templator.__init__`` and ``jobs/custom-cert.py`` already do -- both of
+    which document THIS reader as the one that keeps the name.
+    """
+
+    @pytest.fixture
+    def alone(self, fresh):
+        """A fresh install seeded by the lifespan, then configured single-site under the reserved
+        name -- the deployment the CI case drives, with no other row anywhere."""
+        assert fresh.seed_default_server_service() == ""
+        fresh.save_config({"MULTISITE": "no", "SERVER_NAME": DEFAULT_SERVER_ID}, "scheduler")
+        assert _ids(fresh) == {DEFAULT_SERVER_ID}
+        assert _methods(fresh)[DEFAULT_SERVER_ID] == DEFAULT_SERVER_METHOD
+        return fresh
+
+    @pytest.mark.parametrize("global_only", (False, True))
+    @pytest.mark.parametrize("filtered", (None, ("SERVER_NAME",)))
+    def test_the_only_row_is_kept_by_every_reader(self, alone, global_only, filtered):
+        """`get_non_default_settings` is what the scheduler renders from and `get_config` is what
+        it takes `full_config` from, so a rule that holds on one of them holds for half a render."""
+        for reader in (alone.get_config, alone.get_non_default_settings):
+            roster = reader(global_only=global_only, methods=False, filtered_settings=filtered)["SERVER_NAME"]
+            assert roster == DEFAULT_SERVER_ID, (reader.__name__, global_only, filtered)
+
+    def test_the_strip_still_fires_as_soon_as_anything_else_remains(self, alone):
+        """The control, and the half the CI sibling case drives
+        (`SERVER_NAME: "default-server www.example.com"`): the keep is "nothing else remains", not
+        "single-site", so one real service is enough to put the reserved id back out of the roster."""
+        alone.save_config({"MULTISITE": "yes", "SERVER_NAME": "app1.example.com", "app1.example.com_SERVER_NAME": "app1.example.com"}, "scheduler")
+        alone.save_config({"MULTISITE": "no", "SERVER_NAME": f"{DEFAULT_SERVER_ID} app1.example.com"}, "scheduler")
+        assert _ids(alone) == {DEFAULT_SERVER_ID, "app1.example.com"}
+
+        assert alone.get_config()["SERVER_NAME"] == "app1.example.com"
+        assert alone.get_non_default_settings()["SERVER_NAME"] == "app1.example.com"
+
+    def test_the_rule_survives_a_one_shot_iterable(self):
+        """`strip_default_server_unless_alone` is typed `Iterable`, exported in `__all__`, and the
+        1.8 unification note proposes three more callers for it. Walking `names` twice would let the
+        strip exhaust a generator and the fallback answer `[]` -- this exact outage, silently, on the
+        only input that needs the keep at all."""
+        assert strip_default_server_unless_alone(iter([DEFAULT_SERVER_ID])) == [DEFAULT_SERVER_ID]
+        assert strip_default_server_unless_alone(name for name in (DEFAULT_SERVER_ID, "app1.example.com")) == ["app1.example.com"]
+        assert strip_default_server_unless_alone(None) == []
+        assert strip_default_server_unless_alone(()) == []
+
+    def test_two_real_rows_beside_the_reserved_one_both_survive(self, fresh):
+        """The keep removes nothing from the strip: with anything else in the roster the reserved id
+        goes, and every real name stays. `Templator.render` renders ONE block from the whole string
+        in single-site, so a name lost here is a `Host` the deployment stops answering."""
+        fresh.save_config(
+            {
+                "MULTISITE": "yes",
+                "SERVER_NAME": f"app1.example.com {DEFAULT_SERVER_ID} app2.example.com",
+                "app1.example.com_SERVER_NAME": "app1.example.com",
+                "app2.example.com_SERVER_NAME": "app2.example.com",
+            },
+            "scheduler",
+        )
+        assert _ids(fresh) == {DEFAULT_SERVER_ID, "app1.example.com", "app2.example.com"}
+
+        fresh.save_config({"MULTISITE": "no", "SERVER_NAME": "app1.example.com app2.example.com"}, "scheduler")
+
+        assert _ids(fresh) == {DEFAULT_SERVER_ID, "app1.example.com", "app2.example.com"}
+        assert set(fresh.get_config()["SERVER_NAME"].split()) == {"app1.example.com", "app2.example.com"}

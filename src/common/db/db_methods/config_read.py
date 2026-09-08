@@ -8,7 +8,7 @@ from model import Global_values, Services, Services_settings, Settings, Template
 
 from common_utils import split_templates  # type: ignore
 
-from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD  # type: ignore
+from default_server import DEFAULT_SERVER_ID, DEFAULT_SERVER_METHOD, strip_default_server_unless_alone  # type: ignore
 
 from resource_group_resolver import value_for_validation  # type: ignore
 
@@ -295,7 +295,20 @@ class DatabaseConfigReadMixin(DatabaseMixinBase):
                 strip = any(row.id == DEFAULT_SERVER_ID and row.method == DEFAULT_SERVER_METHOD for row in rows) and not (
                     is_multisite or ("MULTISITE" not in config and self._stored_multisite(session) == "yes")
                 )
-                servers = " ".join(row.id for row in rows if not (strip and row.id == DEFAULT_SERVER_ID))
+                # ...UNLESS it is the only row, which `strip_default_server_unless_alone` is the
+                # rule for. The API's lifespan seeds the reserved row on a fresh install BEFORE
+                # MULTISITE is knowable (`db_methods/services.py`, and the gate test says why it
+                # cannot wait), so a single-site deployment whose own SERVER_NAME is
+                # `default-server` holds exactly one row and it is the seeded one. Stripping it
+                # blind emptied SERVER_NAME: `push-configs.py` -> `gen/main.py` (no `--variables`)
+                # reads THIS dict, so `Templator.render` iterated an empty roster and rendered no
+                # server block at all, `_write_config` wrote `SERVER_NAME=` into `variables.env`,
+                # and the instance answered nothing -- with `customcert:init()` aborting on
+                # `attempt to concatenate a nil value` on the way past. Same rule as
+                # `Templator.__init__` and `jobs/custom-cert.py`, both of which already document
+                # this reader as the one that keeps the name.
+                roster = [row.id for row in rows]
+                servers = " ".join(strip_default_server_unless_alone(roster) if strip else roster)
 
             config["SERVER_NAME"] = {
                 "value": servers,

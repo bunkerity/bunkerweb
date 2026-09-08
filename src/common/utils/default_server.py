@@ -49,6 +49,7 @@ __all__ = (
     "is_default_server",
     "is_reserved_default_server",
     "strip_default_server",
+    "strip_default_server_unless_alone",
 )
 
 # The reserved service id. NOT "_": that string is already the default-server marker at runtime
@@ -162,6 +163,29 @@ def is_reserved_default_server(service: Optional[Mapping[str, Any]]) -> bool:
 def strip_default_server(names: Optional[Iterable[Any]]) -> List[Any]:
     """``names`` without the reserved id, order preserved."""
     return [name for name in (names or ()) if not is_default_server(name)]
+
+
+def strip_default_server_unless_alone(names: Optional[Iterable[Any]]) -> List[Any]:
+    """:func:`strip_default_server`, except that the reserved id SURVIVES when nothing else does.
+
+    The single-site rule of the conception, and the one every roster producer has to agree on: the
+    reserved id is a MULTISITE-only feature, so it is stripped wherever it is not one of the names
+    a deployment actually serves -- but a roster it is the ONLY member of is not "a roster with one
+    thing too many", it is the whole deployment. Dropping it there renders zero server blocks
+    (``Templator.render`` iterates ``SERVER_NAME``), writes ``SERVER_NAME=`` into ``variables.env``,
+    and leaves the instance answering nothing at all with one log line as the only signal --
+    strictly worse than serving a name that merely collides with an id reserved since 1.7.
+
+    ``Templator.__init__`` states the same rule inline because it also has to emit two different
+    warnings and rewrite two configuration dicts; this is the caller-independent half.
+
+    ``names`` is materialised FIRST and walked once. A generator or any other one-shot iterable is
+    exhausted by the strip, so reading it a second time for the fallback would answer ``[]`` -- the
+    exact outage this function exists to prevent, silently, on the only shape that needs it.
+    """
+    declared = list(names or ())
+    kept = strip_default_server(declared)
+    return kept or declared
 
 
 # The reserved service's own stream port lists (`core/misc/plugin.json`). Multisite and empty by
