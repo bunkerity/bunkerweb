@@ -37,6 +37,16 @@ Comment ça marche :
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global   | non      | Temps d’inactivité max (ms) avant fermeture d’une connexion du pool. |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global   | non      | Nb max de connexions conservées dans le pool.                  |
 
+!!! info "Autorité privée : comment `REDIS_SSL_CA` est approuvée"
+    Avec `REDIS_SSL_VERIFY: "yes"` (valeur par défaut), la vérification utilise les autorités système/certifi, qui ne contiennent pas votre autorité privée. Un certificat valide peut donc échouer avec `CERTIFICATE_VERIFY_FAILED`. `REDIS_SSL_CA` désigne un bundle PEM à approuver selon deux chemins :
+
+    - **Clients Python :** le chemin est transmis au client, notamment pour l'URL du broker Celery (worker et API), les jobs `push-configs` et `sync-bans`, le limiteur API, `bwcli` et l'UI. L'URL du broker et le limiteur API ne transmettent l'autorité que lorsque la vérification est activée ; avec `REDIS_SSL_VERIFY: "no"`, elle n'est pas utilisée.
+    - **Requêtes NGINX Lua (`clusterstore.lua`, avec `USE_REDIS: "yes"`) :** l'autorité est ajoutée au bundle de confiance. Les cosockets OpenResty utilisent le fichier global `lua_ssl_trusted_certificate`, sans magasin par connexion. Le générateur ajoute votre autorité au bundle racine livré, sans retirer les autorités publiques utilisées pour HTTPS.
+
+    Le fichier doit être lisible sur le worker qui génère la configuration et par chaque client Python : montez-le au même chemin dans scheduler, worker, API et UI. Les instances BunkerWeb reçoivent le bundle combiné sans montage supplémentaire. Un fichier absent, illisible ou PEM invalide **fait échouer la génération** : aucune configuration n'est envoyée et la flotte conserve celle en cours.
+
+    Un `CELERY_BROKER_URL` explicite reste prioritaire : ajoutez-y vous-même `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem`.
+
 !!! tip "Haute disponibilité"
     Configurez Redis Sentinel pour un failover automatique en production.
 

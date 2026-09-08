@@ -102,7 +102,7 @@ Exemples :
     | ------------- | ------ | --------- | -------- | ----------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | non      | Activer Antibot : définir sur `cookie` pour activer ce mécanisme. |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "JavaScript"
 
@@ -125,7 +125,7 @@ Exemples :
     | ------------- | ------ | --------- | -------- | --------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | non      | Activer Antibot : définir sur `javascript` pour activer ce mécanisme. |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Captcha"
 
@@ -160,7 +160,7 @@ Exemples :
     | `USE_ANTIBOT`              | `no`                                                   | multisite | non      | **Activer Antibot :** définir sur `captcha` pour activer ce mécanisme.                                                                                                                                                                                    |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | non      | **Alphabet du Captcha :** une chaîne de caractères à utiliser pour générer le CAPTCHA. Caractères pris en charge : toutes les lettres (a-z, A-Z), les chiffres 2-9 (exclut 0 et 1), et les caractères spéciaux : ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "reCAPTCHA"
 
@@ -187,7 +187,7 @@ Exemples :
     | `ANTIBOT_RECAPTCHA_JA4`        |        | multisite | non      | Empreinte TLS JA4 optionnelle à inclure dans les évaluations Enterprise.                                            |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`  | multisite | non      | Score minimum requis pour passer (s’applique à la v3 classique et à la nouvelle version).                           |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "hCaptcha"
 
@@ -203,7 +203,7 @@ Exemples :
     | `ANTIBOT_HCAPTCHA_SITEKEY` |        | multisite | non      | Clé site hCaptcha.                                                  |
     | `ANTIBOT_HCAPTCHA_SECRET`  |        | multisite | non      | Clé secrète hCaptcha.                                               |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Turnstile"
 
@@ -219,7 +219,7 @@ Exemples :
     | `ANTIBOT_TURNSTILE_SITEKEY` |        | multisite | non      | Clé site Turnstile (Cloudflare).                                     |
     | `ANTIBOT_TURNSTILE_SECRET`  |        | multisite | non      | Clé secrète Turnstile (Cloudflare).                                  |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "mCaptcha"
 
@@ -238,7 +238,7 @@ Exemples :
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | non      | Clé secrète mCaptcha.                                               |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | non      | Domaine à utiliser pour mCaptcha.                                   |
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 === "Cap.js"
 
@@ -263,7 +263,7 @@ Exemples :
         - Utilisez le widget Cap.js **0.1.48 ou ultérieur**. BunkerWeb diffuse une CSP stricte basée sur un nonce ; les widgets antérieurs cassent les défis d’instrumentation parce que le `<script>` inline injecté dans l’iframe `srcdoc` isolée ne propage pas le nonce. Si vous auto-hébergez `tiago2/cap`, épinglez une version récente (par ex. `tiago2/cap:3.1.2` ou plus récente) ou définissez `WIDGET_VERSION` à `0.1.48` ou plus.
         - Les **défis d’instrumentation** de Cap.js (activés par défaut) exécutent du JavaScript fourni par le serveur via `eval`, qu’un nonce ne peut pas autoriser. BunkerWeb exécute le widget dans une iframe isolée de même origine qui porte le `'unsafe-eval'` nécessaire, afin que la page de défi principale conserve une CSP stricte et sans `eval` — aucune configuration requise.
 
-    Reportez‑vous aux [Paramètres communs](#paramètres-communs) pour les options supplémentaires.
+    Reportez‑vous aux [Paramètres communs](#parametres-communs) pour les options supplémentaires.
 
 ### Les défis dans la page Rapports
 

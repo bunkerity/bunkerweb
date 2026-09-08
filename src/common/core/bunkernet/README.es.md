@@ -32,12 +32,20 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 | ------------------ | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet. |
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
+| `USE_BUNKERNET_STATS` | `yes` | global | no | **Estadísticas de eficacia:** Guarda en la base de datos estadísticas de contribución, tamaño de listas y conectividad de BunkerNet. |
+| `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | no | **Retención:** Antigüedad máxima, en días, de las estadísticas de eficacia guardadas. |
 
 !!! tip "Protección de Red"
     Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
 !!! info "Informes Anónimos"
     Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+
+!!! info "Estadísticas de eficacia"
+    Con `USE_BUNKERNET_STATS` habilitado, `bunkernet-stats` guarda una vez por ejecución las métricas
+    de contribución y salud del despliegue (tamaño de lista, informes pendientes y estado de registro).
+    `bunkernet-cleanup-stats` elimina filas anteriores a `BUNKERNET_STATS_RETENTION_DAYS`. Ambos jobs
+    se omiten por completo, registrando el motivo, cuando `USE_BUNKERNET_STATS` es `no`.
 
 ### Configuraciones de Ejemplo
 

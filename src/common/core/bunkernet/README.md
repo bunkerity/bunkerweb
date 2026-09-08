@@ -32,12 +32,17 @@ Follow these steps to configure and use the BunkerNet feature:
 | ------------------ | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Enable BunkerNet:** Set to `yes` to enable the BunkerNet threat intelligence sharing.        |
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **BunkerNet Server:** The address of the BunkerNet API server for sharing threat intelligence. |
+| `USE_BUNKERNET_STATS` | `yes` | global | no | **BunkerNet Effectiveness Stats:** Persist BunkerNet effectiveness statistics (contribution, blocklist size, connectivity) to the database. |
+| `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | no | **Stats Retention:** Maximum age (in days) of persisted BunkerNet effectiveness statistics. |
 
 !!! tip "Network Protection"
     When BunkerNet detects that an IP address has been involved in malicious activity across multiple BunkerWeb instances, it adds that IP to a collective blacklist. This provides a proactive defense layer, protecting your site from threats before they can target you directly.
 
 !!! info "Anonymous Reporting"
     When reporting threat information to BunkerNet, your instance only shares the necessary data to identify the threat: the IP address, the reason for blocking, and minimal contextual data. No personal information about your users or sensitive details about your site is shared.
+
+!!! info "Effectiveness stats"
+    When `USE_BUNKERNET_STATS` is enabled, the `bunkernet-stats` job persists deployment-level contribution and health metrics (blocklist size, pending reports, registration status) to the database once per run, and `bunkernet-cleanup-stats` prunes rows older than `BUNKERNET_STATS_RETENTION_DAYS`. Both jobs skip entirely — and log why — when `USE_BUNKERNET_STATS` is `no`.
 
 ### Example Configurations
 

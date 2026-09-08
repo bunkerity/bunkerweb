@@ -48,6 +48,26 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
     !!! warning "Aplicación de SNI"
         Habilitar la validación estricta de SNI proporciona una seguridad más fuerte, pero puede causar problemas si BunkerWeb está detrás de un proxy inverso que reenvía las solicitudes HTTPS sin preservar la información de SNI. Pruebe a fondo antes de habilitarlo en entornos de producción. `DISABLE_DEFAULT_SERVER_STRICT_SNI` solo tiene un servidor predeterminado sobre el que aplicarse (`MULTISITE=yes`, o `DISABLE_DEFAULT_SERVER=yes` en modo de sitio único) — en modo de sitio único puro queda silenciosamente inerte, ya que el bloque de tu propio servicio ya es el predeterminado de NGINX.
 
+=== "Modo del servicio"
+
+    **Declarar el propósito de un servicio**
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `SERVICE_MODE` | `standard` | multisite | no | **Modo del servicio:** `standard` para un servicio normal; `redirect_only` para un listener que solo redirige. |
+
+    `SERVICE_MODE` declara el propósito que lee el clasificador central de la cuota PRO. Un
+    servicio declarado `redirect_only` que contenga **solo** un perfil de redirección — sin proxy
+    inverso, configuración personalizada ni recursos adjuntos salvo redirección o certificado —
+    está destinado a quedar exento de la cuota, sin límite de cantidad. La exención nunca se
+    deduce de `REDIRECT_TO` ni de ningún otro ajuste.
+
+    !!! info "La exención todavía no está activa"
+        La clasificación y sus pruebas están completas, pero la exención depende de una bandera
+        interna que se activará en otra versión. Hasta entonces, un `redirect_only` válido se
+        factura igual que un servicio normal: declararlo hoy solo lo prepara. Un servicio con
+        capacidades no permitidas también se factura, independientemente de esa bandera.
+
 === "Configuración del Servidor Predeterminado"
 
     **El servidor predeterminado es un servicio que puedes editar**

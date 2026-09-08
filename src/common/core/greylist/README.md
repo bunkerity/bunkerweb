@@ -79,6 +79,61 @@ Follow these steps to configure and use the Greylist feature:
     | `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
     | `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
 
+=== "Composite rules (AND)"
+    **What this does:** require several criteria *at once*. Each flat list above is an OR — any single one matching is enough to greylist a visitor. A rule is an AND: it greylists only a visitor that matches every one of its terms.
+
+    | Setting | Default | Context | Multiple | Description |
+    | ------- | ------- | ------- | -------- | ----------- |
+    | `GREYLIST_RULE` |  | multisite | yes | **Greylist rule:** Terms joined with ` AND `; every one must match. |
+
+    A rule is a list of terms separated by the literal ` AND ` — uppercase, one space on each
+    side. Every term must match for the rule to match:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` is accepted as an alias of `ua`. A `<value>` may be a resource-group token such
+    as `@office`, resolved against that term's kind. Rules are declared with the usual
+    numeric-suffix form: `GREYLIST_RULE_1`, `GREYLIST_RULE_2`, and so on.
+
+    ```yaml
+    USE_GREYLIST: "yes"
+    # a partner's crawler, but only when it comes from the partner's own network
+    GREYLIST_RULE_1: "ip:203.0.113.0/24 AND ua:^PartnerCrawler"
+    # everything from one ASN, except its scanners
+    GREYLIST_RULE_2: "asn:12345 AND NOT ua:(?:nmap|masscan)"
+    # a country plus a path, using a resource group for the country list
+    GREYLIST_RULE_3: "country:@internal-markets AND uri:^/api/v1/"
+    ```
+
+    !!! warning "OR between rules, AND inside one"
+        This is the distinction readers get wrong. **Rules are OR'd** — with each other and with
+        the flat lists above: a visitor matching `GREYLIST_IP`, or any single rule, is greylisted.
+        **Terms inside one rule are AND'd**: the rule above greylists nobody unless every one of its
+        terms matches. Two criteria written as two rules is an OR; the same two written as two
+        terms of one rule is an AND.
+
+    !!! info "Limits"
+        * A term whose subject the request cannot supply is **unknown**, and a rule holding an
+          unknown term never matches — `NOT` does not rescue it. `ua:` and `uri:` are always
+          unknown in stream mode, and a `ua:` term is unknown on a request that sends no
+          `User-Agent` header. A failed lookup (no GeoIP database, a resolver error) is unknown
+          too; a private client IP is **not** — it definitely has no ASN and its country is
+          `local`, so `NOT asn:…` legitimately matches it.
+        * A rule containing a `ua:` or `uri:` term therefore cannot match in a stream service.
+          It is not refused — the same service configuration may serve HTTP too — but a warning
+          naming the rule is logged when the configuration loads, so it is never *silently* dead.
+        * A rule made only of `NOT` terms is valid but matches almost every request. Same
+          warning channel.
+        * There is no escaping syntax. Because ` AND ` is the separator, a `ua:` or `uri:` regex
+          may not contain " and " in any casing; such a rule is refused when it is saved.
+        * An `rdns:` term is forward-confirmed, exactly like the flat `GREYLIST_RDNS` pass: the
+          matching PTR hostname is resolved back and the term is only true when it resolves to
+          the client IP.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 

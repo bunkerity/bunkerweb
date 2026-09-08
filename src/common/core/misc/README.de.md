@@ -48,6 +48,28 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
     !!! warning "SNI-Erzwingung"
         Die Aktivierung der strikten SNI-Validierung bietet eine stärkere Sicherheit, kann jedoch Probleme verursachen, wenn BunkerWeb hinter einem Reverse-Proxy betrieben wird, der HTTPS-Anfragen ohne Beibehaltung der SNI-Informationen weiterleitet. Testen Sie gründlich, bevor Sie dies in Produktionsumgebungen aktivieren. `DISABLE_DEFAULT_SERVER_STRICT_SNI` hat nur dann einen Standardserver, auf dem es durchgesetzt werden kann (`MULTISITE=yes`, oder `DISABLE_DEFAULT_SERVER=yes` im Single-Site-Modus) — im reinen Single-Site-Modus ist es stillschweigend wirkungslos, da der Block Ihres eigenen Dienstes bereits der NGINX-Standard ist.
 
+=== "Dienstmodus"
+
+    **Zweck eines Dienstes deklarieren**
+
+    | Einstellung | Standard | Kontext | Mehrfach | Beschreibung |
+    | ----------- | -------- | ------- | -------- | ------------ |
+    | `SERVICE_MODE` | `standard` | multisite | nein | **Dienstmodus:** `standard` für einen gewöhnlichen Dienst, `redirect_only` für einen Listener, der ausschließlich weiterleitet. |
+
+    `SERVICE_MODE` deklariert den Zweck eines Dienstes für die zentrale PRO-Kontingentklassifizierung.
+    Ein ausdrücklich als `redirect_only` deklarierter Dienst mit **ausschließlich** einem
+    Weiterleitungsprofil — ohne Reverse Proxy, eigene Konfiguration oder zugewiesene Ressourcen
+    außer Weiterleitung oder Zertifikat — soll ohne Mengenbegrenzung vom PRO-Dienstkontingent
+    ausgenommen werden. Dies wird nie aus `REDIRECT_TO` oder anderen Einstellungen abgeleitet.
+
+    !!! info "Die Ausnahme ist noch nicht aktiv"
+        Klassifizierungsregel und Tests sind vollständig, aber die Ausnahme hängt an einem internen
+        Schalter, den eine spätere Version aktiviert. Bis dahin zählt auch eine gültige
+        `redirect_only`-Deklaration genau wie ein gewöhnlicher Dienst. Heute ändert sie die
+        Abrechnung nicht, sondern bereitet den Dienst auf die spätere Ausnahme vor. Ein
+        `redirect_only`-Dienst mit einer unzulässigen Funktion zählt unabhängig vom Schalter
+        weiterhin: Die Ausnahme ist eine bewusste Auswahl, kein Abmelden von der Abrechnung.
+
 === "Konfiguration des Standardservers"
 
     **Der Standardserver ist ein Dienst, den Sie bearbeiten können**

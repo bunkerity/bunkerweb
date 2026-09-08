@@ -83,6 +83,77 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     | `WHITELIST_URI_URLS`        |          | multisite | nein     | **URI-Whitelist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Whitelist gesetzt werden sollen, getrennt durch Leerzeichen. |
     | `WHITELIST_IGNORE_URI_URLS` |          | multisite | nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.                                        |
 
+=== "Zusammengesetzte Regeln (AND)"
+    **Funktion:** Mehrere Kriterien müssen *gleichzeitig* zutreffen. Die flachen Listen sind mit
+    OR verknüpft: Schon ein Treffer genügt. Eine Regel ist ein AND: Nur Besucher, auf die alle
+    Terme zutreffen, werden auf die Whitelist gesetzt. Dadurch umgehen Besucher alle späteren Sicherheitsprüfungen; mehrere Bedingungen grenzen diese weitreichende Ausnahme ein.
+
+    | Einstellung | Standard | Kontext | Mehrfach | Beschreibung |
+    | ----------- | -------- | ------- | -------- | ------------ |
+    | `WHITELIST_RULE` | | multisite | ja | **Whitelist-Regel:** Mit ` AND ` verknüpfte Terme; alle müssen zutreffen. |
+
+    Eine Regel besteht aus Termen, getrennt durch das wörtliche ` AND `: Großbuchstaben mit
+    genau einem Leerzeichen auf jeder Seite. Jeder Term muss zutreffen:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` ist ein Alias für `ua`. `<value>` kann ein Ressourcengruppen-Token wie `@office`
+    sein, das anhand des Termtyps aufgelöst wird. Verwenden Sie die üblichen numerischen Suffixe:
+    `WHITELIST_RULE_1`, `WHITELIST_RULE_2` und so weiter.
+
+    ```yaml
+    USE_WHITELIST: "yes"
+    # Monitoring-Probe nur aus dem Monitoring-Netz
+    WHITELIST_RULE_1: "ip:10.20.0.0/16 AND ua:^HealthCheck/"
+    # Büronetz außer der ASN des Gäste-VLANs
+    WHITELIST_RULE_2: "ip:@office AND NOT asn:64500"
+    ```
+
+    !!! warning "OR zwischen Regeln, AND innerhalb einer Regel"
+        **Regeln sind mit OR verknüpft**, untereinander und mit den flachen Listen: Ein Besucher,
+        auf den `WHITELIST_IP` oder eine einzelne Regel zutrifft, wird auf die Whitelist gesetzt.
+        **Terme innerhalb einer Regel sind mit AND verknüpft**: Die Regel trifft nur zu, wenn
+        alle ihre Terme zutreffen. Zwei Kriterien als zwei Regeln ergeben OR; dieselben Kriterien
+        als zwei Terme einer Regel ergeben AND.
+
+    !!! info "Grenzen"
+        * Kann die Anfrage die benötigte Information nicht liefern, ist ein Term **unbekannt**.
+          Eine Regel mit unbekanntem Term trifft nie zu, auch nicht durch `NOT`. Im Stream-Modus
+          sind `ua:` und `uri:` immer unbekannt, `ua:` auch bei fehlendem `User-Agent`-Header.
+          Fehlgeschlagene Abfragen (fehlende GeoIP-Datenbank, Resolver-Fehler) sind ebenfalls
+          unbekannt. Eine private Client-IP ist dagegen **nicht** unbekannt: Sie hat definitiv
+          keine ASN und gehört zum Land `local`; `NOT asn:…` kann daher berechtigt zutreffen.
+        * Eine Regel mit `ua:` oder `uri:` kann im Stream-Dienst folglich nie treffen. Sie wird
+          nicht abgelehnt, weil dieselbe Dienstkonfiguration auch HTTP bedienen kann; beim Laden
+          erscheint jedoch eine Warnung mit ihrem Namen. Sie bleibt nicht unbemerkt wirkungslos.
+        * Regeln ausschließlich aus `NOT`-Termen sind gültig, treffen jedoch auf fast jede Anfrage
+          zu. Auch dafür wird eine Warnung ausgegeben.
+        * Es gibt keine Escape-Syntax. Wegen des Trenners ` AND ` darf ein `ua:`- oder `uri:`-Regex
+          kein „ and “ in beliebiger Groß-/Kleinschreibung enthalten. Solche Regeln werden beim
+          Speichern abgelehnt.
+        * Ein `rdns:`-Term wird wie `WHITELIST_RDNS` vorwärtsbestätigt: Der passende PTR-Hostname
+          wird zurück aufgelöst; nur wenn er zur Client-IP führt, ist der Term wahr.
+
+    !!! warning "Ein Regeltreffer überspringt spätere Prüfungen — ModSecurity bleibt aktiv"
+        Ein Whitelist-Regeltreffer überspringt wie ein Listentreffer jede **spätere** Prüfung
+        von BunkerWeb. Er deaktiviert ModSecurity **nicht**.
+
+        ModSecurity erfährt über `is_whitelisted` von der Whitelist; seine Phase-1-Regel
+        `ctl:ruleEngine=Off` liest diese Variable. Sie wird in der Phase `set` vor ModSecurity
+        ausschließlich aus dem **Cache** je Besucher befüllt. Diese Phase wertet selbst nichts
+        aus, weil sie nicht unterbrechen darf und `rdns:` eine Auflösung benötigt. Ein flacher
+        Listentreffer füllt den Cache und erreicht ModSecurity ab der zweiten Anfrage.
+        Regelurteile werden dagegen nie gecacht, nur die Wahrheit jedes Terms im eigenen
+        Namensraum. Für eine **nur** per Regel erlaubte Anfrage laufen ModSecurity und OWASP
+        CRS deshalb bei jeder Anfrage vollständig.
+
+        Meist ist dies erwünscht: Eine eng gefasste Regel lässt Verkehr durch und erhält die WAF.
+        Benötigen Sie das Verhalten einer flachen Liste, verwenden Sie eine flache Liste.
+
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 

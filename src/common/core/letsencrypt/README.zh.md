@@ -41,6 +41,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | 设置                                        | 默认值        | 上下文    | 多选 | 描述                                                                                                                                                                                 |
 | ------------------------------------------- | ------------- | --------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `AUTO_LETS_ENCRYPT`                         | `no`          | multisite | 否   | **启用 Let's Encrypt：** 设置为 `yes` 以启用自动证书颁发和续订。                                                                                                                     |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` | `yes` | multisite | no | **禁用公共后缀：** 拒绝为匹配[公共后缀列表](https://publicsuffix.org/)的域请求证书（推荐）。仅在明确需要为裸公共后缀签发证书时关闭。 |
 | `LETS_ENCRYPT_PASSTHROUGH`                  | `no`          | multisite | 否   | **传递 Let's Encrypt 请求：** 设置为 `yes` 以将 Let's Encrypt 请求传递给 Web 服务器。当 BunkerWeb 位于处理 SSL 的另一个反向代理前面时，此功能很有用。                                |
 | `EMAIL_LETS_ENCRYPT`                        | `-`           | multisite | 否   | **联系电子邮件：** 用于 Let's Encrypt 到期提醒的电子邮件地址。只有在接受不接收任何警报或恢复邮件的情况下才可留空（此时 Certbot 会使用 `--register-unsafely-without-email` 注册）。   |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt` | multisite | 否   | **证书颁发机构：** 选择用于签发证书的 ACME 服务器。可选值：`letsencrypt` 或 `zerossl`。                                                                                              |
@@ -91,7 +92,9 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 ### 支持的 DNS 提供商
 
-Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提供商都需要使用 `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置提供特定的凭据。
+Let's Encrypt 插件通过 [certbot-dns-multi](https://github.com/alexzorin/certbot-dns-multi) 执行 DNS-01 验证，该组件内嵌 [lego](https://go-acme.github.io/lego/dns/) 的 DNS 提供者，因此支持 lego 的全部 200 多家 DNS 提供商，不限于下表。将 `LETS_ENCRYPT_DNS_PROVIDER` 设为提供商代码，通过 `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 提供凭据。
+
+凭据可使用下表中保留兼容的历史键名，或原生 lego 环境变量名（例如 Cloudflare 的 `CF_DNS_API_TOKEN`）。在 lego 变量名后添加 `_FILE` 可从文件读取值。完整提供商列表和各自接受的变量见 [lego DNS 提供商文档](https://go-acme.github.io/lego/dns/)。
 
 | 提供商            | 描述             | 强制性设置                                                                                                   | 可选设置                                                                                                                                                                                                                                                     | 文档                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
@@ -125,6 +128,9 @@ Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提�
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
 | `scaleway`        | Scaleway         | `application_token`                                                                                          |                                                                                                                                                                                                                                                              | [文档](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)                 |
 | `transip`         | TransIP          | `key_file`<br>`username`                                                                                     |                                                                                                                                                                                                                                                              | [文档](https://certbot-dns-transip.readthedocs.io/en/stable/)                                |
+
+!!! info "其他提供商和 lego 凭据名称"
+    上表列出 BunkerWeb 以往记录的提供商，旧凭据键仍有效。其他 lego 提供商也可使用：将其代码作为 `LETS_ENCRYPT_DNS_PROVIDER`，把 lego 环境变量名作为 `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 条目（见 [lego 文档](https://go-acme.github.io/lego/dns/)）。部分旧代码有映射，两种写法均接受：`google` → `gcloud`、`nsone` → `ns1`、`gandi` → `gandiv5`、`rfc2136` → `dnsupdate`、`domainoffensive` → `dode`。
 
 ### 配置示例
 

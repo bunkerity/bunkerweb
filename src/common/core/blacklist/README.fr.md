@@ -113,6 +113,48 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     | `BLACKLIST_URI_URLS`        |        | multisite | non      | **URL de listes noires d’URI :** Liste d’URL contenant des motifs d’URI à bloquer.                                    |
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
 
+=== "Règles composites (AND)"
+    **Fonctionnement :** exiger plusieurs critères *simultanément*. Les listes simples ci-dessus fonctionnent en OU : une seule correspondance suffit pour que le visiteur soit bloqué. Une règle fonctionne en ET : tous ses termes doivent correspondre. Cela permet de cibler précisément un comportement.
+
+    | Paramètre | Défaut | Contexte | Multiple | Description |
+    | --------- | ------ | -------- | -------- | ----------- |
+    | `BLACKLIST_RULE` | | multisite | yes | **Règle de liste noire :** termes reliés par ` AND ` ; tous doivent correspondre. |
+
+    Les termes sont séparés par le texte littéral ` AND `, en majuscules, avec exactement une espace de chaque côté :
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` est un alias de `ua`. Une `<value>` peut être un jeton de groupe de ressources comme `@office`, résolu selon le type du terme. Les règles utilisent les suffixes numériques habituels : `BLACKLIST_RULE_1`, `BLACKLIST_RULE_2`, etc.
+
+    ```yaml
+    USE_BLACKLIST: "yes"
+    # a scraper, but only when it hits the expensive endpoint
+    BLACKLIST_RULE_1: "ua:^ScrapyBot AND uri:^/search"
+    # a hosting provider's ASN, except its own monitoring range
+    BLACKLIST_RULE_2: "asn:64500 AND NOT ip:198.51.100.0/24"
+    ```
+
+    !!! warning "OU entre les règles, ET au sein d'une règle"
+        **Les règles sont reliées par OU**, entre elles et avec les listes simples : un visiteur correspondant à `BLACKLIST_IP` ou à une seule règle est bloqué. **Les termes d'une règle sont reliés par ET** : tous doivent correspondre. Deux critères écrits dans deux règles forment un OU ; les mêmes critères écrits dans une seule règle forment un ET.
+
+    !!! info "Limites"
+        - Un terme dont la requête ne fournit pas le sujet est **inconnu** : une règle contenant ce terme ne correspond jamais, même avec `NOT`. `ua:` et `uri:` sont toujours inconnus en mode stream ; `ua:` l'est aussi sans en-tête `User-Agent`. Une recherche échouée (base GeoIP absente, erreur de résolution) produit également un résultat inconnu. Une IP privée, en revanche, n'a explicitement aucun ASN et son pays est `local` : `NOT asn:…` peut donc lui correspondre.
+        - Une règle contenant `ua:` ou `uri:` ne peut pas correspondre à un service stream. Elle n'est pas refusée, car la même configuration peut aussi servir du HTTP, mais un avertissement nommant la règle apparaît au chargement.
+        - Une règle composée uniquement de termes `NOT` est valide, mais correspond à presque toutes les requêtes ; elle produit le même type d'avertissement.
+        - Il n'existe pas de syntaxe d'échappement. Une regex `ua:` ou `uri:` ne peut pas contenir « and » entouré d'espaces, quelle que soit la casse : la règle serait refusée à l'enregistrement.
+        - Un terme `rdns:` vérifie le PTR **sans** confirmation directe, comme `BLACKLIST_RDNS`. Faire correspondre un PTR usurpé à une liste de refus n'est pas une attaque ; exiger sa résolution directe permettrait à un client sans enregistrement A d'échapper à la règle. Les listes grise et blanche effectuent cette confirmation.
+
+    !!! info "Les listes d'exclusion s'appliquent aussi aux règles, par type"
+        Une entrée `BLACKLIST_IGNORE_*` annule le verdict d'une règle comme celui d'une liste simple, **pour son type uniquement**. `BLACKLIST_IGNORE_IP` dispense de la vérification IP simple et ne neutralise une règle que si celle-ci contient un terme `ip:`. Une exclusion d'un type absent de la règle n'a aucun effet.
+
+        Avec `BLACKLIST_RULE_1: "ip:203.0.113.0/24 AND country:CN"` et `BLACKLIST_IGNORE_URI: "^/static"`, une exclusion globale laisserait passer toutes les requêtes vers `/static`. Le client choisissant l'URI, il pourrait contourner toute la règle.
+
+        Les correspondances sont `ip:` ↔ `BLACKLIST_IGNORE_IP`, `rdns:` ↔ `BLACKLIST_IGNORE_RDNS`, `asn:` ↔ `BLACKLIST_IGNORE_ASN`, `ua:` ↔ `BLACKLIST_IGNORE_USER_AGENT` et `uri:` ↔ `BLACKLIST_IGNORE_URI`. `country:` n'a pas de liste d'exclusion : une règle composée uniquement de termes `country:` ne peut pas être neutralisée ainsi. Ajoutez un terme `ip:` ou `asn:` si vous avez besoin d'une exception.
+
 !!! info "Support des formats d’URL"
     Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
 

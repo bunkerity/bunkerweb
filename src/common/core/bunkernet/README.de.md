@@ -32,12 +32,20 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 | ------------------ | -------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`    | `yes`                      | multisite | nein     | **BunkerNet aktivieren:** Auf `yes` setzen, um den Austausch von Bedrohungsdaten zu aktivieren.    |
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten. |
+| `USE_BUNKERNET_STATS` | `yes` | global | nein | **BunkerNet-Wirksamkeitsstatistiken:** Statistiken zu Beitrag, Sperrlistengröße und Verbindung in der Datenbank speichern. |
+| `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | nein | **Statistikaufbewahrung:** Höchstalter gespeicherter BunkerNet-Wirksamkeitsstatistiken in Tagen. |
 
 !!! tip "Netzwerkschutz"
     Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.
 
 !!! info "Anonymes Melden"
     Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.
+
+!!! info "Wirksamkeitsstatistiken"
+    Mit `USE_BUNKERNET_STATS` speichert der Job `bunkernet-stats` pro Lauf Metriken der
+    Bereitstellung zu Beitrag und Zustand (Sperrlistengröße, ausstehende Berichte, Registrierungsstatus).
+    `bunkernet-cleanup-stats` entfernt Zeilen älter als `BUNKERNET_STATS_RETENTION_DAYS`.
+    Bei `USE_BUNKERNET_STATS=no` überspringen beide Jobs ihre Arbeit und protokollieren den Grund.
 
 ### Beispielkonfigurationen
 

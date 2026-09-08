@@ -48,6 +48,19 @@
     !!! warning "SNI 强制执行"
         启用严格的 SNI 验证可提供更强的安全性，但如果 BunkerWeb 位于一个转发 HTTPS 请求但未保留 SNI 信息的反向代理之后，可能会导致问题。在生产环境中启用之前请进行彻底测试。`DISABLE_DEFAULT_SERVER_STRICT_SNI` 只有在存在默认服务器时才能生效（`MULTISITE=yes`，或单站点下的 `DISABLE_DEFAULT_SERVER=yes`）——在纯单站点模式下它会静默失效，因为你自己服务的 server 块本身就已经是 NGINX 的默认块。
 
+=== "服务模式"
+
+    **声明服务的用途**
+
+    | 设置 | 默认值 | 上下文 | 多个 | 描述 |
+    | ---- | ------ | ------ | ---- | ---- |
+    | `SERVICE_MODE` | `standard` | multisite | no | **服务模式：** 普通服务使用 `standard`，仅执行重定向的监听器使用 `redirect_only`。 |
+
+    `SERVICE_MODE` 由中央 PRO 配额分类器读取。显式声明为 `redirect_only` 且仅携带重定向配置的服务（没有反向代理、自定义配置，以及重定向或证书之外的附加资源）原计划不计入 PRO 服务配额，也不限制数量。不会根据 `REDIRECT_TO` 或其他设置推断此豁免。
+
+    !!! info "配额豁免尚未启用"
+        分类规则和测试已完成，但豁免仍由将在后续版本开启的内部开关控制。目前有效的 `redirect_only` 服务仍与普通服务一样计费，声明仅为未来豁免做准备，不会改变当前计费。携带不允许能力的 `redirect_only` 服务无论开关状态如何都会计费；豁免需要操作员明确选择，不能借此直接退出计费。
+
 === "配置 Default Server"
 
     **Default Server 是一个可以编辑的服务**

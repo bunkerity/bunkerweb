@@ -39,6 +39,16 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
 
+!!! info "私有 CA：`REDIS_SSL_CA` 如何受信任"
+    `REDIS_SSL_VERIFY: "yes"`（默认）使用系统/certifi 信任库，其中没有私有 CA，即使证书有效也会出现 `CERTIFICATE_VERIFY_FAILED`。`REDIS_SSL_CA` 指定受信任的 PEM CA 包，通过两条路径作用于产品：
+
+    - **Python 客户端直接接收路径**：Celery 代理 URL（Worker 和 API）、`push-configs`/`sync-bans` 任务、API 限流器、`bwcli` 和 UI。代理 URL 与 API 限流器仅在启用验证时传递 CA；`REDIS_SSL_VERIFY: "no"` 时不验证，也不传递 CA。
+    - **NGINX Lua 请求路径**（`USE_REDIS: "yes"` 时使用的 `clusterstore.lua`）将 CA 追加到信任包。OpenResty cosocket 没有逐连接信任库，只使用全局 `lua_ssl_trusted_certificate`。配置生成器把您的 CA 追加到内置根证书包，并把指令指向合并后的文件，随配置发给每个实例。追加而非替换，确保 Antibot、BunkerNet、CrowdSec 的 HTTPS 验证仍信任原有根证书。
+
+    **文件位置：** 配置生成处（Worker）和每个 Python 客户端都从自身文件系统读取，因此请在调度器、Worker、API、UI 挂载相同路径。实例无需挂载，它们接收合并后的包。文件缺失、不可读或不是有效 PEM 时，配置生成会失败，避免 NGINX 因错误的 `lua_ssl_trusted_certificate` 无法启动；不推送新配置，集群继续使用已有配置。
+
+    显式 `CELERY_BROKER_URL` 优先于推导值；自行设置 URL 时须自行加入 `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem`。
+
 !!! tip "使用 Redis Sentinel 实现高可用性"
     对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
 
@@ -116,7 +126,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     `settings.redis.redisSentinelHosts` 和 `settings.redis.redisSentinelMaster` 配置 Sentinel（chart ≥ v1.0.21）。
     对于没有专用 chart 键的任何设置，请使用 `scheduler.extraEnvs`。仅在 `bunkerweb.extraEnvs` 上设置它们将**不起作用**。
 
-### Redis 最佳实践
+### Redis 最佳实践 {#redis-best-practices}
 
 在使用 Redis 或 Valkey 与 BunkerWeb 时，请考虑以下最佳实践以确保最佳性能、安全性和可靠性：
 

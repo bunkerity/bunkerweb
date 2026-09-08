@@ -39,6 +39,29 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
 | `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
 
+!!! info "CA privada: cómo se confía en `REDIS_SSL_CA`"
+    Con `REDIS_SSL_VERIFY: "yes"` (predeterminado), se usa el almacén del sistema/certifi, que no
+    contiene tu CA privada: incluso un certificado válido falla con `CERTIFICATE_VERIFY_FAILED`.
+    `REDIS_SSL_CA` especifica un paquete PEM de CA de confianza y llega a ambas partes del producto:
+
+    - **Clientes Python:** se pasa la ruta al cliente: URL del broker Celery (worker y API), jobs
+      `push-configs` y `sync-bans`, limitador de la API, `bwcli` e interfaz. La URL del broker y el
+      limitador solo incluyen la CA con verificación activa; con `REDIS_SSL_VERIFY: "no"` no se envía.
+    - **Peticiones NGINX Lua** (`clusterstore.lua`, con `USE_REDIS: "yes"`): se añade la CA al
+      paquete de confianza. Un cosocket OpenResty usa el único archivo global
+      `lua_ssl_trusted_certificate`, no un almacén por conexión. El generador añade la CA a las
+      raíces incluidas y distribuye el resultado con la configuración. No sustituye las raíces:
+      Antibot, BunkerNet y CrowdSec conservan la confianza HTTPS anterior.
+
+    **Ubicación del archivo.** Lo leen el worker al generar y cada cliente Python desde su propio
+    sistema de archivos: móntalo en la misma ruta en scheduler, worker, API e interfaz. Las
+    instancias reciben el paquete combinado sin montaje adicional. Si `REDIS_SSL_CA` falta, no
+    puede leerse o no es PEM válido, **falla la generación**: una ruta incorrecta haría que NGINX
+    no arrancase, por lo que no se envía nada y la flota conserva su configuración anterior.
+
+    Una `CELERY_BROKER_URL` explícita tiene prioridad sobre la derivada: incluye manualmente
+    `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem` cuando la configures.
+
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
 
@@ -80,6 +103,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     REDIS_PASSWORD: "your-strong-password"
     REDIS_SSL: "yes"
     REDIS_SSL_VERIFY: "yes"
+    REDIS_SSL_CA: "/etc/bunkerweb/redis-ca.pem"
     ```
 
 === "Configuración de Redis Sentinel"
@@ -118,7 +142,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     cualquier ajuste sin una clave dedicada en el chart, use `scheduler.extraEnvs`. Definirlos solo en
     `bunkerweb.extraEnvs` no tiene **ningún efecto**.
 
-### Mejores Prácticas de Redis
+### Mejores Prácticas de Redis {#redis-best-practices}
 
 Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas para garantizar un rendimiento, seguridad y fiabilidad óptimos:
 

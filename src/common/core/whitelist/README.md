@@ -83,6 +83,75 @@ Follow these steps to configure and use the Whitelist feature:
     | `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
     | `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
 
+=== "Composite rules (AND)"
+    **What this does:** require several criteria *at once*. Each flat list above is an OR — any single one matching is enough to whitelist a visitor, bypassing every later security check. A rule is an AND: it whitelists only a visitor that matches every one of its terms, which is how you keep a broad bypass narrow.
+
+    | Setting | Default | Context | Multiple | Description |
+    | ------- | ------- | ------- | -------- | ----------- |
+    | `WHITELIST_RULE` |  | multisite | yes | **Whitelist rule:** Terms joined with ` AND `; every one must match. |
+
+    A rule is a list of terms separated by the literal ` AND ` — uppercase, one space on each
+    side. Every term must match for the rule to match:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` is accepted as an alias of `ua`. A `<value>` may be a resource-group token such
+    as `@office`, resolved against that term's kind. Rules are declared with the usual
+    numeric-suffix form: `WHITELIST_RULE_1`, `WHITELIST_RULE_2`, and so on.
+
+    ```yaml
+    USE_WHITELIST: "yes"
+    # the monitoring probe, but only from the monitoring network
+    WHITELIST_RULE_1: "ip:10.20.0.0/16 AND ua:^HealthCheck/"
+    # the office network, except the guest VLAN's ASN
+    WHITELIST_RULE_2: "ip:@office AND NOT asn:64500"
+    ```
+
+    !!! warning "OR between rules, AND inside one"
+        This is the distinction readers get wrong. **Rules are OR'd** — with each other and with
+        the flat lists above: a visitor matching `WHITELIST_IP`, or any single rule, is whitelisted.
+        **Terms inside one rule are AND'd**: the rule above whitelists nobody unless every one of its
+        terms matches. Two criteria written as two rules is an OR; the same two written as two
+        terms of one rule is an AND.
+
+    !!! info "Limits"
+        * A term whose subject the request cannot supply is **unknown**, and a rule holding an
+          unknown term never matches — `NOT` does not rescue it. `ua:` and `uri:` are always
+          unknown in stream mode, and a `ua:` term is unknown on a request that sends no
+          `User-Agent` header. A failed lookup (no GeoIP database, a resolver error) is unknown
+          too; a private client IP is **not** — it definitely has no ASN and its country is
+          `local`, so `NOT asn:…` legitimately matches it.
+        * A rule containing a `ua:` or `uri:` term therefore cannot match in a stream service.
+          It is not refused — the same service configuration may serve HTTP too — but a warning
+          naming the rule is logged when the configuration loads, so it is never *silently* dead.
+        * A rule made only of `NOT` terms is valid but matches almost every request. Same
+          warning channel.
+        * There is no escaping syntax. Because ` AND ` is the separator, a `ua:` or `uri:` regex
+          may not contain " and " in any casing; such a rule is refused when it is saved.
+        * An `rdns:` term is forward-confirmed, exactly like the flat `WHITELIST_RDNS` pass: the
+          matching PTR hostname is resolved back and the term is only true when it resolves to
+          the client IP.
+
+    !!! warning "A rule hit skips the later checks — it does not turn ModSecurity off"
+        A whitelist rule hit skips every **later** BunkerWeb check, the same way a flat-list hit
+        does. It does **not** disable ModSecurity.
+
+        ModSecurity is told about the whitelist through the `is_whitelisted` variable, which its
+        phase-1 `ctl:ruleEngine=Off` rule reads. That variable is written in the `set` phase,
+        which runs before ModSecurity and only ever consults the per-visitor whitelist **cache** —
+        it evaluates nothing itself, because that phase cannot yield and an `rdns:` term has to
+        resolve. A flat-list hit populates that cache, so from the second request on it reaches
+        ModSecurity. A rule verdict is never cached (only each term's truth is, under its own
+        namespace), so a request whitelisted **only** by a rule runs ModSecurity and the OWASP
+        CRS in full, every time.
+
+        In practice that is usually what you want: a narrow rule keeps the WAF on for the
+        traffic it lets through. Where you need the flat-list behaviour, use a flat list.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 

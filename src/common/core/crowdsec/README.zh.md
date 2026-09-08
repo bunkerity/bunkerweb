@@ -157,7 +157,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.8.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -382,6 +382,8 @@ docker run -d --name bunkerweb-aio \
   -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/appsec-bot-challenge" \
   bunkerity/bunkerweb-all-in-one:1.7.0-beta
 ```
+
+首次启用机器人检测时，入口脚本还会为挑战运行时生成稳定的 `master_secret`，并保存到 `/var/lib/bunkerweb`（与一体化镜像的其他持久状态使用同一卷）。否则 CrowdSec 每次重启都会生成新密钥，使所有未完成的挑战 Cookie 失效。请为 `/data` 挂载持久卷，让此密钥及实例身份在重建后保留。
 
 !!! warning "被质询的客户端需要 JavaScript 和 Cookie"
     质询页面会运行脚本并把结果保存在 Cookie 中。任何两者皆无的正常客户端——API 调用方、监控探针、订阅源阅读器、大多数命令行工具——都无法完成质询，并会被反复质询。请**在 CrowdSec 一侧**排除或放行它们（该捆绑包自带针对搜索引擎、监控、订阅源、静态文件和 API 路径的排除配置），而不要使用 `CROWDSEC_EXCLUDE_LOCATION`——它会关闭该路径上的所有 CrowdSec 检查，而不仅仅是质询。

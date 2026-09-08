@@ -113,6 +113,78 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_URI_URLS`        |         | multisite | no       | **URI Blacklist URLs:** List of URLs containing URI patterns to block, separated by spaces. |
     | `BLACKLIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                   |
 
+=== "Composite rules (AND)"
+    **What this does:** require several criteria *at once*. Each flat list above is an OR — any single one matching is enough to deny a visitor. A rule is an AND: it denies only a visitor that matches every one of its terms, which is how you block a pattern without blocking a whole network.
+
+    | Setting | Default | Context | Multiple | Description |
+    | ------- | ------- | ------- | -------- | ----------- |
+    | `BLACKLIST_RULE` |  | multisite | yes | **Blacklist rule:** Terms joined with ` AND `; every one must match. |
+
+    A rule is a list of terms separated by the literal ` AND ` — uppercase, one space on each
+    side. Every term must match for the rule to match:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` is accepted as an alias of `ua`. A `<value>` may be a resource-group token such
+    as `@office`, resolved against that term's kind. Rules are declared with the usual
+    numeric-suffix form: `BLACKLIST_RULE_1`, `BLACKLIST_RULE_2`, and so on.
+
+    ```yaml
+    USE_BLACKLIST: "yes"
+    # a scraper, but only when it hits the expensive endpoint
+    BLACKLIST_RULE_1: "ua:^ScrapyBot AND uri:^/search"
+    # a hosting provider's ASN, except its own monitoring range
+    BLACKLIST_RULE_2: "asn:64500 AND NOT ip:198.51.100.0/24"
+    ```
+
+    !!! warning "OR between rules, AND inside one"
+        This is the distinction readers get wrong. **Rules are OR'd** — with each other and with
+        the flat lists above: a visitor matching `BLACKLIST_IP`, or any single rule, is denied.
+        **Terms inside one rule are AND'd**: the rule above denies nobody unless every one of its
+        terms matches. Two criteria written as two rules is an OR; the same two written as two
+        terms of one rule is an AND.
+
+    !!! info "Limits"
+        * A term whose subject the request cannot supply is **unknown**, and a rule holding an
+          unknown term never matches — `NOT` does not rescue it. `ua:` and `uri:` are always
+          unknown in stream mode, and a `ua:` term is unknown on a request that sends no
+          `User-Agent` header. A failed lookup (no GeoIP database, a resolver error) is unknown
+          too; a private client IP is **not** — it definitely has no ASN and its country is
+          `local`, so `NOT asn:…` legitimately matches it.
+        * A rule containing a `ua:` or `uri:` term therefore cannot match in a stream service.
+          It is not refused — the same service configuration may serve HTTP too — but a warning
+          naming the rule is logged when the configuration loads, so it is never *silently* dead.
+        * A rule made only of `NOT` terms is valid but matches almost every request. Same
+          warning channel.
+        * There is no escaping syntax. Because ` AND ` is the separator, a `ua:` or `uri:` regex
+          may not contain " and " in any casing; such a rule is refused when it is saved.
+        * An `rdns:` term matches the PTR record **without** forward confirmation, exactly like
+          the flat `BLACKLIST_RDNS` pass: spoofing a PTR *into* a deny list is not an attack,
+          and requiring the forward lookup would let a client with no A record out of the rule.
+          Greylist and whitelist rules do forward-confirm, matching theirs.
+
+    !!! info "Ignore lists apply to rules too — per kind"
+        A `BLACKLIST_IGNORE_*` entry waives a rule verdict exactly as it waives a flat-list one,
+        and with the same scope: **per kind**. `BLACKLIST_IGNORE_IP` shields the IP check in the
+        flat pass, and waives a rule only if that rule has an `ip:` term. An ignore whose kind
+        the rule never tests does nothing to it.
+
+        The scope is deliberate. With
+        `BLACKLIST_RULE_1: "ip:203.0.113.0/24 AND country:CN"` and
+        `BLACKLIST_IGNORE_URI: "^/static"`, waiving on any ignore would let every request to
+        `/static` walk past the rule — and the URI is chosen by the client, so the rule would be
+        one path away from switched off.
+
+        The mapping is the obvious one: `ip:` ↔ `BLACKLIST_IGNORE_IP`, `rdns:` ↔
+        `BLACKLIST_IGNORE_RDNS`, `asn:` ↔ `BLACKLIST_IGNORE_ASN`, `ua:` ↔
+        `BLACKLIST_IGNORE_USER_AGENT`, `uri:` ↔ `BLACKLIST_IGNORE_URI`. `country:` has no ignore
+        list, so a rule made only of `country:` terms cannot be waived by anything — add an
+        `ip:` or `asn:` term if you need an exception path for it.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 

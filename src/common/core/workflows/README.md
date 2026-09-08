@@ -48,6 +48,14 @@ The counter is scoped to service + rule + client IP, so it never interferes with
 
 An instance that has not received the compiled policy yet — first boot, or a push that never arrived — logs one error and serves traffic under its ordinary protections. Conversely, a policy the control plane cannot compile is never distributed at all: the push is abandoned and every instance keeps the policy it already had. Deleting a resource group a rule references is refused while that rule exists.
 
+### Regex budget
+
+| Setting                 | Default | Context | Multiple | Description                                                                                                                                                     |
+| ------------------------ | ------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WORKFLOWS_REGEX_BUDGET` | `512`   | global  | no       | **Regex Budget:** Maximum number of distinct regular expressions compiled across all workflow rules. NGINX shares one regex cache between every plugin, so rules beyond this budget are disabled instead of silently degrading the whole instance. |
+
+Compilation walks every workflow in sorted id order and spends the budget as it goes, so an instance that runs out mid-artefact disables the remaining rules rather than the whole instance — and does it in a deterministic order, so two instances loading the same artefact degrade the same rules, not different ones.
+
 ### Managing workflows
 
 Everything is done from the **Workflows** page of the web UI, or through the `/workflows` API endpoints. Rules are stored centrally and compiled into a single artefact distributed to every instance with the usual configuration push.

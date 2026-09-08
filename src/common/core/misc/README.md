@@ -48,6 +48,19 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
     !!! warning "SNI Enforcement"
         Enabling strict SNI validation provides stronger security but may cause issues if BunkerWeb is behind a reverse proxy that forwards HTTPS requests without preserving SNI information. Test thoroughly before enabling in production environments. `DISABLE_DEFAULT_SERVER_STRICT_SNI` only has a default server to enforce it on (`MULTISITE=yes`, or `DISABLE_DEFAULT_SERVER=yes` in single-site) — in plain single-site it is silently inert, since your own service's block is already NGINX's default.
 
+=== "Service Mode"
+
+    **Declaring a service's purpose**
+
+    | Setting        | Default    | Context   | Multiple | Description                                                                                                                          |
+    | -------------- | ---------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+    | `SERVICE_MODE` | `standard` | multisite | no       | **Service Mode:** `standard` for an ordinary service, `redirect_only` for a listener that does nothing but redirect.                   |
+
+    `SERVICE_MODE` is the declared purpose of a service, read by the central PRO quota classifier. A service explicitly declared `redirect_only` and carrying **nothing but** a redirect profile (no reverse proxy, no custom config, no attached resource other than a redirect or a certificate) is meant to be exempt from the PRO service quota, without a cap on how many of them exist — the exemption is never inferred from `REDIRECT_TO` or any other setting.
+
+    !!! info "The exemption is not live yet"
+        The classification rule and its tests are complete, but the exemption itself is gated behind an internal flag that a later release flips on. Until then, a valid `redirect_only` declaration is still billed exactly like an ordinary service, so declaring one today changes nothing about what is billed — it only prepares the service for when the exemption ships. (A `redirect_only` service carrying a forbidden capability is billed too, regardless of the flag — the exemption is opt-in for the operator, never opt-out of billing.)
+
 === "Configuring the Default Server"
 
     **The default server is a service you can edit**

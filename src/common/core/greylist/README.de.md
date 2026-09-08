@@ -79,6 +79,63 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     | `GREYLIST_URI`      |          | multisite | nein     | **URI-Greylist:** Liste von URI-Mustern (PCRE-Regex), die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen.            |
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
+=== "Zusammengesetzte Regeln (AND)"
+    **Funktion:** Mehrere Kriterien müssen *gleichzeitig* zutreffen. Die flachen Listen sind mit
+    OR verknüpft: Schon ein Treffer genügt. Eine Regel ist ein AND: Nur Besucher, auf die alle
+    Terme zutreffen, werden auf die Greylist gesetzt.
+
+    | Einstellung | Standard | Kontext | Mehrfach | Beschreibung |
+    | ----------- | -------- | ------- | -------- | ------------ |
+    | `GREYLIST_RULE` | | multisite | ja | **Greylist-Regel:** Mit ` AND ` verknüpfte Terme; alle müssen zutreffen. |
+
+    Eine Regel besteht aus Termen, getrennt durch das wörtliche ` AND `: Großbuchstaben mit
+    genau einem Leerzeichen auf jeder Seite. Jeder Term muss zutreffen:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` ist ein Alias für `ua`. `<value>` kann ein Ressourcengruppen-Token wie `@office`
+    sein, das anhand des Termtyps aufgelöst wird. Verwenden Sie die üblichen numerischen Suffixe:
+    `GREYLIST_RULE_1`, `GREYLIST_RULE_2` und so weiter.
+
+    ```yaml
+    USE_GREYLIST: "yes"
+    # Partner-Crawler nur aus dessen eigenem Netz
+    GREYLIST_RULE_1: "ip:203.0.113.0/24 AND ua:^PartnerCrawler"
+    # Alles aus einer ASN außer deren Scannern
+    GREYLIST_RULE_2: "asn:12345 AND NOT ua:(?:nmap|masscan)"
+    # Land und Pfad mit einer Ressourcengruppe für die Länder
+    GREYLIST_RULE_3: "country:@internal-markets AND uri:^/api/v1/"
+    ```
+
+    !!! warning "OR zwischen Regeln, AND innerhalb einer Regel"
+        **Regeln sind mit OR verknüpft**, untereinander und mit den flachen Listen: Ein Besucher,
+        auf den `GREYLIST_IP` oder eine einzelne Regel zutrifft, wird auf die Greylist gesetzt.
+        **Terme innerhalb einer Regel sind mit AND verknüpft**: Die Regel trifft nur zu, wenn
+        alle ihre Terme zutreffen. Zwei Kriterien als zwei Regeln ergeben OR; dieselben Kriterien
+        als zwei Terme einer Regel ergeben AND.
+
+    !!! info "Grenzen"
+        * Kann die Anfrage die benötigte Information nicht liefern, ist ein Term **unbekannt**.
+          Eine Regel mit unbekanntem Term trifft nie zu, auch nicht durch `NOT`. Im Stream-Modus
+          sind `ua:` und `uri:` immer unbekannt, `ua:` auch bei fehlendem `User-Agent`-Header.
+          Fehlgeschlagene Abfragen (fehlende GeoIP-Datenbank, Resolver-Fehler) sind ebenfalls
+          unbekannt. Eine private Client-IP ist dagegen **nicht** unbekannt: Sie hat definitiv
+          keine ASN und gehört zum Land `local`; `NOT asn:…` kann daher berechtigt zutreffen.
+        * Eine Regel mit `ua:` oder `uri:` kann im Stream-Dienst folglich nie treffen. Sie wird
+          nicht abgelehnt, weil dieselbe Dienstkonfiguration auch HTTP bedienen kann; beim Laden
+          erscheint jedoch eine Warnung mit ihrem Namen. Sie bleibt nicht unbemerkt wirkungslos.
+        * Regeln ausschließlich aus `NOT`-Termen sind gültig, treffen jedoch auf fast jede Anfrage
+          zu. Auch dafür wird eine Warnung ausgegeben.
+        * Es gibt keine Escape-Syntax. Wegen des Trenners ` AND ` darf ein `ua:`- oder `uri:`-Regex
+          kein „ and “ in beliebiger Groß-/Kleinschreibung enthalten. Solche Regeln werden beim
+          Speichern abgelehnt.
+        * Ein `rdns:`-Term wird wie `GREYLIST_RDNS` vorwärtsbestätigt: Der passende PTR-Hostname
+          wird zurück aufgelöst; nur wenn er zur Client-IP führt, ist der Term wahr.
+
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 

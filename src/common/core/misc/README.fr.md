@@ -48,6 +48,17 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
     !!! warning "Application du SNI"
         Activer la validation stricte du SNI offre une sécurité renforcée mais peut causer des problèmes si BunkerWeb est derrière un proxy inverse qui transmet les requêtes HTTPS sans préserver les informations SNI. Testez minutieusement avant d'activer en production. `DISABLE_DEFAULT_SERVER_STRICT_SNI` n'a de serveur par défaut sur lequel s'appliquer que lorsque `MULTISITE=yes` (ou `DISABLE_DEFAULT_SERVER=yes` en mode mono-site) — en mono-site pur, il est silencieusement sans effet, puisque le bloc de votre propre service est déjà celui par défaut de NGINX.
 
+=== "Mode du service"
+
+    | Paramètre | Défaut | Contexte | Multiple | Description |
+    | --------- | ------ | -------- | -------- | ----------- |
+    | `SERVICE_MODE` | `standard` | multisite | non | **Mode du service :** `standard` pour un service ordinaire, `redirect_only` pour un service dédié aux redirections. |
+
+    `SERVICE_MODE` déclare la fonction du service au classificateur central du quota PRO. Un service explicitement `redirect_only`, avec **uniquement** un profil de redirection (aucun reverse proxy, configuration personnalisée ou ressource attachée autre qu'une redirection ou un certificat), est destiné à être exempté du quota sans limite de nombre. Cette exemption n'est jamais déduite de `REDIRECT_TO` ni d'un autre paramètre.
+
+    !!! info "L'exemption n'est pas encore active"
+        La classification et ses tests sont prêts, mais un indicateur interne réserve l'activation à une version ultérieure. Pour l'instant, même une déclaration `redirect_only` valide est comptabilisée comme un service ordinaire : la déclaration prépare la future exemption sans modifier la facturation. Un service `redirect_only` ayant une capacité interdite reste comptabilisé quelle que soit la valeur de cet indicateur.
+
 === "Configuration du serveur par défaut"
 
     **Le serveur par défaut est un service que vous pouvez modifier**

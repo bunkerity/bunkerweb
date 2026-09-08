@@ -372,27 +372,27 @@ Siga estos pasos para habilitar y configurar la función Antibot:
 
 Las siguientes configuraciones son compartidas por todos los mecanismos de desafío:
 
-| Configuración          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                   |
-| ---------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.                                                                                               |
-| `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío.                                                                                        |
-| `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.                                                                                             |
-| `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original. |
+| Configuración          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                            |
+| ---------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_URI`          | `/challenge`      | multisite | no       | **URL del desafío:** La URL a la que se redirigirá a los usuarios para completar el desafío. Asegúrese de que esta URL no se utilice para nada más en su sitio.        |
+| `ANTIBOT_TIME_RESOLVE` | `60`              | multisite | no       | **Límite de tiempo del desafío:** El tiempo máximo (en segundos) que un usuario tiene para completar el desafío. Después de este tiempo, se generará un nuevo desafío. |
+| `ANTIBOT_TIME_VALID`   | `86400`           | multisite | no       | **Validez del desafío:** Cuánto tiempo (en segundos) es válido un desafío completado. Después de este tiempo, los usuarios tendrán que resolver un nuevo desafío.      |
+| `ANTIBOT_SUCCESS_URI`  |                   | multisite | no       | **URL de redirección tras el éxito:** Una URL fija a la que redirigir a los usuarios después de que resuelvan correctamente el desafío, en lugar de la página que solicitaron originalmente. Déjelo vacío para devolver a los usuarios a su destino original.      |
 
 ### Excluir tráfico de los desafíos
 
 BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben omitir por completo el desafío antibot. Esto es útil para incluir en la lista blanca servicios de confianza, redes internas o páginas específicas que siempre deben ser accesibles sin desafío:
 
-| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                         |
-| --------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                      |
+| --------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con query string. |
-| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                         |
-| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                       |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                              |
-| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                                                                                      |
-| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_IGNORE_COUNTRY`    |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_ONLY_COUNTRY`      |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite.                                                                    |
+| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                      |
+| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                    |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.           |
+| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                   |
+| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_IGNORE_COUNTRY`    |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_ONLY_COUNTRY`      |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite. |
 
 !!! note "Comportamiento de la configuración basada en países"
       - Cuando se configuran `ANTIBOT_IGNORE_COUNTRY` y `ANTIBOT_ONLY_COUNTRY`, la lista de exclusiones tiene prioridad: los países presentes en ambas listas omiten el desafío.
@@ -590,13 +590,13 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-    | Configuración                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                               |
-    | ---------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`                | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `capjs` para habilitar el desafío de Cap.js.                                         |
-    | `ANTIBOT_CAPJS_FRONTEND_URL` |                   | multisite | no       | **URL frontend de Cap.js:** URL visible para el navegador del servidor Cap.js que sirve el widget.                        |
-    | `ANTIBOT_CAPJS_BACKEND_URL`  |                   | multisite | no       | **URL backend de Cap.js:** URL interna opcional que BunkerWeb usa para `/siteverify`; si está vacía, usa la URL frontend. |
-    | `ANTIBOT_CAPJS_SITEKEY`      |                   | multisite | no       | **Clave del sitio de Cap.js:** La clave de sitio para el desafío de Cap.js.                                               |
-    | `ANTIBOT_CAPJS_SECRET`       |                   | multisite | no       | **Clave secreta de Cap.js:** La clave secreta que BunkerWeb usa para verificar los tokens de Cap.js.                      |
+    | Configuración                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                       |
+    | ---------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `capjs` para habilitar el desafío de Cap.js.                                                  |
+    | `ANTIBOT_CAPJS_FRONTEND_URL` |                   | multisite | no       | **URL frontend de Cap.js:** URL visible para el navegador del servidor Cap.js que sirve el widget.                                 |
+    | `ANTIBOT_CAPJS_BACKEND_URL`  |                   | multisite | no       | **URL backend de Cap.js:** URL interna opcional que BunkerWeb usa para `/siteverify`; si está vacía, usa la URL frontend.          |
+    | `ANTIBOT_CAPJS_SITEKEY`      |                   | multisite | no       | **Clave del sitio de Cap.js:** La clave de sitio para el desafío de Cap.js.                                                        |
+    | `ANTIBOT_CAPJS_SECRET`       |                   | multisite | no       | **Clave secreta de Cap.js:** La clave secreta que BunkerWeb usa para verificar los tokens de Cap.js.                               |
 
     !!! note "Requisitos operativos"
         - Use HTTPS para `ANTIBOT_CAPJS_FRONTEND_URL` en producción. El worker del navegador requiere `crypto.subtle` en un contexto seguro, y HTTPS evita cambios MITM en el widget.
@@ -607,11 +607,11 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
-### Desafíos en la página de Reportes
+### Los desafíos en la página de Informes
 
-Cada página de desafío que sirve Antibot se registra como un reporte y aparece como *Antibot challenge (captcha) served* en la columna **Motivo** de la página de Reportes, junto con el proveedor utilizado. BunkerWeb responde el desafío por sí mismo con un 200 en lugar de reenviar la solicitud a su aplicación, por lo que el reporte se conserva según el motivo que lleva y no según su estado — el filtro de Reportes de otro modo solo conserva bloqueos (4xx), detecciones y sesiones de stream bloqueadas.
+Cada página de desafío que Antibot sirve se registra como un informe y se lee como *Antibot challenge (captcha) served* en la columna **Motivo** de la página de Informes, con el proveedor utilizado. BunkerWeb responde un desafío por sí mismo con un 200 en lugar de reenviar la petición a su aplicación, así que el informe se conserva por el motivo que lleva y no por su estado — el filtro de Informes solo conserva, por lo demás, los bloqueos (4xx), las detecciones y las sesiones de flujo bloqueadas.
 
-Antibot desafía a todo visitante no identificado de un servicio protegido, no solo a los que sospecha, por lo que se genera un reporte por cada desafío servido — un volumen mucho mayor que un acierto de lista negra o una decisión de CrowdSec. El ajuste que se llena primero es `METRICS_MAX_BLOCKED_REQUESTS` — el búfer en memoria por worker, `1k` por defecto (`METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, cuando se usa Redis). Una vez lleno, descarta primero lo más antiguo, eliminando solicitudes bloqueadas genuinas para hacer sitio a los desafíos, así que auméntelo primero; luego dimensione `METRICS_RETENTION_DAYS` y `METRICS_RETENTION_MAX_ROWS` para el histórico almacenado, o establezca `METRICS_PERSIST_TO_DB=no` si no desea conservar ese histórico en absoluto. Las pestañas analíticas de la página de Reportes no se ven afectadas: un desafío servido se lista en el registro de eventos pero nunca se cuenta como bloqueo, por lo que no aparece en **Principales infractores** ni en el mapa de amenazas.
+Antibot desafía a todo visitante no identificado de un servicio protegido, no solo a los que sospecha, de modo que se genera un informe por desafío servido — un volumen muy superior al de un acierto de lista negra o de una decisión de CrowdSec. El ajuste que se llena primero es `METRICS_MAX_BLOCKED_REQUESTS`: el búfer en memoria por worker, `1k` de forma predeterminada (o `METRICS_MAX_BLOCKED_REQUESTS_REDIS`, `10k`, si se usa Redis). Cuando se llena, descarta primero lo más antiguo, es decir, peticiones bloqueadas reales para dejar sitio a los desafíos; auméntelo primero. Después dimensione `METRICS_RETENTION_DAYS` y `METRICS_RETENTION_MAX_ROWS` para el historial almacenado, o ponga `METRICS_PERSIST_TO_DB=no` si no desea almacenarlo. Las pestañas analíticas de la página de Informes no se ven afectadas: un desafío servido aparece en el registro de eventos pero nunca cuenta como bloqueo, así que no sale en **Principales atacantes** ni en el mapa de amenazas.
 
 ### Configuraciones de ejemplo
 
@@ -890,36 +890,67 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 
     Una copia de seguridad solo puede restaurarse en el mismo motor de base de datos del que se tomó — el motor forma parte del nombre del archivo (`backup-mariadb-…`), y una restauración en otro distinto se rechaza antes de tocar nada. Si migró entre motores, ambos conjuntos de copias permanecen en el directorio: `restore` sin argumento toma el archivo más reciente de cualquier motor, así que indique la ruta explícitamente para restaurar una copia más antigua de su motor actual.
 
-### Downgrade controlado
+### Regresión controlada
 
-Volver a una versión anterior de BunkerWeb **no** es lo inverso de una actualización. Algunas tablas de 1.7 no tienen equivalente en 1.6.x, y en algunos motores de base de datos la migración no puede reproducirse hacia atrás en absoluto. Tres comandos hacen que eso sea decidible en lugar de una apuesta, y solo el último de ellos cambia algo:
+Volver a una versión anterior de BunkerWeb **no** es lo inverso de una actualización. Algunas tablas
+de 1.7 no tienen dónde ir en 1.6.x, y en algunos motores de base de datos la migración no puede
+reproducirse hacia atrás. Tres comandos hacen que la decisión sea verificable, y solo el último
+modifica algo:
 
 ```bash
-# 1. ¿Puede esta instalación volver atrás? Solo lectura: no se crea esquema, ni datos, ni base de datos.
+# 1. ¿Puede esta instalación volver atrás? Solo lectura: ningún esquema, ningún dato, ninguna base
+#    de datos creada.
 bwcli plugin backup preflight 1.6.14
 
-# 2. Mantener a los escritores detenidos. En primer plano: sigue reteniendo hasta que lo detenga con Ctrl-C.
+# 2. Congelar las escrituras. En primer plano: mantiene el bloqueo hasta que pulses Ctrl-C.
 bwcli plugin backup quiesce 1.6.14
 
-# 3. En otra shell, mientras el paso 2 está reteniendo: informa qué pasaría, luego hazlo.
+# 3. En otra terminal, mientras el paso 2 mantiene el bloqueo: primero el informe, luego la
+#    ejecución.
 bwcli plugin backup downgrade 1.6.14
 bwcli plugin backup downgrade 1.6.14 --execute
 ```
 
-Si un par de versiones puede degradarse en el mismo lugar se lee de un **manifiesto de compatibilidad** incluido en la versión (`downgrade-manifest.json`, sobrescribible con `DOWNGRADE_MANIFEST`); nunca se deduce del número de versión. Para 1.7.0 de vuelta a 1.6.14 el manifiesto registra, a partir de ejecuciones de actualización/downgrade medidas en bases de datos reales:
+Si un par de versiones puede regresar en el sitio se lee de un **manifiesto de compatibilidad**
+distribuido con la versión (`downgrade-manifest.json`, sustituible con `DOWNGRADE_MANIFEST`); nunca
+se deduce del número de versión. Para 1.7.0 hacia 1.6.14 el manifiesto registra, a partir de
+ejecuciones de migración medidas sobre bases de datos reales:
 
-| Motor | Downgrade en el mismo lugar | Por qué |
-| ------ | ------------------ | --- |
-| SQLite | ✅ probado | El esquema vuelve exactamente como lo declara 1.6.14, sin perder ninguna fila base. |
-| PostgreSQL | ✅ probado | Igual, más dos tipos enum sin usar que quedan y que 1.6.14 nunca mira. |
-| MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a mitad de camino (errores 1265 y 1553) y deja un esquema híbrido. |
+| Motor | Regresión en el sitio | Por qué |
+| ----- | --------------------- | ------- |
+| SQLite | ✅ probado | El esquema vuelve exactamente al que declara 1.6.14, sin perder ninguna fila de base. |
+| PostgreSQL | ✅ probado | Igual, más dos tipos enum sin usar que quedan atrás y que 1.6.14 nunca consulta. |
+| MariaDB | ❌ restaurar desde copia de seguridad | La migración aborta a medio camino (errores 1265 y 1553) y deja un esquema híbrido. |
 | MySQL | ❌ restaurar desde copia de seguridad | El error 1265 también se midió aquí; el segundo bloqueo se infiere de MariaDB, no se midió en MySQL. |
 
-!!! danger "Un downgrade en el mismo lugar destruye datos exclusivos de 1.7"
-    Todo certificado almacenado centralmente, todo recurso adjuntable (redirecciones, pools de upstream, workflows, grupos de recursos), todas las métricas de solicitudes y el mapa de amenazas, cada passkey registrada, y cada credencial de instancia almacenada — las instancias registradas deben volver a registrarse después. Los bloqueos son la única excepción: el job `sync-bans` los vuelve a aprender, perdiendo solo su duración restante. El preflight cuenta las tablas que puede contar — incluidos los grupos de recursos que usted mismo creó, pero no los que trae BunkerWeb — y se niega mientras alguna de ellas aún contenga algo. Lo que no puede contar lo muestra en su lugar, justo antes del aviso de confirmación: las columnas eliminadas de las tablas que sobreviven, y los datos excluidos porque nunca están vacíos (métricas de solicitudes, preferencias de la UI). Lea esa lista; nada se niega en su nombre por ella.
+Una instalación 1.7 recién creada no tiene ninguna revisión de Alembic sellada — solo una actualización la
+sella — así que allí el preflight informa ⚠️ *No Alembic revision is stamped*. Es un aviso, no un rechazo:
+la regresión en el sitio necesita el sello para saber qué migraciones se ejecutaron, la restauración desde
+una copia de seguridad no, y sigue disponible.
 
-!!! tip "Todo fallo deja algo que se puede arrancar"
-    `downgrade --execute` se niega a menos que exista una retención de quiescencia para ese mismo destino, el preflight que vuelve a ejecutar por sí mismo salga limpio, y el manifiesto marque el par como probado. Esa nueva ejecución lee la base de datos primaria — la que está a punto de migrar — incluso cuando `DATABASE_URI_READONLY` apunta a una réplica de solo lectura, para que una réplica rezagada no pueda responder por filas que el downgrade destruiría. Luego toma su propia copia de seguridad justo antes de migrar, y la restaura si algo sale mal — así un downgrade fallido le devuelve a donde empezó en lugar de a un esquema medio migrado. En el raro caso de que la propia reversión no pueda completarse, se detiene e informa `manual_recovery_required`, indicando el archivo de copia de seguridad y el comando exacto `bwcli plugin backup restore` para terminar a mano.
+!!! danger "Una regresión en el sitio destruye los datos propios de 1.7"
+    Todos los certificados almacenados de forma centralizada, todos los recursos adjuntables
+    (redirecciones, pools de upstreams, flujos de trabajo, grupos de recursos), todas las métricas de
+    peticiones y el mapa de amenazas, todas las passkeys registradas, y todas las credenciales de
+    instancia almacenadas — las instancias inscritas tendrán que volver a inscribirse después. Los
+    baneos son la única excepción: el job `sync-bans` los reaprende y solo se pierde su duración
+    restante. El preflight cuenta las tablas que sabe contar — incluidos los grupos de recursos que
+    hayas creado tú, pero no los que trae BunkerWeb — y rechaza mientras alguna de ellas contenga
+    algo. Lo que no puede contar lo enumera justo antes de la confirmación: las columnas eliminadas
+    de tablas que sobreviven, y los datos excluidos por no estar nunca vacíos (métricas de
+    peticiones, preferencias de la UI). Lee esa lista: para eso nada rechaza en tu lugar.
+
+!!! tip "Cada fallo deja algo que puede arrancar"
+    `downgrade --execute` rechaza mientras no haya un bloqueo activo para ese mismo destino, el
+    preflight que él mismo vuelve a ejecutar no esté limpio, y el manifiesto no marque el par como
+    probado. Esa reejecución lee la base de datos primaria — la que está a punto de migrar — incluso
+    cuando `DATABASE_URI_READONLY` apunta a una réplica de solo lectura, de modo que una réplica
+    retrasada no puede responder por las filas que la regresión destruiría. Después toma su propia copia
+    de seguridad justo antes de migrar, y la restaura si algo sale mal — así una regresión fallida te
+    devuelve al punto de partida en lugar de dejarte sobre un esquema a medio migrar. En el caso raro de
+    que la propia restauración no llegue a completarse, se detiene e informa `manual_recovery_required`,
+    indicando el archivo de copia de seguridad y el comando `bwcli plugin backup restore` exacto para
+    terminar a mano.
 
 ### Configuraciones de ejemplo
 
@@ -1286,6 +1317,70 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+=== "Reglas compuestas (AND)"
+    **Función:** exigir varios criterios *a la vez*. Las listas simples anteriores se combinan con
+    OR: basta una coincidencia para denegar al visitante. Una regla es AND: solo coincide si se cumplen todos sus términos.
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `BLACKLIST_RULE` | | multisite | sí | **Regla de lista:** Términos unidos por ` AND `; deben coincidir todos. |
+
+    Los términos se separan con el literal ` AND `, en mayúsculas y con un espacio a cada lado:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` es un alias de `ua`. Un `<value>` puede ser un grupo como `@office`, resuelto
+    según el tipo del término. Usa sufijos numéricos: `BLACKLIST_RULE_1`, `BLACKLIST_RULE_2`, etc.
+
+    ```yaml
+    USE_BLACKLIST: "yes"
+    # Un scraper, solo cuando accede al endpoint costoso
+    BLACKLIST_RULE_1: "ua:^ScrapyBot AND uri:^/search"
+    # ASN de un proveedor, salvo su propia red de monitorización
+    BLACKLIST_RULE_2: "asn:64500 AND NOT ip:198.51.100.0/24"
+    ```
+
+    !!! warning "OR entre reglas, AND dentro de cada una"
+        **Las reglas se combinan con OR**, entre sí y con las listas simples: coincidir con
+        `BLACKLIST_IP` o con cualquier regla basta para denegar al visitante. **Los términos de una regla
+        se combinan con AND**: deben cumplirse todos. Dos criterios en reglas distintas son OR;
+        los mismos dos como términos de una regla son AND.
+
+    !!! info "Límites"
+        - Un término cuyo dato no está disponible es **desconocido** y una regla que lo contenga
+          nunca coincide; `NOT` no lo cambia. `ua:` y `uri:` siempre son desconocidos en stream;
+          `ua:` también lo es sin cabecera `User-Agent`. Un fallo de consulta (base GeoIP ausente,
+          error DNS) también es desconocido. Una IP privada **no** lo es: no tiene ASN y su país
+          es `local`, por lo que `NOT asn:…` sí coincide legítimamente.
+        - Una regla con `ua:` o `uri:` no coincide en un servicio stream. No se rechaza porque la
+          misma configuración puede servir HTTP, pero al cargarla se registra una advertencia
+          que identifica la regla para evitar que quede inactiva sin explicación.
+        - Una regla formada solo por términos `NOT` es válida pero coincide con casi todas las
+          peticiones. Produce la misma advertencia.
+        - No hay sintaxis de escape. Como ` AND ` es el separador, una regex `ua:` o `uri:` no
+          puede contener " and " con ninguna combinación de mayúsculas: se rechaza al guardar.
+        - `rdns:` compara el PTR **sin** confirmación directa, igual que `BLACKLIST_RDNS`:
+          falsificar un PTR para entrar en una lista de bloqueo no es un ataque y exigir un A
+          permitiría evitar la regla a clientes sin él. Greylist y Whitelist sí confirman el DNS directo.
+    !!! info "Las listas de exclusión también se aplican a las reglas, por tipo"
+        Una entrada `BLACKLIST_IGNORE_*` anula una regla igual que una lista simple, **por tipo**.
+        `BLACKLIST_IGNORE_IP` solo anula reglas que tengan un término `ip:`. Una exclusión de un
+        tipo que la regla no comprueba no tiene efecto.
+
+        Con `BLACKLIST_RULE_1: "ip:203.0.113.0/24 AND country:CN"` y
+        `BLACKLIST_IGNORE_URI: "^/static"`, anular por cualquier exclusión permitiría saltarse la
+        regla pidiendo `/static`, una ruta elegida por el cliente.
+
+        La correspondencia es `ip:` ↔ `BLACKLIST_IGNORE_IP`, `rdns:` ↔ `BLACKLIST_IGNORE_RDNS`,
+        `asn:` ↔ `BLACKLIST_IGNORE_ASN`, `ua:` ↔ `BLACKLIST_IGNORE_USER_AGENT` y `uri:` ↔
+        `BLACKLIST_IGNORE_URI`. `country:` no tiene lista de exclusión: una regla formada solo por
+        ese tipo no se puede anular; añade `ip:` o `asn:` si necesitas excepciones.
+
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
@@ -1485,12 +1580,20 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 | ------------------ | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`    | `yes`                      | multisite | no       | **Habilitar BunkerNet:** Establezca en `yes` para habilitar el intercambio de inteligencia sobre amenazas de BunkerNet. |
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
+| `USE_BUNKERNET_STATS` | `yes` | global | no | **Estadísticas de eficacia:** Guarda en la base de datos estadísticas de contribución, tamaño de listas y conectividad de BunkerNet. |
+| `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | no | **Retención:** Antigüedad máxima, en días, de las estadísticas de eficacia guardadas. |
 
 !!! tip "Protección de Red"
     Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
 !!! info "Informes Anónimos"
     Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+
+!!! info "Estadísticas de eficacia"
+    Con `USE_BUNKERNET_STATS` habilitado, `bunkernet-stats` guarda una vez por ejecución las métricas
+    de contribución y salud del despliegue (tamaño de lista, informes pendientes y estado de registro).
+    `bunkernet-cleanup-stats` elimina filas anteriores a `BUNKERNET_STATS_RETENTION_DAYS`. Ambos jobs
+    se omiten por completo, registrando el motivo, cuando `USE_BUNKERNET_STATS` es `no`.
 
 ### Configuraciones de Ejemplo
 
@@ -1981,7 +2084,7 @@ Las siguientes secciones desarrollan cada paso.
     source: appsec
     ```
 
-    `appsec_configs` (plural) es una lista y se añade, así que las configuraciones AppSec adicionales extienden `appsec-default` en lugar de reemplazarlo. La clave singular `appsec_config` toma un único nombre y no puede combinarse con la clave plural — use la forma plural si planea habilitar la [detección de bots](#detección-de-bots-crowdsec-18).
+    `appsec_configs` (plural) es una lista y añade, de modo que las configuraciones AppSec adicionales amplían `appsec-default` en lugar de reemplazarlo. El singular `appsec_config` admite un solo nombre y no puede combinarse con la clave plural: use la forma plural si piensa habilitar la detección de bots.
 
     **Syslog**
 
@@ -2210,34 +2313,32 @@ Las siguientes secciones desarrollan cada paso.
 
 Aplica las siguientes variables de entorno (o valores del scheduler) para que la instancia de BunkerWeb pueda comunicarse con la API local de CrowdSec. Como mínimo necesitas `USE_CROWDSEC`, `CROWDSEC_API` y `CROWDSEC_API_KEY` con una clave válida creada mediante `cscli bouncers add`.
 
-Cada ajuste es `multisite`, por lo que un valor establecido sin prefijo se aplica a todos los servicios, y un valor prefijado con un nombre de servidor lo sobrescribe solo para ese servicio.
-
 | Ajuste                      | Valor por defecto      | Contexto  | Múltiple | Descripción                                                                                                                                   |
 | --------------------------- | ---------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_CROWDSEC`              | `no`                   | multisite | no       | **Habilitar CrowdSec:** Establezca en `yes` para habilitar el bouncer de CrowdSec.                                                            |
-| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite | no       | **URL de la API de CrowdSec:** La dirección del servicio de la API Local de CrowdSec. Déjelo vacío para deshabilitar las consultas de decisiones. |
-| `CROWDSEC_API_KEY`          |                        | multisite | no       | **Clave de API de CrowdSec:** La clave de API para autenticarse con la API de CrowdSec, obtenida usando `cscli bouncers add`.                 |
-| `CROWDSEC_MODE`             | `live`                 | multisite | no       | **Modo de Operación:** `live` (consultar la API para cada solicitud) o `stream` (almacenar en caché periódicamente todas las decisiones).     |
-| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
-| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`.   |
-| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
-| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
-| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
+| `CROWDSEC_API`              | `http://crowdsec:8080` | multisite    | no       | **URL de la API de CrowdSec:** La dirección del servicio de la API Local de CrowdSec.                                                         |
+| `CROWDSEC_API_KEY`          |                        | multisite    | no       | **Clave de API de CrowdSec:** La clave de API para autenticarse con la API de CrowdSec, obtenida usando `cscli bouncers add`.                 |
+| `CROWDSEC_MODE`             | `live`                 | multisite    | no       | **Modo de Operación:** `live` (consultar la API para cada solicitud) o `stream` (almacenar en caché periódicamente todas las decisiones).     |
+| `CROWDSEC_ENABLE_INTERNAL`  | `no`                   | multisite    | no       | **Tráfico Interno:** Establezca en `yes` para verificar el tráfico interno contra las decisiones de CrowdSec.                                 |
+| `CROWDSEC_REQUEST_TIMEOUT`  | `1000`                 | multisite    | no       | **Tiempo de Espera de la Solicitud:** Tiempo de espera en milisegundos para las solicitudes HTTP a la API Local de CrowdSec en modo `live`.   |
+| `CROWDSEC_EXCLUDE_LOCATION` |                        | multisite    | no       | **Ubicaciones Excluidas:** Lista de ubicaciones (URI) separadas por comas para excluir de las verificaciones de CrowdSec.                     |
+| `CROWDSEC_CACHE_EXPIRATION` | `1`                    | multisite    | no       | **Expiración de la Caché:** El tiempo de expiración de la caché en segundos para las decisiones de IP en modo `live`.                         |
+| `CROWDSEC_UPDATE_FREQUENCY` | `10`                   | multisite    | no       | **Frecuencia de Actualización:** Con qué frecuencia (en segundos) obtener decisiones nuevas/expiradas de la API de CrowdSec en modo `stream`. |
 
-!!! info "Cómo coincide `CROWDSEC_EXCLUDE_LOCATION`"
-    Cada entrada separada por comas excluye la propia URI **y todo lo que está por debajo**: `/health` omite `/health` y `/health/live`, pero no `/healthcheck` — siempre se requiere un separador antes del resto de la ruta. La exclusión es total: una solicitud excluida no llega ni a la API Local ni al Componente AppSec, así que no excluya una ruta que aún desee inspeccionar. En particular, nunca excluya `/crowdsec-internal`: la [detección de bots](#detección-de-bots-crowdsec-18) sirve sus recursos de desafío desde ahí, y excluirla desactiva el desafío silenciosamente.
+!!! info "Cómo compara `CROWDSEC_EXCLUDE_LOCATION`"
+    Cada entrada separada por comas excluye la propia URI **y todo lo que cuelgue de ella**: `/health` omite `/health` y `/health/live`, pero no `/healthcheck` — siempre hace falta un separador antes del resto de la ruta. La exclusión es total: una petición excluida no llega ni a la Local API ni al Componente AppSec, así que no excluya una ruta que aún quiera inspeccionar. En particular, nunca excluya `/crowdsec-internal`: la detección de bots sirve desde ahí los recursos de su desafío y excluirlo lo desactiva de forma silenciosa.
 
 #### Ajustes del Componente de Seguridad de Aplicaciones
 
 | Ajuste                            | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                      |
 | --------------------------------- | ----------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `CROWDSEC_APPSEC_URL`             |                   | multisite | no       | **URL de AppSec:** La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.         |
-| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | multisite | no       | **Acción en Caso de Falla:** Acción a tomar cuando AppSec devuelve un error. Puede ser `passthrough` o `deny`.                   |
-| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | multisite | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec.                      |
-| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | multisite | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec.                       |
-| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | multisite | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.   |
-| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | multisite | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
-| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | multisite | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
+| `CROWDSEC_APPSEC_URL`             |                   | multisite   | no       | **URL de AppSec:** La URL del Componente de Seguridad de Aplicaciones de CrowdSec. Dejar vacío para deshabilitar AppSec.         |
+| `CROWDSEC_APPSEC_FAILURE_ACTION`  | `passthrough`     | multisite   | no       | **Acción en Caso de Falla:** Acción a tomar cuando AppSec devuelve un error. Puede ser `passthrough` o `deny`.                   |
+| `CROWDSEC_APPSEC_CONNECT_TIMEOUT` | `100`             | multisite   | no       | **Tiempo de Espera de Conexión:** El tiempo de espera en milisegundos para conectarse al Componente AppSec.                      |
+| `CROWDSEC_APPSEC_SEND_TIMEOUT`    | `100`             | multisite   | no       | **Tiempo de Espera de Envío:** El tiempo de espera en milisegundos para enviar datos al Componente AppSec.                       |
+| `CROWDSEC_APPSEC_PROCESS_TIMEOUT` | `500`             | multisite   | no       | **Tiempo de Espera de Procesamiento:** El tiempo de espera en milisegundos para procesar la solicitud en el Componente AppSec.   |
+| `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | multisite   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
+| `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | multisite   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
 !!! info "Sobre los Modos de Operación"
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
@@ -2245,24 +2346,24 @@ Cada ajuste es `multisite`, por lo que un valor establecido sin prefijo se aplic
 
 #### Endpoints por servicio
 
-Como los endpoints son `multisite`, los servicios de la misma instancia pueden usar distintos componentes de CrowdSec, o solo algunos de ellos. Las dos funciones son independientes:
+Como los endpoints son `multisite`, los servicios de la misma instancia pueden usar componentes CrowdSec distintos, o solo algunos de ellos. Las dos funciones son independientes:
 
-- **Las consultas de decisiones** están activas cuando `CROWDSEC_API` está definido. Establézcalo como cadena vacía para que un servicio omita por completo la API Local.
-- **La inspección AppSec** está activa cuando `CROWDSEC_APPSEC_URL` está definido. Establézcalo como cadena vacía para que un servicio omita la inspección profunda de solicitudes.
+- Las **consultas de decisiones** están activas cuando `CROWDSEC_API` está establecido. Ponlo como cadena vacía para que un servicio se salte por completo la Local API.
+- La **inspección AppSec** está activa cuando `CROWDSEC_APPSEC_URL` está establecido. Ponlo como cadena vacía para que un servicio se salte la inspección profunda de la solicitud.
 
-Un servicio con `USE_CROWDSEC` en `yes` y ambas URL vacías no verifica nada, y la instancia registra que no hay ningún endpoint definido.
+Un servicio con `USE_CROWDSEC` en `yes` y ambas URL vacías no comprueba nada, y la instancia registra que no hay ningún endpoint definido.
 
-!!! warning "Una caché de decisiones por instancia"
-    Las decisiones en caché viven en una única zona de memoria compartida para toda la instancia, indexada por la API Local de la que proceden. Los servicios que apuntan a la misma `CROWDSEC_API` reutilizan las decisiones en caché entre sí, lo que mantiene la consulta económica. Los servicios que apuntan a API Locales distintas nunca ven las decisiones del otro. El dimensionamiento de esa zona es a nivel de instancia, así que una flota con muchas API Locales distintas y listas de decisiones grandes comparte un único presupuesto.
+!!! warning "Una sola caché de decisiones por instancia"
+    Las decisiones en caché viven en una única zona de memoria compartida para toda la instancia, indexada por la Local API de la que proceden. Los servicios que apuntan a la misma `CROWDSEC_API` reutilizan las decisiones en caché de los demás, lo que mantiene la consulta barata. Los servicios que apuntan a Local API distintas nunca ven las decisiones de los demás. El dimensionamiento de esa zona es a nivel de instancia, así que una flota con muchas Local API distintas y listas de decisiones grandes comparte un único presupuesto.
 
-!!! info "Clave del bouncer por API Local"
-    `CROWDSEC_API_KEY` se resuelve por servicio como cualquier otro ajuste. Cuando los servicios apuntan a API Locales distintas, dé a cada uno la clave registrada con `cscli bouncers add` en su propio host CrowdSec, de lo contrario las consultas se rechazan por no estar autenticadas.
+!!! info "Clave de bouncer por Local API"
+    `CROWDSEC_API_KEY` se resuelve por servicio como cualquier otro ajuste. Cuando los servicios apuntan a Local API distintas, dale a cada uno la clave registrada con `cscli bouncers add` en su propio host de CrowdSec; de lo contrario, las consultas se rechazan por no estar autenticadas.
 
 ### Detección de bots (CrowdSec 1.8+)
 
-CrowdSec 1.8 añade detección de bots al Componente AppSec. En lugar de bloquear directamente a un cliente sospechoso, el Componente AppSec puede responder con un **desafío**: una página autocontenida que hace fingerprinting del navegador y le hace resolver una prueba de trabajo, cuyo resultado se puntúa después en el lado de CrowdSec. BunkerWeb sirve esa página exactamente como la produjo CrowdSec — mismo estado, mismas cabeceras, misma cookie, en la URI original — y nunca reenvía la solicitud a su aplicación. Un cliente que falla sigue siendo denegado por la propia página de baneo de BunkerWeb, así que la experiencia de bloqueo no cambia en nada.
+CrowdSec 1.8 añade la detección de bots al Componente AppSec. En lugar de banear directamente a un cliente sospechoso, el Componente AppSec puede responder con un **desafío**: una página autocontenida que toma la huella del navegador y le hace resolver una prueba de trabajo, cuyo resultado puntúa después el propio CrowdSec. BunkerWeb sirve esa página exactamente como CrowdSec la produjo — mismo estado, mismas cabeceras, misma cookie, sobre la URI original — y nunca reenvía la petición a su aplicación. Un cliente que falla sigue siendo denegado por la página de baneo propia de BunkerWeb, así que la experiencia de bloqueo no cambia.
 
-La detección de bots **no está activada por defecto**: el bouncer retransmite un desafío en cuanto el motor emite uno, pero el motor solo emite uno una vez que usted instala la colección y carga su configuración.
+La detección de bots **no está activada por defecto**: el bouncer retransmite un desafío en cuanto el motor emite uno, pero el motor solo lo emite una vez que usted instala la colección y carga su configuración.
 
 **Activarla en un motor CrowdSec independiente**
 
@@ -2270,7 +2371,7 @@ La detección de bots **no está activada por defecto**: el bouncer retransmite 
 cscli collections install crowdsecurity/appsec-bot-challenge
 ```
 
-Luego añada las configuraciones que instaló al archivo de adquisición de AppSec, junto a `appsec-default`:
+Después añada al archivo de adquisición de AppSec las configuraciones que ha instalado, junto a `appsec-default`:
 
 ```yaml
 appsec_configs:
@@ -2282,13 +2383,13 @@ listen_addr: 0.0.0.0:7422
 source: appsec
 ```
 
-Reinicie CrowdSec y luego confirme los rechazos con `cscli alerts list --kind bot-detection`.
+Reinicie CrowdSec y confirme los rechazos con `cscli alerts list --kind bot-detection`.
 
-Tres paquetes listos para usar fijan el umbral de rechazo: `crowdsecurity/appsec-bot-challenge` rechaza con una puntuación de 75, `crowdsecurity/appsec-bot-challenge-strict` en 45, y `crowdsecurity/appsec-bot-challenge-permissive` en 100. Instale el que desee — son alternativas, no capas.
+Tres paquetes listos para usar fijan el umbral de rechazo: `crowdsecurity/appsec-bot-challenge` rechaza a partir de una puntuación de 75, `crowdsecurity/appsec-bot-challenge-strict` a partir de 45 y `crowdsecurity/appsec-bot-challenge-permissive` a partir de 100. Instale el que quiera: son alternativas, no capas.
 
-**Activarla en la imagen Todo en Uno**
+**Activarla en la imagen All-In-One**
 
-Establezca `CROWDSEC_EXTRA_COLLECTIONS` en el contenedor y reinícielo; el entrypoint instala la colección y añade sus configuraciones al archivo de adquisición AppSec por usted:
+Defina `CROWDSEC_EXTRA_COLLECTIONS` en el contenedor y reinícielo; el entrypoint instala la colección y añade sus configuraciones al archivo de adquisición de AppSec por usted:
 
 ```shell
 docker run -d --name bunkerweb-aio \
@@ -2298,63 +2399,67 @@ docker run -d --name bunkerweb-aio \
   bunkerity/bunkerweb-all-in-one:1.7.0-beta
 ```
 
-El entrypoint también deriva un `master_secret` estable para el runtime del desafío la primera vez que se activa la detección de bots, y lo persiste en `/var/lib/bunkerweb` (el mismo volumen donde la imagen Todo en Uno guarda todo lo demás). Sin él, CrowdSec genera uno nuevo en cada reinicio e invalida toda cookie de desafío pendiente; dele al contenedor un volumen persistente para `/data` para que el secreto — y el resto de la identidad de la instancia — sobreviva a una recreación.
+El entrypoint también deriva un `master_secret` estable para los desafíos la primera vez que se
+habilita la detección de bots y lo conserva en `/var/lib/bunkerweb`, en el mismo volumen que el
+resto del estado AIO. Sin él, CrowdSec genera otro en cada reinicio e invalida todas las cookies de
+desafío pendientes. Monta un volumen persistente en `/data` para conservar el secreto y la
+identidad de la instancia al recrear el contenedor.
 
 !!! warning "Los clientes desafiados necesitan JavaScript y cookies"
-    La página de desafío ejecuta un script y guarda su resultado en una cookie. Cualquier cliente legítimo que carezca de ambos — consumidores de API, sondas de monitorización, lectores de feeds, la mayoría de herramientas de línea de comandos — no puede resolverlo y seguirá siendo desafiado. Excluyalos o añádalos a una lista blanca **del lado de CrowdSec** (el paquete incluye exclusiones para motores de búsqueda, monitorización, feeds, archivos estáticos y rutas de API), no con `CROWDSEC_EXCLUDE_LOCATION`, que desactiva toda verificación de CrowdSec para esa ruta en lugar de solo el desafío.
+    La página del desafío ejecuta un script y guarda su resultado en una cookie. Cualquier cliente legítimo que no tenga ambas cosas — consumidores de API, sondas de monitorización, lectores de feeds, la mayoría de herramientas de línea de comandos — no puede resolverlo y seguirá siendo desafiado. Exclúyalos o póngalos en lista de permitidos **del lado de CrowdSec** (el paquete incluye exclusiones para buscadores, monitorización, feeds, ficheros estáticos y rutas de API), no con `CROWDSEC_EXCLUDE_LOCATION`, que desactiva toda comprobación de CrowdSec para esa ruta y no solo el desafío.
 
-!!! warning "El host de CrowdSec necesita un mapeo de memoria ejecutable"
-    El desafío se ofusca del lado del servidor mediante un runtime WebAssembly que CrowdSec solo ejecuta en modo compilador — no hay fallback de intérprete. El **host que ejecuta CrowdSec** necesita por tanto SSE4.1 en amd64 (arm64 no tiene tal requisito) y un kernel que permita convertir un mapeo con permiso de escritura en ejecutable. Un host reforzado con W^X, o una política restrictiva de seccomp o SELinux, hace que CrowdSec registre `failed to create wasm runtime in compiler mode` o `the kernel likely denied an executable memory mapping` al arrancar, y la detección de bots permanece desactivada. Este es un requisito del host del motor, no de los navegadores de sus visitantes.
+!!! warning "El host de CrowdSec necesita memoria ejecutable"
+    El desafío se ofusca en el servidor mediante un runtime WebAssembly que CrowdSec solo ejecuta en modo compilador: no hay alternativa interpretada. Por eso el **host donde corre CrowdSec** necesita SSE4.1 en amd64 (arm64 no tiene ese requisito) y un núcleo que permita convertir en ejecutable una zona de memoria escribible. En un host endurecido con W^X, o bajo una política restrictiva de seccomp o SELinux, CrowdSec registra `failed to create wasm runtime in compiler mode` o `the kernel likely denied an executable memory mapping` al arrancar y la detección de bots queda desactivada. Es un requisito del host del motor, no de los navegadores de sus visitantes.
 
-!!! tip "Conserve la Content-Security-Policy de la página de desafío"
-    CrowdSec siempre adjunta una Content-Security-Policy a la página de desafío, y la página la necesita para funcionar. BunkerWeb la conserva porque `Content-Security-Policy` está en el `KEEP_UPSTREAM_HEADERS` por defecto. Dos ajustes eluden esa lista y romperían el desafío: un `CUSTOM_HEADER` que usted mismo defina como `Content-Security-Policy`, y listarlo en `REMOVE_HEADERS`. Si usa cualquiera de los dos, la instancia registra una advertencia al arrancar nombrando el ajuste.
+!!! tip "Conserve la Content-Security-Policy de la página del desafío"
+    CrowdSec siempre adjunta una Content-Security-Policy a la página del desafío, y la página la necesita para ejecutarse. BunkerWeb la conserva porque `Content-Security-Policy` figura en el valor por defecto de `KEEP_UPSTREAM_HEADERS`. Dos ajustes evitan esa lista y romperían el desafío: un `CUSTOM_HEADER` que defina usted mismo `Content-Security-Policy`, e incluirlo en `REMOVE_HEADERS`. Si usa alguno de los dos, la instancia registra un aviso al arrancar indicando el ajuste.
 
-**Leer el veredicto de CrowdSec en la página de Reportes**
+**Leer el veredicto de CrowdSec en la página de Informes**
 
-Cada remediación de CrowdSec se registra como un reporte, y el reporte ahora nombra el veredicto en lugar de decir solo `crowdsec`. La página de **Reportes** lo lee como una frase — *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)* — y los detalles del reporte conservan debajo los campos en bruto: `source` (`appsec` o `lapi`), `action` (`ban`, `captcha` o `challenge`), `http_status` (el estado que la remediación *declaró*, que no siempre es el servido — un baneo LAPI no lleva ninguno, y un baneo AppSec declara 403 mientras BunkerWeb responde con `DENY_HTTP_STATUS`), además de `scenario`, `origin` y `duration` cuando la decisión provino de la API Local.
+Cada remediación de CrowdSec se registra como un informe, y el informe ahora nombra el veredicto en lugar de limitarse a decir `crowdsec`. La página **Informes** lo lee como una frase — *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: crowdsecurity/http-probing)* — y el detalle del informe conserva debajo los campos en bruto: `source` (`appsec` o `lapi`), `action` (`ban`, `captcha` o `challenge`), `http_status` (el estado que la remediación *declaró*, que no siempre es el servido: un baneo de LAPI no lleva ninguno y un baneo de AppSec declara 403 mientras BunkerWeb responde con `DENY_HTTP_STATUS`), además de `scenario`, `origin` y `duration` cuando la decisión viene de la API local.
 
-Un desafío servido responde con un 200 en lugar de un código de bloqueo, y el filtro de reportes conserva las filas 4xx, `detect` y de stream — así que solo por su estado el desafío se descartaría. El filtro ahora conserva una remediación de CrowdSec según su **motivo**, sea cual sea el estado con el que terminó, así que el desafío se muestra. Bajo `SECURITY_MODE=detect` no se sirve nada, y el veredicto nombra la remediación que *se habría aplicado*, algo por lo demás invisible — las propias líneas de alerta del bouncer solo se disparan en las rutas que renderizan una respuesta.
+Un desafío servido responde con un 200 y no con un código de bloqueo, y el filtro de informes conserva las filas 4xx, `detect` y de flujo: solo por su estado, el desafío se descartaría. Ahora el filtro conserva una remediación de CrowdSec por su **motivo**, sea cual sea el estado con el que terminó, así que el desafío sí se muestra. Con `SECURITY_MODE=detect` no se sirve nada y el veredicto nombra la remediación que *se habría* aplicado, invisible de otro modo: las líneas de alerta del propio bouncer solo se emiten en las rutas que generan una respuesta.
 
-!!! info "El escenario solo está presente en una decisión reciente"
-    Una decisión de la API Local lleva su escenario solo en una consulta en vivo. Una vez que la remediación está en caché, la caché almacena la remediación y nada más, así que las siguientes solicitudes del mismo cliente informan la acción sin escenario. Los veredictos de AppSec nunca llevan uno: no provienen de una decisión en absoluto.
+!!! info "El escenario solo aparece en una decisión reciente"
+    Una decisión de la API local lleva su escenario únicamente en una consulta en vivo. Una vez que la remediación está en caché, la caché guarda la remediación y nada más, de modo que las siguientes peticiones del mismo cliente informan de la acción sin escenario. Los veredictos de AppSec nunca llevan uno: no proceden de una decisión.
 
-### Remediación con captcha (renderizada por el antibot de BunkerWeb)
+### Remediación captcha (renderizada por el antibot de BunkerWeb)
 
-Una decisión `captcha` de CrowdSec significa *demuestra que eres humano*, no *vete*. BunkerWeb la responde con su **propio desafío antibot** en lugar de la página de captcha de CrowdSec: un único aspecto y comportamiento para cada desafío que su sitio sirve, sin un segundo juego de claves de captcha que gestionar, y los proveedores que CrowdSec no ofrece — `javascript`, `cookie`, `mcaptcha`, `capjs` — quedan también disponibles para una decisión de CrowdSec.
+Una decisión `captcha` de CrowdSec significa *demuestra que eres humano*, no *vete*. BunkerWeb la responde con su **propio desafío antibot** en lugar de la página captcha de CrowdSec: una sola apariencia para todos los desafíos que sirve su sitio, ningún segundo juego de claves captcha que gestionar, y los proveedores que CrowdSec no ofrece — `javascript`, `cookie`, `mcaptcha`, `capjs` — quedan disponibles también para una decisión de CrowdSec.
 
-| Ajuste                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                        |
-| ---------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `CROWDSEC_CAPTCHA_PROVIDER`  | `captcha`         | multisite | no       | **Desafío de captcha:** Qué desafío antibot mostrar cuando CrowdSec pide un captcha. Establezca en `no` para ignorar las decisiones de captcha. |
+| Ajuste                      | Predeterminado | Contexto  | Múltiple | Descripción                                                                                                                          |
+| --------------------------- | -------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_CAPTCHA_PROVIDER` | `captcha`      | multisite | no       | **Desafío captcha:** Qué desafío antibot mostrar cuando CrowdSec pide un captcha. Póngalo en `no` para ignorar las decisiones captcha. |
 
-Toma los mismos valores que `USE_ANTIBOT`: `cookie`, `javascript`, `captcha`, `recaptcha`, `hcaptcha`, `turnstile`, `mcaptcha`, `capjs`. Los de terceros leen sus claves de los propios ajustes `ANTIBOT_*` del antibot, así que no hay nada que configurar dos veces.
+Acepta los mismos valores que `USE_ANTIBOT`: `cookie`, `javascript`, `captcha`, `recaptcha`, `hcaptcha`, `turnstile`, `mcaptcha`, `capjs`. Los de terceros leen sus claves de los propios ajustes `ANTIBOT_*` del antibot, así que no hay nada que configurar dos veces.
 
 !!! warning "El antibot debe estar activado en el servicio"
-    La página de desafío solo existe en un servicio cuyo `USE_ANTIBOT` esté establecido en algo distinto de `no` (o que tenga una regla de desafío de workflow). En un servicio sin él, una decisión `captcha` se **banea** en lugar de desafiarse, y la instancia registra una línea nombrando ambos ajustes. `USE_ANTIBOT: "cookie"` es la forma más económica de activarlo: un visitante normal pasa en un único intercambio, mientras que a un cliente marcado por CrowdSec se le muestra el desafío `CROWDSEC_CAPTCHA_PROVIDER` en su lugar.
+    La página de desafío solo existe en un servicio cuyo `USE_ANTIBOT` esté puesto en algo distinto de `no` (o que tenga una regla de desafío de workflow). En un servicio sin ello, una decisión `captcha` se **banea** en lugar de desafiarse, y la instancia registra una línea que nombra ambos ajustes. `USE_ANTIBOT: "cookie"` es la forma más barata de activarlo: un visitante corriente pasa en un solo viaje de ida y vuelta, mientras que a un cliente marcado por CrowdSec se le muestra el desafío de `CROWDSEC_CAPTCHA_PROVIDER`.
 
-!!! warning "Esto cambia el comportamiento tras la actualización"
-    Hasta ahora BunkerWeb solo reaccionaba a decisiones `ban`, así que una decisión `captcha` de su API Local nunca se consultaba y no tenía ningún efecto en absoluto. Ahora se consulta, se almacena en caché y se respeta, y renderiza el desafío descrito arriba. Para conservar el comportamiento anterior, establezca `CROWDSEC_CAPTCHA_PROVIDER: "no"`: las decisiones de captcha se ignoran entonces exactamente como antes. Note que el filtro ampliado es `BOUNCING_ON_TYPE=all` y no un par `ban`+`captcha` — el bouncer solo acepta un valor — así que cualquier decisión de **otro** tipo que emitan sus perfiles de CrowdSec también se respeta ahora y, al ser desconocida para el bouncer, se aplica como baneo. Y la exclusión solo restaura el comportamiento anterior **por completo cuando todos los servicios que comparten la misma API Local de CrowdSec la establecen**: la caché de decisiones está particionada por API Local, no por servicio (`cache_partition.lua`), así que un servicio hermano que quede en el valor por defecto almacena en caché la decisión de captcha, y el servicio que se excluyó la vuelve a leer y banea con ella.
+!!! warning "Esto cambia el comportamiento al actualizar"
+    Hasta ahora BunkerWeb solo reaccionaba a las decisiones `ban`, de modo que una decisión `captcha` de su Local API nunca se recuperaba y no tenía ningún efecto. Ahora se recupera, se cachea y se respeta, y renderiza el desafío descrito arriba. Para conservar el comportamiento anterior, ponga `CROWDSEC_CAPTCHA_PROVIDER: "no"`: las decisiones captcha se ignoran entonces exactamente como antes. Tenga en cuenta que el filtro ampliado es `BOUNCING_ON_TYPE=all` y no un par `ban`+`captcha` — el bouncer solo acepta un valor —, así que una decisión de **cualquier otro** tipo que emitan sus perfiles de CrowdSec también se respeta ahora y, al ser desconocida para el bouncer, se aplica como un baneo. Y la exclusión solo restaura el comportamiento anterior **por completo si todos los servicios que comparten la misma Local API de CrowdSec la ponen**: la caché de decisiones se particiona por Local API, no por servicio (`cache_partition.lua`), así que un servicio hermano que se quede con el valor por defecto cachea la decisión captcha y el servicio que se excluye la lee y banea con ella.
 
-!!! tip "`cookie` no demuestra nada aquí"
-    El proveedor `cookie` se resuelve solo, sin preguntarle nada al visitante. Es un valor barato y correcto para `USE_ANTIBOT`, pero como `CROWDSEC_CAPTCHA_PROVIDER` cuesta dos redirecciones y concede un pase de la duración de la sesión para una decisión que significa *demuestra que eres humano*. Prefiera `captcha`, `javascript` o `capjs`.
+!!! tip "`cookie` no prueba nada aquí"
+    El proveedor `cookie` se resuelve solo, sin preguntar nada al visitante. Es un valor barato y razonable para `USE_ANTIBOT`, pero como `CROWDSEC_CAPTCHA_PROVIDER` cuesta dos redirecciones y concede un pase de toda la sesión ante una decisión que significa *demuestra que eres humano*. Prefiera `captcha`, `javascript` o `capjs`.
 
-!!! info "CrowdSec nunca sabe que el captcha se resolvió"
-    El desafío se resuelve contra BunkerWeb, no contra el motor, así que `cscli metrics` no cuenta ningún captcha, `CAPTCHA_EXPIRATION` no se aplica, y otro bouncer en la misma API Local sigue desafiando al mismo cliente. Lo que retiene la respuesta es la sesión de BunkerWeb del visitante: una vez resuelto, ese navegador no vuelve a ser desafiado durante la vida de su sesión — incluso si mientras tanto llega una **nueva** decisión de captcha para la misma dirección. Cualquier cliente sin esa sesión (otro navegador, otro dispositivo, un almacén de cookies vaciado) es desafiado con normalidad.
+!!! info "CrowdSec nunca se entera de que el captcha fue resuelto"
+    El desafío se resuelve contra BunkerWeb, no contra el motor, así que `cscli metrics` no cuenta ningún captcha, `CAPTCHA_EXPIRATION` no se aplica y otro bouncer sobre la misma Local API seguirá desafiando al mismo cliente. Quien guarda la respuesta es la sesión BunkerWeb del visitante: una vez resuelto, ese navegador no vuelve a ser desafiado durante toda la vida de su sesión — incluso si entre tanto llega una **nueva** decisión captcha para la misma dirección. Cualquier cliente sin esa sesión (otro navegador, otro dispositivo, un almacén de cookies vaciado) es desafiado con normalidad.
 
-### Entregar el veredicto a un workflow de seguridad
+### Delegar el veredicto a un flujo de trabajo de seguridad
 
-Un veredicto de CrowdSec puede ser respondido por sus propios **workflows de seguridad** en lugar de por la propia remediación de CrowdSec: una regla con una condición de *veredicto de CrowdSec* puede desafiar, redirigir o bloquear una solicitud marcada según sus propios criterios.
+Un veredicto de CrowdSec puede ser respondido por sus propios **flujos de trabajo de seguridad** en lugar de por la remediación de CrowdSec: una regla con una condición *veredicto de CrowdSec* puede desafiar, redirigir o bloquear una petición marcada según sus propios términos.
 
-| Ajuste                          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                    |
-| ------------------------------- | ------------------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `CROWDSEC_DEFER_TO_WORKFLOWS`   | `no`               | multisite | no       | **Dejar que los workflows de seguridad decidan:** entregar el veredicto a los workflows adjuntos a este servicio en lugar de aplicarlo aquí. |
+| Ajuste                        | Predeterminado | Contexto  | Múltiple | Descripción                                                                                                                     |
+| ----------------------------- | -------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `CROWDSEC_DEFER_TO_WORKFLOWS` | `no`           | multisite | no       | **Dejar decidir a los flujos de seguridad:** entregar el veredicto a los flujos asociados a este servicio en lugar de aplicarlo aquí. |
 
-La condición lee dos hechos: la **fuente** del veredicto (`appsec` o `lapi`) y la **remediación** que CrowdSec pidió (`ban` o `captcha`; un `challenge` lo sirve el propio CrowdSec antes de que se ejecuten los workflows, así que no se ofrece). Una solicitud que CrowdSec no juzgó deja la condición sin decidir, lo que nunca coincide; una solicitud que CrowdSec juzgó y no tenía nada en contra la hace falsa.
+La condición lee dos hechos: la **fuente** del veredicto (`appsec` o `lapi`) y la **remediación** solicitada por CrowdSec (`ban` o `captcha`; un `challenge` lo sirve CrowdSec antes de que se ejecuten los workflows, por lo que no se ofrece). Una petición que CrowdSec no juzgó deja la condición indecisa, lo que nunca coincide; una petición que CrowdSec juzgó y no tuvo nada en contra la hace falsa.
 
-!!! warning "Nada se abre por defecto"
-    Con `no` — el valor por defecto — CrowdSec aplica su veredicto por sí mismo, exactamente como antes. Con `yes`, el veredicto se aplica sin cambios siempre que ninguna regla de workflow coincidió, y la instancia registra una línea nombrando ambos ajustes cuando el servicio no tiene ningún workflow adjunto en absoluto.
+!!! warning "Por defecto no se abre nada"
+    Con `no` —el valor predeterminado— CrowdSec aplica su veredicto él mismo, exactamente como antes. Con `yes`, el veredicto se aplica sin cambios cuando ninguna regla coincide, y la instancia registra una línea que nombra ambos ajustes si el servicio no tiene ningún flujo asociado.
 
 !!! info "Tres respuestas siguen viniendo de BunkerWeb mientras el veredicto espera"
-    El preflight CORS (`204`), `/robots.txt` y `/security.txt` los genera BunkerWeb antes de que se ejecuten los workflows, así que un cliente marcado puede seguir recibiendo esas tres. Ninguna de ellas llega a su aplicación, y toda solicitud que lo haría se verifica primero contra la escalera de workflows.
+    El preflight CORS (`204`), `/robots.txt` y `/security.txt` los genera BunkerWeb antes de que se ejecuten los flujos, así que un cliente marcado todavía puede recibir esos tres. Ninguno llega a su aplicación, y toda petición que sí lo haría pasa antes por la escalera de flujos.
 
 ### Configuraciones de Ejemplo
 
@@ -2390,29 +2495,29 @@ La condición lee dos hechos: la **fuente** del veredicto (`appsec` o `lapi`) y 
 
 === "Configuración por servicio"
 
-    AppSec en cada servicio público, consultas de decisiones en un subconjunto, y un servicio completamente excluido. Los valores sin prefijo son la base para toda la flota y cada servicio solo sobrescribe lo que difiere:
+    AppSec en todos los servicios públicos, consultas de decisiones solo en un subconjunto, y un servicio dejado fuera por completo. Los valores sin prefijo son la base a nivel de flota y cada servicio solo sobrescribe lo que difiere:
 
     ```yaml
     MULTISITE: "yes"
     SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
 
-    # Base para cada servicio
+    # Base para todos los servicios
     USE_CROWDSEC: "yes"
     CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-    CROWDSEC_API: "" # Sin consulta de decisiones a menos que un servicio la pida
+    CROWDSEC_API: "" # Sin consulta de decisiones a menos que un servicio la solicite
     CROWDSEC_API_KEY: ""
 
-    # app1 añade la consulta de decisiones de la API Local además de AppSec
+    # app1 añade la consulta de decisiones de la Local API además de AppSec
     app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
     app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
 
     # app2 conserva solo AppSec, heredando la base vacía de CROWDSEC_API
 
-    # intranet no se verifica en absoluto
+    # intranet no se comprueba en absoluto
     intranet.example.com_USE_CROWDSEC: "no"
     ```
 
-    Un servicio también puede apuntar a un host CrowdSec completamente distinto, con su propia clave de bouncer:
+    Un servicio también puede apuntar a un host de CrowdSec completamente distinto, con su propia clave de bouncer:
 
     ```yaml
     app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
@@ -2423,7 +2528,6 @@ La condición lee dos hechos: la **fuente** del veredicto (`appsec` o `lapi`) y 
 ### Paso&nbsp;3 – Validar la integración
 
 - En los registros del scheduler, busque las entradas `CrowdSec configuration successfully generated` y `CrowdSec bouncer denied request` para verificar que el complemento esté activo.
-- En los registros de la instancia de BunkerWeb, la fase de inicialización informa cuántos bouncers se construyeron y cuántos servicios cubren. Los servicios que comparten una configuración idéntica comparten un bouncer, así que los dos recuentos difieren cuando una flota usa varios endpoints distintos.
 - En el lado de CrowdSec, supervise `cscli metrics show` o la CrowdSec Console para asegurarse de que las decisiones de BunkerWeb aparezcan como se espera.
 - En la interfaz de BunkerWeb, abra la página del complemento CrowdSec para ver el estado de la integración.
 
@@ -2578,22 +2682,22 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 ### Ajustes de Configuración
 
-| Ajuste                            | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                                                 |
-| --------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                                                     |
-| `DATABASE_URI_READONLY`           |                                           | global   | no       | **URI de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la principal está caída.                                                                |
-| `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                                               |
-| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | no       | **Máximo de Ejecuciones:** El número máximo de registros de ejecución de trabajos a conservar antes de la limpieza automática.                                                              |
-| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                                           |
-| `DATABASE_POOL_SIZE`              | `40`                                      | global   | no       | **Tamaño del Pool:** El número de conexiones a mantener en el pool de conexiones de la base de datos.                                                                                       |
-| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | no       | **Desbordamiento Máximo del Pool:** El número máximo de conexiones adicionales por encima del tamaño del pool. `-1` para ilimitado.                                                         |
-| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool.                                                                    |
-| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar.                                                                |
-| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                      |
-| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`. |
-| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar.                                                                           |
-| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                 |
-| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                      |
+| Ajuste                          | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
+| ------------------------------- | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                    | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                                                              |
+| `DATABASE_URI_READONLY`           |                                           | global   | no       | **URI de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la principal está caída.                                                                         |
+| `DATABASE_LOG_LEVEL`              | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                                                       |
+| `DATABASE_MAX_JOBS_RUNS`          | `10000`                                   | global   | no       | **Máximo de Ejecuciones:** El número máximo de registros de ejecución de trabajos a conservar antes de la limpieza automática.                                                                       |
+| `DATABASE_MAX_SESSION_AGE_DAYS`   | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                                                    |
+| `DATABASE_POOL_SIZE`              | `40`                                      | global   | no       | **Tamaño del Pool:** El número de conexiones a mantener en el pool de conexiones de la base de datos.                                                                                                |
+| `DATABASE_POOL_MAX_OVERFLOW`      | `20`                                      | global   | no       | **Desbordamiento Máximo del Pool:** El número máximo de conexiones adicionales por encima del tamaño del pool. `-1` para ilimitado.                                                                  |
+| `DATABASE_POOL_TIMEOUT`           | `5`                                       | global   | no       | **Tiempo de Espera del Pool:** El número de segundos a esperar antes de abandonar la obtención de una conexión del pool.                                                                             |
+| `DATABASE_POOL_RECYCLE`           | `1800`                                    | global   | no       | **Reciclaje del Pool:** El número de segundos tras los cuales una conexión se recicla automáticamente. `-1` para desactivar.                                                                         |
+| `DATABASE_POOL_PRE_PING`          | `yes`                                     | global   | no       | **Pre-Ping del Pool:** Si se prueba la conexión al extraerla del pool.                                                                                                                               |
+| `DATABASE_POOL_RESET_ON_RETURN`   |                                           | global   | no       | **Reinicio al Devolver:** Cómo se reinician las conexiones al devolverlas al pool. Vacío = auto (`none` para MySQL/MariaDB, `rollback` para otros). Opciones: `rollback`, `commit`, `none`.          |
+| `DATABASE_RETRY_TIMEOUT`          | `60`                                      | global   | no       | **Tiempo de Reintento:** El número máximo de segundos a esperar la disponibilidad de la base de datos al iniciar.                                                                                    |
+| `DATABASE_REQUEST_RETRY_ATTEMPTS` | `2`                                       | global   | no       | **Intentos de Reintento:** El número de reintentos en caso de errores transitorios durante las operaciones.                                                                                          |
+| `DATABASE_REQUEST_RETRY_DELAY`    | `0.25`                                    | global   | no       | **Retraso entre Reintentos:** El retraso en segundos entre reintentos en caso de errores transitorios.                                                                                               |
 
 !!! tip "Selección de Base de Datos"
     - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos.
@@ -3021,6 +3125,58 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_URI`      |                   | multisite | no       | **Lista Gris de URI:** Lista de patrones de URI (expresión regular PCRE) para incluir en la lista gris, separados por espacios.   |
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
 
+=== "Reglas compuestas (AND)"
+    **Función:** exigir varios criterios *a la vez*. Las listas simples anteriores se combinan con
+    OR: basta una coincidencia para incluir al visitante en la lista gris. Una regla es AND: solo coincide si se cumplen todos sus términos.
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `GREYLIST_RULE` | | multisite | sí | **Regla de lista:** Términos unidos por ` AND `; deben coincidir todos. |
+
+    Los términos se separan con el literal ` AND `, en mayúsculas y con un espacio a cada lado:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` es un alias de `ua`. Un `<value>` puede ser un grupo como `@office`, resuelto
+    según el tipo del término. Usa sufijos numéricos: `GREYLIST_RULE_1`, `GREYLIST_RULE_2`, etc.
+
+    ```yaml
+    USE_GREYLIST: "yes"
+    # Crawler del socio, solo desde la red del socio
+    GREYLIST_RULE_1: "ip:203.0.113.0/24 AND ua:^PartnerCrawler"
+    # Un ASN, salvo sus escáneres
+    GREYLIST_RULE_2: "asn:12345 AND NOT ua:(?:nmap|masscan)"
+    # País y ruta, con un grupo de países
+    GREYLIST_RULE_3: "country:@internal-markets AND uri:^/api/v1/"
+    ```
+
+    !!! warning "OR entre reglas, AND dentro de cada una"
+        **Las reglas se combinan con OR**, entre sí y con las listas simples: coincidir con
+        `GREYLIST_IP` o con cualquier regla basta para incluir al visitante en la lista gris. **Los términos de una regla
+        se combinan con AND**: deben cumplirse todos. Dos criterios en reglas distintas son OR;
+        los mismos dos como términos de una regla son AND.
+
+    !!! info "Límites"
+        - Un término cuyo dato no está disponible es **desconocido** y una regla que lo contenga
+          nunca coincide; `NOT` no lo cambia. `ua:` y `uri:` siempre son desconocidos en stream;
+          `ua:` también lo es sin cabecera `User-Agent`. Un fallo de consulta (base GeoIP ausente,
+          error DNS) también es desconocido. Una IP privada **no** lo es: no tiene ASN y su país
+          es `local`, por lo que `NOT asn:…` sí coincide legítimamente.
+        - Una regla con `ua:` o `uri:` no coincide en un servicio stream. No se rechaza porque la
+          misma configuración puede servir HTTP, pero al cargarla se registra una advertencia
+          que identifica la regla para evitar que quede inactiva sin explicación.
+        - Una regla formada solo por términos `NOT` es válida pero coincide con casi todas las
+          peticiones. Produce la misma advertencia.
+        - No hay sintaxis de escape. Como ` AND ` es el separador, una regex `ua:` o `uri:` no
+          puede contener " and " con ninguna combinación de mayúsculas: se rechaza al guardar.
+        - `rdns:` requiere confirmación directa, igual que `GREYLIST_RDNS`: se resuelve
+          el hostname PTR coincidente y solo es verdadero si devuelve la IP del cliente.
+
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
@@ -3141,7 +3297,7 @@ El plugin gRPC permite a BunkerWeb hacer proxy de servicios gRPC a través de HT
 | ---------------------------- | -------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
 | `USE_GRPC`                   | `no`           | multisite | no       | **Habilitar gRPC:** Pon `yes` para habilitar el proxy gRPC.                                            |
 | `GRPC_HOST`                  |                | multisite | sí       | **Upstream gRPC:** Valor usado por `grpc_pass` (por ejemplo `grpc://service:50051` o `grpcs://...`).   |
-| `GRPC_URL`                   | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. |
+| `GRPC_URL`                   | `/`            | multisite | sí       | **URL de location:** Ruta que se enviará al upstream gRPC. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, se puede anteponer `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor. |
 | `GRPC_CUSTOM_HOST`           |                | multisite | no       | **Cabecera Host personalizada:** Sobrescribe la cabecera `Host` enviada al upstream.                   |
 | `GRPC_HEADERS`               |                | multisite | sí       | **Cabeceras extra al upstream:** Lista separada por punto y coma de valores para `grpc_set_header`.    |
 | `GRPC_HIDE_HEADERS`          |                | multisite | sí       | **Cabeceras de respuesta ocultas:** Lista separada por espacios de valores para `grpc_hide_header`.    |
@@ -3361,7 +3517,7 @@ Siga estos pasos para configurar y usar la función de Cabeceras:
 | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regula la captación previa de DNS para reducir las solicitudes de red no intencionadas y mejorar la privacidad.                     |
 | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Política de Referencia:** Controla la cantidad de información de referencia enviada, salvaguardando la privacidad del usuario.                                |
 | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), bluetooth=(), ...` | multisite | no       | **Política de Permisos:** Restringe el acceso a las funciones del navegador, reduciendo los posibles vectores de ataque.                                        |
-| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`    | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
+| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Content-Security-Policy-Report-Only Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Conservar Cabeceras:** Preserva las cabeceras de origen seleccionadas, ayudando a la integración con sistemas heredados mientras se mantiene la seguridad.    |
 
     !!! tip "Mejores Prácticas"
         - Revise y actualice regularmente sus cabeceras de seguridad para alinearse con los estándares de seguridad en evolución.
@@ -3638,6 +3794,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | Ajuste                                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`              | multisite | no       | **Habilitar Let's Encrypt:** Establezca en `yes` para habilitar la emisión y renovación automática de certificados.                                                                                                                                                                                                                                                         |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` | `yes` | multisite | no | **Deshabilitar sufijos públicos:** Rechaza certificados para dominios de la [Public Suffix List](https://publicsuffix.org/) (recomendado). Desactívalo solo si necesitas conscientemente un certificado para un sufijo público sin subdominio. |
 | `LETS_ENCRYPT_PASSTHROUGH`                  | `no`              | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está delante de otro proxy inverso que maneja SSL.                                                                                                                                                                      |
 | `EMAIL_LETS_ENCRYPT`                        | `-`               | multisite | no       | **Correo electrónico de contacto:** Dirección utilizada para los avisos de caducidad de Let's Encrypt. Déjelo en blanco solo si acepta no recibir alertas ni correos de recuperación (Certbot se registra con `--register-unsafely-without-email`).                                                                                                                         |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt`     | multisite | no       | **Autoridad de certificación:** Seleccione el servidor ACME para la emisión. Opciones: `letsencrypt` o `zerossl`.                                                                                                                                                                                                                                                           |
@@ -3649,7 +3806,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_CHALLENGE`                    | `http`            | multisite | no       | **Tipo de desafío:** Método utilizado para verificar la propiedad del dominio. Opciones: `http` o `dns`.                                                                                                                                                                                                                                                                    |
 | `LETS_ENCRYPT_DNS_PROVIDER`                 |                   | multisite | no       | **Proveedor de DNS:** Cuando se utilizan desafíos DNS, el proveedor de DNS a utilizar (por ejemplo, cloudflare, route53, digitalocean).                                                                                                                                                                                                                                     |
 | `LETS_ENCRYPT_DNS_PROPAGATION`              | `default`         | multisite | no       | **Propagación de DNS:** El tiempo de espera para la propagación de DNS en segundos. Si no se proporciona ningún valor, se utiliza el tiempo de propagación predeterminado del proveedor.                                                                                                                                                                                    |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |                   | multisite | yes      | **Elemento de credencial:** Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, `cloudflare_api_token 123456`). Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.                                                                                                                                           |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`          |                   | multisite | yes      | **Elemento de credencial:** Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, `cloudflare_api_token 123456`). Escriba la clave, un espacio y luego el valor, y no entrecomille la clave. Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.                                                                                                                                           |
 | `LETS_ENCRYPT_DNS_CREDENTIAL_DECODE_BASE64` | `yes`             | multisite | no       | **Decodificar credenciales DNS en Base64:** Decodifica automáticamente las credenciales del proveedor DNS codificadas en base64 cuando se establece en `yes`. Cuando está habilitado, los valores que coinciden con el formato base64 se decodifican antes de su uso (excepto para el proveedor `rfc2136`). Desactive si sus credenciales están intencionalmente en base64. |
 | `USE_LETS_ENCRYPT_WILDCARD`                 | `no`              | multisite | no       | **Certificados comodín:** Cuando se establece en `yes`, crea certificados comodín para todos los dominios. Solo disponible con desafíos DNS.                                                                                                                                                                                                                                |
 | `USE_LETS_ENCRYPT_STAGING`                  | `no`              | multisite | no       | **Usar entorno de prueba:** Cuando se establece en `yes`, utiliza el entorno de prueba de Let's Encrypt para realizar pruebas. El entorno de prueba tiene límites de velocidad más altos pero produce certificados que no son de confianza para los navegadores.                                                                                                            |
@@ -3688,9 +3845,15 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 ### Proveedores de DNS compatibles
 
-El complemento de Let's Encrypt realiza desafíos DNS-01 mediante [certbot-dns-multi](https://github.com/alexzorin/certbot-dns-multi), que integra los proveedores DNS de [lego](https://go-acme.github.io/lego/dns/); por lo tanto, **se admiten los más de 200 proveedores DNS de lego**, no solo los que se muestran a continuación. Establezca `LETS_ENCRYPT_DNS_PROVIDER` en un código de proveedor y proporcione sus credenciales con el ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`.
+El plugin realiza los desafíos DNS-01 mediante [certbot-dns-multi](https://github.com/alexzorin/certbot-dns-multi),
+que integra los proveedores DNS de [lego](https://go-acme.github.io/lego/dns/): admite **los más de
+200 proveedores de lego**, no solo los de la tabla. Define el código en `LETS_ENCRYPT_DNS_PROVIDER`
+y sus credenciales mediante `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`.
 
-Las credenciales pueden indicarse con los nombres de clave históricos de BunkerWeb (mostrados en la tabla inferior y conservados por compatibilidad) o con los nombres nativos de variables de entorno de lego del proveedor (por ejemplo, `CF_DNS_API_TOKEN` para Cloudflare). Cualquier valor de credencial también puede leerse desde un archivo añadiendo `_FILE` al nombre de la variable de lego. Para consultar la lista completa de proveedores y las variables de credenciales exactas que acepta cada uno, consulte la [documentación de proveedores DNS de lego](https://go-acme.github.io/lego/dns/).
+Se aceptan tanto las claves históricas de BunkerWeb de la tabla, por compatibilidad, como las
+variables nativas de lego (por ejemplo `CF_DNS_API_TOKEN` para Cloudflare). Añadir `_FILE` al nombre
+de una variable lego permite leer su valor desde un archivo. Consulta la lista completa y las
+variables exactas en [la documentación DNS de lego](https://go-acme.github.io/lego/dns/).
 
 | Proveedor         | Descripción      | Ajustes obligatorios                                                                                         | Ajustes opcionales                                                                                                                                                                                                                                                                                   | Documentación                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -3725,8 +3888,13 @@ Las credenciales pueden indicarse con los nombres de clave históricos de Bunker
 | `scaleway`        | Scaleway         | `application_token`                                                                                          |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)                 |
 | `transip`         | TransIP          | `key_file`<br>`username`                                                                                     |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-transip.readthedocs.io/en/stable/)                                |
 
-!!! info "Uso de otros proveedores y nombres de credenciales de lego"
-    La tabla enumera los proveedores que BunkerWeb ha documentado históricamente; sus claves de credenciales heredadas siguen siendo aceptadas. Cualquier otro proveedor de lego también funciona: use su código como `LETS_ENCRYPT_DNS_PROVIDER` y sus nombres de variables de entorno de lego como entradas `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` (consulte la [documentación de proveedores DNS de lego](https://go-acme.github.io/lego/dns/)). Algunos nombres heredados se asignan a un código de lego distinto: `google` → `gcloud`, `nsone` → `ns1`, `gandi` → `gandiv5`, `rfc2136` → `dnsupdate`, `domainoffensive` → `dode`; ambas formas se aceptan.
+!!! info "Otros proveedores y nombres de credenciales lego"
+    La tabla conserva los proveedores y claves históricamente documentados. Cualquier otro
+    proveedor lego también funciona: usa su código en `LETS_ENCRYPT_DNS_PROVIDER` y sus variables
+    lego como entradas `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`. Algunos nombres antiguos se corresponden
+    con otro código: `google` → `gcloud`, `nsone` → `ns1`, `gandi` → `gandiv5`, `rfc2136` →
+    `dnsupdate`, `domainoffensive` → `dode`. Se aceptan ambos nombres. Consulta
+    [los proveedores DNS de lego](https://go-acme.github.io/lego/dns/).
 
 ### Configuraciones de Ejemplo
 
@@ -4241,7 +4409,64 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 | `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`              | global   | no       | **SNI Estricto:** Cuando se establece en `yes`, requiere SNI para las conexiones HTTPS y rechaza las conexiones sin un SNI válido.                    |
 
     !!! warning "Aplicación de SNI"
-        Habilitar la validación estricta de SNI proporciona una seguridad más fuerte, pero puede causar problemas si BunkerWeb está detrás de un proxy inverso que reenvía las solicitudes HTTPS sin preservar la información de SNI. Pruebe a fondo antes de habilitarlo en entornos de producción.
+        Habilitar la validación estricta de SNI proporciona una seguridad más fuerte, pero puede causar problemas si BunkerWeb está detrás de un proxy inverso que reenvía las solicitudes HTTPS sin preservar la información de SNI. Pruebe a fondo antes de habilitarlo en entornos de producción. `DISABLE_DEFAULT_SERVER_STRICT_SNI` solo tiene un servidor predeterminado sobre el que aplicarse (`MULTISITE=yes`, o `DISABLE_DEFAULT_SERVER=yes` en modo de sitio único) — en modo de sitio único puro queda silenciosamente inerte, ya que el bloque de tu propio servicio ya es el predeterminado de NGINX.
+
+=== "Modo del servicio"
+
+    **Declarar el propósito de un servicio**
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `SERVICE_MODE` | `standard` | multisite | no | **Modo del servicio:** `standard` para un servicio normal; `redirect_only` para un listener que solo redirige. |
+
+    `SERVICE_MODE` declara el propósito que lee el clasificador central de la cuota PRO. Un
+    servicio declarado `redirect_only` que contenga **solo** un perfil de redirección — sin proxy
+    inverso, configuración personalizada ni recursos adjuntos salvo redirección o certificado —
+    está destinado a quedar exento de la cuota, sin límite de cantidad. La exención nunca se
+    deduce de `REDIRECT_TO` ni de ningún otro ajuste.
+
+    !!! info "La exención todavía no está activa"
+        La clasificación y sus pruebas están completas, pero la exención depende de una bandera
+        interna que se activará en otra versión. Hasta entonces, un `redirect_only` válido se
+        factura igual que un servicio normal: declararlo hoy solo lo prepara. Un servicio con
+        capacidades no permitidas también se factura, independientemente de esa bandera.
+
+=== "Configuración del Servidor Predeterminado"
+
+    **El servidor predeterminado es un servicio que puedes editar**
+
+    El bloque que responde a las solicitudes que no coinciden con ningún servicio configurado — un hostname desconocido, una dirección IP en bruto, un `Host` que nadie sirve — se expone como un **servicio reservado llamado `default-server`**. Aparece fijado en la parte superior de la lista de servicios en la interfaz web y `GET /services` lo devuelve marcado como `reserved: true`.
+
+    !!! warning "Solo multisitio"
+        Esta es una **función multisitio**: todo lo que hay en esta página se aplica cuando `MULTISITE` está en `yes`. Los ajustes por servicio solo se materializan y solo se resuelven en tiempo de ejecución en modo multisitio, así que con `MULTISITE=no` el servicio reservado queda inerte e invisible — la fila reservada no aparece en `GET /services`, no se muestra en la interfaz web, nunca aparece en `SERVER_NAME` — un servicio tuyo que casualmente lleve ese nombre es otro asunto, ver la nota de actualización al final de este párrafo — y los tres ejecutores de fase descritos abajo no se renderizan. El servidor predeterminado se comporta exactamente igual que antes de 1.7, y la anulación global del certificado `DEFAULT_SERVER_SSL_*` se almacena pero solo se sirve donde existe un bloque de servidor predeterminado: con `MULTISITE=no` eso significa `DISABLE_DEFAULT_SERVER=yes`, de lo contrario el bloque de tu único servicio es el predeterminado de NGINX y responde a las solicitudes no emparejadas con su propio certificado (el job registra una advertencia al respecto). En un despliegue de sitio único ya existente la fila no se crea en absoluto; en una instalación nueva puede crearse antes de que `MULTISITE` se haya escrito por primera vez, en cuyo caso simplemente permanece en la base de datos sin hacer nada. Establece `MULTISITE=yes` y el servicio reservado estará ahí en el siguiente guardado de configuración, sin reinicio. Si ya tienes un servicio llamado `default-server`, **no** se adopta: se registra un error que lo nombra, y — a diferencia del servicio reservado — todavía se puede renombrar y eliminar para que lo puedas apartar. Con `MULTISITE=no` también se sigue sirviendo exactamente como cualquier otro servicio tuyo: el nombre permanece en `SERVER_NAME` y su bloque `server{}` se renderiza, con una advertencia en cada generación pidiéndote que lo renombres antes de activar `MULTISITE`.
+
+    Es una fila de servicio real, así que su certificado, ajustes TLS, cabeceras de respuesta, páginas de error y whitelist se almacenan y editan exactamente igual que los de cualquier otro servicio. También es permanente: no se puede crear, renombrar, convertir en borrador ni eliminar, nunca cuenta contra la cuota de servicios PRO, y un despliegue de autoconf que elimina su último ingress no lo elimina.
+
+    En su página solo se ofrecen los ajustes que tienen sentido sin un hostname: los proveedores de certificado, TLS, `errors`, `headers`, `whitelist` y los ajustes misceláneos. Reverse proxy, gRPC, redirecciones, sesiones, antibot, mTLS, CORS y autenticación básica HTTP no se ofrecen — no hay ningún `Host` al que enrutar ni identidad de servicio a la que vincularse, así que esos ajustes se almacenarían y nunca se aplicarían.
+
+    Estos ajustes realmente se ejecutan: el servidor predeterminado ejecuta las fases `set`, `access` y `header` de ese subconjunto seleccionado, algo que nunca hacía antes. Para que actualizar un despliegue no cambie lo que responde su bloque catch-all, el servicio reservado se **inicializa** al crearse con `AUTO_REDIRECT_HTTP_TO_HTTPS=no`, `REDIRECT_HTTP_TO_HTTPS=no` y `USE_WHITELIST=no` — visibles en su página, y tuyos para cambiar. Solo al crearse: una fila existente nunca se reescribe. En una instalación **nueva** la fila puede crearse antes de que la tabla de ajustes esté poblada, en cuyo caso no lleva valores iniciales y el catch-all sigue tus ajustes globales; en las actualizaciones, donde hay comportamiento que preservar, siempre se inicializa.
+
+    Un comportamiento es nuevo por diseño: `ALLOWED_METHODS` ahora también se aplica aquí, así que una solicitud a un hostname que no sirves con un método fuera de `GET|POST|HEAD|QUERY` se responde con `405` en lugar de la página predeterminada. Los bans se aplican en el servidor predeterminado y las cabeceras de respuesta se emiten ahí, ambas cosas siendo el objetivo de hacerlo configurable.
+
+    !!! info "Dónde vive el certificado"
+        El certificado que presenta el servidor predeterminado se define con los cuatro ajustes **globales** `DEFAULT_SERVER_SSL_*` del plugin [Certificado SSL personalizado](#custom-ssl-certificate), no con uno por servicio. La página del servidor predeterminado enlaza directamente a ellos.
+
+    **Catch-all de stream (TCP)**
+
+    En `stream` no hay SNI en TCP puro y ninguno en absoluto en UDP, así que NGINX selecciona un bloque únicamente por `address:port`: un servidor predeterminado en un puerto que escucha un servicio ganaría ahí y respondería el tráfico de ese servicio. Por eso el servidor predeterminado de stream es opt-in y tiene sus propios puertos.
+
+    | Ajuste                        | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                             |
+    | ------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `DEFAULT_SERVER_STREAM_PORTS`  |         | multisite | sí      | **Puertos de Stream del Servidor Predeterminado:** Puertos en los que el servidor predeterminado acepta conexiones de stream (TCP) que no coinciden con ningún servicio configurado. Vacío lo deshabilita, que es el valor por defecto. |
+    | `DEFAULT_SERVER_STREAM_PORTS_SSL` |      | multisite | sí      | **Puertos de Stream del Servidor Predeterminado (TLS):** Cuáles de esos puertos se sirven por TLS. Debe ser un subconjunto de `DEFAULT_SERVER_STREAM_PORTS`; vacío significa solo TCP plano.               |
+
+    Configúralo en el servicio reservado, por ejemplo `default-server_DEFAULT_SERVER_STREAM_PORTS=9000` (y `_1`, `_2`, … para más puertos). Es un ajuste multisitio como cualquier otro, así que definirlo **globalmente** también llega al servidor predeterminado y abre el listener ahí — si eso no es lo que quieres, limítalo a `default-server`.
+
+    Se **rechazan** tres tipos de puerto cuando los guardas en el servicio reservado — su página en la interfaz web, o `PATCH /services/default-server` — cada uno nombrando lo que ya lo ocupa: un puerto que escucha algún servicio de stream (sin SNI el servidor predeterminado respondería el tráfico de ese servicio), un puerto usado por un listener HTTP o HTTPS en cualquier parte del despliegue, y un puerto que BunkerWeb reserva para sí mismo (el servidor de healthcheck, la API interna, y en la imagen all-in-one su servicio de interfaz web y de API). El del medio no es una preferencia: `http{}` y `stream{}` abren sus propios sockets, así que el mismo puerto en ambos hace que NGINX rechace arrancar — y `8080`, el `HTTP_PORT` por defecto, es exactamente ese caso.
+
+    Escrito **globalmente** en su lugar, se acepta el mismo valor — la página de ajustes globales no es la ruta de guardado del servicio reservado — y se resuelve en el momento de la generación: el puerto conflictivo se elimina del bloque del servidor predeterminado y se registra el motivo. Lo mismo ocurre con un puerto que un servicio de stream reclama *después* de que lo guardaste. En cualquier caso, el servicio real siempre conserva su puerto.
+
+    Un puerto que también aparece en `DEFAULT_SERVER_STREAM_PORTS_SSL` se sirve con `ssl` y presenta el certificado `DEFAULT_SERVER_SSL_*`. Esa lista es el interruptor TLS de los puertos anteriores, no un segundo conjunto de listeners: un puerto en ella que `DEFAULT_SERVER_STREAM_PORTS` no contiene se rechaza al guardarlo, y se descarta con una línea de log si llegó a la base de datos por otra vía. Cada conexión se responde y se cierra; el servidor predeterminado de stream nunca hace proxy.
 
 === "Estado HTTP de Denegación"
 
@@ -4276,8 +4501,8 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   Reduce la superficie de ataque al deshabilitar métodos potencialmente dañinos
         -   Bloquea las técnicas de enumeración de métodos HTTP utilizadas por los atacantes
 
-| Ajuste            | Valor por defecto        | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
-| ----------------- | ------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                     |
+| ----------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
 | `ALLOWED_METHODS` | `GET\|POST\|HEAD\|QUERY` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. Los métodos personalizados en mayúsculas pueden contener guiones bajos y guiones. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
@@ -4300,10 +4525,10 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   Previene los ataques de carga de archivos
         -   Reduce el riesgo de agotamiento de los recursos del servidor
 
-| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                             |
-| ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MAX_CLIENT_SIZE` | `10m`             | multisite | no       | **Tamaño Máximo de Solicitud:** El tamaño máximo permitido para los cuerpos de las solicitudes de los clientes (por ejemplo, cargas de archivos).       |
-| `MAX_HEADERS`     | `100`             | global    | no       | **Cabeceras Máximas:** Número máximo de líneas de cabecera por solicitud. Las solicitudes que superen este límite son rechazadas con `400 Bad Request`. |
+| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                  |
+| ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MAX_CLIENT_SIZE` | `10m`             | multisite | no       | **Tamaño Máximo de Solicitud:** El tamaño máximo permitido para los cuerpos de las solicitudes de los clientes (por ejemplo, cargas de archivos).            |
+| `MAX_HEADERS`     | `100`             | global    | no       | **Cabeceras Máximas:** Número máximo de líneas de cabecera por solicitud. Las solicitudes que superen este límite son rechazadas con `400 Bad Request`.      |
 
     !!! tip "Mejores Prácticas de Configuración del Tamaño de la Solicitud"
         Si necesita permitir un cuerpo de solicitud de tamaño ilimitado, puede establecer el valor de `MAX_CLIENT_SIZE` en `0`. Sin embargo, esto **no se recomienda** debido a los posibles riesgos de seguridad y rendimiento.
@@ -4326,12 +4551,12 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   **Ventajas de Seguridad:** Los protocolos modernos como HTTP/2 y HTTP/3 imponen TLS/HTTPS por defecto, reducen la susceptibilidad a ciertos ataques y mejoran la privacidad a través de encabezados cifrados (HTTP/3).
         -   **Beneficios de Rendimiento:** Características como la multiplexación, la compresión de encabezados, el empuje del servidor y la transferencia de datos binarios mejoran la velocidad y la eficiencia.
 
-| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                        |
-| -------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                  |
+| -------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
 | `LISTEN_HTTP`        | `yes`             | multisite | no       | **Escucha HTTP:** Responda a las solicitudes HTTP (inseguras) cuando se establezca en `yes`. También puede desactivarse dejando `HTTP_PORT` vacío. |
-| `HTTP2`              | `yes`             | multisite | no       | **HTTP2:** Soporte para el protocolo HTTP2 cuando HTTPS está habilitado.                                                                           |
-| `HTTP3`              | `yes`             | multisite | no       | **HTTP3:** Soporte para el protocolo HTTP3 cuando HTTPS está habilitado.                                                                           |
-| `HTTP3_ALT_SVC_PORT` | `443`             | multisite | no       | **Puerto Alt-Svc de HTTP3:** Puerto a utilizar en el encabezado Alt-Svc para HTTP3.                                                                |
+| `HTTP2`              | `yes`             | multisite | no       | **HTTP2:** Soporte para el protocolo HTTP2 cuando HTTPS está habilitado.                     |
+| `HTTP3`              | `yes`             | multisite | no       | **HTTP3:** Soporte para el protocolo HTTP3 cuando HTTPS está habilitado.                     |
+| `HTTP3_ALT_SVC_PORT` | `443`             | multisite | no       | **Puerto Alt-Svc de HTTP3:** Puerto a utilizar en el encabezado Alt-Svc para HTTP3.          |
 
     !!! example "Sobre HTTP/3"
         HTTP/3, la última versión del Protocolo de Transferencia de Hipertexto, utiliza QUIC sobre UDP en lugar de TCP, abordando problemas como el bloqueo de cabeza de línea para conexiones más rápidas y fiables.
@@ -4525,19 +4750,21 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 ### Ajustes de Configuración
 
-| Ajuste                                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                    |
-| ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
-| `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`          | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`             | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                   | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                   |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
+| Ajuste                                | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                      |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                          |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                    |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                                   |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                              |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. Debe terminar en `.log`, dentro de `/var/log/bunkerweb/`.             |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`.     |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | **Límite del cuerpo:** Tamaño máximo que inspecciona ModSecurity, con sufijos `k`/`m`/`g`. Si se supera, aplica `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION`. Vacío lo deriva de `MAX_CLIENT_SIZE`, que NGINX impone antes de ModSecurity; un valor superior no tiene efecto. |
+| `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` | `Reject` | multisite | no | **Acción al superar el límite:** `Reject` devuelve `413`; `ProcessPartial` inspecciona solo la parte dentro del límite y envía el resto al backend. Sirve para cargas grandes, pero reduce la cobertura WAF de contenido no archivo, como JSON y formularios. |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                                 |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Plugins CRS:** Lista separada por espacios de plugins que descargar e instalar (`plugin-name[/tag]` o URL). |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                                |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
     **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
@@ -4764,15 +4991,15 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
 
 ### Parámetros de configuración
 
-| Parámetro                     | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                        |
-| ----------------------------- | -------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MTLS`                    | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                                                                                                                                              |
-| `MTLS_CA_CERTIFICATE`         |                      | multisite | no       | **Paquete de CA de clientes:** ruta absoluta al paquete de CA de confianza (PEM). Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`; debe ser legible.                                                                                                                  |
-| `MTLS_VERIFY_CLIENT`          | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`).                                                                                                                          |
+| Parámetro                     | Valor predeterminado | Contexto | Múltiple | Descripción                                                                                                                                             |
+| ----------------------------- | -------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MTLS`                    | `no`                 | multisite | no       | **Usar mutual TLS:** habilita la autenticación mediante certificados de cliente para el sitio actual.                                                   |
+| `MTLS_CA_CERTIFICATE`         |                      | multisite | no       | **Paquete de CA de clientes:** ruta absoluta al paquete de CA de confianza (PEM). Obligatorio cuando `MTLS_VERIFY_CLIENT` es `on` u `optional`; debe ser legible. |
+| `MTLS_VERIFY_CLIENT`          | `on`                 | multisite | no       | **Modo de verificación:** elija si los certificados son obligatorios (`on`), opcionales (`optional`) o aceptados sin validación de CA (`optional_no_ca`). |
 | `MTLS_URL`                    |                      | multisite | sí       | **URL mTLS:** expresión regular comparada con la URI de la solicitud para exigir un certificado de cliente válido solo en las rutas coincidentes (solo HTTP). Requiere que `MTLS_VERIFY_CLIENT` sea `optional` u `optional_no_ca`. Déjelo vacío para aplicar mTLS a todo el sitio. |
-| `MTLS_VERIFY_DEPTH`           | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                                                                                                                                                        |
+| `MTLS_VERIFY_DEPTH`           | `2`                  | multisite | no       | **Profundidad de verificación:** profundidad máxima de la cadena aceptada para los certificados de cliente.                                            |
 | `MTLS_FORWARD_CLIENT_HEADERS` | `yes`                | multisite | no       | **Reenviar cabeceras del cliente:** propaga los resultados de la verificación (`X-SSL-Client-*` con estado, DN, emisor, serie, huella y ventana de validez). Las cabeceras `X-SSL-*` enviadas por el cliente siempre se eliminan en la entrada, de modo que estos valores no se pueden falsificar. |
-| `MTLS_CRL`                    |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM. Se aplica siempre que la verificación de certificados de cliente está activa; nunca se omite en silencio.                                                                                                             |
+| `MTLS_CRL`                    |                      | multisite | no       | **Ruta de la CRL de clientes:** ruta opcional a una lista de revocación de certificados en formato PEM. Se aplica siempre que la verificación de certificados de cliente está activa; nunca se omite en silencio. |
 
 !!! tip "Mantén los certificados actualizados"
     Guarde los paquetes de CA y las listas de revocación en un volumen montado que pueda leer la **instancia de BunkerWeb**: NGINX abre `MTLS_CA_CERTIFICATE` y `MTLS_CRL` por sí mismo y ningún job los distribuye, así que en un despliegue separado no basta con montarlos donde se ejecuta el Scheduler.
@@ -4848,12 +5075,12 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
     MTLS_FORWARD_CLIENT_HEADERS: "yes"
     ```
 
-    | Solicitud    | Certificado         | Resultado                             |
-    | ------------ | ------------------- | ------------------------------------- |
-    | `GET /`      | ninguno             | Permitido (ruta sin mTLS)             |
-    | `GET /login` | ninguno             | Denegado (`403`)                      |
-    | `GET /login` | válido              | Permitido, `X-SSL-Client-*` reenviado |
-    | `GET /login` | inválido / expirado | Denegado (`403`)                      |
+    | Solicitud        | Certificado         | Resultado                               |
+    | ---------------- | ------------------- | --------------------------------------- |
+    | `GET /`          | ninguno             | Permitido (ruta sin mTLS)               |
+    | `GET /login`     | ninguno             | Denegado (`403`)                        |
+    | `GET /login`     | válido              | Permitido, `X-SSL-Client-*` reenviado   |
+    | `GET /login`     | inválido / expirado | Denegado (`403`)                        |
 
 ## OpenAPI Validator <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5275,7 +5502,7 @@ Más allá de los ajustes por servicio de más abajo, una redirección puede gua
 
 | Ajuste                    | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                     |
 | ------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. |
+| `REDIRECT_FROM`           | `/`               | multisite | yes      | **Ruta desde la que redirigir:** La ruta que se redirigirá. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, se puede anteponer `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor. |
 | `REDIRECT_TO`             |                   | multisite | yes      | **URL de destino:** La URL de destino a la que se redirigirá a los visitantes. Deje en blanco para deshabilitar la redirección. |
 | `REDIRECT_TO_REQUEST_URI` | `no`              | multisite | yes      | **Preservar ruta:** Cuando se establece en `yes`, agrega el URI de la solicitud original a la URL de destino.                   |
 | `REDIRECT_TO_STATUS_CODE` | `301`             | multisite | yes      | **Código de estado HTTP:** El código de estado HTTP a utilizar. Opciones: `301`, `302`, `303`, `307` o `308`.                   |
@@ -5403,34 +5630,47 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 
 ### Ajustes de Configuración
 
-| Ajuste                    | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                                                                         |
-| ------------------------- | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REDIS`               | `no`              | global   | no       | **Habilitar Redis:** Establezca en `yes` para habilitar la integración de Redis/Valkey para el modo de clúster.                                                                                     |
+| Ajuste                    | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                             |
+| ------------------------- | ----------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `USE_REDIS`               | `no`              | global   | no       | **Habilitar Redis:** Establezca en `yes` para habilitar la integración de Redis/Valkey para el modo de clúster.         |
 | `REDIS_HOST`              |                   | global   | no       | **Servidor Redis/Valkey:** Dirección IP o nombre de host del servidor Redis/Valkey. No es necesario cuando `REDIS_SENTINEL_HOSTS` está definido (el maestro se resuelve a través de los Sentinels). |
-| `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                                                                                                |
-| `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                                                                                              |
-| `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.                                                                                    |
-| `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.                                                                              |
-| `REDIS_SSL_CA`            |                   | global   | no       | **Paquete de CA SSL de Redis/Valkey:** Ruta a un paquete CA en formato PEM usado para verificar el certificado del servidor (CA privada). Confiado por los clientes Python y, mediante el paquete de confianza generado, por la ruta de solicitud — vea la nota más abajo. |
-| `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey.                                                          |
-| `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).                                                                                        |
-| `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                                                                                                   |
-| `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                                                                                               |
-| `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                                                                                                       |
-| `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                                                                                                     |
-| `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                                                                                                  |
-| `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo.                                                                      |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                                                                                                         |
+| `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                    |
+| `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                  |
+| `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.        |
+| `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
+| `REDIS_SSL_CA`            |                   | global   | no       | **Paquete de CA SSL de Redis/Valkey:** Ruta a un paquete de CA en PEM usado para verificar el certificado del servidor (CA privada). Lo usan los clientes Python y, mediante el paquete de confianza generado, la ruta de petición. Un archivo ausente o inválido hace fallar la generación de configuración. |
+| `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. |
+| `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
+| `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
+| `REDIS_SENTINEL_HOSTS`    |                   | global   | no       | **Hosts de Sentinel:** Lista de hosts de Redis Sentinel separados por espacios (nombredehost:puerto).                   |
+| `REDIS_SENTINEL_USERNAME` |                   | global   | no       | **Nombre de usuario de Sentinel:** Nombre de usuario para la autenticación de Redis Sentinel.                           |
+| `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
+| `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
+| `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
+| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
 
 !!! info "CA privada: cómo se confía en `REDIS_SSL_CA`"
-    Con `REDIS_SSL_VERIFY: "yes"` (el valor por defecto), la verificación usa el almacén de confianza del sistema/certifi, que nunca contiene una CA privada — un certificado perfectamente válido igualmente falla con `CERTIFICATE_VERIFY_FAILED`, y la única salida solía ser desactivar la verificación para todos los consumidores a la vez. `REDIS_SSL_CA` designa en su lugar un paquete CA en PEM en el que confiar. Llega a ambas mitades del producto, por dos vías distintas:
+    Con `REDIS_SSL_VERIFY: "yes"` (predeterminado), se usa el almacén del sistema/certifi, que no
+    contiene tu CA privada: incluso un certificado válido falla con `CERTIFICATE_VERIFY_FAILED`.
+    `REDIS_SSL_CA` especifica un paquete PEM de CA de confianza y llega a ambas partes del producto:
 
-    - **Clientes Python — la ruta se pasa al cliente.** La URL del broker de Celery (worker y API), los jobs (`push-configs`, `sync-bans`), el limitador de tasa de la API, `bwcli` y la interfaz web. La URL del broker y el limitador de tasa de la API solo llevan la CA mientras la verificación está activa: con `REDIS_SSL_VERIFY: "no"` no se verifica nada, así que no se envía ninguna CA.
-    - **La ruta de solicitud Lua de NGINX (`clusterstore.lua`, usada cuando `USE_REDIS: "yes"`) — la CA se añade al paquete de confianza.** Un cosocket de OpenResty no tiene almacén de confianza por conexión; verifica contra el único archivo global `lua_ssl_trusted_certificate`. Así que el generador de configuración añade su CA al paquete raíz incluido y apunta esa directiva al resultado, que viaja a cada instancia junto con la configuración. Añadida, nunca reemplazada: antibot, BunkerNet y CrowdSec verifican su propio HTTPS contra el mismo almacén y siguen confiando en todo lo que confiaban antes.
+    - **Clientes Python:** se pasa la ruta al cliente: URL del broker Celery (worker y API), jobs
+      `push-configs` y `sync-bans`, limitador de la API, `bwcli` e interfaz. La URL del broker y el
+      limitador solo incluyen la CA con verificación activa; con `REDIS_SSL_VERIFY: "no"` no se envía.
+    - **Peticiones NGINX Lua** (`clusterstore.lua`, con `USE_REDIS: "yes"`): se añade la CA al
+      paquete de confianza. Un cosocket OpenResty usa el único archivo global
+      `lua_ssl_trusted_certificate`, no un almacén por conexión. El generador añade la CA a las
+      raíces incluidas y distribuye el resultado con la configuración. No sustituye las raíces:
+      Antibot, BunkerNet y CrowdSec conservan la confianza HTTPS anterior.
 
-    **Dónde debe existir el archivo.** Se lee donde se genera la configuración (el worker) y por cada cliente Python en su propio sistema de archivos, así que móntelo en la misma ruta en el scheduler, el worker, la API y la UI. Las instancias de BunkerWeb no necesitan nada montado — reciben el paquete combinado. Un `REDIS_SSL_CA` que falte, no se pueda leer o no sea un paquete PEM válido **hace fallar la generación de configuración** a propósito: que `lua_ssl_trusted_certificate` apunte a un archivo erróneo hace que NGINX se niegue a arrancar, así que no se envía nada y la flota sigue sirviendo la configuración que ya tenía.
+    **Ubicación del archivo.** Lo leen el worker al generar y cada cliente Python desde su propio
+    sistema de archivos: móntalo en la misma ruta en scheduler, worker, API e interfaz. Las
+    instancias reciben el paquete combinado sin montaje adicional. Si `REDIS_SSL_CA` falta, no
+    puede leerse o no es PEM válido, **falla la generación**: una ruta incorrecta haría que NGINX
+    no arrancase, por lo que no se envía nada y la flota conserva su configuración anterior.
 
-    Una `CELERY_BROKER_URL` explícita sigue ganando sobre la derivada: ponga usted mismo `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem` en ella si la define a mano.
+    Una `CELERY_BROKER_URL` explícita tiene prioridad sobre la derivada: incluye manualmente
+    `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem` cuando la configures.
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
@@ -5473,7 +5713,6 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     REDIS_PASSWORD: "your-strong-password"
     REDIS_SSL: "yes"
     REDIS_SSL_VERIFY: "yes"
-    # Solo para un certificado firmado por una CA privada; omítalo para uno de confianza pública
     REDIS_SSL_CA: "/etc/bunkerweb/redis-ca.pem"
     ```
 
@@ -5513,7 +5752,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     cualquier ajuste sin una clave dedicada en el chart, use `scheduler.extraEnvs`. Definirlos solo en
     `bunkerweb.extraEnvs` no tiene **ningún efecto**.
 
-### Mejores Prácticas de Redis
+### Mejores Prácticas de Redis {#redis-best-practices}
 
 Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas para garantizar un rendimiento, seguridad y fiabilidad óptimos:
 
@@ -5641,7 +5880,7 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
 | --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
 | `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular.                                                                              |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, se puede anteponer `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor.                                                                              |
 | `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
 | `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
 | `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
@@ -6150,59 +6389,91 @@ Para más información, consulte la [documentación de robots.txt](https://www.r
 
 Compatibilidad con STREAM :x:
 
-El complemento Workflows añade la capa de política entre los ajustes individuales y las protecciones Lua: reglas reutilizables y ordenadas que se adjuntan a los servicios, cada una empareja un árbol de condiciones con una acción.
+El plugin Workflows añade una capa de políticas entre los ajustes individuales y las protecciones
+Lua: reglas reutilizables y ordenadas que se adjuntan a servicios, cada una con un árbol de
+condiciones y una acción.
 
 Una regla responde a una pregunta que los ajustes individuales no pueden expresar por sí solos:
 
-> **Si** la solicitud viene de Francia **y** apunta a `/login`, **y** supera las 10 solicitudes por minuto, **entonces** muestra un desafío hCaptcha.
+> **Si** la petición viene de Francia **y** apunta a `/login` **y** supera 10 peticiones por minuto,
+> **entonces** muestra un desafío hCaptcha.
 
-Los workflows **orquestan** las protecciones existentes en lugar de reemplazarlas. Una acción `challenge` entrega la solicitud a Antibot; un umbral de tasa usa el mismo contador que Limit. Todo ajuste que ya tenga sigue funcionando.
+Los workflows **coordinan** las protecciones existentes. La acción `challenge` entrega la petición
+a Antibot y un umbral de frecuencia usa el mismo contador que Limit. Los ajustes existentes siguen funcionando.
 
 ### Cómo se evalúa una regla
 
-Para cada servicio, sus workflows adjuntos se evalúan en el orden en que se adjuntaron, y las reglas dentro de cada workflow en el orden en que las organizó. **La primera regla que coincide de forma efectiva gana** y ejecuta su única acción; nada después de ella se evalúa.
+En cada servicio se evalúan los workflows en el orden de asociación, y sus reglas en el orden
+configurado. **Gana la primera regla que coincide efectivamente**: ejecuta su única acción y no
+se evalúa nada posterior.
 
 Una condición es un árbol de nodos `ALL` / `ANY` / `NOT` sobre:
 
-| Condición | Coincide con |
-|---|---|
-| IP / CIDR | la IP efectiva del cliente, tras la resolución Real-IP |
-| País | el país ISO resuelto desde la base de datos GeoIP |
-| ASN | el número de sistema autónomo de la IP del cliente |
-| URI | la ruta normalizada — exacta, por prefijo o expresión regular |
-| Método HTTP | el método de la solicitud |
-| Grupo de recursos | un grupo de IP, país o ASN que mantiene en otro lugar, referenciado por id |
-| Veredicto de CrowdSec | lo que CrowdSec decidió sobre la solicitud — su fuente (`appsec` o `lapi`) y la remediación que pidió (`ban` o `captcha`) |
+| Condición | Dato comparado |
+| --------- | -------------- |
+| IP / CIDR | IP efectiva del cliente, tras la resolución Real IP |
+| País | País ISO resuelto desde la base GeoIP |
+| ASN | Número de sistema autónomo de la IP del cliente |
+| URI | Ruta normalizada: exacta, prefijo o expresión regular |
+| Método HTTP | Método de la petición |
+| Grupo de recursos | Grupo de IP, países o ASN mantenido aparte y referenciado por ID |
+| Veredicto CrowdSec | Decisión de CrowdSec: fuente (`appsec` o `lapi`) y acción solicitada (`ban` o `captcha`) |
 
-Las condiciones son **de tres valores**. Un predicado es verdadero, falso, o *desconocido* cuando el hecho que necesita no está disponible — una base de datos GeoIP ausente, por ejemplo. Una regla solo coincide cuando su árbol resuelve a verdadero, así que una base de datos rota hace que una regla deje de coincidir en lugar de empezar a coincidir por accidente.
+Las condiciones tienen **tres valores**: verdadero, falso o *desconocido* cuando falta el dato,
+por ejemplo la base GeoIP. Una regla solo coincide si el árbol resulta verdadero: una base averiada
+hace que deje de coincidir, no que coincida por accidente.
 
-Una condición de **veredicto de CrowdSec** está indecisa en un servicio que CrowdSec no juzgó, y es falsa en una solicitud que CrowdSec juzgó y no tenía nada en contra — dos hechos distintos, y ninguno de ellos coincide. Para que un workflow responda *en lugar de* CrowdSec en vez de después, establezca `CROWDSEC_DEFER_TO_WORKFLOWS` en `yes` en el servicio: CrowdSec entrega entonces su veredicto en lugar de aplicarlo, y se aplica sin cambios siempre que ninguna regla coincidió.
+Una condición de **veredicto CrowdSec** es indeterminada si CrowdSec no evaluó el servicio, y falsa
+si lo evaluó y no encontró nada: son casos distintos y ninguno coincide. Para que un workflow
+responda *en lugar de* CrowdSec, establece `CROWDSEC_DEFER_TO_WORKFLOWS` en `yes` en el servicio.
+CrowdSec entrega su veredicto sin aplicarlo; si ninguna regla coincide, se aplica sin cambios.
 
-### Los umbrales de tasa son una compuerta, no una acción
+### Los umbrales de frecuencia son una condición, no una acción
 
-Una regla puede llevar un umbral. No es "entonces limitar la tasa": decide **si la regla coincide siquiera**. Por debajo del umbral la regla pierde y la evaluación continúa con la siguiente regla.
+Una regla puede tener un umbral que decide **si coincide**, no una acción de limitación. Por debajo
+del umbral se continúa con la siguiente regla.
 
-Eso es lo que le permite expresar "por encima de 10 solicitudes por minuto responder 429, si no mostrar un desafío" como dos reglas ordenadas con las mismas condiciones — la primera con el umbral y un bloqueo, la segunda sin él.
+Así se expresa «por encima de 10 peticiones por minuto responde 429; si no, muestra un desafío»
+con dos reglas ordenadas con las mismas condiciones: la primera con umbral y bloqueo, la segunda sin umbral.
 
-El contador está delimitado a servicio + regla + IP del cliente, así que nunca interfiere con los contadores de `LIMIT_REQ_*`.
+El contador se limita a servicio + regla + IP del cliente y no interfiere con `LIMIT_REQ_*`.
 
 ### Acciones
 
-* **challenge** — muestra un proveedor Antibot específico (`captcha`, `hcaptcha`, `turnstile`, …). Funciona incluso en un servicio donde `USE_ANTIBOT` es `no`, y anula las propias listas de ignorados de Antibot: las exclusiones que quiera van en las condiciones de la regla. El servicio ya debe tener las credenciales de ese proveedor.
-* **block** — responde con el estado de denegación de la instancia, o `429` para una regla cuyo propósito es limitar una tasa.
-* **redirect** — envía al cliente a una URL fija con un 301/302/303/307/308.
+- **challenge**: muestra un proveedor Antibot concreto (`captcha`, `hcaptcha`, `turnstile`, …).
+  Funciona incluso con `USE_ANTIBOT` en `no` y prevalece sobre sus listas de exclusión: expresa las
+  exclusiones en las condiciones de la regla. El servicio debe tener las credenciales del proveedor.
+- **block**: responde con el estado de denegación de la instancia o `429` para una regla de frecuencia.
+- **redirect**: envía al cliente a una URL fija con 301/302/303/307/308.
 
-### Modo detección
+### Modo de detección
 
-`SECURITY_MODE=detect` ejecuta los mismos árboles, en el mismo orden, con los mismos contadores de tasa — pero no aplica nada. La acción que *se habría tomado* se registra en los reportes, de modo que una política puede medirse contra tráfico real antes de activarla.
+`SECURITY_MODE=detect` ejecuta los mismos árboles en el mismo orden y con los mismos contadores,
+pero no aplica acciones. Los informes registran lo que *habría* ocurrido para medir la política
+con tráfico real antes de activarla.
 
 ### Comportamiento ante fallos
 
-Una instancia que aún no ha recibido la política compilada — primer arranque, o un push que nunca llegó — registra un error y sirve tráfico bajo sus protecciones habituales. A la inversa, una política que el plano de control no puede compilar nunca se distribuye en absoluto: el push se abandona y cada instancia conserva la política que ya tenía. Eliminar un grupo de recursos al que una regla hace referencia se rechaza mientras esa regla exista.
+Una instancia sin política compilada — primer arranque o envío no recibido — registra un error y
+sirve tráfico con sus protecciones habituales. Una política que el plano de control no puede
+compilar no se distribuye: se abandona el envío y las instancias conservan la anterior. No se
+puede eliminar un grupo de recursos mientras una regla lo referencie.
+
+### Presupuesto de expresiones regulares
+
+| Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+| ------ | -------------- | -------- | -------- | ----------- |
+| `WORKFLOWS_REGEX_BUDGET` | `512` | global | no | **Presupuesto regex:** Máximo de expresiones regulares distintas compiladas entre todas las reglas. NGINX comparte una caché regex entre plugins; las reglas que superan este límite se deshabilitan para evitar degradar silenciosamente toda la instancia. |
+
+La compilación recorre los workflows por ID ordenado y consume el presupuesto a medida que avanza.
+Si se agota durante un artefacto, desactiva las reglas restantes de forma determinista: dos
+instancias con el mismo artefacto desactivan las mismas reglas.
 
 ### Gestión de workflows
 
-Todo se hace desde la página **Workflows** de la interfaz web, o a través de los endpoints de la API `/workflows`. Las reglas se almacenan de forma centralizada y se compilan en un único artefacto distribuido a cada instancia con el push de configuración habitual.
+Se gestionan desde **Workflows** en la interfaz o los endpoints `/workflows`. Las reglas se guardan
+centralmente y se compilan en un único artefacto distribuido a todas las instancias con el envío
+habitual de configuración.
 
 ## Security.txt
 
@@ -6403,16 +6674,16 @@ Siga estos pasos para configurar y usar la función de Sesiones:
 
 ### Ajustes de Configuración
 
-| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                   |
-| --------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SESSIONS_SECRET`           | `random`          | global    | no       | **Secreto de sesión:** Clave criptográfica utilizada para firmar las cookies de sesión. Debe ser una cadena fuerte y aleatoria única para su sitio.                                                                                                                                           |
-| `SESSIONS_NAME`             | `random`          | global    | no       | **Nombre de la cookie:** El nombre de la cookie que almacenará el identificador de sesión.                                                                                                                                                                                                    |
+| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                      |
+| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SESSIONS_SECRET`           | `random`          | global    | no       | **Secreto de sesión:** Clave criptográfica utilizada para firmar las cookies de sesión. Debe ser una cadena fuerte y aleatoria única para su sitio.                                                                                            |
+| `SESSIONS_NAME`             | `random`          | global    | no       | **Nombre de la cookie:** El nombre de la cookie que almacenará el identificador de sesión.                                                                                                                                                       |
 | `SESSIONS_DOMAIN`           |                   | multisite | no       | **Dominio de la cookie:** Atributo `Domain` opcional aplicado a la cookie de sesión (por ejemplo `example.com`). Déjelo vacío para mantener la cookie limitada al host. Configúrelo por servidor para compartir el estado de sesión entre subdominios hermanos del mismo dominio registrable. |
-| `SESSIONS_IDLING_TIMEOUT`   | `1800`            | global    | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide.                                                                                                                                                                          |
-| `SESSIONS_ROLLING_TIMEOUT`  | `3600`            | global    | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse.                                                                                                                                                                                           |
-| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`           | global    | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad.                                                                                                                                                            |
-| `SESSIONS_CHECK_IP`         | `yes`             | global    | no       | **Comprobar IP:** Cuando se establece en `yes`, destruye la sesión si la dirección IP del cliente cambia.                                                                                                                                                                                     |
-| `SESSIONS_CHECK_USER_AGENT` | `yes`             | global    | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                                                                                                                                                               |
+| `SESSIONS_IDLING_TIMEOUT`   | `1800`            | global    | no       | **Tiempo de espera por inactividad:** Tiempo máximo (en segundos) de inactividad antes de que la sesión se invalide.                                                                                                                             |
+| `SESSIONS_ROLLING_TIMEOUT`  | `3600`            | global    | no       | **Tiempo de espera renovable:** Tiempo máximo (en segundos) antes de que una sesión deba renovarse.                                                                                                                                              |
+| `SESSIONS_ABSOLUTE_TIMEOUT` | `86400`           | global    | no       | **Tiempo de espera absoluto:** Tiempo máximo (en segundos) antes de que una sesión se destruya independientemente de la actividad.                                                                                                               |
+| `SESSIONS_CHECK_IP`         | `yes`             | global    | no       | **Comprobar IP:** Cuando se establece en `yes`, destruye la sesión si la dirección IP del cliente cambia.                                                                                                                                        |
+| `SESSIONS_CHECK_USER_AGENT` | `yes`             | global    | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                                                                                                                  |
 
 !!! warning "Consideraciones de Seguridad"
     El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
@@ -6429,12 +6700,12 @@ Siga estos pasos para configurar y usar la función de Sesiones:
     2. Asegúrese de que todas las instancias usen exactamente el mismo `SESSIONS_SECRET` y `SESSIONS_NAME`
     3. Esto garantiza que los usuarios mantengan su sesión independientemente de qué instancia de BunkerWeb maneje sus solicitudes
 
-!!! info "Revocación de sesiones"
-    Sin Redis, los datos de sesión viven en la propia cookie, así que destruir una sesión solo la eliminaba del navegador, y la cookie firmada seguía siendo válida hasta que expiraba. BunkerWeb mantiene una lista de denegación de identificadores de sesión destruidos en memoria compartida, de modo que una cookie destruida se rechaza la próxima vez que se presenta.
+!!! info "Revocación de Sesiones"
+    Sin Redis, los datos de sesión viven en la propia cookie, por lo que destruir una sesión solo la borraba del navegador y la cookie firmada seguía siendo válida hasta expirar. BunkerWeb mantiene una lista de denegación de identificadores de sesión destruidos en memoria compartida, de modo que una cookie destruida se rechaza en su siguiente uso.
 
-    - Solo se aplica cuando los datos de sesión se almacenan en la cookie. Con `USE_REDIS` en `yes`, los datos de sesión están del lado del servidor, y destruir una sesión ya la elimina.
+    - Solo se aplica cuando los datos de sesión se almacenan en la cookie. Con `USE_REDIS` en `yes`, los datos están en el servidor y destruir la sesión ya los elimina.
     - La lista de denegación es local a cada instancia de BunkerWeb. Use Redis para revocar sesiones en todo un clúster.
-    - Dimensiónela con `SESSIONS_REVOCATION_MEMORY_SIZE`. Si el almacén se llena o queda no disponible, la sesión se trata como válida y se registra una advertencia.
+    - Ajuste su tamaño con `SESSIONS_REVOCATION_MEMORY_SIZE`. Si el almacén se llena o deja de estar disponible, la sesión se considera válida y se registra una advertencia.
 
 ### Configuraciones de Ejemplo
 
@@ -6760,6 +7031,70 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
+
+=== "Reglas compuestas (AND)"
+    **Función:** exigir varios criterios *a la vez*. Las listas simples anteriores se combinan con
+    OR: basta una coincidencia para incluir al visitante en la lista blanca y omitir las comprobaciones de seguridad posteriores. Una regla es AND: solo coincide si se cumplen todos sus términos.
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `WHITELIST_RULE` | | multisite | sí | **Regla de lista:** Términos unidos por ` AND `; deben coincidir todos. |
+
+    Los términos se separan con el literal ` AND `, en mayúsculas y con un espacio a cada lado:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` es un alias de `ua`. Un `<value>` puede ser un grupo como `@office`, resuelto
+    según el tipo del término. Usa sufijos numéricos: `WHITELIST_RULE_1`, `WHITELIST_RULE_2`, etc.
+
+    ```yaml
+    USE_WHITELIST: "yes"
+    # Sonda de monitorización, solo desde su red
+    WHITELIST_RULE_1: "ip:10.20.0.0/16 AND ua:^HealthCheck/"
+    # Red de oficina, salvo el ASN de la VLAN de invitados
+    WHITELIST_RULE_2: "ip:@office AND NOT asn:64500"
+    ```
+
+    !!! warning "OR entre reglas, AND dentro de cada una"
+        **Las reglas se combinan con OR**, entre sí y con las listas simples: coincidir con
+        `WHITELIST_IP` o con cualquier regla basta para incluir al visitante en la lista blanca y omitir las comprobaciones de seguridad posteriores. **Los términos de una regla
+        se combinan con AND**: deben cumplirse todos. Dos criterios en reglas distintas son OR;
+        los mismos dos como términos de una regla son AND.
+
+    !!! info "Límites"
+        - Un término cuyo dato no está disponible es **desconocido** y una regla que lo contenga
+          nunca coincide; `NOT` no lo cambia. `ua:` y `uri:` siempre son desconocidos en stream;
+          `ua:` también lo es sin cabecera `User-Agent`. Un fallo de consulta (base GeoIP ausente,
+          error DNS) también es desconocido. Una IP privada **no** lo es: no tiene ASN y su país
+          es `local`, por lo que `NOT asn:…` sí coincide legítimamente.
+        - Una regla con `ua:` o `uri:` no coincide en un servicio stream. No se rechaza porque la
+          misma configuración puede servir HTTP, pero al cargarla se registra una advertencia
+          que identifica la regla para evitar que quede inactiva sin explicación.
+        - Una regla formada solo por términos `NOT` es válida pero coincide con casi todas las
+          peticiones. Produce la misma advertencia.
+        - No hay sintaxis de escape. Como ` AND ` es el separador, una regex `ua:` o `uri:` no
+          puede contener " and " con ninguna combinación de mayúsculas: se rechaza al guardar.
+        - `rdns:` requiere confirmación directa, igual que `WHITELIST_RDNS`: se resuelve
+          el hostname PTR coincidente y solo es verdadero si devuelve la IP del cliente.
+    !!! warning "Una coincidencia omite comprobaciones posteriores, pero no desactiva ModSecurity"
+        Una regla coincidente omite las comprobaciones **posteriores** de BunkerWeb como una lista
+        simple, pero **no** desactiva ModSecurity.
+
+        ModSecurity consulta `is_whitelisted` en su regla de fase 1 `ctl:ruleEngine=Off`. La
+        variable se escribe en la fase `set`, anterior a ModSecurity, que solo consulta la
+        **caché** por visitante: no evalúa reglas porque no puede ceder la ejecución y `rdns:`
+        necesita resolver DNS. Las listas simples llenan esa caché y alcanzan ModSecurity desde
+        la segunda petición. El resultado de una regla nunca se almacena en esa caché: solo la
+        verdad de cada término, en su propio espacio. Una petición permitida **solo** por una
+        regla ejecuta ModSecurity y OWASP CRS completos en cada ocasión.
+
+        Así, una regla estrecha mantiene el WAF activo para el tráfico admitido. Si necesitas el
+        comportamiento de las listas simples, usa una lista simple.
+
 
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.

@@ -41,6 +41,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | Ajuste                                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTO_LETS_ENCRYPT`                         | `no`              | multisite | no       | **Habilitar Let's Encrypt:** Establezca en `yes` para habilitar la emisión y renovación automática de certificados.                                                                                                                                                                                                                                                         |
+| `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` | `yes` | multisite | no | **Deshabilitar sufijos públicos:** Rechaza certificados para dominios de la [Public Suffix List](https://publicsuffix.org/) (recomendado). Desactívalo solo si necesitas conscientemente un certificado para un sufijo público sin subdominio. |
 | `LETS_ENCRYPT_PASSTHROUGH`                  | `no`              | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está delante de otro proxy inverso que maneja SSL.                                                                                                                                                                      |
 | `EMAIL_LETS_ENCRYPT`                        | `-`               | multisite | no       | **Correo electrónico de contacto:** Dirección utilizada para los avisos de caducidad de Let's Encrypt. Déjelo en blanco solo si acepta no recibir alertas ni correos de recuperación (Certbot se registra con `--register-unsafely-without-email`).                                                                                                                         |
 | `LETS_ENCRYPT_SERVER`                       | `letsencrypt`     | multisite | no       | **Autoridad de certificación:** Seleccione el servidor ACME para la emisión. Opciones: `letsencrypt` o `zerossl`.                                                                                                                                                                                                                                                           |
@@ -91,7 +92,15 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 ### Proveedores de DNS compatibles
 
-El complemento de Let's Encrypt admite una amplia gama de proveedores de DNS para los desafíos de DNS. Cada proveedor requiere credenciales específicas que deben proporcionarse utilizando el ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`.
+El plugin realiza los desafíos DNS-01 mediante [certbot-dns-multi](https://github.com/alexzorin/certbot-dns-multi),
+que integra los proveedores DNS de [lego](https://go-acme.github.io/lego/dns/): admite **los más de
+200 proveedores de lego**, no solo los de la tabla. Define el código en `LETS_ENCRYPT_DNS_PROVIDER`
+y sus credenciales mediante `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`.
+
+Se aceptan tanto las claves históricas de BunkerWeb de la tabla, por compatibilidad, como las
+variables nativas de lego (por ejemplo `CF_DNS_API_TOKEN` para Cloudflare). Añadir `_FILE` al nombre
+de una variable lego permite leer su valor desde un archivo. Consulta la lista completa y las
+variables exactas en [la documentación DNS de lego](https://go-acme.github.io/lego/dns/).
 
 | Proveedor         | Descripción      | Ajustes obligatorios                                                                                         | Ajustes opcionales                                                                                                                                                                                                                                                                                   | Documentación                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -125,6 +134,14 @@ El complemento de Let's Encrypt admite una amplia gama de proveedores de DNS par
 | `sakuracloud`     | Sakura Cloud     | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                            |
 | `scaleway`        | Scaleway         | `application_token`                                                                                          |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)                 |
 | `transip`         | TransIP          | `key_file`<br>`username`                                                                                     |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-transip.readthedocs.io/en/stable/)                                |
+
+!!! info "Otros proveedores y nombres de credenciales lego"
+    La tabla conserva los proveedores y claves históricamente documentados. Cualquier otro
+    proveedor lego también funciona: usa su código en `LETS_ENCRYPT_DNS_PROVIDER` y sus variables
+    lego como entradas `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM`. Algunos nombres antiguos se corresponden
+    con otro código: `google` → `gcloud`, `nsone` → `ns1`, `gandi` → `gandiv5`, `rfc2136` →
+    `dnsupdate`, `domainoffensive` → `dode`. Se aceptan ambos nombres. Consulta
+    [los proveedores DNS de lego](https://go-acme.github.io/lego/dns/).
 
 ### Configuraciones de Ejemplo
 

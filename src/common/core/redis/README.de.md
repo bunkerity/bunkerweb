@@ -37,6 +37,36 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. |
 | `REDIS_KEEPALIVE_POOL`    | `10`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
 
+!!! info "Private CA: So wird `REDIS_SSL_CA` vertraut"
+    Mit `REDIS_SSL_VERIFY: "yes"` (Standard) verwendet die Prüfung den System-/certifi-Speicher,
+    der keine private CA enthält. Selbst ein gültiges Zertifikat scheitert dann mit
+    `CERTIFICATE_VERIFY_FAILED`; bisher musste die Prüfung für alle Verbraucher deaktiviert werden.
+    `REDIS_SSL_CA` benennt stattdessen ein vertrauenswürdiges PEM-CA-Bundle. Es erreicht beide
+    Produkthälften über unterschiedliche Wege:
+
+    - **Python-Clients erhalten den Dateipfad:** Celery-Broker-URL (Worker und API), Jobs
+      (`push-configs`, `sync-bans`), API-Ratenbegrenzer, `bwcli` und Web-UI. Broker-URL und
+      API-Ratenbegrenzer erhalten die CA nur bei aktiver Prüfung; mit `REDIS_SSL_VERIFY: "no"`
+      wird keine CA übergeben.
+    - **NGINX-Lua-Anfragepfad (`clusterstore.lua`, bei `USE_REDIS: "yes"`): Die CA wird an das
+      Trust-Bundle angehängt.** Ein OpenResty-Cosocket hat keinen eigenen Vertrauensspeicher je
+      Verbindung, sondern prüft gegen die globale Datei `lua_ssl_trusted_certificate`. Der
+      Generator hängt Ihre CA an das ausgelieferte Root-Bundle an und setzt die Direktive auf
+      das Ergebnis, das mit der Konfiguration jede Instanz erreicht. Das Bundle wird ergänzt,
+      nie ersetzt: Antibot, BunkerNet und CrowdSec prüfen HTTPS gegen denselben Speicher und
+      vertrauen weiterhin allen bisherigen CAs.
+
+    **Wo die Datei liegen muss:** Sie wird bei der Generierung (Worker) und von jedem Python-Client
+    in dessen Dateisystem gelesen. Mounten Sie sie auf Scheduler, Worker, API und UI unter demselben
+    Pfad. Die BunkerWeb-Instanzen erhalten das kombinierte Bundle und brauchen keinen Mount.
+    Ein fehlendes, unlesbares oder ungültiges PEM-Bundle in `REDIS_SSL_CA` lässt die
+    **Konfigurationsgenerierung bewusst scheitern**: Eine ungültige Datei für
+    `lua_ssl_trusted_certificate` würde NGINX am Start hindern. Es wird nichts übertragen;
+    die Flotte bedient weiterhin ihre bisherige Konfiguration.
+
+    Ein ausdrücklich gesetztes `CELERY_BROKER_URL` hat weiterhin Vorrang vor einem abgeleiteten
+    Wert. Ergänzen Sie darin selbst `ssl_cert_reqs=required&ssl_ca_certs=/path/to/ca.pem`.
+
 !!! tip "Hochverfügbarkeit"
     Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
 

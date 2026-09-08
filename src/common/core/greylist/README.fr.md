@@ -79,6 +79,43 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
     | `GREYLIST_URI`      |        | multisite | non      | **Greylist URI :** Liste de motifs d'URI (regex PCRE) à placer en greylist, séparés par des espaces. |
     | `GREYLIST_URI_URLS` |        | multisite | non      | **URL de greylist URI :** Liste d'URL contenant des motifs d'URI à placer en greylist, séparées par des espaces. |
 
+=== "Règles composites (AND)"
+    **Fonctionnement :** exiger plusieurs critères *simultanément*. Les listes simples ci-dessus fonctionnent en OU : une seule correspondance suffit pour que le visiteur soit placé en liste grise. Une règle fonctionne en ET : tous ses termes doivent correspondre. Cela permet de cibler précisément un comportement.
+
+    | Paramètre | Défaut | Contexte | Multiple | Description |
+    | --------- | ------ | -------- | -------- | ----------- |
+    | `GREYLIST_RULE` | | multisite | yes | **Règle de liste grise :** termes reliés par ` AND ` ; tous doivent correspondre. |
+
+    Les termes sont séparés par le texte littéral ` AND `, en majuscules, avec exactement une espace de chaque côté :
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` est un alias de `ua`. Une `<value>` peut être un jeton de groupe de ressources comme `@office`, résolu selon le type du terme. Les règles utilisent les suffixes numériques habituels : `GREYLIST_RULE_1`, `GREYLIST_RULE_2`, etc.
+
+    ```yaml
+    USE_GREYLIST: "yes"
+    # a partner's crawler, but only when it comes from the partner's own network
+    GREYLIST_RULE_1: "ip:203.0.113.0/24 AND ua:^PartnerCrawler"
+    # everything from one ASN, except its scanners
+    GREYLIST_RULE_2: "asn:12345 AND NOT ua:(?:nmap|masscan)"
+    # a country plus a path, using a resource group for the country list
+    GREYLIST_RULE_3: "country:@internal-markets AND uri:^/api/v1/"
+    ```
+
+    !!! warning "OU entre les règles, ET au sein d'une règle"
+        **Les règles sont reliées par OU**, entre elles et avec les listes simples : un visiteur correspondant à `GREYLIST_IP` ou à une seule règle est placé en liste grise. **Les termes d'une règle sont reliés par ET** : tous doivent correspondre. Deux critères écrits dans deux règles forment un OU ; les mêmes critères écrits dans une seule règle forment un ET.
+
+    !!! info "Limites"
+        - Un terme dont la requête ne fournit pas le sujet est **inconnu** : une règle contenant ce terme ne correspond jamais, même avec `NOT`. `ua:` et `uri:` sont toujours inconnus en mode stream ; `ua:` l'est aussi sans en-tête `User-Agent`. Une recherche échouée (base GeoIP absente, erreur de résolution) produit également un résultat inconnu. Une IP privée, en revanche, n'a explicitement aucun ASN et son pays est `local` : `NOT asn:…` peut donc lui correspondre.
+        - Une règle contenant `ua:` ou `uri:` ne peut pas correspondre à un service stream. Elle n'est pas refusée, car la même configuration peut aussi servir du HTTP, mais un avertissement nommant la règle apparaît au chargement.
+        - Une règle composée uniquement de termes `NOT` est valide, mais correspond à presque toutes les requêtes ; elle produit le même type d'avertissement.
+        - Il n'existe pas de syntaxe d'échappement. Une regex `ua:` ou `uri:` ne peut pas contenir « and » entouré d'espaces, quelle que soit la casse : la règle serait refusée à l'enregistrement.
+        - Un terme `rdns:` fait l'objet d'une confirmation directe, comme `GREYLIST_RDNS` : le nom PTR correspondant est résolu et le terme n'est vrai que si cette résolution renvoie l'IP du client.
+
 !!! info "Prise en charge du format d'URL"
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 

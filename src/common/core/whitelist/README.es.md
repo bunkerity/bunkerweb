@@ -83,6 +83,70 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
 
+=== "Reglas compuestas (AND)"
+    **Función:** exigir varios criterios *a la vez*. Las listas simples anteriores se combinan con
+    OR: basta una coincidencia para incluir al visitante en la lista blanca y omitir las comprobaciones de seguridad posteriores. Una regla es AND: solo coincide si se cumplen todos sus términos.
+
+    | Ajuste | Predeterminado | Contexto | Múltiple | Descripción |
+    | ------ | -------------- | -------- | -------- | ----------- |
+    | `WHITELIST_RULE` | | multisite | sí | **Regla de lista:** Términos unidos por ` AND `; deben coincidir todos. |
+
+    Los términos se separan con el literal ` AND `, en mayúsculas y con un espacio a cada lado:
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` es un alias de `ua`. Un `<value>` puede ser un grupo como `@office`, resuelto
+    según el tipo del término. Usa sufijos numéricos: `WHITELIST_RULE_1`, `WHITELIST_RULE_2`, etc.
+
+    ```yaml
+    USE_WHITELIST: "yes"
+    # Sonda de monitorización, solo desde su red
+    WHITELIST_RULE_1: "ip:10.20.0.0/16 AND ua:^HealthCheck/"
+    # Red de oficina, salvo el ASN de la VLAN de invitados
+    WHITELIST_RULE_2: "ip:@office AND NOT asn:64500"
+    ```
+
+    !!! warning "OR entre reglas, AND dentro de cada una"
+        **Las reglas se combinan con OR**, entre sí y con las listas simples: coincidir con
+        `WHITELIST_IP` o con cualquier regla basta para incluir al visitante en la lista blanca y omitir las comprobaciones de seguridad posteriores. **Los términos de una regla
+        se combinan con AND**: deben cumplirse todos. Dos criterios en reglas distintas son OR;
+        los mismos dos como términos de una regla son AND.
+
+    !!! info "Límites"
+        - Un término cuyo dato no está disponible es **desconocido** y una regla que lo contenga
+          nunca coincide; `NOT` no lo cambia. `ua:` y `uri:` siempre son desconocidos en stream;
+          `ua:` también lo es sin cabecera `User-Agent`. Un fallo de consulta (base GeoIP ausente,
+          error DNS) también es desconocido. Una IP privada **no** lo es: no tiene ASN y su país
+          es `local`, por lo que `NOT asn:…` sí coincide legítimamente.
+        - Una regla con `ua:` o `uri:` no coincide en un servicio stream. No se rechaza porque la
+          misma configuración puede servir HTTP, pero al cargarla se registra una advertencia
+          que identifica la regla para evitar que quede inactiva sin explicación.
+        - Una regla formada solo por términos `NOT` es válida pero coincide con casi todas las
+          peticiones. Produce la misma advertencia.
+        - No hay sintaxis de escape. Como ` AND ` es el separador, una regex `ua:` o `uri:` no
+          puede contener " and " con ninguna combinación de mayúsculas: se rechaza al guardar.
+        - `rdns:` requiere confirmación directa, igual que `WHITELIST_RDNS`: se resuelve
+          el hostname PTR coincidente y solo es verdadero si devuelve la IP del cliente.
+    !!! warning "Una coincidencia omite comprobaciones posteriores, pero no desactiva ModSecurity"
+        Una regla coincidente omite las comprobaciones **posteriores** de BunkerWeb como una lista
+        simple, pero **no** desactiva ModSecurity.
+
+        ModSecurity consulta `is_whitelisted` en su regla de fase 1 `ctl:ruleEngine=Off`. La
+        variable se escribe en la fase `set`, anterior a ModSecurity, que solo consulta la
+        **caché** por visitante: no evalúa reglas porque no puede ceder la ejecución y `rdns:`
+        necesita resolver DNS. Las listas simples llenan esa caché y alcanzan ModSecurity desde
+        la segunda petición. El resultado de una regla nunca se almacena en esa caché: solo la
+        verdad de cada término, en su propio espacio. Una petición permitida **solo** por una
+        regla ejecuta ModSecurity y OWASP CRS completos en cada ocasión.
+
+        Así, una regla estrecha mantiene el WAF activo para el tráfico admitido. Si necesitas el
+        comportamiento de las listas simples, usa una lista simple.
+
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 

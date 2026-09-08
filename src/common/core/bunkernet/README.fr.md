@@ -31,12 +31,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité BunkerNet :
 | ------------------ | -------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------- |
 | `USE_BUNKERNET`    | `yes`                      | multisite | non      | **Activer BunkerNet :** Mettre à `yes` pour activer le partage de renseignements BunkerNet.  |
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | non      | **Serveur BunkerNet :** Adresse du serveur API BunkerNet pour partager les renseignements sur les menaces. |
+| `USE_BUNKERNET_STATS` | `yes` | global | non | **Statistiques d'efficacité :** conserver en base les statistiques BunkerNet de contribution, taille de liste et connectivité. |
+| `BUNKERNET_STATS_RETENTION_DAYS` | `30` | global | non | **Rétention :** âge maximal, en jours, des statistiques BunkerNet persistées. |
 
 !!! tip "Protection réseau"
     Lorsque BunkerNet détecte qu'une adresse IP a été impliquée dans une activité malveillante sur plusieurs instances BunkerWeb, il ajoute cette IP à une blacklist collective. Cela fournit une couche de défense proactive, protégeant votre site contre les menaces avant qu'elles ne vous ciblent directement.
 
 !!! info "Signalement anonyme"
     Lors du signalement d'informations de menace à BunkerNet, votre instance ne partage que les données nécessaires pour identifier la menace : l'adresse IP, la raison du blocage et un minimum de contexte. Aucune information personnelle sur vos utilisateurs ni aucun détail sensible sur votre site n'est partagé.
+
+!!! info "Statistiques d'efficacité"
+    Avec `USE_BUNKERNET_STATS=yes`, le job `bunkernet-stats` conserve à chaque exécution les métriques de contribution et de santé du déploiement (taille de liste, rapports en attente, état d'enregistrement). `bunkernet-cleanup-stats` supprime les lignes dépassant `BUNKERNET_STATS_RETENTION_DAYS`. Avec `USE_BUNKERNET_STATS=no`, les deux jobs sont entièrement ignorés et journalisent la raison.
 
 ### Exemples de configuration
 

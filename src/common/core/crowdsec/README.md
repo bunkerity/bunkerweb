@@ -387,6 +387,8 @@ docker run -d --name bunkerweb-aio \
   bunkerity/bunkerweb-all-in-one:1.7.0-beta
 ```
 
+The entrypoint also derives a stable `master_secret` for the challenge runtime the first time bot detection is enabled, and persists it under `/var/lib/bunkerweb` (the same volume as everything else the all-in-one image keeps). Without it, CrowdSec generates a new one on every restart and invalidates every outstanding challenge cookie; give the container a persistent volume for `/data` so the secret — and the rest of the instance's identity — survives a recreation.
+
 !!! warning "Challenged clients need JavaScript and cookies"
     The challenge page runs a script and stores its result in a cookie. Any legitimate client that has neither — API consumers, monitoring probes, feed readers, most command-line tools — cannot solve it and will keep being challenged. Exclude or allowlist them **on the CrowdSec side** (the bundle ships exclusions for search engines, monitoring, feeds, static files and API paths), not with `CROWDSEC_EXCLUDE_LOCATION`, which switches off every CrowdSec check for that path rather than just the challenge.
 

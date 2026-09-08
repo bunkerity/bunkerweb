@@ -83,6 +83,48 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
     | `WHITELIST_URI_URLS`        |        | multisite | non      | **URL de whitelist URI :** Liste d'URL contenant des motifs d'URI à placer en whitelist, séparées par des espaces. |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de liste d'ignore URI :** Liste d'URL contenant des motifs d'URI à ignorer.              |
 
+=== "Règles composites (AND)"
+    **Fonctionnement :** exiger plusieurs critères *simultanément*. Les listes simples ci-dessus fonctionnent en OU : une seule correspondance suffit pour que le visiteur soit placé en liste blanche. Une règle fonctionne en ET : tous ses termes doivent correspondre. Cela permet de cibler précisément un comportement.
+
+    | Paramètre | Défaut | Contexte | Multiple | Description |
+    | --------- | ------ | -------- | -------- | ----------- |
+    | `WHITELIST_RULE` | | multisite | yes | **Règle de liste blanche :** termes reliés par ` AND ` ; tous doivent correspondre. |
+
+    Les termes sont séparés par le texte littéral ` AND `, en majuscules, avec exactement une espace de chaque côté :
+
+    ```
+    <rule> := <term> ( " AND " <term> )*
+    <term> := [ "NOT " ] <kind> ":" <value>
+    <kind> := ip | country | asn | rdns | ua | uri
+    ```
+
+    `user_agent` est un alias de `ua`. Une `<value>` peut être un jeton de groupe de ressources comme `@office`, résolu selon le type du terme. Les règles utilisent les suffixes numériques habituels : `WHITELIST_RULE_1`, `WHITELIST_RULE_2`, etc.
+
+    ```yaml
+    USE_WHITELIST: "yes"
+    # the monitoring probe, but only from the monitoring network
+    WHITELIST_RULE_1: "ip:10.20.0.0/16 AND ua:^HealthCheck/"
+    # the office network, except the guest VLAN's ASN
+    WHITELIST_RULE_2: "ip:@office AND NOT asn:64500"
+    ```
+
+    !!! warning "OU entre les règles, ET au sein d'une règle"
+        **Les règles sont reliées par OU**, entre elles et avec les listes simples : un visiteur correspondant à `WHITELIST_IP` ou à une seule règle est placé en liste blanche. **Les termes d'une règle sont reliés par ET** : tous doivent correspondre. Deux critères écrits dans deux règles forment un OU ; les mêmes critères écrits dans une seule règle forment un ET.
+
+    !!! info "Limites"
+        - Un terme dont la requête ne fournit pas le sujet est **inconnu** : une règle contenant ce terme ne correspond jamais, même avec `NOT`. `ua:` et `uri:` sont toujours inconnus en mode stream ; `ua:` l'est aussi sans en-tête `User-Agent`. Une recherche échouée (base GeoIP absente, erreur de résolution) produit également un résultat inconnu. Une IP privée, en revanche, n'a explicitement aucun ASN et son pays est `local` : `NOT asn:…` peut donc lui correspondre.
+        - Une règle contenant `ua:` ou `uri:` ne peut pas correspondre à un service stream. Elle n'est pas refusée, car la même configuration peut aussi servir du HTTP, mais un avertissement nommant la règle apparaît au chargement.
+        - Une règle composée uniquement de termes `NOT` est valide, mais correspond à presque toutes les requêtes ; elle produit le même type d'avertissement.
+        - Il n'existe pas de syntaxe d'échappement. Une regex `ua:` ou `uri:` ne peut pas contenir « and » entouré d'espaces, quelle que soit la casse : la règle serait refusée à l'enregistrement.
+        - Un terme `rdns:` fait l'objet d'une confirmation directe, comme `WHITELIST_RDNS` : le nom PTR correspondant est résolu et le terme n'est vrai que si cette résolution renvoie l'IP du client.
+
+    !!! warning "Une règle saute les vérifications suivantes sans désactiver ModSecurity"
+        Une règle de liste blanche saute les vérifications BunkerWeb **suivantes**, comme une liste simple. Elle ne désactive **pas** ModSecurity.
+
+        ModSecurity consulte la variable `is_whitelisted` dans sa règle de phase 1 `ctl:ruleEngine=Off`. Cette variable est écrite pendant la phase `set`, avant ModSecurity, uniquement à partir du **cache** de liste blanche du visiteur. Cette phase n'évalue rien elle-même, car elle ne peut pas suspendre son exécution alors qu'un terme `rdns:` exige une résolution. Une correspondance de liste simple remplit ce cache et atteint donc ModSecurity dès la deuxième requête. Le verdict d'une règle n'est jamais mis en cache (seul le résultat de chaque terme l'est, dans son propre espace de noms) : une requête autorisée **uniquement** par une règle traverse intégralement ModSecurity et OWASP CRS à chaque fois.
+
+        Une règle précise maintient ainsi le WAF pour le trafic autorisé. Utilisez une liste simple si vous avez besoin du comportement des listes simples.
+
 !!! info "Prise en charge du format d'URL"
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 
