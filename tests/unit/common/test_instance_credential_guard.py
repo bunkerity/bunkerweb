@@ -94,6 +94,10 @@ class TestALostCredentialIsFatal:
 
         assert "INSTANCE_ENROLLMENT_CODE" in output
         assert "/instances/<hostname>/enroll" in output
+        assert 'PATCH /instances/<hostname> with {"credential": ""}' in output
+        assert "remove both" in output
+        assert "instance-credential.json" in output and "instance-enrolled" in output
+        assert "missing or unreadable" not in output
         # The escape hatch, for an operator who removed the credential on purpose. Without it the
         # only documented way out of the refusal is to enroll an instance you wanted unenrolled.
         assert str(tmp_path / "instance-enrolled") in output
