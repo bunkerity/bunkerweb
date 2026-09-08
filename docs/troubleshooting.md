@@ -274,6 +274,117 @@ If you see the following error `upstream sent too big header while reading respo
 
 If you see the following error `could not build server_names_hash, you should increase server_names_hash_bucket_size` in the logs, you will need to tweak the `SERVER_NAMES_HASH_BUCKET_SIZE` setting.
 
+## Background jobs never run {#background-jobs}
+
+Since 1.7 the Scheduler does not execute jobs itself. It dispatches them through the **API** (`POST /jobs/dispatch`) onto a **job broker**, and a **Worker** picks them up and runs them (see [Scheduler](concepts.md#scheduler)). The Worker and the broker are new in 1.7; the API is not, but it is on this path now. When any of the three is missing or unreachable the failure is silent: nothing crashes, the Scheduler keeps generating configuration, the instances stay healthy — and no certificate is renewed, no blocklist is refreshed and no backup is taken.
+
+The symptom to look for is a **last run** that stops advancing on the **Jobs** page of the web UI, or on the API:
+
+```bash
+# container stacks: the API service name; on Linux: http://127.0.0.1:8888
+curl -H "Authorization: Bearer $API_TOKEN" http://bw-api:8888/jobs
+```
+
+### The Worker is not running
+
+The most common cause on an installation upgraded from 1.6 is that the Worker was never added: bumping the image tags of a 1.6 stack leaves it without `bw-api`, `bw-worker` and `bw-jobs-broker` entirely. See [the upgrade notes](upgrading.md#breaking-changes) and redeploy from the reference stack for your integration.
+
+=== "Docker"
+
+    ```shell
+    docker compose ps bw-api bw-worker bw-jobs-broker
+    docker compose logs bw-worker
+    ```
+
+    No such service means the stack predates 1.7 — add the three services, `API_URL`, `API_TOKEN` and `CELERY_BROKER_URL`, then recreate.
+
+=== "Linux"
+
+    ```shell
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    journalctl -u bunkerweb-worker --no-pager -n 100
+    ```
+
+    `bunkerweb-worker` is a new unit in 1.7 and the package installs it on every host, so the answer is `enabled`/`disabled`, never "not found".
+
+    **Check it on the host that runs `bunkerweb-scheduler`.** There, `enabled`+`active` is what you want; `systemctl enable --now bunkerweb-worker` fixes it and pulls the broker unit in on its own. If it is active but idle, the broker is the next thing to look at.
+
+    **On a BunkerWeb-instance-only node** — a `--worker` install, in the installer's sense of "runs the instance, not the control plane" — `disabled` is correct and deliberate: that host owns no jobs. Do not enable it there.
+
+    !!! warning "Every package upgrade re-enables it on an instance-only node"
+        The package decides what a host runs from `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` in its own environment, and **no upgrade sets them** — not a plain `apt install bunkerweb=...`, and not `install-bunkerweb.sh` either, whose upgrade path exits before it would export them. So every upgrade takes the host for a standalone one and **enables and starts** `bunkerweb-worker`, plus the first Redis unit it finds — on a node like this that is the distro `redis-server` (or `valkey`/`redis`), since an instance-only install provisions no `bunkerweb-broker`.
+
+        It is harmless as far as jobs go: that host is dispatched none (its worker falls back to `redis://127.0.0.1:6379/0`, which no control plane dispatches to). That fallback is what makes it harmless, with one exception: if this node's `CELERY_BROKER_URL` was made to point at a **routable** broker — copied in from a `--broker-url` install, or set by hand — the leftover worker really does consume jobs. A copied installer-provisioned URL is not that: the dedicated broker binds `127.0.0.1` and its URL says a `127.0.0.1` address, so on this node it resolves to this node's own loopback and the worker just retry-loops on a refused connection. If you want it gone: `systemctl disable --now bunkerweb-worker`, repeated after **each** upgrade — only a fresh install, or an explicit `--worker` installer run, does it for you.
+
+        **Leave the Redis unit alone unless you know it is not your WAF datastore.** `USE_REDIS` and `REDIS_HOST` are *fleet* settings and live on the control plane — web UI → **Global settings** → Redis, or the scheduler host's `/etc/bunkerweb/variables.env`. They are not in this node's own `/etc/bunkerweb/variables.env`, which ignores those keys, so grepping *that* file proves nothing. The rendered configuration the control plane pushed does carry them, so on a node that has received at least one push you can also answer it locally:
+
+        ```bash
+        grep -E '^(USE_REDIS|REDIS_HOST)=' /etc/nginx/variables.env
+        ```
+
+        Before that first push the node is running off its own boot defaults, and only the control plane knows. Look them up there, and if `REDIS_HOST` is an address of **this** host — a LAN address, not necessarily `127.0.0.1`; a datastore shared across instances is reached by a routable one — then this server holds your shared bans and rate-limit counters, and disabling it drops them and un-shares them. Only once you have checked: `systemctl disable --now redis-server` (or `valkey`, or `redis`).
+
+        One consequence to expect on such a host: the leftover worker points at `127.0.0.1:6379`, so if your local datastore is password-protected it logs `NOAUTH` forever. That is this node's idle worker talking to the datastore, not a broken job pipeline — the section below diagnoses the **scheduler** host.
+
+### The broker refuses the connection (`NOAUTH`)
+
+If the broker is password-protected but `CELERY_BROKER_URL` carries no credentials, the broker answers `NOAUTH Authentication required`. The Worker stays `active` while consuming nothing, and `POST /jobs/dispatch` on the API answers `502`.
+
+```bash
+journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'   # Linux
+docker compose logs bw-worker | grep -i 'NOAUTH\|AuthenticationError'    # Docker
+```
+
+First verify that the endpoint is a dedicated job broker configured with `maxmemory-policy noeviction`. If port `6379` serves an evicting WAF datastore, provision a separate broker through the [Linux installer](integrations.md#easy-installation-script) or configure one yourself, then use its actual address and port. Fixing `NOAUTH` alone does not protect jobs and leases from eviction.
+
+Then give the broker its own credentials. On Linux one write to `/etc/bunkerweb/variables.env` covers both components, because the Worker and the API read that file before their own environment; in a container stack, set it on both services:
+
+```bash
+CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0     # Linux, a dedicated noeviction distro Redis
+CELERY_BROKER_URL=redis://:<password>@bw-jobs-broker:6379/0 # a container stack
+```
+
+Check `/etc/bunkerweb/broker.conf` before you touch anything. If that file exists, the installer provisioned a dedicated `bunkerweb-broker` and `CELERY_BROKER_URL` already points at it **with its password** — edit the line that is there rather than adding one, and read the port off it: `6380` is only the default, and the installer walks up from it when it is taken. If the file does not exist, `CELERY_BROKER_URL` is whatever you set — or unset, in which case on Linux the Worker and the API both fall back to `redis://127.0.0.1:6379/0` — and the fix above is the one you want. The installer provisions the dedicated broker narrowly — a fresh install, or an upgrade of a host whose Redis carries a `requirepass` or an evicting `maxmemory` — so an upgraded host with a plain distro Redis, or one installed with `--no-broker` or `--broker-url`, has no `broker.conf`.
+
+Then restart both: `systemctl restart bunkerweb-worker bunkerweb-api`, or recreate `bw-worker` and `bw-api`.
+
+!!! warning "The broker is not the WAF data store"
+    The job broker must run `maxmemory-policy noeviction`: it holds the leases that stop two workers pushing configurations at once, and those are keys *with* a TTL, so any `volatile-*` policy is free to drop them mid-flight. A data store, by contrast, is normally capped and left free to evict — transient counters are cheaper to lose than writes are to refuse. `maxmemory-policy` is per-server and never per-database, so pointing the two roles at different database numbers of the same server does **not** separate them. Full explanation in [the upgrade notes](upgrading.md#breaking-changes).
+
+## An enrolled instance refuses to start {#lost-instance-credential}
+
+An instance that redeemed an enrollment code stores the credential it was given in `/var/lib/bunkerweb/instance-credential.json`, and from then on it accepts **only** that credential — it never falls back to the shared `API_TOKEN`. If the file disappears while the marker recording the enrollment survives, the instance refuses to start rather than come up deaf to the control plane, and says so:
+
+```
+This instance was enrolled but its credential is gone (/var/lib/bunkerweb/instance-credential.json
+is missing or contains no usable credential) [...] Refusing to start.
+```
+
+The trigger is narrow on purpose: the marker is still there and a usable credential is not — the file was deleted, truncated, restored without it, or left with no credential inside it. A file that exists but cannot be *read* (root-owned after an upgrade, say) leaves the question open, so the instance boots — and then refuses every push until the permissions are fixed. Restore its permissions instead of re-enrolling it.
+
+Two neighbouring cases boot normally and fail at the control plane instead, where every push to the instance is refused: a container recreated with **no** `/data` volume at all (marker and credential go together, and it comes back as a fresh, unenrolled instance), and a restore from a snapshot taken *before* the enrollment (neither file is in it). The instance logs only a per-call `can't validate API token from IP …` warning, which never says the enrollment is what went missing — the diagnosis is on the control-plane side.
+
+Two ways out of the boot refusal:
+
+- **Keep it enrolled**: issue a new enrollment code for it — the key button on the **Instances** page of the web UI, or `POST /instances/{hostname}/enroll` on the API — and pass it as `INSTANCE_ENROLLMENT_CODE` on the next start.
+- **Put it back on the shared token** — two sides, and both are needed. On the instance, delete `/var/lib/bunkerweb/instance-enrolled` **and** `instance-credential.json`: a leftover empty or truncated credential file makes the instance refuse every token, the shared one included. That lets it boot on `API_TOKEN`, and on its own changes nothing else — the control plane still holds the minted credential for that row and keeps dialing with it, so every push is still refused. Clear it on the row too:
+
+    ```bash
+    curl -X PATCH -H "Authorization: Bearer $API_TOKEN" -H 'Content-Type: application/json' \
+      -d '{"credential": ""}' http://bw-api:8888/instances/<hostname>
+    ```
+
+    An empty `credential` clears the stored one whatever the instance's method is, and the control plane goes back to dialing it with the shared `API_TOKEN`. This is an API-only route — the **Instances** page offers rotate and revoke, not clear.
+
+    **It does not lift a revocation.** If you revoked the instance first — the reflex, and a button on that same page — clearing the credential is a no-op: the row stays revoked and every push stays refused. Two things lift it: a new enrollment code, or, on an instance that declares its own token (`BUNKERWEB_INSTANCE_API_TOKEN[_n]`, the grouped `BUNKERWEB_INSTANCE_HOST_n` form — the flat `BUNKERWEB_INSTANCES` list carries no token), the next scheduler configuration save, which re-sources the credential from the environment and lifts the revocation with it. That declared token has to **differ from the global `API_TOKEN`**: declaring the shared one again is not a declaration at all as far as this goes, and nothing happens — no lift, no log line. The scheduler logs that it did. On any other row, re-enrolling is not the preferred recovery, it is the only one. If you would rather not call the API: a **UI- or API-registered** instance can be deleted on the **Instances** page (or `DELETE /instances/{hostname}`) and added again; an instance **declared through the environment** (`BUNKERWEB_INSTANCES`) can be taken out of the declared list, given one scheduler configuration save — which deletes the row, and with it any TLS pinning or name set from the UI — then declared again. Both throw away more than the `PATCH` does.
+
+    An instance **discovered** by autoconf, Kubernetes or Swarm is never in this situation at all: the control plane refuses to mint a credential for a row sourced from an orchestrator, so it never holds an enrollment.
+
+    **Re-enrolling is the supported recovery; prefer it.**
+
+!!! tip "Give the instance a persistent `/data`"
+    The reference stacks mount a `bw-instance-data` volume on the `bunkerweb` service for exactly this reason. Without it, every `docker compose down` followed by `up` throws the credential away and the instance comes back unenrolled — silently, because it boots fine; the refusal shows up at the control plane, as pushes that never land. See [Instance enrollment](web-ui.md#instance-enrollment).
+
 ## Timezone
 
 When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).

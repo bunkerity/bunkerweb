@@ -274,6 +274,202 @@ Si ves el siguiente error `upstream sent too big header while reading response h
 
 Si ves el siguiente error `could not build server_names_hash, you should increase server_names_hash_bucket_size` en los registros, necesitarás ajustar la configuración `SERVER_NAMES_HASH_BUCKET_SIZE`.
 
+## Los jobs en segundo plano nunca se ejecutan {#background-jobs}
+
+Desde 1.7, el Scheduler envía los jobs a través de la **API** (`POST /jobs/dispatch`) a un **broker**,
+y un **Worker** los recoge y ejecuta (consulta [Programador](concepts.md#scheduler)). El Worker y
+el broker son nuevos; la API ya existía, pero ahora participa en esta ruta. Si alguno falta o no
+es accesible, nada se bloquea de forma evidente: el Scheduler sigue generando configuración y las
+instancias están sanas, pero no se renuevan certificados, no se actualizan listas ni se hacen backups.
+
+Busca una **última ejecución** que deje de avanzar en la página **Jobs** o en la API:
+
+```bash
+# Contenedores: nombre del servicio API; Linux: http://127.0.0.1:8888
+curl -H "Authorization: Bearer $API_TOKEN" http://bw-api:8888/jobs
+```
+
+### El Worker no está ejecutándose
+
+Tras actualizar desde 1.6, la causa más habitual es no haber añadido el Worker: cambiar solo las
+etiquetas deja el stack sin `bw-api`, `bw-worker` ni `bw-jobs-broker`. Consulta
+[las notas de actualización](upgrading.md#breaking-changes) y despliega desde el stack de referencia.
+
+=== "Docker"
+
+    ```shell
+    docker compose ps bw-api bw-worker bw-jobs-broker
+    docker compose logs bw-worker
+    ```
+
+    Si no existe el servicio, el stack es anterior a 1.7. Añade los tres servicios, `API_URL`,
+    `API_TOKEN` y `CELERY_BROKER_URL`, y recréalo.
+
+=== "Linux"
+
+    ```shell
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    journalctl -u bunkerweb-worker --no-pager -n 100
+    ```
+
+    `bunkerweb-worker` es una unidad nueva en 1.7 que el paquete instala en todos los hosts: debe
+    responder `enabled`/`disabled`, nunca "not found".
+
+    **Compruébalo en el host de `bunkerweb-scheduler`.** Ahí debe estar `enabled` y `active`;
+    `systemctl enable --now bunkerweb-worker` lo corrige e inicia por dependencia la unidad del
+    broker. Si está activo pero sin trabajo, comprueba el broker.
+
+    **En un nodo que solo ejecuta la instancia BunkerWeb**, una instalación `--worker` en el
+    sentido del instalador, `disabled` es correcto: ese host no tiene jobs. No lo habilites ahí.
+
+    !!! warning "Cada actualización del paquete lo vuelve a habilitar en un nodo de solo instancia"
+        El paquete determina el perfil a partir de `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` en su
+        propio entorno y **ninguna actualización los define**, ni `apt install bunkerweb=...` ni
+        `install-bunkerweb.sh`, cuya ruta de actualización termina antes de exportarlos. Cada
+        actualización trata ese host como autónomo y **habilita e inicia** `bunkerweb-worker` y
+        la primera unidad Redis encontrada: `redis-server`, `valkey` o `redis`, porque una
+        instalación de solo instancia no aprovisiona `bunkerweb-broker`.
+
+        Normalmente no recibe jobs: su worker usa `redis://127.0.0.1:6379/0`, donde ningún plano de
+        control envía trabajo. La excepción es que su `CELERY_BROKER_URL` apunte a un broker
+        **accesible por red**, por ejemplo copiada desde una instalación `--broker-url` o definida
+        manualmente: entonces sí consume jobs. Una URL del broker dedicado del instalador usa
+        `127.0.0.1`; copiada en otro nodo apunta al loopback de ese nodo y solo reintenta una
+        conexión rechazada. Para quitar el worker: `systemctl disable --now bunkerweb-worker`,
+        después de **cada** actualización. Solo una instalación nueva o una ejecución explícita
+        del instalador con `--worker` lo hace automáticamente.
+
+        **No desactives Redis sin confirmar que no es tu almacén WAF.** `USE_REDIS` y `REDIS_HOST`
+        son ajustes de la *flota*, configurados en la interfaz → **Global settings** → Redis o
+        en `/etc/bunkerweb/variables.env` del host Scheduler. El archivo del propio nodo ignora
+        esas claves: buscar ahí no demuestra nada. Tras recibir al menos una configuración, puedes
+        consultar localmente los valores que envió el plano de control:
+
+        ```bash
+        grep -E '^(USE_REDIS|REDIS_HOST)=' /etc/nginx/variables.env
+        ```
+
+        Antes del primer envío solo el plano de control conoce esos valores. Si `REDIS_HOST` es
+        una dirección de **este** host — posiblemente una IP LAN, no `127.0.0.1` — este servidor
+        guarda los bloqueos compartidos y contadores; desactivarlo los pierde y deja de compartirlos.
+        Solo después de comprobarlo: `systemctl disable --now redis-server` (o `valkey` o `redis`).
+
+        Si el almacén local en `127.0.0.1:6379` tiene contraseña, ese worker sobrante registra
+        `NOAUTH` continuamente. Es el worker inactivo del nodo hablando con el almacén, no un
+        fallo del sistema de jobs. El diagnóstico siguiente corresponde al host **Scheduler**.
+
+### El broker rechaza la conexión (`NOAUTH`)
+
+Si el broker tiene contraseña y `CELERY_BROKER_URL` no contiene credenciales, responde
+`NOAUTH Authentication required`. El Worker sigue `active` sin consumir nada y `POST /jobs/dispatch`
+devuelve `502`.
+
+```bash
+journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'   # Linux
+docker compose logs bw-worker | grep -i 'NOAUTH\|AuthenticationError'    # Docker
+```
+
+Primero verifica que el endpoint sea un broker de jobs dedicado con `maxmemory-policy noeviction`.
+Si el puerto `6379` sirve un almacén WAF que expulsa claves, aprovisiona un broker separado mediante
+el [instalador de Linux](integrations.md#script-de-instalacion-facil) o configúralo tú mismo y usa
+su dirección y puerto reales. Corregir solo `NOAUTH` no protege los jobs ni los bloqueos temporales
+contra la expulsión.
+
+Después, asigna al broker sus credenciales. En Linux basta con escribir una vez en
+`/etc/bunkerweb/variables.env`: Worker y API lo leen antes de su propio entorno. En contenedores,
+configúralo en ambos servicios:
+
+```bash
+CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0     # Redis de la distribución dedicado, con noeviction
+CELERY_BROKER_URL=redis://:<password>@bw-jobs-broker:6379/0 # Stack de contenedores
+```
+
+Comprueba `/etc/bunkerweb/broker.conf` antes de cambiar nada. Si existe, el instalador aprovisionó
+un `bunkerweb-broker` dedicado y `CELERY_BROKER_URL` ya apunta a él **con contraseña**: modifica
+esa línea y consulta su puerto; `6380` solo es el predeterminado y el instalador lo incrementa si
+está ocupado. Si no existe, se usa tu URL o, si no la definiste, `redis://127.0.0.1:6379/0` en Linux,
+y corresponde la corrección anterior. El instalador solo aprovisiona el broker en instalaciones
+nuevas o actualizaciones con `requirepass` o un `maxmemory` que permita expulsiones. Un host
+actualizado con Redis de distribución sin cambios, `--no-broker` o `--broker-url` no tiene ese archivo.
+
+Después reinicia ambos: `systemctl restart bunkerweb-worker bunkerweb-api`, o recrea `bw-worker` y `bw-api`.
+
+!!! warning "El broker no es el almacén WAF"
+    El broker debe usar `maxmemory-policy noeviction`: contiene los bloqueos temporales que evitan
+    envíos simultáneos de configuración desde dos workers. Son claves **con** TTL y cualquier
+    política `volatile-*` puede expulsarlas durante el trabajo. El almacén suele tener límite y
+    permitir expulsiones: perder contadores cuesta menos que rechazar escrituras. La política es
+    por servidor, no por base de datos; distintos números de base en el mismo servidor **no**
+    separan los roles. Consulta [las notas de actualización](upgrading.md#breaking-changes).
+
+## Una instancia registrada no arranca {#lost-instance-credential}
+
+Una instancia que canjea un código de registro guarda su credencial en
+`/var/lib/bunkerweb/instance-credential.json` y desde entonces acepta **solo** esa credencial,
+sin volver al `API_TOKEN` compartido. Si desaparece el archivo pero queda el marcador de registro,
+se niega a arrancar y lo indica:
+
+```
+This instance was enrolled but its credential is gone (/var/lib/bunkerweb/instance-credential.json
+is missing or contains no usable credential) [...] Refusing to start.
+```
+
+El disparador es concreto: existe el marcador pero no una credencial utilizable, porque el archivo
+se borró, truncó, restauró sin credencial o quedó vacío. Si existe pero no se puede **leer** (por
+ejemplo, pertenece a root tras actualizar), la instancia arranca y rechaza los envíos hasta que
+se reparen los permisos. Restaura esos permisos en lugar de volver a registrarla.
+
+Otros dos casos arrancan normalmente pero rechazan los envíos desde el plano de control: recrear
+el contenedor **sin** volumen `/data` (se pierden marcador y credencial y vuelve como instancia nueva)
+o restaurar una instantánea **anterior** al registro. La instancia solo registra
+`can't validate API token from IP …` en cada llamada, sin explicar el registro perdido; el
+diagnóstico está en el plano de control.
+
+Dos maneras de resolver el rechazo al arrancar:
+
+- **Mantener el registro**: emite un código nuevo con el botón de llave de **Instances** o
+  `POST /instances/{hostname}/enroll` y pásalo como `INSTANCE_ENROLLMENT_CODE` en el siguiente arranque.
+- **Volver al token compartido** requiere dos cambios. En la instancia, elimina
+  `/var/lib/bunkerweb/instance-enrolled` **y** `instance-credential.json`: un archivo vacío o
+  truncado restante hace que rechace cualquier token, incluido el compartido. Así arranca con
+  `API_TOKEN`, pero el plano de control todavía conserva la credencial emitida y sigue usándola.
+  Bórrala también en su fila:
+
+    ```bash
+    curl -X PATCH -H "Authorization: Bearer $API_TOKEN" -H 'Content-Type: application/json' \
+      -d '{"credential": ""}' http://bw-api:8888/instances/<hostname>
+    ```
+
+    Una `credential` vacía borra la almacenada cualquiera que sea el método de la instancia y
+    recupera el `API_TOKEN` compartido. Esta operación solo existe en la API: **Instances** ofrece
+    rotar y revocar, no vaciar.
+
+    **No levanta una revocación.** Si revocaste primero, vaciar la credencial no cambia nada: la
+    fila sigue revocada y todos los envíos se rechazan. La levantan un código de registro nuevo o,
+    para una instancia con token propio declarado (`BUNKERWEB_INSTANCE_API_TOKEN[_n]`, forma
+    agrupada `BUNKERWEB_INSTANCE_HOST_n`; la lista simple `BUNKERWEB_INSTANCES` no contiene tokens),
+    el siguiente guardado del scheduler, que vuelve a leer la credencial del entorno y levanta
+    la revocación. El token declarado debe **diferir del `API_TOKEN` global**: repetir el compartido
+    no cuenta y no produce ni cambio ni mensaje. Cuando se levanta, el scheduler lo registra.
+    En cualquier otra fila, volver a registrarla es la única recuperación.
+
+    Sin usar la API, una instancia **registrada desde la interfaz o la API** puede eliminarse en
+    **Instances** (o `DELETE /instances/{hostname}`) y añadirse de nuevo. Una instancia **declarada
+    en el entorno** (`BUNKERWEB_INSTANCES`) puede retirarse de la lista, guardarse una configuración
+    del scheduler — elimina su fila, incluida la fijación TLS y el nombre configurados en la
+    interfaz — y declararse otra vez. Ambas opciones descartan más datos que el `PATCH`.
+
+    Una instancia **descubierta** por autoconf, Kubernetes o Swarm nunca tiene este problema:
+    el plano de control no emite credenciales de registro para filas procedentes de un orquestador.
+
+    **Volver a registrarla es la recuperación admitida; úsala preferentemente.**
+
+!!! tip "Proporciona un `/data` persistente a la instancia"
+    Los stacks de referencia montan `bw-instance-data` en `bunkerweb` para esto. Sin él, cada
+    `docker compose down` seguido de `up` pierde la credencial y la instancia vuelve sin registro.
+    Arranca correctamente y el rechazo solo aparece como envíos que no llegan desde el plano de
+    control. Consulta [Registro de instancias](web-ui.md#instance-enrollment).
+
 ## Zona horaria
 
 Cuando se utilizan integraciones basadas en contenedores, la zona horaria del contenedor puede no coincidir con la de la máquina anfitriona. Para resolver esto, puedes establecer la variable de entorno `TZ` a la zona horaria de tu elección en tus contenedores (p. ej., `TZ=Europe/Paris`). Encontrarás la lista de identificadores de zona horaria [aquí](https://es.wikipedia.org/wiki/Anexo:Lista_de_zonas_horarias_de_la_base_de_datos_IANA#Lista).

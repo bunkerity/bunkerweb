@@ -274,6 +274,213 @@ Wenn Sie den Fehler `upstream sent too big header while reading response header 
 
 Wenn Sie den Fehler `could not build server_names_hash, you should increase server_names_hash_bucket_size` in den Protokollen sehen, müssen Sie die Einstellung `SERVER_NAMES_HASH_BUCKET_SIZE` anpassen.
 
+## Hintergrundjobs laufen nie {#background-jobs}
+
+Seit 1.7 versendet der Scheduler Jobs über die API an einen Celery-Worker. Fehlt die API, der Worker
+oder der Job-Broker, fällt der Stack ohne deutlichen Fehler aus: Der Scheduler generiert weiter
+Konfigurationen und die Instanzen bleiben gesund, aber es werden weder Zertifikate erneuert noch
+Sperrlisten aktualisiert oder Backups erstellt.
+
+Erkennbar ist das am **letzten Lauf**, der auf der **Jobs**-Seite der Web-UI oder in der API nicht
+mehr fortschreitet:
+
+```bash
+# Container-Stacks: API-Dienstname; unter Linux: http://127.0.0.1:8888
+curl -H "Authorization: Bearer $API_TOKEN" http://bw-api:8888/jobs
+```
+
+### Der Worker läuft nicht
+
+Nach einem Upgrade von 1.6 fehlt häufig der Worker: Das bloße Ändern der Image-Tags ergänzt weder
+`bw-api` noch `bw-worker` oder `bw-jobs-broker`. Siehe [Upgrade-Hinweise](upgrading.md#breaking-changes);
+setzen Sie den Stack anhand der Referenz Ihrer Integration neu auf.
+
+=== "Docker"
+
+    ```shell
+    docker compose ps bw-api bw-worker bw-jobs-broker
+    docker compose logs bw-worker
+    ```
+
+    „No such service“ bedeutet, dass der Stack vor 1.7 entstand. Ergänzen Sie die drei Dienste,
+    `API_URL`, `API_TOKEN` und `CELERY_BROKER_URL` und erstellen Sie die Container neu.
+
+=== "Linux"
+
+    ```shell
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    journalctl -u bunkerweb-worker --no-pager -n 100
+    ```
+
+    `bunkerweb-worker` ist eine neue Unit in 1.7, die das Paket auf jedem Host installiert.
+    Die Antwort lautet daher `enabled`/`disabled`, nie „not found“.
+
+    **Prüfen Sie dies auf dem Host mit `bunkerweb-scheduler`.** Dort sind `enabled` und `active`
+    richtig. `systemctl enable --now bunkerweb-worker` aktiviert ihn und zieht die Broker-Unit
+    automatisch nach. Bleibt er trotz aktivem Zustand untätig, prüfen Sie als Nächstes den Broker.
+
+    **Auf einem reinen BunkerWeb-Instanzknoten** — einer `--worker`-Installation im Sinne des
+    Installers, also „Instanz ohne Control Plane“ — ist `disabled` richtig und beabsichtigt:
+    Dieser Host besitzt keine Jobs. Aktivieren Sie ihn dort nicht.
+
+    !!! warning "Jedes Paket-Upgrade aktiviert ihn auf einem reinen Instanzknoten erneut"
+        Das Paket entscheidet anhand von `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` in seiner eigenen
+        Umgebung über die Host-Rolle. **Kein Upgrade setzt diese Variablen**: weder ein direktes
+        `apt install bunkerweb=...` noch `install-bunkerweb.sh`, dessen Upgrade-Pfad vorher endet.
+        Deshalb behandelt jedes Upgrade den Host als Einzelinstallation und **aktiviert und startet**
+        `bunkerweb-worker` sowie die erste gefundene Redis-Unit. Auf einem Instanzknoten ist dies
+        das Distributions-`redis-server` (oder `valkey`/`redis`), da dort kein `bunkerweb-broker`
+        bereitgestellt wird.
+
+        Für Jobs ist das zunächst harmlos: Der Worker fällt auf `redis://127.0.0.1:6379/0` zurück,
+        an das keine Control Plane Aufträge sendet. Eine Ausnahme besteht, wenn `CELERY_BROKER_URL`
+        dieses Knotens auf einen **erreichbaren entfernten** Broker gesetzt wurde, etwa aus einer
+        `--broker-url`-Installation kopiert oder von Hand. Dann übernimmt der verbliebene Worker
+        tatsächlich Jobs. Eine vom Installer bereitgestellte URL tut dies nicht: Der dedizierte Broker
+        bindet `127.0.0.1`, und die URL zeigt dort auf den eigenen Loopback des Knotens. Der Worker
+        wiederholt lediglich erfolglose Verbindungsversuche. Entfernen können Sie ihn mit
+        `systemctl disable --now bunkerweb-worker`, nach **jedem** Upgrade erneut. Nur eine frische
+        Installation oder ein ausdrücklicher Installer-Lauf mit `--worker` erledigt das automatisch.
+
+        **Lassen Sie die Redis-Unit unangetastet, solange nicht feststeht, dass sie kein WAF-Datastore
+        ist.** `USE_REDIS` und `REDIS_HOST` sind *flottenweite* Einstellungen auf der Control Plane:
+        Web-UI → **Globale Einstellungen** → Redis oder `/etc/bunkerweb/variables.env` des
+        Scheduler-Hosts. Die eigene `variables.env` des Instanzknotens ignoriert diese Schlüssel;
+        eine Suche darin beweist nichts. Nach mindestens einem Push enthält jedoch die gerenderte
+        Konfiguration die Werte, sodass sie lokal lesbar sind:
+
+        ```bash
+        grep -E '^(USE_REDIS|REDIS_HOST)=' /etc/nginx/variables.env
+        ```
+
+        Vor dem ersten Push verwendet der Knoten seine Start-Standardwerte; nur die Control Plane
+        kennt die Flottenwerte. Prüfen Sie diese dort. Zeigt `REDIS_HOST` auf **diesen** Host — etwa
+        dessen LAN-Adresse, nicht zwingend `127.0.0.1` —, hält er gemeinsame Sperren und
+        Ratenlimit-Zähler. Sein Abschalten löscht diese und beendet ihre gemeinsame Nutzung.
+        Erst nach dieser Prüfung: `systemctl disable --now redis-server` (oder `valkey` oder `redis`).
+
+        Auf einem solchen Host kann der verbliebene Worker endlos `NOAUTH` protokollieren, wenn
+        der Datastore auf `127.0.0.1:6379` passwortgeschützt ist. Das ist dessen untätiger Worker,
+        keine defekte Job-Pipeline. Der folgende Abschnitt diagnostiziert den **Scheduler**-Host.
+
+### Der Broker lehnt die Verbindung ab (`NOAUTH`)
+
+Ist der Broker passwortgeschützt, aber `CELERY_BROKER_URL` enthält keine Zugangsdaten, antwortet
+er mit `NOAUTH Authentication required`. Der Worker bleibt `active`, ohne Aufträge zu übernehmen;
+`POST /jobs/dispatch` antwortet mit `502`.
+
+```bash
+journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'   # Linux
+docker compose logs bw-worker | grep -i 'NOAUTH\|AuthenticationError'    # Docker
+```
+
+Prüfen Sie zuerst, dass der Endpunkt ein dedizierter Job-Broker mit `maxmemory-policy noeviction`
+ist. Dient Port `6379` einem WAF-Datastore mit Schlüsselverdrängung, stellen Sie über den
+[Linux-Installer](integrations.md#einfaches-installationsskript) einen separaten Broker bereit oder
+konfigurieren Sie selbst einen. Verwenden Sie dann dessen tatsächliche Adresse und Port.
+Die Behebung von `NOAUTH` allein schützt Jobs und Leases nicht vor Verdrängung.
+
+Geben Sie dem Broker danach eigene Zugangsdaten. Unter Linux genügt ein Eintrag in
+`/etc/bunkerweb/variables.env`, weil Worker und API diese Datei vor ihrer eigenen Umgebung lesen.
+In Container-Stacks setzen Sie den Wert auf beiden Diensten:
+
+```bash
+CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0     # Linux: dediziertes Distributions-Redis mit noeviction
+CELERY_BROKER_URL=redis://:<password>@bw-jobs-broker:6379/0 # Container-Stack
+```
+
+Prüfen Sie vor Änderungen `/etc/bunkerweb/broker.conf`. Existiert diese Datei, hat der Installer
+einen dedizierten `bunkerweb-broker` bereitgestellt, und `CELERY_BROKER_URL` zeigt bereits **mit
+Passwort** darauf. Bearbeiten Sie die vorhandene Zeile, statt eine weitere anzulegen, und lesen Sie
+den Port daraus: `6380` ist nur der Standard; bei Belegung sucht der Installer aufwärts weiter.
+Ohne diese Datei gilt Ihr gesetzter Wert oder, falls keiner gesetzt ist, unter Linux für Worker und
+API `redis://127.0.0.1:6379/0`; dann passt die obige Lösung. Der Installer provisioniert den Broker
+nur bei einer frischen Installation oder einem Upgrade mit `requirepass` oder verdrängendem
+`maxmemory`. Ein Upgrade mit unverändertem Distributions-Redis oder eine Installation mit
+`--no-broker` beziehungsweise `--broker-url` besitzt daher keine `broker.conf`.
+
+Starten Sie danach beide neu: `systemctl restart bunkerweb-worker bunkerweb-api`, oder erstellen
+Sie `bw-worker` und `bw-api` neu.
+
+!!! warning "Der Broker ist nicht der WAF-Datastore"
+    Der Job-Broker benötigt `maxmemory-policy noeviction`: Er hält die Leases, die gleichzeitige
+    Konfigurations-Pushes zweier Worker verhindern. Diese Schlüssel haben eine TTL und könnten durch
+    jede `volatile-*`-Policy mitten im Betrieb verdrängt werden. Ein Datastore ist dagegen üblicherweise
+    begrenzt und darf Schlüssel verdrängen: Flüchtige Zähler zu verlieren ist günstiger, als
+    Schreibvorgänge abzulehnen. `maxmemory-policy` gilt pro Server, nie pro Datenbank. Unterschiedliche
+    Datenbanknummern desselben Servers trennen die Rollen **nicht**. Siehe
+    [Upgrade-Hinweise](upgrading.md#breaking-changes).
+
+## Eine registrierte Instanz startet nicht {#lost-instance-credential}
+
+Nach dem Einlösen eines Registrierungscodes speichert eine Instanz ihre Zugangsdaten in
+`/var/lib/bunkerweb/instance-credential.json`. Danach akzeptiert sie **nur** diese und fällt nie auf
+das gemeinsame `API_TOKEN` zurück. Geht die Datei verloren, während die Registrierungsmarkierung
+erhalten bleibt, verweigert sie den Start, statt ohne Verbindung zur Control Plane hochzufahren:
+
+```
+This instance was enrolled but its credential is gone (/var/lib/bunkerweb/instance-credential.json
+is missing or contains no usable credential) [...] Refusing to start.
+```
+
+Der Auslöser ist bewusst eng gefasst: Die Markierung existiert, nutzbare Zugangsdaten fehlen. Die
+Datei wurde gelöscht, gekürzt, bei der Wiederherstellung ausgelassen oder enthält keine Zugangsdaten
+mehr. Eine vorhandene, aber *unlesbare* Datei — etwa nach einem Upgrade im Besitz von root — lässt
+die Frage offen: Die Instanz startet, verweigert jedoch alle Pushes, bis die Dateirechte korrigiert
+sind. Stellen Sie dann die Rechte wieder her, statt sie neu zu registrieren.
+
+Zwei benachbarte Fälle starten normal und scheitern erst bei der Control Plane: ein Container ganz
+**ohne** `/data`-Volume (Markierung und Zugangsdaten gehen gemeinsam verloren; er startet als neue,
+unregistrierte Instanz) und eine Wiederherstellung aus einem Snapshot von *vor* der Registrierung
+(beide Dateien fehlen). Die Instanz meldet je Aufruf lediglich `can't validate API token from IP …`,
+ohne die verlorene Registrierung zu nennen. Die Diagnose liegt auf der Control Plane.
+
+Zwei Wege beheben die Startverweigerung:
+
+- **Registrierung beibehalten**: Erstellen Sie einen neuen Code über die Schlüsselschaltfläche auf
+  der **Instanzen**-Seite oder `POST /instances/{hostname}/enroll` und geben Sie ihn beim nächsten
+  Start als `INSTANCE_ENROLLMENT_CODE` an.
+- **Zum gemeinsamen Token zurückkehren**: Beide Seiten müssen geändert werden. Löschen Sie auf
+  der Instanz `/var/lib/bunkerweb/instance-enrolled` **und** `instance-credential.json`. Eine leere
+  oder gekürzte Restdatei lässt die Instanz jedes Token verweigern, auch das gemeinsame. Damit startet
+  sie auf `API_TOKEN`, aber die Control Plane verwendet weiterhin die gespeicherten individuellen
+  Zugangsdaten und jeder Push wird abgelehnt. Leeren Sie diese auch am Eintrag:
+
+    ```bash
+    curl -X PATCH -H "Authorization: Bearer $API_TOKEN" -H 'Content-Type: application/json' \
+      -d '{"credential": ""}' http://bw-api:8888/instances/<hostname>
+    ```
+
+    Ein leeres `credential` entfernt den gespeicherten Wert unabhängig von der Methode der Instanz.
+    Die Control Plane verwendet wieder `API_TOKEN`. Das geht nur über die API: Die **Instanzen**-Seite
+    bietet Rotation und Widerruf, kein Leeren.
+
+    **Ein Widerruf wird dadurch nicht aufgehoben.** Wurde die Instanz zuerst widerrufen, bleibt das
+    Leeren wirkungslos; der Eintrag bleibt gesperrt. Zwei Dinge heben den Widerruf auf: ein neuer
+    Registrierungscode oder, bei einem eigenen deklarierten Token (`BUNKERWEB_INSTANCE_API_TOKEN[_n]`
+    in der gruppierten Form `BUNKERWEB_INSTANCE_HOST_n`, nicht in der flachen Liste
+    `BUNKERWEB_INSTANCES`), der nächste Konfigurationsspeichervorgang des Schedulers. Dieser übernimmt
+    das Token erneut aus der Umgebung und hebt den Widerruf auf. Das deklarierte Token muss sich
+    **vom globalen `API_TOKEN` unterscheiden**. Das gemeinsame Token erneut zu deklarieren zählt
+    nicht: Es gibt weder Aufhebung noch Logmeldung. Bei tatsächlicher Aufhebung protokolliert der
+    Scheduler dies. Für alle anderen Einträge ist erneutes Registrieren der einzige Weg.
+    Ohne API-Aufruf können **UI- oder API-registrierte** Instanzen auf der **Instanzen**-Seite
+    (oder mit `DELETE /instances/{hostname}`) gelöscht und neu angelegt werden. **Per Umgebung**
+    deklarierte Instanzen (`BUNKERWEB_INSTANCES`) können aus der Liste entfernt, nach einem
+    Konfigurationsspeichervorgang des Schedulers erneut deklariert werden. Dieser löscht den Eintrag
+    einschließlich UI-seitigem TLS-Pinning und Namen. Beide Wege verwerfen mehr als `PATCH`.
+
+    Von Autoconf, Kubernetes oder Swarm **entdeckte** Instanzen sind hiervon nie betroffen: Die
+    Control Plane erzeugt für Orchestrator-Einträge keine individuellen Zugangsdaten.
+
+    **Erneutes Registrieren ist der unterstützte und bevorzugte Wiederherstellungsweg.**
+
+!!! tip "Persistentes `/data` für die Instanz"
+    Deshalb mounten die Referenzstacks `bw-instance-data` auf dem Dienst `bunkerweb`. Ohne Volume
+    verwirft jedes `docker compose down` gefolgt von `up` die Zugangsdaten. Die Instanz startet
+    unregistriert und ohne Warnung; fehlgeschlagene Pushes zeigen das Problem auf der Control Plane.
+    Siehe [Instanzregistrierung](web-ui.md#instance-enrollment).
+
 ## Zeitzone
 
 Bei Verwendung von containerbasierten Integrationen kann die Zeitzone des Containers von der des Host-Rechners abweichen. Um dies zu beheben, können Sie die Umgebungsvariable `TZ` auf die Zeitzone Ihrer Wahl in Ihren Containern setzen (z. B. `TZ=Europe/Paris`). Eine Liste der Zeitzonen-Identifikatoren finden Sie [hier](https://de.wikipedia.org/wiki/Liste_der_Zeitzonen-Datenbank-Zeitzonen#Liste).

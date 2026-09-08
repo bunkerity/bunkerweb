@@ -274,6 +274,115 @@ BunkerWeb 中 ModSecurity 的默认配置是以异常评分模式加载核心规
 
 如果您在日志中看到以下错误 `could not build server_names_hash, you should increase server_names_hash_bucket_size`，您将需要调整 `SERVER_NAMES_HASH_BUCKET_SIZE` 设置。
 
+## 后台任务始终不运行 {#background-jobs}
+
+如果证书不再续期、封禁列表过时、备份停止，而堆栈仍显示健康，请检查任务页的**上次运行**时间是否继续变化。也可以直接查询 API：
+
+```bash
+# 容器堆栈使用 API 服务名；Linux 使用 http://127.0.0.1:8888
+curl -H "Authorization: Bearer $API_TOKEN" http://bw-api:8888/jobs
+```
+
+### Worker 未运行
+
+从 1.6 升级后最常见的原因是根本没有添加 Worker：只更新 1.6 堆栈的镜像标签会缺少 `bw-api`、`bw-worker` 和 `bw-jobs-broker`。请参阅[升级说明](upgrading.md#breaking-changes)，按对应集成的参考堆栈重新部署。
+
+=== "Docker"
+
+    ```shell
+    docker compose ps bw-api bw-worker bw-jobs-broker
+    docker compose logs bw-worker
+    ```
+
+    找不到这些服务说明堆栈早于 1.7；添加三个服务及 `API_URL`、`API_TOKEN`、`CELERY_BROKER_URL` 后重新创建。
+
+=== "Linux"
+
+    ```shell
+    systemctl is-enabled bunkerweb-worker; systemctl is-active bunkerweb-worker
+    journalctl -u bunkerweb-worker --no-pager -n 100
+    ```
+
+    `bunkerweb-worker` 是 1.7 的新单元，软件包会在每台主机安装它，因此结果应为 `enabled`/`disabled`，而不是 “not found”。
+
+    **在运行 `bunkerweb-scheduler` 的主机上检查。** 该主机应为 `enabled` 且 `active`；执行 `systemctl enable --now bunkerweb-worker` 可修复，同时自动启动任务代理单元。如果它运行中却空闲，应继续检查任务代理。
+
+    **仅运行 BunkerWeb 实例的节点**（安装器 `--worker`，意为运行实例而非控制平面）应保持 `disabled`：此主机不负责执行任务，不要在这里启用它。
+
+    !!! warning "每次软件包升级都会在仅实例节点上重新启用 Worker"
+        软件包依据自身环境中的 `WORKER_MODE`/`MANAGER_MODE`/`SERVICE_*` 判断主机角色，但所有升级路径都没有设置这些变量，包括普通 `apt install bunkerweb=...` 和在导出变量前就退出升级路径的 `install-bunkerweb.sh`。因此每次升级都会把主机当作独立安装，启用并启动 `bunkerweb-worker`，以及找到的第一个 Redis 单元。仅实例安装不配置 `bunkerweb-broker`，所以通常启动的是发行版 `redis-server`（或 `valkey`/`redis`）。
+
+        通常不会影响任务：Worker 回退到 `redis://127.0.0.1:6379/0`，没有控制平面向这里派发任务。但如果该节点的 `CELERY_BROKER_URL` 指向**可路由的**任务代理（来自 `--broker-url` 安装或手动配置），残留 Worker 就真的会消费任务。复制安装器生成的本地代理 URL 不属于这种情况：它绑定 `127.0.0.1`，在此节点仍指向自己的回环地址，只会因连接被拒绝而不断重试。需要关闭时，执行 `systemctl disable --now bunkerweb-worker`，并在**每次**升级后重复；只有全新安装或显式运行 `--worker` 安装器才会自动处理。
+
+        **除非已确认 Redis 不是 WAF 数据存储，否则不要停用它。** `USE_REDIS` 和 `REDIS_HOST` 是集群设置，位于控制平面：Web UI → **全局设置** → Redis，或调度器主机的 `/etc/bunkerweb/variables.env`。实例节点自己的同名文件会忽略这些键，搜索它不能证明任何事情。至少接收过一次配置推送的节点可查询已渲染配置：
+
+        ```bash
+        grep -E '^(USE_REDIS|REDIS_HOST)=' /etc/nginx/variables.env
+        ```
+
+        首次推送前节点只使用启动默认值，必须到控制平面查看。如果 `REDIS_HOST` 是**此主机**的地址（可能是 LAN 地址，不一定是 `127.0.0.1`），此服务器可能存储共享封禁和限流计数器；停用它会丢失这些数据并停止共享。核实之后才能执行 `systemctl disable --now redis-server`（或 `valkey`、`redis`）。
+
+        残留 Worker 指向 `127.0.0.1:6379`，如果本机数据存储受密码保护，它会持续记录 `NOAUTH`。这是此节点闲置 Worker 在访问数据存储，不代表任务执行链故障；下节诊断的是**调度器**主机。
+
+### 任务代理拒绝连接（`NOAUTH`）
+
+代理受密码保护而 `CELERY_BROKER_URL` 没有凭据时，会返回 `NOAUTH Authentication required`。Worker 保持 `active` 却不消费任务，API 的 `POST /jobs/dispatch` 返回 `502`。
+
+```bash
+journalctl -u bunkerweb-worker | grep -i 'NOAUTH\|AuthenticationError'   # Linux
+docker compose logs bw-worker | grep -i 'NOAUTH\|AuthenticationError'    # Docker
+```
+
+先确认此端点是使用 `maxmemory-policy noeviction` 的专用任务代理。如果端口 `6379` 运行的是会淘汰键的 WAF 数据存储，请通过 [Linux 安装器](integrations.md#easy-installation-script) 配置独立代理，或自行配置，然后使用其实际地址和端口。仅修复 `NOAUTH` 无法保护任务和租约免遭淘汰。
+
+然后为任务代理配置自己的凭据。Linux 上写入 `/etc/bunkerweb/variables.env` 一次即可覆盖 Worker 和 API，因为它们先读取该文件，再读取自身环境；容器堆栈需要对两个服务都设置：
+
+```bash
+CELERY_BROKER_URL=redis://:<password>@127.0.0.1:6379/0     # Linux，使用 noeviction 的专用发行版 Redis
+CELERY_BROKER_URL=redis://:<password>@bw-jobs-broker:6379/0 # 容器堆栈
+```
+
+修改前检查 `/etc/bunkerweb/broker.conf`。如果存在，安装器已配置专用 `bunkerweb-broker`，现有 `CELERY_BROKER_URL` 已包含密码并指向它；请编辑原有行，不要追加，并读取其中的实际端口。`6380` 只是默认值，被占用时安装器会向上选择。如果文件不存在，使用的是自行设置的 `CELERY_BROKER_URL`；未设置时 Linux Worker 和 API 均回退到 `redis://127.0.0.1:6379/0`，适用上面的修复。安装器只在全新安装，或主机 Redis 带有 `requirepass` 或会淘汰键的 `maxmemory` 设置时配置专用代理；使用普通发行版 Redis 的升级主机，以及使用 `--no-broker` 或 `--broker-url` 的安装没有 `broker.conf`。
+
+随后重启两个组件：`systemctl restart bunkerweb-worker bunkerweb-api`，或重新创建 `bw-worker` 和 `bw-api`。
+
+!!! warning "任务代理不是 WAF 数据存储"
+    任务代理必须使用 `maxmemory-policy noeviction`。它持有防止两个 Worker 同时推送配置的租约，这些键带有 TTL，任何 `volatile-*` 策略都可能提前淘汰它们。数据存储通常设置上限并允许淘汰，丢失临时计数器比拒绝写入的代价更低。`maxmemory-policy` 按服务器而非数据库生效，使用同一服务器的不同数据库编号不能隔离两种角色。详见[升级说明](upgrading.md#breaking-changes)。
+
+## 已注册实例拒绝启动 {#lost-instance-credential}
+
+实例兑换注册代码后将凭据保存在 `/var/lib/bunkerweb/instance-credential.json`，此后只接受该凭据，永不回退到共享 `API_TOKEN`。若凭据文件消失但注册标记还在，实例会拒绝启动，并显示：
+
+```
+This instance was enrolled but its credential is gone (/var/lib/bunkerweb/instance-credential.json
+is missing or contains no usable credential) [...] Refusing to start.
+```
+
+触发条件是注册标记仍在，但没有可用凭据：文件被删除、截断、还原时遗漏或不含凭据。如果文件存在却无法读取（例如升级后归 root 所有），实例会启动，但在权限修复前拒绝所有推送；此时应恢复权限，而不是重新注册。
+
+另外两种情况会正常启动，却在控制平面表现为所有推送被拒绝：完全没有 `/data` 卷地重建容器（标记和凭据一同丢失，成为全新未注册实例），或从注册前的快照恢复（其中没有这两个文件）。实例只在每次调用时记录 `can't validate API token from IP …` 警告，不会指出注册状态丢失，需在控制平面诊断。
+
+启动被拒绝后有两条恢复路径：
+
+- **继续注册**：在 Web UI **实例**页点击钥匙按钮，或调用 API `POST /instances/{hostname}/enroll`，签发新注册代码，下一次启动时通过 `INSTANCE_ENROLLMENT_CODE` 传入。
+- **恢复共享令牌**：必须同时处理两端。在实例上删除 `/var/lib/bunkerweb/instance-enrolled` 和 `instance-credential.json`；残留的空或截断凭据文件会让实例拒绝所有令牌，包括共享令牌。这样实例可用 `API_TOKEN` 启动，但控制平面仍持有此前签发的凭据，推送仍会被拒绝，因此还须清除数据库行中的凭据：
+
+    ```bash
+    curl -X PATCH -H "Authorization: Bearer $API_TOKEN" -H 'Content-Type: application/json' \
+      -d '{"credential": ""}' http://bw-api:8888/instances/<hostname>
+    ```
+
+    空 `credential` 会清除已存储凭据，不受实例来源方法限制，控制平面恢复使用共享 `API_TOKEN`。此操作仅由 API 提供；**实例**页提供轮换和撤销，不提供清空。
+
+    **清空不会解除撤销。** 如果先撤销了实例，清空凭据不起作用：该行继续被撤销，所有推送仍被拒绝。新注册代码可以解除撤销；对于声明自身令牌的实例（`BUNKERWEB_INSTANCE_API_TOKEN[_n]`，配合分组形式 `BUNKERWEB_INSTANCE_HOST_n`；扁平的 `BUNKERWEB_INSTANCES` 列表没有令牌），下一次调度器配置保存也会从环境重新读取凭据并解除撤销，且记录日志。声明的令牌必须**不同于全局 `API_TOKEN`**；再次声明共享令牌不算有效声明，不会解除撤销，也不会有日志。其他行只能通过重新注册恢复。如果不想调用 API，**UI 或 API 注册**的实例可在实例页（或 `DELETE /instances/{hostname}`）删除后重建；**通过环境声明**的实例可先从 `BUNKERWEB_INSTANCES` 移除，保存一次调度器配置，待该行连同 UI 设置的 TLS 指纹固定和名称一起删除后，再重新声明。这两种办法比 `PATCH` 丢弃更多配置。
+
+    autoconf、Kubernetes 或 Swarm **发现的实例**不涉及此情况：控制平面拒绝为编排器来源的行签发凭据，因此它们从未注册。
+
+    **重新注册是受支持的恢复方式，应优先使用。**
+
+!!! tip "为实例提供持久 `/data`"
+    参考堆栈在 `bunkerweb` 服务挂载 `bw-instance-data` 卷正是为此。缺少它时，每次 `docker compose down` 后再 `up` 都会丢失凭据，实例以未注册状态正常启动；控制平面则出现推送无法送达的问题。参见[实例注册](web-ui.md#instance-enrollment)。
+
 ## 时区
 
 当使用基于容器的集成时，容器的时区可能与主机的时区不匹配。要解决此问题，您可以在您的容器上将 `TZ` 环境变量设置为您选择的时区（例如 `TZ=Europe/Paris`）。您可以在[此处](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)找到时区标识符的列表。
