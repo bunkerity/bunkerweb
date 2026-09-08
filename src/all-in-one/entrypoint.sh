@@ -237,78 +237,43 @@ else
 	log "ENTRYPOINT" "ℹ️" "Scheduler service is disabled, autostart not enabled"
 fi
 
-# Worker service defaults to "yes" whenever the scheduler is enabled (scheduler needs a
-# worker to actually execute jobs via Celery). Forces USE_REDIS=yes so a local broker is
-# guaranteed, and exports CELERY_BROKER_URL pointing at it.
+# Worker service defaults to "yes" whenever the scheduler is enabled.
+# Its dedicated broker is independent of the WAF's USE_REDIS and REDIS_* settings.
 if [ "${SERVICE_SCHEDULER}" = "yes" ] && [ -z "${SERVICE_WORKER+x}" ]; then
 	export SERVICE_WORKER="yes"
 fi
 
 if [ "${SERVICE_WORKER}" = "yes" ]; then
-	if [ "${USE_REDIS:-no}" != "yes" ]; then
-		export USE_REDIS="yes"
-		log "ENTRYPOINT" "ℹ️" "Auto-enabled USE_REDIS (required by worker)"
+	# The image ENV also supplies this URL to fresh healthcheck and bwcli processes.
+	if [ -z "${CELERY_BROKER_URL:-}" ]; then
+		log "ENTRYPOINT" "❌" "CELERY_BROKER_URL must not be empty when SERVICE_WORKER=yes"
+		exit 1
 	fi
-	# The password has to go into the URL. The embedded Redis gets `requirepass` from
-	# REDIS_PASSWORD further down, so a derived URL without it produced a worker that
-	# could never authenticate to its own broker -- the operator had to hand-set
-	# CELERY_BROKER_URL to recover. An explicit CELERY_BROKER_URL still wins.
-	# The password is used verbatim, so it must not contain the URL delimiters @ : / #
-	# -- the same rule validate_redis_password() enforces in misc/install-bunkerweb.sh.
-	_broker_credentials=""
-	if [ -n "${REDIS_PASSWORD:-}" ]; then
-		_broker_credentials=":${REDIS_PASSWORD}@"
-	fi
-	# REDIS_SSL reached every other Redis consumer (clusterstore.lua, the API's rate_limit
-	# storage, sync-bans) but not this URL: it always said `redis://`, so pointing REDIS_HOST
-	# at a TLS Redis gave the worker -- and the API's dispatch client, which reads the same
-	# variable -- a plaintext handshake against a TLS listener. Every connection came back
-	# "reset by peer", the worker never consumed and POST /jobs/dispatch answered 502.
-	#
-	# ssl_cert_reqs is always spelled out, never left to a default. Three clients read this one
-	# URL: kombu (the Celery transport) harvests every `ssl_*` query key into conninfo.ssl in
-	# `kombu/utils/url.py` parse_url, and `redis.Redis.from_url` reads them too --
-	# worker/tasks.py `_broker_client` (delivery counter) and jobs/push-configs.py
-	# `_redis_client` (the push lease). Both halves of the branch are load-bearing:
-	#   - `=required`: without it a bare `rediss://` makes kombu log "defaulting to insecure SSL
-	#     behaviour" and fall back to CERT_NONE, silently dropping the verification
-	#     REDIS_SSL_VERIFY asked for (it defaults to yes in core/redis/plugin.json).
-	#   - `=none`: redundant for kombu, which would fall back to CERT_NONE anyway, but required
-	#     for the two redis-py consumers, which otherwise verify and fail
-	#     CERTIFICATE_VERIFY_FAILED against a private CA while the worker itself is connected.
-	# Verification uses the system/certifi trust store unless REDIS_SSL_CA names a bundle: both
-	# readers of this URL take `ssl_ca_certs` from the query (redis-py `parse_url`, kombu
-	# `parse_url` -> conninfo.ssl -> connparams), so the path needs no per-client plumbing.
-	# Before it existed a private-CA Redis had no option but REDIS_SSL_VERIFY=no.
-	#
-	# The value goes in verbatim and is NOT validated here. plugin.json's regex gates the
-	# database/Configurator path only; this reads the raw environment, so a path containing & # or
-	# ? would corrupt the query. Deliberately left alone -- an operator who can set REDIS_SSL_CA in
-	# the environment can set CELERY_BROKER_URL outright, so there is nothing to defend against.
-	_broker_scheme="redis"
-	_broker_query=""
-	if [ "${REDIS_SSL:-no}" = "yes" ]; then
-		_broker_scheme="rediss"
-		if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
-			_broker_query="?ssl_cert_reqs=required"
-			if [ -n "${REDIS_SSL_CA:-}" ]; then
-				_broker_query="${_broker_query}&ssl_ca_certs=${REDIS_SSL_CA}"
-			fi
-		else
-			_broker_query="?ssl_cert_reqs=none"
+	if [ "${CELERY_BROKER_URL}" = "redis://127.0.0.1:6380/0" ]; then
+		# Mounted /data volumes from older images do not contain this directory.
+		# The entrypoint runs as nginx, so newly created data is owned by nginx too.
+		broker_dir="/data/broker"
+		# /data already exists; only the new broker directory needs this mode.
+		# shellcheck disable=SC2174
+		if ! mkdir -p -m 770 "$broker_dir" || [ ! -w "$broker_dir" ] || [ ! -x "$broker_dir" ]; then
+			log "ENTRYPOINT" "❌" "Failed to prepare writable broker data directory at $broker_dir (check /data permissions)"
+			exit 1
 		fi
+		sed -i 's/autostart=false/autostart=true/;s/autorestart=false/autorestart=true/' /etc/supervisor.d/broker.ini
+		log "ENTRYPOINT" "✅" "Enabled dedicated job broker on 127.0.0.1:6380"
+	else
+		sed -i 's/autostart=true/autostart=false/;s/autorestart=true/autorestart=false/' /etc/supervisor.d/broker.ini
+		log "ENTRYPOINT" "ℹ️" "Dedicated job broker is disabled (external CELERY_BROKER_URL)"
 	fi
-	export CELERY_BROKER_URL="${CELERY_BROKER_URL:-${_broker_scheme}://${_broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0${_broker_query}}"
-	unset _broker_credentials _broker_scheme _broker_query
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/worker.ini
-	# Redact the credentials before logging : the URL can now carry the broker password,
-	# and an operator-supplied CELERY_BROKER_URL could always have carried one.
+	# Operator-supplied URLs may contain credentials.
 	_broker_display="$(printf '%s' "${CELERY_BROKER_URL}" | sed -E 's#://[^@/]*@#://***@#')"
 	log "ENTRYPOINT" "✅" "Enabled autorestart for worker service (CELERY_BROKER_URL=${_broker_display})"
 	unset _broker_display
 else
 	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/worker.ini
-	log "ENTRYPOINT" "ℹ️" "Worker service is disabled, autostart not enabled"
+	sed -i 's/autostart=true/autostart=false/;s/autorestart=true/autorestart=false/' /etc/supervisor.d/broker.ini
+	log "ENTRYPOINT" "ℹ️" "Worker and dedicated job broker are disabled, autostart not enabled"
 fi
 
 # The scheduler and autoconf both hard-require the bundled API. Whenever either runs

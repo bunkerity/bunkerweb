@@ -9,12 +9,13 @@ Agent guide for the BunkerWeb all-in-one (AIO) Docker image in `src/all-in-one/`
 
 ## What This Is
 
-Every BunkerWeb component in a single container managed by **supervisord**: BunkerWeb (NGINX), Scheduler, Worker, UI, API, Autoconf, Redis, CrowdSec and a log-streaming service. Only AIO-specific behavior is documented here.
+Every BunkerWeb component in a single container managed by **supervisord**: BunkerWeb (NGINX), Scheduler, Worker, UI, API, Autoconf, the job broker, WAF Redis, CrowdSec and a log-streaming service. Only AIO-specific behavior is documented here.
 
 ## Critical Rules
 
 - Service toggles are applied by `entrypoint.sh` — it `sed`s `autostart`/`autorestart` in the `supervisor.d/*.ini` files **before** supervisord starts.
 - `SERVICE_WORKER` defaults to enabled only when `SERVICE_SCHEDULER=yes`. Keep the Scheduler/Worker/API coupling intact.
+- The image sets `CELERY_BROKER_URL=redis://127.0.0.1:6380/0` so fresh CLI and healthcheck processes inherit it. The embedded broker runs only with the Worker enabled and that URL selected. External URLs stay verbatim; an empty URL is rejected when the Worker is enabled. `REDIS_*` configures only the WAF datastore.
 - Persistent data is rooted at `/data` and exposed through symlinks to the standard runtime paths.
 - CrowdSec, Redis and logstream behavior is AIO-specific — do not leak those assumptions into the standalone components.
 - Dependency versions are bumped in `deps/*.json` and read by the Dockerfile through `jq`.
@@ -36,17 +37,18 @@ Dev ports: 80→8080, 443→8443 (TCP/UDP), 7000 for the UI. Credentials match t
 
 Supervisord (`supervisord.conf`, per-service `supervisor.d/*.ini`) starts services by priority:
 
-| Priority | Service   | Toggle              | Default                                                                             |
-| -------- | --------- | ------------------- | ----------------------------------------------------------------------------------- |
-| 10       | bunkerweb | (always on)         | yes                                                                                 |
-| 12       | redis     | `USE_REDIS`         | yes                                                                                 |
-| 12       | crowdsec  | `USE_CROWDSEC`      | no                                                                                  |
-| 15       | logstream | (always on)         | yes                                                                                 |
-| 20       | ui        | `SERVICE_UI`        | yes                                                                                 |
-| 25       | api       | `SERVICE_API`       | image-level `no`; effectively enabled because the default Scheduler auto-enables it |
-| 28       | worker    | `SERVICE_WORKER`    | yes, only when `SERVICE_SCHEDULER=yes` (auto-set by `entrypoint.sh`)                |
-| 30       | scheduler | `SERVICE_SCHEDULER` | yes                                                                                 |
-| 30       | autoconf  | `AUTOCONF_MODE`     | no                                                                                  |
+| Priority | Service   | Toggle                              | Default                                                                             |
+| -------- | --------- | ----------------------------------- | ----------------------------------------------------------------------------------- |
+| 10       | bunkerweb | (always on)                         | yes                                                                                 |
+| 12       | redis     | `USE_REDIS`                         | yes                                                                                 |
+| 12       | broker    | Worker enabled + default broker URL | yes with the default Scheduler/Worker configuration                                 |
+| 12       | crowdsec  | `USE_CROWDSEC`                      | no                                                                                  |
+| 15       | logstream | (always on)                         | yes                                                                                 |
+| 20       | ui        | `SERVICE_UI`                        | yes                                                                                 |
+| 25       | api       | `SERVICE_API`                       | image-level `no`; effectively enabled because the default Scheduler auto-enables it |
+| 28       | worker    | `SERVICE_WORKER`                    | yes, only when `SERVICE_SCHEDULER=yes` (auto-set by `entrypoint.sh`)                |
+| 30       | scheduler | `SERVICE_SCHEDULER`                 | yes                                                                                 |
+| 30       | autoconf  | `AUTOCONF_MODE`                     | no                                                                                  |
 
 ### Entrypoint flow
 
@@ -76,6 +78,7 @@ Compiled in the builder stage, pinned in `deps/*.json`: Go uses per-architecture
 - `acquis.yaml` — acquisition of the BunkerWeb `access.log`, `error.log` and `modsec_audit.log`
 - `appsec.yaml` — AppSec module on `127.0.0.1:7422`
 - `redis.conf` — Redis on `127.0.0.1` with AOF persistence to `/var/lib/redis/`
+- `broker.conf` — dedicated Redis on `127.0.0.1:6380`, `maxmemory 256mb`, `noeviction`, AOF under `/data/broker`; it starts before the Worker and stops after it.
 
 ## Data Persistence
 
@@ -87,6 +90,8 @@ Compiled in the builder stage, pinned in `deps/*.json`: Go uses per-architecture
 | `/etc/bunkerweb/*`     | `/data/{configs,plugins,pro}` |
 | `/var/lib/crowdsec`    | `/data/crowdsec`              |
 | `/var/lib/redis`       | `/data/redis`                 |
+
+The broker writes directly to `/data/broker`; startup creates the directory on pre-existing mounted volumes too.
 
 Exposed ports: `8080` HTTP, `8443` HTTPS (TCP + UDP/QUIC), `7000` UI, `8888` API when `SERVICE_API=yes`.
 

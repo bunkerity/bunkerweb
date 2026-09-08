@@ -62,47 +62,28 @@ fi
 # Check the worker only when it is supposed to run. Mirror the entrypoint gate: it
 # defaults to on whenever the scheduler is on. Without this a wedged worker left the
 # container healthy while every job silently stopped running.
-if [ "${SERVICE_WORKER:-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
+if [ "${SERVICE_WORKER-${SERVICE_SCHEDULER:-yes}}" = "yes" ]; then
   status=$(supervisorctl status "worker" 2>/dev/null)
   if ! echo "$status" | grep -q "RUNNING"; then
     echo "Service worker is not running: $status"
     exit 1
   fi
 
-  # The entrypoint derives CELERY_BROKER_URL from REDIS_* and exports it, but only supervisord's
-  # children inherit that -- a HEALTHCHECK process is started fresh from the container env, where
-  # the variable is unset (it is in neither the image ENV nor variables.env). `celery inspect ping`
-  # then falls back to redis://127.0.0.1:6379/0, which is the right broker only when the AIO runs
-  # the embedded Redis with no password: point REDIS_HOST at an external server, or set
-  # REDIS_PASSWORD, and the probe dialled a broker nobody listens on, so a healthy worker kept the
-  # container unhealthy for ever. Same derivation as entrypoint.sh -- keep the two in sync. An
-  # explicit CELERY_BROKER_URL still wins, there as here.
+  # The image ENV supplies the same broker URL to startup and fresh healthchecks.
   if [ -z "${CELERY_BROKER_URL:-}" ]; then
-    broker_credentials=""
-    if [ -n "${REDIS_PASSWORD:-}" ]; then
-      broker_credentials=":${REDIS_PASSWORD}@"
+    echo "CELERY_BROKER_URL must not be empty when SERVICE_WORKER=yes"
+    exit 1
+  fi
+  if [ "${CELERY_BROKER_URL}" = "redis://127.0.0.1:6380/0" ]; then
+    status=$(supervisorctl status "broker" 2>/dev/null)
+    if ! echo "$status" | grep -q "RUNNING"; then
+      echo "Dedicated job broker is not running: $status"
+      exit 1
     fi
-    # REDIS_SSL picks the scheme, exactly as entrypoint.sh does: probing a TLS broker over
-    # plaintext resets the connection, so `celery inspect ping` failed and the container stayed
-    # unhealthy for ever even though the worker was fine. The query is not decoration here
-    # either -- kombu harvests `ssl_*` query keys in `kombu/utils/url.py` parse_url, so
-    # `=required` is what makes this probe actually verify instead of falling back to
-    # CERT_NONE, and REDIS_SSL_CA is what lets it verify a private CA at all. Keep identical
-    # to entrypoint.sh; see the longer note there.
-    broker_scheme="redis"
-    broker_query=""
-    if [ "${REDIS_SSL:-no}" = "yes" ]; then
-      broker_scheme="rediss"
-      if [ "${REDIS_SSL_VERIFY:-yes}" = "yes" ]; then
-        broker_query="?ssl_cert_reqs=required"
-        if [ -n "${REDIS_SSL_CA:-}" ]; then
-          broker_query="${broker_query}&ssl_ca_certs=${REDIS_SSL_CA}"
-        fi
-      else
-        broker_query="?ssl_cert_reqs=none"
-      fi
+    if [ "$(REDISCLI_AUTH='' redis-cli -h 127.0.0.1 -p 6380 ping 2>/dev/null)" != "PONG" ]; then
+      echo "Dedicated job broker is RUNNING but not responding to PING"
+      exit 1
     fi
-    export CELERY_BROKER_URL="${broker_scheme}://${broker_credentials}${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:-6379}/0${broker_query}"
   fi
 
   # Not executable in the image (COPY src/worker keeps 0644), so run it through bash.

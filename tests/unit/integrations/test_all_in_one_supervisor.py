@@ -43,7 +43,7 @@ TRUNCATING_UNIT = (
 
 def declared_command(text: str) -> str:
     """The `command=` value as a human reading the file sees it."""
-    return next(line[len("command=") :] for line in text.splitlines() if line.startswith("command="))
+    return next(line.removeprefix("command=") for line in text.splitlines() if line.startswith("command="))
 
 
 def parsed_command(text: str, program: str) -> str:
@@ -71,9 +71,9 @@ def test_every_all_in_one_unit_parses_to_its_full_declared_command():
     assert losses == [], "supervisord will truncate: " + "; ".join(f"{unit} {declared} -> {parsed} chars" for unit, declared, parsed in losses)
 
 
-def test_all_ten_units_are_actually_being_checked():
+def test_all_eleven_units_are_actually_being_checked():
     """Anti-vacuity on the walker: a guard that finds no files passes forever."""
-    assert len(list(UNITS_DIR.glob("*.ini"))) == 10, "the all-in-one unit count changed -- read the new unit, then update this number"
+    assert len(list(UNITS_DIR.glob("*.ini"))) == 11, "the all-in-one unit count changed -- read the new unit, then update this number"
 
 
 def test_the_detector_still_catches_the_shape_that_broke_crowdsec(tmp_path):
@@ -96,3 +96,11 @@ def test_the_stand_in_agrees_with_the_real_supervisor_parser():
         real = options.UnhosedConfigParser()
         real.read_string(text)
         assert real.get(f"program:{unit.stem}", "command") == parsed_command(text, unit.stem), f"{unit.stem}: stand-in and supervisor disagree"
+
+
+def test_broker_starts_before_worker_and_stops_after_it():
+    parser = ConfigParser(interpolation=None)
+    parser.read([UNITS_DIR / "broker.ini", UNITS_DIR / "worker.ini"])
+    assert parser.getint("program:broker", "priority") < parser.getint("program:worker", "priority")
+    assert parser.get("program:broker", "user") == "nginx"
+    assert "redis-server /etc/broker.conf" in parser.get("program:broker", "command")

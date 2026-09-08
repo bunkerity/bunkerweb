@@ -278,10 +278,14 @@ RUN cp helpers/bwcli /usr/bin/ && \
     # Setup Redis && \
     mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
     mv all-in-one/conf/redis.conf /etc/redis.conf && \
+    mv all-in-one/conf/broker.conf /etc/broker.conf && \
+    mkdir /data/broker && \
     rm -rf all-in-one/conf && \
     chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \
     chmod -R 770 /data /var/lib/redis && \
     chmod 660 /etc/redis.conf && \
+    chown nginx:nginx /data/broker && \
+    chmod 644 /etc/broker.conf && \
     # Set up supervisor configuration && \
     mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
@@ -306,6 +310,8 @@ ENV PYTHONPATH="/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db"
 ENV SERVICE_UI="yes"
 ENV SERVICE_SCHEDULER="yes"
 ENV SERVICE_API="no"
+ENV CELERY_BROKER_URL="redis://127.0.0.1:6380/0"
+ENV DATABASE_URI="sqlite:////var/lib/bunkerweb/db.sqlite3"
 ENV AUTOCONF_MODE="no"
 ENV USE_CROWDSEC="no"
 ENV USE_REDIS="yes"
