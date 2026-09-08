@@ -67,20 +67,33 @@ function selfsigned:init()
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
-			local check, data = read_files({
-				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. "/cert.pem",
-				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. "/key.pem",
-			})
-			if not check then
-				self.logger:log(ERR, "error while reading files : " .. data)
+			-- Same guard, same reason as `customcert:init()` : a SERVER_NAME that reached the
+			-- instance EMPTY is "", not nil, so the check above does not catch it and the match then
+			-- yields nil, which aborts init() inside init_by_lua on the concatenation below.
+			local first_server = server_name:match("%S+")
+			if not first_server then
+				self.logger:log(
+					ERR,
+					"GENERATE_SELF_SIGNED_SSL is enabled but SERVER_NAME is empty : no service certificate to load"
+				)
 				ret_ok = false
-				ret_err = "error reading files"
+				ret_err = "no server name configured"
 			else
-				check, err = self:load_data(data, server_name)
+				local check, data = read_files({
+					"/var/cache/bunkerweb/selfsigned/" .. first_server .. "/cert.pem",
+					"/var/cache/bunkerweb/selfsigned/" .. first_server .. "/key.pem",
+				})
 				if not check then
-					self.logger:log(ERR, "error while loading data : " .. err)
+					self.logger:log(ERR, "error while reading files : " .. data)
 					ret_ok = false
-					ret_err = "error loading data"
+					ret_err = "error reading files"
+				else
+					check, err = self:load_data(data, server_name)
+					if not check then
+						self.logger:log(ERR, "error while loading data : " .. err)
+						ret_ok = false
+						ret_err = "error loading data"
+					end
 				end
 			end
 		end

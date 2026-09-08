@@ -187,20 +187,37 @@ function customcert:init()
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
-			local check, data = read_files({
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/cert.pem",
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/key.pem",
-			})
-			if not check then
-				self.logger:log(ERR, "error while reading files : " .. data)
+			-- A SERVER_NAME that reached the instance EMPTY is "", not nil, so the check above does
+			-- not catch it : the match then yields nil and the two concatenations below aborted
+			-- init() inside init_by_lua ("attempt to concatenate a nil value"), which costs the
+			-- whole phase. `certificates:init()` guards the same shape for the same reason.
+			-- Recorded rather than returned : the default server's own certificate at the end of
+			-- this function is independent of any service -- `jobs/custom-cert.py` evaluates its
+			-- override "whether or not any service does" -- so an empty roster must not cost it too.
+			local first_server = server_name:match("%S+")
+			if not first_server then
+				self.logger:log(
+					ERR,
+					"USE_CUSTOM_SSL is enabled but SERVER_NAME is empty : no service certificate to load"
+				)
 				ret_ok = false
-				ret_err = "error reading files"
+				ret_err = "no server name configured"
 			else
-				check, err = self:load_data(data, server_name, wildcard_certificates)
+				local check, data = read_files({
+					"/var/cache/bunkerweb/customcert/" .. first_server .. "/cert.pem",
+					"/var/cache/bunkerweb/customcert/" .. first_server .. "/key.pem",
+				})
 				if not check then
-					self.logger:log(ERR, "error while loading data : " .. err)
+					self.logger:log(ERR, "error while reading files : " .. data)
 					ret_ok = false
-					ret_err = "error loading data"
+					ret_err = "error reading files"
+				else
+					check, err = self:load_data(data, server_name, wildcard_certificates)
+					if not check then
+						self.logger:log(ERR, "error while loading data : " .. err)
+						ret_ok = false
+						ret_err = "error loading data"
+					end
 				end
 			end
 		end

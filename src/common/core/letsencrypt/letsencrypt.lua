@@ -378,7 +378,16 @@ function letsencrypt:init()
 				insert(server_list, part)
 			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
-			if use_wildcard_mode then
+			-- Same guard, same reason as `customcert:init()` : a SERVER_NAME that reached the instance
+			-- EMPTY is "", not nil, so the check above does not catch it, `cert_identifier` is nil and
+			-- the non-wildcard branch below aborts init() inside init_by_lua on its concatenation.
+			-- Recorded rather than returned : the two internalstore keys published at the end of this
+			-- function are what `ssl_certificate()` reads, and it refuses every handshake without them.
+			if not cert_identifier then
+				self.logger:log(ERR, "USE_LETS_ENCRYPT is enabled but SERVER_NAME is empty : no certificate to load")
+				ret_ok = false
+				ret_err = "no server name configured"
+			elseif use_wildcard_mode then
 				local wildcard_groups = build_wildcard_groups(server_list)
 				local bases = {}
 				for base, _ in pairs(wildcard_groups) do
