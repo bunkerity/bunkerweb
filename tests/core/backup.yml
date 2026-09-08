@@ -39,6 +39,56 @@ actions:
     result: "Nothing was changed"
     not_result: "Pre-downgrade backup taken"
     restart_stack: false
+  # A job still in flight when the harness reaches the action below is a deterministic red, not a
+  # flake to retry away: `check_writers` (src/common/core/backup/downgrade.py:350-379) refuses the
+  # preflight on ANY job queued or in flight, by design (push 15, Autoconf CI -- AIO and Linux
+  # passed the same spec in the same run). This waits it out with the SAME read-only preflight the
+  # command below runs -- `wait_for_writers_idle.py`'s own docstring has the detail -- bounded at
+  # 120s, so the harness cannot mask a real refusal by waiting forever; it only ever waits out this
+  # one check, and the action right after re-runs the full preflight for real.
+  downgrade_preflight_waits_for_writers_idle:
+    type: script
+    script:
+      [
+        "python3",
+        "tests/core/backup/wait_for_writers_idle.py",
+        "Docker",
+        "1.6.14",
+      ]
+    result: "writers are idle"
+    restart_stack: false
+    Linux:
+      script:
+        [
+          "python3",
+          "tests/core/backup/wait_for_writers_idle.py",
+          "Linux",
+          "1.6.14",
+        ]
+    Autoconf:
+      script:
+        [
+          "python3",
+          "tests/core/backup/wait_for_writers_idle.py",
+          "Autoconf",
+          "1.6.14",
+        ]
+    Kubernetes:
+      script:
+        [
+          "python3",
+          "tests/core/backup/wait_for_writers_idle.py",
+          "Kubernetes",
+          "1.6.14",
+        ]
+    All-in-one:
+      script:
+        [
+          "python3",
+          "tests/core/backup/wait_for_writers_idle.py",
+          "All-in-one",
+          "1.6.14",
+        ]
   downgrade_finds_the_shipped_manifest:
     type: bwcli
     command: "plugin backup downgrade 1.6.14"
