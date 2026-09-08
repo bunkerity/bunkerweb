@@ -14,31 +14,27 @@ La interfaz web es el plano de control visual de BunkerWeb. Administra servicios
     - Sesiones: firmadas con `FLASK_SECRET`, vida útil por defecto 12 h, fijadas a IP y User-Agent; `ALWAYS_REMEMBER` controla cookies persistentes
     - Logs: `/var/log/bunkerweb/ui.log` (+ access log si se captura), UID/GID 101 dentro del contenedor
     - Salud: `GET /healthcheck` opcional si `ENABLE_HEALTHCHECK=yes`
-    - Dependencias: comparte la base de datos de BunkerWeb y habla con la API para recargar, bloquear o consultar instancias
+    - Dependencias: lee y escribe la configuración mediante la API; el Scheduler, Worker, broker de jobs y base de datos deben estar disponibles
 
 ## Checklist de seguridad
 
 - Ejecuta la UI detrás de BunkerWeb en una red interna; usa un `REVERSE_PROXY_URL` difícil de adivinar y limita IPs de origen.
 - Establece `ADMIN_USERNAME` / `ADMIN_PASSWORD` fuertes; usa `OVERRIDE_ADMIN_CREDS=yes` solo cuando quieras forzar un reseteo.
 - Proporciona `TOTP_ENCRYPTION_KEYS` y habilita TOTP en cuentas admin; guarda los códigos de recuperación.
+- Prefiere passkeys cuando sea posible: define `UI_WEBAUTHN_RP_ID` (o una sola entrada `UI_ALLOWED_HOSTS`) y registra al menos dos por cuenta. Resisten el phishing: no firman para un origen incorrecto.
 - Usa TLS (terminado en BunkerWeb o `UI_SSL_ENABLED=yes` con rutas de cert/clave); fija `UI_FORWARDED_ALLOW_IPS` a proxies de confianza.
 - Persiste secretos: monta `/var/lib/bunkerweb` para conservar `FLASK_SECRET`, llaves Biscuit y material TOTP entre reinicios.
 - Mantén `CHECK_PRIVATE_IP=yes` (por defecto) para ligar sesiones a la IP; deja `ALWAYS_REMEMBER=no` salvo que requieras cookies largas.
-- Asegura que `/var/log/bunkerweb` sea legible por UID/GID 101 (o el UID mapeado en rootless) para que la UI pueda leer logs.
+- Asegura que `/var/log/bunkerweb` permita escritura a UID/GID 101 (o el UID mapeado en rootless) para que la UI pueda leer logs.
 
 ## Puesta en marcha
 
-La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
+La interfaz accede a BunkerWeb mediante la API. Ejecútala con Scheduler, Worker, broker dedicado y base de datos, como en los stacks de referencia.
 
 === "Inicio rápido (asistente)"
 
-    Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
-
-    ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.7.0~beta-rc1/misc/integrations/docker-compose.yml up -d
-    ```
-
-    Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
+    Usa las imágenes publicadas y la estructura de la [guía rápida](quickstart-guide.md#__tabbed_1_3)
+    para levantar el stack, y completa el asistente en el navegador.
 
 === "Avanzado (entorno presembrado)"
 
@@ -46,8 +42,12 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     ```yaml
     x-service-env: &service-env
-      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
-      LOG_TYPES: "stderr syslog"
+      # We anchor the environment variables to avoid duplication
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Replace this shared token before deploying
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
+      LOG_TYPES: "stderr syslog" # Service logs from supporting components
       LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
     services:
@@ -56,17 +56,83 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
-          - "443:8443/udp"
+          - "443:8443/udp" # QUIC
         environment:
+          <<: *service-env
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+        volumes:
+          - bw-instance-data:/data
         restart: "unless-stopped"
-        networks: [bw-universe, bw-services]
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *service-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+          # the database IS a file under /data.
+          - bw-worker-storage:/data
+        environment:
+          <<: *service-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.7.0-beta
         environment:
           <<: *service-env
-          BUNKERWEB_INSTANCES: "bunkerweb"
+          BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
@@ -75,61 +141,83 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
           DISABLE_DEFAULT_SERVER: "yes"
           www.example.com_USE_TEMPLATE: "ui"
           www.example.com_USE_REVERSE_PROXY: "yes"
-          www.example.com_REVERSE_PROXY_URL: "/changeme"
+          www.example.com_REVERSE_PROXY_URL: "/changeme" # Change it to a hard-to-guess URI
           www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
         volumes:
-          - bw-storage:/data
+          - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
-        networks: [bw-universe, bw-db]
+        networks:
+          - bw-universe
+          - bw-db
 
       bw-ui:
         image: bunkerity/bunkerweb-ui:1.7.0-beta
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
-          ADMIN_PASSWORD: "Str0ng&P@ss!"
-          # TOTP_ENCRYPTION_KEYS: "changeme" # Opcional: se genera en el volumen bw-ui-data si no se define; una clave tiene 43 caracteres
+          ADMIN_PASSWORD: "Str0ng&P@ss!" # Remember to set a stronger password for the admin user
+          # TOTP_ENCRYPTION_KEYS: "changeme" # Optional: generated in the bw-ui-data volume when unset; a key must be 43 characters
           UI_FORWARDED_ALLOW_IPS: "10.20.30.0/24"
         volumes:
-          - bw-logs:/var/log/bunkerweb
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
           - bw-ui-data:/data # This is used to persist the UI secrets (Flask secret, TOTP encryption keys, Biscuit keys)
         restart: "unless-stopped"
-        networks: [bw-universe, bw-db]
+        networks:
+          - bw-universe
+          - bw-db
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
         command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
           MYSQL_USER: "bunkerweb"
-          MYSQL_PASSWORD: "changeme"
+          MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
         volumes:
           - bw-data:/var/lib/mysql
         restart: "unless-stopped"
-        networks: [bw-db]
+        networks:
+          - bw-db
 
       bw-syslog:
         image: balabit/syslog-ng:4.10.2
+        cap_add:
+          - NET_BIND_SERVICE  # Bind to low ports
+          - NET_BROADCAST  # Send broadcasts
+          - NET_RAW  # Use raw sockets
+          - DAC_READ_SEARCH  # Read files bypassing permissions
+          - DAC_OVERRIDE  # Override file permissions
+          - CHOWN  # Change ownership
+          - SYSLOG  # Write to system logs
         volumes:
-          - bw-logs:/var/log/bunkerweb
-          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+          - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
+          - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # This is the syslog-ng configuration file
         restart: "unless-stopped"
-        networks: [bw-universe]
+        networks:
+          - bw-universe
 
     volumes:
+      bw-instance-data:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       bw-data:
       bw-storage:
       bw-logs:
-      bw-lib:
       bw-ui-data:
 
     networks:
       bw-universe:
+        name: bw-universe
         ipam:
-          config: [{ subnet: 10.20.30.0/24 }]
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
       bw-services:
+        name: bw-services
       bw-db:
+        name: bw-db
     ```
 
 === "Docker Autoconf"
@@ -168,6 +256,12 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     ```
 
     Los códigos de recuperación se muestran una sola vez; si pierdes las llaves de cifrado, se eliminan los secretos TOTP almacenados.
+- Passkeys (WebAuthn / FIDO2): al resolver `UI_WEBAUTHN_RP_ID` (ver abajo), la pestaña **Security** del perfil muestra **Passkeys**. Una passkey permite entrar sin usuario ni contraseña: el autenticador verifica localmente, sin pedir TOTP. Puedes registrar varias, cada una con nombre, fecha de creación y último uso. Una llave FIDO2 antigua no descubrible no inicia sesión por sí sola, pero sirve como alternativa a TOTP después de la contraseña.
+
+    Es una vía *alternativa*, no un requisito adicional: registrar una passkey no la exige después
+    de la contraseña. No tienen códigos de recuperación y perder el dispositivo podría bloquear
+    la cuenta. Contraseña y TOTP siguen funcionando igual; las cuentas sin passkey no cambian.
+    Usa TOTP con códigos de recuperación para *exigir* un segundo factor.
 - Sesiones: duración de inactividad por defecto 12 h (`SESSION_LIFETIME_HOURS`), refrescada en cada petición. Se aplica un límite absoluto vía `SESSION_ABSOLUTE_HOURS` (por defecto `168` = 7 días) — superado ese tiempo, los usuarios son desconectados aunque sigan activos. Rotación opcional del identificador de sesión (`SESSION_ROLLING_HOURS`, por defecto `0` = deshabilitada) regenera el ID de sesión en ese intervalo. Sesiones fijadas a IP y User-Agent; `CHECK_PRIVATE_IP=no` relaja el control de IP solo en rangos privados. `ALWAYS_REMEMBER=yes` fuerza cookies persistentes.
 - Ajusta `PROXY_NUMBERS` si varios proxies añaden `X-Forwarded-*`.
 
@@ -233,6 +327,42 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 | `ALWAYS_REMEMBER`                           | Activar siempre “remember me”                                                                                          | `yes` o `no`            | `no`                      |
 | `CHECK_PRIVATE_IP`                          | Ligar sesión a IP (relaja en redes privadas con `no`)                                                                  | `yes` o `no`            | `yes`                     |
 | `PROXY_NUMBERS`                             | Saltos de proxy confiables para `X-Forwarded-*`                                                                        | Entero                  | `1`                       |
+| `UI_WEBAUTHN_RP_ID` | Identificador de parte confiable WebAuthn (dominio sin esquema ni puerto). Por defecto, la única entrada no comodín de `UI_ALLOWED_HOSTS`. | Nombre de dominio | derivado; si no, deshabilitado |
+| `UI_WEBAUTHN_ORIGINS` | Orígenes exactos aceptados durante la operación. | URLs separadas por espacios/comas | `https://<RP ID>` |
+
+!!! warning "El RP ID forma parte del límite de seguridad"
+    Las credenciales WebAuthn están vinculadas criptográficamente al RP ID. Nunca se deduce de
+    `Host`, controlable por un atacante. Se usa `UI_WEBAUTHN_RP_ID`; en su ausencia, la única
+    entrada de `UI_ALLOWED_HOSTS` si no es comodín (sin `:port`); si no hay ninguna válida, las
+    passkeys quedan desactivadas y la interfaz registra el motivo al arrancar.
+
+    **Cambiar el dominio de la interfaz invalida todas las passkeys registradas.** Los usuarios
+    deben registrar otras en el nuevo dominio; no se pueden migrar porque el autenticador incorpora
+    el RP ID. Conserva TOTP o contraseña como alternativa antes de cambiar el dominio. Estas
+    operaciones requieren HTTPS, salvo `localhost` (por eso funciona `http://localhost:7000` en desarrollo).
+
+### Gestor de certificados {#certificate-manager}
+
+| Ajuste | Descripción | Valores aceptados | Predeterminado |
+| ------ | ----------- | ----------------- | -------------- |
+| `CERTIFICATE_ENCRYPTION_KEYS` | Anillo de claves AES-256-GCM para las claves privadas almacenadas. | Objeto JSON de IDs a claves de 32 bytes en base64 | sin definir |
+| `CERTIFICATE_ENCRYPTION_ACTIVE_KEY` | ID de clave para nuevas claves privadas importadas o generadas. | Clave presente en el anillo | sin definir |
+
+Ambas variables son necesarias para crear, importar y renovar certificados autofirmados. Conserva
+los IDs antiguos mientras haya certificados que los usen y proporciona el mismo anillo a todos
+los procesos API y worker que gestionen certificados. Los endpoints de descarga nunca exponen claves privadas.
+
+La API concentra en `/certificates` el inventario: listado, metadatos, asignaciones, eliminación de
+certificados no gestionados y descargas públicas. El ciclo de vida depende del proveedor:
+`/selfsigned/certificates` crea y renueva autofirmados, `/customcert/certificates/upload` importa
+PEM y `/letsencrypt/certificates` programa ACME y expone la consulta de estados huérfanos. Así los
+proveedores siguen siendo extensibles y la interfaz no evita la API.
+
+Las asignaciones del gestor organizan el inventario; no sustituyen los ajustes de Let's Encrypt o
+certificados personalizados por servicio que controlan el TLS activo. Los registros Let's Encrypt
+se sincronizan desde la caché certbot. La eliminación gestionada por el proveedor no está disponible
+hasta que el worker pueda confirmar y reintentar operaciones específicas de caché de forma duradera:
+eliminar el estado ACME todavía no elimina automáticamente su registro del inventario.
 
 ### Logging
 
@@ -289,7 +419,18 @@ log { source(s_net); destination(d_dyna_file); };
 - Gestionar usuarios de UI, roles, sesiones y TOTP con códigos de recuperación.
 - Actualizar a BunkerWeb PRO y ver estado de licencia en la página dedicada.
 
-### Registro de instancias
+### La entrada del servidor predeterminado {#the-default-server-entry}
+
+Con `MULTISITE=yes`, la lista de servicios muestra arriba una entrada fijada **Default server** con una explicación.
+Es `default-server`, que responde a peticiones sin servicio coincidente: hostname desconocido, IP
+directa o un `Host` no servido. La entrada reservada no existe en modo de sitio único.
+
+Permite configurar certificado, TLS, cabeceras, páginas de error y lista blanca. No ofrece proxy
+inverso, gRPC, redirecciones, sesiones, antibot, mTLS, CORS ni autenticación HTTP básica: no tiene
+hostname que enrutar ni identidad de servicio a la que vincularlos. Tampoco permite eliminar,
+clonar o convertir; es permanente y nunca cuenta para la cuota PRO.
+
+### Registro de instancias {#instance-enrollment}
 
 Una instancia mostrada en la página **Instancias** puede recibir su propia credencial del plano de control en lugar de compartir el `API_TOKEN` global. El botón de llave de la fila (o el menú de historial) emite un código de registro de un solo uso, mostrado una vez, que la instancia canjea al arrancar mediante `INSTANCE_ENROLLMENT_CODE`; a partir de entonces solo responde a la credencial que el plano de control acuñó para ella. La mecánica completa, incluidos los endpoints de la API y la diferencia entre `manual` y `autoconf`, está en la [referencia de la API](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
 
@@ -302,6 +443,110 @@ Una instancia que declara su propio `BUNKERWEB_INSTANCE_API_TOKEN_<n>` muestra e
 
 !!! note "Una fila `manual` sigue sin poder eliminarse desde aquí"
     Registrar, rotar o revocar una fila declarada en el entorno funciona desde esta página, pero eliminarla no — el siguiente guardado de configuración la vuelve a crear a partir de `BUNKERWEB_INSTANCES` / `BUNKERWEB_INSTANCE_*`. En su lugar, quite el hostname del entorno, lo que también elimina su registro.
+
+### Grupos de recursos {#resource-groups}
+
+En **Configure → Resource groups** mantén listas reutilizables de IP/CIDR, países, ASN, sufijos
+DNS inversos, patrones de User-Agent y URI. Cada entrada tiene un tipo y un comentario opcional.
+Puedes clonar grupos, exportarlos en JSON y consultar todas sus referencias antes de cambiarlos.
+
+Usa `@alias` en un ajuste compatible, por ejemplo `@office 203.0.113.5`. Las listas de Whitelist,
+Blacklist, Greylist, Real IP, DNSBL y Antibot admiten referencias. El token se conserva en la base
+y se expande al generar la configuración según el tipo del ajuste: modificar el grupo actualiza
+todos sus consumidores en el siguiente envío. Los workflows seleccionan grupos por ID estable.
+
+El alias tiene entre 1 y 64 letras, cifras, guiones o guiones bajos. `@EU`, `@G7` y `@SCHENGEN`
+están reservados. Se rechazan grupos inexistentes o sin entradas del tipo requerido y no se puede
+eliminar un grupo mientras lo use un ajuste o workflow.
+
+### Upstreams
+
+En **Configure → Upstreams** mantén pools reutilizables HTTP, gRPC o stream y adjúntalos a varios
+servicios. Cada pool tiene nombre, protocolo (`http`, `grpc`, `stream`), método de balanceo
+(`round_robin`, `least_conn`, `ip_hash`), hasta 64 servidores con peso, max-fails, fail-timeout y
+rol primary/backup/down, un número opcional de conexiones keepalive y `backend_ssl`. La asociación
+registra la ruta del proxy inverso (`/` por defecto); un pool admite hasta 100 servicios.
+
+La página usa `GET /upstreams`, `POST /upstreams`, `PATCH /upstreams/{id}`, `DELETE /upstreams/{id}`
+y `POST/DELETE /upstreams/{id}/attachments[/{service}]` para listar, crear, editar, eliminar y asociar o separar.
+
+### Plantillas {#templates}
+
+En **Configure → Templates** puedes explorar, crear y gestionar plantillas reutilizables: ajustes,
+pasos ordenados y configuraciones personalizadas que un servicio adopta mediante `USE_TEMPLATE`.
+La galería muestra cuántos servicios, incluidos borradores, usan cada plantilla y sus funciones.
+El editor usa el mismo catálogo de ajustes multisitio que los servicios y permite empezar desde
+cero o clonar una plantilla. El **Templates catalogue** comunitario ofrece plantillas preparadas.
+Instalarlas requiere `admin`, no basta con `write`: pueden contener configuración NGINX guardada
+sin validar el contenido. Los ajustes siempre se verifican contra la tabla de ajustes de esta
+versión; una plantilla que nombre un ajuste desconocido se rechaza.
+
+Desde 1.7, `USE_TEMPLATE` acepta varias plantillas por servicio, aplicadas en orden; ante un
+conflicto gana la última. Esta página permite crear esos bloques reutilizables.
+
+### Gestión de la caché web {#web-cache-management}
+
+**Web cache** gestiona la caché NGINX del proxy inverso. Muestra el estado de informe de cada
+instancia, entradas y tamaño en disco, servicios con `USE_PROXY_CACHE` efectivo y contadores
+`HIT`, `MISS`, `BYPASS` y `STALE` cuando Metrics los proporciona.
+
+Puedes purgar una URL HTTP(S) absoluta o toda la caché. Para una URL se reconstruye el
+`PROXY_CACHE_KEY` exacto; proporciona la plantilla personalizada del servicio si difiere de la
+predeterminada. La API admite hasta 100 URLs por petición.
+
+!!! warning "Una purga completa afecta a todos los servicios con caché"
+    `scope: "all"` vacía la zona compartida `proxycache` en cada instancia accesible. No se limita
+    a un servicio ni recarga NGINX. Una instancia inaccesible se omite sin encolar trabajo:
+    comprueba el resultado por instancia antes de dar por terminada la purga de toda la flota.
+
+### Panel de informes {#reports-dashboard}
+
+La página **Reports** cubre peticiones HTTP bloqueadas y sesiones STREAM bloqueadas. **Overview**
+muestra la actividad del intervalo seleccionado, **Attack patterns** agrupa reglas ModSecurity y
+familias de ataque, **Top offenders** clasifica IP, países y ASN, y **Event log** ofrece búsqueda
+en el servidor, filtros, columnas ordenables, detalles y exportación CSV o Excel. Los administradores
+pueden bloquear un infractor, filas seleccionadas o todas las IP del resultado filtrado.
+
+Un informe incluye peticiones bloqueadas con 4xx, detecciones bajo `SECURITY_MODE=detect` y sesiones
+STREAM bloqueadas. También conserva tres acciones por su motivo aunque no respondan con bloqueo:
+un desafío de detección de bots CrowdSec 1.8, servido por BunkerWeb con 200 sin llegar a la aplicación;
+una redirección de workflows con 3xx; y un desafío Antibot, servido igual que el de CrowdSec.
+Un desafío Antibot se muestra a cualquier visitante no identificado, no solo a
+atacantes, y puede llenar el búfer `METRICS_MAX_BLOCKED_REQUESTS` (por worker, `1k` por defecto)
+o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` con Redis. El búfer descarta primero lo más antiguo y puede
+perder bloqueos reales para guardar desafíos. Aumenta primero ese límite y después dimensiona
+`METRICS_RETENTION_DAYS` y `METRICS_RETENTION_MAX_ROWS`. Las pestañas analíticas y el mapa solo
+cuentan peticiones bloqueadas o detectadas, nunca desafíos servidos.
+
+La columna **Reason** muestra la decisión registrada por el plugin, por ejemplo
+*CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: …)*,
+*Antibot challenge (captcha) served* o *Security workflow api-shield: redirect*. Los detalles
+conservan los campos originales. Ordenación y filtro siguen usando el valor subyacente: los
+filtros guardados mantienen su significado.
+
+`METRICS_PERSIST_TO_DB=yes` es el predeterminado y conserva un historial central, limitado por
+`METRICS_RETENTION_DAYS` y `METRICS_RETENTION_MAX_ROWS`. Sin persistencia, los informes quedan en
+memoria o Redis y pueden caducar antes. Si falla la API Metrics, el registro usa la consulta
+heredada de instancias/Redis y las pestañas analíticas quedan vacías hasta que Metrics se recupere.
+
+### Mapa de amenazas {#threatmap}
+
+**Threatmap** es una vista personal para una pantalla mural de los mismos informes almacenados.
+Dibuja arcos del país de origen al centro simbólico (ilustra el origen, no un ataque geolocalizado:
+no se recogen coordenadas ni un nombre de servicio tiene posición), colorea países por volumen
+bloqueado y muestra principales infractores y eventos recientes. Requiere `METRICS_PERSIST_TO_DB=yes`;
+si está desactivado, lo explica. El modo de pantalla completa oculta el marco de la aplicación.
+`GET /threatmap/data` refresca las cifras con un retraso aproximado de uno a dos minutos, el
+intervalo del job que recopila los informes.
+
+### Tiempos {#timings}
+
+**Timings** muestra `METRICS_COLLECT_TIMINGS`: tiempo consumido por las fases de cada plugin,
+agregado en la flota y ordenado por coste total. Los porcentajes usan la duración completa de la
+petición que la fase `request` de Metrics registra siempre. `init`, `init_worker(s)`, `timer` y
+la API interna no tienen porcentaje porque no se ejecutan una vez por petición. Cuando ninguna
+instancia informa, la página distingue la función desactivada (consulta `METRICS_COLLECT_TIMINGS`)
+de una API inaccesible, en lugar de presentar una tabla vacía como si no hubiera actividad.
 
 ### Ejecuciones de jobs diferidas
 
@@ -355,7 +600,7 @@ Pega tu clave PRO en la página **PRO** de la UI (o precarga `PRO_LICENSE_KEY` p
   <figcaption>Información de licencia PRO</figcaption>
 </figure>
 
-## Traducciones (i18n)
+## Traducciones (i18n) {#translations-i18n}
 
 La interfaz web está disponible en varios idiomas gracias a las contribuciones de la comunidad. Las traducciones se almacenan en archivos JSON por idioma (por ejemplo `en.json`, `fr.json`, …). Para cada idioma se documenta claramente si la traducción fue realizada de forma manual o generada mediante IA, así como su estado de revisión.
 

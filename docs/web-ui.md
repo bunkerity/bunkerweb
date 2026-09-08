@@ -14,7 +14,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
     - Sessions: signed with `FLASK_SECRET`, default lifetime 12h, pinned to IP and User-Agent; `ALWAYS_REMEMBER` controls persistent cookies
     - Logs: `/var/log/bunkerweb/ui.log` (+ access log when captured), UID/GID 101 inside the container
     - Health: optional `GET /healthcheck` when `ENABLE_HEALTHCHECK=yes`
-    - Dependencies: shares the BunkerWeb database and talks to the API to reload, ban, or query instances
+    - Dependencies: reads and writes configuration through the API; the Scheduler, Worker, job broker and database must be available
 
 ## Security checklist
 
@@ -29,7 +29,7 @@ The Web UI is the visual control plane for BunkerWeb. It drives services, global
 
 ## Run it
 
-The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachable.
+The UI reaches BunkerWeb through the API. Run it with the Scheduler, Worker, dedicated job broker and database shown in the reference stacks.
 
 === "Quickstart (wizard)"
 
@@ -43,6 +43,9 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
     x-service-env: &service-env
       # We anchor the environment variables to avoid duplication
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      API_URL: "http://bw-api:8888"
+      API_TOKEN: "changeme" # Replace this shared token before deploying
+      CELERY_BROKER_URL: "redis://bw-jobs-broker:6379/0"
       LOG_TYPES: "stderr syslog" # Service logs from supporting components
       LOG_SYSLOG_ADDRESS: "udp://bw-syslog:514"
 
@@ -54,13 +57,75 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - "443:8443/tcp"
           - "443:8443/udp" # QUIC
         environment:
+          <<: *service-env
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Optional API token when securing API access
-          API_TOKEN: "" # Make sure that it matches the one set in the scheduler
+        volumes:
+          - bw-instance-data:/data
         restart: "unless-stopped"
         networks:
           - bw-universe
           - bw-services
+
+      bw-api:
+        image: bunkerity/bunkerweb-api:1.7.0-beta
+        restart: "unless-stopped"
+        environment:
+          <<: *service-env
+          API_USERNAME: "changeme"
+          API_PASSWORD: "Ch@ngeme1234"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-worker:
+        image: bunkerity/bunkerweb-worker:1.7.0-beta
+        restart: "unless-stopped"
+        depends_on:
+          - bw-api
+          - bw-jobs-broker
+        volumes:
+          # Its own volume: DATABASE_URI points at a real server here, so this /data holds
+          # nothing but a scratch tree the worker rebuilds from the database -- no reason to
+          # share the scheduler's. The SQLite stack (docker.yml) does share it, because there
+          # the database IS a file under /data.
+          - bw-worker-storage:/data
+        environment:
+          <<: *service-env
+          BUNKERWEB_INSTANCES: "bunkerweb"
+        networks:
+          - bw-universe
+          - bw-db
+
+      bw-jobs-broker:
+        image: valkey/valkey:8-alpine
+        # noeviction on purpose: a broker that evicts under memory pressure drops queued
+        # jobs on the floor, and nothing upstream would notice.
+        # appendonly on purpose: a broker restart must not vaporise queued jobs.
+        # AOF, not RDB ("--save" stays empty) — a 60s RDB loss window on a job queue
+        # means silently dropped work, which is what the at-least-once acks exist to stop.
+        command:
+          [
+            "valkey-server",
+            "--save",
+            "",
+            "--appendonly",
+            "yes",
+            "--maxmemory",
+            "256mb",
+            "--maxmemory-policy",
+            "noeviction",
+          ]
+        volumes:
+          - bw-jobs-broker-data:/data
+        healthcheck:
+          test: ["CMD", "valkey-cli", "ping"]
+          interval: 5s
+          timeout: 3s
+          retries: 10
+          start_period: 5s
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
 
       bw-scheduler:
         image: bunkerity/bunkerweb-scheduler:1.7.0-beta
@@ -70,8 +135,6 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
           API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
-          # Optional API token when securing API access
-          API_TOKEN: "" # Make sure that it matches the one set in the bunkerweb service
           ACCESS_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb_access"
           ERROR_LOG_1: "syslog:server=bw-syslog:514,tag=bunkerweb"
           DISABLE_DEFAULT_SERVER: "yes"
@@ -135,6 +198,9 @@ The UI expects the scheduler/(BunkerWeb) API/redis/database stack to be reachabl
           - bw-universe
 
     volumes:
+      bw-instance-data:
+      bw-worker-storage:
+      bw-jobs-broker-data:
       bw-data:
       bw-storage:
       bw-logs:
@@ -379,7 +445,7 @@ log {
 
 ### The default server entry
 
-The services list always shows one pinned entry at the top labelled **Default server**, with a one-line explainer under it. It is the reserved `default-server` service: the block that answers requests matching no configured service — an unknown hostname, a raw IP address, a `Host` nobody serves.
+With `MULTISITE=yes`, the services list shows one pinned entry at the top labelled **Default server**, with a one-line explainer under it. It is the reserved `default-server` service: the block that answers requests matching no configured service — an unknown hostname, a raw IP address, a `Host` nobody serves. The reserved entry does not exist in single-site mode.
 
 Open it to configure the certificate it presents, its TLS settings, response headers, error pages and whitelist. Only those apply: reverse proxy, gRPC, redirects, sessions, antibot, mTLS, CORS and HTTP basic auth are not offered on its page, because the block has no hostname to route and no service identity to bind to. It offers no delete, clone or convert action either — it is permanent, and it is never counted against the PRO service quota.
 
@@ -405,6 +471,18 @@ Reference a group from a supported list setting with its `@alias`, for example `
 
 The alias contains 1 to 64 letters, digits, underscores, or dashes. Built-in country aliases such as `@EU`, `@G7`, and `@SCHENGEN` are reserved. BunkerWeb refuses a reference when the group does not exist or has no entries of the required type. It also prevents deleting a group while a setting or workflow uses it.
 
+### Upstreams
+
+Open **Configure → Upstreams** to maintain reusable HTTP, gRPC, or stream backend pools, attachable to several services at once instead of re-typing the same backend list on each one. Each pool has a name, a protocol (`http`, `grpc`, or `stream`), a load-balancing method (`round_robin`, `least_conn`, or `ip_hash`), up to 64 member servers (each with a weight, a max-fails count, a fail-timeout, and a primary/backup/down role), an optional keepalive connection count, and a `backend_ssl` switch. Attaching a pool to a service records the reverse-proxy path it answers under (`/` by default); a pool can be attached to up to 100 services.
+
+The page calls the `/upstreams` family of the API: `GET /upstreams` to list, `POST /upstreams` to create, `PATCH /upstreams/{id}` to edit, `DELETE /upstreams/{id}` to remove, and `POST/DELETE /upstreams/{id}/attachments[/{service}]` to attach or detach a service.
+
+### Templates
+
+Open **Configure → Templates** to browse, create, and manage reusable service templates — settings, ordered configuration steps, and custom configs that a service adopts through `USE_TEMPLATE`. The gallery page shows each template's usage count (how many services, including drafts, currently reference it) and derived feature badges; the editor builds a template's settings and steps against the same multisite settings catalogue services use, and can start from a blank template or clone an existing one. A community **Templates catalogue** offers curated, pre-built templates; installing one requires the `admin` role rather than plain `write`, because a catalogue template can carry custom-config text — served as NGINX configuration on the instances — that is stored without content validation. Every setting in an installed or saved template is still checked against this build's live settings table, so a template naming an unknown setting is refused.
+
+Since 1.7, `USE_TEMPLATE` accepts several templates per service, applied in the order given, with the last one winning on a conflicting setting — the Templates page is where those reusable building blocks are authored.
+
 ### Web cache management
 
 The **Web cache** page manages the NGINX response cache used by Reverse Proxy. It shows each instance's reporting state, on-disk entry count and size, the services whose effective `USE_PROXY_CACHE` value is enabled, and cache-status counters such as `HIT`, `MISS`, `BYPASS`, and `STALE` when the Metrics plugin reports them.
@@ -423,6 +501,14 @@ A report covers every request a plugin blocked (a 4xx), every request it merely 
 Where a plugin records what it decided, the **Reason** column shows it as a sentence instead of a bare plugin name: *CrowdSec AppSec: bot-detection challenge*, *CrowdSec LAPI: request blocked (scenario: …)*, *Antibot challenge (captcha) served* or *Security workflow api-shield: redirect* rather than just `crowdsec`, `antibot` or `workflows`, and the incident details keep the raw fields underneath. Sorting and the Reason filter still work on the underlying value, so a saved filter does not change meaning.
 
 `METRICS_PERSIST_TO_DB=yes` is the default and gives the event log a durable, centrally queryable source. `METRICS_RETENTION_DAYS` and `METRICS_RETENTION_MAX_ROWS` bound that history. When persistence is disabled, reports remain in instance memory or Redis and can expire sooner. If the Metrics API is unavailable, the UI falls back to the legacy instance/Redis query for the event log; the analytical dashboard tabs show an empty state until metrics are available again.
+
+### Threatmap
+
+The **Threatmap** page is a personal, wall-display-oriented view of the same stored reports the Reports page reads: a world map with arcs drawn from each blocked request's country of origin to a symbolic center (an illustration of origin, not a geolocated strike — no coordinates are collected, and a service name has no position), a choropleth of blocked-traffic volume by country, top-offender panels, and a ticker of recent events. It requires `METRICS_PERSIST_TO_DB=yes`; with persistence off the page explains that rather than showing an empty map. A fullscreen toggle drops the application chrome for a screen meant to be left running, and figures are refreshed from `GET /threatmap/data`, trailing real traffic by roughly one to two minutes — the interval of the scrape job that fills the underlying reports.
+
+### Timings
+
+The **Timings** page shows `METRICS_COLLECT_TIMINGS` data: how much of each request's time each plugin's phases consumed, aggregated by plugin and phase across the fleet, sorted by total cost. Every row's percentage share is computed against the whole-request duration that the Metrics plugin's own `request` phase records unconditionally; a handful of phases that do not run once per request (`init`, `init_worker(s)`, `timer`, the internal API) show no percentage, since a request cannot be charged a fair share of something with no defined per-request cost. If no instance is currently reporting, the page distinguishes "the feature is off" (checked against `METRICS_COLLECT_TIMINGS` when there is nothing to show) from "the API is unreachable" rather than presenting an empty table as an idle fleet.
 
 ### Deferred job runs
 
