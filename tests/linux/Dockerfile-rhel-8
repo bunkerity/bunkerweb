@@ -1,4 +1,4 @@
-FROM redhat/ubi8-init:8.10@sha256:b4e2ea14aaf2f165b1430f73713fad80de970ef30fae66bff3cb0edfd222c62e
+FROM redhat/ubi8-init:8.10@sha256:fd4a086230ef7817c7d0ab58c046d3123c2701635414383897fb0e842ef63b9c
 
 ENV NGINX_VERSION=1.30.4
 

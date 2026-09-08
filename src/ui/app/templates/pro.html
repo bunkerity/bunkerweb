@@ -113,16 +113,11 @@
                         </div>
                     </div>
                     <div class="card-body position-relative d-flex flex-column justify-content-center align-items-center text-center courier-prime">
-                        <p class="fw-semibold mb-3">
-                            Test <span class="text-primary">BunkerWeb PRO</span> for <strong>free</strong> for <strong>30 days</strong>!
-                        </p>
-                        <p class="mb-3">
-                            Use the code <code class="fw-bold text-primary">freetrial</code> during checkout on the panel.
-                        </p>
-                        <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
+                        <p class="fw-semibold mb-3">Test <span class="text-primary">BunkerWeb PRO</span> free for <strong>30 days</strong>.</p>
+                        <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
                            class="btn btn-primary text-uppercase don-jose"
                            target="_blank"
-                           rel="noopener">Redeem Free Trial</a>
+                           rel="noopener">Start Free Trial</a>
                     </div>
                 </div>
             </div>
@@ -259,6 +254,20 @@
                                             data-bs-original-title="Skip checks and force download of PRO plugins. Keeps current state on failure."
                                             data-i18n="tooltip.button.force_update">
                                         <span data-i18n="button.force_update">Force update</span>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for("pro") }}/refresh-ui">
+                                    <input type="hidden"
+                                           id="csrf_token"
+                                           name="csrf_token"
+                                           value="{{ csrf_token() }}" />
+                                    <button type="submit"
+                                            class="btn btn-outline-secondary text-uppercase don-jose mt-3"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-original-title="Reloads the PRO plugins the web UI already has, without downloading anything."
+                                            data-i18n="tooltip.button.refresh_ui_plugins">
+                                        <span data-i18n="button.refresh_ui_plugins">Refresh UI plugins</span>
                                     </button>
                                 </form>
                             </div>

@@ -478,7 +478,7 @@ def list_misconfigured(services: Dict[str, Dict[str, Union[str, bool, int, Dict[
     return sorted(name for name, config in services.items() if config.get("misconfigured"))
 
 
-def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
+def extract_wildcard_groups(domains: List[str], service: str, rejected_services: Optional[Set[str]] = None) -> Dict[str, List[str]]:
     cleaned_labels: List[List[str]] = []
 
     for domain in domains:
@@ -499,7 +499,10 @@ def extract_wildcard_groups(domains: List[str]) -> Dict[str, List[str]]:
 
     groups: Dict[str, Set[str]] = {}
     for labels_list in grouped.values():
-        for base in _determine_wildcard_bases(labels_list):
+        bases = _determine_wildcard_bases(labels_list, service)
+        if not bases and rejected_services is not None:
+            rejected_services.add(service)
+        for base in bases:
             base = base.strip(".")
             if not base:
                 continue
@@ -528,9 +531,11 @@ def certificate_fingerprint(config: Dict[str, Union[str, bool, int, Dict[str, st
     )
 
 
-def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_entries(service: str, rejected_services: Optional[Set[str]] = None) -> Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     server_names, base_config = build_service_config(service)
     if not server_names:
+        if base_config["misconfigured"] and rejected_services is not None:
+            rejected_services.add(service)
         return {}
 
     # Deduplicate server names to avoid sending duplicate domains to the ACME server
@@ -540,9 +545,11 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
 
     entries: Dict[str, Dict[str, Union[str, bool, int, Dict[str, str]]]] = {}
     if base_config["wildcard"]:
-        wildcard_groups = extract_wildcard_groups(list(unique_names))
+        wildcard_groups = extract_wildcard_groups(list(unique_names), service, rejected_services if base_config["activated"] else None)
         if not wildcard_groups and base_config["activated"]:
             LOGGER.warning(f"[Service: {service}] No valid wildcard groups found, skipping generation.")
+        if base_config["misconfigured"] and rejected_services is not None:
+            rejected_services.add(service)
         for base, names in wildcard_groups.items():
             config = base_config.copy()
             config["server_names"] = ",".join(names)
@@ -555,7 +562,7 @@ def build_service_entries(service: str) -> Dict[str, Dict[str, Union[str, bool, 
     return entries
 
 
-def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+def _determine_wildcard_bases(labels_list: List[List[str]], service: str) -> Set[str]:
     if not labels_list:
         return set()
 
@@ -576,7 +583,21 @@ def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
             break
 
     if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
-        return {".".join(common_suffix)}
+        base = ".".join(common_suffix)
+        # A wildcard matches exactly one label, so *.base plus base cover names of at most
+        # len(common_suffix) + 1 labels. Anything deeper would be dropped from the certificate
+        # while still being served, so refuse the whole group instead of issuing one that omits it.
+        uncovered = sorted(".".join(labels) for labels in labels_list if len(labels) > len(common_suffix) + 1)
+        if uncovered:
+            covered = sorted(".".join(labels) for labels in labels_list if len(labels) <= len(common_suffix) + 1)
+            LOGGER.error(
+                f"[Service: {service}] Wildcard group *.{base} cannot cover {', '.join(uncovered)} alongside "
+                f"{', '.join(covered)} "
+                "(a wildcard matches a single label); skipping this group, nothing is issued for any of those "
+                "names until they are split into separate services."
+            )
+            return set()
+        return {base}
 
     bases: Set[str] = set()
     for labels in labels_list:
@@ -835,11 +856,14 @@ try:
         sys_exit(0)
 
     services = {}
+    # Keep service errors separate from certificate lineage names: a valid sibling can use the
+    # same lineage name as a rejected service, and must still receive its certificate.
+    rejected_services: Set[str] = set()
     for service in server_names.split():
         if not service.strip():
             continue
 
-        for cert_name, config in build_service_entries(service).items():
+        for cert_name, config in build_service_entries(service, rejected_services).items():
             if cert_name in services:
                 if certificate_fingerprint(services[cert_name]) == certificate_fingerprint(config):
                     merged = normalize_server_names(services[cert_name]["server_names"]) | normalize_server_names(config["server_names"])
@@ -850,7 +874,7 @@ try:
             services[cert_name] = config
 
     if not any(service["activated"] for service in services.values()):
-        misconfigured_services = list_misconfigured(services)
+        misconfigured_services = sorted(rejected_services | set(list_misconfigured(services)))
         if misconfigured_services:
             LOGGER.error(
                 "Let's Encrypt is enabled but no certificate can be requested, invalid configuration for "
@@ -1130,7 +1154,7 @@ try:
         ensure_accounts_for_orphans(DATA_PATH, cmd_env.copy(), CERTBOT_BIN, LOG_LEVEL, WORK_DIR, LOGS_DIR, LOGGER)
         sanitized_lineages = sorted(set(sanitized_lineages) | set(sanitize_and_persist(JOB, DATA_PATH, LOGGER)))
 
-    misconfigured_services = list_misconfigured(services)
+    misconfigured_services = sorted(rejected_services | set(list_misconfigured(services)))
     if misconfigured_services:
         LOGGER.error(
             f"Skipped certificate generation for {len(misconfigured_services)} service(s) with an invalid "

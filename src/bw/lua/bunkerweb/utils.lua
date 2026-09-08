@@ -19,6 +19,7 @@ local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
 local HTTP_CLOSE = ngx.HTTP_CLOSE or 444
 local null = ngx.null
 local re_match = ngx.re.match
+local get_headers = ngx.req and ngx.req.get_headers
 local subsystem = ngx.config.subsystem
 local get_phase = ngx.get_phase
 local kill = ngx.thread.kill
@@ -100,9 +101,17 @@ utils.has_variable = function(variable, value)
 	local multisite = variables["global"]["MULTISITE"] == "yes"
 	if multisite then
 		local servers = variables["global"]["SERVER_NAME"]
+		local global_value = variables["global"][variable]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][variable] == value then
+			-- Same effective-value rule as get_variable: a service inherits the global value for
+			-- every key its own table does not carry, otherwise a partially populated service
+			-- hides a setting that is enabled globally and every hook gated on this returns false.
+			local server_value = variables[server][variable]
+			if server_value == nil then
+				server_value = global_value
+			end
+			if server_value == value then
 				return true, "success"
 			end
 		end
@@ -155,6 +164,146 @@ utils.get_multiple_variables = function(vars)
 		end
 	end
 	return result
+end
+
+-- Pair <PREFIX>_NAME_<n> with <PREFIX>_VALUE_<n> once, during init. Resolving the numeric
+-- suffixes per request would mean walking every scoped variable on every request.
+-- Returns { [server_name] = { { name = "x-internal-auth", value = "^s3cr3t$" }, ... } } where
+-- a nil value means "match on the header being present, whatever it carries".
+utils.get_header_rules = function(prefix)
+	local variables, err = utils.get_multiple_variables({ prefix .. "_NAME", prefix .. "_VALUE" })
+	if not variables then
+		return nil, err
+	end
+	local global_vars = variables["global"] or {}
+	local name_pattern = "^" .. prefix .. "_NAME(_?%d*)$"
+
+	-- Same effective-value rule as get_variable : a service inherits the global value for every
+	-- key its own table does not carry. Without the fallback a non-multisite setup, which only
+	-- ever has the "global" scope, would silently match nothing.
+	local function build(vars, server)
+		local keys = {}
+		for variable in pairs(global_vars) do
+			keys[variable] = true
+		end
+		for variable in pairs(vars) do
+			keys[variable] = true
+		end
+		local rules = {}
+		for variable in pairs(keys) do
+			local suffix = variable:match(name_pattern)
+			if suffix then
+				local name = vars[variable]
+				if name == nil then
+					name = global_vars[variable]
+				end
+				local value_key = prefix .. "_VALUE" .. suffix
+				local value = vars[value_key]
+				if value == nil then
+					value = global_vars[value_key]
+				end
+				if value == "" then
+					value = nil
+				end
+				if name and name ~= "" then
+					local keep = true
+					if value then
+						-- Compile here so a broken pattern is caught once, at init. It must never reach
+						-- the request path : that error log echoes the pattern, and the pattern holds the
+						-- operator's shared secret. An empty subject isolates compile failure exactly.
+						local _, compile_err = re_match("", value, "o")
+						if compile_err then
+							logger:log(
+								ERR,
+								"ignoring "
+									.. prefix
+									.. " rule for header "
+									.. name
+									.. " on server "
+									.. server
+									.. " : its value is not a valid regex"
+							)
+							keep = false
+						end
+					end
+					if keep then
+						rules[#rules + 1] = { name = name:lower(), value = value }
+					end
+				end
+			end
+		end
+		return rules
+	end
+
+	-- Every scope is stored, empty ones included : an empty service table means "this service
+	-- has no header rules", which must not fall back to the global scope in pick_header_rules.
+	local result = {}
+	for server, vars in pairs(variables) do
+		result[server] = build(vars, server)
+	end
+	return result
+end
+
+-- Pick the rule set that applies to this request. A service falls back to the global scope,
+-- which is the only scope a non-multisite setup ever has.
+utils.pick_header_rules = function(stored, server_name)
+	if not stored then
+		return {}
+	end
+	return (server_name and stored[server_name]) or stored["global"] or {}
+end
+
+-- Deliberately not utils.regex_match : its failure path logs the pattern, which here is the
+-- shared secret. Errors are reported with the header name only.
+local function header_value_matches(value, rule, source)
+	local match, match_err = re_match(value, rule.value, "o")
+	if match_err then
+		logger:log(
+			ERR,
+			"error while matching " .. (source or "header rule") .. " on header " .. rule.name .. " : " .. match_err
+		)
+		return false
+	end
+	return match ~= nil
+end
+
+-- Request-time counterpart of get_header_rules. Returns the name of the header that matched,
+-- never its value, so callers can log the reason without leaking the secret.
+utils.match_header_rules = function(ctx, rules, source)
+	if not rules or #rules == 0 then
+		return nil
+	end
+	-- The stream subsystem has no request headers at all, and no ngx.req.get_headers to call.
+	if not get_headers then
+		return nil
+	end
+	local headers = ctx.bw.http_headers
+	if not headers then
+		-- Without the explicit cap get_headers() silently stops at 100, so raising MAX_HEADERS
+		-- would let a client push the matching header out of reach - and a padded request would
+		-- slip past a blacklist rule entirely.
+		headers = get_headers(tonumber((utils.get_variable("MAX_HEADERS", false))) or 100)
+		ctx.bw.http_headers = headers
+	end
+	for _, rule in ipairs(rules) do
+		local value = headers[rule.name]
+		if value ~= nil then
+			if not rule.value then
+				return rule.name
+			end
+			if type(value) == "table" then
+				-- A repeated header arrives as a list : any occurrence may carry the secret.
+				for _, one in ipairs(value) do
+					if header_value_matches(one, rule, source) then
+						return rule.name
+					end
+				end
+			elseif header_value_matches(value, rule, source) then
+				return rule.name
+			end
+		end
+	end
+	return nil
 end
 
 utils.is_ip_in_networks = function(ip, networks)
@@ -454,10 +603,31 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		server_name = var.server_name
 	end
 
+	local variables, variables_err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't get variables : " .. variables_err
+	end
+	local global_variables = variables["global"] or {}
+
+	-- Effective USE_WHITELIST for a service, same rule as get_variable: the service value when
+	-- its table carries one, the global value otherwise. The stored lists exist for every
+	-- service whether or not the plugin is enabled for it, so without this gate a service with
+	-- whitelisting turned off still lifts an active ban through its own configured entries.
+	local function whitelist_enabled(name)
+		local value = variables[name] and variables[name]["USE_WHITELIST"]
+		if value == nil then
+			value = global_variables["USE_WHITELIST"]
+		end
+		return value == "yes"
+	end
+
 	-- Helper to check a specific service whitelist list
 	local function check_service(name)
 		if not name or name == "" then
 			return nil, "no service name"
+		end
+		if not whitelist_enabled(name) then
+			return false, "ok"
 		end
 		-- Fast path: check whitelist cache for the service
 		local cache = require("bunkerweb.cachestore"):new(false)
@@ -502,11 +672,7 @@ utils.is_ip_whitelisted = function(ip, server_name)
 	end
 
 	-- Fallback: iterate all configured services (covers default-server paths)
-	local variables, err = internalstore:get("variables", true)
-	if not variables then
-		return nil, "can't get variables : " .. err
-	end
-	local servers = variables["global"] and variables["global"]["SERVER_NAME"] or ""
+	local servers = global_variables["SERVER_NAME"] or ""
 	for srv in servers:gmatch("%S+") do
 		local ok, info = check_service(srv)
 		if ok then
@@ -514,9 +680,10 @@ utils.is_ip_whitelisted = function(ip, server_name)
 		end
 	end
 
-	-- Last resort: check global whitelist IPs directly (useful when no services matched)
-	local global_wl = variables["global"] and variables["global"]["WHITELIST_IP"] or ""
-	if global_wl ~= "" then
+	-- Last resort: check global whitelist IPs directly (useful when no services matched).
+	-- Gated the same way: a global list is only in force while whitelisting is on globally.
+	local global_wl = global_variables["WHITELIST_IP"] or ""
+	if global_wl ~= "" and global_variables["USE_WHITELIST"] == "yes" then
 		local networks = {}
 		for n in global_wl:gmatch("%S+") do
 			table.insert(networks, n)
@@ -1168,14 +1335,62 @@ utils.new_cachestore = function(ctx, pool)
 	return require "bunkerweb.cachestore":new(use_redis, ctx, pool == nil or pool)
 end
 
-utils.regex_match = function(str, regex, options)
-	local all_options = "o"
-	if options then
-		all_options = all_options .. options
+local RELOG_INTERVAL = 3600
+-- per worker, per subsystem; cache key -> { ts = <last logged>, err = <compile error> }
+local bad_regexes = {}
+
+-- os.time has no JIT recorder in LuaJIT (lib_os.c declares no LJLIB_REC), so calling it aborts
+-- the enclosing trace. Keep it off the happy path: only the already-failed branches read it.
+local os_time = os.time
+
+local function log_bad_regex(regex, err, source)
+	-- ngx.var is unavailable in init and init_worker and raises inside a timer. pcall guards the
+	-- capability instead of enumerating phases, so a future caller in a new phase degrades to
+	-- "-" rather than dying.
+	local ok, server_name = pcall(function()
+		return var.server_name
+	end)
+	-- %q escapes a newline as backslash plus a real newline, which would split this entry over
+	-- two log lines; collapse it so the record stays parseable.
+	local quoted = (("%q"):format(regex):gsub("\\\n", "\\n"))
+	logger:log(
+		ERR,
+		("invalid regex for %s on server %s : %s (regex = %s)"):format(
+			source or "an unidentified setting",
+			(ok and server_name) or "-",
+			err,
+			quoted
+		)
+	)
+end
+
+local function relog_bad_regex(regex, bad, source)
+	local now = os_time()
+	if now - bad.ts >= RELOG_INTERVAL then
+		bad.ts = now
+		log_bad_regex(regex, bad.err, source)
+	end
+end
+
+utils.regex_match = function(str, regex, options, source)
+	local all_options = "o" .. (options or "")
+	-- Compile validity depends on the flags, so the memo key includes them.
+	local key = all_options .. "\0" .. regex
+	local bad = bad_regexes[key]
+	if bad then
+		relog_bad_regex(regex, bad, source)
+		return nil
 	end
 	local match, err = re_match(str, regex, all_options)
 	if err then
-		logger:log(ERR, "error while matching regex " .. regex .. "with string " .. str)
+		-- ngx.re.match reports runtime failures through the same channel as compile failures,
+		-- but a no-match returns nil with no error (lua-resty-core regex.lua:672-678), so an
+		-- empty subject isolates compile failure exactly. Only that case is memoized.
+		local _, probe_err = re_match("", regex, all_options)
+		if probe_err then
+			bad_regexes[key] = { ts = os_time(), err = probe_err }
+		end
+		log_bad_regex(regex, err, source)
 		return nil
 	end
 	return match

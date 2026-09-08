@@ -135,6 +135,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`  | global | 否   | **缓存存储 IPC 内存大小：** 内部缓存存储 (ipc) 的大小。          |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`  | global | 否   | **缓存存储未命中内存大小：** 内部缓存存储（未命中）的大小。      |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`  | global | 否   | **缓存存储锁内存大小：** 内部缓存存储（锁）的大小。              |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m` | global | 否   | **会话吊销内存大小：** 存放已吊销 Cookie 会话标识符的存储大小。   |
 
 === "日志设置"
 
@@ -157,7 +158,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `AUTOCONF_MODE`          | `no`   | global    | 否   | **自动配置模式：** 启用 Autoconf Docker 集成。                           |
     | `SWARM_MODE`             | `no`   | global    | 否   | **Swarm 模式：** 启用 Docker Swarm 集成。                                |
     | `KUBERNETES_MODE`        | `no`   | global    | 否   | **Kubernetes 模式：** 启用 Kubernetes 集成。                             |
-    | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值。              |
+    | `USE_TEMPLATE`           |        | multisite | 否   | **使用模板：** 要使用的配置模板，它将覆盖特定设置的默认值；在服务上设置的值会覆盖模板。              |
 
 === "Nginx 设置"
 

@@ -179,6 +179,7 @@ http {
 * [Configuration](#configuration)
     * [Session Configuration](#session-configuration)
     * [Cookie Storage Configuration](#cookie-storage-configuration)
+    * [Session Revocation Configuration](#session-revocation-configuration)
     * [DSHM Storage Configuration](#dshm-storage-configuration)
     * [File Storage Configuration](#file-storage-configuration)
     * [Memcached Storage Configuration](#memcached-storage-configuration)
@@ -327,6 +328,8 @@ Here are the possible session configuration options:
 | `request_headers`           |    `nil`     | Set of headers to send to upstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` request headers when `set_headers` is called.                                        |
 | `response_headers`          |    `nil`     | Set of headers to send to downstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` response headers when `set_headers` is called.                                     |
 | `storage`                   |    `nil`     | Storage is responsible of storing session data, use `nil` or `"cookie"` (data is stored in cookie), `"dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`, `"redis"`, or `"shm"`, or give a name of custom module (`"custom-storage"`), or a `table` that implements session storage interface. |
+| `revocation`                |    `nil`     | Storage used for cookie session revocation records. Use `nil` or `false` to disable, a storage name such as `"shm"`, `"redis"`, `"mysql"`, or `"postgres"`, a custom storage module name, or a storage `table` with `set`/`get` methods.                                                                |
+| `revocation_fail_mode`      |   `"open"`   | Behavior when the revocation store is unreachable, use `"open"` (treat as not revoked) or `"closed"` (reject the session).                                                                                                                                                                           |
 | `dshm`                      |    `nil`     | Configuration for dshm storage, e.g. `{ prefix = "sessions" }` (see below)                                                                                                                                                                                                                           |
 | `file`                      |    `nil`     | Configuration for file storage, e.g. `{ path = "/tmp", suffix = "session" }` (see below)                                                                                                                                                                                                             |
 | `memcached`                 |    `nil`     | Configuration for memcached storage, e.g. `{ prefix = "sessions" }` (see below)                                                                                                                                                                                                                      |
@@ -341,6 +344,79 @@ Here are the possible session configuration options:
 
 When storing data to cookie, there is no additional configuration required,
 just set the `storage` to `nil` or `"cookie"`.
+
+
+## Session Revocation Configuration
+
+Cookie (stateless) sessions are self-contained: once issued, a cookie remains
+valid until it expires according to the configured timeouts. Revocation adds
+an optional storage-backed denylist so that destroyed sessions are rejected
+immediately, without waiting for the cookie to expire.
+
+Revocation is only available when session data is stored in the cookie
+(`storage` is `nil` or `"cookie"`). Select the backend explicitly with
+`revocation = "dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`,
+`"redis"`, or `"shm"`. The backend uses its normal configuration section and
+the same storage `set`/`get` contract used for session data. Custom storage
+module names and pre-built storage tables are also supported. Setting
+`revocation = false` or leaving it unset disables revocation.
+
+On every `session:open`, the library checks whether the session identifier is
+revoked. On `session:destroy`, the identifier is written to the selected
+storage with a TTL equal to the remaining session lifetime (rolling and
+absolute timeouts). The revocation mark is a lightweight sentinel; no session
+payload is stored.
+
+Use `revocation_fail_mode` to control behavior when the storage is unavailable:
+
+- `"open"` (default): log a warning and treat the session as not revoked.
+  Destroy still clears the cookie even if the revocation write fails.
+- `"closed"`: reject the session open or destroy operation.
+
+Revocation applies to `session:destroy` (and `session:logout` when it destroys
+the last audience). It does not revoke the previous session identifier on
+`session:save` (session rotation) or partial `session:logout` (multiple
+audiences). After rotation or partial logout, the previous cookie remains
+usable until its `stale_ttl` or timeout elapses.
+
+Examples:
+
+```lua
+-- Redis denylist
+require("resty.session").init({
+  storage = "cookie",
+  revocation = "redis",
+  redis = {
+    host = "127.0.0.1",
+    password = "secret",
+    prefix = "sessions",
+  },
+})
+
+-- Shared memory denylist
+require("resty.session").init({
+  storage = "cookie",
+  revocation = "shm",
+  shm = {
+    zone = "sessions",
+    prefix = "revocations",
+  },
+})
+
+-- MySQL denylist
+require("resty.session").init({
+  storage = "cookie",
+  revocation = "mysql",
+  mysql = {
+    host = "127.0.0.1",
+    database = "sessions",
+    username = "session",
+    password = "secret",
+  },
+})
+```
+
+The same pattern works for `"dshm"`, `"file"`, `"memcached"`, and `"postgres"`.
 
 
 ## DSHM Storage Configuration
@@ -1466,7 +1542,7 @@ for other users as well.
 `lua-resty-session` uses two clause BSD license.
 
 ```
-Copyright (c) 2014 – 2025 Aapo Talvensaari, 2022 – 2025 Samuele Illuminati
+Copyright (c) 2014 – 2026 Aapo Talvensaari, 2022 – 2026 Samuele Illuminati
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

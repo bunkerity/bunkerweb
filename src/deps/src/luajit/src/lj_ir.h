@@ -53,7 +53,7 @@
   _(KINT64,	N , cst, ___) \
   _(KSLOT,	N , ref, lit) \
   \
-  /* Bit ops. */ \
+  /* Bit ops. ORDER BIT */ \
   _(BNOT,	N , ref, ___) \
   _(BSWAP,	N , ref, ___) \
   _(BAND,	C , ref, ref) \

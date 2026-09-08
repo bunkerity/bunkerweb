@@ -32,6 +32,11 @@ on:
         required: false
         type: string
         default: ""
+      CANDIDATE:
+        description: Unique release run identifier; export final bits for testing and promotion
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -47,10 +52,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }} # pin every job in a run to one commit
+          persist-credentials: false
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh ${{ inputs.RELEASE }}
@@ -95,7 +104,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        if: inputs.PUSH == true
+        if: inputs.PUSH == true || inputs.CANDIDATE != ''
         uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
@@ -109,7 +118,7 @@ jobs:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
-        if: inputs.CACHE == true
+        if: inputs.CACHE == true && inputs.CANDIDATE == ''
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -124,7 +133,7 @@ jobs:
           DOCKER_BUILD_SUMMARY: "false" # skip the docker/build-push-action job summary; Trivy publishes its own
       # Build non-cached image
       - name: Build image
-        if: inputs.CACHE != true
+        if: inputs.CACHE != true && inputs.CANDIDATE == ''
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
@@ -136,55 +145,84 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
         env:
           DOCKER_BUILD_SUMMARY: "false" # skip the docker/build-push-action job summary; Trivy publishes its own
+      - name: Build final candidate image
+        if: inputs.CANDIDATE != ''
+        id: candidate
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          tags: ghcr.io/bunkerity/${{ inputs.IMAGE }}-tests:${{ inputs.CANDIDATE }}-${{ inputs.CACHE_SUFFIX }}
+          outputs: type=registry,oci-mediatypes=true,compression=zstd
+          provenance: true
+          sbom: true
+          labels: ${{ steps.meta.outputs.labels }}
+        env:
+          DOCKER_BUILD_SUMMARY: "false"
+      - name: Select exact image for scanning
+        env:
+          DIGEST: ${{ steps.candidate.outputs.digest }}
+          IMAGE: ${{ inputs.IMAGE }}
+          CANDIDATE: ${{ inputs.CANDIDATE }}
+        run: |
+          if [ -n "$CANDIDATE" ]; then
+            test -n "$DIGEST"
+            echo "SCAN_REF=ghcr.io/bunkerity/$IMAGE-tests@$DIGEST" >> "$GITHUB_ENV"
+          else
+            echo "SCAN_REF=local/$IMAGE" >> "$GITHUB_ENV"
+          fi
       # Check vulnerabilities with Trivy — SARIF report (non-blocking, feeds the GitHub Security tab)
       - name: Trivy scan (SARIF)
-        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
-          image-ref: local/${{ inputs.IMAGE }}
+          image-ref: ${{ env.SCAN_REF }}
           scanners: vuln
           ignore-unfixed: true
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
+          ignore-policy: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
         env:
+          TRIVY_PLATFORM: ${{ inputs.ARCH }}
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
       - name: Upload Trivy SARIF report
-        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        if: ${{ always() && (inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false) }}
         continue-on-error: true # don't let a missing/partial SARIF mask the real scan error (the gate is the source of truth)
-        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
           sarif_file: trivy-results.sarif
           category: trivy-${{ inputs.IMAGE }}-${{ inputs.ARCH }}
       # Hard gate — fail the build on ANY matching vulnerability
       - name: Trivy gate
-        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        if: ${{ inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
-          image-ref: local/${{ inputs.IMAGE }}
+          image-ref: ${{ env.SCAN_REF }}
           scanners: vuln
           ignore-unfixed: true
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           skip-dirs: /root/.cargo
           trivyignores: .trivyignore
-          ignore-policy: .trivyignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
+          ignore-policy: .github/trivy/ignore.rego # ignore pkg:pypi/* (pip/dependabot) and pkg:golang/* (manual deps/*.json pin bumps)
           format: template
           template: "@.github/trivy/summary.tpl"
           output: trivy-summary.md
           exit-code: "1"
         env:
+          TRIVY_PLATFORM: ${{ inputs.ARCH }}
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
       # Publish the Trivy results to the GitHub Actions run summary
       - name: Trivy summary
-        if: ${{ always() && startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
+        if: ${{ always() && (inputs.CANDIDATE != '' || startsWith(inputs.CACHE_SUFFIX, 'arm') == false) }}
         run: |
           {
             echo "## Trivy — \`$IMAGE\` ($ARCH)"
@@ -193,9 +231,26 @@ jobs:
         env:
           IMAGE: "${{ inputs.IMAGE }}"
           ARCH: "${{ inputs.ARCH }}"
+      - name: Record scanned candidate
+        if: inputs.CANDIDATE != ''
+        env:
+          DIGEST: ${{ steps.candidate.outputs.digest }}
+          IMAGE: ${{ inputs.IMAGE }}
+          PLATFORM: ${{ inputs.ARCH }}
+          SUFFIX: ${{ inputs.CACHE_SUFFIX }}
+        run: python3 .github/scripts/release_artifacts.py record-image --image "$IMAGE" --platform "$PLATFORM" --digest "$DIGEST" --output "image-$IMAGE-$SUFFIX.json"
+      - name: Upload candidate receipt
+        if: inputs.CANDIDATE != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: candidate-image-${{ inputs.IMAGE }}-${{ inputs.CACHE_SUFFIX }}
+          overwrite: true
+          path: image-${{ inputs.IMAGE }}-${{ inputs.CACHE_SUFFIX }}.json
+          if-no-files-found: error
+          retention-days: 7
       # Push image
       - name: Push image
-        if: inputs.PUSH == true
+        if: inputs.PUSH == true && inputs.CANDIDATE == ''
         run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
         env:
           IMAGE: "${{ inputs.IMAGE }}"

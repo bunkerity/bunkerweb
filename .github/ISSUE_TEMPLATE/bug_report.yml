@@ -11,6 +11,26 @@ body:
     attributes:
       value: >
         📊 Please check the live service status first: https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template. If an incident is ongoing, reference it in your report.
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Select the primary area involved.
+      options:
+        - Web UI
+        - API
+        - Scheduler
+        - Core plugins
+        - External plugins
+        - Docker / Autoconf
+        - Swarm
+        - Kubernetes
+        - Linux
+        - All-in-one
+        - Documentation
+        - Other / unsure
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -51,7 +71,7 @@ body:
       label: BunkerWeb version
       description: What version of BunkerWeb are you running?
       placeholder: Version
-      value: 1.6.14
+      value: 1.6.15~rc2
     validations:
       required: true
   - type: dropdown
@@ -78,6 +98,13 @@ body:
       description: What Linux distribution are you using? (e.g. Ubuntu Server 18.04)
       placeholder: Linux distribution
   - type: checkboxes
+    id: duplicate-search
+    attributes:
+      label: Duplicate search
+      options:
+        - label: I searched open and closed issues and did not find an existing report
+          required: true
+  - type: checkboxes
     id: removed-private-data
     attributes:
       label: Removed private data
@@ -91,7 +118,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/bunkerity/bunkerweb/blob/master/.github/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

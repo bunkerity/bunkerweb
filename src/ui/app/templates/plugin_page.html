@@ -112,6 +112,12 @@
                                             {% if ping_subtitle %}
                                                 <p class="card-text small mb-0 text-{{ value.get('subtitle_color', 'muted') }}">{{ ping_subtitle }}</p>
                                             {% endif %}
+                                            {% if value.get('action_url') and value.get('action_label') %}
+                                                <a href="{{ value.get('action_url') }}"
+                                                   class="btn btn-sm btn-outline-primary mt-3">
+                                                    <i class="bx bx-search-alt me-1" aria-hidden="true"></i><span{% if value.get('action_i18n') %} data-i18n="{{ value.get('action_i18n') }}"{% endif %}>{{ value.get('action_label') }}</span>
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

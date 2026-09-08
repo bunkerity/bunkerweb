@@ -69,6 +69,14 @@ function set_loading_state() {
         echo "IS_LOADING=yes" >> "$nginx_variables_path"
     fi
 
+    # The scheduler skips a push whose archive digest matches the applied marker left by the
+    # previous one. That marker lives outside the tree it describes, keyed by destination path,
+    # so a push never archives its own bookkeeping. Editing variables.env here makes the tree
+    # differ from what the marker describes, so the push carrying IS_LOADING=no would be
+    # answered "already applied" and the instance would stay in the loading state, serving
+    # traffic with every Lua plugin disabled.
+    rm -f "/var/tmp/bunkerweb/pushswap/$(dirname "$nginx_variables_path" | sed 's/[^[:alnum:]][^[:alnum:]]*/_/g').applied"
+
     return 0
 }
 
@@ -162,17 +170,19 @@ function start() {
             # defaults to the empty string, so testing the value skipped it entirely and
             # the temp config was generated with no token at all.
             if [[ -v "defaults[$key]" ]]; then
-                # Set variable if defined and non-empty in the file
-                [[ -n "$value" ]] && eval "${key}=\"$value\""
+                # Set variable if defined and non-empty in the file. printf -v assigns without
+                # evaluating: /etc/bunkerweb is owned by nginx:nginx and every unit runs as root,
+                # so eval here ran a value's command substitution as root.
+                [[ -n "$value" ]] && printf -v "$key" '%s' "$value"
             fi
         done < "$env_file"
     fi
 
     # Assign default values for unset variables
     for key in "${!defaults[@]}"; do
-        eval "value=\${${key}:-}"
+        value="${!key:-}"
         if [ -z "$value" ]; then
-            eval "${key}=\"${defaults[$key]}\""
+            printf -v "$key" '%s' "${defaults[$key]}"
         fi
     done
 
@@ -234,7 +244,9 @@ function start() {
     while [ $count -lt 10 ] ; do
         check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
         # shellcheck disable=SC2181
-        if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
+        # The temp config carries IS_LOADING=yes, so the endpoint answers "loading" here :
+        # either state means nginx is up and answering.
+        if [ $? -eq 0 ] && [[ "$check" =~ ^(ok|loading)$ ]] ; then
             break
         fi
         count=$((count + 1))

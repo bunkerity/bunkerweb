@@ -208,6 +208,15 @@
     "regex": "^\\d+(?:[kKmMgG])?$",
     "type": "text"
   },
+  "SESSIONS_REVOCATION_MEMORY_SIZE": {
+    "context": "global",
+    "default": "16m",
+    "help": "Size of the internal store holding revoked cookie session identifiers.",
+    "id": "sessions-revocation-memory-size",
+    "label": "Sessions revocation memory size",
+    "regex": "^\\d+(?:[kKmMgG])?$",
+    "type": "text"
+  },
   "USE_API": {
     "context": "global",
     "default": "yes",
@@ -277,7 +286,7 @@
     "help": "Optional token to authenticate API calls. If set, the scheduler (and any client) must send it via the Authorization header. Note: must be set on both BunkerWeb and the scheduler environments.",
     "id": "api-token",
     "label": "API access token",
-    "regex": ".*",
+    "regex": "^.*$",
     "type": "text"
   },
   "API_WHITELIST_IP": {
@@ -422,7 +431,7 @@
   "USE_TEMPLATE": {
     "context": "multisite",
     "default": "",
-    "help": "Config template to use that will override the default values of specific settings.",
+    "help": "Config template to use that overrides the default values of specific settings; a value set on the service overrides the template.",
     "id": "use-template",
     "label": "Use template",
     "regex": "^.*$",

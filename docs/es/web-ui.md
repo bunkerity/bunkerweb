@@ -35,7 +35,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
     Usa las imágenes publicadas y el layout del [guía rápida](quickstart-guide.md#__tabbed_1_3) para levantar el stack, luego completa el asistente en el navegador.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.14-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc2-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Visita el hostname del scheduler (ej. `https://www.example.com/changeme`) y ejecuta el asistente `/setup` para configurar la UI, el scheduler y la instancia.
@@ -52,7 +52,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ La UI requiere scheduler/API de BunkerWeb/redis/base de datos accesibles.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -292,7 +292,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Actualizar a PRO {#upgrade-to-pro}
 
 !!! tip "Prueba gratis de BunkerWeb PRO"
-    Usa el código `freetrial` en el [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc) para un mes de prueba.
+    Inicia una prueba gratuita de 30 días de BunkerWeb PRO desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=spanish&utm_campaign=self&utm_source=doc).
 
 Pega tu clave PRO en la página **PRO** de la UI (o precarga `PRO_LICENSE_KEY` para el asistente). Las actualizaciones se descargan en segundo plano por el scheduler; revisa en la UI la caducidad y los límites de servicios tras aplicarlas.
 

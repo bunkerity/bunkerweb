@@ -68,6 +68,26 @@
       "regex": "^.*$",
       "type": "multivalue"
     },
+    "GREYLIST_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that adds the request to the greylist. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "greylist-header-name",
+      "label": "Greylisted header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "greylist-header"
+    },
+    "GREYLIST_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to add the request to the greylist. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "greylist-header-value",
+      "label": "Greylisted header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "greylist-header"
+    },
     "GREYLIST_IP_URLS": {
       "context": "multisite",
       "default": "",

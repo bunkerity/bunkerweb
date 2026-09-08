@@ -35,7 +35,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
     Verwenden Sie die veröffentlichten Images und das Layout aus dem [Quickstart-Guide](quickstart-guide.md#__tabbed_1_3). Stack starten, dann den Wizard im Browser abschließen.
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.14-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc2-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     Öffnen Sie den Scheduler-Host (z. B. `https://www.example.com/changeme`) und führen Sie den `/setup`-Wizard aus, um UI, Scheduler und Instanz zu konfigurieren.
@@ -52,7 +52,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ Die UI erwartet, dass Scheduler/(BunkerWeb-)API/Redis/DB erreichbar sind.
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -292,7 +292,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO Gratistest"
-    Code `freetrial` im [BunkerWeb-Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc) für einen Monat Test.
+    Starten Sie eine 30-tägige kostenlose Testversion von BunkerWeb PRO im [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?language=german&utm_campaign=self&utm_source=doc).
 
 Fügen Sie den PRO-Lizenzschlüssel in der Seite **PRO** der UI ein (oder setzen Sie `PRO_LICENSE_KEY` vorab für den Wizard). Upgrades werden im Hintergrund vom Scheduler geladen; prüfen Sie Ablaufdatum und Service-Limits in der UI nach Anwendung.
 

@@ -1,8 +1,8 @@
 # Fortgeschrittene Nutzungen
 
-Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples) des GitHub-Repositorys verfügbar.
+Viele Beispiele für reale Anwendungsfälle sind im Ordner [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples) des GitHub-Repositorys verfügbar.
 
-Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/misc/integrations) verfügbar.
+Wir stellen auch zahlreiche Boilerplates zur Verfügung, wie z. B. YAML-Dateien für verschiedene Integrationen und Datenbanktypen. Diese sind im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) verfügbar.
 
 Dieser Abschnitt konzentriert sich nur auf fortgeschrittene Nutzungen und Sicherheits-Tuning. Informationen zu allen verfügbaren Einstellungen finden Sie im [Features-Abschnitt](features.md) der Dokumentation.
 
@@ -85,7 +85,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.14
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -96,7 +96,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.14
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen aktualisiert werden.
@@ -260,7 +260,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.14
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Weitere Einstellungen zur echten IP finden Sie im [Features-Abschnitt](features.
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.14
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
         ```bash
         # Skript und Checksumme laden
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.14/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh.sha256
 
         # Prüfsumme verifizieren
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Ersetzen durch die IPs Ihrer Worker
@@ -607,7 +607,7 @@ Der Manager ist das Gehirn des Clusters. Er führt den Scheduler, die Datenbank 
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         ports:
           - "7000:7000" # UI-Port veröffentlichen
         environment:
@@ -693,7 +693,7 @@ Worker sind die Knoten, die den eingehenden Verkehr verarbeiten.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -998,7 +998,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1026,7 +1026,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1037,7 +1037,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1122,6 +1122,9 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     systemctl start bunkerweb-scheduler
     ```
 
+    !!! info "Das Neuladen liest den Ordner erneut ein"
+        Ein Neuladen liest `/etc/bunkerweb/configs` erneut ein: dort erstellte, geänderte oder gelöschte Dateien werden angewendet und in der Datenbank gespeichert. Eine Konfiguration, die der Weboberfläche oder der API gehört, behält ihren Besitzer, nur ihr Inhalt wird aus der Datei aktualisiert.
+
 === "All-in-one"
 
     Bei Verwendung des [All-in-one-Images](integrations.md#all-in-one-aio-image) haben Sie zwei Möglichkeiten, benutzerdefinierte Konfigurationen hinzuzufügen:
@@ -1151,7 +1154,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1191,7 +1194,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1214,7 +1217,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1257,7 +1260,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1327,7 +1330,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1574,7 +1577,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -1597,7 +1600,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1612,7 +1615,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -1663,7 +1666,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - "10000:10000" # app1
@@ -1893,7 +1896,7 @@ Eine vollständige Liste der Einstellungen für den `stream`-Modus finden Sie im
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           # Behalten, wenn Sie die Let's Encrypt-Automatisierung mit dem http-Challenge-Typ verwenden möchten
           - published: 80
@@ -2023,7 +2026,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Bitte beachten Sie, dass Sie, wenn Ihr Container bereits erstellt wurde, ihn löschen und neu erstellen müssen, damit die neuen Umgebungsvariablen angewendet werden.
@@ -2067,7 +2070,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2082,7 +2085,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Diese Einstellung ist obligatorisch, um die BunkerWeb-Instanz anzugeben
@@ -2176,7 +2179,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2189,7 +2192,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -2204,7 +2207,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.14
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2444,7 +2447,7 @@ BunkerWeb unterstützt PHP über externe oder entfernte [PHP-FPM](https://www.ph
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2543,7 +2546,7 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2602,11 +2605,11 @@ Es gibt zwei Hauptkategorien von Protokollen, die konfiguriert werden können:
 
 Service-Protokolle werden durch die Einstellung `LOG_TYPES` gesteuert, die mehrere Werte mit Leerzeichen getrennt akzeptiert (z. B. `LOG_TYPES="stderr syslog"`).
 
-| Wert     | Beschreibung                                                                                                                                                                                                                       |
-| :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`   | Schreibt Protokolle in eine einfache Datei. Die externe Rotation wird bei Linux-Installationen von `logrotate` und unter Docker von Ihrem Container-Logging-Treiber übernommen. Erforderlich für den Protokollanzeiger der Web-UI. |
-| `stderr` | Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (`docker logs`).                                                                                                                            |
-| `syslog` | Sendet Protokolle an einen Syslog-Server. Erfordert, dass `LOG_SYSLOG_ADDRESS` gesetzt ist.                                                                                                                                        |
+| Wert     | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                   |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`   | Schreibt Protokolle in eine einfache Datei. Bei Linux-Installationen übernimmt `logrotate` die externe Rotation. In einem Container rotiert nichts eine Datei, die ein Dienst selbst schreibt: Die Aufbewahrung liegt dann beim Betreiber, also die Datei in ein Volume mounten und selbst rotieren oder dort `stderr`/`syslog` bevorzugen. Erforderlich für den Protokollanzeiger der Web-UI. |
+| `stderr` | Schreibt Protokolle in Standardfehlerausgabe. Standard für containerisierte Umgebungen (`docker logs`).                                                                                                                                                                                                                                                                                        |
+| `syslog` | Sendet Protokolle an einen Syslog-Server. Erfordert, dass `LOG_SYSLOG_ADDRESS` gesetzt ist.                                                                                                                                                                                                                                                                                                    |
 
 Wenn Sie `file` verwenden, sollten Sie zusätzlich konfigurieren:
 
@@ -2640,11 +2643,29 @@ LOG_LEVEL=notice
 LOG_LEVEL_1=error
 ```
 
+### Aufbewahrung der Protokolldateien {#log-file-retention}
+
+Nur die Integrationen, die reale Protokolldateien führen, benötigen eine Aufbewahrungsregelung, und beide verwenden denselben Mechanismus: `logrotate`, mit der Richtlinie, die BunkerWeb unter `/etc/logrotate.d/bunkerweb` installiert. Sie rotiert jede Datei, die auf `/var/log/bunkerweb/*.log` passt, täglich oder früher, sobald die Datei 100 MB überschreitet, behält vierzehn nummerierte Generationen (`modsec_audit.log.1`, `.2.gz` und so weiter) und verwendet `copytruncate`.
+
+- **Linux**: Die Pakete hängen von `logrotate` ab, und das System führt es über seinen eigenen Timer aus. Es ist nichts weiter zu tun.
+- **All-in-one**: Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus, mit derselben Richtliniendatei.
+- **Docker, Autoconf, Swarm und Kubernetes**: Es gibt nichts zu rotieren. `src/bw/Dockerfile` ersetzt `access.log`, `error.log` und `modsec_audit.log` beim Bauen des Images durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass die Aufbewahrung dem Logging-Treiber Ihrer Laufzeitumgebung obliegt (siehe [Docker-Best-Practices für Protokolle](#docker-logging-best-practices) weiter unten).
+
+`copytruncate` ist das, was eine einzige Richtlinie für alle passend macht. Es kopiert die Datei beiseite und leert das Original an Ort und Stelle, statt es umzubenennen, sodass ein Schreibprozess, der sein Protokoll nie erneut öffnet, weiterhin in die richtige Datei schreibt. ModSecurity ist genau so ein Schreibprozess: Es öffnet das Audit-Log einmal beim Laden der Konfiguration und hält den Deskriptor. Eine Rotation per Umbenennung würde dazu führen, dass es für immer in das Archiv schreibt, während die aktive Datei leer bleibt.
+
+Bearbeiten Sie `/etc/logrotate.d/bunkerweb`, um den Schwellenwert oder die Anzahl der Generationen zu ändern, oder um ein `maxage` hinzuzufügen. Mounten Sie beim All-in-one Ihre eigene Datei über diesen Pfad.
+
+Zwei Direktiven sind dort tragend. `maxsize` hält `daily` am Leben: Das ähnliche `size` schließt die Intervall-Direktiven aus und würde nur nach Größe rotieren. Und `dateext` würde jedes Archiv nach dem Datum benennen, sodass eine zweite Rotation am selben Datum mit `destination ... already exists, skipping rotation` fehlschlägt und die aktive Datei bis zum Datumswechsel unrotiert bleibt.
+
+Der Speicherort des Audit-Logs wird über `MODSECURITY_SEC_AUDIT_LOG` festgelegt (multisite, Standard `/var/log/bunkerweb/modsec_audit.log`); siehe die [ModSecurity-Einstellungen](features.md#modsecurity). Wird er außerhalb von `/var/log/bunkerweb` gesetzt, fällt er aus der obigen Richtlinie heraus, und bei einer Container-Integration ersetzt er den Symlink durch eine reale Datei, die nichts rotiert. Wenn Sie ihn verschieben, mounten Sie ihn auf ein Volume und rotieren Sie ihn selbst. Die Einstellung akzeptiert nur einen Pfad unterhalb von `/var/log/bunkerweb` und kann daher nicht auf `/data` zeigen: Um den Audit-Verlauf über eine Neuerstellung des Containers hinweg zu behalten, mounten Sie ein Volume auf `/var/log/bunkerweb` selbst, was den gesamten Protokollsatz erhält und nicht nur das Audit-Log.
+
+Mit dem Standardwert `BCFH` von `MODSECURITY_SEC_AUDIT_LOG_PARTS` legt Teil `C` den Anfragetext im Audit-Log ab. Behandeln Sie die Datei als sensibel, bevor Sie sie irgendwohin kopieren.
+
 ### Integrations-Defaults & Beispiele
 
 === "Linux"
 
-    **Standardverhalten**: `LOG_TYPES="file"`. Protokolle werden unter `/var/log/bunkerweb/*.log` geschrieben. Die Rotation übernimmt die installierte System-`logrotate`-Konfiguration unter `/etc/logrotate.d/bunkerweb` (täglich, 7 Tage Aufbewahrung, Komprimierung per `copytruncate`).
+    **Standardverhalten**: `LOG_TYPES="file"`. Protokolle werden unter `/var/log/bunkerweb/*.log` geschrieben. Die Rotation übernimmt die installierte System-`logrotate`-Konfiguration unter `/etc/logrotate.d/bunkerweb` (täglich oder ab 100 MB, vierzehn Generationen, Komprimierung per `copytruncate`).
 
     **Beispiel**: Lokale Dateien behalten (für die Web-UI) und zusätzlich an den System-Syslog spiegeln.
 
@@ -2666,6 +2687,8 @@ LOG_LEVEL_1=error
 
     **Standardverhalten**: `LOG_TYPES="stderr"`. Protokolle sind über `docker logs` sichtbar.
 
+    Diese Images haben von vornherein keine von BunkerWeb verwalteten Protokolldateien zu begrenzen: `src/bw/Dockerfile` löscht `access.log`, `error.log` und `modsec_audit.log` beim Bauen des Images und ersetzt alle drei durch Symlinks auf die eigene Standardausgabe und den eigenen Standardfehlerkanal des Containers, sodass `ACCESS_LOG`, `ERROR_LOG` und `MODSECURITY_SEC_AUDIT_LOG` standardmäßig direkt in den Log-Stream des Containers gelangen. Die Aufbewahrung liegt dort bei Ihrer Laufzeitumgebung, über den Logging-Treiber (siehe [Docker-Best-Practices für Protokolle](#docker-logging-best-practices) weiter unten) oder einen externen Collector; BunkerWeb liefert kein `logrotate` in seinen Images mit.
+
     **Beispiel (Adaptation aus dem Quickstart-Guide)**: Behalten Sie `docker logs` (stderr) BEI und senden Sie zusätzlich an einen zentralen Syslog-Container (benötigt für Web UI und CrowdSec).
 
     ```yaml
@@ -2686,7 +2709,7 @@ LOG_LEVEL_1=error
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifikation der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.14
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2699,7 +2722,7 @@ LOG_LEVEL_1=error
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.14
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen setzen
@@ -2716,7 +2739,7 @@ LOG_LEVEL_1=error
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.14
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *bw-env
         volumes:
@@ -2792,6 +2815,12 @@ LOG_LEVEL_1=error
       bw-db:
         name: bw-db
     ```
+
+=== "All-in-one"
+
+    **Standardverhalten**: wie Docker (`LOG_TYPES="stderr"`), aber das All-in-one-Image behält `ACCESS_LOG`, `ERROR_LOG` und `MODSECURITY_SEC_AUDIT_LOG` als reguläre Dateien unter `/var/log/bunkerweb/` (dieselben Standardwerte wie unter Linux), weil sowohl das mitgelieferte CrowdSec als auch der Protokollanzeiger der Web-UI sie von der Festplatte lesen.
+
+    BunkerWeb begrenzt sie dort für Sie: Das Image liefert `logrotate` mit und führt es stündlich unter supervisor aus, mit derselben Richtlinie, die auch die Linux-Pakete installieren (siehe [Aufbewahrung der Protokolldateien](#log-file-retention) weiter oben). Da die Rotation mit `copytruncate` erfolgt, behalten die Dateien ihren Inode, sodass der CrowdSec-Parser und der Protokollanzeiger ihnen über eine Rotation hinweg folgen, ohne neu starten zu müssen.
 
 === "Kubernetes"
 
@@ -2869,7 +2898,7 @@ log {
 };
 ```
 
-## Docker Logging Best Practices
+## Docker Logging Best Practices {#docker-logging-best-practices}
 
 Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den `json-file`-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.
 
@@ -2882,7 +2911,7 @@ Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compo
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.14
+    image: bunkerity/bunkerweb:1.6.15-rc2
     logging:
       driver: "json-file"
       options:
@@ -2991,7 +3020,7 @@ Die üblichen Variablen sind:
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.14
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Wenn der Container bereits existiert, erstellen Sie ihn neu, um die neue Umgebung anzuwenden.
@@ -3002,7 +3031,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3021,7 +3050,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3064,7 +3093,7 @@ Die üblichen Variablen sind:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.14
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3333,12 +3362,12 @@ Der **BunkerWeb MCP-Server** ermöglicht es KI-Assistenten wie **Claude Code** u
 
 ### Docker Compose Beispiel
 
-Ein vollständiges Beispiel ist in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.14/examples/mcp-stack) verfügbar:
+Ein vollständiges Beispiel ist in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples/mcp-stack) verfügbar:
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.14
+    image: bunkerity/bunkerweb-api:1.6.15-rc2
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -4159,11 +4188,11 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.14
+            image: bunkerity/bunkerweb:1.6.15-rc2
             # ... andere Einstellungen (keine Umgebungsvariablen für Custom Pages hier benötigt)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.14
+            image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4246,7 +4275,7 @@ Vorlagen verwenden Lua-Vorlagensyntax mit den folgenden Trennzeichen:
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.14
+                  image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"

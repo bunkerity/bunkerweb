@@ -133,6 +133,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`             | global   | Non      | **Mémoire cachestore IPC :** Taille du cache interne (IPC).                           |
     | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`             | global   | Non      | **Mémoire cachestore miss :** Taille du cache interne (miss).                         |
     | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`             | global   | Non      | **Mémoire cachestore locks :** Taille du cache interne (locks).                       |
+    | `SESSIONS_REVOCATION_MEMORY_SIZE` | `16m`          | global   | Non      | **Mémoire de révocation des sessions :** Taille du stockage des identifiants de session cookie révoqués. |
 
 === "Paramètres de journalisation"
 
@@ -155,7 +156,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `AUTOCONF_MODE`          | `no`              | global    | Non      | **Mode Autoconf :** Active l’intégration Docker Autoconf.                                                                                                           |
     | `SWARM_MODE`             | `no`              | global    | Non      | **Mode Swarm :** Active l’intégration Docker Swarm.                                                                                                                 |
     | `KUBERNETES_MODE`        | `no`              | global    | Non      | **Mode Kubernetes :** Active l’intégration Kubernetes.                                                                                                              |
-    | `USE_TEMPLATE`           |                   | multisite | Non      | **Utiliser un template :** Modèle de configuration qui surcharge les valeurs par défaut de certains paramètres.                                                     |
+    | `USE_TEMPLATE`           |                   | multisite | Non      | **Utiliser un template :** Modèle de configuration qui surcharge les valeurs par défaut de certains paramètres ; une valeur définie sur le service l'emporte sur le modèle.                                                     |
 
 === "Paramètres Nginx"
 

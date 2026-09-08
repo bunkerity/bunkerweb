@@ -921,6 +921,25 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vmeta_binop			// Binop call for compatibility.
 #endif
   |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  add CARG3, BASE, RC, lsl #3
+  |  mov CARG4, CARG3
+  |  b >1
+  |
+  |->vmeta_bitop:
+  |  add CARG3, BASE, RB, lsl #3
+  |   add CARG4, BASE, RC, lsl #3
+  |1:
+  |  uxtb CARG5w, INSw
+  |   add CARG2, BASE, RA, lsl #3
+  |    str BASE, L->base
+  |   mov CARG1, L
+  |    str PC, SAVE_PC
+  |  bl extern lj_meta_bitop  // (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  b ->cont_nop
+  |
   |//-- Call metamethod ----------------------------------------------------
   |
   |->vmeta_call:			// Resolve and call __call metamethod.
@@ -2876,6 +2895,51 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  ldr TMP0, [BASE, RB, lsl #3]
     |  str TMP0, [BASE, RA, lsl #3]	// Copy result to RA.
     |  ins_next
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  // RA = dst, RC = src
+    |  ldr CARG1, [BASE, RC, lsl #3]
+    |  checkint CARG1, ->vmeta_bnot
+    |  mvn CARG1w, CARG1w
+    |  add_TISNUM CARG1, CARG1
+    |  str CARG1, [BASE, RA, lsl #3]
+    |  ins_next
+    break;
+
+    |.macro ins_bitop, ins
+    |  decode_RB RB, INS
+    |   and RC, RC, #255
+    |  // RA = dst, RB = src1, RC = src2
+    |  ldr CARG1, [BASE, RB, lsl #3]
+    |   ldr CARG2, [BASE, RC, lsl #3]
+    |  checkint CARG1, ->vmeta_bitop
+    |   checkint CARG2, ->vmeta_bitop
+    |  ins CARG1w, CARG1w, CARG2w
+    |  add_TISNUM CARG1, CARG1
+    |  str CARG1, [BASE, RA, lsl #3]
+    |  ins_next
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop and
+    break;
+  case BC_BOR:
+    |  ins_bitop orr
+    break;
+  case BC_BXOR:
+    |  ins_bitop eor
+    break;
+  case BC_BSHL:
+    |  ins_bitop lsl
+    break;
+  case BC_BSHR:
+    |  ins_bitop lsr
+    break;
+  case BC_BSAR:
+    |  ins_bitop asr
     break;
 
   /* -- Constant ops ------------------------------------------------------ */

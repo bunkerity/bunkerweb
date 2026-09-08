@@ -12,6 +12,7 @@ nav: # language-agnostic structure (same file names in each locale folder)
   - Concepts: "concepts.md"
   - Integrations: "integrations.md"
   - Quickstart guide: "quickstart-guide.md"
+  - Building from source: "building.md"
   - Features: "features.md"
   - Advanced usages: "advanced.md"
   - Web UI: "web-ui.md"
@@ -101,6 +102,7 @@ plugins:
             Concepts: Concepts
             Integrations: Intégrations
             "Quickstart guide": "Guide de démarrage rapide"
+            "Building from source": "Compiler depuis les sources"
             Features: Fonctionnalités
             "Advanced usages": "Utilisations avancées"
             "Web UI": "Interface Web"
@@ -118,6 +120,7 @@ plugins:
             Concepts: Konzepte
             Integrations: Integrationen
             "Quickstart guide": Schnellstart
+            "Building from source": "Aus dem Quellcode erstellen"
             Features: Funktionen
             "Advanced usages": "Erweiterte Nutzung"
             "Web UI": "Weboberfläche"
@@ -135,6 +138,7 @@ plugins:
             Concepts: Conceptos
             Integrations: Integraciones
             "Quickstart guide": "Guía de inicio rápido"
+            "Building from source": "Compilar desde el código fuente"
             Features: Funcionalidades
             "Advanced usages": "Usos avanzados"
             "Web UI": "Interfaz web"
@@ -152,6 +156,7 @@ plugins:
             Concepts: 概念
             Integrations: 集成
             "Quickstart guide": "快速入门指南"
+            "Building from source": "从源代码构建"
             Features: 功能
             "Advanced usages": "高级用法"
             "Web UI": "Web 界面"

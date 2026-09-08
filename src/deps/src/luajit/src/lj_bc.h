@@ -98,7 +98,7 @@
   _(UNM,	dst,	___,	var,	unm) \
   _(LEN,	dst,	___,	var,	len) \
   \
-  /* Binary ops. ORDER OPR. VV last, POW must be next. */ \
+  /* Binary ops. ORDER OPR. ORDER ARITH. VV last, POW must be next. */ \
   _(ADDVN,	dst,	var,	num,	add) \
   _(SUBVN,	dst,	var,	num,	sub) \
   _(MULVN,	dst,	var,	num,	mul) \
@@ -185,6 +185,15 @@
   _(JLOOP,	rbase,	___,	lit,	___) \
   \
   _(JMP,	rbase,	___,	jump,	___) \
+  \
+  /* Bit operators. ORDER OPR. ORDER BIT. */ \
+  _(BNOT,	dst,	___,	var,	___) \
+  _(BAND,	dst,	var,	var,	___) \
+  _(BOR,	dst,	var,	var,	___) \
+  _(BXOR,	dst,	var,	var,	___) \
+  _(BSHL,	dst,	var,	var,	___) \
+  _(BSHR,	dst,	var,	var,	___) \
+  _(BSAR,	dst,	var,	var,	___) \
   \
   /* Function headers. I/J = interp/JIT, F/V/C = fixarg/vararg/C func. */ \
   _(FUNCF,	rbase,	___,	___,	___) \

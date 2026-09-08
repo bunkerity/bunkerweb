@@ -7,6 +7,7 @@ local datastore = class("datastore")
 local logger = clogger:new("DATASTORE")
 
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local subsystem = ngx.config.subsystem
 local shared = ngx.shared
 local match = string.match
@@ -16,6 +17,22 @@ local match = string.match
 -- read/write once the variables store has been populated (lazy: utils.get_variable
 -- depends on this very module so resolution is deferred to first call).
 local DEFAULT_DATASTORE_LRU = 1000
+
+-- Setting that sizes each shared dict, so an eviction warning can name the knob to turn: this
+-- module serves zones sized by three different settings and "the zone size" names none of them.
+-- Built by identity, skipping the dicts the running subsystem does not declare, so an absent one
+-- cannot be matched by a nil lookup.
+local DICT_SIZE_SETTING = {}
+for name, setting in pairs({
+	metrics_datastore = "METRICS_MEMORY_SIZE",
+	metrics_datastore_stream = "METRICS_MEMORY_SIZE",
+	internalstore = "INTERNALSTORE_MEMORY_SIZE",
+	internalstore_stream = "INTERNALSTORE_MEMORY_SIZE",
+}) do
+	if shared[name] then
+		DICT_SIZE_SETTING[shared[name]] = setting
+	end
+end
 
 local lru, err_lru = lrucache.new(DEFAULT_DATASTORE_LRU)
 if not lru then
@@ -108,6 +125,7 @@ function datastore:initialize(dict)
 	else
 		self.dict = shared.datastore_stream
 	end
+	self.size_setting = (self.dict and DICT_SIZE_SETTING[self.dict]) or "DATASTORE_MEMORY_SIZE"
 end
 
 function datastore:get(key, worker)
@@ -156,18 +174,42 @@ function datastore:set(key, value, exptime, worker)
 	end
 end
 
+-- Last time an eviction warning was emitted, per zone. A zone that has reached capacity
+-- force-evicts on every single write, and the metrics zone is written for every live key on
+-- every timer tick, so anything finer than per-zone turns a saturated zone into a permanent
+-- log stream. The zone size is the only fix, so the zone is also the only useful granularity.
+local forcible_warned = {}
+local FORCIBLE_WARN_INTERVAL = 60
+
+local function warn_forcible(setting, key)
+	local now = ngx.time()
+	local last = forcible_warned[setting]
+	if last and now - last < FORCIBLE_WARN_INTERVAL then
+		return
+	end
+	forcible_warned[setting] = now
+	logger:log(WARN, "shared dict is full : writing " .. key .. " evicted an unexpired entry, raise " .. setting)
+end
+
 function datastore:set_with_retries(key, value, exptime, max_retries)
 	max_retries = max_retries or 5
-	local success, err
+	local success, err, forcible
 	-- Try multiple times if we need to make room for the new value
 	for _ = 1, max_retries do
 		if exptime == nil or exptime < 0 then
-			success, err = self.dict:set(key, value)
+			success, err, forcible = self.dict:set(key, value)
 		else
-			success, err = self.dict:set(key, value, exptime)
+			success, err, forcible = self.dict:set(key, value, exptime)
 		end
 		-- Ok case
 		if success then
+			-- The write succeeded by evicting an unexpired entry. This zone also holds active
+			-- bans, so a silent eviction can drop one; the caller only ever sees success, hence
+			-- the warning here. Throttled per zone: a zone at capacity force-evicts on every
+			-- write, and its size is the only thing the operator can act on.
+			if forcible then
+				warn_forcible(self.size_setting, key)
+			end
 			return true, "success"
 		end
 		-- Unknown error, can't do nothing

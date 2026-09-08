@@ -128,8 +128,8 @@ local function get(path, prefix, suffix, name, key, current_time)
   -- TODO: do we want to check expiry here?
   -- The cookie header already has the info and has a MAC too.
   local exp = get_modification(file_path)
-  if exp and exp < current_time then
-    return nil, "expired"
+  if not exp or exp < current_time then
+    return nil
   end
 
   return file_read(file_path)

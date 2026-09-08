@@ -225,7 +225,7 @@ LJLIB_CF(rawlen)		LJLIB_REC(.)
 }
 #endif
 
-LJLIB_CF(unpack)
+LJLIB_CF(unpack)		LJLIB_REC(.)
 {
   GCtab *t = lj_lib_checktab(L, 1);
   int32_t n, i = lj_lib_optint(L, 2, 1);

@@ -180,6 +180,8 @@ _LE_REUSE_SERVER_PATHS = {
 # above (which keys off regr.json alone) counts it as present.
 _ACCOUNT_REQUIRED_FILES = ("regr.json", "private_key.json", "meta.json")
 
+_LINEAGE_REQUIRED_FILES = ("cert", "privkey", "chain", "fullchain")
+
 
 def _server_subpath(server_url: str) -> str:
     """Relative path under accounts/ that certbot derives from an ACME server URL."""
@@ -391,8 +393,9 @@ def path_is_inside(child: Path, parent: Path) -> bool:
 def _read_lineage_paths(conf_path: Path) -> Optional[Dict[str, str]]:
     """Parse a renewal conf's top-section path keys, or None if the file can't be read.
 
-    Returns the archive_dir / cert / fullchain values (whichever are present). These keys
-    only appear in the top section certbot writes, so a flat partition parse is unambiguous.
+    Returns archive_dir plus Certbot's four required file references (whichever are present).
+    These keys only appear in the top section certbot writes, so a flat partition parse is
+    unambiguous.
     """
     keys: Dict[str, str] = {}
     try:
@@ -404,7 +407,7 @@ def _read_lineage_paths(conf_path: Path) -> Optional[Dict[str, str]]:
         if not sep_char:
             continue
         k = key.strip()
-        if k in ("archive_dir", "cert", "fullchain") and k not in keys:
+        if k in ("archive_dir", *_LINEAGE_REQUIRED_FILES) and k not in keys:
             keys[k] = value.strip()
     return keys
 
@@ -423,15 +426,16 @@ def detect_broken_lineages(data_path: Path) -> List[Dict[str, Any]]:
     """List renewal/*.conf whose lineage is broken independently of the ACME account.
 
     A conf is broken when ANY of:
-      (a) it can't be read, or carries neither an archive_dir nor a cert path;
+      (a) it can't be read, or is missing any of Certbot's four required file references;
       (b) a lineage name in its body (archive/<name>, live/<name>) differs from the filename
           stem — the signature that makes `certbot certificates`/`renew` fail to parse;
       (c) no certificate material exists (no live/<name>/fullchain.pem under data_path for the
           conf stem or any body-derived lineage name);
-      (d) live/<stem>/fullchain.pem exists but is a regular file, not a symlink. Certbot
-          requires every live/<name>/*.pem to be a symlink into archive/; a dereferenced
-          regular file makes `certbot renew` raise CertStorageError ("expected ... to be a
-          symlink") and certbot then issues unbounded duplicate -NNNN lineages.
+      (d) any required live/<stem>/*.pem is not a symlink resolving to existing material.
+          Certbot requires all four to be symlinks into archive/ AND their targets to exist, so
+          a dereferenced regular file, a dangling link and an absent file all make `certbot
+          renew` raise CertStorageError and certbot then issues unbounded duplicate -NNNN
+          lineages.
 
     Healthy, wildcard, and `-ecdsa` lineages all keep body names equal to the stem and their
     live/ files as symlinks into archive/, so they are never flagged. Returns one dict per
@@ -451,8 +455,8 @@ def detect_broken_lineages(data_path: Path) -> List[Dict[str, Any]]:
 
         if keys is None:
             reason = "renewal conf could not be read"
-        elif "archive_dir" not in keys and "cert" not in keys:
-            reason = "renewal conf has neither an archive_dir nor a cert path"
+        elif missing_refs := [name for name in _LINEAGE_REQUIRED_FILES if name not in keys]:
+            reason = f"renewal conf is missing required file reference(s): {', '.join(missing_refs)}"
         else:
             body_names = _body_lineage_names(keys)
             mismatched = sorted({name for name in body_names if name != stem})
@@ -463,12 +467,19 @@ def detect_broken_lineages(data_path: Path) -> List[Dict[str, Any]]:
                 # key is an absolute certbot path that, in the UI scratch context, would resolve
                 # against the live host tree rather than this snapshot; check only data_path-anchored
                 # live/<name>/fullchain.pem for the conf stem and any body-derived lineage name.
-                live_fullchain = data_path.joinpath("live", stem, "fullchain.pem")
                 has_material = any(data_path.joinpath("live", name, "fullchain.pem").exists() for name in {stem, *body_names})
                 if not has_material:
                     reason = f"no certificate material for lineage '{stem}'"
-                elif live_fullchain.exists() and not live_fullchain.is_symlink():
-                    reason = f"live certificate files for lineage '{stem}' are not symlinks"
+                else:
+                    # is_symlink() does not follow the link, exists() does: together they cover all
+                    # three states certbot rejects, a regular file, a dangling link and an absent one.
+                    unusable = [
+                        f"{name}.pem"
+                        for name in _LINEAGE_REQUIRED_FILES
+                        if not (path := data_path.joinpath("live", stem, f"{name}.pem")).is_symlink() or not path.exists()
+                    ]
+                    if unusable:
+                        reason = f"live certificate files for lineage '{stem}' are not usable symlinks: {', '.join(unusable)}"
 
         if reason:
             broken.append(
@@ -611,6 +622,8 @@ if __name__ == "__main__":
             "version = 2.11.0\n"
             f"archive_dir = {root.joinpath('archive', lineage).as_posix()}\n"
             f"cert = {root.joinpath('live', lineage, 'cert.pem').as_posix()}\n"
+            f"privkey = {root.joinpath('live', lineage, 'privkey.pem').as_posix()}\n"
+            f"chain = {root.joinpath('live', lineage, 'chain.pem').as_posix()}\n"
             f"fullchain = {root.joinpath('live', lineage, 'fullchain.pem').as_posix()}\n"
             "\n[renewalparams]\n"
             "authenticator = manual\n"
@@ -657,12 +670,48 @@ if __name__ == "__main__":
         _write_conf(renewal, "flattened.example.org", "flattened.example.org", root)
         _make_material_flat(root, "flattened.example.org")
 
+        # A half-written conf with certificate material still fails Certbot's ALL_FOUR check.
+        missing_refs = "missing-references.example.org"
+        renewal.joinpath(f"{missing_refs}.conf").write_text(
+            f"archive_dir = {root.joinpath('archive', missing_refs).as_posix()}\n"
+            f"cert = {root.joinpath('live', missing_refs, 'cert.pem').as_posix()}\n"
+            f"fullchain = {root.joinpath('live', missing_refs, 'fullchain.pem').as_posix()}\n",
+            encoding="utf-8",
+        )
+        _make_material(root, missing_refs)
+
+        # A regular cert.pem must be caught even while fullchain.pem remains a valid symlink.
+        regular_cert = "regular-cert.example.org"
+        _write_conf(renewal, regular_cert, regular_cert, root)
+        _make_material(root, regular_cert)
+        regular_cert_path = root.joinpath("live", regular_cert, "cert.pem")
+        regular_cert_path.unlink()
+        regular_cert_path.write_text("cert-material", encoding="utf-8")
+
+        # A dangling symlink and an absent live file are both rejected by certbot even though the
+        # link, or its absence, is invisible to a follows-symlinks existence test.
+        dangling_chain = "dangling-chain.example.org"
+        _write_conf(renewal, dangling_chain, dangling_chain, root)
+        _make_material(root, dangling_chain)
+        root.joinpath("archive", dangling_chain, "chain1.pem").unlink()
+
+        absent_privkey = "absent-privkey.example.org"
+        _write_conf(renewal, absent_privkey, absent_privkey, root)
+        _make_material(root, absent_privkey)
+        root.joinpath("live", absent_privkey, "privkey.pem").unlink()
+
         broken = detect_broken_lineages(root)
-        assert [b["cert_name"] for b in broken] == ["domain.se", "flattened.example.org"], broken
+        by_name = {entry["cert_name"]: entry for entry in broken}
+        assert set(by_name) == {"domain.se", "flattened.example.org", missing_refs, regular_cert, dangling_chain, absent_privkey}, broken
         # Body-name alias: lineage_names carries BOTH the conf stem and the body name, so the UI can
         # match a row keyed off either. This is the contract /heal's alias resolution relies on.
-        assert {"domain.se", "domain.se.conf"} <= set(broken[0]["lineage_names"]), broken[0]
-        assert "not symlinks" in broken[1]["reason"], broken[1]
+        assert {"domain.se", "domain.se.conf"} <= set(by_name["domain.se"]["lineage_names"]), by_name["domain.se"]
+        assert "not usable symlinks" in by_name["flattened.example.org"]["reason"], by_name["flattened.example.org"]
+        assert "missing required" in by_name[missing_refs]["reason"], by_name[missing_refs]
+        assert "cert.pem" in by_name[regular_cert]["reason"], by_name[regular_cert]
+        assert "chain.pem" in by_name[dangling_chain]["reason"], by_name[dangling_chain]
+        assert "privkey.pem" in by_name[absent_privkey]["reason"], by_name[absent_privkey]
+        assert "healthy.example.org" not in by_name, broken
 
         quarantine = Path(tmp, "quarantine")
         acted = purge_lineage(root, renewal.joinpath("domain.se.conf"), quarantine_root=quarantine, logger=None)

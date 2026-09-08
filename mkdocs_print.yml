@@ -16,6 +16,7 @@ nav: # language-agnostic structure (same file names in each locale folder)
   - Concepts: "concepts.md"
   - Integrations: "integrations.md"
   - Quickstart guide: "quickstart-guide.md"
+  - Building from source: "building.md"
   - Features: "features.md"
   - Advanced usages: "advanced.md"
   - Web UI: "web-ui.md"

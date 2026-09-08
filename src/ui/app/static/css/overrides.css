@@ -798,8 +798,12 @@ button.list-group-item-secondary.active {
   max-height: 60vh !important;
 }
 
-td.highlight {
-  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+table.dataTable tbody tr:hover > td {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+table.table.dataTable > tbody > tr.selected:hover > td {
+  background-color: rgba(var(--bs-primary-rgb), 0.16);
 }
 
 .text-bw-green {

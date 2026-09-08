@@ -354,11 +354,11 @@
 |
 |// Synthesize SSE FP constants.
 |.macro sseconst_abs, reg, tmp		// Synthesize abs mask.
-|  mov64 tmp, U64x(7fffffff,ffffffff); movd reg, tmp
+|  mov64 tmp, U64x(7fffffff,ffffffff); movq reg, tmp
 |.endmacro
 |
 |.macro sseconst_hi, reg, tmp, val	// Synthesize hi-32 bit const.
-|  mov64 tmp, U64x(val,00000000); movd reg, tmp
+|  mov64 tmp, U64x(val,00000000); movq reg, tmp
 |.endmacro
 |
 |.macro sseconst_sign, reg, tmp		// Synthesize sign mask.
@@ -1092,6 +1092,47 @@ static void build_subroutines(BuildCtx *ctx)
 #else
   |  jmp ->vmeta_binop			// Binop call for compatibility.
 #endif
+  |
+  |//-- Bit operator metamethods -------------------------------------------
+  |
+  |->vmeta_bnot:
+  |  mov RB, RA
+  |  lea RC, [BASE+RD*8]
+  |  mov RA, RC
+  |  jmp >2
+  |
+  |// Caveat: ra=RB rb=RC rc=RA.
+  |->vmeta_bitop:
+  |.if DUALNUM
+  |  movzx RCd, PC_RB
+  |  movzx RAd, PC_RC
+  |.endif
+  |  lea RC, [BASE+RC*8]
+  |  lea RA, [BASE+RA*8]
+  |2:
+  |.if X64WIN
+  |  mov CARG3, RC
+  |  mov CARG4, RA
+  |  lea RA, [BASE+RB*8]
+  |  movzx RC, PC_OP
+  |  mov ARG5, RC
+  |  mov L:RB, SAVE_L
+  |  mov L:RB->base, BASE		// Caveat: CARG2d == BASE.
+  |  mov CARG2, RA
+  |  mov CARG1, L:RB			// Caveat: CARG1d == RA.
+  |.else
+  |  lea CARG2, [BASE+RB*8]
+  |  // CARG4 == RA.
+  |  movzx CARG5, PC_OP
+  |  mov L:CARG1, SAVE_L
+  |  mov L:CARG1->base, BASE		// Caveat: CARG3d == BASE.
+  |  mov CARG3, RC
+  |  mov L:RB, L:CARG1
+  |.endif
+  |  mov SAVE_PC, PC
+  |  call extern lj_meta_bitop // (lua_State *L, TValue *ra,*rb,*rc, BCReg op)
+  |  mov BASE, L:RB->base
+  |  jmp ->cont_nop
   |
   |//-- Call metamethod ----------------------------------------------------
   |
@@ -2046,7 +2087,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |1:
   |  ja ->fff_fallback
-  |  movd xmm0, RB
+  |  movq xmm0, RB
   |.else
   |  checknumtp [BASE], ->fff_fallback
   |  movsd xmm0, qword [BASE]
@@ -2081,7 +2122,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  jmp <1
   |2:
   |  ja ->fff_fallback_bit_op
-  |  movd xmm0, RA
+  |  movq xmm0, RA
   |.else
   |  checknumtp [RD], ->fff_fallback_bit_op
   |  movsd xmm0, qword [RD]
@@ -2665,7 +2706,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  ret
   |1:
   |  mov64 rdx, U64x(c3f00000,00000000)	// -0x1p64 (double).
-  |  movd xmm1, rdx
+  |  movq xmm1, rdx
   |  addsd xmm0,  xmm1
   |  cvttsd2si rax, xmm0		// Convert [2^63..2^64+2^63) range.
   |  // Note that -0x1p63 converts to -0x8000000000000000LL either way.
@@ -2977,16 +3018,16 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  ja ->vmeta_comp
     |  // RA is an integer, RD is a number.
     |  cvtsi2sd xmm1, RAd
-    |  movd xmm0, RD
+    |  movq xmm0, RD
     |  jmp >3
     |.else
     |  cmp ITYPEd, LJ_TISNUM; jae ->vmeta_comp
     |  cmp RBd, LJ_TISNUM; jae ->vmeta_comp
     |.endif
     |1:
-    |  movd xmm0, RD
+    |  movq xmm0, RD
     |2:
-    |  movd xmm1, RA
+    |  movq xmm1, RA
     |3:
     |  add PC, 4
     |  ucomisd xmm0, xmm1
@@ -3031,7 +3072,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |7:  // RD is not an integer.
     |  ja >5
     |  // RD is a number.
-    |  movd xmm1, RD
+    |  movq xmm1, RD
     |  cmp ITYPEd, LJ_TISNUM; jb >1; jne >5
     |  // RD is a number, RA is an integer.
     |  cvtsi2sd xmm0, RAd
@@ -3046,10 +3087,10 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.else
     |  cmp RBd, LJ_TISNUM; jae >5
     |  cmp ITYPEd, LJ_TISNUM; jae >5
-    |  movd xmm1, RD
+    |  movq xmm1, RD
     |.endif
     |1:
-    |  movd xmm0, RA
+    |  movq xmm0, RA
     |2:
     |  ucomisd xmm0, xmm1
     |4:
@@ -3171,11 +3212,11 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |
     |8:  // RA is an integer, RD is a number.
     |  cvtsi2sd xmm0, RBd
-    |  movd xmm1, RD
+    |  movq xmm1, RD
     |  ucomisd xmm0, xmm1
     |  jmp >4
     |1:
-    |  movd xmm0, RD
+    |  movq xmm0, RD
     |.else
     |  checknum RB, >3
     |1:
@@ -3429,7 +3470,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.if DUALNUM
     |  ins_arithdn intins
     |.else
-    |  ins_arith, sseins
+    |  ins_arith sseins
     |.endif
     |.endmacro
 
@@ -3487,6 +3528,88 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  mov RC, [BASE+RB*8]
     |  mov [BASE+RA*8], RC
     |  ins_next
+    break;
+
+  /* -- Bit ops ----------------------------------------------------------- */
+
+  case BC_BNOT:
+    |  ins_AD  // RA = dst, RD = src
+    |.if DUALNUM
+    |  mov RB, [BASE+RD*8]
+    |  checkint RB, ->vmeta_bnot
+    |  not RBd
+    |  setint RB
+    |  mov [BASE+RA*8], RB
+    |  ins_next
+    |.else
+    |  checknumtp [BASE+RD*8], ->vmeta_bnot
+    |  movsd xmm0, qword [BASE+RD*8]
+    |  sseconst_tobit xmm1, RB
+    |  addsd xmm0, xmm1
+    |  movd RBd, xmm0
+    |  not RBd
+    |  cvtsi2sd xmm0, RBd
+    |  movsd qword [BASE+RA*8], xmm0
+    |  ins_next
+    |.endif
+    break;
+
+    |.macro ins_bitop, ins, shift
+    |  ins_A  // Really ins_ABC. RB = dst, RC = src1, RA = src2
+    |  // Swap registers around to avoid reloading RA.
+    |  mov RB, RA
+    |  movzx RAd, RCL	// Really src2 (C).
+    |  movzx RCd, RCH	// Really src1 (B).
+    |.if DUALNUM
+    |  mov RA, [BASE+RA*8]
+    |  mov RC, [BASE+RC*8]
+    |  checkint RA, ->vmeta_bitop
+    |  checkint RC, ->vmeta_bitop
+    |.if shift == 1
+    |  ins RCd, cl		// Assumes RA is ecx.
+    |.else
+    |  ins RCd, RAd
+    |.endif
+    |  setint RC
+    |  mov [BASE+RB*8], RC
+    |.else
+    |  checknumtp [BASE+RA*8], ->vmeta_bitop
+    |  checknumtp [BASE+RC*8], ->vmeta_bitop
+    |  movsd xmm0, qword [BASE+RA*8]
+    |  movsd xmm1, qword [BASE+RC*8]
+    |  sseconst_tobit xmm2, RC
+    |  addsd xmm0, xmm2
+    |  addsd xmm1, xmm2
+    |  movd RAd, xmm0
+    |  movd RCd, xmm1
+    |.if shift == 1
+    |  ins RCd, cl		// Assumes RA is ecx.
+    |.else
+    |  ins RCd, RAd
+    |.endif
+    |  cvtsi2sd xmm0, RCd
+    |  movsd qword [BASE+RB*8], xmm0
+    |.endif
+    |  ins_next
+    |.endmacro
+
+  case BC_BAND:
+    |  ins_bitop and, 0
+    break;
+  case BC_BOR:
+    |  ins_bitop or, 0
+    break;
+  case BC_BXOR:
+    |  ins_bitop xor, 0
+    break;
+  case BC_BSHL:
+    |  ins_bitop shl, 1
+    break;
+  case BC_BSHR:
+    |  ins_bitop shr, 1
+    break;
+  case BC_BSAR:
+    |  ins_bitop sar, 1
     break;
 
   /* -- Constant ops ------------------------------------------------------ */
@@ -3771,7 +3894,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.else
     |  // Convert number to int and back and compare.
     |  checknum RC, >5
-    |  movd xmm0, RC
+    |  movq xmm0, RC
     |  cvttsd2si RCd, xmm0
     |  cvtsi2sd xmm1, RCd
     |  ucomisd xmm0, xmm1
@@ -3897,7 +4020,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.else
     |  // Convert number to int and back and compare.
     |  checknum RC, >5
-    |  movd xmm0, RC
+    |  movq xmm0, RC
     |  cvttsd2si RCd, xmm0
     |  cvtsi2sd xmm1, RCd
     |  ucomisd xmm0, xmm1
