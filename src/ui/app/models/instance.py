@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from datetime import datetime, timedelta
 from heapq import heappush, heapreplace
@@ -269,24 +270,37 @@ class InstancesUtils:
     def __init__(self, db):
         self.__db = db
 
+    # Mirrors the METRICS_MAX_BLOCKED_REQUESTS_REDIS default in
+    # src/common/core/metrics/plugin.json. A larger fallback here would let a failed
+    # config read authorise a scan wider than the operator ever configured.
+    _DEFAULT_MAX_BLOCKED_REQUESTS_REDIS = 10000
+
     def _get_max_blocked_requests_redis(self) -> int:
-        default_max = 100000
+        default_max = self._DEFAULT_MAX_BLOCKED_REQUESTS_REDIS
         try:
-            config = self.__db.get_config(global_only=True, methods=False)
+            # Filtered: an unfiltered get_config() pulls the whole global configuration
+            # out of the database, and this runs on every Redis read path.
+            config = self.__db.get_config(global_only=True, methods=False, filtered_settings=("METRICS_MAX_BLOCKED_REQUESTS_REDIS",))
             value = _parse_count(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max), default_max)
             return max(0, value)
         except Exception:
             return default_max
 
-    def _get_redis_scan_start_index(self, redis_client, max_requests: int) -> int:
-        if max_requests <= 0:
-            return 0
+    def _get_redis_scan_window(self, redis_client, max_requests: int) -> Tuple[int, Optional[int]]:
+        """Return ``(start_index, total)`` for a capped scan of the "requests" list.
+
+        The length is returned alongside the offset so callers can pass it into the
+        iterators, which would otherwise issue their own LLEN for the same list on
+        the same request. ``total`` is None when the length could not be read, which
+        is the iterators' signal to fall back to chunk-based termination.
+        """
         try:
-            total_requests = redis_client.llen("requests")
-            total_requests = int(total_requests or 0)
-            return max(0, total_requests - max_requests)
+            total = int(redis_client.llen("requests") or 0)
         except Exception:
-            return 0
+            return 0, None
+        if max_requests <= 0:
+            return 0, total
+        return max(0, total - max_requests), total
 
     @staticmethod
     def _decode_redis_text(value: Any) -> str:
@@ -327,10 +341,20 @@ class InstancesUtils:
                 break
 
     def _get_redis_request_state(self, redis_client) -> Optional[dict]:
-        """Read the metrics writer's certificate for the current retained list."""
+        """Read the metrics writer's certificate for the current retained list.
+
+        The certificate and the list length are fetched in one pipelined round trip.
+        Besides halving the cost, sending them together narrows the window in which a
+        concurrent push can land between the two reads and make a valid certificate
+        look stale.
+        """
         with suppress(ValueError, TypeError):
-            state = loads(redis_client.get("requests:facets:initialized") or "null")
-            if isinstance(state, dict) and state.get("version") == 2 and state.get("length") == int(redis_client.llen("requests") or 0):
+            pipe = redis_client.pipeline(transaction=False)
+            pipe.get("requests:facets:initialized")
+            pipe.llen("requests")
+            raw_state, raw_length = pipe.execute()
+            state = loads(raw_state or "null")
+            if isinstance(state, dict) and state.get("version") == 2 and state.get("length") == int(raw_length or 0):
                 return state
         return None
 
@@ -411,9 +435,9 @@ class InstancesUtils:
     ) -> dict[str, dict[str, dict[str, int]]]:
         pane_counts: dict[str, dict[str, dict[str, int]]] = {field: {} for field in pane_fields}
         seen_ids: set = set()
-        scan_start_idx = self._get_redis_scan_start_index(redis_client, max_requests)
+        scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_requests)
 
-        for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+        for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
             report_id = report.get("id")
             if report_id is not None:
                 if report_id in seen_ids:
@@ -550,6 +574,23 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
         ] or ""
 
+    @staticmethod
+    def _gather_from_instances(instances: List["Instance"], collect) -> List[dict[str, Any]]:
+        """Query every instance at once instead of one after another.
+
+        Each call is a blocking HTTP round trip, so a serial loop cost the sum of
+        every instance's latency on a page that only needs the slowest one.
+        """
+        if not instances:
+            return []
+        if len(instances) == 1:
+            return collect(instances[0])
+        gathered: List[dict[str, Any]] = []
+        with ThreadPoolExecutor(max_workers=min(len(instances), 8)) as executor:
+            for result in executor.map(collect, instances):
+                gathered.extend(result)
+        return gathered
+
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
 
@@ -566,8 +607,7 @@ class InstancesUtils:
                 return []
             bans = get_instance_bans(instance)
         else:
-            for instance in instances or self.get_instances(status="up"):
-                bans.extend(get_instance_bans(instance))
+            bans = self._gather_from_instances(instances or self.get_instances(status="up"), get_instance_bans)
 
         # Improved deduplication that considers IP, scope, and service combination
         # A unique ban is defined by the combination of IP address, ban scope, and service
@@ -603,8 +643,7 @@ class InstancesUtils:
                 return []
             reports = get_instance_reports(instance)
         else:
-            for instance in instances or self.get_instances(status="up"):
-                reports.extend(get_instance_reports(instance))
+            reports = self._gather_from_instances(instances or self.get_instances(status="up"), get_instance_reports)
 
         return sorted(reports, key=itemgetter("date"), reverse=True)
 
@@ -629,11 +668,11 @@ class InstancesUtils:
 
         if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
+                scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
                 # Iterate newest-first and stop at the first match: the tail-most
                 # occurrence of an id is its most recent one, so this avoids the
                 # full O(N) scan the forward loop needed to pick the max-date match.
-                for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                     if str(report.get("id", "")) == report_id:
                         return report.get("data", {})
             except Exception as e:
@@ -832,8 +871,8 @@ class InstancesUtils:
                 heap_seq = 0
                 is_desc = order_dir == "desc"
 
-                scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                     report_id = report.get("id")
                     if report_id is not None:
                         if report_id in seen_ids:
@@ -983,7 +1022,7 @@ class InstancesUtils:
             return sorted(reports, key=lambda x: float(x.get("date", 0) or 0), reverse=reverse)
         return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
 
-    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25):
+    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25, total: Optional[int] = None):
         """Lazily yield decoded request reports from the Redis "requests" list.
 
         LRANGE calls are batched through a non-transactional pipeline
@@ -994,13 +1033,15 @@ class InstancesUtils:
         """
         start = max(0, start_index)
 
-        # Bound the scan with a single LLEN so we don't pipeline ranges past the
-        # end of the list. On error, fall back to short/empty-chunk termination
-        # (the original contract).
-        try:
-            total = int(redis_client.llen("requests") or 0)
-        except Exception:
-            total = None
+        # Bound the scan with the list length so we don't pipeline ranges past the
+        # end of it. Callers that already computed a scan window pass it in; only
+        # fetch it when they did not. On error, fall back to short/empty-chunk
+        # termination (the original contract).
+        if total is None:
+            try:
+                total = int(redis_client.llen("requests") or 0)
+            except Exception:
+                total = None
 
         while True:
             if total is not None and start >= total:
@@ -1036,7 +1077,7 @@ class InstancesUtils:
                 break
             start = s
 
-    def _iter_redis_requests_reverse(self, redis_client, chunk_size: int = 2000, start_index: int = 0):
+    def _iter_redis_requests_reverse(self, redis_client, chunk_size: int = 2000, start_index: int = 0, total: Optional[int] = None):
         """Lazily yield decoded reports newest-first (tail -> head).
 
         RPUSH appends the newest report at the tail, and the list is written in
@@ -1045,13 +1086,14 @@ class InstancesUtils:
         scanning the whole capped window (which is what the forward iterator
         forces when it must pick the max-date match).
         """
-        try:
-            total = int(redis_client.llen("requests") or 0)
-        except Exception:
-            # Redis flaky: yield nothing so single-id callers fall through to the
-            # instance-API fallback (unlike the forward iterator's chunk-based
-            # termination — reverse callers early-break, so there is nothing to salvage).
-            return
+        if total is None:
+            try:
+                total = int(redis_client.llen("requests") or 0)
+            except Exception:
+                # Redis flaky: yield nothing so single-id callers fall through to the
+                # instance-API fallback (unlike the forward iterator's chunk-based
+                # termination — reverse callers early-break, so there is nothing to salvage).
+                return
         low = max(0, start_index)
         hi = total - 1
         while hi >= low:
@@ -1238,8 +1280,8 @@ class InstancesUtils:
         else:
             # Process requests in chunks using the iterator
             # This avoids loading all requests into memory at once
-            scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-            requests_iter = self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx)
+            scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+            requests_iter = self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total)
 
         seen_ids: set = set()
         for request in requests_iter:
@@ -1418,8 +1460,8 @@ class InstancesUtils:
 
                     requests_list = []
                     seen_ids: set = set()
-                    scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-                    for request in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                    scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+                    for request in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                         req_id = request.get("id")
                         if req_id is not None:
                             if req_id in seen_ids:

@@ -27,7 +27,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                    |
 | `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                  |
 | `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.        |
-| `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
+| `REDIS_SSL_VERIFY`        | `no`              | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
 | `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
@@ -36,7 +36,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
+| `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX. |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
@@ -137,7 +137,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 #### Optimización del Rendimiento
 
-- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica. `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: en régimen estable, las conexiones son aproximadamente `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`. Dimensione el límite `maxclients` de Redis/Valkey por encima, porque una conexión rechazada impide comprobar en esa petición los baneos que solo están en Redis
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
 - **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos

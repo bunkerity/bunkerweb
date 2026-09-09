@@ -27,6 +27,12 @@
 - [BUGFIX] `metrics`: dashboard IP counts respect the selected window, and cold counters keep their stored baseline when the worker cache is full.
 - [BUGFIX] `metrics`: an instance refills the Redis reports list after it is evicted or deleted, `METRICS_REDIS_TTL=0` strips the expiry already set on those keys, and a failed TTL refresh is logged.
 - [BUGFIX] `ui`: `METRICS_MAX_BLOCKED_REQUESTS_REDIS=0` keeps the reports out of Redis instead of hiding them; the reports page, the dashboard and the metrics endpoint read them from the instances.
+- [BUGFIX] `redis`: a pooled connection no longer re-authenticates, re-selects the database and sends `DISCARD` on every use, and the ban check asks Redis for both keys in one round trip, so a request on default settings costs two Redis round trips instead of seven; a ban already cached on the instance is now enforced while Redis is unreachable, where it previously was not.
+- [BUGFIX] `redis`: `REDIS_KEEPALIVE_POOL` defaults to 64 per NGINX worker; size `maxclients` from `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`.
+- [BUGFIX] `ui`, `cli`: `REDIS_SSL_VERIFY` is honored by the Web UI and `bwcli`, so a TLS Redis with a private CA works from both.
+- [BUGFIX] `ui`: one Redis client per worker instead of one per request, and an unmodified session is written back once per quarter of its lifetime instead of on every request, so a session idle since its last write can expire up to a quarter early.
+- [BUGFIX] `ui`: the reports page reads the list length once per scan and the writer certificate in one round trip, and a failed config read no longer authorises a scan ten times the configured window.
+- [BUGFIX] `ui`, `cli`: ban listings scan Redis in batches of 1000 and fetch values in one pipeline, and the bans page merges instance bans in linear time.
 - [BUGFIX] `crowdsec`: cache prefixes no longer shift with another service's Local API, and the health endpoint reports every failure at once.
 - [BUGFIX] `autoconf`: a stuck Kubernetes watch is detected on its own, and an invalid Ingress or HTTPRoute path is skipped with a warning.
 - [BUGFIX] `reverseproxy`, `redirect`, `grpc`: location operands are quoted, and the location settings reject whitespace, `;`, `{`, `}` and a bare modifier.

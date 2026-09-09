@@ -27,7 +27,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_PORT`              | `6379`     | global | 否   | **Redis/Valkey 端口：** Redis/Valkey 服务器的端口号。                            |
 | `REDIS_DATABASE`          | `0`        | global | 否   | **Redis/Valkey 数据库：** 在 Redis/Valkey 服务器上使用的数据库编号 (0-15)。      |
 | `REDIS_SSL`               | `no`       | global | 否   | **Redis/Valkey SSL：** 设置为 `yes` 以启用 Redis/Valkey 连接的 SSL/TLS 加密。    |
-| `REDIS_SSL_VERIFY`        | `yes`      | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
+| `REDIS_SSL_VERIFY`        | `no`       | global | 否   | **Redis/Valkey SSL 验证：** 设置为 `yes` 以验证 Redis/Valkey 服务器的 SSL 证书。 |
 | `REDIS_TIMEOUT`           | `1000`     | global | 否   | **Redis/Valkey 超时：** Redis/Valkey 连接/读取/写入操作的超时时间（毫秒）。      |
 | `REDIS_USERNAME`          |            | global | 否   | **Redis/Valkey 用户名：** 用于 Redis/Valkey 身份验证的用户名 (Redis 6.0+)。      |
 | `REDIS_PASSWORD`          |            | global | 否   | **Redis/Valkey 密码：** 用于 Redis/Valkey 身份验证的密码。                       |
@@ -36,7 +36,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_SENTINEL_PASSWORD` |            | global | 否   | **Sentinel 密码：** 用于 Redis Sentinel 身份验证的密码。                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global | 否   | **Sentinel 主节点：** Redis Sentinel 配置中主节点的名称。                        |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global | 否   | **Keepalive 空闲时间：** 关闭池中 Redis/Valkey 连接前的最大空闲时间（毫秒）。    |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global | 否   | **Keepalive 池：** 每个 NGINX worker 在池中保留的最大 Redis/Valkey 连接数。 |
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
     对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
@@ -135,7 +135,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 
 #### 性能优化
 
-- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践。`REDIS_KEEPALIVE_POOL` 按每个 NGINX worker 生效：稳态下的连接数约为 `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x 实例数`。请将 Redis/Valkey 的 `maxclients` 上限设置在该值之上，否则被拒绝的连接会使该请求无法检查仅保存在 Redis 中的封禁
 - **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
 - **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
 - **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式

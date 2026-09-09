@@ -25,7 +25,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_PORT`              | `6379`     | global  | nein     | Redis-/Valkey-Port.                                           |
 | `REDIS_DATABASE`          | `0`        | global  | nein     | Datenbanknummer (0–15).                                       |
 | `REDIS_SSL`               | `no`       | global  | nein     | Aktiviert SSL/TLS.                                            |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
+| `REDIS_SSL_VERIFY`        | `no`       | global  | nein     | Überprüft das SSL-Zertifikat des Servers.                     |
 | `REDIS_TIMEOUT`           | `1000`     | global  | nein     | Timeout (ms) für Verbindung/Lesen/Schreiben.                 |
 | `REDIS_USERNAME`          |            | global  | nein     | Benutzername (Redis ≥ 6.0).                                   |
 | `REDIS_PASSWORD`          |            | global  | nein     | Passwort.                                                     |
@@ -34,7 +34,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_SENTINEL_PASSWORD` |            | global  | nein     | Sentinel-Passwort.                                            |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | nein     | Name des Sentinel-Masters.                                    |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global  | nein     | Maximale Leerlaufzeit (ms), bevor eine gepoolte Redis-/Valkey-Verbindung geschlossen wird. |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen, pro NGINX-Worker. |
 
 !!! tip "Hochverfügbarkeit"
     Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
@@ -132,7 +132,7 @@ Berücksichtigen Sie bei der Verwendung von Redis oder Valkey mit BunkerWeb dies
 - **Backup-Strategie:** Implementieren Sie regelmäßige Redis-Backups als Teil Ihres Disaster-Recovery-Plans
 
 #### Leistungsoptimierung
-- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen
+- **Connection Pooling:** BunkerWeb implementiert dies bereits, aber stellen Sie sicher, dass andere Anwendungen dieser Praxis folgen. `REDIS_KEEPALIVE_POOL` gilt pro NGINX-Worker: im Dauerbetrieb liegt die Zahl der Verbindungen bei etwa `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x Instanzen`. Setzen Sie das `maxclients`-Limit von Redis/Valkey darüber an, denn eine abgewiesene Verbindung verhindert für diese Anfrage die Prüfung der nur in Redis gehaltenen Sperren
 - **Pipelining:** Verwenden Sie, wenn möglich, Pipelining für Massenoperationen, um den Netzwerk-Overhead zu reduzieren
 - **Teure Operationen vermeiden:** Seien Sie vorsichtig mit Befehlen wie KEYS in Produktionsumgebungen
 - **Benchmarken Sie Ihre Arbeitslast:** Verwenden Sie redis-benchmark, um Ihre spezifischen Arbeitslastmuster zu testen

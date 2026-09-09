@@ -25,7 +25,7 @@ Comment ça marche :
 | `REDIS_PORT`              | `6379`     | global   | non      | Port Redis/Valkey.                                             |
 | `REDIS_DATABASE`          | `0`        | global   | non      | Numéro de base (0–15).                                         |
 | `REDIS_SSL`               | `no`       | global   | non      | Activer SSL/TLS.                                               |
-| `REDIS_SSL_VERIFY`        | `yes`      | global   | non      | Vérifier le certificat SSL du serveur.                         |
+| `REDIS_SSL_VERIFY`        | `no`       | global   | non      | Vérifier le certificat SSL du serveur.                         |
 | `REDIS_TIMEOUT`           | `1000`     | global   | non      | Timeout (ms) pour connexion/lecture/écriture.                  |
 | `REDIS_USERNAME`          |            | global   | non      | Nom d’utilisateur (Redis ≥ 6.0).                               |
 | `REDIS_PASSWORD`          |            | global   | non      | Mot de passe.                                                  |
@@ -34,7 +34,7 @@ Comment ça marche :
 | `REDIS_SENTINEL_PASSWORD` |            | global   | non      | Mot de passe Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster` | global   | non      | Nom du master Sentinel.                                        |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`    | global   | non      | Temps d’inactivité max (ms) avant fermeture d’une connexion du pool. |
-| `REDIS_KEEPALIVE_POOL`    | `10`       | global   | non      | Nb max de connexions conservées dans le pool.                  |
+| `REDIS_KEEPALIVE_POOL`    | `64`       | global   | non      | Nb max de connexions conservées dans le pool, par worker NGINX. |
 
 !!! tip "Haute disponibilité"
     Configurez Redis Sentinel pour un failover automatique en production.
@@ -130,7 +130,7 @@ Lorsque vous utilisez Redis ou Valkey avec BunkerWeb, prenez en compte ces bonne
 - **Stratégie de sauvegarde :** Mettez en œuvre des sauvegardes régulières de Redis dans le cadre de votre plan de reprise après sinistre
 
 #### Optimisation des performances
-- **Pooling de connexions :** BunkerWeb l'implémente déjà, mais assurez-vous que les autres applications suivent cette pratique
+- **Pooling de connexions :** BunkerWeb l'implémente déjà, mais assurez-vous que les autres applications suivent cette pratique. `REDIS_KEEPALIVE_POOL` s'applique par worker NGINX : en régime établi, le nombre de connexions vaut environ `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`. Dimensionnez la limite `maxclients` de Redis/Valkey au-dessus, car une connexion refusée empêche, pour cette requête, la vérification des bannissements conservés uniquement dans Redis
 - **Pipelining :** Lorsque c'est possible, utilisez le pipelining pour les opérations en masse afin de réduire la surcharge réseau
 - **Évitez les opérations coûteuses :** Soyez prudent avec les commandes comme KEYS dans les environnements de production
 - **Testez votre charge de travail :** Utilisez redis-benchmark pour tester vos modèles de charge de travail spécifiques
