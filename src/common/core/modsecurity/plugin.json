@@ -127,7 +127,7 @@
     "MODSECURITY_SEC_REQUEST_BODY_LIMIT": {
       "context": "multisite",
       "default": "",
-      "help": "SecRequestBodyLimit directive of ModSecurity. Maximum request body size that ModSecurity will inspect (supports k/m/g suffixes, e.g. 10m). Requests exceeding this limit are handled according to SecRequestBodyLimitAction (Reject by default). When empty, derived from MAX_CLIENT_SIZE. Set 0 for no limit (not recommended — may cause out-of-memory kills). NGINX enforces MAX_CLIENT_SIZE before ModSecurity, so setting this higher than MAX_CLIENT_SIZE has no effect.",
+      "help": "SecRequestBodyLimit directive of ModSecurity. Maximum request body size that ModSecurity will inspect (k/m/g suffixes, e.g. 10m). Requests over this limit follow SecRequestBodyLimitAction (Reject by default). When empty, derived from MAX_CLIENT_SIZE. Set 0 for no limit (not recommended, may cause out-of-memory kills). NGINX enforces MAX_CLIENT_SIZE first, so a higher value here has no effect. REVERSE_PROXY_MAX_CLIENT_SIZE overrides this value for its own location.",
       "id": "modsecurity-sec-request-body-limit",
       "label": "SecRequestBodyLimit",
       "regex": "^(\\d+[kKmMgG]?)?$",

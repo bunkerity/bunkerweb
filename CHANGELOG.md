@@ -153,6 +153,7 @@
 - [BUGFIX] `installer`: a Docker upgrade is verified by image identity, health and stability, and .env is read last-wins as Compose reads it.
 - [BUGFIX] `services`: a single-site deployment named only `default-server` reached its instances with an empty `SERVER_NAME` and served nothing.
 - [BUGFIX] `healthcheck`: `/healthz` answers `loading` while the instance is loading or reloading instead of always `ok`, and the container healthcheck matches the status exactly.
+- [FEATURE] `reverseproxy`: `REVERSE_PROXY_MAX_CLIENT_SIZE` sets the body size, and the ModSecurity body limit, per URL.
 
 ## v1.6.14~rc1 - 2026/07/??
 

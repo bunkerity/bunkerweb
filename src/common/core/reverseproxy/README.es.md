@@ -243,6 +243,7 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
 | `REVERSE_PROXY_INCLUDES`          |                   | multisite | yes      | **Configuraciones Adicionales:** Incluya configuraciones adicionales en el bloque de ubicación.                                                                                                   |
 | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`             | multisite | yes      | **Pasar el Cuerpo de la Solicitud:** Habilite o deshabilite el paso del cuerpo de la solicitud.                                                                                                   |
 | `REVERSE_PROXY_MODSECURITY`       | `yes`             | multisite | yes      | **ModSecurity (por ubicación):** Establézcalo en `no` para emitir `modsecurity off;` en esta ubicación; omite el WAF en endpoints de cargas grandes para evitar OOM (consulte la nota siguiente). |
+| `REVERSE_PROXY_MAX_CLIENT_SIZE`   |                   | multisite | yes      | **Tamaño Máximo del Cuerpo (por ubicación):** Tamaño máximo del cuerpo para esta ubicación (`0` para ilimitado). Si está vacío, se aplica el `MAX_CLIENT_SIZE` del servicio.                      |
 | `REVERSE_PROXY_SEND_PROXY_PROTOCOL` | `auto` | multisite | no | **Enviar protocolo PROXY:** Envía la cabecera del protocolo PROXY al upstream de stream. `auto` sigue el ajuste global `USE_PROXY_PROTOCOL`, que es lo que BunkerWeb hacía antes de que existiera este ajuste; `yes` y `no` deciden con independencia del listener de entrada. Solo servicios stream (TCP/UDP). |
 
     !!! warning "Consideraciones de Seguridad"
@@ -252,6 +253,9 @@ Esto es independiente del complemento `mtls`, que autentica *a los clientes que 
         ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si, **y solo si**, una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
 
         Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
+    !!! tip "Tamaño del cuerpo por URL"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` limita el cuerpo solo para una URL, de modo que un endpoint de carga dedicado puede aceptar archivos grandes mientras el resto del servicio mantiene el `MAX_CLIENT_SIZE` más estricto. También establece el límite del cuerpo de la solicitud de ModSecurity en esa ubicación, anulando tanto el valor del servicio como un `MODSECURITY_SEC_REQUEST_BODY_LIMIT` explícito, por lo que la carga no es rechazada por el WAF mientras cada otra URL conserva su propio límite. Dos límites no cambian: los cuerpos JSON, XML y codificados como formulario siguen limitados por `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` (`131072` por defecto, `400` por encima), y `0` desactiva el límite de ModSecurity en esa ubicación, que entonces almacena un cuerpo de cualquier tamaño. ModSecurity lee el cuerpo completo antes de enviar la solicitud, así que ajuste el valor a lo que el endpoint realmente necesita.
 
 === "Configuración de Caché"
 
