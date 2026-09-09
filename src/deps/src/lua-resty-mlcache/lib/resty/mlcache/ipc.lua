@@ -222,14 +222,15 @@ function _M:poll(timeout)
         self.idx = idx
 
         if elapsed >= timeout then
-            -- This index is never going to arrive. broadcast() consumes an index at
-            -- incr() before it stores anything, so a hole is left both by an event the
-            -- shm evicted and by a set() that returned "no memory", and neither can be
-            -- filled afterwards. Retrying the same index costs the whole timeout on
-            -- every later call while self.idx advances by one, which no busy writer is
-            -- ever caught up with. Step over the hole to the next event the shm still
-            -- holds, so a lost event costs one skip rather than a permanent stall, and
-            -- events after the hole are still delivered.
+            -- this index is never going to arrive: broadcast() consumes an
+            -- index at incr() before it stores anything, so a hole is left
+            -- both by an event the shm evicted and by a set() that returned
+            -- "no memory", and neither can be filled afterwards. Skipping a
+            -- single index per call means a run of lost events costs the
+            -- whole timeout once per index, which a busy writer outpaces.
+            -- Walk to the next index the shm still holds instead, so a run
+            -- of lost events costs one timeout in total and the events that
+            -- survived it are still delivered on the next poll().
             local probe  = idx + 1
             local budget = MAX_HOLE_SCAN
 
@@ -243,22 +244,23 @@ function _M:poll(timeout)
             end
 
             if probe > shm_idx then
-                -- Nothing left to deliver: resume at the head with no backlog.
+                -- nothing left to deliver, resume at the current shm index
                 self.idx = shm_idx
 
             else
-                -- Resume just before the next event the shm still holds. When the scan
-                -- ran out of budget instead of finding one, this resumes where it
-                -- stopped, so a hole longer than MAX_HOLE_SCAN costs one more poll per
-                -- chunk rather than the backlog that sits behind it.
+                -- resume just before the next event the shm still holds; when
+                -- the scan ran out of budget rather than finding one, this
+                -- resumes where it stopped, so a run longer than
+                -- MAX_HOLE_SCAN costs one more poll() per chunk instead of
+                -- the events sitting behind it
                 self.idx = probe - 1
             end
 
             log(INFO, "no event data at index '", idx, "', skipped ",
-                      self.idx - idx + 1, " lost event(s), resuming at index '",
-                      self.idx + 1, "'")
+                      self.idx - idx + 1, " lost event(s), resuming at ",
+                      "index '", self.idx + 1, "'")
 
-            return true
+            return nil, "timeout"
         end
 
         if err then
