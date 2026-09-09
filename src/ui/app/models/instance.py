@@ -622,12 +622,13 @@ class InstancesUtils:
             return None
 
         redis_client = get_redis_client()
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
-        if redis_client and not hostname:
+        if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    return {}
                 scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
                 # Iterate newest-first and stop at the first match: the tail-most
                 # occurrence of an id is its most recent one, so this avoids the
@@ -686,13 +687,13 @@ class InstancesUtils:
 
         pane_fields = self._REPORT_PANE_FIELDS
         redis_client = get_redis_client()
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
-        if redis_client and not hostname:
+        if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    return {field: {} for field in pane_fields}
-
                 # The facets cover the whole retained list, which the 5 s trim leaves above
                 # the cap for most of every tick. Discarding them there means a full
                 # streaming scan on nearly every page load.
@@ -763,15 +764,14 @@ class InstancesUtils:
 
             return True
 
-        # If Redis is available, use it for optimized queries
-        if redis_client and not hostname:
-            try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    if count_only:
-                        return {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
-                    return {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
+        # If Redis is available, use it for optimized queries
+        if redis_client and max_redis_requests > 0 and not hostname:
+            try:
                 pane_filters = parse_search_panes(search_panes)
                 pane_fields = self._REPORT_PANE_FIELDS
                 selected_pane_values = {field: set(values) for field, values in pane_filters.items()}
@@ -1230,20 +1230,12 @@ class InstancesUtils:
         # Initialize time buckets for the last N hours
         time_buckets: dict[datetime, int] = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(hours)}
 
-        if not redis_client:
-            # Fallback: fetch requests from instance API when Redis is unavailable
+        # A cap of 0 keeps reports out of Redis entirely; the instances still buffer them.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
+        if not redis_client or max_redis_requests == 0:
+            # Fallback: fetch requests from instance API when Redis holds none
             requests_iter = self._iter_instance_api_requests()
         else:
-            max_redis_requests = self._get_max_blocked_requests_redis()
-            if max_redis_requests == 0:
-                return {
-                    "request_countries": {},
-                    "top_blocked_ips": {},
-                    "blocked_unique_ips": 0,
-                    "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
-                    "request_statuses": {},
-                }
-
             # Process requests in chunks using the iterator
             # This avoids loading all requests into memory at once
             scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
@@ -1421,7 +1413,8 @@ class InstancesUtils:
                     # home page or get_reports_query() for paginated report access instead.
                     max_redis_requests = self._get_max_blocked_requests_redis()
                     if max_redis_requests == 0:
-                        return {"requests": []}
+                        # Reports live on the instances only; an empty dict falls through to them.
+                        return {}
 
                     requests_list = []
                     seen_ids: set = set()
