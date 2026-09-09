@@ -122,7 +122,7 @@
       "name": "lua-resty-mlcache v2.7.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
       "commit": "b4d0aed5adf74b118238efdcd971224278ec7d26",
-      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t"
+      "post_install": "rm -r src/deps/src/lua-resty-mlcache/t && patch --forward src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua src/deps/misc/mlcache-ipc-skip-evicted.patch || rm src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.orig src/deps/src/lua-resty-mlcache/lib/resty/mlcache/ipc.lua.rej"
     },
     {
       "id": "lua-resty-openssl",
