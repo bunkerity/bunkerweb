@@ -160,17 +160,16 @@ class ReleaseArtifactsTest(TestCase):
                     with self.assertRaises(ValueError):
                         release.assemble(args)
 
-    def test_smoke_uses_only_exact_candidates_without_source_mounts_or_builds(self):
-        manifest = self.manifest()
-        for platform in release.PLATFORMS:
-            config = compose_config(manifest, platform)
-            self.assertEqual(set(config["services"]), set(release.IMAGES))
-            for name, service in config["services"].items():
-                self.assertEqual(service["image"], manifest["images"][name]["ref"])
-                self.assertEqual(service["platform"], platform)
-                self.assertNotIn("build", service)
-                self.assertNotIn("ports", service)
-                self.assertFalse(any("/usr/share/bunkerweb" in volume for volume in service["volumes"]))
+    def test_smoke_uses_only_pushed_staging_images_without_source_mounts_or_builds(self):
+        config = compose_config()
+        self.assertEqual(set(config["services"]), set(release.IMAGES))
+        for name, service in config["services"].items():
+            self.assertEqual(service["image"], f"ghcr.io/bunkerity/{name}-tests:testing")
+            self.assertNotIn("build", service)
+            self.assertNotIn("ports", service)
+            self.assertFalse(any("/usr/share/bunkerweb" in volume for volume in service["volumes"]))
+            # The API and the all-in-one API refuse to start without an auth path.
+            self.assertTrue(service["environment"]["API_TOKEN"])
 
     def test_workflow_graph_has_no_publication_bypass(self):
         root = Path(__file__).resolve().parents[1] / "workflows"
@@ -187,27 +186,18 @@ class ReleaseArtifactsTest(TestCase):
         for name in ("push-images", "push-packages", "push-gh", "push-doc"):
             self.assertIn("gate", ancestors(name))
             self.assertIn("validate-tests", ancestors(name))
-            self.assertIn("staging-tests", ancestors(name))
-            self.assertIn("smoke-images", ancestors(name))
         for name in ("push-images", "push-packages"):
             self.assertEqual(jobs[name]["with"]["MANIFEST_SHA256"], "${{ needs.push-gh.outputs.manifest_sha256 }}")
-        self.assertEqual(set(jobs["smoke-images"]["strategy"]["matrix"]["platform"]), set(release.PLATFORMS))
-        linux_entries = [entry for entry in jobs["staging-tests"]["strategy"]["matrix"]["include"] if entry["type"] == "linux"]
-        self.assertEqual([entry["platform"] for entry in linux_entries], ["linux/amd64"])
-        self.assertEqual(jobs["staging-tests-arm64"]["with"]["PLATFORM"], "linux/arm64")
-        self.assertEqual(jobs["staging-tests-arm64"]["with"]["TYPE"], "linux")
-        self.assertIn("staging-tests", jobs["staging-tests-arm64"]["needs"])
-        # Every package platform the release builds must be integration-tested by one of the two Linux jobs.
-        tested_platforms = {entry["platform"] for entry in linux_entries} | {jobs["staging-tests-arm64"]["with"]["PLATFORM"]}
-        self.assertEqual(tested_platforms, set(release.PACKAGE_PLATFORMS))
-        self.assertEqual(set(jobs["delete-infras"]["strategy"]["matrix"]["type"]), {"docker", "autoconf", "k8s"})
-        self.assertNotIn("staging-tests-arm64", jobs["delete-infras"]["needs"])
-        self.assertIn("always()", jobs["delete-infras"]["if"])
-        self.assertEqual(jobs["delete-infras-linux"]["with"]["TYPE"], "linux")
-        self.assertIn("staging-tests-arm64", jobs["delete-infras-linux"]["needs"])
-        self.assertIn("always()", jobs["delete-infras-linux"]["if"])
-        for name in ("push-images", "push-packages", "push-gh", "push-doc"):
-            self.assertIn("staging-tests-arm64", ancestors(name))
+        # Integration suites and their cloud infrastructure belong to the staging branch only.
+        for name in ("create-infras", "staging-tests", "staging-tests-arm64", "delete-infras", "delete-infras-linux"):
+            self.assertNotIn(name, jobs)
+        staging = safe_load((root / "staging.yml").read_text())["jobs"]
+        for name in ("push-images", "push-packages"):
+            self.assertIn("smoke-images", staging[name]["needs"])
+            self.assertIn("staging-tests", staging[name]["needs"])
+        self.assertEqual(set(staging["staging-tests"]["strategy"]["matrix"]["type"]), {"docker", "autoconf", "k8s", "linux"})
+        self.assertEqual(set(staging["delete-infras"]["strategy"]["matrix"]["type"]), {"docker", "autoconf", "k8s", "linux"})
+        self.assertIn("always()", staging["delete-infras"]["if"])
         matrix = jobs["build-packages"]["strategy"]["matrix"]
         self.assertEqual(set(matrix["linux"]), set(release.DISTROS))
         self.assertEqual(set(matrix["platforms"]), set(release.PACKAGE_PLATFORMS))
