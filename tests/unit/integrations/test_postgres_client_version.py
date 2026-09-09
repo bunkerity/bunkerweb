@@ -19,6 +19,7 @@ reintroduces a bare meta-package on the install line, or swaps the checked-in si
 """
 
 import re
+import subprocess
 from hashlib import sha256
 from pathlib import Path
 
@@ -118,6 +119,21 @@ def test_the_pgdg_key_is_checked_in_and_is_the_postgresql_repository_key():
     assert digest == KEYRING_SHA256, f"the PGDG signing key changed ({digest}); re-verify the fingerprint before updating this hash"
 
 
+def _is_git_ignored(relpath: str) -> bool:
+    """True if git ignores ``relpath``, so an agent scratch copy under `.cache/` (gitignore:13)
+    or any other ignored directory never pollutes this drift guard."""
+    try:
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", relpath],
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return result.returncode == 0
+    except OSError:
+        return relpath.startswith(".cache/")
+
+
 def test_every_dockerfile_installing_a_postgresql_client_is_accounted_for():
     """A sixth image that quietly installs a client must not slip past the guard above."""
     known = set(DOCKERFILES) | set(EXEMPT_DOCKERFILES)
@@ -125,8 +141,11 @@ def test_every_dockerfile_installing_a_postgresql_client_is_accounted_for():
     for path in ROOT.glob("**/Dockerfile*"):
         if ".git" in path.parts or "node_modules" in path.parts:
             continue
+        relpath = path.relative_to(ROOT).as_posix()
+        if _is_git_ignored(relpath):
+            continue
         if "postgresql-client" in path.read_text(encoding="utf-8", errors="ignore"):
-            found.add(path.relative_to(ROOT).as_posix())
+            found.add(relpath)
     assert found <= known, f"Dockerfile(s) install a PostgreSQL client but are neither guarded nor exempt: {sorted(found - known)}"
     # Non-vacuity: a glob that silently stopped matching would make the assertion above trivially
     # true, so require that every guarded file was actually discovered by the sweep.
