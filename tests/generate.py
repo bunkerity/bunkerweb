@@ -210,7 +210,9 @@ if ARGS.integration in ("Autoconf", "Swarm", "Kubernetes"):
         config["variables"].pop("HTTP_PORT", None)
         config["variables"].pop("HTTPS_PORT", None)
 
-        config["variables"]["DNS_RESOLVERS"] = "kube-dns.kube-system.svc.cluster.local"
+        # kube-dns on stock clusters, coredns on Scaleway Kapsule (port of dev 41c48e58c's intent,
+        # applied here too: this generator hardcodes the same resolver name as tests/utils/bunkerweb.yml).
+        config["variables"]["DNS_RESOLVERS"] = "coredns.kube-system.svc.cluster.local"
         config["variables"]["API_WHITELIST_IP"] = "127.0.0.0/8 10.0.0.0/8"
         config["variables"]["USE_REDIS"] = "yes"
         config["variables"]["REDIS_HOST"] = "svc-bunkerweb-redis.bunkerweb.svc.cluster.local"
