@@ -19,7 +19,7 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Event, Lock
-from time import monotonic, sleep
+from time import monotonic, sleep, time
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union, cast
 
@@ -1630,9 +1630,14 @@ if __name__ == "__main__":
                     if _gc_counter >= 10:
                         collect()
                         _gc_counter = 0
-                    current_time = datetime.now().astimezone()
+                    try:
+                        # A lock is stale 30s after its creation, whatever happened to its holder.
+                        # The deadline is monotonic so that an NTP step can't extend the wait.
+                        lock_deadline = monotonic() + DB_LOCK_FILE.stat().st_ctime + 30 - time()
+                    except OSError:
+                        lock_deadline = monotonic()
 
-                    while DB_LOCK_FILE.is_file() and DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp():
+                    while DB_LOCK_FILE.is_file() and monotonic() < lock_deadline:
                         LOGGER.debug("Database is locked, waiting for it to be unlocked (timeout: 30s) ...")
                         sleep(1)
 
