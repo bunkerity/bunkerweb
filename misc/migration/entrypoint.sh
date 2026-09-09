@@ -71,18 +71,17 @@ if ls versions/*.py &>/dev/null; then
     # PostgreSQL: apply one at a time because some migrations use
     # execute_with_new_transaction() which opens a second DB connection
     # and deadlocks during bulk upgrade head.
+    head_revision=$(alembic heads) || exit_with_error "Failed to determine migration head"
+    [[ -n "$head_revision" && "$head_revision" != *$'\n'* ]] || exit_with_error "Expected exactly one migration head"
+    head_revision=${head_revision%% *}
+    [[ "$head_revision" =~ ^[[:alnum:]_]+$ ]] || exit_with_error "Invalid migration head"
     while true; do
-      output=$(alembic upgrade +1 2>&1)
-      rc=$?
-      echo "$output"
-      # If no migration was applied, we've reached head — done
-      if ! echo "$output" | grep -q "Running upgrade"; then
-        break
-      fi
-      # A migration was attempted but alembic failed
-      if [[ $rc -ne 0 ]]; then
-        exit_with_error "Failed to apply existing migrations"
-      fi
+      current_revision=$(alembic current) || exit_with_error "Failed to determine current migration revision"
+      [[ "$current_revision" != *$'\n'* ]] || exit_with_error "Expected at most one current migration revision"
+      current_revision=${current_revision%% *}
+      [[ -z "$current_revision" || "$current_revision" =~ ^[[:alnum:]_]+$ ]] || exit_with_error "Invalid current migration revision"
+      [[ "$current_revision" == "$head_revision" ]] && break
+      alembic upgrade +1 || exit_with_error "Failed to apply existing migrations"
     done
   else
     # sqlite/mariadb/mysql: bulk apply is safe and fast

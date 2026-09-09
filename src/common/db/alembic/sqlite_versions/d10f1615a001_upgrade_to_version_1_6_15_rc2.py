@@ -17,12 +17,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("bw_ui_users", sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
+    if op.get_context().as_sql or "totp_last_counter" not in {column["name"] for column in sa.inspect(op.get_bind()).get_columns("bw_ui_users")}:
+        op.add_column("bw_ui_users", sa.Column("totp_last_counter", sa.BigInteger(), nullable=True))
     # Local replay counters have no secret identifier and may already have been lost.
     # Expire all tokens valid before migration (30-second period, 3-second window).
     # Existing users can authenticate with the next fresh code, at most 33 seconds later.
     counter = int((time() + 3) // 30)
-    op.execute(f"UPDATE bw_ui_users SET totp_last_counter = {counter} WHERE totp_secret IS NOT NULL AND totp_secret != ''")
+    op.execute(f"UPDATE bw_ui_users SET totp_last_counter = {counter} WHERE totp_secret IS NOT NULL AND totp_secret != '' AND totp_last_counter IS NULL")
     op.execute("UPDATE bw_metadata SET version = '1.6.15~rc2' WHERE id = 1")
     op.execute("UPDATE bw_metadata SET last_pro_check = NULL WHERE id = 1")
 
