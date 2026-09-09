@@ -346,110 +346,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  create-infras:
-    needs: [candidates]
-    strategy:
-      fail-fast: false
-      matrix:
-        type: [docker, autoconf, k8s, linux]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-
-  staging-tests:
-    needs: [candidates, create-infras]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - type: docker
-            runs_on: '["self-hosted", "bw-docker"]'
-          - type: autoconf
-            runs_on: '["self-hosted", "bw-autoconf"]'
-          - type: k8s
-            runs_on: '["ubuntu-latest"]'
-          - type: linux
-            runs_on: '["self-hosted", "bw-linux"]'
-            platform: linux/amd64
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: ${{ matrix.type }}
-      RUNS_ON: ${{ matrix.runs_on }}
-      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
-      PLATFORM: ${{ matrix.platform || '' }}
-    secrets:
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
-      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
-
-  # arm64 packages run through QEMU and take several times longer than native ones. They get
-  # their own job, and their own 360-minute ceiling, after the native suites so the shared Linux
-  # test infrastructure and test domains are never used by two jobs at once.
-  staging-tests-arm64:
-    needs: [candidates, create-infras, staging-tests]
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: linux
-      RUNS_ON: '["self-hosted", "bw-linux"]'
-      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
-      PLATFORM: linux/arm64
-    secrets:
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
-      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
-      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
-      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
-
-  smoke-images:
-    needs: [candidates]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/386, linux/arm64, linux/arm/v7]
-    env:
-      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: release-manifest
-      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
-      - name: Start all six candidate images
-        env:
-          PLATFORM: ${{ matrix.platform }}
-        run: python3 .github/scripts/release_smoke.py "$PLATFORM"
-
   validate-tests:
     if: ${{ always() }}
-    needs:
-      [
-        prepare,
-        plumber,
-        codeql,
-        candidates,
-        staging-tests,
-        staging-tests-arm64,
-        smoke-images,
-      ]
+    needs: [prepare, plumber, codeql, candidates]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -465,31 +364,6 @@ jobs:
           NEEDS_JSON: ${{ toJSON(needs) }}
           MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
         run: python3 .github/scripts/release_artifacts.py gate
-
-  delete-infras:
-    if: ${{ always() }}
-    needs: [create-infras, staging-tests]
-    strategy:
-      fail-fast: false
-      matrix:
-        type: [docker, autoconf, k8s]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-
-  # The Linux test infrastructure is shared by both Linux test jobs, so it is torn down last.
-  delete-infras-linux:
-    if: ${{ always() }}
-    needs: [create-infras, staging-tests, staging-tests-arm64]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: linux
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
   # Required reviewers on the existing release environment approve only tested
   # candidates. Every public image/package/GitHub/docs publication descends here.

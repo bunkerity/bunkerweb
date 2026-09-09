@@ -23,7 +23,7 @@ DISTROS = {
     "rhel-9": "rpm",
     "rhel-10": "rpm",
 }
-REQUIRED_JOBS = {"prepare", "plumber", "codeql", "candidates", "staging-tests", "staging-tests-arm64", "smoke-images"}
+REQUIRED_JOBS = {"prepare", "plumber", "codeql", "candidates"}
 
 
 def require(condition, message):

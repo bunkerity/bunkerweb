@@ -99,6 +99,23 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
+  # The integration suites never boot the all-in-one or the standalone API image.
+  smoke-images:
+    needs: [build-containers]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Start all six staging images
+        run: python3 .github/scripts/release_smoke.py
+
   codeql:
     uses: ./.github/workflows/codeql.yml
     permissions:
@@ -162,7 +179,7 @@ jobs:
 
   # Push Docker images
   push-images:
-    needs: [staging-tests]
+    needs: [staging-tests, smoke-images]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -254,7 +271,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [staging-tests]
+    needs: [staging-tests, smoke-images]
     strategy:
       matrix:
         linux:
