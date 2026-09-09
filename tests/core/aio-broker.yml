@@ -1,0 +1,22 @@
+# The AIO job broker has two promises that a normal action boundary cannot prove:
+# the container health follows the supervised broker process, and queued work survives
+# recreation of the container while the named /data volume stays in place. The script
+# action owns each boundary so run.sh cannot wait for the deliberately stopped worker or
+# replace the persistence restart with its full-clean `down -v` path.
+integrations:
+  - "All-in-one"
+
+actions:
+  healthcheck_tracks_the_broker:
+    type: script
+    script: ["./tests/core/aio-broker/test.sh", "healthcheck"]
+    result: "healthcheck:"
+    restart_stack: false
+    log_from: broker
+    log: "Ready to accept connections"
+
+  queued_jobs_survive_recreation:
+    type: script
+    script: ["./tests/core/aio-broker/test.sh", "persistence"]
+    result: "persistence:"
+    full_clean: true

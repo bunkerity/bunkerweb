@@ -66,7 +66,7 @@ class ActionData(BaseModel):
     method: Literal["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"] = "GET"
     log: str = ""  # ? If log is not empty, then the log must be present in BunkerWeb logs
     not_log: str = ""  # ? If not_log is not empty, then the log must not be present in BunkerWeb logs
-    log_from: Literal["bunkerweb", "controller", "scheduler", "database"] = "bunkerweb"
+    log_from: Literal["bunkerweb", "broker", "controller", "scheduler", "database"] = "bunkerweb"
     auth: Optional[Tuple[str, str]] = None
     body: Optional[str] = None
     body_length: int = 0  # ? If body_length is 0, then no body is sent Else, will send the letter "a" body_length times
