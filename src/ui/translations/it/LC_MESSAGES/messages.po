@@ -4708,6 +4708,12 @@ msgstr "Altre impostazioni"
 msgid "settings.custom_config.title"
 msgstr "Configurazione Personalizzata"
 
+msgid "settings.header_rules.description"
+msgstr "Confronta un’intestazione della richiesta per nome e, facoltativamente, una regex PCRE sul suo valore. Numerate a coppie: il nome n. 1 va con il valore n. 1. Lascia il valore vuoto per confrontare solo la presenza dell’intestazione. Il valore è un segreto condiviso che qualsiasi client può inviare: servilo solo via HTTPS, ancora la regex con ^ e $, e ruotalo. Solo HTTP: un servizio stream non porta intestazioni di richiesta."
+
+msgid "settings.header_rules.title"
+msgstr "Regole di intestazione"
+
 msgid "settings.headers.browser.description"
 msgstr "Piccoli header a valore fisso. Un valore vuoto rimuove l'header invece di inviarlo."
 

@@ -1754,6 +1754,10 @@
         "title": "Inne ustawienia",
         "description": "Zadeklarowane przez wtyczkę, ale jeszcze nieumieszczone na tej stronie. Mimo to zapisują się normalnie."
       }
+    },
+    "header_rules": {
+      "description": "Dopasowuje nagłówek żądania po nazwie oraz opcjonalnie wyrażeniem regularnym PCRE do jego wartości. Numerowane parami: nazwa nr 1 idzie w parze z wartością nr 1. Pozostaw wartość pustą, aby dopasować samą obecność nagłówka. Wartość jest współdzielonym sekretem, który może wysłać dowolny klient — udostępniaj ją wyłącznie przez HTTPS, zakotwicz wyrażenie znakami ^ i $ oraz regularnie ją zmieniaj. Tylko HTTP: usługa stream nie przenosi nagłówków żądania.",
+      "title": "Reguły nagłówków"
     }
   },
   "setup": {

@@ -1808,6 +1808,10 @@
         "title": "Pengaturan lainnya",
         "description": "Dinyatakan oleh plugin tetapi belum ditempatkan di halaman ini. Tetap tersimpan secara normal."
       }
+    },
+    "header_rules": {
+      "description": "Cocokkan header permintaan berdasarkan nama, dan secara opsional regex PCRE pada nilainya. Diberi nomor berpasangan: nama #1 sejalan dengan nilai #1. Biarkan nilainya kosong untuk mencocokkan keberadaan header saja. Nilainya adalah rahasia bersama yang dapat dikirim klien mana pun — sajikan hanya melalui HTTPS, jangkarkan regex dengan ^ dan $, dan rotasikan. Hanya HTTP: layanan stream tidak membawa header permintaan.",
+      "title": "Aturan header"
     }
   },
   "setup": {

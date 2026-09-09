@@ -125,6 +125,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Whitelist :
 
         Une règle précise maintient ainsi le WAF pour le trafic autorisé. Utilisez une liste simple si vous avez besoin du comportement des listes simples.
 
+=== "En-tête"
+    **Ce que cela fait :** Place en whitelist les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Utile pour une sonde ou une passerelle de confiance capable d’envoyer un secret partagé.
+
+    | Paramètre                | Défaut | Contexte  | Multiple | Description                                                                                                                                          |
+    | ------------------------ | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de être mise en liste blanche. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
+    | `WHITELIST_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.   |
+
+    !!! warning "Une règle d’en-tête est un secret partagé"
+        N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc. Elle ne lève pas non plus un bannissement en cours : une IP bannie est rejetée avant l’exécution de la whitelist.
+
 !!! info "Prise en charge du format d'URL"
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 

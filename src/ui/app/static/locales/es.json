@@ -1754,6 +1754,10 @@
         "title": "Otras configuraciones",
         "description": "Declarado por el plugin pero aún no colocado en esta página. Aún se guarda con normalidad."
       }
+    },
+    "header_rules": {
+      "description": "Coincide con una cabecera de solicitud por su nombre y, opcionalmente, con una regex PCRE sobre su valor. Numeradas por pares: el nombre n.º 1 va con el valor n.º 1. Deje el valor vacío para coincidir solo con la presencia de la cabecera. El valor es un secreto compartido que cualquier cliente puede enviar: sírvalo solo por HTTPS, ancle la regex con ^ y $, y rótelo. Solo HTTP: un servicio stream no lleva cabeceras de solicitud.",
+      "title": "Reglas de cabecera"
     }
   },
   "setup": {

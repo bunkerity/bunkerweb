@@ -86,6 +86,10 @@ package.loaded["bunkerweb.rules"] = {
 package.loaded["bunkerweb.plugin"] = {
     initialize = function() end,
     ret = function(_, ok, msg) return { ret = ok, msg = msg } end,
+    -- Base-class helpers for the <PREFIX>_HEADER_NAME/VALUE families. This harness covers list
+    -- loading only, so they are inert here; test_header_rules_plugins_lua.py covers them.
+    init_header_rules = function() return true end,
+    load_header_rules = function() return {} end,
 }
 package.loaded["bunkerweb.utils"] = {
     has_variable = function() return true end,

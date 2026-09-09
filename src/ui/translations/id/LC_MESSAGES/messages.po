@@ -4708,6 +4708,12 @@ msgstr "Pengaturan lainnya"
 msgid "settings.custom_config.title"
 msgstr "Konfigurasi Kustom"
 
+msgid "settings.header_rules.description"
+msgstr "Cocokkan header permintaan berdasarkan nama, dan secara opsional regex PCRE pada nilainya. Diberi nomor berpasangan: nama #1 sejalan dengan nilai #1. Biarkan nilainya kosong untuk mencocokkan keberadaan header saja. Nilainya adalah rahasia bersama yang dapat dikirim klien mana pun — sajikan hanya melalui HTTPS, jangkarkan regex dengan ^ dan $, dan rotasikan. Hanya HTTP: layanan stream tidak membawa header permintaan."
+
+msgid "settings.header_rules.title"
+msgstr "Aturan header"
+
 msgid "settings.headers.browser.description"
 msgstr "Header bernilai tetap yang kecil. Nilai kosong akan menghapus header alih-alih mengirimkannya."
 

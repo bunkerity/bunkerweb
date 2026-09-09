@@ -33,6 +33,7 @@ local encode = cjson.encode
 local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local regex_match = utils.regex_match
+local match_header_rules = utils.match_header_rules
 local ipmatcher_new = ipmatcher.new
 local upper = string.upper
 
@@ -194,7 +195,20 @@ function antibot:initialize(ctx)
 			self.country_only_active = next(self.country_only) ~= nil
 		end
 		self.country_filter_enabled = self.country_ignore_active or self.country_only_active
+		-- Header rules, resolved once in init() : the numeric NAME/VALUE suffixes and the PCRE
+		-- compilation never run on the request path.
+		self.header_rules = self:load_header_rules("plugin_antibot_header_rules")
 	end
+end
+
+-- ANTIBOT_IGNORE_HEADER_NAME/_VALUE are numbered pairs : resolve them once here instead of
+-- walking every scoped variable on every request.
+function antibot:init()
+	local ok, err = self:init_header_rules("ANTIBOT_IGNORE_HEADER", "plugin_antibot_header_rules")
+	if not ok then
+		return self:ret(false, err)
+	end
+	return self:ret(true, "successfully loaded antibot ignore header rules")
 end
 
 function antibot:header()
@@ -380,6 +394,15 @@ function antibot:access()
 	-- rule that explicitly asks for a challenge overrides them: the exclusions it wants are
 	-- expressed in its own condition tree.
 	if not self.ctx.bw.workflow_antibot_provider then
+		-- Ignore headers are matched per request and never cached : the cache is keyed by a
+		-- client attribute, so a cached hit would exempt later requests that carry no header at
+		-- all. Inside the workflow guard on purpose -- it is one more entry in the service's own
+		-- ignore policy, and a workflow rule that explicitly asks for a challenge must still win.
+		local ignored_header = match_header_rules(self.ctx, self.header_rules, "ANTIBOT_IGNORE_HEADER_VALUE")
+		if ignored_header then
+			return self:ret(true, "header " .. ignored_header .. " is ignored")
+		end
+
 		-- Check the caches and ignore lists
 		local checks = {
 			["IP"] = "ip" .. self.ctx.bw.remote_addr,

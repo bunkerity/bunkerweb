@@ -1,0 +1,52 @@
+{# The `<PREFIX>_HEADER_NAME` / `<PREFIX>_HEADER_VALUE` families, for the five plugin bodies that
+   lay their own page out (antibot, blacklist, country, greylist, whitelist). dnsbl has no custom
+   body and gets the same families from the generic form.
+
+   A header rule is name plus an optional PCRE regex on the value, numbered in pairs
+   (`_NAME_1` goes with `_VALUE_1`), which is why it is a `multiple` family and not two flat
+   fields -- and why this section exists at all rather than the keys sitting in a plain grid:
+   `_in_scope` matches a stored `FOO_2` by its BASE name (models/save_scope.py:99-110), so ONE
+   `multiple` in the manifest puts every suffixed row inside the page's declared scope, and a
+   body that renders no cloner posts none of them -- DELETING every pair past the first on the
+   next save (db_methods/config_save.py:579-585). models/plugin_multiple_groups.html is the same
+   cloner the generic form renders, so the DOM contract static/js/settings.js clones off is the
+   one it already knows.
+
+   The caller must:
+     * compute `get_multiples(filtered_settings, config)` in its OWN file -- the static half of
+       ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render reads the body
+       source for that call, not this include;
+     * pass the header families as `header_rule_multiples` (the other families, e.g.
+       `<plugin>-rules`, are rendered by their own section);
+     * add the keys of those families to whatever "placed" set its unplaced backstop uses, so
+       they are not rendered a second time as stragglers.
+
+   `header_rule_group_attr` is the value of the body's own group data attribute, since the four
+   access-control bodies use `data-access-control-group` and antibot uses `data-antibot-group`.
+
+   IT LIVES IN models/, NOT IN plugin_bodies/: `app.utils._PLUGIN_BODIES` globs
+   `plugin_bodies/*.html` and turns every file there into the settings body of a plugin named
+   after it, so a shared partial dropped in that directory becomes a routable body for a
+   plugin that does not exist (and is picked up by the per-body test matrix). The existing
+   shared access-control partials avoid it the same way, by sitting in a subdirectory. #}
+{%- set header_rule_group_attr = header_rule_group_attr | default("access-control", true) -%}
+{% if header_rule_multiples %}
+    {% set setting_id_prefix = "multiple-setting-" + plugin + "-" %}
+    {# HIDE, NEVER OMIT. `hidden` suppresses rendering and nothing else, so the inputs still
+       serialise and the save still carries every suffixed pair; dropping the section from the
+       loop instead would delete those rows. `header_rule_modes` mirrors the visibility contract
+       the caller's own groups use, so a body whose sections appear only for some modes can hand
+       this one the same list rather than leaving it on screen while the feature is off. #}
+    <section class="{{ header_rule_group_attr }}-group mb-4"
+             data-{{ header_rule_group_attr }}-group="header-rules"
+             {% if header_rule_modes %}data-{{ header_rule_group_attr }}-modes="{{ header_rule_modes | join(' ') }}"{% endif %}
+             {% if header_rule_hidden %}hidden{% endif %}
+             aria-labelledby="{{ header_rule_group_attr }}-header-rules-title">
+        <h6 id="{{ header_rule_group_attr }}-header-rules-title" class="mb-1 don-jose">{{ _("settings.header_rules.title") }}</h6>
+        {# Not decoration: the value is a bearer token any client can send, so the page says so
+           where the operator types it, not only in the manifest help. #}
+        <p class="text-muted small courier-prime mb-2">{{ _("settings.header_rules.description") }}</p>
+        {% set plugin_multiples = header_rule_multiples %}
+        {% include "models/plugin_multiple_groups.html" %}
+    </section>
+{% endif %}

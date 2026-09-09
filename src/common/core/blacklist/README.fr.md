@@ -155,6 +155,19 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
 
         Les correspondances sont `ip:` ↔ `BLACKLIST_IGNORE_IP`, `rdns:` ↔ `BLACKLIST_IGNORE_RDNS`, `asn:` ↔ `BLACKLIST_IGNORE_ASN`, `ua:` ↔ `BLACKLIST_IGNORE_USER_AGENT` et `uri:` ↔ `BLACKLIST_IGNORE_URI`. `country:` n'a pas de liste d'exclusion : une règle composée uniquement de termes `country:` ne peut pas être neutralisée ainsi. Ajoutez un terme `ip:` ou `asn:` si vous avez besoin d'une exception.
 
+=== "En-tête"
+    **Ce que cela fait :** Bloque, ou au contraire exempte, les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur. Une règle d’exclusion l’emporte sur toute correspondance de liste noire, y compris celles servies par le cache.
+
+    | Paramètre                       | Défaut | Contexte  | Multiple | Description                                                                                                                                         |
+    | ------------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de être mise en liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`.  |
+    | `BLACKLIST_HEADER_VALUE`        |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de contourner la liste noire. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête.  |
+
+    !!! warning "Une règle d’en-tête est un secret partagé"
+        N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
+
 !!! info "Support des formats d’URL"
     Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
 

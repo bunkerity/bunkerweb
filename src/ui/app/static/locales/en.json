@@ -1808,6 +1808,10 @@
         "title": "Other settings",
         "description": "Declared by the plugin but not yet placed on this page. They still save normally."
       }
+    },
+    "header_rules": {
+      "description": "Match a request header by name, and optionally a PCRE regex on its value. Numbered in pairs: name #1 goes with value #1. Leave the value empty to match on the header being present. The value is a shared secret any client can send — serve it over HTTPS only, anchor the regex with ^ and $, and rotate it. HTTP only: a stream service carries no request headers.",
+      "title": "Header rules"
     }
   },
   "setup": {

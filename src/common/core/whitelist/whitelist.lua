@@ -17,6 +17,7 @@ local has_variable = utils.has_variable
 local get_ips = utils.get_ips
 local get_rdns = utils.get_rdns
 local regex_match = utils.regex_match
+local match_header_rules = utils.match_header_rules
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local deduplicate_list = utils.deduplicate_list
@@ -74,6 +75,9 @@ function whitelist:initialize(ctx)
 		else
 			self.rules = rules.for_server(all_rules, self.ctx.bw.server_name)
 		end
+		-- Header rules, resolved once in init() the same way : the numeric NAME/VALUE suffixes
+		-- and the PCRE compilation never run on the request path.
+		self.header_rules = self:load_header_rules("plugin_whitelist_header_rules")
 	end
 end
 
@@ -180,6 +184,12 @@ function whitelist:init()
 		return self:ret(false, rules_err)
 	end
 
+	-- Header rules : same deal, resolved once here rather than per request.
+	local header_ok, header_err = self:init_header_rules("WHITELIST_HEADER", "plugin_whitelist_header_rules")
+	if not header_ok then
+		return self:ret(false, header_err)
+	end
+
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -237,6 +247,16 @@ function whitelist:set()
 		env_set("is_whitelisted", "yes")
 		return self:ret(true, err)
 	end
+	-- The ModSecurity kill switch tests ENV:is_whitelisted in phase 1, which runs before the
+	-- access phase. Every other kind reaches it through the cache; the header decision is never
+	-- cached, so it has to be taken here as well or a whitelisted probe still trips the CRS.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "WHITELIST_HEADER_VALUE")
+	if matched_header then
+		ngx_var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		return self:ret(true, "header " .. matched_header .. " is whitelisted")
+	end
 	return self:ret(true, "not in whitelist cache")
 end
 
@@ -256,6 +276,16 @@ function whitelist:access()
 		env_set("is_whitelisted", "yes")
 		self:set_metric("counters", "passed_whitelist", 1)
 		return self:ret(true, err, OK)
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "WHITELIST_HEADER_VALUE")
+	if matched_header then
+		ngx_var.is_whitelisted = "yes"
+		self.ctx.bw.is_whitelisted = "yes"
+		env_set("is_whitelisted", "yes")
+		self:set_metric("counters", "passed_whitelist", 1)
+		return self:ret(true, "header " .. matched_header .. " is whitelisted", OK)
 	end
 	-- Perform checks
 	local ok

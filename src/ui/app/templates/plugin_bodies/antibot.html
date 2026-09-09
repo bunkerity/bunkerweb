@@ -89,7 +89,29 @@
 ] -%}
 {# Keys this body lays out by hand rather than through the `groups` loop, so the coverage check
    at the bottom knows they are not missing. #}
-{%- set hand_placed = ["ANTIBOT_IGNORE_COUNTRY", "ANTIBOT_ONLY_COUNTRY"] -%}
+{# The ANTIBOT_IGNORE_HEADER_NAME/_VALUE pair is a `multiple` family and needs the cloner:
+   `_in_scope` matches a stored `..._NAME_2` by its base name (models/save_scope.py:99-110), so a
+   body that renders no cloner posts none of the suffixed rows and DELETES them on the next save
+   (db_methods/config_save.py:579-585). `get_multiples` is called HERE so the static half of
+   ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render reads it in this file. #}
+{# Only the `-header` families belong to this section, the same split the four access-control
+   bodies make. Today it is the plugin's only `multiple` family, so the filter is a no-op -- it is
+   here so a family added later lands in the coverage check (loud, red) instead of quietly
+   rendering under the "Header rules" heading. #}
+{%- set ab_header_ns = namespace(groups={}) -%}
+{%- for group_name, group in get_multiples(filtered_settings, config).items() -%}
+    {%- if group_name.endswith("-header") -%}
+        {%- set _ = ab_header_ns.groups.update({group_name: group}) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set header_rule_multiples = ab_header_ns.groups -%}
+{%- set header_rule_group_attr = "antibot" -%}
+{# Same visibility as the `exemptions` group it belongs with: an exemption is meaningless
+   while no challenge is served, and the mode picker is all antibot shows at `no`. #}
+{%- set header_rule_modes = challenge_modes -%}
+{%- set header_rule_hidden = mode == "no" -%}
+{%- set antibot_header_keys = header_rule_multiples.values() | map("dictsort") | sum(start=[]) | map(attribute=1) | map("list") | sum(start=[]) | list -%}
+{%- set hand_placed = ["ANTIBOT_IGNORE_COUNTRY", "ANTIBOT_ONLY_COUNTRY"] + antibot_header_keys -%}
 <div class="card-body pb-0">
     {% if mode == "no" %}
         <div class="alert alert-secondary d-flex align-items-center mb-4" role="status">
@@ -192,6 +214,7 @@
             {% endfor %}
         </div>
     </section>
+    {% include "models/plugin_header_rules.html" %}
     {# Coverage backstop, not decoration. If antibot's manifest grows a setting and nobody adds it
        to `groups`, the key would silently stop posting and `postable_scope` would delete its row
        on the next save. Rendering the stragglers keeps the save correct on day one; the test

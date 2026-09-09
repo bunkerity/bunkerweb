@@ -4708,6 +4708,12 @@ msgstr "Weitere Einstellungen"
 msgid "settings.custom_config.title"
 msgstr "Benutzerdefinierte Konfiguration"
 
+msgid "settings.header_rules.description"
+msgstr "Gleicht einen Request-Header über seinen Namen ab und optional über eine PCRE-Regex auf seinen Wert. Paarweise nummeriert: Name #1 gehört zu Wert #1. Lassen Sie den Wert leer, um nur auf das Vorhandensein des Headers abzugleichen. Der Wert ist ein gemeinsames Geheimnis, das jeder Client senden kann — nur über HTTPS ausliefern, die Regex mit ^ und $ verankern und regelmäßig wechseln. Nur HTTP: ein Stream-Dienst führt keine Request-Header."
+
+msgid "settings.header_rules.title"
+msgstr "Header-Regeln"
+
 msgid "settings.headers.browser.description"
 msgstr "Kleine Header mit festem Wert. Ein leerer Wert entfernt den Header, anstatt ihn zu senden."
 

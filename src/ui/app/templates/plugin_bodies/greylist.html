@@ -36,9 +36,25 @@
    which fails loudly instead of losing rows quietly. #}
 {%- set setting_id_prefix = "setting-" + plugin + "-" -%}
 {%- set ac_prefix = "GREYLIST" -%}
-{%- set ac_hand_placed = ["USE_GREYLIST", ac_prefix ~ "_RULE"] -%}
 {%- set ac_col = "col-12 col-sm-6 col-lg-4 pb-3" -%}
 {%- set ac_rule_multiples = get_multiples(filtered_settings, config) -%}
+{# The header-rule families (`<PREFIX>_HEADER_NAME`/`_VALUE`, and blacklist's IGNORE pair) are
+   `multiple` too, so they are split out of `ac_rule_multiples` here and handed to
+   models/plugin_header_rules.html; the rest stays with the rules section. Splitting rather than
+   letting either section render everything keeps each family under exactly one cloner -- two
+   would give the same key two sets of inputs and post it twice. #}
+{%- set ac_header_ns = namespace(groups={}, rules={}) -%}
+{%- for group_name, group in ac_rule_multiples.items() -%}
+    {%- if group_name.endswith("-header") -%}
+        {%- set _ = ac_header_ns.groups.update({group_name: group}) -%}
+    {%- else -%}
+        {%- set _ = ac_header_ns.rules.update({group_name: group}) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set header_rule_multiples = ac_header_ns.groups -%}
+{%- set ac_rule_multiples = ac_header_ns.rules -%}
+{%- set ac_header_keys = header_rule_multiples.values() | map("dictsort") | sum(start=[]) | map(attribute=1) | map("list") | sum(start=[]) | list -%}
+{%- set ac_hand_placed = ["USE_GREYLIST", ac_prefix ~ "_RULE"] + ac_header_keys -%}
 {# Derived, not hardcoded: `multivalue` is exactly the ten entry lists (the five direct ones plus
    their `_URLS` downloader variants) and excludes GREYLIST_RDNS_GLOBAL, which is a `check` and
    feeds no entry. A greylist entry list added later is covered for free.
@@ -92,5 +108,6 @@
     {% include "plugin_bodies/access_control/list_matrix.html" %}
     {# Composite AND rules, after the flat lists they are OR'd with. `ac_rule_multiples` is
        computed above so the `multiple`-rendering check can see `get_multiples` in this file. #}
+    {% include "models/plugin_header_rules.html" %}
     {% include "plugin_bodies/access_control/rules.html" %}
 </div>

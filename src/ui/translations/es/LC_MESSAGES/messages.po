@@ -4708,6 +4708,12 @@ msgstr "Otras configuraciones"
 msgid "settings.custom_config.title"
 msgstr "Configuración Personalizada"
 
+msgid "settings.header_rules.description"
+msgstr "Coincide con una cabecera de solicitud por su nombre y, opcionalmente, con una regex PCRE sobre su valor. Numeradas por pares: el nombre n.º 1 va con el valor n.º 1. Deje el valor vacío para coincidir solo con la presencia de la cabecera. El valor es un secreto compartido que cualquier cliente puede enviar: sírvalo solo por HTTPS, ancle la regex con ^ y $, y rótelo. Solo HTTP: un servicio stream no lleva cabeceras de solicitud."
+
+msgid "settings.header_rules.title"
+msgstr "Reglas de cabecera"
+
 msgid "settings.headers.browser.description"
 msgstr "Cabeceras pequeñas de valor fijo. Un valor vacío elimina la cabecera en lugar de enviarla."
 

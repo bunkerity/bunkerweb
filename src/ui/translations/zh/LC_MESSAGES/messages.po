@@ -4703,6 +4703,12 @@ msgstr "其他设置"
 msgid "settings.custom_config.title"
 msgstr "自定义配置"
 
+msgid "settings.header_rules.description"
+msgstr "按名称匹配请求头，并可选地用 PCRE 正则匹配其值。成对编号：名称 #1 与值 #1 配对。将值留空则仅匹配该请求头是否存在。该值是任何客户端都能发送的共享密钥 —— 请仅通过 HTTPS 提供，用 ^ 和 $ 锚定正则，并定期轮换。仅限 HTTP：stream 服务不携带请求头。"
+
+msgid "settings.header_rules.title"
+msgstr "请求头规则"
+
 msgid "settings.headers.browser.description"
 msgstr "值固定的小型标头。空值会移除该标头,而不是发送它。"
 

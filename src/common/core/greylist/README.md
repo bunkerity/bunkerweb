@@ -134,6 +134,17 @@ Follow these steps to configure and use the Greylist feature:
           matching PTR hostname is resolved back and the term is only true when it resolves to
           the client IP.
 
+=== "Header"
+    **What this does:** Greylists requests carrying a given request header, matched by name and, optionally, by a PCRE regex on its value.
+
+    | Setting                 | Default | Context   | Multiple | Description                                                                                                                      |
+    | ----------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |         | multisite | yes      | **Header name:** Name of a request header that makes the request be greylisted. Numbered pairs: `_NAME_1` goes with `_VALUE_1`.  |
+    | `GREYLIST_HEADER_VALUE` |         | multisite | yes      | **Header value:** PCRE regex the header value must match. Leave empty to match on the header being present, whatever it carries. |
+
+    !!! warning "A header rule is a shared secret"
+        Any client can send a header, so a header rule is a bearer token, not a network control. Serve it over HTTPS only, anchor the regex with `^` and `$` (the match is not anchored by default, so `abc` also matches `xabcx`), and rotate the value. When BunkerWeb sits behind a proxy, that proxy must overwrite any client-supplied copy of the header. These rules are HTTP only: a stream service carries no request headers, so nothing matches there.
+
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
 

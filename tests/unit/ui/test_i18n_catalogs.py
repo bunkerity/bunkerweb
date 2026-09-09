@@ -147,8 +147,10 @@ def test_the_json_to_gettext_count_delta_is_only_plural_folding():
     # 2619 adds the 54 wave-12 keys of the instance-enrollment/credential lifecycle, the
     # default-server certificate copy, and the CrowdSec-verdict workflow-condition family.
     # 2632 adds the 13 `bans.flash.*` keys of the bans page flash messages routed through translated().
+    # 2634 adds the 2 `settings.header_rules.*` keys of the header-criterion cloner section, shared
+    # by the antibot, blacklist, country, greylist and whitelist settings bodies.
     # STAGING A SUBSET OF THOSE MEANS RECOMPUTING THIS.
-    assert len(_catalog("en")) == len(english) - len(pairs) == 2632
+    assert len(_catalog("en")) == len(english) - len(pairs) == 2634
 
 
 @pytest.mark.parametrize("code", CODES)

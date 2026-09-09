@@ -1754,6 +1754,10 @@
         "title": "Altre impostazioni",
         "description": "Dichiarato dal plugin ma non ancora collocato in questa pagina. Viene comunque salvato normalmente."
       }
+    },
+    "header_rules": {
+      "description": "Confronta un’intestazione della richiesta per nome e, facoltativamente, una regex PCRE sul suo valore. Numerate a coppie: il nome n. 1 va con il valore n. 1. Lascia il valore vuoto per confrontare solo la presenza dell’intestazione. Il valore è un segreto condiviso che qualsiasi client può inviare: servilo solo via HTTPS, ancora la regex con ^ e $, e ruotalo. Solo HTTP: un servizio stream non porta intestazioni di richiesta.",
+      "title": "Regole di intestazione"
     }
   },
   "setup": {

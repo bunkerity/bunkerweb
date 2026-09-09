@@ -7,6 +7,7 @@ local country = class("country", plugin)
 
 local get_deny_status = utils.get_deny_status
 local regex_match = utils.regex_match
+local match_header_rules = utils.match_header_rules
 local decode = cjson.decode
 local encode = cjson.encode
 local WARN = ngx.WARN
@@ -48,6 +49,23 @@ function country:initialize(ctx)
 			table.insert(self.ignore_uri, pattern)
 		end
 	end
+
+	-- Only request phases have a server name to look the rules up with. Unlike the other list
+	-- plugins this initialize() also runs during init_by_lua, where there is no ctx.bw.
+	self.header_rules = {}
+	if self.is_request then
+		self.header_rules = self:load_header_rules("plugin_country_header_rules")
+	end
+end
+
+-- COUNTRY_IGNORE_HEADER_NAME/_VALUE are numbered pairs : resolve them once here instead of
+-- walking every scoped variable on every request.
+function country:init()
+	local ok, err = self:init_header_rules("COUNTRY_IGNORE_HEADER", "plugin_country_header_rules")
+	if not ok then
+		return self:ret(false, err)
+	end
+	return self:ret(true, "successfully loaded country ignore header rules")
 end
 
 function country:is_ignored_uri()
@@ -79,6 +97,13 @@ function country:access()
 		if ignored then
 			return self:ret(true, "URI " .. self.ctx.bw.uri .. " is ignored (pattern = " .. pattern .. ")")
 		end
+	end
+
+	-- Header rules are matched per request and never cached : the cache is keyed by the client
+	-- IP, so a cached hit would also cover later requests carrying no header at all.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "COUNTRY_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
 	end
 
 	-- Check if IP is in cache

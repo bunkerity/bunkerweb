@@ -4708,6 +4708,12 @@ msgstr "Other settings"
 msgid "settings.custom_config.title"
 msgstr "Custom Configuration"
 
+msgid "settings.header_rules.description"
+msgstr "Match a request header by name, and optionally a PCRE regex on its value. Numbered in pairs: name #1 goes with value #1. Leave the value empty to match on the header being present. The value is a shared secret any client can send — serve it over HTTPS only, anchor the regex with ^ and $, and rotate it. HTTP only: a stream service carries no request headers."
+
+msgid "settings.header_rules.title"
+msgstr "Header rules"
+
 msgid "settings.headers.browser.description"
 msgstr "Small fixed-value headers. An empty value removes the header instead of sending it."
 

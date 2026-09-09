@@ -4728,6 +4728,12 @@ msgstr "إعدادات أخرى"
 msgid "settings.custom_config.title"
 msgstr "تكوين مخصص"
 
+msgid "settings.header_rules.description"
+msgstr "طابِق ترويسة طلب بالاسم، واختيارياً بتعبير نمطي PCRE على قيمتها. مرقّمة أزواجاً: الاسم رقم 1 مع القيمة رقم 1. اترك القيمة فارغة للمطابقة على وجود الترويسة فقط. القيمة سرٌّ مشترك يستطيع أي عميل إرساله — قدّمها عبر HTTPS فقط، وثبّت التعبير النمطي بـ ^ و $، وبدّلها دورياً. HTTP فقط: خدمة stream لا تحمل ترويسات طلب."
+
+msgid "settings.header_rules.title"
+msgstr "قواعد الترويسات"
+
 msgid "settings.headers.browser.description"
 msgstr "ترويسات صغيرة بقيمة ثابتة. القيمة الفارغة تحذف الترويسة بدلاً من إرسالها."
 

@@ -1754,6 +1754,10 @@
         "title": "Iba pang setting",
         "description": "Idineklara ng plugin pero wala pang inilagay na pahina. Nagse-save pa rin ito nang normal."
       }
+    },
+    "header_rules": {
+      "description": "Itugma ang isang request header ayon sa pangalan, at opsyonal na isang PCRE regex sa halaga nito. Binilang nang pares: ang pangalan #1 ay katambal ng halaga #1. Iwanang blangko ang halaga upang itugma lamang ang presensya ng header. Ang halaga ay isang shared secret na maaaring ipadala ng kahit sinong kliyente — ihain lamang ito sa HTTPS, i-anchor ang regex gamit ang ^ at $, at paikutin ito. HTTP lamang: ang isang stream service ay walang dalang request header.",
+      "title": "Mga panuntunan sa header"
     }
   },
   "setup": {

@@ -4708,6 +4708,12 @@ msgstr "Autres paramètres"
 msgid "settings.custom_config.title"
 msgstr "Configuration personnalisée"
 
+msgid "settings.header_rules.description"
+msgstr "Fait correspondre un en-tête de requête par son nom et, optionnellement, une regex PCRE sur sa valeur. Numérotés par paires : le nom n° 1 va avec la valeur n° 1. Laissez la valeur vide pour ne tester que la présence de l’en-tête. La valeur est un secret partagé que n’importe quel client peut envoyer : ne la servez qu’en HTTPS, ancrez la regex avec ^ et $, et faites-la tourner. HTTP uniquement : un service stream ne porte aucun en-tête de requête."
+
+msgid "settings.header_rules.title"
+msgstr "Règles d’en-tête"
+
 msgid "settings.headers.browser.description"
 msgstr "Petits en-têtes à valeur fixe. Une valeur vide supprime l'en-tête au lieu de l'envoyer."
 

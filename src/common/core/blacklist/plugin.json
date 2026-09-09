@@ -99,6 +99,26 @@
       "regex": "^.*$",
       "type": "multivalue"
     },
+    "BLACKLIST_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that adds the request to the blacklist. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "blacklist-header-name",
+      "label": "Blacklisted header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "blacklist-header"
+    },
+    "BLACKLIST_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to add the request to the blacklist. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "blacklist-header-value",
+      "label": "Blacklisted header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "blacklist-header"
+    },
     "BLACKLIST_IGNORE_IP": {
       "context": "multisite",
       "default": "",
@@ -153,6 +173,26 @@
       "regex": "^$|^(?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+(?: AND (?:NOT )?(?:ip|country|asn|rdns|ua|user_agent|uri):(?:(?! [Aa][Nn][Dd](?: |$)).)+)*$",
       "type": "text",
       "multiple": "blacklist-rules"
+    },
+    "BLACKLIST_IGNORE_HEADER_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Name of a request header that exempts the request from the blacklist. Any client can send this header : treat it as a shared secret, only over HTTPS.",
+      "id": "blacklist-ignore-header-name",
+      "label": "Ignored header name",
+      "regex": "^([\\w\\-]+)?$",
+      "type": "text",
+      "multiple": "blacklist-ignore-header"
+    },
+    "BLACKLIST_IGNORE_HEADER_VALUE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value (PCRE regex) the header must match to exempt the request from the blacklist. Leave empty to match on the header being present. Anchor it with ^ and $ : the match is not anchored by default.",
+      "id": "blacklist-ignore-header-value",
+      "label": "Ignored header value",
+      "regex": "^.*$",
+      "type": "password",
+      "multiple": "blacklist-ignore-header"
     },
     "BLACKLIST_IP_URLS": {
       "context": "multisite",

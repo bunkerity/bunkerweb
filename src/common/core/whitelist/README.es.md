@@ -147,6 +147,17 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
         comportamiento de las listas simples, usa una lista simple.
 
 
+=== "Cabecera"
+    **Qué hace esto:** Pone en la lista blanca las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Útil para una sonda o pasarela de confianza que pueda enviar un secreto compartido.
+
+    | Ajuste                   | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                     |
+    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista blanca. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `WHITELIST_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                    |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada. Tampoco levanta un baneo existente: una IP baneada se rechaza antes de que se ejecute la lista blanca.
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 

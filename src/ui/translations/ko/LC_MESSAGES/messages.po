@@ -4703,6 +4703,12 @@ msgstr "기타 설정"
 msgid "settings.custom_config.title"
 msgstr "사용자 정의 설정"
 
+msgid "settings.header_rules.description"
+msgstr "요청 헤더를 이름으로, 그리고 선택적으로 값에 대한 PCRE 정규식으로 일치시킵니다. 쌍으로 번호가 매겨집니다: 이름 #1은 값 #1과 짝을 이룹니다. 헤더의 존재 여부만 확인하려면 값을 비워 두세요. 값은 어떤 클라이언트든 보낼 수 있는 공유 비밀입니다 — HTTPS로만 제공하고, ^와 $로 정규식을 고정하며, 주기적으로 교체하세요. HTTP 전용: stream 서비스에는 요청 헤더가 없습니다."
+
+msgid "settings.header_rules.title"
+msgstr "헤더 규칙"
+
 msgid "settings.headers.browser.description"
 msgstr "값이 고정된 작은 헤더입니다. 값을 비우면 헤더를 전송하는 대신 제거합니다."
 

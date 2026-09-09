@@ -4708,6 +4708,12 @@ msgstr "Iba pang setting"
 msgid "settings.custom_config.title"
 msgstr "Custom na Configuration"
 
+msgid "settings.header_rules.description"
+msgstr "Itugma ang isang request header ayon sa pangalan, at opsyonal na isang PCRE regex sa halaga nito. Binilang nang pares: ang pangalan #1 ay katambal ng halaga #1. Iwanang blangko ang halaga upang itugma lamang ang presensya ng header. Ang halaga ay isang shared secret na maaaring ipadala ng kahit sinong kliyente — ihain lamang ito sa HTTPS, i-anchor ang regex gamit ang ^ at $, at paikutin ito. HTTP lamang: ang isang stream service ay walang dalang request header."
+
+msgid "settings.header_rules.title"
+msgstr "Mga panuntunan sa header"
+
 msgid "settings.headers.browser.description"
 msgstr "Maliliit na header na may fixed na value. Tinatanggal ng blangkong value ang header sa halip na ipadala ito."
 

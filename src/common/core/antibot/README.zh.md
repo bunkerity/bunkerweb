@@ -37,16 +37,21 @@
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                  |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                    |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                      |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。             |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                              |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。             |
-| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。         |
-| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。 |
+| 设置                          | 默认值 | 上下文    | 多个 | 描述                                                                                                               |
+| ----------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------------------------------------ |
+| `ANTIBOT_IGNORE_URI`          |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。模式会同时匹配路径和带查询字符串的完整请求 URI。 |
+| `ANTIBOT_IGNORE_IP`           |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                                                 |
+| `ANTIBOT_IGNORE_RDNS`         |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                                                   |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。                                          |
+| `ANTIBOT_IGNORE_ASN`          |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                                                           |
+| `ANTIBOT_IGNORE_USER_AGENT`   |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。                                          |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |        | multisite | 是   | **请求头名称：** 使请求绕过 antibot 挑战的请求头名称。成对编号：`_NAME_1` 与 `_VALUE_1` 配对。                     |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |        | multisite | 是   | **请求头值：** 请求头值必须匹配的 PCRE 正则表达式。留空则仅检查该请求头是否存在。                                  |
+| `ANTIBOT_IGNORE_COUNTRY`      |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。                                      |
+| `ANTIBOT_ONLY_COUNTRY`        |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。                              |
+
+!!! warning "请求头规则是共享密钥"
+    任何客户端都能发送请求头，因此请求头规则是一种持有者令牌，而非网络层控制。请仅通过 HTTPS 提供，用 `^` 和 `$` 锚定正则（默认不锚定，`abc` 也会匹配 `xabcx`），并定期轮换其值。若 BunkerWeb 位于代理之后，该代理必须覆盖客户端自行发送的同名请求头。 这些规则仅适用于 HTTP：stream 服务不携带请求头，因此在那里不会有任何匹配。
 
 !!! note "国家设置的行为"
       - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。

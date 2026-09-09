@@ -21,6 +21,7 @@ local kill_all_threads = utils.kill_all_threads
 local deduplicate_list = utils.deduplicate_list
 local get_variable = utils.get_variable
 local ipmatcher_new = ipmatcher.new
+local match_header_rules = utils.match_header_rules
 
 local is_in_dnsbl = function(addr, server)
 	local request = arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
@@ -70,6 +71,9 @@ function dnsbl:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		-- Header rules, resolved once in init() : the numeric NAME/VALUE suffixes and the PCRE
+		-- compilation never run on the request path.
+		self.header_rules = self:load_header_rules("plugin_dnsbl_header_rules")
 	end
 end
 
@@ -143,6 +147,13 @@ function dnsbl:init()
 		i = 0
 		lists = { ["IGNORE_IP"] = {} }
 	end
+
+	-- Header rules : resolved here, once per configuration load, never per request.
+	local header_ok, header_err = self:init_header_rules("DNSBL_IGNORE_HEADER", "plugin_dnsbl_header_rules")
+	if not header_ok then
+		return self:ret(false, header_err)
+	end
+
 	return self:ret(true, "successfully loaded DNSBL IGNORE_IP lists")
 end
 
@@ -193,6 +204,13 @@ function dnsbl:access()
 	-- Don't go further if IP is not global
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "client IP is not global, skipping DNSBL check")
+	end
+
+	-- Never cached : dnsbl caches by client IP, so a cached hit here would exempt every later
+	-- request from that IP, header or not.
+	local ignored_header = match_header_rules(self.ctx, self.header_rules, "DNSBL_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored for DNSBL checks")
 	end
 
 	-- Ignore specific IPs/networks if configured

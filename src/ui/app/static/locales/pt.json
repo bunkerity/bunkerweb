@@ -1754,6 +1754,10 @@
         "title": "Outras definições",
         "description": "Declarado pela extensão mas ainda sem colocação nesta página. Ainda assim, guardam-se normalmente."
       }
+    },
+    "header_rules": {
+      "description": "Corresponde a um cabeçalho de pedido pelo nome e, opcionalmente, a uma regex PCRE sobre o seu valor. Numerados aos pares: o nome n.º 1 vai com o valor n.º 1. Deixe o valor vazio para corresponder apenas à presença do cabeçalho. O valor é um segredo partilhado que qualquer cliente pode enviar — sirva-o apenas por HTTPS, ancore a regex com ^ e $, e faça a rotação. Apenas HTTP: um serviço stream não transporta cabeçalhos de pedido.",
+      "title": "Regras de cabeçalho"
     }
   },
   "setup": {

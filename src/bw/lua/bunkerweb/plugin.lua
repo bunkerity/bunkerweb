@@ -12,6 +12,8 @@ local WARN = ngx.WARN
 local get_phase = ngx.get_phase
 local get_variable = utils.get_variable
 local get_ctx_obj = utils.get_ctx_obj
+local get_header_rules = utils.get_header_rules
+local pick_header_rules = utils.pick_header_rules
 local subsystem = ngx.config.subsystem
 local shared = ngx.shared
 local decode = cjson.decode
@@ -109,6 +111,40 @@ end
 
 function plugin:get_id()
 	return self.id
+end
+
+-- Resolve one <PREFIX>_NAME_<n> / <PREFIX>_VALUE_<n> family and park it in the internalstore
+-- under `key`. Call it from init() only : the suffix pairing and the PCRE compilation are paid
+-- once per configuration load, never on the request path -- which also keeps a broken pattern
+-- out of the request-time error log, where it would echo the operator's shared secret.
+-- @return true, or false and an error string the caller returns through self:ret()
+function plugin:init_header_rules(prefix, key)
+	local header_rules, err = get_header_rules(prefix)
+	if not header_rules then
+		return false, "can't resolve " .. prefix .. " header rules : " .. err
+	end
+	local ok, store_err = self.internalstore:set(key, header_rules, nil, true)
+	if not ok then
+		return false, "can't store " .. prefix .. " header rules into internalstore : " .. store_err
+	end
+	return true
+end
+
+-- Request-phase counterpart of init_header_rules : the scope of `key` that applies to this
+-- service. Always a table, so the result can go straight to utils.match_header_rules.
+--
+-- A missing key means init() did not run for this subsystem -- a per-request condition, not a
+-- per-request event, hence the throttled log, same as the composite-rule families. The empty
+-- fallback is fail-closed for an ignore family (nothing is exempted) and fail-open for a
+-- matching one (nothing is added to the list); that is the same direction the flat lists and
+-- the composite rules already take when their own internalstore read fails.
+function plugin:load_header_rules(key)
+	local stored, err = self.internalstore:get(key, true)
+	if not stored then
+		self:log_throttled(ERR, "missing_" .. key, "can't get " .. key .. " : " .. err)
+		return {}
+	end
+	return pick_header_rules(stored, self.ctx.bw.server_name)
 end
 
 -- luacheck: ignore 212

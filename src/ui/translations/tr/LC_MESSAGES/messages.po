@@ -4703,6 +4703,12 @@ msgstr "Diğer ayarlar"
 msgid "settings.custom_config.title"
 msgstr "Özel Yapılandırma"
 
+msgid "settings.header_rules.description"
+msgstr "Bir istek başlığını adına göre ve isteğe bağlı olarak değerine uygulanan bir PCRE regex ile eşleştirir. Çiftler hâlinde numaralandırılır: ad #1, değer #1 ile eşleşir. Yalnızca başlığın varlığını eşleştirmek için değeri boş bırakın. Değer, herhangi bir istemcinin gönderebileceği paylaşılan bir sırdır — yalnızca HTTPS üzerinden sunun, regex’i ^ ve $ ile sabitleyin ve düzenli olarak değiştirin. Yalnızca HTTP: bir stream servisi istek başlığı taşımaz."
+
+msgid "settings.header_rules.title"
+msgstr "Başlık kuralları"
+
 msgid "settings.headers.browser.description"
 msgstr "Sabit değerli küçük başlıklar. Boş bir değer, başlığı göndermek yerine kaldırır."
 

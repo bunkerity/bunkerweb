@@ -116,6 +116,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Greylist :
         - Il n'existe pas de syntaxe d'échappement. Une regex `ua:` ou `uri:` ne peut pas contenir « and » entouré d'espaces, quelle que soit la casse : la règle serait refusée à l'enregistrement.
         - Un terme `rdns:` fait l'objet d'une confirmation directe, comme `GREYLIST_RDNS` : le nom PTR correspondant est résolu et le terme n'est vrai que si cette résolution renvoie l'IP du client.
 
+=== "En-tête"
+    **Ce que cela fait :** Place en liste grise les requêtes portant un en-tête donné, identifié par son nom et, éventuellement, par une regex PCRE sur sa valeur.
+
+    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                                                        |
+    | ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |        | multisite | oui      | Nom d’en-tête : nom d’un en-tête de requête permettant à la requête de être mise en liste grise. Paires numérotées : `_NAME_1` va avec `_VALUE_1`. |
+    | `GREYLIST_HEADER_VALUE` |        | multisite | oui      | Valeur d’en-tête : expression régulière PCRE que la valeur de l’en-tête doit satisfaire. Laisser vide pour ne tester que la présence de l’en-tête. |
+
+    !!! warning "Une règle d’en-tête est un secret partagé"
+        N’importe quel client peut envoyer un en-tête : une règle d’en-tête est donc un jeton porteur, pas un contrôle réseau. À servir uniquement en HTTPS, avec une regex ancrée par `^` et `$` (la recherche n’est pas ancrée par défaut, `abc` correspond aussi à `xabcx`), et une valeur à faire tourner. Si BunkerWeb est derrière un proxy, ce proxy doit écraser toute copie de l’en-tête envoyée par le client. Ces règles ne valent qu’en HTTP : un service stream ne transporte aucun en-tête de requête, rien n’y correspond donc.
+
 !!! info "Prise en charge du format d'URL"
     Tous les paramètres `*_URLS` prennent en charge les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux avec le préfixe `file:///`. L'authentification basique est prise en charge avec le format `http://user:pass@url`.
 

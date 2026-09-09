@@ -16,6 +16,7 @@ local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local regex_match = utils.regex_match
+local match_header_rules = utils.match_header_rules
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local deduplicate_list = utils.deduplicate_list
@@ -72,6 +73,9 @@ function greylist:initialize(ctx)
 		else
 			self.rules = rules.for_server(all_rules, self.ctx.bw.server_name)
 		end
+		-- Header rules, resolved once in init() the same way : the numeric NAME/VALUE suffixes
+		-- and the PCRE compilation never run on the request path.
+		self.header_rules = self:load_header_rules("plugin_greylist_header_rules")
 	end
 end
 
@@ -168,6 +172,12 @@ function greylist:init()
 		return self:ret(false, rules_err)
 	end
 
+	-- Header rules : same deal, resolved once here rather than per request.
+	local header_ok, header_err = self:init_header_rules("GREYLIST_HEADER", "plugin_greylist_header_rules")
+	if not header_ok then
+		return self:ret(false, header_err)
+	end
+
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -209,6 +219,12 @@ function greylist:access()
 	-- Check if access is needed
 	if not self:is_needed() then
 		return self:ret(true, "access not needed")
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "GREYLIST_HEADER_VALUE")
+	if matched_header then
+		return self:ret(true, "header " .. matched_header .. " is in greylist")
 	end
 	-- Check the caches
 	local checks = {

@@ -16,6 +16,7 @@ local get_deny_status = utils.get_deny_status
 local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local regex_match = utils.regex_match
+local match_header_rules = utils.match_header_rules
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local deduplicate_list = utils.deduplicate_list
@@ -130,6 +131,10 @@ function blacklist:initialize(ctx)
 		else
 			self.rules = rules.for_server(all_rules, self.ctx.bw.server_name)
 		end
+		-- Header rules, resolved once in init() the same way : the numeric NAME/VALUE suffixes
+		-- and the PCRE compilation never run on the request path.
+		self.header_rules = self:load_header_rules("plugin_blacklist_header_rules")
+		self.ignore_header_rules = self:load_header_rules("plugin_blacklist_ignore_header_rules")
 	end
 end
 
@@ -237,6 +242,17 @@ function blacklist:init()
 		return self:ret(false, rules_err)
 	end
 
+	-- Header rules : same deal, resolved once here rather than per request.
+	local header_ok, header_err = self:init_header_rules("BLACKLIST_HEADER", "plugin_blacklist_header_rules")
+	if not header_ok then
+		return self:ret(false, header_err)
+	end
+	local ignore_ok, ignore_err =
+		self:init_header_rules("BLACKLIST_IGNORE_HEADER", "plugin_blacklist_ignore_header_rules")
+	if not ignore_ok then
+		return self:ret(false, ignore_err)
+	end
+
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -279,6 +295,16 @@ function blacklist:access()
 	if not self:is_needed() then
 		return self:ret(true, "access not needed")
 	end
+	-- An ignore header wins over everything, cached verdicts and composite rules included. It is
+	-- deliberately NOT scoped by kind the way is_ignored() scopes the flat BLACKLIST_IGNORE_*
+	-- lists : those are matched on attacker-chosen material (a URI, a User-Agent), whereas this
+	-- one only fires on a value the operator configured as a shared secret. That is also why it
+	-- runs before the cache -- the cache is keyed by a client attribute, so honouring it first
+	-- would deny a request the operator explicitly exempted.
+	local ignored_header = match_header_rules(self.ctx, self.ignore_header_rules, "BLACKLIST_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
+	end
 	-- Check the caches
 	local checks = {
 		["IP"] = "ip" .. self.ctx.bw.remote_addr,
@@ -312,6 +338,14 @@ function blacklist:access()
 		if ok and cached then
 			already_cached[k] = true
 		end
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "BLACKLIST_HEADER_VALUE")
+	if matched_header then
+		local header_data = self:get_data("header " .. matched_header)
+		self:set_metric("counters", "failed_" .. header_data.id, 1)
+		return self:ret(true, "header " .. matched_header .. " is blacklisted", get_deny_status(), nil, header_data)
 	end
 	-- Check lists
 	if not self.lists then

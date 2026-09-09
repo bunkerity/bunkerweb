@@ -4713,6 +4713,12 @@ msgstr "Inne ustawienia"
 msgid "settings.custom_config.title"
 msgstr "Konfiguracja niestandardowa"
 
+msgid "settings.header_rules.description"
+msgstr "Dopasowuje nagłówek żądania po nazwie oraz opcjonalnie wyrażeniem regularnym PCRE do jego wartości. Numerowane parami: nazwa nr 1 idzie w parze z wartością nr 1. Pozostaw wartość pustą, aby dopasować samą obecność nagłówka. Wartość jest współdzielonym sekretem, który może wysłać dowolny klient — udostępniaj ją wyłącznie przez HTTPS, zakotwicz wyrażenie znakami ^ i $ oraz regularnie ją zmieniaj. Tylko HTTP: usługa stream nie przenosi nagłówków żądania."
+
+msgid "settings.header_rules.title"
+msgstr "Reguły nagłówków"
+
 msgid "settings.headers.browser.description"
 msgstr "Małe nagłówki o stałej wartości. Pusta wartość usuwa nagłówek zamiast go wysyłać."
 

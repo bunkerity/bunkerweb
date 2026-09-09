@@ -39,6 +39,23 @@
 {%- set only_countries = config.get("WHITELIST_COUNTRY", {}).get("value", filtered_settings.get("WHITELIST_COUNTRY", {}).get("default", "")) -%}
 {%- set blocked_countries = config.get("BLACKLIST_COUNTRY", {}).get("value", filtered_settings.get("BLACKLIST_COUNTRY", {}).get("default", "")) -%}
 {%- set country_mode = "only" if only_countries else ("block" if blocked_countries else "all") -%}
+{# The COUNTRY_IGNORE_HEADER_NAME/_VALUE pair is a `multiple` family, so it needs the cloner --
+   `_in_scope` matches a stored `..._NAME_2` by its base name (models/save_scope.py:99-110), and a
+   page that claims a key its form does not send DELETES that row on the next save. `get_multiples`
+   is called HERE so the static half of
+   ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render reads it in this file. #}
+{# Only the `-header` families belong to this section, the same split the four access-control
+   bodies make. Today it is the plugin's only `multiple` family, so the filter is a no-op -- it is
+   here so a family added later lands in the coverage check (loud, red) instead of quietly
+   rendering under the "Header rules" heading. #}
+{%- set country_header_ns = namespace(groups={}) -%}
+{%- for group_name, group in get_multiples(filtered_settings, config).items() -%}
+    {%- if group_name.endswith("-header") -%}
+        {%- set _ = country_header_ns.groups.update({group_name: group}) -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- set header_rule_multiples = country_header_ns.groups -%}
+{%- set country_header_keys = header_rule_multiples.values() | map("dictsort") | sum(start=[]) | map(attribute=1) | map("list") | sum(start=[]) | list -%}
 <div class="card-body pb-0">
     {% include "plugin_bodies/access_control/decision_order.html" %}
     {% if only_countries and blocked_countries %}
@@ -113,9 +130,10 @@
             {% endfor %}
         </div>
     </section>
+    {% include "models/plugin_header_rules.html" %}
     {# Coverage backstop, not decoration -- see plugin_bodies/access_control/list_matrix.html for
        why every body ships one and why the marker attribute names no plugin. #}
-    {% set country_placed = ["WHITELIST_COUNTRY", "BLACKLIST_COUNTRY", "COUNTRY_IGNORE_URI"] %}
+    {% set country_placed = ["WHITELIST_COUNTRY", "BLACKLIST_COUNTRY", "COUNTRY_IGNORE_URI"] + country_header_keys %}
     {% set country_stragglers = filtered_settings | reject("in", country_placed) | reject("in", blacklisted_settings) | list %}
     {% if country_stragglers %}
         <section class="access-control-group mb-4"
