@@ -1,0 +1,172 @@
+{# The `multiple` groups of ONE plugin: the cloner container, its add/remove/collapse controls
+   and the fields of each numeric suffix.
+
+   Extracted VERBATIM out of models/plugin_settings_body.html (its multiples loop) so a
+   purpose-built plugin body -- templates/plugin_bodies/*.html -- renders a `multiple` family
+   with exactly the chrome and, more importantly, exactly the DOM CONTRACT the generic form
+   renders: `#multiple-<plugin>-<group>` wrapping one `.multiple-container` per suffix, each with
+   a `.multiple-collapse` at `#multiple-<plugin>-<group>-<suffix>`, an `.add-multiple` on suffix 0
+   only, a `.remove-multiple` on the others, and ids of the shape
+   `multiple-setting-<plugin>-<id>-<suffix>`. static/js/settings.js clones off exactly that shape.
+
+   WHY THIS IS NOT OPTIONAL FOR A CUSTOM BODY: `_in_scope` matches a stored `FOO_2` by its BASE
+   name (models/save_scope.py:99-110), so ONE `multiple` in the manifest puts every suffixed row
+   inside the page's declared scope at once -- and a page that claims a key its form does not
+   send has that row DELETED on the next save (db_methods/config_save.py:579-585). Pinned by
+   tests/unit/ui/test_plugin_settings_bodies.py::test_every_shipped_body_renders_the_suffixed_rows_it_declares.
+
+   Caller must set `plugin_multiples` -- the `get_multiples(filtered_settings, config)` mapping,
+   or the subset of it this include is responsible for. `get_multiples` has to be called in the
+   CALLER's own file, because ::test_every_shipped_body_declares_no_multiple_setting_it_cannot_render
+   reads the body source for it.
+
+   WHITESPACE CONTRACT: this partial emits exactly the bytes the inline block emitted, so moving
+   it changed no rendered page -- proven by re-rendering all 45 core manifests x {service,
+   global} x {readonly on, off} = 180 pages to the same sha256 before and after the move. The
+   trimming comment on the LAST line eats the newline after the final closing div, because the
+   caller's include line already supplies one; `end-of-file-fixer` would otherwise put one back
+   and turn a proven pure move into a quiet whitespace change. #}
+    {#- `button` and `docs_url` are macros, not context: an `{% include %}` does not inherit the
+   caller's imports, so they are imported HERE. Forgetting this renders the groups without their
+   add/remove buttons -- silently, since Jinja's default Undefined is callable-free but the
+   surrounding markup still emits. -#}
+{%- from "components/button.html" import button -%}
+{%- from 'macros/docs_link.html' import docs_url -%}
+<div class="card-body row g-2 gx-6 pt-0">
+        {% for multiple, multiples in plugin_multiples.items() %}
+            <div id="multiple-{{ plugin }}-{{ multiple }}"
+                 class="col-12{% if plugin_multiples|length > 1 %} col-md-6{% endif %}{% if plugin_multiples|length > 2 and not settings|length > 1 %} col-lg-4{% endif %}">
+                {% for setting_suffix, settings in multiples.items() %}
+                    <div class="row multiple-container pt-2 pb-2">
+                        {% set setting_id_suffix = "-" + setting_suffix %}
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h6 class="mb-0 me-2">
+                                {{ multiple.replace('-', ' ') | capitalize }}
+                                {% if setting_suffix != "0" %}#{{ setting_suffix }}{% endif %}
+                            </h6>
+                            <div class="d-flex align-items-center">
+                                {% if setting_suffix == "0" %}
+                                    <div class="me-1"
+                                         {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ _("tooltip.disabled_readonly") if user_readonly else _("tooltip.disabled_db_readonly") }}"
+                                         {% endif %}>
+                                        {{ button(id="add-multiple-" + plugin + "-" + multiple, label="ADD", i18n_key="button.multiple_add", variant="text-bw-green", icon="bx-plus-circle bx-sm", disabled=is_readonly, classes="btn-xs rounded-pill add-multiple p-0 pe-2") }}
+                                    </div>
+                                {% else %}
+                                    {{ button(id="remove-multiple-" + plugin + "-" + multiple + "-" + setting_suffix, label="REMOVE", i18n_key="button.multiple_remove", variant="text-danger", icon="bx-trash bx-sm", classes="btn-xs rounded-pill remove-multiple p-0 pe-2") }}
+                                {% endif %}
+                                <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                        type="button"
+                                        class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                        aria-expanded="true"
+                                        aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
+                                    <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span>{{ _("button.multiple_hide") }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                             class="collapse show multiple-collapse pt-0">
+                            <div class="row g-2 gx-6 mt-2 pt-2">
+                                {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
+                                    {% set setting_config = config.get(setting, {}) %}
+                                    {% set setting_default = setting_data.get("default", "") %}
+                                    {% set setting_value = setting_config.get("value", setting_default) %}
+                                    {% set setting_method = setting_config.get("method", "default") %}
+                                    {% set setting_template = setting_config.get("template", "") %}
+                                    {% set disabled = not is_editable_method(setting_method, allow_default=True) and (current_endpoint == "global-config" or current_endpoint == "global-settings" or not setting_config.get("global")) %}
+                                    {% if current_endpoint == "new" or clone %}
+                                        {% set setting_method = "default" %}
+                                        {% set disabled = false %}
+                                    {% endif %}
+                                    {% if is_readonly %}
+                                        {% set disabled = true %}
+                                        {% set setting_method = "readonly" %}
+                                    {% endif %}
+                                    {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                        {% set disabled = true %}
+                                        {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                    {% endif %}
+                                    <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
+                                         {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                   for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                   class="form-label fw-semibold text-truncate">
+                                                {{ setting_data["label"] }}
+                                            </label>
+                                            <div class="d-flex align-items-center">
+                                                {% if (current_endpoint == "global-config" or current_endpoint == "global-settings") and setting_data["context"] == "multisite" %}
+                                                    <a role="badge"
+                                                       href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                                                       class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                                                       data-endpoint="/concepts"
+                                                       data-fragment="#multisite-mode"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-placement="top"
+                                                       data-bs-original-title="Multisite setting"
+                                                       target="_blank"
+                                                       rel="noopener">
+                                                        <span class="bx bx-server bx-xs"></span>
+                                                    </a>
+                                                {% endif %}
+                                                {% if setting_template %}
+                                                    <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="From template: {{ setting_template }}">
+                                                        <span class="bx bx-spreadsheet bx-xs"></span>
+                                                    </span>
+                                                {% endif %}
+                                                {% if setting_method == "api" %}
+                                                    <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="{{ _("badge.managed_via_api") }}">
+                                                        <span class="bx bx-code-curly bx-xs"></span>
+                                                    </span>
+                                                {% endif %}
+                                                {% if setting_config.get("clone") %}
+                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="Cloned from service {{ clone }}">
+                                                        <span class="bx bx-copy-alt bx-xs"></span>
+                                                    </span>
+                                                {% elif current_endpoint != "global-config" and current_endpoint != "global-settings" and setting_config.get("global") and setting_value != setting_default %}
+                                                    <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                          data-bs-toggle="tooltip"
+                                                          data-bs-placement="top"
+                                                          data-bs-original-title="From global settings">
+                                                        <span class="bx bx-globe bx-xs"></span>
+                                                    </span>
+                                                {% endif %}
+                                                <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="{{ setting_data['help'] }}">
+                                                    <span class="bx bx-question-mark bx-xs"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% if setting_data["type"] == "select" %}
+                                            {% include "models/select_setting.html" %}
+                                        {% elif setting_data["type"] == "multiselect" %}
+                                            {% include "models/multiselect_setting.html" %}
+                                        {% elif setting_data["type"] == "multivalue" %}
+                                            {% include "models/multivalue_setting.html" %}
+                                        {% elif setting_data["type"] == "check" %}
+                                            {% include "models/checkbox_setting.html" %}
+                                        {% else %}
+                                            {% include "models/input_setting.html" %}
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{#- -#}
