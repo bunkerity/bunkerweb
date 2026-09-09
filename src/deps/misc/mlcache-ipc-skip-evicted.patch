@@ -6,7 +6,7 @@
  
  
  local function marshall(worker_pid, channel, data)
-@@ -221,7 +222,45 @@
+@@ -221,7 +222,43 @@
          self.idx = idx
  
          if elapsed >= timeout then
@@ -35,13 +35,11 @@
 +                -- Nothing left to deliver: resume at the head with no backlog.
 +                self.idx = shm_idx
 +
-+            elseif budget == 0 then
-+                -- A hole longer than we are willing to walk in one poll. Resume at the
-+                -- head the way a new worker does and accept the loss, rather than
-+                -- paying the timeout again for every chunk of it.
-+                self.idx = shm_idx - 1
-+
 +            else
++                -- Resume just before the next event the shm still holds. When the scan
++                -- ran out of budget instead of finding one, this resumes where it
++                -- stopped, so a hole longer than MAX_HOLE_SCAN costs one more poll per
++                -- chunk rather than the backlog that sits behind it.
 +                self.idx = probe - 1
 +            end
 +
