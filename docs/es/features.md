@@ -160,12 +160,12 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
 
 === "Ajustes de Integración"
 
-    | Parámetro         | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                 |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                             |
-    | `SWARM_MODE`      | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                   |
-    | `KUBERNETES_MODE` | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                |
-    | `USE_TEMPLATE`    |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración a usar que sobrescribirá los valores predeterminados de ajustes específicos. |
+    | Parámetro         | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                       |
+    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`              | global    | No       | **Modo Autoconf:** Habilita la integración con Docker Autoconf.                                                                                                                   |
+    | `SWARM_MODE`      | `no`              | global    | No       | **Modo Swarm:** Habilita la integración con Docker Swarm.                                                                                                                         |
+    | `KUBERNETES_MODE` | `no`              | global    | No       | **Modo Kubernetes:** Habilita la integración con Kubernetes.                                                                                                                      |
+    | `USE_TEMPLATE`    |                   | multisite | No       | **Usar Plantilla:** Plantilla de configuración que sobrescribe los valores predeterminados de ajustes específicos; un valor definido en el servicio prevalece sobre la plantilla. |
 
 === "Ajustes de Nginx"
 
@@ -358,16 +358,21 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 
 BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben omitir por completo el desafío antibot. Esto es útil para incluir en la lista blanca servicios de confianza, redes internas o páginas específicas que siempre deben ser accesibles sin desafío:
 
-| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                         |
-| --------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con query string. |
-| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                         |
-| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                       |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                              |
-| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                                                                                      |
-| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_IGNORE_COUNTRY`    |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.                                                                                |
-| `ANTIBOT_ONLY_COUNTRY`      |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite.                                                                    |
+| Configuración                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                         |
+| ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`          |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío. Los patrones se comprueban contra la ruta y la URI completa de la solicitud con query string. |
+| `ANTIBOT_IGNORE_IP`           |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                                                                                         |
+| `ANTIBOT_IGNORE_RDNS`         |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                                                                                       |
+| `ANTIBOT_RDNS_GLOBAL`         | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.                                                                              |
+| `ANTIBOT_IGNORE_ASN`          |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                                                                                      |
+| `ANTIBOT_IGNORE_USER_AGENT`   |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.                                                                                |
+| `ANTIBOT_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir el desafío antibot. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                        |
+| `ANTIBOT_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                        |
+| `ANTIBOT_IGNORE_COUNTRY`      |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.                                                                                |
+| `ANTIBOT_ONLY_COUNTRY`        |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite.                                                                    |
+
+!!! warning "Una regla de cabecera es un secreto compartido"
+    Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 !!! note "Comportamiento de la configuración basada en países"
       - Cuando se configuran `ANTIBOT_IGNORE_COUNTRY` y `ANTIBOT_ONLY_COUNTRY`, la lista de exclusiones tiene prioridad: los países presentes en ambas listas omiten el desafío.
@@ -1138,6 +1143,19 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
+=== "Cabecera"
+    **Qué hace esto:** Bloquea, o por el contrario exime, las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Una regla de exclusión prevalece sobre cualquier coincidencia de la lista negra, incluidas las cacheadas.
+
+    | Ajuste                          | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                    |
+    | ------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_HEADER_NAME`         |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista negra. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `BLACKLIST_HEADER_VALUE`        |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                   |
+    | `BLACKLIST_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la lista negra. Pares numerados: `_NAME_1` va con `_VALUE_1`.       |
+    | `BLACKLIST_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                   |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
+
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
@@ -1688,11 +1706,16 @@ Siga estos pasos para configurar y utilizar la función de País:
 
 ### Ajustes de configuración
 
-| Ajuste               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                               |
-| -------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WHITELIST_COUNTRY`  |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                           |
-| `BLACKLIST_COUNTRY`  |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                            |
-| `COUNTRY_IGNORE_URI` |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta y la URI de solicitud completa con la cadena de consulta. |
+| Ajuste                        | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                               |
+| ----------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_COUNTRY`           |                   | multisite | no       | **Lista Blanca de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Solo se permiten estos países.                                                                                                                           |
+| `BLACKLIST_COUNTRY`           |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país y/o tokens de grupo separados por espacios. Estos países están bloqueados.                                                                                                                            |
+| `COUNTRY_IGNORE_URI`          |                   | multisite | no       | **URI ignorada:** Lista de patrones de expresiones regulares PCRE separados por espacios para las URI que deben excluirse de la comprobación de país. Los patrones se comprueban contra la ruta y la URI de solicitud completa con la cadena de consulta. |
+| `COUNTRY_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir la comprobación de país. Pares numerados: `_NAME_1` va con `_VALUE_1`.                                                                                         |
+| `COUNTRY_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                                                                                                              |
+
+!!! warning "Una regla de cabecera es un secreto compartido"
+    Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 ### Grupos de países compatibles
 
@@ -1796,13 +1819,53 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 - Acceso a los registros de acceso de BunkerWeb (`/var/log/bunkerweb/access.log` de forma predeterminada) para que el agente de CrowdSec pueda analizar las solicitudes.
 - Acceso a `cscli` en el host de CrowdSec para registrar la clave del bouncer de BunkerWeb.
 
+!!! warning "Inicio explícito en el contenedor todo en uno"
+    El agente CrowdSec integrado solo se inicia si el contenedor todo en uno recibe la variable de entorno sin prefijo `USE_CROWDSEC=yes` y una `CROWDSEC_API` local (por defecto, `http://127.0.0.1:8000`). Activar CrowdSec solo para un servicio no inicia el agente integrado. Para una API local externa, inicie y configure el agente por separado.
+
 ### Flujo de integración
 
 1. Preparar el agente de CrowdSec para ingerir los registros de BunkerWeb.
 2. Configurar BunkerWeb para que consulte la API local de CrowdSec.
 3. Validar el enlace mediante la API `/crowdsec/ping` o la tarjeta de CrowdSec en el panel de administración.
 
+    Esta comprobación realiza una solicitud de lectura autenticada a cada API local configurada. Falla si una API es inaccesible, rechaza las credenciales, devuelve una respuesta no válida o si no se pudo cargar el bouncer de un servicio. Para los servicios que solo usan AppSec, confirma la carga de la configuración; no comprueba la conexión ni la inspección AppSec.
+
 Las siguientes secciones desarrollan cada paso.
+
+### Investigación y eliminación de decisiones
+
+Abra **Páginas adicionales → CrowdSec** en la interfaz web para consultar cada conexión configurada, el servicio afectado, la conectividad con la API local y la sincronización de decisiones. La tarjeta de estado del plugin CrowdSec y las acciones **Investigar IP** de Informes y Baneos abren la misma página. Los enlaces de investigación rellenan la dirección de antemano. Seleccione la conexión cuando varios servicios o instancias utilicen CrowdSec.
+
+Una investigación combina las decisiones actuales de CrowdSec, las alertas disponibles de CrowdSec, los informes conservados de BunkerWeb y los baneos locales de BunkerWeb. Las decisiones actuales y los datos capturados en los informes se muestran por separado. Los nuevos informes de CrowdSec conservan los identificadores de decisión, orígenes, escenarios, objetivos, medidas de remediación y fechas de caducidad disponibles después de que esas decisiones caduquen o se eliminen. Los rechazos de AppSec y los bloqueos causados por una política de gestión de fallos de AppSec tienen fuentes distintas. El historial sigue los ajustes existentes de retención de informes; los informes antiguos y los metadatos opcionales desalojados de la caché pueden no tener detalles adicionales. La consulta de alertas expone metadatos de eventos limitados, sin cuerpos de solicitud sin procesar, cookies ni cabeceras de autenticación.
+
+Los informes locales y los baneos específicos de un servicio se limitan al ámbito del servicio de la conexión seleccionada; también se incluyen los baneos globales de BunkerWeb. Si ya no se puede determinar ese ámbito a partir de la configuración cargada en la instancia, la investigación se detiene para evitar devolver datos de otros servicios. Los informes conservados siguen siendo accesibles cuando la API local no está disponible y la configuración de la conexión sigue cargada.
+
+La sección **Listas de permitidos de CrowdSec** muestra las listas nativas del motor, sus entradas, comentarios, fechas de caducidad y si se gestionan localmente o mediante la Consola de CrowdSec. Las investigaciones de IP comprueban el estado actual de las listas de permitidos del motor y muestran el motivo de coincidencia. Leer y comprobar estas listas requiere las credenciales de gestión descritas a continuación. Una comprobación no disponible se distingue de una IP que no figura en las listas. Las excepciones se aplican a todo el motor CrowdSec; no eliminan los baneos locales de BunkerWeb. CrowdSec 1.8.0 ofrece operaciones de lectura y comprobación mediante LAPI, mientras que las modificaciones nativas requieren `cscli` en su host o un acceso de gestión independiente a la Consola.
+
+El ajuste existente `CROWDSEC_API_KEY` es una **clave de bouncer**: permite leer decisiones, pero no eliminarlas ni consultar alertas. Para habilitar esas operaciones, registre una máquina dedicada en el motor CrowdSec correspondiente y configure estos dos ajustes multisitio opcionales:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: el nombre de acceso de la máquina dedicada.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: la contraseña de esa máquina.
+
+Registre la máquina siguiendo el [procedimiento de autenticación de la API local](https://doc.crowdsec.net/docs/local_api/authentication/) de CrowdSec. Guarde las credenciales de forma privada. Si cualquiera de los ajustes queda vacío, las funciones de gestión no estarán disponibles. La misma configuración se aplica a motores integrados y externos: las solicitudes se envían a través de la instancia BunkerWeb seleccionada, por lo que una API local integrada puede seguir escuchando en localhost. Las solicitudes HTTPS de gestión verifican el certificado del servidor mediante la configuración de confianza TLS de BunkerWeb, independientemente del ajuste de verificación de AppSec.
+
+**Eliminar decisión de CrowdSec** es una acción distinta de levantar un baneo de BunkerWeb. La eliminación desde la interfaz web requiere un administrador con acceso de escritura, credenciales de gestión configuradas, una base de datos de la interfaz con permiso de escritura y la confirmación de la decisión seleccionada. Eliminar una decisión sobre un rango afecta a todo el rango. En un motor compartido, la eliminación también afecta a los demás bouncers que consumen esa decisión. El identificador, ámbito, objetivo y medida de remediación seleccionados se comprueban de nuevo antes de eliminarla; se conservan las otras decisiones y los baneos locales.
+
+Una respuesta correcta confirma la eliminación en la API local y muestra las decisiones coincidentes restantes. Los bouncers incorporan el cambio mediante su actualización de flujo configurada o al caducar la caché del modo live; la interfaz indica que la propagación está pendiente, sin afirmar que todos los clientes ya están permitidos. Otra decisión, un baneo local, una nueva detección o una regla de AppSec pueden seguir bloqueando una solicitud. Los resultados de eliminación se registran con el actor autenticado, la conexión y la decisión seleccionadas.
+
+La API pública ofrece las mismas operaciones:
+
+- `GET /crowdsec`: conexiones, estado de sincronización y errores por instancia.
+- `GET /crowdsec/{connection_id}/decisions`: filtrar por `ip`, `origin` o `scenario`; paginar con `offset` y `limit` (máximo 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: investigación con hasta 200 decisiones, 50 alertas y 50 informes, con totales o límites y secciones marcadas explícitamente como no disponibles.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: detalles de alerta depurados para excluir datos sensibles.
+- `GET /crowdsec/{connection_id}/allowlists`: listas de permitidos nativas, con paginación mediante `offset` y `limit`; hasta 200 entradas por lista, mostrando el número total de entradas.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: pertenencia actual a una lista de permitidos nativa y motivo de coincidencia.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: incluir los valores seleccionados de `scope`, `value` y `decision_type` en el cuerpo JSON.
+
+Utilice el identificador de conexión devuelto sin modificarlo. Incluye la identidad de la instancia, por lo que las URL localhost idénticas en distintas instancias permanecen separadas. Los administradores de la API pueden usar estas operaciones. Los usuarios delegados de la API necesitan el permiso independiente `crowdsec_read` o `crowdsec_delete` en el recurso existente `bans`, para un identificador de conexión devuelto o para `*`. Un permiso ordinario `ban_delete` no autoriza la eliminación de decisiones de CrowdSec. No se requiere ninguna migración de base de datos.
+
+El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 5 MiB y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
 
 ### Paso&nbsp;1 – Preparar CrowdSec para ingerir los registros de BunkerWeb
 
@@ -1868,7 +1931,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1885,7 +1948,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -1919,7 +1982,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
+        image: crowdsecurity/crowdsec:v1.8.0 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
         volumes:
           - cs-data:/var/lib/crowdsec/data # Para persistir los datos de CrowdSec
           - bw-logs:/var/log:ro # Los registros de BunkerWeb para que CrowdSec los analice
@@ -2086,6 +2149,21 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
     - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
+#### Endpoints por servicio
+
+Como los endpoints son `multisite`, los servicios de la misma instancia pueden usar diferentes componentes de CrowdSec, o solo algunos de ellos. Las dos funciones son independientes:
+
+- **Las consultas de decisiones** están activas cuando `CROWDSEC_API` está definido. Establézcalo en una cadena vacía para que un servicio omita por completo la Local API.
+- **La inspección de AppSec** está activa cuando `CROWDSEC_APPSEC_URL` está definido. Establézcalo en una cadena vacía para que un servicio omita la inspección profunda de solicitudes.
+
+Un servicio con `USE_CROWDSEC` en `yes` y ambas URL vacías no verifica nada, y la instancia registra que no se ha definido ningún endpoint.
+
+!!! warning "Una caché de decisiones por instancia"
+    Las decisiones en caché residen en una única zona de memoria compartida para toda la instancia, indexada por la Local API de la que provienen. Los servicios que apuntan a la misma `CROWDSEC_API` reutilizan las decisiones en caché entre sí, lo que mantiene la consulta económica. Los servicios que apuntan a Local API distintas nunca ven las decisiones de los demás. El tamaño de esa zona es a nivel de instancia, por lo que una flota con muchas Local API distintas y listas de decisiones grandes comparte un mismo presupuesto.
+
+!!! info "Clave de bouncer por Local API"
+    `CROWDSEC_API_KEY` se resuelve por servicio como cualquier otro ajuste. Cuando los servicios apuntan a Local API distintas, asigne a cada uno la clave registrada con `cscli bouncers add` en su propio host de CrowdSec; de lo contrario, las consultas se rechazarán por no estar autenticadas.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"
@@ -2118,6 +2196,38 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
+=== "Configuración por servicio"
+
+    AppSec en cada servicio público, consultas de decisiones en un subconjunto, y un servicio completamente excluido. Los valores sin prefijo son la línea base para toda la flota, y cada servicio solo sobrescribe lo que difiere:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Línea base para cada servicio
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Sin consulta de decisiones salvo que un servicio la solicite
+    CROWDSEC_API_KEY: ""
+
+    # app1 añade la consulta de decisiones de la Local API además de AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 mantiene solo AppSec, heredando la línea base vacía de CROWDSEC_API
+
+    # intranet no se verifica en absoluto
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un servicio también puede apuntar a un host de CrowdSec completamente distinto, con su propia clave de bouncer:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
+    ```
+
 ### Paso&nbsp;3 – Validar la integración
 
 - En los registros del scheduler, busque las entradas `CrowdSec configuration successfully generated` y `CrowdSec bouncer denied request` para verificar que el complemento esté activo.
@@ -2131,10 +2241,11 @@ Para una guía más detallada, consulta la documentación de [usos avanzados](ad
 
 Compatibilidad con STREAM :x:
 
-Tweak BunkerWeb error/antibot/default pages with custom HTML.
+Tweak BunkerWeb error/antibot/default/maintenance pages with custom HTML.
 
 | Parámetro                        | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                        |
 | -------------------------------- | -------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CUSTOM_MAINTENANCE_PAGE`        |                      | multisite | no       | Full path of the custom Maintenance plugin page (must be readable by the scheduler) (Can be a lua template).       |
 | `CUSTOM_ERROR_PAGE`              |                      | multisite | no       | Full path of the custom error page (must be readable by the scheduler) (Can be a lua template).                    |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |                      | global    | no       | Full path of the custom default server page (must be readable by the scheduler) (Can be a lua template).           |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |                      | multisite | no       | Full path of the custom antibot captcha page (must be readable by the scheduler) (Can be a lua template).          |
@@ -2348,10 +2459,15 @@ Siga estos pasos para configurar y usar la función DNSBL:
 
 **Listas de Omisión**
 
-| Ajuste                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                      |
-| ---------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `DNSBL_IGNORE_IP`      | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                         |
-| `DNSBL_IGNORE_IP_URLS` | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`. |
+| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                        |
+| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DNSBL_IGNORE_IP`           | ``                | multisite | yes      | IPs/CIDRs separados por espacios para omitir las verificaciones de DNSBL (lista blanca).                                                                           |
+| `DNSBL_IGNORE_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición omitir las comprobaciones DNSBL. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+| `DNSBL_IGNORE_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                       |
+| `DNSBL_IGNORE_IP_URLS`      | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`.                                                   |
+
+!!! warning "Una regla de cabecera es un secreto compartido"
+    Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 !!! tip "Elección de Servidores DNSBL"
     Elija proveedores de DNSBL de buena reputación para minimizar los falsos positivos. La lista predeterminada incluye servicios bien establecidos que son adecuados para la mayoría de los sitios web:
@@ -2594,6 +2710,17 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | ------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
     | `GREYLIST_URI`      |                   | multisite | no       | **Lista Gris de URI:** Lista de patrones de URI (expresión regular PCRE) para incluir en la lista gris, separados por espacios.   |
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
+
+=== "Cabecera"
+    **Qué hace esto:** Pone en la lista gris las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor.
+
+    | Ajuste                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                   |
+    | ----------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `GREYLIST_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista gris. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `GREYLIST_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                  |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada.
 
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
@@ -3229,6 +3356,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`              | global    | no       | **Máximo de copias de seguridad de logs de Certbot:** Número de copias rotadas de `letsencrypt.log` que Certbot conserva por trabajo. El valor predeterminado de Certbot, `1000`, se acumula rápidamente; `50` es un límite razonable. Establece `0` para conservar solo el log activo.                                                                                     |
 
 !!! info "Información y comportamiento"
+    - El controlador local de `/.well-known/acme-challenge/` solo se activa con `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` y `LETS_ENCRYPT_PASSTHROUGH=no`. Las excepciones de redirección a HTTPS y de acceso también requieren que el token solicitado exista como archivo legible y no vacío. Al eliminar el token, se restauran inmediatamente las comprobaciones habituales. Los demás servicios aplican sus reglas habituales de enrutamiento y acceso a esta ruta.
     - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
     - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor.
     - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS.
@@ -3250,6 +3378,8 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 !!! warning "Certificados comodín"
     Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
+
+    Un comodín solo cubre un nivel: `*.example.com` no cubre `a.b.example.com`. Se rechazan los grupos que no pueden cubrir todos los nombres configurados y el servicio afectado se informa como mal configurado. Separe esos nombres en servicios distintos. Los grupos válidos siguen procesándose; si no se puede emitir ningún certificado, el trabajo falla. Los certificados emitidos correctamente para otros grupos siguen solicitando una recarga.
 
 !!! warning "Límites de velocidad"
     Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.
@@ -3570,6 +3700,19 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`                | global   | sí       | Verify SSL certificate in healthchecks.                            |
 | `LOADBALANCER_HEALTHCHECK_HOST`           |                      | global   | sí       | Host header for healthchecks (useful for HTTPS).                   |
 
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Para una guía más detallada, consulta la documentación de [usos avanzados](advanced.md#maintenance-pro).
+
+Compatibilidad con STREAM :x:
+
+Serve a maintenance page instead of forwarding requests to the application.
+
+| Parámetro         | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                               |
+| ----------------- | -------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MAINTENANCE` | `no`                 | multisite | no       | Replace reverse proxy responses with a maintenance page. Ignored on services with USE_UI=yes to preserve Web UI access. Let's Encrypt challenges remain accessible. Customize the page with Custom Pages. |
+
 ## Metrics
 
 Compatibilidad con STREAM :warning:
@@ -3663,20 +3806,23 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 
 ### Ajustes de Configuración
 
-| Ajuste                               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                     |
-| ------------------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`             | multisite | no       | **Habilitar Métricas:** Establezca en `yes` para habilitar la recolección y recuperación de métricas.                                                                                                           |
-| `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                                                                                   |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`.                                                              |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`.                                                           |
-| `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`. |
-| `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster.                                                              |
+| Ajuste                               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_METRICS`                        | `yes`             | multisite | no       | **Habilitar Métricas:** Establezca en `yes` para habilitar la recolección y recuperación de métricas.                                                                                                                                                                                                                                                                          |
+| `METRICS_MEMORY_SIZE`                | `16m`             | global    | no       | **Tamaño de la Memoria:** Tamaño del almacenamiento interno para las métricas (p. ej., `8192`, `16m`, `32m`).                                                                                                                                                                                                                                                                  |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`              | global    | no       | **Máximo de Solicitudes Bloqueadas:** Número máximo de solicitudes bloqueadas para almacenar por trabajador. Acepta la notación abreviada `k`/`m`.                                                                                                                                                                                                                             |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`             | global    | no       | **Máximo de Solicitudes Bloqueadas en Redis:** Número máximo de solicitudes bloqueadas para almacenar en Redis. Acepta la notación abreviada `k`/`m`.                                                                                                                                                                                                                          |
+| `METRICS_REDIS_TTL`                  | `2592000`         | global    | no       | **TTL de Métricas en Redis:** segundos antes de que las claves de métricas en Redis expiren (`0` = permanente); se renueva en cada sincronización para que los datos activos nunca expiren, permitiendo que los datos abandonados sean desalojables bajo `volatile-lru` para que Redis se recupere de la presión de memoria (maxmemory). Acepta la notación abreviada `k`/`m`. |
+| `MAX_LRU_HISTORY`                    | `1k`              | global    | no       | **Historial LRU Máximo:** Número de ranuras LRU por trabajador y límite del arreglo de historial de eventos por clave (trazas de bloqueo, trazas de autenticación, etc.). Acepta la notación abreviada `k`/`m`.                                                                                                                                                                |
+| `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster.                                                                                                                                                                                                                             |
 
 !!! tip "Dimensionamiento de la Asignación de Memoria"
     El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Se admiten valores brutos en bytes y sufijos `k`/`m`. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
 
 !!! info "Integración con Redis"
-    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb.
+    Cuando BunkerWeb utiliza [Redis](#redis), el complemento de métricas sincroniza automáticamente los informes de solicitudes bloqueadas. Al alcanzar `maxmemory`, los informes rechazados permanecen en el búfer limitado del trabajador para volver a intentarlo. El desbordamiento del búfer, la expulsión LRU o la pérdida de datos de Redis pueden eliminar informes. Los recuentos de filtros incompletos se reconstruyen a partir de la lista de solicitudes conservadas. Los informes almacenados con datos no válidos (marca de tiempo o identificador inutilizable) se excluyen de la tabla de informes y de sus totales.
+
+    Los totales de los contadores se recuperan de Redis cuando se necesitan, antes de sincronizarlos, incluso tras su expulsión de la caché LRU local. Los contadores Redis inactivos se conservan hasta que vence `METRICS_REDIS_TTL`; `0` los conserva indefinidamente de forma intencionada. Supervise la memoria de Redis si utiliza métricas con muchas claves distintas.
 
 !!! warning "Consideraciones de Rendimiento"
     Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.
@@ -3896,6 +4042,8 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
         Se recomienda realizar pruebas exhaustivas antes de habilitar HTTP/3 en entornos de producción.
 
+        HTTP/3 se desactiva silenciosamente cuando `USE_PROXY_PROTOCOL` es `yes`. NGINX no puede leer la cabecera del PROXY protocol en un listener QUIC, por lo que no se genera ningún listener `quic` ni cabecera `Alt-Svc` aunque `HTTP3` siga indicando `yes`, y `LIMIT_CONN_MAX_HTTP3` no tiene efecto. Termine el PROXY protocol aguas arriba, o limítese a HTTP/1.1 y HTTP/2.
+
 === "Entrega de Archivos Estáticos"
 
     **Configuración de Entrega de Archivos**
@@ -4079,19 +4227,19 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 ### Ajustes de Configuración
 
-| Ajuste                                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                    |
-| ------------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_MODSECURITY`                     | `yes`             | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                  |
-| `USE_MODSECURITY_CRS`                 | `yes`             | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                      |
-| `MODSECURITY_CRS_VERSION`             | `4`               | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                |
-| `MODSECURITY_SEC_RULE_ENGINE`         | `On`              | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`    | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                               |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`       | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                          |
-| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar.             |
-| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`          | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`. |
-| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`             | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                             |
-| `MODSECURITY_CRS_PLUGINS`             |                   | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                   |
-| `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
+| Ajuste                                | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_MODSECURITY`                     | `yes`                                 | multisite | no       | **Habilitar ModSecurity:** Active la protección del Firewall de Aplicaciones Web ModSecurity.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `USE_MODSECURITY_CRS`                 | `yes`                                 | multisite | no       | **Usar Core Rule Set:** Habilite el OWASP Core Rule Set para ModSecurity.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. La ruta debe terminar en `.log`. La rotación mediante esa extensión solo se aplica donde logrotate está instalado (los paquetes de Linux y la imagen All-In-One); en Docker, Swarm y Kubernetes, un nombre distinto del predeterminado no se transmite ni se rota, y crece sin límite dentro del contenedor, porque solo `modsec_audit.log` está enlazado al streaming de logs del contenedor. |
+| `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`.                                                                                                                                                                                                                                                                                                                                                                                        |
+| `USE_MODSECURITY_CRS_PLUGINS`         | `yes`                                 | multisite | no       | **Habilitar Complementos de CRS:** Habilite conjuntos de reglas de complementos adicionales para el Core Rule Set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `MODSECURITY_CRS_PLUGINS`             |                                       | multisite | no       | **Lista de Complementos de CRS:** Lista de complementos separados por espacios para descargar e instalar (`nombre-plugin[/etiqueta]` o URL).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `USE_MODSECURITY_GLOBAL_CRS`          | `no`                                  | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
     **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
@@ -4228,7 +4376,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Configuración Avanzada con Complementos"
@@ -4316,6 +4464,8 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
 5. **Reenvíe resultados (opcional):** Mantenga `MTLS_FORWARD_CLIENT_HEADERS` en `yes` si los servicios posteriores necesitan inspeccionar el certificado.
 6. **Mantenga la revocación:** Si publica una CRL, configure `MTLS_CRL` (o `MTLS_CRL_DATA`) para que BunkerWeb rechace los certificados revocados.
 
+El Scheduler valida el paquete de CA candidato completo y todas las CRL antes de sustituir cualquiera de los archivos en caché. Una CRL se rechaza si no se puede analizar, o si su emisor forma parte del paquete y la firma no se verifica contra él; una CRL firmada por una CA ausente del paquete se publica con una advertencia, porque NGINX construye la cadena con los intermedios que presenta el cliente. Si los datos no se pueden leer, son inválidos o no coinciden, conserva el par CA/CRL anterior y registra un error. Rote la CA y su CRL juntas y corrija los orígenes inválidos cuanto antes, especialmente antes de que caduque una CRL. Vaciar tanto `MTLS_CRL` como `MTLS_CRL_DATA` elimina deliberadamente la comprobación de revocaciones. Eliminar la configuración de CA, desactivar mTLS o eliminar el servicio borra sus archivos en caché; mientras `USE_MTLS` siga en `yes` con un modo distinto de `optional_no_ca`, `ssl_verify_client` se aplica entonces contra una CA de marcador de posición integrada: con `on` cada cliente recibe un 400 y con `optional` lo recibe cada cliente que presente un certificado, hasta que se configure de nuevo una CA. Las eliminaciones efectivas solicitan una recarga.
+
 ### Parámetros de configuración
 
 | Parámetro                      | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                        |
@@ -4336,7 +4486,7 @@ Siga estos pasos para desplegar Mutual TLS con confianza:
     Los paquetes de CA y las listas de revocación no necesitan montarse en los contenedores de BunkerWeb. Aporte solo al Scheduler una ruta de archivo o datos incrustados; el Scheduler los valida, los almacena en caché y los distribuye a cada instancia. Las actualizaciones se recogen y redistribuyen automáticamente en la siguiente ejecución del job.
 
 !!! warning "Paquete de CA obligatorio en modos estrictos"
-    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Si no hay ninguno disponible, BunkerWeb omite las directivas de mTLS en cada instancia para que el servicio no se ejecute con una referencia de certificado inválida o inexistente. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, el mTLS permanece deshabilitado hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
+    Cuando `MTLS_VERIFY_CLIENT` está en `on` u `optional`, el Scheduler debe poder validar y almacenar en caché un paquete de CA de clientes. Mientras no haya validado y distribuido uno, cada instancia recurre a una CA de marcador de posición con la que ningún cliente puede formar una cadena de confianza. Con `on` eso significa que se rechaza a todos los clientes, donde antes el servicio funcionaba sin ninguna verificación de cliente. Con `optional` un cliente que no presenta certificado sigue pasando, que es lo que significa ese modo; la aplicación para esas peticiones proviene de `MTLS_URL` cuando está definido, y no hay ninguna cuando se deja vacío. Un cliente que sí presenta un certificado es rechazado, porque no hay nada contra lo que validarlo. Utilice `optional_no_ca` solo para diagnóstico porque debilita la autenticación. Tras un reinicio del Scheduler con un `/var/cache/bunkerweb` no persistente, ese estado se mantiene hasta que se complete la primera ejecución del job y redistribuya el paquete de CA; utilice por tanto un volumen de caché persistente cuando se requiera una postura de aplicación estricta.
 
 !!! info "Certificado confiable y verificación"
     BunkerWeb reutiliza el mismo paquete de CA tanto para comprobar clientes como para construir la cadena de confianza, manteniendo coherentes las verificaciones de revocación y el handshake.
@@ -4644,7 +4794,7 @@ Siga estos pasos para configurar y usar las características Pro:
 - **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
 - **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
-Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
+Puede explorar las características Pro con una prueba gratuita de 30 días. Iníciela desde el [Panel de BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) y obtenga más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
 ## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4958,7 +5108,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                                                                                                |
 | `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                                                                                              |
 | `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.                                                                                    |
-| `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.                                                                              |
+| `REDIS_SSL_VERIFY`        | `no`              | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.                                                                              |
 | `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey.                                                          |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).                                                                                        |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                                                                                                   |
@@ -4967,7 +5117,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                                                                                                     |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                                                                                                  |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo.                                                                      |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                                                                                                         |
+| `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX.                                                                                    |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
@@ -5057,6 +5207,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 - **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
 - **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` para uso general o `allkeys-lru` para cargas de trabajo de caché intensivo) apropiada para su caso de uso
 - **Valores predeterminados del all-in-one:** La imagen Docker AIO configura Redis con `maxmemory=256mb` y `maxmemory-policy=volatile-lru`; sobrescriba estos valores mediante las variables de entorno `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY`. Con `volatile-lru`, los contadores transitorios (límite de tasa, mal comportamiento) se desalojan antes que las claves con TTL importantes para las sesiones y los baneos temporales, y las claves sin expiración (baneos permanentes) quedan exentas. Se recomienda la misma política para servidores Redis o Valkey externos utilizados por BunkerWeb.
+- **Mantenga los informes de seguridad fuera del grupo de desalojo:** con el valor predeterminado de `METRICS_REDIS_TTL`, los informes de peticiones bloqueadas llevan una expiración, y es esa expiración la que los hace candidatos al desalojo bajo `volatile-lru`. La lista es una sola clave que contiene toda la ventana conservada: un desalojo se lleva el conjunto, no los informes más antiguos. Establezca `METRICS_REDIS_TTL=0` en cada instancia que comparta el servidor; de lo contrario, una instancia que siga con el valor predeterminado vuelve a fijar la expiración en segundos. No cambia nada bajo `allkeys-lru`, donde ninguna clave es inmune, y no reduce la presión de memoria, la traslada a las claves que siguen expirando, entre ellas los baneos temporales, las sesiones y los veredictos en caché. Dimensione `maxmemory` para los informes que conserva en lugar de confiar en el desalojo: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` fija ese tope.
 - **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
@@ -5067,7 +5218,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 #### Optimización del Rendimiento
 
-- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica. `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: en régimen estable, las conexiones son aproximadamente `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`. Dimensione el límite `maxclients` de Redis/Valkey por encima, porque una conexión rechazada impide comprobar en esa petición los baneos que solo están en Redis
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
 - **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
@@ -5140,17 +5291,19 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - **Manejo de Protocolos:** Soporte para HTTP, HTTPS, WebSockets y otros protocolos
         - **Interceptación de Errores:** Personalice las páginas de error para una experiencia de usuario consistente
 
-| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                     |
-| --------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                              |
-| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                |
-| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular.                                                                              |
-| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                 |
-| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                               |
-| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                            |
-| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente. |
-| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                  |
-| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                              |
+| Ajuste                            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REVERSE_PROXY`               | `no`              | multisite | no       | **Habilitar Proxy Inverso:** Establezca en `yes` para habilitar la funcionalidad de proxy inverso.                                                                                                                                                                                                                                                                         |
+| `REVERSE_PROXY_HOST`              |                   | multisite | yes      | **Host de Backend:** URL completa del recurso al que se hace proxy (proxy_pass).                                                                                                                                                                                                                                                                                           |
+| `REVERSE_PROXY_URL`               | `/`               | multisite | yes      | **URL de Ubicación:** Ruta que se enviará al servidor de backend. Un valor que comienza por `^` o termina en `$` se trata como una ubicación de expresión regular. Opcionalmente, antepón `~`, `~*`, `=` o `^~` seguido de un espacio para establecer explícitamente el modificador de ubicación de nginx; no se permiten espacios, `;`, `{` ni `}` en el resto del valor. |
+| `REVERSE_PROXY_BUFFERING`         | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Respuesta:** Habilite o deshabilite el almacenamiento en búfer de las respuestas del recurso al que se hace proxy.                                                                                                                                                                                                                            |
+| `REVERSE_PROXY_REQUEST_BUFFERING` | `yes`             | multisite | yes      | **Almacenamiento en Búfer de Solicitudes:** Habilite o deshabilite el almacenamiento en búfer de las solicitudes al recurso al que se hace proxy.                                                                                                                                                                                                                          |
+| `REVERSE_PROXY_KEEPALIVE`         | `no`              | multisite | yes      | **Keep-Alive:** Habilite o deshabilite las conexiones keepalive con el recurso al que se hace proxy.                                                                                                                                                                                                                                                                       |
+| `REVERSE_PROXY_HTTP_VERSION`      | `1.1`             | multisite | yes      | **Versión HTTP:** Versión del protocolo HTTP utilizada para hablar con el upstream (`1.0`, `1.1` o `2`). Establezca a `2` para multiplexación HTTP/2 en la conexión upstream. Las ubicaciones WebSocket están fijadas a 1.1 independientemente.                                                                                                                            |
+| `REVERSE_PROXY_CUSTOM_HOST`       |                   | multisite | no       | **Host Personalizado:** Anule el encabezado Host enviado al servidor upstream.                                                                                                                                                                                                                                                                                             |
+| `REVERSE_PROXY_INTERCEPT_ERRORS`  | `yes`             | multisite | no       | **Interceptar Errores:** Si se deben interceptar y reescribir las respuestas de error del backend.                                                                                                                                                                                                                                                                         |
+
+    BunkerWeb entrecomilla la ruta o expresión regular al generar la ubicación de NGINX, conservando las comillas literales, `#` y las barras invertidas de la expresión regular. Introduzca el valor sin añadir comillas de NGINX. Se mantienen las restricciones sobre espacios en blanco, `;`, `{` y `}`.
 
     !!! tip "Mejores Prácticas"
         - Siempre especifique la URL completa en `REVERSE_PROXY_HOST`, incluido el protocolo (http:// o https://)
@@ -5313,6 +5466,7 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
 | `REVERSE_PROXY_INCLUDES`          |                   | multisite | yes      | **Configuraciones Adicionales:** Incluya configuraciones adicionales en el bloque de ubicación.                                                                                                   |
 | `REVERSE_PROXY_PASS_REQUEST_BODY` | `yes`             | multisite | yes      | **Pasar el Cuerpo de la Solicitud:** Habilite o deshabilite el paso del cuerpo de la solicitud.                                                                                                   |
 | `REVERSE_PROXY_MODSECURITY`       | `yes`             | multisite | yes      | **ModSecurity (por ubicación):** Establézcalo en `no` para emitir `modsecurity off;` en esta ubicación; omite el WAF en endpoints de cargas grandes para evitar OOM (consulte la nota siguiente). |
+| `REVERSE_PROXY_MAX_CLIENT_SIZE`   |                   | multisite | yes      | **Tamaño Máximo del Cuerpo (por ubicación):** Tamaño máximo del cuerpo para esta ubicación (`0` para ilimitado). Si está vacío, se aplica el `MAX_CLIENT_SIZE` del servicio.                      |
 
     !!! warning "Consideraciones de Seguridad"
         Tenga cuidado al incluir fragmentos de configuración personalizados, ya que pueden anular la configuración de seguridad de BunkerWeb o introducir vulnerabilidades si no se configuran correctamente.
@@ -5321,6 +5475,9 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         ModSecurity almacena en memoria el cuerpo completo de la solicitud y no puede limitarlo para cargas de varios GB, lo que puede provocar OOM en el worker. Si, **y solo si**, una URL de proxy inverso se usa *exclusivamente* para cargas de archivos (por ejemplo, un endpoint `/upload` dedicado), establezca `REVERSE_PROXY_MODSECURITY_N: "no"` en esa URL. No lo deshabilite en URL de uso mixto: perdería la cobertura del WAF en todo lo servido por esa ubicación.
 
         Para mantener protegidas las cargas después de omitir ModSecurity, combínelo con un plugin de análisis de archivos como [ClamAV](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav) o [VirusTotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal); inspeccionan el archivo cargado en sí en lugar del cuerpo bruto de la solicitud.
+
+    !!! tip "Tamaño del cuerpo por URL"
+        `REVERSE_PROXY_MAX_CLIENT_SIZE_N` limita el cuerpo solo para una URL, de modo que un endpoint de carga dedicado puede aceptar archivos grandes mientras el resto del servicio mantiene el `MAX_CLIENT_SIZE` más estricto. También establece el límite del cuerpo de la solicitud de ModSecurity en esa ubicación, anulando tanto el valor del servicio como un `MODSECURITY_SEC_REQUEST_BODY_LIMIT` explícito, por lo que la carga no es rechazada por el WAF mientras cada otra URL conserva su propio límite. Dos límites no cambian: los cuerpos JSON, XML y codificados como formulario siguen limitados por `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` (`131072` por defecto, `400` por encima), y `0` desactiva el límite de ModSecurity en esa ubicación, que entonces almacena un cuerpo de cualquier tamaño. ModSecurity lee el cuerpo completo antes de enviar la solicitud, así que ajuste el valor a lo que el endpoint realmente necesita.
 
 === "Configuración de Caché"
 
@@ -5641,6 +5798,51 @@ ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ---
 
 Para más información, consulte la [documentación de robots.txt](https://www.robotstxt.org/robotstxt.html).
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+Para una guía más detallada, consulta la documentación de [usos avanzados](advanced.md#saml-pro).
+
+Compatibilidad con STREAM :x:
+
+SAML 2.0 authentication, identity forwarding and attribute-based access control.
+
+| Parámetro                       | Valor predeterminado | Contexto  | Múltiple | Descripción                                                                                                                                                |
+| ------------------------------- | -------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_SAML`                      | `no`                 | multisite | no       | Enable SAML authentication                                                                                                                                 |
+| `SAML_SP_ENTITY_ID`             |                      | multisite | no       | Service provider entity ID                                                                                                                                 |
+| `SAML_SP_BASE_URL`              |                      | multisite | no       | Public HTTPS origin of this service                                                                                                                        |
+| `SAML_IDP_ENTITY_ID`            |                      | multisite | no       | Identity provider entity ID                                                                                                                                |
+| `SAML_IDP_SSO_URL`              |                      | multisite | no       | Identity provider HTTPS SSO URL                                                                                                                            |
+| `SAML_IDP_SLO_URL`              |                      | multisite | no       | Identity provider HTTPS logout URL (empty uses SSO URL)                                                                                                    |
+| `SAML_SP_CERT`                  |                      | multisite | no       | Service provider certificate (PEM)                                                                                                                         |
+| `SAML_SP_PRIVATE_KEY`           |                      | multisite | no       | Service provider private key (PEM, unencrypted)                                                                                                            |
+| `SAML_IDP_CERT`                 |                      | multisite | no       | Trusted identity provider signing certificate (PEM)                                                                                                        |
+| `SAML_ACS_PATH`                 | `/saml/acs`          | multisite | no       | Assertion consumer path                                                                                                                                    |
+| `SAML_LOGOUT_PATH`              | `/saml/logout`       | multisite | no       | Local logout path                                                                                                                                          |
+| `SAML_SLS_PATH`                 | `/saml/sls`          | multisite | no       | Single logout callback path                                                                                                                                |
+| `SAML_METADATA_PATH`            | `/saml/metadata`     | multisite | no       | SP metadata path                                                                                                                                           |
+| `SAML_LOGOUT_REDIRECT`          | `/`                  | multisite | no       | Local path after logout                                                                                                                                    |
+| `SAML_CLOCK_SKEW`               | `60`                 | multisite | no       | Allowed clock skew (seconds)                                                                                                                               |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`                | multisite | no       | Session idle timeout (seconds)                                                                                                                             |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`               | multisite | no       | Absolute session timeout (seconds)                                                                                                                         |
+| `SAML_USER_HEADER`              | `X-User`             | multisite | no       | User identity header (empty disables)                                                                                                                      |
+| `SAML_USER_ATTRIBUTE`           | `NameID`             | multisite | no       | SAML attribute for user (NameID uses the subject identifier)                                                                                               |
+| `SAML_EMAIL_HEADER`             |                      | multisite | no       | Email identity header (empty disables)                                                                                                                     |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`              | multisite | no       | SAML attribute for email (NameID uses the subject identifier)                                                                                              |
+| `SAML_GROUPS_HEADER`            |                      | multisite | no       | Groups identity header (empty disables)                                                                                                                    |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups`             | multisite | no       | SAML attribute for groups (NameID uses the subject identifier)                                                                                             |
+| `SAML_NAME_HEADER`              |                      | multisite | no       | Name identity header (empty disables)                                                                                                                      |
+| `SAML_NAME_ATTRIBUTE`           | `name`               | multisite | no       | SAML attribute for name (NameID uses the subject identifier)                                                                                               |
+| `SAML_GROUPS_SEPARATOR`         | `,`                  | multisite | no       | Separator for multivalued identity attributes                                                                                                              |
+| `SAML_ACL_RULE_COUNT`           |                      | multisite | no       | Number of rules in an explicit ACL list (0 clears the list). Leave empty to discover numbered rules. Managed automatically by the SAML configuration page. |
+| `SAML_USE_ACL`                  | `no`                 | multisite | no       | Enable attribute-based access control                                                                                                                      |
+| `SAML_ACL_MATCH_MODE`           | `all`                | multisite | no       | How access-control rules are combined                                                                                                                      |
+| `SAML_ACL_DENIED_URL`           |                      | multisite | no       | Redirect after ACL denial (empty returns the deny status)                                                                                                  |
+| `SAML_ACL_ATTRIBUTE`            |                      | multisite | sí       | Attribute name to check (NameID uses the subject identifier)                                                                                               |
+| `SAML_ACL_VALUE`                |                      | multisite | sí       | Required attribute value                                                                                                                                   |
+| `SAML_REPLAY_DICT_SIZE`         | `10m`                | global    | no       | Shared-memory capacity for single-instance replay protection                                                                                               |
 
 ## Security.txt
 
@@ -6198,6 +6400,17 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista blanca de URI.                |
     | `WHITELIST_URI_URLS`        |                   | multisite | no       | **URL de Lista Blanca de URI:** Lista de URL que contienen patrones de URI para incluir en la lista blanca, separados por espacios. |
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
+
+=== "Cabecera"
+    **Qué hace esto:** Pone en la lista blanca las peticiones que llevan una cabecera concreta, comprobada por nombre y, opcionalmente, por una expresión regular PCRE sobre su valor. Útil para una sonda o pasarela de confianza que pueda enviar un secreto compartido.
+
+    | Ajuste                   | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                     |
+    | ------------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `WHITELIST_HEADER_NAME`  |                   | multisite | sí       | **Nombre de cabecera:** Nombre de una cabecera de petición que hace que la petición incluirla en la lista blanca. Pares numerados: `_NAME_1` va con `_VALUE_1`. |
+    | `WHITELIST_HEADER_VALUE` |                   | multisite | sí       | **Valor de cabecera:** Expresión regular PCRE que debe coincidir con el valor de la cabecera. Déjelo vacío para comprobar solo su presencia.                    |
+
+    !!! warning "Una regla de cabecera es un secreto compartido"
+        Cualquier cliente puede enviar una cabecera, así que una regla de cabecera es un token portador, no un control de red. Sírvala solo por HTTPS, ancle la expresión regular con `^` y `$` (la búsqueda no está anclada por defecto, así que `abc` también coincide con `xabcx`) y rote el valor. Si BunkerWeb está detrás de un proxy, ese proxy debe sobrescribir cualquier copia de la cabecera enviada por el cliente. Estas reglas son solo para HTTP: un servicio de stream no lleva cabeceras de petición, así que allí no coincide nada. Tampoco levanta un baneo existente: una IP baneada se rechaza antes de que se ejecute la lista blanca.
 
 !!! info "Soporte de Formato de URL"
     Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.

@@ -1268,7 +1268,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 Por defecto, el contenedor expone:
@@ -1284,7 +1284,7 @@ Se requiere un volumen nombrado (o un bind mount) para persistir la base de dato
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1362,7 +1362,7 @@ docker run -d \
   -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 Recomendado (detrás de BunkerWeb) — no publiques el `8888`; en su lugar, haz un proxy inverso:
@@ -1370,7 +1370,7 @@ Recomendado (detrás de BunkerWeb) — no publiques el `8888`; en su lugar, haz 
 ```yaml
 services:
   bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+    image: bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
@@ -1437,7 +1437,7 @@ La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [pe
 A diferencia de las demás imágenes Docker, el Todo en Uno mantiene `access.log`, `error.log` y `modsec_audit.log` como archivos reales bajo `/var/log/bunkerweb/`. El flujo de registro los lee para anteponer un prefijo a cada línea y aplicar `HIDE_SERVICE_LOGS`, y tanto el analizador de CrowdSec incluido como el visor de registros de la interfaz web los leen desde el disco.
 
 - La imagen incluye `logrotate` y lo ejecuta cada hora bajo supervisor. Un fallo de rotación se reporta con el prefijo `[LOGROTATE]` en los registros del contenedor.
-- La política es la misma que instalan los paquetes de Linux, en `/etc/logrotate.d/bunkerweb`: cada archivo que coincide con `/var/log/bunkerweb/*.log` se rota en cuanto supera los 100 MB, se conservan siete generaciones comprimidas, y la rotación usa `copytruncate`.
+- La política es la misma que instalan los paquetes de Linux, en `/etc/logrotate.d/bunkerweb`: cada archivo que coincide con `/var/log/bunkerweb/*.log` se rota a diario, o antes si supera los 100 MB, se conservan catorce generaciones numeradas, y la rotación usa `copytruncate`.
 - `copytruncate` vacía el archivo en el mismo sitio en lugar de renombrarlo, por lo que conserva su inodo. El flujo de registro, el analizador de CrowdSec y el visor de registros lo siguen a través de una rotación sin necesidad de reiniciar, y ModSecurity sigue escribiendo en el archivo correcto aunque nunca reabre su registro de auditoría.
 - Para cambiar el umbral o el número de generaciones, monta tu propio archivo sobre `/etc/logrotate.d/bunkerweb`. Para desactivar la rotación por completo y gestionar tú mismo la retención, monta un archivo vacío sobre esa misma ruta; un volumen montado en `/var/log/bunkerweb` solo cambia dónde viven los datos, no impide que el `logrotate` del contenedor los siga rotando ahí.
 
@@ -1457,9 +1457,10 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
+* El **agente CrowdSec integrado solo se inicia** cuando el contenedor tiene la variable de entorno sin prefijo `USE_CROWDSEC=yes` y una `CROWDSEC_API` local. Activar CrowdSec solo para un servicio (`www.example.com_USE_CROWDSEC=yes`) no lo inicia.
 *   Cuando `USE_CROWDSEC=yes`, el punto de entrada hará lo siguiente:
 
     1.  **Registrará** e **iniciará** el agente local de CrowdSec (a través de `cscli`).
@@ -1516,7 +1517,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 !!! info "Cómo funciona internamente"
@@ -1538,7 +1539,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 Notas:
@@ -1549,7 +1550,7 @@ Notas:
 
 #### Desactivar la API central
 
-Para ejecutar CrowdSec de forma totalmente local, sin registro y sin tráfico hacia los servidores de CrowdSec, establezca `DISABLE_ONLINE_API` en `true`:
+Para desactivar el registro en la Central API y la Console, sin enviar señales ni descargar la lista de bloqueo comunitaria, establezca `DISABLE_ONLINE_API` en `true`. Esto no detiene las actualizaciones del hub: el catálogo de colecciones y parsers se sigue obteniendo del hub de CrowdSec independientemente de este ajuste:
 
 ```bash
 docker run -d \
@@ -1560,7 +1561,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 Es el mismo nombre de variable que usan las imágenes oficiales de CrowdSec, por lo que una configuración existente sigue siendo válida.
@@ -1599,7 +1600,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+  bunkerity/bunkerweb-all-in-one:1.6.15-rc2
 ```
 
 *   El **registro local** se omite cuando `CROWDSEC_API` no es `127.0.0.1` o `localhost`.
@@ -1631,13 +1632,13 @@ Al acceder a estas imágenes preconstruidas desde Docker Hub, puedes obtener y e
 Ya sea que estés realizando pruebas, desarrollando aplicaciones o desplegando BunkerWeb en producción, la opción de contenedorización de Docker proporciona flexibilidad y facilidad de uso. Adoptar este método te permite aprovechar al máximo las características de BunkerWeb mientras te beneficias de las ventajas de la tecnología Docker.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.15-rc1
+docker pull bunkerity/bunkerweb:1.6.15-rc2
 ```
 
 Las imágenes de Docker también están disponibles en [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) y se pueden descargar usando la dirección del repositorio `ghcr.io`:
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.15-rc1
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.15-rc2
 ```
 
 Los conceptos clave para la integración con Docker incluyen:
@@ -1647,7 +1648,7 @@ Los conceptos clave para la integración con Docker incluyen:
 - **Redes**: Las redes de Docker desempeñan un papel vital en la integración de BunkerWeb. Estas redes tienen dos propósitos principales: exponer puertos a los clientes y conectarse a los servicios web ascendentes. Al exponer los puertos, BunkerWeb puede aceptar solicitudes entrantes de los clientes, permitiéndoles acceder a los servicios web protegidos. Además, al conectarse a los servicios web ascendentes, BunkerWeb puede enrutar y gestionar el tráfico de manera eficiente, proporcionando una mayor seguridad y rendimiento.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando SQLite como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, también se admiten otros backends de bases de datos. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) del repositorio para obtener más información.
 
 ### Variables de entorno
 
@@ -1657,7 +1658,7 @@ Las configuraciones se pasan al Programador usando las variables de entorno de D
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -1671,6 +1672,9 @@ services:
 
 !!! tip "Omitir contenedores etiquetados"
     Cuando un contenedor debe ser ignorado por autoconf, establece `DOCKER_IGNORE_LABELS` en el controlador. Proporciona una lista de claves de etiquetas separadas por espacios o comas (por ejemplo `bunkerweb.SERVER_NAME`) o solo el sufijo (`SERVER_NAME`). Cualquier contenedor o fuente de configuración personalizada que lleve una etiqueta coincidente se omite durante el descubrimiento, y la etiqueta se ignora al traducir las configuraciones.
+
+!!! info "KEEP_CONFIG_ON_RESTART"
+    A diferencia de los ajustes anteriores, `KEEP_CONFIG_ON_RESTART` es leído directamente por el propio entrypoint del contenedor `bunkerweb` desde su entorno de proceso, no desde el scheduler ni la base de datos, por lo que debe establecerse en el propio contenedor `bunkerweb`. Establézcalo en `yes` para mantener la configuración generada previamente al reiniciar el contenedor en lugar de renderizar la configuración de carga. Predeterminado `no`.
 
 ### Usando secretos de Docker
 
@@ -1701,7 +1705,7 @@ Esto asegura que las configuraciones sensibles se mantengan fuera del entorno y 
 El [programador](concepts.md#scheduler) se ejecuta en su propio contenedor, que también está disponible en Docker Hub:
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.15-rc1
+docker pull bunkerity/bunkerweb-scheduler:1.6.15-rc2
 ```
 
 !!! info "Configuraciones de BunkerWeb"
@@ -1722,7 +1726,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.15-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         environment:
           # Esto establecerá las configuraciones de la API para el contenedor de BunkerWeb
           <<: *bw-api-env
@@ -1731,7 +1735,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.15-rc1
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           # Esto establecerá las configuraciones de la API para el contenedor del Programador
           <<: *bw-api-env
@@ -1749,7 +1753,7 @@ Se necesita un volumen para almacenar la base de datos SQLite y las copias de se
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     volumes:
       - bw-storage:/data
 ...
@@ -1815,7 +1819,7 @@ El programador es el worker del plano de control que lee configuraciones, genera
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
 | `HEALTHCHECK_INTERVAL`          | Segundos entre healthchecks del programador                                                                                                                                                                                                                                                    | Segundos enteros                              | `30`                                         |
 | `RELOAD_MIN_TIMEOUT`            | Segundos mínimos entre recargas consecutivas                                                                                                                                                                                                                                                   | Segundos enteros                              | `5`                                          |
-| `SEND_FILES_MIN_TIMEOUT`        | Tiempo mínimo de espera de lectura para enviar carpetas de configuración y caché                                                                                                                                                                                                                | Segundos enteros                              | `30`                                         |
+| `SEND_FILES_MIN_TIMEOUT`        | Tiempo mínimo de espera de lectura para el envío de carpetas de configuración y caché; un valor explícito nunca se reduce, y solo el valor derivado del número de servicios se limita a 120 segundos, por lo que el tiempo efectivo es el mayor de los dos. El tiempo de conexión permanece fijo en 5 segundos y el envío del cuerpo tiene su propio tiempo de espera. | Segundos enteros                              | `30`                                         |
 | `DISABLE_CONFIGURATION_TESTING` | Saltar pruebas de configuración antes de aplicar                                                                                                                                                                                                                                               | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_FAIL_SENDING_CONFIG`    | Continuar incluso si algunas instancias no reciben la configuración                                                                                                                                                                                                                            | `yes` o `no`                                  | `no`                                         |
 | `IGNORE_REGEX_CHECK`            | Omitir validación regex de configuraciones (compartido con autoconf)                                                                                                                                                                                                                           | `yes` o `no`                                  | `no`                                         |
@@ -1897,7 +1901,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1910,7 +1914,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Esta configuración es obligatoria para especificar la instancia de BunkerWeb
@@ -1943,7 +1947,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -1956,7 +1960,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     depends_on:
       - bunkerweb
     environment:
@@ -2023,8 +2027,8 @@ Para empezar, descarga el script de instalación y su suma de verificación, lue
 
 ```bash
 # Descargar el script y su suma de verificación
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh
-curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh.sha256
 
 # Verificar la suma de verificación
 sha256sum -c install-bunkerweb.sh.sha256
@@ -2100,7 +2104,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                             |
 | :---------------------- | :------------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.15~rc1`).                                   |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.15~rc2`).                                   |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                                 |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                              |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas.       |
@@ -2167,7 +2171,7 @@ sudo ./install-bunkerweb.sh --yes
 sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Instalar una versión específica
-sudo ./install-bunkerweb.sh --version 1.6.15~rc1
+sudo ./install-bunkerweb.sh --version 1.6.15~rc2
 
 # Configuración del Gestor con instancias de trabajador remotas (se requieren instancias)
 sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
@@ -2311,12 +2315,12 @@ Asegúrate de tener **NGINX 1.30.4 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.15~rc1:
+    Y finalmente instala BunkerWeb 1.6.15~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -2359,12 +2363,12 @@ Asegúrate de tener **NGINX 1.30.4 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.15~rc1:
+    Y finalmente instala BunkerWeb 1.6.15~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -2395,12 +2399,12 @@ Asegúrate de tener **NGINX 1.30.4 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.15~rc1:
+    Y finalmente instala BunkerWeb 1.6.15~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
 	sudo dnf makecache && \
-	sudo -E dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+	sudo -E dnf install -y --allowerasing bunkerweb-1.6.15~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -2445,12 +2449,12 @@ Asegúrate de tener **NGINX 1.30.4 instalado antes de instalar BunkerWeb**. Para
         export UI_WIZARD=no
         ```
 
-    Y finalmente instala BunkerWeb 1.6.15~rc1:
+    Y finalmente instala BunkerWeb 1.6.15~rc2:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.15~rc2
     ```
 
     Para evitar la actualización de los paquetes de NGINX y/o BunkerWeb al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -2473,6 +2477,12 @@ MY_SETTING_2=value2
 Cuando se instala, BunkerWeb viene con tres servicios `bunkerweb`, `bunkerweb-scheduler` y `bunkerweb-ui` que puedes gestionar usando `systemctl`.
 
 Si editas manualmente la configuración de BunkerWeb usando `/etc/bunkerweb/variables.env`, un reinicio del servicio `bunkerweb-scheduler` será suficiente para generar y recargar la configuración sin ningún tiempo de inactividad. Pero dependiendo del caso (como cambiar los puertos de escucha) es posible que necesites reiniciar el servicio `bunkerweb`.
+
+El entrypoint del servicio `bunkerweb` también lee directamente la siguiente variable, fuera del flujo normal de configuración:
+
+| Ajuste                    | Descripción                                                                                                                                                                                                         | Valores aceptados | Predeterminado |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------- |
+| `KEEP_CONFIG_ON_RESTART`  | Mantiene la configuración generada previamente al reiniciar el servicio `bunkerweb` en lugar de renderizar la configuración de carga. Se lee desde el entorno o `/etc/bunkerweb/variables.env`, nunca desde la base de datos. | `yes` o `no`        | `no`            |
 
 ### Alta disponibilidad
 
@@ -2543,7 +2553,7 @@ Al adoptar este enfoque, puedes disfrutar de la reconfiguración en tiempo real 
     La integración de autoconfiguración de Docker implica el uso del **modo multisitio**. Por favor, consulta la [sección de multisitio](concepts.md#multisite-mode) de la documentación para obtener más información.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) del repositorio para obtener más información.
 
 Para habilitar las actualizaciones de configuración automatizadas, incluye un contenedor adicional llamado `bw-autoconf` en la pila. Este contenedor aloja el servicio de autoconfiguración, que gestiona los cambios de configuración dinámicos para BunkerWeb.
 
@@ -2557,7 +2567,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -2572,7 +2582,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -2587,7 +2597,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
     depends_on:
       - bunkerweb
       - bw-docker
@@ -2756,7 +2766,7 @@ Si se establece `AUTOCONF_DISABLE_CLEANUP=yes` en el contenedor `bw-autoconf`:
 ```yaml
 services:
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
     environment:
       AUTOCONF_MODE: "yes"
       AUTOCONF_DISABLE_CLEANUP: "yes" # conservar como borradores los servicios eliminados
@@ -2792,13 +2802,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Establece el espacio de nombres para la instancia de BunkerWeb para que el servicio de autoconfiguración pueda detectarla
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Solo escucha a estos espacios de nombres
@@ -2870,7 +2880,7 @@ Dada la presencia de múltiples instancias de BunkerWeb, es necesario establecer
     ```
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) del repositorio para obtener más información.
 
     La configuración de backends de bases de datos en clúster está fuera del alcance de esta documentación.
 
@@ -2985,12 +2995,50 @@ The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecar
 ```yaml
 controller:
   enabled: true
-  tag: "1.6.15~rc1"
+  tag: "1.6.15~rc2"
 ```
 
 2. For each sidecar, add:
    - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
    - **Environment variable**: `KUBERNETES_MODE: "yes"`
+
+!!! warning "Set `API_TOKEN` on Kubernetes"
+
+    The internal API on port 5000 is a privileged control plane: it serves `/ping`, `/reload`, `/confs` and `/stop`. Pod IPs are dynamic, so `API_WHITELIST_IP` has to cover the cluster's pod CIDR and cannot by itself keep other workloads out. Set `API_TOKEN` on the BunkerWeb pods and every component that calls them, including the Scheduler, Web UI, and API service if deployed, and keep it in a Secret; without it, any pod that can reach port 5000 can drive the data plane.
+
+    Create the Secret in every namespace that runs a BunkerWeb pod, replacing `your-namespace` as needed:
+
+    ```bash
+    kubectl create secret generic bunkerweb-api --namespace your-namespace --from-literal=token="$(openssl rand -hex 32)"
+    ```
+
+    Use the same token in the BunkerWeb pods and every instance API caller. Omitting it from a caller prevents that component from using the instance API:
+
+    ```yaml
+    scheduler:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    bunkerweb:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ui:
+      extraEnvs:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: bunkerweb-api
+              key: token
+    ```
+
+    Narrow `API_WHITELIST_IP` to your cluster's actual pod CIDR rather than the full RFC1918 span wherever you know it.
 
   ```yaml
   apiVersion: apps/v1
@@ -3030,6 +3078,11 @@ controller:
             env:
               - name: API_WHITELIST_IP
                 value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: bunkerweb-api
+                    key: token
               - name: KUBERNETES_MODE
                 value: "yes"
   ---
@@ -3078,7 +3131,7 @@ In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` envir
 
 ```yaml
 scheduler:
-  tag: "1.6.15~rc1"
+  tag: "1.6.15~rc2"
   extraEnvs:
     - name: BUNKERWEB_INSTANCES
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
@@ -3122,7 +3175,7 @@ spec:
 
         # BunkerWeb Sidecar
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ports:
             - containerPort: 8080  # Exposed HTTP port
             - containerPort: 5000  # Internal API (mandatory)
@@ -3131,6 +3184,11 @@ spec:
               value: "yes"  # Enable Kubernetes mode
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
             - name: MULTISITE
               value: "yes"
             - name: USE_REVERSE_PROXY
@@ -3181,6 +3239,11 @@ spec:
           env:
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: bunkerweb-api
+                  key: token
 ```
 
 ###### Important Environment Variables
@@ -3189,7 +3252,8 @@ spec:
 | ------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | `KUBERNETES_MODE`         | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
 | `KUBERNETES_GATEWAY_MODE` | `yes` or `no` (if using Gateway API)                  | Use Gateway API mode                                     |
-| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+| `API_WHITELIST_IP`        | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API. Narrow this to the cluster's actual pod CIDR and pair it with `API_TOKEN`; the whitelist alone does not isolate the API from other workloads |
+| `API_TOKEN`               | *(from a Secret)* | Required on Kubernetes: must match on the BunkerWeb pods and every instance API caller, including the Scheduler, Web UI, and API service if deployed |
 
 
 ##### Step 3: Creating Services
@@ -3393,7 +3457,11 @@ To add a new application protected by BunkerWeb:
 
 #### Archivos YAML completos
 
-En lugar de usar el chart de Helm, también puedes usar las plantillas YAML dentro de la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) del repositorio de GitHub. Ten en cuenta que recomendamos encarecidamente usar el chart de Helm en su lugar.
+En lugar de usar el chart de Helm, también puedes usar las plantillas YAML dentro de la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) del repositorio de GitHub. Ten en cuenta que recomendamos encarecidamente usar el chart de Helm en su lugar.
+
+!!! warning "DNS_RESOLVERS debe nombrar el Service DNS del clúster"
+
+    Dale a `DNS_RESOLVERS` el Service DNS del clúster, cuya ClusterIP es estable durante toda la vida del Service, y nunca una IP de pod. nginx resuelve ese valor una sola vez, cuando analiza su configuración, y reutiliza la dirección obtenida hasta la siguiente recarga: cualquier cosa ligada a pods solo funciona hasta que esos pods se mueven, y un reinicio progresivo de CoreDNS deja entonces todas las resoluciones agotando su tiempo de espera. En un clúster estándar ese Service es `kube-dns.kube-system.svc.cluster.local`, incluso cuando CoreDNS es la implementación que hay detrás.
 
 ### Recursos de Ingress
 
@@ -3541,7 +3609,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+              image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -3697,7 +3765,8 @@ settings:
     # Reemplaza con tu resolvedor de DNS
     # para obtenerlo: kubectl exec en un pod aleatorio y luego cat /etc/resolv.conf
     # si tienes una IP como servidor de nombres, haz una búsqueda de DNS inversa: nslookup <IP>
-    # la mayoría de las veces es coredns.kube-system.svc.cluster.local o kube-dns.kube-system.svc.cluster.local
+    # la mayoría de las veces es kube-dns.kube-system.svc.cluster.local, el Service
+    # detrás del cual está CoreDNS en un clúster estándar
     dnsResolvers: "kube-dns.kube-system.svc.cluster.local"
   kubernetes:
     # Solo consideramos los recursos de Ingress con ingressClass bunkerweb para evitar conflictos con el controlador de ingress existente
@@ -3714,11 +3783,11 @@ service:
 
 # Configuraciones de BunkerWeb
 bunkerweb:
-  tag: 1.6.15~rc1
+  tag: 1.6.15~rc2
 
 # Configuraciones del programador
 scheduler:
-  tag: 1.6.15~rc1
+  tag: 1.6.15~rc2
   extraEnvs:
     # Habilita el módulo de IP real para obtener la IP real de los clientes
     - name: USE_REAL_IP
@@ -3726,11 +3795,11 @@ scheduler:
 
 # Configuraciones del controlador
 controller:
-  tag: 1.6.15~rc1
+  tag: 1.6.15~rc2
 
 # Configuraciones de la UI
 ui:
-  tag: 1.6.15~rc1
+  tag: 1.6.15~rc2
 ```
 
 Instala BunkerWeb con valores personalizados:
@@ -4352,7 +4421,7 @@ Dado que se están ejecutando múltiples instancias de BunkerWeb, se debe crear 
 En cuanto al volumen de la base de datos, la documentación no especifica un enfoque concreto. La elección de una carpeta compartida o un controlador específico para el volumen de la base de datos depende de tu caso de uso particular y se deja como ejercicio para el lector.
 
 !!! info "Backend de la base de datos"
-    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) del repositorio para obtener más información.
+    Ten en cuenta que nuestras instrucciones asumen que estás utilizando MariaDB como el backend de base de datos predeterminado, según lo configurado por el ajuste `DATABASE_URI`. Sin embargo, entendemos que puedes preferir utilizar backends alternativos para tu integración con Docker. Si ese es el caso, ten la seguridad de que otros backends de bases de datos también son posibles. Consulta los archivos docker-compose en la [carpeta misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) del repositorio para obtener más información.
 
     La configuración de backends de bases de datos en clúster está fuera del alcance de esta documentación.
 
@@ -4366,7 +4435,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     ports:
       - published: 80
         target: 8080
@@ -4395,7 +4464,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Etiqueta obligatoria para que el servicio de autoconfiguración identifique la instancia de BunkerWeb
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+    image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -4416,7 +4485,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+    image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda establecer una contraseña más segura para la base de datos
@@ -4568,7 +4637,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ...
         deploy:
           mode: global
@@ -4580,7 +4649,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # Establece el espacio de nombres para la instancia de BunkerWeb
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # Solo escucha a estos espacios de nombres
           ...

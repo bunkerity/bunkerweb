@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
-from ..utils import get_db
+from ..utils import get_db, reportable_config
 from ..schemas import ServiceCreateRequest, ServiceUpdateRequest
 
 router = APIRouter(prefix="/services", tags=["services"])
@@ -51,7 +51,7 @@ def get_service(service: str, full: bool = False, methods: bool = True, with_dra
         conf = db.get_config(methods=methods, with_drafts=with_drafts, service=service)
         return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
-    conf = db.get_non_default_settings(methods=methods, with_drafts=with_drafts, service=service)
+    conf = reportable_config(db.get_config(methods=True, with_drafts=with_drafts, service=service), methods=methods)
     return JSONResponse(status_code=200, content={"status": "success", "service": service, "config": conf})
 
 

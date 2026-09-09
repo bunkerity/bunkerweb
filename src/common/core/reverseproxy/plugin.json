@@ -27,10 +27,10 @@
     "REVERSE_PROXY_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location.",
+      "help": "Location URL that will be proxied. A value starting with ^ or ending with $ is treated as a regex location. Optionally prefix with ~, ~*, = or ^~ followed by one space to set the nginx location modifier explicitly; no spaces, ;, { or } are allowed elsewhere in the value.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^.+$",
+      "regex": "^(?!(?:~\\*|~|\\^~|=)$)(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -298,6 +298,16 @@
       "label": "Reverse proxy ModSecurity",
       "regex": "^(yes|no)$",
       "type": "check",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_MAX_CLIENT_SIZE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Maximum body size for this reverse proxy location (0 for infinite). When empty, the service MAX_CLIENT_SIZE applies. A value also sets the ModSecurity request body limit for this location, overriding the service-wide one; it does not change MODSECURITY_REQ_BODY_NO_FILES_LIMIT.",
+      "id": "reverse-proxy-max-client-size",
+      "label": "Reverse proxy maximum body size",
+      "regex": "^$|^[0-9]+[kKmMgG]?$",
+      "type": "text",
       "multiple": "reverse-proxy"
     },
     "USE_PROXY_CACHE": {

@@ -228,6 +228,13 @@ class Config:
                 variables.pop(key, None)
                 continue
 
+            if plugins_settings[setting].get("type") != "file":
+                stripped_value = value.rstrip("\r\n")
+                if "\n" in stripped_value or "\r" in stripped_value:
+                    report_error(f"Value of {key} contains a newline.")
+                    variables.pop(key, None)
+                    continue
+
             # Validate the variable's value against the regex pattern.
             try:
                 regex_flags = DOTALL if plugins_settings[setting].get("type") == "file" else 0

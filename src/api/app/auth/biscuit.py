@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, Request
-from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact
+from biscuit_auth import AuthorizerBuilder, Biscuit, BiscuitValidationError, Check, Policy, PublicKey, AuthorizationError, Fact, Rule
 
 from common_utils import get_version  # type: ignore
 
@@ -130,16 +130,20 @@ def _resolve_global_settings(method_u: str) -> tuple[Optional[str], Optional[str
     """Resolve global_settings endpoints to fine-grained permissions.
 
     Supported endpoints:
-    - GET              /global_settings       -> global_settings_read
-    - POST|PUT|PATCH   /global_settings       -> global_settings_update
-    Also accepts hyphenated path prefix (global-settings) but canonicalizes rtype to global_settings.
+    - GET              /global_settings       -> global_config_read
+    - POST|PUT|PATCH   /global_settings       -> global_config_update
+    Also accepts /global_config as an alias; both paths resolve to resource type global_config.
+
+    The permission names are global_config_*, not global_settings_*: those are the only names
+    API_PERMISSION_ENUM accepts, so any other spelling resolves to a grant that cannot exist and
+    refuses every non-admin user.
     """
-    rtype = "global_settings"
+    rtype = "global_config"
     verb = PERM_VERB_BY_METHOD.get(method_u)
     if verb == "read":
-        return rtype, "global_settings_read"
+        return rtype, "global_config_read"
     if verb in {"create", "update"}:
-        return rtype, "global_settings_update"
+        return rtype, "global_config_update"
     # For DELETE or other methods, no fine-grained permission mapping
     return rtype, None
 
@@ -149,7 +153,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
 
     Permissions are named with singular prefix (service_*), resource_type is plural "services".
     Special endpoints:
-    - POST   /services/convert -> service_convert
+    - POST   /services/{id}/convert -> service_convert
     - GET    /services/export  -> service_export
     CRUD:
     - GET    /services or /services/{id} -> service_read
@@ -162,7 +166,7 @@ def _resolve_services(path_normalized: str, method_u: str) -> tuple[Optional[str
     parts = [seg for seg in p.split("/") if seg]
 
     # Special actions
-    if p == "/services/convert" and method_u == "POST":
+    if len(parts) == 3 and parts[0] == "services" and parts[2] == "convert" and method_u == "POST":
         return rtype, "service_convert"
     if p == "/services/export" and method_u in {"GET", "OPTIONS"}:
         return rtype, "service_export"
@@ -341,6 +345,11 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     first = parts[0].lower()
     method_u = method.upper()
 
+    if first == "crowdsec":
+        # Reuse the persisted bans resource enum, with independent permissions.
+        # Existing ban_delete grants must not gain authority over a shared engine.
+        return "bans", "crowdsec_delete" if method_u == "DELETE" else "crowdsec_read"
+
     # Bans category
     if first == "bans" or p.startswith("/bans"):
         return _resolve_bans(p, method_u)
@@ -348,7 +357,7 @@ def _resolve_resource_and_perm(path: str, method: str) -> tuple[Optional[str], O
     # Instances special cases
     if first in {"instances", "reload", "stop"}:
         return _resolve_instances(p, method_u)
-    # Global settings special cases (canonicalize hyphenated version)
+    # Global settings endpoint and canonical resource-name alias
     if first in {"global_settings", "global_config"}:
         return _resolve_global_settings(method_u)
     # Services special cases
@@ -392,7 +401,7 @@ def _extract_resource_id(path: str, rtype: Optional[str]) -> Optional[str]:
     if parts[0] in {"reload", "stop", "ban", "unban", "bans", "global_settings", "global-settings"}:
         return None
     # Skip services action endpoints when extracting ID
-    if parts[0] == "services" and len(parts) >= 2 and parts[1] in {"convert", "export"}:
+    if parts[0] == "services" and len(parts) == 2 and parts[1] in {"convert", "export"}:
         return None
     # Skip upload pseudo-id segments for configs/plugins
     if parts[0] in {"configs", "plugins"} and len(parts) >= 2 and parts[1] == "upload":
@@ -544,7 +553,11 @@ class BiscuitGuard:
 
             _raise_time_budget(az)
             self._logger.debug("Biscuit phase2: authorizing route access")
-            az.build(token).authorize()
+            authorized = az.build(token)
+            authorized.authorize()
+            if path.startswith("/crowdsec") and hasattr(request, "state"):
+                subjects = authorized.query(Rule("subject($name) <- user($name) trusting authority"))
+                request.state.auth_subject = str(subjects[0].terms[0]) if subjects else "biscuit"
             self._logger.debug("Biscuit phase2: authorization success")
         except AuthorizationError as e:
             self._logger.debug(f"Biscuit phase2: authorization failed (AuthorizationError):\n{format_exc()}")

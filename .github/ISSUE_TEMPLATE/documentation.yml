@@ -11,6 +11,26 @@ body:
     attributes:
       value: >
         📊 If your docs concern relates to a suspected outage or degraded service, review https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template first and link to any relevant incident.
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected area
+      description: Select the primary area involved.
+      options:
+        - Web UI
+        - API
+        - Scheduler
+        - Core plugins
+        - External plugins
+        - Docker / Autoconf
+        - Swarm
+        - Kubernetes
+        - Linux
+        - All-in-one
+        - Documentation
+        - Other / unsure
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
@@ -23,6 +43,13 @@ body:
     attributes:
       label: Proposed solution (optional)
       description: How it should be fixed or what should be added ?
+  - type: checkboxes
+    id: duplicate-search
+    attributes:
+      label: Duplicate search
+      options:
+        - label: I searched open and closed issues and did not find an existing request
+          required: true
   - type: checkboxes
     id: terms
     attributes:

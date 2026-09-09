@@ -64,6 +64,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`          | global    | no       | **Maximum Certbot Log Backups:** Number of rotated `letsencrypt.log` backups certbot keeps per job. Certbot's own default of 1000 piles up quickly; `50` is a sensible cap. Set to `0` to keep only the live log.                                                              |
 
 !!! info "Information and behavior"
+    - The local `/.well-known/acme-challenge/` handler is enabled only when `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http`, and `LETS_ENCRYPT_PASSTHROUGH=no`. The HTTPS redirect exception and access exception also require the exact requested token to exist as a readable, nonempty file. Deleting the token restores normal checks immediately. Other services apply their normal routing and access rules to this path.
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
     - If no `LETS_ENCRYPT_DNS_PROPAGATION` setting is provided, the provider's default propagation time is used.
     - Full Let's Encrypt automation using the `http` challenge works in stream mode as long as you open the `80/tcp` port from the outside. Use the `LISTEN_STREAM_PORT_SSL` setting to choose your listening SSL/TLS port.
@@ -85,6 +86,8 @@ Follow these steps to configure and use the Let's Encrypt feature:
 
 !!! warning "Wildcard certificates"
     Wildcard certificates are only available with DNS challenges. If you want to use them, you must set the `USE_LETS_ENCRYPT_WILDCARD` setting to `yes` and properly configure your DNS provider credentials.
+
+    A wildcard covers only one label: `*.example.com` does not cover `a.b.example.com`. Groups that cannot cover every configured hostname are refused and the affected service is reported as misconfigured. Split those names into separate services. Valid groups continue to be processed; if none can be issued, the job fails. Successfully issued sibling certificates still request a reload.
 
 !!! warning "Rate Limits"
     Let's Encrypt imposes rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.

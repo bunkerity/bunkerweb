@@ -35,7 +35,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
     使用已发布镜像与[快速入门](quickstart-guide.md#__tabbed_1_3)的布局启动栈，然后在浏览器完成向导。
 
     ```bash
-    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc1-rc1/misc/integrations/docker-compose.yml up -d
+    docker compose -f https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.15~rc2-rc1/misc/integrations/docker-compose.yml up -d
     ```
 
     访问 scheduler 主机名（如 `https://www.example.com/changeme`），运行 `/setup` 向导以配置 UI、scheduler 与实例。
@@ -52,7 +52,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -63,7 +63,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-services]
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *service-env
           BUNKERWEB_INSTANCES: "bunkerweb"
@@ -83,7 +83,7 @@ UI 需要可访问的 scheduler /（BunkerWeb）API / redis / 数据库。
         networks: [bw-universe, bw-db]
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *service-env
           ADMIN_USERNAME: "admin"
@@ -292,7 +292,7 @@ log { source(s_net); destination(d_dyna_file); };
 ## 升级到 PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO 免费试用"
-    在 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc) 使用代码 `freetrial` 可试用一个月。
+    通过 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?language=chinese&utm_campaign=self&utm_source=doc)开始 BunkerWeb PRO 的 30 天免费试用。
 
 将 PRO 许可证粘贴到 UI 的 **PRO** 页面（或预先设置 `PRO_LICENSE_KEY` 供向导使用）。升级由 scheduler 在后台下载；应用后在 UI 中查看到期时间和服务上限。
 

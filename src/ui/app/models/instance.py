@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from datetime import datetime, timedelta
 from heapq import heappush, heapreplace
 from json import dumps as json_dumps, loads
+from math import isfinite
 from operator import itemgetter
 from os import getenv
 from re import fullmatch
@@ -268,24 +270,37 @@ class InstancesUtils:
     def __init__(self, db):
         self.__db = db
 
+    # Mirrors the METRICS_MAX_BLOCKED_REQUESTS_REDIS default in
+    # src/common/core/metrics/plugin.json. A larger fallback here would let a failed
+    # config read authorise a scan wider than the operator ever configured.
+    _DEFAULT_MAX_BLOCKED_REQUESTS_REDIS = 10000
+
     def _get_max_blocked_requests_redis(self) -> int:
-        default_max = 100000
+        default_max = self._DEFAULT_MAX_BLOCKED_REQUESTS_REDIS
         try:
-            config = self.__db.get_config(global_only=True, methods=False)
+            # Filtered: an unfiltered get_config() pulls the whole global configuration
+            # out of the database, and this runs on every Redis read path.
+            config = self.__db.get_config(global_only=True, methods=False, filtered_settings=("METRICS_MAX_BLOCKED_REQUESTS_REDIS",))
             value = _parse_count(config.get("METRICS_MAX_BLOCKED_REQUESTS_REDIS", default_max), default_max)
             return max(0, value)
         except Exception:
             return default_max
 
-    def _get_redis_scan_start_index(self, redis_client, max_requests: int) -> int:
-        if max_requests <= 0:
-            return 0
+    def _get_redis_scan_window(self, redis_client, max_requests: int) -> Tuple[int, Optional[int]]:
+        """Return ``(start_index, total)`` for a capped scan of the "requests" list.
+
+        The length is returned alongside the offset so callers can pass it into the
+        iterators, which would otherwise issue their own LLEN for the same list on
+        the same request. ``total`` is None when the length could not be read, which
+        is the iterators' signal to fall back to chunk-based termination.
+        """
         try:
-            total_requests = redis_client.llen("requests")
-            total_requests = int(total_requests or 0)
-            return max(0, total_requests - max_requests)
+            total = int(redis_client.llen("requests") or 0)
         except Exception:
-            return 0
+            return 0, None
+        if max_requests <= 0:
+            return 0, total
+        return max(0, total - max_requests), total
 
     @staticmethod
     def _decode_redis_text(value: Any) -> str:
@@ -297,6 +312,9 @@ class InstancesUtils:
     # an HSCAN cursor loop. Above it, HGETALL would block the Redis server and
     # materialize the whole hash, so the cursor loop is kept.
     _FACET_HGETALL_MAX = 50000
+
+    # Bounded re-reads of a page whose generation changed under a concurrent push.
+    _FAST_PAGE_ATTEMPTS = 3
 
     def _iter_redis_hash(self, redis_client, hash_key: str, *, count: int = 1000):
         """Yield ``(raw_field, raw_value)`` pairs from a Redis hash.
@@ -322,77 +340,91 @@ class InstancesUtils:
             if cursor == 0:
                 break
 
-    def _get_redis_top_ip_counts_from_facets(self, redis_client, *, limit: int = 10) -> tuple[list[tuple[str, int]], int]:
-        """Read top blocked IPs and unique IP count from Redis request facets.
+    def _get_redis_request_state(self, redis_client) -> Optional[dict]:
+        """Read the metrics writer's certificate for the current retained list.
 
-        Uses HSCAN + heap top-k to keep memory bounded even with large facet maps.
+        The certificate and the list length are fetched in one pipelined round trip.
+        Besides halving the cost, sending them together narrows the window in which a
+        concurrent push can land between the two reads and make a valid certificate
+        look stale.
         """
-        if limit < 0:
-            limit = 0
+        with suppress(ValueError, TypeError):
+            pipe = redis_client.pipeline(transaction=False)
+            pipe.get("requests:facets:initialized")
+            pipe.llen("requests")
+            raw_state, raw_length = pipe.execute()
+            state = loads(raw_state or "null")
+            if isinstance(state, dict) and state.get("version") == 2 and state.get("length") == int(raw_length or 0):
+                return state
+        return None
 
-        top_heap: list[tuple[int, str]] = []
-        unique_ips = 0
-
+    @staticmethod
+    def _decode_redis_report(raw) -> Optional[dict]:
         try:
-            for raw_ip, raw_count in self._iter_redis_hash(redis_client, "requests:facet:ip"):
-                ip = self._decode_redis_text(raw_ip).strip() or "unknown"
-                try:
-                    count = int(self._decode_redis_text(raw_count))
-                except Exception:
-                    continue
-                if count <= 0:
-                    continue
+            report = loads(raw)
+            if not isinstance(report, dict):
+                return None
+            report_id = report.get("id")
+            if report_id is not None and not isinstance(report_id, (str, int, float)):
+                return None
+            if not isfinite(float(report.get("date", 0) or 0)):
+                return None
+            return report
+        except (ValueError, TypeError, OverflowError):
+            return None
 
-                unique_ips += 1
-
-                if limit == 0:
-                    continue
-
-                item = (count, ip)
-                if len(top_heap) < limit:
-                    heappush(top_heap, item)
-                elif item > top_heap[0]:
-                    heapreplace(top_heap, item)
-        except Exception:
-            return [], 0
-
-        top_items = sorted(((ip, count) for count, ip in top_heap), key=lambda item: (-item[1], item[0]))
-        return top_items, unique_ips
-
-    def _get_redis_pane_counts_from_facets(self, redis_client, pane_fields: List[str]) -> Optional[dict[str, dict[str, dict[str, int]]]]:
-        pane_counts: dict[str, dict[str, dict[str, int]]] = {field: {} for field in pane_fields}
-        has_values = False
+    def _get_redis_pane_counts_from_facets(
+        self, redis_client, pane_fields: List[str], *, state: Optional[dict] = None
+    ) -> Optional[dict[str, dict[str, dict[str, int]]]]:
+        # "nonfast" is a paging property: one legacy row raises it while the facets stay
+        # exactly the count of state["valid"], which is what the per-field check below
+        # verifies. Only _get_redis_requests_fast_page needs a nonfast-free list.
+        state = state or self._get_redis_request_state(redis_client)
+        if not state:
+            return None
+        pane_counts: dict[str, dict[str, dict[str, int]]] = {}
 
         for field in pane_fields:
             max_values = max(0, self._REPORT_PANE_MAX_VALUES)
             top_heap: list[tuple[int, str]] = []
-
+            total = 0
             try:
                 for raw_value, raw_count in self._iter_redis_hash(redis_client, f"requests:facet:{field}"):
                     value = self._decode_redis_text(raw_value) or "N/A"
-                    try:
-                        count = int(self._decode_redis_text(raw_count))
-                    except Exception:
-                        continue
+                    count = int(self._decode_redis_text(raw_count))
                     if count <= 0:
-                        continue
-
-                    has_values = True
+                        raise ValueError("invalid facet count")
+                    total += count
                     if max_values == 0:
                         continue
-
                     item = (count, value)
                     if len(top_heap) < max_values:
                         heappush(top_heap, item)
                     elif item > top_heap[0]:
                         heapreplace(top_heap, item)
+                if total != state.get("valid"):
+                    continue
             except Exception:
                 continue
 
-            if max_values > 0:
-                pane_counts[field] = {value: {"total": count, "count": count} for count, value in sorted(top_heap, key=lambda item: (-item[0], item[1]))}
+            pane_counts[field] = {value: {"total": count, "count": count} for count, value in sorted(top_heap, key=lambda item: (-item[0], item[1]))}
 
-        return pane_counts if has_values else None
+        # Concurrent trim/push invalidates the snapshot rather than combining generations.
+        if self._get_redis_request_state(redis_client) != state:
+            return None
+        if len(pane_counts) != len(pane_fields):
+            # Deep validation piggybacks on this existing scan. Ask the next metrics
+            # timer to repair the cache, but never invalidate a newer writer generation.
+            with suppress(Exception):
+                marker = redis_client.get("requests:facets:initialized")
+                if loads(marker) == state:
+                    redis_client.eval(
+                        "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0",
+                        1,
+                        "requests:facets:initialized",
+                        marker,
+                    )
+        return pane_counts
 
     def _get_redis_pane_counts_streaming_fallback(
         self,
@@ -403,9 +435,9 @@ class InstancesUtils:
     ) -> dict[str, dict[str, dict[str, int]]]:
         pane_counts: dict[str, dict[str, dict[str, int]]] = {field: {} for field in pane_fields}
         seen_ids: set = set()
-        scan_start_idx = self._get_redis_scan_start_index(redis_client, max_requests)
+        scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_requests)
 
-        for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+        for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
             report_id = report.get("id")
             if report_id is not None:
                 if report_id in seen_ids:
@@ -429,71 +461,83 @@ class InstancesUtils:
         start: int,
         length: int,
         order_dir: str,
-    ) -> tuple[int, list[dict[str, Any]]]:
-        """Fast pagination path for default date-ordered Redis requests queries.
+        state: Optional[dict] = None,
+    ) -> Optional[tuple[int, list[dict[str, Any]]]]:
+        """Fast pagination for default date queries, preserving Redis insertion order.
 
-        This path avoids scanning the whole Redis list and only reads until the requested page is full or its scan budget is exhausted.
+        The writer validates legacy data during facet rebuild. Uncertified lists
+        and page anomalies return None so the caller uses logical streaming offsets.
         """
         if length <= 0:
-            return 0, []
+            return None
 
-        try:
-            total_requests = int(redis_client.llen("requests") or 0)
-        except Exception:
-            return 0, []
+        # A worker sync burst changes the generation between the two reads on a busy
+        # deployment; re-page the new one instead of taking a transient change for a
+        # permanent disqualification and streaming the whole retained list.
+        for _ in range(self._FAST_PAGE_ATTEMPTS):
+            if state is None:
+                state = self._get_redis_request_state(redis_client)
+            if not state or state.get("nonfast") != 0:
+                return None
+            total_requests = state["length"]
 
-        if total_requests <= 0:
-            return 0, []
+            if total_requests <= 0:
+                return 0, []
 
-        scan_start_idx = self._get_redis_scan_start_index(redis_client, max_requests)
-        capped_total = max(0, total_requests - scan_start_idx)
-        if capped_total <= 0 or start >= capped_total:
-            return capped_total, []
+            # The certificate is the writer's own length, already checked against LLEN.
+            scan_start_idx = max(0, total_requests - max_requests) if max_requests > 0 else 0
+            capped_total = max(0, total_requests - scan_start_idx)
+            if capped_total <= 0 or start >= capped_total:
+                return capped_total, []
 
-        reports: list[dict[str, Any]] = []
-        seen_ids: set = set()
-        next_idx = scan_start_idx + start if order_dir == "asc" else total_requests - 1 - start
-        # ponytail: scan at most four raw pages; raise only if legitimate reports are commonly sparser.
-        remaining_scan = min(capped_total - start, length * 4)
+            reports: list[dict[str, Any]] = []
+            seen_ids: set = set()
+            next_idx = scan_start_idx + start if order_dir == "asc" else total_requests - 1 - start
+            remaining_scan = min(capped_total - start, length)
 
-        while len(reports) < length and remaining_scan > 0 and scan_start_idx <= next_idx < total_requests:
-            fetch_count = min(length, remaining_scan)
-            remaining_scan -= fetch_count
-            if order_dir == "asc":
-                start_idx = next_idx
-                end_idx = start_idx + fetch_count - 1
-                next_idx = end_idx + 1
-            else:
-                # Descending order: newest first from the capped window.
-                end_idx = next_idx
-                start_idx = end_idx - fetch_count + 1
-                next_idx = start_idx - 1
+            while len(reports) < length and remaining_scan > 0 and scan_start_idx <= next_idx < total_requests:
+                fetch_count = min(length, remaining_scan)
+                remaining_scan -= fetch_count
+                if order_dir == "asc":
+                    start_idx = next_idx
+                    end_idx = start_idx + fetch_count - 1
+                    next_idx = end_idx + 1
+                else:
+                    # Descending order: newest first from the capped window.
+                    end_idx = next_idx
+                    start_idx = end_idx - fetch_count + 1
+                    next_idx = start_idx - 1
 
-            raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
-            if not raw_chunk:
-                break
-            if order_dir == "desc":
-                raw_chunk.reverse()
-
-            for report_raw in raw_chunk:
-                try:
-                    report = loads(report_raw)
-                except Exception:
-                    continue
-                if not isinstance(report, dict):
-                    continue
-
-                report_id = report.get("id")
-                if report_id is not None:
-                    if report_id in seen_ids:
-                        continue
-                    seen_ids.add(report_id)
-
-                reports.append(report)
-                if len(reports) == length:
+                raw_chunk = redis_client.lrange("requests", start_idx, end_idx)
+                if not raw_chunk:
                     break
+                if order_dir == "desc":
+                    raw_chunk.reverse()
 
-        return capped_total, reports
+                for report_raw in raw_chunk:
+                    report = self._decode_redis_report(report_raw)
+                    if report is None:
+                        return None
+
+                    report_id = report.get("id")
+                    if report_id is not None:
+                        if report_id in seen_ids:
+                            return None
+                        seen_ids.add(report_id)
+
+                    reports.append(report)
+                    if len(reports) == length:
+                        break
+
+            current = self._get_redis_request_state(redis_client)
+            if current != state:
+                # Re-page the generation just observed rather than reading it again.
+                state = current
+                continue
+            if len(reports) != min(length, capped_total - start):
+                return None
+            return capped_total, reports
+        return None
 
     def get_instances(self, status: Optional[Literal["loading", "up", "down"]] = None) -> List[Instance]:
         return [
@@ -530,6 +574,23 @@ class InstancesUtils:
             instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
         ] or ""
 
+    @staticmethod
+    def _gather_from_instances(instances: List["Instance"], collect) -> List[dict[str, Any]]:
+        """Query every instance at once instead of one after another.
+
+        Each call is a blocking HTTP round trip, so a serial loop cost the sum of
+        every instance's latency on a page that only needs the slowest one.
+        """
+        if not instances:
+            return []
+        if len(instances) == 1:
+            return collect(instances[0])
+        gathered: List[dict[str, Any]] = []
+        with ThreadPoolExecutor(max_workers=min(len(instances), 8)) as executor:
+            for result in executor.map(collect, instances):
+                gathered.extend(result)
+        return gathered
+
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
 
@@ -546,8 +607,7 @@ class InstancesUtils:
                 return []
             bans = get_instance_bans(instance)
         else:
-            for instance in instances or self.get_instances(status="up"):
-                bans.extend(get_instance_bans(instance))
+            bans = self._gather_from_instances(instances or self.get_instances(status="up"), get_instance_bans)
 
         # Improved deduplication that considers IP, scope, and service combination
         # A unique ban is defined by the combination of IP address, ban scope, and service
@@ -583,8 +643,7 @@ class InstancesUtils:
                 return []
             reports = get_instance_reports(instance)
         else:
-            for instance in instances or self.get_instances(status="up"):
-                reports.extend(get_instance_reports(instance))
+            reports = self._gather_from_instances(instances or self.get_instances(status="up"), get_instance_reports)
 
         return sorted(reports, key=itemgetter("date"), reverse=True)
 
@@ -602,17 +661,18 @@ class InstancesUtils:
             return None
 
         redis_client = get_redis_client()
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
-        if redis_client and not hostname:
+        if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    return {}
-                scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
+                scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
                 # Iterate newest-first and stop at the first match: the tail-most
                 # occurrence of an id is its most recent one, so this avoids the
                 # full O(N) scan the forward loop needed to pick the max-date match.
-                for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                for report in self._iter_redis_requests_reverse(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                     if str(report.get("id", "")) == report_id:
                         return report.get("data", {})
             except Exception as e:
@@ -666,22 +726,28 @@ class InstancesUtils:
 
         pane_fields = self._REPORT_PANE_FIELDS
         redis_client = get_redis_client()
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
-        if redis_client and not hostname:
+        if redis_client and max_redis_requests > 0 and not hostname:
             try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    return {field: {} for field in pane_fields}
-
-                facet_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields)
-                if facet_counts is not None:
+                # The facets cover the whole retained list, which the 5 s trim leaves above
+                # the cap for most of every tick. Discarding them there means a full
+                # streaming scan on nearly every page load.
+                facet_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields) or {}
+                missing_fields = [field for field in pane_fields if field not in facet_counts]
+                if not missing_fields:
                     return facet_counts
-
-                return self._get_redis_pane_counts_streaming_fallback(
-                    redis_client,
-                    max_requests=max_redis_requests,
-                    pane_fields=pane_fields,
+                facet_counts.update(
+                    self._get_redis_pane_counts_streaming_fallback(
+                        redis_client,
+                        max_requests=max_redis_requests,
+                        pane_fields=missing_fields,
+                    )
                 )
+                return facet_counts
             except Exception as e:
                 LOGGER.warning(f"Failed to compute pane counts from Redis: {e}")
 
@@ -737,24 +803,31 @@ class InstancesUtils:
 
             return True
 
-        # If Redis is available, use it for optimized queries
-        if redis_client and not hostname:
-            try:
-                max_redis_requests = self._get_max_blocked_requests_redis()
-                if max_redis_requests == 0:
-                    if count_only:
-                        return {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
-                    return {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+        # A cap of 0 keeps reports out of Redis entirely; it does not mean there are none.
+        # The instances still buffer them, so treat it like no Redis at all rather than
+        # answering empty while every instance holds a full window.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
 
+        # If Redis is available, use it for optimized queries
+        if redis_client and max_redis_requests > 0 and not hostname:
+            try:
                 pane_filters = parse_search_panes(search_panes)
                 pane_fields = self._REPORT_PANE_FIELDS
                 selected_pane_values = {field: set(values) for field, values in pane_filters.items()}
                 max_pane_values = max(0, self._REPORT_PANE_MAX_VALUES)
                 pane_counts_enabled = include_pane_counts
                 can_use_precomputed_pane_counts = pane_counts_enabled and search == "" and not pane_filters
-                precomputed_pane_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields) if can_use_precomputed_pane_counts else None
-                use_precomputed_pane_counts = precomputed_pane_counts is not None
-                pane_counts = precomputed_pane_counts if use_precomputed_pane_counts else ({field: {} for field in pane_fields} if pane_counts_enabled else {})
+                # Read once for the facet scan, the paging decision and the count shortcut;
+                # each helper still re-reads it afterwards to validate its own snapshot.
+                certificate = self._get_redis_request_state(redis_client) if can_use_precomputed_pane_counts else None
+                precomputed_pane_counts = self._get_redis_pane_counts_from_facets(redis_client, pane_fields, state=certificate) if certificate else None
+                precomputed_pane_counts = precomputed_pane_counts or {}
+                use_precomputed_pane_counts = all(field in precomputed_pane_counts for field in pane_fields)
+                pane_counts = {field: precomputed_pane_counts.get(field, {}) for field in pane_fields} if pane_counts_enabled else {}
+
+                # Complete facets do not imply a pageable list: only a certificate with no
+                # nonfast row guarantees every retained row is countable and uniquely identified.
+                is_pageable = bool(certificate and use_precomputed_pane_counts and certificate.get("nonfast") == 0)
 
                 is_default_fast_path = (
                     search == ""
@@ -762,24 +835,28 @@ class InstancesUtils:
                     and order_column == "date"
                     and order_dir in ("asc", "desc")
                     and length != -1
-                    and (not pane_counts_enabled or use_precomputed_pane_counts)
+                    and not count_only
+                    and (not pane_counts_enabled or (use_precomputed_pane_counts and is_pageable))
                 )
                 if is_default_fast_path:
-                    total_count, fast_reports = self._get_redis_requests_fast_page(
+                    fast_page = self._get_redis_requests_fast_page(
                         redis_client,
                         max_requests=max_redis_requests,
                         start=start,
                         length=length,
                         order_dir=order_dir,
+                        state=certificate if is_pageable else None,
                     )
-                    return {"total": total_count, "filtered": total_count, "data": fast_reports, "pane_counts": pane_counts}
+                    if fast_page is not None:
+                        total_count, fast_reports = fast_page
+                        return {"total": total_count, "filtered": total_count, "data": fast_reports, "pane_counts": pane_counts}
+                    precomputed_pane_counts = {}
+                    pane_counts = {field: {} for field in pane_fields} if pane_counts_enabled else {}
+                    use_precomputed_pane_counts = False
 
-                if count_only and use_precomputed_pane_counts:
-                    try:
-                        total_requests = int(redis_client.llen("requests") or 0)
-                    except Exception:
-                        total_requests = 0
-                    scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
+                if count_only and use_precomputed_pane_counts and is_pageable:
+                    total_requests = certificate["length"]
+                    scan_start_idx = max(0, total_requests - max_redis_requests) if max_redis_requests > 0 else 0
                     capped_total = max(0, total_requests - scan_start_idx)
                     return {"total": capped_total, "filtered": capped_total, "data": [], "pane_counts": pane_counts}
 
@@ -794,8 +871,8 @@ class InstancesUtils:
                 heap_seq = 0
                 is_desc = order_dir == "desc"
 
-                scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+                for report in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                     report_id = report.get("id")
                     if report_id is not None:
                         if report_id in seen_ids:
@@ -805,9 +882,11 @@ class InstancesUtils:
                     valid_total += 1
                     matches = matches_filters(report, search, pane_filters)
 
-                    if pane_counts_enabled and not use_precomputed_pane_counts:
+                    if pane_counts_enabled:
                         # Update pane counts incrementally to avoid a second pass.
                         for field in pane_fields:
+                            if field in precomputed_pane_counts:
+                                continue
                             value = str(report.get(field, "N/A"))
                             if value not in pane_counts[field]:
                                 # Keep pane maps bounded for high-cardinality fields
@@ -940,10 +1019,10 @@ class InstancesUtils:
         reverse = order_dir == "desc"
 
         if order_column == "date":
-            return sorted(reports, key=lambda x: float(x.get("date", 0)), reverse=reverse)
+            return sorted(reports, key=lambda x: float(x.get("date", 0) or 0), reverse=reverse)
         return sorted(reports, key=lambda x: x.get(order_column, ""), reverse=reverse)
 
-    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25):
+    def _iter_redis_requests(self, redis_client, chunk_size: int = 2000, start_index: int = 0, pipeline_batch: int = 25, total: Optional[int] = None):
         """Lazily yield decoded request reports from the Redis "requests" list.
 
         LRANGE calls are batched through a non-transactional pipeline
@@ -954,13 +1033,15 @@ class InstancesUtils:
         """
         start = max(0, start_index)
 
-        # Bound the scan with a single LLEN so we don't pipeline ranges past the
-        # end of the list. On error, fall back to short/empty-chunk termination
-        # (the original contract).
-        try:
-            total = int(redis_client.llen("requests") or 0)
-        except Exception:
-            total = None
+        # Bound the scan with the list length so we don't pipeline ranges past the
+        # end of it. Callers that already computed a scan window pass it in; only
+        # fetch it when they did not. On error, fall back to short/empty-chunk
+        # termination (the original contract).
+        if total is None:
+            try:
+                total = int(redis_client.llen("requests") or 0)
+            except Exception:
+                total = None
 
         while True:
             if total is not None and start >= total:
@@ -986,11 +1067,8 @@ class InstancesUtils:
                     stop = True
                     break
                 for report_raw in chunk:
-                    try:
-                        report = loads(report_raw)
-                    except Exception:
-                        continue
-                    if isinstance(report, dict):
+                    report = self._decode_redis_report(report_raw)
+                    if report is not None:
                         yield report
                 if len(chunk) < chunk_size:
                     stop = True
@@ -999,7 +1077,7 @@ class InstancesUtils:
                 break
             start = s
 
-    def _iter_redis_requests_reverse(self, redis_client, chunk_size: int = 2000, start_index: int = 0):
+    def _iter_redis_requests_reverse(self, redis_client, chunk_size: int = 2000, start_index: int = 0, total: Optional[int] = None):
         """Lazily yield decoded reports newest-first (tail -> head).
 
         RPUSH appends the newest report at the tail, and the list is written in
@@ -1008,13 +1086,14 @@ class InstancesUtils:
         scanning the whole capped window (which is what the forward iterator
         forces when it must pick the max-date match).
         """
-        try:
-            total = int(redis_client.llen("requests") or 0)
-        except Exception:
-            # Redis flaky: yield nothing so single-id callers fall through to the
-            # instance-API fallback (unlike the forward iterator's chunk-based
-            # termination — reverse callers early-break, so there is nothing to salvage).
-            return
+        if total is None:
+            try:
+                total = int(redis_client.llen("requests") or 0)
+            except Exception:
+                # Redis flaky: yield nothing so single-id callers fall through to the
+                # instance-API fallback (unlike the forward iterator's chunk-based
+                # termination — reverse callers early-break, so there is nothing to salvage).
+                return
         low = max(0, start_index)
         hi = total - 1
         while hi >= low:
@@ -1026,11 +1105,8 @@ class InstancesUtils:
             if not chunk:
                 return
             for report_raw in reversed(chunk):
-                try:
-                    report = loads(report_raw)
-                except Exception:
-                    continue
-                if isinstance(report, dict):
+                report = self._decode_redis_report(report_raw)
+                if report is not None:
                     yield report
             hi = lo - 1
 
@@ -1189,8 +1265,6 @@ class InstancesUtils:
         blocked_ip_counts: dict[str, int] = {}
         request_statuses: dict[int, int] = {}
         blocked_unique_ips = 0
-        top_ips_from_facets: list[tuple[str, int]] = []
-        use_facet_ip_counts = False
 
         current_date = datetime.now().astimezone()
         cutoff_timestamp = (current_date - timedelta(hours=hours)).timestamp()
@@ -1198,29 +1272,24 @@ class InstancesUtils:
         # Initialize time buckets for the last N hours
         time_buckets: dict[datetime, int] = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(hours)}
 
-        if not redis_client:
-            # Fallback: fetch requests from instance API when Redis is unavailable
+        # A cap of 0 keeps reports out of Redis entirely; the instances still buffer them.
+        max_redis_requests = self._get_max_blocked_requests_redis() if redis_client else 0
+        if not redis_client or max_redis_requests == 0:
+            # Fallback: fetch requests from instance API when Redis holds none
             requests_iter = self._iter_instance_api_requests()
         else:
-            top_ips_from_facets, blocked_unique_ips = self._get_redis_top_ip_counts_from_facets(redis_client, limit=top_ips_limit)
-            use_facet_ip_counts = blocked_unique_ips > 0
-
-            max_redis_requests = self._get_max_blocked_requests_redis()
-            if max_redis_requests == 0:
-                return {
-                    "request_countries": {},
-                    "top_blocked_ips": {},
-                    "blocked_unique_ips": 0,
-                    "time_buckets": {key.isoformat(): value for key, value in time_buckets.items()},
-                    "request_statuses": {},
-                }
-
             # Process requests in chunks using the iterator
             # This avoids loading all requests into memory at once
-            scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-            requests_iter = self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx)
+            scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+            requests_iter = self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total)
 
+        seen_ids: set = set()
         for request in requests_iter:
+            report_id = request.get("id")
+            if report_id is not None:
+                if report_id in seen_ids:
+                    continue
+                seen_ids.add(report_id)
             request_date = request.get("date", 0)
             if not isinstance(request_date, (int, float)):
                 try:
@@ -1228,8 +1297,8 @@ class InstancesUtils:
                 except (ValueError, TypeError):
                     continue
 
-            # Skip requests older than cutoff
-            if request_date < cutoff_timestamp:
+            # Apply the same selected window to every dashboard aggregate.
+            if not isfinite(request_date) or request_date < cutoff_timestamp or request_date > current_date.timestamp():
                 continue
 
             country = request.get("country", "unknown")
@@ -1249,12 +1318,11 @@ class InstancesUtils:
                     request_countries[country] = {"blocked": 0}
                 request_countries[country]["blocked"] += 1
 
-                if not use_facet_ip_counts:
-                    ip = request.get("ip")
-                    if ip is None or ip == "":
-                        ip = "unknown"
-                    ip_str = str(ip)
-                    blocked_ip_counts[ip_str] = blocked_ip_counts.get(ip_str, 0) + 1
+                ip = request.get("ip")
+                if ip is None or ip == "":
+                    ip = "unknown"
+                ip_str = str(ip)
+                blocked_ip_counts[ip_str] = blocked_ip_counts.get(ip_str, 0) + 1
 
                 # Add to time bucket
                 with suppress(ValueError, OSError):
@@ -1263,14 +1331,11 @@ class InstancesUtils:
                     if bucket in time_buckets:
                         time_buckets[bucket] += 1
 
-        if use_facet_ip_counts:
-            top_blocked_ips = {ip: {"blocked": count} for ip, count in top_ips_from_facets}
-        else:
-            sorted_ips = sorted(blocked_ip_counts.items(), key=lambda item: (-item[1], item[0]))
-            if top_ips_limit > 0:
-                sorted_ips = sorted_ips[:top_ips_limit]
-            top_blocked_ips = {ip: {"blocked": count} for ip, count in sorted_ips}
-            blocked_unique_ips = len(blocked_ip_counts)
+        sorted_ips = sorted(blocked_ip_counts.items(), key=lambda item: (-item[1], item[0]))
+        if top_ips_limit > 0:
+            sorted_ips = sorted_ips[:top_ips_limit]
+        top_blocked_ips = {ip: {"blocked": count} for ip, count in sorted_ips}
+        blocked_unique_ips = len(blocked_ip_counts)
         blocked_total = sum(time_buckets.values())
 
         # Defensive fallback: if timeline has blocked data but statuses are empty,
@@ -1390,12 +1455,13 @@ class InstancesUtils:
                     # home page or get_reports_query() for paginated report access instead.
                     max_redis_requests = self._get_max_blocked_requests_redis()
                     if max_redis_requests == 0:
-                        return {"requests": []}
+                        # Reports live on the instances only; an empty dict falls through to them.
+                        return {}
 
                     requests_list = []
                     seen_ids: set = set()
-                    scan_start_idx = self._get_redis_scan_start_index(redis_client, max_redis_requests)
-                    for request in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx):
+                    scan_start_idx, scan_total = self._get_redis_scan_window(redis_client, max_redis_requests)
+                    for request in self._iter_redis_requests(redis_client, chunk_size=2000, start_index=scan_start_idx, total=scan_total):
                         req_id = request.get("id")
                         if req_id is not None:
                             if req_id in seen_ids:

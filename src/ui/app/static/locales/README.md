@@ -12,6 +12,7 @@ This directory contains translation files for the BunkerWeb UI. Below is a summa
 | es.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
 | fr.json | Manual (@TheophileDiot)       | Manual (@TheophileDiot)  |
 | hi.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
+| id.json | Manual (@teguh02)             | Manual (@teguh02)        |
 | it.json | AI (Google:Gemini-2.5-pro)    | AI (Google:Gemini-3-pro) |
 | ko.json | Manual (@rayshoo)             | Manual (@rayshoo)        |
 | pl.json | Manual (@tomkolp) via Weblate | Manual (@tomkolp)        |

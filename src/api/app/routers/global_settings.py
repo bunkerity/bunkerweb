@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from ..auth.guard import guard
-from ..utils import get_db
+from ..utils import get_db, reportable_config
 from ..schemas import GlobalSettingsUpdate
 
 config_router = APIRouter(prefix="/global_config", tags=["global_settings"])
@@ -24,7 +24,7 @@ def read_global_settings(full: bool = False, methods: bool = False) -> JSONRespo
     if full:
         conf = db.get_config(global_only=True, methods=methods)
     else:
-        conf = db.get_non_default_settings(global_only=True, methods=methods)
+        conf = reportable_config(db.get_config(global_only=True, methods=True), methods=methods)
     return JSONResponse(status_code=200, content={"status": "success", "settings": conf})
 
 

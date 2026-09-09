@@ -19,6 +19,12 @@ from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
 setup = Blueprint("setup", __name__)
 
+# Reasons the app can redirect here with, mapped to what the user is told. Looked up, never
+# echoed: whatever is in the query string must not reach the page.
+SETUP_NOTICES = {
+    "session_expired": "Your session ended before your change could be saved, so nothing was changed. Log in and try again.",
+}
+
 
 @setup.route("/setup", methods=["GET", "POST"])
 def setup_page():
@@ -291,8 +297,11 @@ def setup_page():
     if not server_name:
         server_name = "www.example.com"
 
+    notice = SETUP_NOTICES.get(request.args.get("reason", ""))
+
     return render_template(
         "setup.html",
+        notice=notice,
         plugins_settings=BW_CONFIG.get_plugins_settings(),
         server_name=server_name,
         ui_user=admin_user,

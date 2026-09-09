@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [features section](features.md) of the documentation to see all the available settings.
 
@@ -85,7 +85,7 @@ You will find more settings about real IP in the [features section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -96,7 +96,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ You will find more settings about real IP in the [features section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -260,7 +260,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
         ```bash
         # Download script and checksum
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh.sha256
 
         # Verify checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -590,7 +590,7 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Replace with your worker IPs
@@ -609,7 +609,7 @@ The Manager is the brain of the cluster. It runs the Scheduler, Database, and op
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         ports:
           - "7000:7000" # Expose the Web UI port
         environment:
@@ -695,7 +695,7 @@ Workers are the nodes that process incoming traffic.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1000,7 +1000,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1028,7 +1028,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1039,7 +1039,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1156,7 +1156,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1196,7 +1196,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1219,7 +1219,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1262,7 +1262,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1332,7 +1332,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1578,7 +1578,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1601,7 +1601,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1616,7 +1616,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1667,7 +1667,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1897,7 +1897,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2027,7 +2027,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -2071,7 +2071,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2086,7 +2086,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2180,7 +2180,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2193,7 +2193,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2208,7 +2208,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2448,7 +2448,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2547,7 +2547,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2646,7 +2646,7 @@ LOG_LEVEL_1=error
 
 ### Log File Retention {#log-file-retention}
 
-Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` once it passes 100 MB, keeps seven compressed generations, and uses `copytruncate`.
+Only the integrations that keep real log files need retention, and both of them use the same mechanism: `logrotate`, with the policy BunkerWeb installs at `/etc/logrotate.d/bunkerweb`. It rotates every file matching `/var/log/bunkerweb/*.log` daily, or earlier if the file passes 100 MB, keeps fourteen numbered generations (`modsec_audit.log.1`, `.2.gz` and so on), and uses `copytruncate`.
 
 - **Linux**: the packages depend on `logrotate` and the system runs it on its own timer. Nothing else to do.
 - **All-in-one**: the image ships `logrotate` and runs it hourly under supervisor, using that same policy file.
@@ -2656,13 +2656,17 @@ Only the integrations that keep real log files need retention, and both of them 
 
 Edit `/etc/logrotate.d/bunkerweb` to change the threshold, the number of generations, or to add a `maxage`. On the All-in-one, mount your own file over that path.
 
-The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](features.md#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself.
+Two directives there are load-bearing. `maxsize` is what keeps `daily` alive: the similar `size` is mutually exclusive with the interval directives, so it would rotate on size only. And adding `dateext` would name every archive after the date, which makes a second rotation on the same date fail with `destination ... already exists, skipping rotation`, leaving the live file unrotated until the date changes.
+
+The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, default `/var/log/bunkerweb/modsec_audit.log`); see the [ModSecurity settings](features.md#modsecurity). Pointing it outside `/var/log/bunkerweb` takes it out of the policy above, and in a container integration it replaces the symlink with a real file that nothing rotates. If you move it, mount it on a volume and rotate it yourself. The setting only accepts a path under `/var/log/bunkerweb`, so it cannot point at `/data`: to keep the audit history across a container recreation, mount a volume on `/var/log/bunkerweb` itself, which persists the whole log set rather than the audit log alone.
+
+With the default `MODSECURITY_SEC_AUDIT_LOG_PARTS` of `BCFH`, part `C` puts the request body in the audit log. Treat the file as sensitive before copying it anywhere.
 
 ### Integration Defaults & Examples
 
 === "Linux"
 
-    **Default behavior**: `LOG_TYPES="file"`. Logs are written to `/var/log/bunkerweb/*.log`. Rotation is handled by the system `logrotate` config installed at `/etc/logrotate.d/bunkerweb` (daily, 7-day retention, compressed via `copytruncate`).
+    **Default behavior**: `LOG_TYPES="file"`. Logs are written to `/var/log/bunkerweb/*.log`. Rotation is handled by the system `logrotate` config installed at `/etc/logrotate.d/bunkerweb` (daily or past 100 MB, fourteen generations, compressed via `copytruncate`).
 
     **Example**: Keep local files (for Web UI) and also mirror to the system syslog.
 
@@ -2706,7 +2710,7 @@ The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, defau
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2719,7 +2723,7 @@ The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, defau
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2736,7 +2740,7 @@ The audit log's location is set by `MODSECURITY_SEC_AUDIT_LOG` (multisite, defau
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *bw-env
         volumes:
@@ -2908,7 +2912,7 @@ You can configure the logging driver for your services in your `docker-compose.y
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     logging:
       driver: "json-file"
       options:
@@ -3017,7 +3021,7 @@ The commonly used variables are:
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     If the container already exists, recreate it to apply the new environment.
@@ -3028,7 +3032,7 @@ The commonly used variables are:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3047,7 +3051,7 @@ The commonly used variables are:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3090,7 +3094,7 @@ The commonly used variables are:
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3359,12 +3363,12 @@ The **BunkerWeb MCP server** enables AI assistants like **Claude Code** and **Cl
 
 ### Docker Compose Example
 
-A complete example is available in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/examples/mcp-stack):
+A complete example is available in [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples/mcp-stack):
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.15-rc1
+    image: bunkerity/bunkerweb-api:1.6.15-rc2
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -3779,6 +3783,8 @@ The Load Balancer Plugin turns BunkerWeb into a traffic director with guardrails
 
 The Custom Pages plugin lets you replace BunkerWeb's built-in pages (error pages, default server page, and antibot challenge pages) with your own custom HTML or Lua templates. This allows you to maintain consistent branding across all user-facing pages served by BunkerWeb.
 
+For Maintenance behavior and customization, see the [Maintenance advanced guide](advanced.md#maintenance-pro).
+
 ### Features
 
 - **Per-service custom error pages** and **antibot challenge pages** (captcha, JavaScript check, reCAPTCHA, hCaptcha, Turnstile, mCaptcha, Cap.js).
@@ -3798,6 +3804,7 @@ The Custom Pages plugin lets you replace BunkerWeb's built-in pages (error pages
 
 | Setting                          | Default | Context   | Description                                                 |
 | -------------------------------- | ------- | --------- | ----------------------------------------------------------- |
+| `CUSTOM_MAINTENANCE_PAGE`        |         | multisite | Absolute path to the custom Maintenance page template.      |
 | `CUSTOM_ERROR_PAGE`              |         | multisite | Absolute path to the custom error page template.            |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |         | global    | Absolute path to the custom default server page template.   |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |         | multisite | Absolute path to the custom antibot CAPTCHA challenge page. |
@@ -4185,11 +4192,11 @@ Templates use Lua template syntax with the following delimiters:
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.15-rc1
+            image: bunkerity/bunkerweb:1.6.15-rc2
             # ... other settings (no environment variables needed here for custom pages)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+            image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4272,7 +4279,7 @@ Templates use Lua template syntax with the following delimiters:
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                  image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -4301,6 +4308,64 @@ Templates use Lua template syntax with the following delimiters:
 - **Cached files** live in `/var/cache/bunkerweb/custom_pages`; updating the source file is enough—the job detects the new hash and reloads NGINX automatically.
 - **CSP compliance**: Always use the `nonce_script` and `nonce_style` variables for inline scripts and styles to ensure proper Content Security Policy handling.
 - **Testing templates**: You can test your templates locally by rendering them with a Lua template engine before deploying to BunkerWeb.
+
+## Maintenance <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#maintenance-pro}
+
+Maintenance replaces responses from standard reverse-proxy locations with a maintenance page while the application is unavailable. It is opt-in per service, returns `503 Service Unavailable`, and never reaches the upstream. The multisite setting defaults to `no`.
+
+### Enable and apply maintenance mode
+
+Set `USE_MAINTENANCE` to `yes` on an existing multisite service that uses the standard reverse proxy. This fragment shows the relevant environment keys; merge it into your scheduler configuration rather than treating it as a complete Compose file:
+
+```yaml
+# Fragment: scheduler environment for one reverse-proxied service
+environment:
+  app.example.com_USE_REVERSE_PROXY: "yes"
+  app.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+  app.example.com_USE_MAINTENANCE: "yes"
+```
+
+Apply through your normal BunkerWeb integration. The scheduler generates the service configuration and reloads workers. Set `app.example.com_USE_MAINTENANCE` to `no` and apply again to restore proxying. If the reverse-proxy settings already exist, only this setting is needed.
+
+The web UI provides two quick toggles: the wrench icon button in the **Maintenance** column on the services page and the floating wrench button on a service's edit page. Both update the service setting and apply it without a page reload. The edit form remains synchronized, including Easy/Advanced mode and the raw editor, while unrelated unsaved edits stay in place.
+
+The toggles require a writable database and service write access. They are disabled for read-only users, read-only databases, and `USE_UI=yes` services so the built-in UI remains available. They refuse to overwrite an externally managed `USE_MAINTENANCE` value; change it through its owner instead. A toggle is rejected while an application is in progress.
+
+### Request behavior and scope
+
+Maintenance applies only to locations generated from BunkerWeb's standard reverse-proxy configuration, including `REVERSE_PROXY_HOST` and its numbered variants. It does not add proxy locations, modify custom locations, or take ownership of manual rewrite handlers. If custom configuration replaces those handlers or backend variables, integrate the maintenance response yourself.
+
+Maintenance preserves the existing HTTPS policy, so an enabled HTTP-to-HTTPS redirect happens first. On the effective HTTPS origin it returns `503` with `Cache-Control: no-store`, a restrictive Content Security Policy, and `X-Content-Type-Options: nosniff`.
+
+GET, POST, OPTIONS, and WebSocket handshakes receive the maintenance page. BunkerWeb discards the request body, so a POST body is never forwarded or replayed. HEAD receives the same status and headers without a body. Existing WebSockets are not explicitly closed; normal worker shutdown during reload applies.
+
+Maintenance runs before authentication, antibot, and other access checks, so whitelisted clients and detection-mode services still receive it. Local NGINX locations, the internal API, and health endpoints keep their normal behavior. The same applies to `/.well-known/acme-challenge/` and configured Let's Encrypt passthrough. Maintenance preserves this exception; it neither issues certificates nor creates an ACME handler.
+
+### Customize the maintenance page
+
+The bundled page works without Custom Pages. To customize it with Custom Pages, open the Custom Pages editor and choose **Maintenance**. **Easy Mode** edits the maintenance title and message, favicon, footer logo/text, and SVG illustration. The title updates the browser title and heading; an empty title or illustration keeps the default. Preserve the `maintenance-top` and `maintenance-tool` SVG classes for the illustration animation.
+
+In **Advanced Mode**, edit the complete HTML/Lua template. The available variables are:
+
+| Variable       | Purpose                                                          |
+| -------------- | ---------------------------------------------------------------- |
+| `title`        | `Site under maintenance`, the page title supplied by the plugin. |
+| `nonce_style`  | Per-response CSP nonce for inline `<style>` elements.            |
+| `nonce_script` | Per-response CSP nonce for inline `<script>` elements.           |
+
+Use the nonce values in every inline style and script, for example `nonce="{* nonce_style *}"`. The response permits embedded images, SVG, and fonts through `data:` URLs and blocks other origins. Embed assets inline or as data URLs; application asset URLs also receive maintenance and cannot load dependencies.
+
+For a file-managed page, set `CUSTOM_MAINTENANCE_PAGE` to an absolute scheduler-readable path. It takes precedence over a UI template and locks that scope in the editor. Without it, a service uses its own UI template or inherits the global template. **Delete** removes a service override and restores inheritance. **Reset** removes the UI template and forces the shipped page, even when a global customization exists. Saving a new service override clears its reset marker. Enable or disable maintenance separately with `USE_MAINTENANCE`.
+
+The Custom Pages job validates HTML and guards against known Lua-template compilation hazards before caching. Invalid source leaves the last accepted cache. An unavailable or failing active page falls back to the bundled page, then a minimal emergency page. Rendering failure never restores proxy traffic.
+
+### Maintenance troubleshooting
+
+- **The toggle is disabled or rejected:** check write permissions, `USE_UI`, and external ownership of `USE_MAINTENANCE`; change externally managed values through their owner.
+- **The application still responds:** confirm a standard reverse-proxy location has `USE_REVERSE_PROXY=yes` and `USE_MAINTENANCE=yes`. Local and ACME paths are exceptions.
+- **You receive a redirect instead of `503`:** the existing HTTPS policy redirects first; follow the HTTPS URL.
+- **The page is bundled:** verify the scheduler-readable file, template validation, and scheduler log; a file setting locks out the UI template.
+- **Inline assets or scripts are missing:** embed them and use `nonce_style` or `nonce_script`; application URLs are unavailable.
 
 ## OpenID Connect <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openid-connect-pro}
 
@@ -4513,6 +4578,196 @@ Common hardening/tuning options:
 - **Clock skew / "token not yet valid"**: ensure NTP is enabled; tune `OPENIDC_IAT_SLACK` if needed.
 - **No user header injected**: verify the claim name in `OPENIDC_USER_HEADER_CLAIM` exists in the ID token/userinfo.
 - **Multi-instance deployments**: enable `USE_REDIS=yes` and configure `REDIS_HOST` (or Sentinel) so sessions are shared.
+
+## SAML <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#saml-pro}
+
+The **SAML** plugin (PRO) makes BunkerWeb a SAML 2.0 service provider (SP) for browser SSO. It accepts an IdP response whose assertion is covered by a trusted signature, creates a session, and can expose selected attributes to the protected upstream as headers. It supports BunkerWeb 1.6.14 and later 1.6.x releases.
+
+### Prerequisites and trust material
+
+Use a public HTTPS origin for each protected service, such as `https://app.example.com`, with no trailing slash, path, or query string. A nonstandard HTTPS port is allowed. SAML needs three pieces of PEM material:
+
+- an **unencrypted RSA private key** for the SP;
+- the matching SP certificate in PEM format; and
+- the IdP's PEM signing certificate, which BunkerWeb trusts when it verifies assertions.
+
+The SP key and certificate must match and must be RSA keys of at least 2048 bits. The IdP SSO URL and, when supplied, the IdP SLO URL must use HTTPS. Keep the private key secret; BunkerWeb uses it to sign authentication and logout requests.
+
+### Configure SAML in the UI
+
+Open **SAML** for the target service and choose its scope. The form groups settings into IdP, SP, session, identity headers, and ACL sections. Use this order:
+
+1. Enable `USE_SAML` for the service.
+2. Enter the public SP origin, SP entity ID, SP certificate, and unencrypted RSA private key.
+3. Enter the IdP entity ID, HTTPS SSO URL, trusted PEM signing certificate, and optional HTTPS SLO URL. An empty SLO URL uses the SSO URL.
+4. Keep the default local paths unless they conflict with an existing route. Save and apply the configuration.
+5. Use **Export metadata** to download or display BunkerWeb's SP metadata, then register that metadata and the exact ACS/SLO URLs with the IdP.
+6. Configure identity attributes and ACL rules, then save and apply again.
+
+BunkerWeb exports SP metadata; it does not import or automatically refresh IdP metadata. Configure the IdP fields and certificates first, then export metadata to avoid a circular setup.
+
+### Browser request flow
+
+An SP-initiated login signs the AuthnRequest with the SP private key and sends it to the IdP using HTTP-Redirect. The IdP returns a response whose assertion is covered by its signature to the ACS with HTTP-POST. BunkerWeb validates correlation, destination, issuer, assertion timestamps, signature, and replay state before creating a session. The original request body is not replayed.
+
+```mermaid
+sequenceDiagram
+  participant B as Browser
+  participant BW as BunkerWeb (SAML SP)
+  participant IdP as Identity Provider
+  participant Up as Upstream
+
+  B->>BW: GET /protected
+  BW-->>B: 302 signed HTTP-Redirect AuthnRequest
+  B->>IdP: GET SSO URL with SAMLRequest
+  IdP-->>B: 200/POST SAMLResponse with signature-protected assertion
+  B->>BW: POST ACS with SAMLResponse
+  BW->>BW: Validate signature, issuer, destination, expiry, replay
+  BW-->>B: 302 /protected with session cookie
+  B->>BW: GET /protected
+  BW->>Up: Request plus configured identity headers
+  Up-->>BW: Response
+  BW-->>B: Response
+```
+
+### Endpoints
+
+All endpoint paths are local paths on the public SP origin. The defaults are multisite settings and can be changed when available to the service.
+
+| Endpoint                         | Setting              | Default          | Method and purpose                                                                  |
+| -------------------------------- | -------------------- | ---------------- | ----------------------------------------------------------------------------------- |
+| SP metadata                      | `SAML_METADATA_PATH` | `/saml/metadata` | `GET` or `HEAD`; publishes SP entity, ACS, SLO, and signing certificate metadata.   |
+| Assertion Consumer Service (ACS) | `SAML_ACS_PATH`      | `/saml/acs`      | `POST`; receives the IdP response whose assertion is covered by its signature.      |
+| Local logout                     | `SAML_LOGOUT_PATH`   | `/saml/logout`   | Starts local logout; an authenticated session triggers a signed IdP logout request. |
+| Single Logout Service (SLS)      | `SAML_SLS_PATH`      | `/saml/sls`      | `GET` or `POST`; receives an IdP logout request or response.                        |
+
+`SAML_LOGOUT_REDIRECT` (default `/`) is the local path used after logout. Keep all four endpoint paths distinct and free of query strings, fragments, backslashes, whitespace, or traversal segments.
+
+### Keycloak 26.5.2 registration
+
+The [Keycloak 26.5.2 SAML client guide](https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc) uses the **Settings**, **Keys**, and **Advanced** client tabs. Use the following values for BunkerWeb's default endpoint layout. Replace `https://app.example.com` with the exact `SAML_SP_BASE_URL`.
+
+Create an enabled SAML client with these registration values. In the Keycloak UI, **Enabled** and **Front channel logout** are on (`true`); the client protocol is `SAML`.
+
+| Client setting       | Value                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| Client ID            | `https://app.example.com/saml/metadata`                                   |
+| Protocol             | `SAML`                                                                    |
+| Enabled              | `true`                                                                    |
+| Front channel logout | `true`                                                                    |
+| Valid redirect URIs  | `https://app.example.com/saml/acs` and `https://app.example.com/saml/sls` |
+
+In the client settings, require signed assertions and documents, require client signatures, select **RSA_SHA256**, and enable **Force POST Binding**. Leave **Encrypt Assertions** off: BunkerWeb requires the assertion to be covered by a trusted IdP signature, either on the assertion or on the entire response, and does not accept encrypted assertions. On **Keys**, enable **Client Signature Required**. Set **Use metadata descriptor URL** to **OFF** and provide the SP certificate manually, so Keycloak can verify BunkerWeb's signed requests without an IdP metadata import cycle. In **Advanced**, set the **Assertion Consumer Service POST Binding URL** to `/saml/acs` and both the **Logout Service POST Binding URL** and **Logout Service Redirect Binding URL** to `/saml/sls` on the public origin. Set the Name ID format to `username` and force that format.
+
+The corresponding client attributes are:
+
+```yaml
+saml.assertion.signature: "true"
+saml.server.signature: "true"
+saml.client.signature: "true"
+saml.encrypt: "false"
+saml.force.post.binding: "true"
+saml.authnstatement: "true"
+saml.signature.algorithm: "RSA_SHA256"
+saml_name_id_format: "username"
+saml_force_name_id_format: "true"
+saml.signing.certificate: "SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"
+saml_assertion_consumer_url_post: "https://app.example.com/saml/acs"
+saml_single_logout_service_url_post: "https://app.example.com/saml/sls"
+saml_single_logout_service_url_redirect: "https://app.example.com/saml/sls"
+```
+
+Add protocol mappers for `email`, `groups`, and `name`. For each mapper, use `protocol: "saml"`, `protocolMapper: "saml-user-attribute-mapper"`, and `consentRequired: false`; set `config.user.attribute` and `config.attribute.name` to the same attribute, and `config.attribute.nameformat` to `Basic`. Ensure the IdP user actually has these attributes; a missing claim produces no corresponding upstream header.
+
+### Settings (explained)
+
+Defaults below come from the SAML plugin settings. Empty defaults are shown as `empty`.
+
+#### Enablement, trust, and routes
+
+| Setting                | Default          | Purpose                                             |
+| ---------------------- | ---------------- | --------------------------------------------------- |
+| `USE_SAML`             | `no`             | Enable SAML for the service.                        |
+| `SAML_SP_ENTITY_ID`    | `empty`          | SP issuer and client identifier.                    |
+| `SAML_SP_BASE_URL`     | `empty`          | Public HTTPS origin with no path or query.          |
+| `SAML_IDP_ENTITY_ID`   | `empty`          | Trusted IdP issuer.                                 |
+| `SAML_IDP_SSO_URL`     | `empty`          | HTTPS IdP login endpoint.                           |
+| `SAML_IDP_SLO_URL`     | `empty`          | HTTPS IdP logout endpoint; empty uses SSO.          |
+| `SAML_SP_CERT`         | `empty`          | Matching SP certificate in PEM format.              |
+| `SAML_SP_PRIVATE_KEY`  | `empty`          | Unencrypted matching RSA private key in PEM format. |
+| `SAML_IDP_CERT`        | `empty`          | Trusted IdP signing certificate in PEM format.      |
+| `SAML_ACS_PATH`        | `/saml/acs`      | Local ACS path.                                     |
+| `SAML_LOGOUT_PATH`     | `/saml/logout`   | Local logout path.                                  |
+| `SAML_SLS_PATH`        | `/saml/sls`      | Local SLS callback path.                            |
+| `SAML_METADATA_PATH`   | `/saml/metadata` | Local SP metadata path.                             |
+| `SAML_LOGOUT_REDIRECT` | `/`              | Local path after logout.                            |
+
+#### Sessions and identity headers
+
+| Setting                         | Default  | Purpose                                                              |
+| ------------------------------- | -------- | -------------------------------------------------------------------- |
+| `SAML_CLOCK_SKEW`               | `60`     | Allowed assertion clock skew in seconds; valid range is 0–300.       |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`    | Idle session lifetime in seconds; valid range is 1–86400.            |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`   | Maximum session lifetime in seconds; valid range is 1–86400.         |
+| `SAML_USER_HEADER`              | `X-User` | Upstream header for the user value; empty disables it.               |
+| `SAML_USER_ATTRIBUTE`           | `NameID` | Attribute for the user value; `NameID` means the subject identifier. |
+| `SAML_EMAIL_HEADER`             | `empty`  | Upstream header for email; empty disables it.                        |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`  | Attribute for email; `NameID` means the subject identifier.          |
+| `SAML_GROUPS_HEADER`            | `empty`  | Upstream header for groups; empty disables it.                       |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups` | Attribute for groups; `NameID` means the subject identifier.         |
+| `SAML_NAME_HEADER`              | `empty`  | Upstream header for display name; empty disables it.                 |
+| `SAML_NAME_ATTRIBUTE`           | `name`   | Attribute for display name; `NameID` means the subject identifier.   |
+| `SAML_GROUPS_SEPARATOR`         | `,`      | Joins multiple values in a header.                                   |
+
+Before authentication, BunkerWeb clears each configured SAML identity header from the incoming request. It adds a header only after a valid response and only when the mapped attribute exists. Header names must be unique, syntactically valid, and cannot use routing or security-sensitive prefixes such as `X-Forwarded-*`, `Proxy-*`, or `Sec-*`. These headers carry identity to the protected upstream; they do not log a user into the BunkerWeb Web UI.
+
+#### Attribute ACL
+
+| Setting               | Default | Purpose                                                      |
+| --------------------- | ------- | ------------------------------------------------------------ |
+| `SAML_ACL_RULE_COUNT` | `empty` | Explicit numbered rule count; `0` clears the list.           |
+| `SAML_USE_ACL`        | `no`    | Enable attribute-based access control after SAML validation. |
+| `SAML_ACL_MATCH_MODE` | `all`   | Combine rules with `all` or `any`.                           |
+| `SAML_ACL_DENIED_URL` | `empty` | Redirect on denial; empty returns the deny status.           |
+| `SAML_ACL_ATTRIBUTE`  | `empty` | Attribute name for an ACL rule.                              |
+| `SAML_ACL_VALUE`      | `empty` | Required value for an ACL rule.                              |
+
+For example, this service requires both membership in `engineering` and the administrator email:
+
+```yaml
+app.example.com_USE_SAML: "yes"
+app.example.com_SAML_USE_ACL: "yes"
+app.example.com_SAML_ACL_RULE_COUNT: "2"
+app.example.com_SAML_ACL_MATCH_MODE: "all"
+app.example.com_SAML_ACL_ATTRIBUTE_1: "groups"
+app.example.com_SAML_ACL_VALUE_1: "engineering"
+app.example.com_SAML_ACL_ATTRIBUTE_2: "email"
+app.example.com_SAML_ACL_VALUE_2: "admin@example.com"
+```
+
+The first pair is `_1` and the second is `_2`; the UI numbers rules from 1. With an explicit count of `2`, both pairs are required; an absent attribute denies access, while an empty configured value is a denial. With `all`, every rule must match; with `any`, one matching rule is enough. With no rules, all authenticated users are allowed. At a service scope, the UI inherits the global rule list until you choose a service list; saving a service list replaces that inherited list, including when the replacement is explicitly empty. Leave `SAML_ACL_RULE_COUNT` empty to discover numbered rules up to the first 100 slots. Set it to `0` to clear all rules. An invalid mode or malformed explicit list fails closed. `SAML_ACL_DENIED_URL` redirects when set; otherwise BunkerWeb returns its denial status.
+
+#### Replay protection
+
+| Setting                 | Default | Context | Purpose                                                       |
+| ----------------------- | ------- | ------- | ------------------------------------------------------------- |
+| `SAML_REPLAY_DICT_SIZE` | `10m`   | global  | Shared-memory capacity for replay protection on one instance. |
+
+Each accepted assertion ID is added atomically to the replay store for the time it could still be accepted. The pending AuthnRequest ID is a separate session correlation value. On one instance, increase `SAML_REPLAY_DICT_SIZE` when the shared dictionary is too small. For replicas, enable the core `USE_REDIS=yes` session mode and point every instance at the same Redis service so replay keys use the shared store. Also keep the core `SESSIONS_SECRET` identical on every replica; otherwise a session created by one worker cannot be read by another. Sessions use secure, host-only cookies by default, with `HttpOnly`, `Secure`, and `SameSite=None`. With Redis enabled, session data moves to a namespaced Redis store instead of the cookie. The IdP's `SessionNotOnOrAfter` can end a session earlier than the configured timeouts. A consumed assertion remains consumed if a later callback step fails.
+
+### Logout
+
+Requesting `SAML_LOGOUT_PATH` clears the authenticated state, saves a pending logout correlation, and starts front-channel SLO. BunkerWeb sends a signed Redirect-binding logout request. After a valid signed LogoutResponse, it destroys the local session and redirects the browser to `SAML_LOGOUT_REDIRECT`. An IdP-initiated LogoutRequest can arrive at `SAML_SLS_PATH`; the SLS validates the issuer, destination, NameID, session index, and replay state, destroys the local session, and returns a signed response to the IdP. If no local session exists, the logout route destroys the empty session and redirects locally.
+
+### Limits and troubleshooting
+
+SAML currently supports SP-initiated browser login with a signed Redirect AuthnRequest and a POST ACS response. It does not support IdP-initiated login, encrypted assertions, or automatic IdP metadata import and refresh. Keep the IdP configured to sign documents/assertions and send the response with POST binding. Authentication and logout POST bodies are limited to 256 KiB; oversized requests are rejected before processing.
+
+- **The UI will not enable SAML:** check the HTTPS origin, all three certificates/keys, matching RSA key and certificate, IdP entity/SSO values, and the four distinct local paths. An invalid configuration is rejected and the request fails closed with `503`; no request reaches the upstream.
+- **The IdP rejects the AuthnRequest:** compare the SP entity ID, exact ACS/SLS URLs, SP certificate, RSA-SHA256 setting, and client-signature requirement. In Keycloak, check **Use metadata descriptor URL** is off and the manually supplied SP certificate is current.
+- **The ACS returns an error or 503:** verify the IdP signing certificate, assertion signature coverage, issuer, destination, clock synchronization, response binding, pending request correlation, and that the assertion ID has not already been consumed. Check that the IdP sends the mapped attributes.
+- **A user authenticates but receives a denial:** enable the expected ACL attributes, confirm numbered pairs and `SAML_ACL_RULE_COUNT`, and check `all` versus `any`. An empty attribute value or missing claim can deny by design.
+- **A session disappears behind a load balancer:** use the same Redis store and core session secret on every replica. Redis must be available when `USE_REDIS=yes`; replay protection and sessions do not silently fall back to per-worker state.
 
 ## LDAP SSO <img src='../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ldap-sso-pro}
 

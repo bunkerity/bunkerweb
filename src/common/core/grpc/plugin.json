@@ -30,7 +30,7 @@
       "help": "Location URL that will be proxied to a gRPC upstream.",
       "id": "grpc-url",
       "label": "gRPC URL",
-      "regex": "^.+$",
+      "regex": "^(?!(?:~\\*|~|\\^~|=)$)(?:(?:~\\*|~|\\^~|=) )?[^\\s;{}]+$",
       "type": "text",
       "multiple": "grpc"
     },

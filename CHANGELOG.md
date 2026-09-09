@@ -1,6 +1,67 @@
 # Changelog
 
-## v1.6.15~rc1 - 2026/08/??
+## v1.6.15~rc2 - 2026/09/??
+
+- [FEATURE] `crowdsec`: investigate IPs, inspect allowlists, and remove decisions through the Web UI and API, with richer report details and on-page allowlist guidance.
+- [FEATURE] `antibot`, `blacklist`, `whitelist`, `greylist`, `dnsbl`, `country`: match on a request header, name plus an optional PCRE regex on the value, as an ignore or list criterion. The value is a shared secret: it is stored as a password setting, never logged, and never cached.
+- [FEATURE] `reverseproxy`: `REVERSE_PROXY_MAX_CLIENT_SIZE` sets the body size, and the ModSecurity body limit, per URL.
+- [BUGFIX] `healthcheck`: `/healthz` answers `loading` while the instance is loading or reloading instead of always `ok`, and the container healthcheck matches the status exactly.
+- [SECURITY] `mtls`: no unverified clients before the CA bundle arrives; an invalid CA or CRL replacement keeps the last good material, a removal takes effect on reload.
+- [SECURITY] `crowdsec`: SHA-256 cache namespaces, `/crowdsec/ping` asks the Local API directly, per-service captcha settings that fail closed on provider errors.
+- [SECURITY] `whitelist`: `USE_WHITELIST=no` no longer lifts an active ban, and the global `WHITELIST_IP` fallback needs whitelisting on globally.
+- [BUGFIX] `api`, `ui`: settings are reported as rendered, and a service keeps its own settings under a globally selected template. (Fixes #3866)
+- [BUGFIX] `linux`, `all-in-one`: log rotation runs on every pass instead of once a day, and keeps fourteen generations. (Fixes #3838)
+- [BUGFIX] `kubernetes`: the example manifests point `DNS_RESOLVERS` at the `kube-dns` Service instead of one most clusters do not have. (Refs #2524)
+- [BUGFIX] `cli`, `linux`: `bwcli` and the pre-upgrade backup also read `DATABASE_URI` from `scheduler.env`. (Fixes #3836)
+- [BUGFIX] `installer`: a same-core Docker retag to an older pre-release is refused as a downgrade.
+- [BUGFIX] `installer`: Docker upgrades verify image, health and restart stability and roll back both files on failure; `.env` is last-wins, a slow stack exits 2.
+- [BUGFIX] `modsecurity`: the CRS plugin download keeps the last complete set on failure and no longer reloads an unchanged set.
+- [BUGFIX] `modsecurity`: `MODSECURITY_SEC_AUDIT_LOG` must end in `.log`.
+- [BUGFIX] `core`: a variables file no longer folds the next variable into the setting above it, and keeps urlsafe base64 and PEM chains whole.
+- [BUGFIX] `ui`: TOTP replay counters live in the database across workers and replicas; expect one fresh code after upgrading, and a read-only database no longer locks 2FA out.
+- [BUGFIX] `ui`: the "session expired" notice survives the redirect to /setup, `<html lang>` follows the language, and every locale has the full key set.
+- [BUGFIX] `ui`: a theme, language or table-column change is no longer dropped when a link is followed right after it.
+- [BUGFIX] `ui`: saving a custom config no longer trips the Web UI's own CRS rules when the config contains an XSS rule pattern.
+- [BUGFIX] `headers`: every hardcoded Permissions-Policy copy (loading, default server, error pages, Web UI) matches the plugin default again.
+- [BUGFIX] `letsencrypt`: a wildcard group mixing hostname depths is reported as misconfigured; only enabled HTTP challenges get the ACME path exception.
+- [BUGFIX] `core`: Lua `has_variable` falls back to the global value, and evicting an unexpired shared dict entry is logged with the setting to raise.
+- [BUGFIX] `core`: a cache event lost to a full shared dict no longer makes every following request wait for it, which cost 0.3 s per request until the instance restarted.
+- [BUGFIX] `metrics`: request facets are rebuilt once across workers and instances, and the reports page keeps its precomputed filter counts.
+- [BUGFIX] `metrics`: dashboard IP counts respect the selected window, and cold counters keep their stored baseline when the worker cache is full.
+- [BUGFIX] `metrics`: an instance refills the Redis reports list after it is evicted or deleted, `METRICS_REDIS_TTL=0` strips the expiry already set on those keys, and a failed TTL refresh is logged.
+- [BUGFIX] `ui`: `METRICS_MAX_BLOCKED_REQUESTS_REDIS=0` keeps the reports out of Redis instead of hiding them; the reports page, the dashboard and the metrics endpoint read them from the instances.
+- [BUGFIX] `redis`: a pooled connection no longer re-authenticates and re-selects the database on every use, and the ban check asks Redis for both keys at once, so a request on default settings costs two round trips instead of seven; a ban already cached on the instance is now enforced while Redis is unreachable.
+- [BUGFIX] `redis`: `REDIS_KEEPALIVE_POOL` defaults to 64 per NGINX worker; size `maxclients` from `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instances`.
+- [BUGFIX] `ui`, `cli`: `REDIS_SSL_VERIFY` is honored by the Web UI and `bwcli`, so a TLS Redis with a private CA works from both.
+- [BUGFIX] `ui`: one Redis client per worker instead of one per request, and an unmodified session is written back once per quarter of its lifetime instead of on every request, so a session idle since its last write can expire up to a quarter early.
+- [BUGFIX] `ui`: the reports page reads the list length once per scan and the writer certificate in one round trip, and a failed config read no longer authorises a scan ten times the configured window.
+- [BUGFIX] `ui`, `cli`: ban listings scan Redis in batches of 1000 and fetch values in one pipeline, and the bans page merges instance bans in linear time.
+- [BUGFIX] `crowdsec`: cache prefixes no longer shift with another service's Local API, and the health endpoint reports every failure at once.
+- [BUGFIX] `autoconf`: a stuck Kubernetes watch is detected on its own, and an invalid Ingress or HTTPRoute path is skipped with a warning.
+- [BUGFIX] `reverseproxy`, `redirect`, `grpc`: location operands are quoted, and the location settings reject whitespace, `;`, `{`, `}` and a bare modifier.
+- [BUGFIX] `scheduler`: the folder push body gets its own timeout, and an explicit `SEND_FILES_MIN_TIMEOUT` is no longer capped at 120 s. (Fixes #2924)
+- [BUGFIX] `scheduler`: a busy instance's `503` is retried, an instance back in loading is pushed to again, and a failed push no longer evicts the others.
+- [BUGFIX] `scheduler`: once-jobs wait for an instance to get the configuration, a custom config edit survives a failed write, a skipped healthcheck unsticks.
+- [BUGFIX] `scheduler`: cache restoration keeps a recoverable backup, cleanup stays inside the cache directory, permission repair skips child symlinks.
+- [BUGFIX] `scheduler`: a failed configuration publication is retried with a backoff instead of on every tick, and each applied change is published once.
+- [BUGFIX] `scheduler`: `CUSTOM_LOG_LEVEL` reaches the generator and a bare IPv6 instance is no longer pushed to twice.
+- [BUGFIX] `core`: a push swap no longer runs during a reload, keeps its digest outside the pushed tree, and never restores its own bookkeeping.
+- [BUGFIX] `core`: a failed push-swap rollback parks unrestored entries under `.bw-rescue.<timestamp>` instead of deleting them; remove it by hand.
+- [BUGFIX] `api`: a plugin id starting with `.bw-` is refused, a failed instance call answers 502, and a folder push gets its own body-write deadline.
+- [BUGFIX] `api`: service conversion uses its `service_convert` permission, and an explicit empty template is reported as empty, not as the global one.
+- [BUGFIX] `db`: `save_config` no longer empties the configuration it is handed (autoconf reloaded on every reconcile); query-string credentials are masked.
+- [BUGFIX] `db`: upgrading a MariaDB or MySQL database created by `1.5.6` no longer aborts on the `bw_jobs_cache` foreign key, whose name differs from an upgraded one's.
+- [DOCS] `templates`: document that a template's value beats one set in the global settings, and that setting it on the service overrides the template.
+- [DOCS] `integrations`, `metrics`: document `KEEP_CONFIG_ON_RESTART`, correct `SEND_FILES_MIN_TIMEOUT` and `DISABLE_ONLINE_API`.
+- [DOCS] `crowdsec`: the all-in-one agent starts only with the unprefixed `USE_CROWDSEC=yes`.
+- [DOCS] Add documentation about the `Maintenance` PRO plugin.
+- [BUILD] `release`: candidates are built once, tested as the exact artifacts and promoted by digest with a manifest; publication requires the `release` environment's reviewers to be the release owners.
+- [ALL-IN-ONE] Update the bundled CrowdSec to `v1.8.0`, fixing two datasource denial of service issues.
+- [BUGFIX] `backup`: the database lock is waited on for at most 30 s and then taken over, so a lock left behind by a killed process no longer wedges the scheduler and every job it runs.
+- [CONTRIBUTION] Thank you [teguh02](https://github.com/teguh02) for your contribution regarding the `Indonesian` translation of the web UI. (#3859)
+- [CONTRIBUTION] Thank you [Ayushsinha322](https://github.com/Ayushsinha322) for correcting the ModSecurity audit log documentation. (#3890)
+
+## v1.6.15~rc1 - 2026/08/31
 
 - [SECURITY] `core`: `KEEP_CONFIG_ON_RESTART=yes` no longer leaves a restarted instance stuck in its loading state with every Lua plugin skipped. `1.6.14` only.
 - [SECURITY] `modsecurity`: reject the RFC 2231 `filename*` parameter in multipart parts, which could hide a malicious filename from the WAF.

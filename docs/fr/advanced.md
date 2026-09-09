@@ -1,8 +1,8 @@
 # Utilisations avancées
 
-De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/examples) du dépôt GitHub.
+De nombreux exemples de cas d'utilisation concrets sont disponibles dans le dossier [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples) du dépôt GitHub.
 
-Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/misc/integrations).
+Nous fournissons également de nombreux modèles standard, tels que des fichiers YAML pour diverses intégrations et types de bases de données. Ceux-ci sont disponibles dans le dossier [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/misc/integrations).
 
 Cette section se concentre uniquement sur les utilisations avancées et le réglage de la sécurité, consultez la [section fonctionnalités](features.md) de la documentation pour voir tous les paramètres disponibles.
 
@@ -85,7 +85,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -96,7 +96,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -104,7 +104,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -121,7 +121,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -129,7 +129,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -176,7 +176,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -184,7 +184,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -249,7 +249,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+            bunkerity/bunkerweb-all-in-one:1.6.15-rc2
         ```
 
         Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -260,7 +260,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -270,7 +270,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -288,7 +288,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -298,7 +298,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -350,7 +350,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -360,7 +360,7 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -485,8 +485,8 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
         ```bash
         # Télécharger le script et sa somme
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh
-        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc1/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.15-rc2/install-bunkerweb.sh.sha256
 
         # Vérifier l'empreinte
         sha256sum -c install-bunkerweb.sh.sha256
@@ -588,7 +588,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
 
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "192.168.1.11 192.168.1.12" # Remplacez par les IPs de vos workers
@@ -607,7 +607,7 @@ Le Manager est le cerveau du cluster. Il exécute le Scheduler, la base de donn�
           - bw-redis
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         ports:
           - "7000:7000" # Exposer le port de l'UI
         environment:
@@ -693,7 +693,7 @@ Les workers sont les nœuds qui traitent le trafic entrant.
     ```yaml title="docker-compose.yml"
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -998,7 +998,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1026,7 +1026,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1037,7 +1037,7 @@ Pour activer systemd-resolved comme résolveur DNS dans BunkerWeb, définissez l
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -1154,7 +1154,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -1194,7 +1194,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Docker"
@@ -1217,7 +1217,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -1260,7 +1260,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1330,7 +1330,7 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       volumes:
         - ./bw-data:/data
       ...
@@ -1576,7 +1576,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Veuillez noter que si votre conteneur existe déjà, vous devrez le supprimer et le recréer afin que les nouvelles variables d'environnement soient prises en compte.
@@ -1599,7 +1599,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1614,7 +1614,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1665,7 +1665,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1895,7 +1895,7 @@ Pour la liste complète des paramètres concernant `stream` le  mode, veuillez v
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -2025,7 +2025,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Veuillez noter que si votre conteneur est déjà créé, vous devrez le supprimer et le recréer pour que les nouvelles variables d'environnement soient appliquées.
@@ -2069,7 +2069,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2084,7 +2084,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -2178,7 +2178,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -2191,7 +2191,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -2206,7 +2206,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -2446,7 +2446,7 @@ BunkerWeb prend en charge PHP en utilisant des  instances [PHP-FPM externes ou ]
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2545,7 +2545,7 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           USE_IPv6: "yes"
 
@@ -2644,7 +2644,7 @@ LOG_LEVEL_1=error
 
 ### Rétention des fichiers journaux {#log-file-retention}
 
-Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` dès qu'il dépasse 100 Mo, conserve sept générations compressées et utilise `copytruncate`.
+Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'une rétention, et toutes deux utilisent le même mécanisme : `logrotate`, avec la politique que BunkerWeb installe dans `/etc/logrotate.d/bunkerweb`. Elle fait tourner tout fichier correspondant à `/var/log/bunkerweb/*.log` chaque jour, ou plus tôt si le fichier dépasse 100 Mo, conserve quatorze générations numérotées (`modsec_audit.log.1`, `.2.gz`, etc.) et utilise `copytruncate`.
 
 - **Linux** : les paquets dépendent de `logrotate`, et le système l'exécute via son propre minuteur. Il n'y a rien d'autre à faire.
 - **All-in-one** : l'image embarque `logrotate` et l'exécute toutes les heures sous supervisor, avec ce même fichier de politique.
@@ -2654,13 +2654,17 @@ Seules les intégrations qui conservent de vrais fichiers journaux ont besoin d'
 
 Modifiez `/etc/logrotate.d/bunkerweb` pour changer le seuil, le nombre de générations, ou pour ajouter un `maxage`. Sur l'All-in-one, montez votre propre fichier par-dessus ce chemin.
 
-L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même.
+Deux directives y sont déterminantes. `maxsize` est ce qui garde `daily` actif : la directive `size`, très proche, est exclusive des directives d'intervalle et ne ferait donc tourner qu'à la taille. Et ajouter `dateext` nommerait chaque archive d'après la date, si bien qu'une deuxième rotation le même jour échouerait avec `destination ... already exists, skipping rotation`, laissant le fichier actif non tourné jusqu'au changement de date.
+
+L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (multisite, par défaut `/var/log/bunkerweb/modsec_audit.log`) ; voir les [paramètres ModSecurity](features.md#modsecurity). Le pointer en dehors de `/var/log/bunkerweb` le sort de la politique ci-dessus, et dans une intégration en conteneurs, il remplace le lien symbolique par un fichier réel que rien ne fait tourner. Si vous le déplacez, montez-le sur un volume et faites-le tourner vous-même. Le paramètre n'accepte qu'un chemin sous `/var/log/bunkerweb`, il ne peut donc pas pointer vers `/data` : pour conserver l'historique d'audit après une recréation du conteneur, montez un volume sur `/var/log/bunkerweb` lui-même, ce qui préserve l'ensemble des journaux et pas seulement le journal d'audit.
+
+Avec la valeur par défaut `BCFH` de `MODSECURITY_SEC_AUDIT_LOG_PARTS`, la partie `C` place le corps de la requête dans le journal d'audit. Traitez ce fichier comme sensible avant de le copier ailleurs.
 
 ### Valeurs par défaut et exemples d'intégration
 
 === "Linux"
 
-    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`. La rotation est gérée par la configuration système `logrotate` installée dans `/etc/logrotate.d/bunkerweb` (quotidienne, rétention de 7 jours, compression via `copytruncate`).
+    **Comportement par défaut** : `LOG_TYPES="file"`. Les journaux sont écrits dans `/var/log/bunkerweb/*.log`. La rotation est gérée par la configuration système `logrotate` installée dans `/etc/logrotate.d/bunkerweb` (quotidienne ou au-delà de 100 Mo, quatorze générations, compression via `copytruncate`).
 
     **Exemple** : Conserver les fichiers locaux (pour l'interface Web) et les reproduire également vers le syslog système.
 
@@ -2704,7 +2708,7 @@ L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (mu
     services:
       bunkerweb:
         # Ceci est le nom qui sera utilisé pour identifier l'instance dans le Scheduler
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -2717,7 +2721,7 @@ L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (mu
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom d'instance correct
@@ -2734,7 +2738,7 @@ L'emplacement du journal d'audit est défini par `MODSECURITY_SEC_AUDIT_LOG` (mu
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+        image: bunkerity/bunkerweb-ui:1.6.15-rc2
         environment:
           <<: *bw-env
         volumes:
@@ -2906,7 +2910,7 @@ Vous pouvez configurer le pilote de journalisation pour vos services dans votre 
 ```yaml
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.15-rc1
+    image: bunkerity/bunkerweb:1.6.15-rc2
     logging:
       driver: "json-file"
       options:
@@ -3015,7 +3019,7 @@ Les variables couramment utilisées sont :
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+        bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
     Si le conteneur existe déjà, recréez-le pour appliquer le nouvel environnement.
@@ -3026,7 +3030,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3045,7 +3049,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3088,7 +3092,7 @@ Les variables couramment utilisées sont :
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
       ...
       environment:
         HTTP_PROXY: "http://proxy.example.local:3128"
@@ -3357,12 +3361,12 @@ Le **serveur MCP BunkerWeb** permet aux assistants IA comme **Claude Code** et *
 
 ### Exemple Docker Compose
 
-Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc1/examples/mcp-stack) :
+Un exemple complet est disponible dans [`examples/mcp-stack/`](https://github.com/bunkerity/bunkerweb/tree/v1.6.15-rc2/examples/mcp-stack) :
 
 ```yaml
 services:
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.15-rc1
+    image: bunkerity/bunkerweb-api:1.6.15-rc2
     environment:
       API_TOKEN: "my-bearer-token-for-mcp"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"
@@ -3777,6 +3781,8 @@ Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec gard
 
 Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerWeb (pages d'erreur, page du serveur par défaut et pages de défi antibot) par vos propres modèles HTML ou Lua personnalisés. Cela vous permet de maintenir une image de marque cohérente sur toutes les pages destinées aux utilisateurs servies par BunkerWeb.
 
+Pour le comportement et la personnalisation de la Maintenance, consultez le [guide avancé sur la Maintenance](advanced.md#maintenance-pro).
+
 ### Fonctionnalités
 
 - **Pages d'erreur personnalisées par service** et **pages de défi antibot** (captcha, vérification JavaScript, reCAPTCHA, hCaptcha, Turnstile, mCaptcha, Cap.js).
@@ -3796,6 +3802,7 @@ Le plugin Custom Pages vous permet de remplacer les pages intégrées de BunkerW
 
 | Paramètre                        | Défaut | Contexte  | Description                                                                  |
 | -------------------------------- | ------ | --------- | ---------------------------------------------------------------------------- |
+| `CUSTOM_MAINTENANCE_PAGE`        |        | multisite | Chemin absolu vers le modèle de page Maintenance personnalisé.               |
 | `CUSTOM_ERROR_PAGE`              |        | multisite | Chemin absolu vers le modèle de page d'erreur personnalisé.                  |
 | `CUSTOM_DEFAULT_SERVER_PAGE`     |        | global    | Chemin absolu vers le modèle de page du serveur par défaut personnalisé.     |
 | `CUSTOM_ANTIBOT_CAPTCHA_PAGE`    |        | multisite | Chemin absolu vers la page de défi CAPTCHA antibot personnalisée.            |
@@ -4183,11 +4190,11 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
         ```yaml
         services:
           bunkerweb:
-            image: bunkerity/bunkerweb:1.6.15-rc1
+            image: bunkerity/bunkerweb:1.6.15-rc2
             # ... autres paramètres (pas de variables d'environnement nécessaires ici pour les pages personnalisées)
 
           bw-scheduler:
-            image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+            image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
             volumes:
               - ./templates:/custom_templates:ro
             environment:
@@ -4270,7 +4277,7 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
             spec:
               containers:
                 - name: bunkerweb-scheduler
-                  image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                  image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                   env:
                     - name: CUSTOM_ERROR_PAGE
                       value: "/custom_templates/error.html"
@@ -4299,6 +4306,64 @@ Les modèles utilisent la syntaxe de modèle Lua avec les délimiteurs suivants 
 - **Les fichiers mis en cache** se trouvent dans `/var/cache/bunkerweb/custom_pages` ; la mise à jour du fichier source suffit—le job détecte le nouveau hash et recharge NGINX automatiquement.
 - **Conformité CSP** : Utilisez toujours les variables `nonce_script` et `nonce_style` pour les scripts et styles inline afin d'assurer une bonne gestion de la Content Security Policy.
 - **Test des modèles** : Vous pouvez tester vos modèles localement en les rendant avec un moteur de modèle Lua avant de les déployer sur BunkerWeb.
+
+## Maintenance <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#maintenance-pro}
+
+La Maintenance remplace les réponses des emplacements de proxy inverse standard par une page de maintenance lorsque l'application est indisponible. Elle est activée au niveau de chaque service, renvoie `503 Service Unavailable` et n'atteint jamais l'upstream. Le paramètre multisite est défini par défaut sur `no`.
+
+### Activer et appliquer le mode maintenance
+
+Définissez `USE_MAINTENANCE` sur `yes` pour un service multisite existant qui utilise le proxy inverse standard. Cet extrait présente les clés d'environnement concernées ; fusionnez-le dans votre configuration du scheduler au lieu de le considérer comme un fichier Compose complet :
+
+```yaml
+# Fragment : environnement du scheduler pour un service avec proxy inverse
+environment:
+  app.example.com_USE_REVERSE_PROXY: "yes"
+  app.example.com_REVERSE_PROXY_HOST: "http://app:8080"
+  app.example.com_USE_MAINTENANCE: "yes"
+```
+
+Appliquez ce réglage via votre intégration BunkerWeb habituelle. Le scheduler génère la configuration du service et recharge les workers. Définissez `app.example.com_USE_MAINTENANCE` sur `no`, puis appliquez de nouveau pour rétablir le proxy. Si les paramètres du proxy inverse existent déjà, seul ce paramètre est nécessaire.
+
+L'interface Web propose deux boutons d'activation rapide : le bouton avec une icône de clé à molette dans la colonne **Maintenance** sur la page des services et le bouton flottant en forme de clé à molette sur la page de modification d'un service. Les deux mettent à jour le paramètre du service et l'appliquent sans rechargement de la page. Le formulaire de modification reste synchronisé, y compris les modes Facile/Avancé et l'éditeur brut, tandis que les modifications non enregistrées sans lien restent en place.
+
+Les boutons nécessitent une base de données accessible en écriture et un accès en écriture au service. Ils sont désactivés pour les utilisateurs en lecture seule, les bases de données en lecture seule et les services `USE_UI=yes`, afin que l'interface intégrée reste disponible. Ils refusent de remplacer une valeur `USE_MAINTENANCE` gérée de l'extérieur ; modifiez-la auprès de son propriétaire. Un bouton est rejeté lorsqu'une application est en cours.
+
+### Comportement et portée des requêtes
+
+La Maintenance s'applique uniquement aux emplacements générés à partir de la configuration de proxy inverse standard de BunkerWeb, y compris `REVERSE_PROXY_HOST` et ses variantes numérotées. Elle n'ajoute pas d'emplacements de proxy, ne modifie pas les emplacements personnalisés et ne prend pas en charge les gestionnaires de réécriture manuels. Si une configuration personnalisée remplace ces gestionnaires ou les variables du backend, intégrez vous-même la réponse de maintenance.
+
+La Maintenance conserve la politique HTTPS existante : une redirection HTTP vers HTTPS activée s'effectue d'abord. Sur l'origine HTTPS effective, elle renvoie `503` avec `Cache-Control: no-store`, une Content Security Policy restrictive et `X-Content-Type-Options: nosniff`.
+
+Les requêtes GET, POST, OPTIONS et les handshakes WebSocket reçoivent la page de maintenance. BunkerWeb ignore le corps de la requête : le corps d'une requête POST n'est jamais transmis ni rejoué. Une requête HEAD reçoit le même statut et les mêmes en-têtes, sans corps. Les WebSockets existantes ne sont pas fermées explicitement ; l'arrêt normal des workers lors du rechargement s'applique.
+
+La Maintenance s'exécute avant l'authentification, l'antibot et les autres contrôles d'accès ; les clients autorisés et les services en mode détection la reçoivent donc également. Les emplacements NGINX locaux, l'API interne et les endpoints de santé conservent leur comportement normal. Il en va de même pour `/.well-known/acme-challenge/` et le passthrough Let's Encrypt configuré. La Maintenance conserve cette exception ; elle n'émet pas de certificats et ne crée pas de gestionnaire ACME.
+
+### Personnaliser la page de maintenance
+
+La page fournie fonctionne sans Custom Pages. Pour la personnaliser avec Custom Pages, ouvrez l'éditeur Custom Pages et choisissez **Maintenance**. Le **Mode facile** modifie le titre et le message de maintenance, le favicon, le logo/texte du pied de page et l'illustration SVG. Le titre met à jour le titre du navigateur et l'en-tête ; un titre ou une illustration vide conserve la valeur par défaut. Conservez les classes SVG `maintenance-top` et `maintenance-tool` pour l'animation de l'illustration.
+
+En **Mode avancé**, modifiez le modèle HTML/Lua complet. Les variables disponibles sont :
+
+| Variable       | Rôle                                                          |
+| -------------- | ------------------------------------------------------------- |
+| `title`        | `Site under maintenance`, titre de page fourni par le plugin. |
+| `nonce_style`  | Nonce CSP par réponse pour les éléments `<style>` inline.     |
+| `nonce_script` | Nonce CSP par réponse pour les éléments `<script>` inline.    |
+
+Utilisez les valeurs nonce dans chaque style et script inline, par exemple `nonce="{* nonce_style *}"`. La réponse autorise les images intégrées, les SVG et les polices via des URL `data:` et bloque les autres origines. Intégrez les ressources en ligne ou sous forme d'URL de données ; les URL de ressources de l'application reçoivent également la maintenance et ne peuvent pas charger de dépendances.
+
+Pour une page gérée par fichier, définissez `CUSTOM_MAINTENANCE_PAGE` sur un chemin absolu lisible par le scheduler. Cette valeur est prioritaire sur un modèle UI et verrouille cette portée dans l'éditeur. Sans cette valeur, un service utilise son propre modèle UI ou hérite du modèle global. **Supprimer** retire la surcharge du service et rétablit l'héritage. **Réinitialiser** supprime le modèle UI et force la page fournie, même lorsqu'une personnalisation globale existe. L'enregistrement d'une nouvelle surcharge de service efface son marqueur de réinitialisation. Activez ou désactivez la maintenance séparément avec `USE_MAINTENANCE`.
+
+Le job Custom Pages valide le HTML et se protège contre les problèmes connus de compilation des modèles Lua avant la mise en cache. Une source invalide conserve le dernier cache accepté. Une page active indisponible ou défaillante revient à la page fournie, puis à une page d'urgence minimale. Un échec de rendu ne rétablit jamais le trafic vers le proxy.
+
+### Dépannage de la Maintenance
+
+- **Le bouton est désactivé ou rejeté :** vérifiez les droits d'écriture, `USE_UI` et la gestion externe de `USE_MAINTENANCE` ; modifiez les valeurs gérées de l'extérieur auprès de leur propriétaire.
+- **L'application répond toujours :** vérifiez qu'un emplacement de proxy inverse standard possède `USE_REVERSE_PROXY=yes` et `USE_MAINTENANCE=yes`. Les chemins locaux et ACME sont des exceptions.
+- **Vous recevez une redirection au lieu de `503` :** la politique HTTPS existante redirige d'abord ; suivez l'URL HTTPS.
+- **La page fournie est utilisée :** vérifiez le fichier lisible par le scheduler, la validation du modèle et le journal du scheduler ; un paramètre de fichier verrouille le modèle UI.
+- **Des ressources ou scripts inline sont absents :** intégrez-les et utilisez `nonce_style` ou `nonce_script` ; les URL de l'application ne sont pas disponibles.
 
 ## OpenID Connect <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#openid-connect-pro}
 
@@ -4511,6 +4576,196 @@ Options fréquentes de durcissement / tuning :
 - **Dérive d'horloge / "token not yet valid"** : activez NTP ; ajustez `OPENIDC_IAT_SLACK` si nécessaire.
 - **Header utilisateur absent** : vérifiez que le claim de `OPENIDC_USER_HEADER_CLAIM` existe dans l'ID token/userinfo.
 - **Déploiements multi-instance** : activez `USE_REDIS=yes` et configurez `REDIS_HOST` (ou Sentinel) pour partager les sessions.
+
+## SAML <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#saml-pro}
+
+Le plugin **SAML** (PRO) transforme BunkerWeb en fournisseur de services (SP) SAML 2.0 pour le SSO dans le navigateur. Il accepte une réponse IdP dont l'assertion est couverte par une signature de confiance, crée une session et peut exposer certains attributs à l'upstream protégé sous forme d'en-têtes. Il prend en charge BunkerWeb 1.6.14 et les versions 1.6.x ultérieures.
+
+### Prérequis et éléments de confiance
+
+Utilisez une origine HTTPS publique pour chaque service protégé, telle que `https://app.example.com`, sans barre oblique finale, chemin ni chaîne de requête. Un port HTTPS non standard est autorisé. SAML nécessite trois éléments au format PEM :
+
+- une **clé privée RSA non chiffrée** pour le SP ;
+- le certificat SP correspondant au format PEM ;
+- le certificat de signature PEM de l'IdP, que BunkerWeb utilise pour vérifier les assertions.
+
+La clé et le certificat SP doivent correspondre et être des clés RSA d'au moins 2048 bits. L'URL SSO de l'IdP et, si elle est fournie, son URL SLO doivent utiliser HTTPS. Gardez la clé privée secrète ; BunkerWeb l'utilise pour signer les requêtes d'authentification et de déconnexion.
+
+### Configurer SAML dans l'interface
+
+Ouvrez **SAML** pour le service cible et choisissez sa portée. Le formulaire regroupe les paramètres dans les sections IdP, SP, session, en-têtes d'identité et ACL. Suivez cet ordre :
+
+1. Activez `USE_SAML` pour le service.
+2. Saisissez l'origine SP publique, l'identifiant d'entité SP, le certificat SP et la clé privée RSA non chiffrée.
+3. Saisissez l'identifiant d'entité IdP, l'URL SSO HTTPS, le certificat de signature PEM approuvé et, éventuellement, l'URL SLO HTTPS. Une URL SLO vide utilise l'URL SSO.
+4. Conservez les chemins locaux par défaut sauf s'ils sont en conflit avec une route existante. Enregistrez et appliquez la configuration.
+5. Utilisez **Exporter les métadonnées** pour télécharger ou afficher les métadonnées SP de BunkerWeb, puis enregistrez ces métadonnées ainsi que les URL ACS/SLO exactes auprès de l'IdP.
+6. Configurez les attributs d'identité et les règles ACL, puis enregistrez et appliquez de nouveau.
+
+BunkerWeb exporte les métadonnées SP ; il n'importe pas les métadonnées IdP et ne les actualise pas automatiquement. Configurez d'abord les champs et certificats IdP, puis exportez les métadonnées afin d'éviter une boucle de configuration.
+
+### Flux de requête du navigateur
+
+Une connexion initiée par le SP signe l'AuthnRequest avec la clé privée SP et l'envoie à l'IdP via HTTP-Redirect. L'IdP renvoie à l'ACS une réponse dont l'assertion est couverte par sa signature via HTTP-POST. BunkerWeb valide la corrélation, la destination, l'émetteur, les horodatages de l'assertion, la signature et l'état de rejeu avant de créer une session. Le corps de la requête initiale n'est pas rejoué.
+
+```mermaid
+sequenceDiagram
+  participant B as Navigateur
+  participant BW as BunkerWeb (SP SAML)
+  participant IdP as Fournisseur d'identité
+  participant Up as Upstream
+
+  B->>BW: GET /protected
+  BW-->>B: 302 AuthnRequest HTTP-Redirect signé
+  B->>IdP: GET URL SSO avec SAMLRequest
+  IdP-->>B: 200/POST SAMLResponse avec assertion protégée par signature
+  B->>BW: POST ACS avec SAMLResponse
+  BW->>BW: Valider signature, émetteur, destination, expiration, rejeu
+  BW-->>B: 302 /protected avec cookie de session
+  B->>BW: GET /protected
+  BW->>Up: Requête et en-têtes d'identité configurés
+  Up-->>BW: Réponse
+  BW-->>B: Réponse
+```
+
+### Endpoints
+
+Tous les chemins d'endpoint sont des chemins locaux sur l'origine SP publique. Les valeurs par défaut sont des paramètres multisite et peuvent être modifiées lorsqu'elles sont disponibles pour le service.
+
+| Endpoint                         | Paramètre            | Défaut           | Méthode et objectif                                                                                     |
+| -------------------------------- | -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| Métadonnées SP                   | `SAML_METADATA_PATH` | `/saml/metadata` | `GET` ou `HEAD` ; publie les métadonnées d'entité SP, ACS, SLO et du certificat de signature.           |
+| Assertion Consumer Service (ACS) | `SAML_ACS_PATH`      | `/saml/acs`      | `POST` ; reçoit la réponse IdP dont l'assertion est couverte par sa signature.                          |
+| Déconnexion locale               | `SAML_LOGOUT_PATH`   | `/saml/logout`   | Lance la déconnexion locale ; une session authentifiée déclenche une requête de déconnexion IdP signée. |
+| Single Logout Service (SLS)      | `SAML_SLS_PATH`      | `/saml/sls`      | `GET` ou `POST` ; reçoit une requête ou une réponse de déconnexion IdP.                                 |
+
+`SAML_LOGOUT_REDIRECT` (par défaut `/`) est le chemin local utilisé après la déconnexion. Conservez les quatre chemins d'endpoint distincts et exempts de chaînes de requête, fragments, barres obliques inverses, espaces ou segments de traversée.
+
+### Enregistrement de Keycloak 26.5.2
+
+Le [guide du client SAML Keycloak 26.5.2](https://github.com/keycloak/keycloak/blob/26.5.2/docs/documentation/server_admin/topics/clients/saml/proc-creating-saml-client.adoc) utilise les onglets client **Settings**, **Keys** et **Advanced**. Utilisez les valeurs suivantes pour la disposition d'endpoint par défaut de BunkerWeb. Remplacez `https://app.example.com` par la valeur exacte de `SAML_SP_BASE_URL`.
+
+Créez un client SAML activé avec ces valeurs d'enregistrement. Dans l'interface Keycloak, **Enabled** et **Front channel logout** sont activés (`true`) ; le protocole client est `SAML`.
+
+| Paramètre client     | Valeur                                                                   |
+| -------------------- | ------------------------------------------------------------------------ |
+| Client ID            | `https://app.example.com/saml/metadata`                                  |
+| Protocol             | `SAML`                                                                   |
+| Enabled              | `true`                                                                   |
+| Front channel logout | `true`                                                                   |
+| Valid redirect URIs  | `https://app.example.com/saml/acs` et `https://app.example.com/saml/sls` |
+
+Dans les paramètres du client, exigez les assertions et documents signés, exigez les signatures client, sélectionnez **RSA_SHA256** et activez **Force POST Binding**. Laissez **Encrypt Assertions** désactivé : BunkerWeb exige que l'assertion soit couverte par une signature IdP de confiance, sur l'assertion ou sur la réponse complète, et n'accepte pas les assertions chiffrées. Dans **Keys**, activez **Client Signature Required**. Définissez **Use metadata descriptor URL** sur **OFF** et fournissez manuellement le certificat SP afin que Keycloak puisse vérifier les requêtes signées de BunkerWeb sans cycle d'importation de métadonnées IdP. Dans **Advanced**, définissez l'**Assertion Consumer Service POST Binding URL** sur `/saml/acs` et les **Logout Service POST Binding URL** et **Logout Service Redirect Binding URL** sur `/saml/sls` sur l'origine publique. Définissez le format Name ID sur `username` et forcez ce format.
+
+Les attributs client correspondants sont :
+
+```yaml
+saml.assertion.signature: "true"
+saml.server.signature: "true"
+saml.client.signature: "true"
+saml.encrypt: "false"
+saml.force.post.binding: "true"
+saml.authnstatement: "true"
+saml.signature.algorithm: "RSA_SHA256"
+saml_name_id_format: "username"
+saml_force_name_id_format: "true"
+saml.signing.certificate: "SP_CERTIFICATE_BODY_WITHOUT_PEM_WRAPPERS"
+saml_assertion_consumer_url_post: "https://app.example.com/saml/acs"
+saml_single_logout_service_url_post: "https://app.example.com/saml/sls"
+saml_single_logout_service_url_redirect: "https://app.example.com/saml/sls"
+```
+
+Ajoutez des mappers de protocole pour `email`, `groups` et `name`. Pour chaque mapper, utilisez `protocol: "saml"`, `protocolMapper: "saml-user-attribute-mapper"` et `consentRequired: false` ; définissez `config.user.attribute` et `config.attribute.name` sur le même attribut, et `config.attribute.nameformat` sur `Basic`. Vérifiez que l'utilisateur IdP possède réellement ces attributs ; l'absence d'un claim ne produit pas l'en-tête upstream correspondant.
+
+### Paramètres (expliqués)
+
+Les valeurs par défaut ci-dessous proviennent des paramètres du plugin SAML. Les valeurs par défaut vides sont indiquées par `empty`.
+
+#### Activation, confiance et routes
+
+| Paramètre              | Défaut           | Objectif                                                     |
+| ---------------------- | ---------------- | ------------------------------------------------------------ |
+| `USE_SAML`             | `no`             | Active SAML pour le service.                                 |
+| `SAML_SP_ENTITY_ID`    | `empty`          | Émetteur SP et identifiant client.                           |
+| `SAML_SP_BASE_URL`     | `empty`          | Origine HTTPS publique sans chemin ni requête.               |
+| `SAML_IDP_ENTITY_ID`   | `empty`          | Émetteur IdP approuvé.                                       |
+| `SAML_IDP_SSO_URL`     | `empty`          | Endpoint de connexion IdP en HTTPS.                          |
+| `SAML_IDP_SLO_URL`     | `empty`          | Endpoint de déconnexion IdP en HTTPS ; vide, il utilise SSO. |
+| `SAML_SP_CERT`         | `empty`          | Certificat SP correspondant au format PEM.                   |
+| `SAML_SP_PRIVATE_KEY`  | `empty`          | Clé privée RSA correspondante, non chiffrée, au format PEM.  |
+| `SAML_IDP_CERT`        | `empty`          | Certificat de signature IdP approuvé au format PEM.          |
+| `SAML_ACS_PATH`        | `/saml/acs`      | Chemin ACS local.                                            |
+| `SAML_LOGOUT_PATH`     | `/saml/logout`   | Chemin de déconnexion local.                                 |
+| `SAML_SLS_PATH`        | `/saml/sls`      | Chemin de callback SLS local.                                |
+| `SAML_METADATA_PATH`   | `/saml/metadata` | Chemin des métadonnées SP locales.                           |
+| `SAML_LOGOUT_REDIRECT` | `/`              | Chemin local après la déconnexion.                           |
+
+#### Sessions et en-têtes d'identité
+
+| Paramètre                       | Défaut   | Objectif                                                                      |
+| ------------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `SAML_CLOCK_SKEW`               | `60`     | Décalage d'horloge d'assertion autorisé en secondes ; plage valide : 0–300.   |
+| `SAML_SESSION_IDLE_TIMEOUT`     | `900`    | Durée de vie d'inactivité de la session en secondes ; plage valide : 1–86400. |
+| `SAML_SESSION_ABSOLUTE_TIMEOUT` | `3600`   | Durée de vie maximale de la session en secondes ; plage valide : 1–86400.     |
+| `SAML_USER_HEADER`              | `X-User` | En-tête upstream pour la valeur utilisateur ; vide, il est désactivé.         |
+| `SAML_USER_ATTRIBUTE`           | `NameID` | Attribut de la valeur utilisateur ; `NameID` désigne l'identifiant du sujet.  |
+| `SAML_EMAIL_HEADER`             | `empty`  | En-tête upstream pour l'adresse e-mail ; vide, il est désactivé.              |
+| `SAML_EMAIL_ATTRIBUTE`          | `email`  | Attribut de l'adresse e-mail ; `NameID` désigne l'identifiant du sujet.       |
+| `SAML_GROUPS_HEADER`            | `empty`  | En-tête upstream pour les groupes ; vide, il est désactivé.                   |
+| `SAML_GROUPS_ATTRIBUTE`         | `groups` | Attribut des groupes ; `NameID` désigne l'identifiant du sujet.               |
+| `SAML_NAME_HEADER`              | `empty`  | En-tête upstream pour le nom affiché ; vide, il est désactivé.                |
+| `SAML_NAME_ATTRIBUTE`           | `name`   | Attribut du nom affiché ; `NameID` désigne l'identifiant du sujet.            |
+| `SAML_GROUPS_SEPARATOR`         | `,`      | Séparateur de plusieurs valeurs dans un en-tête.                              |
+
+Avant l'authentification, BunkerWeb efface chaque en-tête d'identité SAML configuré de la requête entrante. Il n'ajoute un en-tête qu'après une réponse valide et uniquement lorsque l'attribut mappé existe. Les noms d'en-tête doivent être uniques, syntaxiquement valides et ne peuvent pas utiliser de préfixes liés au routage ou sensibles à la sécurité, tels que `X-Forwarded-*`, `Proxy-*` ou `Sec-*`. Ces en-têtes transmettent l'identité à l'upstream protégé ; ils n'ouvrent pas de session pour l'utilisateur dans l'interface Web BunkerWeb.
+
+#### ACL d'attributs
+
+| Paramètre             | Défaut  | Objectif                                                                    |
+| --------------------- | ------- | --------------------------------------------------------------------------- |
+| `SAML_ACL_RULE_COUNT` | `empty` | Nombre explicite de règles numérotées ; `0` efface la liste.                |
+| `SAML_USE_ACL`        | `no`    | Active le contrôle d'accès basé sur les attributs après la validation SAML. |
+| `SAML_ACL_MATCH_MODE` | `all`   | Combine les règles avec `all` ou `any`.                                     |
+| `SAML_ACL_DENIED_URL` | `empty` | Redirection en cas de refus ; vide, renvoie le statut de refus.             |
+| `SAML_ACL_ATTRIBUTE`  | `empty` | Nom de l'attribut d'une règle ACL.                                          |
+| `SAML_ACL_VALUE`      | `empty` | Valeur requise pour une règle ACL.                                          |
+
+Par exemple, ce service exige à la fois l'appartenance à `engineering` et l'adresse e-mail de l'administrateur :
+
+```yaml
+app.example.com_USE_SAML: "yes"
+app.example.com_SAML_USE_ACL: "yes"
+app.example.com_SAML_ACL_RULE_COUNT: "2"
+app.example.com_SAML_ACL_MATCH_MODE: "all"
+app.example.com_SAML_ACL_ATTRIBUTE_1: "groups"
+app.example.com_SAML_ACL_VALUE_1: "engineering"
+app.example.com_SAML_ACL_ATTRIBUTE_2: "email"
+app.example.com_SAML_ACL_VALUE_2: "admin@example.com"
+```
+
+La première paire est `_1` et la seconde `_2` ; l'interface numérote les règles à partir de 1. Avec un nombre explicite de `2`, les deux paires sont requises ; l'absence d'un attribut refuse l'accès, tandis qu'une valeur configurée vide constitue un refus. Avec `all`, toutes les règles doivent correspondre ; avec `any`, une seule règle correspondante suffit. Sans règle, tous les utilisateurs authentifiés sont autorisés. À la portée d'un service, l'interface hérite de la liste de règles globale jusqu'à ce que vous choisissiez une liste de service ; l'enregistrement d'une liste de service remplace cette liste héritée, y compris lorsque le remplacement est explicitement vide. Laissez `SAML_ACL_RULE_COUNT` vide pour découvrir les règles numérotées jusqu'au premier des 100 emplacements. Définissez-le sur `0` pour effacer toutes les règles. Un mode invalide ou une liste explicite mal formée échoue de manière restrictive. `SAML_ACL_DENIED_URL` redirige lorsqu'il est défini ; sinon BunkerWeb renvoie son statut de refus.
+
+#### Protection contre le rejeu
+
+| Paramètre               | Défaut | Contexte | Objectif                                                                             |
+| ----------------------- | ------ | -------- | ------------------------------------------------------------------------------------ |
+| `SAML_REPLAY_DICT_SIZE` | `10m`  | global   | Capacité de la mémoire partagée pour la protection contre le rejeu sur une instance. |
+
+Chaque identifiant d'assertion accepté est ajouté de manière atomique au magasin de rejeu pendant la durée où il pourrait encore être accepté. L'identifiant AuthnRequest en attente est une valeur de corrélation de session distincte. Sur une instance, augmentez `SAML_REPLAY_DICT_SIZE` lorsque le dictionnaire partagé est trop petit. Pour les répliques, activez le mode de session core `USE_REDIS=yes` et pointez chaque instance vers le même service Redis afin que les clés de rejeu utilisent le magasin partagé. Conservez également le même `SESSIONS_SECRET` core sur chaque réplique ; sinon une session créée par un worker ne peut pas être lue par un autre. Les sessions utilisent par défaut des cookies sécurisés limités à l'hôte, avec `HttpOnly`, `Secure` et `SameSite=None`. Lorsque Redis est activé, les données de session passent dans un magasin Redis avec espace de noms au lieu du cookie. Le `SessionNotOnOrAfter` de l'IdP peut terminer une session avant les délais configurés. Une assertion consommée reste consommée si une étape ultérieure du callback échoue.
+
+### Déconnexion
+
+Une requête vers `SAML_LOGOUT_PATH` efface l'état authentifié, enregistre une corrélation de déconnexion en attente et démarre le SLO en frontal. BunkerWeb envoie une requête de déconnexion signée avec le binding Redirect. Après une `LogoutResponse` signée valide, il détruit la session locale et redirige le navigateur vers `SAML_LOGOUT_REDIRECT`. Une `LogoutRequest` initiée par l'IdP peut arriver sur `SAML_SLS_PATH` ; le SLS valide l'émetteur, la destination, le NameID, l'index de session et l'état de rejeu, détruit la session locale et renvoie une réponse signée à l'IdP. Si aucune session locale n'existe, la route de déconnexion détruit la session vide et redirige localement.
+
+### Limites et dépannage
+
+SAML prend actuellement en charge la connexion navigateur initiée par le SP avec un AuthnRequest Redirect signé et une réponse ACS POST. Il ne prend pas en charge la connexion initiée par l'IdP, les assertions chiffrées ni l'importation et l'actualisation automatiques des métadonnées IdP. Configurez l'IdP pour signer les documents/assertions et envoyer la réponse avec le binding POST. Les corps POST d'authentification et de déconnexion sont limités à 256 KiB ; les requêtes trop volumineuses sont rejetées avant traitement.
+
+- **L'interface ne peut pas activer SAML :** vérifiez l'origine HTTPS, les trois certificats/clés, la correspondance de la clé et du certificat RSA, les valeurs d'entité/SSO IdP et les quatre chemins locaux distincts. Une configuration invalide est rejetée et la requête échoue de manière restrictive avec `503` ; aucune requête n'atteint l'upstream.
+- **L'IdP rejette l'AuthnRequest :** comparez l'identifiant d'entité SP, les URL ACS/SLS exactes, le certificat SP, le réglage RSA-SHA256 et l'exigence de signature client. Dans Keycloak, vérifiez que **Use metadata descriptor URL** est désactivé et que le certificat SP fourni manuellement est à jour.
+- **L'ACS renvoie une erreur ou `503` :** vérifiez le certificat de signature IdP, la couverture de signature de l'assertion, l'émetteur, la destination, la synchronisation de l'horloge, le binding de réponse, la corrélation de requête en attente et le fait que l'identifiant d'assertion n'a pas déjà été consommé. Vérifiez que l'IdP envoie les attributs mappés.
+- **Un utilisateur s'authentifie mais reçoit un refus :** activez les attributs ACL attendus, confirmez les paires numérotées et `SAML_ACL_RULE_COUNT`, puis vérifiez `all` par rapport à `any`. Une valeur d'attribut vide ou un claim absent peut refuser l'accès par conception.
+- **Une session disparaît derrière un équilibreur de charge :** utilisez le même magasin Redis et le même secret de session core sur chaque réplique. Redis doit être disponible lorsque `USE_REDIS=yes` ; la protection contre le rejeu et les sessions ne reviennent pas silencieusement à un état par worker.
 
 ## LDAP SSO <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO) {#ldap-sso-pro}
 

@@ -27,13 +27,53 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 - 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
 - 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
 
+!!! warning "显式启动一体化容器中的代理"
+    只有一体化容器设置了不带服务前缀的环境变量 `USE_CROWDSEC=yes`，并使用本机 `CROWDSEC_API`（默认为 `http://127.0.0.1:8000`）时，才会启动内置 CrowdSec 代理。仅为某个服务启用 CrowdSec 不会启动内置代理。使用外部本地 API 时，需要单独启动并配置该代理。
+
 ### 集成流程
 
 1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
 2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
 3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
 
+    此检查会向每个已配置的本地 API 发送经过身份验证的只读请求。如果 API 无法访问、凭据被拒绝、响应无效或某个服务的 bouncer 无法加载，检查将失败。对于仅使用 AppSec 的服务，此检查只确认配置已加载，不验证 AppSec 连接或检测功能。
+
 以下各节将依次说明这些步骤。
+
+### IP 调查与决策移除
+
+在 Web 界面中打开 **附加页面 → CrowdSec**，查看各个已配置的连接、受影响的服务、本地 API 连通性和决策同步状态。CrowdSec 插件状态卡片以及报告和封禁页面中的 **调查 IP** 操作都会打开同一页面。调查链接会预先填入 IP 地址。当多个服务或实例使用 CrowdSec 时，请选择相应连接。
+
+调查结果汇总当前 CrowdSec 决策、可用的 CrowdSec 告警、保留的 BunkerWeb 报告和 BunkerWeb 本地封禁。当前决策与报告中捕获的证据分开展示。新的 CrowdSec 报告会保留可用的决策 ID、来源、场景、目标、处置措施和到期时间，即使相关决策已到期或被移除。AppSec 拒绝与 AppSec 故障策略导致的拒绝使用不同的来源标识。历史证据遵循现有的报告保留设置；旧报告和已从缓存中逐出的可选元数据可能没有额外详情。告警查看功能仅展示有限的事件元数据，不暴露原始请求正文、Cookie 或认证标头。
+
+本地报告和服务专属封禁仅限于所选连接的服务范围；BunkerWeb 全局封禁也会包含在结果中。如果无法再从实例已加载的配置中确定该范围，调查将停止，以免返回其他服务的证据。当本地 API 不可用但连接配置仍已加载时，保留的报告依然可以访问。
+
+**CrowdSec 允许列表** 部分展示引擎的原生允许列表、条目、备注、到期时间，以及列表由本地还是 CrowdSec Console 管理。IP 调查会检查引擎当前的允许列表状态，并显示匹配原因。读取和检查允许列表需要下文所述的管理凭据。界面会区分检查不可用和 IP 不在允许列表中这两种情况。允许列表例外适用于整个 CrowdSec 引擎，不会移除 BunkerWeb 本地封禁。CrowdSec 1.8.0 通过 LAPI 提供读取和检查操作；修改原生允许列表则需要在其主机上使用 `cscli`，或通过独立的 Console 管理权限完成。
+
+现有的 `CROWDSEC_API_KEY` 是 **bouncer 密钥**，支持读取决策，但不能移除决策或查看告警。要启用这些操作，请在相应的 CrowdSec 引擎上注册专用机器，并配置以下两个可选的多站点设置：
+
+- `CROWDSEC_MANAGEMENT_LOGIN`：专用机器的登录名。
+- `CROWDSEC_MANAGEMENT_PASSWORD`：该机器的密码。
+
+按照 CrowdSec 的[本地 API 认证流程](https://doc.crowdsec.net/docs/local_api/authentication/)注册机器，并妥善保管凭据。任一设置为空时，管理功能均不可用。内置引擎和外部引擎使用相同配置：请求经由所选 BunkerWeb 实例发送，因此内置本地 API 可以继续仅监听 localhost。管理操作的 HTTPS 请求使用 BunkerWeb 的 TLS 信任配置验证服务器证书，与 AppSec 的验证设置相互独立。
+
+**移除 CrowdSec 决策** 与解除 BunkerWeb 封禁是不同的操作。在 Web 界面中移除决策需要具有写入权限的管理员、已配置的管理凭据、可写的界面数据库，以及对所选决策的确认。移除针对地址范围的决策会影响整个范围。在共享引擎上移除决策也会影响使用该决策的其他 bouncer。移除前会再次核对所选 ID、范围、目标和处置措施；其他决策和本地封禁会被保留。
+
+成功响应会确认决策已从本地 API 移除，并显示仍然匹配的决策。Bouncer 会在配置的流刷新或 live 模式缓存到期后获取变化；界面会将传播状态标记为待完成，而不会声称所有客户端都已获准访问。其他决策、本地封禁、新检测结果或 AppSec 规则仍可能阻止请求。移除结果会记录到日志中，同时包含已认证的操作者及所选连接和决策。
+
+公共 API 提供相同的操作：
+
+- `GET /crowdsec`：连接、同步状态和各实例的错误。
+- `GET /crowdsec/{connection_id}/decisions`：按 `ip`、`origin` 或 `scenario` 筛选；使用 `offset` 和 `limit` 分页（上限为 200）。
+- `GET /crowdsec/{connection_id}/ips/{ip}`：调查结果，最多包含 200 条决策、50 条告警和 50 份报告，并显示总数或上限，以及明确标记为不可用的部分。
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`：已过滤敏感数据的告警详情。
+- `GET /crowdsec/{connection_id}/allowlists`：原生允许列表，使用 `offset` 和 `limit` 分页；每个列表最多返回 200 个条目，同时显示完整的条目总数。
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`：当前是否匹配原生允许列表，以及匹配原因。
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`：在 JSON 请求体中包含所选的 `scope`、`value` 和 `decision_type`。
+
+请原样使用返回的连接 ID。它包含实例身份，因此不同实例上相同的 localhost URL 仍会被区分。API 管理员可以使用这些操作。委派的 API 用户需要在现有 `bans` 资源下获得独立的 `crowdsec_read` 或 `crowdsec_delete` 权限，权限范围为返回的连接 ID 或 `*`。普通的 `ban_delete` 权限不允许移除 CrowdSec 决策。无需进行数据库迁移。
+
+运行时按目标保留各条独立决策，因此移除一条决策不会抹去同一 IP 或范围上的其他封禁。可选的报告元数据使用独立的 5 MiB 缓存，不会逐出用于执行封禁的条目。流刷新使用 `/var/run/bunkerweb` 中的非阻塞进程锁，锁会一直保持到更新发布完成，并在 worker 退出时自动释放。
 
 ### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
@@ -103,7 +143,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -120,7 +160,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -154,7 +194,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.8.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -321,6 +361,21 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
     - **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
 
+#### 按服务的端点
+
+由于这些端点是 `multisite` 的，同一实例上的不同服务可以使用不同的 CrowdSec 组件，或只使用其中一部分。这两个功能相互独立：
+
+- 当设置了 `CROWDSEC_API` 时，**决策查询**处于活动状态。将其设为空字符串可让某个服务完全跳过 Local API。
+- 当设置了 `CROWDSEC_APPSEC_URL` 时，**AppSec 检测**处于活动状态。将其设为空字符串可让某个服务跳过深度请求检测。
+
+如果某个服务的 `USE_CROWDSEC` 设为 `yes` 但两个 URL 都为空，则该服务不会进行任何检查，实例会记录未定义任何端点。
+
+!!! warning "每个实例一个决策缓存"
+    缓存的决策存放在整个实例共用的单个共享内存区中，按其来源的 Local API 建立索引。指向同一个 `CROWDSEC_API` 的服务会相互复用缓存的决策，这也是查询保持低成本的原因。指向不同 Local API 的服务永远看不到彼此的决策。该区域的大小是实例级别的，因此拥有多个不同 Local API 和大型决策列表的集群会共用同一份预算。
+
+!!! info "每个 Local API 一个 Bouncer 密钥"
+    `CROWDSEC_API_KEY` 与其他设置一样按服务解析。当服务指向不同的 Local API 时，请为每个服务分配在其各自 CrowdSec 主机上通过 `cscli bouncers add` 注册的密钥，否则查询会因未通过身份验证而被拒绝。
+
 ### 示例配置
 
 === "基本配置"
@@ -351,6 +406,38 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "按服务配置"
+
+    在每个公开服务上启用 AppSec，在一部分服务上启用决策查询，并完全排除一个服务。不带前缀的值是整个集群的基线，每个服务只覆盖与基线不同的部分：
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # 每个服务的基线
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # 除非某个服务需要，否则不进行决策查询
+    CROWDSEC_API_KEY: ""
+
+    # app1 在 AppSec 之上增加 Local API 决策查询
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 仅保留 AppSec，继承空的 CROWDSEC_API 基线
+
+    # intranet 完全不进行检查
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    服务也可以指向完全不同的 CrowdSec 主机，并使用自己的 bouncer 密钥：
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### 第&nbsp;3&nbsp;步 – 验证集成

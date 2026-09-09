@@ -133,8 +133,8 @@
     },
     "REDIS_KEEPALIVE_POOL": {
       "context": "global",
-      "default": "10",
-      "help": "Max number of redis connection(s) kept in the pool.",
+      "default": "64",
+      "help": "Maximum Redis connections kept in the pool per NGINX worker. Steady-state connections are roughly nginx_workers x pool x instances and must stay within the Redis/Valkey maxclients limit.",
       "id": "redis-keepalive-pool",
       "label": "Redis keepalive pool",
       "regex": "^[0-9]+$",

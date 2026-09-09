@@ -30,7 +30,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
-from common_utils import get_redis_client as get_common_redis_client, is_newer_version_available  # type: ignore
+from common_utils import is_newer_version_available  # type: ignore
 
 from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
@@ -65,6 +65,7 @@ from app.routes.about import about
 from app.routes.bans import bans
 from app.routes.cache import cache
 from app.routes.configs import configs
+from app.routes.crowdsec import crowdsec
 from app.routes.global_settings import global_settings
 from app.routes.home import home
 from app.routes.instances import instances
@@ -81,6 +82,7 @@ from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
 from app.routes.templates import templates as templates_bp
+from app.routes.utils import get_redis_client as get_ui_redis_client, session_storage_due
 
 BLUEPRINTS = (
     about,
@@ -88,6 +90,7 @@ BLUEPRINTS = (
     profile,
     jobs,
     reports,
+    crowdsec,
     totp,
     home,
     logout,
@@ -670,56 +673,35 @@ with app.app_context():
     session_cache_dir = LIB_DIR.joinpath("ui_sessions_cache")
     session_timeout = int(app.config["PERMANENT_SESSION_LIFETIME"].total_seconds())
 
-    redis_settings = BW_CONFIG.get_config(
-        global_only=True,
-        methods=False,
-        filtered_settings=(
-            "USE_REDIS",
-            "REDIS_HOST",
-            "REDIS_PORT",
-            "REDIS_DATABASE",
-            "REDIS_TIMEOUT",
-            "REDIS_KEEPALIVE_POOL",
-            "REDIS_SSL",
-            "REDIS_USERNAME",
-            "REDIS_PASSWORD",
-            "REDIS_SENTINEL_HOSTS",
-            "REDIS_SENTINEL_USERNAME",
-            "REDIS_SENTINEL_PASSWORD",
-            "REDIS_SENTINEL_MASTER",
-        ),
-    )
-
-    redis_client = None
-    if redis_settings.get("USE_REDIS", "no").lower() == "yes":
-        redis_client = get_common_redis_client(
-            use_redis=True,
-            redis_host=redis_settings.get("REDIS_HOST"),
-            redis_port=redis_settings.get("REDIS_PORT", "6379"),
-            redis_db=redis_settings.get("REDIS_DATABASE", "0"),
-            redis_timeout=redis_settings.get("REDIS_TIMEOUT", "1000.0"),
-            redis_keepalive_pool=redis_settings.get("REDIS_KEEPALIVE_POOL", "10"),
-            redis_ssl=redis_settings.get("REDIS_SSL", "no") == "yes",
-            redis_username=redis_settings.get("REDIS_USERNAME") or None,
-            redis_password=redis_settings.get("REDIS_PASSWORD") or None,
-            redis_sentinel_hosts=redis_settings.get("REDIS_SENTINEL_HOSTS", []),
-            redis_sentinel_username=redis_settings.get("REDIS_SENTINEL_USERNAME") or None,
-            redis_sentinel_password=redis_settings.get("REDIS_SENTINEL_PASSWORD") or None,
-            redis_sentinel_master=redis_settings.get("REDIS_SENTINEL_MASTER", ""),
-        )
-        if redis_client:
-            LOGGER.debug("Using Redis as session backend")
-            app.config["SESSION_TYPE"] = "redis"
-            app.config["SESSION_REDIS"] = redis_client
-            app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
-        else:
+    # Same helper the routes use, so the worker ends up with one memoised client and one
+    # connection pool instead of a session pool plus a per-request one.
+    redis_client = get_ui_redis_client()
+    if redis_client:
+        LOGGER.debug("Using Redis as session backend")
+        app.config["SESSION_TYPE"] = "redis"
+        app.config["SESSION_REDIS"] = redis_client
+        app.config["SESSION_KEY_PREFIX"] = "bunkerweb_ui_session:"
+    else:
+        # get_redis_client returns None for both "disabled" and "unreachable"; only the second
+        # is worth a WARNING, because this worker is now pinned to file sessions for its life.
+        if BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("USE_REDIS",)).get("USE_REDIS", "no") == "yes":
             LOGGER.warning("Redis configured but unavailable for sessions, falling back to FileSystemCache")
-
-    if not redis_client:
+        LOGGER.debug("Using FileSystemCache as session backend")
         app.config["SESSION_TYPE"] = "cachelib"
         app.config["SESSION_CACHELIB"] = SafeFileSystemCache(cache_dir=session_cache_dir, threshold=0, default_timeout=session_timeout)
     sess = Session()
     sess.init_app(app)
+
+    # SESSION_REFRESH_EACH_REQUEST makes flask-session's should_set_storage return True on
+    # every request, so an untouched session is rewritten to the store even for a static
+    # asset. Throttle the expiry-only refreshes; a modified session still writes at once,
+    # which leaves login, logout and _rotate_session_id untouched.
+    _session_lifetime_seconds = app.config["PERMANENT_SESSION_LIFETIME"].total_seconds()
+
+    def _throttled_should_set_storage(flask_app, flask_session) -> bool:
+        return session_storage_due(flask_session, _session_lifetime_seconds)
+
+    app.session_interface.should_set_storage = _throttled_should_set_storage
 
     biscuit = BiscuitMiddleware(app)
 
@@ -735,7 +717,7 @@ with app.app_context():
     csrf = CSRFProtect()
     csrf.init_app(app)
 
-    app.config["EXTRA_PAGES"] = []
+    app.config["EXTRA_PAGES"] = ["crowdsec"]
 
     def custom_url_for(endpoint, **values):
         if endpoint:
@@ -893,14 +875,13 @@ def handle_csrf_error(_):
     except (AssertionError, RuntimeError):
         user_id = "unknown"
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {user_id}")
-    try:
-        if not current_user:
-            return redirect(url_for("setup.setup_page"), 303)
-    except (AssertionError, RuntimeError):
-        return redirect(url_for("setup.setup_page"), 303)
     response = logout_page()
     response.status_code = 303
-    if request.method == "POST":
+    if not DB.get_ui_user():
+        # No admin exists yet (e.g. mid-setup-wizard): there is no usable login page for
+        # this reason to land on, so hand it to /setup directly instead.
+        response.headers["Location"] = url_for("setup.setup_page", reason="session_expired")
+    elif request.method == "POST":
         # A submitted form dies here rather than at the login check, because the CSRF
         # token lives in the session that just went away. logout_page() clears the
         # session and the response tells the browser to drop its cookies, so a flash
@@ -1410,8 +1391,9 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
     # * Permissions-Policy header to prevent unwanted behavior
+    # Must stay byte-identical to the PERMISSIONS_POLICY default in src/common/core/headers/plugin.json.
     response.headers["Permissions-Policy"] = (
-        "accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
+        "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), ch-device-memory=(), ch-downlink=(), ch-dpr=(), ch-ect=(), ch-prefers-color-scheme=(), ch-prefers-reduced-motion=(), ch-prefers-reduced-transparency=(), ch-rtt=(), ch-save-data=(), ch-ua-arch=(), ch-ua-bitness=(), ch-ua-form-factors=(), ch-ua-full-version-list=(), ch-ua-full-version=(), ch-ua-high-entropy-values=(), ch-ua-mobile=(), ch-ua-model=(), ch-ua-platform-version=(), ch-ua-platform=(), ch-ua-wow64=(), ch-ua=(), ch-viewport-height=(), ch-viewport-width=(), ch-width=(), compute-pressure=(), cross-origin-isolated=(), deferred-fetch-minimal=(), deferred-fetch=(), device-attributes=(), digital-credentials-create=(), digital-credentials-get=(), display-capture=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), focus-without-user-activation=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), haptics=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), keyboard-map=(), language-detector=(), language-model=(), local-fonts=(), local-network-access=(), local-network=(), loopback-network=(), magnetometer=(), manual-text=(), media-playback-while-not-visible=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), picture-in-picture=(), private-state-token-issuance=(), private-state-token-redemption=(), proofreader=(), publickey-credentials-create=(), publickey-credentials-get=(), rewriter=(), screen-wake-lock=(), serial=(), shared-storage-select-url=(), shared-storage=(), speaker-selection=(), storage-access=(), summarizer=(), tools=(), translator=(), unload=(), usb=(), vertical-scroll=(), web-app-installation=(), web-share=(), webnn=(), window-management=(), writer=(), xr-spatial-tracking=()"
     )
 
     # * X-Robots-Tag header to stay out of search indexes: robots.txt stops crawling, not the

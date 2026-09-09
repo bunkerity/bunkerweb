@@ -10,7 +10,7 @@ from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import argv as sys_argv, exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -23,7 +23,44 @@ from logger import getLogger  # type: ignore
 from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 from env_file import parse_env_file  # type: ignore
 
-VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"), Path(sep, "etc", "bunkerweb", "variables.env"))
+# bwcli has to resolve the database the running scheduler resolved, so it reads the operator's
+# files the way the scheduler's unit exports them: variables.env then the per-service file, later
+# wins (src/common/helpers/utils.sh export_env_file, called twice by bunkerweb-scheduler.sh). A
+# Scheduler Only install puts DATABASE_URI in scheduler.env and nowhere else, so dropping that
+# file left bwcli talking to a different database than the scheduler. misc/install-bunkerweb.sh
+# resolves the same URI from the same two files for the upgrade backup
+# (`_upgrade_backup_database_uri`), value-based where this is presence-based, so the two differ on
+# a key the later file sets to the empty string.
+OPERATOR_VARIABLES_PATHS = (Path(sep, "etc", "bunkerweb", "variables.env"), Path(sep, "etc", "bunkerweb", "scheduler.env"))
+
+# /etc/nginx/variables.env is generated output: during the loading render it carries plugin
+# defaults for every setting start.sh does not whitelist, DATABASE_URI among them, so a value read
+# from it must never beat one an operator wrote. It only fills keys the operator's files leave
+# unset.
+GENERATED_VARIABLES_PATHS = (Path(sep, "etc", "nginx", "variables.env"),)
+
+VARIABLES_PATHS = OPERATOR_VARIABLES_PATHS + GENERATED_VARIABLES_PATHS
+
+
+def resolve_variables(
+    operator_paths: Tuple[Path, ...] = OPERATOR_VARIABLES_PATHS,
+    generated_paths: Tuple[Path, ...] = GENERATED_VARIABLES_PATHS,
+) -> Dict[str, str]:
+    """Merge the variables files the way the scheduler's environment ends up merged.
+
+    The operator's files override one another in order, the generated one only fills gaps. The
+    process environment is not merged in here: it wins at lookup time, see `__get_variable`.
+    """
+    variables: Dict[str, str] = {}
+    for path in operator_paths:
+        if path.is_file():
+            variables.update(parse_env_file(path))
+    for path in generated_paths:
+        if path.is_file():
+            for key, value in parse_env_file(path).items():
+                if not variables.get(key):
+                    variables[key] = value
+    return variables
 
 
 def format_remaining_time(seconds):
@@ -92,19 +129,8 @@ class CLI(ApiCaller):
             # Update environment with secrets
             environ.update(docker_secrets)
 
-        # /etc/nginx/variables.env only exists once an instance has rendered its configuration,
-        # while a Linux install keeps DATABASE_URI in /etc/bunkerweb/variables.env. Reading the
-        # generated file alone leaves DATABASE_URI empty whenever the instance has not written
-        # it yet, and the CLI then talks to the default SQLite path instead of the database the
-        # rest of the stack uses.
-        self.__variables = {}
+        self.__variables = resolve_variables()
         self.__db = None
-        for variables_path in VARIABLES_PATHS:
-            if not variables_path.is_file():
-                continue
-            for key, value in parse_env_file(variables_path).items():
-                if not self.__variables.get(key):
-                    self.__variables[key] = value
 
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
@@ -143,6 +169,8 @@ class CLI(ApiCaller):
             redis_timeout=self.__get_variable("REDIS_TIMEOUT", "1000.0"),
             redis_keepalive_pool=self.__get_variable("REDIS_KEEPALIVE_POOL", "10"),
             redis_ssl=self.__get_variable("REDIS_SSL", "no") == "yes",
+            # Verify unless told not to: bwcli verified by redis-py default before this existed.
+            redis_ssl_verify=self.__get_variable("REDIS_SSL_VERIFY", "yes") != "no",
             redis_username=self.__get_variable("REDIS_USERNAME", None) or None,
             redis_password=self.__get_variable("REDIS_PASSWORD", None) or None,
             redis_sentinel_hosts=self.__get_variable("REDIS_SENTINEL_HOSTS", []),
@@ -295,6 +323,57 @@ class CLI(ApiCaller):
             return False, self.__format_error(f"Failed to ban {ip}: {e}")
         return False, self.__format_error(f"Failed to ban {ip}")
 
+    def __collect_redis_bans(self, pattern: str, scope: str) -> list:
+        """Read every ban matching a pattern in two round trips instead of 3N.
+
+        scan_iter without count leaves Redis on its COUNT=10 default, so key
+        discovery costs one round trip per ten keys, and a get plus a ttl per key
+        adds two more each. Both are collapsed here.
+        """
+        keys = list(self.__redis.scan_iter(pattern, count=1000))
+        if not keys:
+            return []
+
+        pipe = self.__redis.pipeline(transaction=False)
+        for key in keys:
+            pipe.get(key)
+            pipe.ttl(key)
+        results = pipe.execute()
+
+        bans = []
+        for idx, key in enumerate(keys):
+            data = results[2 * idx]
+            if not data:
+                continue
+            exp = results[2 * idx + 1]
+            key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+            raw_value = data.decode("utf-8", "replace") if isinstance(data, bytes) else data
+
+            if scope == "global":
+                ip = key_str.replace("bans_ip_", "")
+                service = "unknown"
+            else:
+                service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
+
+            try:
+                ban_data = loads(raw_value)
+            except (JSONDecodeError, ValueError) as e:
+                self.__logger.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
+                ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": scope, "permanent": False}
+
+            ban_data["ip"] = ip
+            # If permanent flag is set, override TTL to 0
+            if ban_data.get("permanent", False):
+                exp = 0
+            ban_data["exp"] = exp
+            if scope == "global":
+                ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
+            else:
+                ban_data["service"] = service
+                ban_data["ban_scope"] = "service"
+            bans.append(ban_data)
+        return bans
+
     def bans(self) -> Tuple[bool, str]:
         """Get all bans from the system"""
         servers = {}
@@ -314,51 +393,7 @@ class CLI(ApiCaller):
 
         if self.__redis:
             try:
-                servers["redis"] = []
-                # Get global bans
-                for key in self.__redis.scan_iter("bans_ip_*"):
-                    key_str = key.decode("utf-8") if isinstance(key, bytes) else key
-                    ip = key_str.replace("bans_ip_", "")
-                    data = self.__redis.get(key)
-                    if not data:
-                        continue
-                    exp = self.__redis.ttl(key)
-                    raw_value = data.decode("utf-8", "replace")
-                    try:
-                        ban_data = loads(raw_value)
-                    except (JSONDecodeError, ValueError) as e:
-                        self.__logger.warning(f"Failed to decode ban data for {ip}, using raw value as reason: {e}")
-                        ban_data = {"reason": raw_value, "service": "unknown", "date": 0, "country": "unknown", "ban_scope": "global", "permanent": False}
-                    ban_data["ip"] = ip
-                    # If permanent flag is set, override TTL to 0
-                    if ban_data.get("permanent", False):
-                        exp = 0
-                    ban_data["exp"] = exp
-                    ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
-                    servers["redis"].append(ban_data)
-
-                # Get service-specific bans
-                for key in self.__redis.scan_iter("bans_service_*_ip_*"):
-                    key_str = key.decode("utf-8") if isinstance(key, bytes) else key
-                    service, ip = key_str.replace("bans_service_", "").rsplit("_ip_", 1)
-                    data = self.__redis.get(key)
-                    if not data:
-                        continue
-                    exp = self.__redis.ttl(key)
-                    raw_value = data.decode("utf-8", "replace")
-                    try:
-                        ban_data = loads(raw_value)
-                    except (JSONDecodeError, ValueError) as e:
-                        self.__logger.warning(f"Failed to decode ban data for {ip} on service {service}, using raw value as reason: {e}")
-                        ban_data = {"reason": raw_value, "service": service, "date": 0, "country": "unknown", "ban_scope": "service", "permanent": False}
-                    ban_data["ip"] = ip
-                    # If permanent flag is set, override TTL to 0
-                    if ban_data.get("permanent", False):
-                        exp = 0
-                    ban_data["exp"] = exp
-                    ban_data["service"] = service
-                    ban_data["ban_scope"] = "service"
-                    servers["redis"].append(ban_data)
+                servers["redis"] = self.__collect_redis_bans("bans_ip_*", "global") + self.__collect_redis_bans("bans_service_*_ip_*", "service")
             except Exception as e:
                 self.__logger.error(f"Failed to get bans from redis: {e}")
 

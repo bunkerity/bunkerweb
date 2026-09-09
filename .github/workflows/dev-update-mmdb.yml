@@ -17,6 +17,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.BUNKERBOT_TOKEN }}
           ref: dev
+          persist-credentials: false
       - name: Download mmdb files
         run: |
           mkdir -p src/bw/misc/
@@ -51,8 +52,12 @@ jobs:
           fi
           rm -f asn.mmdb country.mmdb
           gunzip asn.mmdb.gz country.mmdb.gz
+      - name: Configure Git authentication
+        run: gh auth setup-git --hostname github.com --force
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
+        env:
+          GH_TOKEN: ${{ secrets.BUNKERBOT_TOKEN }}
         with:
           branch: dev
           commit_message: "Monthly mmdb update"

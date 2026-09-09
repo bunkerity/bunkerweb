@@ -42,7 +42,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     services:
       bunkerweb:
         # Name, unter dem die Instanz im Scheduler erscheint
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -55,7 +55,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Instanznamen korrekt setzen
@@ -77,7 +77,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.15-rc1
+        image: bunkerity/bunkerweb-api:1.6.15-rc2
         environment:
           <<: *bw-env
           API_USERNAME: "admin"
@@ -144,7 +144,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
       -e SERVICE_API=yes \
       -e API_WHITELIST_IPS="127.0.0.0/8" \
       -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.15-rc2
     ```
 
 === "Linux"
@@ -178,10 +178,10 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
 
 - Grobe Rolle: GET/HEAD/OPTIONS brauchen `read`; schreibende Verben brauchen `write`.
 - Feingranulare ACL greift, wenn Routen Berechtigungen deklarieren; `admin(true)` umgeht Checks.
-- Ressourcentypen: `instances`, `global_settings`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
+- Ressourcentypen: `instances`, `global_config`, `services`, `configs`, `plugins`, `cache`, `bans`, `jobs`.
 - Berechtigungsnamen:
   - `instances_*`: `instances_read`, `instances_update`, `instances_delete`, `instances_create`, `instances_execute`
-  - `global_settings_*`: `global_settings_read`, `global_settings_update`
+  - `global_config`: `global_config_read`, `global_config_update`
   - `services`: `service_read`, `service_create`, `service_update`, `service_delete`, `service_convert`, `service_export`
   - `configs`: `configs_read`, `config_read`, `config_create`, `config_update`, `config_delete`
   - `plugins`: `plugin_read`, `plugin_create`, `plugin_delete`
@@ -198,7 +198,7 @@ Wählen Sie die Variante, die zu Ihrer Umgebung passt.
     - `configs`: `config_create`, `config_update`, `config_delete` (and `POST /configs/upload`)
     - `services`: `service_create`, `service_update`, `service_convert`
     - `plugins`: `plugin_create`
-    - `global_settings`: `global_settings_update`
+    - `global_config`: `global_config_update`
 
     Treat these exactly like admin: **never grant them to a party you would not trust as an administrator.** Reserve read scopes (`*_read`, `service_export`, `cache_read`, …) for limited or automation tokens. Granting one of these to a non-admin user emits a warning in the API logs.
 

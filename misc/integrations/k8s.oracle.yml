@@ -66,7 +66,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.15-rc1
+          image: bunkerity/bunkerweb:1.6.15-rc2
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -120,7 +120,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+          image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -155,7 +155,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+          image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -163,9 +163,11 @@ spec:
             - name: DATABASE_URI
               value: "mysql+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
             # replace with your DNS resolvers
-            # e.g. : kube-dns.kube-system.svc.cluster.local
+            # nginx resolves this once, when it parses its configuration, and keeps the
+            # address until the next reload. Use the cluster DNS Service name, whose
+            # ClusterIP is stable, and never a pod IP.
             - name: DNS_RESOLVERS
-              value: "coredns.kube-system.svc.cluster.local"
+              value: "kube-dns.kube-system.svc.cluster.local"
             # 10.0.0.0/8 is the cluster internal subnet
             - name: API_WHITELIST_IP
               value: "127.0.0.0/8 10.0.0.0/8"

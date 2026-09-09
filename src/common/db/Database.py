@@ -11,11 +11,11 @@ from logging import Logger
 from os import _exit, getenv, sep
 from os.path import join as os_join
 from pathlib import Path
-from re import DOTALL, Match, compile as re_compile, escape, error as RegexError, search
+from re import DOTALL, IGNORECASE, Match, compile as re_compile, escape, error as RegexError, search
 from sys import argv, path as sys_path
 from threading import Lock
 from traceback import format_exc
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Set, Tuple, TypeVar, Union
 from time import sleep
 from uuid import uuid4
 from warnings import filterwarnings
@@ -127,24 +127,56 @@ def retry_on_transient_db_errors(func: Callable[..., T]) -> Callable[..., T]:
 
 # Greedy to the last "@" of the authority so an unencoded "@" inside the password is
 # covered too, but stopping at "/", "?" and "#" so an "@" in the path or query does not
-# drag the host into the mask.
-DB_URI_PASSWORD_RX = re_compile(r"(://[^:/?#\[\]@]*:)[^\s/?#]*@")
+# drag the host into the mask. The username class is SQLAlchemy's own, "@" and whitespace
+# included: this pass also runs on RAW text, where the username is not percent-encoded, and a
+# username the class rejects makes the whole match fail and leaves the password in the log.
+DB_URI_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^\s/?#]*@")
+
+# The same span SQLAlchemy's own parser uses: a username that stops at the first ":" and a password
+# that stops at the first "@". Both classes are its classes character for character, so every DSN it
+# parses is one this matches. Narrowing either of them, by whitespace or by anything else, is a DSN
+# that parses, fails the round trip, then matches nothing and reaches the log in cleartext. Only
+# used once make_url has confirmed there is a password, so the wide classes cannot drag a host into
+# the mask the way they would on arbitrary text.
+DB_URI_AUTHORITY_PASSWORD_RX = re_compile(r"(://[^:/]*:)[^@]*@")
+
+# Several drivers take the credential in the query string instead of the authority
+# (`?password=`, `?sslpassword=`, `?token=`), where render_as_string(hide_password=True) leaves
+# it untouched. Matched on the parameter NAME so a driver-specific spelling is covered too, and
+# the value is cut at the next separator so the rest of the DSN survives the mask.
+DB_URI_QUERY_SECRET_RX = re_compile(r"([?&][^=&\s]*(?:password|passwd|pwd|secret|token|api[-_]?key)[^=&\s]*=)[^&#\s]*", IGNORECASE)
 
 
 def mask_db_uri(db_string: str) -> str:
-    """Return a database URI with its password replaced, safe to log.
+    """Return a database URI, or any text that may embed one, safe to log.
 
     Callers reach this on malformed input, which make_url() either rejects outright
-    or, worse, parses wrongly, so the regex has to be able to stand on its own.
+    or, worse, parses wrongly, so the regexes have to be able to stand on their own. Driver
+    exceptions are passed through here for the same reason: they quote the DSN they failed on.
     """
     if not db_string:
         return db_string
     masked = db_string
     with suppress(BaseException):
-        masked = make_url(db_string).render_as_string(hide_password=True)
+        url = make_url(db_string)
+        # make_url anchors at the start and its query group stops at the first newline, so a driver
+        # message that merely BEGINS with a URI parses, and rendering it back would drop the failure
+        # reason the operator needs (these call sites exit right after logging). Only let it rewrite
+        # a string it reproduces exactly; anything else keeps its own text and is masked by regex.
+        if url.render_as_string(hide_password=False) == db_string:
+            masked = url.render_as_string(hide_password=True)
+        elif url.password:
+            # A password carrying "/", "?" or "#" does not survive the round trip (render_as_string
+            # percent-encodes it) and is outside DB_URI_PASSWORD_RX's class as well, so without
+            # this neither masker fires and the credential reaches the log verbatim.
+            # `openssl rand -base64` produces "/" routinely. Matched by span rather than by the
+            # value of url.password, which is percent-DECODED and so does not occur in the text
+            # being masked whenever the operator escaped a delimiter.
+            masked = DB_URI_AUTHORITY_PASSWORD_RX.sub(r"\1***@", masked, count=1)
     # Second pass on purpose: given an unencoded "@" in the password, make_url takes only
     # the part before it for the password and hides that, leaving the rest to reach the log.
-    return DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    masked = DB_URI_PASSWORD_RX.sub(r"\1***@", masked)
+    return DB_URI_QUERY_SECRET_RX.sub(r"\1***", masked)
 
 
 class Database:
@@ -341,7 +373,7 @@ class Database:
             self.logger.error(f"Invalid database URI: {mask_db_uri(sqlalchemy_string)}")
             error = True
         except SQLAlchemyError as e:
-            self.logger.error(f"Error when trying to create the engine: {e}")
+            self.logger.error(f"Error when trying to create the engine: {mask_db_uri(str(e))}")
             error = True
         finally:
             if error:
@@ -394,7 +426,7 @@ class Database:
                         connection_target = mask_db_uri(self.database_uri_readonly)
                         reason_logged = False
                         continue
-                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {e}")
+                    self.logger.error(f"Can't connect to database {connection_target} after {DATABASE_RETRY_TIMEOUT} seconds: {mask_db_uri(str(e))}")
                     _exit(1)
 
                 if any(error in str(e) for error in self.READONLY_ERROR):
@@ -409,12 +441,12 @@ class Database:
                 elif log:
                     # Reason once, then the terse line: repeating the exception every 5 seconds is
                     # noise, but withholding it for the whole window leaves nothing to act on.
-                    detail = "" if reason_logged else f" : {e}"
+                    detail = "" if reason_logged else f" : {mask_db_uri(str(e))}"
                     reason_logged = True
                     self.logger.warning(f"Can't connect to database {connection_target}, retrying in 5 seconds ...{detail}")
                 sleep(5)
             except BaseException as e:
-                self.logger.error(f"Error when trying to connect to the database: {e}")
+                self.logger.error(f"Error when trying to connect to the database: {mask_db_uri(str(e))}")
                 exit(1)
 
         if log:
@@ -707,7 +739,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.15~rc1"
+                return "1.6.15~rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -741,7 +773,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.15~rc1",
+            "version": "1.6.15~rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1709,6 +1741,16 @@ class Database:
                                between our read and our flush. Set False on the retry
                                itself so a genuine conflict cannot loop.
         """
+        # The pass below pops as it goes (DATABASE_URI, then every `<service>_IS_DRAFT` marker),
+        # so it drains whatever dict it is handed. Two things went wrong with that: the conflict
+        # retry replayed the drained dict and published services the caller had marked as drafts,
+        # and a caller that keeps its payload (autoconf hands over its long-lived config) saw it
+        # come back short and read the difference as a configuration change on the next pass.
+        # Drain a copy and leave the caller's dict, which is also what the retry replays. Shallow
+        # on purpose: this carries every setting of every service, and only its own keys are ever
+        # removed, never a value mutated in place.
+        retry_config = config
+        config = config.copy()
         to_put = []
         to_update = []
         to_delete = []
@@ -2647,7 +2689,7 @@ class Database:
             # session in another.
             self.logger.debug(f"Concurrent write while saving the config ({conflict}), recomputing and retrying once ...")
             return self.save_config(
-                config,
+                retry_config,
                 method,
                 changed,
                 file_names,
@@ -3154,16 +3196,20 @@ class Database:
         services = config["SERVER_NAME"]["value"].split()
         services_set = set(services)  # O(1) lookup for service prefix matching
 
+        if service:
+            # Strip the prefix in one pass. Stripping inside the loop below popped every key and
+            # re-inserted the stripped one, so an un-prefixed key later in the same snapshot popped
+            # the value that had just been renamed onto it and dropped it on the `continue`. A
+            # globally declared template writes exactly such keys (the block above fills the
+            # un-prefixed name whenever no global row shadows it), so every setting the service set
+            # for itself disappeared from its own configuration.
+            prefix = f"{service}_"
+            config = {key[len(prefix) :]: data for key, data in config.items() if key.startswith(prefix)}  # noqa: E203
+
         # Process config items - use list(items()) which is more memory efficient than copy().items()
         # for large dicts since it creates a list of tuples, not a full dict copy
         for key, data in list(config.items()):
-            new_value = None
-            if service:
-                data = config.pop(key)
-                if not key.startswith(f"{service}_"):
-                    continue
-                key = key.replace(f"{service}_", "")
-                new_value = data
+            new_value = data if service else None
 
             if not methods:
                 new_value = data["value"]
@@ -3514,6 +3560,14 @@ class Database:
 
             db_services = query.all()
 
+            # A service with no row of its own inherits the global value, and for USE_TEMPLATE that
+            # template is in force at render time (get_config materialises {service}_USE_TEMPLATE
+            # for every service). Reporting the missing row as "no template" told the operator the
+            # opposite of what the generator does.
+            inherited = dict(
+                session.query(Global_values.setting_id, Global_values.value).filter(Global_values.setting_id.in_(("USE_TEMPLATE", "SECURITY_MODE"))).all()
+            )
+
         for service in db_services:
             services.append(
                 {
@@ -3522,8 +3576,8 @@ class Database:
                     "is_draft": service.is_draft,
                     "creation_date": service.creation_date,
                     "last_update": service.last_update,
-                    "template": service.template or "",
-                    "security_mode": service.security_mode or "block",
+                    "template": service.template if service.template is not None else inherited.get("USE_TEMPLATE") or "",
+                    "security_mode": service.security_mode or inherited.get("SECURITY_MODE") or "block",
                 }
             )
 
@@ -3638,39 +3692,49 @@ class Database:
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
-        job_name = job_name or argv[0].replace(".py", "")
-        service_id = service_id or None
-        with self._db_session() as session:
-            if self.readonly:
-                return "The database is read-only, the changes will not be saved"
+        return self.upsert_job_caches(
+            [{"job_name": job_name or argv[0].replace(".py", ""), "service_id": service_id, "file_name": file_name, "data": data, "checksum": checksum}]
+        )
 
-            cache = session.query(Jobs_cache).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+    def upsert_job_caches(self, entries: List[Dict[str, Any]], *, deletions: Sequence[Dict[str, Any]] = ()) -> str:
+        """Save and delete cache files in one transaction, or roll back the whole set."""
+        if not entries and not deletions:
+            return ""
+        if self.readonly:
+            return "The database is read-only, the changes will not be saved"
 
-            if not cache:
-                session.add(
-                    Jobs_cache(
-                        job_name=job_name,
-                        service_id=service_id,
-                        file_name=file_name,
-                        data=data,
-                        last_update=datetime.now().astimezone(),
-                        checksum=checksum,
-                    )
-                )
-            else:
-                if checksum is None or cache.checksum != checksum:
-                    cache.data = data
+        # A caller malformed against this contract is not a database outage: check the keys here so
+        # the two are distinguishable, and keep the redaction below for driver errors only.
+        for entry in entries:
+            missing = {"job_name", "service_id", "file_name", "data", "checksum"}.difference(entry)
+            if missing:
+                return f"Malformed job cache entry, missing {', '.join(sorted(missing))}"
+        for entry in deletions:
+            missing = {"job_name", "service_id", "file_name"}.difference(entry)
+            if missing:
+                return f"Malformed job cache deletion, missing {', '.join(sorted(missing))}"
+
+        try:
+            with self._db_session() as session:
+                for entry in entries:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    cache = session.query(Jobs_cache).filter_by(**key).first()
+                    if cache is None:
+                        cache = Jobs_cache(**key, data=entry["data"], checksum=entry["checksum"])
+                        session.add(cache)
+                    elif entry["checksum"] is None or cache.checksum != entry["checksum"]:
+                        cache.data = entry["data"]
+                        cache.checksum = entry["checksum"]
+                    # Unchanged data still refreshes the expiry window.
                     cache.last_update = datetime.now().astimezone()
-                    cache.checksum = checksum
-                else:
-                    # Data unchanged — refresh timestamp to reset expiry window
-                    cache.last_update = datetime.now().astimezone()
-
-            try:
+                for entry in deletions:
+                    key = {"job_name": entry["job_name"], "service_id": entry["service_id"] or None, "file_name": entry["file_name"]}
+                    session.query(Jobs_cache).filter_by(**key).delete(synchronize_session=False)
                 session.commit()
-            except BaseException as e:
-                return str(e)
-
+        except Exception as e:
+            # Driver exceptions can embed the cache payload or connection credentials.
+            self.logger.error(f"Failed to save job caches ({type(e).__name__})")
+            return "An error occurred while saving job caches"
         return ""
 
     def update_external_plugins(
@@ -5923,6 +5987,27 @@ class Database:
                 return f"An error occurred while deleting template {template_id}.\n{e}"
 
         return ""
+
+    def use_ui_user_totp(self, username: str, totp_secret: str, counter: int) -> bool:
+        """Consume a counter once, across replicas, only for the user's current secret."""
+        if self.readonly or not totp_secret or type(counter) is not int or counter < 0:
+            return False
+        try:
+            with self._db_session() as session:
+                updated = (
+                    session.query(Users)
+                    .filter(
+                        Users.username == username,
+                        Users.totp_secret == totp_secret,
+                        (Users.totp_last_counter.is_(None)) | (Users.totp_last_counter < counter),
+                    )
+                    .update({Users.totp_last_counter: counter}, synchronize_session=False)
+                )
+                session.commit()
+                return updated == 1
+        except Exception as e:
+            self.logger.error(f"Failed to consume TOTP counter ({type(e).__name__})")
+            return False
 
     def get_ui_users(self, *, as_dict: bool = False) -> Union[str, List[Union[Users, dict]]]:
         """Get ui users."""

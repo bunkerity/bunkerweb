@@ -27,7 +27,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_PORT`              | `6379`            | global   | no       | **Puerto Redis/Valkey:** Número de puerto del servidor Redis/Valkey.                                                    |
 | `REDIS_DATABASE`          | `0`               | global   | no       | **Base de datos Redis/Valkey:** Número de base de datos a utilizar en el servidor Redis/Valkey (0-15).                  |
 | `REDIS_SSL`               | `no`              | global   | no       | **SSL de Redis/Valkey:** Establezca en `yes` para habilitar el cifrado SSL/TLS para la conexión de Redis/Valkey.        |
-| `REDIS_SSL_VERIFY`        | `yes`             | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
+| `REDIS_SSL_VERIFY`        | `no`              | global   | no       | **Verificación SSL de Redis/Valkey:** Establezca en `yes` para verificar el certificado SSL del servidor Redis/Valkey.  |
 | `REDIS_TIMEOUT`           | `1000`            | global   | no       | **Tiempo de espera de Redis/Valkey:** Tiempo de espera de conexión/lectura/escritura en milisegundos para las operaciones de Redis/Valkey. |
 | `REDIS_USERNAME`          |                   | global   | no       | **Nombre de usuario de Redis/Valkey:** Nombre de usuario para la autenticación de Redis/Valkey (Redis 6.0+).            |
 | `REDIS_PASSWORD`          |                   | global   | no       | **Contraseña de Redis/Valkey:** Contraseña para la autenticación de Redis/Valkey.                                       |
@@ -36,7 +36,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_SENTINEL_PASSWORD` |                   | global   | no       | **Contraseña de Sentinel:** Contraseña para la autenticación de Redis Sentinel.                                         |
 | `REDIS_SENTINEL_MASTER`   | `mymaster`        | global   | no       | **Maestro de Sentinel:** Nombre del maestro en la configuración de Redis Sentinel.                                      |
 | `REDIS_KEEPALIVE_IDLE`    | `30000`           | global   | no       | **Tiempo de inactividad de keepalive:** Tiempo máximo de inactividad (en milisegundos) antes de cerrar una conexión del grupo. |
-| `REDIS_KEEPALIVE_POOL`    | `10`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
+| `REDIS_KEEPALIVE_POOL`    | `64`              | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo, por worker de NGINX. |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
     Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
@@ -126,6 +126,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 - **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
 - **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` para uso general o `allkeys-lru` para cargas de trabajo de caché intensivo) apropiada para su caso de uso
 - **Valores predeterminados del all-in-one:** La imagen Docker AIO configura Redis con `maxmemory=256mb` y `maxmemory-policy=volatile-lru`; sobrescriba estos valores mediante las variables de entorno `REDIS_MAXMEMORY` y `REDIS_MAXMEMORY_POLICY`. Con `volatile-lru`, los contadores transitorios (límite de tasa, mal comportamiento) se desalojan antes que las claves con TTL importantes para las sesiones y los baneos temporales, y las claves sin expiración (baneos permanentes) quedan exentas. Se recomienda la misma política para servidores Redis o Valkey externos utilizados por BunkerWeb.
+- **Mantenga los informes de seguridad fuera del grupo de desalojo:** con el valor predeterminado de `METRICS_REDIS_TTL`, los informes de peticiones bloqueadas llevan una expiración, y es esa expiración la que los hace candidatos al desalojo bajo `volatile-lru`. La lista es una sola clave que contiene toda la ventana conservada: un desalojo se lleva el conjunto, no los informes más antiguos. Establezca `METRICS_REDIS_TTL=0` en cada instancia que comparta el servidor; de lo contrario, una instancia que siga con el valor predeterminado vuelve a fijar la expiración en segundos. No cambia nada bajo `allkeys-lru`, donde ninguna clave es inmune, y no reduce la presión de memoria, la traslada a las claves que siguen expirando, entre ellas los baneos temporales, las sesiones y los veredictos en caché. Dimensione `maxmemory` para los informes que conserva en lugar de confiar en el desalojo: `METRICS_MAX_BLOCKED_REQUESTS_REDIS` fija ese tope.
 - **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
@@ -136,7 +137,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 
 #### Optimización del Rendimiento
 
-- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica. `REDIS_KEEPALIVE_POOL` se aplica por worker de NGINX: en régimen estable, las conexiones son aproximadamente `WORKER_PROCESSES x REDIS_KEEPALIVE_POOL x instancias`. Dimensione el límite `maxclients` de Redis/Valkey por encima, porque una conexión rechazada impide comprobar en esa petición los baneos que solo están en Redis
 - **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
 - **Evite operaciones costosas:** Tenga cuidado con comandos como KEYS en entornos de producción
 - **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos

@@ -359,6 +359,17 @@ class Configurator:
 
         return config
 
+    @staticmethod
+    def __has_embedded_newline(value: str, setting_type: Optional[str]) -> bool:
+        # variables.env is line-oriented: Templator writes "KEY=VALUE\n" and load_variables reads
+        # every schema-known key back, so a value carrying its own newline defines a second
+        # setting. Settings of type "file" hold PEM data and are exempt, and trailing newlines
+        # stay valid because a Kubernetes ConfigMap block scalar always leaves one.
+        if setting_type == "file":
+            return False
+        stripped = value.rstrip("\r\n")
+        return "\n" in stripped or "\r" in stripped
+
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
         # MULTISITE=no
@@ -366,6 +377,9 @@ class Configurator:
             where, real_var = self.__find_var(variable)
             if not where:
                 return False, f"variable name {variable} doesn't exist"
+
+            if self.__has_embedded_newline(value, where[real_var].get("type")):
+                return False, f"value of {variable} contains a newline"
 
             try:
                 regex_flags = DOTALL if where[real_var].get("type") == "file" else 0
@@ -382,6 +396,9 @@ class Configurator:
             return False, f"variable name {variable} doesn't exist"
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite"
+
+        if self.__has_embedded_newline(value, where[real_var].get("type")):
+            return False, f"value of {variable} contains a newline"
 
         try:
             regex_flags = DOTALL if where[real_var].get("type") == "file" else 0

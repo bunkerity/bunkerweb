@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
-from time import sleep
+from time import sleep, time
 from typing import Any, Dict, Optional, Tuple, Union
 
 from flask import Response, g, has_request_context, redirect, request, url_for
@@ -164,12 +164,13 @@ def get_redis_client():
     """
     Get a Redis client using configuration from BW_CONFIG.
 
-    The client is cached on ``flask.g`` for the duration of the current request,
-    so a single request that touches Redis multiple times only pays one
-    BW_CONFIG DB query and one connection PING. The cache stores ``None`` too
-    (Redis disabled or unreachable), so we don't keep re-probing within a
-    request. Outside of a request context (e.g. background executor threads,
-    CLI) the client is never cached and ``flash`` is skipped.
+    The client itself is memoised process-wide by ``common_utils.get_redis_client``,
+    keyed on the connection parameters, so background executor threads share the
+    same pool as request threads. The ``flask.g`` cache on top of it only saves the
+    repeated BW_CONFIG DB query within a single request, and stores ``None`` too
+    (Redis disabled or unreachable) so we don't keep re-probing. Outside of a
+    request context (e.g. background executor threads, CLI) nothing is cached on
+    ``g`` and ``flash`` is skipped.
     """
     if has_request_context() and "bw_redis_client" in g:
         return g.bw_redis_client
@@ -185,6 +186,7 @@ def get_redis_client():
             "REDIS_TIMEOUT",
             "REDIS_KEEPALIVE_POOL",
             "REDIS_SSL",
+            "REDIS_SSL_VERIFY",
             "REDIS_USERNAME",
             "REDIS_PASSWORD",
             "REDIS_SENTINEL_HOSTS",
@@ -204,12 +206,17 @@ def get_redis_client():
         redis_timeout=db_config.get("REDIS_TIMEOUT", "1000.0"),
         redis_keepalive_pool=db_config.get("REDIS_KEEPALIVE_POOL", "10"),
         redis_ssl=db_config.get("REDIS_SSL", "no") == "yes",
+        # Fallback is "yes", not the plugin.json default of "no": before this parameter
+        # existed the UI never passed ssl_cert_reqs, so redis-py verified by default. An
+        # operator who never set REDIS_SSL_VERIFY must not lose that; an explicit "no" is honored.
+        redis_ssl_verify=db_config.get("REDIS_SSL_VERIFY", "yes") != "no",
         redis_username=db_config.get("REDIS_USERNAME") or None,
         redis_password=db_config.get("REDIS_PASSWORD") or None,
         redis_sentinel_hosts=db_config.get("REDIS_SENTINEL_HOSTS", []),
         redis_sentinel_username=db_config.get("REDIS_SENTINEL_USERNAME") or None,
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
+        logger=LOGGER,
     )
 
     if use_redis and not redis_client and has_request_context():
@@ -219,6 +226,41 @@ def get_redis_client():
         g.bw_redis_client = redis_client
 
     return redis_client
+
+
+# Fraction of PERMANENT_SESSION_LIFETIME an unmodified session's stored copy may burn
+# before it is written back purely to slide its expiry. At the 12h default that is one
+# write every 3h per session instead of one per request, and it leaves 9h of TTL slack
+# behind every skipped write: flask-session's save_session returns before
+# should_set_cookie when storage is skipped, so the browser cookie and the store entry
+# only ever slide together and a client can never hold a cookie for an expired key.
+# The cost is that a session idle for longer than lifetime * (1 - ratio) after its last
+# write can expire early: 9h instead of 12h in the worst case.
+SESSION_STORAGE_REFRESH_RATIO = 0.25
+SESSION_LAST_STORED_KEY = "_last_stored_at"
+
+
+def session_storage_due(session: Any, lifetime_seconds: float, now: Optional[float] = None) -> bool:
+    """Decide whether a server-side session must be written back to storage.
+
+    flask-session's ``should_set_storage`` returns ``session.modified or
+    SESSION_REFRESH_EACH_REQUEST``, and the Web UI sets that flag, so every request with a
+    non-empty session rewrites the whole payload, static assets included, since Flask
+    serves them at the URL root here.
+
+    A modified session still writes immediately: login, logout and session id rotation all
+    depend on it. An unmodified one writes only once its stored copy is old enough, tracked
+    by a stamp inside the payload so no extra read is needed.
+    """
+    now = time() if now is None else now
+
+    if not session.modified:
+        last_stored = session.get(SESSION_LAST_STORED_KEY)
+        if isinstance(last_stored, (int, float)) and not isinstance(last_stored, bool) and now - last_stored < lifetime_seconds * SESSION_STORAGE_REFRESH_RATIO:
+            return False
+
+    session[SESSION_LAST_STORED_KEY] = now
+    return True
 
 
 def extract_file_setting_names(variables: Dict[str, str]) -> Dict[str, str]:

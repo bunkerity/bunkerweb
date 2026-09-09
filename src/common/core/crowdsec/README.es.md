@@ -27,13 +27,53 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 - Acceso a los registros de acceso de BunkerWeb (`/var/log/bunkerweb/access.log` de forma predeterminada) para que el agente de CrowdSec pueda analizar las solicitudes.
 - Acceso a `cscli` en el host de CrowdSec para registrar la clave del bouncer de BunkerWeb.
 
+!!! warning "Inicio explícito en el contenedor todo en uno"
+    El agente CrowdSec integrado solo se inicia si el contenedor todo en uno recibe la variable de entorno sin prefijo `USE_CROWDSEC=yes` y una `CROWDSEC_API` local (por defecto, `http://127.0.0.1:8000`). Activar CrowdSec solo para un servicio no inicia el agente integrado. Para una API local externa, inicie y configure el agente por separado.
+
 ### Flujo de integración
 
 1. Preparar el agente de CrowdSec para ingerir los registros de BunkerWeb.
 2. Configurar BunkerWeb para que consulte la API local de CrowdSec.
 3. Validar el enlace mediante la API `/crowdsec/ping` o la tarjeta de CrowdSec en el panel de administración.
 
+    Esta comprobación realiza una solicitud de lectura autenticada a cada API local configurada. Falla si una API es inaccesible, rechaza las credenciales, devuelve una respuesta no válida o si no se pudo cargar el bouncer de un servicio. Para los servicios que solo usan AppSec, confirma la carga de la configuración; no comprueba la conexión ni la inspección AppSec.
+
 Las siguientes secciones desarrollan cada paso.
+
+### Investigación y eliminación de decisiones
+
+Abra **Páginas adicionales → CrowdSec** en la interfaz web para consultar cada conexión configurada, el servicio afectado, la conectividad con la API local y la sincronización de decisiones. La tarjeta de estado del plugin CrowdSec y las acciones **Investigar IP** de Informes y Baneos abren la misma página. Los enlaces de investigación rellenan la dirección de antemano. Seleccione la conexión cuando varios servicios o instancias utilicen CrowdSec.
+
+Una investigación combina las decisiones actuales de CrowdSec, las alertas disponibles de CrowdSec, los informes conservados de BunkerWeb y los baneos locales de BunkerWeb. Las decisiones actuales y los datos capturados en los informes se muestran por separado. Los nuevos informes de CrowdSec conservan los identificadores de decisión, orígenes, escenarios, objetivos, medidas de remediación y fechas de caducidad disponibles después de que esas decisiones caduquen o se eliminen. Los rechazos de AppSec y los bloqueos causados por una política de gestión de fallos de AppSec tienen fuentes distintas. El historial sigue los ajustes existentes de retención de informes; los informes antiguos y los metadatos opcionales desalojados de la caché pueden no tener detalles adicionales. La consulta de alertas expone metadatos de eventos limitados, sin cuerpos de solicitud sin procesar, cookies ni cabeceras de autenticación.
+
+Los informes locales y los baneos específicos de un servicio se limitan al ámbito del servicio de la conexión seleccionada; también se incluyen los baneos globales de BunkerWeb. Si ya no se puede determinar ese ámbito a partir de la configuración cargada en la instancia, la investigación se detiene para evitar devolver datos de otros servicios. Los informes conservados siguen siendo accesibles cuando la API local no está disponible y la configuración de la conexión sigue cargada.
+
+La sección **Listas de permitidos de CrowdSec** muestra las listas nativas del motor, sus entradas, comentarios, fechas de caducidad y si se gestionan localmente o mediante la Consola de CrowdSec. Las investigaciones de IP comprueban el estado actual de las listas de permitidos del motor y muestran el motivo de coincidencia. Leer y comprobar estas listas requiere las credenciales de gestión descritas a continuación. Una comprobación no disponible se distingue de una IP que no figura en las listas. Las excepciones se aplican a todo el motor CrowdSec; no eliminan los baneos locales de BunkerWeb. CrowdSec 1.8.0 ofrece operaciones de lectura y comprobación mediante LAPI, mientras que las modificaciones nativas requieren `cscli` en su host o un acceso de gestión independiente a la Consola.
+
+El ajuste existente `CROWDSEC_API_KEY` es una **clave de bouncer**: permite leer decisiones, pero no eliminarlas ni consultar alertas. Para habilitar esas operaciones, registre una máquina dedicada en el motor CrowdSec correspondiente y configure estos dos ajustes multisitio opcionales:
+
+- `CROWDSEC_MANAGEMENT_LOGIN`: el nombre de acceso de la máquina dedicada.
+- `CROWDSEC_MANAGEMENT_PASSWORD`: la contraseña de esa máquina.
+
+Registre la máquina siguiendo el [procedimiento de autenticación de la API local](https://doc.crowdsec.net/docs/local_api/authentication/) de CrowdSec. Guarde las credenciales de forma privada. Si cualquiera de los ajustes queda vacío, las funciones de gestión no estarán disponibles. La misma configuración se aplica a motores integrados y externos: las solicitudes se envían a través de la instancia BunkerWeb seleccionada, por lo que una API local integrada puede seguir escuchando en localhost. Las solicitudes HTTPS de gestión verifican el certificado del servidor mediante la configuración de confianza TLS de BunkerWeb, independientemente del ajuste de verificación de AppSec.
+
+**Eliminar decisión de CrowdSec** es una acción distinta de levantar un baneo de BunkerWeb. La eliminación desde la interfaz web requiere un administrador con acceso de escritura, credenciales de gestión configuradas, una base de datos de la interfaz con permiso de escritura y la confirmación de la decisión seleccionada. Eliminar una decisión sobre un rango afecta a todo el rango. En un motor compartido, la eliminación también afecta a los demás bouncers que consumen esa decisión. El identificador, ámbito, objetivo y medida de remediación seleccionados se comprueban de nuevo antes de eliminarla; se conservan las otras decisiones y los baneos locales.
+
+Una respuesta correcta confirma la eliminación en la API local y muestra las decisiones coincidentes restantes. Los bouncers incorporan el cambio mediante su actualización de flujo configurada o al caducar la caché del modo live; la interfaz indica que la propagación está pendiente, sin afirmar que todos los clientes ya están permitidos. Otra decisión, un baneo local, una nueva detección o una regla de AppSec pueden seguir bloqueando una solicitud. Los resultados de eliminación se registran con el actor autenticado, la conexión y la decisión seleccionadas.
+
+La API pública ofrece las mismas operaciones:
+
+- `GET /crowdsec`: conexiones, estado de sincronización y errores por instancia.
+- `GET /crowdsec/{connection_id}/decisions`: filtrar por `ip`, `origin` o `scenario`; paginar con `offset` y `limit` (máximo 200).
+- `GET /crowdsec/{connection_id}/ips/{ip}`: investigación con hasta 200 decisiones, 50 alertas y 50 informes, con totales o límites y secciones marcadas explícitamente como no disponibles.
+- `GET /crowdsec/{connection_id}/alerts/{alert_id}`: detalles de alerta depurados para excluir datos sensibles.
+- `GET /crowdsec/{connection_id}/allowlists`: listas de permitidos nativas, con paginación mediante `offset` y `limit`; hasta 200 entradas por lista, mostrando el número total de entradas.
+- `GET /crowdsec/{connection_id}/allowlists/check?ip={ip}`: pertenencia actual a una lista de permitidos nativa y motivo de coincidencia.
+- `DELETE /crowdsec/{connection_id}/decisions/{decision_id}`: incluir los valores seleccionados de `scope`, `value` y `decision_type` en el cuerpo JSON.
+
+Utilice el identificador de conexión devuelto sin modificarlo. Incluye la identidad de la instancia, por lo que las URL localhost idénticas en distintas instancias permanecen separadas. Los administradores de la API pueden usar estas operaciones. Los usuarios delegados de la API necesitan el permiso independiente `crowdsec_read` o `crowdsec_delete` en el recurso existente `bans`, para un identificador de conexión devuelto o para `*`. Un permiso ordinario `ban_delete` no autoriza la eliminación de decisiones de CrowdSec. No se requiere ninguna migración de base de datos.
+
+El entorno de ejecución conserva las decisiones individuales por objetivo, de modo que eliminar una no puede borrar otro baneo sobre la misma IP o rango. Los metadatos opcionales de los informes utilizan una caché independiente de 5 MiB y no pueden desalojar las entradas que aplican los bloqueos. Las actualizaciones del flujo utilizan un bloqueo de proceso no bloqueante en `/var/run/bunkerweb`, mantenido hasta publicar la actualización y liberado automáticamente si el worker termina.
 
 ### Paso&nbsp;1 – Preparar CrowdSec para ingerir los registros de BunkerWeb
 
@@ -99,7 +139,7 @@ Las siguientes secciones desarrollan cada paso.
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.15-rc1
+        image: bunkerity/bunkerweb:1.6.15-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -116,7 +156,7 @@ Las siguientes secciones desarrollan cada paso.
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -150,7 +190,7 @@ Las siguientes secciones desarrollan cada paso.
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.8 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
+        image: crowdsecurity/crowdsec:v1.8.0 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
         volumes:
           - cs-data:/var/lib/crowdsec/data # Para persistir los datos de CrowdSec
           - bw-logs:/var/log:ro # Los registros de BunkerWeb para que CrowdSec los analice
@@ -317,6 +357,21 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
     - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
+#### Endpoints por servicio
+
+Como los endpoints son `multisite`, los servicios de la misma instancia pueden usar diferentes componentes de CrowdSec, o solo algunos de ellos. Las dos funciones son independientes:
+
+- **Las consultas de decisiones** están activas cuando `CROWDSEC_API` está definido. Establézcalo en una cadena vacía para que un servicio omita por completo la Local API.
+- **La inspección de AppSec** está activa cuando `CROWDSEC_APPSEC_URL` está definido. Establézcalo en una cadena vacía para que un servicio omita la inspección profunda de solicitudes.
+
+Un servicio con `USE_CROWDSEC` en `yes` y ambas URL vacías no verifica nada, y la instancia registra que no se ha definido ningún endpoint.
+
+!!! warning "Una caché de decisiones por instancia"
+    Las decisiones en caché residen en una única zona de memoria compartida para toda la instancia, indexada por la Local API de la que provienen. Los servicios que apuntan a la misma `CROWDSEC_API` reutilizan las decisiones en caché entre sí, lo que mantiene la consulta económica. Los servicios que apuntan a Local API distintas nunca ven las decisiones de los demás. El tamaño de esa zona es a nivel de instancia, por lo que una flota con muchas Local API distintas y listas de decisiones grandes comparte un mismo presupuesto.
+
+!!! info "Clave de bouncer por Local API"
+    `CROWDSEC_API_KEY` se resuelve por servicio como cualquier otro ajuste. Cuando los servicios apuntan a Local API distintas, asigne a cada uno la clave registrada con `cscli bouncers add` en su propio host de CrowdSec; de lo contrario, las consultas se rechazarán por no estar autenticadas.
+
 ### Configuraciones de Ejemplo
 
 === "Configuración Básica"
@@ -347,6 +402,38 @@ Aplica las siguientes variables de entorno (o valores del scheduler) para que la
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
+
+=== "Configuración por servicio"
+
+    AppSec en cada servicio público, consultas de decisiones en un subconjunto, y un servicio completamente excluido. Los valores sin prefijo son la línea base para toda la flota, y cada servicio solo sobrescribe lo que difiere:
+
+    ```yaml
+    MULTISITE: "yes"
+    SERVER_NAME: "app1.example.com app2.example.com intranet.example.com"
+
+    # Línea base para cada servicio
+    USE_CROWDSEC: "yes"
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_API: "" # Sin consulta de decisiones salvo que un servicio la solicite
+    CROWDSEC_API_KEY: ""
+
+    # app1 añade la consulta de decisiones de la Local API además de AppSec
+    app1.example.com_CROWDSEC_API: "http://crowdsec:8080"
+    app1.example.com_CROWDSEC_API_KEY: "your-api-key-here"
+
+    # app2 mantiene solo AppSec, heredando la línea base vacía de CROWDSEC_API
+
+    # intranet no se verifica en absoluto
+    intranet.example.com_USE_CROWDSEC: "no"
+    ```
+
+    Un servicio también puede apuntar a un host de CrowdSec completamente distinto, con su propia clave de bouncer:
+
+    ```yaml
+    app2.example.com_CROWDSEC_API: "http://crowdsec-dmz:8080"
+    app2.example.com_CROWDSEC_API_KEY: "dmz-bouncer-key"
+    app2.example.com_CROWDSEC_APPSEC_URL: "http://crowdsec-dmz:7422"
     ```
 
 ### Paso&nbsp;3 – Validar la integración

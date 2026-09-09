@@ -2,6 +2,10 @@
 
 ## 从 1.6.X 升级
 
+### 双因素认证防重放保护
+
+请同时升级所有 Web UI 副本：双因素验证码的防重放保护现在保存在共享数据库中，且仅覆盖运行此版本的副本。迁移期间，已显示的验证码可能在最多 33 秒内被拒绝；此后请使用新的验证码。请按照 [Web UI 故障排除](troubleshooting.md#web-ui) 中的说明，让每个 UI 副本都能访问现有的 TOTP 加密密钥。防重放计数器不会替代这些密钥。当数据库处于只读状态时，验证码在数据库恢复可写之前会在没有防重放保护的情况下被接受。
+
 ### 步骤
 
 === "Docker"
@@ -44,7 +48,7 @@
 
             1. 检测
                 * 从 `.env` 中读回安装类型（full、manager、worker、scheduler、ui、api），因此您无需重新声明拓扑结构。
-                * 从 `.env` 中恢复密钥、主机端口、worker 列表和 Compose 项目名称，因此升级不会轮换数据库密码、使已保存的 2FA 密钥失效，也不会改动您已发布的端口。
+                * 从 `.env` 中恢复密钥、主机端口、worker 列表和 Compose 项目名称，因此升级不会轮换数据库密码、使已保存的 2FA 密钥失效，也不会改动您已发布的端口。同一键重复出现时以最后一次赋值为准；可选的 `export` 前缀会被接受，而命令行中显式给出的值仍然优先。引号、变量插值、转义以及其他不受支持的 dotenv 语法会在重写文件之前被拒绝；对于这类文件请使用手动升级方式。
                 * 从容器中读取实际运行的版本，而不是信任镜像标签，因此浮动标签（`latest`、`testing`）和上一次中断的升级都能被正确识别。
             2. 升级决策
                 * 已在运行相同版本：打印堆栈状态并退出。
@@ -57,11 +61,12 @@
                 * 对没有自身数据库的 `worker`、`ui` 和 `api` 堆栈会跳过此步骤。
             4. 文件更新
                 * `.env` 会以新的镜像标签重写；您手动添加的任何条目都会被保留。
-                * 仅当 `docker-compose.yml` 仍与脚本生成的内容一致时才会重新生成，因此本地修改得以保留。传入 `--overwrite-compose` 可强制重新生成。两种情况下都会保留一份 `.bak.<时间戳>` 副本。
+                * 仅当 `docker-compose.yml` 仍与脚本生成的内容一致时才会重新生成，因此本地修改得以保留。传入 `--overwrite-compose` 可强制重新生成普通文件。以符号链接形式存在的 Compose 文件始终会被保留。两种情况下都会保留一份 `.bak.<时间戳>` 副本。
             5. 应用与验证
                 * 先执行 `docker compose pull`，再执行 `docker compose up -d`——只有镜像发生变化的容器会被重建，因此停机时间短于完整的 `down`/`up` 流程。
-                * 如果拉取失败，则不会重建任何容器，`.env` 中会恢复为先前的标签，正在运行的堆栈保持不变。
-                * 随后脚本会重新从容器读取版本，并检查调度器是否进入重启循环——数据库迁移失败正是以这种方式表现出来的。
+                * 如果在重建之前的某一步失败，先前的 `.env` 和 `docker-compose.yml` 都会被恢复。重建一旦开始，脚本不会自动回退二进制文件，因为数据库模式可能已经改变。
+                * 随后脚本会检查预期的镜像 ID、容器健康状态以及重启计数的变化。它要求至少间隔十秒的两次健康观测后才报告成功；被复用容器的历史重启本身不会导致升级失败。
+                * 如果服务在等待超时内未被确认为健康，堆栈将保持运行，不做任何回退，脚本以状态码 2 退出，而不是报告升级失败；可用 `--docker-wait-timeout N` 为缓慢的首次启动留出更多时间。
 
         * **常用选项**：
 
@@ -75,6 +80,7 @@
             | `--overwrite-compose`   | 即使 `docker-compose.yml` 曾被本地修改也重新生成 |
             | `--force-type-change`   | 允许堆栈更改拓扑结构（具有破坏性）               |
             | `--no-pull`             | 重建堆栈前不拉取镜像                             |
+            | `--docker-wait-timeout N` | 等待堆栈变为健康状态的秒数（默认：600）        |
             | `-y, --yes`             | 无人值守运行；不带该选项的管道调用会以错误退出   |
 
     === "手动"
@@ -98,16 +104,16 @@
                     ```yaml
                     services:
                         bunkerweb:
-                            image: bunkerity/bunkerweb:1.6.15-rc1
+                            image: bunkerity/bunkerweb:1.6.15-rc2
                             ...
                         bw-scheduler:
-                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                            image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                             ...
                         bw-autoconf:
-                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+                            image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
                             ...
                         bw-ui:
-                            image: bunkerity/bunkerweb-ui:1.6.15-rc1
+                            image: bunkerity/bunkerweb-ui:1.6.15-rc2
                             ...
                     ```
 
@@ -163,7 +169,7 @@
 
             4.  **拉取新镜像**：
                 ```bash
-                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                docker pull bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                 ```
 
             5.  **用相同选项重新创建容器**，复用与之前相同的 `/data` 卷、端口和环境变量：
@@ -174,7 +180,7 @@
                 -p 80:8080/tcp \
                 -p 443:8443/tcp \
                 -p 443:8443/udp \
-                bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                 ```
 
         === "Docker Compose"
@@ -183,7 +189,7 @@
                 ```yaml
                 services:
                     bunkerweb-aio:
-                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc1
+                        image: bunkerity/bunkerweb-all-in-one:1.6.15-rc2
                         ...
                 ```
 
@@ -306,20 +312,20 @@
             示例：
 
             ```bash
-            # 交互式升级到 1.6.15~rc1（会提示备份）
-            sudo ./install-bunkerweb.sh --version 1.6.15~rc1
+            # 交互式升级到 1.6.15~rc2（会提示备份）
+            sudo ./install-bunkerweb.sh --version 1.6.15~rc2
 
             # 使用自动备份到自定义目录的非交互式升级
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --backup-dir /var/backups/bw-2025-01 -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --backup-dir /var/backups/bw-2025-01 -y
 
             # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 -y -q
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 -y -q
 
             # 执行一次空运行（计划）而不应用更改
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --dry-run
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --dry-run
 
             # 跳过自动备份进行升级（不推荐）
-            sudo ./install-bunkerweb.sh -v 1.6.15~rc1 --no-auto-backup -y
+            sudo ./install-bunkerweb.sh -v 1.6.15~rc2 --no-auto-backup -y
             ```
 
             !!! warning "跳过备份"
@@ -399,7 +405,7 @@
 
                         ```shell
                         sudo apt update && \
-                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+                        sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
                         ```
 
                         为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -425,7 +431,7 @@
 
                         ```shell
                         sudo dnf makecache && \
-                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+                        sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc2
                         ```
 
                         为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -897,16 +903,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.15-rc1
+                        image: bunkerity/bunkerweb:1.6.15-rc2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.15-rc2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.15-rc2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.15-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.15-rc2
                         ...
                 ```
 
@@ -941,7 +947,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.15~rc2
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -967,7 +973,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.15~rc2
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

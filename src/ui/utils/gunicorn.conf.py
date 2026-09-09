@@ -684,4 +684,5 @@ def post_fork(server, worker):
 
 def on_exit(server):
     HEALTH_FILE.unlink(missing_ok=True)
+
     UI_DATA_FILE.unlink(missing_ok=True)

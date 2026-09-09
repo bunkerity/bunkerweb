@@ -6,7 +6,7 @@ on:
   push:
     tags: ["v*"]
 
-# One shared ARM VM and one shared image cache namespace: every release run
+# One shared ARM VM and staging infrastructure: every release/staging run
 # serializes. Never cancel, a half-published release must finish or be aborted
 # by hand.
 concurrency:
@@ -23,7 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write # draft releases are only visible to callers with push access; this job only reads
+      actions: read # inspect release environment protection
     outputs:
       version: ${{ steps.derive.outputs.version }}
       versionrpm: ${{ steps.derive.outputs.versionrpm }}
@@ -53,27 +54,49 @@ jobs:
             exit 1
           fi
 
+          # Guard 1b - src/VERSION matching the tag is not enough on its own. A
+          # release build never runs update-version.sh (container-build.yml gates
+          # it on testing/dev), so the tree's own literals are what ships. Bumping
+          # src/VERSION by hand leaves the Dockerfile LABELs, the installer default
+          # and pyproject behind, and Guard 1 passes anyway.
+          bash misc/check-version-consistency.sh
+
           # Guard 2 - annotated tags only. A lightweight tag records no tagger,
-          # so nothing links the release to a human.
-          OBJ_TYPE="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}" --jq '.object.type')"
+          # so nothing links the release to a human, and there is no tag object
+          # to carry a signature.
+          TAG_REF="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")"
+          OBJ_TYPE="$(printf '%s' "$TAG_REF" | jq -r '.object.type')"
+          OBJ_SHA="$(printf '%s' "$TAG_REF" | jq -r '.object.sha')"
           if [ "$OBJ_TYPE" != "tag" ]; then
-            echo "::error::$TAG is a lightweight tag; create it with git tag -a"
+            echo "::error::$TAG is a lightweight tag; create it with git tag -s"
             exit 1
           fi
 
-          # Guard 3 - never republish. A force-pushed tag would otherwise
-          # overwrite published images with different bits under one version.
-          # Only an explicit 404 means absent. A 403, a rate limit or a network
-          # blip must not be read as permission to republish.
-          if REL_ERR="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --silent 2>&1)"; then
-            echo "::error::a GitHub release already exists for $TAG; refusing to republish"
-            exit 1
-          elif ! printf '%s' "$REL_ERR" | grep -q 'HTTP 404'; then
-            echo "::error::cannot determine whether a release exists for $TAG: $REL_ERR"
+          # Guard 3 - the tag must carry a signature GitHub can verify against a
+          # key on the signer's account. The tag is what authorises the publish;
+          # unsigned, it proves nothing about who asked for the release.
+          TAG_OBJECT="$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/${OBJ_SHA}")"
+          VERIF="$(printf '%s' "$TAG_OBJECT" | jq -r '"\(.verification.verified) \(.verification.reason)"')"
+          if [ "${VERIF%% *}" != "true" ]; then
+            echo "::error::$TAG is not signed by a verifiable key (${VERIF#* }); create it with git tag -s"
             exit 1
           fi
 
-          # Guard 4 - push-github.yml builds the release body from this section
+          echo "signed tag target $(printf '%s' "$TAG_OBJECT" | jq -r '.object.sha') vs GITHUB_SHA ${GITHUB_SHA}"
+          if ! printf '%s' "$TAG_OBJECT" | jq -e --arg sha "$GITHUB_SHA" '.object.type == "commit" and .object.sha == $sha' >/dev/null; then
+            echo "::error::signed tag target differs from the triggering commit"
+            exit 1
+          fi
+
+          # Guard 4 - include drafts: a draft can already own partially published
+          # artifacts. Never rebuild after any release has claimed this version.
+          if ! gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/releases?per_page=100" |
+            jq -e --arg tag "$TAG" 'type == "array" and all(.[]; type == "array") and all(.[][]; (.tag_name | type) == "string" and .tag_name != $tag)' >/dev/null; then
+            echo "::error::release $TAG already exists (including drafts), or its absence cannot be verified"
+            exit 1
+          fi
+
+          # Guard 5 - push-github.yml builds the release body from this section
           # and fails silently (empty body) when it is missing.
           # Exact match on the version token: "^## v1.6.15" also accepts
           # "## v1.6.150", and the dots are regex wildcards.
@@ -81,6 +104,11 @@ jobs:
             echo "::error::CHANGELOG.md has no '## v${VERSION}' section"
             exit 1
           fi
+
+          # GitHub otherwise silently creates missing environments without protection. Self-review
+          # is accepted as long as every required reviewer is one of the release owners.
+          gh api "repos/${GITHUB_REPOSITORY}/environments/release" |
+            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and (.reviewers | length) > 0 and all(.reviewers[]; .type == "User" and (.reviewer.login | IN("TheophileDiot", "fl0ppy-d1sk"))))' >/dev/null
 
           case "$TAG" in
             *-rc*)   CHANNEL=rc     ; PRERELEASE=true  ; HIDDEN=true  ;;
@@ -96,7 +124,7 @@ jobs:
             echo "hidden=$HIDDEN"
           } >> "$GITHUB_OUTPUT"
 
-          echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel." >> "$GITHUB_STEP_SUMMARY"
+          echo "Releasing \`$VERSION\` on the \`$CHANNEL\` channel, from signed tag \`$TAG\`." >> "$GITHUB_STEP_SUMMARY"
 
   plumber:
     needs: [prepare]
@@ -154,6 +182,7 @@ jobs:
       CACHE: ${{ matrix.cache }}
       PUSH: ${{ matrix.push }}
       CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+      CANDIDATE: candidate-${{ github.run_id }}-${{ github.run_attempt }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -178,6 +207,7 @@ jobs:
       security-events: write # Trivy SARIF upload
     needs: [prepare, create-arm]
     strategy:
+      fail-fast: false
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
@@ -209,6 +239,7 @@ jobs:
       CACHE: ${{ matrix.cache }}
       PUSH: ${{ matrix.push }}
       CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+      CANDIDATE: candidate-${{ github.run_id }}-${{ github.run_attempt }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -265,6 +296,7 @@ jobs:
       LINUX: ${{ matrix.linux }}
       PACKAGE: ${{ matrix.package }}
       TEST: false
+      CANDIDATE: true
       PLATFORMS: ${{ matrix.platforms }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -273,28 +305,221 @@ jobs:
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
-  # Publication gate. `environment:` is not allowed on a job that calls a
-  # reusable workflow, so this plain job carries it and everything that
-  # publishes hangs off it. It sits after every build and the Trivy hard gate,
-  # so you only ever approve something already green.
-  #
-  # The `release` environment MUST exist with required reviewers. If it does
-  # not, GitHub creates an unprotected one on the fly and this gate passes
-  # without stopping.
-  gate:
+  # Candidate registry tags are internal transport only. The manifest pins the
+  # assembled indexes and every platform/package before any integration runs.
+  candidates:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: release
+    timeout-minutes: 30
+    needs: [prepare, build-containers, build-containers-arm, build-packages]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      manifest_sha256: ${{ steps.manifest.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: candidate-*
+          path: receipts
+          merge-multiple: true
+      - name: Assemble final indexes and manifest
+        id: manifest
+        run: |
+          python3 .github/scripts/release_artifacts.py assemble --directory receipts
+          sha256sum release-manifest.json > release-manifest.json.sha256
+          echo "sha256=$(cut -d ' ' -f 1 release-manifest.json.sha256)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-manifest
+          path: release-manifest.json*
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 7
+
+  create-infras:
+    needs: [candidates]
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [docker, autoconf, k8s, linux]
+    uses: ./.github/workflows/staging-create-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+  staging-tests:
+    needs: [candidates, create-infras]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - type: docker
+            runs_on: '["self-hosted", "bw-docker"]'
+          - type: autoconf
+            runs_on: '["self-hosted", "bw-autoconf"]'
+          - type: k8s
+            runs_on: '["ubuntu-latest"]'
+          - type: linux
+            runs_on: '["self-hosted", "bw-linux"]'
+            platform: linux/amd64
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: ${{ matrix.type }}
+      RUNS_ON: ${{ matrix.runs_on }}
+      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
+      PLATFORM: ${{ matrix.platform || '' }}
+    secrets:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
+      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
+
+  # arm64 packages run through QEMU and take several times longer than native ones. They get
+  # their own job, and their own 360-minute ceiling, after the native suites so the shared Linux
+  # test infrastructure and test domains are never used by two jobs at once.
+  staging-tests-arm64:
+    needs: [candidates, create-infras, staging-tests]
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: linux
+      RUNS_ON: '["self-hosted", "bw-linux"]'
+      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
+      PLATFORM: linux/arm64
+    secrets:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      TEST_DOMAINS_DOCKER: ${{ secrets.TEST_DOMAINS_DOCKER }}
+      TEST_DOMAINS_AUTOCONF: ${{ secrets.TEST_DOMAINS_AUTOCONF }}
+      TEST_DOMAINS_KUBERNETES: ${{ secrets.TEST_DOMAINS_KUBERNETES }}
+      TEST_DOMAINS_LINUX: ${{ secrets.TEST_DOMAINS_LINUX }}
+
+  smoke-images:
+    needs: [candidates]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux/amd64, linux/386, linux/arm64, linux/arm/v7]
+    env:
+      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+      - name: Start all six candidate images
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: python3 .github/scripts/release_smoke.py "$PLATFORM"
+
+  validate-tests:
+    if: ${{ always() }}
     needs:
       [
         prepare,
         plumber,
         codeql,
-        build-containers,
-        build-containers-arm,
-        build-packages,
+        candidates,
+        staging-tests,
+        staging-tests-arm64,
+        smoke-images,
       ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-manifest
+      - name: Require every candidate gate to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
+        run: python3 .github/scripts/release_artifacts.py gate
+
+  delete-infras:
+    if: ${{ always() }}
+    needs: [create-infras, staging-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [docker, autoconf, k8s]
+    uses: ./.github/workflows/staging-delete-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+  # The Linux test infrastructure is shared by both Linux test jobs, so it is torn down last.
+  delete-infras-linux:
+    if: ${{ always() }}
+    needs: [create-infras, staging-tests, staging-tests-arm64]
+    uses: ./.github/workflows/staging-delete-infra.yml
+    with:
+      TYPE: linux
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+  # Required reviewers on the existing release environment approve only tested
+  # candidates. Every public image/package/GitHub/docs publication descends here.
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    needs: [prepare, validate-tests]
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Recheck release environment protection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/environments/release" |
+            jq -e '.name == "release" and any(.protection_rules[]; .type == "required_reviewers" and (.reviewers | length) > 0 and all(.reviewers[]; .type == "User" and (.reviewer.login | IN("TheophileDiot", "fl0ppy-d1sk"))))' >/dev/null
+      - name: Recheck signed tag target before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          TAG_REF="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}")"
+          test "$(printf '%s' "$TAG_REF" | jq -r '.object.type')" = tag
+          OBJ_SHA="$(printf '%s' "$TAG_REF" | jq -r '.object.sha')"
+          gh api "repos/${GITHUB_REPOSITORY}/git/tags/${OBJ_SHA}" |
+            jq -e --arg sha "$GITHUB_SHA" '.verification.verified == true and .object.type == "commit" and .object.sha == $sha' >/dev/null
       - name: Approved
         run: |
           echo "Publishing \`${{ needs.prepare.outputs.version }}\` to the \`${{ needs.prepare.outputs.channel }}\` channel." >> "$GITHUB_STEP_SUMMARY"
@@ -304,7 +529,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [prepare, create-arm, push-gh]
+    needs: [prepare, candidates, push-gh]
     strategy:
       matrix:
         image:
@@ -318,39 +543,31 @@ jobs:
           ]
         include:
           - image: bunkerweb
-            cache_from: bunkerweb
-            dockerfile: src/bw/Dockerfile
+            source: bunkerweb
           - image: bunkerweb-scheduler
-            cache_from: scheduler
-            dockerfile: src/scheduler/Dockerfile
+            source: scheduler
           - image: bunkerweb-autoconf
-            cache_from: autoconf
-            dockerfile: src/autoconf/Dockerfile
+            source: autoconf
           - image: bunkerweb-ui
-            cache_from: ui
-            dockerfile: src/ui/Dockerfile
+            source: ui
           - image: bunkerweb-api
-            cache_from: api
-            dockerfile: src/api/Dockerfile
+            source: api
           - image: bunkerweb-all-in-one
-            cache_from: all-in-one
-            dockerfile: src/all-in-one/Dockerfile
+            source: all-in-one
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: ${{ matrix.image }}
-      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
-      CACHE_FROM: ${{ matrix.cache_from }}-${{ needs.prepare.outputs.channel }}
-      DOCKERFILE: ${{ matrix.dockerfile }}
+      IMAGE: ${{ matrix.source }}
+      TAGS: bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.prepare.outputs.version }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.channel }},registry.gitlab.com/bunkerity/bunkerweb/${{ matrix.image }}:${{ needs.prepare.outputs.version }}
+      MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
+      GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
 
   # Push Linux packages
   push-packages:
-    needs: [prepare, push-gh]
+    needs: [prepare, candidates, push-gh]
     strategy:
       matrix:
         linux:
@@ -490,6 +707,7 @@ jobs:
       BW_VERSION: ${{ matrix.package == 'rpm' && needs.prepare.outputs.versionrpm || needs.prepare.outputs.version }}
       PACKAGE_ARCH: ${{ matrix.package_arch }}
       ARCH: ${{ matrix.arch }}
+      MANIFEST_SHA256: ${{ needs.push-gh.outputs.manifest_sha256 }}
     secrets:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
@@ -502,14 +720,16 @@ jobs:
 
   # Push on GH
   push-gh:
-    needs: [prepare, doc-pdf]
+    needs: [prepare, candidates, doc-pdf]
     permissions:
       contents: write
       discussions: write
+      actions: read # verify the original publisher failed before resuming a claim
     uses: ./.github/workflows/push-github.yml
     with:
       VERSION: ${{ needs.prepare.outputs.version }}
       PRERELEASE: ${{ needs.prepare.outputs.prerelease == 'true' }}
+      MANIFEST_SHA256: ${{ needs.candidates.outputs.manifest_sha256 }}
 
   # Push doc
   push-doc:
@@ -529,7 +749,7 @@ jobs:
     # `always()` alone also fires when `prepare` rejected the tag and create-arm
     # never ran, which deletes an empty ARM_ID and fails noisily.
     if: ${{ always() && needs.create-arm.outputs.id != '' }}
-    needs: [create-arm, push-images, build-packages]
+    needs: [create-arm, build-containers-arm, build-packages]
     uses: ./.github/workflows/rm-arm.yml
     secrets:
       ARM_ID: ${{ needs.create-arm.outputs.id }}

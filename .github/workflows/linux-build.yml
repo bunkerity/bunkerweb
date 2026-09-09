@@ -23,6 +23,10 @@ on:
         required: false
         type: boolean
         default: false
+      CANDIDATE:
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -154,8 +158,25 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: package-${{ inputs.LINUX }}-${{ env.LARCH }}
+          overwrite: ${{ inputs.CANDIDATE }}
           retention-days: 7
           path: package-${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          if-no-files-found: error
+      - name: Record final candidate package
+        if: inputs.CANDIDATE
+        env:
+          DISTRO: ${{ inputs.LINUX }}
+          PLATFORM: ${{ inputs.PLATFORMS }}
+        run: python3 .github/scripts/release_artifacts.py record-package --distro "$DISTRO" --platform "$PLATFORM" --directory "package-$DISTRO" --output "package-$DISTRO-$LARCH.json"
+      - name: Upload candidate package receipt
+        if: inputs.CANDIDATE
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: candidate-package-${{ inputs.LINUX }}-${{ env.LARCH }}
+          overwrite: true
+          path: package-${{ inputs.LINUX }}-${{ env.LARCH }}.json
+          if-no-files-found: error
+          retention-days: 7
       # Build test image
       - name: Extract metadata
         if: inputs.TEST == true

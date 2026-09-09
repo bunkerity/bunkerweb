@@ -15,6 +15,9 @@ local get_rdns = utils.get_rdns
 local rdns_forward_confirmed = utils.rdns_forward_confirmed
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
+local get_header_rules = utils.get_header_rules
+local match_header_rules = utils.match_header_rules
+local pick_header_rules = utils.pick_header_rules
 local get_variable = utils.get_variable
 local deduplicate_list = utils.deduplicate_list
 local ipmatcher_new = ipmatcher.new
@@ -64,6 +67,10 @@ function blacklist:initialize(ctx)
 			end
 			self.lists[kind] = deduplicate_list(self.lists[kind])
 		end
+		local header_rules = self.internalstore:get("plugin_blacklist_header_rules", true)
+		self.header_rules = pick_header_rules(header_rules, self.ctx.bw.server_name)
+		local ignore_header_rules = self.internalstore:get("plugin_blacklist_ignore_header_rules", true)
+		self.ignore_header_rules = pick_header_rules(ignore_header_rules, self.ctx.bw.server_name)
 	end
 end
 
@@ -153,6 +160,23 @@ function blacklist:init()
 			["IGNORE_URI"] = {},
 		}
 	end
+	local header_rules, header_err = get_header_rules("BLACKLIST_HEADER")
+	if not header_rules then
+		return self:ret(false, header_err)
+	end
+	local header_ok, header_store_err = self.internalstore:set("plugin_blacklist_header_rules", header_rules, nil, true)
+	if not header_ok then
+		return self:ret(false, header_store_err)
+	end
+	local ignore_rules, ignore_err = get_header_rules("BLACKLIST_IGNORE_HEADER")
+	if not ignore_rules then
+		return self:ret(false, ignore_err)
+	end
+	local ignore_ok, ignore_store_err =
+		self.internalstore:set("plugin_blacklist_ignore_header_rules", ignore_rules, nil, true)
+	if not ignore_ok then
+		return self:ret(false, ignore_store_err)
+	end
 	return self:ret(true, "successfully loaded all IP/network/rDNS/ASN/User-Agent/URI")
 end
 
@@ -160,6 +184,11 @@ function blacklist:access()
 	-- Check if access is needed
 	if not self:is_needed() then
 		return self:ret(true, "access not needed")
+	end
+	-- An ignore header wins over everything, cached verdicts included.
+	local ignored_header = match_header_rules(self.ctx, self.ignore_header_rules, "BLACKLIST_IGNORE_HEADER_VALUE")
+	if ignored_header then
+		return self:ret(true, "header " .. ignored_header .. " is ignored")
 	end
 	-- Check the caches
 	local checks = {
@@ -194,6 +223,14 @@ function blacklist:access()
 		if ok and cached then
 			already_cached[k] = true
 		end
+	end
+	-- Header rules are matched per request and never cached : the cache is keyed by a client
+	-- attribute, so a cached hit would also cover later requests carrying no header at all.
+	local matched_header = match_header_rules(self.ctx, self.header_rules, "BLACKLIST_HEADER_VALUE")
+	if matched_header then
+		local header_data = self:get_data("header " .. matched_header)
+		self:set_metric("counters", "failed_" .. header_data.id, 1)
+		return self:ret(true, "header " .. matched_header .. " is blacklisted", get_deny_status(), nil, header_data)
 	end
 	-- Check lists
 	if not self.lists then
@@ -361,7 +398,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in ignore list
 	local ignore = false
 	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
-		if regex_match(self.ctx.bw.uri, ignore_uri) then
+		if regex_match(self.ctx.bw.uri, ignore_uri, nil, "BLACKLIST_IGNORE_URI(_URLS)") then
 			ignore = true
 			break
 		end
@@ -369,7 +406,7 @@ function blacklist:is_blacklisted_uri()
 	-- Check if URI is in blacklist
 	if not ignore then
 		for _, uri in ipairs(self.lists["URI"]) do
-			if regex_match(self.ctx.bw.uri, uri) then
+			if regex_match(self.ctx.bw.uri, uri, nil, "BLACKLIST_URI(_URLS)") then
 				return true, "URI " .. uri
 			end
 		end
@@ -382,7 +419,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in ignore list
 	local ignore = false
 	for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
-		if regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ignore_ua, nil, "BLACKLIST_IGNORE_USER_AGENT(_URLS)") then
 			ignore = true
 			break
 		end
@@ -390,7 +427,7 @@ function blacklist:is_blacklisted_ua()
 	-- Check if UA is in blacklist
 	if not ignore then
 		for _, ua in ipairs(self.lists["USER_AGENT"]) do
-			if regex_match(self.ctx.bw.http_user_agent, ua) then
+			if regex_match(self.ctx.bw.http_user_agent, ua, nil, "BLACKLIST_USER_AGENT(_URLS)") then
 				return true, "UA " .. ua
 			end
 		end

@@ -64,6 +64,7 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_MAX_LOG_BACKUPS`              | `50`              | global    | no       | **Máximo de copias de seguridad de logs de Certbot:** Número de copias rotadas de `letsencrypt.log` que Certbot conserva por trabajo. El valor predeterminado de Certbot, `1000`, se acumula rápidamente; `50` es un límite razonable. Establece `0` para conservar solo el log activo.                                                                                     |
 
 !!! info "Información y comportamiento"
+    - El controlador local de `/.well-known/acme-challenge/` solo se activa con `AUTO_LETS_ENCRYPT=yes`, `LETS_ENCRYPT_CHALLENGE=http` y `LETS_ENCRYPT_PASSTHROUGH=no`. Las excepciones de redirección a HTTPS y de acceso también requieren que el token solicitado exista como archivo legible y no vacío. Al eliminar el token, se restauran inmediatamente las comprobaciones habituales. Los demás servicios aplican sus reglas habituales de enrutamiento y acceso a esta ruta.
     - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
     - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor.
     - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS.
@@ -85,6 +86,8 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 !!! warning "Certificados comodín"
     Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
+
+    Un comodín solo cubre un nivel: `*.example.com` no cubre `a.b.example.com`. Se rechazan los grupos que no pueden cubrir todos los nombres configurados y el servicio afectado se informa como mal configurado. Separe esos nombres en servicios distintos. Los grupos válidos siguen procesándose; si no se puede emitir ningún certificado, el trabajo falla. Los certificados emitidos correctamente para otros grupos siguen solicitando una recarga.
 
 !!! warning "Límites de velocidad"
     Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.

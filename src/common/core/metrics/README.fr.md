@@ -93,6 +93,7 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
 | `METRICS_MEMORY_SIZE`                | `16m`    | global    | non      | **Taille mémoire :** taille du stockage interne des métriques (par exemple `8192`, `16m`, `32m`).                                          |
 | `METRICS_MAX_BLOCKED_REQUESTS`       | `1k`     | global    | non      | **Maximum de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker par worker. Accepte la notation abrégée `k`/`m`.          |
 | `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `10k`    | global    | non      | **Maximum Redis de requêtes bloquées :** nombre maximal de requêtes bloquées à stocker dans Redis. Accepte la notation abrégée `k`/`m`.    |
+| `METRICS_REDIS_TTL`                  | `2592000`| global    | non      | **TTL Redis des métriques :** secondes avant l'expiration des clés de métriques Redis (`0` = permanent) ; renouvelé à chaque synchronisation afin que les données actives n'expirent jamais, ce qui permet aux données abandonnées de devenir évictables sous `volatile-lru` pour que Redis se rétablisse en cas de pression mémoire (maxmemory). Accepte la notation abrégée `k`/`m`. |
 | `MAX_LRU_HISTORY`                    | `1k`     | global    | non      | **Historique LRU maximal :** nombre d'emplacements LRU par worker et limite du tableau d'historique des événements par clé (traces de blocage, traces d'authentification, etc.). Accepte la notation abrégée `k`/`m`. |
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | non      | **Enregistrer les métriques dans Redis :** mettez `yes` pour stocker les métriques (compteurs et tableaux) dans Redis pour l'agrégation. |
 
@@ -100,7 +101,9 @@ Par exemple, `/metrics/requests` renvoie des informations sur les requêtes bloq
     Le paramètre `METRICS_MEMORY_SIZE` doit être ajusté selon votre volume de trafic et le nombre d'instances. Les valeurs brutes en octets et les suffixes `k`/`m` sont pris en charge. Pour les sites à fort trafic, envisagez d'augmenter cette valeur afin de garantir la capture de toutes les métriques sans perte de données.
 
 !!! info "Intégration Redis"
-    Lorsque BunkerWeb est configuré pour utiliser [Redis](#redis), le plugin Metrics synchronise automatiquement les données de requêtes bloquées avec le serveur Redis. Cela fournit une vue centralisée des événements de sécurité sur plusieurs instances de BunkerWeb.
+    Lorsque BunkerWeb utilise [Redis](#redis), le plugin Metrics y synchronise automatiquement les rapports de requêtes bloquées. Lorsque Redis atteint `maxmemory`, les rapports refusés restent dans le tampon limité du worker pour une nouvelle tentative. Un débordement du tampon, une éviction LRU ou une perte de données Redis peut toutefois supprimer des rapports. Les compteurs de filtres incomplets sont reconstruits à partir de la liste des requêtes conservées. Les rapports stockés dont les données sont invalides (horodatage ou identifiant inutilisable) sont exclus du tableau des rapports et de ses totaux.
+
+    Les totaux des compteurs sont récupérés dans Redis au besoin avant leur synchronisation, y compris après une éviction du cache LRU local. Les compteurs Redis inactifs restent stockés jusqu'à expiration de `METRICS_REDIS_TTL` ; `0` les conserve volontairement sans limite de durée. Surveillez donc la mémoire Redis si vos métriques comportent beaucoup de clés distinctes.
 
 !!! warning "Considérations de performance"
     Définir des valeurs très élevées pour `METRICS_MAX_BLOCKED_REQUESTS` ou `METRICS_MAX_BLOCKED_REQUESTS_REDIS` peut augmenter l'utilisation de la mémoire. Surveillez les ressources système et ajustez ces valeurs selon vos besoins réels et les ressources disponibles.

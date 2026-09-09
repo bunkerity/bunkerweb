@@ -10,7 +10,9 @@ from pathlib import Path
 from platform import machine
 from re import compile as re_compile
 from tarfile import open as tar_open
-from typing import Dict, List, Optional, Union, Any
+from threading import Lock
+from time import monotonic
+from typing import Dict, List, Optional, Tuple, Union, Any
 from urllib.parse import urlsplit
 from math import ceil
 import logging
@@ -442,6 +444,49 @@ def is_newer_version_available(current_version: str, latest_version: str) -> boo
         return False
 
 
+_REDIS_CLIENT_LOCK = Lock()
+# Single-entry, process-wide memo: (cache_key, client_or_None, negative_window_deadline).
+# A configuration change yields a different key and therefore a new client, so there is no
+# separate invalidation path. The superseded client is never closed: the Web UI hands the
+# very same object to flask-session as app.config["SESSION_REDIS"], and closing it would
+# break every live session in the worker. Dropping the reference is enough, the pool is
+# garbage collected once nothing uses it.
+_REDIS_CLIENT_ENTRY: Optional[Tuple[tuple, Any, float]] = None
+
+# How long a failed connection is remembered before another connect is attempted.
+# REDIS_TIMEOUT feeds both socket_timeout and socket_connect_timeout (default 1000 ms), so
+# without a negative window every single request against a down Redis pays a full timeout.
+REDIS_NEGATIVE_CACHE_SECONDS = 10.0
+
+
+def shared_redis_pool_size() -> int:
+    """Upper bound on connections in the process-wide Redis pool.
+
+    Deliberately NOT derived from REDIS_KEEPALIVE_POOL: that setting sizes the per-NGINX-worker
+    keepalive pool of the OpenResty Lua client and means nothing here. It was only safe as a
+    Python max_connections while every call owned a private pool.
+
+    Now that one client is shared, the cap has to cover everything in the process that can
+    talk to Redis at once: the gunicorn gthread request threads (MAX_THREADS, defaulting to
+    MAX_WORKERS * 2, src/ui/utils/gunicorn.conf.py) plus the two 4-worker executors in
+    src/ui/app/dependencies.py. redis-py *raises* MaxConnectionsError rather than blocking
+    once the pool is exhausted, so this is a hard ceiling, not a target. Connections are
+    created lazily, so a generous cap costs nothing while idle.
+    """
+    try:
+        workers = int(getenv("MAX_WORKERS") or max(effective_cpu_count() - 1, 1))
+    except ValueError:
+        workers = 1
+    try:
+        threads = int(getenv("MAX_THREADS") or workers * 2)
+    except ValueError:
+        threads = workers * 2
+
+    # + 8 for CONFIG_TASKS_EXECUTOR and PAGE_TASKS_EXECUTOR, doubled for short overlaps
+    # (a thread holding a connection while another is checked out), floored at 32.
+    return max(32, (max(threads, 1) + 8) * 2)
+
+
 def get_redis_client(
     use_redis: bool = False,
     redis_host: Optional[str] = None,
@@ -450,6 +495,7 @@ def get_redis_client(
     redis_timeout: Union[str, float] = "1000.0",
     redis_keepalive_pool: Union[str, int] = "10",
     redis_ssl: bool = False,
+    redis_ssl_verify: bool = True,
     redis_username: Optional[str] = None,
     redis_password: Optional[str] = None,
     redis_sentinel_hosts: Union[List[List[str]], List[tuple], str] = [],
@@ -469,6 +515,7 @@ def get_redis_client(
         redis_timeout: Connection timeout in milliseconds
         redis_keepalive_pool: Maximum connections in pool
         redis_ssl: Whether to use SSL for connection
+        redis_ssl_verify: Whether to verify the Redis server certificate (REDIS_SSL_VERIFY)
         redis_username: Redis username for authentication
         redis_password: Redis password for authentication
         redis_sentinel_hosts: List of Redis Sentinel hosts
@@ -480,6 +527,8 @@ def get_redis_client(
     Returns:
         Redis client instance or None if connection fails
     """
+    global _REDIS_CLIENT_ENTRY
+
     if not use_redis:
         return None
 
@@ -521,6 +570,36 @@ def get_redis_client(
     if isinstance(redis_sentinel_hosts, str):
         redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
 
+    # Every connection parameter except the logger, so a configuration change simply
+    # produces a different key.
+    cache_key = (
+        redis_host,
+        redis_port,
+        redis_db,
+        redis_timeout,
+        redis_ssl,
+        redis_ssl_verify,
+        redis_username,
+        redis_password,
+        tuple(tuple(host) for host in redis_sentinel_hosts),
+        redis_sentinel_username,
+        redis_sentinel_password,
+        redis_sentinel_master,
+    )
+
+    entry = _REDIS_CLIENT_ENTRY
+    if entry is not None and entry[0] == cache_key:
+        if entry[1] is not None:
+            # No ping on a cache hit: it never proved anything about the next command, and
+            # every Redis branch in the Web UI already falls back to the instance HTTP APIs.
+            return entry[1]
+        if monotonic() < entry[2]:
+            return None
+
+    # ssl_cert_reqs is only meaningful on a TLS connection, and the non-SSL Sentinel
+    # connection class does not accept it at all.
+    ssl_kwargs = {"ssl_cert_reqs": "required" if redis_ssl_verify else "none"} if redis_ssl else {}
+
     redis_client = None
 
     try:
@@ -537,24 +616,22 @@ def get_redis_client(
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,
                 socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
+                max_connections=shared_redis_pool_size(),
+                **ssl_kwargs,
             )
 
-            try:
-                # Test the connection
-                sentinel.discover_master(redis_sentinel_master)
+            # Test the connection. No inner handler: a Sentinel failure must reach the outer
+            # except below, which is what arms the negative window. Returning early here left
+            # every request paying a full discover_master timeout against a down Sentinel.
+            sentinel.discover_master(redis_sentinel_master)
 
-                # Get master connection
-                redis_client = sentinel.master_for(
-                    redis_sentinel_master,
-                    db=redis_db,
-                    username=redis_username,
-                    password=redis_password,
-                )
-            except Exception as e:
-                if logger:
-                    logger.error(f"Failed to connect to Redis Sentinel: {e}")
-                return None
+            # Get master connection
+            redis_client = sentinel.master_for(
+                redis_sentinel_master,
+                db=redis_db,
+                username=redis_username,
+                password=redis_password,
+            )
 
         # Direct connection to Redis
         else:
@@ -574,18 +651,32 @@ def get_redis_client(
                 socket_timeout=redis_timeout / 1000,
                 socket_connect_timeout=redis_timeout / 1000,
                 socket_keepalive=True,
-                max_connections=redis_keepalive_pool,
+                max_connections=shared_redis_pool_size(),
                 ssl=redis_ssl,
+                **ssl_kwargs,
             )
 
-        # Test the connection
+        # Test the connection once, when the client is built.
         redis_client.ping()
         if logger:
             logger.info("Successfully connected to Redis")
+
+        # Built outside the lock, published under it: holding a lock across a connect would
+        # serialise every thread in the worker behind one slow handshake.
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is not None and entry[0] == cache_key and entry[1] is not None:
+                # Another thread won the race; drop ours (never close it) and share theirs.
+                return entry[1]
+            _REDIS_CLIENT_ENTRY = (cache_key, redis_client, 0.0)
 
         return redis_client
 
     except Exception as e:
         if logger:
             logger.error(f"Failed to connect to Redis: {e}")
+        with _REDIS_CLIENT_LOCK:
+            entry = _REDIS_CLIENT_ENTRY
+            if entry is None or entry[0] != cache_key or entry[1] is None:
+                _REDIS_CLIENT_ENTRY = (cache_key, None, monotonic() + REDIS_NEGATIVE_CACHE_SECONDS)
         return None

@@ -1,7 +1,7 @@
 import re
 from logging.config import fileConfig
 from os import environ
-from sqlalchemy import engine_from_config
+from sqlalchemy import Enum, String, engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
@@ -104,6 +104,23 @@ def _extract_version(text):
     return match.group(1) if match else None
 
 
+def _compare_type(context_, inspected_column, metadata_column, inspected_type, metadata_type):
+    if metadata_column.table.name not in ("bw_custom_configs", "bw_template_custom_configs") or metadata_column.name != "type":
+        return None
+    if not isinstance(metadata_type, Enum):
+        return None
+    if context_.dialect.name == "sqlite" and isinstance(inspected_type, String):
+        # SQLite stores these enums as strings; retaining extra capacity needs no DDL.
+        if inspected_type.length is None or inspected_type.length >= metadata_type.length:
+            return False
+    if context_.dialect.name in ("mysql", "mariadb") and isinstance(inspected_type, Enum):
+        # Preserve the legacy value instead of narrowing an enum that may contain data.
+        existing, desired = set(inspected_type.enums), set(metadata_type.enums)
+        if desired < existing and existing - desired == {"default_server_stream"}:
+            return False
+    return None
+
+
 def _strip_ignored_ops(container):
     if container is None:
         return
@@ -178,6 +195,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         process_revision_directives=process_revision_directives,
+        compare_type=_compare_type,
     )
 
     with context.begin_transaction():
@@ -198,6 +216,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
+            compare_type=_compare_type,
         )
 
         with context.begin_transaction():
