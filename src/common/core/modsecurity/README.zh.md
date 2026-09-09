@@ -34,7 +34,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | 否   | **CRS 版本：** 要使用的 OWASP 核心规则集版本。选项：`3` 或 `4`。注意：`nightly` 已弃用，将默认使用 v4。                                     |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | 否   | **规则引擎：** 控制是否强制执行规则。选项：`On`、`DetectionOnly` 或 `Off`。                                                                 |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | 否   | **审计引擎：** 控制审计日志的工作方式。选项：`On`、`Off` 或 `RelevantOnly`。                                                                |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | 否   | **审计日志部分：** 审计日志中要包含的请求/响应的哪些部分。                                                                                  |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | 否   | **审计日志路径：** ModSecurity 写入审计条目的文件路径。必须是常规文件：Serial 审计写入器会锁定该文件，管道或流无法支持锁定。必须位于 `/var/log/bunkerweb/` 下并以 `.log` 结尾。                |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | 否   | **请求体限制（无文件）：** 不含文件上传的请求体的最大大小。接受纯字节或人类可读的后缀（`k`、`m`、`g`），例如 `131072`、`256k`、`1m`、`2g`。 |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | **请求体上限：** ModSecurity 检查的请求体最大大小，支持 `k`/`m`/`g` 后缀。超出时按 `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION` 处理。空值从 `MAX_CLIENT_SIZE` 推导；NGINX 先执行 `MAX_CLIENT_SIZE` 限制，因此设得比它更大无效。 |
@@ -178,7 +178,7 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "带插件的高级配置"

@@ -34,7 +34,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | `MODSECURITY_CRS_VERSION`             | `4`                                   | multisite | no       | **Versión de CRS:** La versión del OWASP Core Rule Set a utilizar. Opciones: `3` o `4`. Nota: `nightly` está obsoleto y utiliza v4 por defecto.                                                                                                    |
 | `MODSECURITY_SEC_RULE_ENGINE`         | `On`                                  | multisite | no       | **Motor de Reglas:** Controle si se aplican las reglas. Opciones: `On`, `DetectionOnly` u `Off`.                                                                                                                                                   |
 | `MODSECURITY_SEC_AUDIT_ENGINE`        | `RelevantOnly`                        | multisite | no       | **Motor de Auditoría:** Controle cómo funciona el registro de auditoría. Opciones: `On`, `Off` o `RelevantOnly`.                                                                                                                                   |
-| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `ABIJDEFHZ`                           | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                              |
+| `MODSECURITY_SEC_AUDIT_LOG_PARTS`     | `BCFH`                                | multisite | no       | **Partes del Registro de Auditoría:** Qué partes de las solicitudes/respuestas incluir en los registros de auditoría.                                                                                                                              |
 | `MODSECURITY_SEC_AUDIT_LOG`           | `/var/log/bunkerweb/modsec_audit.log` | multisite | no       | **Ruta del Registro de Auditoría:** Ruta del archivo en el que ModSecurity escribe las entradas de auditoría. Debe ser un archivo regular: el escritor de auditoría Serial lo bloquea, algo que una tubería o flujo no puede soportar. Debe terminar en `.log`, dentro de `/var/log/bunkerweb/`.             |
 | `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` | `131072`                              | multisite | no       | **Límite del Cuerpo de la Solicitud (Sin Archivos):** Tamaño máximo para los cuerpos de las solicitudes sin carga de archivos. Acepta bytes simples o sufijos legibles por humanos (`k`, `m`, `g`), por ejemplo, `131072`, `256k`, `1m`, `2g`.     |
 | `MODSECURITY_SEC_REQUEST_BODY_LIMIT` | | multisite | no | **Límite del cuerpo:** Tamaño máximo que inspecciona ModSecurity, con sufijos `k`/`m`/`g`. Si se supera, aplica `MODSECURITY_SEC_REQUEST_BODY_LIMIT_ACTION`. Vacío lo deriva de `MAX_CLIENT_SIZE`, que NGINX impone antes de ModSecurity; un valor superior no tiene efecto. |
@@ -178,7 +178,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     MODSECURITY_CRS_VERSION: "4"
     MODSECURITY_SEC_RULE_ENGINE: "DetectionOnly"
     MODSECURITY_SEC_AUDIT_ENGINE: "On"
-    MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABIJDEFHZ"
+    MODSECURITY_SEC_AUDIT_LOG_PARTS: "BCEFHJK"
     ```
 
 === "Configuración Avanzada con Complementos"
