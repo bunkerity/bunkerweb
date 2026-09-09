@@ -597,7 +597,7 @@ BunkerWeb 会在 `bw_metadata` 表中跟踪实例变更
 
     !!! note "数据库路径"
         我们假设您正在使用默认的数据库路径。如果您正在使用自定义路径，您需要调整该命令。
-        对于 All-in-one，我们假设数据库是位于持久化 `/data` 卷中的 `db.sqlite3` (`/data/db.sqlite3`)。
+        对于 All-in-one，我们假设数据库是位于持久化 `/data/lib` 卷中的 `db.sqlite3` (`/data/lib/db.sqlite3`)。
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3

@@ -685,7 +685,7 @@ En caso de que hayas olvidado tus credenciales de la interfaz de usuario o esté
 
     !!! note "Ruta de la base de datos"
         Asumimos que estás utilizando la ruta de la base de datos predeterminada. Si estás utilizando una ruta personalizada, necesitarás adaptar el comando.
-        Para Todo en uno, asumimos que la base de datos es `db.sqlite3` ubicada en el volumen persistente `/data` (`/data/db.sqlite3`).
+        Para Todo en uno, asumimos que la base de datos es `db.sqlite3` ubicada en el volumen persistente `/data/lib` (`/data/lib/db.sqlite3`).
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3

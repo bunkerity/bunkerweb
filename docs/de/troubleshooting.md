@@ -696,7 +696,7 @@ Falls Sie Ihre UI-Anmeldeinformationen vergessen haben oder Probleme mit 2FA hab
 
     !!! note "Datenbankpfad"
         Wir gehen davon aus, dass Sie den Standard-Datenbankpfad verwenden. Wenn Sie einen benutzerdefinierten Pfad verwenden, müssen Sie den Befehl anpassen.
-        Für All-in-one gehen wir davon aus, dass die Datenbank `db.sqlite3` im persistenten `/data`-Volume (`/data/db.sqlite3`) liegt.
+        Für All-in-one gehen wir davon aus, dass die Datenbank `db.sqlite3` im persistenten `/data/lib`-Volume (`/data/lib/db.sqlite3`) liegt.
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3

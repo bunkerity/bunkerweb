@@ -1295,6 +1295,7 @@ The All-In-One image comes with several built-in services, which can be controll
 - `AUTOCONF_MODE=no` (default) - Enables the autoconf service
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
+- `DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3` (default) - `/var/lib/bunkerweb` is symlinked to `/data/lib` inside the container, so the SQLite file persists at `/data/lib/db.sqlite3`; set this to an external DSN to use a different database instead
 - `HIDE_SERVICE_LOGS=` (optional) - Comma-separated list of services to silence in container logs. Accepted values: `api`, `autoconf`, `bunkerweb`, `crowdsec`, `broker`, `redis`, `scheduler`, `worker`, `ui`, `nginx.access`, `nginx.error`, `modsec`.
 - **Logging**: The all-in-one image streams every service's stdout and stderr to the container output. Use `docker logs bunkerweb-aio` (or your preferred container logging driver) to view and rotate logs — the image does not write on-disk log files for its Python services.
 

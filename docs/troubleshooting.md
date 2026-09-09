@@ -600,7 +600,7 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
 
     !!! note "Database path"
         We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.
-        For All-in-one, we assume the database is `db.sqlite3` located in the persistent `/data` volume (`/data/db.sqlite3`).
+        For All-in-one, we assume the database is `db.sqlite3` located in the persistent `/data/lib` volume (`/data/lib/db.sqlite3`).
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3

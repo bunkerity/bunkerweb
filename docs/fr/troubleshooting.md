@@ -602,7 +602,7 @@ Si vous avez oublié vos informations d'identification de l'interface utilisateu
 
     !!! note "Chemin de la base de données"
         Nous supposons que vous utilisez le chemin de base de données par défaut. Si vous utilisez un chemin personnalisé, vous devrez adapter la commande.
-        Pour Tout-en-un, nous supposons que la base de données est `db.sqlite3` située dans le volume persistant `/data` (`/data/db.sqlite3`).
+        Pour Tout-en-un, nous supposons que la base de données est `db.sqlite3` située dans le volume persistant `/data/lib` (`/data/lib/db.sqlite3`).
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3
