@@ -125,9 +125,12 @@ function saveLanguage(rootUrl, language) {
   data.append("language", language);
   data.append("csrf_token", csrfToken);
 
+  // keepalive: the request must survive a navigation started right after the
+  // language is picked, otherwise the preference never reaches the database.
   fetch(rootUrl, {
     method: "POST",
     body: data,
+    keepalive: true,
   })
     .then((response) => {
       if (!response.ok) {
@@ -138,18 +141,6 @@ function saveLanguage(rootUrl, language) {
       console.error("Error saving language preference to server:", error);
     });
 }
-
-// Debounce function to prevent multiple rapid requests
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
-
-const debouncedSaveLanguage = debounce(saveLanguage, 1000);
 
 // Check if language preference exists in localStorage
 const savedLang = localStorage.getItem("language");
@@ -218,8 +209,9 @@ function changeLanguage(lang) {
     .trim()
     .replace(/\/home$/, "/set_language");
 
-  // Save language preference to server
-  debouncedSaveLanguage(rootUrl, alpha2);
+  // Save language preference to server (sent immediately: a debounce here was
+  // dropped whenever the user navigated within a second of picking a language)
+  saveLanguage(rootUrl, alpha2);
 }
 
 // Helper to update DataTable language and translations for a given table

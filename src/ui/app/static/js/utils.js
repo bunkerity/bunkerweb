@@ -541,8 +541,8 @@ $(document).ready(() => {
     updateNotificationsBadge();
   });
 
-  // Debounced clear notifications logic
-  const clearNotifications = debounce((rootUrl) => {
+  // Clear notifications logic (see saveTheme: no debounce, keepalive request)
+  const clearNotifications = (rootUrl) => {
     const csrfToken = $("#csrf_token").val();
     const data = new FormData();
     data.append("csrf_token", csrfToken);
@@ -555,6 +555,7 @@ $(document).ready(() => {
       method: "POST",
       credentials: "same-origin",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
@@ -576,13 +577,58 @@ $(document).ready(() => {
           error,
         );
       });
-  }, 300);
+  };
 
   $(document).on("click", "#clear-notifications-btn", function () {
     clearNotifications($(this).data("root-url"));
   });
 
-  const saveTheme = debounce((rootUrl, theme) => {
+  // Per-tab record of a theme choice whose /set_theme write has not been
+  // acknowledged yet. sessionStorage: it must survive the navigation that
+  // causes the race, and it must not leak into other tabs or outlive the tab.
+  // Only a fresh marker is replayed: the race it covers resolves in
+  // milliseconds, while a stale one left by another tab would fight that tab
+  // for the stored theme on every navigation.
+  const PENDING_THEME_TTL = 15000;
+
+  const readPendingTheme = () => {
+    try {
+      const [theme, at] = (sessionStorage.getItem("pendingTheme") || "").split(
+        "|",
+      );
+      if (theme !== "light" && theme !== "dark") return null;
+      if (!(Date.now() - Number(at) < PENDING_THEME_TTL)) {
+        sessionStorage.removeItem("pendingTheme");
+        return null;
+      }
+      return theme;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const setPendingTheme = (theme) => {
+    try {
+      sessionStorage.setItem("pendingTheme", `${theme}|${Date.now()}`);
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  const clearPendingTheme = () => {
+    try {
+      sessionStorage.removeItem("pendingTheme");
+    } catch (e) {
+      // Storage unavailable (private mode): non-fatal.
+    }
+  };
+
+  // One-shot user action: post it right away and mark the request keepalive so a
+  // navigation started just after the toggle cannot cancel it. A debounce here
+  // dropped the write entirely when the user clicked a link within a second of
+  // toggling, and the next page then re-synced localStorage from the stale DB
+  // theme, so the choice was lost until the user toggled again.
+  const saveTheme = (rootUrl, theme) => {
     const csrfToken = $("#csrf_token").val();
 
     const data = new FormData();
@@ -592,17 +638,20 @@ $(document).ready(() => {
     fetch(rootUrl, {
       method: "POST",
       body: data,
+      keepalive: true,
     })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        // Handle success, redirect, etc.
+        // Not cleared here: a page whose render started before this write
+        // committed can still be showing the old theme. The marker is dropped
+        // by the next render that agrees with it (or when it expires).
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
       });
-  }, 1000);
+  };
 
   // Server renders the authoritative theme on <html> and #theme; anon pages get
   // it resolved into window.__bwResolvedTheme by the head script. Repaint only
@@ -615,9 +664,20 @@ $(document).ready(() => {
 
   const isAuthenticated = $("body").attr("data-authenticated") === "true";
 
+  // A toggle followed immediately by a navigation leaves /set_theme in flight
+  // while the next page is already being rendered, so that page can still read
+  // the previous theme from the database. The tab remembers the intent until
+  // the write is acknowledged; whatever is left over is replayed here.
+  const pendingTheme = readPendingTheme();
+  const replayPending = pendingTheme !== null && pendingTheme !== serverTheme;
+  const effectiveTheme = replayPending ? pendingTheme : desiredTheme;
+  if (pendingTheme !== null && !replayPending) {
+    clearPendingTheme(); // the database caught up on its own
+  }
+
   if (isAuthenticated) {
     try {
-      localStorage.setItem("theme", desiredTheme); // sync cache with DB
+      localStorage.setItem("theme", effectiveTheme); // sync cache with DB
     } catch (e) {
       // Storage unavailable (private mode): non-fatal.
     }
@@ -625,9 +685,13 @@ $(document).ready(() => {
   // Anon pages: only an explicit toggle may persist; an OS-resolved write here
   // would masquerade as a choice and freeze live OS tracking (base.html).
 
-  if (desiredTheme !== serverTheme) {
-    // <html> already fixed pre-paint; reconcile body assets only.
-    applyTheme(desiredTheme);
+  if (effectiveTheme !== serverTheme) {
+    // <html> already fixed pre-paint; reconcile body assets only. A replayed
+    // choice also gets re-sent, so the database stops disagreeing with the tab.
+    applyTheme(
+      effectiveTheme,
+      replayPending ? $("#dark-mode-toggle").data("root-url") : null,
+    );
   }
 
   // Explicit user choice -> always persist, even on anon pages.
@@ -723,6 +787,7 @@ $(document).ready(() => {
     if (!rootUrl || window.location.pathname.includes("/setup") || dbReadOnly)
       return;
 
+    setPendingTheme(theme);
     saveTheme(rootUrl.replace(/\/profile$/, "/set_theme"), theme);
   }
 
