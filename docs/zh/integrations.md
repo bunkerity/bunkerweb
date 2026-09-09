@@ -4645,7 +4645,7 @@ kubectl delete ingress <old-ingress> -n <namespace>
 </figure>
 
 !!! tip "PRO 支持"
-    **如果您需要 Swarm 支持**，请通过 [contact@bunkerity.com](mailto:contact@bunkerity.com) 或[联系表单](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)与我们联系。
+    **如果您在 Swarm 集成方面需要帮助**，请通过 [contact@bunkerity.com](mailto:contact@bunkerity.com) 或[联系表单](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)与我们联系。
 
 !!! info "Docker 自动配置"
     Swarm 集成与 Docker 自动配置集成类似（但使用服务而不是容器）。如果需要，请先阅读[Docker 自动配置集成部分](#docker-autoconf)。

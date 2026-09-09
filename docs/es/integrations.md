@@ -4614,7 +4614,7 @@ Aplicación con reglas NGINX personalizadas a través de `configuration-snippet`
 </figure>
 
 !!! tip "Soporte PRO"
-    **Si necesitas soporte para Swarm**, por favor contáctanos en [contact@bunkerity.com](mailto:contact@bunkerity.com) o a través del [formulario de contacto](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+    **Si necesitas ayuda con la integración de Swarm**, por favor contáctanos en [contact@bunkerity.com](mailto:contact@bunkerity.com) o a través del [formulario de contacto](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Autoconfiguración de Docker"
     La integración con Swarm es similar a la de autoconfiguración de Docker (pero con servicios en lugar de contenedores). Por favor, lee primero la [sección de integración de autoconfiguración de Docker](#docker-autoconf) si es necesario.

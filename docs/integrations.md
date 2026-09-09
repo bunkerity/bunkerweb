@@ -4730,7 +4730,7 @@ Application with custom NGINX rules via `configuration-snippet`: complex rewrite
 </figure>
 
 !!! tip "PRO support"
-    **If you need Swarm support**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+    **If you need help with the Swarm integration**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Docker autoconf"
     The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
