@@ -212,6 +212,10 @@ local table_remove = table.remove
 
 local REQUEST_FACET_FIELDS = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 
+-- Stripping the TTL is a one-shot migration: in persist mode nothing re-adds one, since
+-- every writer uses bare SET/RPUSH/HINCRBY. Later cycles would be pure round trips.
+local persisted_redis = false
+
 -- Bounded set of nginx $upstream_cache_status values counted per served request
 -- (reverseproxy proxy_cache). Distinct axis from the blocked-request facets above;
 -- keeps the cache-status counter cardinality fixed and skips nil/unknown statuses.
@@ -508,24 +512,40 @@ end
 -- all discarded, so buffering them collapses 11+N round-trips into one. Keep this
 -- function free of early returns after init_pipeline -- escaping it would leave the
 -- client buffering for the rest of the cycle.
+-- METRICS_REDIS_TTL=0 is documented as keeping the keys permanent. Only refreshing the
+-- TTL when it is set leaves a key that already carries one expiring for another full
+-- period, and under volatile-lru it stays evictable for exactly that long, which is how
+-- an operator who set 0 to pin the reports list still loses it. PERSIST makes the
+-- documented behaviour true on an instance that ran with a TTL before.
 local function refresh_request_ttls(self, ttl, wid)
-	if not ttl or ttl <= 0 then
-		return
+	local persist = ttl <= 0
+	if persist then
+		if persisted_redis then
+			return
+		end
+		persisted_redis = true
 	end
 	-- While buffering, every call returns nil with no error, so `healthy` cannot be
 	-- falsely poisoned; only commit_pipeline reports a real socket failure.
 	self.clusterstore:call("init_pipeline")
-	self.clusterstore:call("expire", "requests:ids", ttl)
-	self.clusterstore:call("expire", "requests", ttl)
-	for _, field in ipairs(REQUEST_FACET_FIELDS) do
-		self.clusterstore:call("expire", "requests:facet:" .. field, ttl)
+	local function touch(key)
+		if persist then
+			self.clusterstore:call("persist", key)
+		else
+			self.clusterstore:call("expire", key, ttl)
+		end
 	end
-	self.clusterstore:call("expire", "requests:facets:initialized", ttl)
+	touch("requests:ids")
+	touch("requests")
+	for _, field in ipairs(REQUEST_FACET_FIELDS) do
+		touch("requests:facet:" .. field)
+	end
+	touch("requests:facets:initialized")
 	if self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
 		for _, key in ipairs(lru:get_keys()) do
 			if key ~= "setup" and key ~= "requests" and key ~= "baseline" then
 				if key ~= "stream_requests" then
-					self.clusterstore:call("expire", "metrics:" .. key .. ":" .. wid, ttl)
+					touch("metrics:" .. key .. ":" .. wid)
 				end
 			end
 		end
@@ -1027,7 +1047,7 @@ function metrics:timer()
 	end
 
 	self.redis_ok = nil
-	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"]) or 0
+	local ttl = parse_count(self.variables["METRICS_REDIS_TTL"])
 	-- Stays true after the OOM breaker trips redis_ok, so the TTL refresh still runs.
 	local redis_connected = false
 	if self.use_redis then
@@ -1215,7 +1235,7 @@ function metrics:timer()
 	if self.redis_ok then
 		enforce_redis_requests_cap(self)
 	end
-	if redis_connected and ttl > 0 then
+	if redis_connected and ttl then
 		refresh_request_ttls(self, ttl, wid)
 	end
 	-- Always attempt cleanup when Redis was used, even if connection dropped mid-cycle.

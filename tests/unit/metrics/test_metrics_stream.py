@@ -314,13 +314,11 @@ def _lua_block(path: Path, directive: str) -> str:
 
 @needs_lua
 def test_an_acknowledged_batch_leaves_the_buffer_empty():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(3)
         local ok, msg = push_stream_reports()
         print(tostring(ok) .. "|" .. msg .. "|" .. #stream_requests .. "|" .. LAST_REQUEST.opts.body)
-        """
-    )
+        """)
     ok, msg, remaining, body = out.split("|")
     assert ok == "true"
     assert msg == "pushed 3 stream reports"
@@ -363,15 +361,13 @@ def test_reports_logged_while_the_push_is_in_flight_are_not_dropped():
     A naive "clear what I read" would drop a
     session that was logged mid-flight and never transmitted.
     """
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         ON_REQUEST = function() log_a_session("late") end
         local ok = push_stream_reports(1000)
         local pending = stream_requests
         print(tostring(ok) .. "|" .. #pending .. "|" .. pending[1].id .. "|" .. LAST_REQUEST.opts.body)
-        """
-    )
+        """)
     ok, remaining, first, body = out.split("|")
     assert ok == "true"
     assert remaining == "1", "the mid-flight session must survive"
@@ -447,14 +443,12 @@ def test_stream_report_persistence_encode_failure_returns_the_timer_error_key():
 
 @needs_lua
 def test_a_refused_batch_is_kept_for_the_next_tick():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         RESPONSE = { status = 503 }
         local ok, msg = push_stream_reports()
         print(tostring(ok) .. "|" .. msg .. "|" .. #stream_requests)
-        """
-    )
+        """)
     ok, msg, remaining = out.split("|")
     assert ok == "false"
     assert "503" in msg
@@ -465,8 +459,7 @@ def test_a_refused_batch_is_kept_for_the_next_tick():
 def test_a_failed_push_puts_its_batch_back_in_front():
     """Restoring after the mid-flight arrivals would reorder the buffer, and the drop-oldest
     cap would then evict the newest reports instead of the oldest."""
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         RESPONSE = { status = 503 }
         ON_REQUEST = function() log_a_session("late") end
@@ -475,15 +468,13 @@ def test_a_failed_push_puts_its_batch_back_in_front():
         local ids = {}
         for _, request in ipairs(pending) do ids[#ids + 1] = request.id end
         print(table.concat(ids, ","))
-        """
-    )
+        """)
     assert out == "req1,req2,late"
 
 
 @needs_lua
 def test_a_permanently_failing_push_stays_bounded():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(5)
         RESPONSE = { status = 503 }
         push_stream_reports(3)
@@ -491,8 +482,7 @@ def test_a_permanently_failing_push_stays_bounded():
         local ids = {}
         for _, request in ipairs(pending) do ids[#ids + 1] = request.id end
         print(#pending .. "|" .. table.concat(ids, ","))
-        """
-    )
+        """)
     remaining, ids = out.split("|")
     assert remaining == "3", "an API that stays down must not grow the buffer without bound"
     assert ids == "req3,req4,req5", "the cap drops the oldest, like every other buffer here"
@@ -500,15 +490,13 @@ def test_a_permanently_failing_push_stays_bounded():
 
 @needs_lua
 def test_an_unreachable_api_keeps_the_batch():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         RESPONSE = nil
         RESPONSE_ERR = "connection refused"
         local ok, msg = push_stream_reports()
         print(tostring(ok) .. "|" .. msg .. "|" .. #stream_requests)
-        """
-    )
+        """)
     ok, msg, remaining = out.split("|")
     assert ok == "false"
     assert "connection refused" in msg
@@ -517,13 +505,11 @@ def test_an_unreachable_api_keeps_the_batch():
 
 @needs_lua
 def test_nothing_is_sent_when_the_buffer_is_empty():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(0)
         local ok, msg = push_stream_reports()
         print(tostring(ok) .. "|" .. msg .. "|" .. tostring(LAST_REQUEST))
-        """
-    )
+        """)
     ok, msg, request = out.split("|")
     assert ok == "true"
     assert msg == "no stream reports to push"
@@ -532,14 +518,12 @@ def test_nothing_is_sent_when_the_buffer_is_empty():
 
 @needs_lua
 def test_an_internal_api_failure_keeps_the_batch():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         REQUEST_ERROR = true
         local ok, msg = push_stream_reports()
         print(tostring(ok) .. "|" .. msg .. "|" .. #stream_requests)
-        """
-    )
+        """)
     ok, msg, remaining = out.split("|")
     assert ok == "false"
     assert "helper exploded" in msg
@@ -548,21 +532,18 @@ def test_an_internal_api_failure_keeps_the_batch():
 
 @needs_lua
 def test_an_encoding_failure_keeps_the_batch_without_calling_the_api():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         ENCODE_ERROR = true
         local ok = push_stream_reports()
         print(tostring(ok) .. "|" .. #stream_requests .. "|" .. tostring(LAST_REQUEST))
-        """
-    )
+        """)
     assert out.split("|") == ["false", "2", "nil"]
 
 
 @needs_lua
 def test_a_malformed_or_incomplete_ack_keeps_the_batch():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(2)
         ACK_ERROR = true
         local malformed = push_stream_reports()
@@ -571,8 +552,7 @@ def test_a_malformed_or_incomplete_ack_keeps_the_batch():
         ACK = { status = "success", msg = { accepted = 1 } }
         local incomplete = push_stream_reports()
         print(tostring(malformed) .. "|" .. tostring(incomplete) .. "|" .. after_malformed .. "|" .. #stream_requests)
-        """
-    )
+        """)
     malformed, incomplete, after_malformed, remaining = out.split("|")
     assert malformed == "false"
     assert incomplete == "false"
@@ -581,16 +561,14 @@ def test_a_malformed_or_incomplete_ack_keeps_the_batch():
 
 @needs_lua
 def test_the_shared_internal_api_receives_only_request_specific_options():
-    out = _run_lua(
-        """
+    out = _run_lua("""
         reset(1)
         push_stream_reports()
         print(LAST_REQUEST.path .. "|" .. LAST_REQUEST.opts.method .. "|"
             .. LAST_REQUEST.opts.headers["Content-Type"] .. "|"
             .. tostring(LAST_REQUEST.opts.headers["Host"]) .. "|"
             .. tostring(LAST_REQUEST.opts.headers["Authorization"]))
-        """
-    )
+        """)
     path, method, content_type, host, authorization = out.split("|")
     assert path == "/metrics/stream-reports"
     assert method == "POST"
@@ -1004,7 +982,9 @@ def test_the_redis_id_index_is_trimmed_rebuilt_and_expired_with_requests():
     source = METRICS_LUA.read_text(encoding="utf-8")
     assert "redis.pcall('SREM', KEYS[2], tostring(req.id))" in _extract_script("TRIM_SCRIPT")
     assert "redis.pcall('SADD', KEYS[2], tostring(id))" in _extract_script("REBUILD_SCRIPT")
-    assert 'self.clusterstore:call("expire", "requests:ids", ttl)' in source
+    # Port of dev 9520495e4: expire/persist is now behind the touch() helper (ttl<=0 -> PERSIST,
+    # ttl>0 -> EXPIRE) so requests:ids is asserted through that call site, not a bare :call("expire", ...).
+    assert 'touch("requests:ids")' in source
 
 
 @needs_lua
@@ -1402,7 +1382,7 @@ def test_an_errored_probe_never_drives_the_cap_0_wipe():
     """
     for failing in ("llen", "get", "hlen", "scard"):
         script = preamble + _extract("self_heal_request_facets")
-        script += '\nself_heal_request_facets(SELF)\nprint(tostring(EVAL))'
+        script += "\nself_heal_request_facets(SELF)\nprint(tostring(EVAL))"
         result = subprocess.run([LUA, "-", failing], input=script, capture_output=True, text=True)
         assert result.returncode == 0, f"lua failed:\n{result.stdout}\n{result.stderr}"
         assert result.stdout.strip() == "nil", f"a failed {failing} still drove a write to Redis"
