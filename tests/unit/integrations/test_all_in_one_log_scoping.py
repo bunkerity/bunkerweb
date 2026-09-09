@@ -74,6 +74,13 @@ def test_aio_scheduler_scope_uses_the_leading_component_tag(monkeypatch):
     assert get_logs(monkeypatch, f"{worker_line}\n{scheduler_line}", {"bunkerweb.type": "all-in-one"}, "scheduler") == [scheduler_line]
 
 
+def test_aio_broker_logs_are_separate_from_waf_redis(monkeypatch):
+    redis_line = "2026-09-09T11:23:29Z [REDIS] Ready to accept connections"
+    broker_line = "2026-09-09T11:24:46Z [BROKER] Ready to accept connections"
+
+    assert get_logs(monkeypatch, f"{redis_line}\n{broker_line}", {"bunkerweb.type": "all-in-one"}, "broker") == [broker_line]
+
+
 def test_aio_bunkerweb_logs_keep_nginx_and_modsecurity_streams(monkeypatch):
     lines = [
         "2026-08-26T17:05:23Z [WORKER] [❌] unrelated worker error",

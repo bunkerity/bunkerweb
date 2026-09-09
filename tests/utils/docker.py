@@ -17,6 +17,7 @@ CONTAINER_TYPES = {
     # 1.7 moved the database clients (sqlite3, mariadb, psql) to the API image, so
     # queries run there rather than in the scheduler.
     "api": {"name": "bw-api"},
+    "broker": {"name": "bw-jobs-broker"},
 }
 
 # Scoping a container lookup to the stack this run brought up.
@@ -84,6 +85,7 @@ AIO_LOG_TAGS = {
     "controller": ("[AUTOCONF]",),
     "scheduler": ("[SCHEDULER]",),
     "api": ("[API]",),
+    "broker": ("[BROKER]",),
 }
 AIO_RECOGNIZED_LOG_TAGS = {tag for tags in AIO_LOG_TAGS.values() for tag in tags} | {
     "[WORKER]",
@@ -108,7 +110,7 @@ def get_docker_client() -> DockerClient:
 _CONTAINER_CACHE: Dict[Tuple[Logger, str], Container] = {}
 
 
-def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"]) -> Container:
+def get_container(logger: Logger, _type: Literal["bunkerweb", "broker", "controller", "scheduler", "database", "api"]) -> Container:
     cache_key = (logger, _type)
     cached = _CONTAINER_CACHE.get(cache_key)
     if cached is not None:
@@ -139,7 +141,7 @@ def get_container(logger: Logger, _type: Literal["bunkerweb", "controller", "sch
     return containers[0]
 
 
-def get_logs(logger: Logger, _type: Literal["bunkerweb", "controller", "scheduler", "database", "api"], since: Optional[float]) -> List[str]:
+def get_logs(logger: Logger, _type: Literal["bunkerweb", "broker", "controller", "scheduler", "database", "api"], since: Optional[float]) -> List[str]:
     container = get_container(logger, _type)
     logs = (
         container.logs(

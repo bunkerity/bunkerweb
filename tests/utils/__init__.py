@@ -59,7 +59,7 @@ def get_logs(
     integration: Literal["Docker", "Linux", "Autoconf", "Swarm", "Kubernetes", "All-in-one"],
     since: Optional[Union[datetime, str]] = None,
     *,
-    log_from: Literal["bunkerweb", "controller", "scheduler", "database"] = "bunkerweb",
+    log_from: Literal["bunkerweb", "broker", "controller", "scheduler", "database"] = "bunkerweb",
 ) -> List[str]:
     if integration != "Linux":
         if isinstance(since, str):
