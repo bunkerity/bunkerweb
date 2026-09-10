@@ -449,6 +449,14 @@ With `MULTISITE=yes`, the services list shows one pinned entry at the top labell
 
 Open it to configure the certificate it presents, its TLS settings, response headers, error pages and whitelist. Only those apply: reverse proxy, gRPC, redirects, sessions, antibot, mTLS, CORS and HTTP basic auth are not offered on its page, because the block has no hostname to route and no service identity to bind to. It offers no delete, clone or convert action either — it is permanent, and it is never counted against the PRO service quota.
 
+### Service mode
+
+A service is either `standard` or `redirect_only`. A redirect-only service does nothing but redirect — it carries no reverse proxy, no file serving, no custom NGINX snippet, no template and no attached upstream or workflow — and it will stop counting against the PRO service quota once redirect-only billing goes live. Everywhere else it stays an ordinary service: it keeps its own page, its metrics and its place in the services list.
+
+The declaration is explicit. It is never inferred from the redirect settings, and it is made from the **Service mode** card on the service's settings page, not from the settings form. If the service still carries something a redirect-only service may not — or is missing something it must have, such as a `REDIRECT_TO` target, or `SERVE_FILES` explicitly set to `no` since it otherwise defaults to `yes` — the card lists each reason and the action stays disabled until they are gone. The card is not offered on a draft service — a draft is never counted either way — though converting one through the API still works.
+
+The services list badges every service that would qualify, so the saving can be found without opening each page.
+
 ### Instance enrollment
 
 An instance shown on the **Instances** page can be given its own control-plane credential instead of sharing the global `API_TOKEN`. The row's key button (or the history menu) issues a single-use enrollment code, shown once, that the instance redeems at boot with `INSTANCE_ENROLLMENT_CODE`; from then on it answers only to the credential the control plane minted for it. Full mechanics, including the API endpoints and the `manual` vs `autoconf` split, are in the [API reference](api.md#enrollment-an-alternative-to-setting-credential-by-hand).

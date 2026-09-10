@@ -473,6 +473,26 @@ Auth werden nicht angeboten, weil der Block weder einen routbaren Hostnamen noch
 besitzt. Löschen, Klonen und Umwandeln sind ebenfalls nicht möglich: Der Eintrag ist permanent und
 zählt nie zum PRO-Dienstkontingent.
 
+### Dienstmodus {#service-mode}
+
+Ein Dienst ist entweder `standard` oder `redirect_only`. Ein redirect-only-Dienst tut nichts außer
+weiterleiten — er trägt keinen Reverse Proxy, keine Dateiauslieferung, keinen benutzerdefinierten
+NGINX-Schnipsel, keine Vorlage und keinen angehängten Upstream oder Workflow — und er zählt nicht
+mehr zum PRO-Dienstkontingent, sobald die redirect-only-Abrechnung live geht. Überall sonst bleibt
+er ein gewöhnlicher Dienst: eigene Seite, eigene Metriken, eigener Platz in der Dienstliste.
+
+Die Deklaration ist explizit. Sie wird nie aus den Weiterleitungseinstellungen abgeleitet und
+erfolgt über die Karte **Dienstmodus** auf der Einstellungsseite des Dienstes, nicht über das
+Einstellungsformular. Trägt der Dienst noch etwas, das ein redirect-only-Dienst nicht haben darf —
+oder fehlt ihm etwas Erforderliches, etwa ein `REDIRECT_TO`-Ziel oder ein explizites
+`SERVE_FILES=no`, da es sonst standardmäßig auf `yes` steht —, listet die Karte jeden Grund auf,
+und die Aktion bleibt deaktiviert, bis sie beseitigt sind. Bei einem Dienst im Draft-Status wird
+die Karte nicht angezeigt — ein Draft zählt ohnehin nie mit —, die Umwandlung über die API
+funktioniert für ihn trotzdem.
+
+Die Dienstliste kennzeichnet jeden Dienst, der dafür infrage käme, damit sich die Einsparung ohne
+Öffnen jeder einzelnen Seite finden lässt.
+
 ### Instanzregistrierung {#instance-enrollment}
 
 Eine auf der Seite **Instanzen** angezeigte Instanz kann anstelle des gemeinsam genutzten globalen `API_TOKEN` ihre eigene Anmeldeinformation der Steuerungsebene erhalten. Über die Schlüssel-Schaltfläche der Zeile (oder das Verlaufsmenü) wird ein einmal verwendbarer Registrierungscode ausgestellt, der nur einmal angezeigt wird; die Instanz löst ihn beim Start mit `INSTANCE_ENROLLMENT_CODE` ein. Danach reagiert sie nur noch auf die von der Steuerungsebene für sie ausgestellte Anmeldeinformation. Die vollständige Funktionsweise, einschließlich der API-Endpunkte und der Unterscheidung zwischen `manual` und `autoconf`, steht in der [API-Referenz](api.md#enrollment-an-alternative-to-setting-credential-by-hand).

@@ -439,6 +439,14 @@ Avec `MULTISITE=yes`, la liste des services affiche une entrée épinglée **Ser
 
 Ouvrez-le pour configurer son certificat, TLS, ses en-têtes de réponse, pages d'erreur et liste blanche. Reverse proxy, gRPC, redirections, sessions, antibot, mTLS, CORS et authentification HTTP Basic n'y sont pas proposés : il n'a ni nom d'hôte à router ni identité de service associée. Il ne peut pas être supprimé, cloné ou converti et ne compte jamais dans le quota PRO.
 
+### Mode du service {#service-mode}
+
+Un service est soit `standard`, soit `redirect_only`. Un service redirect-only ne fait rien d'autre que rediriger — il ne porte ni reverse proxy, ni service de fichiers, ni configuration NGINX personnalisée, ni modèle, ni upstream ou workflow attaché — et il ne comptera plus dans le quota PRO une fois la facturation redirect-only activée. Partout ailleurs, c'est un service ordinaire : il garde sa propre page, ses métriques et sa place dans la liste des services.
+
+La déclaration est explicite. Elle n'est jamais déduite des paramètres de redirection, et se fait depuis la carte **Mode du service** sur la page de paramètres du service, pas depuis le formulaire de paramètres. Si le service porte encore quelque chose qu'un service redirect-only ne peut pas avoir — ou s'il lui manque quelque chose qu'il doit avoir, comme une cible `REDIRECT_TO`, ou `SERVE_FILES` explicitement à `no` puisqu'il vaut `yes` par défaut —, la carte liste chaque raison et l'action reste désactivée tant qu'elles ne sont pas levées. La carte n'apparaît pas sur un service en brouillon — un brouillon ne compte jamais, dans un sens ou l'autre — même si la conversion via l'API fonctionne toujours pour lui.
+
+La liste des services signale chaque service qui serait éligible, pour trouver l'économie sans ouvrir chaque page.
+
 ### Enrôlement des instances {#instance-enrollment}
 
 Une instance affichée sur la page **Instances** peut recevoir son propre identifiant de plan de contrôle au lieu de partager l'`API_TOKEN` global. Le bouton clé de la ligne (ou le menu d'historique) émet un code d'enrôlement à usage unique, affiché une seule fois, que l'instance échange au démarrage via `INSTANCE_ENROLLMENT_CODE` ; elle ne répond ensuite plus qu'à l'identifiant émis pour elle par le plan de contrôle. Le mécanisme complet, y compris les points d'API et la distinction `manual` / `autoconf`, se trouve dans la [référence API](api.md#enrollment-an-alternative-to-setting-credential-by-hand).

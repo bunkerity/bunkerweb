@@ -430,6 +430,26 @@ inverso, gRPC, redirecciones, sesiones, antibot, mTLS, CORS ni autenticación HT
 hostname que enrutar ni identidad de servicio a la que vincularlos. Tampoco permite eliminar,
 clonar o convertir; es permanente y nunca cuenta para la cuota PRO.
 
+### Modo del servicio {#service-mode}
+
+Un servicio es `standard` o `redirect_only`. Un servicio redirect-only no hace nada más que
+redirigir — no lleva proxy inverso, ni servicio de archivos, ni configuración NGINX
+personalizada, ni plantilla, ni upstream o workflow adjunto — y dejará de contar para la cuota
+PRO en cuanto se active la facturación redirect-only. En todo lo demás sigue siendo un servicio
+normal: conserva su propia página, sus métricas y su lugar en la lista de servicios.
+
+La declaración es explícita. Nunca se infiere de los ajustes de redirección, y se hace desde la
+tarjeta **Modo del servicio** en la página de ajustes del servicio, no desde el formulario de
+ajustes. Si el servicio todavía tiene algo que un servicio redirect-only no puede tener — o le
+falta algo que debe tener, como un destino `REDIRECT_TO`, o `SERVE_FILES` puesto explícitamente
+en `no`, ya que por defecto vale `yes` —, la tarjeta lista cada motivo y la acción permanece
+deshabilitada hasta que desaparecen. La tarjeta no
+aparece en un servicio en borrador — un borrador nunca cuenta de ningún modo — aunque la
+conversión por la API sigue funcionando para él.
+
+La lista de servicios marca cada servicio que calificaría, para encontrar el ahorro sin abrir
+cada página.
+
 ### Registro de instancias {#instance-enrollment}
 
 Una instancia mostrada en la página **Instancias** puede recibir su propia credencial del plano de control en lugar de compartir el `API_TOKEN` global. El botón de llave de la fila (o el menú de historial) emite un código de registro de un solo uso, mostrado una vez, que la instancia canjea al arrancar mediante `INSTANCE_ENROLLMENT_CODE`; a partir de entonces solo responde a la credencial que el plano de control acuñó para ella. La mecánica completa, incluidos los endpoints de la API y la diferencia entre `manual` y `autoconf`, está en la [referencia de la API](api.md#enrollment-an-alternative-to-setting-credential-by-hand).
