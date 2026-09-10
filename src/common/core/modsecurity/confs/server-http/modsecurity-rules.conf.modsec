@@ -123,7 +123,10 @@ SecResponseBodyLimitAction ProcessPartial
 # Log useful stuff
 SecAuditEngine {{ MODSECURITY_SEC_AUDIT_ENGINE }}
 SecAuditLogParts A{{ MODSECURITY_SEC_AUDIT_LOG_PARTS | replace(" ", "") | replace("A", "") | replace("Z", "") }}Z
-SecAuditLogType Serial
+SecAuditLogType {{ MODSECURITY_SEC_AUDIT_LOG_TYPE }}
+  {% if MODSECURITY_SEC_AUDIT_LOG_TYPE == "Concurrent" %}
+SecAuditLogStorageDir {{ MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR }}
+  {% endif %}
 SecAuditLog {{ MODSECURITY_SEC_AUDIT_LOG }}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}

@@ -4366,6 +4366,20 @@ Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwic
 !!! note "Menschenlesbare Größenwerte"
     Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
+
+### Concurrent-Auditprotokolle
+
+| Einstellung | Standard | Beschreibung |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Schreibmodus: `Serial` (Standard) oder `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Standardmäßig leer; für `Concurrent` ist ein absoluter Speicherpfad erforderlich. |
+
+Setzen Sie `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` und `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Erstellen Sie das Verzeichnis vorher auf jeder BunkerWeb-Instanz mit Schreib- und Suchrechten für den nginx-Worker. Verwenden Sie für aufzubewahrende Daten ein persistentes Volume. BunkerWeb lehnt ungültige Konfigurationen vor der Anwendung ab und erstellt das Verzeichnis nicht. Im globalen CRS-Modus (`USE_MODSECURITY_GLOBAL_CRS=yes`) müssen beide Einstellungen global gesetzt werden; Dienstüberschreibungen wählen keinen eigenen Schreibmodus.
+
+`MODSECURITY_SEC_AUDIT_LOG` bleibt eine normale, sperrbare `.log`-Datei: Bei `Serial` enthält sie vollständige Datensätze, bei `Concurrent` einen Index zu den Transaktionsdateien. Indexpfad und Rotationsregeln bleiben unverändert. Der Betreiber verwaltet Speicherplatz, Zugriffsrechte und die rekursive Aufbewahrung der datierten Unterverzeichnisse. Die Rotation des Index entfernt keine Transaktionsdateien. Prüfen Sie vor dem Wechsel die Kompatibilität der Protokollleser, die Serial-Datensätze erwarten.
+
+Concurrent ändert die Speicherung der Einträge; es führt keine Stichprobenauswahl von Anfragen durch und reduziert nicht die mit `MODSECURITY_SEC_AUDIT_LOG_PARTS` ausgewählten Auditdaten. Planen Sie den Speicher anhand der Anfragerate, der ausgewählten Teile und der Aufbewahrungsdauer. Messen Sie die Eintragsgrößen mit repräsentativem Datenverkehr, statt einen festen Aufwand pro blockierter Anfrage anzunehmen.
+
 ## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crown pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 

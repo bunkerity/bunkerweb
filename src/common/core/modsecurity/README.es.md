@@ -217,3 +217,16 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
 
 !!! note "Valores de tamaño legibles por humanos"
     Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+
+### Registros de auditoría Concurrent
+
+| Ajuste | Predeterminado | Descripción |
+| --- | --- | --- |
+| `MODSECURITY_SEC_AUDIT_LOG_TYPE` | `Serial` | Modo: `Serial` (predeterminado) o `Concurrent`. |
+| `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR` | | Vacío por defecto; `Concurrent` requiere un directorio de almacenamiento absoluto. |
+
+Configure `MODSECURITY_SEC_AUDIT_LOG_TYPE=Concurrent` y `MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR=/var/log/bunkerweb/audit`. Cree previamente ese directorio en cada instancia de BunkerWeb con permisos de escritura y acceso para el worker nginx. Use un volumen persistente para conservar los registros. BunkerWeb rechaza las configuraciones inválidas antes de aplicarlas; no crea el directorio. En modo CRS global (`USE_MODSECURITY_GLOBAL_CRS=yes`), configure ambos ajustes globalmente; los valores por servicio no seleccionan otro modo de escritura.
+
+`MODSECURITY_SEC_AUDIT_LOG` sigue siendo un archivo `.log` normal que admite bloqueo: contiene registros completos con `Serial` y un índice de archivos por transacción con `Concurrent`. La ruta del índice y sus reglas de rotación no cambian. El operador debe gestionar el espacio, los permisos y la retención recursiva de los subdirectorios fechados. Rotar el índice no elimina los archivos de transacción. Compruebe la compatibilidad de los lectores que esperan registros Serial antes de cambiar.
+
+Concurrent cambia cómo se almacenan los registros; no muestrea las solicitudes ni reduce los datos seleccionados por `MODSECURITY_SEC_AUDIT_LOG_PARTS`. Dimensione el almacenamiento según la tasa de solicitudes, las partes seleccionadas y el período de retención; mida el tamaño de los registros con tráfico representativo en lugar de asumir un coste fijo por solicitud bloqueada.

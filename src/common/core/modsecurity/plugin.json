@@ -106,10 +106,29 @@
         { "id": "K", "label": "K - List of matched rules", "value": "K" }
       ]
     },
+    "MODSECURITY_SEC_AUDIT_LOG_TYPE": {
+      "context": "multisite",
+      "default": "Serial",
+      "help": "Audit writer: Serial uses one file; Concurrent writes per-transaction files and keeps SecAuditLog as the index. In global CRS mode, set this globally.",
+      "id": "modsecurity-sec-audit-log-type",
+      "label": "SecAuditLogType",
+      "regex": "^(Serial|Concurrent)$",
+      "type": "select",
+      "select": ["Serial", "Concurrent"]
+    },
+    "MODSECURITY_SEC_AUDIT_LOG_STORAGE_DIR": {
+      "context": "multisite",
+      "default": "",
+      "help": "Concurrent audit storage: an absolute directory preprovisioned on each BunkerWeb instance, writable/searchable by the nginx worker. The operator manages persistence and recursive retention. In global CRS mode, set this globally.",
+      "id": "modsecurity-sec-audit-log-storage-dir",
+      "label": "SecAuditLogStorageDir",
+      "regex": "^(?:/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+/?)?$",
+      "type": "text"
+    },
     "MODSECURITY_SEC_AUDIT_LOG": {
       "context": "multisite",
       "default": "/var/log/bunkerweb/modsec_audit.log",
-      "help": "Path of the file ModSecurity writes audit entries to. Must be a regular file: the Serial audit writer locks it, which is not possible on a pipe or a stream. Must end in .log, under /var/log/bunkerweb/.",
+      "help": "Audit file for Serial, index file for Concurrent. Must be a regular file because the writer locks it, which is not possible on a pipe or stream. Must end in .log, under /var/log/bunkerweb/.",
       "id": "modsecurity-sec-audit-log",
       "label": "SecAuditLog",
       "regex": "^/var/log/bunkerweb/[\\w-][\\w.-]*\\.log$",
