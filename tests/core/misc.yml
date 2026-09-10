@@ -42,6 +42,7 @@ actions:
       - "Linux"
       - "Docker"
       - "Autoconf"
+      - "Kubernetes"
     url: "http://127.0.0.1"
     status: 403
     config:
@@ -52,6 +53,7 @@ actions:
       - "Linux"
       - "Docker"
       - "Autoconf"
+      - "Kubernetes"
     url: "http://127.0.0.1"
     string: "Nothing to see here ..."
     config:
@@ -115,18 +117,24 @@ actions:
   # rebind is missing the plugin resolves against `ngx.var.server_name`, which is the literal `_`
   # inside this block, and the header simply never appears -- the failure this pins is silent.
   #
-  # AUTOCONF ONLY. The reserved row is multisite-only (PO ruling 2026-09-06,
+  # AUTOCONF AND KUBERNETES. The reserved row is multisite-only (PO ruling 2026-09-06,
   # `db_methods/services.py:seed_default_server_service`), and there is no default server BLOCK to
   # render it into either: `confs/http.conf` includes `default-server-http.conf` only under
   # `MULTISITE=yes`, `DISABLE_DEFAULT_SERVER=yes` or `IS_LOADING=yes`. The Docker and Linux arms are
   # single-site (`tests/utils/config.yml` sets one `SERVER_NAME` and no `MULTISITE`), so there
   # `www.example.com`'s own block is NGINX's implicit default and every assertion below is answered
-  # by the service instead. Autoconf is the multisite arm these were green on all along; Kubernetes
-  # is multisite too but dials through an ingress, which is why it was never in this list.
+  # by the service instead. Autoconf and Kubernetes both set `MULTISITE=yes` (`tests/generate.py`)
+  # and both dial `http://127.0.0.1` straight into the BunkerWeb pod/container's own default block --
+  # this action's `config:` is a global, server-name-prefixed setting delivered through the
+  # scheduler's env (`bw-secret` on Kubernetes, the same mechanism `tests/models/action.py`'s
+  # `config` field uses on every arm), not a per-service label/annotation, so it never touches the
+  # Kubernetes Ingress object at all. (Wave-12 note this corrects: it previously said Kubernetes
+  # "dials through an ingress" -- that's the per-service `www.example.com` path, not this one.)
   default_server_service_settings_apply:
     type: header
     integrations:
       - "Autoconf"
+      - "Kubernetes"
     url: "http://127.0.0.1"
     response_headers:
       X-Default-Server: "^reserved$"
@@ -146,6 +154,7 @@ actions:
     type: header
     integrations:
       - "Autoconf"
+      - "Kubernetes"
     url: "http://www.example.com"
     response_headers:
       # `null` is the harness's "must not be present" (tests/models/header.py), not an empty match.
